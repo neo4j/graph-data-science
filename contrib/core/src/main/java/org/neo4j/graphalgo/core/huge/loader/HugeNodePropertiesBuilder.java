@@ -20,13 +20,14 @@ package org.neo4j.graphalgo.core.huge.loader;
 
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.PagedLongDoubleMap;
 import org.neo4j.kernel.api.StatementConstants;
 
 final class HugeNodePropertiesBuilder {
 
     private final double defaultValue;
     private final int propertyId;
-    private final PagedPropertyMap properties;
+    private final PagedLongDoubleMap properties;
 
     public static HugeNodePropertiesBuilder of(
             long numberOfNodes,
@@ -34,14 +35,14 @@ final class HugeNodePropertiesBuilder {
             double defaultValue,
             int propertyId) {
         assert propertyId != StatementConstants.NO_SUCH_PROPERTY_KEY;
-        PagedPropertyMap properties = PagedPropertyMap.of(numberOfNodes, tracker);
+        PagedLongDoubleMap properties = PagedLongDoubleMap.of(numberOfNodes, tracker);
         return new HugeNodePropertiesBuilder(defaultValue, propertyId, properties);
     }
 
     private HugeNodePropertiesBuilder(
             final double defaultValue,
             final int propertyId,
-            final PagedPropertyMap properties) {
+            final PagedLongDoubleMap properties) {
         this.defaultValue = defaultValue;
         this.propertyId = propertyId;
         this.properties = properties;

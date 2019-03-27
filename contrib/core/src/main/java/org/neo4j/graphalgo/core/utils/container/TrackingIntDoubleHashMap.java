@@ -38,7 +38,7 @@ public final class TrackingIntDoubleHashMap extends IntDoubleHashMap {
         super(DEFAULT_EXPECTED_ELEMENTS, DEFAULT_LOAD_FACTOR, HashOrderMixing.defaultStrategy());
         this.tracker = tracker;
         this.instanceSize = new LongAdder();
-        trackBuffers(keys.length);
+        trackUsage(bufferUsage(keys.length));
     }
 
     @Override
@@ -51,18 +51,17 @@ public final class TrackingIntDoubleHashMap extends IntDoubleHashMap {
         int lengthBefore = keys.length;
         super.allocateBuffers(arraySize);
         int lengthAfter = keys.length;
-        long addedMemory = bufferUsage(-lengthBefore) + bufferUsage(lengthAfter);
-        tracker.add(addedMemory);
-        instanceSize.add(addedMemory);
-    }
-
-    private void trackBuffers(int length) {
-        tracker.add(sizeOfIntArray(length));
-        tracker.add(sizeOfDoubleArray(length));
+        long addedMemory = bufferUsage(lengthAfter) - bufferUsage(lengthBefore);
+        trackUsage(addedMemory);
     }
 
     private long bufferUsage(int length) {
         return sizeOfIntArray(length) + sizeOfDoubleArray(length);
+    }
+
+    private void trackUsage(long addedMemory) {
+        tracker.add(addedMemory);
+        instanceSize.add(addedMemory);
     }
 
     public long instanceSize() {

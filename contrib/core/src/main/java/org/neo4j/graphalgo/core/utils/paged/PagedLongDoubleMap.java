@@ -16,66 +16,73 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.huge.loader;
+package org.neo4j.graphalgo.core.utils.paged;
 
 import com.carrotsearch.hppc.IntDoubleMap;
 import org.neo4j.graphalgo.core.utils.container.TrackingIntDoubleHashMap;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
-import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.shallowSizeOfInstance;
+import java.util.Arrays;
+
 import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfObjectArray;
 
-final class PagedPropertyMap {
+public final class PagedLongDoubleMap {
 
     private static final int PAGE_SHIFT = 14;
     private static final int PAGE_SIZE = 1 << PAGE_SHIFT;
     private static final long PAGE_MASK = (long) (PAGE_SIZE - 1);
 
-    static PagedPropertyMap of(long size, AllocationTracker tracker) {
+    public static PagedLongDoubleMap of(long size, AllocationTracker tracker) {
         int numPages = PageUtil.numPagesFor(size, PAGE_SHIFT, PAGE_MASK);
-        TrackingIntDoubleHashMap[] pages = new TrackingIntDoubleHashMap[numPages];
-
-        tracker.add(shallowSizeOfInstance(HugeLongArray.class));
         tracker.add(sizeOfObjectArray(numPages));
-
-        return new PagedPropertyMap(size, pages, tracker);
+        TrackingIntDoubleHashMap[] pages = new TrackingIntDoubleHashMap[numPages];
+        return new PagedLongDoubleMap(pages, tracker);
     }
 
-    private final long size;
     private final AllocationTracker tracker;
     private TrackingIntDoubleHashMap[] pages;
 
-    private PagedPropertyMap(
-            long size,
+    private PagedLongDoubleMap(
             TrackingIntDoubleHashMap[] pages,
             AllocationTracker tracker) {
-        this.size = size;
         this.pages = pages;
         this.tracker = tracker;
     }
 
     public double getOrDefault(long index, double defaultValue) {
-        assert index < size;
         int pageIndex = pageIndex(index);
-        int indexInPage = indexInPage(index);
-        IntDoubleMap page = pages[pageIndex];
-        return page == null ? defaultValue : page.getOrDefault(indexInPage, defaultValue);
+        if (pageIndex < pages.length) {
+            IntDoubleMap page = pages[pageIndex];
+            if (page != null) {
+                int indexInPage = indexInPage(index);
+                return page.getOrDefault(indexInPage, defaultValue);
+            }
+        }
+        return defaultValue;
     }
 
     public void put(long index, double value) {
-        assert index < size;
         int pageIndex = pageIndex(index);
-        int indexInPage = indexInPage(index);
         TrackingIntDoubleHashMap subMap = subMap(pageIndex);
+        int indexInPage = indexInPage(index);
         subMap.putSync(indexInPage, value);
     }
 
     private TrackingIntDoubleHashMap subMap(int pageIndex) {
+        if (pageIndex >= pages.length) {
+            return growNewSubMap(pageIndex);
+        }
         TrackingIntDoubleHashMap subMap = pages[pageIndex];
         if (subMap != null) {
             return subMap;
+        }
+        return forceNewSubMap(pageIndex);
+    }
+
+    private synchronized TrackingIntDoubleHashMap growNewSubMap(int pageIndex) {
+        if (pageIndex >= pages.length) {
+            long allocated = sizeOfObjectArray(1 + pageIndex) - sizeOfObjectArray(pages.length);
+            tracker.add(allocated);
+            pages = Arrays.copyOf(pages, 1 + pageIndex);
         }
         return forceNewSubMap(pageIndex);
     }
@@ -89,10 +96,6 @@ final class PagedPropertyMap {
         return subMap;
     }
 
-    public long size() {
-        return size;
-    }
-
     public long release() {
         if (pages != null) {
             TrackingIntDoubleHashMap[] pages = this.pages;
@@ -103,6 +106,7 @@ final class PagedPropertyMap {
                     released += page.instanceSize();
                 }
             }
+            tracker.remove(released);
             return released;
         }
         return 0L;

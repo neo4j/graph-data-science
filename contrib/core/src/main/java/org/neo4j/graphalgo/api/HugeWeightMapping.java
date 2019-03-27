@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.api;
 import static org.neo4j.graphalgo.core.utils.RawValues.getHead;
 import static org.neo4j.graphalgo.core.utils.RawValues.getTail;
 
-public interface HugeWeightMapping extends WeightMapping {
+public interface HugeWeightMapping extends WeightMapping, HugeNodeWeights {
 
     /**
      * returns the weight for the relationship defined by their start and end nodes.
@@ -38,6 +38,7 @@ public interface HugeWeightMapping extends WeightMapping {
     /**
      * returns the weight for a node or the loaded default weight if no weight has been defined.
      */
+    @Override
     default double nodeWeight(long nodeId) {
         return weight(nodeId, -1L);
     }

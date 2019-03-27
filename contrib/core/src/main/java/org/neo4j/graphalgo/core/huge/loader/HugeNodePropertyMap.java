@@ -19,14 +19,15 @@
 package org.neo4j.graphalgo.core.huge.loader;
 
 import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphalgo.core.utils.paged.PagedLongDoubleMap;
 
 final class HugeNodePropertyMap implements HugeWeightMapping {
 
-    private PagedPropertyMap properties;
+    private PagedLongDoubleMap properties;
     private final double defaultValue;
     private final int propertyId;
 
-    HugeNodePropertyMap(PagedPropertyMap properties, double defaultValue, int propertyId) {
+    HugeNodePropertyMap(PagedLongDoubleMap properties, double defaultValue, int propertyId) {
         this.properties = properties;
         this.defaultValue = defaultValue;
         this.propertyId = propertyId;
