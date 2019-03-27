@@ -20,6 +20,10 @@ package org.neo4j.graphalgo.impl.louvain;
 
 import com.carrotsearch.hppc.IntIntMap;
 import com.carrotsearch.hppc.IntIntScatterMap;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.paged.PagedLongDoubleMap;
 
 public class LouvainUtils {
 
@@ -40,6 +44,33 @@ public class LouvainUtils {
             } else {
                 map.put(community, c);
                 communities[i] = c++;
+            }
+        }
+        return c;
+    }
+
+    /**
+     * normalize nodeToCommunity-Array. Maps community IDs
+     * in a sequential order starting at 0.
+     *
+     * @param communities
+     * @return number of communities
+     */
+    static long normalize(HugeLongArray communities) {
+        PagedLongDoubleMap map = PagedLongDoubleMap.of(communities.size(), AllocationTracker.EMPTY);
+        long c = 0L;
+        HugeCursor<long[]> cursor = communities.cursor(communities.newCursor());
+        while (cursor.next()) {
+            long[] array = cursor.array;
+            for (int i = cursor.offset; i < cursor.limit; i++) {
+                long community = array[i];
+                double mapped = map.getOrDefault(community, -1.);
+                if (mapped != -1.) {
+                    array[i] = (long) mapped;
+                } else {
+                    map.put(community, c);
+                    array[i] = c++;
+                }
             }
         }
         return c;

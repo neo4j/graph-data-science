@@ -18,19 +18,21 @@
  */
 package org.neo4j.graphalgo.impl.louvain;
 
-import com.carrotsearch.hppc.*;
+import com.carrotsearch.hppc.IntContainer;
+import com.carrotsearch.hppc.IntObjectMap;
+import com.carrotsearch.hppc.LongDoubleMap;
 import com.carrotsearch.hppc.procedures.IntProcedure;
 import org.neo4j.collection.primitive.PrimitiveIntIterable;
 import org.neo4j.collection.primitive.PrimitiveIntIterator;
-import org.neo4j.graphalgo.api.*;
-import org.neo4j.graphalgo.core.IdMap;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.RelationshipConsumer;
+import org.neo4j.graphalgo.api.RelationshipIntersect;
+import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphdb.Direction;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.function.IntPredicate;
 
 /**
