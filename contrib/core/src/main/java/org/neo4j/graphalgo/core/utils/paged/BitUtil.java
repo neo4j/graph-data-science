@@ -24,6 +24,10 @@ public final class BitUtil {
         return value > 0 && ((value & (~value + 1)) == value);
     }
 
+    public static boolean isPowerOfTwo(final long value) {
+        return value > 0L && ((value & (~value + 1L)) == value);
+    }
+
     /**
      * returns the previous highest power of two, or the current value if it's already a power of two or zero
      */
