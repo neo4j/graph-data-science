@@ -92,11 +92,11 @@ public final class HugeIdMap implements HugeIdMapping, HugeNodeIterator, HugeBat
                 IdIterable::new);
     }
 
-    private static final class IdIterable implements PrimitiveLongIterable {
+    public static final class IdIterable implements PrimitiveLongIterable {
         private final long start;
         private final long length;
 
-        private IdIterable(long start, long length) {
+        public IdIterable(long start, long length) {
             this.start = start;
             this.length = length;
         }

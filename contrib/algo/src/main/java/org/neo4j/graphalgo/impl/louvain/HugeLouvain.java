@@ -20,28 +20,21 @@ package org.neo4j.graphalgo.impl.louvain;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntObjectMap;
-import com.carrotsearch.hppc.IntObjectScatterMap;
 import com.carrotsearch.hppc.IntScatterSet;
-import com.carrotsearch.hppc.LongDoubleScatterMap;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.HugeGraph;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
-import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.paged.MemoryUsage;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongLongDoubleMap;
 import org.neo4j.graphalgo.impl.Algorithm;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -57,6 +50,7 @@ import java.util.stream.Stream;
  *
  * @author mknblch
  */
+@SuppressWarnings("Duplicates")
 public class HugeLouvain extends Algorithm<HugeLouvain> {
 
     private final long rootNodeCount;
@@ -73,10 +67,11 @@ public class HugeLouvain extends Algorithm<HugeLouvain> {
     private HugeGraph root;
     private long communityCount;
 
-    public HugeLouvain(HugeGraph graph,
-                       ExecutorService pool,
-                       int concurrency,
-                       AllocationTracker tracker) {
+    public HugeLouvain(
+            HugeGraph graph,
+            ExecutorService pool,
+            int concurrency,
+            AllocationTracker tracker) {
         this.root = graph;
         this.pool = pool;
         this.concurrency = concurrency;
@@ -114,19 +109,22 @@ public class HugeLouvain extends Algorithm<HugeLouvain> {
             // rebuild graph based on the community structure
             final HugeLongArray communityIds = modularityOptimization.getCommunityIds();
             communityCount = LouvainUtils.normalize(communityIds);
-            // release the old algo instance
-            modularityOptimization.release();
             progressLogger.log(
                     "level: " + (level + 1) +
                             " communities: " + communityCount +
                             " q: " + modularityOptimization.getModularity());
+
             if (communityCount >= nodeCount) {
+                // release the old algo instance
+                modularityOptimization.release();
                 break;
             }
             nodeCount = communityCount;
             dendrogram[level] = rebuildCommunityStructure(communityIds);
             modularities[level] = modularityOptimization.getModularity();
             graph = rebuildGraph(graph, communityIds, communityCount);
+            // release the old algo instance
+            modularityOptimization.release();
         }
         dendrogram = Arrays.copyOf(dendrogram, level);
         return this;
@@ -193,44 +191,46 @@ public class HugeLouvain extends Algorithm<HugeLouvain> {
         // count and normalize community structure
         final long nodeCount = communityIds.size();
         // bag of nodeId->{nodeId, ..}
+        SubGraph subGraph = new SubGraph(nodeCount, tracker);
+        HugeLongLongDoubleMap relationshipWeights = new HugeLongLongDoubleMap(nodeCount, tracker);
+        for (long i = 0L; i < nodeCount; ++i) {
+            // map node nodeId to community nodeId
+            final long sourceCommunity = communityIds.get(i);
+            // get transitions from current node
+            graph.forEachOutgoing(i, (s, t) -> {
+                // mapping
+                final long targetCommunity = communityIds.get(t);
+                final double value = graph.weightOf(s, t);
+                if (sourceCommunity == targetCommunity) {
+                    nodeWeights.addTo(sourceCommunity, value);
+                }
+                // add IN and OUT relation
+                subGraph.add(targetCommunity, sourceCommunity);
+                subGraph.add(sourceCommunity, targetCommunity);
 
-        // TODO:
-//        final IntObjectMap<IntScatterSet> relationships = new IntObjectScatterMap<>(nodeCount);
-//        // accumulated weights
-//        final LongDoubleScatterMap relationshipWeights = new LongDoubleScatterMap(nodeCount);
-//        // for each node in the current graph
-//        for (int i = 0; i < nodeCount; i++) {
-//            // map node nodeId to community nodeId
-//            final int sourceCommunity = communityIds[i];
-//            // get transitions from current node
-//            graph.forEachOutgoing(i, (s, t, r) -> {
-//                // mapping
-//                final int targetCommunity = communityIds[t];
-//                final double value = graph.weightOf(s, t);
-//                if (sourceCommunity == targetCommunity) {
-//                    nodeWeights[sourceCommunity] += value;
-//                }
-//                // add IN and OUT relation
-//                putIfAbsent(relationships, targetCommunity).add(sourceCommunity);
-//                putIfAbsent(relationships, sourceCommunity).add(targetCommunity);
-//                relationshipWeights.addTo(RawValues.combineIntInt(sourceCommunity, targetCommunity), value / 2); // TODO validate
-//                relationshipWeights.addTo(RawValues.combineIntInt(targetCommunity, sourceCommunity), value / 2);
-//                return true;
-//            });
-//        }
-//        // create temporary graph
-//        return new LouvainGraph(communityCount, relationships, relationshipWeights);
+                relationshipWeights.addTo(sourceCommunity, targetCommunity, value / 2.0); // TODO validate
+                relationshipWeights.addTo(targetCommunity, sourceCommunity, value / 2.0);
+                return true;
+            });
 
-        return new HugeLouvainGraph(communityCount, null, null);
+        }
+
+        if (graph instanceof HugeLouvainGraph) {
+            graph.release();
+        }
+
+        // create temporary graph
+        return new HugeLouvainGraph(communityCount, subGraph, relationshipWeights);
     }
 
     private HugeLongArray rebuildCommunityStructure(HugeLongArray communityIds) {
         // rebuild community array
+        HugeLongArray communities = this.communities;
         assert rootNodeCount == communities.size();
         HugeLongArray ints = HugeLongArray.newArray(rootNodeCount, tracker);
         ints.setAll(i -> communityIds.get(communities.get(i)));
-        communities = ints;
-        return communities;
+        tracker.remove(communities.release());
+        return this.communities = ints;
     }
 
     /**
@@ -255,7 +255,7 @@ public class HugeLouvain extends Algorithm<HugeLouvain> {
     }
 
     public double getFinalModularity() {
-        return modularities[level-1];
+        return modularities[level - 1];
     }
 
     /**
@@ -308,7 +308,7 @@ public class HugeLouvain extends Algorithm<HugeLouvain> {
 
     @Override
     public HugeLouvain release() {
-        tracker.add(4 * rootNodeCount);
+        tracker.remove(communities.release());
         communities = null;
         return this;
     }

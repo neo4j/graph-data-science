@@ -190,8 +190,6 @@ public class HugeModularityOptimization extends Algorithm<HugeModularityOptimiza
         for (int i = 0; i < concurrency; i++) {
             tasks.add(new Task());
         }
-        // (2x double + 1x int) * N * threads
-        tracker.add(20 * nodeCount * concurrency);
         // as long as maxIterations is not reached
         for (iterations = 0; iterations < maxIterations && terminationFlag.running(); iterations++) {
             // reset node counter (for logging)
@@ -209,7 +207,6 @@ public class HugeModularityOptimization extends Algorithm<HugeModularityOptimiza
             // sync all tasks with the best candidate for the next round
             sync(candidate, tasks);
         }
-        tracker.remove(20 * nodeCount * concurrency);
         return this;
     }
 

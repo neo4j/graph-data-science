@@ -27,11 +27,11 @@ import org.neo4j.graphalgo.api.HugeWeightedRelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
-import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.graphalgo.core.utils.paged.PagedLongDoubleMap;
+import org.neo4j.graphalgo.core.huge.loader.HugeIdMap;
+import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongLongDoubleMap;
 import org.neo4j.graphdb.Direction;
+import org.roaringbitmap.longlong.LongIterator;
 
 import java.util.Collection;
 import java.util.Set;
@@ -45,34 +45,16 @@ import java.util.function.LongPredicate;
  *
  * @author mknblch
  */
-public class HugeLouvainGraph implements HugeGraph {
+public final class HugeLouvainGraph implements HugeGraph {
 
     private final long nodeCount;
-    private final HugeObjectArray<HugeLongArray> graph;
-    private final PagedLongDoubleMap weights;
+    private final SubGraph graph;
+    private final HugeLongLongDoubleMap weights;
 
-    HugeLouvainGraph(long newNodeCount, HugeObjectArray<HugeLongArray> graph, PagedLongDoubleMap weights) {
+    HugeLouvainGraph(long newNodeCount, SubGraph graph, HugeLongLongDoubleMap weights) {
         this.nodeCount = newNodeCount;
         this.graph = graph;
         this.weights = weights;
-    }
-
-    @Override
-    public int toMappedNodeId(long nodeId) {
-        // not implemented
-        return -1;
-    }
-
-    @Override
-    public long toOriginalNodeId(int nodeId) {
-        // not implemented
-        return -1L;
-    }
-
-    @Override
-    public boolean contains(long nodeId) {
-        // not implemented
-        return false;
     }
 
     @Override
@@ -82,179 +64,123 @@ public class HugeLouvainGraph implements HugeGraph {
 
     @Override
     public void forEachRelationship(long nodeId, Direction direction, HugeRelationshipConsumer consumer) {
-        final HugeLongArray intCursors = graph.get(nodeId);
-        if (null == intCursors) {
+        LongIterator ints = graph.get(nodeId);
+        if (null == ints) {
             return;
         }
-        try (HugeCursor<long[]> cursor = intCursors.cursor(intCursors.newCursor())) {
-            while (cursor.next()) {
-                long[] array = cursor.array;
-                for (int i = cursor.offset; i < cursor.limit; i++) {
-                    long target = array[i];
-                    if (!consumer.accept(nodeId, target)) {
-                        return;
-                    }
-                }
+        while (ints.hasNext()) {
+            if (!consumer.accept(nodeId, ints.next())) {
+                return;
             }
         }
     }
 
     @Override
-    public double weightOf(final long sourceNodeId, final long targetNodeId) {
-        // TODO
-        //  return weights.getOrDefault(RawValues.combineIntInt(sourceNodeId, targetNodeId), 0);
-        throw new UnsupportedOperationException(
-                "org.neo4j.graphalgo.impl.louvain.HugeLouvainGraph.weightOf is not implemented.");
+    public double weightOf(long sourceNodeId, long targetNodeId) {
+        return weights.getOrDefault(sourceNodeId, targetNodeId, 0.0);
     }
 
-    // TODO:
+    @Override
+    public Collection<PrimitiveLongIterable> hugeBatchIterables(int batchSize) {
+        return LazyBatchCollection.of(
+                nodeCount(),
+                batchSize,
+                HugeIdMap.IdIterable::new);
+    }
+
+    @Override
+    public int degree(long nodeId, Direction direction) {
+        return graph.degree(nodeId);
+    }
+
+    @Override
+    public void release() {
+        weights.release();
+        graph.release();
+    }
+
+    @Override
+    public boolean contains(long nodeId) {
+        throw new UnsupportedOperationException("contains is not supported.");
+    }
 
     @Override
     public RelationshipIntersect intersection() {
-        throw new UnsupportedOperationException(
-                "org.neo4j.graphalgo.impl.louvain.HugeLouvainGraph.intersection is not implemented.");
+        throw new UnsupportedOperationException("intersection is not supported.");
     }
 
     @Override
-    public Collection<PrimitiveLongIterable> hugeBatchIterables(final int batchSize) {
-        throw new UnsupportedOperationException(
-                "org.neo4j.graphalgo.impl.louvain.HugeLouvainGraph.hugeBatchIterables is not implemented.");
+    public long toHugeMappedNodeId(long nodeId) {
+        throw new UnsupportedOperationException("toHugeMappedNodeId is not supported.");
     }
 
     @Override
-    public int degree(final long nodeId, final Direction direction) {
-        throw new UnsupportedOperationException(
-                "org.neo4j.graphalgo.impl.louvain.HugeLouvainGraph.degree is not implemented.");
+    public long toOriginalNodeId(long nodeId) {
+        throw new UnsupportedOperationException("toOriginalNodeId is not supported.");
     }
 
     @Override
-    public long toHugeMappedNodeId(final long nodeId) {
-        throw new UnsupportedOperationException(
-                "org.neo4j.graphalgo.impl.louvain.HugeLouvainGraph.toHugeMappedNodeId is not implemented.");
-    }
-
-    @Override
-    public long toOriginalNodeId(final long nodeId) {
-        throw new UnsupportedOperationException(
-                "org.neo4j.graphalgo.impl.louvain.HugeLouvainGraph.toOriginalNodeId is not implemented.");
-    }
-
-    @Override
-    public void forEachNode(final LongPredicate consumer) {
-
+    public void forEachNode(LongPredicate consumer) {
+        throw new UnsupportedOperationException("forEachNode is not supported.");
     }
 
     @Override
     public PrimitiveLongIterator hugeNodeIterator() {
-        throw new UnsupportedOperationException(
-                "org.neo4j.graphalgo.impl.louvain.HugeLouvainGraph.hugeNodeIterator is not implemented.");
+        throw new UnsupportedOperationException("hugeNodeIterator is not supported.");
     }
 
     @Override
-    public HugeWeightMapping hugeNodeProperties(final String type) {
-        throw new UnsupportedOperationException(
-                "org.neo4j.graphalgo.impl.louvain.HugeLouvainGraph.hugeNodeProperties is not implemented.");
+    public HugeWeightMapping hugeNodeProperties(String type) {
+        throw new UnsupportedOperationException("hugeNodeProperties is not supported.");
     }
 
     @Override
-    public long getTarget(final long nodeId, final long index, final Direction direction) {
-        throw new UnsupportedOperationException(
-                "org.neo4j.graphalgo.impl.louvain.HugeLouvainGraph.getTarget is not implemented.");
+    public long getTarget(long nodeId, long index, Direction direction) {
+        throw new UnsupportedOperationException("getTarget is not supported.");
     }
 
     @Override
-    public void forEachRelationship(
-            final long nodeId, final Direction direction, final HugeWeightedRelationshipConsumer consumer) {
-
+    public void forEachRelationship(long nodeId, Direction direction, HugeWeightedRelationshipConsumer consumer) {
+        throw new UnsupportedOperationException("forEachRelationship is not supported.");
     }
 
     @Override
-    public boolean exists(final long sourceNodeId, final long targetNodeId, final Direction direction) {
-        throw new UnsupportedOperationException(
-                "org.neo4j.graphalgo.impl.louvain.HugeLouvainGraph.exists is not implemented.");
+    public boolean exists(long sourceNodeId, long targetNodeId, Direction direction) {
+        throw new UnsupportedOperationException("exists is not supported.");
     }
 
     @Override
     public Set<String> availableNodeProperties() {
-        throw new UnsupportedOperationException(
-                "org.neo4j.graphalgo.impl.louvain.HugeLouvainGraph.availableNodeProperties is not implemented.");
+        throw new UnsupportedOperationException("availableNodeProperties is not supported.");
     }
 
     @Override
-    public int getTarget(final int nodeId, final int index, final Direction direction) {
-        throw new UnsupportedOperationException(
-                "org.neo4j.graphalgo.impl.louvain.HugeLouvainGraph.getTarget is not implemented.");
+    public int getTarget(int nodeId, int index, Direction direction) {
+        throw new UnsupportedOperationException("getTarget is not supported.");
     }
 
     @Override
-    public void forEachRelationship(final int nodeId, final Direction direction, final RelationshipConsumer consumer) {
-
+    public void forEachRelationship(int nodeId, Direction direction, RelationshipConsumer consumer) {
+        throw new UnsupportedOperationException("forEachRelationship is not supported.");
     }
 
     @Override
-    public boolean exists(final int sourceNodeId, final int targetNodeId, final Direction direction) {
-        throw new UnsupportedOperationException(
-                "org.neo4j.graphalgo.impl.louvain.HugeLouvainGraph.exists is not implemented.");
+    public boolean exists(int sourceNodeId, int targetNodeId, Direction direction) {
+        throw new UnsupportedOperationException("exists is not supported.");
     }
 
     @Override
-    public void forEachRelationship(
-            final int nodeId, final Direction direction, final WeightedRelationshipConsumer consumer) {
-
+    public void forEachRelationship(int nodeId, Direction direction, WeightedRelationshipConsumer consumer) {
+        throw new UnsupportedOperationException("forEachRelationship is not supported.");
     }
-
 
     @Override
     public String getType() {
-        // not implemented
-        throw new IllegalStateException("not implemented");
+        throw new UnsupportedOperationException("getType is not supported.");
     }
 
     @Override
     public void canRelease(boolean canRelease) {
+        throw new UnsupportedOperationException("canRelease is not supported.");
     }
-
-//    @Override
-//    public Collection<PrimitiveIntIterable> batchIterables(int batchSize) {
-//        return ParallelUtil.batchIterables(batchSize, nodeCount);
-//    }
-
-//    @Override
-//    public int degree(int nodeId, Direction direction) {
-//        final IntContainer intContainer = graph.get(nodeId);
-//        if (null == intContainer) {
-//            return 0;
-//        }
-//        return intContainer.size();
-//    }
-
-//    @Override
-//    public void forEachNode(IntPredicate consumer) {
-//        throw new UnsupportedOperationException("not implemented");
-//    }
-//
-//    @Override
-//    public PrimitiveIntIterator nodeIterator() {
-//        throw new UnsupportedOperationException("not implemented");
-//    }
-//
-//    @Override
-//    public boolean exists(int sourceNodeId, int targetNodeId, Direction direction) {
-//        throw new UnsupportedOperationException("not implemented");
-//    }
-//
-//    @Override
-//    public void forEachRelationship(int nodeId, Direction direction, WeightedRelationshipConsumer consumer) {
-//        throw new UnsupportedOperationException("not implemented");
-//    }
-//
-//    @Override
-//    public RelationshipIntersect intersection() {
-//        throw new UnsupportedOperationException("not implemented");
-//    }
-//
-//    @Override
-//    public int getTarget(int nodeId, int index, Direction direction) {
-//        return -1;
-//    }
 }

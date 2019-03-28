@@ -19,6 +19,7 @@
 package org.neo4j.graphalgo.impl.louvain;
 
 import org.junit.Test;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -43,5 +44,26 @@ public class LouvainUtilsTest {
         int[] communities = {1, 2, 3, 4, 7, 5};
         assertEquals(6, LouvainUtils.normalize(communities));
         assertArrayEquals(new int[]{0, 1, 2, 3, 4, 5}, communities);
+    }
+
+    @Test
+    public void hugeDifferentNumbers() {
+        HugeLongArray communities = HugeLongArray.of(10, 3, 4, 7, 6, 7, 10);
+        assertEquals(5, LouvainUtils.normalize(communities));
+        assertArrayEquals(new int[]{0, 1, 2, 3, 4, 3, 0}, communities.toArray(Integer.TYPE));
+    }
+
+    @Test
+    public void hugeAllTheSame() {
+        HugeLongArray communities = HugeLongArray.of(10, 10, 10, 10);
+        assertEquals(1, LouvainUtils.normalize(communities));
+        assertArrayEquals(new int[]{0, 0, 0, 0}, communities.toArray(Integer.TYPE));
+    }
+
+    @Test
+    public void hugeAllDifferent() {
+        HugeLongArray communities = HugeLongArray.of(1, 2, 3, 4, 7, 5);
+        assertEquals(6, LouvainUtils.normalize(communities));
+        assertArrayEquals(new int[]{0, 1, 2, 3, 4, 5}, communities.toArray(Integer.TYPE));
     }
 }
