@@ -18,8 +18,6 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import com.carrotsearch.hppc.LongHashSet;
-import com.carrotsearch.hppc.LongSet;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
@@ -33,37 +31,53 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.impl.louvain.HugeLouvain;
 import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
- * (a)-(b)-(d)
- * | /            -> (abc)-(d)
- * (c)
+ * (a)-(b)--(g)-(h)
+ * \  /     \ /
+ * (c)     (i)           (ABC)-(GHI)
+ * \      /         =>    \   /
+ * (d)-(e)                (DEF)
+ * \  /
+ * (f)
  *
  * @author mknblch
  */
-public class HugeLouvainTest1 {
+public class HugeLouvainMultiLevelTest {
 
-    private static final String unidirectional =
+    private static final String COMPLEX_CYPHER =
             "CREATE (a:Node {name:'a'})\n" +
                     "CREATE (b:Node {name:'b'})\n" +
                     "CREATE (c:Node {name:'c'})\n" +
                     "CREATE (d:Node {name:'d'})\n" +
+                    "CREATE (e:Node {name:'e'})\n" +
+                    "CREATE (f:Node {name:'f'})\n" +
+                    "CREATE (g:Node {name:'g'})\n" +
+                    "CREATE (h:Node {name:'h'})\n" +
+                    "CREATE (i:Node {name:'i'})\n" +
                     "CREATE" +
+
                     " (a)-[:TYPE]->(b),\n" +
+                    " (a)-[:TYPE]->(c),\n" +
                     " (b)-[:TYPE]->(c),\n" +
-                    " (c)-[:TYPE]->(a),\n" +
-                    " (a)-[:TYPE]->(c)";
+
+                    " (g)-[:TYPE]->(h),\n" +
+                    " (g)-[:TYPE]->(i),\n" +
+                    " (h)-[:TYPE]->(i),\n" +
+
+                    " (e)-[:TYPE]->(d),\n" +
+                    " (e)-[:TYPE]->(f),\n" +
+                    " (d)-[:TYPE]->(f),\n" +
+
+                    " (a)-[:TYPE]->(g),\n" +
+                    " (c)-[:TYPE]->(e),\n" +
+                    " (f)-[:TYPE]->(i)";
 
     public static final Label LABEL = Label.label("Node");
-    public static final String ABCD = "abcd";
 
     @Rule
     public ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
@@ -72,11 +86,6 @@ public class HugeLouvainTest1 {
     public ErrorCollector collector = new ErrorCollector();
 
     private HugeGraph graph;
-    private final Map<String, Integer> nameMap;
-
-    public HugeLouvainTest1() {
-        nameMap = new HashMap<>();
-    }
 
     private void setup(String cypher) {
         DB.execute(cypher);
@@ -85,33 +94,13 @@ public class HugeLouvainTest1 {
                 .withAnyLabel()
                 .withoutNodeProperties()
                 .withOptionalRelationshipWeightsFromProperty("w", 1.0)
-                //.withDirection(Direction.BOTH)
                 .asUndirected(true)
                 .load(HugeGraphFactory.class);
-
-        try (Transaction transaction = DB.beginTx()) {
-            for (int i = 0; i < ABCD.length(); i++) {
-                final String value = String.valueOf(ABCD.charAt(i));
-                final int id = graph.toMappedNodeId(DB.findNode(LABEL, "name", value).getId());
-                nameMap.put(value, id);
-            }
-            transaction.success();
-        }
-    }
-
-    public void printCommunities(HugeLouvain louvain) {
-        try (Transaction transaction = DB.beginTx()) {
-            louvain.resultStream()
-                    .forEach(r -> {
-                        System.out.println(DB.getNodeById(r.nodeId).getProperty("name") + ":" + r.community);
-                    });
-            transaction.success();
-        }
     }
 
     @Test
-    public void testRunner() throws Exception {
-        setup(unidirectional);
+    public void testComplex() {
+        setup(COMPLEX_CYPHER);
         final HugeLouvain algorithm = new HugeLouvain(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
@@ -123,12 +112,16 @@ public class HugeLouvainTest1 {
             }
             System.out.println("level " + i + ": " + dendogram[i - 1]);
         }
-        assertCommunities(algorithm);
+
+        assertArrayEquals(new long[]{0, 0, 0, 1, 1, 1, 2, 2, 2}, dendogram[0].toArray());
+        assertArrayEquals(new long[]{0, 0, 0, 1, 1, 1, 2, 2, 2}, algorithm.getCommunityIds().toArray());
+        assertEquals(0.53, algorithm.getFinalModularity(), 0.01);
+        assertArrayEquals(new double[]{0.53}, algorithm.getModularities(), 0.01);
     }
 
     @Test
-    public void testRandomNeighborLouvain() throws Exception {
-        setup(unidirectional);
+    public void testComplexRNL() {
+        setup(COMPLEX_CYPHER);
         final HugeLouvain algorithm = new HugeLouvain(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
@@ -140,39 +133,6 @@ public class HugeLouvainTest1 {
             }
             System.out.println("level " + i + ": " + dendogram[i - 1]);
         }
-        assertCommunities(algorithm);
-    }
 
-    public void assertCommunities(HugeLouvain louvain) {
-        assertUnion(new String[]{"a", "b", "c"}, louvain.getCommunityIds());
-        assertDisjoint(new String[]{"a", "d"}, louvain.getCommunityIds());
-    }
-
-    private void assertUnion(String[] nodeNames, HugeLongArray values) {
-        final long[] communityIds = values.toArray();
-        long current = -1L;
-        for (String name : nodeNames) {
-            if (!nameMap.containsKey(name)) {
-                throw new IllegalArgumentException("unknown node name: " + name);
-            }
-            final int id = nameMap.get(name);
-            if (current == -1L) {
-                current = communityIds[id];
-            } else {
-                assertEquals(
-                        "Node " + name + " belongs to wrong community " + communityIds[id],
-                        current,
-                        communityIds[id]);
-            }
-        }
-    }
-
-    private void assertDisjoint(String[] nodeNames, HugeLongArray values) {
-        final long[] communityIds = values.toArray();
-        final LongSet set = new LongHashSet();
-        for (String name : nodeNames) {
-            final long communityId = communityIds[nameMap.get(name)];
-            assertTrue("Node " + name + " belongs to wrong community " + communityId, set.add(communityId));
-        }
     }
 }

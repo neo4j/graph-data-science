@@ -43,27 +43,45 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
- * (a)-(b)-(d)
- * | /            -> (abc)-(d)
- * (c)
+ * (a)-(b)---(e)-(f)
+ *  | X |     | X |   (z)
+ * (c)-(d)   (g)-(h)
  *
- * @author mknblch
+ *  @author mknblch
  */
-public class HugeLouvainTest1 {
+public class HugeLouvainWeightedGraphTest {
 
     private static final String unidirectional =
             "CREATE (a:Node {name:'a'})\n" +
                     "CREATE (b:Node {name:'b'})\n" +
                     "CREATE (c:Node {name:'c'})\n" +
                     "CREATE (d:Node {name:'d'})\n" +
+                    "CREATE (e:Node {name:'e'})\n" +
+                    "CREATE (f:Node {name:'f'})\n" +
+                    "CREATE (g:Node {name:'g'})\n" +
+                    "CREATE (h:Node {name:'h'})\n" +
+                    "CREATE (z:Node {name:'z'})\n" +
                     "CREATE" +
                     " (a)-[:TYPE]->(b),\n" +
-                    " (b)-[:TYPE]->(c),\n" +
-                    " (c)-[:TYPE]->(a),\n" +
-                    " (a)-[:TYPE]->(c)";
+                    " (a)-[:TYPE]->(c),\n" +
+                    " (a)-[:TYPE]->(d),\n" +
+                    " (c)-[:TYPE]->(d),\n" +
+                    " (c)-[:TYPE]->(b),\n" +
+                    " (b)-[:TYPE]->(d),\n" +
 
+                    " (e)-[:TYPE]->(f),\n" +
+                    " (e)-[:TYPE]->(g),\n" +
+                    " (e)-[:TYPE]->(h),\n" +
+                    " (f)-[:TYPE]->(h),\n" +
+                    " (f)-[:TYPE]->(g),\n" +
+                    " (g)-[:TYPE]->(h),\n" +
+
+                    " (e)-[:TYPE {w:4}]->(b)";
+
+
+    private static final int MAX_ITERATIONS = 10;
     public static final Label LABEL = Label.label("Node");
-    public static final String ABCD = "abcd";
+    public static final String ABCDEFGHZ = "abcdefghz";
 
     @Rule
     public ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
@@ -74,7 +92,7 @@ public class HugeLouvainTest1 {
     private HugeGraph graph;
     private final Map<String, Integer> nameMap;
 
-    public HugeLouvainTest1() {
+    public HugeLouvainWeightedGraphTest() {
         nameMap = new HashMap<>();
     }
 
@@ -85,13 +103,12 @@ public class HugeLouvainTest1 {
                 .withAnyLabel()
                 .withoutNodeProperties()
                 .withOptionalRelationshipWeightsFromProperty("w", 1.0)
-                //.withDirection(Direction.BOTH)
                 .asUndirected(true)
                 .load(HugeGraphFactory.class);
 
         try (Transaction transaction = DB.beginTx()) {
-            for (int i = 0; i < ABCD.length(); i++) {
-                final String value = String.valueOf(ABCD.charAt(i));
+            for (int i = 0; i < ABCDEFGHZ.length(); i++) {
+                final String value = String.valueOf(ABCDEFGHZ.charAt(i));
                 final int id = graph.toMappedNodeId(DB.findNode(LABEL, "name", value).getId());
                 nameMap.put(value, id);
             }
@@ -100,52 +117,62 @@ public class HugeLouvainTest1 {
     }
 
     public void printCommunities(HugeLouvain louvain) {
-        try (Transaction transaction = DB.beginTx()) {
-            louvain.resultStream()
-                    .forEach(r -> {
-                        System.out.println(DB.getNodeById(r.nodeId).getProperty("name") + ":" + r.community);
-                    });
-            transaction.success();
-        }
+        DB.executeAndCommit(db -> {
+            louvain.resultStream().forEach(r -> {
+                System.out.println(db.getNodeById(r.nodeId).getProperty("name") + ":" + r.community);
+            });
+        });
     }
 
     @Test
-    public void testRunner() throws Exception {
+    public void testWeightedLouvain() throws Exception {
         setup(unidirectional);
-        final HugeLouvain algorithm = new HugeLouvain(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
+        final HugeLouvain louvain =
+                new HugeLouvain(graph,Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
-                .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
+                        .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
                 .compute(10, 10);
-        final HugeLongArray[] dendogram = algorithm.getDendrogram();
-        for (int i = 1; i <= dendogram.length; i++) {
-            if (null == dendogram[i - 1]) {
+
+        final HugeLongArray[] dendogram = louvain.getDendrogram();
+        for (int i = 0; i < dendogram.length; i++) {
+            if (null == dendogram[i]) {
                 break;
             }
-            System.out.println("level " + i + ": " + dendogram[i - 1]);
+            System.out.println("level " + i + ": " + dendogram[i]);
         }
-        assertCommunities(algorithm);
+        printCommunities(louvain);
+        System.out.println("louvain.getRuns() = " + louvain.getLevel());
+        System.out.println("louvain.getCommunityCount() = " + louvain.getCommunityCount());
+        assertCommunities(louvain);
+        assertTrue("Maximum iterations > " + MAX_ITERATIONS,louvain.getLevel() < MAX_ITERATIONS);
     }
 
     @Test
-    public void testRandomNeighborLouvain() throws Exception {
+    public void testWeightedRandomNeighborLouvain() throws Exception {
         setup(unidirectional);
-        final HugeLouvain algorithm = new HugeLouvain(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
+        final HugeLouvain louvain =
+                new HugeLouvain(graph,Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
-                .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
+                        .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
                 .compute(10, 10, true);
-        final HugeLongArray[] dendogram = algorithm.getDendrogram();
-        for (int i = 1; i <= dendogram.length; i++) {
-            if (null == dendogram[i - 1]) {
+
+        final HugeLongArray[] dendogram = louvain.getDendrogram();
+        for (int i = 0; i < dendogram.length; i++) {
+            if (null == dendogram[i]) {
                 break;
             }
-            System.out.println("level " + i + ": " + dendogram[i - 1]);
+            System.out.println("level " + i + ": " + dendogram[i]);
         }
-        assertCommunities(algorithm);
+        printCommunities(louvain);
+        System.out.println("louvain.getRuns() = " + louvain.getLevel());
+        System.out.println("louvain.getCommunityCount() = " + louvain.getCommunityCount());
     }
 
     public void assertCommunities(HugeLouvain louvain) {
-        assertUnion(new String[]{"a", "b", "c"}, louvain.getCommunityIds());
-        assertDisjoint(new String[]{"a", "d"}, louvain.getCommunityIds());
+        assertUnion(new String[]{"a", "c", "d"}, louvain.getCommunityIds());
+        assertUnion(new String[]{"f", "g", "h"}, louvain.getCommunityIds());
+        assertDisjoint(new String[]{"a", "f", "z"}, louvain.getCommunityIds());
+        assertUnion(new String[]{"b", "e"}, louvain.getCommunityIds());
     }
 
     private void assertUnion(String[] nodeNames, HugeLongArray values) {
@@ -159,10 +186,7 @@ public class HugeLouvainTest1 {
             if (current == -1L) {
                 current = communityIds[id];
             } else {
-                assertEquals(
-                        "Node " + name + " belongs to wrong community " + communityIds[id],
-                        current,
-                        communityIds[id]);
+                assertEquals("Node " + name + " belongs to wrong community " + communityIds[id], current, communityIds[id]);
             }
         }
     }

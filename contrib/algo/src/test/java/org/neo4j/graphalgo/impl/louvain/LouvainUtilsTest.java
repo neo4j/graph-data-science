@@ -50,20 +50,20 @@ public class LouvainUtilsTest {
     public void hugeDifferentNumbers() {
         HugeLongArray communities = HugeLongArray.of(10, 3, 4, 7, 6, 7, 10);
         assertEquals(5, LouvainUtils.normalize(communities));
-        assertArrayEquals(new int[]{0, 1, 2, 3, 4, 3, 0}, communities.toArray(Integer.TYPE));
+        assertArrayEquals(new long[]{0, 1, 2, 3, 4, 3, 0}, communities.toArray());
     }
 
     @Test
     public void hugeAllTheSame() {
         HugeLongArray communities = HugeLongArray.of(10, 10, 10, 10);
         assertEquals(1, LouvainUtils.normalize(communities));
-        assertArrayEquals(new int[]{0, 0, 0, 0}, communities.toArray(Integer.TYPE));
+        assertArrayEquals(new long[]{0, 0, 0, 0}, communities.toArray());
     }
 
     @Test
     public void hugeAllDifferent() {
         HugeLongArray communities = HugeLongArray.of(1, 2, 3, 4, 7, 5);
         assertEquals(6, LouvainUtils.normalize(communities));
-        assertArrayEquals(new int[]{0, 1, 2, 3, 4, 5}, communities.toArray(Integer.TYPE));
+        assertArrayEquals(new long[]{0, 1, 2, 3, 4, 5}, communities.toArray());
     }
 }
