@@ -18,15 +18,16 @@
  */
 package org.neo4j.graphalgo.bench;
 
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.HugeGraph;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
+import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.impl.infomap.InfoMap;
+import org.neo4j.graphalgo.impl.louvain.HugeLouvain;
 import org.neo4j.graphalgo.impl.louvain.Louvain;
 import org.neo4j.graphalgo.impl.pagerank.PageRankAlgorithm;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
@@ -51,9 +52,8 @@ public class ClusteringBenchmark {
 
     private static final String LABEL = "Node";
     private static final String RELATIONSHIP = "REL";
-    private static final int NODE_COUNT = 200;
 
-    private Graph g;
+    private HugeGraph g;
     private GraphDatabaseAPI api;
 
     @Param({"0.1", "0.25", "0.5"})
@@ -61,6 +61,9 @@ public class ClusteringBenchmark {
 
     @Param({"1", "4", "8"})
     private int concurrency;
+
+    @Param({"200"})
+    private int nodeCount;
 
     private CentralityResult pageRankResult;
 
@@ -75,16 +78,16 @@ public class ClusteringBenchmark {
                 .setLabel(LABEL)
                 .setRelationship(RELATIONSHIP)
                 .newCompleteGraphBuilder()
-                .createCompleteGraph(NODE_COUNT, connectedness);
+                .createCompleteGraph(nodeCount, connectedness);
 
-        g = new GraphLoader(api)
+        g = (HugeGraph) new GraphLoader(api)
                 .withLabel(LABEL)
                 .withRelationshipType(RELATIONSHIP)
                 .withoutRelationshipWeights()
                 .withoutNodeWeights()
                 .withSort(true)
                 .asUndirected(true)
-                .load(HeavyGraphFactory.class);
+                .load(HugeGraphFactory.class);
 
         pageRankResult = PageRankAlgorithm.of(g, 1. - InfoMap.TAU, LongStream.empty())
                 .compute(10)
@@ -102,12 +105,22 @@ public class ClusteringBenchmark {
     public Object _01_louvain() {
         return new Louvain(g, Pools.DEFAULT, concurrency, AllocationTracker.EMPTY)
                 .withProgressLogger(ProgressLogger.NULL_LOGGER)
+                .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
                 .compute(99, 99999)
                 .getCommunityCount();
     }
 
     @Benchmark
-    public Object _02_infoMap() {
+    public Object _02_hugeLouvain() {
+        return new HugeLouvain(g, Pools.DEFAULT, concurrency, AllocationTracker.EMPTY)
+                .withProgressLogger(ProgressLogger.NULL_LOGGER)
+                .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
+                .compute(99, 99999)
+                .getCommunityCount();
+    }
+
+    @Benchmark
+    public Object _03_infoMap() {
         return InfoMap.unweighted(g, pageRankResult::score, InfoMap.THRESHOLD, InfoMap.TAU, Pools.FJ_POOL, concurrency,ProgressLogger.NULL_LOGGER, TerminationFlag.RUNNING_TRUE)
                 .compute()
                 .getCommunityCount();
