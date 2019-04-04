@@ -141,7 +141,7 @@ public final class LdbcDownloader {
         }
     }
 
-    private static Path tempDirFor(String... subDirs) throws IOException {
+    public static Path tempDirFor(String... subDirs) throws IOException {
         Path tmpDir = getDefaultTempDir().toAbsolutePath();
         for (String subDir : subDirs) {
             tmpDir = tmpDir.resolve(subDir);

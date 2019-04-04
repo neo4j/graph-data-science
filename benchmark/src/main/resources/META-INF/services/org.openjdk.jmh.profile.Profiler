@@ -1,2 +1,3 @@
 org.neo4j.prof.JFR
 org.neo4j.prof.Heap
+org.neo4j.prof.FlameGraph
