@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.impl.louvain.HugeLouvain;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
@@ -39,6 +40,7 @@ import org.neo4j.test.rule.ImpermanentDatabaseRule;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -99,16 +101,6 @@ public class HugeLouvainTest1 {
         }
     }
 
-    public void printCommunities(HugeLouvain louvain) {
-        try (Transaction transaction = DB.beginTx()) {
-            louvain.resultStream()
-                    .forEach(r -> {
-                        System.out.println(DB.getNodeById(r.nodeId).getProperty("name") + ":" + r.community);
-                    });
-            transaction.success();
-        }
-    }
-
     @Test
     public void testRunner() throws Exception {
         setup(unidirectional);
@@ -121,7 +113,6 @@ public class HugeLouvainTest1 {
             if (null == dendogram[i - 1]) {
                 break;
             }
-            System.out.println("level " + i + ": " + dendogram[i - 1]);
         }
         assertCommunities(algorithm);
     }
@@ -138,9 +129,38 @@ public class HugeLouvainTest1 {
             if (null == dendogram[i - 1]) {
                 break;
             }
-            System.out.println("level " + i + ": " + dendogram[i - 1]);
         }
         assertCommunities(algorithm);
+    }
+
+    @Test
+    public void testMultithreadedLouvain() {
+        GraphBuilder.create(DB)
+                .setLabel("Node")
+                .setRelationship("REL")
+                .newCompleteGraphBuilder()
+                .createCompleteGraph(200, 1.0);
+        graph = (HugeGraph) new GraphLoader(DB)
+                .withLabel("Node")
+                .withRelationshipType("REL")
+                .withOptionalRelationshipWeightsFromProperty("w", 1.0)
+                .withoutNodeWeights()
+                .withSort(true)
+                .asUndirected(true)
+                .load(HugeGraphFactory.class);
+
+        HugeLouvain algorithm = new HugeLouvain(graph, Pools.DEFAULT, 4, AllocationTracker.EMPTY)
+                .withProgressLogger(TestProgressLogger.INSTANCE)
+                .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
+                .compute(99, 99999);
+
+        assertEquals(1, algorithm.getLevel());
+        long[] expected = new long[200];
+        HugeLongArray[] dendrogram = algorithm.getDendrogram();
+        for (HugeLongArray communities : dendrogram) {
+            long[] communityIds = communities.toArray();
+            assertArrayEquals(expected, communityIds);
+        }
     }
 
     public void assertCommunities(HugeLouvain louvain) {

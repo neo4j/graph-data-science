@@ -19,8 +19,10 @@
 package org.neo4j.graphalgo.impl.louvain;
 
 import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.DoubleArrayList;
 import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.IntScatterSet;
+import com.carrotsearch.hppc.ObjectArrayList;
 import org.neo4j.graphalgo.api.HugeGraph;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -50,8 +52,7 @@ import java.util.stream.Stream;
  *
  * @author mknblch
  */
-@SuppressWarnings("Duplicates")
-public class HugeLouvain extends Algorithm<HugeLouvain> {
+public final class HugeLouvain extends Algorithm<HugeLouvain> {
 
     private final long rootNodeCount;
     private int level;
@@ -63,8 +64,8 @@ public class HugeLouvain extends Algorithm<HugeLouvain> {
     private HugeLongArray communities;
     private double[] modularities;
     private HugeLongArray[] dendrogram;
-    private HugeDoubleArray nodeWeights;
-    private HugeGraph root;
+    private final HugeDoubleArray nodeWeights;
+    private final HugeGraph root;
     private long communityCount;
 
     public HugeLouvain(
@@ -88,46 +89,7 @@ public class HugeLouvain extends Algorithm<HugeLouvain> {
     }
 
     public HugeLouvain compute(int maxLevel, int maxIterations, boolean rnd) {
-        // temporary graph
-        HugeGraph graph = this.root;
-        // result arrays
-        dendrogram = new HugeLongArray[maxLevel];
-        modularities = new double[maxLevel];
-        long nodeCount = rootNodeCount;
-        for (level = 0; level < maxLevel; level++) {
-            // start modularity optimization
-            final HugeModularityOptimization modularityOptimization =
-                    new HugeModularityOptimization(graph,
-                            nodeId -> nodeWeights.get(nodeId),
-                            pool,
-                            concurrency,
-                            tracker, System.currentTimeMillis())
-                            .withProgressLogger(progressLogger)
-                            .withTerminationFlag(terminationFlag)
-                            .withRandomNeighborOptimization(rnd)
-                            .compute(maxIterations);
-            // rebuild graph based on the community structure
-            final HugeLongArray communityIds = modularityOptimization.getCommunityIds();
-            communityCount = LouvainUtils.normalize(communityIds);
-            progressLogger.log(
-                    "level: " + (level + 1) +
-                            " communities: " + communityCount +
-                            " q: " + modularityOptimization.getModularity());
-
-            if (communityCount >= nodeCount) {
-                // release the old algo instance
-                modularityOptimization.release();
-                break;
-            }
-            nodeCount = communityCount;
-            dendrogram[level] = rebuildCommunityStructure(communityIds);
-            modularities[level] = modularityOptimization.getModularity();
-            graph = rebuildGraph(graph, communityIds, communityCount);
-            // release the old algo instance
-            modularityOptimization.release();
-        }
-        dendrogram = Arrays.copyOf(dendrogram, level);
-        return this;
+        return computeOf(root, rootNodeCount, maxLevel, maxIterations, rnd);
     }
 
     public HugeLouvain compute(HugeWeightMapping communityMap, int maxLevel, int maxIterations, boolean rnd) {
@@ -142,15 +104,29 @@ public class HugeLouvain extends Algorithm<HugeLouvain> {
         long nodeCount = comCount.cardinality();
         LouvainUtils.normalize(communities);
         HugeGraph graph = rebuildGraph(this.root, communities, nodeCount);
-        // result arrays
-        dendrogram = new HugeLongArray[maxLevel];
-        modularities = new double[maxLevel];
 
-        for (level = 0; level < maxLevel && terminationFlag.running(); level++) {
+        return computeOf(graph, nodeCount, maxLevel, maxIterations, rnd);
+    }
+
+    private HugeLouvain computeOf(
+            HugeGraph rootGraph,
+            long rootNodeCount,
+            int maxLevel,
+            int maxIterations,
+            boolean rnd) {
+
+        // result arrays, start with small buffers in case we don't require max iterations to converge
+        ObjectArrayList<HugeLongArray> dendrogram = new ObjectArrayList<>(0);
+        DoubleArrayList modularities = new DoubleArrayList(0);
+        long communityCount = this.communityCount;
+        long nodeCount = rootNodeCount;
+        HugeGraph graph = rootGraph;
+
+        for (int level = 0; level < maxLevel && running(); level++) {
             // start modularity optimization
             final HugeModularityOptimization modularityOptimization =
                     new HugeModularityOptimization(graph,
-                            nodeId -> nodeWeights.get(nodeId),
+                            nodeWeights::get,
                             pool,
                             concurrency,
                             tracker, System.currentTimeMillis())
@@ -161,21 +137,29 @@ public class HugeLouvain extends Algorithm<HugeLouvain> {
             // rebuild graph based on the community structure
             final HugeLongArray communityIds = modularityOptimization.getCommunityIds();
             communityCount = LouvainUtils.normalize(communityIds);
-            // release the old algo instance
-            modularityOptimization.release();
             progressLogger.log(
                     "level: " + (level + 1) +
                             " communities: " + communityCount +
                             " q: " + modularityOptimization.getModularity());
             if (communityCount >= nodeCount) {
+                // release the old algo instance
+                modularityOptimization.release();
                 break;
             }
             nodeCount = communityCount;
-            dendrogram[level] = rebuildCommunityStructure(communityIds);
-            modularities[level] = modularityOptimization.getModularity();
+            dendrogram.add(rebuildCommunityStructure(communityIds));
+            modularities.add(modularityOptimization.getModularity());
             graph = rebuildGraph(graph, communityIds, communityCount);
+            // release the old algo instance
+            modularityOptimization.release();
         }
-        dendrogram = Arrays.copyOf(dendrogram, level);
+        int dendrogramSize = dendrogram.elementsCount;
+        HugeLongArray[] dendrogramArray = new HugeLongArray[dendrogramSize];
+        System.arraycopy(dendrogram.buffer, 0, dendrogramArray, 0, dendrogramSize);
+        this.dendrogram = dendrogramArray;
+        this.modularities = modularities.toArray();
+        this.level = modularities.elementsCount;
+        this.communityCount = communityCount;
         return this;
     }
 
@@ -225,12 +209,12 @@ public class HugeLouvain extends Algorithm<HugeLouvain> {
 
     private HugeLongArray rebuildCommunityStructure(HugeLongArray communityIds) {
         // rebuild community array
-        HugeLongArray communities = this.communities;
-        assert rootNodeCount == communities.size();
-        HugeLongArray ints = HugeLongArray.newArray(rootNodeCount, tracker);
-        ints.setAll(i -> communityIds.get(communities.get(i)));
-        tracker.remove(communities.release());
-        return this.communities = ints;
+        this.communities.setAll(i -> communityIds.get(communities.get(i)));
+        // the communities are stored in the dendrogram, one per level
+        // so we have to copy the current state and return it as a snapshot
+        HugeLongArray copy = HugeLongArray.newArray(rootNodeCount, tracker);
+        this.communities.copyTo(copy, rootNodeCount);
+        return copy;
     }
 
     /**

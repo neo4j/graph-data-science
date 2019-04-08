@@ -25,6 +25,7 @@ import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.HugeGraph;
 import org.neo4j.graphalgo.api.HugeNodeIterator;
 import org.neo4j.graphalgo.api.HugeNodeWeights;
+import org.neo4j.graphalgo.api.HugeRelationshipIterator;
 import org.neo4j.graphalgo.core.sources.RandomHugeNodeIterator;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pointer;
@@ -53,7 +54,7 @@ import java.util.function.LongPredicate;
  *
  * @author mknblch
  */
-public class HugeModularityOptimization extends Algorithm<HugeModularityOptimization> {
+public final class HugeModularityOptimization extends Algorithm<HugeModularityOptimization> {
 
     private static final double MINIMUM_MODULARITY = -1.0;
     /**
@@ -67,15 +68,15 @@ public class HugeModularityOptimization extends Algorithm<HugeModularityOptimiza
     private final HugeNodeWeights nodeWeights;
     private HugeGraph graph;
     private ExecutorService pool;
-    private HugeNodeIterator nodeIterator;
+    private final HugeNodeIterator nodeIterator;
     private double m2, m22;
     private HugeLongArray communities;
     private HugeDoubleArray ki;
     private int iterations;
     private double q = MINIMUM_MODULARITY;
-    private AtomicInteger counter = new AtomicInteger(0);
+    private final AtomicInteger counter = new AtomicInteger(0);
     private boolean randomNeighborSelection = false;
-    private Random random;
+    private final Random random;
 
     HugeModularityOptimization(
             HugeGraph graph,
@@ -274,10 +275,11 @@ public class HugeModularityOptimization extends Algorithm<HugeModularityOptimiza
     /**
      * Restartable task to perform modularity optimization
      */
-    private class Task implements Runnable {
+    private final class Task implements Runnable {
 
         final HugeDoubleArray sTot, sIn;
         final HugeLongArray localCommunities;
+        final HugeRelationshipIterator rels;
         private final TerminationFlag terminationFlag;
         double bestGain, bestWeight, q = MINIMUM_MODULARITY;
         long bestCommunity;
@@ -292,6 +294,7 @@ public class HugeModularityOptimization extends Algorithm<HugeModularityOptimiza
             sTot = HugeDoubleArray.newArray(nodeCount, tracker);
             ki.copyTo(sTot, nodeCount);
             localCommunities = HugeLongArray.newArray(nodeCount, tracker);
+            rels = graph.concurrentCopy();
             communities.copyTo(localCommunities, nodeCount);
             sIn = HugeDoubleArray.newArray(nodeCount, tracker);
             sIn.fill(0.);
@@ -346,7 +349,7 @@ public class HugeModularityOptimization extends Algorithm<HugeModularityOptimiza
             LongDoubleMap communityWeights = new LongDoubleHashMap(degree);
 
             final long[] communityCount = {0L};
-            graph.forEachRelationship(node, D, (s, t) -> {
+            rels.forEachRelationship(node, D, (s, t) -> {
                 double weight = graph.weightOf(s, t);
                 long localCommunity = localCommunities.get(t);
                 if (communityWeights.containsKey(localCommunity)) {
@@ -394,7 +397,7 @@ public class HugeModularityOptimization extends Algorithm<HugeModularityOptimiza
         }
 
         private void removeWeightForSelfRelationships(long node, LongDoubleMap communityWeights) {
-            graph.forEachRelationship(node, D, (s, t) -> {
+            rels.forEachRelationship(node, D, (s, t) -> {
                 if (s == t) {
                     double currentWeight = communityWeights.get(localCommunities.get(s));
                     communityWeights.put(localCommunities.get(s), currentWeight - graph.weightOf(s, t));
@@ -406,7 +409,7 @@ public class HugeModularityOptimization extends Algorithm<HugeModularityOptimiza
         private double calcModularity() {
             final Pointer.DoublePointer pointer = Pointer.wrap(.0);
             for (long node = 0L; node < nodeCount; node++) {
-                graph.forEachOutgoing(node, (s, t) -> {
+                rels.forEachOutgoing(node, (s, t) -> {
                     if (localCommunities.get(s) != localCommunities.get(t)) {
                         return true;
                     }
