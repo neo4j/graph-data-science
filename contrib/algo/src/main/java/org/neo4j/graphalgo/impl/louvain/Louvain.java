@@ -28,7 +28,8 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.Algorithm;
+import org.neo4j.graphalgo.core.write.Exporter;
+import org.neo4j.graphalgo.core.write.Translators;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,7 +51,7 @@ import java.util.stream.Stream;
  *
  * @author mknblch
  */
-public class Louvain extends Algorithm<Louvain> {
+public final class Louvain extends LouvainAlgo<Louvain> {
 
     private final int rootNodeCount;
     private int level;
@@ -233,27 +234,16 @@ public class Louvain extends Algorithm<Louvain> {
         return communities;
     }
 
-    public int[] getCommunityIds(int level) {
-        return dendrogram[level];
-    }
-
     public int[][] getDendrogram() {
         return dendrogram;
     }
 
+    @Override
     public double[] getModularities() {
         return Arrays.copyOfRange(modularities, 0, level);
     }
 
-    public double getFinalModularity() {
-        return modularities[level-1];
-    }
-
-    /**
-     * number of outer iterations
-     *
-     * @return
-     */
+    @Override
     public int getLevel() {
         return level;
     }
@@ -265,6 +255,11 @@ public class Louvain extends Algorithm<Louvain> {
      */
     public long getCommunityCount() {
         return communityCount;
+    }
+
+    @Override
+    public long communityIdOf(final long node) {
+        return communities[(int) node];
     }
 
     /**
@@ -293,13 +288,33 @@ public class Louvain extends Algorithm<Louvain> {
     }
 
     @Override
-    public Louvain me() {
-        return this;
+    public void export(
+            Exporter exporter,
+            String propertyName,
+            boolean includeIntermediateCommunities,
+            String intermediateCommunitiesPropertyName) {
+
+        if (includeIntermediateCommunities) {
+            exporter.write(
+                    propertyName,
+                    communities,
+                    Translators.INT_ARRAY_TRANSLATOR,
+                    intermediateCommunitiesPropertyName,
+                    dendrogram,
+                    COMMUNITIES_TRANSLATOR
+            );
+        } else {
+            exporter.write(
+                    propertyName,
+                    communities,
+                    Translators.INT_ARRAY_TRANSLATOR
+            );
+        }
     }
 
     @Override
     public Louvain release() {
-        tracker.add(4 * rootNodeCount);
+        tracker.remove(4 * rootNodeCount);
         communities = null;
         return this;
     }
@@ -324,32 +339,5 @@ public class Louvain extends Algorithm<Louvain> {
             return newSet;
         }
         return intCursors;
-    }
-
-    /**
-     * result object
-     */
-    public static final class Result {
-
-        public final long nodeId;
-        public final long community;
-
-        public Result(long id, long community) {
-            this.nodeId = id;
-            this.community = community;
-        }
-    }
-
-    public static final class StreamingResult {
-        public final long nodeId;
-        public final List<Long> communities;
-        public final long community;
-
-        public StreamingResult(long nodeId, List<Long> communities, long community) {
-
-            this.nodeId = nodeId;
-            this.communities = communities;
-            this.community = community;
-        }
     }
 }

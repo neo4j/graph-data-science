@@ -20,8 +20,6 @@ package org.neo4j.graphalgo.impl.louvain;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.DoubleArrayList;
-import com.carrotsearch.hppc.IntObjectMap;
-import com.carrotsearch.hppc.IntScatterSet;
 import com.carrotsearch.hppc.ObjectArrayList;
 import org.neo4j.graphalgo.api.HugeGraph;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
@@ -31,7 +29,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongDoubleMap;
-import org.neo4j.graphalgo.impl.Algorithm;
+import org.neo4j.graphalgo.core.write.Exporter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,7 +50,7 @@ import java.util.stream.Stream;
  *
  * @author mknblch
  */
-public final class HugeLouvain extends Algorithm<HugeLouvain> {
+public final class HugeLouvain extends LouvainAlgo<HugeLouvain> {
 
     private final long rootNodeCount;
     private int level;
@@ -153,10 +151,7 @@ public final class HugeLouvain extends Algorithm<HugeLouvain> {
             // release the old algo instance
             modularityOptimization.release();
         }
-        int dendrogramSize = dendrogram.elementsCount;
-        HugeLongArray[] dendrogramArray = new HugeLongArray[dendrogramSize];
-        System.arraycopy(dendrogram.buffer, 0, dendrogramArray, 0, dendrogramSize);
-        this.dendrogram = dendrogramArray;
+        this.dendrogram = dendrogram.toArray(HugeLongArray.class);
         this.modularities = modularities.toArray();
         this.level = modularities.elementsCount;
         this.communityCount = communityCount;
@@ -226,20 +221,13 @@ public final class HugeLouvain extends Algorithm<HugeLouvain> {
         return communities;
     }
 
-    public HugeLongArray getCommunityIds(int level) {
-        return dendrogram[level];
-    }
-
     public HugeLongArray[] getDendrogram() {
         return dendrogram;
     }
 
+    @Override
     public double[] getModularities() {
         return Arrays.copyOfRange(modularities, 0, level);
-    }
-
-    public double getFinalModularity() {
-        return modularities[level - 1];
     }
 
     /**
@@ -247,6 +235,7 @@ public final class HugeLouvain extends Algorithm<HugeLouvain> {
      *
      * @return
      */
+    @Override
     public int getLevel() {
         return level;
     }
@@ -258,6 +247,11 @@ public final class HugeLouvain extends Algorithm<HugeLouvain> {
      */
     public long getCommunityCount() {
         return communityCount;
+    }
+
+    @Override
+    public long communityIdOf(final long node) {
+        return communities.get(node);
     }
 
     /**
@@ -286,8 +280,27 @@ public final class HugeLouvain extends Algorithm<HugeLouvain> {
     }
 
     @Override
-    public HugeLouvain me() {
-        return this;
+    public void export(
+            Exporter exporter,
+            String propertyName,
+            boolean includeIntermediateCommunities,
+            String intermediateCommunitiesPropertyName) {
+        if (includeIntermediateCommunities) {
+            exporter.write(
+                    propertyName,
+                    communities,
+                    HugeLongArray.Translator.INSTANCE,
+                    intermediateCommunitiesPropertyName,
+                    dendrogram,
+                    HUGE_COMMUNITIES_TRANSLATOR
+            );
+        } else {
+            exporter.write(
+                    propertyName,
+                    communities,
+                    HugeLongArray.Translator.INSTANCE
+            );
+        }
     }
 
     @Override
@@ -307,42 +320,5 @@ public final class HugeLouvain extends Algorithm<HugeLouvain> {
     public HugeLouvain withTerminationFlag(TerminationFlag terminationFlag) {
         this.terminationFlag = terminationFlag;
         return this;
-    }
-
-    private static IntScatterSet putIfAbsent(IntObjectMap<IntScatterSet> relationships, int community) {
-        final IntScatterSet intCursors = relationships.get(community);
-        if (null == intCursors) {
-            final IntScatterSet newSet = new IntScatterSet();
-            relationships.put(community, newSet);
-            return newSet;
-        }
-        return intCursors;
-    }
-
-    /**
-     * result object
-     */
-    public static final class Result {
-
-        public final long nodeId;
-        public final long community;
-
-        public Result(long id, long community) {
-            this.nodeId = id;
-            this.community = community;
-        }
-    }
-
-    public static final class StreamingResult {
-        public final long nodeId;
-        public final List<Long> communities;
-        public final long community;
-
-        public StreamingResult(long nodeId, List<Long> communities, long community) {
-
-            this.nodeId = nodeId;
-            this.communities = communities;
-            this.community = community;
-        }
     }
 }
