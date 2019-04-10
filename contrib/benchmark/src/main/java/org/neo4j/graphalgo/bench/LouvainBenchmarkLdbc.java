@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -48,8 +49,10 @@ public class LouvainBenchmarkLdbc {
     private GraphDatabaseAPI db;
     private Transaction tx;
 
+    @Param({"HEAVY", "HUGE"})
+    GraphImpl graph;
 
-    @Param({"4", "8"})
+    @Param({"1", "4"})
     int threads;
 
     @Setup
@@ -81,7 +84,7 @@ public class LouvainBenchmarkLdbc {
     public Object _01_louvainParallel() {
         return runQuery(
                 db,
-                "CALL algo.louvain(null, null, {maxIterations:1, concurrency:" + threads + "}) "
+                "CALL algo.louvain(null, null, {maxIterations:1, concurrency: $threads, graph: $graph}) "
                         + "YIELD loadMillis, computeMillis, writeMillis, nodes, communityCount, iterations"
                 , r -> {
                     long load = r.getNumber("loadMillis").longValue();
@@ -102,11 +105,11 @@ public class LouvainBenchmarkLdbc {
         );
     }
 
-    private static Object runQuery(
+    private Object runQuery(
             GraphDatabaseAPI db,
             String query,
             Consumer<Result.ResultRow> action) {
-        try (Result result = db.execute(query)) {
+        try (Result result = db.execute(query, MapUtil.map("threads", threads, "graph", graph.name()))) {
             result.accept(r -> {
                 action.accept(r);
                 return true;
