@@ -24,16 +24,23 @@ import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.neo4j.graphalgo.LouvainProc;
+import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
+
+import java.util.Arrays;
+import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
 
 /**
  *
  */
+@RunWith(Parameterized.class)
 public class LouvainClusteringPreDefinedCommunitiesIntegrationTest {
 
     @ClassRule
@@ -53,24 +60,30 @@ public class LouvainClusteringPreDefinedCommunitiesIntegrationTest {
         DB.execute(cypher);
     }
 
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> data() {
+        return Arrays.asList(
+                new Object[]{"heavy"},
+                new Object[]{"huge"}
+        );
+    }
+
+    @Parameterized.Parameter
+    public String graphImpl;
+
     @Rule
     public ExpectedException exceptions = ExpectedException.none();
 
     @Test
     public void testStream() {
-        final String cypher = "CALL algo.louvain.stream('', '', {concurrency:1, community: 'community', randomNeighbor:false}) " +
+        final String cypher = "CALL algo.louvain.stream('', '', {concurrency:1, community: 'community', randomNeighbor:false, graph:$graph}) " +
                 "YIELD nodeId, community, communities";
         final IntIntScatterMap testMap = new IntIntScatterMap();
-        DB.execute(cypher).accept(row -> {
-            final long nodeId = (long) row.get("nodeId");
+        DB.execute(cypher, MapUtil.map("graph", graphImpl)).accept(row -> {
             final long community = (long) row.get("community");
             testMap.addTo((int) community, 1);
             return false;
         });
         assertEquals(3, testMap.size());
     }
-
-
-
-
 }
