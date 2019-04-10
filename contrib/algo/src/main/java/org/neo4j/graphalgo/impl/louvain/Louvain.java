@@ -331,7 +331,7 @@ public final class Louvain extends LouvainAlgo<Louvain> {
         return this;
     }
 
-    private static IntScatterSet putIfAbsent(IntObjectMap<IntScatterSet> relationships, int community) {
+    static IntScatterSet putIfAbsent(IntObjectMap<IntScatterSet> relationships, int community) {
         final IntScatterSet intCursors = relationships.get(community);
         if (null == intCursors) {
             final IntScatterSet newSet = new IntScatterSet();

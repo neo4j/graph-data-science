@@ -29,9 +29,7 @@ import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphalgo.core.huge.loader.HugeIdMap;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongLongDoubleMap;
 import org.neo4j.graphdb.Direction;
-import org.roaringbitmap.longlong.LongIterator;
 
 import java.util.Collection;
 import java.util.Set;
@@ -49,9 +47,9 @@ public final class HugeLouvainGraph implements HugeGraph {
 
     private final long nodeCount;
     private final SubGraph graph;
-    private final HugeLongLongDoubleMap weights;
+    private final SubWeights weights;
 
-    HugeLouvainGraph(long newNodeCount, SubGraph graph, HugeLongLongDoubleMap weights) {
+    HugeLouvainGraph(long newNodeCount, SubGraph graph, SubWeights weights) {
         this.nodeCount = newNodeCount;
         this.graph = graph;
         this.weights = weights;
@@ -64,20 +62,12 @@ public final class HugeLouvainGraph implements HugeGraph {
 
     @Override
     public void forEachRelationship(long nodeId, Direction direction, HugeRelationshipConsumer consumer) {
-        LongIterator ints = graph.get(nodeId);
-        if (null == ints) {
-            return;
-        }
-        while (ints.hasNext()) {
-            if (!consumer.accept(nodeId, ints.next())) {
-                return;
-            }
-        }
+        graph.forEach(nodeId, consumer);
     }
 
     @Override
     public double weightOf(long sourceNodeId, long targetNodeId) {
-        return weights.getOrDefault(sourceNodeId, targetNodeId, 0.0);
+        return weights.getOrDefault(sourceNodeId, targetNodeId);
     }
 
     @Override

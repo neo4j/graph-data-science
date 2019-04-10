@@ -26,9 +26,9 @@ import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongLongDoubleMap;
 import org.neo4j.graphalgo.core.write.Exporter;
 
 import java.util.ArrayList;
@@ -158,6 +158,8 @@ public final class HugeLouvain extends LouvainAlgo<HugeLouvain> {
         return this;
     }
 
+    private static final int MAX_MAP_ENTRIES = (int) ((Integer.MAX_VALUE - 2) * 0.75f);
+
     /**
      * create a virtual graph based on the community structure of the
      * previous louvain round
@@ -169,29 +171,46 @@ public final class HugeLouvain extends LouvainAlgo<HugeLouvain> {
     private HugeGraph rebuildGraph(HugeGraph graph, HugeLongArray communityIds, long communityCount) {
         // count and normalize community structure
         final long nodeCount = communityIds.size();
+
+        if (nodeCount < MAX_MAP_ENTRIES) {
+            return rebuildSmallerGraph(graph, communityIds, (int) nodeCount, communityCount);
+        }
+
         // bag of nodeId->{nodeId, ..}
-        SubGraph subGraph = new SubGraph(nodeCount, tracker);
-        HugeLongLongDoubleMap relationshipWeights = new HugeLongLongDoubleMap(nodeCount, tracker);
-        for (long i = 0L; i < nodeCount; ++i) {
-            // map node nodeId to community nodeId
-            final long sourceCommunity = communityIds.get(i);
-            // get transitions from current node
-            graph.forEachOutgoing(i, (s, t) -> {
-                // mapping
-                final long targetCommunity = communityIds.get(t);
-                final double value = graph.weightOf(s, t);
-                if (sourceCommunity == targetCommunity) {
-                    nodeWeights.addTo(sourceCommunity, value);
-                }
-                // add IN and OUT relation
-                subGraph.add(targetCommunity, sourceCommunity);
-                subGraph.add(sourceCommunity, targetCommunity);
+        LongLongSubGraph subGraph = new LongLongSubGraph(nodeCount, tracker);
+        // accumulated weights
+        LongLongSubWeights subWeights = new LongLongSubWeights(nodeCount, tracker);
 
-                relationshipWeights.addTo(sourceCommunity, targetCommunity, value / 2.0); // TODO validate
-                relationshipWeights.addTo(targetCommunity, sourceCommunity, value / 2.0);
-                return true;
-            });
+        // for each node in the current graph
+        HugeCursor<long[]> cursor = communityIds.cursor(communityIds.newCursor());
+        while (cursor.next()) {
+            long[] communities = cursor.array;
+            int start = cursor.offset;
+            int end = cursor.limit;
+            long nodeId = cursor.base + start;
 
+            while (start < end) {
+                // map node nodeId to community nodeId
+                final long sourceCommunity = communities[start];
+
+                // get transitions from current node
+                graph.forEachOutgoing(nodeId, (s, t) -> {
+                    // mapping
+                    final long targetCommunity = communityIds.get(t);
+                    final double value = graph.weightOf(s, t);
+                    if (sourceCommunity == targetCommunity) {
+                        nodeWeights.addTo(sourceCommunity, value);
+                    }
+
+                    // add IN and OUT relation and weights
+                    subGraph.add(sourceCommunity, targetCommunity);
+                    subWeights.add(sourceCommunity, targetCommunity, value / 2.0); // TODO validate
+                    return true;
+                });
+
+                ++start;
+                ++nodeId;
+            }
         }
 
         if (graph instanceof HugeLouvainGraph) {
@@ -199,7 +218,54 @@ public final class HugeLouvain extends LouvainAlgo<HugeLouvain> {
         }
 
         // create temporary graph
-        return new HugeLouvainGraph(communityCount, subGraph, relationshipWeights);
+        return new HugeLouvainGraph(communityCount, subGraph, subWeights);
+    }
+
+    private HugeGraph rebuildSmallerGraph(
+        HugeGraph graph,
+        HugeLongArray communityIds,
+        int nodeCount,
+        long communityCount) {
+
+        // bag of nodeId->{nodeId, ..}
+        final IntIntSubGraph subGraph = new IntIntSubGraph(nodeCount);
+        // accumulated weights
+        final IntIntSubWeights subWeights = new IntIntSubWeights(nodeCount);
+
+        // for each node in the current graph
+        HugeCursor<long[]> cursor = communityIds.cursor(communityIds.newCursor());
+        while (cursor.next()) {
+            long[] communities = cursor.array;
+            int start = cursor.offset;
+            int end = cursor.limit;
+            long nodeId = cursor.base + start;
+
+            while (start < end) {
+                // map node nodeId to community nodeId
+                final int sourceCommunity = (int) communities[start];
+
+                // get transitions from current node
+                graph.forEachOutgoing(nodeId, (s, t) -> {
+                    // mapping
+                    final int targetCommunity = (int) communityIds.get(t);
+                    final double value = graph.weightOf(s, t);
+                    if (sourceCommunity == targetCommunity) {
+                        nodeWeights.addTo(sourceCommunity, value);
+                    }
+
+                    // add IN and OUT relation and weights
+                    subGraph.add(sourceCommunity, targetCommunity);
+                    subWeights.add(sourceCommunity, targetCommunity, value / 2.0); // TODO validate
+                    return true;
+                });
+
+                ++start;
+                ++nodeId;
+            }
+        }
+
+        // create temporary graph
+        return new HugeLouvainGraph(communityCount, subGraph, subWeights);
     }
 
     private HugeLongArray rebuildCommunityStructure(HugeLongArray communityIds) {
