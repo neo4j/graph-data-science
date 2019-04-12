@@ -125,6 +125,12 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
      * {@inheritDoc}
      */
     @Override
+    abstract public long sizeOf();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     abstract public long release();
 
     /**
@@ -314,6 +320,11 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
         }
 
         @Override
+        public long sizeOf() {
+            return sizeOfLongArray(size);
+        }
+
+        @Override
         public long release() {
             if (page != null) {
                 page = null;
@@ -469,6 +480,11 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
         @Override
         public long size() {
             return size;
+        }
+
+        @Override
+        public long sizeOf() {
+            return memoryUsed;
         }
 
         @Override
