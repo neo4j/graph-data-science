@@ -149,6 +149,16 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
      * {@inheritDoc}
      */
     @Override
+    public final HugeLongArray copyOf(final long newLength, final AllocationTracker tracker) {
+        HugeLongArray copy = HugeLongArray.newArray(newLength, tracker);
+        this.copyTo(copy, newLength);
+        return copy;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     final Long boxedGet(final long index) {
         return get(index);
     }

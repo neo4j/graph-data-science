@@ -132,6 +132,16 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
      * {@inheritDoc}
      */
     @Override
+    public final HugeDoubleArray copyOf(final long newLength, final AllocationTracker tracker) {
+        HugeDoubleArray copy = HugeDoubleArray.newArray(newLength, tracker);
+        this.copyTo(copy, newLength);
+        return copy;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     final Double boxedGet(final long index) {
         return get(index);
     }
