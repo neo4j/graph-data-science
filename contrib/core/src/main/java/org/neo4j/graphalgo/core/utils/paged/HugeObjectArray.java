@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2017 "Neo4j, Inc." <http://neo4j.com>
  *
  * This file is part of Neo4j Graph Algorithms <http://github.com/neo4j-contrib/neo4j-graph-algorithms>.
