@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2017 "Neo4j, Inc." <http://neo4j.com>
  *
  * This file is part of Neo4j Graph Algorithms <http://github.com/neo4j-contrib/neo4j-graph-algorithms>.
@@ -22,10 +22,10 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public final class HugeLongArrayTest extends HugeArrayTestBase<long[], Long, HugeLongArray> {
+public final class HugeIntArrayTest extends HugeArrayTestBase<int[], Integer, HugeIntArray> {
 
     @Test
-    public void shouldBinaryOrValues() {
+    public final void shouldBinaryOrValues() {
         testArray(10, array -> {
             int index = between(2, 8);
             int value = between(42, 1337);
@@ -37,7 +37,7 @@ public final class HugeLongArrayTest extends HugeArrayTestBase<long[], Long, Hug
     }
 
     @Test
-    public void shouldBinaryAndValues() {
+    public final void shouldBinaryAndValues() {
         testArray(10, array -> {
             int index = between(2, 8);
             int value = between(42, 1337);
@@ -61,27 +61,27 @@ public final class HugeLongArrayTest extends HugeArrayTestBase<long[], Long, Hug
     }
 
     @Override
-    HugeLongArray singleArray(final int size) {
-        return HugeLongArray.newSingleArray(size, AllocationTracker.EMPTY);
+    HugeIntArray singleArray(final int size) {
+        return HugeIntArray.newSingleArray(size, AllocationTracker.EMPTY);
     }
 
     @Override
-    HugeLongArray pagedArray(final int size) {
-        return HugeLongArray.newPagedArray(size, AllocationTracker.EMPTY);
+    HugeIntArray pagedArray(final int size) {
+        return HugeIntArray.newPagedArray(size, AllocationTracker.EMPTY);
     }
 
     @Override
     long bufferSize(final int size) {
-        return MemoryUsage.sizeOfLongArray(size);
+        return MemoryUsage.sizeOfIntArray(size);
     }
 
     @Override
-    Long box(final int value) {
-        return (long) value;
+    Integer box(final int value) {
+        return value;
     }
 
     @Override
-    int unbox(final Long value) {
-        return value.intValue();
+    int unbox(final Integer value) {
+        return value;
     }
 }

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2017 "Neo4j, Inc." <http://neo4j.com>
  *
  * This file is part of Neo4j Graph Algorithms <http://github.com/neo4j-contrib/neo4j-graph-algorithms>.
@@ -22,31 +22,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public final class HugeLongArrayTest extends HugeArrayTestBase<long[], Long, HugeLongArray> {
-
-    @Test
-    public void shouldBinaryOrValues() {
-        testArray(10, array -> {
-            int index = between(2, 8);
-            int value = between(42, 1337);
-            array.set(index, value);
-            int newValue = between(42, 1337);
-            array.or(index, newValue);
-            assertEquals(value | newValue, array.get(index));
-        });
-    }
-
-    @Test
-    public void shouldBinaryAndValues() {
-        testArray(10, array -> {
-            int index = between(2, 8);
-            int value = between(42, 1337);
-            array.set(index, value);
-            int newValue = between(42, 1337);
-            array.and(index, newValue);
-            assertEquals(value & newValue, array.get(index));
-        });
-    }
+public final class HugeDoubleArrayTest extends HugeArrayTestBase<double[], Double, HugeDoubleArray> {
 
     @Test
     public final void shouldAddToValues() {
@@ -56,32 +32,32 @@ public final class HugeLongArrayTest extends HugeArrayTestBase<long[], Long, Hug
             array.set(index, value);
             int newValue = between(42, 1337);
             array.addTo(index, newValue);
-            assertEquals(value + newValue, array.get(index));
+            assertEquals(value + newValue, array.get(index), 1e-4);
         });
     }
 
     @Override
-    HugeLongArray singleArray(final int size) {
-        return HugeLongArray.newSingleArray(size, AllocationTracker.EMPTY);
+    HugeDoubleArray singleArray(final int size) {
+        return HugeDoubleArray.newSingleArray(size, AllocationTracker.EMPTY);
     }
 
     @Override
-    HugeLongArray pagedArray(final int size) {
-        return HugeLongArray.newPagedArray(size, AllocationTracker.EMPTY);
+    HugeDoubleArray pagedArray(final int size) {
+        return HugeDoubleArray.newPagedArray(size, AllocationTracker.EMPTY);
     }
 
     @Override
     long bufferSize(final int size) {
-        return MemoryUsage.sizeOfLongArray(size);
+        return MemoryUsage.sizeOfDoubleArray(size);
     }
 
     @Override
-    Long box(final int value) {
-        return (long) value;
+    Double box(final int value) {
+        return (double) value;
     }
 
     @Override
-    int unbox(final Long value) {
+    int unbox(final Double value) {
         return value.intValue();
     }
 }

@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.IntersectionConsumer;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.DoubleArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.graphalgo.impl.Algorithm;
 import org.neo4j.graphdb.Direction;
@@ -85,8 +85,8 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
     }
 
     @Override
-    public DoubleArray getCoefficients() {
-        final DoubleArray array = DoubleArray.newArray(nodeCount, tracker);
+    public HugeDoubleArray getCoefficients() {
+        final HugeDoubleArray array = HugeDoubleArray.newArray(nodeCount, tracker);
         final double[] adder = new double[]{0.0};
         for (int i = 0; i < nodeCount; i++) {
             final double c = TriangleCountAlgorithm.calculateCoefficient(triangles.get(i), graph.degree(i, Direction.OUTGOING));

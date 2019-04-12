@@ -18,8 +18,12 @@
  */
 package org.neo4j.graphalgo.utils;
 
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.paged.NewHugeArrays;
 import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
+import org.neo4j.unsafe.impl.batchimport.cache.ChunkedHeapFactory;
 import org.neo4j.unsafe.impl.batchimport.cache.DynamicLongArray;
 import org.neo4j.unsafe.impl.batchimport.cache.OffHeapLongArray;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -66,7 +70,7 @@ public class LongArrayBenchmark {
     }
 
     @Benchmark
-    public long paged_get(LongArrays arrays) {
+    public long huge_paged_get(LongArrays arrays) {
         final int size = arrays.size;
         final HugeLongArray array = arrays.paged;
         long res = 0;
@@ -77,14 +81,62 @@ public class LongArrayBenchmark {
     }
 
     @Benchmark
-    public HugeLongArray paged_set(LongArrays arrays) {
-        return LongArrays.createPaged(arrays.primitive);
+    public long huge_paged_get_cursor(LongArrays arrays) {
+        final HugeLongArray array = arrays.paged;
+        HugeCursor<long[]> cursor = array.cursor(array.newCursor());
+        long res = 0;
+        long[] block;
+        int limit;
+        while (cursor.next()) {
+            block = cursor.array;
+            limit = cursor.limit;
+            for (int i = cursor.offset; i < limit; ++i) {
+                res += block[i];
+            }
+        }
+        return res;
     }
 
     @Benchmark
-    public long huge_get(LongArrays arrays) {
+    public HugeLongArray huge_paged_set(LongArrays arrays) {
+        long[] values = arrays.primitive;
+        final HugeLongArray array = NewHugeArrays.newPagedArray(values.length, AllocationTracker.EMPTY);
+        for (int i = 0; i < values.length; i++) {
+            long value = values[i];
+            if (value >= 0) {
+                array.set(i, value);
+            }
+        }
+        return array;
+    }
+
+    @Benchmark
+    public HugeLongArray huge_paged_set_cursor(LongArrays arrays) {
+        long[] values = arrays.primitive;
+        final HugeLongArray array = NewHugeArrays.newPagedArray(values.length, AllocationTracker.EMPTY);
+        HugeCursor<long[]> cursor = array.cursor(array.newCursor());
+        long[] block;
+        int limit, offset, idx;
+        while (cursor.next()) {
+            block = cursor.array;
+            limit = cursor.limit;
+            offset = cursor.offset;
+            idx = (int) cursor.base;
+            while (offset < limit) {
+             long value = values[idx++];
+                if (value >= 0L) {
+                    block[offset] = value;
+                }
+                ++offset;
+            }
+        }
+        return array;
+    }
+
+    @Benchmark
+    public long huge_single_get(LongArrays arrays) {
         final int size = arrays.size;
-        final HugeLongArray array = arrays.huge;
+        final HugeLongArray array = arrays.single;
         long res = 0;
         for (int i = 0; i < size; i++) {
             res += array.get(i);
@@ -93,8 +145,56 @@ public class LongArrayBenchmark {
     }
 
     @Benchmark
-    public HugeLongArray huge_set(LongArrays arrays) {
-        return LongArrays.createHuge(arrays.primitive);
+    public long huge_single_get_cursor(LongArrays arrays) {
+        final HugeLongArray array = arrays.single;
+        HugeCursor<long[]> cursor = array.cursor(array.newCursor());
+        long res = 0;
+        long[] block;
+        int limit;
+        while (cursor.next()) {
+            block = cursor.array;
+            limit = cursor.limit;
+            for (int i = cursor.offset; i < limit; ++i) {
+                res += block[i];
+            }
+        }
+        return res;
+    }
+
+    @Benchmark
+    public HugeLongArray huge_single_set(LongArrays arrays) {
+        long[] values = arrays.primitive;
+        final HugeLongArray array = HugeLongArray.newArray(values.length, AllocationTracker.EMPTY);
+        for (int i = 0; i < values.length; i++) {
+            long value = values[i];
+            if (value >= 0) {
+                array.set(i, value);
+            }
+        }
+        return array;
+    }
+
+    @Benchmark
+    public HugeLongArray huge_single_set_cursor(LongArrays arrays) {
+        long[] values = arrays.primitive;
+        final HugeLongArray array = HugeLongArray.newArray(values.length, AllocationTracker.EMPTY);
+        HugeCursor<long[]> cursor = array.cursor(array.newCursor());
+        long[] block;
+        int limit, offset, idx;
+        while (cursor.next()) {
+            block = cursor.array;
+            limit = cursor.limit;
+            offset = cursor.offset;
+            idx = (int) cursor.base;
+            while (offset < limit) {
+             long value = values[idx++];
+                if (value >= 0L) {
+                    block[offset] = value;
+                }
+                ++offset;
+            }
+        }
+        return array;
     }
 
     @Benchmark
@@ -110,7 +210,15 @@ public class LongArrayBenchmark {
 
     @Benchmark
     public SparseLongArray sparse_set(LongArrays arrays) {
-        return LongArrays.createSparse(arrays.primitive);
+        long[] values = arrays.primitive;
+        final SparseLongArray array = SparseLongArray.newArray(values.length, AllocationTracker.EMPTY);
+        for (int i = 0; i < values.length; i++) {
+            long value = values[i];
+            if (value >= 0) {
+                array.set(i, value);
+            }
+        }
+        return array;
     }
 
     @Benchmark
@@ -126,7 +234,15 @@ public class LongArrayBenchmark {
 
     @Benchmark
     public OffHeapLongArray offHeap_set(LongArrays arrays) {
-        return LongArrays.createOffHeap(arrays.primitive);
+        long[] values = arrays.primitive;
+        final OffHeapLongArray array = new OffHeapLongArray(values.length, -1L, 0, NoMemoryTracker.INSTANCE);
+        for (int i = 0; i < values.length; i++) {
+            long value = values[i];
+            if (value >= 0) {
+                array.set(i, value);
+            }
+        }
+        return array;
     }
 
     @Benchmark
@@ -142,6 +258,14 @@ public class LongArrayBenchmark {
 
     @Benchmark
     public DynamicLongArray chunked_set(LongArrays arrays) {
-        return LongArrays.createChunked(arrays.primitive);
+        long[] values = arrays.primitive;
+        final DynamicLongArray array = ChunkedHeapFactory.newArray(values.length, -1L);
+        for (int i = 0; i < values.length; i++) {
+            long value = values[i];
+            if (value >= 0) {
+                array.set(i, value);
+            }
+        }
+        return array;
     }
 }

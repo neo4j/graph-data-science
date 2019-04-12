@@ -51,7 +51,7 @@ public class LongArrays {
 
     long[] primitive;
     HugeLongArray paged;
-    HugeLongArray huge;
+    HugeLongArray single;
     SparseLongArray sparse;
     OffHeapLongArray offHeap;
     DynamicLongArray chunked;
@@ -60,7 +60,7 @@ public class LongArrays {
     public void setup() {
         primitive = createPrimitive(size, sparseness, distribution);
         paged = createPaged(primitive);
-        huge = createHuge(primitive);
+        single = createSingle(primitive);
         sparse = createSparse(primitive);
         offHeap = createOffHeap(primitive);
         chunked = createChunked(primitive);
@@ -103,8 +103,8 @@ public class LongArrays {
         return array;
     }
 
-    static HugeLongArray createHuge(long[] values) {
-        final HugeLongArray array = HugeLongArray.newArray(values.length, AllocationTracker.EMPTY);
+    static HugeLongArray createSingle(long[] values) {
+        final HugeLongArray array = NewHugeArrays.newSingleArray(values.length, AllocationTracker.EMPTY);
         for (int i = 0; i < values.length; i++) {
             long value = values[i];
             if (value >= 0) {

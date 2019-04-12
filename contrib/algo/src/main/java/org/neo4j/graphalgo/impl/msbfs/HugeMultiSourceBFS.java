@@ -22,6 +22,7 @@ import org.neo4j.graphalgo.api.HugeIdMapping;
 import org.neo4j.graphalgo.api.HugeRelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Direction;
 
@@ -240,8 +241,8 @@ public final class HugeMultiSourceBFS implements Runnable, MsBFSAlgo {
             HugeLongArray nextSet,
             HugeLongArray seenSet) {
 
-        HugeLongArray.Cursor visitCursor = visitSet.newCursor();
-        HugeLongArray.Cursor nextCursor = nextSet.newCursor();
+        HugeCursor<long[]> visitCursor = visitSet.newCursor();
+        HugeCursor<long[]> nextCursor = nextSet.newCursor();
         int depth = 0;
 
         while (true) {

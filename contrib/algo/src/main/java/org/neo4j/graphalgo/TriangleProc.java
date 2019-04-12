@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraph;
 import org.neo4j.graphalgo.core.utils.*;
-import org.neo4j.graphalgo.core.utils.paged.DoubleArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.core.write.Translators;
@@ -268,7 +268,7 @@ public class TriangleProc {
         if (algorithm instanceof IntersectingTriangleCount) {
             if (coefficientProperty.isPresent()) {
                 // huge with coefficients
-                final DoubleArray coefficients = ((IntersectingTriangleCount) algorithm).getCoefficients();
+                final HugeDoubleArray coefficients = ((IntersectingTriangleCount) algorithm).getCoefficients();
                 final PagedAtomicIntegerArray triangles = ((IntersectingTriangleCount) algorithm).getTriangles();
                 exporter.write(
                         writeProperty,
@@ -276,7 +276,7 @@ public class TriangleProc {
                         PagedAtomicIntegerArray.Translator.INSTANCE,
                         coefficientProperty.get(),
                         coefficients,
-                        DoubleArray.Translator.INSTANCE
+                        HugeDoubleArray.Translator.INSTANCE
                 );
             } else {
                 // huge without coefficients

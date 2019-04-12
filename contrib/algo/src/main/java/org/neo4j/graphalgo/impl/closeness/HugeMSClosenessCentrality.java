@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.impl.closeness;
 import org.neo4j.graphalgo.api.HugeGraph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.DoubleArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.impl.msbfs.HugeMultiSourceBFS;
 import org.neo4j.graphdb.Direction;
 
 import java.util.concurrent.ExecutorService;
-import java.util.function.LongToIntFunction;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -93,8 +92,8 @@ public class HugeMSClosenessCentrality extends MSBFSCCAlgorithm<HugeMSClosenessC
     }
 
     @Override
-    public DoubleArray getCentrality() {
-        final DoubleArray cc = DoubleArray.newArray(nodeCount, tracker);
+    public HugeDoubleArray getCentrality() {
+        final HugeDoubleArray cc = HugeDoubleArray.newArray(nodeCount, tracker);
         for (int i = 0; i < nodeCount; i++) {
             cc.set(i, centrality(farness.get(i),
                     component.get(i),

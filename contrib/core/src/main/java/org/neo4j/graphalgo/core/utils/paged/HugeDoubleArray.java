@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2017 "Neo4j, Inc." <http://neo4j.com>
  *
  * This file is part of Neo4j Graph Algorithms <http://github.com/neo4j-contrib/neo4j-graph-algorithms>.
@@ -21,9 +21,9 @@ package org.neo4j.graphalgo.core.utils.paged;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
 import java.util.Arrays;
-import java.util.function.IntToLongFunction;
+import java.util.function.IntToDoubleFunction;
 import java.util.function.LongFunction;
-import java.util.function.LongUnaryOperator;
+import java.util.function.LongToDoubleFunction;
 
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SHIFT;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SIZE;
@@ -32,19 +32,19 @@ import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.exclusiveIndexOfPa
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.indexInPage;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.numberOfPages;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.pageIndex;
-import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfObjectArray;
 
 /**
- * A long-indexable version of a primitive long array ({@code long[]}) that can contain more than 2 bn. elements.
+ * A long-indexable version of a primitive double array ({@code double[]}) that can contain more than 2 bn. elements.
  * <p>
- * It is implemented by paging of smaller long-arrays ({@code long[][]}) to support approx. 32k bn. elements.
- * If the the provided size is small enough, an optimized view of a single {@code long[]} might be used.
+ * It is implemented by paging of smaller double-arrays ({@code double[][]}) to support approx. 32k bn. elements.
+ * If the the provided size is small enough, an optimized view of a single {@code double[]} might be used.
  * <p>
  * <ul>
  * <li>The array is of a fixed size and cannot grow or shrink dynamically.</li>
  * <li>The array is not optimized for sparseness and has a large memory overhead if the values written to it are very sparse (see {@link SparseLongArray} for a different implementation that can profit from sparse data).</li>
- * <li>The array does not support default values and returns the same default for unset values that a regular {@code long[]} does ({@code 0}).</li>
+ * <li>The array does not support default values and returns the same default for unset values that a regular {@code double[]} does ({@code 0}).</li>
  * </ul>
  * <p>
  * <h3>Basic Usage</h3>
@@ -52,46 +52,29 @@ import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfObjectArray
  * {@code}
  * AllocationTracker tracker = ...;
  * long arraySize = 42L;
- * HugeLongArray array = HugeLongArray.newArray(arraySize, tracker);
- * array.set(13L, 37L);
- * long value = array.get(13L);
- * // value = 37L
+ * HugeDoubleArray array = HugeDoubleArray.newArray(arraySize, tracker);
+ * array.set(13L, 37D);
+ * double value = array.get(13L);
+ * // value = 37D
  * {@code}
  * </pre>
  *
  * @author phorn@avantgarde-labs.de
  */
-public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArray> {
+public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDoubleArray> {
 
     /**
-     * @return the long value at the given index
+     * @return the double value at the given index
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    abstract public long get(long index);
+    abstract public double get(long index);
 
     /**
-     * Sets the long value at the given index to the given value.
+     * Sets the double value at the given index to the given value.
      *
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    abstract public void set(long index, long value);
-
-    /**
-     * Computes the bit-wise OR ({@code |}) of the existing value and the provided value at the given index.
-     * If there was no previous value, the final result is set to the provided value ({@code x | 0 == x}).
-     *
-     * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
-     */
-    abstract public void or(long index, final long value);
-
-    /**
-     * Computes the bit-wise AND ({@code &}) of the existing value and the provided value at the given index.
-     * If there was no previous value, the final result is set to the 0 ({@code x & 0 == 0}).
-     *
-     * @return the now current value after the operation
-     * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
-     */
-    abstract public long and(long index, final long value);
+    abstract public void set(long index, double value);
 
     /**
      * Adds ({@code +}) the existing value and the provided value at the given index and stored the result into the given index.
@@ -99,21 +82,21 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
      *
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    abstract public void addTo(long index, long value);
+    abstract public void addTo(long index, double value);
 
     /**
      * Set all elements using the provided generator function to compute each element.
      * <p>
-     * The behavior is identical to {@link Arrays#setAll(long[], IntToLongFunction)}.
+     * The behavior is identical to {@link Arrays#setAll(double[], IntToDoubleFunction)}.
      */
-    abstract public void setAll(LongUnaryOperator gen);
+    abstract public void setAll(LongToDoubleFunction gen);
 
     /**
-     * Assigns the specified long value to each element.
+     * Assigns the specified double value to each element.
      * <p>
-     * The behavior is identical to {@link Arrays#fill(long[], long)}.
+     * The behavior is identical to {@link Arrays#fill(double[], double)}.
      */
-    abstract public void fill(long value);
+    abstract public void fill(double value);
 
     /**
      * {@inheritDoc}
@@ -131,19 +114,19 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
      * {@inheritDoc}
      */
     @Override
-    abstract public HugeCursor<long[]> newCursor();
+    abstract public HugeCursor<double[]> newCursor();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    abstract public void copyTo(final HugeLongArray dest, final long length);
+    abstract public void copyTo(final HugeDoubleArray dest, final long length);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    final Long boxedGet(final long index) {
+    final Double boxedGet(final long index) {
         return get(index);
     }
 
@@ -151,7 +134,7 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
      * {@inheritDoc}
      */
     @Override
-    final void boxedSet(final long index, final Long value) {
+    final void boxedSet(final long index, final Double value) {
         set(index, value);
     }
 
@@ -159,7 +142,7 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
      * {@inheritDoc}
      */
     @Override
-    final void boxedSetAll(final LongFunction<Long> gen) {
+    final void boxedSetAll(final LongFunction<Double> gen) {
         setAll(gen::apply);
     }
 
@@ -167,7 +150,7 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
      * {@inheritDoc}
      */
     @Override
-    final void boxedFill(final Long value) {
+    final void boxedFill(final Double value) {
         fill(value);
     }
 
@@ -175,131 +158,119 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
      * {@inheritDoc}
      */
     @Override
-    public long[] toArray() {
-        return dumpToArray(long[].class);
+    public double[] toArray() {
+        return dumpToArray(double[].class);
     }
 
     /**
      * Creates a new array if the given size, tracking the memory requirements into the given {@link AllocationTracker}.
      * The tracker is no longer referenced, as the arrays do not dynamically change their size.
      */
-    public static HugeLongArray newArray(long size, AllocationTracker tracker) {
+    public static HugeDoubleArray newArray(long size, AllocationTracker tracker) {
         if (size <= SINGLE_PAGE_SIZE) {
-            return SingleHugeLongArray.of(size, tracker);
+            return SingleHugeDoubleArray.of(size, tracker);
         }
-        return PagedHugeLongArray.of(size, tracker);
+        return PagedHugeDoubleArray.of(size, tracker);
     }
 
-    public static HugeLongArray of(final long... values) {
-        return new SingleHugeLongArray(values.length, values);
-    }
-
-    /* test-only */
-    static HugeLongArray newPagedArray(long size, AllocationTracker tracker) {
-        return PagedHugeLongArray.of(size, tracker);
+    public static HugeDoubleArray of(final double... values) {
+        return new HugeDoubleArray.SingleHugeDoubleArray(values.length, values);
     }
 
     /* test-only */
-    static HugeLongArray newSingleArray(int size, AllocationTracker tracker) {
-        return SingleHugeLongArray.of(size, tracker);
+    static HugeDoubleArray newPagedArray(long size, AllocationTracker tracker) {
+        return PagedHugeDoubleArray.of(size, tracker);
+    }
+
+    /* test-only */
+    static HugeDoubleArray newSingleArray(int size, AllocationTracker tracker) {
+        return SingleHugeDoubleArray.of(size, tracker);
     }
 
     /**
-     * A {@link PropertyTranslator} for instances of {@link HugeLongArray}s.
+     * A {@link PropertyTranslator} for instances of {@link HugeDoubleArray}s.
      */
-    public static class Translator implements PropertyTranslator.OfLong<HugeLongArray> {
+    public static class Translator implements PropertyTranslator.OfDouble<HugeDoubleArray> {
 
         public static final Translator INSTANCE = new Translator();
 
         @Override
-        public long toLong(final HugeLongArray data, final long nodeId) {
+        public double toDouble(final HugeDoubleArray data, final long nodeId) {
             return data.get(nodeId);
         }
     }
 
-    private static final class SingleHugeLongArray extends HugeLongArray {
+    private static final class SingleHugeDoubleArray extends HugeDoubleArray {
 
-        private static HugeLongArray of(long size, AllocationTracker tracker) {
+        private static HugeDoubleArray of(long size, AllocationTracker tracker) {
             assert size <= SINGLE_PAGE_SIZE;
             final int intSize = (int) size;
-            long[] page = new long[intSize];
-            tracker.add(sizeOfLongArray(intSize));
+            double[] page = new double[intSize];
+            tracker.add(sizeOfDoubleArray(intSize));
 
-            return new SingleHugeLongArray(intSize, page);
+            return new SingleHugeDoubleArray(intSize, page);
         }
 
         private final int size;
-        private long[] page;
+        private double[] page;
 
-        private SingleHugeLongArray(int size, long[] page) {
+        private SingleHugeDoubleArray(int size, double[] page) {
             this.size = size;
             this.page = page;
         }
 
         @Override
-        public long get(long index) {
+        public double get(long index) {
             assert index < size;
             return page[(int) index];
         }
 
         @Override
-        public void set(long index, long value) {
+        public void set(long index, double value) {
             assert index < size;
             page[(int) index] = value;
         }
 
         @Override
-        public void or(long index, final long value) {
-            assert index < size;
-            page[(int) index] |= value;
-        }
-
-        @Override
-        public long and(long index, final long value) {
-            assert index < size;
-            return page[(int) index] &= value;
-        }
-
-        @Override
-        public void addTo(long index, long value) {
+        public void addTo(long index, double value) {
             assert index < size;
             page[(int) index] += value;
         }
 
         @Override
-        public void setAll(LongUnaryOperator gen) {
-            Arrays.setAll(page, gen::applyAsLong);
+        public void setAll(LongToDoubleFunction gen) {
+            Arrays.setAll(page, gen::applyAsDouble);
         }
 
         @Override
-        public void fill(long value) {
+        public void fill(double value) {
             Arrays.fill(page, value);
         }
 
         @Override
-        public void copyTo(HugeLongArray dest, long length) {
+        public void copyTo(HugeDoubleArray dest, long length) {
             if (length > size) {
                 length = size;
             }
             if (length > dest.size()) {
                 length = dest.size();
             }
-            if (dest instanceof SingleHugeLongArray) {
-                SingleHugeLongArray dst = (SingleHugeLongArray) dest;
+            if (dest instanceof SingleHugeDoubleArray) {
+                SingleHugeDoubleArray dst = (SingleHugeDoubleArray) dest;
                 System.arraycopy(page, 0, dst.page, 0, (int) length);
-                Arrays.fill(dst.page, (int) length, dst.size, 0L);
-            } else if (dest instanceof PagedHugeLongArray) {
-                PagedHugeLongArray dst = (PagedHugeLongArray) dest;
+                Arrays.fill(dst.page, (int) length, dst.size, 0D);
+            } else if (dest instanceof PagedHugeDoubleArray) {
+                PagedHugeDoubleArray dst = (PagedHugeDoubleArray) dest;
                 int start = 0;
                 int remaining = (int) length;
-                for (long[] dstPage : dst.pages) {
+                for (double[] dstPage : dst.pages) {
                     int toCopy = Math.min(remaining, dstPage.length);
                     if (toCopy == 0) {
-                        Arrays.fill(page, 0L);
+                        Arrays.fill(page, 0D);
                     } else {
                         System.arraycopy(page, start, dstPage, 0, toCopy);
                         if (toCopy < dstPage.length) {
-                            Arrays.fill(dstPage, toCopy, dstPage.length, 0L);
+                            Arrays.fill(dstPage, toCopy, dstPage.length, 0D);
                         }
                         start += toCopy;
                         remaining -= toCopy;
@@ -317,59 +288,59 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
         public long release() {
             if (page != null) {
                 page = null;
-                return sizeOfLongArray(size);
+                return sizeOfDoubleArray(size);
             }
             return 0L;
         }
 
         @Override
-        public HugeCursor<long[]> newCursor() {
+        public HugeCursor<double[]> newCursor() {
             return new HugeCursor.SinglePageCursor<>(page);
+        }
+
+        @Override
+        public double[] toArray() {
+            return page;
         }
 
         @Override
         public String toString() {
             return Arrays.toString(page);
         }
-
-        @Override
-        public long[] toArray() {
-            return page;
-        }
     }
 
-    private static final class PagedHugeLongArray extends HugeLongArray {
+    private static final class PagedHugeDoubleArray extends HugeDoubleArray {
 
-        private static HugeLongArray of(long size, AllocationTracker tracker) {
+        private static HugeDoubleArray of(long size, AllocationTracker tracker) {
             int numPages = numberOfPages(size);
-            long[][] pages = new long[numPages][];
+            double[][] pages = new double[numPages][];
 
             long memoryUsed = sizeOfObjectArray(numPages);
-            final long pageBytes = sizeOfLongArray(PAGE_SIZE);
+            final long pageBytes = sizeOfDoubleArray(PAGE_SIZE);
             for (int i = 0; i < numPages - 1; i++) {
                 memoryUsed += pageBytes;
-                pages[i] = new long[PAGE_SIZE];
+                pages[i] = new double[PAGE_SIZE];
             }
             final int lastPageSize = exclusiveIndexOfPage(size);
-            pages[numPages - 1] = new long[lastPageSize];
-            memoryUsed += sizeOfLongArray(lastPageSize);
+            pages[numPages - 1] = new double[lastPageSize];
+            memoryUsed += sizeOfDoubleArray(lastPageSize);
             tracker.add(memoryUsed);
 
-            return new PagedHugeLongArray(size, pages, memoryUsed);
+            return new PagedHugeDoubleArray(size, pages, memoryUsed);
         }
 
         private final long size;
-        private long[][] pages;
+        private double[][] pages;
         private final long memoryUsed;
 
-        private PagedHugeLongArray(long size, long[][] pages, long memoryUsed) {
+        private PagedHugeDoubleArray(long size, double[][] pages, long memoryUsed) {
             this.size = size;
             this.pages = pages;
             this.memoryUsed = memoryUsed;
         }
 
         @Override
-        public long get(long index) {
+        public double get(long index) {
             assert index < size;
             final int pageIndex = pageIndex(index);
             final int indexInPage = indexInPage(index);
@@ -377,7 +348,7 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
         }
 
         @Override
-        public void set(long index, long value) {
+        public void set(long index, double value) {
             assert index < size;
             final int pageIndex = pageIndex(index);
             final int indexInPage = indexInPage(index);
@@ -385,23 +356,7 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
         }
 
         @Override
-        public void or(long index, final long value) {
-            assert index < size;
-            final int pageIndex = pageIndex(index);
-            final int indexInPage = indexInPage(index);
-            pages[pageIndex][indexInPage] |= value;
-        }
-
-        @Override
-        public long and(long index, final long value) {
-            assert index < size;
-            final int pageIndex = pageIndex(index);
-            final int indexInPage = indexInPage(index);
-            return pages[pageIndex][indexInPage] &= value;
-        }
-
-        @Override
-        public void addTo(long index, long value) {
+        public void addTo(long index, double value) {
             assert index < size;
             final int pageIndex = pageIndex(index);
             final int indexInPage = indexInPage(index);
@@ -409,33 +364,33 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
         }
 
         @Override
-        public void setAll(LongUnaryOperator gen) {
+        public void setAll(LongToDoubleFunction gen) {
             for (int i = 0; i < pages.length; i++) {
                 final long t = ((long) i) << PAGE_SHIFT;
-                Arrays.setAll(pages[i], j -> gen.applyAsLong(t + j));
+                Arrays.setAll(pages[i], j -> gen.applyAsDouble(t + j));
             }
         }
 
         @Override
-        public void fill(long value) {
-            for (long[] page : pages) {
+        public void fill(double value) {
+            for (double[] page : pages) {
                 Arrays.fill(page, value);
             }
         }
 
         @Override
-        public void copyTo(HugeLongArray dest, long length) {
+        public void copyTo(HugeDoubleArray dest, long length) {
             if (length > size) {
                 length = size;
             }
             if (length > dest.size()) {
                 length = dest.size();
             }
-            if (dest instanceof SingleHugeLongArray) {
-                SingleHugeLongArray dst = (SingleHugeLongArray) dest;
+            if (dest instanceof SingleHugeDoubleArray) {
+                SingleHugeDoubleArray dst = (SingleHugeDoubleArray) dest;
                 int start = 0;
                 int remaining = (int) length;
-                for (long[] page : pages) {
+                for (double[] page : pages) {
                     int toCopy = Math.min(remaining, page.length);
                     if (toCopy == 0) {
                         break;
@@ -444,24 +399,24 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
                     start += toCopy;
                     remaining -= toCopy;
                 }
-                Arrays.fill(dst.page, start, dst.size, 0L);
-            } else if (dest instanceof PagedHugeLongArray) {
-                PagedHugeLongArray dst = (PagedHugeLongArray) dest;
+                Arrays.fill(dst.page, start, dst.size, 0D);
+            } else if (dest instanceof PagedHugeDoubleArray) {
+                PagedHugeDoubleArray dst = (PagedHugeDoubleArray) dest;
                 int pageLen = Math.min(pages.length, dst.pages.length);
                 int lastPage = pageLen - 1;
                 long remaining = length;
                 for (int i = 0; i < lastPage; i++) {
-                    long[] page = pages[i];
-                    long[] dstPage = dst.pages[i];
+                    double[] page = pages[i];
+                    double[] dstPage = dst.pages[i];
                     System.arraycopy(page, 0, dstPage, 0, page.length);
                     remaining -= page.length;
                 }
-                if (remaining > 0) {
+                if (remaining > 0L) {
                     System.arraycopy(pages[lastPage], 0, dst.pages[lastPage], 0, (int) remaining);
-                    Arrays.fill(dst.pages[lastPage], (int) remaining, dst.pages[lastPage].length, 0L);
+                    Arrays.fill(dst.pages[lastPage], (int) remaining, dst.pages[lastPage].length, 0D);
                 }
                 for (int i = pageLen; i < dst.pages.length; i++) {
-                    Arrays.fill(dst.pages[i], 0L);
+                    Arrays.fill(dst.pages[i], 0D);
                 }
             }
         }
@@ -481,7 +436,7 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
         }
 
         @Override
-        public HugeCursor<long[]> newCursor() {
+        public HugeCursor<double[]> newCursor() {
             return new HugeCursor.PagedCursor<>(size, pages);
         }
     }
