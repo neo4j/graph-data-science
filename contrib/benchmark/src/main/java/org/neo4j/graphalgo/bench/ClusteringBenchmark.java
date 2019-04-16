@@ -107,7 +107,7 @@ public class ClusteringBenchmark {
                 .withProgressLogger(ProgressLogger.NULL_LOGGER)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
                 .compute(99, 99999)
-                .getCommunityCount();
+                .communityCount();
     }
 
     @Benchmark
