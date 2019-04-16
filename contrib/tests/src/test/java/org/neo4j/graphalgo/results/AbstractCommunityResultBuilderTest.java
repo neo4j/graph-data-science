@@ -40,7 +40,7 @@ public final class AbstractCommunityResultBuilderTest {
             assertEquals("should build 10 communities with 4 members", 10L, histogram.getCountAtValue(4L));
             assertEquals("should build 2 communities with 5 members", 2L, histogram.getCountAtValue(5L));
         });
-        builder.buildII(42, n -> (n / 10) + 1);
+        builder.buildfromKnownSizes(42, n -> (n / 10) + 1);
     }
 
     @Test
@@ -53,7 +53,7 @@ public final class AbstractCommunityResultBuilderTest {
             assertEquals("should build 10 communities with 4 members", 10L, histogram.getCountAtValue(4L));
             assertEquals("should build 2 communities with 5 members", 2L, histogram.getCountAtValue(5L));
         });
-        builder.buildLI(42, n -> ((int)n / 10) + 1);
+        builder.buildfromKnownLongSizes(42, n -> ((int)n / 10) + 1);
     }
 
     private AbstractCommunityResultBuilder<Void> builder(ObjLongConsumer<Histogram> check) {

@@ -18,8 +18,6 @@
  */
 package org.neo4j.graphalgo.results;
 
-import com.carrotsearch.hppc.LongLongMap;
-import com.carrotsearch.hppc.LongLongScatterMap;
 import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -124,48 +122,43 @@ public abstract class AbstractCommunityResultBuilder<T> {
         }
     }
 
-    public T buildII(int nodeCount, IntUnaryOperator fun) {
+    public T buildfromKnownSizes(int nodeCount, IntUnaryOperator sizeForNode) {
         final ProgressTimer timer = ProgressTimer.start();
         final Histogram histogram = new Histogram(2);
         for (int nodeId = 0; nodeId < nodeCount; nodeId++) {
-            final long size = fun.applyAsInt(nodeId);
-            histogram.recordValue(size);
+            final int communitySize = sizeForNode.applyAsInt(nodeId);
+            histogram.recordValue(communitySize);
         }
 
         timer.stop();
 
-        final LongLongMap communitySizeMap = new LongLongScatterMap();
         return build(loadDuration,
                 evalDuration,
                 writeDuration,
                 timer.getDuration(),
                 nodeCount,
-                communitySizeMap.size(),
+                nodeCount,
                 histogram,
                 write
         );
-
-
     }
 
-    public T buildLI(long nodeCount, LongToIntFunction fun) {
-
-        final Histogram histogram = new Histogram(2);
+    public T buildfromKnownLongSizes(long nodeCount, LongToIntFunction sizeForNode) {
         final ProgressTimer timer = ProgressTimer.start();
-        for (int nodeId = 0; nodeId < nodeCount; nodeId++) {
-            final long size = fun.applyAsInt(nodeId);
-            histogram.recordValue(size);
+        final Histogram histogram = new Histogram(2);
+        for (long nodeId = 0L; nodeId < nodeCount; nodeId++) {
+            final int communitySize = sizeForNode.applyAsInt(nodeId);
+            histogram.recordValue(communitySize);
         }
 
         timer.stop();
 
-        final LongLongMap communitySizeMap = new LongLongScatterMap();
         return build(loadDuration,
                 evalDuration,
                 writeDuration,
                 timer.getDuration(),
                 nodeCount,
-                communitySizeMap.size(),
+                nodeCount,
                 histogram,
                 write
         );
