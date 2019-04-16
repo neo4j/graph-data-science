@@ -159,7 +159,7 @@ public class BalancedTriadsProc {
         // result
         builder.withBalancedTriadCount(balancedTriads.getBalancedTriangleCount())
                 .withUnbalancedTriadCount(balancedTriads.getUnbalancedTriangleCount());
-        return Stream.of(builder.buildII(graph.nodeCount(), balancedTriads.getBalancedTriangles()::get));
+        return Stream.of(builder.buildLI(graph.nodeCount(), balancedTriads.getBalancedTriangles()::get));
     }
 
     /**

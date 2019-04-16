@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.LongLongScatterMap;
 import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 
-import java.util.function.IntFunction;
+import java.util.function.IntUnaryOperator;
 import java.util.function.LongToIntFunction;
 import java.util.function.LongUnaryOperator;
 
@@ -122,11 +122,11 @@ public abstract class AbstractCommunityResultBuilder<T> {
         }
     }
 
-    public T buildII(long nodeCount, IntFunction<Integer> fun) {
+    public T buildII(int nodeCount, IntUnaryOperator fun) {
         final ProgressTimer timer = ProgressTimer.start();
         final Histogram histogram = new Histogram(2);
         for (int nodeId = 0; nodeId < nodeCount; nodeId++) {
-            final long size = fun.apply(nodeId);
+            final long size = fun.applyAsInt(nodeId);
             histogram.recordValue(size);
         }
 
