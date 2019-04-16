@@ -311,7 +311,8 @@ public final class HugeLouvain extends LouvainAlgo<HugeLouvain> {
      *
      * @return
      */
-    public long getCommunityCount() {
+    @Override
+    public long communityCount() {
         return communityCount;
     }
 

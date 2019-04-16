@@ -177,7 +177,19 @@ public abstract class AbstractCommunityResultBuilder<T> {
             AllocationTracker tracker,
             long nodeCount,
             LongUnaryOperator fun) {
+        return build(4L, tracker, nodeCount, fun);
+    }
 
+    /**
+     * build result. If you know (or can reasonably estimate) the number of final communities,
+     * prefer this overload over {@link #build(AllocationTracker, long, LongUnaryOperator)} as this
+     * one will presize the counting bag and avoid excessive allocations and resizing operations.
+     */
+    public T build(
+            long expectedNumberOfCommunities,
+            AllocationTracker tracker,
+            long nodeCount,
+            LongUnaryOperator fun) {
         final LongLongMap communitySizeMap = new LongLongScatterMap();
         final ProgressTimer timer = ProgressTimer.start();
         for (long nodeId = 0L; nodeId < nodeCount; nodeId++) {

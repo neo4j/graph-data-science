@@ -248,6 +248,7 @@ public final class Louvain extends LouvainAlgo<Louvain> {
         return level;
     }
 
+    @Override
     public long communityCount() {
         return communityCount;
     }
