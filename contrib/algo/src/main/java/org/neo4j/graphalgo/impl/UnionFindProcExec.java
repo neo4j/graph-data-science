@@ -94,9 +94,9 @@ public final class UnionFindProcExec implements BiConsumer<String, Algorithm<?>>
         }
 
         if (dssResult.isHuge) {
-            return Stream.of(builder.build(graph.nodeCount(), dssResult.hugeStruct::find));
+            return Stream.of(builder.build(tracker, graph.nodeCount(), dssResult.hugeStruct::find));
         } else {
-            return Stream.of(builder.build(graph.nodeCount(), l -> (long) dssResult.struct.find((int) l)));
+            return Stream.of(builder.build(tracker, graph.nodeCount(), l -> (long) dssResult.struct.find((int) l)));
         }
     }
 

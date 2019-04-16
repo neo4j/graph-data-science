@@ -22,6 +22,7 @@ import com.carrotsearch.hppc.LongLongMap;
 import com.carrotsearch.hppc.LongLongScatterMap;
 import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.util.function.IntUnaryOperator;
 import java.util.function.LongToIntFunction;
@@ -172,7 +173,10 @@ public abstract class AbstractCommunityResultBuilder<T> {
     /**
      * build result
      */
-    public T build(long nodeCount, LongUnaryOperator fun) {
+    public T build(
+            AllocationTracker tracker,
+            long nodeCount,
+            LongUnaryOperator fun) {
 
         final LongLongMap communitySizeMap = new LongLongScatterMap();
         final ProgressTimer timer = ProgressTimer.start();

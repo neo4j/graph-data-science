@@ -137,7 +137,7 @@ public final class LabelPropagationProc {
             write(concurrency, writeProperty, graph, labels, stats);
         }
 
-        return Stream.of(stats.build(graph.nodeCount(), labels::labelFor));
+        return Stream.of(stats.build(tracker, graph.nodeCount(), labels::labelFor));
     }
 
     @Procedure(value = "algo.labelPropagation.stream")
