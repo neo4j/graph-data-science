@@ -139,7 +139,6 @@ public abstract class AbstractCommunityResultBuilder<T> {
                 timer.getDuration(),
                 nodeCount,
                 communitySizeMap.size(),
-                communitySizeMap,
                 histogram,
                 write
         );
@@ -165,7 +164,6 @@ public abstract class AbstractCommunityResultBuilder<T> {
                 timer.getDuration(),
                 nodeCount,
                 communitySizeMap.size(),
-                communitySizeMap,
                 histogram,
                 write
         );
@@ -193,7 +191,6 @@ public abstract class AbstractCommunityResultBuilder<T> {
                 timer.getDuration(),
                 nodeCount,
                 communitySizeMap.size(),
-                communitySizeMap,
                 histogram,
                 write
         );
@@ -206,7 +203,6 @@ public abstract class AbstractCommunityResultBuilder<T> {
             long postProcessingMillis,
             long nodeCount,
             long communityCount,
-            LongLongMap communitySizeMap,
             Histogram communityHistogram,
             boolean write);
 

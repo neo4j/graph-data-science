@@ -18,7 +18,6 @@
  */
 package org.neo4j.graphalgo;
 
-import com.carrotsearch.hppc.LongLongMap;
 import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.api.HugeGraph;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -253,7 +252,15 @@ public class BalancedTriadsProc {
         }
 
         @Override
-        protected Result build(long loadMillis, long computeMillis, long writeMillis, long postProcessingMillis, long nodeCount, long communityCount, LongLongMap communitySizeMap, Histogram communityHistogram, boolean write) {
+        protected Result build(
+                long loadMillis,
+                long computeMillis,
+                long writeMillis,
+                long postProcessingMillis,
+                long nodeCount,
+                long communityCount,
+                Histogram communityHistogram,
+                boolean write) {
             return new Result(
                     loadMillis, computeMillis, writeMillis, postProcessingMillis,  nodeCount, balancedTriadCount, unbalancedTriadCount,
                     communityHistogram.getValueAtPercentile(100),

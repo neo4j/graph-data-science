@@ -18,7 +18,6 @@
  */
 package org.neo4j.graphalgo;
 
-import com.carrotsearch.hppc.LongLongMap;
 import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.HugeGraph;
@@ -485,7 +484,15 @@ public class TriangleProc {
 
         // communityCount is not used here
         @Override
-        protected Result build(long loadMillis, long computeMillis, long writeMillis, long postProcessingMillis, long nodeCount, long communityCount, LongLongMap communitySizeMap, Histogram communityHistogram, boolean write) {
+        protected Result build(
+                long loadMillis,
+                long computeMillis,
+                long writeMillis,
+                long postProcessingMillis,
+                long nodeCount,
+                long communityCount,
+                Histogram communityHistogram,
+                boolean write) {
             return new Result(
                     loadMillis,
                     computeMillis,

@@ -18,7 +18,6 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import com.carrotsearch.hppc.LongLongMap;
 import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -174,7 +173,15 @@ public final class UnionFindProcExec implements BiConsumer<String, Algorithm<?>>
         private String writeProperty;
 
         @Override
-        protected UnionFindResult build(long loadMillis, long computeMillis, long writeMillis, long postProcessingMillis, long nodeCount, long communityCount, LongLongMap communitySizeMap, Histogram communityHistogram, boolean write) {
+        protected UnionFindResult build(
+                long loadMillis,
+                long computeMillis,
+                long writeMillis,
+                long postProcessingMillis,
+                long nodeCount,
+                long communityCount,
+                Histogram communityHistogram,
+                boolean write) {
             return new UnionFindResult(
                     loadMillis,
                     computeMillis,
