@@ -18,13 +18,13 @@
  */
 package org.neo4j.graphalgo.results;
 
-import com.carrotsearch.hppc.LongLongMap;
 import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.HdrHistogram.Histogram;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 
 public class CommunityHistogram {
 
-    public static Histogram buildFrom(LongLongMap communitySizeMap) {
+    public static Histogram buildFrom(HugeLongLongMap communitySizeMap) {
         final Histogram histogram = new Histogram(2);
 
         for (LongLongCursor cursor : communitySizeMap) {

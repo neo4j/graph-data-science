@@ -18,17 +18,18 @@
  */
 package org.neo4j.graphalgo.results;
 
-import com.carrotsearch.hppc.LongLongMap;
-import com.carrotsearch.hppc.LongLongScatterMap;
 import org.HdrHistogram.Histogram;
 import org.junit.Test;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 
 import static org.junit.Assert.assertEquals;
 
 public class CommunityHistogramTest {
+
     @Test
-    public void oneCommunity() {
-        final LongLongMap communitySizeMap = new LongLongScatterMap();
+    public void oneCommunityFromHugeMap() {
+        HugeLongLongMap communitySizeMap = new HugeLongLongMap(AllocationTracker.EMPTY);
         communitySizeMap.addTo(1, 4);
 
         Histogram histogram = CommunityHistogram.buildFrom(communitySizeMap);
@@ -37,8 +38,8 @@ public class CommunityHistogramTest {
     }
 
     @Test
-    public void multipleCommunities() {
-        final LongLongMap communitySizeMap = new LongLongScatterMap();
+    public void multipleCommunitiesFromHugeMap() {
+        HugeLongLongMap communitySizeMap = new HugeLongLongMap(AllocationTracker.EMPTY);
         communitySizeMap.addTo(1, 4);
         communitySizeMap.addTo(2, 10);
         communitySizeMap.addTo(3, 9);
