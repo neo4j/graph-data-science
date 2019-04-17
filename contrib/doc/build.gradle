@@ -31,6 +31,8 @@ plugins {
     id 'org.neo4j.doc.build.docbook' version '1.0-alpha03'
 }
 
+description = 'Neo4j Graph Algorithms :: Docs'
+
 if (!project.hasProperty('graphAlgoVersion')) { ext.graphAlgoVersion = '3.5.0.0' }
 
 ext {

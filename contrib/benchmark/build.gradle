@@ -1,0 +1,23 @@
+repositories {
+    maven {
+        url = 'http://maven.ej-technologies.com/repository'
+    }
+}
+
+dependencies {
+    compile project(':graph-algorithms-algo')
+    compile project(':graph-algorithms-core')
+    compile 'org.neo4j:neo4j:3.5.3'
+    compile 'org.neo4j:neo4j-kernel:3.5.3'
+    compile 'org.neo4j:neo4j-io:3.5.3'
+    compile 'org.neo4j.community:it-test-support:3.5.3'
+    compile 'org.neo4j:procedure-compiler:3.5.3'
+    compile 'com.jprofiler:jprofiler-agent:10.1-PRE4'
+    compile 'org.openjdk.jmh:jmh-core:1.21'
+    compile 'org.apache.commons:commons-math3:3.6.1'
+    compile 'org.apache.commons:commons-compress:1.18'
+    compile 'org.mockito:mockito-core:2.23.4'
+    compileOnly 'org.openjdk.jmh:jmh-generator-annprocess:1.21'
+}
+
+description = 'Neo4j Graph Algorithms :: Benchmark'
