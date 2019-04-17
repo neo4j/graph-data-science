@@ -75,7 +75,7 @@ public final class HugeLongLongDoubleMapTest {
     }
 
     @Test
-    public void supportsNullKeys() {
+    public void supportsZeroKeys() {
         HugeLongLongDoubleMap map = new HugeLongLongDoubleMap(AllocationTracker.EMPTY);
 
         map.addTo(0L, 0L, 1.0);

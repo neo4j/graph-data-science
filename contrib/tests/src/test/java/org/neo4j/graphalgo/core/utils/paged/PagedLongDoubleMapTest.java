@@ -41,7 +41,7 @@ public final class PagedLongDoubleMapTest {
     }
 
     @Test
-    public void supportsNullKeys() {
+    public void supportsZeroKeys() {
         PagedLongDoubleMap map = PagedLongDoubleMap.of(4L, AllocationTracker.EMPTY);
 
         map.put(0L, 1.0);
