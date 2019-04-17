@@ -15,6 +15,9 @@ dependencies {
     compile 'org.neo4j.community:it-test-support:3.5.3'
     compile 'org.neo4j:procedure-compiler:3.5.3'
     compile 'com.jprofiler:jprofiler-agent:10.1-PRE4'
+    compile('org.openjdk.jmh:jmh-core:1.21') {
+        exclude group: 'org.apache.commons', module: 'commons-math3'
+    }
     compile 'org.openjdk.jmh:jmh-core:1.21'
     compile 'org.apache.commons:commons-math3:3.6.1'
     compile 'org.apache.commons:commons-compress:1.18'

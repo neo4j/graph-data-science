@@ -31,3 +31,13 @@ shadowJar {
     exclude 'META-INF/versions/**/*'
 }
 
+tasks.withType(JavaCompile) {
+    options.compilerArgs <<
+        '-AIgnoreContextWarnings' <<
+        '-AGeneratedDocumentationPath=target/generated-documentation' <<
+        '-ADocumentation.FieldDelimiter=¦' <<
+        '-ADocumentation.ExportedHeaders=qualified name¦description¦type' <<
+        '-ADocumentation.QuotedFields=false' <<
+        '-ADocumentation.DelimitedFirstField=true' <<
+        '-ADocumentation.ExportGrouping=SINGLE'
+}
