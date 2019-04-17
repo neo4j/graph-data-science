@@ -1,3 +1,5 @@
+apply plugin: 'com.github.johnrengelman.shadow'
+
 repositories {
     maven {
         url = 'http://maven.ej-technologies.com/repository'
@@ -21,3 +23,16 @@ dependencies {
 }
 
 description = 'Neo4j Graph Algorithms :: Benchmark'
+
+shadowJar {
+    classifier = 'benchmark'
+    zip64 = true
+    manifest {
+        attributes 'Main-Class': 'org.openjdk.jmh.Main'
+    }
+    mergeServiceFiles()
+    exclude 'META-INF/versions/**/*'
+    exclude 'META-INF/*.SF'
+    exclude 'META-INF/*.DSA'
+    exclude 'META-INF/*.RSA'
+}
