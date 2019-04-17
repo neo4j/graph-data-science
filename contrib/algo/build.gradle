@@ -3,10 +3,12 @@ apply plugin: 'com.github.johnrengelman.shadow'
 dependencies {
     compile project(':graph-algorithms-core')
     compile 'com.carrotsearch:hppc:0.7.3'
+    compile 'org.neo4j:neo4j:3.5.3'
     compile 'org.hdrhistogram:HdrHistogram:2.1.9'
     compile 'io.dropwizard.metrics:metrics-core:4.0.2'
     testCompile 'com.pholser:junit-quickcheck-core:0.8.1'
     testCompile 'com.pholser:junit-quickcheck-generators:0.8.1'
+    testCompile 'org.neo4j:neo4j-kernel-api:3.5.3:tests'
     testCompile 'org.neo4j:neo4j-kernel:3.5.3'
     testCompile 'org.neo4j:neo4j-io:3.5.3'
     testCompile 'junit:junit:4.12'
