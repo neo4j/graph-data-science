@@ -51,20 +51,20 @@ public final class PagedLongDoubleMapTest {
 
     @Test
     public void acceptsInitialSize() {
-        PagedLongDoubleMap map = PagedLongDoubleMap.of(0L, AllocationTracker.EMPTY);
-        map.put(1L, 1.0);
-        double actual = map.getOrDefault(1L, 0.0);
-        assertEquals(1.0, actual, 1e-4);
+        AllocationTracker tracker = AllocationTracker.create();
+        PagedLongDoubleMap.of(0L, tracker);
+        // size 0 creates an empty page array
+        assertEquals(sizeOfObjectArray(0), tracker.tracked());
 
-        map = PagedLongDoubleMap.of(1L, AllocationTracker.EMPTY);
-        map.put(1L, 1.0);
-        actual = map.getOrDefault(1L, 0.0);
-        assertEquals(1.0, actual, 1e-4);
+        tracker = AllocationTracker.create();
+        PagedLongDoubleMap.of(100L, tracker);
+        // size 100 creates a page array with a single (null) page
+        assertEquals(sizeOfObjectArray(1), tracker.tracked());
 
-        map = PagedLongDoubleMap.of(100L, AllocationTracker.EMPTY);
-        map.put(1L, 1.0);
-        actual = map.getOrDefault(1L, 0.0);
-        assertEquals(1.0, actual, 1e-4);
+        tracker = AllocationTracker.create();
+        PagedLongDoubleMap.of(100_000L, tracker);
+        // size 100_000 creates a page array with a 7 (null) pages (based on page size of 2^14)
+        assertEquals(sizeOfObjectArray(7), tracker.tracked());
     }
 
     @Test

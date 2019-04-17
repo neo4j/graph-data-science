@@ -29,6 +29,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfObjectArray;
 
 public final class HugeLongLongDoubleMapTest {
 
@@ -111,20 +112,28 @@ public final class HugeLongLongDoubleMapTest {
 
     @Test
     public void acceptsInitialSize() {
-        HugeLongLongDoubleMap map = new HugeLongLongDoubleMap(0L, AllocationTracker.EMPTY);
-        map.addTo(1L, 1L, 1.0);
-        double actual = map.getOrDefault(1L, 1L, 0.0);
-        assertEquals(1.0, actual, 1e-4);
+        // minimum buffer size is 4
+        long minimumSize = sizeOfDoubleArray(4)
+                // double the buffer size for keys, as we have two keys
+                + 2L * sizeOfLongArray(4);
+        AllocationTracker tracker = AllocationTracker.create();
+        new HugeLongLongDoubleMap(0L, tracker);
+        // minimum buffer size is 4
+        assertEquals(minimumSize, tracker.tracked());
 
-        map = new HugeLongLongDoubleMap(1L, AllocationTracker.EMPTY);
-        map.addTo(1L, 1L, 1.0);
-        actual = map.getOrDefault(1L, 1L, 0.0);
-        assertEquals(1.0, actual, 1e-4);
+        tracker = AllocationTracker.create();
+        // 3 * load_factor -> buffer size of 4
+        new HugeLongLongDoubleMap(3L, tracker);
+        // minimum buffer size is 4
+        assertEquals(minimumSize, tracker.tracked());
 
-        map = new HugeLongLongDoubleMap(100L, AllocationTracker.EMPTY);
-        map.addTo(1L, 1L, 1.0);
-        actual = map.getOrDefault(1L, 1L, 0.0);
-        assertEquals(1.0, actual, 1e-4);
+        tracker = AllocationTracker.create();
+        new HugeLongLongDoubleMap(100L, tracker);
+        // 100 with load_factor => 128; round up to next power of two -> 256
+        long expectedSize = sizeOfDoubleArray(256)
+                // double the buffer size for keys, as we have two keys
+                + 2L * sizeOfLongArray(256);
+        assertEquals(expectedSize, tracker.tracked());
     }
 
     @Test
