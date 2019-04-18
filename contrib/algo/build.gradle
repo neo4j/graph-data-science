@@ -2,23 +2,24 @@ apply plugin: 'com.github.johnrengelman.shadow'
 
 dependencies {
     compile project(':graph-algorithms-core')
-    compile 'com.carrotsearch:hppc:0.7.3'
-    compile 'io.dropwizard.metrics:metrics-core:4.0.2'
-    compile 'org.hdrhistogram:HdrHistogram:2.1.9'
+    compile group: 'com.carrotsearch'      , name: 'hppc'         , version: versions.hppc
+    compile group: 'io.dropwizard.metrics' , name: 'metrics-core' , version: '4.0.2'
+    compile group: 'org.hdrhistogram'      , name: 'HdrHistogram' , version: '2.1.9'
 
-    compileOnly 'org.neo4j:neo4j:3.5.3'
-    compileOnly 'org.neo4j:neo4j-slf4j:3.5.3'
-    compileOnly 'net.biville.florent:neo4j-sproc-compiler:1.2.1'
+    compileOnly group: 'org.neo4j'           , name: 'neo4j'                , version: versions.neo4j
+    compileOnly group: 'org.neo4j'           , name: 'neo4j-slf4j'          , version: versions.neo4j
+    compileOnly group: 'net.biville.florent' , name: 'neo4j-sproc-compiler' , version: '1.2.1'
 
-    testCompile 'com.pholser:junit-quickcheck-core:0.8.1'
-    testCompile 'com.pholser:junit-quickcheck-generators:0.8.1'
-    testCompile 'org.neo4j:neo4j-kernel-api:3.5.3:tests'
-    testCompile 'org.neo4j:neo4j-kernel:3.5.3'
-    testCompile 'org.neo4j:neo4j-io:3.5.3'
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.hamcrest:hamcrest-library:1.3'
-    testCompile 'org.mockito:mockito-core:2.23.4'
-    testCompile 'org.mockito:mockito-inline:2.23.4'
+    testCompile group: 'com.pholser'  , name: 'junit-quickcheck-core'       , version: '0.8.1'
+    testCompile group: 'com.pholser'  , name: 'junit-quickcheck-generators' , version: '0.8.1'
+    testCompile group: 'org.neo4j'    , name: 'neo4j'                       , version: versions.neo4j
+    testCompile group: 'org.neo4j'    , name: 'neo4j-kernel'                , version: versions.neo4j
+    testCompile group: 'org.neo4j'    , name: 'neo4j-kernel-api'            , version: versions.neo4j
+    testCompile group: 'org.neo4j'    , name: 'neo4j-io'                    , version: versions.neo4j
+    testCompile group: 'junit'        , name: 'junit'                       , version: versions.junit
+    testCompile group: 'org.hamcrest' , name: 'hamcrest-library'            , version: versions.hamcrest
+    testCompile group: 'org.mockito'  , name: 'mockito-core'                , version: versions.mockito
+    testCompile group: 'org.mockito'  , name: 'mockito-inline'              , version: versions.mockito
 }
 
 task javadocJar(type: Jar) {

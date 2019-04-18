@@ -1,6 +1,7 @@
 dependencies {
-    compile 'com.carrotsearch:hppc:0.7.3'
-    compileOnly 'org.neo4j:neo4j:3.5.3'
+    compile group: 'com.carrotsearch', name: 'hppc', version: versions.hppc
+
+    compileOnly group: 'org.neo4j', name: 'neo4j', version: versions.neo4j
 }
 
 task javadocJar(type: Jar) {

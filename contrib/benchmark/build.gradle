@@ -9,20 +9,22 @@ repositories {
 dependencies {
     compile project(':graph-algorithms-algo')
     compile project(':graph-algorithms-core')
-    compile 'org.neo4j:neo4j:3.5.3'
-    compile 'org.neo4j:neo4j-kernel:3.5.3'
-    compile 'org.neo4j:neo4j-io:3.5.3'
-    compile 'org.neo4j.community:it-test-support:3.5.3'
-    compile 'org.neo4j:procedure-compiler:3.5.3'
-    compile 'com.jprofiler:jprofiler-agent:10.1-PRE4'
+
+    compile group: 'org.neo4j',            name: 'neo4j',              version: versions.neo4j
+    compile group: 'org.neo4j',            name: 'neo4j-kernel',       version: versions.neo4j
+    compile group: 'org.neo4j',            name: 'neo4j-io',           version: versions.neo4j
+    compile group: 'org.neo4j.community',  name: 'it-test-support',    version: versions.neo4j
+    compile group: 'org.neo4j',            name: 'procedure-compiler', version: versions.neo4j
+    compile group: 'com.jprofiler',        name: 'jprofiler-agent',    version: '10.1-PRE4'
     compile('org.openjdk.jmh:jmh-core:1.21') {
         exclude group: 'org.apache.commons', module: 'commons-math3'
     }
-    compile 'org.openjdk.jmh:jmh-core:1.21'
-    compile 'org.apache.commons:commons-math3:3.6.1'
-    compile 'org.apache.commons:commons-compress:1.18'
-    compile 'org.mockito:mockito-core:2.23.4'
-    compileOnly 'org.openjdk.jmh:jmh-generator-annprocess:1.21'
+    compile group: 'org.openjdk.jmh',      name: 'jmh-core',         version: versions.jmh
+    compile group: 'org.apache.commons',   name: 'commons-math3',    version: '3.6.1'
+    compile group: 'org.apache.commons',   name: 'commons-compress', version: '1.18'
+    compile group: 'org.mockito',          name: 'mockito-core',     version: versions.mockito
+
+    compileOnly group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: versions.jmh
 }
 
 description = 'Neo4j Graph Algorithms :: Benchmark'
