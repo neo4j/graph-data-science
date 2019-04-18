@@ -22,3 +22,8 @@ task javadocJar(type: Jar) {
 
 description = 'Neo4j Graph Algorithms :: Tests'
 publishing.publications.maven.artifact(javadocJar)
+
+test {
+    useJUnit()
+    maxHeapSize = "1G"
+}
