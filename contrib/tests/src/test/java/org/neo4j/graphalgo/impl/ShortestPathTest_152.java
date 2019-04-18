@@ -123,11 +123,12 @@ public class ShortestPathTest_152 {
 
         // TODO: this is actually wrong, order should be 0/50/80/100
         // see https://github.com/neo4j-contrib/neo4j-graph-algorithms/issues/722 and fix test afterwards
+        // 2019-04-18: This test now succeeds with the "correct" values and order
         verify(mock, times(1)).accept(eq(0.0));
         verify(mock, times(1)).accept(eq(50.0));
-        verify(mock, times(1)).accept(eq(90.0));
-        verify(mock, times(1)).accept(eq(120.0));
-        verify(mock, times(1)).accept(eq(140.0));
+        verify(mock, times(1)).accept(eq(80.0));
+        verify(mock, times(1)).accept(eq(100.0));
+//        verify(mock, times(1)).accept(eq(140.0));
     }
 
     @Test
