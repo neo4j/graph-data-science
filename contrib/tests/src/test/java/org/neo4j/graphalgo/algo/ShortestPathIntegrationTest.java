@@ -1,9 +1,10 @@
 /*
- * Copyright (c) 2017 "Neo4j, Inc." <http://neo4j.com>
+ * Copyright (c) 2017-2019 "Neo4j,"
+ * Neo4j Sweden AB [http://neo4j.com]
  *
- * This file is part of Neo4j Graph Algorithms <http://github.com/neo4j-contrib/neo4j-graph-algorithms>.
+ * This file is part of Neo4j.
  *
- * Neo4j Graph Algorithms is free software: you can redistribute it and/or modify
+ * Neo4j is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -16,7 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 /**
  * Copyright (c) 2017 "Neo4j, Inc." <http://neo4j.com>
  *
