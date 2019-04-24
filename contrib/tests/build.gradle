@@ -23,7 +23,6 @@ task javadocJar(type: Jar) {
 }
 
 description = 'Neo4j Graph Algorithms :: Tests'
-publishing.publications.maven.artifact(javadocJar)
 
 // TODO: Make sure we ported all settings from the maven config
 test {

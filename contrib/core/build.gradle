@@ -10,4 +10,3 @@ task javadocJar(type: Jar) {
 }
 
 description = 'Neo4j Graph Algorithms :: Core'
-publishing.publications.maven.artifact(javadocJar)
