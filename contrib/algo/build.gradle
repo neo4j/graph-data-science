@@ -31,7 +31,7 @@ task javadocJar(type: Jar) {
 description = 'Neo4j Graph Algorithms :: Algo'
 
 shadowJar {
-    classifier = null
+    classifier = "standalone"
     minimize()
     exclude 'META-INF/versions/**/*'
 }
@@ -55,4 +55,10 @@ publishing {
     }
 }
 
-cipr.dependsOn publishAlgoPublicationToPipelineRepository
+task shadowCopy(type: Copy) {
+    from(shadowJar)
+    into distributionDir
+}
+
+ci.finalizedBy shadowCopy
+cipr.finalizedBy shadowCopy
