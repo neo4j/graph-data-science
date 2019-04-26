@@ -31,6 +31,7 @@ task javadocJar(type: Jar) {
 description = 'Neo4j Graph Algorithms :: Algo'
 
 shadowJar {
+    classifier = null
     minimize()
     exclude 'META-INF/versions/**/*'
 }
@@ -45,3 +46,13 @@ tasks.withType(JavaCompile) {
         '-ADocumentation.DelimitedFirstField=true' <<
         '-ADocumentation.ExportGrouping=SINGLE'
 }
+
+publishing {
+    publications {
+        algo(MavenPublication) {
+            project.shadow.component(it)
+        }
+    }
+}
+
+cipr.dependsOn publishAlgoPublicationToPipelineRepository
