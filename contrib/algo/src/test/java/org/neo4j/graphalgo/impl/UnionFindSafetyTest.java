@@ -45,6 +45,7 @@ import java.util.function.LongPredicate;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertSame;
+import static org.neo4j.graphalgo.impl.UnionFindAlgo.NOTHING;
 
 @RunWith(Parameterized.class)
 public final class UnionFindSafetyTest {
@@ -69,8 +70,11 @@ public final class UnionFindSafetyTest {
             unionFindAlgo.run(
                     graph,
                     Pools.DEFAULT,
+                    AllocationTracker.EMPTY,
                     10,
-                    10
+                    10,
+                    Double.NaN,
+                    NOTHING
             );
         } catch (Throwable e) {
             assertSame(error, Exceptions.rootCause(e));
@@ -87,12 +91,15 @@ public final class UnionFindSafetyTest {
                     Pools.DEFAULT,
                     AllocationTracker.EMPTY,
                     10,
-                    10
+                    10,
+                    Double.NaN,
+                    NOTHING
             );
         } catch (Throwable e) {
             assertSame(error, Exceptions.rootCause(e));
         }
     }
+
 
     private static final class FlakyGraph implements HugeGraph {
         private final int nodes;

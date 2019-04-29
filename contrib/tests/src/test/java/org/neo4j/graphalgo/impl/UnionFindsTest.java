@@ -155,7 +155,7 @@ public class UnionFindsTest {
     }
 
     private DSSResult run(final UnionFindAlgo uf) {
-        return uf.runAny(
+        return uf.run(
                 graph,
                 Pools.DEFAULT,
                 AllocationTracker.EMPTY,

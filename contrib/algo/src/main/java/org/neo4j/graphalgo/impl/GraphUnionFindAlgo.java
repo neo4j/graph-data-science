@@ -28,7 +28,7 @@ public abstract class GraphUnionFindAlgo<G extends Graph, R, ME extends GraphUni
 
     protected G graph;
 
-    GraphUnionFindAlgo(final G graph) {
+    protected GraphUnionFindAlgo(final G graph) {
         this.graph = graph;
     }
 

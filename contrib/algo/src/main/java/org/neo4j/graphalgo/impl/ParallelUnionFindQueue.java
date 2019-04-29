@@ -89,7 +89,7 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<Graph, DisjointSe
         return getStruct(queue);
     }
 
-    static <T> void mergeTask(
+    public static <T> void mergeTask(
             final BlockingQueue<T> queue,
             final AtomicInteger expected,
             BinaryOperator<T> merge) {

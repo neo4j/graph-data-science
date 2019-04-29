@@ -53,18 +53,12 @@ public final class UnionFindProcExec implements BiConsumer<String, Algorithm<?>>
     private final GraphDatabaseAPI api;
     private final Log log;
     private final KernelTransaction transaction;
-    private final  UnionFindAlgo sequential;
-    private final UnionFindAlgo parallel;
+    private final UnionFindAlgoInterface sequential;
+    private final UnionFindAlgoInterface parallel;
 
     public static Stream<UnionFindResult> run(
-            Map<String, Object> config,
-            String label,
-            String relationship,
+            ProcedureConfiguration configuration,
             Supplier<UnionFindProcExec> unionFind) {
-        ProcedureConfiguration configuration = ProcedureConfiguration
-                .create(config)
-                .overrideNodeLabelOrQuery(label)
-                .overrideRelationshipTypeOrQuery(relationship);
 
         AllocationTracker tracker = AllocationTracker.create();
 
@@ -219,14 +213,8 @@ public final class UnionFindProcExec implements BiConsumer<String, Algorithm<?>>
     }
 
     public static Stream<DisjointSetStruct.Result> stream(
-            Map<String, Object> config,
-            String label,
-            String relationship,
+            ProcedureConfiguration configuration,
             Supplier<UnionFindProcExec> unionFind) {
-        ProcedureConfiguration configuration = ProcedureConfiguration
-                .create(config)
-                .overrideNodeLabelOrQuery(label)
-                .overrideRelationshipTypeOrQuery(relationship);
 
         AllocationTracker tracker = AllocationTracker.create();
         UnionFindProcExec uf = unionFind.get();
@@ -247,8 +235,8 @@ public final class UnionFindProcExec implements BiConsumer<String, Algorithm<?>>
             GraphDatabaseAPI api,
             Log log,
             KernelTransaction transaction,
-            UnionFindAlgo sequential,
-            UnionFindAlgo parallel) {
+            UnionFindAlgoInterface sequential,
+            UnionFindAlgoInterface parallel) {
         this.api = api;
         this.log = log;
         this.transaction = transaction;
@@ -295,8 +283,8 @@ public final class UnionFindProcExec implements BiConsumer<String, Algorithm<?>>
         int concurrency = config.getConcurrency();
         int minBatchSize = config.getBatchSize();
         final double threshold = config.get(CONFIG_THRESHOLD, Double.NaN);
-        UnionFindAlgo uf = concurrency > 1 ? parallel : sequential;
-        return uf.runAny(
+        UnionFindAlgoInterface uf = concurrency > 1 ? parallel : sequential;
+        return uf.run(
                 graph,
                 Pools.DEFAULT,
                 tracker,

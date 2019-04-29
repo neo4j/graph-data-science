@@ -37,10 +37,14 @@ public enum UFBenchmarkCombination {
     HUGE_FJ_MERGE(GraphImpl.HUGE, UnionFindAlgo.FJ_MERGE),
     HUGE_SEQ(GraphImpl.HUGE, UnionFindAlgo.SEQ),
 
+    //TODO: Changes made in this commit are causing this to run non-huge algorithm on HugeGraph
+    //This needs to be re-established correctly subsequently
+    //Take a look at this again when moving Huge out of Community Core
+
     HUGE_HUGE_QUEUE(GraphImpl.HUGE, UnionFindAlgo.QUEUE) {
         @Override
         public Object run(final Graph graph) {
-            return algo.runAny(
+            return algo.run(
                 graph,
                 Pools.DEFAULT,
                 AllocationTracker.EMPTY,
@@ -53,7 +57,7 @@ public enum UFBenchmarkCombination {
     HUGE_HUGE_FORK_JOIN(GraphImpl.HUGE, UnionFindAlgo.FORK_JOIN) {
         @Override
         public Object run(final Graph graph) {
-            return algo.runAny(
+            return algo.run(
                 graph,
                 Pools.DEFAULT,
                 AllocationTracker.EMPTY,
@@ -66,7 +70,7 @@ public enum UFBenchmarkCombination {
     HUGE_HUGE_FJ_MERGE(GraphImpl.HUGE, UnionFindAlgo.FJ_MERGE) {
         @Override
         public Object run(final Graph graph) {
-            return algo.runAny(
+            return algo.run(
                 graph,
                 Pools.DEFAULT,
                 AllocationTracker.EMPTY,
@@ -79,7 +83,7 @@ public enum UFBenchmarkCombination {
     HUGE_HUGE_SEQ(GraphImpl.HUGE, UnionFindAlgo.SEQ) {
         @Override
         public Object run(final Graph graph) {
-            return algo.runAny(
+            return algo.run(
                 graph,
                 Pools.DEFAULT,
                 AllocationTracker.EMPTY,
@@ -102,7 +106,10 @@ public enum UFBenchmarkCombination {
         return algo.run(
                 graph,
                 Pools.DEFAULT,
+                AllocationTracker.EMPTY,
                 (int) (graph.nodeCount() / Pools.DEFAULT_CONCURRENCY),
-                Pools.DEFAULT_CONCURRENCY);
+                Pools.DEFAULT_CONCURRENCY,
+                Double.NaN,
+                NOTHING);
     }
 }

@@ -19,10 +19,10 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.impl.UnionFindAlgo;
 import org.neo4j.graphalgo.impl.UnionFindProcExec;
-import org.neo4j.graphalgo.results.DefaultCommunityResult;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
@@ -59,10 +59,8 @@ public class UnionFindProc {
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         return UnionFindProcExec.run(
-                config,
-                label,
-                relationship,
-                this::ufExec);
+                config( config, label, relationship ),
+                this::seqQueue );
     }
 
     @Procedure(value = "algo.unionFind.stream")
@@ -75,13 +73,120 @@ public class UnionFindProc {
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         return UnionFindProcExec.stream(
-                config,
-                label,
-                relationship,
-                this::ufExec);
+                config( config, label, relationship ),
+                this::seqQueue );
     }
 
-    private UnionFindProcExec ufExec() {
+    @Procedure(value = "algo.unionFind.queue", mode = Mode.WRITE)
+    @Description("CALL algo.unionFind(label:String, relationship:String, " +
+                 "{property:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition',concurrency:4}) " +
+                 "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
+    public Stream<UnionFindProcExec.UnionFindResult> unionFindQueue(
+            @Name(value = "label", defaultValue = "") String label,
+            @Name(value = "relationship", defaultValue = "") String relationship,
+            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+
+        return UnionFindProcExec.run(
+                config( config, label, relationship ),
+                this::seqQueue
+        );
+    }
+
+    @Procedure(value = "algo.unionFind.queue.stream")
+    @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
+                 "{property:'propertyName', threshold:0.42, defaultValue:1.0, concurrency:4}) " +
+                 "YIELD nodeId, setId - yields a setId to each node id")
+    public Stream<DisjointSetStruct.Result> unionFindQueueStream(
+            @Name(value = "label", defaultValue = "") String label,
+            @Name(value = "relationship", defaultValue = "") String relationship,
+            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+
+        return UnionFindProcExec.stream(
+                config( config, label, relationship ),
+                this::seqQueue );
+    }
+
+    @Procedure(value = "algo.unionFind.forkJoinMerge", mode = Mode.WRITE)
+    @Description("CALL algo.unionFind(label:String, relationship:String, " +
+                 "{property:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition', concurrency:4}) " +
+                 "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
+    public Stream<UnionFindProcExec.UnionFindResult> unionFindForkJoinMerge(
+            @Name(value = "label", defaultValue = "") String label,
+            @Name(value = "relationship", defaultValue = "") String relationship,
+            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+
+        return UnionFindProcExec.run(
+                config( config, label, relationship ),
+                this::seqMerge
+        );
+    }
+
+    @Procedure(value = "algo.unionFind.forkJoinMerge.stream")
+    @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
+                 "{property:'propertyName', threshold:0.42, defaultValue:1.0, concurrency:4}) " +
+                 "YIELD nodeId, setId - yields a setId to each node id")
+    public Stream<DisjointSetStruct.Result> unionFindForkJoinMergeStream(
+            @Name(value = "label", defaultValue = "") String label,
+            @Name(value = "relationship", defaultValue = "") String relationship,
+            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+
+        return UnionFindProcExec.stream(
+                config( config, label, relationship ),
+                this::seqMerge
+        );
+    }
+
+    @Procedure(value = "algo.unionFind.forkJoin", mode = Mode.WRITE)
+    @Description("CALL algo.unionFind(label:String, relationship:String, " +
+                 "{property:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition',concurrency:4}) " +
+                 "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
+    public Stream<UnionFindProcExec.UnionFindResult> unionFindForkJoin(
+            @Name(value = "label", defaultValue = "") String label,
+            @Name(value = "relationship", defaultValue = "") String relationship,
+            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+
+        return UnionFindProcExec.run(
+                config( config, label, relationship ),
+                this::seqForkJoin
+        );
+    }
+
+    @Procedure(value = "algo.unionFind.forkJoin.stream")
+    @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
+                 "{property:'propertyName', threshold:0.42, defaultValue:1.0,concurrency:4}) " +
+                 "YIELD nodeId, setId - yields a setId to each node id")
+    public Stream<DisjointSetStruct.Result> unionFindForJoinStream(
+            @Name(value = "label", defaultValue = "") String label,
+            @Name(value = "relationship", defaultValue = "") String relationship,
+            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+
+        return UnionFindProcExec.stream(
+                config( config, label, relationship ),
+                this::seqForkJoin
+        );
+    }
+
+    private UnionFindProcExec seqForkJoin() {
+        return new UnionFindProcExec(
+                api,
+                log,
+                transaction,
+                UnionFindAlgo.SEQ,
+                UnionFindAlgo.FORK_JOIN
+        );
+    }
+
+    private UnionFindProcExec seqMerge() {
+        return new UnionFindProcExec(
+                api,
+                log,
+                transaction,
+                UnionFindAlgo.SEQ,
+                UnionFindAlgo.FJ_MERGE
+        );
+    }
+
+    private UnionFindProcExec seqQueue() {
         return new UnionFindProcExec(
                 api,
                 log,
@@ -89,5 +194,13 @@ public class UnionFindProc {
                 UnionFindAlgo.SEQ,
                 UnionFindAlgo.QUEUE
         );
+    }
+
+    private ProcedureConfiguration config( Map<String,Object> config, String label, String relationship )
+    {
+        return ProcedureConfiguration
+                .create( config )
+                .overrideNodeLabelOrQuery( label )
+                .overrideRelationshipTypeOrQuery( relationship );
     }
 }
