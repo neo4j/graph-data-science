@@ -1,0 +1,40 @@
+dependencies {
+    compile project(':graph-algorithms-algo')
+//    compile group: 'com.carrotsearch'      , name: 'hppc'         , version: versions.hppc
+//    compile group: 'io.dropwizard.metrics' , name: 'metrics-core' , version: '4.0.2'
+//    compile group: 'org.hdrhistogram'      , name: 'HdrHistogram' , version: '2.1.9'
+//    compile group: 'org.roaringbitmap'     , name: 'RoaringBitmap', version: '0.7.45'
+//
+    compileOnly group: 'org.neo4j'           , name: 'neo4j'                , version: versions.neo4j
+//    compileOnly group: 'org.neo4j'           , name: 'neo4j-slf4j'          , version: versions.neo4j
+//    compileOnly group: 'net.biville.florent' , name: 'neo4j-sproc-compiler' , version: '1.2.1'
+//
+//    testCompile group: 'com.pholser'  , name: 'junit-quickcheck-core'       , version: '0.8.1'
+//    testCompile group: 'com.pholser'  , name: 'junit-quickcheck-generators' , version: '0.8.1'
+//    testCompile group: 'org.neo4j'    , name: 'neo4j'                       , version: versions.neo4j
+//    testCompile group: 'org.neo4j'    , name: 'neo4j-kernel'                , version: versions.neo4j
+//    testCompile group: 'org.neo4j'    , name: 'neo4j-kernel-api'            , version: versions.neo4j
+//    testCompile group: 'org.neo4j'    , name: 'neo4j-io'                    , version: versions.neo4j
+//    testCompile group: 'junit'        , name: 'junit'                       , version: versions.junit
+//    testCompile group: 'org.hamcrest' , name: 'hamcrest-library'            , version: versions.hamcrest
+//    testCompile group: 'org.mockito'  , name: 'mockito-core'                , version: versions.mockito
+//    testCompile group: 'org.mockito'  , name: 'mockito-inline'              , version: versions.mockito
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from(javadoc.destinationDir)
+}
+
+description = 'Neo4j Graph Algorithms :: Procedures'
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs <<
+        '-AIgnoreContextWarnings' <<
+        '-AGeneratedDocumentationPath=target/generated-documentation' <<
+        '-ADocumentation.FieldDelimiter=¦' <<
+        '-ADocumentation.ExportedHeaders=qualified name¦description¦type' <<
+        '-ADocumentation.QuotedFields=false' <<
+        '-ADocumentation.DelimitedFirstField=true' <<
+        '-ADocumentation.ExportGrouping=SINGLE'
+}

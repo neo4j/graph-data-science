@@ -1,4 +1,5 @@
 dependencies {
+    compile project(':graph-algorithms-proc')
     compile project(':graph-algorithms-algo')
     compile project(':graph-algorithms-core')
 
