@@ -291,24 +291,24 @@ public class ProcedureConfiguration {
      */
     public Class<? extends GraphFactory> getGraphImpl(String defaultGraphImpl) {
         final String graphImpl = getGraphName(defaultGraphImpl);
-        return HeavyGraphFactory.class;
-//        switch (graphImpl.toLowerCase(Locale.ROOT)) {
-//            case HeavyGraph.TYPE:
-//                return HeavyGraphFactory.class;
-//            case HeavyCypherGraphFactory.TYPE:
-//                return HeavyCypherGraphFactory.class;
-//            case LightGraph.TYPE:
-//                return HeavyGraphFactory.class;
-//            case GraphView.TYPE:
-//                return GraphViewFactory.class;
-//            case HugeGraph.TYPE:
-//                return HugeGraphFactory.class;
-//            default:
-//                if (validCustomName(graphImpl) && LoadGraphFactory.check(graphImpl)) {
-//                    return LoadGraphFactory.class;
-//                }
-//                throw new IllegalArgumentException("Unknown impl: " + graphImpl);
-//        }
+//        return HeavyGraphFactory.class;
+        switch (graphImpl.toLowerCase(Locale.ROOT)) {
+            case HeavyGraph.TYPE:
+                return HeavyGraphFactory.class;
+            case HeavyCypherGraphFactory.TYPE:
+                return HeavyCypherGraphFactory.class;
+            case LightGraph.TYPE:
+                return HeavyGraphFactory.class;
+            case GraphView.TYPE:
+                return GraphViewFactory.class;
+            case HugeGraph.TYPE:
+                return HugeGraphFactory.class;
+            default:
+                if (validCustomName(graphImpl) && LoadGraphFactory.check(graphImpl)) {
+                    return LoadGraphFactory.class;
+                }
+                throw new IllegalArgumentException("Unknown impl: " + graphImpl);
+        }
     }
 
     private static Set<String> RESERVED = new HashSet<>(asList(HeavyGraph.TYPE, HeavyCypherGraphFactory.TYPE,

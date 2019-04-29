@@ -22,31 +22,25 @@ package org.neo4j.graphalgo.algo;
 import com.carrotsearch.hppc.IntIntMap;
 import com.carrotsearch.hppc.IntIntScatterMap;
 import com.carrotsearch.hppc.cursors.IntIntCursor;
+import com.neo4j.algo.UnionFindProc;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.neo4j.graphalgo.UnionFindProc;
+
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 
-import java.util.Arrays;
-import java.util.Collection;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author mknblch
  */
-@RunWith(Parameterized.class)
-public class UnionFindProcIntegrationTest {
+public class HugeUnionFindProcIntegrationTest
+{
 
     private static GraphDatabaseAPI db;
 
@@ -96,21 +90,9 @@ public class UnionFindProcIntegrationTest {
         if (db != null) db.shutdown();
     }
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(
-                new Object[]{"Heavy"},
-                new Object[]{"Light"},
-                new Object[]{"Kernel"}
-        );
-    }
-
-    @Parameterized.Parameter
-    public String graphImpl;
-
     @Test
     public void testUnionFind() throws Exception {
-        db.execute("CALL algo.unionFind('', '',{graph:'"+graphImpl+"'}) YIELD setCount, communityCount")
+        db.execute( "CALL algo.unionFind('', '',{graph:'Huge'}) YIELD setCount, communityCount")
                 .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(3L, row.getNumber("communityCount"));
                     assertEquals(3L, row.getNumber("setCount"));
@@ -120,7 +102,7 @@ public class UnionFindProcIntegrationTest {
 
     @Test
     public void testUnionFindWithLabel() throws Exception {
-        db.execute("CALL algo.unionFind('Label', '',{graph:'"+graphImpl+"'}) YIELD setCount, communityCount")
+        db.execute( "CALL algo.unionFind('Label', '',{graph:'Huge'}) YIELD setCount, communityCount")
                 .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(1L, row.getNumber("communityCount"));
                     assertEquals(1L, row.getNumber("setCount"));
@@ -130,7 +112,7 @@ public class UnionFindProcIntegrationTest {
 
     @Test
     public void testUnionFindWriteBack() throws Exception {
-        db.execute("CALL algo.unionFind('', 'TYPE', {write:true,graph:'"+graphImpl+"'}) YIELD setCount, communityCount, writeMillis, nodes, partitionProperty, writeProperty")
+        db.execute( "CALL algo.unionFind('', 'TYPE', {write:true,graph:'Huge'}) YIELD setCount, communityCount, writeMillis, nodes, partitionProperty, writeProperty")
                 .accept((Result.ResultVisitor<Exception>) row -> {
                     assertNotEquals(-1L, row.getNumber("writeMillis"));
                     assertNotEquals(-1L, row.getNumber("nodes"));
@@ -144,7 +126,7 @@ public class UnionFindProcIntegrationTest {
 
     @Test
     public void testUnionFindWriteBackExplicitWriteProperty() throws Exception {
-        db.execute("CALL algo.unionFind('', 'TYPE', {write:true,graph:'"+graphImpl+"', writeProperty:'unionFind'}) YIELD setCount, communityCount, writeMillis, nodes, partitionProperty, writeProperty")
+        db.execute( "CALL algo.unionFind('', 'TYPE', {write:true,graph:'Huge', writeProperty:'unionFind'}) YIELD setCount, communityCount, writeMillis, nodes, partitionProperty, writeProperty")
                 .accept((Result.ResultVisitor<Exception>) row -> {
                     assertNotEquals(-1L, row.getNumber("writeMillis"));
                     assertNotEquals(-1L, row.getNumber("nodes"));
@@ -160,7 +142,7 @@ public class UnionFindProcIntegrationTest {
     @Test
     public void testUnionFindStream() throws Exception {
         final IntIntScatterMap map = new IntIntScatterMap(11);
-        db.execute("CALL algo.unionFind.stream('', 'TYPE', {graph:'"+graphImpl+"'}) YIELD setId")
+        db.execute( "CALL algo.unionFind.stream('', 'TYPE', {graph:'Huge'}) YIELD setId")
                 .accept((Result.ResultVisitor<Exception>) row -> {
                     map.addTo(row.getNumber("setId").intValue(), 1);
                     return true;
@@ -171,7 +153,9 @@ public class UnionFindProcIntegrationTest {
     @Test
     public void testThresholdUnionFindStream() throws Exception {
         final IntIntScatterMap map = new IntIntScatterMap(11);
-        db.execute("CALL algo.unionFind.stream('', 'TYPE', {weightProperty:'cost', defaultValue:10.0, threshold:5.0, concurrency:1, graph:'"+graphImpl+"'}) YIELD setId")
+        db.execute(
+                "CALL algo.unionFind.stream('', 'TYPE', {weightProperty:'cost', defaultValue:10.0, threshold:5.0, concurrency:1, graph:'" +
+                    "Huge" + "'}) YIELD setId")
                 .accept((Result.ResultVisitor<Exception>) row -> {
                     map.addTo(row.getNumber("setId").intValue(), 1);
                     return true;
@@ -182,7 +166,8 @@ public class UnionFindProcIntegrationTest {
     @Test
     public void testThresholdUnionFindLowThreshold() throws Exception {
         final IntIntScatterMap map = new IntIntScatterMap(11);
-        db.execute("CALL algo.unionFind.stream('', 'TYPE', {weightProperty:'cost', defaultValue:10.0, concurrency:1, threshold:3.14, graph:'"+graphImpl+"'}) YIELD setId")
+        db.execute( "CALL algo.unionFind.stream('', 'TYPE', {weightProperty:'cost', defaultValue:10.0, concurrency:1, threshold:3.14, graph:'" +
+                    "Huge" + "'}) YIELD setId")
                 .accept((Result.ResultVisitor<Exception>) row -> {
                     map.addTo(row.getNumber("setId").intValue(), 1);
                     return true;
