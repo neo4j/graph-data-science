@@ -108,6 +108,12 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
      * {@inheritDoc}
      */
     @Override
+    abstract public long sizeOf();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     abstract public long release();
 
     /**
@@ -121,6 +127,12 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
      */
     @Override
     abstract public void copyTo(final HugeObjectArray dest, final long length);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    abstract public HugeObjectArray<T> copyOf(final long newLength, final AllocationTracker tracker);
 
     /**
      * {@inheritDoc}
@@ -273,8 +285,21 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
         }
 
         @Override
+        public HugeObjectArray<T> copyOf(long newLength, AllocationTracker tracker) {
+            Class<T> tCls = (Class<T>) page.getClass().getComponentType();
+            HugeObjectArray<T> copy = HugeObjectArray.newArray(tCls, newLength, tracker);
+            this.copyTo(copy, newLength);
+            return copy;
+        }
+
+        @Override
         public long size() {
             return size;
+        }
+
+        @Override
+        public long sizeOf() {
+            return sizeOfObjectArray(size);
         }
 
         @Override
@@ -420,8 +445,21 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
         }
 
         @Override
+        public HugeObjectArray<T> copyOf(long newLength, AllocationTracker tracker) {
+            Class<T> tCls = (Class<T>) pages.getClass().getComponentType().getComponentType();
+            HugeObjectArray<T> copy = HugeObjectArray.newArray(tCls, newLength, tracker);
+            this.copyTo(copy, newLength);
+            return copy;
+        }
+
+        @Override
         public long size() {
             return size;
+        }
+
+        @Override
+        public long sizeOf() {
+            return memoryUsed;
         }
 
         @Override

@@ -102,8 +102,10 @@ public class StronglyConnectedComponentsProc {
         SCCResult.Builder builder = SCCResult.builder();
 
         ProgressTimer loadTimer = builder.timeLoad();
+        AllocationTracker tracker = AllocationTracker.create();
         Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, configuration)
+                .withAllocationTracker(tracker)
                 .withOptionalLabel(label)
                 .withOptionalRelationshipType(relationship)
                 .withoutRelationshipWeights()
@@ -143,7 +145,7 @@ public class StronglyConnectedComponentsProc {
             });
         }
 
-        return Stream.of(builder.build(graph.nodeCount(), l -> (long) connectedComponents[((int) l)]));
+        return Stream.of(builder.build(tracker, graph.nodeCount(), l -> (long) connectedComponents[((int) l)]));
     }
 
     // algo.scc.tunedTarjan
@@ -160,8 +162,10 @@ public class StronglyConnectedComponentsProc {
         SCCResult.Builder builder = SCCResult.builder();
 
         ProgressTimer loadTimer = builder.timeLoad();
+        AllocationTracker tracker = AllocationTracker.create();
         Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, configuration)
+                .withAllocationTracker(tracker)
                 .withoutRelationshipWeights()
                 .withDirection(Direction.OUTGOING)
                 .load(configuration.getGraphImpl());
@@ -196,7 +200,7 @@ public class StronglyConnectedComponentsProc {
         }
 
         final int[] connectedComponents = tarjan.getConnectedComponents();
-        return Stream.of(builder.build(graph.nodeCount(), l -> (long) connectedComponents[((int) l)]));
+        return Stream.of(builder.build(tracker, graph.nodeCount(), l -> (long) connectedComponents[((int) l)]));
     }
 
     // algo.scc.tunedTarjan.stream
@@ -270,11 +274,11 @@ public class StronglyConnectedComponentsProc {
 
         if (graph instanceof HugeGraph) {
             final HugeLongArray connectedComponents = tarjan.getConnectedComponents();
-            return Stream.of(builder.build(graph.nodeCount(), connectedComponents::get));
+            return Stream.of(builder.build(tracker, graph.nodeCount(), connectedComponents::get));
         }
         final int[] connectedComponents = tarjan.getConnectedComponents();
         tarjan.release();
-        return Stream.of(builder.build(graph.nodeCount(), l -> (long) connectedComponents[((int) l)]));
+        return Stream.of(builder.build(tracker, graph.nodeCount(), l -> (long) connectedComponents[((int) l)]));
     }
 
     private void write(ProcedureConfiguration configuration, Graph graph, TerminationFlag terminationFlag, SCCAlgorithm tarjan, String partitionProperty) {
@@ -356,8 +360,10 @@ public class StronglyConnectedComponentsProc {
         SCCResult.Builder builder = SCCResult.builder();
 
         ProgressTimer loadTimer = builder.timeLoad();
+        AllocationTracker tracker = AllocationTracker.create();
         Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, configuration)
+                .withAllocationTracker(tracker)
                 .withoutRelationshipWeights()
                 .load(configuration.getGraphImpl());
         loadTimer.stop();
@@ -399,7 +405,7 @@ public class StronglyConnectedComponentsProc {
             });
         }
 
-        return Stream.of(builder.build(graph.nodeCount(), l -> (long) connectedComponents[((int) l)]));
+        return Stream.of(builder.build(tracker, graph.nodeCount(), l -> (long) connectedComponents[((int) l)]));
     }
 
     // algo.scc.multistep.stream

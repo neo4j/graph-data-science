@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.impl.MSColoring;
@@ -66,9 +67,10 @@ public class MSColoringProc {
         final UnionFindProcExec.Builder builder = new UnionFindProcExec.Builder();
 
         // loading
+        AllocationTracker tracker = AllocationTracker.create();
         final Graph graph;
         try (ProgressTimer timer = builder.timeLoad()) {
-            graph = load(configuration);
+            graph = load(configuration, tracker);
         }
 
         if (graph.nodeCount() == 0) {
@@ -88,7 +90,7 @@ public class MSColoringProc {
                     write(graph, struct, configuration));
         }
 
-        return Stream.of(builder.build(graph.nodeCount(), n -> (long) struct.get((int) n)));
+        return Stream.of(builder.build(tracker, graph.nodeCount(), n -> (long) struct.get((int) n)));
     }
 
     @Procedure(value = "algo.unionFind.mscoloring.stream")
@@ -105,7 +107,8 @@ public class MSColoringProc {
                 .overrideRelationshipTypeOrQuery(relationship);
 
         // loading
-        final Graph graph = load(configuration);
+        AllocationTracker tracker = AllocationTracker.create();
+        final Graph graph = load(configuration, tracker);
 
         if (graph.nodeCount() == 0) {
             graph.release();
@@ -119,9 +122,12 @@ public class MSColoringProc {
                 .resultStream();
     }
 
-    private Graph load(ProcedureConfiguration config) {
+    private Graph load(
+            ProcedureConfiguration config,
+            AllocationTracker tracker) {
         return new GraphLoader(api, Pools.DEFAULT)
                 .init(log, config.getNodeLabelOrQuery(),config.getRelationshipOrQuery(),config)
+                .withAllocationTracker(tracker)
                 .withOptionalRelationshipWeightsFromProperty(
                         config.getWeightProperty(),
                         config.getWeightPropertyDefaultValue(1.0))

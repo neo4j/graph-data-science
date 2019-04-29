@@ -31,6 +31,11 @@ abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, Self>> {
     abstract public void copyTo(final Self dest, long length);
 
     /**
+     * Creates a copy of the given array. The behavior is identical to {@link Arrays#copyOf(int[], int)}.
+     */
+    abstract public Self copyOf(long newLength, AllocationTracker tracker);
+
+    /**
      * Returns the length of this array.
      * <p>
      * If the size is greater than zero, the highest supported index is {@code size() - 1}
@@ -38,6 +43,13 @@ abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, Self>> {
      * The behavior is identical to calling {@code array.length} on primitive arrays.
      */
     abstract public long size();
+
+
+    /**
+     * @return the amount of memory used by the instance of this array, in bytes.
+     * This should be the same as returned from {@link #release()} without actually releasing the array.
+     */
+    abstract public long sizeOf();
 
     /**
      * Destroys the data, allowing the underlying storage arrays to be collected as garbage.

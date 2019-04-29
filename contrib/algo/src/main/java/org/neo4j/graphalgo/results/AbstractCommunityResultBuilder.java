@@ -18,12 +18,12 @@
  */
 package org.neo4j.graphalgo.results;
 
-import com.carrotsearch.hppc.LongLongMap;
-import com.carrotsearch.hppc.LongLongScatterMap;
 import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 
-import java.util.function.IntFunction;
+import java.util.function.IntUnaryOperator;
 import java.util.function.LongToIntFunction;
 import java.util.function.LongUnaryOperator;
 
@@ -122,50 +122,43 @@ public abstract class AbstractCommunityResultBuilder<T> {
         }
     }
 
-    public T buildII(long nodeCount, IntFunction<Integer> fun) {
+    public T buildfromKnownSizes(int nodeCount, IntUnaryOperator sizeForNode) {
         final ProgressTimer timer = ProgressTimer.start();
         final Histogram histogram = new Histogram(2);
         for (int nodeId = 0; nodeId < nodeCount; nodeId++) {
-            final long size = fun.apply(nodeId);
-            histogram.recordValue(size);
+            final int communitySize = sizeForNode.applyAsInt(nodeId);
+            histogram.recordValue(communitySize);
         }
 
         timer.stop();
 
-        final LongLongMap communitySizeMap = new LongLongScatterMap();
         return build(loadDuration,
                 evalDuration,
                 writeDuration,
                 timer.getDuration(),
                 nodeCount,
-                communitySizeMap.size(),
-                communitySizeMap,
+                nodeCount,
                 histogram,
                 write
         );
-
-
     }
 
-    public T buildLI(long nodeCount, LongToIntFunction fun) {
-
-        final Histogram histogram = new Histogram(2);
+    public T buildfromKnownLongSizes(long nodeCount, LongToIntFunction sizeForNode) {
         final ProgressTimer timer = ProgressTimer.start();
-        for (int nodeId = 0; nodeId < nodeCount; nodeId++) {
-            final long size = fun.applyAsInt(nodeId);
-            histogram.recordValue(size);
+        final Histogram histogram = new Histogram(2);
+        for (long nodeId = 0L; nodeId < nodeCount; nodeId++) {
+            final int communitySize = sizeForNode.applyAsInt(nodeId);
+            histogram.recordValue(communitySize);
         }
 
         timer.stop();
 
-        final LongLongMap communitySizeMap = new LongLongScatterMap();
         return build(loadDuration,
                 evalDuration,
                 writeDuration,
                 timer.getDuration(),
                 nodeCount,
-                communitySizeMap.size(),
-                communitySizeMap,
+                nodeCount,
                 histogram,
                 write
         );
@@ -174,9 +167,24 @@ public abstract class AbstractCommunityResultBuilder<T> {
     /**
      * build result
      */
-    public T build(long nodeCount, LongUnaryOperator fun) {
+    public T build(
+            AllocationTracker tracker,
+            long nodeCount,
+            LongUnaryOperator fun) {
+        return build(4L, tracker, nodeCount, fun);
+    }
 
-        final LongLongMap communitySizeMap = new LongLongScatterMap();
+    /**
+     * build result. If you know (or can reasonably estimate) the number of final communities,
+     * prefer this overload over {@link #build(AllocationTracker, long, LongUnaryOperator)} as this
+     * one will presize the counting bag and avoid excessive allocations and resizing operations.
+     */
+    public T build(
+            long expectedNumberOfCommunities,
+            AllocationTracker tracker,
+            long nodeCount,
+            LongUnaryOperator fun) {
+        final HugeLongLongMap communitySizeMap = new HugeLongLongMap(expectedNumberOfCommunities, tracker);
         final ProgressTimer timer = ProgressTimer.start();
         for (long nodeId = 0L; nodeId < nodeCount; nodeId++) {
             final long communityId = fun.applyAsLong(nodeId);
@@ -187,13 +195,15 @@ public abstract class AbstractCommunityResultBuilder<T> {
 
         timer.stop();
 
+        long communityCount = communitySizeMap.size();
+        communitySizeMap.release();
+
         return build(loadDuration,
                 evalDuration,
                 writeDuration,
                 timer.getDuration(),
                 nodeCount,
-                communitySizeMap.size(),
-                communitySizeMap,
+                communityCount,
                 histogram,
                 write
         );
@@ -206,7 +216,6 @@ public abstract class AbstractCommunityResultBuilder<T> {
             long postProcessingMillis,
             long nodeCount,
             long communityCount,
-            LongLongMap communitySizeMap,
             Histogram communityHistogram,
             boolean write);
 

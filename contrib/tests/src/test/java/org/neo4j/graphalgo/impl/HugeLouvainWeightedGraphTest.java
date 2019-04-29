@@ -142,7 +142,7 @@ public class HugeLouvainWeightedGraphTest {
         }
         printCommunities(louvain);
         System.out.println("louvain.getRuns() = " + louvain.getLevel());
-        System.out.println("louvain.getCommunityCount() = " + louvain.getCommunityCount());
+        System.out.println("louvain.communityCount() = " + louvain.communityCount());
         assertCommunities(louvain);
         assertTrue("Maximum iterations > " + MAX_ITERATIONS,louvain.getLevel() < MAX_ITERATIONS);
     }
@@ -165,7 +165,7 @@ public class HugeLouvainWeightedGraphTest {
         }
         printCommunities(louvain);
         System.out.println("louvain.getRuns() = " + louvain.getLevel());
-        System.out.println("louvain.getCommunityCount() = " + louvain.getCommunityCount());
+        System.out.println("louvain.communityCount() = " + louvain.communityCount());
     }
 
     public void assertCommunities(HugeLouvain louvain) {

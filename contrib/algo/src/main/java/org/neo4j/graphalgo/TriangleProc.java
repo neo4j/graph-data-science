@@ -18,7 +18,6 @@
  */
 package org.neo4j.graphalgo;
 
-import com.carrotsearch.hppc.LongLongMap;
 import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.HugeGraph;
@@ -241,10 +240,10 @@ public class TriangleProc {
 
         if (algorithm instanceof IntersectingTriangleCount) {
             final PagedAtomicIntegerArray triangles = ((IntersectingTriangleCount) algorithm).getTriangles();
-            return Stream.of(builder.buildLI(graph.nodeCount(), triangles::get));
+            return Stream.of(builder.buildfromKnownLongSizes(graph.nodeCount(), triangles::get));
         } else if (algorithm instanceof TriangleCountQueue){
             final AtomicIntegerArray triangles = ((TriangleCountQueue) algorithm).getTriangles();
-            return Stream.of(builder.buildII(graph.nodeCount(), triangles::get));
+            return Stream.of(builder.buildfromKnownSizes(Math.toIntExact(graph.nodeCount()), triangles::get));
         }
         throw new UnsupportedOperationException("unknown algorithm");
     }
@@ -389,7 +388,7 @@ public class TriangleProc {
                 .withTriangleCount(triangleCount.getTriangleCount());
 
         final AtomicIntegerArray triangles = triangleCount.getTriangles();
-        return Stream.of(builder.buildII(graph.nodeCount(), triangles::get));
+        return Stream.of(builder.buildfromKnownSizes(Math.toIntExact(graph.nodeCount()), triangles::get));
     }
 
 
@@ -485,7 +484,15 @@ public class TriangleProc {
 
         // communityCount is not used here
         @Override
-        protected Result build(long loadMillis, long computeMillis, long writeMillis, long postProcessingMillis, long nodeCount, long communityCount, LongLongMap communitySizeMap, Histogram communityHistogram, boolean write) {
+        protected Result build(
+                long loadMillis,
+                long computeMillis,
+                long writeMillis,
+                long postProcessingMillis,
+                long nodeCount,
+                long communityCount,
+                Histogram communityHistogram,
+                boolean write) {
             return new Result(
                     loadMillis,
                     computeMillis,

@@ -18,7 +18,6 @@
  */
 package org.neo4j.graphalgo.results;
 
-import com.carrotsearch.hppc.LongLongMap;
 import org.HdrHistogram.Histogram;
 
 public class LabelPropagationStats {
@@ -134,7 +133,15 @@ public class LabelPropagationStats {
 
 
         @Override
-        protected LabelPropagationStats build(long loadMillis, long computeMillis, long writeMillis, long postProcessingMillis, long nodeCount, long communityCount, LongLongMap communitySizeMap, Histogram communityHistogram, boolean write) {
+        protected LabelPropagationStats build(
+                long loadMillis,
+                long computeMillis,
+                long writeMillis,
+                long postProcessingMillis,
+                long nodeCount,
+                long communityCount,
+                Histogram communityHistogram,
+                boolean write) {
             return new LabelPropagationStats(
                     loadMillis,
                     computeMillis,

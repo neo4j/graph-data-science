@@ -18,7 +18,6 @@
  */
 package org.neo4j.graphalgo.results;
 
-import com.carrotsearch.hppc.LongLongMap;
 import org.HdrHistogram.Histogram;
 
 /**
@@ -88,7 +87,15 @@ public class SCCResult {
         private String writeProperty;
 
         @Override
-        protected SCCResult build(long loadMillis, long computeMillis, long writeMillis, long postProcessingMillis, long nodeCount, long communityCount, LongLongMap communitySizeMap, Histogram communityHistogram, boolean write) {
+        protected SCCResult build(
+                long loadMillis,
+                long computeMillis,
+                long writeMillis,
+                long postProcessingMillis,
+                long nodeCount,
+                long communityCount,
+                Histogram communityHistogram,
+                boolean write) {
             return new SCCResult(
                     loadMillis,
                     computeMillis,

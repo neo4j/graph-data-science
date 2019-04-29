@@ -18,7 +18,6 @@
  */
 package org.neo4j.graphalgo.results;
 
-import com.carrotsearch.hppc.LongLongMap;
 import org.HdrHistogram.Histogram;
 
 /**
@@ -84,7 +83,15 @@ public class DefaultCommunityResult {
     public static class DefaultCommunityResultBuilder extends AbstractCommunityResultBuilder<DefaultCommunityResult> {
 
         @Override
-        protected DefaultCommunityResult build(long loadMillis, long computeMillis, long writeMillis, long postProcessingMillis, long nodeCount, long communityCount, LongLongMap communitySizeMap, Histogram communityHistogram, boolean write) {
+        protected DefaultCommunityResult build(
+                long loadMillis,
+                long computeMillis,
+                long writeMillis,
+                long postProcessingMillis,
+                long nodeCount,
+                long communityCount,
+                Histogram communityHistogram,
+                boolean write) {
             return new DefaultCommunityResult(
                     loadMillis,
                     evalDuration,

@@ -124,6 +124,12 @@ public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArra
      * {@inheritDoc}
      */
     @Override
+    abstract public long sizeOf();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     abstract public long release();
 
     /**
@@ -137,6 +143,16 @@ public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArra
      */
     @Override
     abstract public void copyTo(final HugeIntArray dest, final long length);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final HugeIntArray copyOf(final long newLength, final AllocationTracker tracker) {
+        HugeIntArray copy = HugeIntArray.newArray(newLength, tracker);
+        this.copyTo(copy, newLength);
+        return copy;
+    }
 
     /**
      * {@inheritDoc}
@@ -313,6 +329,11 @@ public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArra
         }
 
         @Override
+        public long sizeOf() {
+            return sizeOfIntArray(size);
+        }
+
+        @Override
         public long release() {
             if (page != null) {
                 page = null;
@@ -468,6 +489,11 @@ public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArra
         @Override
         public long size() {
             return size;
+        }
+
+        @Override
+        public long sizeOf() {
+            return memoryUsed;
         }
 
         @Override

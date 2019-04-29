@@ -108,6 +108,12 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
      * {@inheritDoc}
      */
     @Override
+    abstract public long sizeOf();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     abstract public long release();
 
     /**
@@ -121,6 +127,16 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
      */
     @Override
     abstract public void copyTo(final HugeDoubleArray dest, final long length);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final HugeDoubleArray copyOf(final long newLength, final AllocationTracker tracker) {
+        HugeDoubleArray copy = HugeDoubleArray.newArray(newLength, tracker);
+        this.copyTo(copy, newLength);
+        return copy;
+    }
 
     /**
      * {@inheritDoc}
@@ -285,6 +301,11 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
         }
 
         @Override
+        public long sizeOf() {
+            return sizeOfDoubleArray(size);
+        }
+
+        @Override
         public long release() {
             if (page != null) {
                 page = null;
@@ -424,6 +445,11 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
         @Override
         public long size() {
             return size;
+        }
+
+        @Override
+        public long sizeOf() {
+            return memoryUsed;
         }
 
         @Override
