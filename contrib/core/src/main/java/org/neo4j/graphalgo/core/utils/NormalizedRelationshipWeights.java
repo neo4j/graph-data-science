@@ -33,12 +33,15 @@ public class NormalizedRelationshipWeights implements RelationshipWeights {
     private RelationshipWeights weights;
     private LongDoubleMap nodeWeightSum;
 
-    public NormalizedRelationshipWeights(int nodeCount, RelationshipIterator relationshipIterator, RelationshipWeights weights) {
+    public NormalizedRelationshipWeights(
+            int nodeCount,
+            RelationshipIterator relationshipIterator,
+            RelationshipWeights weights) {
         this.weights = weights;
         this.nodeWeightSum = new LongDoubleScatterMap();
         for (int n = 0; n < nodeCount; n++) {
-            relationshipIterator.forEachRelationship(n, Direction.OUTGOING, (s, t, r) -> {
-                nodeWeightSum.addTo(s, weights.weightOf(s, t));
+            relationshipIterator.forEachRelationship(n, Direction.OUTGOING, (s, t, w) -> {
+                nodeWeightSum.addTo(s, w);
                 return true;
             });
         }

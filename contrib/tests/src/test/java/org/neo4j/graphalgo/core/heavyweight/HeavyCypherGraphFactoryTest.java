@@ -23,17 +23,17 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphdb.*;
+import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.test.TestGraphDatabaseFactory;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class HeavyCypherGraphFactoryTest {
 
@@ -66,12 +66,12 @@ public class HeavyCypherGraphFactoryTest {
 
 
     @Test
-    public void testLoadCypher() throws Exception {
+    public void testLoadCypher() {
         String nodes = "MATCH (n) RETURN id(n) as id, n.partition AS partition, n.foo AS foo";
-        String rels = "MATCH (n)-[r]->(m) WHERE type(r) = {rel} RETURN id(n) as source, id(m) as target, r.prop as weight";
+        String rels = "MATCH (n)-[r]->(m) WHERE type(r) = {rel} RETURN id(n) as source, id(m) as target, r.prop as weight ORDER BY id(r) DESC ";
 
         final HeavyGraph graph = (HeavyGraph) new GraphLoader((GraphDatabaseAPI) db)
-                .withParams(MapUtil.map("rel","REL"))
+                .withParams(MapUtil.map("rel", "REL"))
                 .withRelationshipWeightsFromProperty("prop", 0)
                 .withLabel(nodes)
                 .withRelationshipType(rels)
@@ -79,15 +79,30 @@ public class HeavyCypherGraphFactoryTest {
                         PropertyMapping.of("partition", "partition", 0.0),
                         PropertyMapping.of("foo", "foo", 5.0)
                 )
+                .withSort(true)
                 .load(HeavyCypherGraphFactory.class);
 
+        long node1 = graph.toMappedNodeId(id1);
+        long node2 = graph.toMappedNodeId(id2);
+        long node3 = graph.toMappedNodeId(id3);
+
         assertEquals(3, graph.nodeCount());
-        assertEquals(2, graph.degree(graph.toMappedNodeId(id1), Direction.OUTGOING));
-        assertEquals(1, graph.degree(graph.toMappedNodeId(id2), Direction.OUTGOING));
-        assertEquals(0, graph.degree(graph.toMappedNodeId(id3), Direction.OUTGOING));
+        assertEquals(2, graph.degree(node1, Direction.OUTGOING));
+        assertEquals(1, graph.degree(node2, Direction.OUTGOING));
+        assertEquals(0, graph.degree(node3, Direction.OUTGOING));
         AtomicInteger total = new AtomicInteger();
         graph.forEachNode(n -> {
             graph.forEachRelationship(n, Direction.OUTGOING, (s, t, w) -> {
+                String rel = "(" + s + ")-->(" + t + ")";
+                if (s == id1 && t == id2) {
+                    assertEquals("weight of " + rel, 1.0, w, 1e-4);
+                } else if (s == id2 && t == id3) {
+                    assertEquals("weight of " + rel, 2.0, w, 1e-4);
+                } else if (s == id1 && t == id3) {
+                    assertEquals("weight of " + rel, 3.0, w, 1e-4);
+                } else {
+                    fail("Unexpected relationship " + rel);
+                }
                 total.addAndGet((int) w);
                 return true;
             });
@@ -95,8 +110,8 @@ public class HeavyCypherGraphFactoryTest {
         });
         assertEquals(6, total.get());
 
-        assertEquals(6.0D, graph.nodeProperties("partition").get(0L), 0.01);
-        assertEquals(5.0D, graph.nodeProperties("foo").get(0L), 0.01);
-        assertEquals(4.0D, graph.nodeProperties("foo").get(1L), 0.01);
+        assertEquals(6.0D, graph.nodeProperties("partition").get((long) node1), 0.01);
+        assertEquals(5.0D, graph.nodeProperties("foo").get((long) node1), 0.01);
+        assertEquals(4.0D, graph.nodeProperties("foo").get((long) node2), 0.01);
     }
 }

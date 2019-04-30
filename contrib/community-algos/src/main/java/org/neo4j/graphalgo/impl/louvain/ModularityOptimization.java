@@ -165,8 +165,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         m2 = .0;
         for (int node = 0; node < nodeCount; node++) {
             // since we use an undirected graph 2m is counted here
-            graph.forEachRelationship(node, D, (s, t) -> {
-                final double w = graph.weightOf(s, t);
+            graph.forEachRelationship(node, D, (s, t, w) -> {
                 m2 += w;
                 ki.addTo(s, w / 2);
                 ki.addTo(t, w / 2);
@@ -350,8 +349,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             LongDoubleMap communityWeights = new LongDoubleHashMap(degree);
 
             final long[] communityCount = {0L};
-            rels.forEachRelationship(node, D, (s, t) -> {
-                double weight = graph.weightOf(s, t);
+            rels.forEachRelationship(node, D, (s, t, weight) -> {
                 long localCommunity = localCommunities.get(t);
                 if (communityWeights.containsKey(localCommunity)) {
                     communityWeights.addTo(localCommunity, weight);
@@ -398,10 +396,10 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         }
 
         private void removeWeightForSelfRelationships(long node, LongDoubleMap communityWeights) {
-            rels.forEachRelationship(node, D, (s, t) -> {
+            rels.forEachRelationship(node, D, (s, t, w) -> {
                 if (s == t) {
                     double currentWeight = communityWeights.get(localCommunities.get(s));
-                    communityWeights.put(localCommunities.get(s), currentWeight - graph.weightOf(s, t));
+                    communityWeights.put(localCommunities.get(s), currentWeight - w);
                 }
                 return true;
             });

@@ -143,7 +143,6 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
                 labels,
                 nodes,
                 localGraphs,
-                graph,
                 nodeWeights,
                 progressLogger,
                 direction,
@@ -315,7 +314,6 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         private final Labels existingLabels;
         private final RandomLongIterable nodes;
         private final ThreadLocal<RelationshipIterator> graph;
-        private final RelationshipWeights relationshipWeights;
         private final HugeWeightMapping nodeWeights;
         private final ProgressLogger progressLogger;
         private final Direction direction;
@@ -327,7 +325,6 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
                 Labels existingLabels,
                 RandomLongIterable nodes,
                 ThreadLocal<RelationshipIterator> graph,
-                RelationshipWeights relationshipWeights,
                 HugeWeightMapping nodeWeights,
                 ProgressLogger progressLogger,
                 Direction direction,
@@ -337,7 +334,6 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
             this.existingLabels = existingLabels;
             this.nodes = nodes;
             this.graph = graph;
-            this.relationshipWeights = relationshipWeights;
             this.nodeWeights = nodeWeights;
             this.progressLogger = progressLogger;
             this.direction = direction;
@@ -359,7 +355,6 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         Computation computeStep() {
             return new ComputeStep(
                     graph,
-                    relationshipWeights,
                     nodeWeights,
                     progressLogger,
                     direction,
@@ -371,10 +366,9 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         }
     }
 
-    private static final class ComputeStep extends Computation implements RelationshipConsumer {
+    private static final class ComputeStep extends Computation implements WeightedRelationshipConsumer {
 
         private final ThreadLocal<RelationshipIterator> graphs;
-        private final RelationshipWeights relationshipWeights;
         private final HugeWeightMapping nodeWeights;
         private final Direction direction;
         private final RandomLongIterable nodes;
@@ -382,7 +376,6 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
 
         private ComputeStep(
                 ThreadLocal<RelationshipIterator> graphs,
-                RelationshipWeights relationshipWeights,
                 HugeWeightMapping nodeWeights,
                 ProgressLogger progressLogger,
                 Direction direction,
@@ -392,7 +385,6 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
                 RandomProvider random) {
             super(existingLabels, progressLogger, maxNode, random);
             this.graphs = graphs;
-            this.relationshipWeights = relationshipWeights;
             this.nodeWeights = nodeWeights;
             this.direction = direction;
             this.nodes = nodes;
@@ -410,15 +402,14 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         }
 
         @Override
-        double weightOf(final long nodeId, final long candidate) {
-            double relationshipWeight = relationshipWeights.weightOf(nodeId, candidate);
+        double weightOf(final long nodeId, final long candidate, final double relationshipWeight) {
             double nodeWeight = nodeWeights.nodeWeight(candidate);
             return relationshipWeight * nodeWeight;
         }
 
         @Override
-        public boolean accept(final long sourceNodeId, final long targetNodeId) {
-            castVote(sourceNodeId, targetNodeId);
+        public boolean accept(final long sourceNodeId, final long targetNodeId, final double weight) {
+            castVote(sourceNodeId, targetNodeId, weight);
             return true;
         }
     }
@@ -458,7 +449,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
 
         abstract void forEach(long nodeId);
 
-        abstract double weightOf(long nodeId, long candidate);
+        abstract double weightOf(long nodeId, long candidate, double relationshipWeight);
 
         @Override
         public final void run() {
@@ -510,8 +501,8 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
             return didChange;
         }
 
-        final void castVote(long nodeId, long candidate) {
-            double weight = weightOf(nodeId, candidate);
+        final void castVote(long nodeId, long candidate, double weight) {
+            weight = weightOf(nodeId, candidate, weight);
             long partition = existingLabels.labelFor(candidate);
             votes.addTo(partition, weight);
         }

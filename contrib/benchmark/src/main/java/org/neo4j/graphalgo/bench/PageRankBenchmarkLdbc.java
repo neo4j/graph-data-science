@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.LongStream;
 
 @Threads(1)
-@Fork(value = 1, jvmArgs = {"-Xms8g", "-Xmx8g", "-XX:+UseG1GC"})
+@Fork(value = 1, jvmArgs = {"-Xms16g", "-Xmx16g", "-XX:+UseG1GC"})
 @Warmup(iterations = 5, time = 1)
 @Measurement(iterations = 5, time = 2)
 @State(Scope.Benchmark)

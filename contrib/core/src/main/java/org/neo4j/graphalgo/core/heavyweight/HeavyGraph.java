@@ -23,8 +23,12 @@ import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.*;
 import org.neo4j.graphalgo.core.IntIdMap;
-import org.neo4j.graphalgo.core.NullWeightMap;
 import org.neo4j.graphalgo.core.utils.RawValues;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.RelationshipConsumer;
+import org.neo4j.graphalgo.api.RelationshipIntersect;
+import org.neo4j.graphalgo.api.WeightMapping;
+import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Collection;
@@ -43,7 +47,6 @@ public class HeavyGraph implements Graph {
 
     private final IntIdMap nodeIdMap;
     private AdjacencyMatrix container;
-    private WeightMapping relationshipWeights;
 
     private Map<String, WeightMapping> nodePropertiesMapping;
 
@@ -52,11 +55,9 @@ public class HeavyGraph implements Graph {
     public HeavyGraph(
             IntIdMap nodeIdMap,
             AdjacencyMatrix container,
-            final WeightMapping relationshipWeights,
             Map<String, WeightMapping> nodePropertiesMapping) {
         this.nodeIdMap = nodeIdMap;
         this.container = container;
-        this.relationshipWeights = relationshipWeights;
         this.nodePropertiesMapping = nodePropertiesMapping;
     }
 
@@ -95,7 +96,7 @@ public class HeavyGraph implements Graph {
             final long nodeId,
             final Direction direction,
             final WeightedRelationshipConsumer consumer) {
-        container.forEach(nodeId, direction, relationshipWeights, consumer);
+        container.forEach(nodeId, direction, consumer);
     }
 
     @Override
@@ -116,11 +117,11 @@ public class HeavyGraph implements Graph {
     @Override
     public double weightOf(final long sourceNodeId, final long targetNodeId) {
         checkSize(sourceNodeId, targetNodeId);
-        return relationshipWeights.get((int) sourceNodeId, (int) targetNodeId);
+        return container.weightOf((int) sourceNodeId, (int) targetNodeId);
     }
 
     public boolean hasWeights() {
-        return !(relationshipWeights instanceof NullWeightMap);
+        return container.hasWeights();
     }
 
     @Override
@@ -156,7 +157,6 @@ public class HeavyGraph implements Graph {
     public void release() {
         if (!canRelease) return;
         container = null;
-        relationshipWeights = null;
         nodePropertiesMapping.clear();
     }
 
