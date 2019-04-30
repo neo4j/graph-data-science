@@ -19,35 +19,28 @@
  */
 package org.neo4j.graphalgo.core.heavyweight;
 
-import org.neo4j.collection.primitive.PrimitiveIntIterable;
-import org.neo4j.collection.primitive.PrimitiveIntIterator;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.IntersectionConsumer;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.RelationshipConsumer;
-import org.neo4j.graphalgo.api.RelationshipIntersect;
-import org.neo4j.graphalgo.api.RelationshipPredicate;
-import org.neo4j.graphalgo.api.WeightMapping;
-import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
-import org.neo4j.graphalgo.core.IdMap;
+import org.neo4j.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.collection.primitive.PrimitiveLongIterator;
+import org.neo4j.graphalgo.api.*;
+import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.graphalgo.core.NullWeightMap;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.IntPredicate;
+import java.util.function.LongPredicate;
 
 /**
  * Heavy weighted graph built of an adjacency matrix.
  *
  * @author mknblch
  */
-public class HeavyGraph implements Graph, NodeProperties, RelationshipPredicate, RelationshipIntersect {
+public class HeavyGraph implements Graph {
 
     public final static String TYPE = "heavy";
 
-    private final IdMap nodeIdMap;
+    private final IntIdMap nodeIdMap;
     private AdjacencyMatrix container;
     private WeightMapping relationshipWeights;
 
@@ -56,7 +49,7 @@ public class HeavyGraph implements Graph, NodeProperties, RelationshipPredicate,
     private boolean canRelease = true;
 
     public HeavyGraph(
-            IdMap nodeIdMap,
+            IntIdMap nodeIdMap,
             AdjacencyMatrix container,
             final WeightMapping relationshipWeights,
             Map<String, WeightMapping> nodePropertiesMapping) {
@@ -72,45 +65,45 @@ public class HeavyGraph implements Graph, NodeProperties, RelationshipPredicate,
     }
 
     @Override
-    public void forEachNode(IntPredicate consumer) {
-        nodeIdMap.forEach(consumer);
+    public void forEachNode(LongPredicate consumer) {
+        nodeIdMap.forEachNode(consumer);
     }
 
     @Override
-    public PrimitiveIntIterator nodeIterator() {
+    public PrimitiveLongIterator nodeIterator() {
         return nodeIdMap.iterator();
     }
 
     @Override
-    public Collection<PrimitiveIntIterable> batchIterables(int batchSize) {
-        return nodeIdMap.batchIterables(batchSize);
+    public Collection<PrimitiveLongIterable> batchIterables(int batchSize) {
+        return nodeIdMap.longBatchIterables(batchSize);
     }
 
     @Override
-    public int degree(int nodeId, Direction direction) {
+    public int degree(long nodeId, Direction direction) {
         return container.degree(nodeId, direction);
     }
 
     @Override
-    public void forEachRelationship(int nodeId, Direction direction, RelationshipConsumer consumer) {
+    public void forEachRelationship(long nodeId, Direction direction, RelationshipConsumer consumer) {
         container.forEach(nodeId, direction, consumer);
     }
 
     @Override
     public void forEachRelationship(
-            final int nodeId,
+            final long nodeId,
             final Direction direction,
             final WeightedRelationshipConsumer consumer) {
         container.forEach(nodeId, direction, relationshipWeights, consumer);
     }
 
     @Override
-    public int toMappedNodeId(long originalNodeId) {
+    public long toMappedNodeId(long originalNodeId) {
         return nodeIdMap.get(originalNodeId);
     }
 
     @Override
-    public long toOriginalNodeId(int mappedNodeId) {
+    public long toOriginalNodeId(long mappedNodeId) {
         return nodeIdMap.toOriginalNodeId(mappedNodeId);
     }
 
@@ -120,7 +113,7 @@ public class HeavyGraph implements Graph, NodeProperties, RelationshipPredicate,
     }
 
     @Override
-    public double weightOf(final int sourceNodeId, final int targetNodeId) {
+    public double weightOf(final long sourceNodeId, final long targetNodeId) {
         return relationshipWeights.get(sourceNodeId, targetNodeId);
     }
 
@@ -129,8 +122,27 @@ public class HeavyGraph implements Graph, NodeProperties, RelationshipPredicate,
     }
 
     @Override
-    public WeightMapping nodeProperties(String type) {
-        return nodePropertiesMapping.get(type);
+    public HugeWeightMapping nodeProperties(String type) {
+        WeightMapping weightMapping = nodePropertiesMapping.get(type);
+        return new HugeWeightMapping() {
+
+            @Override
+            public double weight(long source, long target) {
+                checkSize(source, target);
+                return weightMapping.get((int) source, (int) target);
+            }
+
+            @Override
+            public double weight(long source, long target, double defaultValue) {
+                checkSize(target);
+                return relationshipWeights.get((int) target, defaultValue);
+            }
+
+            @Override
+            public long release() {
+                return 0;
+            }
+        };
     }
 
     @Override
@@ -147,7 +159,7 @@ public class HeavyGraph implements Graph, NodeProperties, RelationshipPredicate,
     }
 
     @Override
-    public boolean exists(int sourceNodeId, int targetNodeId, Direction direction) {
+    public boolean exists(long sourceNodeId, long targetNodeId, Direction direction) {
 
         switch (direction) {
             case OUTGOING:
@@ -164,7 +176,7 @@ public class HeavyGraph implements Graph, NodeProperties, RelationshipPredicate,
     }
 
     @Override
-    public int getTarget(int nodeId, int index, Direction direction) {
+    public long getTarget(long nodeId, long index, Direction direction) {
         switch (direction) {
             case OUTGOING:
                 return container.getTargetOutgoing(nodeId, index);
@@ -175,11 +187,6 @@ public class HeavyGraph implements Graph, NodeProperties, RelationshipPredicate,
             default:
                 return container.getTargetBoth(nodeId, index);
         }
-    }
-
-    @Override
-    public void intersectAll(long node, IntersectionConsumer consumer) {
-        container.intersectAll(Math.toIntExact(node), consumer);
     }
 
     @Override
@@ -194,6 +201,16 @@ public class HeavyGraph implements Graph, NodeProperties, RelationshipPredicate,
 
     @Override
     public RelationshipIntersect intersection() {
-        return this;
+        return (nodeId, consumer) -> container.intersectAll(Math.toIntExact(nodeId), consumer);
+    }
+
+    //TODO: Remove this once we have confidence
+    // Could turn into assertion and go with compiling with/without -ea
+    public static void checkSize(long... values) {
+        for (long v : values) {
+            if (v > Integer.MAX_VALUE) {
+                throw new IllegalStateException("Long value too large for int: " + v);
+            }
+        }
     }
 }

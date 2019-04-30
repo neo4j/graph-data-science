@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.sources;
 
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.graphalgo.api.HugeNodeIterator;
+import org.neo4j.graphalgo.api.NodeIterator;
 import org.neo4j.graphalgo.core.utils.RandomLongIterator;
 
 import java.util.Random;
@@ -31,17 +31,17 @@ import java.util.function.LongPredicate;
  *
  * @author mknblch
  */
-public class RandomHugeNodeIterator implements HugeNodeIterator {
+public class RandomNodeIterator implements NodeIterator {
 
     private final long nodeCount;
 
-    public RandomHugeNodeIterator(long nodeCount) {
+    public RandomNodeIterator(long nodeCount) {
         this.nodeCount = nodeCount;
     }
 
     @Override
     public void forEachNode(final LongPredicate consumer) {
-        final PrimitiveLongIterator nodeIterator = hugeNodeIterator();
+        final PrimitiveLongIterator nodeIterator = nodeIterator();
         while (nodeIterator.hasNext()) {
             if (!consumer.test(nodeIterator.next())) {
                 break;
@@ -50,7 +50,7 @@ public class RandomHugeNodeIterator implements HugeNodeIterator {
     }
 
     @Override
-    public PrimitiveLongIterator hugeNodeIterator() {
+    public PrimitiveLongIterator nodeIterator() {
         return new RandomLongIterator(nodeCount, new Random(System.currentTimeMillis()));
     }
 }

@@ -19,21 +19,22 @@
  */
 package org.neo4j.graphalgo.api;
 
+import org.neo4j.graphdb.Direction;
+
 /**
- * consumer interface for unweighted relationships.
- *
  * @author mknblch
  */
-public interface HugeRelationshipConsumer {
+public interface OldRelationshipIterator extends OldIncomingRelationshipIterator, OldOutgoingRelationshipIterator {
 
-    /**
-     * Called for every edge that matches a given relation-constraint
-     *
-     * @param sourceNodeId mapped source node id
-     * @param targetNodeId mapped target node id
-     * @return {@code true} if the iteration shall continue, otherwise {@code false}.
-     */
-    boolean accept(
-            long sourceNodeId,
-            long targetNodeId);
+    void forEachRelationship(int nodeId, Direction direction, RelationshipConsumer consumer);
+
+    @Override
+    default void forEachIncoming(int nodeId, RelationshipConsumer consumer) {
+        forEachRelationship(nodeId, Direction.INCOMING, consumer);
+    }
+
+    @Override
+    default void forEachOutgoing(int nodeId, RelationshipConsumer consumer) {
+        forEachRelationship(nodeId, Direction.OUTGOING, consumer);
+    }
 }

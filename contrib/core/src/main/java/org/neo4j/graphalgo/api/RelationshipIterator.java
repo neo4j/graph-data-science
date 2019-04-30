@@ -24,17 +24,36 @@ import org.neo4j.graphdb.Direction;
 /**
  * @author mknblch
  */
-public interface RelationshipIterator extends IncomingRelationshipIterator, OutgoingRelationshipIterator {
+public interface RelationshipIterator {
 
-    void forEachRelationship(int nodeId, Direction direction, RelationshipConsumer consumer);
+    void forEachRelationship(
+            long nodeId,
+            Direction direction,
+            RelationshipConsumer consumer);
 
-    @Override
-    default void forEachIncoming(int nodeId, RelationshipConsumer consumer) {
+    void forEachRelationship(
+            long nodeId,
+            Direction direction,
+            WeightedRelationshipConsumer consumer);
+
+    default void forEachIncoming(
+            long nodeId,
+            RelationshipConsumer consumer) {
         forEachRelationship(nodeId, Direction.INCOMING, consumer);
     }
 
-    @Override
-    default void forEachOutgoing(int nodeId, RelationshipConsumer consumer) {
+    default void forEachOutgoing(
+            long nodeId,
+            RelationshipConsumer consumer) {
         forEachRelationship(nodeId, Direction.OUTGOING, consumer);
     }
+
+    /**
+     * @return a copy of this iterator that reuses new cursors internally,
+     *         so that iterations happen independent from other iterations.
+     */
+    default RelationshipIterator concurrentCopy() {
+        return this;
+    }
+
 }

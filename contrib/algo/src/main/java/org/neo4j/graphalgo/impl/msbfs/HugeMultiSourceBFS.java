@@ -19,12 +19,12 @@
  */
 package org.neo4j.graphalgo.impl.msbfs;
 
-import org.neo4j.graphalgo.api.HugeIdMapping;
-import org.neo4j.graphalgo.api.HugeRelationshipIterator;
+import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.paged.Cursor;
+import org.neo4j.graphalgo.core.utils.paged.LongArray;
 import org.neo4j.graphdb.Direction;
 
 import java.util.AbstractCollection;
@@ -86,8 +86,8 @@ public final class HugeMultiSourceBFS implements Runnable, MsBFSAlgo {
     private final ThreadLocal<HugeLongArray> nexts;
     private final ThreadLocal<HugeLongArray> seens;
 
-    private final HugeIdMapping nodeIds;
-    private final HugeRelationshipIterator relationships;
+    private final IdMapping nodeIds;
+    private final RelationshipIterator relationships;
     private final Direction direction;
     private final HugeBfsConsumer perNodeAction;
     private final long[] startNodes;
@@ -96,8 +96,8 @@ public final class HugeMultiSourceBFS implements Runnable, MsBFSAlgo {
     private long nodeCount;
 
     public HugeMultiSourceBFS(
-            HugeIdMapping nodeIds,
-            HugeRelationshipIterator relationships,
+            IdMapping nodeIds,
+            RelationshipIterator relationships,
             Direction direction,
             HugeBfsConsumer perNodeAction,
             AllocationTracker tracker,
@@ -117,8 +117,8 @@ public final class HugeMultiSourceBFS implements Runnable, MsBFSAlgo {
     }
 
     private HugeMultiSourceBFS(
-            HugeIdMapping nodeIds,
-            HugeRelationshipIterator relationships,
+            IdMapping nodeIds,
+            RelationshipIterator relationships,
             Direction direction,
             HugeBfsConsumer perNodeAction,
             long nodeCount,
@@ -139,8 +139,8 @@ public final class HugeMultiSourceBFS implements Runnable, MsBFSAlgo {
     }
 
     private HugeMultiSourceBFS(
-            HugeIdMapping nodeIds,
-            HugeRelationshipIterator relationships,
+            IdMapping nodeIds,
+            RelationshipIterator relationships,
             Direction direction,
             HugeBfsConsumer perNodeAction,
             long nodeCount,

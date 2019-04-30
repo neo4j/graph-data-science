@@ -100,13 +100,13 @@ public class HugePageRank extends Algorithm<HugePageRank> implements PageRankAlg
     private final int concurrency;
     private final int batchSize;
     private final AllocationTracker tracker;
-    private final HugeIdMapping idMapping;
-    private final HugeNodeIterator nodeIterator;
-    private final HugeRelationshipIterator relationshipIterator;
-    private final HugeDegrees degrees;
+    private final IdMapping idMapping;
+    private final NodeIterator nodeIterator;
+    private final RelationshipIterator relationshipIterator;
+    private final Degrees degrees;
     private final double dampingFactor;
-    private final HugeGraph graph;
-    private final HugeRelationshipWeights relationshipWeights;
+    private final Graph graph;
+    private final RelationshipWeights relationshipWeights;
     private LongStream sourceNodeIds;
     private PageRankVariant pageRankVariant;
 
@@ -115,11 +115,11 @@ public class HugePageRank extends Algorithm<HugePageRank> implements PageRankAlg
 
     /**
      * Forces sequential use. If you want parallelism, prefer
-     * {@link #HugePageRank(ExecutorService, int, int, AllocationTracker, HugeGraph, double, LongStream, PageRankVariant)}
+     * {@link #HugePageRank(ExecutorService, int, int, AllocationTracker, Graph, double, LongStream, PageRankVariant)}
      */
     HugePageRank(
             AllocationTracker tracker,
-            HugeGraph graph,
+            Graph graph,
             double dampingFactor,
             LongStream sourceNodeIds,
             PageRankVariant pageRankVariant) {
@@ -144,7 +144,7 @@ public class HugePageRank extends Algorithm<HugePageRank> implements PageRankAlg
             int concurrency,
             int batchSize,
             AllocationTracker tracker,
-            HugeGraph graph,
+            Graph graph,
             double dampingFactor,
             LongStream sourceNodeIds,
             PageRankVariant pageRankVariant) {
@@ -225,8 +225,8 @@ public class HugePageRank extends Algorithm<HugePageRank> implements PageRankAlg
 
     private List<Partition> partitionGraph(
             int batchSize,
-            HugeNodeIterator nodeIterator,
-            HugeDegrees degrees) {
+            NodeIterator nodeIterator,
+            Degrees degrees) {
         PrimitiveLongIterator nodes = nodeIterator.hugeNodeIterator();
         List<Partition> partitions = new ArrayList<>();
         long start = 0L;
@@ -247,8 +247,8 @@ public class HugePageRank extends Algorithm<HugePageRank> implements PageRankAlg
             long nodeCount,
             double dampingFactor,
             long[] sourceNodeIds,
-            HugeRelationshipIterator relationshipIterator,
-            HugeDegrees degrees,
+            RelationshipIterator relationshipIterator,
+            Degrees degrees,
             List<Partition> partitions,
             ExecutorService pool) {
         concurrency = findIdealConcurrency(nodeCount, partitions, concurrency, log);
@@ -436,7 +436,7 @@ public class HugePageRank extends Algorithm<HugePageRank> implements PageRankAlg
 
         Partition(
                 PrimitiveLongIterator nodes,
-                HugeDegrees degrees,
+                Degrees degrees,
                 long startNode,
                 long batchSize) {
             assert batchSize > 0L;

@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.huge.loader;
 
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.api.HugeGraph;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.ApproximatedImportProgress;
@@ -41,7 +41,7 @@ public final class HugeGraphFactory extends GraphFactory {
     }
 
     @Override
-    public HugeGraph build() {
+    public Graph build() {
         return importGraph();
     }
 
@@ -70,12 +70,12 @@ public final class HugeGraphFactory extends GraphFactory {
         );
     }
 
-    private HugeGraph importGraph() {
+    private Graph importGraph() {
         GraphDimensions dimensions = this.dimensions;
         int concurrency = setup.concurrency();
         AllocationTracker tracker = setup.tracker;
         IdsAndProperties mappingAndProperties = loadHugeIdMap(tracker, concurrency);
-        HugeGraph graph = loadRelationships(dimensions, tracker, mappingAndProperties, concurrency);
+        Graph graph = loadRelationships(dimensions, tracker, mappingAndProperties, concurrency);
         progressLogger.logDone(tracker);
         return graph;
     }
@@ -92,7 +92,7 @@ public final class HugeGraphFactory extends GraphFactory {
                 .call(setup.log);
     }
 
-    private HugeGraph loadRelationships(
+    private Graph loadRelationships(
             GraphDimensions dimensions,
             AllocationTracker tracker,
             IdsAndProperties idsAndProperties,

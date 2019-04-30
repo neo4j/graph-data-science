@@ -17,21 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.huge.loader;
+package org.neo4j.graphalgo.api;
 
-import org.neo4j.graphalgo.api.HugeWeightMapping;
+/**
+ * Getter for weight property values at relationships
+ *
+ * @author mknblch
+ */
+public interface OldRelationshipWeights {
 
-import java.util.Map;
+    OldRelationshipWeights CONSTANT_1 = (s, t) -> 1.;
 
-final class IdsAndProperties {
-
-    final IdMap hugeIdMap;
-    final Map<String, HugeWeightMapping> properties;
-
-    IdsAndProperties(
-            final IdMap hugeIdMap,
-            final Map<String, HugeWeightMapping> properties) {
-        this.hugeIdMap = hugeIdMap;
-        this.properties = properties;
-    }
+    /**
+     * get weight between source and target node id
+     *
+     * @param sourceNodeId source node
+     * @param targetNodeId target node
+     * @return the weight
+     */
+    double weightOf(int sourceNodeId, int targetNodeId); // TODO default weight?
 }

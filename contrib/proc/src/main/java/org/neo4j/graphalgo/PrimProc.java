@@ -157,7 +157,7 @@ public class PrimProc {
         if (configuration.isWriteFlag()) {
             mstPrim.release();
             builder.timeWrite(() -> {
-                Exporter.of(graph, api)
+                Exporter.of(api, graph)
                         .withLog(log)
                         .build()
                         .writeRelationshipAndProperty(

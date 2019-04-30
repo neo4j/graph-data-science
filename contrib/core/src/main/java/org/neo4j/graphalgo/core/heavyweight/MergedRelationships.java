@@ -23,12 +23,14 @@ import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.core.DuplicateRelationshipsStrategy;
 import org.neo4j.graphalgo.core.WeightMap;
+import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphdb.Direction;
 
 import java.util.function.Supplier;
 
 import static org.neo4j.graphalgo.core.heavyweight.CypherLoadingUtils.newWeightMapping;
 import static org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory.ESTIMATED_DEGREE;
+import static org.neo4j.graphalgo.core.heavyweight.HeavyGraph.checkSize;
 
 public class MergedRelationships implements RelationshipConsumer {
     private final AdjacencyMatrix matrix;
@@ -54,8 +56,9 @@ public class MergedRelationships implements RelationshipConsumer {
         WeightMap resultWeights = hasRelationshipWeights && result.relWeights().size() > 0 ? result.relWeights() : null;
         result.matrix().nodesWithRelationships(Direction.OUTGOING).forEachNode(
                 node -> {
-                    result.matrix().forEach(node, Direction.OUTGOING, (source, target, relationship) -> {
-                        Supplier<Number> weightSupplier = () -> resultWeights.get(relationship);
+                    result.matrix().forEach(node, Direction.OUTGOING, (source, target) -> {
+                        checkSize(source, target);
+                        Supplier<Number> weightSupplier = () -> resultWeights.get(RawValues.combineIntInt((int) source, (int) target));
                         duplicateRelationshipsStrategy.handle(source, target, matrix, resultWeights != null, relWeights, weightSupplier);
                         return true;
                     });
@@ -72,7 +75,7 @@ public class MergedRelationships implements RelationshipConsumer {
     }
 
     @Override
-    public boolean accept(int sourceNodeId, int targetNodeId, long relationId) {
+    public boolean accept(long sourceNodeId, long targetNodeId) {
         return false;
     }
 }

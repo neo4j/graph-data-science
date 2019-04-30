@@ -31,18 +31,18 @@ public interface IdMapping {
      * defines the lower bound of mapped node ids
      * TODO: function?
      */
-    int START_NODE_ID = 0;
+    long START_NODE_ID = 0;
 
     /**
      * Map neo4j nodeId to inner nodeId
      * TODO rename?
      */
-    int toMappedNodeId(long nodeId);
+    long toMappedNodeId(long nodeId);
 
     /**
      * Map inner nodeId back to original nodeId
      */
-    long toOriginalNodeId(int nodeId);
+    long toOriginalNodeId(long nodeId);
 
     /**
      * Returns true iff the nodeId is mapped, otherwise false
@@ -50,7 +50,7 @@ public interface IdMapping {
     boolean contains(long nodeId);
 
     /**
-     * Count of nodes.
+     * count of nodes
      */
     long nodeCount();
 }

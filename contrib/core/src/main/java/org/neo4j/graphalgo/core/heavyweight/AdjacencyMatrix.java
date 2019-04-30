@@ -33,7 +33,9 @@ import org.neo4j.graphdb.Direction;
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.function.IntPredicate;
+import java.util.function.LongPredicate;
 
+import static org.neo4j.graphalgo.core.heavyweight.HeavyGraph.checkSize;
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.LINEAR_SEARCH_LIMIT;
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.binarySearch;
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.linearSearch;
@@ -178,7 +180,12 @@ public class AdjacencyMatrix {
     /**
      * add outgoing relation
      */
-    public void addOutgoing(int sourceNodeId, int targetNodeId) {
+    public void addOutgoing(long sourceNodeId, long targetNodeId) {
+        checkSize(sourceNodeId, targetNodeId);
+        addOutgoing((int) sourceNodeId, (int) targetNodeId);
+    }
+
+    private void addOutgoing(int sourceNodeId, int targetNodeId) {
         final int degree = outOffsets[sourceNodeId];
         final int nextDegree = degree + 1;
         growOut(sourceNodeId, nextDegree);
@@ -189,7 +196,12 @@ public class AdjacencyMatrix {
     /**
      * checks for outgoing target node
      */
-    public boolean hasOutgoing(int sourceNodeId, int targetNodeId) {
+    public boolean hasOutgoing(long sourceNodeId, long targetNodeId) {
+        checkSize(sourceNodeId, targetNodeId);
+        return hasOutgoing((int) sourceNodeId, (int) targetNodeId);
+    }
+
+    private boolean hasOutgoing(int sourceNodeId, int targetNodeId) {
 
         final int degree = outOffsets[sourceNodeId];
         final int[] rels = outgoing[sourceNodeId];
@@ -201,7 +213,12 @@ public class AdjacencyMatrix {
         return linearSearch(rels, degree, targetNodeId);
     }
 
-    public int getTargetOutgoing(int nodeId, int index) {
+    int getTargetOutgoing(long nodeId, long index) {
+        checkSize(nodeId, index);
+        return getTargetOutgoing((int) nodeId, (int) index);
+    }
+
+    private int getTargetOutgoing(int nodeId, int index) {
         final int degree = outOffsets[nodeId];
         if (index < 0 || index >= degree) {
             return -1;
@@ -209,7 +226,12 @@ public class AdjacencyMatrix {
         return outgoing[nodeId][index];
     }
 
-    public int getTargetIncoming(int nodeId, int index) {
+    int getTargetIncoming(long nodeId, long index) {
+        checkSize(nodeId, index);
+        return getTargetIncoming((int) nodeId, (int) index);
+    }
+
+    private int getTargetIncoming(int nodeId, int index) {
         final int degree = inOffsets[nodeId];
         if (index < 0 || index >= degree) {
             return -1;
@@ -217,7 +239,12 @@ public class AdjacencyMatrix {
         return incoming[nodeId][index];
     }
 
-    public int getTargetBoth(int nodeId, int index) {
+    int getTargetBoth(long nodeId, long index) {
+        checkSize(nodeId, index);
+        return getTargetBoth((int) nodeId, (int) index);
+    }
+
+    private int getTargetBoth(int nodeId, int index) {
         final int outDegree = outOffsets[nodeId];
         if (index >= 0 && index < outDegree) {
             return outgoing[nodeId][index];
@@ -235,7 +262,12 @@ public class AdjacencyMatrix {
     /**
      * checks for incoming target node
      */
-    public boolean hasIncoming(int sourceNodeId, int targetNodeId) {
+    boolean hasIncoming(long sourceNodeId, long targetNodeId) {
+        checkSize(sourceNodeId, targetNodeId);
+        return hasIncoming((int) sourceNodeId, (int) targetNodeId);
+    }
+
+    private boolean hasIncoming(int sourceNodeId, int targetNodeId) {
 
         final int degree = inOffsets[sourceNodeId];
         final int[] rels = incoming[sourceNodeId];
@@ -263,7 +295,12 @@ public class AdjacencyMatrix {
      *
      * @throws NullPointerException if the direction hasn't been loaded.
      */
-    public int degree(int nodeId, Direction direction) {
+    public int degree(long nodeId, Direction direction) {
+        checkSize(nodeId);
+        return degree((int) nodeId, direction);
+    }
+
+    private int degree(int nodeId, Direction direction) {
         switch (direction) {
             case OUTGOING: {
                 return outOffsets[nodeId];
@@ -280,7 +317,12 @@ public class AdjacencyMatrix {
     /**
      * iterate over each edge at the given node using an unweighted consumer
      */
-    public void forEach(int nodeId, Direction direction, RelationshipConsumer consumer) {
+    public void forEach(long nodeId, Direction direction, RelationshipConsumer consumer) {
+        checkSize(nodeId);
+        forEach((int) nodeId, direction, consumer);
+    }
+
+    private void forEach(int nodeId, Direction direction, RelationshipConsumer consumer) {
         switch (direction) {
             case OUTGOING:
                 forEachOutgoing(nodeId, consumer);
@@ -298,7 +340,12 @@ public class AdjacencyMatrix {
     /**
      * iterate over each edge at the given node using a weighted consumer
      */
-    public void forEach(int nodeId, Direction direction, WeightMapping weights, WeightedRelationshipConsumer consumer) {
+    void forEach(long nodeId, Direction direction, WeightMapping weights, WeightedRelationshipConsumer consumer) {
+        checkSize(nodeId);
+        forEach((int) nodeId, direction, weights, consumer);
+    }
+
+    private void forEach(int nodeId, Direction direction, WeightMapping weights, WeightedRelationshipConsumer consumer) {
         switch (direction) {
             case OUTGOING:
                 forEachOutgoing(nodeId, weights, consumer);
@@ -336,7 +383,7 @@ public class AdjacencyMatrix {
         final int degree = outOffsets[nodeId];
         final int[] outs = outgoing[nodeId];
         for (int i = 0; i < degree; i++) {
-            consumer.accept(nodeId, outs[i], RawValues.combineIntInt(nodeId, outs[i]));
+            consumer.accept(nodeId, outs[i]);
         }
     }
 
@@ -344,7 +391,7 @@ public class AdjacencyMatrix {
         final int degree = inOffsets[nodeId];
         final int[] ins = incoming[nodeId];
         for (int i = 0; i < degree; i++) {
-            consumer.accept(nodeId, ins[i], RawValues.combineIntInt(ins[i], nodeId));
+            consumer.accept(nodeId, ins[i]);
         }
     }
 
@@ -353,7 +400,7 @@ public class AdjacencyMatrix {
         final int[] outs = outgoing[nodeId];
         for (int i = 0; i < degree; i++) {
             final long relationId = RawValues.combineIntInt(nodeId, outs[i]);
-            consumer.accept(nodeId, outs[i], relationId, weights.get(relationId));
+            consumer.accept(nodeId, outs[i], weights.get(relationId));
         }
     }
 
@@ -362,11 +409,11 @@ public class AdjacencyMatrix {
         final int[] neighbours = incoming[nodeId];
         for (int i = 0; i < degree; i++) {
             final long relationId = RawValues.combineIntInt(neighbours[i], nodeId);
-            consumer.accept(nodeId, neighbours[i], relationId, weights.get(relationId));
+            consumer.accept(nodeId, neighbours[i], weights.get(relationId));
         }
     }
 
-    public NodeIterator nodesWithRelationships(Direction direction) {
+    public DegreeCheckingNodeIterator nodesWithRelationships(Direction direction) {
         if (direction == Direction.OUTGOING) {
             return new DegreeCheckingNodeIterator(outOffsets);
         } else {
@@ -404,7 +451,7 @@ public class AdjacencyMatrix {
         }
     }
 
-    private static class DegreeCheckingNodeIterator implements NodeIterator {
+    static class DegreeCheckingNodeIterator {
 
         private final int[] array;
 
@@ -412,8 +459,7 @@ public class AdjacencyMatrix {
             this.array = array != null ? array : EMPTY_INTS;
         }
 
-        @Override
-        public void forEachNode(IntPredicate consumer) {
+        public void forEachNode(LongPredicate consumer) {
             for (int node = 0; node < array.length; node++) {
                 if (array[node] > 0 && !consumer.test(node)) {
                     break;
@@ -421,7 +467,6 @@ public class AdjacencyMatrix {
             }
         }
 
-        @Override
         public PrimitiveIntIterator nodeIterator() {
             return new PrimitiveIntIterator() {
                 int index = findNext();

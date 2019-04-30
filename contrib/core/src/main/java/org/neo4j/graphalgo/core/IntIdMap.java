@@ -24,9 +24,8 @@ import com.carrotsearch.hppc.LongIntMap;
 import com.carrotsearch.hppc.cursors.LongIntCursor;
 import org.neo4j.collection.primitive.PrimitiveIntIterable;
 import org.neo4j.collection.primitive.PrimitiveIntIterator;
-import org.neo4j.graphalgo.api.BatchNodeIterable;
-import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.api.NodeIterator;
+import org.neo4j.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.MemoryUsage;
@@ -34,13 +33,21 @@ import org.neo4j.graphalgo.core.utils.paged.MemoryUsage;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.function.IntPredicate;
+import java.util.function.LongPredicate;
+import java.util.stream.Collectors;
+
+import static org.neo4j.graphalgo.core.heavyweight.HeavyGraph.checkSize;
 
 /**
  * This is basically a long to int mapper. It sorts the id's in ascending order so its
  * guaranteed that there is no ID greater then nextGraphId / capacity
  */
-public final class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
+public final class IntIdMap {
+
+    /**
+     * defines the lower bound of mapped node ids
+     */
+    public static int START_NODE_ID = 0;
 
     private final IdIterator iter;
     private int nextGraphId;
@@ -50,7 +57,7 @@ public final class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
     /**
      * initialize the map with maximum node capacity
      */
-    public IdMap(final int capacity) {
+    public IntIdMap(final int capacity) {
         nodeToGraphIds = new LongIntHashMap(capacity);
         iter = new IdIterator();
     }
@@ -58,7 +65,7 @@ public final class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
     /**
      * CTor used by deserializing logic
      */
-    public IdMap(
+    public IntIdMap(
             long[] graphIds,
             LongIntHashMap nodeToGraphIds) {
         this.nextGraphId = graphIds.length;
@@ -67,8 +74,23 @@ public final class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
         iter = new IdIterator();
     }
 
-    public PrimitiveIntIterator iterator() {
-        return iter.reset(nextGraphId);
+    private PrimitiveIntIterator nodeIterator() {
+        return new IdIterator().reset(graphIds.length);
+    }
+
+    public PrimitiveLongIterator iterator() {
+        final PrimitiveIntIterator base = iter.reset(nextGraphId);
+        return new PrimitiveLongIterator() {
+            @Override
+            public boolean hasNext() {
+                return base.hasNext();
+            }
+
+            @Override
+            public long next() {
+                return base.next();
+            }
+        };
     }
 
     public int mapOrGet(long longValue) {
@@ -90,7 +112,7 @@ public final class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
     }
 
     public void buildMappedIds(AllocationTracker tracker) {
-        tracker.add(MemoryUsage.shallowSizeOfInstance(IdMap.class));
+        tracker.add(MemoryUsage.shallowSizeOfInstance(IntIdMap.class));
         tracker.add(MemoryUsage.sizeOfLongArray(nodeToGraphIds.keys.length));
         tracker.add(MemoryUsage.sizeOfIntArray(nodeToGraphIds.values.length));
         tracker.add(MemoryUsage.sizeOfLongArray(size()));
@@ -112,7 +134,7 @@ public final class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
         return nodeToGraphIds;
     }
 
-    public void forEach(IntPredicate consumer) {
+    public void forEachNode(LongPredicate consumer) {
         int limit = this.nextGraphId;
         for (int i = 0; i < limit; i++) {
             if (!consumer.test(i)) {
@@ -121,42 +143,46 @@ public final class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
         }
     }
 
-    @Override
     public int toMappedNodeId(long nodeId) {
         return mapOrGet(nodeId);
     }
 
-    @Override
-    public long toOriginalNodeId(int nodeId) {
-        return graphIds[nodeId];
+    public long toOriginalNodeId(long nodeId) {
+        checkSize(nodeId);
+        return graphIds[(int) nodeId];
     }
 
-    @Override
     public boolean contains(final long nodeId) {
         return nodeToGraphIds.containsKey(nodeId);
     }
 
-    @Override
     public long nodeCount() {
         return graphIds.length;
     }
 
-    @Override
-    public void forEachNode(IntPredicate consumer) {
-        final int count = graphIds.length;
-        for (int i = 0; i < count; i++) {
-            if (!consumer.test(i)) {
-                return;
+    public Collection<PrimitiveLongIterable> longBatchIterables(int batchSize) {
+        Collection<PrimitiveIntIterable> base = batchIterables(batchSize);
+        return base.stream().map((intIterable) -> new PrimitiveLongIterable() {
+            PrimitiveIntIterator base1 = intIterable.iterator();
+
+            @Override
+            public PrimitiveLongIterator iterator() {
+                return new PrimitiveLongIterator() {
+
+                    @Override
+                    public boolean hasNext() {
+                        return base1.hasNext();
+                    }
+
+                    @Override
+                    public long next() {
+                        return base1.next();
+                    }
+                };
             }
-        }
+        }).collect(Collectors.toList());
     }
 
-    @Override
-    public PrimitiveIntIterator nodeIterator() {
-        return new IdIterator().reset(graphIds.length);
-    }
-
-    @Override
     public Collection<PrimitiveIntIterable> batchIterables(int batchSize) {
         int nodeCount = graphIds.length;
         int numberOfBatches = ParallelUtil.threadSize(batchSize, nodeCount);

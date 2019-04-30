@@ -20,7 +20,8 @@
 package org.neo4j.graphalgo.core.huge.loader;
 
 import org.apache.lucene.util.LongsRef;
-import org.neo4j.graphalgo.api.HugeGraph;
+
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 
 import org.neo4j.graphalgo.core.huge.HugeAdjacencyList;
@@ -115,9 +116,9 @@ class HugeAdjacencyBuilder {
         return (int) offsets[localId];
     }
 
-    static HugeGraph apply(
+    static Graph apply(
             final AllocationTracker tracker,
-            final HugeIdMap idMapping,
+            final IdMap idMapping,
             final HugeWeightMapping weights,
             final Map<String, HugeWeightMapping> nodeProperties,
             final HugeAdjacencyBuilder inAdjacency,

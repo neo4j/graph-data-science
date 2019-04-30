@@ -21,14 +21,12 @@ package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.graphalgo.api.HugeGraph;
-import org.neo4j.graphalgo.api.HugeRelationshipConsumer;
-import org.neo4j.graphalgo.api.HugeWeightedRelationshipConsumer;
-import org.neo4j.graphalgo.api.RelationshipIntersect;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
+import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
-import org.neo4j.graphalgo.core.huge.loader.HugeIdMap;
+import org.neo4j.graphalgo.core.huge.loader.IdMap;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
@@ -82,9 +80,9 @@ import java.util.function.LongPredicate;
  * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding#varints">more abount vlong</a>
  * @see <a href="https://shipilev.net/jvm-anatomy-park/4-tlab-allocation/">more abount TLAB allocation</a>
  */
-public class HugeGraphImpl implements HugeGraph {
+public class HugeGraphImpl implements Graph {
 
-    private final HugeIdMap idMapping;
+    private final IdMap idMapping;
     private final AllocationTracker tracker;
 
     private HugeWeightMapping weights;
@@ -100,7 +98,7 @@ public class HugeGraphImpl implements HugeGraph {
 
     public HugeGraphImpl(
             final AllocationTracker tracker,
-            final HugeIdMap idMapping,
+            final IdMap idMapping,
             final HugeWeightMapping weights,
             final Map<String, HugeWeightMapping> nodeProperties,
             final HugeAdjacencyList inAdjacency,
@@ -126,8 +124,8 @@ public class HugeGraphImpl implements HugeGraph {
     }
 
     @Override
-    public Collection<PrimitiveLongIterable> hugeBatchIterables(final int batchSize) {
-        return idMapping.hugeBatchIterables(batchSize);
+    public Collection<PrimitiveLongIterable> batchIterables(final int batchSize) {
+        return idMapping.batchIterables(batchSize);
     }
 
     @Override
@@ -136,8 +134,8 @@ public class HugeGraphImpl implements HugeGraph {
     }
 
     @Override
-    public PrimitiveLongIterator hugeNodeIterator() {
-        return idMapping.hugeNodeIterator();
+    public PrimitiveLongIterator nodeIterator() {
+        return idMapping.nodeIterator();
     }
 
     @Override
@@ -146,7 +144,7 @@ public class HugeGraphImpl implements HugeGraph {
     }
 
     @Override
-    public HugeWeightMapping hugeNodeProperties(final String type) {
+    public HugeWeightMapping nodeProperties(final String type) {
         return nodeProperties.get(type);
     }
 
@@ -156,51 +154,51 @@ public class HugeGraphImpl implements HugeGraph {
     }
 
     @Override
-    public void forEachRelationship(long nodeId, Direction direction, HugeRelationshipConsumer consumer) {
+    public void forEachRelationship(long nodeId, Direction direction, RelationshipConsumer consumer) {
         runForEach(nodeId, direction, consumer, /* reuseCursor */ true);
     }
 
     @Override
-    public void forEachRelationship(long nodeId, Direction direction, HugeWeightedRelationshipConsumer consumer) {
+    public void forEachRelationship(long nodeId, Direction direction, WeightedRelationshipConsumer consumer) {
         forEachRelationship(nodeId, direction, (sourceNodeId, targetNodeId) ->
                 consumer.accept(sourceNodeId, targetNodeId, direction == Direction.INCOMING ?
                         weightOf(targetNodeId, sourceNodeId) :
                         weightOf(sourceNodeId, targetNodeId)));
     }
 
-    @Override
-    public void forEachRelationship(int nodeId, Direction direction, RelationshipConsumer consumer) {
-        switch (direction) {
-            case INCOMING:
-                forEachIncoming(nodeId, consumer);
-                return;
+//    @Override
+//    public void forEachRelationship(int nodeId, Direction direction, RelationshipConsumer consumer) {
+//        switch (direction) {
+//            case INCOMING:
+//                forEachIncoming(nodeId, consumer);
+//                return;
+//
+//            case OUTGOING:
+//                forEachOutgoing(nodeId, consumer);
+//                return;
+//
+//            default:
+//                forEachOutgoing(nodeId, consumer);
+//                forEachIncoming(nodeId, consumer);
+//        }
+//    }
 
-            case OUTGOING:
-                forEachOutgoing(nodeId, consumer);
-                return;
-
-            default:
-                forEachOutgoing(nodeId, consumer);
-                forEachIncoming(nodeId, consumer);
-        }
-    }
-
-    @Override
-    public void forEachRelationship(int nodeId, Direction direction, WeightedRelationshipConsumer consumer) {
-        switch (direction) {
-            case INCOMING:
-                forEachIncoming(nodeId, consumer);
-                return;
-
-            case OUTGOING:
-                forEachOutgoing(nodeId, consumer);
-                return;
-
-            default:
-                forEachOutgoing(nodeId, consumer);
-                forEachIncoming(nodeId, consumer);
-        }
-    }
+//    @Override
+//    public void forEachRelationship(int nodeId, Direction direction, WeightedRelationshipConsumer consumer) {
+//        switch (direction) {
+//            case INCOMING:
+//                forEachIncoming(nodeId, consumer);
+//                return;
+//
+//            case OUTGOING:
+//                forEachOutgoing(nodeId, consumer);
+//                return;
+//
+//            default:
+//                forEachOutgoing(nodeId, consumer);
+//                forEachIncoming(nodeId, consumer);
+//        }
+//    }
 
     @Override
     public int degree(
@@ -225,8 +223,8 @@ public class HugeGraphImpl implements HugeGraph {
     }
 
     @Override
-    public long toHugeMappedNodeId(long nodeId) {
-        return idMapping.toHugeMappedNodeId(nodeId);
+    public long toMappedNodeId(long nodeId) {
+        return idMapping.toMappedNodeId(nodeId);
     }
 
     @Override
@@ -240,11 +238,10 @@ public class HugeGraphImpl implements HugeGraph {
     }
 
     @Override
-    public void forEachIncoming(long node, final HugeRelationshipConsumer consumer) {
+    public void forEachIncoming(long node, final RelationshipConsumer consumer) {
         runForEach(node, Direction.INCOMING, consumer, /* reuseCursor */ true);
     }
 
-    @Override
     public void forEachIncoming(int nodeId, RelationshipConsumer consumer) {
         runForEach(
                 Integer.toUnsignedLong(nodeId),
@@ -264,19 +261,19 @@ public class HugeGraphImpl implements HugeGraph {
     }
 
     @Override
-    public void forEachOutgoing(long node, final HugeRelationshipConsumer consumer) {
+    public void forEachOutgoing(long node, final RelationshipConsumer consumer) {
         runForEach(node, Direction.OUTGOING, consumer, /* reuseCursor */ true);
     }
 
-    @Override
-    public void forEachOutgoing(int nodeId, RelationshipConsumer consumer) {
-        runForEach(
-                Integer.toUnsignedLong(nodeId),
-                Direction.OUTGOING,
-                toHugeOutConsumer(consumer),
-                /* reuseCursor */ false
-        );
-    }
+//    @Override
+//    public void forEachOutgoing(int nodeId, RelationshipConsumer consumer) {
+//        runForEach(
+//                Integer.toUnsignedLong(nodeId),
+//                Direction.OUTGOING,
+//                toHugeOutConsumer(consumer),
+//                /* reuseCursor */ false
+//        );
+//    }
 
     public void forEachOutgoing(int nodeId, WeightedRelationshipConsumer consumer) {
         runForEach(
@@ -288,7 +285,7 @@ public class HugeGraphImpl implements HugeGraph {
     }
 
     @Override
-    public HugeGraph concurrentCopy() {
+    public Graph concurrentCopy() {
         return new HugeGraphImpl(
                 tracker,
                 idMapping,
@@ -306,19 +303,19 @@ public class HugeGraphImpl implements HugeGraph {
         return new HugeGraphIntersectImpl(outAdjacency, outOffsets);
     }
 
-    /**
-     * O(n) !
-     */
-    @Override
-    public boolean exists(int sourceNodeId, int targetNodeId, Direction direction) {
-        return exists(
-                Integer.toUnsignedLong(sourceNodeId),
-                Integer.toUnsignedLong(targetNodeId),
-                direction,
-                // Graph interface should be thread-safe
-                false
-        );
-    }
+//    /**
+//     * O(n) !
+//     */
+//    @Override
+//    public boolean exists(int sourceNodeId, int targetNodeId, Direction direction) {
+//        return exists(
+//                Integer.toUnsignedLong(sourceNodeId),
+//                Integer.toUnsignedLong(targetNodeId),
+//                direction,
+//                // Graph interface should be thread-safe
+//                false
+//        );
+//    }
 
     /**
      * O(n) !
@@ -340,19 +337,19 @@ public class HugeGraphImpl implements HugeGraph {
         return consumer.found;
     }
 
-    /**
-     * O(n) !
-     */
-    @Override
-    public int getTarget(int nodeId, int index, Direction direction) {
-        return Math.toIntExact(getTarget(
-                Integer.toUnsignedLong(nodeId),
-                Integer.toUnsignedLong(index),
-                direction,
-                // Graph interface should be thread-safe
-                false
-        ));
-    }
+//    /**
+//     * O(n) !
+//     */
+//    @Override
+//    public int getTarget(int nodeId, int index, Direction direction) {
+//        return Math.toIntExact(getTarget(
+//                Integer.toUnsignedLong(nodeId),
+//                Integer.toUnsignedLong(index),
+//                direction,
+//                // Graph interface should be thread-safe
+//                false
+//        ));
+//    }
 
     /*
      * O(n) !
@@ -377,7 +374,7 @@ public class HugeGraphImpl implements HugeGraph {
     private void runForEach(
             long sourceNodeId,
             Direction direction,
-            HugeRelationshipConsumer consumer,
+            RelationshipConsumer consumer,
             boolean reuseCursor) {
         if (direction == Direction.BOTH) {
             runForEach(sourceNodeId, Direction.OUTGOING, consumer, reuseCursor);
@@ -466,48 +463,44 @@ public class HugeGraphImpl implements HugeGraph {
     private void consumeNodes(
             long startNode,
             HugeAdjacencyList.Cursor cursor,
-            HugeRelationshipConsumer consumer) {
+            RelationshipConsumer consumer) {
         //noinspection StatementWithEmptyBody
         while (cursor.hasNextVLong() && consumer.accept(startNode, cursor.nextVLong())) ;
     }
 
-    private HugeRelationshipConsumer toHugeOutConsumer(RelationshipConsumer consumer) {
+    private RelationshipConsumer toHugeOutConsumer(RelationshipConsumer consumer) {
         return (s, t) -> consumer.accept(
                 (int) s,
-                (int) t,
-                RawValues.combineIntInt((int) s, (int) t));
+                (int) t);
     }
 
-    private HugeRelationshipConsumer toHugeInConsumer(RelationshipConsumer consumer) {
+    private RelationshipConsumer toHugeInConsumer(RelationshipConsumer consumer) {
         return (s, t) -> consumer.accept(
                 (int) s,
-                (int) t,
-                RawValues.combineIntInt((int) t, (int) s));
+                (int) t);
     }
 
-    private HugeRelationshipConsumer toHugeOutConsumer(WeightedRelationshipConsumer consumer) {
+    private RelationshipConsumer toHugeOutConsumer(WeightedRelationshipConsumer consumer) {
         return (s, t) -> {
             double weight = weightOf(s, t);
             return consumer.accept(
                     (int) s,
                     (int) t,
-                    RawValues.combineIntInt((int) s, (int) t),
                     weight);
         };
     }
 
-    private HugeRelationshipConsumer toHugeInConsumer(WeightedRelationshipConsumer consumer) {
+    private RelationshipConsumer toHugeInConsumer(WeightedRelationshipConsumer consumer) {
         return (s, t) -> {
             double weight = weightOf(t, s);
             return consumer.accept(
                     (int) s,
                     (int) t,
-                    RawValues.combineIntInt((int) t, (int) s),
                     weight);
         };
     }
 
-    private static class GetTargetConsumer implements HugeRelationshipConsumer {
+    private static class GetTargetConsumer implements RelationshipConsumer {
         private long count;
         private long target = -1;
 
@@ -525,7 +518,7 @@ public class HugeGraphImpl implements HugeGraph {
         }
     }
 
-    private static class ExistsConsumer implements HugeRelationshipConsumer {
+    private static class ExistsConsumer implements RelationshipConsumer {
         private final long targetNodeId;
         private boolean found = false;
 

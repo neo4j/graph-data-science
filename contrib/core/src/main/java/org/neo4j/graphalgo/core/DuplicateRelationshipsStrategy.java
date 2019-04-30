@@ -24,6 +24,8 @@ import org.neo4j.graphalgo.core.utils.RawValues;
 
 import java.util.function.Supplier;
 
+import static org.neo4j.graphalgo.core.heavyweight.HeavyGraph.checkSize;
+
 public enum DuplicateRelationshipsStrategy {
     NONE {
         public double merge(double runningTotal, double weight) {
@@ -52,6 +54,13 @@ public enum DuplicateRelationshipsStrategy {
     };
 
     public abstract double merge(double runningTotal, double weight);
+
+    // TODO: This should not rely on the HeavyGraph implementation, but I don't want to propagate the int -> long
+    //       change further down before I understand the implications.
+    public void handle(long source, long target, AdjacencyMatrix matrix, boolean hasRelationshipWeights, WeightMap relWeights, Supplier<Number> weightSupplier) {
+        checkSize(source, target);
+        handle((int) source, (int) target, matrix, hasRelationshipWeights, relWeights, weightSupplier);
+    }
 
     public void handle(int source, int target, AdjacencyMatrix matrix, boolean hasRelationshipWeights, WeightMap relWeights, Supplier<Number> weightSupplier) {
         if (this == DuplicateRelationshipsStrategy.NONE) {

@@ -19,15 +19,20 @@
  */
 package org.neo4j.graphalgo.api;
 
-import org.neo4j.graphdb.Direction;
-
 /**
- * The Degree interface is intended to return the degree
- * of a given node and direction.
+ * Consumer Interface for weighted edges
  *
  * @author mknblch
  */
-public interface HugeDegrees {
+public interface OldWeightedRelationshipConsumer {
 
-    int degree(long nodeId, Direction direction);
+    /**
+     * Called for each edge of the given node
+     *
+     * @param sourceNodeId mapped source node id
+     * @param targetNodeId mapped target node id
+     * @param relationId   deprecated
+     * @param weight       the weight/cost of this edge
+     */
+    boolean accept(int sourceNodeId, int targetNodeId, @Deprecated long relationId, double weight);
 }

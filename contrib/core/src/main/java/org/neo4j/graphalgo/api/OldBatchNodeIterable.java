@@ -19,19 +19,20 @@
  */
 package org.neo4j.graphalgo.api;
 
+import org.neo4j.collection.primitive.PrimitiveIntIterable;
+
+import java.util.Collection;
+
 /**
- * iterator for outgoing relations.
+ * Iterate over each graph-nodeId in batches.
  *
- * @author mknblch
+ * @author knutwalker
  */
-public interface OutgoingRelationshipIterator {
+public interface OldBatchNodeIterable {
 
     /**
-     * iterate over each outgoing relation or until
-     * the consumer stops the iteration.
-     *
-     * @param nodeId   graph-NodeId
-     * @param consumer the relation Consumer
+     * @return a collection of iterables over every node, partitioned by
+     *         the given batch size.
      */
-    void forEachOutgoing(int nodeId, RelationshipConsumer consumer);
+    Collection<PrimitiveIntIterable> batchIterables(int batchSize);
 }

@@ -1,7 +1,11 @@
 dependencies {
     compile group: 'com.carrotsearch', name: 'hppc', version: versions.hppc
 
-    compileOnly group: 'org.neo4j', name: 'neo4j', version: versions.neo4j
+    compileOnly group: 'org.neo4j',             name: 'neo4j', version: versions.neo4j
+    testCompile group: 'org.neo4j',             name: 'neo4j', version: versions.neo4j
+    testCompile group: 'junit',                 name: 'junit', version: versions.junit
+    testCompile group: 'org.neo4j.community',   name: 'it-test-support', version: versions.neo4j
+    testCompile group: 'org.mockito',           name: 'mockito-core',             version: '1.10.19'
 }
 
 task javadocJar(type: Jar) {

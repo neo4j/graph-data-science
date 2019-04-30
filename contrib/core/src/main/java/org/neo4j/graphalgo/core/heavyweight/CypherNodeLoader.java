@@ -25,7 +25,7 @@ import com.carrotsearch.hppc.procedures.LongIntProcedure;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.IdMap;
+import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.graphalgo.core.WeightMap;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -109,7 +109,7 @@ class CypherNodeLoader {
         return new Nodes(
                 0L,
                 total,
-                new IdMap(graphIds,nodeToGraphIds),
+                new IntIdMap(graphIds,nodeToGraphIds),
                 null,null,
                 nodeProperties,
                 setup.nodeDefaultWeight,
@@ -119,7 +119,7 @@ class CypherNodeLoader {
 
     private Nodes loadNodes(long offset, int batchSize) {
         int capacity = batchSize == NO_BATCH ? INITIAL_NODE_COUNT : batchSize;
-        final IdMap idMap = new IdMap(capacity);
+        final IntIdMap idMap = new IntIdMap(capacity);
 
         Map<PropertyMapping, WeightMap> nodeProperties = nodeProperties(capacity);
 

@@ -40,7 +40,7 @@ public class NonWeightedPageRankVariant implements PageRankVariant {
     }
 
     @Override
-    public HugeNonWeightedComputeStep createHugeComputeStep(double dampingFactor, long[] sourceNodeIds, HugeRelationshipIterator relationshipIterator, HugeDegrees degrees, HugeRelationshipWeights relationshipWeights, AllocationTracker tracker, int partitionSize, long start, DegreeCache aggregatedDegrees, long nodeCount) {
+    public HugeNonWeightedComputeStep createHugeComputeStep(double dampingFactor, long[] sourceNodeIds, RelationshipIterator relationshipIterator, Degrees degrees, RelationshipWeights relationshipWeights, AllocationTracker tracker, int partitionSize, long start, DegreeCache aggregatedDegrees, long nodeCount) {
         return new HugeNonWeightedComputeStep(
                 dampingFactor,
                 sourceNodeIds,

@@ -44,7 +44,7 @@ public class DegreeNormalizedRelationshipWeights implements RelationshipWeights 
     }
 
     @Override
-    public double weightOf(int sourceNodeId, int targetNodeId) {
+    public double weightOf(long sourceNodeId, long targetNodeId) {
         return 1. / degrees.degree(sourceNodeId, direction);
     }
 }

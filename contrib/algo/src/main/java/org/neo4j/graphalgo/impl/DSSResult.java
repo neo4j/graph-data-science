@@ -21,8 +21,8 @@ package org.neo4j.graphalgo.impl;
 
 import com.carrotsearch.hppc.predicates.IntIntPredicate;
 import com.carrotsearch.hppc.predicates.LongLongPredicate;
-import org.neo4j.graphalgo.api.HugeIdMapping;
-import org.neo4j.graphalgo.api.HugeNodeIterator;
+import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.api.NodeIterator;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeIterator;
 import org.neo4j.graphalgo.core.utils.dss.DisjointSetStruct;
@@ -71,7 +71,7 @@ public final class DSSResult {
     public Stream<DisjointSetStruct.Result> resultStream(IdMapping idMapping) {
         return struct != null
                 ? struct.resultStream(idMapping)
-                : hugeStruct.resultStream(((HugeIdMapping) idMapping));
+                : hugeStruct.resultStream(idMapping);
     }
 
     public void forEach(NodeIterator nodes, IntIntPredicate consumer) {
@@ -82,7 +82,7 @@ public final class DSSResult {
         }
     }
 
-    public void forEach(HugeNodeIterator nodes, LongLongPredicate consumer) {
+    public void forEach(NodeIterator nodes, LongLongPredicate consumer) {
         if (hugeStruct != null) {
             nodes.forEachNode(nodeId -> consumer.apply(nodeId, hugeStruct.find(nodeId)));
         } else {

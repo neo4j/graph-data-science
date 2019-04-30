@@ -20,18 +20,18 @@
 package org.neo4j.graphalgo.api;
 
 /**
- * Getter for weight property values at relationships
+ * Iterator for incoming relations based on nodeId.
  *
  * @author mknblch
  */
-public interface HugeRelationshipWeights {
+public interface OldIncomingRelationshipIterator {
 
     /**
-     * get weight between source and target node id
+     * Iterates over each relationship in the nodeSet
+     * or until the consumer stops the iteration.
      *
-     * @param sourceNodeId source node
-     * @param targetNodeId target node
-     * @return the weight
+     * @param nodeId   node id
+     * @param consumer a relationship consumer
      */
-    double weightOf(long sourceNodeId, long targetNodeId);
+    void forEachIncoming(int nodeId, RelationshipConsumer consumer);
 }

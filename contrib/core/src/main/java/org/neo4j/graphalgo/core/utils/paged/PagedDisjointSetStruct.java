@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.utils.paged;
 
 
 import com.carrotsearch.hppc.LongScatterSet;
-import org.neo4j.graphalgo.api.HugeIdMapping;
+import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.utils.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
@@ -130,9 +130,9 @@ public final class PagedDisjointSetStruct {
         return set.size();
     }
 
-    public Stream<DisjointSetStruct.Result> resultStream(HugeIdMapping idMapping) {
+    public Stream<DisjointSetStruct.Result> resultStream(IdMapping idMapping) {
 
-        return LongStream.range(HugeIdMapping.START_NODE_ID, idMapping.nodeCount())
+        return LongStream.range(IdMapping.START_NODE_ID, idMapping.nodeCount())
                 .mapToObj(mappedId ->
                         new DisjointSetStruct.Result(
                                 idMapping.toOriginalNodeId(mappedId),

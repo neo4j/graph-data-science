@@ -24,11 +24,11 @@ import org.neo4j.graphdb.Direction;
 /**
  * @author mknblch
  */
-public interface HugeRelationshipPredicate {
+public interface OldRelationshipPredicate {
 
-    boolean exists(long sourceNodeId, long targetNodeId, Direction direction);
+    boolean exists(int sourceNodeId, int targetNodeId, Direction direction);
 
-    default boolean exists(long sourceNodeId, long targetNodeId) {
+    default boolean exists(int sourceNodeId, int targetNodeId) {
         return exists(sourceNodeId, targetNodeId, Direction.OUTGOING);
     }
 }

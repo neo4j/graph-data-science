@@ -173,7 +173,7 @@ public class ShortestPathProc {
                 dijkstra.release();
 
                 final DequeMapping mapping = new DequeMapping(graph, finalPath);
-                Exporter.of(mapping, api)
+                Exporter.of(api, mapping)
                         .withLog(log)
                         .build()
                         .write(
@@ -249,12 +249,12 @@ public class ShortestPathProc {
         }
 
         @Override
-        public int toMappedNodeId(final long nodeId) {
+        public long toMappedNodeId(final long nodeId) {
             return mapping.toMappedNodeId(nodeId);
         }
 
         @Override
-        public long toOriginalNodeId(final int nodeId) {
+        public long toOriginalNodeId(final long nodeId) {
             assert nodeId < length;
             return mapping.toOriginalNodeId(data[offset + nodeId]);
         }

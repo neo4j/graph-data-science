@@ -26,14 +26,14 @@ import org.neo4j.graphdb.Direction;
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.binaryLookup;
 
 final class HugeArticleRankComputeStep extends HugeBaseComputeStep implements HugeRelationshipConsumer {
-    private final HugeRelationshipIterator relationshipIterator;
+    private final RelationshipIterator relationshipIterator;
     private double averageDegree;
 
     HugeArticleRankComputeStep(
             double dampingFactor,
             long[] sourceNodeIds,
-            HugeRelationshipIterator relationshipIterator,
-            HugeDegrees degrees,
+            RelationshipIterator relationshipIterator,
+            Degrees degrees,
             AllocationTracker tracker,
             int partitionSize,
             long startNode,
@@ -56,7 +56,7 @@ final class HugeArticleRankComputeStep extends HugeBaseComputeStep implements Hu
     void singleIteration() {
         long startNode = this.startNode;
         long endNode = this.endNode;
-        HugeRelationshipIterator rels = this.relationshipIterator;
+        RelationshipIterator rels = this.relationshipIterator;
         for (long nodeId = startNode; nodeId < endNode; ++nodeId) {
             double delta = deltas[(int) (nodeId - startNode)];
             if (delta > 0) {

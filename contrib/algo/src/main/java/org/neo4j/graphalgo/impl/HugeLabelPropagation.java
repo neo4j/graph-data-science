@@ -20,11 +20,11 @@
 package org.neo4j.graphalgo.impl;
 
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.graphalgo.api.HugeGraph;
-import org.neo4j.graphalgo.api.HugeNodeProperties;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.HugeRelationshipConsumer;
-import org.neo4j.graphalgo.api.HugeRelationshipIterator;
-import org.neo4j.graphalgo.api.HugeRelationshipWeights;
+import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.RandomLongIterable;
@@ -34,13 +34,13 @@ import org.neo4j.graphdb.Direction;
 
 import java.util.concurrent.ExecutorService;
 
-public final class HugeLabelPropagation extends BaseLabelPropagation<HugeGraph, HugeWeightMapping, HugeLabelPropagation> {
+public final class HugeLabelPropagation extends BaseLabelPropagation<Graph, HugeWeightMapping, HugeLabelPropagation> {
 
-    private final ThreadLocal<HugeRelationshipIterator> localGraphs;
+    private final ThreadLocal<RelationshipIterator> localGraphs;
 
     public HugeLabelPropagation(
-            HugeGraph graph,
-            HugeNodeProperties nodeProperties,
+            Graph graph,
+            NodeProperties nodeProperties,
             int batchSize,
             int concurrency,
             ExecutorService executor,
@@ -63,7 +63,7 @@ public final class HugeLabelPropagation extends BaseLabelPropagation<HugeGraph, 
 
     @Override
     Initialization initStep(
-            final HugeGraph graph,
+            final Graph graph,
             final Labels labels,
             final HugeWeightMapping nodeProperties,
             final HugeWeightMapping nodeWeights,
@@ -90,8 +90,8 @@ public final class HugeLabelPropagation extends BaseLabelPropagation<HugeGraph, 
         private final HugeWeightMapping nodeProperties;
         private final Labels existingLabels;
         private final RandomLongIterable nodes;
-        private final ThreadLocal<HugeRelationshipIterator> graph;
-        private final HugeRelationshipWeights relationshipWeights;
+        private final ThreadLocal<RelationshipIterator> graph;
+        private final RelationshipWeights relationshipWeights;
         private final HugeWeightMapping nodeWeights;
         private final ProgressLogger progressLogger;
         private final Direction direction;
@@ -102,8 +102,8 @@ public final class HugeLabelPropagation extends BaseLabelPropagation<HugeGraph, 
                 HugeWeightMapping nodeProperties,
                 Labels existingLabels,
                 RandomLongIterable nodes,
-                ThreadLocal<HugeRelationshipIterator> graph,
-                HugeRelationshipWeights relationshipWeights,
+                ThreadLocal<RelationshipIterator> graph,
+                RelationshipWeights relationshipWeights,
                 HugeWeightMapping nodeWeights,
                 ProgressLogger progressLogger,
                 Direction direction,
@@ -149,16 +149,16 @@ public final class HugeLabelPropagation extends BaseLabelPropagation<HugeGraph, 
 
     private static final class ComputeStep extends Computation implements HugeRelationshipConsumer {
 
-        private final ThreadLocal<HugeRelationshipIterator> graphs;
-        private final HugeRelationshipWeights relationshipWeights;
+        private final ThreadLocal<RelationshipIterator> graphs;
+        private final RelationshipWeights relationshipWeights;
         private final HugeWeightMapping nodeWeights;
         private final Direction direction;
         private final RandomLongIterable nodes;
-        private HugeRelationshipIterator graph;
+        private RelationshipIterator graph;
 
         private ComputeStep(
-                ThreadLocal<HugeRelationshipIterator> graphs,
-                HugeRelationshipWeights relationshipWeights,
+                ThreadLocal<RelationshipIterator> graphs,
+                RelationshipWeights relationshipWeights,
                 HugeWeightMapping nodeWeights,
                 ProgressLogger progressLogger,
                 Direction direction,

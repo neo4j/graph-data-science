@@ -19,8 +19,8 @@
  */
 package org.neo4j.graphalgo.impl.pagerank;
 
-import org.neo4j.graphalgo.api.HugeDegrees;
-import org.neo4j.graphalgo.api.HugeRelationshipIterator;
+import org.neo4j.graphalgo.api.Degrees;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.util.Arrays;
@@ -40,8 +40,8 @@ public abstract class HugeBaseComputeStep implements HugeComputeStep {
     long[] starts;
     private int[] lengths;
     private long[] sourceNodeIds;
-    final HugeRelationshipIterator relationshipIterator;
-    final HugeDegrees degrees;
+    final RelationshipIterator relationshipIterator;
+    final Degrees degrees;
     private final AllocationTracker tracker;
 
     private final double alpha;
@@ -60,8 +60,8 @@ public abstract class HugeBaseComputeStep implements HugeComputeStep {
     HugeBaseComputeStep(
             double dampingFactor,
             long[] sourceNodeIds,
-            HugeRelationshipIterator relationshipIterator,
-            HugeDegrees degrees,
+            RelationshipIterator relationshipIterator,
+            Degrees degrees,
             AllocationTracker tracker,
             int partitionSize,
             long startNode) {

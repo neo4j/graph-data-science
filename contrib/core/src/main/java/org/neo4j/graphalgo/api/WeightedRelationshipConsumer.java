@@ -19,20 +19,20 @@
  */
 package org.neo4j.graphalgo.api;
 
-/**
- * Consumer Interface for weighted edges
- *
- * @author mknblch
- */
 public interface WeightedRelationshipConsumer {
-
     /**
-     * Called for each edge of the given node
+     * Called for every edge that matches a given relation-constraint
      *
      * @param sourceNodeId mapped source node id
      * @param targetNodeId mapped target node id
-     * @param relationId   deprecated
-     * @param weight       the weight/cost of this edge
+     * @param weight relationship weight
+     * @return {@code true} if the iteration shall continue, otherwise {@code false}.
      */
-    boolean accept(int sourceNodeId, int targetNodeId, @Deprecated long relationId, double weight);
+    boolean accept(
+            long sourceNodeId,
+            long targetNodeId, double weight);
+
 }
+
+
+

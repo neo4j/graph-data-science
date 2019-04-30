@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
 
 final class HugeIdMapBuilder {
 
-    static HugeIdMap build(
+    static IdMap build(
             HugeLongArrayBuilder idMapBuilder,
             long highestNodeId,
             AllocationTracker tracker) {
@@ -46,7 +46,7 @@ final class HugeIdMapBuilder {
             }
         }
 
-        return new HugeIdMap(graphIds, nodeToGraphIds, idMapBuilder.size());
+        return new IdMap(graphIds, nodeToGraphIds, idMapBuilder.size());
     }
 
     private HugeIdMapBuilder() {

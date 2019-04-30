@@ -31,8 +31,9 @@ public interface RelationshipConsumer {
      *
      * @param sourceNodeId mapped source node id
      * @param targetNodeId mapped target node id
-     * @param relationId   deprecated
      * @return {@code true} if the iteration shall continue, otherwise {@code false}.
      */
-    boolean accept(int sourceNodeId, int targetNodeId, @Deprecated long relationId);
+    boolean accept(
+            long sourceNodeId,
+            long targetNodeId);
 }

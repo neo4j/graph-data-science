@@ -19,19 +19,25 @@
  */
 package org.neo4j.graphalgo.api;
 
+import org.neo4j.collection.primitive.PrimitiveIntIterator;
+
+import java.util.function.IntPredicate;
+
 /**
- * Iterator for incoming relations based on nodeId.
+ * Iterate over each node Id until either
+ * all nodes have been consumed or the consumer
+ * decides to stop the iteration.
  *
  * @author mknblch
  */
-public interface IncomingRelationshipIterator {
+public interface OldNodeIterator {
+    /**
+     * Iterate over each nodeId
+     */
+    void forEachNode(IntPredicate consumer);
 
     /**
-     * Iterates over each relationship in the nodeSet
-     * or until the consumer stops the iteration.
-     *
-     * @param nodeId   node id
-     * @param consumer a relationship consumer
+     * get graph-nodeId iterator
      */
-    void forEachIncoming(int nodeId, RelationshipConsumer consumer);
+    PrimitiveIntIterator nodeIterator();
 }

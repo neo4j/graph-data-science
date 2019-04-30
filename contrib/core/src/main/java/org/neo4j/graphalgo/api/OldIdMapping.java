@@ -19,22 +19,38 @@
  */
 package org.neo4j.graphalgo.api;
 
-import org.neo4j.collection.primitive.PrimitiveLongIterator;
-
-import java.util.function.LongPredicate;
-
 /**
- * Iterate over each node Id until either
- * all nodes have been consumed or the consumer
- * decides to stop the iteration.
+ * bidirectional mapping between long neo4j-nodeId and
+ * temporary int graph-nodeId.
  *
  * @author mknblch
  */
-public interface HugeNodeIterator {
-    /**
-     * Iterate over each nodeId
-     */
-    void forEachNode(LongPredicate consumer);
+public interface OldIdMapping {
 
-    PrimitiveLongIterator hugeNodeIterator();
+    /**
+     * defines the lower bound of mapped node ids
+     * TODO: function?
+     */
+    int START_NODE_ID = 0;
+
+    /**
+     * Map neo4j nodeId to inner nodeId
+     * TODO rename?
+     */
+    int toMappedNodeId(long nodeId);
+
+    /**
+     * Map inner nodeId back to original nodeId
+     */
+    long toOriginalNodeId(int nodeId);
+
+    /**
+     * Returns true iff the nodeId is mapped, otherwise false
+     */
+    boolean contains(long nodeId);
+
+    /**
+     * Count of nodes.
+     */
+    long nodeCount();
 }

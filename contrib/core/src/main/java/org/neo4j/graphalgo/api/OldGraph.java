@@ -19,21 +19,22 @@
  */
 package org.neo4j.graphalgo.api;
 
+
 /**
- * Getter interface for node properties for huge graphs.
+ * Composition of often used source interfaces
+ *
+ * @author mknblch
  */
-public interface HugeNodeProperties extends NodeProperties {
+public interface OldGraph extends IdMapping, Degrees, NodeIterator, BatchNodeIterable, RelationshipWeights, RelationshipIterator, RelationshipPredicate, WeightedRelationshipIterator, RelationshipAccess {
 
     /**
-     * return the property mapping for a type
-     *
-     * @param type       the node property type
-     * @return the mapping associated with that type
+     * release resources which are not part of the result or IdMapping
      */
-    HugeWeightMapping hugeNodeProperties(String type);
+     default void release() {}
 
-    @Override
-    default WeightMapping nodeProperties(String type) {
-        return hugeNodeProperties(type);
-    }
+    String getType();
+
+    void canRelease(boolean canRelease);
+
+    RelationshipIntersect intersection();
 }

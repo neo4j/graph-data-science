@@ -19,12 +19,24 @@
  */
 package org.neo4j.graphalgo.api;
 
-import org.neo4j.graphdb.Direction;
+import java.util.Set;
 
 /**
+ * Getter interface for node properties.
+ *
  * @author mknblch
  */
-public interface HugeRelationshipAccess {
+public interface OldNodeProperties {
 
-    long getTarget(long nodeId, long index, Direction direction);
+    /**
+     * return the property mapping for a type
+     *
+     * @param type       the node property type
+     * @return the mapping associated with that type
+     */
+//    double valueOf(int nodeId, double defaultValue);
+
+    WeightMapping nodeProperties(String type);
+
+    Set<String> availableNodeProperties();
 }

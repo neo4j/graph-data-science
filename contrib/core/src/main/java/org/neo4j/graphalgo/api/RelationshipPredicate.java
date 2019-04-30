@@ -26,9 +26,9 @@ import org.neo4j.graphdb.Direction;
  */
 public interface RelationshipPredicate {
 
-    boolean exists(int sourceNodeId, int targetNodeId, Direction direction);
+    boolean exists(long sourceNodeId, long targetNodeId, Direction direction);
 
-    default boolean exists(int sourceNodeId, int targetNodeId) {
+    default boolean exists(long sourceNodeId, long targetNodeId) {
         return exists(sourceNodeId, targetNodeId, Direction.OUTGOING);
     }
 }

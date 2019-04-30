@@ -20,9 +20,9 @@
 package org.neo4j.graphalgo.impl.msbfs;
 
 import org.junit.Test;
-import org.neo4j.graphalgo.api.HugeGraph;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.HugeRelationshipConsumer;
-import org.neo4j.graphalgo.api.HugeRelationshipIterator;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.HugeWeightedRelationshipConsumer;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.HugeDirectIdMapping;
@@ -244,7 +244,7 @@ public final class HugeMultiSourceBFSTest {
         final int nodeCount = 8192;
         final int sourceCount = 1024;
 
-        HugeRelationshipIterator iter = new HugeRelationshipIterator() {
+        RelationshipIterator iter = new RelationshipIterator() {
             @Override
             public void forEachRelationship(long nodeId, Direction direction, HugeRelationshipConsumer consumer) {
                 for (long i = 0; i < nodeCount; i++) {
@@ -293,7 +293,7 @@ public final class HugeMultiSourceBFSTest {
 
     private static void withGraph(
             String cypher,
-            Consumer<? super HugeGraph> block) {
+            Consumer<? super Graph> block) {
         GraphDatabaseAPI db = (GraphDatabaseAPI)
                 new TestGraphDatabaseFactory()
                         .newImpermanentDatabaseBuilder()
@@ -304,7 +304,7 @@ public final class HugeMultiSourceBFSTest {
                 db.execute(cypher).close();
                 tx.success();
             }
-            block.accept((HugeGraph) new GraphLoader(db).load(HugeGraphFactory.class));
+            block.accept(new GraphLoader(db).load(HugeGraphFactory.class));
         } finally {
             db.shutdown();
         }
@@ -312,7 +312,7 @@ public final class HugeMultiSourceBFSTest {
 
     private static void withGrid(
             Consumer<? super GraphBuilder<?>> build,
-            Consumer<? super HugeGraph> block) {
+            Consumer<? super Graph> block) {
         GraphDatabaseAPI db = (GraphDatabaseAPI)
                 new TestGraphDatabaseFactory()
                         .newImpermanentDatabaseBuilder()
@@ -327,7 +327,7 @@ public final class HugeMultiSourceBFSTest {
                 tx.success();
             }
             try (Transaction tx = db.beginTx()) {
-                HugeGraph graph = (HugeGraph) new GraphLoader(db).load(HugeGraphFactory.class);
+                Graph graph = (Graph) new GraphLoader(db).load(HugeGraphFactory.class);
                 block.accept(graph);
                 tx.success();
             }

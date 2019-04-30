@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.heavyweight;
 
 import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.core.IdMap;
+import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.graphalgo.core.WeightMap;
 import org.neo4j.graphdb.Result;
 
@@ -28,10 +28,10 @@ import java.util.Map;
 
 class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private long rows;
-    private IdMap idMap;
+    private IntIdMap idMap;
     private Map<PropertyMapping, WeightMap> nodeProperties;
 
-    NodeRowVisitor(IdMap idMap, Map<PropertyMapping, WeightMap> nodeProperties) {
+    NodeRowVisitor(IntIdMap idMap, Map<PropertyMapping, WeightMap> nodeProperties) {
         this.idMap = idMap;
         this.nodeProperties = nodeProperties;
     }

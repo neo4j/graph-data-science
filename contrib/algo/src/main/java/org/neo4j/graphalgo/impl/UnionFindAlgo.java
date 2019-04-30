@@ -116,6 +116,7 @@ public enum UnionFindAlgo implements UnionFindAlgoInterface {
                 int concurrency,
                 double threshold,
                 BiConsumer<String, Algorithm<?>> prepare) {
+            System.out.println("Yes I was run");
             GraphUnionFind algo = new GraphUnionFind(graph);
             prepare.accept("CC(SequentialUnionFind)", algo);
             DisjointSetStruct struct = Double.isFinite(threshold)

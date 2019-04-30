@@ -17,21 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.huge.loader;
+package org.neo4j.graphalgo.api;
 
-import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphdb.Direction;
 
-import java.util.Map;
+/**
+ * The Degree interface is intended to return the degree
+ * of a given node and direction.
+ *
+ * @author mknblch
+ */
+public interface OldDegrees {
 
-final class IdsAndProperties {
-
-    final IdMap hugeIdMap;
-    final Map<String, HugeWeightMapping> properties;
-
-    IdsAndProperties(
-            final IdMap hugeIdMap,
-            final Map<String, HugeWeightMapping> properties) {
-        this.hugeIdMap = hugeIdMap;
-        this.properties = properties;
-    }
+    int degree(int nodeId, Direction direction);
 }

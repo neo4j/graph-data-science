@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.heavyweight;
 
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.core.IdMap;
+import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.graphalgo.core.WeightMap;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -86,7 +86,7 @@ public class CypherRelationshipLoader {
 
     private Relationships loadRelationships(long offset, int batchSize, Nodes nodes) {
 
-        IdMap idMap = nodes.idMap;
+        IntIdMap idMap = nodes.idMap;
 
         int nodeCount = idMap.size();
         int capacity = batchSize == NO_BATCH ? nodeCount : batchSize;

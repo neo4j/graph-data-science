@@ -31,12 +31,12 @@ import org.neo4j.graphdb.Direction;
 public interface RelationshipIntersect {
 
     /**
-     * @see HugeDegrees#degree(long, Direction)
+     * @see Degrees#degree(long, Direction)
      */
 //    int degree(long nodeId);
 
     /**
-     * @see HugeRelationshipIterator#forEachOutgoing(long, HugeRelationshipConsumer)
+     * @see RelationshipIterator#forEachOutgoing(long, HugeRelationshipConsumer)
      */
 //    void forEachRelationship(long nodeId, HugeRelationshipConsumer consumer);
 

@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.impl.pagerank;
 
-import org.neo4j.graphalgo.api.HugeDegrees;
+import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.HugeRelationshipConsumer;
-import org.neo4j.graphalgo.api.HugeRelationshipIterator;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 
@@ -34,8 +34,8 @@ final class HugeEigenvectorCentralityComputeStep extends HugeBaseComputeStep imp
     HugeEigenvectorCentralityComputeStep(
             double dampingFactor,
             long[] sourceNodeIds,
-            HugeRelationshipIterator relationshipIterator,
-            HugeDegrees degrees,
+            RelationshipIterator relationshipIterator,
+            Degrees degrees,
             AllocationTracker tracker,
             int partitionSize,
             long startNode,
@@ -58,7 +58,7 @@ final class HugeEigenvectorCentralityComputeStep extends HugeBaseComputeStep imp
     void singleIteration() {
         long startNode = this.startNode;
         long endNode = this.endNode;
-        HugeRelationshipIterator rels = this.relationshipIterator;
+        RelationshipIterator rels = this.relationshipIterator;
         for (long nodeId = startNode; nodeId < endNode; ++nodeId) {
             double delta = deltas[(int) (nodeId - startNode)];
             if (delta > 0.0) {

@@ -23,11 +23,12 @@ import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.LongDoubleMap;
 import org.neo4j.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.graphalgo.api.HugeGraph;
-import org.neo4j.graphalgo.api.HugeNodeIterator;
-import org.neo4j.graphalgo.api.HugeNodeWeights;
-import org.neo4j.graphalgo.api.HugeRelationshipIterator;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeIterator;
+import org.neo4j.graphalgo.api.NodeWeights;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.sources.RandomHugeNodeIterator;
+import org.neo4j.graphalgo.core.sources.RandomNodeIterator;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pointer;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -67,9 +68,9 @@ public final class HugeModularityOptimization extends Algorithm<HugeModularityOp
     private final int concurrency;
     private final AllocationTracker tracker;
     private final HugeNodeWeights nodeWeights;
-    private HugeGraph graph;
+    private Graph graph;
     private ExecutorService pool;
-    private final HugeNodeIterator nodeIterator;
+    private final NodeIterator nodeIterator;
     private double m2, m22;
     private HugeLongArray communities;
     private HugeDoubleArray ki;
@@ -80,8 +81,8 @@ public final class HugeModularityOptimization extends Algorithm<HugeModularityOp
     private final Random random;
 
     HugeModularityOptimization(
-            HugeGraph graph,
-            HugeNodeWeights nodeWeights,
+            Graph graph,
+            NodeWeights nodeWeights,
             ExecutorService pool,
             int concurrency,
             AllocationTracker tracker,
@@ -113,13 +114,13 @@ public final class HugeModularityOptimization extends Algorithm<HugeModularityOp
      * @param concurrency
      * @return
      */
-    private HugeNodeIterator createNodeIterator(int concurrency) {
+    private NodeIterator createNodeIterator(int concurrency) {
 
         if (concurrency > 1) {
-            return new RandomHugeNodeIterator(nodeCount);
+            return new RandomNodeIterator(nodeCount);
         }
 
-        return new HugeNodeIterator() {
+        return new NodeIterator() {
             @Override
             public void forEachNode(final LongPredicate consumer) {
                 for (long i = 0L; i < nodeCount; i++) {
@@ -280,7 +281,7 @@ public final class HugeModularityOptimization extends Algorithm<HugeModularityOp
 
         final HugeDoubleArray sTot, sIn;
         final HugeLongArray localCommunities;
-        final HugeRelationshipIterator rels;
+        final RelationshipIterator rels;
         private final TerminationFlag terminationFlag;
         double bestGain, bestWeight, q = MINIMUM_MODULARITY;
         long bestCommunity;

@@ -61,8 +61,8 @@ public class WeightedPageRankVariant implements PageRankVariant {
 
     @Override
     public HugeComputeStep createHugeComputeStep(double dampingFactor, long[] sourceNodeIds,
-                                                 HugeRelationshipIterator relationshipIterator, HugeDegrees degrees,
-                                                 HugeRelationshipWeights relationshipWeights, AllocationTracker tracker,
+                                                 RelationshipIterator relationshipIterator, Degrees degrees,
+                                                 RelationshipWeights relationshipWeights, AllocationTracker tracker,
                                                  int partitionCount, long start, DegreeCache aggregatedDegrees, long nodeCount) {
         return new HugeWeightedComputeStep(
                 dampingFactor,

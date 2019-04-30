@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.core;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -46,7 +46,7 @@ public abstract class Neo4JTestCase {
 
     @BeforeClass
     public static void setup() {
-        db = TestDatabaseCreator.createTestDatabase();
+        db = createTestDatabase();
     }
 
     @AfterClass
@@ -93,5 +93,11 @@ public abstract class Neo4JTestCase {
             transaction.success();
             return relation.getId();
         }
+    }
+
+    public static GraphDatabaseAPI createTestDatabase() {
+        return (GraphDatabaseAPI)new TestGraphDatabaseFactory()
+                .newImpermanentDatabaseBuilder(new File(UUID.randomUUID().toString()))
+                .newGraphDatabase();
     }
 }

@@ -32,8 +32,8 @@ public class HugeNonWeightedComputeStep extends HugeBaseComputeStep implements H
     HugeNonWeightedComputeStep(
             double dampingFactor,
             long[] sourceNodeIds,
-            HugeRelationshipIterator relationshipIterator,
-            HugeDegrees degrees,
+            RelationshipIterator relationshipIterator,
+            Degrees degrees,
             AllocationTracker tracker,
             int partitionSize,
             long startNode) {
@@ -49,7 +49,7 @@ public class HugeNonWeightedComputeStep extends HugeBaseComputeStep implements H
     void singleIteration() {
         long startNode = this.startNode;
         long endNode = this.endNode;
-        HugeRelationshipIterator rels = this.relationshipIterator;
+        RelationshipIterator rels = this.relationshipIterator;
         for (long nodeId = startNode; nodeId < endNode; ++nodeId) {
             double delta = deltas[(int) (nodeId - startNode)];
             if (delta > 0.0) {

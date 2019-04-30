@@ -19,20 +19,19 @@
  */
 package org.neo4j.graphalgo.api;
 
-public interface HugeWeightedRelationshipConsumer {
+/**
+ * iterator for outgoing relations.
+ *
+ * @author mknblch
+ */
+public interface OldOutgoingRelationshipIterator {
+
     /**
-     * Called for every edge that matches a given relation-constraint
+     * iterate over each outgoing relation or until
+     * the consumer stops the iteration.
      *
-     * @param sourceNodeId mapped source node id
-     * @param targetNodeId mapped target node id
-     * @param weight relationship weight
-     * @return {@code true} if the iteration shall continue, otherwise {@code false}.
+     * @param nodeId   graph-NodeId
+     * @param consumer the relation Consumer
      */
-    boolean accept(
-            long sourceNodeId,
-            long targetNodeId, double weight);
-
+    void forEachOutgoing(int nodeId, RelationshipConsumer consumer);
 }
-
-
-

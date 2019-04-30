@@ -20,11 +20,13 @@
 package org.neo4j.graphalgo.core.sources;
 
 import org.neo4j.collection.primitive.PrimitiveIntIterator;
+import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.NodeIterator;
 
 import java.util.Arrays;
 import java.util.Random;
 import java.util.function.IntPredicate;
+import java.util.function.LongPredicate;
 
 /**
  * NodeIterator adapter with randomized order
@@ -40,8 +42,8 @@ public class ShuffledNodeIterator implements NodeIterator {
     }
 
     @Override
-    public void forEachNode(IntPredicate consumer) {
-        final PrimitiveIntIterator nodeIterator = nodeIterator();
+    public void forEachNode(LongPredicate consumer) {
+        final PrimitiveLongIterator nodeIterator = nodeIterator();
         while (nodeIterator.hasNext()) {
             if (!consumer.test(nodeIterator.next())) {
                 break;
@@ -50,23 +52,23 @@ public class ShuffledNodeIterator implements NodeIterator {
     }
 
     @Override
-    public PrimitiveIntIterator nodeIterator() {
+    public PrimitiveLongIterator nodeIterator() {
         return new ShuffledIterAdapter(nodeCount, System.currentTimeMillis());
     }
 
-    public PrimitiveIntIterator nodeIterator(long seed) {
+    public PrimitiveLongIterator nodeIterator(long seed) {
         return new ShuffledIterAdapter(nodeCount, seed);
     }
 
-    private class ShuffledIterAdapter implements PrimitiveIntIterator {
+    private class ShuffledIterAdapter implements PrimitiveLongIterator {
 
         private final int nodeCount;
-        private final int[] nodes;
+        private final long[] nodes;
         private int offset = 0;
 
         private ShuffledIterAdapter(int nodeCount, long seed) {
             this.nodeCount = nodeCount;
-            this.nodes = new int[nodeCount];
+            this.nodes = new long[nodeCount];
             Arrays.setAll(nodes, i -> i);
             shuffle(nodes, nodeCount, new Random(seed));
         }
@@ -77,13 +79,14 @@ public class ShuffledNodeIterator implements NodeIterator {
         }
 
         @Override
-        public int next() {
+        public long next() {
             return nodes[offset++];
         }
     }
 
-    private static void shuffle(int[] data, int length, Random rnd) {
-        int t, r;
+    private static void shuffle(long[] data, int length, Random rnd) {
+        long t;
+        int r;
         for (int i = 0; i < length; i++) {
             r = i + rnd.nextInt(length - i);
             t = data[i];

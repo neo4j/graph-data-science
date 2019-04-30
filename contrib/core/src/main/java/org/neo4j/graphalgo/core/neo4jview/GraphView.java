@@ -22,12 +22,16 @@ package org.neo4j.graphalgo.core.neo4jview;
 import org.neo4j.collection.primitive.PrimitiveIntCollections;
 import org.neo4j.collection.primitive.PrimitiveIntIterable;
 import org.neo4j.collection.primitive.PrimitiveIntIterator;
+import org.neo4j.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
+import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.IdMap;
+import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.graphalgo.core.loading.LoadRelationships;
 import org.neo4j.graphalgo.core.loading.ReadHelper;
 import org.neo4j.graphalgo.core.utils.RawValues;
@@ -45,8 +49,10 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.IntPredicate;
+import java.util.function.LongPredicate;
 import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
 
@@ -63,13 +69,13 @@ public class GraphView implements Graph {
 
     private final GraphDimensions dimensions;
     private final double propertyDefaultWeight;
-    private final IdMap idMapping;
+    private final IntIdMap idMapping;
     private boolean loadAsUndirected;
 
     GraphView(
             GraphDatabaseAPI db,
             GraphDimensions dimensions,
-            IdMap idMapping,
+            IntIdMap idMapping,
             double propertyDefaultWeight, boolean loadAsUndirected) {
         this.tx = new TransactionWrapper(db);
         this.dimensions = dimensions;
@@ -78,21 +84,34 @@ public class GraphView implements Graph {
         this.loadAsUndirected = loadAsUndirected;
     }
 
+//    @Override
+//    public void forEachRelationship(int nodeId, Direction direction, RelationshipConsumer consumer) {
+//        final WeightedRelationshipConsumer asWeighted =
+//                (sourceNodeId, targetNodeId, relationId, weight) ->
+//                        consumer.accept(sourceNodeId, targetNodeId, relationId);
+//        forAllRelationships(nodeId, direction, false, asWeighted);
+//    }
+
     @Override
-    public void forEachRelationship(int nodeId, Direction direction, RelationshipConsumer consumer) {
+    public void forEachRelationship(long nodeId, Direction direction, RelationshipConsumer consumer) {
         final WeightedRelationshipConsumer asWeighted =
-                (sourceNodeId, targetNodeId, relationId, weight) ->
-                        consumer.accept(sourceNodeId, targetNodeId, relationId);
+                (sourceNodeId, targetNodeId, weight) ->
+                        consumer.accept(sourceNodeId, targetNodeId);
         forAllRelationships(nodeId, direction, false, asWeighted);
     }
 
+//    @Override
+//    public void forEachRelationship(int nodeId, Direction direction, WeightedRelationshipConsumer consumer) {
+//        forAllRelationships(nodeId, direction, true, consumer);
+//    }
+
     @Override
-    public void forEachRelationship(int nodeId, Direction direction, WeightedRelationshipConsumer consumer) {
+    public void forEachRelationship(long nodeId, Direction direction, WeightedRelationshipConsumer consumer) {
         forAllRelationships(nodeId, direction, true, consumer);
     }
 
     private void forAllRelationships(
-            int nodeId,
+            long nodeId,
             Direction direction,
             boolean readWeights,
             WeightedRelationshipConsumer action) {
@@ -123,11 +142,11 @@ public class GraphView implements Graph {
                                 weight = ReadHelper.readProperty(pc, dimensions.relWeightId(), defaultWeight);
                             }
                         }
-                        final int otherId = toMappedNodeId(cursor.otherNodeReference());
+                        final long otherId = toMappedNodeId(cursor.otherNodeReference());
                         long relId = RawValues.combineIntInt(
                                 (int) cursor.sourceNodeReference(),
                                 (int) cursor.targetNodeReference());
-                        if (!action.accept(nodeId, otherId, relId, weight)) {
+                        if (!action.accept(nodeId, otherId,weight)) {
                             breaker.run();
                         }
                     };
@@ -155,29 +174,29 @@ public class GraphView implements Graph {
     }
 
     @Override
-    public void forEachNode(IntPredicate consumer) {
+    public void forEachNode(LongPredicate consumer) {
         idMapping.forEachNode(consumer);
     }
 
     @Override
-    public PrimitiveIntIterator nodeIterator() {
-        return idMapping.nodeIterator();
+    public PrimitiveLongIterator nodeIterator() {
+        return idMapping.iterator();
     }
 
     @Override
-    public Collection<PrimitiveIntIterable> batchIterables(final int batchSize) {
+    public Collection<PrimitiveLongIterable> batchIterables(final int batchSize) {
         int nodeCount = dimensions.nodeCount();
         int numberOfBatches = (int) Math.ceil(nodeCount / (double) batchSize);
         if (numberOfBatches == 1) {
             return Collections.singleton(this::nodeIterator);
         }
-        PrimitiveIntIterable[] iterators = new PrimitiveIntIterable[numberOfBatches];
+        PrimitiveLongIterable[] iterators = new PrimitiveLongIterable[numberOfBatches];
         Arrays.setAll(iterators, i -> () -> new SizedNodeIterator(nodeIterator(), i * batchSize, batchSize));
         return Arrays.asList(iterators);
     }
 
     @Override
-    public int degree(int nodeId, Direction direction) {
+    public int degree(long nodeId, Direction direction) {
         return withinTransactionInt(transaction -> {
             try (NodeCursor nc = transaction.cursors().allocateNodeCursor()) {
                 transaction.dataRead().singleNode(toOriginalNodeId(nodeId), nc);
@@ -196,12 +215,12 @@ public class GraphView implements Graph {
     }
 
     @Override
-    public int toMappedNodeId(long nodeId) {
+    public long toMappedNodeId(long nodeId) {
         return idMapping.toMappedNodeId(nodeId);
     }
 
     @Override
-    public long toOriginalNodeId(int nodeId) {
+    public long toOriginalNodeId(long nodeId) {
         return idMapping.toOriginalNodeId(nodeId);
     }
 
@@ -211,7 +230,7 @@ public class GraphView implements Graph {
     }
 
     @Override
-    public double weightOf(final int sourceNodeId, final int targetNodeId) {
+    public double weightOf(final long sourceNodeId, final long targetNodeId) {
         final long sourceId = toOriginalNodeId(sourceNodeId);
         final long targetId = toOriginalNodeId(targetNodeId);
 
@@ -253,6 +272,38 @@ public class GraphView implements Graph {
         });
     }
 
+    @Override
+    public HugeWeightMapping nodeProperties(String type) {
+        // TODO: This interface was never implemented for the graph view.
+        //       With the unified Graph interface, we need to implemented (or refactor further).
+        throw new UnsupportedOperationException("Not implemented yet.");
+//        WeightMapping weightMapping = nodePropertiesMapping.get(type);
+//        return new HugeWeightMapping() {
+//
+//            @Override
+//            public double weight(long source, long target) {
+//                return weightMapping.get((int) source, (int) target);
+//            }
+//
+//            @Override
+//            public double weight(long source, long target, double defaultValue) {
+//                return relationshipWeights.get((int) target, defaultValue);
+//            }
+//
+//            @Override
+//            public long release() {
+//                return 0;
+//            }
+//        };
+    }
+
+    @Override
+    public Set<String> availableNodeProperties() {
+        // TODO: This interface was never implemented for the graph view.
+        //       With the unified Graph interface, we need to implemented (or refactor further).
+        throw new UnsupportedOperationException("Not implemented yet.");
+    }
+
     private int withinTransactionInt(ToIntFunction<KernelTransaction> block) {
         return tx.applyAsInt(block);
     }
@@ -270,14 +321,14 @@ public class GraphView implements Graph {
     }
 
     @Override
-    public int getTarget(int nodeId, int index, Direction direction) {
+    public long getTarget(long nodeId, long index, Direction direction) {
         GetTargetConsumer consumer = new GetTargetConsumer(index);
         forEachRelationship(nodeId, direction, consumer);
         return consumer.found;
     }
 
     @Override
-    public boolean exists(int sourceNodeId, int targetNodeId, Direction direction) {
+    public boolean exists(long sourceNodeId, long targetNodeId, Direction direction) {
         ExistsConsumer existsConsumer = new ExistsConsumer(targetNodeId);
         forEachRelationship(sourceNodeId, direction, existsConsumer);
         return existsConsumer.found;
@@ -297,13 +348,13 @@ public class GraphView implements Graph {
         throw new UnsupportedOperationException("Not implemented for Graph View");
     }
 
-    private static class SizedNodeIterator implements PrimitiveIntIterator {
+    private static class SizedNodeIterator implements PrimitiveLongIterator {
 
-        private final PrimitiveIntIterator iterator;
+        private final PrimitiveLongIterator iterator;
         private int remaining;
 
         private SizedNodeIterator(
-                PrimitiveIntIterator iterator,
+                PrimitiveLongIterator iterator,
                 int start,
                 int length) {
             while (iterator.hasNext() && start-- > 0) {
@@ -319,7 +370,7 @@ public class GraphView implements Graph {
         }
 
         @Override
-        public int next() {
+        public long next() {
             remaining--;
             return iterator.next();
         }
@@ -366,18 +417,18 @@ public class GraphView implements Graph {
     }
 
     private static class GetTargetConsumer implements RelationshipConsumer {
-        private final int index;
-        int count;
-        int found;
+        private final long index;
+        long count;
+        long found;
 
-        public GetTargetConsumer(int index) {
+        public GetTargetConsumer(long index) {
             this.index = index;
             count = index;
             found = -1;
         }
 
         @Override
-        public boolean accept(int s, int t, long r) {
+        public boolean accept(long s, long t) {
             if (count-- == 0) {
                 found = t;
                 return false;
@@ -387,15 +438,15 @@ public class GraphView implements Graph {
     }
 
     private static class ExistsConsumer implements RelationshipConsumer {
-        private final int targetNodeId;
+        private final long targetNodeId;
         private boolean found = false;
 
-        public ExistsConsumer(int targetNodeId) {
+        public ExistsConsumer(long targetNodeId) {
             this.targetNodeId = targetNodeId;
         }
 
         @Override
-        public boolean accept(int s, int t, long r) {
+        public boolean accept(long s, long t) {
             if (t == targetNodeId) {
                 found = true;
                 return false;

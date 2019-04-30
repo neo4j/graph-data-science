@@ -21,9 +21,9 @@ package org.neo4j.graphalgo.core.huge.loader;
 
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.graphalgo.api.HugeBatchNodeIterable;
-import org.neo4j.graphalgo.api.HugeIdMapping;
-import org.neo4j.graphalgo.api.HugeNodeIterator;
+import org.neo4j.graphalgo.api.BatchNodeIterable;
+import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.api.NodeIterator;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
@@ -35,7 +35,7 @@ import java.util.function.LongPredicate;
  * This is basically a long to int mapper. It sorts the id's in ascending order so its
  * guaranteed that there is no ID greater then nextGraphId / capacity
  */
-public final class HugeIdMap implements HugeIdMapping, HugeNodeIterator, HugeBatchNodeIterable {
+public final class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
 
     private long nodeCount;
     private HugeLongArray graphIds;
@@ -44,14 +44,14 @@ public final class HugeIdMap implements HugeIdMapping, HugeNodeIterator, HugeBat
     /**
      * initialize the map with pre-built sub arrays
      */
-    HugeIdMap(HugeLongArray graphIds, SparseLongArray nodeToGraphIds, long nodeCount) {
+    IdMap(HugeLongArray graphIds, SparseLongArray nodeToGraphIds, long nodeCount) {
         this.nodeCount = nodeCount;
         this.graphIds = graphIds;
         this.nodeToGraphIds = nodeToGraphIds;
     }
 
     @Override
-    public long toHugeMappedNodeId(long nodeId) {
+    public long toMappedNodeId(long nodeId) {
         return nodeToGraphIds.get(nodeId);
     }
 
@@ -81,12 +81,12 @@ public final class HugeIdMap implements HugeIdMapping, HugeNodeIterator, HugeBat
     }
 
     @Override
-    public PrimitiveLongIterator hugeNodeIterator() {
+    public PrimitiveLongIterator nodeIterator() {
         return new IdIterator(nodeCount());
     }
 
     @Override
-    public Collection<PrimitiveLongIterable> hugeBatchIterables(int batchSize) {
+    public Collection<PrimitiveLongIterable> batchIterables(int batchSize) {
         return LazyBatchCollection.of(
                 nodeCount(),
                 batchSize,

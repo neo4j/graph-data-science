@@ -19,17 +19,17 @@
  */
 package org.neo4j.graphalgo.impl.pagerank;
 
-import org.neo4j.graphalgo.api.HugeDegrees;
+import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.HugeRelationshipConsumer;
-import org.neo4j.graphalgo.api.HugeRelationshipIterator;
-import org.neo4j.graphalgo.api.HugeRelationshipWeights;
+import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.binaryLookup;
 
 public class HugeWeightedComputeStep extends HugeBaseComputeStep implements HugeRelationshipConsumer {
-    private final HugeRelationshipWeights relationshipWeights;
+    private final RelationshipWeights relationshipWeights;
     private final double[] aggregatedDegrees;
     private double sumOfWeights;
     private double delta;
@@ -37,9 +37,9 @@ public class HugeWeightedComputeStep extends HugeBaseComputeStep implements Huge
     HugeWeightedComputeStep(
             double dampingFactor,
             long[] sourceNodeIds,
-            HugeRelationshipIterator relationshipIterator,
-            HugeDegrees degrees,
-            HugeRelationshipWeights relationshipWeights,
+            RelationshipIterator relationshipIterator,
+            Degrees degrees,
+            RelationshipWeights relationshipWeights,
             AllocationTracker tracker,
             int partitionSize,
             long startNode,
@@ -58,7 +58,7 @@ public class HugeWeightedComputeStep extends HugeBaseComputeStep implements Huge
     void singleIteration() {
         long startNode = this.startNode;
         long endNode = this.endNode;
-        HugeRelationshipIterator rels = this.relationshipIterator;
+        RelationshipIterator rels = this.relationshipIterator;
         for (long nodeId = startNode; nodeId < endNode; ++nodeId) {
             delta = deltas[(int) (nodeId - startNode)];
             if (delta > 0.0) {

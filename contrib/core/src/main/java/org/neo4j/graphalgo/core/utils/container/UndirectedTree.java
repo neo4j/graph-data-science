@@ -242,10 +242,7 @@ public class UndirectedTree {
                     if (!seen.getAndSet(child)) {
                         queue.addLast(child);
                     }
-                    if (!consumer.accept(
-                            node,
-                            child,
-                            RELATION_ID_NOT_SUPPORTED)) {
+                    if (!consumer.accept(node, child)) {
                         return;
                     }
                 } while ((child = siblings[child]) != INVALID_NODE);
@@ -258,10 +255,7 @@ public class UndirectedTree {
         if (child != INVALID_NODE) {
             int sibling = child;
             do {
-                if (!consumer.accept(
-                        node,
-                        sibling,
-                        RELATION_ID_NOT_SUPPORTED)) {
+                if (!consumer.accept(node, sibling)) {
                     return;
                 }
                 iterateDFS(sibling, consumer);
@@ -272,7 +266,7 @@ public class UndirectedTree {
 
     public String toString(int root) {
         final StringBuilder builder = new StringBuilder();
-        iterateBFS(root, (s, t, r) -> {
+        iterateBFS(root, (s, t) -> {
             if (builder.length() > 0) {
                 builder.append(", ");
             }

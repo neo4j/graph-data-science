@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
-import org.neo4j.graphalgo.api.HugeIdMapping;
+import org.neo4j.graphalgo.api.IdMapping;
 
-public final class HugeDirectIdMapping implements HugeIdMapping {
+public final class HugeDirectIdMapping implements IdMapping {
     private final long nodeCount;
 
     public HugeDirectIdMapping(long nodeCount) {
@@ -29,7 +29,7 @@ public final class HugeDirectIdMapping implements HugeIdMapping {
     }
 
     @Override
-    public long toHugeMappedNodeId(long nodeId) {
+    public long toMappedNodeId(long nodeId) {
         return nodeId;
     }
 

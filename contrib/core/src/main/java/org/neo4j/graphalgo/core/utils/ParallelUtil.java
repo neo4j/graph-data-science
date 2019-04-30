@@ -22,8 +22,8 @@ package org.neo4j.graphalgo.core.utils;
 import org.neo4j.collection.primitive.PrimitiveIntIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.api.BatchNodeIterable;
-import org.neo4j.graphalgo.api.HugeBatchNodeIterable;
-import org.neo4j.graphalgo.core.IdMap;
+import org.neo4j.graphalgo.core.IntIdMap;
+import org.neo4j.graphalgo.core.huge.loader.IdMap;
 import org.neo4j.helpers.Exceptions;
 
 import java.util.*;
@@ -49,8 +49,7 @@ public final class ParallelUtil {
 
     public static final int DEFAULT_BATCH_SIZE = 10_000;
 
-
-    public static Collection<PrimitiveIntIterable> batchIterables(int concurrency, int nodeCount) {
+    public static Collection<PrimitiveLongIterable> batchIterables(int concurrency, int nodeCount) {
         if (concurrency <= 0) {
             throw new IllegalArgumentException("concurrency must be > 0");
         }
@@ -59,11 +58,11 @@ public final class ParallelUtil {
         if (numberOfBatches == 1) {
             return Collections.singleton(new IdMap.IdIterable(0, nodeCount));
         }
-        PrimitiveIntIterable[] iterators = new PrimitiveIntIterable[numberOfBatches];
+        PrimitiveLongIterable[] iterators = new PrimitiveLongIterable[numberOfBatches];
         Arrays.setAll(iterators, i -> {
             int start = i * batchSize;
             int length = Math.min(batchSize, nodeCount - start);
-            return new IdMap.IdIterable(start, length);
+            return new IntIdMap.IdIterable(start, length);
         });
         return Arrays.asList(iterators);
     }
@@ -161,7 +160,7 @@ public final class ParallelUtil {
     public static <T extends Runnable> List<T> readParallel(
             int concurrency,
             int batchSize,
-            BatchNodeIterable idMapping,
+            IntIdMap idMapping,
             ParallelGraphImporter<T> importer,
             ExecutorService executor) {
 
@@ -199,12 +198,12 @@ public final class ParallelUtil {
     public static <T extends Runnable> List<T> readParallel(
             int concurrency,
             int batchSize,
-            HugeBatchNodeIterable idMapping,
+            BatchNodeIterable idMapping,
             ExecutorService executor,
             HugeParallelGraphImporter<T> importer) {
 
         Collection<PrimitiveLongIterable> iterators =
-                idMapping.hugeBatchIterables(batchSize);
+                idMapping.batchIterables(batchSize);
 
         int threads = iterators.size();
 
