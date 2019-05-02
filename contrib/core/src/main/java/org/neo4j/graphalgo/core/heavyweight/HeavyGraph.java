@@ -24,6 +24,7 @@ import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.*;
 import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.graphalgo.core.NullWeightMap;
+import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Collection;
@@ -134,8 +135,8 @@ public class HeavyGraph implements Graph {
 
             @Override
             public double weight(long source, long target, double defaultValue) {
-                checkSize(target);
-                return relationshipWeights.get((int) target, defaultValue);
+                checkSize(source, target);
+                return weightMapping.get(RawValues.combineIntInt((int) source, (int) target), defaultValue);
             }
 
             @Override
