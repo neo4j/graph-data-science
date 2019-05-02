@@ -11,7 +11,6 @@ import org.junit.runners.Parameterized;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
@@ -25,8 +24,8 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static org.junit.Assert.*;
-import static org.neo4j.graphalgo.impl.LabelPropagationAlgorithm.PARTITION_TYPE;
-import static org.neo4j.graphalgo.impl.LabelPropagationAlgorithm.WEIGHT_TYPE;
+import static org.neo4j.graphalgo.impl.LabelPropagation.PARTITION_TYPE;
+import static org.neo4j.graphalgo.impl.LabelPropagation.WEIGHT_TYPE;
 
 @RunWith(Parameterized.class)
 public final class LabelPropagationTest {
@@ -123,7 +122,7 @@ public final class LabelPropagationTest {
     }
 
     private void testClustering(int batchSize) {
-        testClustering(new HugeLabelPropagation(
+        testClustering(new LabelPropagation(
                 graph,
                 graph,
                 batchSize,
@@ -134,14 +133,14 @@ public final class LabelPropagationTest {
     }
 
     // possible bad seed: -2300107887844480632
-    private void testClustering(LabelPropagationAlgorithm<?> lp) {
+    private void testClustering(LabelPropagation lp) {
         Long seed = Long.getLong("tests.seed");
         if (seed != null) {
             lp.compute(Direction.OUTGOING, 10L, seed);
         } else {
             lp.compute(Direction.OUTGOING, 10L);
         }
-        LabelPropagationAlgorithm.Labels labels = lp.labels();
+        LabelPropagation.Labels labels = lp.labels();
         assertNotNull(labels);
         IntObjectMap<IntArrayList> cluster = groupByPartitionInt(labels);
         assertNotNull(cluster);
@@ -178,7 +177,7 @@ public final class LabelPropagationTest {
         }
     }
 
-    private static IntObjectMap<IntArrayList> groupByPartitionInt(LabelPropagationAlgorithm.Labels labels) {
+    private static IntObjectMap<IntArrayList> groupByPartitionInt(LabelPropagation.Labels labels) {
         if (labels == null) {
             return null;
         }
