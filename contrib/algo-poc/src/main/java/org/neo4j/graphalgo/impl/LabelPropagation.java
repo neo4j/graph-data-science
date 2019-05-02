@@ -6,6 +6,7 @@ import com.carrotsearch.hppc.LongDoubleScatterMap;
 import com.carrotsearch.hppc.cursors.LongDoubleCursor;
 import org.neo4j.collection.primitive.PrimitiveIntIterator;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.*;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
@@ -14,6 +15,7 @@ import org.neo4j.graphalgo.core.utils.RandomLongIterable;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.BitUtil;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
@@ -32,6 +34,9 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
 
     public static final String PARTITION_TYPE = "property";
     public static final String WEIGHT_TYPE = "weight";
+
+    public static final PropertyTranslator.OfLong<Labels> LABEL_TRANSLATOR =
+            Labels::labelFor;
 
     private final long nodeCount;
     private final AllocationTracker tracker;
