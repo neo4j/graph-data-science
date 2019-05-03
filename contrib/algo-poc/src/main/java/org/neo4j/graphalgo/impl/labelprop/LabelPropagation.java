@@ -1,4 +1,4 @@
-package org.neo4j.graphalgo.impl;
+package org.neo4j.graphalgo.impl.labelprop;
 
 import com.carrotsearch.hppc.HashOrderMixing;
 import com.carrotsearch.hppc.LongDoubleHashMap;

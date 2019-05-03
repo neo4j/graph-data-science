@@ -17,6 +17,7 @@ import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
@@ -24,8 +25,8 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static org.junit.Assert.*;
-import static org.neo4j.graphalgo.impl.LabelPropagation.PARTITION_TYPE;
-import static org.neo4j.graphalgo.impl.LabelPropagation.WEIGHT_TYPE;
+import static org.neo4j.graphalgo.impl.labelprop.LabelPropagation.PARTITION_TYPE;
+import static org.neo4j.graphalgo.impl.labelprop.LabelPropagation.WEIGHT_TYPE;
 
 @RunWith(Parameterized.class)
 public final class LabelPropagationTest {
@@ -177,7 +178,7 @@ public final class LabelPropagationTest {
         }
     }
 
-    private static IntObjectMap<IntArrayList> groupByPartitionInt(LabelPropagation.Labels labels) {
+    private static IntObjectMap<IntArrayList> groupByPartitionInt( LabelPropagation.Labels labels) {
         if (labels == null) {
             return null;
         }
