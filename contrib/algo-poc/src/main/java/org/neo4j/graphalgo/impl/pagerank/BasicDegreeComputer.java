@@ -17,23 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.api;
+package org.neo4j.graphalgo.impl.pagerank;
 
-public interface WeightedRelationshipConsumer {
-    /**
-     * Called for every edge that matches a given relation-constraint
-     *
-     * @param sourceNodeId mapped source node id
-     * @param targetNodeId mapped target node id
-     * @param weight       relationship weight
-     * @return {@code true} if the iteration shall continue, otherwise {@code false}.
-     */
-    boolean accept(
-        long sourceNodeId,
-        long targetNodeId,
-        double weight
-    );
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.impl.degree.AverageDegreeCentrality;
+import org.neo4j.graphdb.Direction;
+
+import java.util.concurrent.ExecutorService;
+
+public class BasicDegreeComputer implements DegreeComputer {
+    private Graph graph;
+
+    public BasicDegreeComputer(Graph graph) {
+        this.graph = graph;
+    }
+
+    @Override
+    public DegreeCache degree(ExecutorService executor, int concurrency) {
+        AverageDegreeCentrality degreeCentrality = new AverageDegreeCentrality(graph, executor, concurrency, Direction.OUTGOING);
+        degreeCentrality.compute();
+        return new DegreeCache(new double[0], new double[0][], degreeCentrality.average());
+    }
 }
-
-
-

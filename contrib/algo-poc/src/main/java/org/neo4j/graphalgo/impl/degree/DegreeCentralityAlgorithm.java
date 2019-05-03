@@ -17,23 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.api;
+package org.neo4j.graphalgo.impl.degree;
 
-public interface WeightedRelationshipConsumer {
-    /**
-     * Called for every edge that matches a given relation-constraint
-     *
-     * @param sourceNodeId mapped source node id
-     * @param targetNodeId mapped target node id
-     * @param weight       relationship weight
-     * @return {@code true} if the iteration shall continue, otherwise {@code false}.
-     */
-    boolean accept(
-        long sourceNodeId,
-        long targetNodeId,
-        double weight
-    );
+import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.impl.results.CentralityResult;
+
+public interface DegreeCentralityAlgorithm {
+    CentralityResult result();
+
+    void compute();
+
+    Algorithm<?> algorithm();
 }
-
-
-

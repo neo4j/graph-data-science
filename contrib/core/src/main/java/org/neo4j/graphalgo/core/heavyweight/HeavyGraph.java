@@ -115,7 +115,8 @@ public class HeavyGraph implements Graph {
 
     @Override
     public double weightOf(final long sourceNodeId, final long targetNodeId) {
-        return relationshipWeights.get(sourceNodeId, targetNodeId);
+        checkSize(sourceNodeId, targetNodeId);
+        return relationshipWeights.get((int) sourceNodeId, (int) targetNodeId);
     }
 
     public boolean hasWeights() {

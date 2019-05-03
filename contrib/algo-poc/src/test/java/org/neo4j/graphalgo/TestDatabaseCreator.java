@@ -17,23 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.api;
+package org.neo4j.graphalgo;
 
-public interface WeightedRelationshipConsumer {
-    /**
-     * Called for every edge that matches a given relation-constraint
-     *
-     * @param sourceNodeId mapped source node id
-     * @param targetNodeId mapped target node id
-     * @param weight       relationship weight
-     * @return {@code true} if the iteration shall continue, otherwise {@code false}.
-     */
-    boolean accept(
-        long sourceNodeId,
-        long targetNodeId,
-        double weight
-    );
+import org.junit.Ignore;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.test.TestGraphDatabaseFactory;
+
+import java.io.File;
+import java.util.UUID;
+
+/**
+ * @author mh
+ * @since 13.10.17
+ */
+@Ignore
+public class TestDatabaseCreator {
+
+    public static GraphDatabaseAPI createTestDatabase() {
+        return (GraphDatabaseAPI)new TestGraphDatabaseFactory()
+                .newImpermanentDatabaseBuilder(new File(UUID.randomUUID().toString()))
+                .newGraphDatabase();
+    }
 }
-
-
-

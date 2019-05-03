@@ -17,23 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.api;
+package org.neo4j.graphalgo.impl.results;
 
-public interface WeightedRelationshipConsumer {
-    /**
-     * Called for every edge that matches a given relation-constraint
-     *
-     * @param sourceNodeId mapped source node id
-     * @param targetNodeId mapped target node id
-     * @param weight       relationship weight
-     * @return {@code true} if the iteration shall continue, otherwise {@code false}.
-     */
-    boolean accept(
-        long sourceNodeId,
-        long targetNodeId,
-        double weight
-    );
+import org.neo4j.graphalgo.core.write.Exporter;
+
+import java.util.function.Function;
+
+public interface CentralityResult
+{
+
+    double score( int nodeId );
+
+    double score( long nodeId );
+
+    void export( String propertyName, Exporter exporter );
+
+    void export( String propertyName, Exporter exporter, Function<Double,Double> normalizationFunction );
+
+    double computeMax();
+
+    double computeL2Norm();
+
+    double computeL1Norm();
 }
-
-
-
