@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl;
+package org.neo4j.graphalgo.impl.degree;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -31,9 +31,8 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
-import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
-import org.neo4j.graphalgo.impl.pagerank.PageRankFactory;
-import org.neo4j.graphalgo.impl.results.CentralityResult;
+import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.impl.degree.WeightedDegreeCentrality;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
@@ -44,20 +43,26 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
-import java.util.stream.LongStream;
+
+import static org.junit.Assert.assertArrayEquals;
 
 @RunWith(Parameterized.class)
-public final class ArticleRankTest {
+public final class WeightedDegreeCentralityTest {
 
     private Class<? extends GraphFactory> graphImpl;
 
     @Parameterized.Parameters(name = "{1}")
     public static Collection<Object[]> data() {
+//        return Arrays.asList(
+//                new Object[]{HeavyGraphFactory.class, "HeavyGraphFactory"},
+//                new Object[]{HeavyCypherGraphFactory.class, "HeavyCypherGraphFactory"},
+//                new Object[]{HugeGraphFactory.class, "HugeGraphFactory"},
+//                new Object[]{GraphViewFactory.class, "GraphViewFactory"}
+//        );
+
         return Arrays.asList(
                 new Object[]{HeavyGraphFactory.class, "HeavyGraphFactory"},
-                new Object[]{HeavyCypherGraphFactory.class, "HeavyCypherGraphFactory"},
-                new Object[]{HugeGraphFactory.class, "HugeGraphFactory"},
-                new Object[]{GraphViewFactory.class, "GraphViewFactory"}
+                new Object[]{HugeGraphFactory.class, "HugeGraphFactory"}
         );
     }
 
@@ -84,19 +89,33 @@ public final class ArticleRankTest {
             "CREATE (s:Label2 {name:\"s\"})\n" +
             "CREATE (t:Label2 {name:\"t\"})\n" +
             "CREATE\n" +
-            "  (b)-[:TYPE1]->(c),\n" +
+            "  (b)-[:TYPE1 {weight: 2.0}]->(c),\n" +
+            "  (c)-[:TYPE1 {weight: 2.0}]->(b),\n" +
 
-            "  (c)-[:TYPE1]->(b),\n" +
+            "  (d)-[:TYPE1 {weight: 5.0}]->(a),\n" +
+            "  (d)-[:TYPE1 {weight: 2.0}]->(b),\n" +
 
-            "  (d)-[:TYPE1]->(a),\n" +
-            "  (d)-[:TYPE1]->(b),\n" +
+            "  (e)-[:TYPE1 {weight: 2.0}]->(b),\n" +
+            "  (e)-[:TYPE1 {weight: 7.0}]->(d),\n" +
+            "  (e)-[:TYPE1 {weight: 1.0}]->(f),\n" +
 
-            "  (e)-[:TYPE1]->(b),\n" +
-            "  (e)-[:TYPE1]->(d),\n" +
-            "  (e)-[:TYPE1]->(f),\n" +
+            "  (f)-[:TYPE1 {weight: 2.0}]->(b),\n" +
+            "  (f)-[:TYPE1 {weight: 2.0}]->(e),\n" +
 
-            "  (f)-[:TYPE1]->(b),\n" +
-            "  (f)-[:TYPE1]->(e),\n" +
+            "  (a)-[:TYPE3 {weight: -2.0}]->(b),\n" +
+
+            "  (b)-[:TYPE3 {weight: 2.0}]->(c),\n" +
+            "  (c)-[:TYPE3 {weight: 2.0}]->(b),\n" +
+
+            "  (d)-[:TYPE3 {weight: 2.0}]->(a),\n" +
+            "  (d)-[:TYPE3 {weight: 2.0}]->(b),\n" +
+
+            "  (e)-[:TYPE3 {weight: 2.0}]->(b),\n" +
+            "  (e)-[:TYPE3 {weight: 2.0}]->(d),\n" +
+            "  (e)-[:TYPE3 {weight: 2.0}]->(f),\n" +
+
+            "  (f)-[:TYPE3 {weight: 2.0}]->(b),\n" +
+            "  (f)-[:TYPE3 {weight: 2.0}]->(e),\n" +
 
             "  (g)-[:TYPE2]->(b),\n" +
             "  (g)-[:TYPE2]->(e),\n" +
@@ -123,28 +142,28 @@ public final class ArticleRankTest {
         if (db!=null) db.shutdown();
     }
 
-    public ArticleRankTest(
+    public WeightedDegreeCentralityTest(
             Class<? extends GraphFactory> graphImpl,
             String nameIgnoredOnlyForTestName) {
         this.graphImpl = graphImpl;
     }
 
     @Test
-    public void test() throws Exception {
+    public void buildWeightsArray() throws Exception {
         final Label label = Label.label("Label1");
-        final Map<Long, Double> expected = new HashMap<>();
+        final Map<Long, double[]> expected = new HashMap<>();
 
         try (Transaction tx = db.beginTx()) {
-            expected.put(db.findNode(label, "name", "a").getId(), 0.2071625);
-            expected.put(db.findNode(label, "name", "b").getId(), 0.4706795);
-            expected.put(db.findNode(label, "name", "c").getId(), 0.3605195);
-            expected.put(db.findNode(label, "name", "d").getId(), 0.195118);
-            expected.put(db.findNode(label, "name", "e").getId(), 0.2071625);
-            expected.put(db.findNode(label, "name", "f").getId(), 0.195118);
-            expected.put(db.findNode(label, "name", "g").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "h").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "i").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "j").getId(), 0.15);
+            expected.put(db.findNode(label, "name", "a").getId(), new double[] {});
+            expected.put(db.findNode(label, "name", "b").getId(), new double[] {2.0});
+            expected.put(db.findNode(label, "name", "c").getId(), new double[] {2.0});
+            expected.put(db.findNode(label, "name", "d").getId(), new double[] {5.0,2.0});
+            expected.put(db.findNode(label, "name", "e").getId(), new double[] {2.0,7.0,1.0});
+            expected.put(db.findNode(label, "name", "f").getId(), new double[] {2.0,2.0});
+            expected.put(db.findNode(label, "name", "g").getId(), new double[] {});
+            expected.put(db.findNode(label, "name", "h").getId(), new double[] {});
+            expected.put(db.findNode(label, "name", "i").getId(), new double[] {});
+            expected.put(db.findNode(label, "name", "j").getId(), new double[] {});
             tx.close();
         }
 
@@ -152,7 +171,8 @@ public final class ArticleRankTest {
         if (graphImpl.isAssignableFrom(HeavyCypherGraphFactory.class)) {
             graph = new GraphLoader(db)
                     .withLabel("MATCH (n:Label1) RETURN id(n) as id")
-                    .withRelationshipType("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
+                    .withRelationshipType("MATCH (n:Label1)-[type:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target, type.weight AS weight")
+                    .withOptionalRelationshipWeightsFromProperty("weight", 1.0)
                     .load(graphImpl);
 
         } else {
@@ -160,23 +180,24 @@ public final class ArticleRankTest {
                     .withLabel(label)
                     .withRelationshipType("TYPE1")
                     .withDirection(Direction.OUTGOING)
+                    .withOptionalRelationshipWeightsFromProperty("weight", 1.0)
+                    .withSort(true)
                     .load(graphImpl);
         }
 
-        final CentralityResult rankResult = PageRankFactory
-                .articleRankOf(graph, 0.85, LongStream.empty())
-                .compute(40)
-                .result();
+        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph, Pools.DEFAULT, 1, Direction.OUTGOING);
+        degreeCentrality.compute(true);
 
         IntStream.range(0, expected.size()).forEach(i -> {
             final long nodeId = graph.toOriginalNodeId(i);
-            System.out.println(nodeId + " -> " + rankResult.score(i));
-//            assertEquals(
-//                    "Node#" + nodeId,
-//                    expected.get(nodeId),
-//                    rankResult.score(i),
-//                    1e-2
-//            );
+            assertArrayEquals(
+                    "Node#" + nodeId,
+                    expected.get(nodeId),
+                    degreeCentrality.weights()[i],
+                    0.01
+
+            );
         });
     }
+
 }
