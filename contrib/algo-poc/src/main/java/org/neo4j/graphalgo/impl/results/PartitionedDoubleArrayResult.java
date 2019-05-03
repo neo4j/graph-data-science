@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.impl.results;
 
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
-import org.neo4j.graphalgo.impl.CentralityUtils;
+import org.neo4j.graphalgo.impl.utils.CentralityUtils;
 
 import java.util.function.Function;
 
