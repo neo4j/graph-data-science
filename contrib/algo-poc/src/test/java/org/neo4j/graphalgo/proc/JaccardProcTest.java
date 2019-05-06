@@ -17,11 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.algo.similarity;
+package org.neo4j.graphalgo.proc;
 
 import org.junit.*;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.similarity.JaccardProc;
+import org.neo4j.graphalgo.proc.JaccardProc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -35,7 +35,7 @@ import static java.util.Collections.singletonMap;
 import static org.junit.Assert.*;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
-public class JaccardTest {
+public class JaccardProcTest {
 
     private static GraphDatabaseAPI db;
     private Transaction tx;

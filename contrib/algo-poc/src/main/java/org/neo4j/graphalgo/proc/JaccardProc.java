@@ -17,10 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.similarity;
+package org.neo4j.graphalgo.proc;
 
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
-import org.neo4j.graphalgo.similarity.recorder.SimilarityRecorder;
+import org.neo4j.graphalgo.impl.results.SimilarityResult;
+import org.neo4j.graphalgo.impl.results.SimilaritySummaryResult;
+import org.neo4j.graphalgo.impl.similarity.CategoricalInput;
+import org.neo4j.graphalgo.impl.similarity.SimilarityComputer;
+import org.neo4j.graphalgo.impl.similarity.SimilarityInput;
+import org.neo4j.graphalgo.impl.similarity.SimilarityRecorder;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -29,8 +34,6 @@ import org.neo4j.procedure.Procedure;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import static org.neo4j.graphalgo.similarity.SimilarityInput.indexesFor;
-
 
 public class JaccardProc extends SimilarityProc {
 
@@ -48,12 +51,12 @@ public class JaccardProc extends SimilarityProc {
         }
 
         long[] inputIds = SimilarityInput.extractInputIds(inputs);
-        int[] sourceIndexIds = indexesFor(inputIds, configuration, "sourceIds");
-        int[] targetIndexIds = indexesFor(inputIds, configuration, "targetIds");
+        int[] sourceIndexIds = SimilarityInput.indexesFor(inputIds, configuration, "sourceIds");
+        int[] targetIndexIds = SimilarityInput.indexesFor(inputIds, configuration, "targetIds");
 
         SimilarityComputer<CategoricalInput> computer = similarityComputer(sourceIndexIds, targetIndexIds);
 
-        return topN(similarityStream(inputs, sourceIndexIds, targetIndexIds, computer, configuration, () -> null,
+        return SimilarityProc.topN(similarityStream(inputs, sourceIndexIds, targetIndexIds, computer, configuration, () -> null,
                 getSimilarityCutoff(configuration), getTopK(configuration)), getTopN(configuration));
     }
 
@@ -73,14 +76,14 @@ public class JaccardProc extends SimilarityProc {
         }
 
         long[] inputIds = SimilarityInput.extractInputIds(inputs);
-        int[] sourceIndexIds = indexesFor(inputIds, configuration, "sourceIds");
-        int[] targetIndexIds = indexesFor(inputIds, configuration,"targetIds");
+        int[] sourceIndexIds = SimilarityInput.indexesFor(inputIds, configuration, "sourceIds");
+        int[] targetIndexIds = SimilarityInput.indexesFor(inputIds, configuration,"targetIds");
 
         SimilarityComputer<CategoricalInput> computer = similarityComputer(sourceIndexIds, targetIndexIds);
-        SimilarityRecorder<CategoricalInput> recorder = categoricalSimilarityRecorder(computer, configuration);
+        SimilarityRecorder<CategoricalInput> recorder = SimilarityProc.categoricalSimilarityRecorder(computer, configuration);
 
         double similarityCutoff = getSimilarityCutoff(configuration);
-        Stream<SimilarityResult> stream = topN(similarityStream(inputs,sourceIndexIds, targetIndexIds, recorder, configuration, () -> null,
+        Stream<SimilarityResult> stream = SimilarityProc.topN(similarityStream(inputs,sourceIndexIds, targetIndexIds, recorder, configuration, () -> null,
 
                 similarityCutoff, getTopK(configuration)), getTopN(configuration));
 

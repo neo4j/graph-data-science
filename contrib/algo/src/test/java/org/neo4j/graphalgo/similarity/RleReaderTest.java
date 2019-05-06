@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.*;
 
 @RunWith(JUnitQuickcheck.class)
 public class RleReaderTest {

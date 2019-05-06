@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.similarity;
+package org.neo4j.graphalgo.proc;
 
 import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.LongDoubleMap;
@@ -27,9 +27,10 @@ import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.similarity.recorder.NonRecordingSimilarityRecorder;
-import org.neo4j.graphalgo.similarity.recorder.RecordingSimilarityRecorder;
-import org.neo4j.graphalgo.similarity.recorder.SimilarityRecorder;
+import org.neo4j.graphalgo.impl.results.SimilarityExporter;
+import org.neo4j.graphalgo.impl.results.SimilarityResult;
+import org.neo4j.graphalgo.impl.results.SimilaritySummaryResult;
+import org.neo4j.graphalgo.impl.similarity.*;
 import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -42,9 +43,6 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.similarity.TopKConsumer.topK;
-import static org.neo4j.graphalgo.similarity.Weights.REPEAT_CUTOFF;
-
 public class SimilarityProc {
     @Context
     public GraphDatabaseAPI api;
@@ -53,7 +51,7 @@ public class SimilarityProc {
     @Context
     public KernelTransaction transaction;
 
-    static TopKConsumer<SimilarityResult>[] initializeTopKConsumers(int length, int topK) {
+    public static TopKConsumer<SimilarityResult>[] initializeTopKConsumers(int length, int topK) {
         Comparator<SimilarityResult> comparator = topK > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
         topK = Math.abs(topK);
 
@@ -72,7 +70,7 @@ public class SimilarityProc {
         if (topN > 10000) {
             return stream.sorted(comparator).limit(topN);
         }
-        return topK(stream, topN, comparator);
+        return TopKConsumer.topK(stream, topN, comparator);
     }
 
     static SimilarityRecorder<WeightedInput> similarityRecorder(SimilarityComputer<WeightedInput> computer, ProcedureConfiguration configuration) {
@@ -152,14 +150,14 @@ public class SimilarityProc {
         return ids;
     }
 
-    WeightedInput[] prepareWeights(Object rawData, ProcedureConfiguration configuration, Double skipValue) throws Exception {
-        if (ProcedureConstants.CYPHER_QUERY.equals(configuration.getGraphName("dense"))) {
-            return prepareSparseWeights(api, (String) rawData,  skipValue, configuration);
-        } else {
-            List<Map<String, Object>> data = (List<Map<String, Object>>) rawData;
-            return WeightedInput.prepareDenseWeights(data, getDegreeCutoff(configuration), skipValue);
-        }
-    }
+//    WeightedInput[] prepareWeights(Object rawData, ProcedureConfiguration configuration, Double skipValue) throws Exception {
+//        if (ProcedureConstants.CYPHER_QUERY.equals(configuration.getGraphName("dense"))) {
+//            return prepareSparseWeights(api, (String) rawData,  skipValue, configuration);
+//        } else {
+//            List<Map<String, Object>> data = (List<Map<String, Object>>) rawData;
+//            return WeightedInput.prepareDenseWeights(data, getDegreeCutoff(configuration), skipValue);
+//        }
+//    }
 
     Double readSkipValue(ProcedureConfiguration configuration) {
         return configuration.get("skipValue", Double.NaN);
@@ -168,7 +166,7 @@ public class SimilarityProc {
     private WeightedInput[] prepareSparseWeights(GraphDatabaseAPI api, String query, Double skipValue, ProcedureConfiguration configuration) throws Exception {
         Map<String, Object> params = configuration.getParams();
         Long degreeCutoff = getDegreeCutoff(configuration);
-        int repeatCutoff = configuration.get("sparseVectorRepeatCutoff", REPEAT_CUTOFF).intValue();
+        int repeatCutoff = configuration.get("sparseVectorRepeatCutoff", Weights.REPEAT_CUTOFF).intValue();
 
         Result result = api.execute(query, params);
 
@@ -230,10 +228,10 @@ public class SimilarityProc {
     }
 
 
-    Supplier<RleDecoder> createDecoderFactory(ProcedureConfiguration configuration, WeightedInput input) {
-        int size = input.initialSize;
-        return createDecoderFactory(configuration.getGraphName("dense"), size);
-    }
+//    Supplier<RleDecoder> createDecoderFactory(ProcedureConfiguration configuration, WeightedInput input) {
+//        int size = input.initialSize;
+//        return createDecoderFactory(configuration.getGraphName("dense"), size);
+//    }
 
 
 }

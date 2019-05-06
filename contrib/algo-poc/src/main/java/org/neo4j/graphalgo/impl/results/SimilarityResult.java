@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.similarity;
+package org.neo4j.graphalgo.impl.results;
 
 import org.HdrHistogram.DoubleHistogram;
 
@@ -87,14 +87,14 @@ public class SimilarityResult implements Comparable<SimilarityResult> {
         return  this;
     }
 
-    void record(DoubleHistogram histogram) {
+    public void record(DoubleHistogram histogram) {
         try {
             histogram.recordValue(similarity);
         } catch (ArrayIndexOutOfBoundsException ignored) {
         }
     }
-    static Comparator<SimilarityResult> ASCENDING = (o1, o2) -> -o1.compareTo(o2);
-    static Comparator<SimilarityResult> DESCENDING = SimilarityResult::compareTo;
+    public static Comparator<SimilarityResult> ASCENDING = (o1, o2) -> -o1.compareTo(o2);
+    public static Comparator<SimilarityResult> DESCENDING = SimilarityResult::compareTo;
 
     @Override
     public String toString() {

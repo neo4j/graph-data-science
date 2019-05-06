@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.similarity;
+package org.neo4j.graphalgo.impl.similarity;
 
-public interface SimilarityComputer<T> {
-    SimilarityResult similarity(RleDecoder decoder, T source, T target, double cutoff);
+public interface Computations {
+    long count();
 }

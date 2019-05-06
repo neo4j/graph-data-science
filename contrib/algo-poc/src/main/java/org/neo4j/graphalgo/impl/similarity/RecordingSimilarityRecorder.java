@@ -17,8 +17,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.similarity;
+package org.neo4j.graphalgo.impl.similarity;
 
-interface SimilarityConsumer {
-    void accept(int sourceIndex, int targetIndex, SimilarityResult result);
+import org.neo4j.graphalgo.impl.results.SimilarityResult;
+
+import java.util.concurrent.atomic.LongAdder;
+
+public class RecordingSimilarityRecorder<T> implements SimilarityRecorder<T> {
+
+    private final SimilarityComputer<T> computer;
+    private final LongAdder computations = new LongAdder();
+
+    public RecordingSimilarityRecorder(SimilarityComputer computer) {
+        this.computer = computer;
+    }
+
+    public long count() {
+        return computations.longValue();
+    }
+
+
+    @Override
+    public SimilarityResult similarity(RleDecoder decoder, T source, T target, double cutoff) {
+        computations.increment();
+        return computer.similarity(decoder, source, target, cutoff);
+    }
 }
+

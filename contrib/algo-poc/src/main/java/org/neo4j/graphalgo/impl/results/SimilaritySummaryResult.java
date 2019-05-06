@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.similarity;
+package org.neo4j.graphalgo.impl.results;
 
 import org.HdrHistogram.DoubleHistogram;
 
@@ -73,7 +73,7 @@ public class SimilaritySummaryResult {
         this.p100 = p100;
     }
 
-    static SimilaritySummaryResult from(long length, long sourceIdsLength, long targetIdsLength, AtomicLong similarityPairs, long computations, String writeRelationshipType, String writeProperty, boolean write, DoubleHistogram histogram) {
+    public static SimilaritySummaryResult from(long length, long sourceIdsLength, long targetIdsLength, AtomicLong similarityPairs, long computations, String writeRelationshipType, String writeProperty, boolean write, DoubleHistogram histogram) {
         long sourceNodes = sourceIdsLength == 0 ? length : sourceIdsLength;
         long targetNodes = targetIdsLength == 0 ? length : targetIdsLength;
 

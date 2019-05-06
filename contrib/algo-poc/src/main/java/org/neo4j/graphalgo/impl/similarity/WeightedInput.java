@@ -17,15 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.similarity;
+package org.neo4j.graphalgo.impl.similarity;
 
 import org.neo4j.graphalgo.core.utils.Intersections;
+import org.neo4j.graphalgo.impl.results.SimilarityResult;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-class WeightedInput implements Comparable<WeightedInput>, SimilarityInput {
+public class WeightedInput implements Comparable<WeightedInput>, SimilarityInput {
     private final long id;
     private int itemCount;
     private final double[] weights;

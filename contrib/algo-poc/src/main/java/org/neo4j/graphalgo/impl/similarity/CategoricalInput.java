@@ -17,13 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.similarity;
+package org.neo4j.graphalgo.impl.similarity;
 
 import org.neo4j.graphalgo.core.utils.Intersections;
+import org.neo4j.graphalgo.impl.results.SimilarityResult;
 
 import java.util.Arrays;
-
-
 
 public class CategoricalInput implements  Comparable<CategoricalInput>, SimilarityInput {
     long id;
@@ -43,7 +42,7 @@ public class CategoricalInput implements  Comparable<CategoricalInput>, Similari
         return Long.compare(id, o.id);
     }
 
-    SimilarityResult jaccard(double similarityCutoff, CategoricalInput e2, boolean bidirectional) {
+    public SimilarityResult jaccard(double similarityCutoff, CategoricalInput e2, boolean bidirectional) {
         long intersection = Intersections.intersection3(targets, e2.targets);
         if (similarityCutoff >= 0d && intersection == 0) return null;
         int count1 = targets.length;
