@@ -17,16 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl;
+package org.neo4j.graphalgo.impl.louvain;
 
-import com.carrotsearch.hppc.IntHashSet;
-import com.carrotsearch.hppc.IntSet;
+import com.carrotsearch.hppc.LongHashSet;
+import com.carrotsearch.hppc.LongSet;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.neo4j.graphalgo.LouvainProc;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
@@ -37,7 +36,7 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.impl.louvain.Louvain;
+import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
@@ -47,18 +46,17 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * (a)-(b)-(d)
- *  | /            -> (abc)-(d)
+ * | /            -> (abc)-(d)
  * (c)
  *
- *  @author mknblch
+ * @author mknblch
  */
 @RunWith(Parameterized.class)
-public class LouvainTest1 {
+public class HugeLouvainTest1 {
 
     private static final String unidirectional =
             "CREATE (a:Node {name:'a'})\n" +
@@ -80,11 +78,11 @@ public class LouvainTest1 {
     @Rule
     public ErrorCollector collector = new ErrorCollector();
 
-    private Class<? extends GraphFactory> graphImpl;
     private Graph graph;
     private final Map<String, Integer> nameMap;
+    private Class<? extends GraphFactory> graphImpl;
 
-    public LouvainTest1(
+    public HugeLouvainTest1(
             Class<? extends GraphFactory> graphImpl,
             String name) {
         this.graphImpl = graphImpl;
@@ -113,19 +111,9 @@ public class LouvainTest1 {
         try (Transaction transaction = DB.beginTx()) {
             for (int i = 0; i < ABCD.length(); i++) {
                 final String value = String.valueOf(ABCD.charAt(i));
-                final int id = graph.toMappedNodeId(DB.findNode(LABEL, "name", value).getId());
-                nameMap.put(value, id);
+                final long id = graph.toMappedNodeId(DB.findNode(LABEL, "name", value).getId());
+                nameMap.put(value, (int) id);
             }
-            transaction.success();
-        }
-    }
-
-    public void printCommunities(Louvain louvain) {
-        try (Transaction transaction = DB.beginTx()) {
-            louvain.resultStream()
-                    .forEach(r -> {
-                        System.out.println(DB.getNodeById(r.nodeId).getProperty("name") + ":" + r.community);
-                    });
             transaction.success();
         }
     }
@@ -133,16 +121,15 @@ public class LouvainTest1 {
     @Test
     public void testRunner() throws Exception {
         setup(unidirectional);
-        final Louvain algorithm = new Louvain(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
+        final HugeLouvain algorithm = new HugeLouvain(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
                 .compute(10, 10);
-        final int[][] dendogram = algorithm.getDendrogram();
+        final HugeLongArray[] dendogram = algorithm.getDendrogram();
         for (int i = 1; i <= dendogram.length; i++) {
             if (null == dendogram[i - 1]) {
                 break;
             }
-            System.out.println("level " + i + ": " + Arrays.toString(dendogram[i - 1]));
         }
         assertCommunities(algorithm);
     }
@@ -150,58 +137,79 @@ public class LouvainTest1 {
     @Test
     public void testRandomNeighborLouvain() throws Exception {
         setup(unidirectional);
-        final Louvain algorithm = new Louvain(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
+        final HugeLouvain algorithm = new HugeLouvain(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
                 .compute(10, 10, true);
-        final int[][] dendogram = algorithm.getDendrogram();
+        final HugeLongArray[] dendogram = algorithm.getDendrogram();
         for (int i = 1; i <= dendogram.length; i++) {
             if (null == dendogram[i - 1]) {
                 break;
             }
-            System.out.println("level " + i + ": " + Arrays.toString(dendogram[i - 1]));
         }
         assertCommunities(algorithm);
     }
 
-    public void assertCommunities(Louvain louvain) {
+    @Test
+    public void testMultithreadedLouvain() {
+        GraphBuilder.create(DB)
+                .setLabel("Node")
+                .setRelationship("REL")
+                .newCompleteGraphBuilder()
+                .createCompleteGraph(200, 1.0);
+        graph = new GraphLoader(DB)
+                .withLabel("Node")
+                .withRelationshipType("REL")
+                .withOptionalRelationshipWeightsFromProperty("w", 1.0)
+                .withoutNodeWeights()
+                .withSort(true)
+                .asUndirected(true)
+                .load(graphImpl);
+
+        HugeLouvain algorithm = new HugeLouvain(graph, Pools.DEFAULT, 4, AllocationTracker.EMPTY)
+                .withProgressLogger(TestProgressLogger.INSTANCE)
+                .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
+                .compute(99, 99999);
+
+        assertEquals(1, algorithm.getLevel());
+        long[] expected = new long[200];
+        HugeLongArray[] dendrogram = algorithm.getDendrogram();
+        for (HugeLongArray communities : dendrogram) {
+            long[] communityIds = communities.toArray();
+            assertArrayEquals(expected, communityIds);
+        }
+    }
+
+    public void assertCommunities(HugeLouvain louvain) {
         assertUnion(new String[]{"a", "b", "c"}, louvain.getCommunityIds());
         assertDisjoint(new String[]{"a", "d"}, louvain.getCommunityIds());
     }
 
-    private void assertUnion(String[] nodeNames, Object values) {
-        final int[] communityIds = toIntArray(values);
-        int current = -1;
+    private void assertUnion(String[] nodeNames, HugeLongArray values) {
+        final long[] communityIds = values.toArray();
+        long current = -1L;
         for (String name : nodeNames) {
             if (!nameMap.containsKey(name)) {
                 throw new IllegalArgumentException("unknown node name: " + name);
             }
             final int id = nameMap.get(name);
-            if (current == -1) {
+            if (current == -1L) {
                 current = communityIds[id];
             } else {
-                assertEquals("Node " + name + " belongs to wrong community " + communityIds[id], current, communityIds[id]);
+                assertEquals(
+                        "Node " + name + " belongs to wrong community " + communityIds[id],
+                        current,
+                        communityIds[id]);
             }
         }
     }
 
-    private void assertDisjoint(String[] nodeNames, Object values) {
-        final int[] communityIds = toIntArray(values);
-        final IntSet set = new IntHashSet();
+    private void assertDisjoint(String[] nodeNames, HugeLongArray values) {
+        final long[] communityIds = values.toArray();
+        final LongSet set = new LongHashSet();
         for (String name : nodeNames) {
-            final int communityId = communityIds[nameMap.get(name)];
+            final long communityId = communityIds[nameMap.get(name)];
             assertTrue("Node " + name + " belongs to wrong community " + communityId, set.add(communityId));
         }
-    }
-
-    public static int[] toIntArray(Object communityIds) {
-        if (communityIds instanceof HugeLongArray) {
-            final HugeLongArray array = (HugeLongArray) communityIds;
-            final long size = array.size();
-            final int[] data = new int[Math.toIntExact(size)];
-            Arrays.setAll(data, i -> Math.toIntExact(array.get(i)));
-            return data;
-        }
-        return (int[]) communityIds;
     }
 }

@@ -3,7 +3,7 @@ dependencies {
 //    compile group: 'com.carrotsearch'      , name: 'hppc'         , version: versions.hppc
     compile group: 'io.dropwizard.metrics' , name: 'metrics-core' , version: '4.0.2'
     compile group: 'org.hdrhistogram'      , name: 'HdrHistogram' , version: '2.1.9'
-//    compile group: 'org.roaringbitmap'     , name: 'RoaringBitmap', version: '0.7.45'
+    compile group: 'org.roaringbitmap'     , name: 'RoaringBitmap', version: '0.7.45'
 //
     compileOnly group: 'org.neo4j'           , name: 'neo4j'                , version: versions.neo4j
 //    compileOnly group: 'org.neo4j'           , name: 'neo4j-slf4j'          , version: versions.neo4j

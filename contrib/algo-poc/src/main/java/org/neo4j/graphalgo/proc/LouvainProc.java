@@ -17,35 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.proc;
 
 import org.HdrHistogram.Histogram;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeGraph;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.*;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.impl.louvain.HugeLouvain;
-import org.neo4j.graphalgo.impl.louvain.Louvain;
 import org.neo4j.graphalgo.impl.louvain.LouvainAlgo;
-import org.neo4j.graphalgo.results.AbstractCommunityResultBuilder;
+import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
-import org.neo4j.procedure.Context;
-import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Mode;
-import org.neo4j.procedure.Name;
-import org.neo4j.procedure.Procedure;
+import org.neo4j.procedure.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -209,36 +198,18 @@ public class LouvainProc {
 
         if (clusterProperty.isPresent()) {
             // use predefined clustering
-            if (graph instanceof HugeGraph) {
-                HugeGraph hugeGraph = (HugeGraph) graph;
-                HugeWeightMapping communityMap = hugeGraph.hugeNodeProperties(CLUSTERING_IDENTIFIER);
-                HugeLouvain hugeLouvain = new HugeLouvain(hugeGraph, Pools.DEFAULT, concurrency, tracker)
-                        .withProgressLogger(ProgressLogger.wrap(log, "Louvain"))
-                        .withTerminationFlag(TerminationFlag.wrap(transaction));
-                hugeLouvain.compute(communityMap, iterations, maxIterations, randomNeighbor);
-                return hugeLouvain;
-            } else {
-                WeightMapping communityMap = ((NodeProperties) graph).nodeProperties(CLUSTERING_IDENTIFIER);
-                Louvain louvain = new Louvain(graph, Pools.DEFAULT, concurrency, tracker)
-                        .withProgressLogger(ProgressLogger.wrap(log, "Louvain"))
-                        .withTerminationFlag(TerminationFlag.wrap(transaction));
-                louvain.compute(communityMap, iterations, maxIterations, randomNeighbor);
-                return louvain;
-            }
+            HugeWeightMapping communityMap = graph.nodeProperties(CLUSTERING_IDENTIFIER);
+            HugeLouvain hugeLouvain = new HugeLouvain(graph, Pools.DEFAULT, concurrency, tracker)
+                    .withProgressLogger(ProgressLogger.wrap(log, "Louvain"))
+                    .withTerminationFlag(TerminationFlag.wrap(transaction));
+            hugeLouvain.compute(communityMap, iterations, maxIterations, randomNeighbor);
+            return hugeLouvain;
         } else {
-            if (graph instanceof HugeGraph) {
-                HugeLouvain hugeLouvain = new HugeLouvain((HugeGraph) graph, Pools.DEFAULT, concurrency, tracker)
-                        .withProgressLogger(ProgressLogger.wrap(log, "Louvain"))
-                        .withTerminationFlag(TerminationFlag.wrap(transaction));
-                hugeLouvain.compute(iterations, maxIterations, randomNeighbor);
-                return hugeLouvain;
-            } else {
-                Louvain louvain = new Louvain(graph, Pools.DEFAULT, concurrency, tracker)
-                        .withProgressLogger(ProgressLogger.wrap(log, "Louvain"))
-                        .withTerminationFlag(TerminationFlag.wrap(transaction));
-                louvain.compute(iterations, maxIterations, randomNeighbor);
-                return louvain;
-            }
+            HugeLouvain hugeLouvain = new HugeLouvain(graph, Pools.DEFAULT, concurrency, tracker)
+                    .withProgressLogger(ProgressLogger.wrap(log, "Louvain"))
+                    .withTerminationFlag(TerminationFlag.wrap(transaction));
+            hugeLouvain.compute(iterations, maxIterations, randomNeighbor);
+            return hugeLouvain;
         }
     }
 

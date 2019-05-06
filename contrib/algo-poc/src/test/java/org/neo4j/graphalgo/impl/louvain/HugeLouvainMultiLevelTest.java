@@ -17,22 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl;
+package org.neo4j.graphalgo.impl.louvain;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.neo4j.graphalgo.TestProgressLogger;
-import org.neo4j.graphalgo.api.HugeGraph;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.impl.louvain.HugeLouvain;
 import org.neo4j.graphdb.Label;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
+
+import java.util.Arrays;
+import java.util.Collection;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -48,6 +54,7 @@ import static org.junit.Assert.assertEquals;
  *
  * @author mknblch
  */
+@RunWith(Parameterized.class)
 public class HugeLouvainMultiLevelTest {
 
     private static final String COMPLEX_CYPHER =
@@ -86,17 +93,32 @@ public class HugeLouvainMultiLevelTest {
     @Rule
     public ErrorCollector collector = new ErrorCollector();
 
-    private HugeGraph graph;
+    private Class<? extends GraphFactory> graphImpl;
+    private Graph graph;
+
+    public HugeLouvainMultiLevelTest(
+            Class<? extends GraphFactory> graphImpl,
+            String name) {
+        this.graphImpl = graphImpl;
+    }
+
+    @Parameterized.Parameters(name = "{1}")
+    public static Collection<Object[]> data() {
+        return Arrays.asList(
+                new Object[]{HeavyGraphFactory.class, "heavy"},
+                new Object[]{HugeGraphFactory.class, "huge"}
+        );
+    }
 
     private void setup(String cypher) {
         DB.execute(cypher);
-        graph = (HugeGraph) new GraphLoader(DB)
+        graph = new GraphLoader(DB)
                 .withAnyRelationshipType()
                 .withAnyLabel()
                 .withoutNodeProperties()
                 .withOptionalRelationshipWeightsFromProperty("w", 1.0)
                 .asUndirected(true)
-                .load(HugeGraphFactory.class);
+                .load(graphImpl);
     }
 
     @Test
