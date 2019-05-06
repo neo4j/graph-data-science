@@ -33,7 +33,6 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
-import org.neo4j.graphalgo.impl.results.DSSResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -74,7 +73,7 @@ public final class UnionFindProcExec implements BiConsumer<String, Algorithm<?>>
             return Stream.of(UnionFindResult.EMPTY);
         }
 
-        final DSSResult dssResult = uf.evaluate(
+        final PagedDisjointSetStruct result = uf.evaluate(
                 builder::timeEval,
                 graph,
                 configuration,
@@ -86,14 +85,10 @@ public final class UnionFindProcExec implements BiConsumer<String, Algorithm<?>>
             builder.withWrite(true);
             builder.withPartitionProperty(writeProperty).withWriteProperty(writeProperty);
 
-            uf.write(builder::timeWrite, graph, dssResult, configuration, writeProperty);
+            uf.write(builder::timeWrite, graph, result, configuration, writeProperty);
         }
 
-        if (dssResult.isHuge) {
-            return Stream.of(builder.build(tracker, graph.nodeCount(), dssResult.hugeStruct::find));
-        } else {
-            return Stream.of(builder.build(tracker, graph.nodeCount(), l -> (long) dssResult.struct.find((int) l)));
-        }
+        return Stream.of(builder.build(tracker, graph.nodeCount(), result::find));
     }
 
     public static class UnionFindResult {
@@ -227,7 +222,7 @@ public final class UnionFindProcExec implements BiConsumer<String, Algorithm<?>>
             return Stream.empty();
         }
 
-        DSSResult result = uf.evaluate(graph, configuration, tracker);
+        PagedDisjointSetStruct result = uf.evaluate(graph, configuration, tracker);
         graph.release();
         return result.resultStream(graph);
     }
@@ -267,7 +262,7 @@ public final class UnionFindProcExec implements BiConsumer<String, Algorithm<?>>
                 .load(config.getGraphImpl());
     }
 
-    private DSSResult evaluate(
+    private PagedDisjointSetStruct evaluate(
             Supplier<ProgressTimer> timer,
             Graph graph,
             ProcedureConfiguration config,
@@ -277,7 +272,7 @@ public final class UnionFindProcExec implements BiConsumer<String, Algorithm<?>>
         }
     }
 
-    private DSSResult evaluate(
+    private PagedDisjointSetStruct evaluate(
             Graph graph,
             ProcedureConfiguration config,
             final AllocationTracker tracker) {
@@ -298,7 +293,7 @@ public final class UnionFindProcExec implements BiConsumer<String, Algorithm<?>>
     private void write(
             Supplier<ProgressTimer> timer,
             Graph graph,
-            DSSResult struct,
+            PagedDisjointSetStruct struct,
             ProcedureConfiguration configuration, String writeProperty) {
         try (ProgressTimer ignored = timer.get()) {
             write(graph, struct, configuration, writeProperty);
@@ -307,7 +302,7 @@ public final class UnionFindProcExec implements BiConsumer<String, Algorithm<?>>
 
     private void write(
             Graph graph,
-            DSSResult struct,
+            PagedDisjointSetStruct struct,
             ProcedureConfiguration configuration, String writeProperty) {
         log.debug("Writing results");
         Exporter exporter = Exporter.of(api, graph)
@@ -317,11 +312,7 @@ public final class UnionFindProcExec implements BiConsumer<String, Algorithm<?>>
                         configuration.getConcurrency(),
                         TerminationFlag.wrap(transaction))
                 .build();
-        if (struct.hugeStruct != null) {
-            write(exporter, struct.hugeStruct, writeProperty);
-        } else {
-            write(exporter, struct.struct, writeProperty);
-        }
+        write(exporter, struct, writeProperty);
     }
 
     @Override

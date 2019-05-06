@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
-import org.neo4j.graphalgo.impl.results.DSSResult;
 
 import java.util.concurrent.ExecutorService;
 import java.util.function.BiConsumer;
@@ -35,12 +34,11 @@ import java.util.function.BiConsumer;
  * Some benchmarks exist to measure the difference between
  * forkjoin & queue approaches and huge/heavy
  */
-public enum UnionFindAlgo implements UnionFindAlgoInterface
-{
+public enum UnionFindAlgo implements UnionFindAlgoInterface {
 
     QUEUE {
         @Override
-        public DSSResult run(
+        public PagedDisjointSetStruct run(
                 Graph graph,
                 ExecutorService executor,
                 AllocationTracker tracker,
@@ -60,12 +58,12 @@ public enum UnionFindAlgo implements UnionFindAlgoInterface
                     ? algo.compute(threshold)
                     : algo.compute();
             algo.release();
-            return new DSSResult(struct);
+            return struct;
         }
     },
     FORK_JOIN {
         @Override
-        public DSSResult run(
+        public PagedDisjointSetStruct run(
                 Graph graph,
                 ExecutorService executor,
                 AllocationTracker tracker,
@@ -83,12 +81,12 @@ public enum UnionFindAlgo implements UnionFindAlgoInterface
                     ? algo.compute(threshold)
                     : algo.compute();
             algo.release();
-            return new DSSResult(struct);
+            return struct;
         }
     },
     FJ_MERGE {
         @Override
-        public DSSResult run(
+        public PagedDisjointSetStruct run(
                 Graph graph,
                 ExecutorService executor,
                 AllocationTracker tracker,
@@ -107,12 +105,12 @@ public enum UnionFindAlgo implements UnionFindAlgoInterface
                     ? algo.compute(threshold)
                     : algo.compute();
             algo.release();
-            return new DSSResult(struct);
+            return struct;
         }
     },
     SEQ {
         @Override
-        public DSSResult run(
+        public PagedDisjointSetStruct run(
                 Graph graph,
                 ExecutorService executor,
                 AllocationTracker tracker,
@@ -128,7 +126,7 @@ public enum UnionFindAlgo implements UnionFindAlgoInterface
                     ? algo.compute(threshold)
                     : algo.compute();
             algo.release();
-            return new DSSResult(struct);
+            return struct;
         }
     };
 
