@@ -17,20 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.proc;
 
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.dss.DisjointSetStruct;
-import org.neo4j.graphalgo.impl.UnionFindAlgo;
-import org.neo4j.graphalgo.impl.UnionFindProcExec;
+import org.neo4j.graphalgo.impl.unionfind.HugeUnionFindAlgo;
+import org.neo4j.graphalgo.impl.unionfind.UnionFindProcExec;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
-import org.neo4j.procedure.Context;
-import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Mode;
-import org.neo4j.procedure.Name;
-import org.neo4j.procedure.Procedure;
+import org.neo4j.procedure.*;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -51,8 +47,8 @@ public class UnionFindProc {
 
     @Procedure(value = "algo.unionFind", mode = Mode.WRITE)
     @Description("CALL algo.unionFind(label:String, relationship:String, " +
-            "{weightProperty:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition'}) " +
-            "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
+                 "{weightProperty:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition'}) " +
+                 "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
     public Stream<UnionFindProcExec.UnionFindResult> unionFind(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
@@ -65,8 +61,8 @@ public class UnionFindProc {
 
     @Procedure(value = "algo.unionFind.stream")
     @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
-            "{weightProperty:'propertyName', threshold:0.42, defaultValue:1.0) " +
-            "YIELD nodeId, setId - yields a setId to each node id")
+                 "{weightProperty:'propertyName', threshold:0.42, defaultValue:1.0) " +
+                 "YIELD nodeId, setId - yields a setId to each node id")
     public Stream<DisjointSetStruct.Result> unionFindStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
@@ -171,8 +167,8 @@ public class UnionFindProc {
                 api,
                 log,
                 transaction,
-                UnionFindAlgo.SEQ,
-                UnionFindAlgo.FORK_JOIN
+                HugeUnionFindAlgo.SEQ,
+                HugeUnionFindAlgo.FORK_JOIN
         );
     }
 
@@ -181,8 +177,8 @@ public class UnionFindProc {
                 api,
                 log,
                 transaction,
-                UnionFindAlgo.SEQ,
-                UnionFindAlgo.FJ_MERGE
+                HugeUnionFindAlgo.SEQ,
+                HugeUnionFindAlgo.FJ_MERGE
         );
     }
 
@@ -191,15 +187,14 @@ public class UnionFindProc {
                 api,
                 log,
                 transaction,
-                UnionFindAlgo.SEQ,
-                UnionFindAlgo.QUEUE
+                HugeUnionFindAlgo.SEQ,
+                HugeUnionFindAlgo.QUEUE
         );
     }
 
     private ProcedureConfiguration config( Map<String,Object> config, String label, String relationship )
     {
-        return ProcedureConfiguration
-                .create( config )
+        return new ProcedureConfiguration(config)
                 .overrideNodeLabelOrQuery( label )
                 .overrideRelationshipTypeOrQuery( relationship );
     }

@@ -17,12 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl;
+package org.neo4j.graphalgo.impl.unionfind;
 
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeGraph;
-import org.neo4j.graphalgo.core.utils.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
+import org.neo4j.graphalgo.impl.results.DSSResult;
 
 import java.util.concurrent.ExecutorService;
 import java.util.function.BiConsumer;
@@ -34,7 +35,8 @@ import java.util.function.BiConsumer;
  * Some benchmarks exist to measure the difference between
  * forkjoin & queue approaches and huge/heavy
  */
-public enum UnionFindAlgo implements UnionFindAlgoInterface {
+public enum HugeUnionFindAlgo implements UnionFindAlgoInterface
+{
 
     QUEUE {
         @Override
@@ -46,19 +48,20 @@ public enum UnionFindAlgo implements UnionFindAlgoInterface {
                 int concurrency,
                 double threshold,
                 BiConsumer<String, Algorithm<?>> prepare) {
-            ParallelUnionFindQueue algo = new ParallelUnionFindQueue(
+
+            HugeParallelUnionFindQueue algo = new HugeParallelUnionFindQueue(
                     graph,
                     executor,
                     minBatchSize,
-                    concurrency);
-            prepare.accept("CC(ParallelUnionFindQueue)", algo);
-            DisjointSetStruct struct = Double.isFinite(threshold)
+                    concurrency,
+                    tracker);
+            prepare.accept("CC(HugeParallelUnionFindQueue)", algo);
+            PagedDisjointSetStruct struct = Double.isFinite(threshold)
                     ? algo.compute(threshold)
                     : algo.compute();
             algo.release();
             return new DSSResult(struct);
         }
-
     },
     FORK_JOIN {
         @Override
@@ -70,12 +73,13 @@ public enum UnionFindAlgo implements UnionFindAlgoInterface {
                 int concurrency,
                 double threshold,
                 BiConsumer<String, Algorithm<?>> prepare) {
-            ParallelUnionFindForkJoin algo = new ParallelUnionFindForkJoin(
+            HugeParallelUnionFindForkJoin algo = new HugeParallelUnionFindForkJoin(
                     graph,
+                    tracker,
                     minBatchSize,
                     concurrency);
-            prepare.accept("CC(ParallelUnionFindForkJoin)", algo);
-            DisjointSetStruct struct = Double.isFinite(threshold)
+            prepare.accept("CC(HugeParallelUnionFindForkJoin)", algo);
+            PagedDisjointSetStruct struct = Double.isFinite(threshold)
                     ? algo.compute(threshold)
                     : algo.compute();
             algo.release();
@@ -92,13 +96,14 @@ public enum UnionFindAlgo implements UnionFindAlgoInterface {
                 int concurrency,
                 double threshold,
                 BiConsumer<String, Algorithm<?>> prepare) {
-            ParallelUnionFindFJMerge algo = new ParallelUnionFindFJMerge(
+            HugeParallelUnionFindFJMerge algo = new HugeParallelUnionFindFJMerge(
                     graph,
                     executor,
+                    tracker,
                     minBatchSize,
                     concurrency);
-            prepare.accept("CC(ParallelUnionFindFJMerge)", algo);
-            DisjointSetStruct struct = Double.isFinite(threshold)
+            prepare.accept("CC(HugeParallelUnionFindFJMerge)", algo);
+            PagedDisjointSetStruct struct = Double.isFinite(threshold)
                     ? algo.compute(threshold)
                     : algo.compute();
             algo.release();
@@ -115,10 +120,11 @@ public enum UnionFindAlgo implements UnionFindAlgoInterface {
                 int concurrency,
                 double threshold,
                 BiConsumer<String, Algorithm<?>> prepare) {
-            System.out.println("Yes I was run");
-            GraphUnionFind algo = new GraphUnionFind(graph);
-            prepare.accept("CC(SequentialUnionFind)", algo);
-            DisjointSetStruct struct = Double.isFinite(threshold)
+            HugeGraphUnionFind algo = new HugeGraphUnionFind(
+                    graph,
+                    AllocationTracker.EMPTY);
+            prepare.accept("CC(HugeSequentialUnionFind)", algo);
+            PagedDisjointSetStruct struct = Double.isFinite(threshold)
                     ? algo.compute(threshold)
                     : algo.compute();
             algo.release();

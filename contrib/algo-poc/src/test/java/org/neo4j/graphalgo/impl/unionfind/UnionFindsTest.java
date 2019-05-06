@@ -17,8 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl;
+package org.neo4j.graphalgo.impl.unionfind;
 
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -33,6 +34,7 @@ import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.impl.results.DSSResult;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
@@ -86,6 +88,7 @@ public class UnionFindsTest {
                 .withAnyLabel()
                 .withRelationshipType(RELATIONSHIP_TYPE)
                 .load(graphImpl);
+        System.out.println(graph.getClass().getSimpleName());
     }
 
     private static void createTestGraph(int... setSizes) {
@@ -107,41 +110,41 @@ public class UnionFindsTest {
 
     @Test
     public void testSeq() {
-        test(UnionFindAlgo.SEQ);
+        test(HugeUnionFindAlgo.SEQ);
     }
 
     @Test
     public void testQueue() {
-        test(UnionFindAlgo.QUEUE);
+        test(HugeUnionFindAlgo.QUEUE);
     }
 
     @Test
     public void testForkJoin() {
-        test(UnionFindAlgo.FORK_JOIN);
+        test(HugeUnionFindAlgo.FORK_JOIN);
     }
 
     @Test
     public void testFJMerge() {
-        test(UnionFindAlgo.FJ_MERGE);
+        test(HugeUnionFindAlgo.FJ_MERGE);
     }
 
 
-    private void test(UnionFindAlgo uf) {
+    private void test(HugeUnionFindAlgo uf) {
         DSSResult result = run(uf);
 
-        assertEquals(setsCount, result.getSetCount());
-        int[] setRegions = new int[setsCount];
+        Assert.assertEquals(setsCount, result.getSetCount());
+        long[] setRegions = new long[setsCount];
         Arrays.fill(setRegions, -1);
 
         result.forEach(graph, (nodeId, setId) -> {
-            int expectedSetRegion = nodeId / setSize;
-            int setRegion = setId / setSize;
+            long expectedSetRegion = nodeId / setSize;
+            int setRegion = (int) (setId / setSize);
             assertEquals(
                     "Node " + nodeId + " in unexpected set: " + setId,
                     expectedSetRegion,
                     setRegion);
 
-            int regionSetId = setRegions[setRegion];
+            long regionSetId = setRegions[setRegion];
             if (regionSetId == -1) {
                 setRegions[setRegion] = setId;
             } else {
@@ -154,7 +157,7 @@ public class UnionFindsTest {
         });
     }
 
-    private DSSResult run(final UnionFindAlgo uf) {
+    private DSSResult run(final HugeUnionFindAlgo uf) {
         return uf.run(
                 graph,
                 Pools.DEFAULT,
@@ -162,6 +165,6 @@ public class UnionFindsTest {
                 setSize / Pools.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT_CONCURRENCY,
                 Double.NaN,
-                UnionFindAlgo.NOTHING);
+                HugeUnionFindAlgo.NOTHING);
     }
 }

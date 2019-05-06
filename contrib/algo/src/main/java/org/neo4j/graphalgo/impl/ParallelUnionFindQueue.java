@@ -89,39 +89,6 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<Graph, DisjointSe
         return getStruct(queue);
     }
 
-    public static <T> void mergeTask(
-            final BlockingQueue<T> queue,
-            final AtomicInteger expected,
-            BinaryOperator<T> merge) {
-        // basically a decrement operation, but we don't decrement in case there's not
-        // enough sets for us to operate on
-        int available, afterMerge;
-        do {
-            available = expected.get();
-            // see if there are at least two sets to take, so we don't wait for a set that will never come
-            if (available < 2) {
-                return;
-            }
-            // decrease by one, as we're pushing a new set onto the queue
-            afterMerge = available - 1;
-        } while (!expected.compareAndSet(available, afterMerge));
-
-        boolean pushed = false;
-        try {
-            final T a = queue.take();
-            final T b = queue.take();
-            final T next = merge.apply(a, b);
-            queue.add(next);
-            pushed = true;
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException(e);
-        } finally {
-            if (!pushed) {
-                expected.decrementAndGet();
-            }
-        }
-    }
 
     @Override
     public DisjointSetStruct compute(double threshold) {
