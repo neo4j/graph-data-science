@@ -22,23 +22,16 @@ package org.neo4j.graphalgo.impl.louvain;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.neo4j.graphalgo.HeavyHugeTester;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphdb.Label;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
-
-import java.util.Arrays;
-import java.util.Collection;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -54,8 +47,7 @@ import static org.junit.Assert.assertEquals;
  *
  * @author mknblch
  */
-@RunWith(Parameterized.class)
-public class LouvainMultiLevelTest {
+public class LouvainMultiLevelTest extends HeavyHugeTester {
 
     private static final String COMPLEX_CYPHER =
             "CREATE (a:Node {name:'a'})\n" +
@@ -85,8 +77,6 @@ public class LouvainMultiLevelTest {
                     " (c)-[:TYPE]->(e),\n" +
                     " (f)-[:TYPE]->(i)";
 
-    public static final Label LABEL = Label.label("Node");
-
     @Rule
     public ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
 
@@ -96,18 +86,9 @@ public class LouvainMultiLevelTest {
     private Class<? extends GraphFactory> graphImpl;
     private Graph graph;
 
-    public LouvainMultiLevelTest(
-            Class<? extends GraphFactory> graphImpl,
-            String name) {
+    public LouvainMultiLevelTest(Class<? extends GraphFactory> graphImpl, String name) {
+        super(graphImpl);
         this.graphImpl = graphImpl;
-    }
-
-    @Parameterized.Parameters(name = "{1}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(
-                new Object[]{HeavyGraphFactory.class, "heavy"},
-                new Object[]{HugeGraphFactory.class, "huge"}
-        );
     }
 
     private void setup(String cypher) {

@@ -24,10 +24,11 @@ import com.carrotsearch.hppc.LongSet;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
+import org.neo4j.graphalgo.HeavyHugeTester;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -49,7 +50,7 @@ import static org.junit.Assert.assertTrue;
  *
  *  @author mknblch
  */
-public class LouvainWeightedGraphTest {
+public class LouvainWeightedGraphTest extends HeavyHugeTester {
 
     private static final String unidirectional =
             "CREATE (a:Node {name:'a'})\n" +
@@ -92,7 +93,8 @@ public class LouvainWeightedGraphTest {
     private Graph graph;
     private final Map<String, Integer> nameMap;
 
-    public LouvainWeightedGraphTest() {
+    public LouvainWeightedGraphTest(Class<? extends GraphFactory> graphImpl, String name) {
+        super(graphImpl);
         nameMap = new HashMap<>();
     }
 
@@ -104,7 +106,7 @@ public class LouvainWeightedGraphTest {
                 .withoutNodeProperties()
                 .withOptionalRelationshipWeightsFromProperty("w", 1.0)
                 .asUndirected(true)
-                .load(HugeGraphFactory.class);
+                .load(graphImpl);
 
         try (Transaction transaction = DB.beginTx()) {
             for (int i = 0; i < ABCDEFGHZ.length(); i++) {

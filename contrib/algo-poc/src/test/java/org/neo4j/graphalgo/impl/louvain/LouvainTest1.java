@@ -24,14 +24,11 @@ import com.carrotsearch.hppc.LongSet;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.neo4j.graphalgo.HeavyHugeTester;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -41,8 +38,6 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,8 +50,7 @@ import static org.junit.Assert.*;
  *
  * @author mknblch
  */
-@RunWith(Parameterized.class)
-public class LouvainTest1 {
+public class LouvainTest1 extends HeavyHugeTester {
 
     private static final String unidirectional =
             "CREATE (a:Node {name:'a'})\n" +
@@ -80,21 +74,10 @@ public class LouvainTest1 {
 
     private Graph graph;
     private final Map<String, Integer> nameMap;
-    private Class<? extends GraphFactory> graphImpl;
 
-    public LouvainTest1(
-            Class<? extends GraphFactory> graphImpl,
-            String name) {
-        this.graphImpl = graphImpl;
+    public LouvainTest1(Class<? extends GraphFactory> graphImpl, String name) {
+        super(graphImpl);
         nameMap = new HashMap<>();
-    }
-
-    @Parameterized.Parameters(name = "{1}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(
-                new Object[]{HeavyGraphFactory.class, "heavy"},
-                new Object[]{HugeGraphFactory.class, "huge"}
-        );
     }
 
     private void setup(String cypher) {
