@@ -17,8 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.proc;
 
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -27,11 +28,12 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.Algorithm;
-import org.neo4j.graphalgo.impl.pagerank.PageRankAlgorithm;
+import org.neo4j.graphalgo.impl.pagerank.PageRank;
+import org.neo4j.graphalgo.impl.pagerank.PageRankFactory;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
-import org.neo4j.graphalgo.results.CentralityScore;
-import org.neo4j.graphalgo.results.PageRankScore;
+import org.neo4j.graphalgo.impl.results.CentralityScore;
+import org.neo4j.graphalgo.impl.results.PageRankScore;
+import org.neo4j.graphalgo.impl.utils.CentralityUtils;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -45,6 +47,7 @@ import java.util.Map;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+//TODO: Add acceptance tests ("integration tests")
 public final class ArticleRankProc {
 
     public static final String CONFIG_DAMPING = "dampingFactor";
@@ -165,7 +168,7 @@ public final class ArticleRankProc {
         List<Node> sourceNodes = configuration.get("sourceNodes", new ArrayList<>());
         LongStream sourceNodeIds = sourceNodes.stream().mapToLong(Node::getId);
 
-        PageRankAlgorithm prAlgo = PageRankAlgorithm.articleRankOf(
+        PageRank prAlgo = PageRankFactory.articleRankOf(
                     tracker,
                     graph,
                     dampingFactor,
@@ -175,7 +178,6 @@ public final class ArticleRankProc {
                     batchSize);
 
         Algorithm<?> algo = prAlgo
-                .algorithm()
                 .withLog(log)
                 .withTerminationFlag(terminationFlag);
 
