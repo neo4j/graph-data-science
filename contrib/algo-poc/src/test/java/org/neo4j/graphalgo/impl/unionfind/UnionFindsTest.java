@@ -110,26 +110,26 @@ public class UnionFindsTest {
 
     @Test
     public void testSeq() {
-        test(HugeUnionFindAlgo.SEQ);
+        test(UnionFindAlgo.SEQ);
     }
 
     @Test
     public void testQueue() {
-        test(HugeUnionFindAlgo.QUEUE);
+        test(UnionFindAlgo.QUEUE);
     }
 
     @Test
     public void testForkJoin() {
-        test(HugeUnionFindAlgo.FORK_JOIN);
+        test(UnionFindAlgo.FORK_JOIN);
     }
 
     @Test
     public void testFJMerge() {
-        test(HugeUnionFindAlgo.FJ_MERGE);
+        test(UnionFindAlgo.FJ_MERGE);
     }
 
 
-    private void test(HugeUnionFindAlgo uf) {
+    private void test(UnionFindAlgo uf) {
         DSSResult result = run(uf);
 
         Assert.assertEquals(setsCount, result.getSetCount());
@@ -157,7 +157,7 @@ public class UnionFindsTest {
         });
     }
 
-    private DSSResult run(final HugeUnionFindAlgo uf) {
+    private DSSResult run(final UnionFindAlgo uf) {
         return uf.run(
                 graph,
                 Pools.DEFAULT,
@@ -165,6 +165,6 @@ public class UnionFindsTest {
                 setSize / Pools.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT_CONCURRENCY,
                 Double.NaN,
-                HugeUnionFindAlgo.NOTHING);
+                UnionFindAlgo.NOTHING);
     }
 }

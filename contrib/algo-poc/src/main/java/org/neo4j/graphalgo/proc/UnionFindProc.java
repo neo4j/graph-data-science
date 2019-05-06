@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.proc;
 
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.dss.DisjointSetStruct;
-import org.neo4j.graphalgo.impl.unionfind.HugeUnionFindAlgo;
+import org.neo4j.graphalgo.impl.unionfind.UnionFindAlgo;
 import org.neo4j.graphalgo.impl.unionfind.UnionFindProcExec;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -167,8 +167,8 @@ public class UnionFindProc {
                 api,
                 log,
                 transaction,
-                HugeUnionFindAlgo.SEQ,
-                HugeUnionFindAlgo.FORK_JOIN
+                UnionFindAlgo.SEQ,
+                UnionFindAlgo.FORK_JOIN
         );
     }
 
@@ -177,8 +177,8 @@ public class UnionFindProc {
                 api,
                 log,
                 transaction,
-                HugeUnionFindAlgo.SEQ,
-                HugeUnionFindAlgo.FJ_MERGE
+                UnionFindAlgo.SEQ,
+                UnionFindAlgo.FJ_MERGE
         );
     }
 
@@ -187,8 +187,8 @@ public class UnionFindProc {
                 api,
                 log,
                 transaction,
-                HugeUnionFindAlgo.SEQ,
-                HugeUnionFindAlgo.QUEUE
+                UnionFindAlgo.SEQ,
+                UnionFindAlgo.QUEUE
         );
     }
 

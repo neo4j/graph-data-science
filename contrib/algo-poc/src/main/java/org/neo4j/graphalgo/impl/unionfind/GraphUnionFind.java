@@ -42,14 +42,14 @@ import org.neo4j.graphdb.Direction;
  *
  * @author mknblch
  */
-public class HugeGraphUnionFind extends GraphUnionFindAlgo<Graph, PagedDisjointSetStruct, HugeGraphUnionFind>
+public class GraphUnionFind extends GraphUnionFindAlgo<Graph, PagedDisjointSetStruct, GraphUnionFind>
 {
 
     private PagedDisjointSetStruct dss;
     private final long nodeCount;
     private RelationshipConsumer unrestricted;
 
-    HugeGraphUnionFind(
+    GraphUnionFind(
             Graph graph,
             AllocationTracker tracker) {
         super(graph);
@@ -84,7 +84,7 @@ public class HugeGraphUnionFind extends GraphUnionFindAlgo<Graph, PagedDisjointS
     }
 
     @Override
-    public HugeGraphUnionFind release() {
+    public GraphUnionFind release() {
         dss = null;
         unrestricted = null;
         return super.release();

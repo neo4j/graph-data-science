@@ -48,7 +48,7 @@ import java.util.concurrent.RecursiveTask;
  *
  * @author mknblch
  */
-public class HugeParallelUnionFindFJMerge extends GraphUnionFindAlgo<Graph, PagedDisjointSetStruct, HugeParallelUnionFindFJMerge>
+public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<Graph, PagedDisjointSetStruct, ParallelUnionFindFJMerge>
 {
 
     private final ExecutorService executor;
@@ -63,7 +63,7 @@ public class HugeParallelUnionFindFJMerge extends GraphUnionFindAlgo<Graph, Page
      * @param graph
      * @param executor
      */
-    HugeParallelUnionFindFJMerge(
+    ParallelUnionFindFJMerge(
             Graph graph,
             ExecutorService executor,
             AllocationTracker tracker,
@@ -113,7 +113,7 @@ public class HugeParallelUnionFindFJMerge extends GraphUnionFindAlgo<Graph, Page
     }
 
     @Override
-    public HugeParallelUnionFindFJMerge release() {
+    public ParallelUnionFindFJMerge release() {
         struct = null;
         return super.release();
     }

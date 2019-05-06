@@ -35,7 +35,7 @@ import java.util.function.BiConsumer;
  * Some benchmarks exist to measure the difference between
  * forkjoin & queue approaches and huge/heavy
  */
-public enum HugeUnionFindAlgo implements UnionFindAlgoInterface
+public enum UnionFindAlgo implements UnionFindAlgoInterface
 {
 
     QUEUE {
@@ -49,13 +49,13 @@ public enum HugeUnionFindAlgo implements UnionFindAlgoInterface
                 double threshold,
                 BiConsumer<String, Algorithm<?>> prepare) {
 
-            HugeParallelUnionFindQueue algo = new HugeParallelUnionFindQueue(
+            ParallelUnionFindQueue algo = new ParallelUnionFindQueue(
                     graph,
                     executor,
                     minBatchSize,
                     concurrency,
                     tracker);
-            prepare.accept("CC(HugeParallelUnionFindQueue)", algo);
+            prepare.accept("CC(ParallelUnionFindQueue)", algo);
             PagedDisjointSetStruct struct = Double.isFinite(threshold)
                     ? algo.compute(threshold)
                     : algo.compute();
@@ -73,12 +73,12 @@ public enum HugeUnionFindAlgo implements UnionFindAlgoInterface
                 int concurrency,
                 double threshold,
                 BiConsumer<String, Algorithm<?>> prepare) {
-            HugeParallelUnionFindForkJoin algo = new HugeParallelUnionFindForkJoin(
+            ParallelUnionFindForkJoin algo = new ParallelUnionFindForkJoin(
                     graph,
                     tracker,
                     minBatchSize,
                     concurrency);
-            prepare.accept("CC(HugeParallelUnionFindForkJoin)", algo);
+            prepare.accept("CC(ParallelUnionFindForkJoin)", algo);
             PagedDisjointSetStruct struct = Double.isFinite(threshold)
                     ? algo.compute(threshold)
                     : algo.compute();
@@ -96,13 +96,13 @@ public enum HugeUnionFindAlgo implements UnionFindAlgoInterface
                 int concurrency,
                 double threshold,
                 BiConsumer<String, Algorithm<?>> prepare) {
-            HugeParallelUnionFindFJMerge algo = new HugeParallelUnionFindFJMerge(
+            ParallelUnionFindFJMerge algo = new ParallelUnionFindFJMerge(
                     graph,
                     executor,
                     tracker,
                     minBatchSize,
                     concurrency);
-            prepare.accept("CC(HugeParallelUnionFindFJMerge)", algo);
+            prepare.accept("CC(ParallelUnionFindFJMerge)", algo);
             PagedDisjointSetStruct struct = Double.isFinite(threshold)
                     ? algo.compute(threshold)
                     : algo.compute();
@@ -120,7 +120,7 @@ public enum HugeUnionFindAlgo implements UnionFindAlgoInterface
                 int concurrency,
                 double threshold,
                 BiConsumer<String, Algorithm<?>> prepare) {
-            HugeGraphUnionFind algo = new HugeGraphUnionFind(
+            GraphUnionFind algo = new GraphUnionFind(
                     graph,
                     AllocationTracker.EMPTY);
             prepare.accept("CC(HugeSequentialUnionFind)", algo);

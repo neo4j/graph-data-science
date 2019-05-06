@@ -44,7 +44,7 @@ import java.util.concurrent.RecursiveTask;
  *
  * @author mknblch
  */
-public class HugeParallelUnionFindForkJoin extends GraphUnionFindAlgo<Graph, PagedDisjointSetStruct, HugeParallelUnionFindForkJoin>
+public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<Graph, PagedDisjointSetStruct, ParallelUnionFindForkJoin>
 {
 
     private final AllocationTracker tracker;
@@ -56,7 +56,7 @@ public class HugeParallelUnionFindForkJoin extends GraphUnionFindAlgo<Graph, Pag
      *
      * @param graph
      */
-    HugeParallelUnionFindForkJoin(
+    ParallelUnionFindForkJoin(
             Graph graph,
             AllocationTracker tracker,
             int minBatchSize,
