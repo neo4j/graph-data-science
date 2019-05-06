@@ -38,13 +38,13 @@ import java.util.function.LongPredicate;
  *
  * @author mknblch
  */
-public final class HugeLouvainGraph implements Graph {
+public final class LouvainGraph implements Graph {
 
     private final long nodeCount;
     private final SubGraph graph;
     private final SubWeights weights;
 
-    HugeLouvainGraph(long newNodeCount, SubGraph graph, SubWeights weights) {
+    LouvainGraph(long newNodeCount, SubGraph graph, SubWeights weights) {
         this.nodeCount = newNodeCount;
         this.graph = graph;
         this.weights = weights;

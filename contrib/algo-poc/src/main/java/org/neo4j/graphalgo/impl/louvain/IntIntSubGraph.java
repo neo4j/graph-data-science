@@ -35,8 +35,8 @@ final class IntIntSubGraph extends SubGraph {
   }
 
   void add(int source, int target) {
-    HugeLouvain.putIfAbsent(graph, source).add(target);
-    HugeLouvain.putIfAbsent(graph, target).add(source);
+    Louvain.putIfAbsent(graph, source).add(target);
+    Louvain.putIfAbsent(graph, target).add(source);
   }
 
   @Override

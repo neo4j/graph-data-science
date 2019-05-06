@@ -55,7 +55,7 @@ import java.util.function.LongPredicate;
  *
  * @author mknblch
  */
-public final class HugeModularityOptimization extends Algorithm<HugeModularityOptimization> {
+public final class ModularityOptimization extends Algorithm<ModularityOptimization> {
 
     private static final double MINIMUM_MODULARITY = -1.0;
     /**
@@ -79,7 +79,7 @@ public final class HugeModularityOptimization extends Algorithm<HugeModularityOp
     private boolean randomNeighborSelection = false;
     private final Random random;
 
-    HugeModularityOptimization(
+    ModularityOptimization(
             Graph graph,
             HugeNodeWeights nodeWeights,
             ExecutorService pool,
@@ -99,7 +99,7 @@ public final class HugeModularityOptimization extends Algorithm<HugeModularityOp
         communities = HugeLongArray.newArray(nodeCount, tracker);
     }
 
-    public HugeModularityOptimization withRandomNeighborOptimization(boolean randomNeighborSelection) {
+    public ModularityOptimization withRandomNeighborOptimization(boolean randomNeighborSelection) {
         this.randomNeighborSelection = randomNeighborSelection;
         return this;
     }
@@ -183,7 +183,7 @@ public final class HugeModularityOptimization extends Algorithm<HugeModularityOp
      * @param maxIterations
      * @return
      */
-    public HugeModularityOptimization compute(int maxIterations) {
+    public ModularityOptimization compute(int maxIterations) {
         final TerminationFlag terminationFlag = getTerminationFlag();
         // init helper values & initial community structure
         init();
@@ -253,7 +253,7 @@ public final class HugeModularityOptimization extends Algorithm<HugeModularityOp
      * @return this
      */
     @Override
-    public HugeModularityOptimization me() {
+    public ModularityOptimization me() {
         return this;
     }
 
@@ -263,7 +263,7 @@ public final class HugeModularityOptimization extends Algorithm<HugeModularityOp
      * @return this
      */
     @Override
-    public HugeModularityOptimization release() {
+    public ModularityOptimization release() {
         tracker.remove(ki.release());
         this.ki = null;
         tracker.remove(communities.release());

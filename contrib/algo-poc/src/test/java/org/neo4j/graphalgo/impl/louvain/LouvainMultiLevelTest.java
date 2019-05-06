@@ -55,7 +55,7 @@ import static org.junit.Assert.assertEquals;
  * @author mknblch
  */
 @RunWith(Parameterized.class)
-public class HugeLouvainMultiLevelTest {
+public class LouvainMultiLevelTest {
 
     private static final String COMPLEX_CYPHER =
             "CREATE (a:Node {name:'a'})\n" +
@@ -96,7 +96,7 @@ public class HugeLouvainMultiLevelTest {
     private Class<? extends GraphFactory> graphImpl;
     private Graph graph;
 
-    public HugeLouvainMultiLevelTest(
+    public LouvainMultiLevelTest(
             Class<? extends GraphFactory> graphImpl,
             String name) {
         this.graphImpl = graphImpl;
@@ -124,7 +124,7 @@ public class HugeLouvainMultiLevelTest {
     @Test
     public void testComplex() {
         setup(COMPLEX_CYPHER);
-        final HugeLouvain algorithm = new HugeLouvain(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
+        final Louvain algorithm = new Louvain(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
                 .compute(10, 10);
@@ -145,7 +145,7 @@ public class HugeLouvainMultiLevelTest {
     @Test
     public void testComplexRNL() {
         setup(COMPLEX_CYPHER);
-        final HugeLouvain algorithm = new HugeLouvain(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
+        final Louvain algorithm = new Louvain(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
                 .compute(10, 10, true);

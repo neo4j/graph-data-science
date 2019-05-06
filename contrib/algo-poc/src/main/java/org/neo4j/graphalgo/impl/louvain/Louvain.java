@@ -49,7 +49,7 @@ import java.util.stream.Stream;
  *
  * @author mknblch
  */
-public final class HugeLouvain extends LouvainAlgo<HugeLouvain> {
+public final class Louvain extends LouvainAlgo<Louvain> {
 
     private final long rootNodeCount;
     private int level;
@@ -65,7 +65,7 @@ public final class HugeLouvain extends LouvainAlgo<HugeLouvain> {
     private final Graph root;
     private long communityCount;
 
-    public HugeLouvain(
+    public Louvain(
             Graph graph,
             ExecutorService pool,
             int concurrency,
@@ -81,15 +81,15 @@ public final class HugeLouvain extends LouvainAlgo<HugeLouvain> {
         communities.setAll(i -> i);
     }
 
-    public HugeLouvain compute(int maxLevel, int maxIterations) {
+    public Louvain compute(int maxLevel, int maxIterations) {
         return compute(maxLevel, maxIterations, false);
     }
 
-    public HugeLouvain compute(int maxLevel, int maxIterations, boolean rnd) {
+    public Louvain compute(int maxLevel, int maxIterations, boolean rnd) {
         return computeOf(root, rootNodeCount, maxLevel, maxIterations, rnd);
     }
 
-    public HugeLouvain compute(HugeWeightMapping communityMap, int maxLevel, int maxIterations, boolean rnd) {
+    public Louvain compute(HugeWeightMapping communityMap, int maxLevel, int maxIterations, boolean rnd) {
         BitSet comCount = new BitSet();
         communities.setAll(i -> {
             final long t = (long) communityMap.nodeWeight(i, -1.0);
@@ -105,7 +105,7 @@ public final class HugeLouvain extends LouvainAlgo<HugeLouvain> {
         return computeOf(graph, nodeCount, maxLevel, maxIterations, rnd);
     }
 
-    private HugeLouvain computeOf(
+    private Louvain computeOf(
             Graph rootGraph,
             long rootNodeCount,
             int maxLevel,
@@ -121,8 +121,8 @@ public final class HugeLouvain extends LouvainAlgo<HugeLouvain> {
 
         for (int level = 0; level < maxLevel && running(); level++) {
             // start modularity optimization
-            final HugeModularityOptimization modularityOptimization =
-                    new HugeModularityOptimization(graph,
+            final ModularityOptimization modularityOptimization =
+                    new ModularityOptimization(graph,
                             nodeWeights::get,
                             pool,
                             concurrency,
@@ -212,12 +212,12 @@ public final class HugeLouvain extends LouvainAlgo<HugeLouvain> {
             }
         }
 
-        if (graph instanceof HugeLouvainGraph) {
+        if (graph instanceof LouvainGraph) {
             graph.release();
         }
 
         // create temporary graph
-        return new HugeLouvainGraph(communityCount, subGraph, subWeights);
+        return new LouvainGraph(communityCount, subGraph, subWeights);
     }
 
     private Graph rebuildSmallerGraph(
@@ -264,7 +264,7 @@ public final class HugeLouvain extends LouvainAlgo<HugeLouvain> {
         }
 
         // create temporary graph
-        return new HugeLouvainGraph(communityCount, subGraph, subWeights);
+        return new LouvainGraph(communityCount, subGraph, subWeights);
     }
 
     private HugeLongArray rebuildCommunityStructure(HugeLongArray communityIds) {
@@ -370,20 +370,20 @@ public final class HugeLouvain extends LouvainAlgo<HugeLouvain> {
     }
 
     @Override
-    public HugeLouvain release() {
+    public Louvain release() {
         tracker.remove(communities.release());
         communities = null;
         return this;
     }
 
     @Override
-    public HugeLouvain withProgressLogger(ProgressLogger progressLogger) {
+    public Louvain withProgressLogger(ProgressLogger progressLogger) {
         this.progressLogger = progressLogger;
         return this;
     }
 
     @Override
-    public HugeLouvain withTerminationFlag(TerminationFlag terminationFlag) {
+    public Louvain withTerminationFlag(TerminationFlag terminationFlag) {
         this.terminationFlag = terminationFlag;
         return this;
     }

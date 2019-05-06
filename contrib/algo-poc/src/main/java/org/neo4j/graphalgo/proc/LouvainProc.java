@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.*;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.Exporter;
-import org.neo4j.graphalgo.impl.louvain.HugeLouvain;
+import org.neo4j.graphalgo.impl.louvain.Louvain;
 import org.neo4j.graphalgo.impl.louvain.LouvainAlgo;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -199,17 +199,17 @@ public class LouvainProc {
         if (clusterProperty.isPresent()) {
             // use predefined clustering
             HugeWeightMapping communityMap = graph.nodeProperties(CLUSTERING_IDENTIFIER);
-            HugeLouvain hugeLouvain = new HugeLouvain(graph, Pools.DEFAULT, concurrency, tracker)
+            Louvain louvain = new Louvain(graph, Pools.DEFAULT, concurrency, tracker)
                     .withProgressLogger(ProgressLogger.wrap(log, "Louvain"))
                     .withTerminationFlag(TerminationFlag.wrap(transaction));
-            hugeLouvain.compute(communityMap, iterations, maxIterations, randomNeighbor);
-            return hugeLouvain;
+            louvain.compute(communityMap, iterations, maxIterations, randomNeighbor);
+            return louvain;
         } else {
-            HugeLouvain hugeLouvain = new HugeLouvain(graph, Pools.DEFAULT, concurrency, tracker)
+            Louvain louvain = new Louvain(graph, Pools.DEFAULT, concurrency, tracker)
                     .withProgressLogger(ProgressLogger.wrap(log, "Louvain"))
                     .withTerminationFlag(TerminationFlag.wrap(transaction));
-            hugeLouvain.compute(iterations, maxIterations, randomNeighbor);
-            return hugeLouvain;
+            louvain.compute(iterations, maxIterations, randomNeighbor);
+            return louvain;
         }
     }
 
