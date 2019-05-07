@@ -21,9 +21,8 @@ package org.neo4j.graphalgo.impl.triangle;
 
 import com.carrotsearch.hppc.IntStack;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeGraph;
-import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.IntersectionConsumer;
+import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphdb.Direction;
@@ -31,6 +30,8 @@ import org.neo4j.graphdb.Direction;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveTask;
+
+import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
 
 /**
  *
@@ -74,9 +75,7 @@ public class TriangleCountForkJoin extends TriangleCountBase<AtomicDoubleArray, 
 
     @Override
     void runCompute() {
-        ForkJoinTask<Long> countTask = graph instanceof HugeGraph
-                ? new HugeTask((HugeGraph) graph, 0, nodeCount)
-                : new TriangleTask(0, nodeCount);
+        ForkJoinTask<Long> countTask = new HugeTask(graph, 0, nodeCount);
         triangleCount = pool.invoke(countTask);
         CoefficientTask coefficientTask = new CoefficientTask(
                 Direction.OUTGOING,
@@ -140,21 +139,21 @@ public class TriangleCountForkJoin extends TriangleCountBase<AtomicDoubleArray, 
             final TerminationFlag flag = getTerminationFlag();
             final int[] head = {-1};
             for (head[0] = start; head[0] < end; head[0]++) {
-                graph.forEachRelationship(head[0], D, (s, t, r) -> {
+                graph.forEachRelationship(head[0], D, longToIntConsumer((s, t) -> {
                     if (t > s) {
                         nodes.push(t);
                     }
                     return flag.running();
-                });
+                }));
                 while (!nodes.isEmpty()) {
                     final int node = nodes.pop();
-                    graph.forEachRelationship(node, D, (s, t, r) -> {
+                    graph.forEachRelationship(node, D, longToIntConsumer((s, t) -> {
                         if (t > s && graph.exists(t, head[0], D)) {
                             exportTriangle(head[0], s, t);
                             triangles[0]++;
                         }
                         return flag.running();
-                    });
+                    }));
                 }
                 nodeVisited();
             }
@@ -204,14 +203,14 @@ public class TriangleCountForkJoin extends TriangleCountBase<AtomicDoubleArray, 
 
     private class HugeTask extends RecursiveTask<Long> implements IntersectionConsumer {
 
-        private HugeGraph hugeGraph;
+        private Graph hugeGraph;
         private RelationshipIntersect hg;
         private final int start;
         private final int end;
 
         private long count;
 
-        HugeTask(HugeGraph graph, int start, int end) {
+        HugeTask(Graph graph, int start, int end) {
             this.hugeGraph = graph;
             this.start = start;
             this.end = end;

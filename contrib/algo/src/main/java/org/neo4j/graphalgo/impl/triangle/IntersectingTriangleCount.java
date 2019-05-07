@@ -20,8 +20,8 @@
 package org.neo4j.graphalgo.impl.triangle;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.IntersectionConsumer;
+import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
@@ -43,9 +43,14 @@ import java.util.stream.Stream;
  * This impl uses another approach where all the triangles can be calculated
  * using set intersection methods of the graph itself.
  *
+ *  https://epubs.siam.org/doi/pdf/10.1137/1.9781611973198.1
+ *  http://www.cse.cuhk.edu.hk/~jcheng/papers/triangle_kdd11.pdf
+ *  https://i11www.iti.kit.edu/extra/publications/sw-fclt-05_t.pdf
+ *  http://www.math.cmu.edu/~ctsourak/tsourICDM08.pdf
+ *
  * @author mknblch
  */
-public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCount> implements TriangleCountAlgorithm {
+public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCount> {
 
     private Graph graph;
     private ExecutorService executorService;
@@ -70,27 +75,23 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
         queue = new AtomicLong();
     }
 
-    @Override
     public long getTriangleCount() {
         return triangleCount.longValue();
     }
 
-    @Override
     public double getAverageCoefficient() {
         return averageClusteringCoefficient;
     }
 
-    @Override
     public PagedAtomicIntegerArray getTriangles() {
         return triangles;
     }
 
-    @Override
     public HugeDoubleArray getCoefficients() {
         final HugeDoubleArray array = HugeDoubleArray.newArray(nodeCount, tracker);
         final double[] adder = new double[]{0.0};
         for (int i = 0; i < nodeCount; i++) {
-            final double c = TriangleCountAlgorithm.calculateCoefficient(triangles.get(i), graph.degree(i, Direction.OUTGOING));
+            final double c = calculateCoefficient(triangles.get(i), graph.degree(i, Direction.OUTGOING));
             array.set(i, c);
             adder[0] += (c);
         }
@@ -103,7 +104,7 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
                 .mapToObj(i -> new Result(
                         graph.toOriginalNodeId(i),
                         triangles.get(i),
-                        TriangleCountAlgorithm.calculateCoefficient(triangles.get(i), graph.degree(i, Direction.OUTGOING))));
+                        calculateCoefficient(triangles.get(i), graph.degree(i, Direction.OUTGOING))));
     }
 
     @Override
@@ -119,7 +120,6 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
         return this;
     }
 
-    @Override
     public IntersectingTriangleCount compute() {
         visitedNodes.set(0);
         queue.set(0);
@@ -159,5 +159,37 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
                 triangleCount.increment();
             }
         }
+    }
+
+    private double calculateCoefficient(int triangles, int degree) {
+        if (triangles == 0) {
+            return 0.0;
+        }
+        return ((double) (triangles << 1)) / (degree * (degree - 1));
+    }
+
+    /**
+     * result type
+     */
+    public static class Result {
+
+        public final long nodeId;
+        public final long triangles;
+        public final double coefficient;
+
+        public Result(long nodeId, long triangles, double coefficient) {
+            this.nodeId = nodeId;
+            this.triangles = triangles;
+            this.coefficient = coefficient;
+        }
+        @Override
+        public String toString() {
+            return "Result{" +
+                    "nodeId=" + nodeId +
+                    ", triangles=" + triangles +
+                    ", coefficient=" + coefficient +
+                    '}';
+        }
+
     }
 }

@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo;
 
 import org.HdrHistogram.Histogram;
-import org.neo4j.graphalgo.api.HugeGraph;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.*;
@@ -57,7 +57,7 @@ public class BalancedTriadsProc {
     @Procedure("algo.balancedTriads.stream")
     @Description("CALL algo.balancedTriads.stream(label, relationship, {concurrency:8}) " +
             "YIELD nodeId, balanced, unbalanced")
-    public Stream<HugeBalancedTriads.Result> balancedTriadsStream(
+    public Stream<BalancedTriads.Result> balancedTriadsStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
@@ -67,7 +67,7 @@ public class BalancedTriadsProc {
                 .overrideRelationshipTypeOrQuery(relationship);
 
         // load
-        final HugeGraph graph = (HugeGraph) new GraphLoader(api, Pools.DEFAULT)
+        final Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .withOptionalLabel(configuration.getNodeLabelOrQuery())
                 .withOptionalRelationshipType(configuration.getRelationshipOrQuery())
                 .withOptionalRelationshipWeightsFromProperty(configuration.getWeightProperty(), 0.0)
@@ -75,7 +75,7 @@ public class BalancedTriadsProc {
                 .withSort(true)
                 .withLog(log)
                 .asUndirected(true)
-                .load(configuration.getGraphImpl(HugeGraph.TYPE, HugeGraph.TYPE));
+                .load(configuration.getGraphImpl());
 
         // omit empty graphs
         if (graph.nodeCount() == 0) {
@@ -84,7 +84,7 @@ public class BalancedTriadsProc {
         }
 
         // compute
-        return new HugeBalancedTriads(graph, Pools.DEFAULT, configuration.getConcurrency(), AllocationTracker.create())
+        return new BalancedTriads(graph, Pools.DEFAULT, configuration.getConcurrency(), AllocationTracker.create())
                 .withProgressLogger(ProgressLogger.wrap(log, "balancedTriads"))
                 .withTerminationFlag(TerminationFlag.wrap(transaction))
                 .compute()
@@ -101,8 +101,8 @@ public class BalancedTriadsProc {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        final HugeGraph graph;
-        final HugeBalancedTriads balancedTriads;
+        final Graph graph;
+        final BalancedTriads balancedTriads;
 
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
                 .overrideNodeLabelOrQuery(label)
@@ -112,7 +112,7 @@ public class BalancedTriadsProc {
 
         // load
         try (ProgressTimer timer = builder.timeLoad()) {
-            graph = (HugeGraph) new GraphLoader(api, Pools.DEFAULT)
+            graph = (Graph) new GraphLoader(api, Pools.DEFAULT)
                     .withOptionalLabel(configuration.getNodeLabelOrQuery())
                     .withOptionalRelationshipType(configuration.getRelationshipOrQuery())
                     .withOptionalRelationshipWeightsFromProperty(configuration.getWeightProperty(), 0.0)
@@ -120,13 +120,13 @@ public class BalancedTriadsProc {
                     .withSort(true)
                     .withLog(log)
                     .asUndirected(true)
-                    .load(configuration.getGraphImpl(HugeGraph.TYPE, HugeGraph.TYPE));
+                    .load(configuration.getGraphImpl());
         }
 
         // compute
         final TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
         try (ProgressTimer timer = builder.timeEval()) {
-            balancedTriads = new HugeBalancedTriads(graph, Pools.DEFAULT, configuration.getConcurrency(), AllocationTracker.create())
+            balancedTriads = new BalancedTriads(graph, Pools.DEFAULT, configuration.getConcurrency(), AllocationTracker.create())
                     .withProgressLogger(ProgressLogger.wrap(log, "balancedTriads"))
                     .withTerminationFlag(terminationFlag)
                     .compute();

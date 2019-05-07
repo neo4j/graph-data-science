@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.triangle;
 
-import org.neo4j.graphalgo.api.HugeGraph;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IntersectionConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
@@ -57,14 +57,14 @@ import java.util.stream.Stream;
  *
  * @author mknblch
  */
-public class HugeBalancedTriads extends Algorithm<HugeBalancedTriads> {
+public class BalancedTriads extends Algorithm<BalancedTriads> {
 
     public interface BalancedPredicate {
 
         boolean isBalanced(double w1, double w2, double w3);
     }
 
-    private HugeGraph graph;
+    private Graph graph;
     private ExecutorService executorService;
     private final PagedAtomicIntegerArray balancedTriangles;
     private final PagedAtomicIntegerArray unbalancedTriangles;
@@ -76,7 +76,7 @@ public class HugeBalancedTriads extends Algorithm<HugeBalancedTriads> {
     private final AtomicLong visitedNodes;
     private BalancedPredicate balancedPredicate = (w1, w2, w3) -> (w1 * w2 * w3) >= .0;
 
-    public HugeBalancedTriads(HugeGraph graph, ExecutorService executorService, int concurrency, AllocationTracker tracker) {
+    public BalancedTriads(Graph graph, ExecutorService executorService, int concurrency, AllocationTracker tracker) {
         this.graph = graph;
         this.executorService = executorService;
         this.concurrency = concurrency;
@@ -90,7 +90,7 @@ public class HugeBalancedTriads extends Algorithm<HugeBalancedTriads> {
     }
 
     @Override
-    public final HugeBalancedTriads me() {
+    public final BalancedTriads me() {
         return this;
     }
 
@@ -99,7 +99,7 @@ public class HugeBalancedTriads extends Algorithm<HugeBalancedTriads> {
      * @return
      */
     @Override
-    public HugeBalancedTriads release() {
+    public BalancedTriads release() {
         executorService = null;
         graph = null;
         unbalancedTriangles.release();
@@ -113,7 +113,7 @@ public class HugeBalancedTriads extends Algorithm<HugeBalancedTriads> {
      * compute number of balanced and unbalanced triangles
      * @return
      */
-    public HugeBalancedTriads compute() {
+    public BalancedTriads compute() {
         visitedNodes.set(0);
         queue.set(0);
         balancedTriangleCount.reset();
@@ -197,7 +197,7 @@ public class HugeBalancedTriads extends Algorithm<HugeBalancedTriads> {
 
         private RelationshipIntersect hg;
 
-        HugeTask(HugeGraph graph) {
+        HugeTask(Graph graph) {
             hg = graph.intersection();
         }
 

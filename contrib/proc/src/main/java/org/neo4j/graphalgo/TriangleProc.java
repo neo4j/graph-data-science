@@ -21,22 +21,31 @@ package org.neo4j.graphalgo;
 
 import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeGraph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
-import org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraph;
-import org.neo4j.graphalgo.core.utils.*;
+import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
+import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.core.write.Translators;
-import org.neo4j.graphalgo.impl.triangle.*;
+import org.neo4j.graphalgo.impl.triangle.IntersectingTriangleCount;
+import org.neo4j.graphalgo.impl.triangle.TriangleCountBase;
+import org.neo4j.graphalgo.impl.triangle.TriangleCountForkJoin;
+import org.neo4j.graphalgo.impl.triangle.TriangleStream;
 import org.neo4j.graphalgo.results.AbstractCommunityResultBuilder;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
-import org.neo4j.procedure.*;
+import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Mode;
+import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.Optional;
@@ -82,10 +91,7 @@ public class TriangleProc {
                 .asUndirected(true)
                 .init(log, label, relationship, configuration)
                 .withDirection(TriangleCountBase.D)
-                .load(configuration.getGraphImpl(
-                        HeavyGraph.TYPE,
-                        HeavyGraph.TYPE, HeavyCypherGraphFactory.TYPE, HugeGraph.TYPE
-                ));
+                .load(configuration.getGraphImpl());
 
         if (graph.nodeCount() == 0) {
             graph.release();
@@ -102,7 +108,7 @@ public class TriangleProc {
     @Procedure("algo.triangleCount.stream")
     @Description("CALL algo.triangleCount.stream(label, relationship, {concurrency:8}) " +
             "YIELD nodeId, triangles - yield nodeId, number of triangles")
-    public Stream<TriangleCountAlgorithm.Result> triangleCountQueueStream(
+    public Stream<IntersectingTriangleCount.Result> triangleCountQueueStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
@@ -120,17 +126,18 @@ public class TriangleProc {
                 .asUndirected(true)
                 .init(log, label, relationship, configuration)
                 .withDirection(TriangleCountBase.D)
-                .load(configuration.getGraphImpl(
-                        HeavyGraph.TYPE,
-                        HeavyGraph.TYPE, HeavyCypherGraphFactory.TYPE, HugeGraph.TYPE
-                ));
+                .load(configuration.getGraphImpl());
 
         if (graph.nodeCount() == 0) {
             graph.release();
             return Stream.empty();
         }
 
-        return TriangleCountAlgorithm.instance(graph, Pools.DEFAULT, configuration.getConcurrency())
+        return new IntersectingTriangleCount(
+                graph,
+                Pools.DEFAULT,
+                configuration.getConcurrency(),
+                AllocationTracker.create())
                 .withProgressLogger(ProgressLogger.wrap(log, "triangleCount"))
                 .withTerminationFlag(TerminationFlag.wrap(transaction))
                 .compute()
@@ -159,10 +166,7 @@ public class TriangleProc {
                 .asUndirected(true)
                 .init(log, label, relationship, configuration)
                 .withDirection(TriangleCountBase.D)
-                .load(configuration.getGraphImpl(
-                        HeavyGraph.TYPE,
-                        HeavyGraph.TYPE, HeavyCypherGraphFactory.TYPE, HugeGraph.TYPE
-                ));
+                .load(configuration.getGraphImpl());
 
         return new TriangleCountForkJoin(
                 graph,
@@ -185,7 +189,7 @@ public class TriangleProc {
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         final Graph graph;
-        final TriangleCountAlgorithm triangleCount;
+        final IntersectingTriangleCount triangleCount;
 
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
                 .overrideNodeLabelOrQuery(label)
@@ -202,15 +206,16 @@ public class TriangleProc {
                     .asUndirected(true)
                     .init(log, label, relationship, configuration)
                     .withDirection(TriangleCountBase.D)
-                    .load(configuration.getGraphImpl(
-                            HeavyGraph.TYPE,
-                            HeavyGraph.TYPE, HeavyCypherGraphFactory.TYPE, HugeGraph.TYPE
-                    ));
+                    .load(configuration.getGraphImpl());
         }
 
         final TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
         try (ProgressTimer timer = builder.timeEval()) {
-            triangleCount = TriangleCountAlgorithm.instance(graph, Pools.DEFAULT, configuration.getConcurrency())
+            triangleCount = new IntersectingTriangleCount(
+                    graph,
+                    Pools.DEFAULT,
+                    configuration.getConcurrency(),
+                    AllocationTracker.create())
                     .withProgressLogger(ProgressLogger.wrap(log, "triangleCount"))
                     .withTerminationFlag(TerminationFlag.wrap(transaction))
                     .compute();
@@ -221,12 +226,19 @@ public class TriangleProc {
             builder.withWrite(true);
             try (ProgressTimer timer = builder.timeWrite()) {
                 String writeProperty = configuration.getWriteProperty(DEFAULT_WRITE_PROPERTY_VALUE);
-                Optional<String> clusteringCoefficientProperty = configuration.getString(COEFFICIENT_WRITE_PROPERTY_VALUE);
+                Optional<String> clusteringCoefficientProperty = configuration.getString(
+                        COEFFICIENT_WRITE_PROPERTY_VALUE);
 
                 builder.withWriteProperty(writeProperty);
                 builder.withClusteringCoefficientProperty(clusteringCoefficientProperty);
 
-                write(graph, triangleCount, configuration, terminationFlag, writeProperty, clusteringCoefficientProperty);
+                write(
+                        graph,
+                        triangleCount,
+                        configuration,
+                        terminationFlag,
+                        writeProperty,
+                        clusteringCoefficientProperty);
             }
         }
 
@@ -234,83 +246,56 @@ public class TriangleProc {
         builder.withAverageClusteringCoefficient(triangleCount.getAverageCoefficient())
                 .withTriangleCount(triangleCount.getTriangleCount());
 
-        return buildResult(builder, graph, triangleCount);
-    }
-
-    private Stream<Result> buildResult(TriangleCountResultBuilder builder, Graph graph, TriangleCountAlgorithm algorithm) {
-
-        if (algorithm instanceof IntersectingTriangleCount) {
-            final PagedAtomicIntegerArray triangles = ((IntersectingTriangleCount) algorithm).getTriangles();
-            return Stream.of(builder.buildfromKnownLongSizes(graph.nodeCount(), triangles::get));
-        } else if (algorithm instanceof TriangleCountQueue){
-            final AtomicIntegerArray triangles = ((TriangleCountQueue) algorithm).getTriangles();
-            return Stream.of(builder.buildfromKnownSizes(Math.toIntExact(graph.nodeCount()), triangles::get));
-        }
-        throw new UnsupportedOperationException("unknown algorithm");
+        final PagedAtomicIntegerArray triangles = ((IntersectingTriangleCount) triangleCount).getTriangles();
+        return Stream.of(builder.buildfromKnownLongSizes(graph.nodeCount(), triangles::get));
     }
 
     /**
      * writeback method for "algo.triangleCount"
-     * @param graph the graph
-     * @param algorithm Impl. of TriangleCountAlgorithm
-     * @param configuration configuration wrapper
-     * @param flag termination flag
+     *
+     * @param graph               the graph
+     * @param algorithm           Impl. of TriangleCountAlgorithm
+     * @param configuration       configuration wrapper
+     * @param flag                termination flag
      * @param writeProperty
      * @param coefficientProperty
      */
-    private void write(Graph graph, TriangleCountAlgorithm algorithm, ProcedureConfiguration configuration, TerminationFlag flag, String writeProperty, Optional<String> coefficientProperty) {
+    private void write(
+            Graph graph,
+            IntersectingTriangleCount algorithm,
+            ProcedureConfiguration configuration,
+            TerminationFlag flag,
+            String writeProperty,
+            Optional<String> coefficientProperty) {
 
         final Exporter exporter = Exporter.of(api, graph)
                 .withLog(log)
                 .parallel(Pools.DEFAULT, configuration.getConcurrency(), flag)
                 .build();
 
-        if (algorithm instanceof IntersectingTriangleCount) {
-            if (coefficientProperty.isPresent()) {
-                // huge with coefficients
-                final HugeDoubleArray coefficients = ((IntersectingTriangleCount) algorithm).getCoefficients();
-                final PagedAtomicIntegerArray triangles = ((IntersectingTriangleCount) algorithm).getTriangles();
-                exporter.write(
-                        writeProperty,
-                        triangles,
-                        PagedAtomicIntegerArray.Translator.INSTANCE,
-                        coefficientProperty.get(),
-                        coefficients,
-                        HugeDoubleArray.Translator.INSTANCE
-                );
-            } else {
-                // huge without coefficients
-                final PagedAtomicIntegerArray triangles = ((IntersectingTriangleCount) algorithm).getTriangles();
-                exporter.write(
-                        writeProperty,
-                        triangles,
-                        PagedAtomicIntegerArray.Translator.INSTANCE
-                );
-            }
-        } else if (algorithm instanceof TriangleCountQueue){
 
-            if (coefficientProperty.isPresent()) {
-                // nonhuge with coefficients
-                final double[] coefficients = ((TriangleCountQueue) algorithm).getCoefficients();
-                final AtomicIntegerArray triangles = ((TriangleCountQueue) algorithm).getTriangles();
-                exporter.write(
-                        writeProperty,
-                        triangles,
-                        Translators.ATOMIC_INTEGER_ARRAY_TRANSLATOR,
-                        coefficientProperty.get(),
-                        coefficients,
-                        Translators.DOUBLE_ARRAY_TRANSLATOR
-                );
-            } else {
-                // nonhuge without coefficients
-                final AtomicIntegerArray triangles = ((TriangleCountQueue) algorithm).getTriangles();
-                exporter.write(
-                        writeProperty,
-                        triangles,
-                        Translators.ATOMIC_INTEGER_ARRAY_TRANSLATOR
-                );
-            }
+        if (coefficientProperty.isPresent()) {
+            // huge with coefficients
+            final HugeDoubleArray coefficients = ((IntersectingTriangleCount) algorithm).getCoefficients();
+            final PagedAtomicIntegerArray triangles = ((IntersectingTriangleCount) algorithm).getTriangles();
+            exporter.write(
+                    writeProperty,
+                    triangles,
+                    PagedAtomicIntegerArray.Translator.INSTANCE,
+                    coefficientProperty.get(),
+                    coefficients,
+                    HugeDoubleArray.Translator.INSTANCE
+            );
+        } else {
+            // huge without coefficients
+            final PagedAtomicIntegerArray triangles = ((IntersectingTriangleCount) algorithm).getTriangles();
+            exporter.write(
+                    writeProperty,
+                    triangles,
+                    PagedAtomicIntegerArray.Translator.INSTANCE
+            );
         }
+
     }
 
     @Procedure(value = "algo.triangleCount.forkJoin", mode = Mode.WRITE)
@@ -341,10 +326,7 @@ public class TriangleProc {
                     .asUndirected(true)
                     .init(log, label, relationship, configuration)
                     .withDirection(TriangleCountBase.D)
-                    .load(configuration.getGraphImpl(
-                            HeavyGraph.TYPE,
-                            HeavyGraph.TYPE, HeavyCypherGraphFactory.TYPE, HugeGraph.TYPE
-                    ));
+                    .load(configuration.getGraphImpl());
         }
 
         final TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
@@ -439,9 +421,27 @@ public class TriangleProc {
         public final String writeProperty;
         public final String clusteringCoefficientProperty;
 
-        public Result(long loadMillis, long computeMillis, long postProcessingMillis, long writeMillis, long nodeCount,
-                      long triangleCount, long p100, long p99, long p95, long p90, long p75, long p50, long p25, long p10, long p5, long p1,
-                      double averageClusteringCoefficient, boolean write, String writeProperty, String clusteringCoefficientProperty) {
+        public Result(
+                long loadMillis,
+                long computeMillis,
+                long postProcessingMillis,
+                long writeMillis,
+                long nodeCount,
+                long triangleCount,
+                long p100,
+                long p99,
+                long p95,
+                long p90,
+                long p75,
+                long p50,
+                long p25,
+                long p10,
+                long p5,
+                long p1,
+                double averageClusteringCoefficient,
+                boolean write,
+                String writeProperty,
+                String clusteringCoefficientProperty) {
             this.loadMillis = loadMillis;
             this.computeMillis = computeMillis;
             this.postProcessingMillis = postProcessingMillis;
@@ -461,7 +461,7 @@ public class TriangleProc {
             this.p1 = p1;
             this.write = write;
             this.writeProperty = writeProperty;
-            this.clusteringCoefficientProperty= clusteringCoefficientProperty;
+            this.clusteringCoefficientProperty = clusteringCoefficientProperty;
         }
     }
 

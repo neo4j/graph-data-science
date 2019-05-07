@@ -19,12 +19,9 @@
  */
 package org.neo4j.graphalgo.impl.triangle;
 
-import com.carrotsearch.hppc.IntStack;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeGraph;
-import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.IntersectionConsumer;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraph;
+import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -35,7 +32,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Spliterators;
-import java.util.concurrent.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -124,11 +123,7 @@ public class TriangleStream extends Algorithm<TriangleStream> {
         queue.set(0);
         runningThreads.set(0);
         final Collection<Runnable> tasks;
-        if (graph instanceof HugeGraph || graph instanceof HeavyGraph) {
-            tasks = ParallelUtil.tasks(concurrency, () -> new IntersectTask(graph));
-        } else {
-            tasks = ParallelUtil.tasks(concurrency, Task::new);
-        }
+        tasks = ParallelUtil.tasks(concurrency, () -> new IntersectTask(graph));
         ParallelUtil.run(tasks, false, executorService, null);
     }
 
@@ -154,43 +149,12 @@ public class TriangleStream extends Algorithm<TriangleStream> {
 
         abstract void evaluateNode(int nodeId);
 
-        void emit(int nodeA, int nodeB, int nodeC) {
+        void emit(long nodeA, long nodeB, long nodeC) {
             Result result = new Result(
                     graph.toOriginalNodeId(nodeA),
                     graph.toOriginalNodeId(nodeB),
                     graph.toOriginalNodeId(nodeC));
             resultQueue.offer(result);
-        }
-    }
-
-    private final class Task extends BaseTask {
-
-        private final Graph graph;
-        private IntStack nodes;
-
-        private Task() {
-            this.graph = TriangleStream.this.graph;
-            nodes = new IntStack();
-        }
-
-        @Override
-        void evaluateNode(final int nodeId) {
-            IntStack nodes = this.nodes;
-            graph.forEachRelationship(nodeId, D, (s, t, r) -> {
-                if (t > s) {
-                    nodes.add(t);
-                }
-                return running();
-            });
-            while (!nodes.isEmpty()) {
-                final int node = nodes.pop();
-                graph.forEachRelationship(node, D, (s, t, r) -> {
-                    if (t > s && graph.exists(t, nodeId, D)) {
-                        emit(nodeId, s, t);
-                    }
-                    return running();
-                });
-            }
         }
     }
 
@@ -209,7 +173,7 @@ public class TriangleStream extends Algorithm<TriangleStream> {
 
         @Override
         public void accept(final long nodeA, final long nodeB, final long nodeC) {
-            emit((int) nodeA, (int) nodeB, (int) nodeC);
+            emit(nodeA, nodeB, nodeC);
         }
     }
 
