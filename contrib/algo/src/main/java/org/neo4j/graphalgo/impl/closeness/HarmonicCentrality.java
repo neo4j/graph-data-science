@@ -26,8 +26,8 @@ import org.neo4j.graphalgo.core.utils.paged.PagedAtomicDoubleArray;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.Algorithm;
-import org.neo4j.graphalgo.impl.msbfs.HugeBfsConsumer;
-import org.neo4j.graphalgo.impl.msbfs.HugeMultiSourceBFS;
+import org.neo4j.graphalgo.impl.msbfs.BfsConsumer;
+import org.neo4j.graphalgo.impl.msbfs.MultiSourceBFS;
 import org.neo4j.graphdb.Direction;
 
 import java.util.concurrent.ExecutorService;
@@ -59,13 +59,13 @@ public class HarmonicCentrality extends Algorithm<HarmonicCentrality> {
 
     public HarmonicCentrality compute() {
         final ProgressLogger progressLogger = getProgressLogger();
-        final HugeBfsConsumer consumer = (nodeId, depth, sourceNodeIds) -> {
+        final BfsConsumer consumer = (nodeId, depth, sourceNodeIds) -> {
             final double len = sourceNodeIds.size();
             inverseFarness.add(nodeId, len * (1.0 / depth));
             progressLogger.logProgress((double) nodeId / (nodeCount - 1));
         };
 
-        new HugeMultiSourceBFS(
+        new MultiSourceBFS(
                 graph,
                 graph,
                 Direction.BOTH,
