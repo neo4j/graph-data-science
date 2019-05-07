@@ -20,79 +20,74 @@
 package org.neo4j.graphalgo.impl.closeness;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.PagedAtomicDoubleArray;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.Algorithm;
-import org.neo4j.graphalgo.impl.msbfs.BfsConsumer;
-import org.neo4j.graphalgo.impl.msbfs.MultiSourceBFS;
+import org.neo4j.graphalgo.impl.msbfs.HugeBfsConsumer;
+import org.neo4j.graphalgo.impl.msbfs.HugeMultiSourceBFS;
 import org.neo4j.graphdb.Direction;
 
 import java.util.concurrent.ExecutorService;
-import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 /**
- * Harmonic Centrality Algorithm.
- *
- * Harmonic centrality (also known as valued centrality) is a variant of closeness centrality,
- * that was invented to solve the problem the original formula had when dealing with unconnected graphs.
+ * Harmonic Centrality Algorithm
  *
  * @author mknblch
  */
-public class HarmonicCentrality extends Algorithm<HarmonicCentrality> implements HarmonicCentralityAlgorithm {
+public class HarmonicCentrality extends Algorithm<HarmonicCentrality> {
 
     private Graph graph;
-    private final AtomicDoubleArray inverseFarness;
-    private final int concurrency;
+    private final AllocationTracker allocationTracker;
+    private PagedAtomicDoubleArray inverseFarness;
     private ExecutorService executorService;
-    private final int nodeCount;
+    private final int concurrency;
+    private final long nodeCount;
 
-    public HarmonicCentrality(Graph graph, int concurrency, ExecutorService executorService) {
+    public HarmonicCentrality(Graph graph, AllocationTracker allocationTracker, int concurrency, ExecutorService executorService) {
         this.graph = graph;
-        nodeCount = Math.toIntExact(graph.nodeCount());
+        this.allocationTracker = allocationTracker;
         this.concurrency = concurrency;
         this.executorService = executorService;
-        inverseFarness = new AtomicDoubleArray(nodeCount);
+        nodeCount = graph.nodeCount();
+        inverseFarness = PagedAtomicDoubleArray.newArray(nodeCount, allocationTracker);
     }
 
-    /**
-     * compute centrality using MSBFS
-     * @return
-     */
     public HarmonicCentrality compute() {
         final ProgressLogger progressLogger = getProgressLogger();
-        final BfsConsumer consumer = (nodeId, depth, sourceNodeIds) -> {
-            inverseFarness.add(nodeId, sourceNodeIds.size() * (1.0 / depth));
+        final HugeBfsConsumer consumer = (nodeId, depth, sourceNodeIds) -> {
+            final double len = sourceNodeIds.size();
+            inverseFarness.add(nodeId, len * (1.0 / depth));
             progressLogger.logProgress((double) nodeId / (nodeCount - 1));
         };
-        new MultiSourceBFS(graph, graph, Direction.BOTH, consumer)
+
+        new HugeMultiSourceBFS(
+                graph,
+                graph,
+                Direction.BOTH,
+                consumer,
+                allocationTracker)
                 .run(concurrency, executorService);
+
         return this;
     }
 
-    /**
-     * result stream of nodeId to closeness value
-     * @return
-     */
     public Stream<Result> resultStream() {
-        return IntStream.range(0, nodeCount)
+        return LongStream.range(0, nodeCount)
                 .mapToObj(nodeId -> new Result(
                         graph.toOriginalNodeId(nodeId),
-                        inverseFarness.get(nodeId) / (double) (nodeCount - 1)));
+                        inverseFarness.get(nodeId) / (double)(nodeCount - 1)));
     }
 
-    /**
-     * export results
-     * @param propertyName
-     * @param exporter
-     */
     public void export(final String propertyName, final Exporter exporter) {
         exporter.write(
                 propertyName,
                 inverseFarness,
-                (PropertyTranslator.OfDouble<AtomicDoubleArray>)
+                (PropertyTranslator.OfDouble<PagedAtomicDoubleArray>)
                         (data, nodeId) -> data.get((int) nodeId) / (double) (nodeCount - 1));
     }
 
@@ -101,14 +96,43 @@ public class HarmonicCentrality extends Algorithm<HarmonicCentrality> implements
         return this;
     }
 
-    /**
-     * release inner data structures
-     * @return
-     */
     @Override
     public HarmonicCentrality release() {
         graph = null;
         executorService = null;
+        inverseFarness.release();
+        inverseFarness = null;
         return this;
     }
+
+    public final double[] exportToArray() {
+        return resultStream()
+                .limit(Integer.MAX_VALUE)
+                .mapToDouble(r -> r.centrality)
+                .toArray();
+    }
+
+
+    /**
+     * Result class used for streaming
+     */
+    public final class Result {
+
+        public final long nodeId;
+        public final double centrality;
+
+        public Result(long nodeId, double centrality) {
+            this.nodeId = nodeId;
+            this.centrality = centrality;
+        }
+
+        @Override
+        public String toString() {
+            return "Result{" +
+                    "nodeId=" + nodeId +
+                    ", centrality=" + centrality +
+                    '}';
+        }
+    }
+
 }
