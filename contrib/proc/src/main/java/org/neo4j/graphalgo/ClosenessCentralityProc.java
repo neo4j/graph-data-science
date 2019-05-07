@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeGraph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -29,15 +28,17 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.Exporter;
-import org.neo4j.graphalgo.impl.closeness.HugeMSClosenessCentrality;
-import org.neo4j.graphalgo.impl.closeness.MSBFSCCAlgorithm;
 import org.neo4j.graphalgo.impl.closeness.MSClosenessCentrality;
 import org.neo4j.graphalgo.results.CentralityProcResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
-import org.neo4j.procedure.*;
+import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Mode;
+import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -83,38 +84,17 @@ public class ClosenessCentralityProc {
             return Stream.empty();
         }
 
-        final MSBFSCCAlgorithm<?> algo = newAlgo(tracker,
+        final MSClosenessCentrality algo = new MSClosenessCentrality(
                 graph,
+                tracker,
                 configuration.getConcurrency(),
-                configuration.get("improved", Boolean.FALSE));
+                Pools.DEFAULT, configuration.get("improved", Boolean.FALSE));
         algo
                 .withProgressLogger(ProgressLogger.wrap(log, "ClosenessCentrality(MultiSource)"))
                 .withTerminationFlag(TerminationFlag.wrap(transaction));
         algo.compute();
         graph.release();
         return algo.resultStream();
-    }
-
-    private MSBFSCCAlgorithm<?> newAlgo(
-            final AllocationTracker tracker,
-            final Graph graph,
-            final int concurrency,
-            final boolean wassermanFaust) {
-        final MSBFSCCAlgorithm<?> algo;
-        if (graph instanceof HugeGraph) {
-            HugeGraph hugeGraph = (HugeGraph) graph;
-            algo = new HugeMSClosenessCentrality(
-                    hugeGraph,
-                    tracker,
-                    concurrency,
-                    Pools.DEFAULT, wassermanFaust);
-        } else {
-            algo = new MSClosenessCentrality(
-                    graph,
-                    concurrency,
-                    Pools.DEFAULT, wassermanFaust);
-        }
-        return algo;
     }
 
     @Procedure(value = "algo.closeness", mode = Mode.WRITE)
@@ -151,10 +131,11 @@ public class ClosenessCentralityProc {
             return Stream.of(builder.build());
         }
 
-        final MSBFSCCAlgorithm<?> algo = newAlgo(tracker,
+        final MSClosenessCentrality algo = new MSClosenessCentrality(
                 graph,
+                tracker,
                 concurrency,
-                configuration.get("improved", Boolean.FALSE));
+                Pools.DEFAULT, configuration.get("improved", Boolean.FALSE));
         algo
                 .withProgressLogger(ProgressLogger.wrap(log, "ClosenessCentrality(MultiSource)"))
                 .withTerminationFlag(terminationFlag);

@@ -19,23 +19,24 @@
  */
 package org.neo4j.graphalgo.impl.closeness;
 
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
-import org.neo4j.graphalgo.impl.msbfs.BfsConsumer;
-import org.neo4j.graphalgo.impl.msbfs.MultiSourceBFS;
+import org.neo4j.graphalgo.impl.msbfs.HugeBfsConsumer;
+import org.neo4j.graphalgo.impl.msbfs.HugeMultiSourceBFS;
 import org.neo4j.graphdb.Direction;
 
-import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicIntegerArray;
-import java.util.function.LongToIntFunction;
-import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 /**
- * Normalized Closeness Centrality.
+ * Normalized Closeness Centrality
  *
  * Utilizes the MSBFS for counting the farness between nodes.
  * See MSBFS documentation.
@@ -44,74 +45,83 @@ import java.util.stream.Stream;
  *
  * @author mknblch
  */
-public class MSClosenessCentrality extends MSBFSCCAlgorithm<MSClosenessCentrality> {
+public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality> {
 
     private Graph graph;
-    private AtomicIntegerArray farness;
-    private AtomicIntegerArray component;
+    private PagedAtomicIntegerArray farness;
+    private PagedAtomicIntegerArray component;
 
     private final int concurrency;
     private final ExecutorService executorService;
-    private final int nodeCount;
+    private final long nodeCount;
+    private final AllocationTracker tracker;
 
     private final boolean wassermanFaust;
 
-    public MSClosenessCentrality(Graph graph, int concurrency, ExecutorService executorService, boolean wassermanFaust) {
+    public MSClosenessCentrality(
+            Graph graph,
+            AllocationTracker tracker,
+            int concurrency,
+            ExecutorService executorService, boolean wassermanFaust) {
         this.graph = graph;
-        nodeCount = Math.toIntExact(graph.nodeCount());
+        nodeCount = graph.nodeCount();
         this.concurrency = concurrency;
         this.executorService = executorService;
+        this.tracker = tracker;
         this.wassermanFaust = wassermanFaust;
-        farness = new AtomicIntegerArray(nodeCount);
-        component = new AtomicIntegerArray(nodeCount);
+        farness = PagedAtomicIntegerArray.newArray(nodeCount, this.tracker);
+        component = PagedAtomicIntegerArray.newArray(nodeCount, this.tracker);
     }
 
-    @Override
     public MSClosenessCentrality compute(Direction direction) {
 
         final ProgressLogger progressLogger = getProgressLogger();
-        final BfsConsumer consumer = (nodeId, depth, sourceNodeIds) -> {
-            // number of source node IDs
+
+        final HugeBfsConsumer consumer = (nodeId, depth, sourceNodeIds) -> {
             int len = sourceNodeIds.size();
-            // sum of distances
-            farness.addAndGet(nodeId, len * depth);
-            // count component size too
+            farness.add(nodeId, len * depth);
             while (sourceNodeIds.hasNext()) {
-                component.incrementAndGet(sourceNodeIds.next());
+                component.add(sourceNodeIds.next(), 1);
             }
             progressLogger.logProgress((double) nodeId / (nodeCount - 1));
         };
-        new MultiSourceBFS(graph, graph, direction, consumer)
+
+        new HugeMultiSourceBFS(
+                graph,
+                graph,
+                direction,
+                consumer,
+                tracker)
                 .run(concurrency, executorService);
+
         return this;
     }
 
-    @Override
-    public double[] getCentrality() {
-        final double[] cc = new double[nodeCount];
-        Arrays.parallelSetAll(cc, i -> centrality(farness.get(i),
-                component.get(i),
-                nodeCount,
-                wassermanFaust));
+    public HugeDoubleArray getCentrality() {
+        final HugeDoubleArray cc = HugeDoubleArray.newArray(nodeCount, tracker);
+        for (int i = 0; i < nodeCount; i++) {
+            cc.set(i, centrality(farness.get(i),
+                    component.get(i),
+                    nodeCount,
+                    wassermanFaust));
+        }
         return cc;
     }
 
-    @Override
-    public Stream<Result> resultStream() {
-        return IntStream.range(0, nodeCount)
-                .mapToObj(nodeId -> new Result(
-                        graph.toOriginalNodeId(nodeId),
-                        centrality(farness.get(nodeId), component.get(nodeId), nodeCount, wassermanFaust)));
-    }
-
-    @Override
     public void export(final String propertyName, final Exporter exporter) {
         exporter.write(
                 propertyName,
                 farness,
-                (PropertyTranslator.OfDouble<AtomicIntegerArray>)
-                        (data, nodeId) ->
-                                centrality(farness.get((int) nodeId), component.get((int) nodeId), nodeCount, wassermanFaust));
+                (PropertyTranslator.OfDouble<PagedAtomicIntegerArray>)
+                        (data, nodeId) -> centrality(data.get(nodeId), component.get(nodeId), nodeCount, wassermanFaust));
+    }
+
+    public Stream<MSClosenessCentrality.Result> resultStream() {
+        return LongStream.range(0L, nodeCount)
+                .mapToObj(nodeId -> new MSClosenessCentrality.Result(
+                        graph.toOriginalNodeId(nodeId),
+                        centrality(farness.get(nodeId), component.get(nodeId), nodeCount, wassermanFaust)
+                ));
     }
 
     @Override
@@ -124,6 +134,27 @@ public class MSClosenessCentrality extends MSBFSCCAlgorithm<MSClosenessCentralit
         graph = null;
         farness = null;
         return this;
+    }
+
+    public MSClosenessCentrality compute() {
+        return compute(Direction.OUTGOING);
+    }
+
+    public final double[] exportToArray() {
+        return resultStream()
+                .limit(Integer.MAX_VALUE)
+                .mapToDouble(r -> r.centrality)
+                .toArray();
+    }
+
+    static double centrality(long farness, long componentSize, long nodeCount, boolean wassermanFaust) {
+        if (farness == 0L) {
+            return 0.;
+        }
+        if (wassermanFaust) {
+            return (componentSize / ((double) farness)) * ((componentSize - 1.) / (nodeCount - 1.));
+        }
+        return componentSize / ((double) farness);
     }
 
     /**
