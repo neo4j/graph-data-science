@@ -45,7 +45,7 @@ public class SpanningTree {
             if (parent == -1) {
                 continue;
             }
-            if (!consumer.accept(parent, i, -1L)) {
+            if (!consumer.accept(parent, i)) {
                 return;
             }
         }

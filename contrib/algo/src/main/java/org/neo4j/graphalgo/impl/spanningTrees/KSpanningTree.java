@@ -24,8 +24,7 @@ import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.container.UndirectedTree;
-import org.neo4j.graphalgo.core.utils.dss.DisjointSetStruct;
-import org.neo4j.graphalgo.core.utils.queue.*;
+import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
 import org.neo4j.graphalgo.impl.Algorithm;
 import org.neo4j.graphalgo.results.AbstractResultBuilder;
 
@@ -58,12 +57,13 @@ public class KSpanningTree extends Algorithm<KSpanningTree> {
 
     /**
      * compute the spanning tree
-     * @param startNode the start node
+     * @param startNodeId the start node
      * @param k
      * @param max
      * @return
      */
-    public KSpanningTree compute(int startNode, int k, boolean max) {
+    public KSpanningTree compute(long startNodeId, long k, boolean max) {
+        int startNode = Math.toIntExact(startNodeId);
 
         final ProgressLogger logger = getProgressLogger();
         final Prim prim = new Prim(idMapping, relationshipIterator, weights)

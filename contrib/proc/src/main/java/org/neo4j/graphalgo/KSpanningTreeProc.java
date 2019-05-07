@@ -20,21 +20,24 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeGraph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.impl.spanningTrees.KSpanningTree;
 import org.neo4j.graphalgo.impl.spanningTrees.Prim;
+import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
-import org.neo4j.procedure.*;
+import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Mode;
+import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -106,7 +109,7 @@ public class KSpanningTreeProc {
                     .withoutNodeWeights()
                     .asUndirected(true)
                     .withLog(log)
-                    .load(configuration.getGraphImpl(HugeGraph.TYPE));
+                    .load(configuration.getGraphImpl());
         }
 
         if(graph.nodeCount() == 0) {
@@ -114,14 +117,14 @@ public class KSpanningTreeProc {
             return Stream.of(builder.withEffectiveNodeCount(0).build());
         }
 
-        final int root = graph.toMappedNodeId(startNode);
+        final long root = graph.toMappedNodeId(startNode);
 
         final KSpanningTree kSpanningTree = new KSpanningTree(graph, graph, graph)
                 .withProgressLogger(ProgressLogger.wrap(log, "KSpanningTrees"))
                 .withTerminationFlag(TerminationFlag.wrap(transaction));
 
         builder.timeEval(() -> {
-            kSpanningTree.compute(root, (int)k, max);
+            kSpanningTree.compute(root, k, max);
             builder.withEffectiveNodeCount(kSpanningTree.getSpanningTree().effectiveNodeCount);
         });
 
