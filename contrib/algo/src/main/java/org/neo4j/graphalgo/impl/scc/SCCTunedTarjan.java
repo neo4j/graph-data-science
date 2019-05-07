@@ -30,6 +30,9 @@ import java.util.Arrays;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
+import static org.neo4j.graphalgo.core.utils.Converters.longToIntPredicate;
+
 /**
  * Sequential, recursive strongly connected components algorithm (TunedTarjan).
  * <p>
@@ -65,13 +68,13 @@ public class SCCTunedTarjan extends Algorithm<SCCTunedTarjan> implements SCCAlgo
         maxSetSize = 0;
         minSetSize = Integer.MAX_VALUE;
         dfs = -(nodeCount + 1);
-        graph.forEachNode(node -> {
+        graph.forEachNode(longToIntPredicate(node -> {
             if (connectedComponents[node] == -1) {
                 lowPointDFS(node);
             }
             progressLogger.logProgress((double) node / (nodeCount - 1));
             return running();
-        });
+        }));
         return this;
     }
 
@@ -123,10 +126,10 @@ public class SCCTunedTarjan extends Algorithm<SCCTunedTarjan> implements SCCAlgo
         int lowPoint = dfsNum;
         open.push(nodeId);
         final int sz = edgeStack.size();
-        graph.forEachRelationship(nodeId, Direction.OUTGOING, (sourceNodeId, targetNodeId, relationId) -> {
+        graph.forEachRelationship(nodeId, Direction.OUTGOING, longToIntConsumer((sourceNodeId, targetNodeId) -> {
             edgeStack.push(targetNodeId);
             return true;
-        });
+        }));
 
         while (edgeStack.size() > sz) {
             int w = edgeStack.pop();

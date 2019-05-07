@@ -20,12 +20,9 @@
 package org.neo4j.graphalgo.impl.scc;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeGraph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.results.AbstractResultBuilder;
-import org.neo4j.graphalgo.results.SCCResult;
 
 import java.util.stream.Stream;
 
@@ -108,9 +105,6 @@ public interface SCCAlgorithm {
      * @return
      */
     static SCCAlgorithm iterativeTarjan(Graph graph, AllocationTracker tracker) {
-        if (graph instanceof HugeGraph) {
-            return new HugeSCCIterativeTarjan((HugeGraph) graph, tracker);
-        }
-        return new SCCIterativeTarjan(graph);
+        return new SCCIterativeTarjan(graph, tracker);
     }
 }

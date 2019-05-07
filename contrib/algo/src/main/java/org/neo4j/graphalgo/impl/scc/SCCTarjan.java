@@ -21,12 +21,14 @@ package org.neo4j.graphalgo.impl.scc;
 
 import com.carrotsearch.hppc.IntStack;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.impl.Algorithm;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Arrays;
 import java.util.BitSet;
+
+import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
+import static org.neo4j.graphalgo.core.utils.Converters.longToIntPredicate;
 
 /**
  * Sequential, recursive strongly connected components algorithm (Tarjan).
@@ -65,7 +67,7 @@ public class SCCTarjan extends Algorithm<SCCTarjan> {
      * @return
      */
     public SCCTarjan compute() {
-        graph.forEachNode(this::test);
+        graph.forEachNode(longToIntPredicate(this::test));
         return this;
     }
 
@@ -108,7 +110,7 @@ public class SCCTarjan extends Algorithm<SCCTarjan> {
         indices[node] = index++;
         stack.push(node);
         onStack.set(node);
-        graph.forEachRelationship(node, Direction.OUTGOING, this::accept);
+        graph.forEachRelationship(node, Direction.OUTGOING, longToIntConsumer(this::accept));
         if (indices[node] == lowLink[node]) {
             relax(node);
         }
@@ -123,7 +125,7 @@ public class SCCTarjan extends Algorithm<SCCTarjan> {
         } while (w != nodeId);
     }
 
-    private boolean accept(int source, int target, long unused) {
+    private boolean accept(int source, int target) {
         if (indices[target] == -1) {
             strongConnect(target);
             lowLink[source] = Math.min(lowLink[source], lowLink[target]);

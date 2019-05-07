@@ -17,17 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl;
+package org.neo4j.graphalgo.impl.scc;
 
 import com.carrotsearch.hppc.IntScatterSet;
 import com.carrotsearch.hppc.IntSet;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.traverse.ParallelLocalQueueBFS;
+import org.neo4j.graphalgo.impl.Algorithm;
 import org.neo4j.graphdb.Direction;
 
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
+import static org.neo4j.graphalgo.core.utils.Converters.longToIntPredicate;
 
 /**
  * @author mknblch
@@ -43,22 +47,23 @@ public class ForwardBackwardScc extends Algorithm<ForwardBackwardScc> {
         traverse = new ParallelLocalQueueBFS(graph, executorService, concurrency);
     }
 
-    public ForwardBackwardScc compute(int startNodeId) {
+    public ForwardBackwardScc compute(long startNode) {
+        int startNodeId = Math.toIntExact(startNode);
         scc.clear();
         // D <- BFS( G(V,E(V)), v)
         final IntScatterSet descendant = new IntScatterSet();
         traverse.bfs(startNodeId,
                 Direction.OUTGOING,
                 node -> running(),
-                descendant::add)
+                longToIntConsumer(descendant::add))
                 .awaitTermination();
         getProgressLogger().logProgress(.5);
         // ST <- BFS( G(V, E'(V)), v)
         traverse.reset()
                 .bfs(startNodeId,
                         Direction.INCOMING,
-                        node -> descendant.contains(node) && running(),
-                        scc::add)
+                        longToIntPredicate(node -> descendant.contains(node) && running()),
+                        longToIntConsumer(scc::add))
                 .awaitTermination();
         getProgressLogger().logDone();
         // SCC <- V & ST

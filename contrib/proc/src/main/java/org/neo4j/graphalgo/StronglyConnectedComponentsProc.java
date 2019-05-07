@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeGraph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -31,8 +30,8 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.core.write.Translators;
-import org.neo4j.graphalgo.impl.ForwardBackwardScc;
 import org.neo4j.graphalgo.impl.multistepscc.MultistepSCC;
+import org.neo4j.graphalgo.impl.scc.ForwardBackwardScc;
 import org.neo4j.graphalgo.impl.scc.SCCAlgorithm;
 import org.neo4j.graphalgo.impl.scc.SCCTarjan;
 import org.neo4j.graphalgo.impl.scc.SCCTunedTarjan;
@@ -42,7 +41,11 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
-import org.neo4j.procedure.*;
+import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Mode;
+import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -273,34 +276,21 @@ public class StronglyConnectedComponentsProc {
             builder.timeWrite(() -> write(configuration, graph, terminationFlag, tarjan, partitionProperty));
         }
 
-        if (graph instanceof HugeGraph) {
-            final HugeLongArray connectedComponents = tarjan.getConnectedComponents();
-            return Stream.of(builder.build(tracker, graph.nodeCount(), connectedComponents::get));
-        }
-        final int[] connectedComponents = tarjan.getConnectedComponents();
+        final HugeLongArray connectedComponents = tarjan.getConnectedComponents();
         tarjan.release();
-        return Stream.of(builder.build(tracker, graph.nodeCount(), l -> (long) connectedComponents[((int) l)]));
+        return Stream.of(builder.build(tracker, graph.nodeCount(), connectedComponents::get));
     }
 
-    private void write(ProcedureConfiguration configuration, Graph graph, TerminationFlag terminationFlag, SCCAlgorithm tarjan, String partitionProperty) {
+    private void write(
+            ProcedureConfiguration configuration,
+            Graph graph,
+            TerminationFlag terminationFlag,
+            SCCAlgorithm tarjan,
+            String partitionProperty) {
 
-        if (graph instanceof HugeGraph) {
-            final HugeLongArray connectedComponents = tarjan.getConnectedComponents();
-            graph.release();
-            tarjan.release();
-            Exporter.of(api, graph)
-                    .withLog(log)
-                    .parallel(Pools.DEFAULT, configuration.getConcurrency(), terminationFlag)
-                    .build()
-                    .write(
-                            partitionProperty,
-                            connectedComponents,
-                            HugeLongArray.Translator.INSTANCE
-                    );
-            return;
-        }
-
-        final int[] connectedComponents = tarjan.getConnectedComponents();
+        final HugeLongArray connectedComponents = tarjan.getConnectedComponents();
+        graph.release();
+        tarjan.release();
         Exporter.of(api, graph)
                 .withLog(log)
                 .parallel(Pools.DEFAULT, configuration.getConcurrency(), terminationFlag)
@@ -308,9 +298,8 @@ public class StronglyConnectedComponentsProc {
                 .write(
                         partitionProperty,
                         connectedComponents,
-                        Translators.OPTIONAL_INT_ARRAY_TRANSLATOR
+                        HugeLongArray.Translator.INSTANCE
                 );
-
     }
 
     // algo.scc.iterative.stream

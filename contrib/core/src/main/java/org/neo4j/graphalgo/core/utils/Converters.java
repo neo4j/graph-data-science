@@ -1,5 +1,8 @@
 package org.neo4j.graphalgo.core.utils;
 
+import org.neo4j.graphalgo.api.IntBinaryPredicate;
+import org.neo4j.graphalgo.api.RelationshipConsumer;
+
 import java.util.function.IntConsumer;
 import java.util.function.IntPredicate;
 import java.util.function.LongConsumer;
@@ -15,7 +18,7 @@ public interface Converters {
     static LongPredicate longToIntPredicate(IntPredicate p) {
         return value -> {
             // This will fail on very large graphs
-            int downCast = (int) value;
+            int downCast = Math.toIntExact(value);
             return p.test(downCast);
         };
     }
@@ -23,8 +26,16 @@ public interface Converters {
     static LongConsumer longToIntConsumer(IntConsumer p) {
         return value -> {
             // This will fail on very large graphs
-            int downCast = (int) value;
+            int downCast = Math.toIntExact(value);
             p.accept(downCast);
+        };
+    }
+
+    static RelationshipConsumer longToIntConsumer(IntBinaryPredicate p) {
+        return (sourceNodeId, targetNodeId) -> {
+            int s = Math.toIntExact(sourceNodeId);
+            int t = Math.toIntExact(targetNodeId);
+            return p.test(s, t);
         };
     }
 }
