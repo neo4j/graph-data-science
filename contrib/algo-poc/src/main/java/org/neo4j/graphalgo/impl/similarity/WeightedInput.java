@@ -30,7 +30,7 @@ public class WeightedInput implements Comparable<WeightedInput>, SimilarityInput
     private final long id;
     private int itemCount;
     private final double[] weights;
-    final int initialSize;
+    private final int initialSize;
 
     public WeightedInput(long id, double[] weights, int fullSize, int itemCount) {
         this.initialSize = fullSize;
@@ -68,7 +68,7 @@ public class WeightedInput implements Comparable<WeightedInput>, SimilarityInput
         return new WeightedInput(id, weights);
     }
 
-    static  WeightedInput[] prepareDenseWeights(List<Map<String, Object>> data, long degreeCutoff, Double skipValue) {
+    public static  WeightedInput[] prepareDenseWeights(List<Map<String, Object>> data, long degreeCutoff, Double skipValue) {
         WeightedInput[] inputs = new WeightedInput[data.size()];
         int idx = 0;
 
@@ -203,5 +203,9 @@ public class WeightedInput implements Comparable<WeightedInput>, SimilarityInput
     @Override
     public long getId() {
         return id;
+    }
+
+    public int initialSize() {
+        return initialSize;
     }
 }

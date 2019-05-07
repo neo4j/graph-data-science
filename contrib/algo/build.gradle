@@ -1,7 +1,7 @@
 apply plugin: 'com.github.johnrengelman.shadow'
 
 dependencies {
-    compile project(':graph-algorithms-core')
+    compile project(':algo-poc')
     compile group: 'com.carrotsearch'      , name: 'hppc'         , version: versions.hppc
     compile group: 'io.dropwizard.metrics' , name: 'metrics-core' , version: '4.0.2'
     compile group: 'org.hdrhistogram'      , name: 'HdrHistogram' , version: '2.1.9'

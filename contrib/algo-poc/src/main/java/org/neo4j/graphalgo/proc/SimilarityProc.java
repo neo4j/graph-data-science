@@ -60,7 +60,7 @@ public class SimilarityProc {
         return results;
     }
 
-    static Stream<SimilarityResult> topN(Stream<SimilarityResult> stream, int topN) {
+    protected static Stream<SimilarityResult> topN(Stream<SimilarityResult> stream, int topN) {
         if (topN == 0) {
             return stream;
         }
@@ -73,24 +73,26 @@ public class SimilarityProc {
         return TopKConsumer.topK(stream, topN, comparator);
     }
 
-    static SimilarityRecorder<WeightedInput> similarityRecorder(SimilarityComputer<WeightedInput> computer, ProcedureConfiguration configuration) {
+    protected static SimilarityRecorder<WeightedInput> similarityRecorder(SimilarityComputer<WeightedInput> computer, ProcedureConfiguration configuration) {
         boolean showComputations = configuration.get("showComputations", false);
         return showComputations ? new RecordingSimilarityRecorder<>(computer) : new NonRecordingSimilarityRecorder<>(computer);
     }
 
-    static SimilarityRecorder<CategoricalInput> categoricalSimilarityRecorder(SimilarityComputer<CategoricalInput> computer, ProcedureConfiguration configuration) {
+    protected static SimilarityRecorder<CategoricalInput> categoricalSimilarityRecorder(
+            SimilarityComputer<CategoricalInput> computer,
+            ProcedureConfiguration configuration) {
         boolean showComputations = configuration.get("showComputations", false);
         return showComputations ? new RecordingSimilarityRecorder<>(computer) : new NonRecordingSimilarityRecorder<>(computer);
     }
 
-    Long getDegreeCutoff(ProcedureConfiguration configuration) {
+    protected Long getDegreeCutoff(ProcedureConfiguration configuration) {
         return configuration.getNumber("degreeCutoff", 0L).longValue();
     }
 
     Long getWriteBatchSize(ProcedureConfiguration configuration) {
         return configuration.get("writeBatchSize", 10000L);
     }
-    Stream<SimilaritySummaryResult> writeAndAggregateResults(Stream<SimilarityResult> stream, int length, int sourceIdsLength, int targetIdsLength, ProcedureConfiguration configuration, boolean write, String writeRelationshipType, String writeProperty, Computations computations) {
+    protected Stream<SimilaritySummaryResult> writeAndAggregateResults(Stream<SimilarityResult> stream, int length, int sourceIdsLength, int targetIdsLength, ProcedureConfiguration configuration, boolean write, String writeRelationshipType, String writeProperty, Computations computations) {
         long writeBatchSize = getWriteBatchSize(configuration);
         AtomicLong similarityPairs = new AtomicLong();
         DoubleHistogram histogram = new DoubleHistogram(5);
@@ -109,16 +111,16 @@ public class SimilarityProc {
         return Stream.of(SimilaritySummaryResult.from(length, sourceIdsLength, targetIdsLength, similarityPairs, computations.count(), writeRelationshipType, writeProperty, write, histogram));
     }
 
-    Stream<SimilaritySummaryResult> emptyStream(String writeRelationshipType, String writeProperty) {
+    protected Stream<SimilaritySummaryResult> emptyStream(String writeRelationshipType, String writeProperty) {
         return Stream.of(SimilaritySummaryResult.from(0, 0,0, new AtomicLong(0), -1, writeRelationshipType,
                 writeProperty, false, new DoubleHistogram(5)));
     }
 
-    Double getSimilarityCutoff(ProcedureConfiguration configuration) {
+    protected Double getSimilarityCutoff(ProcedureConfiguration configuration) {
         return configuration.getNumber("similarityCutoff", -1D).doubleValue();
     }
 
-    <T> Stream<SimilarityResult> similarityStream(T[] inputs, int[] sourceIndexIds, int[] targetIndexIds, SimilarityComputer<T> computer, ProcedureConfiguration configuration, Supplier<RleDecoder> decoderFactory, double cutoff, int topK) {
+    protected <T> Stream<SimilarityResult> similarityStream(T[] inputs, int[] sourceIndexIds, int[] targetIndexIds, SimilarityComputer<T> computer, ProcedureConfiguration configuration, Supplier<RleDecoder> decoderFactory, double cutoff, int topK) {
         TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
 
         SimilarityStreamGenerator<T> generator = new SimilarityStreamGenerator<>(terminationFlag, configuration, decoderFactory, computer);
@@ -129,7 +131,7 @@ public class SimilarityProc {
         }
     }
 
-    CategoricalInput[] prepareCategories(List<Map<String, Object>> data, long degreeCutoff) {
+    protected CategoricalInput[] prepareCategories(List<Map<String, Object>> data, long degreeCutoff) {
         CategoricalInput[] ids = new CategoricalInput[data.size()];
         int idx = 0;
         for (Map<String, Object> row : data) {
@@ -150,16 +152,16 @@ public class SimilarityProc {
         return ids;
     }
 
-//    WeightedInput[] prepareWeights(Object rawData, ProcedureConfiguration configuration, Double skipValue) throws Exception {
-//        if (ProcedureConstants.CYPHER_QUERY.equals(configuration.getGraphName("dense"))) {
-//            return prepareSparseWeights(api, (String) rawData,  skipValue, configuration);
-//        } else {
-//            List<Map<String, Object>> data = (List<Map<String, Object>>) rawData;
-//            return WeightedInput.prepareDenseWeights(data, getDegreeCutoff(configuration), skipValue);
-//        }
-//    }
+    protected WeightedInput[] prepareWeights(Object rawData, ProcedureConfiguration configuration, Double skipValue) throws Exception {
+        if (ProcedureConstants.CYPHER_QUERY.equals(configuration.getGraphName("dense"))) {
+            return prepareSparseWeights(api, (String) rawData,  skipValue, configuration);
+        } else {
+            List<Map<String, Object>> data = (List<Map<String, Object>>) rawData;
+            return WeightedInput.prepareDenseWeights(data, getDegreeCutoff(configuration), skipValue);
+        }
+    }
 
-    Double readSkipValue(ProcedureConfiguration configuration) {
+    protected Double readSkipValue(ProcedureConfiguration configuration) {
         return configuration.get("skipValue", Double.NaN);
     }
 
@@ -211,11 +213,11 @@ public class SimilarityProc {
         return inputs;
     }
 
-    int getTopK(ProcedureConfiguration configuration) {
+    protected int getTopK(ProcedureConfiguration configuration) {
         return configuration.getInt("topK", 0);
     }
 
-    int getTopN(ProcedureConfiguration configuration) {
+    protected int getTopN(ProcedureConfiguration configuration) {
         return configuration.getInt("top", 0);
     }
 
@@ -228,10 +230,10 @@ public class SimilarityProc {
     }
 
 
-//    Supplier<RleDecoder> createDecoderFactory(ProcedureConfiguration configuration, WeightedInput input) {
-//        int size = input.initialSize;
-//        return createDecoderFactory(configuration.getGraphName("dense"), size);
-//    }
+    protected Supplier<RleDecoder> createDecoderFactory(ProcedureConfiguration configuration, WeightedInput input) {
+        int size = input.initialSize();
+        return createDecoderFactory(configuration.getGraphName("dense"), size);
+    }
 
 
 }

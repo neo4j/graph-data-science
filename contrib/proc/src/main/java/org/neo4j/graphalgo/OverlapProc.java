@@ -17,10 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.similarity;
+package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
-import org.neo4j.graphalgo.similarity.recorder.SimilarityRecorder;
+import org.neo4j.graphalgo.impl.results.SimilarityResult;
+import org.neo4j.graphalgo.impl.results.SimilaritySummaryResult;
+import org.neo4j.graphalgo.impl.similarity.CategoricalInput;
+import org.neo4j.graphalgo.impl.similarity.SimilarityComputer;
+import org.neo4j.graphalgo.impl.similarity.SimilarityInput;
+import org.neo4j.graphalgo.impl.similarity.SimilarityRecorder;
+import org.neo4j.graphalgo.proc.SimilarityProc;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -30,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.similarity.SimilarityInput.indexesFor;
+import static org.neo4j.graphalgo.impl.similarity.SimilarityInput.indexesFor;
 
 public class OverlapProc extends SimilarityProc {
 
