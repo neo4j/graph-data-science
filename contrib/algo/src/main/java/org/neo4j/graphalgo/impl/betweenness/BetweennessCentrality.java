@@ -123,10 +123,12 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality> {
      * This does not calculate the BC for startNode but adds a little bit
      * to all nodes which are reachable from the startNode
      *
-     * @param startNode the node
+     * @param start the node
      * @return
      */
-    private boolean compute(int startNode) {
+    private boolean compute(long start) {
+        // This will break for very large graphs
+        int startNode = (int) start;
         clearPaths();
         stack.clear();
         queue.clear();
@@ -140,7 +142,9 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality> {
         while (!queue.isEmpty() && running()) {
             int node = queue.removeFirst();
             stack.push(node);
-            graph.forEachRelationship(node, direction, (source, target, relationId) -> {
+            graph.forEachRelationship(node, direction, (source, targetId) -> {
+                // This will break for very large graphs
+                int target = (int) targetId;
                 if (distance[target] < 0) {
                     queue.addLast(target);
                     distance[target] = distance[node] + 1;

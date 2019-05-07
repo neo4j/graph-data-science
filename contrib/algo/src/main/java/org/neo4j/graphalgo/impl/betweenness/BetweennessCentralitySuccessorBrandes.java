@@ -20,7 +20,9 @@
 package org.neo4j.graphalgo.impl.betweenness;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.*;
+import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
+import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.container.MultiQueue;
 import org.neo4j.graphalgo.impl.Algorithm;
 import org.neo4j.graphdb.Direction;
@@ -105,7 +107,10 @@ public class BetweennessCentralitySuccessorBrandes extends Algorithm<Betweenness
         return this;
     }
 
-    private boolean compute(int startNodeId) {
+    private boolean compute(long startNode) {
+
+        // This will break for very large graphs
+        int startNodeId = (int) startNode;
 
         // initialization
 
@@ -132,7 +137,9 @@ public class BetweennessCentralitySuccessorBrandes extends Algorithm<Betweenness
                 graph.forEachRelationship(
                         v,
                         direction,
-                        (sourceNodeId, w, relationId) -> {
+                        (sourceNodeId, target) -> {
+                            // This will break for very large graphs
+                            int w = (int) target;
                             int dw = d.get(w);
                             d.compareAndSet(w, -1, phase + 1);
                             if (dw == -1) {

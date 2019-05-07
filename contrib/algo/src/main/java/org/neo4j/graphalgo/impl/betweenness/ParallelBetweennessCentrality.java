@@ -208,7 +208,10 @@ public class ParallelBetweennessCentrality extends Algorithm<ParallelBetweenness
             while (!queue.isEmpty()) {
                 int node = queue.removeFirst();
                 stack.push(node);
-                graph.forEachRelationship(node, direction, (source, target, relationId) -> {
+                graph.forEachRelationship(node, direction, (source, targetId) -> {
+                    // This will break for very large graphs
+                    int target = (int) targetId;
+
                     if (distance[target] < 0) {
                         queue.addLast(target);
                         distance[target] = distance[node] + 1;

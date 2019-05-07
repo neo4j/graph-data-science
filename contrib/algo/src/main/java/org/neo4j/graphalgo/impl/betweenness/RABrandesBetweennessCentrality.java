@@ -19,7 +19,15 @@
  */
 package org.neo4j.graphalgo.impl.betweenness;
 
-import com.carrotsearch.hppc.*;
+import com.carrotsearch.hppc.IntArrayDeque;
+import com.carrotsearch.hppc.IntArrayList;
+import com.carrotsearch.hppc.IntDoubleMap;
+import com.carrotsearch.hppc.IntDoubleScatterMap;
+import com.carrotsearch.hppc.IntIntMap;
+import com.carrotsearch.hppc.IntIntScatterMap;
+import com.carrotsearch.hppc.IntObjectMap;
+import com.carrotsearch.hppc.IntObjectScatterMap;
+import com.carrotsearch.hppc.IntStack;
 import com.carrotsearch.hppc.cursors.IntCursor;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
@@ -238,7 +246,10 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
                         continue;
                     }
                     pivots.push(node);
-                    graph.forEachRelationship(node, direction, (source, target, relationId) -> {
+                    graph.forEachRelationship(node, direction, (source, targetId) -> {
+                        // This will break for very large graphs
+                        int target = (int) targetId;
+
                         // check if distance has been set before
                         if (distance[target] < 0) {
                             queue.addLast(target);

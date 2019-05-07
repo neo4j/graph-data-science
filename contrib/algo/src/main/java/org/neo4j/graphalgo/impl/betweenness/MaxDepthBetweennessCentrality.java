@@ -135,10 +135,12 @@ public class MaxDepthBetweennessCentrality extends Algorithm<MaxDepthBetweenness
      * This does not calculate the BC for startNode only but adds a little bit
      * to all nodes which are reachable from the startNode within maxDepth
      *
-     * @param startNode
+     * @param startNodeId
      * @return
      */
-    private boolean compute(int startNode) {
+    private boolean compute(long startNodeId) {
+        // This will break for very large graphs
+        int startNode = (int) startNodeId;
         clearPaths();
         stack.clear();
         queue.clear();
@@ -157,7 +159,10 @@ public class MaxDepthBetweennessCentrality extends Algorithm<MaxDepthBetweenness
                 break;
             }
             stack.push(node);
-            graph.forEachRelationship(node, direction, (source, target, relationId) -> {
+            graph.forEachRelationship(node, direction, (source, targetId) -> {
+                // This will break for very large graphs
+                int target = (int) targetId;
+
                 if (distance[target] < 0) {
                     queue.addLast(target);
                     depth.addLast(dp + 1);
