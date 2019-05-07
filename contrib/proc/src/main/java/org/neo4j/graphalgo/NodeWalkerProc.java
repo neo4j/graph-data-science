@@ -17,28 +17,38 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.walking;
+package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
-import org.neo4j.graphalgo.core.utils.*;
+import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.walking.NodeWalker;
 import org.neo4j.graphalgo.impl.walking.WalkPath;
 import org.neo4j.graphalgo.impl.walking.WalkResult;
 import org.neo4j.graphalgo.results.PageRankScore;
-import org.neo4j.graphdb.*;
+import org.neo4j.graphdb.Direction;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
-import org.neo4j.procedure.*;
+import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Mode;
+import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
 
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.stream.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.PrimitiveIterator;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 public class NodeWalkerProc  {
 
@@ -121,11 +131,11 @@ public class NodeWalkerProc  {
                 IntStream deltas = IntStream.range(0, limit).map(i -> indexes[i + 1] - indexes[i]);
                 ids = deltas.mapToLong(delta -> { while (delta > 0 && cursor.next()) delta--;return cursor.nodeReference(); });
             }
-            return ids.mapToInt(graph::toMappedNodeId).onClose(cursor::close);
+            return ids.map(graph::toMappedNodeId).mapToInt(Math::toIntExact).onClose(cursor::close);
         } else if (start instanceof Collection) {
-            return ((Collection)start).stream().mapToLong(e -> ((Number)e).longValue()).mapToInt(graph::toMappedNodeId);
+            return ((Collection)start).stream().mapToLong(e -> ((Number)e).longValue()).map(graph::toMappedNodeId).mapToInt(Math::toIntExact);
         } else if (start instanceof Number) {
-            return LongStream.of(((Number)start).longValue()).mapToInt(graph::toMappedNodeId);
+            return LongStream.of(((Number)start).longValue()).map(graph::toMappedNodeId).mapToInt(Math::toIntExact);
         } else {
             if (nodeCount < limit) {
                 return IntStream.range(0,nodeCount).limit(limit);

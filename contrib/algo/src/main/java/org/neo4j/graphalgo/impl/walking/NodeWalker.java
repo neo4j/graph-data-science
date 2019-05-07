@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.impl.walking;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.Degrees;
+import org.neo4j.graphalgo.api.IntBinaryPredicate;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -35,6 +36,8 @@ import java.util.concurrent.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
 
 public class NodeWalker {
 
@@ -85,7 +88,7 @@ public class NodeWalker {
         int previousNodeId = currentNodeId;
         nodeIds[0] = toOriginalNodeId(graph, currentNodeId);
         for(int i = 1; i <= steps; i++){
-            int nextNodeId = nextNodeStrategy.getNextNode(currentNodeId, previousNodeId);
+            int nextNodeId = Math.toIntExact(nextNodeStrategy.getNextNode(currentNodeId, previousNodeId));
             previousNodeId = currentNodeId;
             currentNodeId = nextNodeId;
 
@@ -103,36 +106,6 @@ public class NodeWalker {
         return currentNodeId == -1 ? -1 : graph.toOriginalNodeId(currentNodeId);
     }
 
-    /*
-    private void startSingleWalk(AbstractWalkOutput output, int nodeId, int steps, long numberOfElements, long startTime) {
-        try {
-            long[] pathIds = doWalk(nodeId, steps, nextNodeStrategy);
-            long numberOfResults = output.numberOfResults() + 1;
-            // log progress ------
-            if(numberOfResults % 50000 == 2500){ //get a better estimate after 2500 walks
-                long progress = (numberOfResults*1000) / (numberOfElements*10); // dont convert to float but keep precision
-                long remainingTime = estimateRemainingTime(startTime, numberOfResults, numberOfElements);
-                long remainingMinutes = TimeUnit.MINUTES.convert(remainingTime, TimeUnit.NANOSECONDS);
-                long remainingHours = TimeUnit.HOURS.convert(remainingTime, TimeUnit.NANOSECONDS);
-                String progressLog = String.format( "Approximately %d %% of all walks done; estimated remaining time is %d minutes or %d hours", progress, remainingMinutes, remainingHours);
-                log.info(progressLog);
-            }
-            // ------
-
-            output.addResult(pathIds);
-        } catch (Exception e) {
-            log.error(String.format("Error with node %d: %s", nodeId, e.getMessage()));
-        }
-    }
-
-    private long estimateRemainingTime(long startNanoTime, long currentIndex, long size) {
-        long elapsedTime = System.nanoTime() - startNanoTime;
-        double timeForOne = elapsedTime / currentIndex;
-        long remainingElements = size - currentIndex;
-        return remainingElements * (long) timeForOne;
-    }
-    */
-
     public static class RandomNextNodeStrategy extends NextNodeStrategy {
 
         public RandomNextNodeStrategy(Graph graph, Degrees degrees) {
@@ -140,7 +113,7 @@ public class NodeWalker {
         }
 
         @Override
-        public int getNextNode(int currentNodeId, int previousNodeId) {
+        public long getNextNode(long currentNodeId, long previousNodeId) {
             int degree = degrees.degree(currentNodeId, Direction.BOTH);
             if (degree == 0) {
                 return -1;
@@ -162,7 +135,10 @@ public class NodeWalker {
             this.inOutParam = inOutParam;
         }
 
-        public int getNextNode(int currentNodeId, int previousNodeId) {
+        public long getNextNode(long currentNode, long previousNode) {
+            int currentNodeId = Math.toIntExact(currentNode);
+            int previousNodeId = Math.toIntExact(previousNode);
+
             int degree = degrees.degree(currentNodeId, Direction.BOTH);
             if (degree == 0) {
                 return -1;
@@ -178,7 +154,7 @@ public class NodeWalker {
                                                       double returnParam, double inOutParam, int degree) {
 
             ProbabilityDistributionComputer consumer = new ProbabilityDistributionComputer(degree, currentNodeId, previousNodeId, returnParam, inOutParam);
-            graph.forEachRelationship(currentNodeId, Direction.BOTH, consumer);
+            graph.forEachRelationship(currentNodeId, Direction.BOTH, longToIntConsumer(consumer));
             return consumer.probabilities();
         }
 
@@ -200,7 +176,7 @@ public class NodeWalker {
             return distribution.length - 1;
         }
 
-        private class ProbabilityDistributionComputer implements RelationshipConsumer {
+        private class ProbabilityDistributionComputer implements IntBinaryPredicate {
             final double[] probabilities;
             private final int currentNodeId;
             private final int previousNodeId;
@@ -220,7 +196,7 @@ public class NodeWalker {
             }
 
             @Override
-            public boolean accept(int start, int end, long rel) {
+            public boolean test(int start, int end) {
                 int neighbourId = start == currentNodeId ? end : start;
 
                 double probability;
@@ -260,6 +236,6 @@ public class NodeWalker {
             this.degrees = degrees;
         }
 
-        public abstract int getNextNode(int currentNodeId, int previousNodeId);
+        public abstract long getNextNode(long currentNodeId, long previousNodeId);
     }
 }
