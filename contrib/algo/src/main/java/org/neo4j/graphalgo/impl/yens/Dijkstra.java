@@ -19,7 +19,11 @@
  */
 package org.neo4j.graphalgo.impl.yens;
 
-import com.carrotsearch.hppc.*;
+import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.IntDoubleMap;
+import com.carrotsearch.hppc.IntDoubleScatterMap;
+import com.carrotsearch.hppc.IntIntMap;
+import com.carrotsearch.hppc.IntIntScatterMap;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -29,6 +33,8 @@ import org.neo4j.graphdb.Direction;
 
 import java.util.Arrays;
 import java.util.Optional;
+
+import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
 
 /**
  * specialized dijkstra impl. for YensKShortestPath
@@ -52,7 +58,7 @@ public class Dijkstra {
     // visited set
     private final BitSet visited;
     // visited filter
-    private RelationshipConsumer filter = (sourceNodeId, targetNodeId, relationId) -> true;
+    private RelationshipConsumer filter = (sourceNodeId, targetNodeId) -> true;
     // traverse direction
     private Direction direction = Direction.BOTH;
     // iteration depth
@@ -85,7 +91,7 @@ public class Dijkstra {
      * @return this
      */
     public Dijkstra withoutFilter() {
-        this.filter = (sourceNodeId, targetNodeId, relationId) -> true;
+        this.filter = (sourceNodeId, targetNodeId) -> true;
         return this;
     }
 
@@ -121,12 +127,14 @@ public class Dijkstra {
 
     /**
      * compute shortest path from sourceNode to targetNode
-     * @param sourceNode mapped source node id
-     * @param targetNode mapped target node id
+     * @param sourceNodeId mapped source node id
+     * @param targetNodeId mapped target node id
      * @param maxDepth maximum traversal depth
      * @return an optional path
      */
-    public Optional<WeightedPath> compute(int sourceNode, int targetNode, int maxDepth) {
+    public Optional<WeightedPath> compute(long sourceNodeId, long targetNodeId, int maxDepth) {
+        int sourceNode = Math.toIntExact(sourceNodeId);
+        int targetNode = Math.toIntExact(targetNodeId);
         if (!dijkstra(sourceNode, targetNode, direction, maxDepth)) {
             return Optional.empty();
         }
@@ -167,8 +175,8 @@ public class Dijkstra {
             double costs = this.costs.getOrDefault(node, Double.MAX_VALUE);
             graph.forEachRelationship(
                     node,
-                    direction, (s, t, relId) -> {
-                        if (!filter.accept(s, t, relId)) {
+                    direction, longToIntConsumer((s, t) -> {
+                        if (!filter.accept(s, t)) {
                             return true;
                         }
                         final double w = graph.weightOf(s, t);
@@ -187,7 +195,7 @@ public class Dijkstra {
                             depth[t] = depth[s] + 1;
                         }
                         return terminationFlag.running();
-                    });
+                    }));
         }
         return false;
     }

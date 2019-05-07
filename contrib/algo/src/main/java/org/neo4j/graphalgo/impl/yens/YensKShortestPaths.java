@@ -19,14 +19,21 @@
  */
 package org.neo4j.graphalgo.impl.yens;
 
-import com.carrotsearch.hppc.*;
+import com.carrotsearch.hppc.IntScatterSet;
+import com.carrotsearch.hppc.LongScatterSet;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.impl.Algorithm;
 import org.neo4j.graphdb.Direction;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.PriorityQueue;
+
+import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
 
 /**
  * Yen's k-shortest-paths Algorithm.
@@ -76,7 +83,7 @@ public class YensKShortestPaths extends Algorithm<YensKShortestPaths> {
         return this;
     }
 
-    private void yens(int k, int start, int goal, Direction direction, int maxDepth) {
+    private void yens(int k, long start, long goal, Direction direction, int maxDepth) {
         final ProgressLogger progressLogger = getProgressLogger();
         // blacklist container for dijkstra
         final IntScatterSet nodeBlackList = new IntScatterSet();
@@ -86,11 +93,11 @@ public class YensKShortestPaths extends Algorithm<YensKShortestPaths> {
         // equip dijkstra with a node and edge filter and set its traversal direction
         final Optional<WeightedPath> shortestPathOpt = dijkstra.withTerminationFlag(getTerminationFlag())
                 .withDirection(direction)
-                .withFilter((s, t, r) ->
+                .withFilter(longToIntConsumer((s, t) ->
                         // set custom node filter
                         !nodeBlackList.contains(t) &&
                         // and edge filter by combining the nodeIds into a long
-                        !edgeBlackList.contains(RawValues.combineIntInt(s, t)))
+                        !edgeBlackList.contains(RawValues.combineIntInt(s, t))))
                 .compute(start, goal, maxDepth);// compute the best shortest path first
         if (!shortestPathOpt.isPresent()) {
             // not a single path found
