@@ -19,16 +19,22 @@
  */
 package org.neo4j.graphalgo.impl.infomap;
 
-import com.carrotsearch.hppc.*;
+import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.BitSetIterator;
+import com.carrotsearch.hppc.IntDoubleMap;
+import com.carrotsearch.hppc.IntDoubleScatterMap;
 import com.carrotsearch.hppc.cursors.IntDoubleCursor;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeWeights;
 import org.neo4j.graphalgo.api.RelationshipWeights;
-import org.neo4j.graphalgo.core.utils.*;
+import org.neo4j.graphalgo.core.utils.DegreeNormalizedRelationshipWeights;
+import org.neo4j.graphalgo.core.utils.NormalizedRelationshipWeights;
+import org.neo4j.graphalgo.core.utils.Pointer;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.Algorithm;
-import org.neo4j.graphalgo.impl.pagerank.PageRankAlgorithm;
-import org.neo4j.graphalgo.impl.pagerank.PageRankResult;
+import org.neo4j.graphalgo.impl.pagerank.PageRankFactory;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphdb.Direction;
 
@@ -94,12 +100,13 @@ public class InfoMap extends Algorithm<InfoMap> {
         final CentralityResult pageRankResult;
         // use parallel PR if concurrency is >1
         if (concurrency > 1) {
-            pageRankResult = PageRankAlgorithm.weightedOf(AllocationTracker.create(), graph, 1. - tau, LongStream.empty(), pool, concurrency, PAGE_RANK_BATCH_SIZE, PAGE_RANK_CACHE_WEIGHTS)
+            pageRankResult = PageRankFactory
+                    .weightedOf(AllocationTracker.create(), graph, 1. - tau, LongStream.empty(), pool, concurrency, PAGE_RANK_BATCH_SIZE, PAGE_RANK_CACHE_WEIGHTS)
                     .compute(prIterations)
                     .result();
             return weighted(graph, pageRankResult::score, weights, threshold, tau, pool, concurrency, logger, terminationFlag);
         } else {
-            pageRankResult = PageRankAlgorithm.weightedOf(graph, 1. - tau, LongStream.empty())
+            pageRankResult = PageRankFactory.weightedOf(graph, 1. - tau, LongStream.empty())
                     .compute(prIterations)
                     .result();
         }
@@ -128,11 +135,11 @@ public class InfoMap extends Algorithm<InfoMap> {
         // use parallel PR if concurrency is >1
         if (concurrency > 1) {
             final AllocationTracker tracker = AllocationTracker.create();
-            pageRankResult = PageRankAlgorithm.of(tracker, graph, 1. - tau, LongStream.empty(), pool, concurrency, PAGE_RANK_BATCH_SIZE)
+            pageRankResult = PageRankFactory.of(tracker, graph, 1. - tau, LongStream.empty(), pool, concurrency, PAGE_RANK_BATCH_SIZE)
                     .compute(prIterations)
                     .result();
         } else {
-            pageRankResult = PageRankAlgorithm.of(graph, 1. - tau, LongStream.empty())
+            pageRankResult = PageRankFactory.of(graph, 1. - tau, LongStream.empty())
                     .compute(prIterations)
                     .result();
         }
@@ -177,7 +184,9 @@ public class InfoMap extends Algorithm<InfoMap> {
         this.n1 = nodeCount - 1.;
         this.sQi = 0.0;
         Arrays.setAll(communities, i -> i);
-        graph.forEachNode(node -> {
+        graph.forEachNode(nodeId -> {
+            // This will fail on very large graphs
+            int node = (int) nodeId;
             Module module = new Module(node, graph, pageRank);
             modules.put(node, module);
             sQi += module.q;
@@ -388,7 +397,10 @@ public class InfoMap extends Algorithm<InfoMap> {
         Module(int startNode, Graph graph, NodeWeights pageRank) {
             this.index = startNode;
             this.wi = new IntDoubleScatterMap();
-            graph.forEachRelationship(startNode, D, (s, t, r) -> {
+            graph.forEachRelationship(startNode, D, (source, target) -> {
+                // This will fail on very large graphs
+                int s = (int) source;
+                int t = (int) target;
                 if (s != t) {
                     final double v = weights.weightOf(s, t);
                     w += v;
