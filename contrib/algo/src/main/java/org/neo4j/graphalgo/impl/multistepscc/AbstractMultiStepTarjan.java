@@ -91,7 +91,10 @@ public abstract class AbstractMultiStepTarjan {
         processSCC(nodeId, connected);
     }
 
-    private boolean accept(int source, int target, long edgeId) {
+    private boolean accept(long s, long t) {
+        // This will break for very large graphs
+        int source = Math.toIntExact(s);
+        int target = Math.toIntExact(t);
         if (!indices.containsKey(target)) {
             strongConnect(target);
             lowLink.put(source, Math.min(lowLink.get(source), lowLink.get(target)));

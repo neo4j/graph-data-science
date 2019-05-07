@@ -28,6 +28,9 @@ import org.neo4j.graphdb.Direction;
 
 import java.util.concurrent.ExecutorService;
 
+import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
+import static org.neo4j.graphalgo.core.utils.Converters.longToIntPredicate;
+
 /**
  * Multistep ForwardBackward Coloring algorithm.
  * <p>
@@ -53,12 +56,12 @@ public class MultiStepFWBW {
         root = pivot(nodes);
         // D <- BFS( G(V,E(V)), v)
         final IntScatterSet descendant = new IntScatterSet();
-        traverse.bfs(root, Direction.OUTGOING, nodes::contains, descendant::add)
+        traverse.bfs(root, Direction.OUTGOING, longToIntPredicate(nodes::contains), longToIntConsumer(descendant::add))
                 .awaitTermination();
         // ST <- BFS( G(V, E'(V)), v)
         final IntSet rootSCC = new IntScatterSet();
         traverse.reset()
-                .bfs(root, Direction.INCOMING, descendant::contains, rootSCC::add)
+                .bfs(root, Direction.INCOMING, longToIntPredicate(descendant::contains), longToIntConsumer(rootSCC::add))
                 .awaitTermination();
         // SCC <- V & ST
         rootSCC.retainAll(descendant);

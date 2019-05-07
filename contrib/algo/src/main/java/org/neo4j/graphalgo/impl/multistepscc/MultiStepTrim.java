@@ -111,7 +111,8 @@ public class MultiStepTrim {
                 filter[0] = false;
                 // rm nodes without incoming arcs and update target degrees
                 if (inDegree[node] == 0) {
-                    graph.forEachRelationship(node, Direction.OUTGOING, (sourceNodeId, targetNodeId, relationId) -> {
+                    graph.forEachRelationship(node, Direction.OUTGOING, (sourceNodeId, targetNode) -> {
+                        int targetNodeId = Math.toIntExact(targetNode);
                         outDegree[targetNodeId]--;
                         return true;
                     });
@@ -119,7 +120,8 @@ public class MultiStepTrim {
                 }
                 // rm nodes without outgoing arcs and update target degrees
                 if (outDegree[node] == 0) {
-                    graph.forEachRelationship(node, Direction.INCOMING, (sourceNodeId, targetNodeId, relationId) -> {
+                    graph.forEachRelationship(node, Direction.INCOMING, (sourceNodeId, targetNode) -> {
+                        int targetNodeId = Math.toIntExact(targetNode);
                         inDegree[targetNodeId]--;
                         return true;
                     });
@@ -127,7 +129,7 @@ public class MultiStepTrim {
                 }
                 // rm self loops (only in complete mode)
                 if (complete && inDegree[node] == 1 && outDegree[node] == 1) {
-                    graph.forEachRelationship(node, Direction.OUTGOING, (sourceNodeId, targetNodeId, relationId) -> {
+                    graph.forEachRelationship(node, Direction.OUTGOING, (sourceNodeId, targetNodeId) -> {
                         if (sourceNodeId == targetNodeId) {
                             filter[0] = true;
                             return false;

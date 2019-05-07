@@ -19,7 +19,10 @@
  */
 package org.neo4j.graphalgo.impl.multistepscc;
 
-import com.carrotsearch.hppc.*;
+import com.carrotsearch.hppc.IntContainer;
+import com.carrotsearch.hppc.IntScatterSet;
+import com.carrotsearch.hppc.IntSet;
+import com.carrotsearch.hppc.IntStack;
 import com.carrotsearch.hppc.cursors.IntCursor;
 import com.carrotsearch.hppc.procedures.IntProcedure;
 import org.neo4j.graphalgo.api.Graph;
@@ -33,7 +36,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.function.IntPredicate;
 
@@ -159,7 +165,8 @@ public class MultiStepColoring {
         nodes.forEach((IntProcedure) node -> {
             final int nodeColor = colors.get(node);
             final boolean[] change = {false};
-            graph.forEachRelationship(node, Direction.OUTGOING, (sourceNodeId, targetNodeId, relationId) -> {
+            graph.forEachRelationship(node, Direction.OUTGOING, (sourceNodeId, target) -> {
+                int targetNodeId = Math.toIntExact(target);
                 if (cas(targetNodeId, nodeColor)) {
                     if (!visited.get(targetNodeId)) {
                         visited.set(targetNodeId);
@@ -193,11 +200,12 @@ public class MultiStepColoring {
             queue.forEach(node -> {
                 final int nodeColor = colors.get(node);
                 final boolean[] change = {false};
-                graph.forEachRelationship(node, Direction.OUTGOING, (sourceNodeId, targetNodeId, relationId) -> {
-                    if (cas(targetNodeId, nodeColor)) {
-                        if (!visited.get(targetNodeId)) {
-                            visited.set(targetNodeId);
-                            queue.push(targetNodeId);
+                graph.forEachRelationship(node, Direction.OUTGOING, (sourceNodeId, targetNodeId) -> {
+                    int nodeId = Math.toIntExact(targetNodeId);
+                    if (cas(nodeId, nodeColor)) {
+                        if (!visited.get(nodeId)) {
+                            visited.set(nodeId);
+                            queue.push(nodeId);
                             change[0] = true;
                         }
                     }
@@ -227,8 +235,9 @@ public class MultiStepColoring {
             nodes.forEach((IntProcedure) node -> {
                 final int nodeColor = colors.get(node);
                 // for each <v, u> in E(V) (direction not specified)
-                graph.forEachRelationship(node, Direction.OUTGOING, (sourceNodeId, targetNodeId, relationId) -> {
-                    if (cas(targetNodeId, nodeColor)) {
+                graph.forEachRelationship(node, Direction.OUTGOING, (sourceNodeId, targetNodeId) -> {
+                    int target = Math.toIntExact(targetNodeId);
+                    if (cas(target, nodeColor)) {
                         changed[0] = true;
                     }
                     return true;

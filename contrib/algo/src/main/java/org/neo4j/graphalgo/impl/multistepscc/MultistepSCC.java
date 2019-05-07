@@ -33,6 +33,9 @@ import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
+import static org.neo4j.graphalgo.core.utils.Converters.longToIntPredicate;
+
 /**
  * Multistep: parallel strongly connected component algorithm
  * <p>
@@ -192,11 +195,11 @@ public class MultistepSCC extends Algorithm<MultistepSCC> {
     private IntSet pred(final IntSet nodes, AtomicIntegerArray colors, final int cv) {
         final IntScatterSet set = new IntScatterSet();
         traverse.reset()
-                .bfs(cv, Direction.INCOMING, nodes::contains, node -> {
+                .bfs(cv, Direction.INCOMING, longToIntPredicate(nodes::contains), longToIntConsumer(node -> {
                     if (colors.get(node) == cv) {
                         set.add(node);
                     }
-                })
+                }))
                 .awaitTermination();
 
         return set;
