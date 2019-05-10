@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeGraph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
@@ -141,7 +140,7 @@ public class PrimProc {
             return Stream.of(builder.build());
         }
 
-        final int root = graph.toMappedNodeId(startNode);
+        final int root = Math.toIntExact(graph.toMappedNodeId(startNode));
         final Prim mstPrim = new Prim(graph, graph, graph)
                 .withProgressLogger(ProgressLogger.wrap(log, "Prim(MaximumSpanningTree)"))
                 .withTerminationFlag(TerminationFlag.wrap(transaction));

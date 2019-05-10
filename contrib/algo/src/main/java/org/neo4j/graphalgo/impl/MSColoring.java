@@ -23,11 +23,11 @@ import com.carrotsearch.hppc.IntIntMap;
 import com.carrotsearch.hppc.IntIntScatterMap;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.msbfs.BfsSources;
 import org.neo4j.graphalgo.impl.msbfs.MultiSourceBFS;
 import org.neo4j.graphdb.Direction;
 
-import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.stream.IntStream;
@@ -68,7 +68,7 @@ public class MSColoring {
         // reset state so that each node has its own id as color
         reset();
         // start bfs from all sources (direction does not matter)
-        new MultiSourceBFS(graph, graph, Direction.OUTGOING, this::nodeAction)
+        new MultiSourceBFS(graph, graph, Direction.OUTGOING, this::nodeAction, AllocationTracker.EMPTY)
                 .run(concurrency, executorService);
         return this;
     }
@@ -94,11 +94,15 @@ public class MSColoring {
                 offset -> colors.set(offset, offset));
     }
 
-    private void nodeAction(int node, int depth, BfsSources bfsSources) {
+    private void nodeAction(long nodeId, int depth, BfsSources bfsSources) {
+        // This will break for very large graphs
+        int node = Math.toIntExact(nodeId);
         // evaluate highest color
         int bestColor = this.colors.get(node);
         while (bfsSources.hasNext()) {
-            final int sourceColor = colors.get(bfsSources.next());
+            // This will break for very large graphs
+            final int next = Math.toIntExact(bfsSources.next());
+            final int sourceColor = colors.get(next);
             bestColor = Math.max(bestColor, sourceColor);
         }
         // set color to target node
@@ -107,7 +111,8 @@ public class MSColoring {
         bfsSources.reset();
         // set highest color to all sources
         while (bfsSources.hasNext()) {
-            final int source = bfsSources.next();
+            // This will break for very large graphs
+            final int source = Math.toIntExact(bfsSources.next());
             setColor(source, bestColor);
         }
     }

@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.impl;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.msbfs.BfsConsumer;
@@ -60,11 +61,11 @@ public class DangalchevClosenessCentrality extends Algorithm<DangalchevCloseness
 
         final BfsConsumer consumer = (nodeId, depth, sourceNodeIds) -> {
             int len = sourceNodeIds.size();
-            farness.add(nodeId, len * 1.0 / Math.pow(2, depth));
+            farness.add(Math.toIntExact(nodeId), len * 1.0 / Math.pow(2, depth));
             progressLogger.logProgress((double) nodeId / (nodeCount - 1));
         };
 
-        new MultiSourceBFS(graph, graph, Direction.OUTGOING, consumer)
+        new MultiSourceBFS(graph, graph, Direction.OUTGOING, consumer, AllocationTracker.EMPTY)
                 .run(concurrency, executorService);
 
         return this;

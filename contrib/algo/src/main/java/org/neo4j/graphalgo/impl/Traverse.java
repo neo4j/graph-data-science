@@ -29,6 +29,8 @@ import org.neo4j.graphdb.Direction;
 import java.util.function.ObjDoubleConsumer;
 import java.util.function.ObjIntConsumer;
 
+import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
+
 /**
  * @author mknblch
  */
@@ -98,7 +100,7 @@ public class Traverse extends Algorithm<Traverse> {
 
     /**
      * traverse along the path
-     * @param sourceNode source node (mapped id)
+     * @param sourceNodeId source node (mapped id)
      * @param direction the traversal direction
      * @param exitCondition exit condition
      * @param agg weight accumulator function
@@ -106,13 +108,14 @@ public class Traverse extends Algorithm<Traverse> {
      * @param weightFunc weight accessor function (either ::addLast or ::addFirst to switch between fifo and lifo behaviour)
      * @return a list of nodes that have been visited
      */
-    private long[] traverse(int sourceNode,
+    private long[] traverse(long sourceNodeId,
                             Direction direction,
                             ExitPredicate exitCondition,
                             Aggregator agg,
                             ObjIntConsumer<IntArrayDeque> nodeFunc,
                             ObjDoubleConsumer<DoubleArrayDeque> weightFunc) {
-
+        // This will break for very large graphs
+        final int sourceNode = Math.toIntExact(sourceNodeId);
         final LongArrayList list = new LongArrayList(nodeCount);
         nodes.clear();
         sources.clear();
@@ -138,7 +141,7 @@ public class Traverse extends Algorithm<Traverse> {
             }
             graph.forEachRelationship(
                     node,
-                    direction, (s, t, relId) -> {
+                    direction, longToIntConsumer((s, t) -> {
                         if (!visited.get(t)) {
                             visited.set(t);
                             nodeFunc.accept(sources, node);
@@ -146,7 +149,7 @@ public class Traverse extends Algorithm<Traverse> {
                             weightFunc.accept(weights, agg.apply(s, t, weight));
                         }
                         return running();
-                    });
+                    }));
         }
         return list.toArray();
     }

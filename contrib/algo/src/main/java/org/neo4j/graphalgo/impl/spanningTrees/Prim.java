@@ -36,7 +36,15 @@ import java.util.Arrays;
 import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
 
 /**
- * Sequential Single-Source minimum/maximum weight spanning tree algorithm (PRIM).
+ * Sequential Single-Source minimum weight spanning tree algorithm (PRIM).
+ * <p>
+ * The algorithm computes the MST by traversing all nodes from a given
+ * startNodeId. It aggregates all transitions into a MinPriorityQueue
+ * and visits each (unvisited) connected node by following only the
+ * cheapest transition and adding it to a specialized form of {@link UndirectedTree}.
+ * <p>
+ * The algorithm also computes the minimum, maximum and sum of all
+ * weights in the MST.
  *
  * @author mknblch
  */
@@ -65,7 +73,7 @@ public class Prim extends Algorithm<Prim> {
     }
 
     /**
-     * callculate min or max spanning trees
+     * Calculate min or max spanning trees
      * @param startNode the start node
      * @param max true to calc max spanning tree, false to calc min spanning tree
      * @return
