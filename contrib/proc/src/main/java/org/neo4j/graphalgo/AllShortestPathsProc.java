@@ -20,17 +20,15 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeGraph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.AllShortestPaths;
-import org.neo4j.graphalgo.impl.HugeMSBFSAllShortestPaths;
 import org.neo4j.graphalgo.impl.MSBFSASPAlgorithm;
 import org.neo4j.graphalgo.impl.MSBFSAllShortestPaths;
+import org.neo4j.graphalgo.impl.WeightedAllShortestPaths;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -61,7 +59,7 @@ public class AllShortestPathsProc {
     @Description("CALL algo.allShortestPaths.stream(weightProperty:String" +
             "{nodeQuery:'labelName', relationshipQuery:'relationshipName', defaultValue:1.0, concurrency:4}) " +
             "YIELD sourceNodeId, targetNodeId, distance - yields a stream of {sourceNodeId, targetNodeId, distance}")
-    public Stream<AllShortestPaths.Result> allShortestPathsStream(
+    public Stream<WeightedAllShortestPaths.Result> allShortestPathsStream(
             @Name(value = "propertyName") String propertyName,
             @Name(value = "config", defaultValue = "{}")
                     Map<String, Object> config) {
@@ -98,28 +96,17 @@ public class AllShortestPathsProc {
 
         // use MSBFS ASP if no weightProperty is set
         if (null == propertyName || propertyName.isEmpty()) {
-            if (graph instanceof HugeGraph) {
-                HugeGraph hugeGraph = (HugeGraph) graph;
-                algo = new HugeMSBFSAllShortestPaths(
-                        hugeGraph,
+            algo = new MSBFSAllShortestPaths(
+                        graph,
                         tracker,
                         configuration.getConcurrency(),
                         Pools.DEFAULT,
                         direction);
-            } else {
-                algo = new MSBFSAllShortestPaths(
-                        graph,
-                        configuration.getConcurrency(),
-                        Pools.DEFAULT,
-                        direction);
-            }
-            algo.withProgressLogger(ProgressLogger.wrap(
-                    log,
-                    "AllShortestPaths(MultiSource)"));
+            algo.withProgressLogger(ProgressLogger.wrap(log, "AllShortestPaths(MultiSource)"));
         } else {
             // weighted ASP otherwise
-            algo = new AllShortestPaths(graph, Pools.DEFAULT, configuration.getConcurrency(), direction)
-                    .withProgressLogger(ProgressLogger.wrap(log, "AllShortestPaths)"));
+            algo = new WeightedAllShortestPaths(graph, Pools.DEFAULT, configuration.getConcurrency(), direction)
+                    .withProgressLogger(ProgressLogger.wrap(log, "WeightedAllShortestPaths)"));
         }
 
         return algo.withTerminationFlag(TerminationFlag.wrap(transaction)).resultStream();

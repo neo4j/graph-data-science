@@ -29,6 +29,8 @@ import org.neo4j.graphdb.Direction;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
+
 /**
  * Dijkstra single source - single target shortest path algorithm
  * <p>
@@ -87,8 +89,8 @@ public class ShortestPathDijkstra extends Algorithm<ShortestPathDijkstra> {
     public ShortestPathDijkstra compute(long startNode, long goalNode, Direction direction) {
         reset();
 
-        int node = graph.toMappedNodeId(startNode);
-        int goal = graph.toMappedNodeId(goalNode);
+        int node = Math.toIntExact(graph.toMappedNodeId(startNode));
+        int goal = Math.toIntExact(graph.toMappedNodeId(goalNode));
         costs.put(node, 0.0);
         queue.add(node, 0.0);
         run(goal, direction);
@@ -153,10 +155,10 @@ public class ShortestPathDijkstra extends Algorithm<ShortestPathDijkstra> {
             double costs = this.costs.getOrDefault(node, Double.MAX_VALUE);
             graph.forEachRelationship(
                     node,
-                    direction, (source, target, relId, weight) -> {
+                    direction, longToIntConsumer((source, target, weight) -> {
                         updateCosts(source, target, weight + costs);
                         return true;
-                    });
+                    }));
             progressLogger.logProgress((double) node / (nodeCount - 1));
         }
     }

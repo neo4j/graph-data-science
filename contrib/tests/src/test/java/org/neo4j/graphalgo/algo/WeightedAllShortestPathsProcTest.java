@@ -52,7 +52,7 @@ import static org.mockito.Mockito.*;
  * S->X: {S,G,H,I,X}:8, {S,D,E,F,X}:12, {S,A,B,C,X}:20
  */
 @RunWith(Parameterized.class)
-public final class AllShortestPathsProcTest {
+public final class WeightedAllShortestPathsProcTest {
 
     private static GraphDatabaseAPI api;
     private static long startNodeId;

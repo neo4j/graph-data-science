@@ -28,6 +28,9 @@ import org.neo4j.graphdb.Direction;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
+import static org.neo4j.graphalgo.core.utils.Converters.longToIntPredicate;
+
 /**
  * sequential single source Dijkstra implementation.
  * <p>
@@ -60,11 +63,11 @@ public class ShortestPaths extends Algorithm<ShortestPaths> {
      * @return itself
      */
     public ShortestPaths compute(long startNode) {
-        graph.forEachNode(node -> {
+        graph.forEachNode(longToIntPredicate( node -> {
             costs.put(node, Double.POSITIVE_INFINITY);
             return true;
-        });
-        final int nodeId = graph.toMappedNodeId(startNode);
+        }));
+        final int nodeId = Math.toIntExact(graph.toMappedNodeId(startNode));
         costs.put(nodeId, 0d);
         queue.add(nodeId, 0d);
         run();
@@ -95,7 +98,7 @@ public class ShortestPaths extends Algorithm<ShortestPaths> {
             graph.forEachRelationship(
                     node,
                     Direction.OUTGOING,
-                    (source, target, relId, weight) -> {
+                    longToIntConsumer((source, target, weight) -> {
                         // relax
                         final double targetCosts = this.costs.getOrDefault(target, Double.POSITIVE_INFINITY);
                         if (weight + sourceCosts < targetCosts) {
@@ -103,7 +106,7 @@ public class ShortestPaths extends Algorithm<ShortestPaths> {
                             queue.set(target, weight + sourceCosts);
                         }
                         return true;
-                    });
+                    }));
             progressLogger.logProgress((double) node / (nodeCount - 1));
         }
     }

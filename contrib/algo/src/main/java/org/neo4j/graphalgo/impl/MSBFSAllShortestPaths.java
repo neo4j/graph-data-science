@@ -22,7 +22,8 @@ package org.neo4j.graphalgo.impl;
 import com.carrotsearch.hppc.AbstractIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.impl.AllShortestPaths.Result;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.impl.WeightedAllShortestPaths.Result;
 import org.neo4j.graphalgo.impl.msbfs.MultiSourceBFS;
 import org.neo4j.graphdb.Direction;
 
@@ -47,14 +48,21 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm<MSBFSAllShortestPat
 
     private Graph graph;
     private BlockingQueue<Result> resultQueue;
+    private final AllocationTracker tracker;
     private final int concurrency;
     private final ExecutorService executorService;
     private final Direction direction;
-    private final int nodeCount;
+    private final long nodeCount;
 
-    public MSBFSAllShortestPaths(Graph graph, int concurrency, ExecutorService executorService, Direction direction) {
+    public MSBFSAllShortestPaths(
+            Graph graph,
+            AllocationTracker tracker,
+            int concurrency,
+            ExecutorService executorService,
+            Direction direction) {
         this.graph = graph;
-        nodeCount = Math.toIntExact(graph.nodeCount());
+        nodeCount = graph.nodeCount();
+        this.tracker = tracker;
         this.concurrency = concurrency;
         this.executorService = executorService;
         this.direction = direction;
@@ -122,31 +130,30 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm<MSBFSAllShortestPat
         public void run() {
 
             final ProgressLogger progressLogger = getProgressLogger();
-
+            final double maxNodeId = nodeCount - 1;
             new MultiSourceBFS(
                     graph,
                     graph,
                     direction,
                     (target, distance, sources) -> {
                         while (sources.hasNext()) {
-                            int source = sources.next();
+                            long source = sources.next();
                             final Result result = new Result(
                                     graph.toOriginalNodeId(source),
                                     graph.toOriginalNodeId(target),
                                     distance);
-
                             try {
                                 resultQueue.put(result);
                             } catch (InterruptedException e) {
                                 throw new RuntimeException(e);
                             }
                         }
-                        progressLogger.logProgress((double) target / (nodeCount - 1));
-                    }
+                        progressLogger.logProgress(target, maxNodeId);
+                    },
+                    tracker
             ).run(concurrency, executorService);
 
             resultQueue.add(new Result(-1, -1, -1));
         }
     }
-
 }

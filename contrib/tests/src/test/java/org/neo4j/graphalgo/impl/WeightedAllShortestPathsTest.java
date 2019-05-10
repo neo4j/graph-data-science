@@ -58,7 +58,7 @@ import static org.mockito.Mockito.verify;
  *
  * @author mknblch
  */
-public class AllShortestPathsTest {
+public class WeightedAllShortestPathsTest {
 
     private static final int width = 2, height = 5;
 
@@ -104,7 +104,7 @@ public class AllShortestPathsTest {
 
         final ResultConsumer mock = mock(ResultConsumer.class);
 
-        new AllShortestPaths(graph, Pools.DEFAULT, 4, Direction.OUTGOING)
+        new WeightedAllShortestPaths(graph, Pools.DEFAULT, 4, Direction.OUTGOING)
                 .resultStream()
                 .peek(System.out::println)
                 .forEach(r -> {

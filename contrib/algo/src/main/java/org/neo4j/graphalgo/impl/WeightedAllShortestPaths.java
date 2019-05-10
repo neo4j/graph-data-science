@@ -30,8 +30,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
+
 /**
- * AllShortestPaths:
+ * WeightedAllShortestPaths:
  * <p>
  * multi-source parallel dijkstra algorithm for computing the shortest path between
  * each pair of nodes.
@@ -41,7 +43,7 @@ import java.util.stream.Stream;
  * < nodeCount. Each thread tries to take one int from the counter at one time and
  * starts its computation on it.
  * <p>
- * The {@link AllShortestPaths#concurrency} value determines the count of workers
+ * The {@link WeightedAllShortestPaths#concurrency} value determines the count of workers
  * that should be spawned.
  * <p>
  * Due to the high memory footprint the result set would have we emit each result into
@@ -49,7 +51,7 @@ import java.util.stream.Stream;
  * add elements to it. The result stream is limited by N^2. If the stream gets closed
  * prematurely the workers get closed too.
  */
-public class AllShortestPaths extends MSBFSASPAlgorithm<AllShortestPaths> {
+public class WeightedAllShortestPaths extends MSBFSASPAlgorithm<WeightedAllShortestPaths> {
 
     private Graph graph;
     private final int nodeCount;
@@ -69,7 +71,7 @@ public class AllShortestPaths extends MSBFSASPAlgorithm<AllShortestPaths> {
 
     private volatile boolean outputStreamOpen;
 
-    public AllShortestPaths(Graph graph, ExecutorService executorService, int concurrency, Direction direction) {
+    public WeightedAllShortestPaths(Graph graph, ExecutorService executorService, int concurrency, Direction direction) {
         this.graph = graph;
         this.nodeCount = Math.toIntExact(graph.nodeCount());
         this.executorService = executorService;
@@ -112,12 +114,12 @@ public class AllShortestPaths extends MSBFSASPAlgorithm<AllShortestPaths> {
     }
 
     @Override
-    public AllShortestPaths me() {
+    public WeightedAllShortestPaths me() {
         return this;
     }
 
     @Override
-    public AllShortestPaths release() {
+    public WeightedAllShortestPaths release() {
         graph = null;
         counter = null;
         resultQueue = null;
@@ -168,11 +170,10 @@ public class AllShortestPaths extends MSBFSASPAlgorithm<AllShortestPaths> {
             while (outputStreamOpen && !queue.isEmpty()) {
                 final int node = queue.pop();
                 final double sourceDistance = distance[node];
-                // scan relationships
                 graph.forEachRelationship(
                         node,
                         direction,
-                        (source, target, relId, weight) -> {
+                        longToIntConsumer((source, target, weight) -> {
                             // relax
                             final double targetDistance = weight + sourceDistance;
                             if (targetDistance < distance[target]) {
@@ -180,7 +181,7 @@ public class AllShortestPaths extends MSBFSASPAlgorithm<AllShortestPaths> {
                                 queue.set(target, targetDistance);
                             }
                             return true;
-                        });
+                        }));
             }
         }
     }

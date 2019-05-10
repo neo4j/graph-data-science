@@ -54,7 +54,7 @@ import static java.util.stream.Collectors.toList;
 import static org.hamcrest.Matchers.is;
 
 @RunWith(Parameterized.class)
-public class AllShortestPaths427Test {
+public class WeightedAllShortestPaths427Test {
 
     private static final String GRAPH =
             "CREATE (n00:Node)\n" +
@@ -413,7 +413,7 @@ public class AllShortestPaths427Test {
     private final List<Result> expected;
     private final List<Result> expectedNonWeighted;
 
-    public AllShortestPaths427Test(
+    public WeightedAllShortestPaths427Test(
             Class<? extends GraphFactory> graphImpl,
             String ignoreParamOnlyForTestNaming) {
         graph = new GraphLoader(DB, Pools.DEFAULT)
@@ -429,7 +429,7 @@ public class AllShortestPaths427Test {
 
     @Test
     public void testWeighted() throws Exception {
-        compare(new AllShortestPaths(
+        compare(new WeightedAllShortestPaths(
                 graph,
                 Pools.DEFAULT,
                 Pools.DEFAULT_CONCURRENCY, Direction.OUTGOING), this.expected);

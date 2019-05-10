@@ -256,7 +256,7 @@ public class ShortestPathProc {
         @Override
         public long toOriginalNodeId(final long nodeId) {
             assert nodeId < length;
-            return mapping.toOriginalNodeId(data[offset + nodeId]);
+            return mapping.toOriginalNodeId(data[offset + Math.toIntExact(nodeId)]);
         }
 
         @Override

@@ -31,6 +31,8 @@ import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
+
 /**
  * parallel non-negative single source shortest path algorithm
  * <p>
@@ -126,7 +128,7 @@ public class ShortestPathDeltaStepping extends Algorithm<ShortestPathDeltaSteppi
         buckets.reset();
 
         // basically assign start node to bucket 0
-        relax(graph.toMappedNodeId(startNode), 0);
+        relax(Math.toIntExact(graph.toMappedNodeId(startNode)), 0);
 
         // as long as the bucket contains any value
         while (!buckets.isEmpty() && running()) {
@@ -140,7 +142,7 @@ public class ShortestPathDeltaStepping extends Algorithm<ShortestPathDeltaSteppi
             // for each node in bucket
             buckets.forEachInBucket(phase, node -> {
                 // relax each outgoing light edge
-                graph.forEachRelationship(node, direction, (sourceNodeId, targetNodeId, relationId, cost) -> {
+                graph.forEachRelationship(node, direction, longToIntConsumer((sourceNodeId, targetNodeId, cost) -> {
                     final int iCost = (int) (cost * multiplier + distance.get(sourceNodeId));
                     if (cost <= delta) { // determine if light or heavy edge
                         light.add(() -> relax(targetNodeId, iCost));
@@ -148,7 +150,7 @@ public class ShortestPathDeltaStepping extends Algorithm<ShortestPathDeltaSteppi
                         heavy.add(() -> relax(targetNodeId, iCost));
                     }
                     return true;
-                });
+                }));
                 return true;
             });
             ParallelUtil.run(light, executorService, futures);

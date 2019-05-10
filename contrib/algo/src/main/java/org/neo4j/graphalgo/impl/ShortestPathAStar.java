@@ -36,6 +36,8 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
+
 public class ShortestPathAStar extends Algorithm<ShortestPathAStar> {
 
     private final GraphDatabaseAPI dbService;
@@ -77,10 +79,10 @@ public class ShortestPathAStar extends Algorithm<ShortestPathAStar> {
             final String propertyKeyLon,
             final Direction direction) {
         reset();
-        final int startNodeInternal = graph.toMappedNodeId(startNode);
+        final int startNodeInternal = Math.toIntExact(graph.toMappedNodeId(startNode));
         final double startNodeLat = getNodeCoordinate(startNodeInternal, propertyKeyLat);
         final double startNodeLon = getNodeCoordinate(startNodeInternal, propertyKeyLon);
-        final int goalNodeInternal = graph.toMappedNodeId(goalNode);
+        final int goalNodeInternal = Math.toIntExact(graph.toMappedNodeId(goalNode));
         final double goalNodeLat = getNodeCoordinate(goalNodeInternal, propertyKeyLat);
         final double goalNodeLon = getNodeCoordinate(goalNodeInternal, propertyKeyLon);
         final double initialHeuristic = computeHeuristic(startNodeLat, startNodeLon, goalNodeLat, goalNodeLon);
@@ -116,7 +118,7 @@ public class ShortestPathAStar extends Algorithm<ShortestPathAStar> {
             graph.forEachRelationship(
                     currentNodeId,
                     direction,
-                    (source, target, relationshipId, weight) -> {
+                    longToIntConsumer((source, target, weight) -> {
                         double neighbourLat = getNodeCoordinate(target, propertyKeyLat);
                         double neighbourLon = getNodeCoordinate(target, propertyKeyLon);
                         double heuristic = computeHeuristic(neighbourLat, neighbourLon, goalLat, goalLon);
@@ -129,7 +131,7 @@ public class ShortestPathAStar extends Algorithm<ShortestPathAStar> {
                             }
                         }
                         return true;
-                    });
+                    }));
             progressLogger.logProgress((double) currentNodeId / (nodeCount - 1));
         }
     }
