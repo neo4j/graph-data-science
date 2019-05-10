@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.similarity;
+package org.neo4j.graphalgo.impl.similarity;
 
 import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import org.junit.Test;
@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static org.junit.Assert.assertArrayEquals;
 
 @RunWith(JUnitQuickcheck.class)
 public class RleReaderTest {

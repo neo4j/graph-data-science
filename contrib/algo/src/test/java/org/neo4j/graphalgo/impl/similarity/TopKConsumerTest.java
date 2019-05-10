@@ -17,11 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.util;
+package org.neo4j.graphalgo.impl.similarity;
 
 import org.junit.Assume;
 import org.junit.Test;
-import org.neo4j.graphalgo.similarity.TopKConsumer;
 
 import java.util.ArrayList;
 import java.util.Collection;

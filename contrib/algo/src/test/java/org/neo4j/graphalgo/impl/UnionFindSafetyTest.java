@@ -25,15 +25,13 @@ import org.junit.runners.Parameterized;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeGraph;
-import org.neo4j.graphalgo.api.HugeRelationshipConsumer;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
-import org.neo4j.graphalgo.api.HugeWeightedRelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.impl.unionfind.UnionFindAlgo;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.Exceptions;
 
@@ -45,7 +43,7 @@ import java.util.function.LongPredicate;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertSame;
-import static org.neo4j.graphalgo.impl.UnionFindAlgo.NOTHING;
+import static org.neo4j.graphalgo.impl.unionfind.UnionFindAlgo.NOTHING;
 
 @RunWith(Parameterized.class)
 public final class UnionFindSafetyTest {
@@ -84,7 +82,7 @@ public final class UnionFindSafetyTest {
     @Test(timeout = 10_000L)
     public void testHugeUnionFindSafetyUnderFailure() {
         IllegalStateException error = new IllegalStateException("some error");
-        HugeGraph graph = new FlakyGraph(100, 10, new Random(42L), error);
+        Graph graph = new FlakyGraph(100, 10, new Random(42L), error);
         try {
             unionFindAlgo.run(
                     graph,
@@ -101,7 +99,7 @@ public final class UnionFindSafetyTest {
     }
 
 
-    private static final class FlakyGraph implements HugeGraph {
+    private static final class FlakyGraph implements Graph {
         private final int nodes;
         private final int maxDegree;
         private final Random random;
@@ -127,7 +125,7 @@ public final class UnionFindSafetyTest {
         public void forEachRelationship(
                 final long nodeId,
                 final Direction direction,
-                final HugeRelationshipConsumer consumer) {
+                final RelationshipConsumer consumer) {
             if (nodeId == 0L) {
                 throw error;
             }
@@ -145,21 +143,13 @@ public final class UnionFindSafetyTest {
         }
 
         @Override
-        public void forEachRelationship(
-                final int nodeId,
-                final Direction direction,
-                final RelationshipConsumer consumer) {
-            forEachRelationship((long) nodeId, direction, (s, t) -> consumer.accept((int) s, (int) t, -1L));
-        }
-
-        @Override
         public RelationshipIntersect intersection() {
             throw new UnsupportedOperationException(
                     "org.neo4j.graphalgo.impl.UnionFindSafetyTest.FlakyGraph.intersection is not implemented.");
         }
 
         @Override
-        public Collection<PrimitiveLongIterable> hugeBatchIterables(final int batchSize) {
+        public Collection<PrimitiveLongIterable> batchIterables(final int batchSize) {
             throw new UnsupportedOperationException(
                     "org.neo4j.graphalgo.impl.UnionFindSafetyTest.FlakyGraph.hugeBatchIterables is not implemented.");
         }
@@ -171,7 +161,7 @@ public final class UnionFindSafetyTest {
         }
 
         @Override
-        public long toHugeMappedNodeId(final long nodeId) {
+        public long toMappedNodeId(final long nodeId) {
             throw new UnsupportedOperationException(
                     "org.neo4j.graphalgo.impl.UnionFindSafetyTest.FlakyGraph.toHugeMappedNodeId is not implemented.");
         }
@@ -194,13 +184,13 @@ public final class UnionFindSafetyTest {
         }
 
         @Override
-        public PrimitiveLongIterator hugeNodeIterator() {
+        public PrimitiveLongIterator nodeIterator() {
             throw new UnsupportedOperationException(
                     "org.neo4j.graphalgo.impl.UnionFindSafetyTest.FlakyGraph.hugeNodeIterator is not implemented.");
         }
 
         @Override
-        public HugeWeightMapping hugeNodeProperties(final String type) {
+        public HugeWeightMapping nodeProperties(final String type) {
             throw new UnsupportedOperationException(
                     "org.neo4j.graphalgo.impl.UnionFindSafetyTest.FlakyGraph.hugeNodeProperties is not implemented.");
         }
@@ -213,7 +203,7 @@ public final class UnionFindSafetyTest {
 
         @Override
         public void forEachRelationship(
-                final long nodeId, final Direction direction, final HugeWeightedRelationshipConsumer consumer) {
+                final long nodeId, final Direction direction, final WeightedRelationshipConsumer consumer) {
 
         }
 
@@ -233,24 +223,6 @@ public final class UnionFindSafetyTest {
         public Set<String> availableNodeProperties() {
             throw new UnsupportedOperationException(
                     "org.neo4j.graphalgo.impl.UnionFindSafetyTest.FlakyGraph.availableNodeProperties is not implemented.");
-        }
-
-        @Override
-        public int getTarget(final int nodeId, final int index, final Direction direction) {
-            throw new UnsupportedOperationException(
-                    "org.neo4j.graphalgo.impl.UnionFindSafetyTest.FlakyGraph.getTarget is not implemented.");
-        }
-
-        @Override
-        public boolean exists(final int sourceNodeId, final int targetNodeId, final Direction direction) {
-            throw new UnsupportedOperationException(
-                    "org.neo4j.graphalgo.impl.UnionFindSafetyTest.FlakyGraph.exists is not implemented.");
-        }
-
-        @Override
-        public void forEachRelationship(
-                final int nodeId, final Direction direction, final WeightedRelationshipConsumer consumer) {
-
         }
     }
 }

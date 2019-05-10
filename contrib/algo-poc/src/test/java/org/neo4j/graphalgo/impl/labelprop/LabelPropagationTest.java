@@ -17,7 +17,6 @@ import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 

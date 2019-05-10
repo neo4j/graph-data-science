@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.LabelPropagationAlgorithm;
+import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -100,8 +100,8 @@ public final class LoadGraphProc {
                     .withOptionalNodeProperty(nodeProperty, 0.0d)
                     .withOptionalNodeWeightsFromProperty(nodeWeight, 1.0d)
                     .withOptionalNodeProperties(
-                            PropertyMapping.of(LabelPropagationAlgorithm.PARTITION_TYPE, nodeProperty, 0.0d),
-                            PropertyMapping.of(LabelPropagationAlgorithm.WEIGHT_TYPE, nodeWeight, 1.0d)
+                            PropertyMapping.of(LabelPropagation.PARTITION_TYPE, nodeProperty, 0.0d),
+                            PropertyMapping.of(LabelPropagation.WEIGHT_TYPE, nodeWeight, 1.0d)
                     )
                     .withDirection(direction)
                     .withSort(stats.sorted)
