@@ -1,3 +1,6 @@
+plugins {
+  id "me.champeau.gradle.jmh" version "0.4.8"
+}
 apply plugin: 'com.github.johnrengelman.shadow'
 
 repositories {
@@ -9,28 +12,35 @@ repositories {
 dependencies {
     compile project(':proc')
 
-    compile group: 'org.neo4j',            name: 'neo4j',              version: versions.neo4j
-    compile group: 'org.neo4j',            name: 'neo4j-kernel',       version: versions.neo4j
-    compile group: 'org.neo4j',            name: 'neo4j-io',           version: versions.neo4j
-    compile group: 'org.neo4j.community',  name: 'it-test-support',    version: versions.neo4j
-    compile group: 'org.neo4j',            name: 'procedure-compiler', version: versions.neo4j
-    compile group: 'com.jprofiler',        name: 'jprofiler-agent',    version: '10.1-PRE4'
-    compile('org.openjdk.jmh:jmh-core:1.21') {
+    jmh group: 'org.neo4j',            name: 'neo4j',              version: versions.neo4j
+    jmh group: 'org.neo4j',            name: 'neo4j-kernel',       version: versions.neo4j
+    jmh group: 'org.neo4j',            name: 'neo4j-io',           version: versions.neo4j
+    jmh group: 'org.neo4j.community',  name: 'it-test-support',    version: versions.neo4j
+    jmh group: 'org.neo4j',            name: 'procedure-compiler', version: versions.neo4j
+    jmh group: 'com.jprofiler',        name: 'jprofiler-agent',    version: '10.1-PRE4'
+    jmh("org.openjdk.jmh:jmh-core:${versions.jmh}") {
         exclude group: 'org.apache.commons', module: 'commons-math3'
     }
-    compile group: 'org.openjdk.jmh',      name: 'jmh-core',         version: versions.jmh
-    compile group: 'org.apache.commons',   name: 'commons-math3',    version: '3.6.1'
-    compile group: 'org.apache.commons',   name: 'commons-compress', version: '1.18'
-    compile group: 'org.mockito',          name: 'mockito-core',     version: versions.mockito
+    jmh group: 'org.openjdk.jmh',      name: 'jmh-core',         version: versions.jmh
+    jmh group: 'org.apache.commons',   name: 'commons-math3',    version: '3.6.1'
+    jmh group: 'org.apache.commons',   name: 'commons-compress', version: '1.18'
+    jmh group: 'org.mockito',          name: 'mockito-core',     version: versions.mockito
 
-    compileOnly group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: versions.jmh
+    jmh group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: versions.jmh
 }
 
 description = 'Neo4j Graph Algorithms :: Benchmark'
 
 shadowJar {
-    classifier = 'benchmark'
+    dependsOn jmhJar
+    archiveBaseName = 'benchmark'
+    archiveClassifier = null
+    version = null
     zip64 = true
+    configurations = [project.configurations.jmh, project.configurations.jmhRuntime]
+    from {
+        jmhJar.outputs.files.collect { it.isDirectory() ? it : zipTree(it) }
+    }
     manifest {
         attributes 'Main-Class': 'org.openjdk.jmh.Main'
     }
