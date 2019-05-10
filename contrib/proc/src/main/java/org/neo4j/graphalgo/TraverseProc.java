@@ -87,7 +87,7 @@ public class TraverseProc {
 
         // target node given; terminate if target is reached
         if (!targetNodes.isEmpty()) {
-            final List<Integer> mappedTargets = targetNodes.stream()
+            final List<Long> mappedTargets = targetNodes.stream()
                     .map(graph::toMappedNodeId)
                     .collect(Collectors.toList());
             exitFunction = (s, t, w) -> mappedTargets.contains(t) ? Traverse.ExitPredicate.Result.BREAK : Traverse.ExitPredicate.Result.FOLLOW;
@@ -151,7 +151,7 @@ public class TraverseProc {
 
         // target node given; terminate if target is reached
         if (!targetNodes.isEmpty()) {
-            final List<Integer> mappedTargets = targetNodes.stream()
+            final List<Long> mappedTargets = targetNodes.stream()
                     .map(graph::toMappedNodeId)
                     .collect(Collectors.toList());
             exitFunction = (s, t, w) -> mappedTargets.contains(t) ? Traverse.ExitPredicate.Result.BREAK : Traverse.ExitPredicate.Result.FOLLOW;

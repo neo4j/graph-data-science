@@ -132,7 +132,7 @@ public class PrimProc {
                     .withoutNodeWeights()
                     .asUndirected(true)
                     .withLog(log)
-                    .load(configuration.getGraphImpl(HugeGraph.TYPE));
+                    .load(configuration.getGraphImpl(Graph.TYPE));
         }
 
         if(graph.nodeCount() == 0) {
@@ -170,7 +170,7 @@ public class PrimProc {
     }
 
     private static RelationshipConsumer writeBack(int relType, int propertyType, Graph graph, Write ops) {
-        return (source, target, rid) -> {
+        return (source, target) -> {
             try {
                 final long relId = ops.relationshipCreate(
                         graph.toOriginalNodeId(source),
