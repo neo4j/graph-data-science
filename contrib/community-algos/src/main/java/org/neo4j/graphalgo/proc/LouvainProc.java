@@ -109,7 +109,7 @@ public class LouvainProc {
                 builder.withIntermediateCommunitiesWriteProperty(intermediateCommunitiesWriteProperty);
 
                 log.debug("Writing results");
-                Exporter exporter = exporter(graph, Pools.DEFAULT, configuration.getConcurrency());
+                Exporter exporter = exporter(graph, Pools.DEFAULT, configuration.getWriteConcurrency());
                 louvain.export(
                         exporter,
                         writeProperty,

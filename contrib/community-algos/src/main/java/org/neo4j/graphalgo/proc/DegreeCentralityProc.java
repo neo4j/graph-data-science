@@ -75,19 +75,42 @@ public final class DegreeCentralityProc {
         CentralityScore.Stats.Builder statsBuilder = new CentralityScore.Stats.Builder();
         AllocationTracker tracker = AllocationTracker.create();
         Direction direction = getDirection(configuration);
-        final Graph graph = load(label, relationship, tracker, configuration.getGraphImpl(), statsBuilder, configuration, weightPropertyKey, direction);
+        final Graph graph = load(
+                label,
+                relationship,
+                tracker,
+                configuration.getGraphImpl(),
+                statsBuilder,
+                configuration,
+                weightPropertyKey,
+                direction);
 
-        if(graph.nodeCount() == 0) {
+        if (graph.nodeCount() == 0) {
             graph.release();
             return Stream.of(statsBuilder.build());
         }
 
         TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
-        CentralityResult scores = evaluate(graph, tracker, terminationFlag, configuration, statsBuilder, weightPropertyKey, direction);
+        CentralityResult scores = evaluate(
+                graph,
+                tracker,
+                terminationFlag,
+                configuration,
+                statsBuilder,
+                weightPropertyKey,
+                direction);
 
         logMemoryUsage(tracker);
 
-        CentralityUtils.write(api, log, graph, terminationFlag, scores, configuration, statsBuilder, DEFAULT_SCORE_PROPERTY);
+        CentralityUtils.write(
+                api,
+                log,
+                graph,
+                terminationFlag,
+                scores,
+                configuration,
+                statsBuilder,
+                DEFAULT_SCORE_PROPERTY);
 
         return Stream.of(statsBuilder.build());
     }
@@ -107,22 +130,37 @@ public final class DegreeCentralityProc {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-            ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
 
         final String weightPropertyKey = configuration.getString(CONFIG_WEIGHT_KEY, null);
 
         CentralityScore.Stats.Builder statsBuilder = new CentralityScore.Stats.Builder();
         Direction direction = getDirection(configuration);
         AllocationTracker tracker = AllocationTracker.create();
-        final Graph graph = load(label, relationship, tracker, configuration.getGraphImpl(), statsBuilder, configuration, weightPropertyKey, direction);
+        final Graph graph = load(
+                label,
+                relationship,
+                tracker,
+                configuration.getGraphImpl(),
+                statsBuilder,
+                configuration,
+                weightPropertyKey,
+                direction);
 
-        if(graph.nodeCount() == 0) {
+        if (graph.nodeCount() == 0) {
             graph.release();
             return Stream.empty();
         }
 
         TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
-        CentralityResult scores = evaluate(graph, tracker, terminationFlag, configuration, statsBuilder, weightPropertyKey, direction);
+        CentralityResult scores = evaluate(
+                graph,
+                tracker,
+                terminationFlag,
+                configuration,
+                statsBuilder,
+                weightPropertyKey,
+                direction);
 
         logMemoryUsage(tracker);
 
@@ -144,7 +182,9 @@ public final class DegreeCentralityProc {
         GraphLoader graphLoader = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, configuration)
                 .withAllocationTracker(tracker)
-                .withOptionalRelationshipWeightsFromProperty(weightPropertyKey, configuration.getWeightPropertyDefaultValue(0.0));
+                .withOptionalRelationshipWeightsFromProperty(
+                        weightPropertyKey,
+                        configuration.getWeightPropertyDefaultValue(0.0));
 
         graphLoader.direction(direction);
 
@@ -163,13 +203,16 @@ public final class DegreeCentralityProc {
             CentralityScore.Stats.Builder statsBuilder,
             String weightPropertyKey, Direction direction) {
 
-        final int concurrency = configuration.getConcurrency();
-
         if (direction == Direction.BOTH) {
             direction = Direction.OUTGOING;
         }
 
-        DegreeCentralityAlgorithm algo = new DegreeCentrality(graph, Pools.DEFAULT, concurrency, direction, weightPropertyKey != null);
+        DegreeCentralityAlgorithm algo = new DegreeCentrality(
+                graph,
+                Pools.DEFAULT,
+                configuration.getConcurrency(),
+                direction,
+                weightPropertyKey != null);
         statsBuilder.timeEval(algo::compute);
         Algorithm<?> algorithm = algo.algorithm();
         algorithm.withTerminationFlag(terminationFlag);
@@ -179,7 +222,6 @@ public final class DegreeCentralityProc {
         graph.release();
         return result;
     }
-
 
 
 }

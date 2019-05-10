@@ -75,7 +75,7 @@ public class AllShortestPathsProc {
                 .withOptionalRelationshipWeightsFromProperty(
                         propertyName,
                         configuration.getWeightPropertyDefaultValue(1.0))
-                .withConcurrency(configuration.getConcurrency())
+                .withConcurrency(configuration.getReadConcurrency())
                 .withAllocationTracker(tracker);
 
         if(direction == Direction.BOTH) {

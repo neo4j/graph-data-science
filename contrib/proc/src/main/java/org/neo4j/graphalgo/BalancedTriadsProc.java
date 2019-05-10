@@ -145,7 +145,7 @@ public class BalancedTriadsProc {
             try (ProgressTimer timer = builder.timeWrite()) {
                 Exporter.of(api, graph)
                         .withLog(log)
-                        .parallel(Pools.DEFAULT, configuration.getConcurrency(), terminationFlag)
+                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), terminationFlag)
                         .build()
                         .write(
                                 balancedProperty,

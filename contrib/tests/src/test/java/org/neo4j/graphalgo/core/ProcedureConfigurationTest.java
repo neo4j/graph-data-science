@@ -96,4 +96,12 @@ public class ProcedureConfigurationTest {
         ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
         assertEquals(1.0, procedureConfiguration.getWeightPropertyDefaultValue(0.0), 0.001);
     }
+
+    @Test
+    public void returnDefaultConcurrencyIfNoReadOrWriteConcurrencyIsGiven() {
+        Map<String, Object> map = MapUtil.map("concurrency", 2L);
+        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
+        assertEquals(2L, procedureConfiguration.getReadConcurrency(1));
+        assertEquals(2L, procedureConfiguration.getWriteConcurrency(1));
+    }
 }

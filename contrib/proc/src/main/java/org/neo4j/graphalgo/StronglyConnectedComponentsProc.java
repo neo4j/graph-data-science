@@ -139,7 +139,7 @@ public class StronglyConnectedComponentsProc {
                 tarjan.release();
                 Exporter.of(api, graph)
                         .withLog(log)
-                        .parallel(Pools.DEFAULT, configuration.getConcurrency(), terminationFlag)
+                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), terminationFlag)
                         .build()
                         .write(
                                 partitionProperty,
@@ -194,7 +194,7 @@ public class StronglyConnectedComponentsProc {
             builder.timeWrite(() -> Exporter
                     .of(api, graph)
                     .withLog(log)
-                    .parallel(Pools.DEFAULT, configuration.getConcurrency(), terminationFlag)
+                    .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), terminationFlag)
                     .build()
                     .write(
                             partitionProperty,
@@ -275,7 +275,7 @@ public class StronglyConnectedComponentsProc {
 
             builder.timeWrite(() -> Exporter.of(api, graph)
                     .withLog(log)
-                    .parallel(Pools.DEFAULT, configuration.getConcurrency(), terminationFlag)
+                    .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), terminationFlag)
                     .build()
                     .write(
                             partitionProperty,
@@ -373,7 +373,7 @@ public class StronglyConnectedComponentsProc {
                 Exporter
                         .of(api, graph)
                         .withLog(log)
-                        .parallel(Pools.DEFAULT, configuration.getConcurrency(), terminationFlag)
+                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), terminationFlag)
                         .build()
                         .write(
                                 partitionProperty,

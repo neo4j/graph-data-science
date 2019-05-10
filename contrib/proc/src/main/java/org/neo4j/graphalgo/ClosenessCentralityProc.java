@@ -110,7 +110,6 @@ public class ClosenessCentralityProc {
         final CentralityProcResult.Builder builder = CentralityProcResult.builder();
 
         AllocationTracker tracker = AllocationTracker.create();
-        int concurrency = configuration.getConcurrency();
         TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
 
         Graph graph;
@@ -134,8 +133,9 @@ public class ClosenessCentralityProc {
         final MSClosenessCentrality algo = new MSClosenessCentrality(
                 graph,
                 tracker,
-                concurrency,
-                Pools.DEFAULT, configuration.get("improved", Boolean.FALSE));
+                configuration.getConcurrency(),
+                Pools.DEFAULT,
+                configuration.get("improved", Boolean.FALSE));
         algo
                 .withProgressLogger(ProgressLogger.wrap(log, "ClosenessCentrality(MultiSource)"))
                 .withTerminationFlag(terminationFlag);
@@ -148,7 +148,7 @@ public class ClosenessCentralityProc {
             builder.timeWrite(() -> {
                 Exporter exporter = Exporter.of(api, graph)
                         .withLog(log)
-                        .parallel(Pools.DEFAULT, concurrency, terminationFlag)
+                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), terminationFlag)
                         .build();
                 algo.export(writeProperty, exporter);
             });

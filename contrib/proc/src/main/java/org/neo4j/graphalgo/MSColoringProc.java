@@ -146,7 +146,7 @@ public class MSColoringProc {
         log.debug("Writing results");
         Exporter.of(api, graph)
                 .withLog(log)
-                .parallel(Pools.DEFAULT, configuration.getConcurrency(), null)
+                .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), null)
                 .build()
                 .write(
                         configuration.get(CONFIG_CLUSTER_PROPERTY, DEFAULT_CLUSTER_PROPERTY),

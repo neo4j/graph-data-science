@@ -134,7 +134,7 @@ public class ShortestPathsProc {
                 graph.release();
                 Exporter.of(api, graph)
                         .withLog(log)
-                        .parallel(Pools.DEFAULT, configuration.getConcurrency(), terminationFlag)
+                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), terminationFlag)
                         .build()
                         .write(
                                 configuration.getWriteProperty(DEFAULT_TARGET_PROPERTY),

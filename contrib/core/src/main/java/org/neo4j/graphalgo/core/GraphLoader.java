@@ -571,7 +571,7 @@ public class GraphLoader {
                 .withName(config.getGraphName(null))
                 .withOptionalLabel(label)
                 .withOptionalRelationshipType(relationship)
-                .withConcurrency(config.getConcurrency())
+                .withConcurrency(config.getReadConcurrency())
                 .withBatchSize(config.getBatchSize())
                 .withDuplicateRelationshipsStrategy(config.getDuplicateRelationshipsStrategy())
                 .withParams(config.getParams());
