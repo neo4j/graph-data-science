@@ -21,7 +21,9 @@ package org.neo4j.graphalgo.core.utils.paged;
 
 
 import com.carrotsearch.hppc.LongScatterSet;
+import com.carrotsearch.hppc.predicates.LongLongPredicate;
 import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.api.NodeIterator;
 import org.neo4j.graphalgo.core.utils.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
@@ -137,6 +139,10 @@ public final class PagedDisjointSetStruct {
                         new DisjointSetStruct.Result(
                                 idMapping.toOriginalNodeId(mappedId),
                                 find(mappedId)));
+    }
+
+    public void forEach(NodeIterator nodes, LongLongPredicate consumer) {
+        nodes.forEachNode(nodeId -> consumer.apply(nodeId, find(nodeId)));
     }
 
     public static final class Translator implements PropertyTranslator.OfLong<PagedDisjointSetStruct> {
