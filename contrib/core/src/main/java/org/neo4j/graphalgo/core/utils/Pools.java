@@ -23,19 +23,14 @@ import org.neo4j.helpers.NamedThreadFactory;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Consumer;
 
 public final class Pools {
 
@@ -79,24 +74,19 @@ public final class Pools {
     static class CallerBlocksPolicy implements RejectedExecutionHandler {
         @Override
         public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-            // Submit again by directly injecting the task into the work queue, waiting if necessary, but also periodically checking if the pool has been
-            // shut down.
-            FutureTask<Void> task = new FutureTask<>( r, null );
+            // Submit again by directly injecting the task into the work queue, waiting if necessary, but also
+            // periodically checking if the pool has been shut down.
+            FutureTask<Void> task = new FutureTask<>(r, null);
             BlockingQueue<Runnable> queue = executor.getQueue();
             while (!executor.isShutdown()) {
                 try {
-                    if ( queue.offer( task, 250, TimeUnit.MILLISECONDS ) )
-                    {
-                        while ( !executor.isShutdown() )
-                        {
-                            try
-                            {
-                                task.get( 250, TimeUnit.MILLISECONDS );
+                    if (queue.offer(task, 250, TimeUnit.MILLISECONDS)) {
+                        while (!executor.isShutdown()) {
+                            try {
+                                task.get(250, TimeUnit.MILLISECONDS);
                                 return; // Success!
-                            }
-                            catch ( TimeoutException ignore )
-                            {
-                                // This is fine an expected. We just want to check that the executor hasn't been shut down.
+                            } catch (TimeoutException ignore) {
+                                // This is fine and expected. We just want to check that the executor hasn't been shut down.
                             }
                         }
                     }
