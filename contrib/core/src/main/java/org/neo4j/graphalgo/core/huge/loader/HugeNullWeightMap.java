@@ -27,11 +27,11 @@ import org.neo4j.graphalgo.api.HugeWeightMapping;
  *
  * @author mknblch
  */
-class HugeNullWeightMap implements HugeWeightMapping {
+public class HugeNullWeightMap implements HugeWeightMapping {
 
     private final double defaultValue;
 
-    HugeNullWeightMap(double defaultValue) {
+    public HugeNullWeightMap(double defaultValue) {
         this.defaultValue = defaultValue;
     }
 

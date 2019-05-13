@@ -292,7 +292,6 @@ public class ProcedureConfiguration {
      */
     public Class<? extends GraphFactory> getGraphImpl(String defaultGraphImpl) {
         final String graphImpl = getGraphName(defaultGraphImpl);
-//        return HeavyGraphFactory.class;
         switch (graphImpl.toLowerCase(Locale.ROOT)) {
             case HeavyGraph.TYPE:
                 return HeavyGraphFactory.class;

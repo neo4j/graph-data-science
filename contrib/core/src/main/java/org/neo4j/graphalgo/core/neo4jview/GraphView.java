@@ -20,18 +20,16 @@
 package org.neo4j.graphalgo.core.neo4jview;
 
 import org.neo4j.collection.primitive.PrimitiveIntCollections;
-import org.neo4j.collection.primitive.PrimitiveIntIterable;
-import org.neo4j.collection.primitive.PrimitiveIntIterator;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
-import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.IntIdMap;
+import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
 import org.neo4j.graphalgo.core.loading.LoadRelationships;
 import org.neo4j.graphalgo.core.loading.ReadHelper;
 import org.neo4j.graphalgo.core.utils.RawValues;
@@ -51,7 +49,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.IntPredicate;
 import java.util.function.LongPredicate;
 import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
@@ -84,14 +81,6 @@ public class GraphView implements Graph {
         this.loadAsUndirected = loadAsUndirected;
     }
 
-//    @Override
-//    public void forEachRelationship(int nodeId, Direction direction, RelationshipConsumer consumer) {
-//        final WeightedRelationshipConsumer asWeighted =
-//                (sourceNodeId, targetNodeId, relationId, weight) ->
-//                        consumer.accept(sourceNodeId, targetNodeId, relationId);
-//        forAllRelationships(nodeId, direction, false, asWeighted);
-//    }
-
     @Override
     public void forEachRelationship(long nodeId, Direction direction, RelationshipConsumer consumer) {
         final WeightedRelationshipConsumer asWeighted =
@@ -99,11 +88,6 @@ public class GraphView implements Graph {
                         consumer.accept(sourceNodeId, targetNodeId);
         forAllRelationships(nodeId, direction, false, asWeighted);
     }
-
-//    @Override
-//    public void forEachRelationship(int nodeId, Direction direction, WeightedRelationshipConsumer consumer) {
-//        forAllRelationships(nodeId, direction, true, consumer);
-//    }
 
     @Override
     public void forEachRelationship(long nodeId, Direction direction, WeightedRelationshipConsumer consumer) {
@@ -274,34 +258,12 @@ public class GraphView implements Graph {
 
     @Override
     public HugeWeightMapping nodeProperties(String type) {
-        // TODO: This interface was never implemented for the graph view.
-        //       With the unified Graph interface, we need to implemented (or refactor further).
-        throw new UnsupportedOperationException("Not implemented yet.");
-//        WeightMapping weightMapping = nodePropertiesMapping.get(type);
-//        return new HugeWeightMapping() {
-//
-//            @Override
-//            public double weight(long source, long target) {
-//                return weightMapping.get((int) source, (int) target);
-//            }
-//
-//            @Override
-//            public double weight(long source, long target, double defaultValue) {
-//                return relationshipWeights.get((int) target, defaultValue);
-//            }
-//
-//            @Override
-//            public long release() {
-//                return 0;
-//            }
-//        };
+        return new HugeNullWeightMap(1d);
     }
 
     @Override
     public Set<String> availableNodeProperties() {
-        // TODO: This interface was never implemented for the graph view.
-        //       With the unified Graph interface, we need to implemented (or refactor further).
-        throw new UnsupportedOperationException("Not implemented yet.");
+        return Collections.emptySet();
     }
 
     private int withinTransactionInt(ToIntFunction<KernelTransaction> block) {
