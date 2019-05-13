@@ -273,33 +273,21 @@ public class StronglyConnectedComponentsProc {
             String partitionProperty = configuration.get(CONFIG_WRITE_PROPERTY, CONFIG_OLD_WRITE_PROPERTY, CONFIG_CLUSTER);
             builder.withPartitionProperty(partitionProperty).withWriteProperty(partitionProperty);
 
-            builder.timeWrite(() -> write(configuration, graph, terminationFlag, tarjan, partitionProperty));
+            builder.timeWrite(() -> Exporter.of(api, graph)
+                    .withLog(log)
+                    .parallel(Pools.DEFAULT, configuration.getConcurrency(), terminationFlag)
+                    .build()
+                    .write(
+                            partitionProperty,
+                            tarjan.getConnectedComponents(),
+                            HugeLongArray.Translator.INSTANCE
+                    ));
         }
 
         final HugeLongArray connectedComponents = tarjan.getConnectedComponents();
         tarjan.release();
-        return Stream.of(builder.build(tracker, graph.nodeCount(), connectedComponents::get));
-    }
-
-    private void write(
-            ProcedureConfiguration configuration,
-            Graph graph,
-            TerminationFlag terminationFlag,
-            SCCAlgorithm tarjan,
-            String partitionProperty) {
-
-        final HugeLongArray connectedComponents = tarjan.getConnectedComponents();
         graph.release();
-        tarjan.release();
-        Exporter.of(api, graph)
-                .withLog(log)
-                .parallel(Pools.DEFAULT, configuration.getConcurrency(), terminationFlag)
-                .build()
-                .write(
-                        partitionProperty,
-                        connectedComponents,
-                        HugeLongArray.Translator.INSTANCE
-                );
+        return Stream.of(builder.build(tracker, graph.nodeCount(), connectedComponents::get));
     }
 
     // algo.scc.iterative.stream

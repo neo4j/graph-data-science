@@ -51,7 +51,7 @@ import static org.junit.Assert.assertNotEquals;
  */
 public class IterativeTarjanSCCTest extends ConnectedComponentsTest {
 
-    protected IterativeTarjanSCCTest(final Class<? extends GraphFactory> graphImpl) {
+    public IterativeTarjanSCCTest(final Class<? extends GraphFactory> graphImpl, String name) {
         super(graphImpl);
     }
 

@@ -51,7 +51,7 @@ import static org.junit.Assert.assertNull;
  */
 public class SCCTunedTarjanTest extends ConnectedComponentsTest {
 
-    protected SCCTunedTarjanTest(final Class<? extends GraphFactory> graphImpl) {
+    public SCCTunedTarjanTest(final Class<? extends GraphFactory> graphImpl, String name) {
         super(graphImpl);
     }
 

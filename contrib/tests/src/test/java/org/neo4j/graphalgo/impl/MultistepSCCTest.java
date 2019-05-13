@@ -26,13 +26,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.neo4j.graphalgo.ConnectedComponentsTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.impl.multistepscc.MultistepSCC;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.Assert.assertEquals;
 
@@ -48,10 +46,6 @@ import static org.junit.Assert.assertEquals;
  */
 public class MultistepSCCTest extends ConnectedComponentsTest {
 
-
-    private static GraphDatabaseAPI api;
-
-    private static Graph graph;
 
     public MultistepSCCTest(Class<? extends GraphFactory> graphImpl, String name) {
         super(graphImpl);

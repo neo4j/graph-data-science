@@ -40,7 +40,7 @@ public abstract class ConnectedComponentsTest extends HeavyHugeTester {
         super(graphImpl);
     }
 
-    public static long getMappedNodeId(String name) {
+    public long getMappedNodeId(String name) {
         final Node[] node = new Node[1];
         api.execute("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n").accept(row -> {
             node[0] = row.getNode("n");
@@ -77,7 +77,7 @@ public abstract class ConnectedComponentsTest extends HeavyHugeTester {
 
         final List<Long> exp = Arrays.asList(expected);
         // check no other element belongs to this set
-        for (int i = 0; i < data.size(); i++) {
+        for (long i = 0; i < data.size(); i++) {
             if (exp.contains(i)) {
                 continue;
             }
