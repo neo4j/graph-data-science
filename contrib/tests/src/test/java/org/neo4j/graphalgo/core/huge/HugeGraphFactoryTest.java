@@ -23,7 +23,7 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.api.HugeGraph;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphdb.Direction;
@@ -63,7 +63,7 @@ public class HugeGraphFactoryTest {
     @Test
     public void testAnyLabel() {
 
-        final HugeGraph graph = (HugeGraph) new GraphLoader(DB)
+        final Graph graph = new GraphLoader(DB)
                 .withAnyLabel()
                 .withAnyRelationshipType()
                 .load(HugeGraphFactory.class);
@@ -74,7 +74,7 @@ public class HugeGraphFactoryTest {
     @Test
     public void testWithLabel() {
 
-        final HugeGraph graph = (HugeGraph) new GraphLoader(DB)
+        final Graph graph = new GraphLoader(DB)
                 .withLabel("Node1")
                 .withoutRelationshipWeights()
                 .withAnyRelationshipType()
@@ -85,7 +85,7 @@ public class HugeGraphFactoryTest {
 
     @Test
     public void testAnyRelation() {
-        final HugeGraph graph = (HugeGraph) new GraphLoader(DB)
+        final Graph graph = new GraphLoader(DB)
                 .withAnyLabel()
                 .withoutRelationshipWeights()
                 .withAnyRelationshipType()
@@ -100,7 +100,7 @@ public class HugeGraphFactoryTest {
 
     @Test
     public void testWithRelation() {
-        final HugeGraph graph = (HugeGraph) new GraphLoader(DB)
+        final Graph graph = new GraphLoader(DB)
                 .withAnyLabel()
                 .withoutRelationshipWeights()
                 .withRelationshipType("REL1")
@@ -116,7 +116,7 @@ public class HugeGraphFactoryTest {
     @Test
     public void testWithProperty() {
 
-        final HugeGraph graph = (HugeGraph) new GraphLoader(DB)
+        final Graph graph = new GraphLoader(DB)
                 .withAnyLabel()
                 .withAnyRelationshipType()
                 .withRelationshipWeightsFromProperty("prop1", 0.0)
@@ -128,7 +128,7 @@ public class HugeGraphFactoryTest {
 
     @Test
     public void testWithNodeProperties() {
-        final HugeGraph graph = (HugeGraph) new GraphLoader(DB)
+        final Graph graph = new GraphLoader(DB)
                 .withoutRelationshipWeights()
                 .withAnyRelationshipType()
                 .withOptionalNodeProperties(
@@ -145,7 +145,7 @@ public class HugeGraphFactoryTest {
 
     @Test
     public void testWithHugeNodeProperties() {
-        final HugeGraph graph = (HugeGraph) new GraphLoader(DB)
+        final Graph graph = new GraphLoader(DB)
                 .withoutRelationshipWeights()
                 .withAnyRelationshipType()
                 .withOptionalNodeProperties(
@@ -155,14 +155,14 @@ public class HugeGraphFactoryTest {
                 )
                 .load(HugeGraphFactory.class);
 
-        assertEquals(1.0, graph.hugeNodeProperties("prop1").nodeWeight(graph.toHugeMappedNodeId(0L)), 0.01);
-        assertEquals(2.0, graph.hugeNodeProperties("prop2").nodeWeight(graph.toHugeMappedNodeId(1L)), 0.01);
-        assertEquals(3.0, graph.hugeNodeProperties("prop3").nodeWeight(graph.toHugeMappedNodeId(2L)), 0.01);
+        assertEquals(1.0, graph.nodeProperties("prop1").nodeWeight(graph.toMappedNodeId(0L)), 0.01);
+        assertEquals(2.0, graph.nodeProperties("prop2").nodeWeight(graph.toMappedNodeId(1L)), 0.01);
+        assertEquals(3.0, graph.nodeProperties("prop3").nodeWeight(graph.toMappedNodeId(2L)), 0.01);
     }
 
-    private long[] collectTargetIds(final HugeGraph graph, long sourceId) {
+    private long[] collectTargetIds(final Graph graph, long sourceId) {
         LongStream.Builder outIds = LongStream.builder();
-        graph.forEachRelationship(graph.toHugeMappedNodeId(sourceId), Direction.OUTGOING,
+        graph.forEachRelationship(graph.toMappedNodeId(sourceId), Direction.OUTGOING,
                 (sourceNodeId, targetNodeId) -> {
                     outIds.add(targetNodeId);
                     return true;
@@ -170,9 +170,9 @@ public class HugeGraphFactoryTest {
         return outIds.build().sorted().toArray();
     }
 
-    private double[] collectTargetWeights(final HugeGraph graph, long sourceId) {
+    private double[] collectTargetWeights(final Graph graph, long sourceId) {
         DoubleStream.Builder outWeights = DoubleStream.builder();
-        graph.forEachRelationship(graph.toHugeMappedNodeId(sourceId), Direction.OUTGOING,
+        graph.forEachRelationship(graph.toMappedNodeId(sourceId), Direction.OUTGOING,
                 (sourceNodeId, targetNodeId, weight) -> {
                     outWeights.add(weight);
                     return true;
@@ -180,8 +180,8 @@ public class HugeGraphFactoryTest {
         return outWeights.build().toArray();
     }
 
-    private long[] expectedIds(final HugeGraph graph, long... expected) {
-        return Arrays.stream(expected).map(graph::toHugeMappedNodeId).sorted().toArray();
+    private long[] expectedIds(final Graph graph, long... expected) {
+        return Arrays.stream(expected).map(graph::toMappedNodeId).sorted().toArray();
     }
 
     private double[] expectedWeights(double... expected) {

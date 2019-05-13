@@ -19,11 +19,14 @@
  */
 package org.neo4j.graphalgo.algo.similarity;
 
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.neo4j.graphalgo.IsFiniteFunc;
+import org.neo4j.graphalgo.PearsonProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.similarity.CosineProc;
-import org.neo4j.graphalgo.similarity.PearsonProc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -34,7 +37,9 @@ import java.util.Collections;
 import java.util.Map;
 
 import static java.util.Collections.singletonMap;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
 public class PearsonTest {

@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.huge;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.neo4j.graphalgo.api.HugeGraph;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -31,8 +31,8 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.TokenWrite;
 import org.neo4j.internal.kernel.api.Write;
-import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
+import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 import org.neo4j.values.storable.Values;
@@ -51,7 +51,7 @@ public final class HugeGraphWeightTest {
     @Test
     public void shouldLoadCorrectWeights() throws Exception {
         mkDb(WEIGHT_BATCH_SIZE << 1, 2);
-        HugeGraph graph = loadGraph(db);
+        Graph graph = loadGraph(db);
 
         graph.forEachNode((long node) -> {
             graph.forEachOutgoing(node, (src, tgt) -> {
@@ -107,8 +107,8 @@ public final class HugeGraphWeightTest {
         });
     }
 
-    private HugeGraph loadGraph(final GraphDatabaseAPI db) {
-        return (HugeGraph) new GraphLoader(db)
+    private Graph loadGraph(final GraphDatabaseAPI db) {
+        return new GraphLoader(db)
                 .withRelationshipWeightsFromProperty("weight", 0)
                 .withDirection(Direction.OUTGOING)
                 .withExecutorService(Pools.DEFAULT)

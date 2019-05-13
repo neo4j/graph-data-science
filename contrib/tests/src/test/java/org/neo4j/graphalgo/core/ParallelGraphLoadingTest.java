@@ -110,7 +110,7 @@ public class ParallelGraphLoadingTest extends RandomGraphTestCase {
                          .findNodes(Label.label("Label2"))
                          .stream()) {
                 nodes.forEach(n -> {
-                    int graphId = sparseGraph.toMappedNodeId(n.getId());
+                    long graphId = sparseGraph.toMappedNodeId(n.getId());
                     assertNotEquals(n + " not mapped", -1, graphId);
                     long neoId = sparseGraph.toOriginalNodeId(graphId);
                     assertEquals(n + " mapped wrongly", n.getId(), neoId);
@@ -182,13 +182,13 @@ public class ParallelGraphLoadingTest extends RandomGraphTestCase {
         }
     }
 
-    private boolean testRelationships(int nodeId) {
+    private boolean testRelationships(long nodeId) {
         testRelationships(nodeId, Direction.OUTGOING);
         testRelationships(nodeId, Direction.INCOMING);
         return true;
     }
 
-    private void testRelationships(int nodeId, final Direction direction) {
+    private void testRelationships(long nodeId, final Direction direction) {
         final Node node = db.getNodeById(graph.toOriginalNodeId(nodeId));
         final Map<Long, Relationship> relationships = Iterables
                 .stream(node.getRelationships(direction))

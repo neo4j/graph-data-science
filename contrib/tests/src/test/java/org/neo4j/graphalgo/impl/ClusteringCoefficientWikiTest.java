@@ -22,20 +22,18 @@ package org.neo4j.graphalgo.impl;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.impl.triangle.TriangleCountQueue;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.impl.triangle.IntersectingTriangleCount;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 /**
  *
@@ -98,10 +96,10 @@ public class ClusteringCoefficientWikiTest {
 
     @Test
     public void test() throws Exception {
-        final TriangleCountQueue algo =
-                new TriangleCountQueue(graph, Pools.DEFAULT, 4)
+        final IntersectingTriangleCount algo =
+                new IntersectingTriangleCount(graph, Pools.DEFAULT, 4, AllocationTracker.EMPTY)
                         .compute();
-        assertArrayEquals(EXPECTED, algo.getCoefficients(), 0.1);
+        assertArrayEquals(EXPECTED, algo.getCoefficients().toArray(), 0.1);
         assertEquals(0.583, algo.getAverageCoefficient(), 0.01);
     }
 }

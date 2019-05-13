@@ -19,22 +19,19 @@
  */
 package org.neo4j.graphalgo.core.heavyweight;
 
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
-import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
-import static org.neo4j.graphdb.Direction.INCOMING;
-import static org.neo4j.graphdb.Direction.OUTGOING;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author mknobloch
@@ -60,8 +57,8 @@ public class AdjacencyMatrixSortingTest {
 
         matrix.forEach(0, Direction.OUTGOING, relationConsumer);
 
-        verify(relationConsumer, times(1)).accept(eq(0), eq(1), eq(RawValues.combineIntInt(0, 1)));
-        verify(relationConsumer, times(1)).accept(eq(0), eq(2), eq(RawValues.combineIntInt(0, 2)));
+        verify(relationConsumer, times(1)).accept(eq(0), eq(1));
+        verify(relationConsumer, times(1)).accept(eq(0), eq(2));
     }
 
     @Test
@@ -74,8 +71,8 @@ public class AdjacencyMatrixSortingTest {
 
         matrix.forEach(0, Direction.INCOMING, relationConsumer);
 
-        verify(relationConsumer, times(1)).accept(eq(0), eq(1), eq(RawValues.combineIntInt(1, 0)));
-        verify(relationConsumer, times(1)).accept(eq(0), eq(2), eq(RawValues.combineIntInt(2, 0)));
+        verify(relationConsumer, times(1)).accept(eq(0), eq(1));
+        verify(relationConsumer, times(1)).accept(eq(0), eq(2));
     }
 
 }

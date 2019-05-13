@@ -25,7 +25,7 @@ import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.LongObjectHashMap;
 import com.carrotsearch.hppc.LongObjectMap;
-import org.neo4j.graphalgo.impl.LabelPropagationAlgorithm.Labels;
+import org.neo4j.graphalgo.impl.labelprop.LabelPropagation.Labels;
 
 public final class LabelPropagationTests {
 

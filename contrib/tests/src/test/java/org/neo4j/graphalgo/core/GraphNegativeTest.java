@@ -134,7 +134,7 @@ public final class GraphNegativeTest extends RandomGraphTestCase {
             graph.forEachRelationship(
                     node,
                     Direction.OUTGOING,
-                    (start, end, rel, weight) -> {
+                    (start, end, weight) -> {
                         assertEquals(13.37, weight, 0.0001);
                         return true;
                     });
@@ -164,22 +164,22 @@ public final class GraphNegativeTest extends RandomGraphTestCase {
                 Relationship rel = iterator.next();
                 final boolean[] hasRelation = {false};
                 long startNode = rel.getStartNode().getId();
-                int startId = graph.toMappedNodeId(startNode);
-                int endId = graph.toMappedNodeId(rel.getEndNodeId());
-                long targetRelId = RawValues.combineIntInt((int) startId, endId);
-                graph.forEachRelationship(startId, Direction.OUTGOING, (src, tgt, relId) -> {
-                    if (relId == targetRelId) {
+                long startId = graph.toMappedNodeId(startNode);
+                long endId = graph.toMappedNodeId(rel.getEndNodeId());
+                graph.forEachRelationship(startId, Direction.OUTGOING, (src, tgt) -> {
+                    if (src == startId && tgt == endId) {
                         hasRelation[0] = true;
                         collector.checkThat(
                                 failMsg(rel),
                                 rel.getEndNode().getId(),
-                                is(graph.toOriginalNodeId(tgt)));
+                                is(graph.toOriginalNodeId(tgt))
+                        );
                     }
                     return true;
                 });
                 // test weighted consumer as well
-                graph.forEachRelationship(startId, Direction.OUTGOING, (src, tgt, relId, weight) -> {
-                    if (relId == targetRelId) {
+                graph.forEachRelationship(startId, Direction.OUTGOING, (src, tgt, weight) -> {
+                    if (src == startId && tgt == endId) {
                         collector.checkThat(
                                 failMsg(rel),
                                 rel.getEndNode().getId(),

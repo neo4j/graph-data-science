@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.shortestpath.SingleSourceShortestPathDijkstra;
 import org.neo4j.graphalgo.impl.util.DoubleAdder;
 import org.neo4j.graphalgo.impl.util.DoubleEvaluator;
@@ -439,6 +440,7 @@ public class WeightedAllShortestPaths427Test {
     public void testMsbfs() throws Exception {
         compare(new MSBFSAllShortestPaths(
                 graph,
+                AllocationTracker.EMPTY,
                 Pools.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT, Direction.OUTGOING), this.expectedNonWeighted);
     }

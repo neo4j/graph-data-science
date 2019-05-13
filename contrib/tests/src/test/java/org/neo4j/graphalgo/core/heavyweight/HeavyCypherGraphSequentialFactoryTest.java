@@ -26,7 +26,6 @@ import org.junit.Test;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DuplicateRelationshipsStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.helpers.collection.Iterators;
@@ -101,7 +100,7 @@ public class HeavyCypherGraphSequentialFactoryTest {
         Assert.assertEquals(COUNT, relCount.get());
         AtomicInteger total = new AtomicInteger();
         graph.forEachNode(n -> {
-            graph.forEachRelationship(n, Direction.OUTGOING, (s, t, r, w) -> {
+            graph.forEachRelationship(n, Direction.OUTGOING, (s, t, w) -> {
                 total.addAndGet((int) w);
                 return true;
             });

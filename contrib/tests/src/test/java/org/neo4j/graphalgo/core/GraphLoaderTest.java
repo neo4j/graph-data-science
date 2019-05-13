@@ -37,6 +37,7 @@ import java.util.Collection;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
 
 /**
  * @author mknblch
@@ -219,10 +220,10 @@ public class GraphLoaderTest {
 
     private void checkRelationships(Graph graph, int node, int... expected) {
         IntArrayList idList = new IntArrayList();
-        graph.forEachOutgoing(node, (s, t, r) -> {
+        graph.forEachOutgoing(node, longToIntConsumer((s, t) -> {
             idList.add(t);
             return true;
-        });
+        }));
         final int[] ids = idList.toArray();
         Arrays.sort(ids);
         Arrays.sort(expected);
@@ -231,10 +232,10 @@ public class GraphLoaderTest {
 
     private void checkIncomingRelationships(Graph graph, int node, int... expected) {
         IntArrayList idList = new IntArrayList();
-        graph.forEachIncoming(node, (s, t, r) -> {
+        graph.forEachIncoming(node, longToIntConsumer((s, t) -> {
             idList.add(t);
             return true;
-        });
+        }));
         final int[] ids = idList.toArray();
         Arrays.sort(ids);
         Arrays.sort(expected);

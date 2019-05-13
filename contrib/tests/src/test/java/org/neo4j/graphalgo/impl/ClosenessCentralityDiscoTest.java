@@ -23,13 +23,12 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeGraph;
+import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.closeness.HugeMSClosenessCentrality;
 import org.neo4j.graphalgo.impl.closeness.MSClosenessCentrality;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
@@ -74,33 +73,28 @@ public class ClosenessCentralityDiscoTest {
     }
 
     @Test
-    public void testHeavy() throws Exception {
-        final Graph graph = new GraphLoader(DB, Pools.DEFAULT)
-                .withLabel("Node")
-                .withRelationshipType("TYPE")
-                .asUndirected(true)
-                .load(HeavyGraphFactory.class);
-        final MSClosenessCentrality algo = new MSClosenessCentrality(graph, 2, Pools.DEFAULT, true);
-        final DoubleConsumer mock = mock(DoubleConsumer.class);
-        algo.compute()
-                .resultStream()
-                .peek(System.out::println)
-                .forEach(r -> mock.accept(r.centrality));
-        verify(mock, times(3)).accept(eq(0.25, 0.01));
-        verify(mock, times(2)).accept(eq(0.0, 0.01));
+    public void testHeavy() {
+        Graph graph = load(HeavyGraphFactory.class);
+        test(graph);
     }
 
     @Test
-    public void testHuge() throws Exception {
+    public void testHuge() {
+        Graph graph = load(HugeGraphFactory.class);
+        test(graph);
+    }
 
-
-        final HugeGraph graph = (HugeGraph) new GraphLoader(DB, Pools.DEFAULT)
+    private Graph load(Class<? extends GraphFactory> factory) {
+        return new GraphLoader(DB, Pools.DEFAULT)
                 .withLabel("Node")
                 .withRelationshipType("TYPE")
                 .asUndirected(true)
-                .load(HugeGraphFactory.class);
-        final HugeMSClosenessCentrality algo = new HugeMSClosenessCentrality(
-                graph,
+                .load(factory);
+    }
+
+    private void test(Graph g) {
+        final MSClosenessCentrality algo = new MSClosenessCentrality(
+                g,
                 AllocationTracker.EMPTY,
                 2,
                 Pools.DEFAULT,

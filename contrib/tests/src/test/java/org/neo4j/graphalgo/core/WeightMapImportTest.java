@@ -171,7 +171,7 @@ public class WeightMapImportTest {
     private WeightedRelationshipConsumer checks(Direction direction, double[] expectedFromIterator, double[] expectedFromGraph) {
         AtomicInteger i = new AtomicInteger();
         int limit = Math.min(expectedFromIterator.length, expectedFromGraph.length);
-        return (s, t, r, w) -> {
+        return (s, t, w) -> {
             String rel = String.format("(%d %s %d)", s, arrow(direction), t);
             if (i.get() >= limit) {
                 collector.addError(new RuntimeException(String.format("Unexpected relationship: %s = %.1f", rel, w)));

@@ -33,11 +33,11 @@ import java.util.function.IntToLongFunction;
 import static org.junit.Assert.*;
 
 @ThreadLeakScope(ThreadLeakScope.Scope.NONE)
-public final class IdMapTest extends RandomizedTest {
+public final class IntIdMapTest extends RandomizedTest {
 
     @Test
     public void shouldReturnSingleIteratorForLargeBatchSize() throws Exception {
-        IdMap idMap = new IdMap(20);
+        IntIdMap idMap = new IntIdMap(20);
         long[] ids = addRandomIds(idMap);
         idMap.buildMappedIds(AllocationTracker.EMPTY);
 
@@ -49,7 +49,7 @@ public final class IdMapTest extends RandomizedTest {
 
     @Test
     public void shouldReturnMultipleIteratorsForSmallBatchSize() throws Exception {
-        IdMap idMap = new IdMap(20);
+        IntIdMap idMap = new IntIdMap(20);
         long[] ids = addRandomIds(idMap);
         idMap.buildMappedIds(AllocationTracker.EMPTY);
 
@@ -66,7 +66,7 @@ public final class IdMapTest extends RandomizedTest {
 
     @Test
     public void shouldFailForZeroBatchSize() throws Exception {
-        IdMap idMap = new IdMap(20);
+        IntIdMap idMap = new IntIdMap(20);
         addRandomIds(idMap);
         idMap.buildMappedIds(AllocationTracker.EMPTY);
 
@@ -80,7 +80,7 @@ public final class IdMapTest extends RandomizedTest {
 
     @Test
     public void shouldFailForNegativeBatchSize() throws Exception {
-        IdMap idMap = new IdMap(20);
+        IntIdMap idMap = new IntIdMap(20);
         addRandomIds(idMap);
         idMap.buildMappedIds(AllocationTracker.EMPTY);
 
@@ -95,7 +95,7 @@ public final class IdMapTest extends RandomizedTest {
     }
 
     private void assertIterables(
-            final IdMap idMap,
+            final IntIdMap idMap,
             final long[] ids,
             final Collection<PrimitiveIntIterable> iterables) {
         int i = 0;
@@ -110,7 +110,7 @@ public final class IdMapTest extends RandomizedTest {
         }
     }
 
-    private long[] addRandomIds(final IdMap idMap) {
+    private long[] addRandomIds(final IntIdMap idMap) {
         LongHashSet seen = new LongHashSet();
         return addSomeIds(idMap, i -> {
             long id;
@@ -121,7 +121,7 @@ public final class IdMapTest extends RandomizedTest {
         });
     }
 
-    private long[] addSomeIds(final IdMap idMap, IntToLongFunction newId) {
+    private long[] addSomeIds(final IntIdMap idMap, IntToLongFunction newId) {
         int iterations = between(10, 20);
         long[] ids = new long[iterations];
         for (int i = 0; i < iterations; i++) {

@@ -21,10 +21,10 @@ package org.neo4j.graphalgo.algo;
 
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.AdditionalMatchers;
 import org.neo4j.graphalgo.BalancedTriadsProc;
-import org.neo4j.graphalgo.api.HugeGraph;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
@@ -43,14 +43,8 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
  */
 public class BalancedTriadsIntegrationTest {
 
-    interface BalancedTriadTestConsumer {
-        void accept(long node, long balanced, long unbalanced);
-    }
-
     @ClassRule
     public static final ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
-
-    private static HugeGraph graph;
 
     @BeforeClass
     public static void setup() throws KernelException {
@@ -84,19 +78,31 @@ public class BalancedTriadsIntegrationTest {
     }
 
     @Test
-    public void test() throws Exception {
-
-        DB.execute("CALL algo.balancedTriads('Node', 'TYPE', {weightProperty:'w'}) YIELD loadMillis, computeMillis, writeMillis, nodeCount, balancedTriadCount, unbalancedTriadCount")
+    @Ignore
+    public void testHeavy() throws Exception {
+        DB.execute(
+                "CALL algo.balancedTriads('Node', 'TYPE', {weightProperty:'w'}) YIELD loadMillis, computeMillis, writeMillis, nodeCount, balancedTriadCount, unbalancedTriadCount")
                 .accept(row -> {
                     assertEquals(3L, row.getNumber("balancedTriadCount"));
                     assertEquals(3L, row.getNumber("unbalancedTriadCount"));
                     return true;
                 });
-
     }
 
     @Test
-    public void testStream() throws Exception {
+    public void testHuge() throws Exception {
+        DB.execute(
+                "CALL algo.balancedTriads('Node', 'TYPE', {weightProperty:'w', graph: 'huge'}) YIELD loadMillis, computeMillis, writeMillis, nodeCount, balancedTriadCount, unbalancedTriadCount")
+                .accept(row -> {
+                    assertEquals(3L, row.getNumber("balancedTriadCount"));
+                    assertEquals(3L, row.getNumber("unbalancedTriadCount"));
+                    return true;
+                });
+    }
+
+    @Test
+    @Ignore
+    public void testHeavyStream() throws Exception {
         final BalancedTriadsConsumer mock = mock(BalancedTriadsConsumer.class);
         DB.execute("CALL algo.balancedTriads.stream('Node', 'TYPE', {weightProperty:'w'}) YIELD nodeId, balanced, unbalanced")
                 .accept(row -> {
@@ -107,6 +113,20 @@ public class BalancedTriadsIntegrationTest {
                     return true;
                 });
                 verify(mock, times(7)).consume(anyLong(), AdditionalMatchers.eq(1.0, 3.0), AdditionalMatchers.eq(1.0, 3.0));
+    }
+
+    @Test
+    public void testHugeStream() throws Exception {
+        final BalancedTriadsConsumer mock = mock(BalancedTriadsConsumer.class);
+        DB.execute("CALL algo.balancedTriads.stream('Node', 'TYPE', {weightProperty:'w', graph: 'huge'}) YIELD nodeId, balanced, unbalanced")
+                .accept(row -> {
+                    final long nodeId = row.getNumber("nodeId").longValue();
+                    final double balanced = row.getNumber("balanced").doubleValue();
+                    final double unbalanced = row.getNumber("unbalanced").doubleValue();
+                    mock.consume(nodeId, balanced, unbalanced);
+                    return true;
+                });
+        verify(mock, times(7)).consume(anyLong(), AdditionalMatchers.eq(1.0, 3.0), AdditionalMatchers.eq(1.0, 3.0));
     }
 
     interface BalancedTriadsConsumer {

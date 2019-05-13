@@ -22,12 +22,12 @@ package org.neo4j.graphalgo.impl;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
-import org.neo4j.graphalgo.api.HugeGraph;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.triangle.HugeBalancedTriads;
+import org.neo4j.graphalgo.impl.triangle.BalancedTriads;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
 import static org.mockito.Matchers.anyInt;
@@ -50,7 +50,7 @@ public class BalancedTriadsTest {
     @ClassRule
     public static final ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
 
-    private static HugeGraph graph;
+    private static Graph graph;
 
     @BeforeClass
     public static void setup() {
@@ -81,7 +81,7 @@ public class BalancedTriadsTest {
 
         DB.execute(cypher);
 
-        graph = (HugeGraph) new GraphLoader(DB, Pools.DEFAULT)
+        graph = new GraphLoader(DB, Pools.DEFAULT)
                 .withLabel("Node")
                 .withRelationshipStatement("TYPE")
                 .withRelationshipWeightsFromProperty("w", 0.0)
@@ -93,7 +93,7 @@ public class BalancedTriadsTest {
     @Test
     public void testStream() throws Exception {
         final BalancedTriadTestConsumer consumer = mock(BalancedTriadTestConsumer.class);
-        new HugeBalancedTriads(graph, Pools.DEFAULT, 4, AllocationTracker.EMPTY)
+        new BalancedTriads(graph, Pools.DEFAULT, 4, AllocationTracker.EMPTY)
                 .compute()
                 .stream()
                 .forEach(r -> consumer.accept(r.nodeId, r.balanced, r.unbalanced));

@@ -100,11 +100,11 @@ public class KSpanningTreeTest {
                 .load(graphImpl);
 
         try (Transaction tx = DB.beginTx()) {
-            a = graph.toMappedNodeId(DB.findNode(Label.label("Node"), "name", "a").getId());
-            b = graph.toMappedNodeId(DB.findNode(Label.label("Node"), "name", "b").getId());
-            c = graph.toMappedNodeId(DB.findNode(Label.label("Node"), "name", "c").getId());
-            d = graph.toMappedNodeId(DB.findNode(Label.label("Node"), "name", "d").getId());
-            x = graph.toMappedNodeId(DB.findNode(Label.label("Node"), "name", "x").getId());
+            a = Math.toIntExact(graph.toMappedNodeId(DB.findNode(Label.label("Node"), "name", "a").getId()));
+            b = Math.toIntExact(graph.toMappedNodeId(DB.findNode(Label.label("Node"), "name", "b").getId()));
+            c = Math.toIntExact(graph.toMappedNodeId(DB.findNode(Label.label("Node"), "name", "c").getId()));
+            d = Math.toIntExact(graph.toMappedNodeId(DB.findNode(Label.label("Node"), "name", "d").getId()));
+            x = Math.toIntExact(graph.toMappedNodeId(DB.findNode(Label.label("Node"), "name", "x").getId()));
             tx.success();
         };
     }

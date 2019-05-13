@@ -25,8 +25,9 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.impl.closeness.MSClosenessCentrality;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.DangalchevClosenessCentrality;
+import org.neo4j.graphalgo.impl.closeness.MSClosenessCentrality;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
 /**
@@ -79,7 +80,7 @@ public class ClosenessCentralityIntegrationTest_546 {
                 .load(HugeGraphFactory.class);
 
         System.out.println("547:");
-        new MSClosenessCentrality(graph, 2, Pools.DEFAULT, false)
+        new MSClosenessCentrality(graph, AllocationTracker.EMPTY, 2, Pools.DEFAULT, false)
                 .compute()
                 .resultStream()
                 .forEach(this::print);
@@ -146,7 +147,7 @@ public class ClosenessCentralityIntegrationTest_546 {
                 .load(HugeGraphFactory.class);
 
         System.out.println("546:");
-        new MSClosenessCentrality(graph, 2, Pools.DEFAULT, false)
+        new MSClosenessCentrality(graph, AllocationTracker.EMPTY, 2, Pools.DEFAULT, false)
                 .compute()
                 .resultStream()
                 .forEach(this::print);
