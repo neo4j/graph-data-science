@@ -21,13 +21,13 @@ package org.neo4j.graphalgo.impl;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.DoubleArrayDeque;
-import com.carrotsearch.hppc.IntArrayDeque;
+import com.carrotsearch.hppc.LongArrayDeque;
 import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphdb.Direction;
 
 import java.util.function.ObjDoubleConsumer;
-import java.util.function.ObjIntConsumer;
+import java.util.function.ObjLongConsumer;
 
 import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
 
@@ -38,16 +38,16 @@ public class Traverse extends Algorithm<Traverse> {
 
     private final int nodeCount;
     private Graph graph;
-    private IntArrayDeque nodes;
-    private IntArrayDeque sources;
+    private LongArrayDeque nodes;
+    private LongArrayDeque sources;
     private DoubleArrayDeque weights;
     private BitSet visited;
 
     public Traverse(Graph graph) {
         this.graph = graph;
         nodeCount = Math.toIntExact(graph.nodeCount());
-        nodes = new IntArrayDeque(nodeCount);
-        sources = new IntArrayDeque(nodeCount);
+        nodes = new LongArrayDeque(nodeCount);
+        sources = new LongArrayDeque(nodeCount);
         weights = new DoubleArrayDeque(nodeCount);
         visited = new BitSet(nodeCount);
     }
@@ -60,7 +60,7 @@ public class Traverse extends Algorithm<Traverse> {
      * @return
      */
     public long[] computeBfs(long sourceId, Direction direction, ExitPredicate exitCondition) {
-        return traverse(graph.toMappedNodeId(sourceId), direction, exitCondition, (s, t, w) -> .0, IntArrayDeque::addLast, DoubleArrayDeque::addLast);
+        return traverse(graph.toMappedNodeId(sourceId), direction, exitCondition, (s, t, w) -> .0, LongArrayDeque::addLast, DoubleArrayDeque::addLast);
     }
 
     /**
@@ -71,7 +71,7 @@ public class Traverse extends Algorithm<Traverse> {
      * @return
      */
     public long[] computeDfs(long sourceId, Direction direction, ExitPredicate exitCondition) {
-        return traverse(graph.toMappedNodeId(sourceId), direction, exitCondition, (s, t, w) -> .0, IntArrayDeque::addFirst, DoubleArrayDeque::addFirst);
+        return traverse(graph.toMappedNodeId(sourceId), direction, exitCondition, (s, t, w) -> .0, LongArrayDeque::addFirst, DoubleArrayDeque::addFirst);
     }
 
     /**
@@ -83,7 +83,7 @@ public class Traverse extends Algorithm<Traverse> {
      * @return
      */
     public long[] computeBfs(long sourceId, Direction direction, ExitPredicate exitCondition, Aggregator aggregator) {
-        return traverse(graph.toMappedNodeId(sourceId), direction, exitCondition, aggregator, IntArrayDeque::addLast, DoubleArrayDeque::addLast);
+        return traverse(graph.toMappedNodeId(sourceId), direction, exitCondition, aggregator, LongArrayDeque::addLast, DoubleArrayDeque::addLast);
     }
 
     /**
@@ -95,12 +95,12 @@ public class Traverse extends Algorithm<Traverse> {
      * @return
      */
     public long[] computeDfs(long sourceId, Direction direction, ExitPredicate exitCondition, Aggregator aggregator) {
-        return traverse(graph.toMappedNodeId(sourceId), direction, exitCondition, aggregator, IntArrayDeque::addFirst, DoubleArrayDeque::addFirst);
+        return traverse(graph.toMappedNodeId(sourceId), direction, exitCondition, aggregator, LongArrayDeque::addFirst, DoubleArrayDeque::addFirst);
     }
 
     /**
      * traverse along the path
-     * @param sourceNodeId source node (mapped id)
+     * @param sourceNode source node (mapped id)
      * @param direction the traversal direction
      * @param exitCondition exit condition
      * @param agg weight accumulator function
@@ -108,14 +108,12 @@ public class Traverse extends Algorithm<Traverse> {
      * @param weightFunc weight accessor function (either ::addLast or ::addFirst to switch between fifo and lifo behaviour)
      * @return a list of nodes that have been visited
      */
-    private long[] traverse(long sourceNodeId,
+    private long[] traverse(long sourceNode,
                             Direction direction,
                             ExitPredicate exitCondition,
                             Aggregator agg,
-                            ObjIntConsumer<IntArrayDeque> nodeFunc,
+                            ObjLongConsumer<LongArrayDeque> nodeFunc,
                             ObjDoubleConsumer<DoubleArrayDeque> weightFunc) {
-        // This will break for very large graphs
-        final int sourceNode = Math.toIntExact(sourceNodeId);
         final LongArrayList list = new LongArrayList(nodeCount);
         nodes.clear();
         sources.clear();
@@ -126,8 +124,8 @@ public class Traverse extends Algorithm<Traverse> {
         visited.set(sourceNode);
         loop:
         while (!nodes.isEmpty() && running()) {
-            final int source = sources.removeFirst();
-            final int node = nodes.removeFirst();
+            final long source = sources.removeFirst();
+            final long node = nodes.removeFirst();
             final double weight = weights.removeFirst();
             switch (exitCondition.test(source, node, weight)) {
                 case BREAK:
@@ -193,7 +191,7 @@ public class Traverse extends Algorithm<Traverse> {
          * @param weightAtSource the total weight that has been collected by the Aggregator during the traversal
          * @return a result
          */
-        Result test(int sourceNode, int currentNode, double weightAtSource);
+        Result test(long sourceNode, long currentNode, double weightAtSource);
     }
 
 
@@ -206,6 +204,6 @@ public class Traverse extends Algorithm<Traverse> {
          * @param weightAtSource the weight that has been aggregated for the currentNode so far
          * @return new weight (e.g. weightAtSource + 1.)
          */
-        double apply(int sourceNode, int currentNode, double weightAtSource);
+        double apply(long sourceNode, long currentNode, double weightAtSource);
     }
 }
