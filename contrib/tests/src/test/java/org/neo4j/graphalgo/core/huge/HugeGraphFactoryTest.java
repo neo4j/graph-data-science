@@ -138,9 +138,9 @@ public class HugeGraphFactoryTest {
                 )
                 .load(HugeGraphFactory.class);
 
-        assertEquals(1.0, graph.nodeProperties("prop1").get(graph.toMappedNodeId(0L)), 0.01);
-        assertEquals(2.0, graph.nodeProperties("prop2").get(graph.toMappedNodeId(1L)), 0.01);
-        assertEquals(3.0, graph.nodeProperties("prop3").get(graph.toMappedNodeId(2L)), 0.01);
+        assertEquals(1.0, graph.nodeProperties("prop1").get((int) graph.toMappedNodeId(0L)), 0.01);
+        assertEquals(2.0, graph.nodeProperties("prop2").get((int) graph.toMappedNodeId(1L)), 0.01);
+        assertEquals(3.0, graph.nodeProperties("prop3").get((int) graph.toMappedNodeId(2L)), 0.01);
     }
 
     @Test
