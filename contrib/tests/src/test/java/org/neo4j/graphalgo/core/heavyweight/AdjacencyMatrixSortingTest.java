@@ -57,8 +57,8 @@ public class AdjacencyMatrixSortingTest {
 
         matrix.forEach(0, Direction.OUTGOING, relationConsumer);
 
-        verify(relationConsumer, times(1)).accept(eq(0), eq(1));
-        verify(relationConsumer, times(1)).accept(eq(0), eq(2));
+        verify(relationConsumer, times(1)).accept(eq(0L), eq(1L));
+        verify(relationConsumer, times(1)).accept(eq(0L), eq(2L));
     }
 
     @Test
@@ -71,8 +71,8 @@ public class AdjacencyMatrixSortingTest {
 
         matrix.forEach(0, Direction.INCOMING, relationConsumer);
 
-        verify(relationConsumer, times(1)).accept(eq(0), eq(1));
-        verify(relationConsumer, times(1)).accept(eq(0), eq(2));
+        verify(relationConsumer, times(1)).accept(eq(0L), eq(1L));
+        verify(relationConsumer, times(1)).accept(eq(0L), eq(2L));
     }
 
 }

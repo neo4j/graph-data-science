@@ -106,14 +106,14 @@ public class AdjacencyMatrixTest {
     @Test
     public void testV0Outgoing() throws Exception {
         matrix.forEach(0, OUTGOING, relationConsumer);
-        verify(relationConsumer, times(1)).accept(eq(0), eq(1));
-        verify(relationConsumer, times(1)).accept(eq(0), eq(2));
+        verify(relationConsumer, times(1)).accept(eq(0L), eq(1L));
+        verify(relationConsumer, times(1)).accept(eq(0L), eq(2L));
     }
 
     @Test
     public void testV1Outgoing() throws Exception {
         matrix.forEach(1, OUTGOING, relationConsumer);
-        verify(relationConsumer, times(1)).accept(eq(1), eq(2));
+        verify(relationConsumer, times(1)).accept(eq(1L), eq(2L));
     }
 
     @Test
@@ -131,14 +131,14 @@ public class AdjacencyMatrixTest {
     @Test
     public void testV1Incoming() throws Exception {
         matrix.forEach(1, INCOMING, relationConsumer);
-        verify(relationConsumer, times(1)).accept(eq(1), eq(0));
+        verify(relationConsumer, times(1)).accept(eq(1L), eq(0L));
     }
 
     @Test
     public void testV2Incoming() throws Exception {
         matrix.forEach(2, INCOMING, relationConsumer);
         verify(relationConsumer, times(2)).accept(anyInt(), anyInt());
-        verify(relationConsumer, times(1)).accept(eq(2), eq(0));
-        verify(relationConsumer, times(1)).accept(eq(2), eq(1));
+        verify(relationConsumer, times(1)).accept(eq(2L), eq(0L));
+        verify(relationConsumer, times(1)).accept(eq(2L), eq(1L));
     }
 }
