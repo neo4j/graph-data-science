@@ -39,12 +39,12 @@ abstract class HugeArrayBuilder<Array, Huge extends HugeArray<Array, ?, Huge>> {
         return new BulkAdder<>(array, array.newCursor());
     }
 
-    public final BulkAdder allocate(final long nodes) {
+    public final BulkAdder<Array> allocate(final long nodes) {
         long startIndex = allocationIndex.getAndAccumulate(nodes, this::upperAllocation);
         if (startIndex == length) {
             return null;
         }
-        BulkAdder adder = adders.get();
+        BulkAdder<Array> adder = adders.get();
         adder.reset(startIndex, upperAllocation(startIndex, nodes));
         return adder;
     }

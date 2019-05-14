@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeIterator;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
 
 import java.util.Collection;
 import java.util.function.LongPredicate;
@@ -39,12 +38,12 @@ public final class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
 
     private long nodeCount;
     private HugeLongArray graphIds;
-    private SparseLongArray nodeToGraphIds;
+    private SparseNodeMapping nodeToGraphIds;
 
     /**
      * initialize the map with pre-built sub arrays
      */
-    IdMap(HugeLongArray graphIds, SparseLongArray nodeToGraphIds, long nodeCount) {
+    IdMap(HugeLongArray graphIds, SparseNodeMapping nodeToGraphIds, long nodeCount) {
         this.nodeCount = nodeCount;
         this.graphIds = graphIds;
         this.nodeToGraphIds = nodeToGraphIds;

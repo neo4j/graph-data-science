@@ -44,7 +44,7 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
  * <p>
  * <ul>
  * <li>The array is of a fixed size and cannot grow or shrink dynamically.</li>
- * <li>The array is not optimized for sparseness and has a large memory overhead if the values written to it are very sparse (see {@link SparseLongArray} for a different implementation that can profit from sparse data).</li>
+ * <li>The array is not optimized for sparseness and has a large memory overhead if the values written to it are very sparse.</li>
  * <li>The array does not support default values and returns the same default for unset values that a regular {@code double[]} does ({@code 0}).</li>
  * </ul>
  * <p>

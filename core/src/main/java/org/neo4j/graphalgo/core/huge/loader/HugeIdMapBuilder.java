@@ -19,32 +19,16 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
-import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
 
 final class HugeIdMapBuilder {
 
     static IdMap build(
             HugeLongArrayBuilder idMapBuilder,
-            long highestNodeId,
-            AllocationTracker tracker) {
+            SparseNodeMapping.Builder nodeMappingBuilder) {
         HugeLongArray graphIds = idMapBuilder.build();
-        SparseLongArray nodeToGraphIds = SparseLongArray.newArray(highestNodeId, tracker);
-
-        try (HugeCursor<long[]> cursor = graphIds.cursor(graphIds.newCursor())) {
-            while (cursor.next()) {
-                long[] array = cursor.array;
-                int offset = cursor.offset;
-                int limit = cursor.limit;
-                long internalId = cursor.base + offset;
-                for (int i = offset; i < limit; ++i, ++internalId) {
-                    nodeToGraphIds.set(array[i], internalId);
-                }
-            }
-        }
+        SparseNodeMapping nodeToGraphIds = nodeMappingBuilder.build();
 
         return new IdMap(graphIds, nodeToGraphIds, idMapBuilder.size());
     }
