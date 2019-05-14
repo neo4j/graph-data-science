@@ -124,8 +124,8 @@ public class WeightMapImportTest {
         checkWeight(0, Direction.INCOMING, 2.0);
         checkWeight(1, Direction.INCOMING, 1.0);
 
-        checkWeight(0, Direction.BOTH, fromGraph(1.0, 1.0), 1.0, 2.0);
-        checkWeight(1, Direction.BOTH, fromGraph(2.0, 2.0), 2.0, 1.0);
+        checkWeight(0, Direction.BOTH, new double[]{1.0, 1.0}, 1.0, 2.0);
+        checkWeight(1, Direction.BOTH, new double[]{2.0, 2.0}, 2.0, 1.0);
     }
 
     @Test
@@ -140,9 +140,9 @@ public class WeightMapImportTest {
         checkWeight(1, Direction.INCOMING, 1.0);
         checkWeight(2, Direction.INCOMING, 2.0);
 
-        checkWeight(0, Direction.BOTH, fromGraph(1.0, 0.0), 1.0, 3.0);
-        checkWeight(1, Direction.BOTH, fromGraph(2.0, 0.0), 2.0, 1.0);
-        checkWeight(2, Direction.BOTH, fromGraph(3.0, 0.0), 3.0, 2.0);
+        checkWeight(0, Direction.BOTH, new double[]{1.0, 0.0}, 1.0, 3.0);
+        checkWeight(1, Direction.BOTH, new double[]{2.0, 0.0}, 2.0, 1.0);
+        checkWeight(2, Direction.BOTH, new double[]{3.0, 0.0}, 3.0, 2.0);
     }
 
     private void setup(String cypher, Direction direction) {
@@ -158,10 +158,6 @@ public class WeightMapImportTest {
 
     private void checkWeight(int nodeId, Direction direction, double... expecteds) {
         graph.forEachRelationship(nodeId, direction, checks(direction, expecteds, expecteds));
-    }
-
-    private double[] fromGraph(double... exptecteds) {
-        return exptecteds;
     }
 
     private void checkWeight(int nodeId, Direction direction, double[] expectedFromGraph, double... expectedFromIterator) {

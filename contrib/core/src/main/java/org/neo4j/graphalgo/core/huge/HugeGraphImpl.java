@@ -160,45 +160,20 @@ public class HugeGraphImpl implements Graph {
 
     @Override
     public void forEachRelationship(long nodeId, Direction direction, WeightedRelationshipConsumer consumer) {
-        forEachRelationship(nodeId, direction, (sourceNodeId, targetNodeId) ->
-                consumer.accept(sourceNodeId, targetNodeId, direction == Direction.INCOMING ?
-                        weightOf(targetNodeId, sourceNodeId) :
-                        weightOf(sourceNodeId, targetNodeId)));
+        switch (direction) {
+            case INCOMING:
+                forEachIncoming(nodeId, consumer);
+                return;
+
+            case OUTGOING:
+                forEachOutgoing(nodeId, consumer);
+                return;
+
+            default:
+                forEachOutgoing(nodeId, consumer);
+                forEachIncoming(nodeId, consumer);
+        }
     }
-
-//    @Override
-//    public void forEachRelationship(int nodeId, Direction direction, RelationshipConsumer consumer) {
-//        switch (direction) {
-//            case INCOMING:
-//                forEachIncoming(nodeId, consumer);
-//                return;
-//
-//            case OUTGOING:
-//                forEachOutgoing(nodeId, consumer);
-//                return;
-//
-//            default:
-//                forEachOutgoing(nodeId, consumer);
-//                forEachIncoming(nodeId, consumer);
-//        }
-//    }
-
-//    @Override
-//    public void forEachRelationship(int nodeId, Direction direction, WeightedRelationshipConsumer consumer) {
-//        switch (direction) {
-//            case INCOMING:
-//                forEachIncoming(nodeId, consumer);
-//                return;
-//
-//            case OUTGOING:
-//                forEachOutgoing(nodeId, consumer);
-//                return;
-//
-//            default:
-//                forEachOutgoing(nodeId, consumer);
-//                forEachIncoming(nodeId, consumer);
-//        }
-//    }
 
     @Override
     public int degree(
@@ -251,9 +226,9 @@ public class HugeGraphImpl implements Graph {
         );
     }
 
-    public void forEachIncoming(int nodeId, WeightedRelationshipConsumer consumer) {
+    public void forEachIncoming(long nodeId, WeightedRelationshipConsumer consumer) {
         runForEach(
-                Integer.toUnsignedLong(nodeId),
+                nodeId,
                 Direction.INCOMING,
                 toHugeInConsumer(consumer),
                 /* reuseCursor */ false
@@ -275,9 +250,9 @@ public class HugeGraphImpl implements Graph {
 //        );
 //    }
 
-    public void forEachOutgoing(int nodeId, WeightedRelationshipConsumer consumer) {
+    public void forEachOutgoing(long nodeId, WeightedRelationshipConsumer consumer) {
         runForEach(
-                Integer.toUnsignedLong(nodeId),
+                nodeId,
                 Direction.OUTGOING,
                 toHugeOutConsumer(consumer),
                 /* reuseCursor */ false

@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.api;
 
 /**
+ * TODO: Define interface contract, esp regarding source/target node ids returned and how that maps to relationship direction
+ *
  * consumer interface for unweighted relationships.
  *
  * @author mknblch
