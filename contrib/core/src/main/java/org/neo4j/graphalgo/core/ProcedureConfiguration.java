@@ -20,11 +20,10 @@
 package org.neo4j.graphalgo.core;
 
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraph;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
-import org.neo4j.graphalgo.core.huge.HugeGraphImpl;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.lightweight.LightGraph;
 import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
@@ -301,7 +300,7 @@ public class ProcedureConfiguration {
                 return HeavyGraphFactory.class;
             case GraphView.TYPE:
                 return GraphViewFactory.class;
-            case HugeGraphImpl.TYPE:
+            case HugeGraph.TYPE:
                 return HugeGraphFactory.class;
             default:
                 if (validCustomName(graphImpl) && LoadGraphFactory.check(graphImpl)) {

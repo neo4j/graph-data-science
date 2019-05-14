@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.IntStack;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IntersectionConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
-import org.neo4j.graphalgo.core.huge.HugeGraphImpl;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphdb.Direction;
@@ -77,7 +77,7 @@ public class TriangleCountForkJoin extends TriangleCountBase<AtomicDoubleArray, 
     @Override
     void runCompute() {
         ForkJoinTask<Long> countTask =
-                graph.getType().equals(HugeGraphImpl.TYPE) ?
+                graph.getType().equals(HugeGraph.TYPE) ?
                         new HugeTask(graph, 0, nodeCount) :
                         new TriangleTask(0, nodeCount);
         triangleCount = pool.invoke(countTask);

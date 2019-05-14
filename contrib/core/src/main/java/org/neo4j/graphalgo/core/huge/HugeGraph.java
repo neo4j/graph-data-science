@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphalgo.core.huge.loader.IdMap;
-import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.internal.kernel.api.CursorFactory;
@@ -80,7 +79,7 @@ import java.util.function.LongPredicate;
  * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding#varints">more abount vlong</a>
  * @see <a href="https://shipilev.net/jvm-anatomy-park/4-tlab-allocation/">more abount TLAB allocation</a>
  */
-public class HugeGraphImpl implements Graph {
+public class HugeGraph implements Graph {
 
     private final IdMap idMapping;
     private final AllocationTracker tracker;
@@ -96,7 +95,7 @@ public class HugeGraphImpl implements Graph {
     private HugeAdjacencyList.Cursor outCache;
     private boolean canRelease = true;
 
-    public HugeGraphImpl(
+    public HugeGraph(
             final AllocationTracker tracker,
             final IdMap idMapping,
             final HugeWeightMapping weights,
@@ -261,7 +260,7 @@ public class HugeGraphImpl implements Graph {
 
     @Override
     public Graph concurrentCopy() {
-        return new HugeGraphImpl(
+        return new HugeGraph(
                 tracker,
                 idMapping,
                 weights,

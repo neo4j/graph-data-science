@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.api.HugeWeightMapping;
 
 import org.neo4j.graphalgo.core.huge.HugeAdjacencyList;
 import org.neo4j.graphalgo.core.huge.HugeAdjacencyOffsets;
-import org.neo4j.graphalgo.core.huge.HugeGraphImpl;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.util.Map;
@@ -137,7 +137,7 @@ class HugeAdjacencyBuilder {
             inOffsets = inAdjacency.globalOffsets;
         }
 
-        return new HugeGraphImpl(
+        return new HugeGraph(
                 tracker, idMapping, weights, nodeProperties,
                 inAdjacencyList, outAdjacencyList, inOffsets, outOffsets
         );
