@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.IntStack;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IntersectionConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
+import org.neo4j.graphalgo.core.huge.HugeGraphImpl;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphdb.Direction;
@@ -75,7 +76,10 @@ public class TriangleCountForkJoin extends TriangleCountBase<AtomicDoubleArray, 
 
     @Override
     void runCompute() {
-        ForkJoinTask<Long> countTask = new HugeTask(graph, 0, nodeCount);
+        ForkJoinTask<Long> countTask =
+                graph.getType().equals(HugeGraphImpl.TYPE) ?
+                        new HugeTask(graph, 0, nodeCount) :
+                        new TriangleTask(0, nodeCount);
         triangleCount = pool.invoke(countTask);
         CoefficientTask coefficientTask = new CoefficientTask(
                 Direction.OUTGOING,
@@ -100,10 +104,6 @@ public class TriangleCountForkJoin extends TriangleCountBase<AtomicDoubleArray, 
     @Override
     public AtomicDoubleArray getClusteringCoefficients() {
         return coefficients;
-    }
-
-    @Override
-    void onTriangle() {
     }
 
     /**
@@ -203,7 +203,7 @@ public class TriangleCountForkJoin extends TriangleCountBase<AtomicDoubleArray, 
 
     private class HugeTask extends RecursiveTask<Long> implements IntersectionConsumer {
 
-        private Graph hugeGraph;
+        private Graph graph;
         private RelationshipIntersect hg;
         private final int start;
         private final int end;
@@ -211,7 +211,7 @@ public class TriangleCountForkJoin extends TriangleCountBase<AtomicDoubleArray, 
         private long count;
 
         HugeTask(Graph graph, int start, int end) {
-            this.hugeGraph = graph;
+            this.graph = graph;
             this.start = start;
             this.end = end;
             hg = graph.intersection();
@@ -222,8 +222,8 @@ public class TriangleCountForkJoin extends TriangleCountBase<AtomicDoubleArray, 
             final int l = end - start;
             if (l > sequentialThreshold && running()) {
                 final int pivot = start + l / 2;
-                final HugeTask left = new HugeTask(hugeGraph, start, pivot);
-                final HugeTask right = new HugeTask(hugeGraph, pivot, end);
+                final HugeTask left = new HugeTask(graph, start, pivot);
+                final HugeTask right = new HugeTask(graph, pivot, end);
                 left.fork();
                 return right.compute() + left.join();
             } else {

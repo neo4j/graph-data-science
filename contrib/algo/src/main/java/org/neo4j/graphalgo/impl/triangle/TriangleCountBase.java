@@ -134,10 +134,7 @@ public abstract class TriangleCountBase<Coeff, Self extends TriangleCountBase<Co
         triangles.incrementAndGet(u);
         triangles.incrementAndGet(v);
         triangles.incrementAndGet(w);
-        onTriangle();
     }
-
-    abstract void onTriangle();
 
     /**
      * progress logging
