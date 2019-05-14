@@ -23,7 +23,6 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.neo4j.graphalgo.InfoMapProc;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.proc.PageRankProc;
 import org.neo4j.graphdb.Node;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -36,8 +35,6 @@ import static org.junit.Assert.assertEquals;
 
 /**
  *
- * TODO REPAIR
- *
  * Graph:
  *
  *        (b)        (e)
@@ -48,11 +45,8 @@ import static org.junit.Assert.assertEquals;
  */
 public class InfoMapIntTest {
 
-
     @ClassRule
     public static ImpermanentDatabaseRule db = new ImpermanentDatabaseRule();
-
-    private static Graph graph;
 
     @BeforeClass
     public static void setupGraph() throws KernelException {
