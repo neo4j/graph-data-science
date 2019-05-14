@@ -19,10 +19,7 @@
  */
 package org.neo4j.graphalgo.core.write;
 
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.api.OldGraph;
-import org.neo4j.graphalgo.core.huge.HugeGraphImpl;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
