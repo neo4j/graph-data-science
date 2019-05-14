@@ -42,7 +42,7 @@ import static org.neo4j.graphalgo.core.heavyweight.HeavyGraph.checkSize;
  * This is basically a long to int mapper. It sorts the id's in ascending order so its
  * guaranteed that there is no ID greater then nextGraphId / capacity
  */
-public final class IntIdMap {
+public class IntIdMap {
 
     /**
      * defines the lower bound of mapped node ids
