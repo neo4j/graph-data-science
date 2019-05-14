@@ -19,25 +19,12 @@
  */
 package org.neo4j.graphalgo.api;
 
-
-import org.neo4j.collection.primitive.PrimitiveIntIterable;
-import org.neo4j.collection.primitive.PrimitiveIntIterator;
-import org.neo4j.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.graphdb.Direction;
-
-import java.util.Collection;
-import java.util.function.IntPredicate;
-import java.util.function.LongPredicate;
-import java.util.stream.Collectors;
-
 /**
  * Composition of often used source interfaces
  *
  * @author mknblch
  */
-public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterable, RelationshipIterator, RelationshipWeights, RelationshipPredicate, RelationshipAccess, NodeProperties
-//        , WeightedRelationshipIterator
-{
+public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterable, RelationshipIterator, RelationshipWeights, RelationshipPredicate, RelationshipAccess, NodeProperties {
 
     String TYPE = "huge";
 
