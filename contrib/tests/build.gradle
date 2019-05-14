@@ -1,7 +1,5 @@
 dependencies {
     compile project(':graph-algorithms-proc')
-    compile project(':graph-algorithms-algo')
-    compile project(':graph-algorithms-core')
     compile project(':enterprise-algo')
 
     compile group: 'org.neo4j.community',   name: 'it-test-support', version: versions.neo4j

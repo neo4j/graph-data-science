@@ -8,8 +8,6 @@ repositories {
 
 dependencies {
     compile project(':graph-algorithms-proc')
-    compile project(':graph-algorithms-algo')
-    compile project(':graph-algorithms-core')
 
     compile group: 'org.neo4j',            name: 'neo4j',              version: versions.neo4j
     compile group: 'org.neo4j',            name: 'neo4j-kernel',       version: versions.neo4j
