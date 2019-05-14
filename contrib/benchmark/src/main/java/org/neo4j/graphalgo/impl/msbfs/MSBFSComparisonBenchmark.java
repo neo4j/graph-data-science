@@ -72,7 +72,7 @@ public class MSBFSComparisonBenchmark {
     @Benchmark
     public MultiSourceBFS msbfs(Blackhole bh) throws Throwable {
         MultiSourceBFS msbfs = new MultiSourceBFS(
-                source.hugeNodes,
+                source.nodes,
                 source.hugeRels,
                 Direction.OUTGOING,
                 hugeConsume(bh),

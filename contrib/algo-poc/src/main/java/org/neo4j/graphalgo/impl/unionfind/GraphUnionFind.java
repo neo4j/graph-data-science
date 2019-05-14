@@ -49,7 +49,7 @@ public class GraphUnionFind extends GraphUnionFindAlgo<Graph, PagedDisjointSetSt
     private final long nodeCount;
     private RelationshipConsumer unrestricted;
 
-    GraphUnionFind(
+    public GraphUnionFind(
             Graph graph,
             AllocationTracker tracker) {
         super(graph);

@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.bench;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
 import org.neo4j.graphalgo.impl.msbfs.MultiSourceBFS;
 import org.neo4j.graphdb.Direction;
@@ -103,7 +104,7 @@ public class MsBfsBenchmarkLdbc {
                         long megaEdgesTraversedPerSecond = (edges / seconds) >> 20;
                         log.info("[%s] thrpt in METPS %d", Thread.currentThread().getName(), megaEdgesTraversedPerSecond);
                     }
-                }
+                }, AllocationTracker.EMPTY
         );
         RunSafely.runSafe(() -> msbfs.run(Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT));
         return msbfs;

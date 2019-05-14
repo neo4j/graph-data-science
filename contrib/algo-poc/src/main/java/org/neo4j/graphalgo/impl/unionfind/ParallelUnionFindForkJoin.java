@@ -56,7 +56,7 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<Graph, PagedDi
      *
      * @param graph
      */
-    ParallelUnionFindForkJoin(
+    public ParallelUnionFindForkJoin(
             Graph graph,
             AllocationTracker tracker,
             int minBatchSize,

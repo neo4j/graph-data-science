@@ -21,10 +21,10 @@ package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.api.IdMapping;
 
-public final class HugeDirectIdMapping implements IdMapping {
+public final class DirectIdMapping implements IdMapping {
     private final long nodeCount;
 
-    public HugeDirectIdMapping(long nodeCount) {
+    public DirectIdMapping(long nodeCount) {
         this.nodeCount = nodeCount;
     }
 

@@ -20,6 +20,7 @@ package org.neo4j.graphalgo.impl.msbfs;
 
 import org.neo4j.graphalgo.bench.RunSafely;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -76,7 +77,8 @@ public class MSBFSBenchmark {
                 source.rels,
                 Direction.OUTGOING,
                 consume(bh),
-                source.sources);
+                AllocationTracker.EMPTY,
+                source.hugeSources);
         RunSafely.runSafe(() -> msbfs.run(Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT));
         return msbfs;
     }

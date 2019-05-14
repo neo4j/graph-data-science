@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.huge.HugeDirectIdMapping;
+import org.neo4j.graphalgo.core.huge.DirectIdMapping;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.helper.graphbuilder.DefaultBuilder;
@@ -271,7 +271,7 @@ public final class MultiSourceBFSTest extends HeavyHugeTester {
         Arrays.setAll(sources, i -> i);
         final int[][] seen = new int[nodeCount][sourceCount];
         MultiSourceBFS msbfs = new MultiSourceBFS(
-                new HugeDirectIdMapping(nodeCount),
+                new DirectIdMapping(nodeCount),
                 iter,
                 Direction.OUTGOING,
                 (nodeId, depth, sourceNodeIds) -> {

@@ -63,7 +63,7 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<Graph, PagedDis
      * @param graph
      * @param executor
      */
-    ParallelUnionFindFJMerge(
+    public ParallelUnionFindFJMerge(
             Graph graph,
             ExecutorService executor,
             AllocationTracker tracker,

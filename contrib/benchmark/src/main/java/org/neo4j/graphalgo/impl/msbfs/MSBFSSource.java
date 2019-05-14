@@ -18,15 +18,10 @@
  */
 package org.neo4j.graphalgo.impl.msbfs;
 
-import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
-import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.api.RelationshipConsumer;
-import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.core.huge.HugeDirectIdMapping;
-import org.neo4j.graphalgo.core.neo4jview.DirectIdMapping;
+import org.neo4j.graphalgo.core.huge.DirectIdMapping;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Arrays;
@@ -49,7 +44,6 @@ public enum MSBFSSource {
     _16384_16384(16384);
 
     final DirectIdMapping nodes;
-    final IdMapping hugeNodes;
     final RelationshipIterator rels;
     final RelationshipIterator hugeRels;
     final int[] sources;
@@ -57,7 +51,6 @@ public enum MSBFSSource {
 
     MSBFSSource(int nodeCount, int sourceCount) {
         this.nodes = new DirectIdMapping(nodeCount);
-        this.hugeNodes = new HugeDirectIdMapping(nodeCount);
         this.rels = new AllNodes(nodeCount);
         this.hugeRels = new HugeAllNodes(nodeCount);
         this.sources = new int[sourceCount];
@@ -68,7 +61,6 @@ public enum MSBFSSource {
 
     MSBFSSource(int nodeCount) {
         this.nodes = new DirectIdMapping(nodeCount);
-        this.hugeNodes = new HugeDirectIdMapping(nodeCount);
         this.rels = new AllNodes(nodeCount);
         this.hugeRels = new HugeAllNodes(nodeCount);
         this.sources = null;

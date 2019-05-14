@@ -19,9 +19,20 @@
 package org.neo4j.graphalgo.bench;
 
 import org.neo4j.graphalgo.core.utils.Intersections;
-import org.neo4j.graphalgo.similarity.RleDecoder;
-import org.neo4j.graphalgo.similarity.Weights;
-import org.openjdk.jmh.annotations.*;
+import org.neo4j.graphalgo.impl.similarity.RleDecoder;
+import org.neo4j.graphalgo.impl.similarity.Weights;
+import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Fork;
+import org.openjdk.jmh.annotations.Measurement;
+import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.TearDown;
+import org.openjdk.jmh.annotations.Threads;
+import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
 import java.io.IOException;

@@ -62,7 +62,7 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<Graph, PagedDisjo
     /**
      * initialize parallel UF
      */
-    ParallelUnionFindQueue(
+    public ParallelUnionFindQueue(
             Graph graph,
             ExecutorService executor,
             int minBatchSize,
