@@ -24,11 +24,13 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.WeightMapping;
-import org.neo4j.graphalgo.core.IdMap;
+import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 
 /**
@@ -48,7 +50,7 @@ public class HeavyGraphFactory extends GraphFactory {
     }
 
     private Graph importGraph(final int batchSize) {
-        final IdMap idMap = loadIdMap();
+        final IntIdMap idMap = loadIdMap();
 
         final Supplier<WeightMapping> relWeights = () -> newWeightMap(
                 dimensions.relWeightId(),
@@ -106,7 +108,7 @@ public class HeavyGraphFactory extends GraphFactory {
 
     private Graph buildCompleteGraph(
             final AdjacencyMatrix matrix,
-            final IdMap idMap,
+            final IntIdMap idMap,
             final Supplier<WeightMapping> relWeightsSupplier,
             final Map<String, Supplier<WeightMapping>> nodePropertySuppliers,
             Collection<RelationshipImporter> tasks) {

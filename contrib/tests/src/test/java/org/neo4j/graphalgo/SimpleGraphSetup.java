@@ -22,9 +22,13 @@ package org.neo4j.graphalgo;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphdb.*;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Label;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 
 /**
  * Builds a simple test graph.
@@ -43,7 +47,7 @@ public class SimpleGraphSetup {
 
     private long n0, n1, n2;
     private long r0, r1, r2;
-    private int v0, v1, v2;
+    private long v0, v1, v2;
 
     public SimpleGraphSetup(GraphDatabaseService db) {
         this.db = db;
@@ -99,15 +103,15 @@ public class SimpleGraphSetup {
         return db;
     }
 
-    public int getV0() {
+    public long getV0() {
         return v0;
     }
 
-    public int getV1() {
+    public long getV1() {
         return v1;
     }
 
-    public int getV2() {
+    public long getV2() {
         return v2;
     }
 

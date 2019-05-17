@@ -89,7 +89,7 @@ public class BetweennessComparisionTest {
                 .withDirection(Direction.OUTGOING)
                 .load(HeavyGraphFactory.class);
 
-        centerId = graph.toMappedNodeId(cId);
+        centerId = Math.toIntExact(graph.toMappedNodeId(cId));
 
         try (ProgressTimer start = ProgressTimer.start(l -> System.out.println("reference bc took " + l + "ms"))) {
             expected = new BetweennessCentrality(graph)

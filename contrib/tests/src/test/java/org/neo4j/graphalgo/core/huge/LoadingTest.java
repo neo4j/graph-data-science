@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
-import com.carrotsearch.hppc.IntArrayList;
+import com.carrotsearch.hppc.LongArrayList;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -98,18 +98,18 @@ public final class LoadingTest {
         checkRels(graph, 2);
     }
 
-    private void checkRels(Graph graph, int node, int... expected) {
+    private void checkRels(Graph graph, int node, long... expected) {
         Arrays.sort(expected);
         assertArrayEquals(expected, mkRels(graph, node));
     }
 
-    private int[] mkRels(Graph graph, int node) {
-        final IntArrayList rels = new IntArrayList();
-        graph.forEachOutgoing(node, (s, t, r) -> {
+    private long[] mkRels(Graph graph, int node) {
+        final LongArrayList rels = new LongArrayList();
+        graph.forEachOutgoing(node, (s, t) -> {
             rels.add(t);
             return true;
         });
-        int[] ids = rels.toArray();
+        long[] ids = rels.toArray();
         Arrays.sort(ids);
         return ids;
     }

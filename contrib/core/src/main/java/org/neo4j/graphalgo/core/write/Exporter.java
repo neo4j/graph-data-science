@@ -19,9 +19,6 @@
  */
 package org.neo4j.graphalgo.core.write;
 
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeGraph;
-import org.neo4j.graphalgo.api.HugeIdMapping;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
@@ -57,15 +54,8 @@ public final class Exporter extends StatementApi {
     private final long nodeCount;
     private final LongUnaryOperator toOriginalId;
 
-    public static Builder of(GraphDatabaseAPI db, Graph graph) {
-        if (graph instanceof HugeGraph) {
-            return new Builder(db, (HugeIdMapping) graph);
-        }
-        return new Builder(db, graph);
-    }
-
-    public static Builder of(IdMapping mapping, GraphDatabaseAPI db) {
-        return new Builder(db, mapping);
+    public static Builder of(GraphDatabaseAPI db, IdMapping idMapping) {
+        return new Builder(db, idMapping);
     }
 
     public static final class Builder {
@@ -79,14 +69,6 @@ public final class Exporter extends StatementApi {
         private int concurrency;
 
         private Builder(GraphDatabaseAPI db, IdMapping idMapping) {
-            Objects.requireNonNull(idMapping);
-            this.db = Objects.requireNonNull(db);
-            this.nodeCount = idMapping.nodeCount();
-            this.toOriginalId = (n) -> idMapping.toOriginalNodeId((int) n);
-            this.concurrency = Pools.DEFAULT_CONCURRENCY;
-        }
-
-        private Builder(GraphDatabaseAPI db, HugeIdMapping idMapping) {
             Objects.requireNonNull(idMapping);
             this.db = Objects.requireNonNull(db);
             this.nodeCount = idMapping.nodeCount();

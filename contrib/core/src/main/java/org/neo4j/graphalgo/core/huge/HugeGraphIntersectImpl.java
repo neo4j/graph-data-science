@@ -19,14 +19,14 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
-import org.neo4j.graphalgo.api.HugeRelationshipConsumer;
+import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.IntersectionConsumer;
 
 /**
  * An instance of this is not thread-safe; Iteration/Intersection on multiple threads will
  * throw misleading {@link NullPointerException}s.
- * Instances are however safe to use concurrently with other {@link org.neo4j.graphalgo.api.HugeRelationshipIterator}s.
+ * Instances are however safe to use concurrently with other {@link org.neo4j.graphalgo.api.RelationshipIterator}s.
  */
 
 class HugeGraphIntersectImpl implements RelationshipIntersect {
@@ -49,19 +49,6 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
         empty = adjacency.newCursor();
     }
 
-    /*
-    @Override
-    public void forEachRelationship(long nodeId, HugeRelationshipConsumer consumer) {
-        HugeAdjacencyList.Cursor cursor = cursor(nodeId, cache, offsets, adjacency);
-        consumeNodes(nodeId, cursor, consumer);
-    }
-
-    @Override
-    public int degree(final long node) {
-        return degree(node, offsets, adjacency);
-    }
-
-    */
     @Override
     public void intersectAll(long nodeIdA, IntersectionConsumer consumer) {
         HugeAdjacencyOffsets offsets = this.offsets;
@@ -134,7 +121,7 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
     private void consumeNodes(
             long startNode,
             HugeAdjacencyList.Cursor cursor,
-            HugeRelationshipConsumer consumer) {
+            RelationshipConsumer consumer) {
         //noinspection StatementWithEmptyBody
         while (cursor.hasNextVLong() && consumer.accept(startNode, cursor.nextVLong())) ;
     }

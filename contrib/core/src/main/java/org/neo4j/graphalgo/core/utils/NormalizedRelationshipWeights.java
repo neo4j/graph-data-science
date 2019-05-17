@@ -19,9 +19,8 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
-import com.carrotsearch.hppc.IntDoubleMap;
-import com.carrotsearch.hppc.IntDoubleScatterMap;
-import org.neo4j.graphalgo.api.NodeIterator;
+import com.carrotsearch.hppc.LongDoubleMap;
+import com.carrotsearch.hppc.LongDoubleScatterMap;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphdb.Direction;
@@ -32,11 +31,11 @@ import org.neo4j.graphdb.Direction;
 public class NormalizedRelationshipWeights implements RelationshipWeights {
 
     private RelationshipWeights weights;
-    private IntDoubleMap nodeWeightSum;
+    private LongDoubleMap nodeWeightSum;
 
     public NormalizedRelationshipWeights(int nodeCount, RelationshipIterator relationshipIterator, RelationshipWeights weights) {
         this.weights = weights;
-        this.nodeWeightSum = new IntDoubleScatterMap();
+        this.nodeWeightSum = new LongDoubleScatterMap();
         for (int n = 0; n < nodeCount; n++) {
             relationshipIterator.forEachRelationship(n, Direction.OUTGOING, (s, t, r) -> {
                 nodeWeightSum.addTo(s, weights.weightOf(s, t));
@@ -46,7 +45,7 @@ public class NormalizedRelationshipWeights implements RelationshipWeights {
     }
 
     @Override
-    public double weightOf(int sourceNodeId, int targetNodeId) {
+    public double weightOf(long sourceNodeId, long targetNodeId) {
         return weights.weightOf(sourceNodeId, targetNodeId) / nodeWeightSum.getOrDefault(sourceNodeId, 1.);
     }
 

@@ -70,20 +70,9 @@ public class MSBFSComparisonBenchmark {
     }
 
     @Benchmark
-    public MsBFSAlgo default_msbfs(Blackhole bh) throws Throwable {
+    public MultiSourceBFS msbfs(Blackhole bh) throws Throwable {
         MultiSourceBFS msbfs = new MultiSourceBFS(
                 source.nodes,
-                source.rels,
-                Direction.OUTGOING,
-                consume(bh),
-                source.sources);
-        return measure(msbfs);
-    }
-
-    @Benchmark
-    public MsBFSAlgo huge_msbfs(Blackhole bh) throws Throwable {
-        HugeMultiSourceBFS msbfs = new HugeMultiSourceBFS(
-                source.hugeNodes,
                 source.hugeRels,
                 Direction.OUTGOING,
                 hugeConsume(bh),
@@ -92,7 +81,7 @@ public class MSBFSComparisonBenchmark {
         return measure(msbfs);
     }
 
-    private MsBFSAlgo measure(MsBFSAlgo msbfs) throws Throwable {
+    private MultiSourceBFS measure(MultiSourceBFS msbfs) throws Throwable {
         try {
             msbfs.run(Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT);
         } catch (StackOverflowError e) {
@@ -109,11 +98,7 @@ public class MSBFSComparisonBenchmark {
         return msbfs;
     }
 
-    private static BfsConsumer consume(Blackhole bh) {
-        return (i, d, s) -> bh.consume(i);
-    }
-
-    private static HugeBfsConsumer hugeConsume(Blackhole bh) {
+    private static BfsConsumer hugeConsume(Blackhole bh) {
         return (i, d, s) -> bh.consume(i);
     }
 }

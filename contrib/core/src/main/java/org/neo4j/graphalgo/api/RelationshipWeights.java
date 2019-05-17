@@ -26,8 +26,6 @@ package org.neo4j.graphalgo.api;
  */
 public interface RelationshipWeights {
 
-    RelationshipWeights CONSTANT_1 = (s, t) -> 1.;
-
     /**
      * get weight between source and target node id
      *
@@ -35,5 +33,5 @@ public interface RelationshipWeights {
      * @param targetNodeId target node
      * @return the weight
      */
-    double weightOf(int sourceNodeId, int targetNodeId); // TODO default weight?
+    double weightOf(long sourceNodeId, long targetNodeId);
 }

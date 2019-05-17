@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.heavyweight;
 
-import org.neo4j.graphalgo.core.IdMap;
+import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.graphalgo.core.WeightMap;
 import org.neo4j.graphalgo.core.loading.ReadHelper;
 import org.neo4j.graphalgo.core.utils.RawValues;
@@ -34,7 +34,7 @@ import java.util.Arrays;
 
 abstract class VisitRelationship {
 
-    private final IdMap idMap;
+    private final IntIdMap idMap;
     private final boolean shouldSort;
 
     private int[] targets;
@@ -45,7 +45,7 @@ abstract class VisitRelationship {
     int prevTarget;
     int sourceGraphId;
 
-    VisitRelationship(final IdMap idMap, final boolean shouldSort) {
+    VisitRelationship(final IntIdMap idMap, final boolean shouldSort) {
         this.idMap = idMap;
         this.shouldSort = shouldSort;
         if (!shouldSort) {
@@ -174,7 +174,7 @@ abstract class VisitRelationship {
 
 final class VisitOutgoingNoWeight extends VisitRelationship {
 
-    VisitOutgoingNoWeight(final IdMap idMap, final boolean shouldSort) {
+    VisitOutgoingNoWeight(final IntIdMap idMap, final boolean shouldSort) {
         super(idMap, shouldSort);
     }
 
@@ -186,7 +186,7 @@ final class VisitOutgoingNoWeight extends VisitRelationship {
 
 final class VisitIncomingNoWeight extends VisitRelationship {
 
-    VisitIncomingNoWeight(final IdMap idMap, final boolean shouldSort) {
+    VisitIncomingNoWeight(final IntIdMap idMap, final boolean shouldSort) {
         super(idMap, shouldSort);
     }
 
@@ -205,7 +205,7 @@ final class VisitOutgoingWithWeight extends VisitRelationship {
     VisitOutgoingWithWeight(
             final Read readOp,
             final CursorFactory cursors,
-            final IdMap idMap,
+            final IntIdMap idMap,
             final boolean shouldSort,
             final WeightMap weights) {
         super(idMap, shouldSort);
@@ -231,7 +231,7 @@ final class VisitIncomingWithWeight extends VisitRelationship {
     VisitIncomingWithWeight(
             final Read readOp,
             final CursorFactory cursors,
-            final IdMap idMap,
+            final IntIdMap idMap,
             final boolean shouldSort,
             final WeightMap weights) {
         super(idMap, shouldSort);
@@ -257,7 +257,7 @@ final class VisitUndirectedOutgoingWithWeight extends VisitRelationship {
     VisitUndirectedOutgoingWithWeight(
             final Read readOp,
             final CursorFactory cursors,
-            final IdMap idMap,
+            final IntIdMap idMap,
             final boolean shouldSort,
             final WeightMap weights) {
         super(idMap, shouldSort);

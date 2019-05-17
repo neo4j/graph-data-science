@@ -24,6 +24,7 @@ import com.carrotsearch.hppc.IntIntScatterMap;
 import com.carrotsearch.hppc.IntScatterSet;
 import com.carrotsearch.hppc.IntSet;
 import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
 import java.util.Arrays;
@@ -115,7 +116,7 @@ public final class DisjointSetStruct {
 
     public Stream<Result> resultStream(IdMapping idMapping) {
 
-        return IntStream.range(IdMapping.START_NODE_ID, (int) idMapping.nodeCount())
+        return IntStream.range(IntIdMap.START_NODE_ID, (int) idMapping.nodeCount())
                 .mapToObj(mappedId ->
                         new Result(
                                 idMapping.toOriginalNodeId(mappedId),
@@ -284,7 +285,8 @@ public final class DisjointSetStruct {
         private final DisjointSetStruct struct;
         private final int length;
 
-        private int offset = IdMapping.START_NODE_ID;
+//        private int offset = IntIdMap.START_NODE_ID;
+        private int offset = IntIdMap.START_NODE_ID;
 
         private NodeSetIterator(DisjointSetStruct struct) {
             this.struct = struct;

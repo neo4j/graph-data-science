@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.api;
 
 /**
+ * TODO: Define interface contract, esp regarding source/target node ids returned and how that maps to relationship direction
+ *
  * consumer interface for unweighted relationships.
  *
  * @author mknblch
@@ -31,8 +33,9 @@ public interface RelationshipConsumer {
      *
      * @param sourceNodeId mapped source node id
      * @param targetNodeId mapped target node id
-     * @param relationId   deprecated
      * @return {@code true} if the iteration shall continue, otherwise {@code false}.
      */
-    boolean accept(int sourceNodeId, int targetNodeId, @Deprecated long relationId);
+    boolean accept(
+            long sourceNodeId,
+            long targetNodeId);
 }

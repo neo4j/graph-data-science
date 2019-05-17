@@ -25,7 +25,7 @@ import org.junit.Test;
 import org.neo4j.collection.primitive.PrimitiveIntIterable;
 import org.neo4j.collection.primitive.PrimitiveIntStack;
 import org.neo4j.function.ThrowingConsumer;
-import org.neo4j.graphalgo.api.BatchNodeIterable;
+import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.helpers.Exceptions;
 
 import java.util.Arrays;
@@ -111,7 +111,8 @@ public final class ParallelUtilTest extends RandomizedTest {
     @Test
     public void shouldRunBatchesSequentialIfNoExecutorIsGiven() {
         PrimitiveIntIterable[] ints = {ints(0, 10), ints(10, 14)};
-        BatchNodeIterable batches = (size) -> Arrays.asList(ints);
+        IntIdMap batches = mock(IntIdMap.class);
+        when(batches.batchIterables(anyInt())).thenReturn(Arrays.asList(ints));
         Runnable task = () -> {
         };
         ParallelGraphImporter importer = mock(ParallelGraphImporter.class);

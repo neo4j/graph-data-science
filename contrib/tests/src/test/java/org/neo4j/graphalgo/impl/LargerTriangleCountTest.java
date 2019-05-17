@@ -32,9 +32,10 @@ import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
+import org.neo4j.graphalgo.impl.triangle.IntersectingTriangleCount;
 import org.neo4j.graphalgo.impl.triangle.TriangleCountForkJoin;
-import org.neo4j.graphalgo.impl.triangle.TriangleCountQueue;
 import org.neo4j.graphalgo.impl.triangle.TriangleStream;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
@@ -98,7 +99,7 @@ public final class LargerTriangleCountTest {
 
     @Test
     public void testQueuePar() {
-        long triangleCount = new TriangleCountQueue(graph, Pools.DEFAULT, Pools.DEFAULT_CONCURRENCY)
+        long triangleCount = new IntersectingTriangleCount(graph, Pools.DEFAULT, Pools.DEFAULT_CONCURRENCY, AllocationTracker.EMPTY)
                 .compute()
                 .getTriangleCount();
         System.out.printf("[%s][par][ queue] count = %d%n", graphName, triangleCount);
@@ -122,7 +123,7 @@ public final class LargerTriangleCountTest {
 
     @Test
     public void testQueueSeq() {
-        long triangleCount = new TriangleCountQueue(graph, null, 1)
+        long triangleCount = new IntersectingTriangleCount(graph, null, 1, AllocationTracker.EMPTY)
                 .compute()
                 .getTriangleCount();
         System.out.printf("[%s][seq][ queue] count = %d%n", graphName, triangleCount);

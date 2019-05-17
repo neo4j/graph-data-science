@@ -19,22 +19,26 @@
  */
 package org.neo4j.graphalgo.api;
 
-
 /**
  * Composition of often used source interfaces
  *
  * @author mknblch
  */
-public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterable, RelationshipWeights, RelationshipIterator, RelationshipPredicate, WeightedRelationshipIterator, RelationshipAccess {
+public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterable, RelationshipIterator, RelationshipWeights, RelationshipPredicate, RelationshipAccess, NodeProperties {
+
+    String TYPE = "huge";
 
     /**
      * release resources which are not part of the result or IdMapping
      */
-    default void release() {}
+    default void release() { }
 
-    String getType();
+    default String getType() {
+        return TYPE;
+    }
 
     void canRelease(boolean canRelease);
 
     RelationshipIntersect intersection();
+
 }

@@ -116,7 +116,7 @@ public class DegreesTest {
                 .load(graphImpl);
     }
 
-    private int nodeId(String name) {
+    private long nodeId(String name) {
         try (Transaction transaction = DB.beginTx()) {
             return graph.toMappedNodeId(DB.findNodes(Label.label("Node"), "name", name).next().getId());
         }

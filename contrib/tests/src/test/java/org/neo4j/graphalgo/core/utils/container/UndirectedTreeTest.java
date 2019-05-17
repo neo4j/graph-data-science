@@ -78,21 +78,9 @@ public final class UndirectedTreeTest {
         tree.addRelationship(0, 1);
         tree.addRelationship(1, 0);
         assertEquals(1, tree.size());
-        tree.forEachBFS(0, (src, tgt, rel) -> {
+        tree.forEachBFS(0, (src, tgt) -> {
             assertEquals("source should be 0", 0, src);
             assertEquals("target should be 1", 0, src);
-            return true;
-        });
-    }
-
-    @Test
-    public void shouldNotSupportRelationshipIDs() throws Exception {
-        UndirectedTree tree = new UndirectedTree(2);
-        tree.addRelationship(0, 1);
-        tree.addRelationship(1, 0);
-        assertEquals(1, tree.size());
-        tree.forEachBFS(0, (src, tgt, rel) -> {
-            assertEquals(-1L, rel);
             return true;
         });
     }
@@ -226,7 +214,7 @@ public final class UndirectedTreeTest {
 
     private static List<String> bfs(UndirectedTree tree, int root) {
         List<String> actual = new ArrayList<>();
-        tree.forEachBFS(root, (src, tgt, rel) -> {
+        tree.forEachBFS(root, (src, tgt) -> {
             actual.add(src + "|" + tgt);
             return true;
         });
@@ -235,7 +223,7 @@ public final class UndirectedTreeTest {
 
     private static List<String> dfs(UndirectedTree tree, int root) {
         List<String> actual = new ArrayList<>();
-        tree.forEachDFS(root, (src, tgt, rel) -> {
+        tree.forEachDFS(root, (src, tgt) -> {
             actual.add(src + "|" + tgt);
             return true;
         });

@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.huge;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
-import org.neo4j.graphalgo.api.HugeGraph;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
@@ -82,11 +82,11 @@ public final class HugeIntersectionTest {
             }
         });
 
-        final HugeGraph graph = (HugeGraph) new GraphLoader(DB).asUndirected(true).load(HugeGraphFactory.class);
+        final Graph graph = new GraphLoader(DB).asUndirected(true).load(HugeGraphFactory.class);
         INTERSECT = graph.intersection();
-        START1 = graph.toHugeMappedNodeId(neoStarts[0]);
-        START2 = graph.toHugeMappedNodeId(neoStarts[1]);
-        TARGETS = Arrays.stream(neoTargets).map(graph::toHugeMappedNodeId).toArray();
+        START1 = graph.toMappedNodeId(neoStarts[0]);
+        START2 = graph.toMappedNodeId(neoStarts[1]);
+        TARGETS = Arrays.stream(neoTargets).map(graph::toMappedNodeId).toArray();
         Arrays.sort(TARGETS);
     }
 

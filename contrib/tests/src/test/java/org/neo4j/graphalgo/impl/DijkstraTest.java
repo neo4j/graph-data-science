@@ -35,6 +35,7 @@ import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
 import static org.junit.Assert.*;
+import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
 
 /**
  * Test for specialized dijkstra implementation with filters & maxDepth
@@ -94,7 +95,7 @@ public class DijkstraTest {
 
         dijkstra = new Dijkstra(graph)
                 .withDirection(Direction.OUTGOING)
-                .withFilter((s, t, r) -> !edgeBlackList.contains(RawValues.combineIntInt(s, t)));
+                .withFilter(longToIntConsumer((s, t) -> !edgeBlackList.contains(RawValues.combineIntInt(s, t))));
     }
 
     private static int id(String name) {
@@ -103,7 +104,7 @@ public class DijkstraTest {
             node[0] = row.getNode("n");
             return false;
         });
-        return graph.toMappedNodeId(node[0].getId());
+        return Math.toIntExact(graph.toMappedNodeId(node[0].getId()));
     }
 
     @Test

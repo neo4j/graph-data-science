@@ -79,7 +79,7 @@ public class HeavyGraphIntersectTest {
             long start = (long)row.get("start");
             List<List<Long>> triangles = (List<List<Long>>) row.get("ids");
             List<List<Long>> found = new ArrayList<>(triangles.size());
-            graph.intersectAll((int)start, (nodeA, nodeB, nodeC) -> found.add(asList(nodeA,nodeB,nodeC)));
+            graph.intersection().intersectAll((int)start, (nodeA, nodeB, nodeC) -> found.add(asList(nodeA,nodeB,nodeC)));
             assertEquals(triangles,found);
             foundIds.add(start);
         }

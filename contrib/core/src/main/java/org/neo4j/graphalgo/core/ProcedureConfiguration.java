@@ -20,10 +20,10 @@
 package org.neo4j.graphalgo.core;
 
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.api.HugeGraph;
 import org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraph;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.lightweight.LightGraph;
 import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
@@ -55,7 +55,7 @@ public class ProcedureConfiguration {
 
     private final Map<String, Object> config;
 
-    private ProcedureConfiguration(Map<String, Object> config) {
+    public ProcedureConfiguration(Map<String, Object> config) {
         this.config = new HashMap<>(config);
     }
 

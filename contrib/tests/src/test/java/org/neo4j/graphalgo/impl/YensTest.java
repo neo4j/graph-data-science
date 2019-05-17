@@ -48,6 +48,7 @@ import static org.mockito.AdditionalMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
 
 /**
  * Graph:
@@ -167,7 +168,7 @@ public class YensTest {
         for (int i = 0; i < pairs.length; i += 2) {
             list.add(RawValues.combineIntInt(pairs[i], pairs[i + 1]));
         }
-        return (s, t, r) -> !list.contains(RawValues.combineIntInt(s, t));
+        return longToIntConsumer((s, t) -> !list.contains(RawValues.combineIntInt(s, t)));
     }
 
     private int id(String name) {
@@ -176,6 +177,6 @@ public class YensTest {
             node[0] = row.getNode("n");
             return false;
         });
-        return graph.toMappedNodeId(node[0].getId());
+        return Math.toIntExact(graph.toMappedNodeId(node[0].getId()));
     }
 }

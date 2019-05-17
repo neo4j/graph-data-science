@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.huge.loader;
 
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.api.HugeIdMapping;
+import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.utils.ImportProgress;
 import org.neo4j.graphalgo.core.utils.StatementAction;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -40,7 +40,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
             GraphDatabaseAPI api,
             GraphSetup setup,
             ImportProgress progress,
-            HugeIdMapping idMap,
+            IdMapping idMap,
             AbstractStorePageCacheScanner<RelationshipRecord> scanner,
             int relType,
             AllocationTracker tracker,
@@ -60,7 +60,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
     static final class Creator implements ImportingThreadPool.CreateScanner {
         private final GraphDatabaseAPI api;
         private final ImportProgress progress;
-        private final HugeIdMapping idMap;
+        private final IdMapping idMap;
         private final AbstractStorePageCacheScanner<RelationshipRecord> scanner;
         private final int relType;
         private final AllocationTracker tracker;
@@ -72,7 +72,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
         Creator(
                 GraphDatabaseAPI api,
                 ImportProgress progress,
-                HugeIdMapping idMap,
+                IdMapping idMap,
                 AbstractStorePageCacheScanner<RelationshipRecord> scanner,
                 int relType,
                 AllocationTracker tracker,
@@ -117,7 +117,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
     }
 
     private final ImportProgress progress;
-    private final HugeIdMapping idMap;
+    private final IdMapping idMap;
     private final AbstractStorePageCacheScanner<RelationshipRecord> scanner;
     private final int relType;
     private final int scannerIndex;
@@ -133,7 +133,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
     private RelationshipsScanner(
             GraphDatabaseAPI api,
             ImportProgress progress,
-            HugeIdMapping idMap,
+            IdMapping idMap,
             AbstractStorePageCacheScanner<RelationshipRecord> scanner,
             int relType,
             int threadIndex,

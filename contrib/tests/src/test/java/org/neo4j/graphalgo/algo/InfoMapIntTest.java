@@ -23,12 +23,8 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.neo4j.graphalgo.InfoMapProc;
-import org.neo4j.graphalgo.PageRankProc;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.impl.pagerank.PageRank;
-import org.neo4j.graphalgo.impl.pagerank.PageRankAlgorithm;
+import org.neo4j.graphalgo.proc.PageRankProc;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
@@ -36,15 +32,8 @@ import org.neo4j.test.rule.ImpermanentDatabaseRule;
 import java.util.BitSet;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 /**
- *
- * TODO REPAIR
  *
  * Graph:
  *
@@ -56,11 +45,8 @@ import static org.mockito.Mockito.verify;
  */
 public class InfoMapIntTest {
 
-
     @ClassRule
     public static ImpermanentDatabaseRule db = new ImpermanentDatabaseRule();
-
-    private static Graph graph;
 
     @BeforeClass
     public static void setupGraph() throws KernelException {

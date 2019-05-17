@@ -25,11 +25,11 @@ import java.util.Map;
 
 final class IdsAndProperties {
 
-    final HugeIdMap hugeIdMap;
+    final IdMap hugeIdMap;
     final Map<String, HugeWeightMapping> properties;
 
     IdsAndProperties(
-            final HugeIdMap hugeIdMap,
+            final IdMap hugeIdMap,
             final Map<String, HugeWeightMapping> properties) {
         this.hugeIdMap = hugeIdMap;
         this.properties = properties;

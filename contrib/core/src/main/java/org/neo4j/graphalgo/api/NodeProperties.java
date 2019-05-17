@@ -22,9 +22,7 @@ package org.neo4j.graphalgo.api;
 import java.util.Set;
 
 /**
- * Getter interface for node properties.
- *
- * @author mknblch
+ * Getter interface for node properties for huge graphs.
  */
 public interface NodeProperties {
 
@@ -34,9 +32,8 @@ public interface NodeProperties {
      * @param type       the node property type
      * @return the mapping associated with that type
      */
-//    double valueOf(int nodeId, double defaultValue);
-
-    WeightMapping nodeProperties(String type);
+    HugeWeightMapping nodeProperties(String type);
 
     Set<String> availableNodeProperties();
+
 }

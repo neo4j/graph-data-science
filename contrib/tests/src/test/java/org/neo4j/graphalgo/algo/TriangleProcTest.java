@@ -22,32 +22,32 @@ package org.neo4j.graphalgo.algo;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TriangleProc;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 
 import java.util.HashSet;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.longThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
- *      (a)--(b)-(d)--(e)
- *        \T1/ \   \T2/
- *        (c)  (g)-(f)
+ *      (a)-- (b)--(d)--(e)
+ *        \T1/       \T2/
+ *        (c)   (g)  (f)
  *          \  /T3\
- *           (h)-(i)
+ *          (h)--(i)
  *
  * @author mknblch
  */
@@ -61,14 +61,14 @@ public class TriangleProcTest {
     public static void setup() throws KernelException {
         final String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
-                        "CREATE (f:Node {name:'f'})\n" +
-                        "CREATE (c:Node {name:'c'})\n" +
-                        "CREATE (e:Node {name:'e'})\n" +
-                        "CREATE (i:Node {name:'i'})\n" +
                         "CREATE (b:Node {name:'b'})\n" +
-                        "CREATE (h:Node {name:'h'})\n" +
+                        "CREATE (c:Node {name:'c'})\n" +
                         "CREATE (d:Node {name:'d'})\n" +
+                        "CREATE (e:Node {name:'e'})\n" +
+                        "CREATE (f:Node {name:'f'})\n" +
                         "CREATE (g:Node {name:'g'})\n" +
+                        "CREATE (h:Node {name:'h'})\n" +
+                        "CREATE (i:Node {name:'i'})\n" +
                         "CREATE" +
                         " (a)-[:TYPE]->(b),\n" +
                         " (b)-[:TYPE]->(c),\n" +
@@ -212,15 +212,11 @@ public class TriangleProcTest {
             final long nodeA = row.getNumber("nodeA").longValue();
             final long nodeB = row.getNumber("nodeB").longValue();
             final long nodeC = row.getNumber("nodeC").longValue();
-            System.out.println(idToName[(int) nodeA] + ","+ idToName[(int) nodeB] + "," + idToName[(int) nodeC]);
             consumer.consume(idToName[(int) nodeA], idToName[(int) nodeB], idToName[(int) nodeC]);
             return true;
         });
 
-        assertTrue(sums.contains(7)); // abc
-        assertTrue(sums.contains(11)); // ghi
-        assertTrue(sums.contains(18)); // def
-
+        assertThat(sums, containsInAnyOrder(0 + 1 + 2, 3 + 4 + 5, 6 + 7 + 8));
     }
 
     interface TriangleCountConsumer {

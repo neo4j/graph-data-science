@@ -27,11 +27,15 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
-import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.neo4j.graphdb.Direction.INCOMING;
 import static org.neo4j.graphdb.Direction.OUTGOING;
 
@@ -102,39 +106,39 @@ public class AdjacencyMatrixTest {
     @Test
     public void testV0Outgoing() throws Exception {
         matrix.forEach(0, OUTGOING, relationConsumer);
-        verify(relationConsumer, times(1)).accept(eq(0), eq(1), eq(RawValues.combineIntInt(0, 1)));
-        verify(relationConsumer, times(1)).accept(eq(0), eq(2), eq(RawValues.combineIntInt(0, 2)));
+        verify(relationConsumer, times(1)).accept(eq(0L), eq(1L));
+        verify(relationConsumer, times(1)).accept(eq(0L), eq(2L));
     }
 
     @Test
     public void testV1Outgoing() throws Exception {
         matrix.forEach(1, OUTGOING, relationConsumer);
-        verify(relationConsumer, times(1)).accept(eq(1), eq(2), eq(RawValues.combineIntInt(1, 2)));
+        verify(relationConsumer, times(1)).accept(eq(1L), eq(2L));
     }
 
     @Test
     public void testV2Outgoing() throws Exception {
         matrix.forEach(2, OUTGOING, relationConsumer);
-        verify(relationConsumer, never()).accept(anyInt(), anyInt(), anyLong());
+        verify(relationConsumer, never()).accept(anyInt(), anyInt());
     }
 
     @Test
     public void testV0Incoming() throws Exception {
         matrix.forEach(0, INCOMING, relationConsumer);
-        verify(relationConsumer, never()).accept(anyInt(), anyInt(), anyLong());
+        verify(relationConsumer, never()).accept(anyInt(), anyInt());
     }
 
     @Test
     public void testV1Incoming() throws Exception {
         matrix.forEach(1, INCOMING, relationConsumer);
-        verify(relationConsumer, times(1)).accept(eq(1), eq(0), eq(RawValues.combineIntInt(0, 1)));
+        verify(relationConsumer, times(1)).accept(eq(1L), eq(0L));
     }
 
     @Test
     public void testV2Incoming() throws Exception {
         matrix.forEach(2, INCOMING, relationConsumer);
-        verify(relationConsumer, times(2)).accept(anyInt(), anyInt(), anyLong());
-        verify(relationConsumer, times(1)).accept(eq(2), eq(0), eq(RawValues.combineIntInt(0, 2)));
-        verify(relationConsumer, times(1)).accept(eq(2), eq(1), eq(RawValues.combineIntInt(1, 2)));
+        verify(relationConsumer, times(2)).accept(anyInt(), anyInt());
+        verify(relationConsumer, times(1)).accept(eq(2L), eq(0L));
+        verify(relationConsumer, times(1)).accept(eq(2L), eq(1L));
     }
 }

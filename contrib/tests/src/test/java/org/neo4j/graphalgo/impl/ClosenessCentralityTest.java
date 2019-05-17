@@ -26,14 +26,12 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.api.HugeGraph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.closeness.HugeMSClosenessCentrality;
 import org.neo4j.graphalgo.impl.closeness.MSClosenessCentrality;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
@@ -116,53 +114,28 @@ public class ClosenessCentralityTest {
 
     @Test
     public void testGetCentrality() throws Exception {
-
-        final double[] centrality = new MSClosenessCentrality(graph, Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT, false)
-                .compute()
-                .exportToArray();
+        final double[] centrality =
+                new MSClosenessCentrality(
+                        graph,
+                        AllocationTracker.EMPTY,
+                        Pools.DEFAULT_CONCURRENCY,
+                        Pools.DEFAULT,
+                        false)
+                        .compute()
+                        .exportToArray();
 
         assertArrayEquals(EXPECTED, centrality, 0.1);
     }
 
     @Test
     public void testStream() throws Exception {
-
         final double[] centrality = new double[(int) graph.nodeCount()];
 
-        new MSClosenessCentrality(graph, Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT, false)
+        new MSClosenessCentrality(graph, AllocationTracker.EMPTY, Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT, false)
                 .compute()
                 .resultStream()
-                .forEach(r -> centrality[graph.toMappedNodeId(r.nodeId)] = r.centrality);
+                .forEach(r -> centrality[Math.toIntExact(graph.toMappedNodeId(r.nodeId))] = r.centrality);
 
         assertArrayEquals(EXPECTED, centrality, 0.1);
-    }
-
-    @Test
-    public void testHugeGetCentrality() throws Exception {
-        if (graph instanceof HugeGraph) {
-            HugeGraph hugeGraph = (HugeGraph) graph;
-            final double[] centrality =
-                    new HugeMSClosenessCentrality(hugeGraph, AllocationTracker.EMPTY, Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT, false)
-                            .compute()
-                            .exportToArray();
-
-            assertArrayEquals(EXPECTED, centrality, 0.1);
-        }
-    }
-
-    @Test
-    public void testHugeStream() throws Exception {
-        if (graph instanceof HugeGraph) {
-            HugeGraph hugeGraph = (HugeGraph) graph;
-
-            final double[] centrality = new double[(int) graph.nodeCount()];
-
-            new HugeMSClosenessCentrality(hugeGraph, AllocationTracker.EMPTY, Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT, false)
-                    .compute()
-                    .resultStream()
-                    .forEach(r -> centrality[graph.toMappedNodeId(r.nodeId)] = r.centrality);
-
-            assertArrayEquals(EXPECTED, centrality, 0.1);
-        }
     }
 }

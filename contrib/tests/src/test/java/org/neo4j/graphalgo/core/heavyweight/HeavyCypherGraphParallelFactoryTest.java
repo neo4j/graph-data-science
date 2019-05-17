@@ -112,11 +112,14 @@ public class HeavyCypherGraphParallelFactoryTest {
 
         Assert.assertEquals(COUNT, graph.nodeCount());
         AtomicInteger relCount = new AtomicInteger();
-        graph.forEachNode(node -> {relCount.addAndGet(graph.degree(node, Direction.OUTGOING));return true;});
+        graph.forEachNode(node -> {
+            relCount.addAndGet(graph.degree(node, Direction.OUTGOING));
+            return true;
+        });
         Assert.assertEquals(COUNT, relCount.get());
         AtomicInteger total = new AtomicInteger();
         graph.forEachNode(n -> {
-            graph.forEachRelationship(n, Direction.OUTGOING, (s, t, r, w) -> {
+            graph.forEachRelationship(n, Direction.OUTGOING, (s, t, w) -> {
                 total.addAndGet((int) w);
                 return true;
             });

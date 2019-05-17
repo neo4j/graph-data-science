@@ -124,8 +124,8 @@ public final class ShortestPathsTest {
         final IntDoubleMap sp = sssp.compute(head)
                 .getShortestPaths();
 
-        assertEquals(8, sp.get(graph.toMappedNodeId(tail)),0.1);
-        assertEquals(Double.POSITIVE_INFINITY, sp.get(graph.toMappedNodeId(outstanding)),0.1);
+        assertEquals(8, sp.get(Math.toIntExact(graph.toMappedNodeId(tail))),0.1);
+        assertEquals(Double.POSITIVE_INFINITY, sp.get(Math.toIntExact(graph.toMappedNodeId(outstanding))),0.1);
     }
 
     public static Node getNode(String name) {

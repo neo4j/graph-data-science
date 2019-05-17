@@ -18,7 +18,7 @@
  */
 package org.neo4j.graphalgo.bench;
 
-import org.neo4j.graphalgo.api.HugeGraph;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -27,13 +27,24 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.impl.infomap.InfoMap;
-import org.neo4j.graphalgo.impl.louvain.HugeLouvain;
 import org.neo4j.graphalgo.impl.louvain.Louvain;
-import org.neo4j.graphalgo.impl.pagerank.PageRankAlgorithm;
+import org.neo4j.graphalgo.impl.pagerank.PageRankFactory;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.TestGraphDatabaseFactory;
-import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Fork;
+import org.openjdk.jmh.annotations.Measurement;
+import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Param;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.TearDown;
+import org.openjdk.jmh.annotations.Threads;
+import org.openjdk.jmh.annotations.Warmup;
 
 import java.util.concurrent.TimeUnit;
 import java.util.stream.LongStream;
@@ -53,7 +64,7 @@ public class ClusteringBenchmark {
     private static final String LABEL = "Node";
     private static final String RELATIONSHIP = "REL";
 
-    private HugeGraph g;
+    private Graph g;
     private GraphDatabaseAPI api;
 
     @Param({"0.1", "0.25", "0.5"})
@@ -80,7 +91,7 @@ public class ClusteringBenchmark {
                 .newCompleteGraphBuilder()
                 .createCompleteGraph(nodeCount, connectedness);
 
-        g = (HugeGraph) new GraphLoader(api)
+        g = new GraphLoader(api)
                 .withLabel(LABEL)
                 .withRelationshipType(RELATIONSHIP)
                 .withoutRelationshipWeights()
@@ -89,7 +100,7 @@ public class ClusteringBenchmark {
                 .asUndirected(true)
                 .load(HugeGraphFactory.class);
 
-        pageRankResult = PageRankAlgorithm.of(g, 1. - InfoMap.TAU, LongStream.empty())
+        pageRankResult = PageRankFactory.of(g, 1. - InfoMap.TAU, LongStream.empty())
                 .compute(10)
                 .result();
     }
@@ -104,15 +115,6 @@ public class ClusteringBenchmark {
     @Benchmark
     public Object _01_louvain() {
         return new Louvain(g, Pools.DEFAULT, concurrency, AllocationTracker.EMPTY)
-                .withProgressLogger(ProgressLogger.NULL_LOGGER)
-                .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
-                .compute(99, 99999)
-                .communityCount();
-    }
-
-    @Benchmark
-    public Object _02_hugeLouvain() {
-        return new HugeLouvain(g, Pools.DEFAULT, concurrency, AllocationTracker.EMPTY)
                 .withProgressLogger(ProgressLogger.NULL_LOGGER)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
                 .compute(99, 99999)

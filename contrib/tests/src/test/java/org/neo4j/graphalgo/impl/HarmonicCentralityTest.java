@@ -32,15 +32,14 @@ import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.closeness.HarmonicCentrality;
+import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -102,7 +101,6 @@ public class HarmonicCentralityTest {
 
     private Graph graph;
 
-
     public HarmonicCentralityTest(
             Class<? extends GraphFactory> graphImpl,
             String nameIgnoredOnlyForTestName) {
@@ -118,7 +116,7 @@ public class HarmonicCentralityTest {
 
         final Consumer mock = mock(Consumer.class);
 
-        new HarmonicCentrality(graph, Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT)
+        new HarmonicCentrality(graph, AllocationTracker.EMPTY, Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT)
                 .compute()
                 .resultStream()
                 .forEach(r -> mock.consume(r.nodeId, r.centrality));

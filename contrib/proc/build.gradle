@@ -1,0 +1,23 @@
+dependencies {
+    compile project(':labs-algos')
+
+    compileOnly group: 'org.neo4j'           , name: 'neo4j'                , version: versions.neo4j
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from(javadoc.destinationDir)
+}
+
+description = 'Neo4j Graph Algorithms :: Procedures'
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs <<
+        '-AIgnoreContextWarnings' <<
+        '-AGeneratedDocumentationPath=target/generated-documentation' <<
+        '-ADocumentation.FieldDelimiter=¦' <<
+        '-ADocumentation.ExportedHeaders=qualified name¦description¦type' <<
+        '-ADocumentation.QuotedFields=false' <<
+        '-ADocumentation.DelimitedFirstField=true' <<
+        '-ADocumentation.ExportGrouping=SINGLE'
+}

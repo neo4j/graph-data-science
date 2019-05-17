@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.heavyweight;
 
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.WeightMapping;
-import org.neo4j.graphalgo.core.IdMap;
+import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.graphalgo.core.NullWeightMap;
 import org.neo4j.graphalgo.core.WeightMap;
 
@@ -30,7 +30,7 @@ import java.util.Map;
 public class Nodes {
     private final long offset;
     private final long rows;
-    IdMap idMap;
+    IntIdMap idMap;
     WeightMap nodeWeights;
     WeightMap nodeProps;
     private final Map<PropertyMapping, WeightMap> nodeProperties;
@@ -40,7 +40,7 @@ public class Nodes {
     Nodes(
             long offset,
             long rows,
-            IdMap idMap,
+            IntIdMap idMap,
             WeightMap nodeWeights,
             WeightMap nodeProps,
             Map<PropertyMapping, WeightMap> nodeProperties,

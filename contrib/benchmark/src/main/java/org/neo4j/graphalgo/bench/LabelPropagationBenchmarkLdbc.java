@@ -18,12 +18,14 @@
  */
 package org.neo4j.graphalgo.bench;
 
-import org.neo4j.graphalgo.LabelPropagationProc;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraph;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
+import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
+import org.neo4j.graphalgo.proc.LabelPropagationProc;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
@@ -117,8 +119,7 @@ public class LabelPropagationBenchmarkLdbc {
 
     @Benchmark
     public Object _03_direct() {
-        return new org.neo4j.graphalgo.impl
-                .LabelPropagation(graph, graph, batchSize, Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT)
+        return new LabelPropagation(graph, graph, batchSize, Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT, AllocationTracker.EMPTY)
                 .compute(Direction.OUTGOING, iterations);
     }
 

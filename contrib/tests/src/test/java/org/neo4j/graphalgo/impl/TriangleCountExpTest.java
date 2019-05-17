@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.graphalgo.helper.graphbuilder.DefaultBuilder;
@@ -36,7 +37,7 @@ import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.impl.triangle.TriangleCountAlgorithm;
+import org.neo4j.graphalgo.impl.triangle.IntersectingTriangleCount;
 import org.neo4j.graphalgo.impl.triangle.TriangleCountForkJoin;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
@@ -116,7 +117,7 @@ public class TriangleCountExpTest {
     @Test
     public void testQueue() {
 
-        final TriangleCountAlgorithm algo = TriangleCountAlgorithm.instance(graph, Pools.DEFAULT, 1);
+        final IntersectingTriangleCount algo = new IntersectingTriangleCount(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY);
         try (ProgressTimer start = ProgressTimer.start(l -> System.out.println("took " + l + "ms"))) {
             algo.compute();
         }
@@ -128,7 +129,7 @@ public class TriangleCountExpTest {
 
     @Test
     public void testQueueParallel() {
-        final TriangleCountAlgorithm algo = TriangleCountAlgorithm.instance(graph, Pools.DEFAULT, 4);
+        final IntersectingTriangleCount algo = new IntersectingTriangleCount(graph, Pools.DEFAULT, 4, AllocationTracker.EMPTY);
         try (ProgressTimer start = ProgressTimer.start(l -> System.out.println("took " + l + "ms"))) {
             algo.compute();
         }
@@ -171,7 +172,7 @@ public class TriangleCountExpTest {
     }
 
     private void assertTriangle(AtomicIntegerArray triangles) {
-        final int centerMapped = graph.toMappedNodeId(centerId);
+        final int centerMapped = Math.toIntExact(graph.toMappedNodeId(centerId));
         assertEquals(TRIANGLE_COUNT, triangles.get(centerMapped));
         for (int i = 0; i < triangles.length(); i++) {
             if (i == centerMapped) {
@@ -182,7 +183,7 @@ public class TriangleCountExpTest {
     }
 
     private void assertTriangle(PagedAtomicIntegerArray triangles) {
-        final int centerMapped = graph.toMappedNodeId(centerId);
+        final int centerMapped = Math.toIntExact(graph.toMappedNodeId(centerId));
         assertEquals(TRIANGLE_COUNT, triangles.get(centerMapped));
         for (int i = 0; i < triangles.size(); i++) {
             if (i == centerMapped) {
@@ -203,7 +204,7 @@ public class TriangleCountExpTest {
     }
 
     private void assertClusteringCoefficient(double[] coefficients) {
-        final int centerMapped = graph.toMappedNodeId(centerId);
+        final int centerMapped = Math.toIntExact(graph.toMappedNodeId(centerId));
         for (int i = 0; i < coefficients.length; i++) {
             if (i == centerMapped) {
                 continue;
@@ -213,7 +214,7 @@ public class TriangleCountExpTest {
     }
 
     private void assertClusteringCoefficient(AtomicDoubleArray coefficients) {
-        final int centerMapped = graph.toMappedNodeId(centerId);
+        final int centerMapped = Math.toIntExact(graph.toMappedNodeId(centerId));
         for (int i = 0; i < coefficients.length(); i++) {
             if (i == centerMapped) {
                 continue;
@@ -223,7 +224,7 @@ public class TriangleCountExpTest {
     }
 
     private void assertClusteringCoefficient(PagedAtomicDoubleArray coefficients) {
-        final int centerMapped = graph.toMappedNodeId(centerId);
+        final int centerMapped = Math.toIntExact(graph.toMappedNodeId(centerId));
         for (int i = 0; i < coefficients.size(); i++) {
             if (i == centerMapped) {
                 continue;

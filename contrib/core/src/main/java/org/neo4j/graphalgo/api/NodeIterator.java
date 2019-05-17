@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.api;
 
-import org.neo4j.collection.primitive.PrimitiveIntIterator;
+import org.neo4j.collection.primitive.PrimitiveLongIterator;
 
-import java.util.function.IntPredicate;
+import java.util.function.LongPredicate;
 
 /**
  * Iterate over each node Id until either
@@ -34,10 +34,7 @@ public interface NodeIterator {
     /**
      * Iterate over each nodeId
      */
-    void forEachNode(IntPredicate consumer);
+    void forEachNode(LongPredicate consumer);
 
-    /**
-     * get graph-nodeId iterator
-     */
-    PrimitiveIntIterator nodeIterator();
+    PrimitiveLongIterator nodeIterator();
 }

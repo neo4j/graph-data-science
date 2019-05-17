@@ -27,7 +27,8 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.impl.triangle.TriangleCountQueue;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.impl.triangle.IntersectingTriangleCount;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -117,11 +118,11 @@ public class ClusteringCoefficientTest {
     @Test
     public void test() throws Exception {
 
-        final TriangleCountQueue algo =
-                new TriangleCountQueue(graph, Pools.DEFAULT, 4)
+        final IntersectingTriangleCount algo =
+                new IntersectingTriangleCount(graph, Pools.DEFAULT, 4, AllocationTracker.EMPTY)
                         .compute();
 
-        assertArrayEquals(EXPECTED, algo.getCoefficients(), 0.01);
+        assertArrayEquals(EXPECTED, algo.getCoefficients().toArray(), 0.01);
         assertEquals(0.827, algo.getAverageCoefficient(), 0.01);
     }
 }

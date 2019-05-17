@@ -124,11 +124,6 @@ The new approach allows us to separate different data sets from importing and th
 
 - provides methods for iterating over _outgoing_ relationships from a given node
 
-==== [.line-through]#org.neo4j.graphalgo.api.WeightedRelationshipIterator#
-
-- outdated but still used in some algorithms
-- iterates over relationships from a given node and direction and provides a single weight as double
-
 ==== org.neo4j.graphalgo.api.RelationshipWeights
 
 - api2 approach for accessing weights

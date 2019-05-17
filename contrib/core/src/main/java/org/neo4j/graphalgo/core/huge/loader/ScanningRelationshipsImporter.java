@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.huge.loader;
 
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.api.HugeIdMapping;
+import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.ImportProgress;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -35,7 +35,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
     private final GraphSetup setup;
     private final ImportProgress progress;
     private final AllocationTracker tracker;
-    private final HugeIdMapping idMap;
+    private final IdMapping idMap;
     private final HugeWeightMapBuilder weights;
     private final boolean loadDegrees;
     private final HugeAdjacencyBuilder outAdjacency;
@@ -47,7 +47,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
             GraphDimensions dimensions,
             ImportProgress progress,
             AllocationTracker tracker,
-            HugeIdMapping idMap,
+            IdMapping idMap,
             HugeWeightMapBuilder weights,
             boolean loadDegrees,
             HugeAdjacencyBuilder outAdjacency,

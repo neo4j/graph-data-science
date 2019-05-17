@@ -64,6 +64,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.neo4j.graphalgo.core.utils.RawValues.combineIntInt;
 
 @RunWith(Parameterized.class)
 public class ParallelGraphLoadingTest extends RandomGraphTestCase {
@@ -110,7 +111,7 @@ public class ParallelGraphLoadingTest extends RandomGraphTestCase {
                          .findNodes(Label.label("Label2"))
                          .stream()) {
                 nodes.forEach(n -> {
-                    int graphId = sparseGraph.toMappedNodeId(n.getId());
+                    long graphId = sparseGraph.toMappedNodeId(n.getId());
                     assertNotEquals(n + " not mapped", -1, graphId);
                     long neoId = sparseGraph.toOriginalNodeId(graphId);
                     assertEquals(n + " mapped wrongly", n.getId(), neoId);
@@ -182,33 +183,39 @@ public class ParallelGraphLoadingTest extends RandomGraphTestCase {
         }
     }
 
-    private boolean testRelationships(int nodeId) {
+    private boolean testRelationships(long nodeId) {
         testRelationships(nodeId, Direction.OUTGOING);
         testRelationships(nodeId, Direction.INCOMING);
         return true;
     }
 
-    private void testRelationships(int nodeId, final Direction direction) {
+    private void testRelationships(long nodeId, final Direction direction) {
         final Node node = db.getNodeById(graph.toOriginalNodeId(nodeId));
         final Map<Long, Relationship> relationships = Iterables
                 .stream(node.getRelationships(direction))
                 .collect(Collectors.toMap(
-                        rel -> RawValues.combineIntInt((int) rel
-                                .getStartNode()
-                                .getId(), (int) rel.getEndNode().getId()),
+                        rel -> combineIntInt((int) rel.getStartNode().getId(), (int) rel.getEndNode().getId()),
                         Function.identity()));
         graph.forEachRelationship(
                 nodeId,
                 direction,
-                (sourceId, targetId, relationId) -> {
+                (sourceId, targetId) -> {
                     assertEquals(nodeId, sourceId);
-                    final Relationship relationship = relationships.remove(
-                            relationId);
+                    long relId = 0;
+                    switch (direction) {
+                        case OUTGOING:
+                            relId = combineIntInt((int) sourceId, (int) targetId);
+                            break;
+                        case INCOMING:
+                            relId = combineIntInt((int) targetId, (int) sourceId);
+                            break;
+                    }
+                    final Relationship relationship = relationships.remove(relId);
                     assertNotNull(
                             String.format(
                                     "Relationship (%d)-[%d]->(%d) that does not exist in the graph",
                                     sourceId,
-                                    relationId,
+                                    relId,
                                     targetId),
                             relationship);
 

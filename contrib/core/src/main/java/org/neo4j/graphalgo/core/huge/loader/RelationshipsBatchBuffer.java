@@ -19,14 +19,14 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
-import org.neo4j.graphalgo.api.HugeIdMapping;
+import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.huge.loader.AbstractStorePageCacheScanner.RecordConsumer;
 import org.neo4j.kernel.impl.store.record.RelationshipRecord;
 
 
 final class RelationshipsBatchBuffer implements RecordConsumer<RelationshipRecord> {
 
-    private final HugeIdMapping idMap;
+    private final IdMapping idMap;
     private final int type;
 
     // 4-long blocks for each rel
@@ -38,7 +38,7 @@ final class RelationshipsBatchBuffer implements RecordConsumer<RelationshipRecor
     private int length;
 
 
-    RelationshipsBatchBuffer(final HugeIdMapping idMap, final int type, int capacity) {
+    RelationshipsBatchBuffer(final IdMapping idMap, final int type, int capacity) {
         this.idMap = idMap;
         this.type = type;
         int bufferLength = Math.multiplyExact(4, capacity);
@@ -55,9 +55,9 @@ final class RelationshipsBatchBuffer implements RecordConsumer<RelationshipRecor
     @Override
     public void add(final RelationshipRecord record) {
         if ((type & record.getType()) == record.getType()) {
-            long source = idMap.toHugeMappedNodeId(record.getFirstNode());
+            long source = idMap.toMappedNodeId(record.getFirstNode());
             if (source != -1L) {
-                long target = idMap.toHugeMappedNodeId(record.getSecondNode());
+                long target = idMap.toMappedNodeId(record.getSecondNode());
                 if (target != -1L) {
                     int position = this.length;
                     long[] buffer = this.buffer;

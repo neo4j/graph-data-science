@@ -123,7 +123,7 @@ public final class ShortestPathDeltaSteppingTest {
         final double[] sp = sssp.compute(head)
                 .getShortestPaths();
 
-        assertEquals(8, sp[graph.toMappedNodeId(tail)],0.1);
+        assertEquals(8, sp[Math.toIntExact(graph.toMappedNodeId(tail))],0.1);
     }
 
     @Test
@@ -134,7 +134,7 @@ public final class ShortestPathDeltaSteppingTest {
         final double[] sp = sssp.compute(head)
                 .getShortestPaths();
 
-        assertEquals(8, sp[graph.toMappedNodeId(tail)],0.1);
+        assertEquals(8, sp[Math.toIntExact(graph.toMappedNodeId(tail))],0.1);
     }
 
     @Test
@@ -143,7 +143,7 @@ public final class ShortestPathDeltaSteppingTest {
 
         final double[] sp = sssp.compute(head).getShortestPaths();
 
-        assertEquals(Double.POSITIVE_INFINITY, sp[graph.toMappedNodeId(getNode("z").getId())],0.1);
+        assertEquals(Double.POSITIVE_INFINITY, sp[Math.toIntExact(graph.toMappedNodeId(getNode("z").getId()))],0.1);
     }
 
     public static Node getNode(String name) {

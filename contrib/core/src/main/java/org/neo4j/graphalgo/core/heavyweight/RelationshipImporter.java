@@ -23,11 +23,13 @@ import com.carrotsearch.hppc.LongDoubleMap;
 import com.carrotsearch.hppc.cursors.LongDoubleCursor;
 import org.neo4j.collection.primitive.PrimitiveIntIterable;
 import org.neo4j.collection.primitive.PrimitiveIntIterator;
+import org.neo4j.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.IdMap;
+import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.graphalgo.core.WeightMap;
 import org.neo4j.graphalgo.core.utils.ImportProgress;
 import org.neo4j.graphalgo.core.utils.StatementAction;
@@ -52,7 +54,7 @@ final class RelationshipImporter extends StatementAction {
     private final int nodeSize;
     private final int nodeOffset;
 
-    private IdMap idMap;
+    private IntIdMap idMap;
     private AdjacencyMatrix matrix;
 
     private WeightMapping relWeights;
@@ -65,7 +67,7 @@ final class RelationshipImporter extends StatementAction {
             ImportProgress progress,
             int batchSize,
             int nodeOffset,
-            IdMap idMap,
+            IntIdMap idMap,
             AdjacencyMatrix matrix,
             PrimitiveIntIterable nodes,
             Supplier<WeightMapping> relWeights,
@@ -191,7 +193,7 @@ final class RelationshipImporter extends StatementAction {
         return new ReadUndirected(transaction, matrix, relationId, visitorOut, visitorIn);
     }
 
-    Graph toGraph(final IdMap idMap, final AdjacencyMatrix matrix) {
+    Graph toGraph(final IntIdMap idMap, final AdjacencyMatrix matrix) {
 
         return new HeavyGraph(
                 idMap,

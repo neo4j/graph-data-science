@@ -21,8 +21,8 @@ package org.neo4j.graphalgo.impl.closeness;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-import static org.neo4j.graphalgo.impl.closeness.MSBFSCCAlgorithm.centrality;
+import static org.junit.Assert.assertEquals;
+import static org.neo4j.graphalgo.impl.closeness.MSClosenessCentrality.centrality;
 
 public class MSBFSCCAlgorithmTest {
     @Test

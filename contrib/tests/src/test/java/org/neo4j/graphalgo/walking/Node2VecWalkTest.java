@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.walking;
 
 import org.junit.*;
+import org.neo4j.graphalgo.NodeWalkerProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.*;
 import org.neo4j.helpers.collection.Iterators;

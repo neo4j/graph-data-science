@@ -20,7 +20,7 @@ package org.neo4j.graphalgo.bench;
 
 import org.neo4j.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.graphalgo.core.huge.loader.HugeIdMap;
+import org.neo4j.graphalgo.core.huge.loader.IdMap;
 import org.neo4j.graphalgo.core.utils.RandomLongIterator;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -86,7 +86,7 @@ public class LongIteratorsBenchmark {
 
     @Benchmark
     public void _04_idIterator(Blackhole bh) {
-        PrimitiveLongIterator iter = new HugeIdMap.IdIterator(size);
+        PrimitiveLongIterator iter = new IdMap.IdIterator(size);
         while (iter.hasNext()) {
             bh.consume(iter.next());
         }
@@ -94,7 +94,7 @@ public class LongIteratorsBenchmark {
 
     @Benchmark
     public void _05_switchingIterator(Blackhole bh) {
-        PrimitiveLongIterator iter = new HugeIdMap.IdIterator(size);
+        PrimitiveLongIterator iter = new IdMap.IdIterator(size);
         iter = new RandomlySwitchingLongIterator(iter, new Random(42L));
         while (iter.hasNext()) {
             bh.consume(iter.next());

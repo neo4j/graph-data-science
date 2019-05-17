@@ -29,5 +29,5 @@ import org.neo4j.graphdb.Direction;
  */
 public interface Degrees {
 
-    int degree(int nodeId, Direction direction);
+    int degree(long nodeId, Direction direction);
 }

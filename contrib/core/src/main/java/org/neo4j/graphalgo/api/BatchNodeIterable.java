@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.api;
 
-import org.neo4j.collection.primitive.PrimitiveIntIterable;
+import org.neo4j.collection.primitive.PrimitiveLongIterable;
 
 import java.util.Collection;
 
@@ -34,5 +34,5 @@ public interface BatchNodeIterable {
      * @return a collection of iterables over every node, partitioned by
      *         the given batch size.
      */
-    Collection<PrimitiveIntIterable> batchIterables(int batchSize);
+    Collection<PrimitiveLongIterable> batchIterables(int batchSize);
 }

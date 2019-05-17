@@ -128,12 +128,12 @@ public class HeavyGraphFactoryTest {
                 .load(HeavyGraphFactory.class);
 
         graph.forEachRelationship(graph.toMappedNodeId(id1), Direction.OUTGOING, relationConsumer);
-        verify(relationConsumer, times(1)).accept(eq(graph.toMappedNodeId(id1)), eq(graph.toMappedNodeId(id3)), anyLong());
-        verify(relationConsumer, times(1)).accept(eq(graph.toMappedNodeId(id1)), eq(graph.toMappedNodeId(id2)), anyLong());
+        verify(relationConsumer, times(1)).accept(eq(graph.toMappedNodeId(id1)), eq(graph.toMappedNodeId(id3)));
+        verify(relationConsumer, times(1)).accept(eq(graph.toMappedNodeId(id1)), eq(graph.toMappedNodeId(id2)));
         Mockito.reset(relationConsumer);
 
         graph.forEachRelationship(graph.toMappedNodeId(id2), Direction.OUTGOING, relationConsumer);
-        verify(relationConsumer, times(1)).accept(eq(graph.toMappedNodeId(id2)), eq(graph.toMappedNodeId(id3)), anyLong());
+        verify(relationConsumer, times(1)).accept(eq(graph.toMappedNodeId(id2)), eq(graph.toMappedNodeId(id3)));
         Mockito.reset(relationConsumer);
     }
 
@@ -146,12 +146,12 @@ public class HeavyGraphFactoryTest {
                 .load(HeavyGraphFactory.class);
 
         graph.forEachRelationship(graph.toMappedNodeId(id1), Direction.OUTGOING, relationConsumer);
-        verify(relationConsumer, times(1)).accept(eq(graph.toMappedNodeId(id1)), eq(graph.toMappedNodeId(id2)), anyLong());
-        verify(relationConsumer, never()).accept(eq(graph.toMappedNodeId(id1)), eq(graph.toMappedNodeId(id3)), anyLong());
+        verify(relationConsumer, times(1)).accept(eq(graph.toMappedNodeId(id1)), eq(graph.toMappedNodeId(id2)));
+        verify(relationConsumer, never()).accept(eq(graph.toMappedNodeId(id1)), eq(graph.toMappedNodeId(id3)));
         Mockito.reset(relationConsumer);
 
         graph.forEachRelationship(graph.toMappedNodeId(id2), Direction.OUTGOING, relationConsumer);
-        verify(relationConsumer, never()).accept(anyInt(), anyInt(), anyLong());
+        verify(relationConsumer, never()).accept(anyInt(), anyInt());
         Mockito.reset(relationConsumer);
     }
 
@@ -166,7 +166,7 @@ public class HeavyGraphFactoryTest {
 
         graph.forEachRelationship(graph.toMappedNodeId(id1), Direction.OUTGOING, weightedRelationConsumer);
         verify(weightedRelationConsumer, times(1))
-                .accept(eq(graph.toMappedNodeId(id1)), eq(graph.toMappedNodeId(id2)), anyLong(), eq(1.0));
+                .accept(eq(graph.toMappedNodeId(id1)), eq(graph.toMappedNodeId(id2)), eq(1.0));
     }
 
     @Test
@@ -181,8 +181,8 @@ public class HeavyGraphFactoryTest {
                 )
                 .load(HeavyGraphFactory.class);
 
-        assertEquals(1.0, graph.nodeProperties("prop1").get(graph.toMappedNodeId(0L)), 0.01);
-        assertEquals(2.0, graph.nodeProperties("prop2").get(graph.toMappedNodeId(1L)), 0.01);
-        assertEquals(3.0, graph.nodeProperties("prop3").get(graph.toMappedNodeId(2L)), 0.01);
+        assertEquals(1.0, graph.nodeProperties("prop1").get((int) graph.toMappedNodeId(0L)), 0.01);
+        assertEquals(2.0, graph.nodeProperties("prop2").get((int) graph.toMappedNodeId(1L)), 0.01);
+        assertEquals(3.0, graph.nodeProperties("prop3").get((int) graph.toMappedNodeId(2L)), 0.01);
     }
 }

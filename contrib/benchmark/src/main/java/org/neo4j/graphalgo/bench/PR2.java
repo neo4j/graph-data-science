@@ -20,7 +20,6 @@ package org.neo4j.graphalgo.bench;
 
 import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeGraph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
@@ -76,7 +75,7 @@ public final class PR2 extends BaseMain {
 
         System.gc();
 
-        Graph graph = null;
+        Graph huge = null;
         Graph heavy = null;
         List<String> messages = new ArrayList<>();
 
@@ -88,7 +87,7 @@ public final class PR2 extends BaseMain {
                 try (ProgressTimer ignored = ProgressTimer.start(time -> messages.add(String.format(
                         "huge load: %d ms",
                         time)))) {
-                    graph = graphLoader.load(HugeGraphFactory.class);
+                    huge = graphLoader.load(HugeGraphFactory.class);
                 }
 
                 jprofBookmark("end huge load");
@@ -123,9 +122,9 @@ public final class PR2 extends BaseMain {
             }
             throw e;
         } finally {
-            if (graph != null && heavy != null) {
+            if (huge != null && heavy != null) {
                 final Graph heavyGraph = heavy;
-                HugeGraph hugeGraph = (HugeGraph) graph;
+                final Graph hugeGraph = huge;
                 try (ProgressTimer ignored = ProgressTimer.start(time -> messages.add(String.format(
                         "traversal: %d ms",
                         time)))) {
@@ -169,9 +168,9 @@ public final class PR2 extends BaseMain {
             }
 //            jprofBookmark("shutdown");
 
-            if (graph != null) {
-                graph.release();
-                graph = null;
+            if (huge != null) {
+                huge.release();
+                huge = null;
             }
             if (heavy != null) {
                 heavy.release();

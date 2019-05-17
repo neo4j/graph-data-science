@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.heavyweight;
 
 import org.junit.Test;
 import org.neo4j.graphalgo.core.DuplicateRelationshipsStrategy;
-import org.neo4j.graphalgo.core.IdMap;
+import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.graphalgo.core.WeightMap;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -37,7 +37,7 @@ public class RelationshipRowVisitorTest {
     @Test
     public void byDefaultDontRemoveDuplicates() {
         AdjacencyMatrix matrix = new AdjacencyMatrix(2, false, AllocationTracker.EMPTY);
-        IdMap idMap = idMap();
+        IntIdMap idMap = idMap();
 
 
         Result.ResultRow row1 = mock(Result.ResultRow.class);
@@ -120,8 +120,8 @@ public class RelationshipRowVisitorTest {
         assertEquals(7.0, relWeights.get(RawValues.combineIntInt(0,1)), 0.01);
     }
 
-    private IdMap idMap() {
-        IdMap idMap = new IdMap(2);
+    private IntIdMap idMap() {
+        IntIdMap idMap = new IntIdMap(2);
         idMap.add(0);
         idMap.add(1);
         idMap.buildMappedIds(AllocationTracker.EMPTY);

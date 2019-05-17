@@ -21,14 +21,18 @@ package org.neo4j.graphalgo.impl.msbfs;
 
 import org.junit.Rule;
 import org.junit.Test;
+import org.neo4j.graphalgo.HeavyHugeTester;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.neo4jview.DirectIdMapping;
+import org.neo4j.graphalgo.core.huge.DirectIdMapping;
+import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.helper.graphbuilder.DefaultBuilder;
 import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
-import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.collection.Pair;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
@@ -39,7 +43,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.IntUnaryOperator;
+import java.util.function.LongUnaryOperator;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -49,7 +53,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.neo4j.graphdb.Direction.OUTGOING;
 
-public final class MultiSourceBFSTest {
+public final class MultiSourceBFSTest extends HeavyHugeTester {
 
     private static final String PAPER_CYPHER = "" +
             "CREATE (a:Foo {id:\"1\"})\n" +
@@ -75,6 +79,10 @@ public final class MultiSourceBFSTest {
     @Rule
     public ImpermanentDatabaseRule db = new ImpermanentDatabaseRule();
 
+    public MultiSourceBFSTest(Class<? extends GraphFactory> graphImpl, String name) {
+        super(graphImpl);
+    }
+
     @Test
     public void testPaperExample() {
         withGraph(PAPER_CYPHER, graph -> {
@@ -84,6 +92,7 @@ public final class MultiSourceBFSTest {
                     graph,
                     OUTGOING,
                     (i, d, s) -> mock.accept(i + 1, d, toList(s, x -> x + 1)),
+                    AllocationTracker.EMPTY,
                     0, 1
             );
 
@@ -107,7 +116,8 @@ public final class MultiSourceBFSTest {
                     graph,
                     graph,
                     OUTGOING,
-                    (i, d, s) -> mock.accept(i + 1, d, toList(s, x -> x + 1))
+                    (i, d, s) -> mock.accept(i + 1, d, toList(s, x -> x + 1)),
+                    AllocationTracker.EMPTY
             );
 
             msbfs.run(Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT);
@@ -144,7 +154,7 @@ public final class MultiSourceBFSTest {
         withGrid(
                 gb -> gb.newGridBuilder().createGrid(8, 4),
                 graph -> {
-                    Set<Pair<Integer, Integer>> seen = new HashSet<>();
+                    Set<Pair<Long, Integer>> seen = new HashSet<>();
                     MultiSourceBFS msbfs = new MultiSourceBFS(
                             graph,
                             graph,
@@ -156,7 +166,8 @@ public final class MultiSourceBFSTest {
                                         d
                                 );
                                 assertTrue(message, seen.add(Pair.of(i, d)));
-                            }
+                            },
+                            AllocationTracker.EMPTY
                     );
                     msbfs.run(1, null);
                 });
@@ -166,8 +177,7 @@ public final class MultiSourceBFSTest {
     public void testParallel() {
         // each node should only be traversed once for every source node
         int maxNodes = 512;
-        int[][] seen = new int[maxNodes][];
-        Arrays.setAll(seen, i -> new int[maxNodes]);
+        int[][] seen = new int[maxNodes][maxNodes];
         withGrid(
                 gb -> gb.newCompleteGraphBuilder().createCompleteGraph(maxNodes),
                 graph -> {
@@ -179,10 +189,11 @@ public final class MultiSourceBFSTest {
                                 assertEquals(1, d);
                                 synchronized (seen) {
                                     while (s.hasNext()) {
-                                        seen[s.next()][i] += 1;
+                                        seen[(int) s.next()][(int) i] += 1;
                                     }
                                 }
-                            });
+                            },
+                            AllocationTracker.EMPTY);
                     msbfs.run(Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT);
                 });
 
@@ -198,7 +209,7 @@ public final class MultiSourceBFSTest {
     @Test
     public void testSize() {
         int maxNodes = 100;
-        // [ last i, expected source from, exptected source to ]
+        // [ last i, expected source from, expected source to ]
         int[] state = {-1, 0, MultiSourceBFS.OMEGA};
         withGrid(
                 gb -> gb.newCompleteGraphBuilder().createCompleteGraph(maxNodes),
@@ -216,7 +227,7 @@ public final class MultiSourceBFSTest {
                                             state[2] + MultiSourceBFS.OMEGA,
                                             maxNodes);
                                 }
-                                state[0] = i;
+                                state[0] = (int) i;
                                 int sourceFrom = state[1];
                                 int sourceTo = state[2];
 
@@ -228,26 +239,35 @@ public final class MultiSourceBFSTest {
                                 }
 
                                 assertEquals(expectedSize, s.size());
-                            });
+                            },
+                            AllocationTracker.EMPTY);
                     // run sequentially to guarantee order
                     msbfs.run(1, null);
                 });
     }
 
     @Test
-    public void testLarger() {
+    public void testLarger() throws Exception {
         final int nodeCount = 8192;
         final int sourceCount = 1024;
 
-        RelationshipIterator iter = (nodeId, direction, consumer) -> {
-            for (int i = 0; i < nodeCount; i++) {
-                if (i != nodeId) {
-                    consumer.accept(nodeId, i, -1L);
+        RelationshipIterator iter = new RelationshipIterator() {
+            @Override
+            public void forEachRelationship(long nodeId, Direction direction, RelationshipConsumer consumer) {
+                for (long i = 0; i < nodeCount; i++) {
+                    if (i != nodeId) {
+                        consumer.accept(nodeId, i);
+                    }
                 }
             }
-        };
 
-        final int[] sources = new int[sourceCount];
+            @Override
+            public void forEachRelationship(long nodeId, Direction direction, WeightedRelationshipConsumer consumer) {
+
+            }
+        } ;
+
+        final long[] sources = new long[sourceCount];
         Arrays.setAll(sources, i -> i);
         final int[][] seen = new int[nodeCount][sourceCount];
         MultiSourceBFS msbfs = new MultiSourceBFS(
@@ -257,12 +277,13 @@ public final class MultiSourceBFSTest {
                 (nodeId, depth, sourceNodeIds) -> {
                     assertEquals(1, depth);
                     synchronized (seen) {
-                        final int[] nodeSeen = seen[nodeId];
+                        final int[] nodeSeen = seen[(int) nodeId];
                         while (sourceNodeIds.hasNext()) {
-                            nodeSeen[sourceNodeIds.next()] += 1;
+                            nodeSeen[(int) sourceNodeIds.next()] += 1;
                         }
                     }
                 },
+                AllocationTracker.EMPTY,
                 sources);
         msbfs.run(Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT);
 
@@ -280,48 +301,48 @@ public final class MultiSourceBFSTest {
     private void withGraph(
             String cypher,
             Consumer<? super Graph> block) {
-        db.execute(cypher).close();
-        block.accept(new GraphLoader(db).load(HeavyGraphFactory.class));
+                db.execute(cypher).close();
+        block.accept(new GraphLoader(db).load(graphImpl));
     }
 
     private void withGrid(
             Consumer<? super GraphBuilder<?>> build,
             Consumer<? super Graph> block) {
         db.executeAndCommit((dba) -> {
-            DefaultBuilder graphBuilder = GraphBuilder.create(db)
-                    .setLabel("Foo")
-                    .setRelationship("BAR");
-            build.accept(graphBuilder);
+                DefaultBuilder graphBuilder = GraphBuilder.create(db)
+                        .setLabel("Foo")
+                        .setRelationship("BAR");
+                build.accept(graphBuilder);
         });
-        Graph graph = new GraphLoader(db).load(HeavyGraphFactory.class);
-        block.accept(graph);
+        Graph graph = new GraphLoader(db).load(graphImpl);
+                block.accept(graph);
     }
 
     private static BfsSources toList(
             BfsSources sources,
-            IntUnaryOperator modify) {
-        List<Integer> ints = new ArrayList<>();
+            LongUnaryOperator modify) {
+        List<Long> longs = new ArrayList<>();
         while (sources.hasNext()) {
-            ints.add(modify.applyAsInt(sources.next()));
+            longs.add(modify.applyAsLong(sources.next()));
         }
-        return new FakeListIterator(ints);
+        return new FakeListIterator(longs);
     }
 
-    private static BfsSources toList(int... sources) {
-        List<Integer> ints = new ArrayList<>();
-        for (int source : sources) {
-            ints.add(source);
+    private static BfsSources toList(long... sources) {
+        List<Long> longs = new ArrayList<>();
+        for (long source : sources) {
+            longs.add(source);
         }
-        return new FakeListIterator(ints);
+        return new FakeListIterator(longs);
     }
 
     private static final class FakeListIterator implements BfsSources {
 
-        private List<?> ints;
+        private List<?> longs;
 
-        private FakeListIterator(List<Integer> ints) {
-            ints.sort(Integer::compareTo);
-            this.ints = ints;
+        private FakeListIterator(List<Long> longs) {
+            longs.sort(Long::compareTo);
+            this.longs = longs;
         }
 
         @Override
@@ -330,13 +351,13 @@ public final class MultiSourceBFSTest {
         }
 
         @Override
-        public int next() {
+        public long next() {
             return 0;
         }
 
         @Override
         public int size() {
-            return ints.size();
+            return longs.size();
         }
 
         @Override
@@ -344,12 +365,12 @@ public final class MultiSourceBFSTest {
 
         @Override
         public boolean equals(final Object obj) {
-            return obj instanceof FakeListIterator && ints.equals(((FakeListIterator) obj).ints);
+            return obj instanceof FakeListIterator && longs.equals(((FakeListIterator) obj).longs);
         }
 
         @Override
         public String toString() {
-            return ints.toString();
+            return longs.toString();
         }
     }
 }

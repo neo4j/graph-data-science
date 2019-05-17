@@ -39,6 +39,7 @@ import org.neo4j.test.rule.ImpermanentDatabaseRule;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -119,13 +120,13 @@ public class PrimTest {
                 .load(graphImpl);
 
         try (Transaction transaction = DB.beginTx()) {
-            a = graph.toMappedNodeId(DB.findNode(label, "name", "a").getId());
-            b = graph.toMappedNodeId(DB.findNode(label, "name", "b").getId());
-            c = graph.toMappedNodeId(DB.findNode(label, "name", "c").getId());
-            d = graph.toMappedNodeId(DB.findNode(label, "name", "d").getId());
-            e = graph.toMappedNodeId(DB.findNode(label, "name", "e").getId());
-            y = graph.toMappedNodeId(DB.findNode(label, "name", "y").getId());
-            z = graph.toMappedNodeId(DB.findNode(label, "name", "z").getId());
+            a = Math.toIntExact(graph.toMappedNodeId(DB.findNode(label, "name", "a").getId()));
+            b = Math.toIntExact(graph.toMappedNodeId(DB.findNode(label, "name", "b").getId()));
+            c = Math.toIntExact(graph.toMappedNodeId(DB.findNode(label, "name", "c").getId()));
+            d = Math.toIntExact(graph.toMappedNodeId(DB.findNode(label, "name", "d").getId()));
+            e = Math.toIntExact(graph.toMappedNodeId(DB.findNode(label, "name", "e").getId()));
+            y = Math.toIntExact(graph.toMappedNodeId(DB.findNode(label, "name", "y").getId()));
+            z = Math.toIntExact(graph.toMappedNodeId(DB.findNode(label, "name", "z").getId()));
             transaction.success();
         }
     }
@@ -192,67 +193,4 @@ public class PrimTest {
         assertEquals(-1 , mst.parent[z]);
     }
 
-    private static void print(int[] parents) {
-        for (int i = 0; i < parents.length; i++) {
-            System.out.printf("%2d ", parents[i]);
-        }
-        System.out.println();
-        for (int i = 0; i < parents.length; i++) {
-            System.out.printf("%2d ", i);
-        }
-        System.out.println("\n");
-    }
-
-    private static class AssertingConsumer implements RelationshipConsumer {
-
-        private static class Pair {
-
-            final int a;
-            final int b;
-
-            private Pair(int a, int b) {
-                this.a = a;
-                this.b = b;
-            }
-
-            @Override
-            public boolean equals(Object o) {
-                if (this == o) return true;
-                if (o == null || getClass() != o.getClass()) return false;
-                Pair pair = (Pair) o;
-                if (a != pair.a) return false;
-                return b == pair.b;
-            }
-
-            @Override
-            public int hashCode() {
-                int result = a;
-                result = 31 * result + b;
-                return result;
-            }
-        }
-
-        private ArrayList<Pair> pairs = new ArrayList<>();
-
-        @Override
-        public boolean accept(int sourceNodeId, int targetNodeId, @Deprecated long relationId) {
-            pairs.add(new Pair(
-                    Math.min(sourceNodeId, targetNodeId),
-                    Math.max(sourceNodeId, targetNodeId)));
-            return true;
-        }
-
-        public void assertSize(int expected) {
-            assertEquals("size does not match", expected, pairs.size());
-        }
-
-        public void assertContains(int a, int b) {
-            assertTrue("{" + a + "," + b + "} not found",
-                    pairs.contains(new Pair(Math.min(a, b), Math.max(a, b))));
-        }
-        public void assertAbsent(int a, int b) {
-            assertFalse("{" + a + "," + b + "} not found",
-                    pairs.contains(new Pair(Math.min(a, b), Math.max(a, b))));
-        }
-    }
 }

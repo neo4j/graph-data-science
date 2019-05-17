@@ -18,15 +18,10 @@
  */
 package org.neo4j.graphalgo.impl.msbfs;
 
-import org.neo4j.graphalgo.api.HugeIdMapping;
-import org.neo4j.graphalgo.api.HugeRelationshipConsumer;
-import org.neo4j.graphalgo.api.HugeRelationshipIterator;
-import org.neo4j.graphalgo.api.HugeWeightedRelationshipConsumer;
-import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.core.huge.HugeDirectIdMapping;
-import org.neo4j.graphalgo.core.neo4jview.DirectIdMapping;
+import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
+import org.neo4j.graphalgo.core.huge.DirectIdMapping;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Arrays;
@@ -48,16 +43,14 @@ public enum MSBFSSource {
     _16384_4096(16384, 4096),
     _16384_16384(16384);
 
-    final IdMapping nodes;
-    final HugeIdMapping hugeNodes;
+    final DirectIdMapping nodes;
     final RelationshipIterator rels;
-    final HugeRelationshipIterator hugeRels;
+    final RelationshipIterator hugeRels;
     final int[] sources;
     final long[] hugeSources;
 
     MSBFSSource(int nodeCount, int sourceCount) {
         this.nodes = new DirectIdMapping(nodeCount);
-        this.hugeNodes = new HugeDirectIdMapping(nodeCount);
         this.rels = new AllNodes(nodeCount);
         this.hugeRels = new HugeAllNodes(nodeCount);
         this.sources = new int[sourceCount];
@@ -68,7 +61,6 @@ public enum MSBFSSource {
 
     MSBFSSource(int nodeCount) {
         this.nodes = new DirectIdMapping(nodeCount);
-        this.hugeNodes = new HugeDirectIdMapping(nodeCount);
         this.rels = new AllNodes(nodeCount);
         this.hugeRels = new HugeAllNodes(nodeCount);
         this.sources = null;
@@ -84,19 +76,21 @@ public enum MSBFSSource {
         }
 
         @Override
-        public void forEachRelationship(
-                int nodeId,
-                Direction direction,
-                RelationshipConsumer consumer) {
+        public void forEachRelationship(long nodeId, Direction direction, RelationshipConsumer consumer) {
             for (int i = 0; i < nodeCount; i++) {
                 if (i != nodeId) {
-                    consumer.accept(nodeId, i, -1L);
+                    consumer.accept(nodeId, i);
                 }
             }
         }
+
+        // TODO: Not sure what to put here.
+        @Override
+        public void forEachRelationship(long nodeId, Direction direction, WeightedRelationshipConsumer consumer) {
+        }
     }
 
-    private static final class HugeAllNodes implements HugeRelationshipIterator {
+    private static final class HugeAllNodes implements RelationshipIterator {
 
         private final long nodeCount;
 
@@ -108,7 +102,7 @@ public enum MSBFSSource {
         public void forEachRelationship(
                 long nodeId,
                 Direction direction,
-                HugeRelationshipConsumer consumer) {
+                RelationshipConsumer consumer) {
             for (long i = 0; i < nodeCount; i++) {
                 if (i != nodeId) {
                     consumer.accept(nodeId, i);
@@ -120,7 +114,7 @@ public enum MSBFSSource {
         public void forEachRelationship(
                 long nodeId,
                 Direction direction,
-                HugeWeightedRelationshipConsumer consumer) {
+                WeightedRelationshipConsumer consumer) {
             forEachRelationship(nodeId, direction, (s, t) -> consumer.accept(s, t, Double.NaN));
         }
     }
