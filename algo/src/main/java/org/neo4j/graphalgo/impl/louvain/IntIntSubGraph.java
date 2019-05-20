@@ -19,50 +19,62 @@
  */
 package org.neo4j.graphalgo.impl.louvain;
 
-import com.carrotsearch.hppc.IntContainer;
-import com.carrotsearch.hppc.IntObjectHashMap;
-import com.carrotsearch.hppc.IntObjectScatterMap;
-import com.carrotsearch.hppc.IntScatterSet;
-import com.carrotsearch.hppc.cursors.IntCursor;
-import org.neo4j.graphalgo.api.RelationshipConsumer;
+import com.carrotsearch.hppc.IntFloatHashMap;
+import com.carrotsearch.hppc.cursors.IntFloatCursor;
+import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 
 final class IntIntSubGraph extends SubGraph {
 
-  private final IntObjectHashMap<IntScatterSet> graph;
+    private IntFloatHashMap[] graph;
+    private final int communityCount;
 
-  IntIntSubGraph(int nodeCount) {
-    this.graph = new IntObjectScatterMap<>(nodeCount);
-  }
-
-  void add(int source, int target) {
-    Louvain.putIfAbsent(graph, source).add(target);
-    Louvain.putIfAbsent(graph, target).add(source);
-  }
-
-  @Override
-  void forEach(final long nodeId, final RelationshipConsumer consumer) {
-    final IntContainer rels = graph.get((int) nodeId);
-    if (null == rels) {
-      return;
+    IntIntSubGraph(final int communityCount) {
+        this.graph = new IntFloatHashMap[communityCount];
+        this.communityCount = communityCount;
     }
-    for (IntCursor cursor : rels) {
-      if (!consumer.accept(nodeId, (long) cursor.value)) {
-        return;
-      }
-    }
-  }
 
-  @Override
-  int degree(final long nodeId) {
-    final IntContainer rels = graph.get((int) nodeId);
-    if (null == rels) {
-      return 0;
+    void add(final int source, final int target, final float weight) {
+        assert source < graph.length && target < graph.length;
+        putIfAbsent(graph, source).addTo(target, weight);
+        putIfAbsent(graph, target).addTo(source, weight);
     }
-    return rels.size();
-  }
 
-  @Override
-  void release() {
-    graph.release();
-  }
+    @Override
+    public long nodeCount() {
+        return communityCount;
+    }
+
+    @Override
+    void forEach(final long nodeId, final WeightedRelationshipConsumer consumer) {
+        assert nodeId < graph.length;
+        IntFloatHashMap targets = graph[(int) nodeId];
+        if (targets != null) {
+            for (IntFloatCursor cursor : targets) {
+                if (!consumer.accept(nodeId, cursor.key, cursor.value)) {
+                    return;
+                }
+            }
+        }
+    }
+
+    @Override
+    int degree(final long nodeId) {
+        assert nodeId < graph.length;
+        IntFloatHashMap targets = graph[(int) nodeId];
+        return null == targets ? 0 : targets.size();
+    }
+
+    @Override
+    public void release() {
+        graph = null;
+    }
+
+    private static IntFloatHashMap putIfAbsent(final IntFloatHashMap[] relationships, final int community) {
+        IntFloatHashMap targets = relationships[community];
+        if (null == targets) {
+            targets = new IntFloatHashMap();
+            relationships[community] = targets;
+        }
+        return targets;
+    }
 }

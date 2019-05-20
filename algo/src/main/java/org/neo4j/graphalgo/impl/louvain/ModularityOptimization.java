@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.impl.louvain;
 
 import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.LongDoubleMap;
+import com.carrotsearch.hppc.cursors.LongDoubleCursor;
 import org.neo4j.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.Algorithm;
@@ -40,7 +41,6 @@ import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.LongPredicate;
@@ -77,15 +77,13 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private double q = MINIMUM_MODULARITY;
     private final AtomicInteger counter = new AtomicInteger(0);
     private boolean randomNeighborSelection = false;
-    private final Random random;
 
     ModularityOptimization(
-            Graph graph,
-            HugeNodeWeights nodeWeights,
-            ExecutorService pool,
-            int concurrency,
-            AllocationTracker tracker,
-            long rndSeed) {
+            final Graph graph,
+            final HugeNodeWeights nodeWeights,
+            final ExecutorService pool,
+            final int concurrency,
+            final AllocationTracker tracker) {
         this.graph = graph;
         this.nodeWeights = nodeWeights;
         nodeCount = graph.nodeCount();
@@ -93,13 +91,12 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         this.concurrency = concurrency;
         this.tracker = tracker;
         this.nodeIterator = createNodeIterator(concurrency);
-        this.random = new Random(rndSeed);
 
         ki = HugeDoubleArray.newArray(nodeCount, tracker);
         communities = HugeLongArray.newArray(nodeCount, tracker);
     }
 
-    public ModularityOptimization withRandomNeighborOptimization(boolean randomNeighborSelection) {
+    ModularityOptimization withRandomNeighborOptimization(final boolean randomNeighborSelection) {
         this.randomNeighborSelection = randomNeighborSelection;
         return this;
     }
@@ -113,7 +110,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
      * @param concurrency
      * @return
      */
-    private NodeIterator createNodeIterator(int concurrency) {
+    private NodeIterator createNodeIterator(final int concurrency) {
 
         if (concurrency > 1) {
             return new RandomNodeIterator(nodeCount);
@@ -142,7 +139,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
      *
      * @return best task
      */
-    private static Task best(Collection<Task> tasks) {
+    private static Task best(final Iterable<Task> tasks) {
         Task best = null; // may stay null if no task improves the current q
         double q = MINIMUM_MODULARITY;
         for (Task task : tasks) {
@@ -182,21 +179,24 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
      * @param maxIterations
      * @return
      */
-    public ModularityOptimization compute(int maxIterations) {
+    public ModularityOptimization compute(final int maxIterations) {
         final TerminationFlag terminationFlag = getTerminationFlag();
         // init helper values & initial community structure
         init();
         // create an array of tasks for parallel exec
-        final ArrayList<Task> tasks = new ArrayList<>();
+        final Collection<Task> tasks = new ArrayList<>();
         for (int i = 0; i < concurrency; i++) {
             tasks.add(new Task());
         }
         // as long as maxIterations is not reached
-        for (iterations = 0; iterations < maxIterations && terminationFlag.running(); iterations++) {
+        for (iterations = 0; iterations < maxIterations; iterations++) {
             // reset node counter (for logging)
             counter.set(0);
             // run all tasks
-            ParallelUtil.runWithConcurrency(concurrency, tasks, pool);
+            ParallelUtil.runWithConcurrency(concurrency, tasks, terminationFlag, pool);
+            if (!terminationFlag.running()) {
+                break;
+            }
             // take the best candidate
             Task candidate = best(tasks);
             if (null == candidate || candidate.q <= this.q) {
@@ -215,7 +215,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
      * sync parent Task with all other task except itself and
      * copy community structure to global community structure
      */
-    private void sync(Task parent, Collection<Task> tasks) {
+    private void sync(final Task parent, final Iterable<Task> tasks) {
         for (Task task : tasks) {
             task.improvement = false;
             if (task == parent) {
@@ -231,7 +231,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
      *
      * @return node-nodeId to localCommunities nodeId mapping
      */
-    public HugeLongArray getCommunityIds() {
+    HugeLongArray getCommunityIds() {
         return communities;
     }
 
@@ -244,7 +244,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         return iterations;
     }
 
-    public double getModularity() {
+    double getModularity() {
         return q;
     }
 
@@ -281,8 +281,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         final HugeLongArray localCommunities;
         final RelationshipIterator rels;
         private final TerminationFlag terminationFlag;
-        double bestGain, bestWeight, q = MINIMUM_MODULARITY;
-        long bestCommunity;
+        double q = MINIMUM_MODULARITY;
         boolean improvement = false;
 
         /**
@@ -292,19 +291,18 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         Task() {
             terminationFlag = getTerminationFlag();
             sTot = HugeDoubleArray.newArray(nodeCount, tracker);
-            ki.copyTo(sTot, nodeCount);
+            sIn = HugeDoubleArray.newArray(nodeCount, tracker);
             localCommunities = HugeLongArray.newArray(nodeCount, tracker);
             rels = graph.concurrentCopy();
+            ki.copyTo(sTot, nodeCount);
             communities.copyTo(localCommunities, nodeCount);
-            sIn = HugeDoubleArray.newArray(nodeCount, tracker);
-            sIn.fill(0.);
         }
 
         /**
          * copy community structure and helper arrays from parent
          * task into this task
          */
-        void sync(Task parent) {
+        void sync(final Task parent) {
             parent.localCommunities.copyTo(localCommunities, nodeCount);
             parent.sTot.copyTo(sTot, nodeCount);
             parent.sIn.copyTo(sIn, nodeCount);
@@ -317,12 +315,16 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             final long denominator = nodeCount * concurrency;
             improvement = false;
             nodeIterator.forEachNode(node -> {
-                final boolean move = move(node);
+                final boolean move = move(node, localCommunities);
                 improvement |= move;
-                progressLogger.logProgress(
-                        counter.getAndIncrement(),
-                        denominator,
-                        () -> String.format("round %d", iterations + 1));
+                long count;
+                if (((count = counter.incrementAndGet()) % 10_000 == 0)) {
+                    progressLogger.logProgress(
+                            count,
+                            denominator,
+                            () -> "round " + iterations);
+
+                }
                 return terminationFlag.running();
             });
             this.q = calcModularity();
@@ -341,45 +343,43 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
          * @param node node nodeId
          * @return true if the node has been moved
          */
-        private boolean move(long node) {
-            final long currentCommunity = bestCommunity = localCommunities.get(node);
+        private boolean move(
+                final long node,
+                final HugeLongArray localCommunities) {
+            final long currentCommunity = localCommunities.get(node);
+
+            double nodeKI = ki.get(node);
+            sTot.addTo(currentCommunity, -nodeKI);
 
             int degree = graph.degree(node, D);
-            HugeLongArray communitiesInOrder = HugeLongArray.newArray(degree, tracker);
             LongDoubleMap communityWeights = new LongDoubleHashMap(degree);
-
-            final long[] communityCount = {0L};
+            Pointer.DoublePointer extraWeight = Pointer.wrap(0.0);
             rels.forEachRelationship(node, D, (s, t, weight) -> {
                 long localCommunity = localCommunities.get(t);
-                if (communityWeights.containsKey(localCommunity)) {
+                if (s != t) {
                     communityWeights.addTo(localCommunity, weight);
-                } else {
-                    communityWeights.put(localCommunity, weight);
-                    communitiesInOrder.set(communityCount[0]++, localCommunity);
+                } else if (localCommunity == currentCommunity) {
+                    extraWeight.v += weight;
                 }
-
                 return true;
             });
 
-            final double w = communityWeights.get(currentCommunity);
-            sTot.addTo(currentCommunity, -ki.get(node));
+            final double w = communityWeights.get(currentCommunity) + extraWeight.v;
             sIn.addTo(currentCommunity, -2.0 * (w + nodeWeights.nodeWeight(node)));
 
-            removeWeightForSelfRelationships(node, communityWeights);
-
             localCommunities.set(node, NONE);
-            bestGain = .0;
-            bestWeight = w;
+            double bestGain = .0;
+            double bestWeight = w;
+            long bestCommunity = currentCommunity;
 
-            if (degree > 0) {
+            if (!communityWeights.isEmpty()) {
                 if (randomNeighborSelection) {
-                    long index = (long) (random.nextDouble() * communitiesInOrder.size());
-                    bestCommunity = communitiesInOrder.get(index);
+                    bestCommunity = communityWeights.iterator().next().key;
                 } else {
-                    for (int i = 0; i < communityCount[0]; i++) {
-                        long community = communitiesInOrder.get(i);
-                        double wic = communityWeights.get(community);
-                        final double g = wic / m2 - sTot.get(community) * ki.get(node) / m22;
+                    for (LongDoubleCursor cursor : communityWeights) {
+                        long community = cursor.key;
+                        double wic = cursor.value;
+                        final double g = wic / m2 - sTot.get(community) * nodeKI / m22;
                         if (g > bestGain) {
                             bestGain = g;
                             bestCommunity = community;
@@ -389,30 +389,19 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                 }
             }
 
-            sTot.addTo(bestCommunity, ki.get(node));
+            sTot.addTo(bestCommunity, nodeKI);
             sIn.addTo(bestCommunity, 2.0 * (bestWeight + nodeWeights.nodeWeight(node)));
             localCommunities.set(node, bestCommunity);
             return bestCommunity != currentCommunity;
         }
 
-        private void removeWeightForSelfRelationships(long node, LongDoubleMap communityWeights) {
-            rels.forEachRelationship(node, D, (s, t, w) -> {
-                if (s == t) {
-                    double currentWeight = communityWeights.get(localCommunities.get(s));
-                    communityWeights.put(localCommunities.get(s), currentWeight - w);
-                }
-                return true;
-            });
-        }
-
         private double calcModularity() {
             final Pointer.DoublePointer pointer = Pointer.wrap(.0);
             for (long node = 0L; node < nodeCount; node++) {
-                rels.forEachOutgoing(node, (s, t) -> {
-                    if (localCommunities.get(s) != localCommunities.get(t)) {
-                        return true;
+                rels.forEachRelationship(node, Direction.OUTGOING, (s, t, w) -> {
+                    if (localCommunities.get(s) == localCommunities.get(t)) {
+                        pointer.v += (w - (ki.get(s) * ki.get(t) / m2));
                     }
-                    pointer.map(v -> v + graph.weightOf(s, t) - (ki.get(s) * ki.get(t) / m2));
                     return true;
                 });
             }

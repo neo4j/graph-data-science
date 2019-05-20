@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.core.utils.*;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.impl.louvain.Louvain;
-import org.neo4j.graphalgo.impl.louvain.LouvainAlgo;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -93,7 +92,7 @@ public class LouvainProc {
             return Stream.of(LouvainResult.EMPTY);
         }
 
-        LouvainAlgo<?> louvain = eval(builder, configuration, graph, tracker, 1);
+        Louvain louvain = eval(builder, configuration, graph, tracker, 1);
 
         if (configuration.isWriteFlag()) {
             builder.timeWrite(() -> {
@@ -128,7 +127,7 @@ public class LouvainProc {
     @Description("CALL algo.louvain.stream(label:String, relationship:String, " +
             "{weightProperty:'propertyName', defaultValue:1.0, concurrency:4, communityProperty:'propertyOfPredefinedCommunity', innerIterations:10, communitySelection:'classic') " +
             "YIELD nodeId, community - yields a setId to each node id")
-    public Stream<LouvainAlgo.StreamingResult> louvainStream(
+    public Stream<Louvain.StreamingResult> louvainStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
@@ -146,7 +145,7 @@ public class LouvainProc {
         }
 
         // evaluation
-        LouvainAlgo<?> louvain = eval(configuration, graph, tracker, configuration.getConcurrency());
+        Louvain louvain = eval(configuration, graph, tracker, configuration.getConcurrency());
         return louvain.dendrogramStream(configuration.get(INCLUDE_INTERMEDIATE_COMMUNITIES, false));
     }
 
@@ -175,7 +174,7 @@ public class LouvainProc {
                 .load(config.getGraphImpl());
     }
 
-    private LouvainAlgo<?> eval(
+    private Louvain eval(
             Builder builder,
             ProcedureConfiguration configuration,
             Graph graph,
@@ -186,7 +185,7 @@ public class LouvainProc {
         }
     }
 
-    private LouvainAlgo<?> eval(
+    private Louvain eval(
             ProcedureConfiguration configuration,
             Graph graph,
             AllocationTracker tracker,
