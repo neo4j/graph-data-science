@@ -25,7 +25,7 @@ import org.neo4j.graphdb.Direction;
 
 import static org.neo4j.graphalgo.core.heavyweight.HeavyGraph.checkSize;
 
-public class MergedRelationships /*implements RelationshipConsumer*/ {
+public class MergedRelationships {
     private final AdjacencyMatrix matrix;
     private boolean hasRelationshipWeights;
     private DuplicateRelationshipsStrategy duplicateRelationshipsStrategy;
