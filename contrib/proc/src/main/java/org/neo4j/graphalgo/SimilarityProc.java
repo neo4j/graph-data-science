@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.proc;
+package org.neo4j.graphalgo;
 
 import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.LongDoubleMap;
@@ -50,15 +50,6 @@ public class SimilarityProc {
     public Log log;
     @Context
     public KernelTransaction transaction;
-
-    public static TopKConsumer<SimilarityResult>[] initializeTopKConsumers(int length, int topK) {
-        Comparator<SimilarityResult> comparator = topK > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
-        topK = Math.abs(topK);
-
-        TopKConsumer<SimilarityResult>[] results = new TopKConsumer[length];
-        for (int i = 0; i < results.length; i++) results[i] = new TopKConsumer<>(topK, comparator);
-        return results;
-    }
 
     protected static Stream<SimilarityResult> topN(Stream<SimilarityResult> stream, int topN) {
         if (topN == 0) {

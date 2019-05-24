@@ -17,44 +17,38 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.proc;
+package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
+import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.pagerank.PageRank;
-import org.neo4j.graphalgo.impl.pagerank.PageRankFactory;
+import org.neo4j.graphalgo.impl.degree.DegreeCentrality;
+import org.neo4j.graphalgo.impl.degree.DegreeCentralityAlgorithm;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphalgo.impl.results.CentralityScore;
-import org.neo4j.graphalgo.impl.results.PageRankScore;
 import org.neo4j.graphalgo.impl.utils.CentralityUtils;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.Node;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.*;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-//TODO: Add acceptance tests ("integration tests")
-public final class ArticleRankProc {
+import static org.neo4j.graphalgo.core.ProcedureConstants.CYPHER_QUERY;
 
-    public static final String CONFIG_DAMPING = "dampingFactor";
+public final class DegreeCentralityProc {
 
-    public static final Double DEFAULT_DAMPING = 0.85;
-    public static final Integer DEFAULT_ITERATIONS = 20;
-    public static final String DEFAULT_SCORE_PROPERTY = "articlerank";
+    public static final String DEFAULT_SCORE_PROPERTY = "degree";
+    public static final String CONFIG_WEIGHT_KEY = "weightProperty";
 
     @Context
     public GraphDatabaseAPI api;
@@ -65,21 +59,23 @@ public final class ArticleRankProc {
     @Context
     public KernelTransaction transaction;
 
-    @Procedure(value = "algo.articleRank", mode = Mode.WRITE)
-    @Description("CALL algo.articleRank(label:String, relationship:String, " +
-            "{iterations:5, dampingFactor:0.85, weightProperty: null, write: true, writeProperty:'articlerank', concurrency:4}) " +
+    @Procedure(value = "algo.degree", mode = Mode.WRITE)
+    @Description("CALL algo.degree(label:String, relationship:String, " +
+            "{ weightProperty: null, write: true, writeProperty:'degree', concurrency:4}) " +
             "YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, dampingFactor, write, writeProperty" +
-            " - calculates page rank and potentially writes back")
-    public Stream<PageRankScore.Stats> articleRank(
+            " - calculates degree centrality and potentially writes back")
+    public Stream<CentralityScore.Stats> degree(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        final String weightPropertyKey = configuration.getString(CONFIG_WEIGHT_KEY, null);
 
-        PageRankScore.Stats.Builder statsBuilder = new PageRankScore.Stats.Builder();
+        CentralityScore.Stats.Builder statsBuilder = new CentralityScore.Stats.Builder();
         AllocationTracker tracker = AllocationTracker.create();
-        final Graph graph = load(label, relationship, tracker, configuration.getGraphImpl(), statsBuilder, configuration);
+        Direction direction = getDirection(configuration);
+        final Graph graph = load(label, relationship, tracker, configuration.getGraphImpl(), statsBuilder, configuration, weightPropertyKey, direction);
 
         if(graph.nodeCount() == 0) {
             graph.release();
@@ -87,29 +83,38 @@ public final class ArticleRankProc {
         }
 
         TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
-        CentralityResult scores = runAlgorithm(graph, tracker, terminationFlag, configuration, statsBuilder);
+        CentralityResult scores = evaluate(graph, tracker, terminationFlag, configuration, statsBuilder, weightPropertyKey, direction);
 
-        log.info("ArticleRank: overall memory usage: %s", tracker.getUsageString());
+        logMemoryUsage(tracker);
 
         CentralityUtils.write(api, log, graph, terminationFlag, scores, configuration, statsBuilder, DEFAULT_SCORE_PROPERTY);
 
         return Stream.of(statsBuilder.build());
     }
 
-    @Procedure(value = "algo.articleRank.stream", mode = Mode.READ)
-    @Description("CALL algo.articleRank.stream(label:String, relationship:String, " +
-            "{iterations:20, dampingFactor:0.85, weightProperty: null, concurrency:4}) " +
-            "YIELD node, score - calculates page rank and streams results")
-    public Stream<CentralityScore> articleRankStream(
+    private Direction getDirection(ProcedureConfiguration configuration) {
+        String graphName = configuration.getGraphName(ProcedureConstants.DEFAULT_GRAPH_IMPL);
+        Direction direction = configuration.getDirection(Direction.INCOMING);
+        return CYPHER_QUERY.equals(graphName) ? Direction.OUTGOING : direction;
+    }
+
+    @Procedure(value = "algo.degree.stream", mode = Mode.READ)
+    @Description("CALL algo.degree.stream(label:String, relationship:String, " +
+            "{weightProperty: null, concurrency:4}) " +
+            "YIELD node, score - calculates degree centrality and streams results")
+    public Stream<CentralityScore> degreeStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+            ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
 
-        PageRankScore.Stats.Builder statsBuilder = new PageRankScore.Stats.Builder();
+        final String weightPropertyKey = configuration.getString(CONFIG_WEIGHT_KEY, null);
+
+        CentralityScore.Stats.Builder statsBuilder = new CentralityScore.Stats.Builder();
+        Direction direction = getDirection(configuration);
         AllocationTracker tracker = AllocationTracker.create();
-        final Graph graph = load(label, relationship, tracker, configuration.getGraphImpl(), statsBuilder, configuration);
+        final Graph graph = load(label, relationship, tracker, configuration.getGraphImpl(), statsBuilder, configuration, weightPropertyKey, direction);
 
         if(graph.nodeCount() == 0) {
             graph.release();
@@ -117,11 +122,15 @@ public final class ArticleRankProc {
         }
 
         TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
-        CentralityResult scores = runAlgorithm(graph, tracker, terminationFlag, configuration, statsBuilder);
+        CentralityResult scores = evaluate(graph, tracker, terminationFlag, configuration, statsBuilder, weightPropertyKey, direction);
 
-        log.info("ArticleRank: overall memory usage: %s", tracker.getUsageString());
+        logMemoryUsage(tracker);
 
         return CentralityUtils.streamResults(graph, scores);
+    }
+
+    private void logMemoryUsage(AllocationTracker tracker) {
+        log.info("Degree Centrality: overall memory usage: %s", tracker.getUsageString());
     }
 
     private Graph load(
@@ -129,20 +138,15 @@ public final class ArticleRankProc {
             String relationship,
             AllocationTracker tracker,
             Class<? extends GraphFactory> graphFactory,
-            PageRankScore.Stats.Builder statsBuilder,
-            ProcedureConfiguration configuration) {
+            CentralityScore.Stats.Builder statsBuilder,
+            ProcedureConfiguration configuration,
+            String weightPropertyKey, Direction direction) {
         GraphLoader graphLoader = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, configuration)
                 .withAllocationTracker(tracker)
-                .withoutRelationshipWeights();
+                .withOptionalRelationshipWeightsFromProperty(weightPropertyKey, configuration.getWeightPropertyDefaultValue(0.0));
 
-        Direction direction = configuration.getDirection(Direction.OUTGOING);
-        if (direction == Direction.BOTH) {
-            graphLoader.asUndirected(true);
-        } else {
-            graphLoader.withDirection(direction);
-        }
-
+        graphLoader.direction(direction);
 
         try (ProgressTimer timer = statsBuilder.timeLoad()) {
             Graph graph = graphLoader.load(graphFactory);
@@ -151,45 +155,31 @@ public final class ArticleRankProc {
         }
     }
 
-    private CentralityResult runAlgorithm(
+    private CentralityResult evaluate(
             Graph graph,
             AllocationTracker tracker,
             TerminationFlag terminationFlag,
             ProcedureConfiguration configuration,
-            PageRankScore.Stats.Builder statsBuilder) {
+            CentralityScore.Stats.Builder statsBuilder,
+            String weightPropertyKey, Direction direction) {
 
-        double dampingFactor = configuration.get(CONFIG_DAMPING, DEFAULT_DAMPING);
-        int iterations = configuration.getIterations(DEFAULT_ITERATIONS);
-        final int batchSize = configuration.getBatchSize();
         final int concurrency = configuration.getConcurrency();
-        log.debug("Computing article rank with damping of " + dampingFactor + " and " + iterations + " iterations.");
 
-        List<Node> sourceNodes = configuration.get("sourceNodes", new ArrayList<>());
-        LongStream sourceNodeIds = sourceNodes.stream().mapToLong(Node::getId);
+        if (direction == Direction.BOTH) {
+            direction = Direction.OUTGOING;
+        }
 
-        PageRank prAlgo = PageRankFactory.articleRankOf(
-                    tracker,
-                    graph,
-                    dampingFactor,
-                    sourceNodeIds,
-                    Pools.DEFAULT,
-                    concurrency,
-                    batchSize);
+        DegreeCentralityAlgorithm algo = new DegreeCentrality(graph, Pools.DEFAULT, concurrency, direction, weightPropertyKey != null);
+        statsBuilder.timeEval(algo::compute);
+        Algorithm<?> algorithm = algo.algorithm();
+        algorithm.withTerminationFlag(terminationFlag);
 
-        Algorithm<?> algo = prAlgo
-                .withLog(log)
-                .withTerminationFlag(terminationFlag);
-
-        statsBuilder.timeEval(() -> prAlgo.compute(iterations));
-
-        statsBuilder
-                .withIterations(iterations)
-                .withDampingFactor(dampingFactor);
-
-        final CentralityResult pageRank = prAlgo.result();
-        algo.release();
+        final CentralityResult result = algo.result();
+        algo.algorithm().release();
         graph.release();
-        return pageRank;
+        return result;
     }
+
+
 
 }

@@ -25,7 +25,7 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.neo4j.graphalgo.ListProc;
 import org.neo4j.graphalgo.linkprediction.LinkPrediction;
-import org.neo4j.graphalgo.proc.PageRankProc;
+import org.neo4j.graphalgo.PageRankProc;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 

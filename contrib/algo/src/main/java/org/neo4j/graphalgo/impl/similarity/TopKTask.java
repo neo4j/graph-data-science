@@ -20,9 +20,9 @@
 package org.neo4j.graphalgo.impl.similarity;
 
 import org.neo4j.graphalgo.impl.results.SimilarityResult;
-import org.neo4j.graphalgo.proc.SimilarityProc;
 
 import static org.neo4j.graphalgo.impl.similarity.SimilarityStreamGenerator.computeSimilarityForSourceIndex;
+import static org.neo4j.graphalgo.impl.similarity.TopKConsumer.initializeTopKConsumers;
 
 class TopKTask<T> implements Runnable {
     private final int batchSize;
@@ -44,7 +44,7 @@ class TopKTask<T> implements Runnable {
         this.similiarityCutoff = similiarityCutoff;
         this.computer = computer;
         this.decoder = decoder;
-        topKConsumers = SimilarityProc.initializeTopKConsumers(length, topK);
+        topKConsumers = initializeTopKConsumers(length, topK);
     }
 
     @Override

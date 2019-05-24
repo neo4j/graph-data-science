@@ -17,13 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.proc;
+package org.neo4j.graphalgo;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.neo4j.graphalgo.PageRankProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Result;
@@ -38,10 +39,11 @@ import java.util.function.Consumer;
 import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
-public class PersonalizedPageRankProcIntegrationTest {
+public class PageRankProcIntegrationTest {
 
     private static GraphDatabaseAPI db;
     private static Map<Long, Double> expected = new HashMap<>();
+    private static Map<Long, Double> weightedExpected = new HashMap<>();
 
     private static final String DB_CYPHER = "" +
             "CREATE (a:Label1 {name:\"a\"})\n" +
@@ -66,14 +68,19 @@ public class PersonalizedPageRankProcIntegrationTest {
             "CREATE (t:Label2 {name:\"t\"})\n" +
             "CREATE\n" +
             "  (b)-[:TYPE1{foo:1.0}]->(c),\n" +
+
             "  (c)-[:TYPE1{foo:1.2}]->(b),\n" +
+
             "  (d)-[:TYPE1{foo:1.3}]->(a),\n" +
             "  (d)-[:TYPE1{foo:1.7}]->(b),\n" +
-            "  (e)-[:TYPE1{foo:1.1}]->(b),\n" +
+
+            "  (e)-[:TYPE1{foo:6.1}]->(b),\n" +
             "  (e)-[:TYPE1{foo:2.2}]->(d),\n" +
             "  (e)-[:TYPE1{foo:1.5}]->(f),\n" +
-            "  (f)-[:TYPE1{foo:3.5}]->(b),\n" +
+
+            "  (f)-[:TYPE1{foo:10.5}]->(b),\n" +
             "  (f)-[:TYPE1{foo:2.9}]->(e),\n" +
+
             "  (g)-[:TYPE2{foo:3.2}]->(b),\n" +
             "  (g)-[:TYPE2{foo:5.3}]->(e),\n" +
             "  (h)-[:TYPE2{foo:9.5}]->(b),\n" +
@@ -113,6 +120,17 @@ public class PersonalizedPageRankProcIntegrationTest {
             expected.put(db.findNode(label, "name", "h").getId(), 0.150);
             expected.put(db.findNode(label, "name", "i").getId(), 0.150);
             expected.put(db.findNode(label, "name", "j").getId(), 0.150);
+
+            weightedExpected.put(db.findNode(label, "name", "a").getId(), 0.218);
+            weightedExpected.put(db.findNode(label, "name", "b").getId(), 2.008);
+            weightedExpected.put(db.findNode(label, "name", "c").getId(), 1.850);
+            weightedExpected.put(db.findNode(label, "name", "d").getId(), 0.185);
+            weightedExpected.put(db.findNode(label, "name", "e").getId(), 0.182);
+            weightedExpected.put(db.findNode(label, "name", "f").getId(), 0.174);
+            weightedExpected.put(db.findNode(label, "name", "g").getId(), 0.150);
+            weightedExpected.put(db.findNode(label, "name", "h").getId(), 0.150);
+            weightedExpected.put(db.findNode(label, "name", "i").getId(), 0.150);
+            weightedExpected.put(db.findNode(label, "name", "j").getId(), 0.150);
             tx.success();
         }
     }
@@ -143,6 +161,43 @@ public class PersonalizedPageRankProcIntegrationTest {
     }
 
     @Test
+    public void testWeightedPageRankStream() throws Exception {
+        final Map<Long, Double> actual = new HashMap<>();
+        runQuery(
+                "CALL algo.pageRank.stream('Label1', 'TYPE1', {graph:'"+graphImpl+"', weightProperty: 'foo'}) YIELD nodeId, score",
+                row -> actual.put(
+                        (Long)row.get("nodeId"),
+                        (Double) row.get("score")));
+
+        assertMapEquals(weightedExpected, actual);
+    }
+
+    @Test
+    public void testWeightedPageRankWithCachedWeightsStream() throws Exception {
+        final Map<Long, Double> actual = new HashMap<>();
+        runQuery(
+                "CALL algo.pageRank.stream('Label1', 'TYPE1', {graph:'"+graphImpl+"', weightProperty: 'foo', cacheWeights: true}) YIELD nodeId, score",
+                row -> actual.put(
+                        (Long)row.get("nodeId"),
+                        (Double) row.get("score")));
+
+        assertMapEquals(weightedExpected, actual);
+    }
+
+    @Test
+    public void testWeightedPageRankWithAllRelationshipsEqualStream() throws Exception {
+        final Map<Long, Double> actual = new HashMap<>();
+        runQuery(
+                "CALL algo.pageRank.stream('Label1', 'TYPE1', {graph:'"+graphImpl+"', weightProperty: 'madeUp', defaultValue: 1.0}) YIELD nodeId, score",
+                row -> actual.put(
+                        (Long)row.get("nodeId"),
+                        (Double) row.get("score")));
+
+        assertMapEquals(expected, actual);
+    }
+
+
+    @Test
     public void testPageRankWriteBack() throws Exception {
         runQuery(
                 "CALL algo.pageRank('Label1', 'TYPE1', {graph:'"+graphImpl+"'}) YIELD writeMillis, write, writeProperty",
@@ -154,7 +209,22 @@ public class PersonalizedPageRankProcIntegrationTest {
                             row.getNumber("writeMillis").intValue() >= 0);
                 });
 
-        assertResult("pagerank");
+        assertResult("pagerank", expected);
+    }
+
+    @Test
+    public void testWeightedPageRankWriteBack() throws Exception {
+        runQuery(
+                "CALL algo.pageRank('Label1', 'TYPE1', {graph:'"+graphImpl+"', weightProperty: 'foo'}) YIELD writeMillis, write, writeProperty",
+                row -> {
+                    assertTrue(row.getBoolean("write"));
+                    assertEquals("pagerank", row.getString("writeProperty"));
+                    assertTrue(
+                            "write time not set",
+                            row.getNumber("writeMillis").intValue() >= 0);
+                });
+
+        assertResult("pagerank", weightedExpected);
     }
 
     @Test
@@ -169,7 +239,7 @@ public class PersonalizedPageRankProcIntegrationTest {
                             row.getNumber("writeMillis").intValue() >= 0);
                 });
 
-        assertResult("foobar");
+        assertResult("foobar", expected);
     }
 
     @Test
@@ -180,7 +250,7 @@ public class PersonalizedPageRankProcIntegrationTest {
                         "write time not set",
                         row.getNumber("writeMillis").intValue() >= 0));
 
-        assertResult("pagerank");
+        assertResult("pagerank", expected);
     }
 
     @Test
@@ -213,7 +283,7 @@ public class PersonalizedPageRankProcIntegrationTest {
         }
     }
 
-    private void assertResult(final String scoreProperty) {
+    private void assertResult(final String scoreProperty, Map<Long, Double> expected) {
         try (Transaction tx = db.beginTx()) {
             for (Map.Entry<Long, Double> entry : expected.entrySet()) {
                 double score = ((Number) db

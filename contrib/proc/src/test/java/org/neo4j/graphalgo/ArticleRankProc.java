@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.proc;
+package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
@@ -28,13 +28,12 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.utils.CentralityUtils;
-import org.neo4j.graphalgo.impl.utils.Normalization;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
 import org.neo4j.graphalgo.impl.pagerank.PageRankFactory;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphalgo.impl.results.CentralityScore;
 import org.neo4j.graphalgo.impl.results.PageRankScore;
+import org.neo4j.graphalgo.impl.utils.CentralityUtils;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -48,9 +47,14 @@ import java.util.Map;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public final class EigenvectorCentralityProc {
+//TODO: Add acceptance tests ("integration tests")
+public final class ArticleRankProc {
+
+    public static final String CONFIG_DAMPING = "dampingFactor";
+
+    public static final Double DEFAULT_DAMPING = 0.85;
     public static final Integer DEFAULT_ITERATIONS = 20;
-    public static final String DEFAULT_SCORE_PROPERTY = "eigenvector";
+    public static final String DEFAULT_SCORE_PROPERTY = "articlerank";
 
     @Context
     public GraphDatabaseAPI api;
@@ -61,12 +65,12 @@ public final class EigenvectorCentralityProc {
     @Context
     public KernelTransaction transaction;
 
-    @Procedure(value = "algo.eigenvector", mode = Mode.WRITE)
-    @Description("CALL algo.eigenvector(label:String, relationship:String, " +
-            "{weightProperty: null, write: true, writeProperty:'eigenvector', concurrency:4}) " +
+    @Procedure(value = "algo.articleRank", mode = Mode.WRITE)
+    @Description("CALL algo.articleRank(label:String, relationship:String, " +
+            "{iterations:5, dampingFactor:0.85, weightProperty: null, write: true, writeProperty:'articlerank', concurrency:4}) " +
             "YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, dampingFactor, write, writeProperty" +
-            " - calculates eigenvector centrality and potentially writes back")
-    public Stream<PageRankScore.Stats> write(
+            " - calculates page rank and potentially writes back")
+    public Stream<PageRankScore.Stats> articleRank(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
@@ -85,18 +89,18 @@ public final class EigenvectorCentralityProc {
         TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
         CentralityResult scores = runAlgorithm(graph, tracker, terminationFlag, configuration, statsBuilder);
 
-        log.info("Eigenvector Centrality: overall memory usage: %s", tracker.getUsageString());
+        log.info("ArticleRank: overall memory usage: %s", tracker.getUsageString());
 
         CentralityUtils.write(api, log, graph, terminationFlag, scores, configuration, statsBuilder, DEFAULT_SCORE_PROPERTY);
 
         return Stream.of(statsBuilder.build());
     }
 
-    @Procedure(value = "algo.eigenvector.stream", mode = Mode.READ)
-    @Description("CALL algo.eigenvector.stream(label:String, relationship:String, " +
-            "{weightProperty: null, concurrency:4}) " +
-            "YIELD node, score - calculates eigenvector centrality and streams results")
-    public Stream<CentralityScore> stream(
+    @Procedure(value = "algo.articleRank.stream", mode = Mode.READ)
+    @Description("CALL algo.articleRank.stream(label:String, relationship:String, " +
+            "{iterations:20, dampingFactor:0.85, weightProperty: null, concurrency:4}) " +
+            "YIELD node, score - calculates page rank and streams results")
+    public Stream<CentralityScore> articleRankStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
@@ -113,17 +117,11 @@ public final class EigenvectorCentralityProc {
         }
 
         TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
-
         CentralityResult scores = runAlgorithm(graph, tracker, terminationFlag, configuration, statsBuilder);
 
-        log.info("Eigenvector Centrality: overall memory usage: %s", tracker.getUsageString());
+        log.info("ArticleRank: overall memory usage: %s", tracker.getUsageString());
 
         return CentralityUtils.streamResults(graph, scores);
-    }
-
-    public Normalization normalization(ProcedureConfiguration configuration) {
-        String normalization = configuration.getString("normalization", null);
-        return normalization != null ? Normalization.valueOf(normalization.toUpperCase()) : Normalization.NONE;
     }
 
     private Graph load(
@@ -159,39 +157,39 @@ public final class EigenvectorCentralityProc {
             TerminationFlag terminationFlag,
             ProcedureConfiguration configuration,
             PageRankScore.Stats.Builder statsBuilder) {
-        double dampingFactor = 1.0;
+
+        double dampingFactor = configuration.get(CONFIG_DAMPING, DEFAULT_DAMPING);
         int iterations = configuration.getIterations(DEFAULT_ITERATIONS);
         final int batchSize = configuration.getBatchSize();
         final int concurrency = configuration.getConcurrency();
-        log.debug("Computing eigenvector centrality with " + iterations + " iterations.");
+        log.debug("Computing article rank with damping of " + dampingFactor + " and " + iterations + " iterations.");
 
         List<Node> sourceNodes = configuration.get("sourceNodes", new ArrayList<>());
         LongStream sourceNodeIds = sourceNodes.stream().mapToLong(Node::getId);
 
-        PageRank prAlgo = selectAlgorithm(graph, tracker, batchSize, concurrency, sourceNodeIds);
+        PageRank prAlgo = PageRankFactory.articleRankOf(
+                    tracker,
+                    graph,
+                    dampingFactor,
+                    sourceNodeIds,
+                    Pools.DEFAULT,
+                    concurrency,
+                    batchSize);
 
         Algorithm<?> algo = prAlgo
                 .withLog(log)
                 .withTerminationFlag(terminationFlag);
 
         statsBuilder.timeEval(() -> prAlgo.compute(iterations));
-        statsBuilder.withIterations(iterations).withDampingFactor(dampingFactor);
 
-        final CentralityResult results = prAlgo.result();
+        statsBuilder
+                .withIterations(iterations)
+                .withDampingFactor(dampingFactor);
+
+        final CentralityResult pageRank = prAlgo.result();
         algo.release();
         graph.release();
-        return normalization(configuration).apply(results);
+        return pageRank;
     }
-
-    private PageRank selectAlgorithm(Graph graph, AllocationTracker tracker, int batchSize, int concurrency, LongStream sourceNodeIds) {
-        return PageRankFactory.eigenvectorCentralityOf(
-                        tracker,
-                        graph,
-                    sourceNodeIds,
-                        Pools.DEFAULT,
-                        concurrency,
-                        batchSize);
-    }
-
 
 }

@@ -23,7 +23,7 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.neo4j.graphalgo.InfoMapProc;
-import org.neo4j.graphalgo.proc.PageRankProc;
+import org.neo4j.graphalgo.PageRankProc;
 import org.neo4j.graphdb.Node;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
