@@ -11,6 +11,8 @@
     </d:tocentry>
     <d:tocentry linkend="named-graph"><?dbhtml filename="projected-graph-model/named-graph/index.html"?>
     </d:tocentry>
+    <d:tocentry linkend="memory-requirements"><?dbhtml filename="projected-graph-model/memory-requirements/index.html"?>
+    </d:tocentry>
     <d:tocentry linkend="yelp-example"><?dbhtml filename="yelp-example/index.html"?>
     </d:tocentry>
     <d:tocentry linkend="procedures"><?dbhtml filename="procedures/index.html"?>

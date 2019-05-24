@@ -1,0 +1,39 @@
+[[memory-requirements]]
+= Memory Requirements
+
+[abstract]
+--
+This section describes memory requirements for the projected graph model used by the Neo4j Graph Algorithms Library.
+--
+
+The graph algorithms library operates completely on the heap, which means we'll need to configure our Neo4j Server with a much larger heap size than we would for transactional workloads.
+The diagram belows shows how memory is used by the projected graph model:
+
+image::graph-model-memory.png[width=500]
+
+The model contains three types of data:
+
+* Node ids - 32 bits per node for "heavy" graph and a maximum of 64 bits per node for "huge"
+* Relationships - pairs of node ids
+* Weights - stored in a https://github.com/carrotsearch/hppc[HPPC^] map
+
+
+Memory configuration depends on the graph projection that we're using.
+
+== Heavy graph projection
+
+This is the default graph projection, and supports graphs up to 2 billion nodes and 2 billion relationships.
+It uses 32 bits (4 bytes) per node, and the amount of memory required can be computed using the following formula:
+
+[source, text]
+----
+(4 bytes * nodes) + (8 bytes * nodes) + (4 bytes * rels)
+----
+
+The amount of memory will be twice this if we use the `direction: "BOTH"` parameter.
+
+
+== Huge graph projection
+
+This graph projection supports graphs with more than 2 billion nodes or 2 billion relationships.
+It stores data in a compressed structure, based on delta encoded sorted id-ranges, which uses a maximum of 64 bits (8 bytes) per node.

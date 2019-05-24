@@ -1,0 +1,23 @@
+[[System-requirements]]
+= System Requirements
+
+== Memory
+
+The library operates completely on heap memory, which means we'll need to configure our Neo4j Server with a much larger heap size than we would for transactional workloads.
+The diagram below shows how the library uses heap memory.
+
+image::memory-usage.png[width=500]
+
+See <<memory-requirements>> for more details on the memory used by the projected graph model.
+
+== CPU
+
+The library uses multiple CPUs for data loading, processing, and writing back results.
+
+[NOTE]
+====
+Up to 4 CPUs will be used when running the library on Neo4j Community Edition.
+All CPUs will be used when running on Neo4j Enterprise Edition.
+====
+
+Most of the algorithms in the library run in parallel, by splitting up the nodes and assigning them to different threads that run part of the algorithm for that node.
