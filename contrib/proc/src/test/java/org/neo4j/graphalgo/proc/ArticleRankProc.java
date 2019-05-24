@@ -62,7 +62,6 @@ public final class ArticleRankProc {
     @Context
     public Log log;
 
-
     @Context
     public KernelTransaction transaction;
 
