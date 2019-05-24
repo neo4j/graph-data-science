@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.algo.similarity;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.neo4j.graphalgo.similarity.Similarities;
+import org.neo4j.graphalgo.similarity.SimilaritiesFunc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
@@ -31,7 +31,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.Assert.assertEquals;
 
-public class SimilaritiesTest {
+public class SimilaritiesFuncTest {
     private static final String SETUP = "create (java:Skill{name:'Java'})\n" +
             "create (neo4j:Skill{name:'Neo4j'})\n" +
             "create (nodejs:Skill{name:'NodeJS'})\n" +
@@ -63,7 +63,7 @@ public class SimilaritiesTest {
 
         db.getDependencyResolver()
                 .resolveDependency(Procedures.class)
-                .registerFunction(Similarities.class);
+                .registerFunction(SimilaritiesFunc.class);
 
         db.execute(SETUP).close();
     }

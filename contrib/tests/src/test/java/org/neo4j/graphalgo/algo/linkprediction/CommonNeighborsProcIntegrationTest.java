@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.algo.linkprediction;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.neo4j.graphalgo.linkprediction.LinkPrediction;
+import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
@@ -68,7 +68,7 @@ public class CommonNeighborsProcIntegrationTest {
 
         ((GraphDatabaseAPI) db).getDependencyResolver()
                 .resolveDependency(Procedures.class)
-                .registerFunction(LinkPrediction.class);
+                .registerFunction(LinkPredictionFunc.class);
 
         db.execute(SETUP).close();
     }

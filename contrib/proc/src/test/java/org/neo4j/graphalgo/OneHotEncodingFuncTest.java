@@ -17,9 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.ml;
+package org.neo4j.graphalgo;
 
 import org.junit.Test;
+import org.neo4j.graphalgo.OneHotEncodingFunc;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,14 +29,14 @@ import java.util.List;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 
-public class OneHotEncodingTest {
+public class OneHotEncodingFuncTest {
 
     @Test
     public void singleCategorySelected() {
         List<Object> values = asList("Italian", "Indian", "Chinese");
         List<Object> selectedValues = Collections.singletonList("Italian");
 
-        assertEquals(asList(1L, 0L, 0L), new OneHotEncoding().oneHotEncoding(values, selectedValues));
+        assertEquals(asList(1L, 0L, 0L), new OneHotEncodingFunc().oneHotEncoding(values, selectedValues));
     }
 
     @Test
@@ -43,7 +44,7 @@ public class OneHotEncodingTest {
         List<Object> values = asList("Italian", "Indian", "Chinese");
         List<Object> selectedValues = Collections.emptyList();
 
-        assertEquals(asList(0L, 0L, 0L), new OneHotEncoding().oneHotEncoding(values, selectedValues));
+        assertEquals(asList(0L, 0L, 0L), new OneHotEncodingFunc().oneHotEncoding(values, selectedValues));
     }
 
     @Test
@@ -51,7 +52,7 @@ public class OneHotEncodingTest {
         List<Object> values = asList("Italian", "Indian", "Chinese");
         List<Object> selectedValues = Arrays.asList("Italian", "Chinese");
 
-        assertEquals(asList(1L, 0L, 1L), new OneHotEncoding().oneHotEncoding(values, selectedValues));
+        assertEquals(asList(1L, 0L, 1L), new OneHotEncodingFunc().oneHotEncoding(values, selectedValues));
     }
 
     @Test
@@ -59,7 +60,7 @@ public class OneHotEncodingTest {
         List<Object> values = asList("Italian", "Indian", "Chinese");
         List<Object> selectedValues = Arrays.asList("Italian", "Chinese", "Indian");
 
-        assertEquals(asList(1L, 1L, 1L), new OneHotEncoding().oneHotEncoding(values, selectedValues));
+        assertEquals(asList(1L, 1L, 1L), new OneHotEncodingFunc().oneHotEncoding(values, selectedValues));
     }
 
     @Test
@@ -67,7 +68,7 @@ public class OneHotEncodingTest {
         List<Object> values = asList("Italian", "Indian", "Chinese");
         List<Object> selectedValues = Collections.singletonList("British");
 
-        assertEquals(asList(0L, 0L, 0L), new OneHotEncoding().oneHotEncoding(values, selectedValues));
+        assertEquals(asList(0L, 0L, 0L), new OneHotEncodingFunc().oneHotEncoding(values, selectedValues));
     }
 
     @Test
@@ -75,19 +76,19 @@ public class OneHotEncodingTest {
         List<Object> values = asList("Italian", "Indian", "Chinese");
         List<Object> selectedValues = Arrays.asList("British", "Chinese");
 
-        assertEquals(asList(0L, 0L, 1L), new OneHotEncoding().oneHotEncoding(values, selectedValues));
+        assertEquals(asList(0L, 0L, 1L), new OneHotEncodingFunc().oneHotEncoding(values, selectedValues));
     }
 
     @Test
     public void nullSelectedMeansNoneSelected() {
         List<Object> values = asList("Italian", "Indian", "Chinese");
 
-        assertEquals(asList(0L, 0L, 0L), new OneHotEncoding().oneHotEncoding(values, null));
+        assertEquals(asList(0L, 0L, 0L), new OneHotEncodingFunc().oneHotEncoding(values, null));
     }
 
     @Test
     public void nullAvailableMeansEmptyArray() {
-        assertEquals(Collections.emptyList(), new OneHotEncoding().oneHotEncoding(null, null));
+        assertEquals(Collections.emptyList(), new OneHotEncodingFunc().oneHotEncoding(null, null));
     }
 
 }

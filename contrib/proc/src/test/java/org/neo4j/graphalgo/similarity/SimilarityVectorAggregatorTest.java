@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.neo4j.graphalgo.similarity.SimilarityVectorAggregator.CATEGORY_KEY;

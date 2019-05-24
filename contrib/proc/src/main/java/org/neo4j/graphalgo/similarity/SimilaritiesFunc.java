@@ -37,7 +37,7 @@ import java.util.Map;
 import static org.neo4j.graphalgo.similarity.SimilarityVectorAggregator.CATEGORY_KEY;
 import static org.neo4j.graphalgo.similarity.SimilarityVectorAggregator.WEIGHT_KEY;
 
-public class Similarities {
+public class SimilaritiesFunc {
 
     @UserFunction("algo.similarity.jaccard")
     @Description("algo.similarity.jaccard([vector1], [vector2]) " +

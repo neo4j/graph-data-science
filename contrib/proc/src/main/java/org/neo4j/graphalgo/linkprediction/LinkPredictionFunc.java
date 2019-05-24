@@ -32,7 +32,7 @@ import org.neo4j.procedure.UserFunction;
 import java.util.Map;
 import java.util.Set;
 
-public class LinkPrediction {
+public class LinkPredictionFunc {
     @Context
     public GraphDatabaseAPI api;
 

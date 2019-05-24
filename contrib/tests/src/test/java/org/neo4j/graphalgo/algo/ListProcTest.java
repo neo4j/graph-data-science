@@ -24,7 +24,7 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.neo4j.graphalgo.ListProc;
-import org.neo4j.graphalgo.linkprediction.LinkPrediction;
+import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
 import org.neo4j.graphalgo.PageRankProc;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
@@ -58,7 +58,7 @@ public class ListProcTest {
         Procedures procedures = DB.getDependencyResolver().resolveDependency(Procedures.class);
         procedures.registerProcedure(ListProc.class);
         procedures.registerProcedure(PageRankProc.class);
-        procedures.registerFunction(LinkPrediction.class);
+        procedures.registerFunction(LinkPredictionFunc.class);
     }
 
     @AfterClass

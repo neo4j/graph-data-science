@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.ml;
+package org.neo4j.graphalgo;
 
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -29,7 +29,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
-public class OneHotEncoding {
+public class OneHotEncodingFunc {
 
     @UserFunction("algo.ml.oneHotEncoding")
     @Description("CALL algo.ml.oneHotEncoding(availableValues, selectedValues) - return a list of selected values in a one hot encoding format.")

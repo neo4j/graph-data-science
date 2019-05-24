@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.algo.similarity;
 
 import org.junit.Test;
-import org.neo4j.graphalgo.similarity.Similarities;
+import org.neo4j.graphalgo.similarity.SimilaritiesFunc;
 import org.neo4j.graphalgo.similarity.SimilarityVectorAggregator;
 import org.neo4j.graphdb.Node;
 import org.neo4j.helpers.collection.MapUtil;
@@ -38,7 +38,7 @@ public class PearsonSimilarityTest {
 
     @Test
     public void identicalVectors() {
-        Similarities similarities = new Similarities();
+        SimilaritiesFunc similarities = new SimilaritiesFunc();
 
         List<Number> user1Ratings = Arrays.asList(5, 6, 7, 8, 9);
         List<Number> user2Ratings = Arrays.asList(4, 5, 6, 7, 8);
@@ -48,7 +48,7 @@ public class PearsonSimilarityTest {
 
     @Test
     public void oppositeVectors() {
-        Similarities similarities = new Similarities();
+        SimilaritiesFunc similarities = new SimilaritiesFunc();
 
         List<Number> user1Ratings = Arrays.asList(9, 8, 7, 6, 5);
         List<Number> user2Ratings = Arrays.asList(4, 5, 6, 7, 8);
@@ -58,7 +58,7 @@ public class PearsonSimilarityTest {
 
     @Test
     public void identicalMaps() {
-        Similarities similarities = new Similarities();
+        SimilaritiesFunc similarities = new SimilaritiesFunc();
 
         SimilarityVectorAggregator aggregator = new SimilarityVectorAggregator();
         Node node = mock(Node.class);
@@ -76,7 +76,7 @@ public class PearsonSimilarityTest {
 
     @Test
     public void oppositeMaps() {
-        Similarities similarities = new Similarities();
+        SimilaritiesFunc similarities = new SimilaritiesFunc();
 
         SimilarityVectorAggregator aggregator1 = new SimilarityVectorAggregator();
         Node node1 = mock(Node.class);
@@ -100,7 +100,7 @@ public class PearsonSimilarityTest {
 
     @Test
     public void someItemsDifferentMap() {
-        Similarities similarities = new Similarities();
+        SimilaritiesFunc similarities = new SimilaritiesFunc();
 
         SimilarityVectorAggregator aggregator1 = new SimilarityVectorAggregator();
         Node node1 = mock(Node.class);
@@ -127,7 +127,7 @@ public class PearsonSimilarityTest {
 
     @Test
     public void noOverlapMap() {
-        Similarities similarities = new Similarities();
+        SimilaritiesFunc similarities = new SimilaritiesFunc();
 
         SimilarityVectorAggregator aggregator1 = new SimilarityVectorAggregator();
         Node node1 = mock(Node.class);
