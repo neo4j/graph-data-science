@@ -37,6 +37,7 @@ publishing {
 }
 
 shadowJar {
+    baseName = "neo4j-graph-algorithms"
     classifier = "standalone"
     minimize()
     exclude 'META-INF/versions/**/*'
