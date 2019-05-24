@@ -1,6 +1,6 @@
 dependencies {
-    compile project(':graph-algorithms-proc')
-    compile project(':enterprise-algo')
+    compile project(':proc')
+//    compile project(':enterprise-core')
 
     compile group: 'org.neo4j.community',   name: 'it-test-support', version: versions.neo4j
     compile group: 'io.dropwizard.metrics', name: 'metrics-core',    version: '4.0.2'

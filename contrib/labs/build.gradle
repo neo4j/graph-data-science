@@ -1,7 +1,6 @@
-apply plugin: 'com.github.johnrengelman.shadow'
-
 dependencies {
-    compile project(':community-algos')
+    compile project(':algo')
+    
     compile group: 'com.carrotsearch'      , name: 'hppc'         , version: versions.hppc
     compile group: 'io.dropwizard.metrics' , name: 'metrics-core' , version: '4.0.2'
     compile group: 'org.hdrhistogram'      , name: 'HdrHistogram' , version: '2.1.9'
@@ -28,13 +27,7 @@ task javadocJar(type: Jar) {
     from(javadoc.destinationDir)
 }
 
-description = 'Neo4j Graph Algorithms :: Algo'
-
-shadowJar {
-    classifier = "standalone"
-    minimize()
-    exclude 'META-INF/versions/**/*'
-}
+description = 'Neo4j Labs :: Graph Algorithms'
 
 tasks.withType(JavaCompile) {
     options.compilerArgs <<
@@ -46,19 +39,3 @@ tasks.withType(JavaCompile) {
         '-ADocumentation.DelimitedFirstField=true' <<
         '-ADocumentation.ExportGrouping=SINGLE'
 }
-
-publishing {
-    publications {
-        algo(MavenPublication) {
-            project.shadow.component(it)
-        }
-    }
-}
-
-task shadowCopy(type: Copy) {
-    from(shadowJar)
-    into distributionDir
-}
-
-ci.finalizedBy shadowCopy
-cipr.finalizedBy shadowCopy

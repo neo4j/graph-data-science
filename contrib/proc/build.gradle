@@ -1,5 +1,7 @@
+apply plugin: 'com.github.johnrengelman.shadow'
+
 dependencies {
-    compile project(':labs-algos')
+    compile project(':labs')
 
     compileOnly group: 'org.neo4j'           , name: 'neo4j'                , version: versions.neo4j
 }
@@ -21,3 +23,25 @@ tasks.withType(JavaCompile) {
         '-ADocumentation.DelimitedFirstField=true' <<
         '-ADocumentation.ExportGrouping=SINGLE'
 }
+
+publishing {
+    publications {
+        algo(MavenPublication) {
+            project.shadow.component(it)
+        }
+    }
+}
+
+shadowJar {
+    classifier = "standalone"
+    minimize()
+    exclude 'META-INF/versions/**/*'
+}
+
+task shadowCopy(type: Copy) {
+    from(shadowJar)
+    into distributionDir
+}
+
+ci.finalizedBy shadowCopy
+cipr.finalizedBy shadowCopy

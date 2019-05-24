@@ -13,4 +13,4 @@ task javadocJar(type: Jar) {
     from(javadoc.destinationDir)
 }
 
-description = 'Neo4j Graph Algorithms :: Core'
+description = 'Neo4j Graph Algorithms :: Community Core'
