@@ -107,9 +107,8 @@ public class ShortestPathDeltaSteppingProc {
         final ShortestPathDeltaStepping algo = new ShortestPathDeltaStepping(graph, delta, direction)
                 .withProgressLogger(ProgressLogger.wrap(log, "ShortestPaths(DeltaStepping)"))
                 .withTerminationFlag(TerminationFlag.wrap(transaction))
-                .withExecutorService(Executors.newFixedThreadPool(
-                        configuration.getConcurrency()
-                )).compute(startNode.getId());
+                .withExecutorService(Executors.newFixedThreadPool(configuration.getConcurrency()))
+                .compute(startNode.getId());
 
         graph.release();
         return algo.resultStream();
@@ -170,7 +169,7 @@ public class ShortestPathDeltaSteppingProc {
             builder.timeWrite(() -> Exporter
                     .of(api, graph)
                     .withLog(log)
-                    .parallel(Pools.DEFAULT, configuration.getConcurrency(), terminationFlag)
+                    .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), terminationFlag)
                     .build()
                     .write(
                             configuration.get(WRITE_PROPERTY, DEFAULT_TARGET_PROPERTY),

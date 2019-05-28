@@ -99,7 +99,6 @@ public final class LabelPropagationProc {
 
         final int iterations = configuration.getIterations(DEFAULT_ITERATIONS);
         final int batchSize = configuration.getBatchSize();
-        final int concurrency = configuration.getConcurrency();
         final String partitionProperty = configuration.getString(CONFIG_PARTITION_KEY, DEFAULT_PARTITION_KEY);
         final String writeProperty = configuration.get(CONFIG_WRITE_KEY, CONFIG_PARTITION_KEY, DEFAULT_PARTITION_KEY);
         final String weightProperty = configuration.getString(CONFIG_WEIGHT_KEY, DEFAULT_WEIGHT_KEY);
@@ -127,10 +126,10 @@ public final class LabelPropagationProc {
             return Stream.of(LabelPropagationStats.EMPTY);
         }
 
-        final Labels labels = compute(configuration, direction, iterations, batchSize, concurrency, graph, tracker, stats);
+        final Labels labels = compute(configuration, direction, iterations, batchSize, configuration.getConcurrency(), graph, tracker, stats);
         if (configuration.isWriteFlag(DEFAULT_WRITE) && writeProperty != null) {
             stats.withWrite(true);
-            write(concurrency, writeProperty, graph, labels, stats);
+            write(configuration.getWriteConcurrency(), writeProperty, graph, labels, stats);
         }
 
         return Stream.of(stats.build(tracker, graph.nodeCount(), labels::labelFor));
@@ -150,7 +149,6 @@ public final class LabelPropagationProc {
 
         final int iterations = configuration.getIterations(DEFAULT_ITERATIONS);
         final int batchSize = configuration.getBatchSize();
-        final int concurrency = configuration.getConcurrency();
         final String partitionProperty = configuration.getString(CONFIG_PARTITION_KEY, DEFAULT_PARTITION_KEY);
         final String weightProperty = configuration.getString(CONFIG_WEIGHT_KEY, DEFAULT_WEIGHT_KEY);
 
@@ -174,7 +172,7 @@ public final class LabelPropagationProc {
             return Stream.empty();
         }
 
-        Labels result = compute(configuration, direction, iterations, batchSize, concurrency, graph, tracker, stats);
+        Labels result = compute(configuration, direction, iterations, batchSize, configuration.getConcurrency(), graph, tracker, stats);
 
         return LongStream.range(0L, result.size())
                 .mapToObj(i -> new StreamResult(graph.toOriginalNodeId(i), result.labelFor(i)));

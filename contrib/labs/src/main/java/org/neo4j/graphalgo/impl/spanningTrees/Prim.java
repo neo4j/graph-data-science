@@ -23,8 +23,8 @@ import com.carrotsearch.hppc.IntDoubleMap;
 import com.carrotsearch.hppc.IntDoubleScatterMap;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.container.UndirectedTree;
 import org.neo4j.graphalgo.core.utils.queue.SharedIntPriorityQueue;
 import org.neo4j.graphalgo.core.utils.traverse.SimpleBitSet;
 import org.neo4j.graphalgo.impl.Algorithm;
@@ -51,14 +51,12 @@ import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
 public class Prim extends Algorithm<Prim> {
 
     private final RelationshipIterator relationshipIterator;
-    private final RelationshipWeights weights;
     private final int nodeCount;
 
     private SpanningTree spanningTree;
 
-    public Prim(IdMapping idMapping, RelationshipIterator relationshipIterator, RelationshipWeights weights) {
+    public Prim(IdMapping idMapping, RelationshipIterator relationshipIterator) {
         this.relationshipIterator = relationshipIterator;
-        this.weights = weights;
         nodeCount = Math.toIntExact(idMapping.nodeCount());
     }
 
@@ -98,18 +96,18 @@ public class Prim extends Algorithm<Prim> {
             }
             effectiveNodeCount++;
             visited.put(node);
-            relationshipIterator.forEachRelationship(node, Direction.OUTGOING, longToIntConsumer((s, t) -> {
+            relationshipIterator.forEachRelationship(node, Direction.OUTGOING, longToIntConsumer((s, t, w) -> {
                 if (visited.contains(t)) {
                     return true;
                 }
                 // invert weight to calculate maximum
-                final double w = max ? -weights.weightOf(s, t) : weights.weightOf(s, t);
-                if (w < cost.getOrDefault(t, Double.MAX_VALUE)) {
+                final double weight = max ? -w : w;
+                if (weight < cost.getOrDefault(t, Double.MAX_VALUE)) {
                     if (cost.containsKey(t)) {
-                        cost.put(t, w);
+                        cost.put(t, weight);
                         queue.update(t);
                     } else {
-                        cost.put(t, w);
+                        cost.put(t, weight);
                         queue.add(t, -1.0);
                     }
                     parent[t] = s;

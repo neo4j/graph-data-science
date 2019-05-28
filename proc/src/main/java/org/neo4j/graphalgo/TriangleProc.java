@@ -270,7 +270,7 @@ public class TriangleProc {
 
         final Exporter exporter = Exporter.of(api, graph)
                 .withLog(log)
-                .parallel(Pools.DEFAULT, configuration.getConcurrency(), flag)
+                .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), flag)
                 .build();
 
 
@@ -346,7 +346,7 @@ public class TriangleProc {
                 final Optional<String> coefficientProperty = configuration.getString(COEFFICIENT_WRITE_PROPERTY_VALUE);
                 final Exporter exporter = Exporter.of(api, graph)
                         .withLog(log)
-                        .parallel(Pools.DEFAULT, configuration.getConcurrency(), terminationFlag)
+                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), terminationFlag)
                         .build();
                 if (coefficientProperty.isPresent()) {
                     exporter.write(

@@ -20,14 +20,11 @@
 package org.neo4j.graphalgo.core.heavyweight;
 
 import org.apache.lucene.util.ArrayUtil;
-import org.apache.lucene.util.RamUsageEstimator;
 import org.neo4j.collection.primitive.PrimitiveIntIterator;
 import org.neo4j.graphalgo.api.*;
 import org.neo4j.graphalgo.core.utils.Intersections;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.MemoryUsage;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Arrays;
@@ -37,7 +34,12 @@ import java.util.function.LongPredicate;
 import static org.neo4j.graphalgo.core.heavyweight.HeavyGraph.checkSize;
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.LINEAR_SEARCH_LIMIT;
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.binarySearch;
+import static org.neo4j.graphalgo.core.utils.ArrayUtil.binarySearchIndex;
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.linearSearch;
+import static org.neo4j.graphalgo.core.utils.ArrayUtil.linearSearchIndex;
+import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfFloatArray;
+import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfIntArray;
+import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfObjectArray;
 
 /**
  * Relation Container built of multiple arrays. The node capacity must be constant and the node IDs have to be
@@ -46,9 +48,11 @@ import static org.neo4j.graphalgo.core.utils.ArrayUtil.linearSearch;
  *
  * @author mknblch
  */
+@SuppressWarnings({"DesignForExtension", "LocalCanBeFinal"})
 public class AdjacencyMatrix {
 
     private static final int[] EMPTY_INTS = new int[0];
+    private static final float[] EMPTY_FLOATS = new float[0];
 
     /**
      * mapping from nodeId to outgoing degree
@@ -66,55 +70,87 @@ public class AdjacencyMatrix {
      * matrix nodeId x [incoming edge-relationIds..]
      */
     private final int[][] incoming;
+    /**
+     * list of weights per nodeId, encoded as {@link Float#floatToIntBits(float).
+     * Representation is sparse, missing values are written as 0
+     */
+    private final float[][] outgoingWeights;
+    /**
+     * list of weights per nodeId, encoded as {@link Float#floatToIntBits(float).
+     * Representation is sparse, missing values are written as 0
+     */
+    private final float[][] incomingWeights;
+    private final double defaultWeight;
 
     private boolean sorted = false;
 
     private final AllocationTracker tracker;
 
-    public AdjacencyMatrix(int nodeCount, boolean sorted, AllocationTracker tracker) {
-        this(nodeCount, true, true, sorted, tracker);
-    }
-
-    AdjacencyMatrix(
+    public AdjacencyMatrix(
             int nodeCount,
-            boolean withIncoming,
-            boolean withOutgoing,
+            boolean withWeights,
+            double defaultWeight,
             boolean sorted,
             AllocationTracker tracker) {
-        this(nodeCount, withIncoming, withOutgoing, sorted, true, tracker);
+        this(nodeCount, true, true, withWeights, defaultWeight, sorted, true, tracker);
     }
 
     AdjacencyMatrix(
             int nodeCount,
             boolean withIncoming,
             boolean withOutgoing,
+            boolean withWeights,
+            double defaultWeight,
             boolean sorted,
             boolean preFill,
             AllocationTracker tracker) {
+        long allocated = 0L;
         if (withOutgoing) {
-            tracker.add(MemoryUsage.sizeOfIntArray(nodeCount));
-            tracker.add(MemoryUsage.sizeOfObjectArray(nodeCount));
+            allocated += sizeOfIntArray(nodeCount);
+            allocated += sizeOfObjectArray(nodeCount);
             this.outOffsets = new int[nodeCount];
             this.outgoing = new int[nodeCount][];
             if (preFill) {
                 Arrays.fill(outgoing, EMPTY_INTS);
             }
+            if (withWeights) {
+                allocated += sizeOfObjectArray(nodeCount);
+                this.outgoingWeights = new float[nodeCount][];
+                if (preFill) {
+                    Arrays.fill(outgoingWeights, EMPTY_FLOATS);
+                }
+            } else {
+                this.outgoingWeights = null;
+            }
         } else {
             this.outOffsets = null;
             this.outgoing = null;
+            this.outgoingWeights = null;
         }
         if (withIncoming) {
-            tracker.add(MemoryUsage.sizeOfIntArray(nodeCount));
-            tracker.add(MemoryUsage.sizeOfObjectArray(nodeCount));
+            allocated += sizeOfIntArray(nodeCount);
+            allocated += sizeOfObjectArray(nodeCount);
             this.inOffsets = new int[nodeCount];
             this.incoming = new int[nodeCount][];
             if (preFill) {
                 Arrays.fill(incoming, EMPTY_INTS);
             }
+            if (withWeights) {
+                allocated += sizeOfObjectArray(nodeCount);
+                this.incomingWeights = new float[nodeCount][];
+                if (preFill) {
+                    Arrays.fill(incomingWeights, EMPTY_FLOATS);
+                }
+            } else {
+                this.incomingWeights = null;
+            }
         } else {
             this.inOffsets = null;
             this.incoming = null;
+            this.incomingWeights = null;
         }
+        tracker.add(allocated);
+        this.defaultWeight = defaultWeight;
         this.sorted = sorted;
         this.tracker = tracker;
     }
@@ -123,22 +159,46 @@ public class AdjacencyMatrix {
      * initialize array for outgoing connections
      */
     public int[] armOut(int sourceNodeId, int degree) {
-        if (degree > 0) {
-            tracker.add(MemoryUsage.sizeOfIntArray(degree));
-            outgoing[sourceNodeId] = new int[degree];
-        }
-        return outgoing[sourceNodeId];
+        return armAny(sourceNodeId, degree, outgoing, outgoingWeights);
     }
 
     /**
      * initialize array for incoming connections
      */
     public int[] armIn(int targetNodeId, int degree) {
+        return armAny(targetNodeId, degree, incoming, incomingWeights);
+    }
+
+    private int[] armAny(int nodeId, int degree, int[][] targets, float[][] weights) {
         if (degree > 0) {
-            tracker.add(MemoryUsage.sizeOfIntArray(degree));
-            incoming[targetNodeId] = new int[degree];
+            tracker.add(sizeOfIntArray(degree));
+            targets[nodeId] = new int[degree];
+            if (weights != null) {
+                tracker.add(sizeOfFloatArray(degree));
+                weights[nodeId] = new float[degree];
+            }
         }
-        return incoming[targetNodeId];
+        return targets[nodeId];
+    }
+
+    /**
+     * get weight storage for incoming weights
+     */
+    float[] getInWeights(int targetNodeId) {
+        if (incomingWeights != null) {
+            return incomingWeights[targetNodeId];
+        }
+        return null;
+    }
+
+    /**
+     * get weight storage for outgoing weights
+     */
+    float[] getOutWeights(int targetNodeId) {
+        if (outgoingWeights != null) {
+            return outgoingWeights[targetNodeId];
+        }
+        return null;
     }
 
     void setOutDegree(int nodeId, final int degree) {
@@ -160,6 +220,16 @@ public class AdjacencyMatrix {
     }
 
     /**
+     * grow array for outgoing weights
+     */
+    private void growOutWeights(int sourceNodeId, int length) {
+        assert length >= 0 : "size must be positive (got " + length + "): likely integer overflow?";
+        if (outgoingWeights[sourceNodeId].length < length) {
+            outgoingWeights[sourceNodeId] = growArray(outgoingWeights[sourceNodeId], length);
+        }
+    }
+
+    /**
      * grow array for incoming connections
      */
     private void growIn(int targetNodeId, int length) {
@@ -169,10 +239,25 @@ public class AdjacencyMatrix {
         }
     }
 
+    /**
+     * grow array for incoming weights
+     */
+    private void growInWeights(int targetNodeId, int length) {
+        assert length >= 0 : "size must be positive (got " + length + "): likely integer overflow?";
+        if (incomingWeights[targetNodeId].length < length) {
+            incomingWeights[targetNodeId] = growArray(incomingWeights[targetNodeId], length);
+        }
+    }
+
     private int[] growArray(int[] array, int length) {
-        int newSize = ArrayUtil.oversize(length, RamUsageEstimator.NUM_BYTES_INT);
-        tracker.remove(MemoryUsage.sizeOfIntArray(array.length));
-        tracker.add(MemoryUsage.sizeOfIntArray(newSize));
+        int newSize = ArrayUtil.oversize(length, Integer.BYTES);
+        tracker.add(sizeOfIntArray(newSize) - sizeOfIntArray(array.length));
+        return Arrays.copyOf(array, newSize);
+    }
+
+    private float[] growArray(float[] array, int length) {
+        int newSize = ArrayUtil.oversize(length, Float.BYTES);
+        tracker.add(sizeOfFloatArray(newSize) - sizeOfFloatArray(array.length));
         return Arrays.copyOf(array, newSize);
     }
 
@@ -190,6 +275,33 @@ public class AdjacencyMatrix {
         growOut(sourceNodeId, nextDegree);
         outgoing[sourceNodeId][degree] = targetNodeId;
         outOffsets[sourceNodeId] = nextDegree;
+    }
+
+    /**
+     * add weight to an outgoing relation
+     */
+    public void addOutgoingWithWeight(int sourceNodeId, int targetNodeId, double weight) {
+        final int degree = outOffsets[sourceNodeId];
+        final int nextDegree = degree + 1;
+        growOut(sourceNodeId, nextDegree);
+        outgoing[sourceNodeId][degree] = targetNodeId;
+        addOutgoingWeight(sourceNodeId, degree, weight);
+        outOffsets[sourceNodeId] = nextDegree;
+    }
+
+    /**
+     * add weight to a specific outgoing relation
+     */
+    public void addOutgoingWeight(int sourceNodeId, int index, double weight) {
+        growOutWeights(sourceNodeId, index + 1);
+        outgoingWeights[sourceNodeId][index] = (float) weight;
+    }
+
+    /**
+     * get the weight from an outgoing relation
+     */
+    public double getOutgoingWeight(int sourceNodeId, int index) {
+        return (double) outgoingWeights[sourceNodeId][index];
     }
 
     /**
@@ -215,6 +327,21 @@ public class AdjacencyMatrix {
     int getTargetOutgoing(long nodeId, long index) {
         checkSize(nodeId, index);
         return getTargetOutgoing((int) nodeId, (int) index);
+    }
+
+    /**
+     * checks for outgoing target node
+     */
+    public int outgoingIndex(int sourceNodeId, int targetNodeId) {
+
+        final int degree = outOffsets[sourceNodeId];
+        final int[] rels = outgoing[sourceNodeId];
+
+        if (sorted && degree > LINEAR_SEARCH_LIMIT) {
+            return binarySearchIndex(rels, degree, targetNodeId);
+        }
+
+        return linearSearchIndex(rels, degree, targetNodeId);
     }
 
     private int getTargetOutgoing(int nodeId, int index) {
@@ -279,6 +406,21 @@ public class AdjacencyMatrix {
     }
 
     /**
+     * checks for incoming target node
+     */
+    public int incomingIndex(int sourceNodeId, int targetNodeId) {
+
+        final int degree = inOffsets[sourceNodeId];
+        final int[] rels = incoming[sourceNodeId];
+
+        if (sorted && degree > LINEAR_SEARCH_LIMIT) {
+            return binarySearchIndex(rels, degree, targetNodeId);
+        }
+
+        return linearSearchIndex(rels, degree, targetNodeId);
+    }
+
+    /**
      * add incoming relation
      */
     public void addIncoming(int sourceNodeId, int targetNodeId) {
@@ -288,6 +430,27 @@ public class AdjacencyMatrix {
         incoming[targetNodeId][degree] = sourceNodeId;
         inOffsets[targetNodeId] = nextDegree;
     }
+
+    /**
+     * add weight to an incoming relation
+     */
+    public void addIncomingWithWeight(int sourceNodeId, int targetNodeId, double weight) {
+        final int degree = inOffsets[targetNodeId];
+        final int nextDegree = degree + 1;
+        growIn(targetNodeId, nextDegree);
+        incoming[targetNodeId][degree] = sourceNodeId;
+        addIncomingWeight(targetNodeId, degree, weight);
+        inOffsets[targetNodeId] = nextDegree;
+    }
+
+    /**
+     * add weight to a specific incoming relation
+     */
+    public void addIncomingWeight(int targetNodeId, int index, double weight) {
+        growInWeights(targetNodeId, index + 1);
+        incomingWeights[targetNodeId][index] = (float) weight;
+    }
+
 
     /**
      * get the degree for node / direction
@@ -339,24 +502,50 @@ public class AdjacencyMatrix {
     /**
      * iterate over each edge at the given node using a weighted consumer
      */
-    void forEach(long nodeId, Direction direction, WeightMapping weights, WeightedRelationshipConsumer consumer) {
+    void forEach(long nodeId, Direction direction, WeightedRelationshipConsumer consumer) {
         checkSize(nodeId);
-        forEach((int) nodeId, direction, weights, consumer);
+        forEach((int) nodeId, direction, consumer);
     }
 
-    private void forEach(int nodeId, Direction direction, WeightMapping weights, WeightedRelationshipConsumer consumer) {
+    private void forEach(int nodeId, Direction direction, WeightedRelationshipConsumer consumer) {
         switch (direction) {
             case OUTGOING:
-                forEachOutgoing(nodeId, weights, consumer);
+                forEachOutgoing(nodeId, consumer);
                 break;
             case INCOMING:
-                forEachIncoming(nodeId, weights, consumer);
+                forEachIncoming(nodeId, consumer);
                 break;
             default:
-                forEachOutgoing(nodeId, weights, consumer);
-                forEachIncoming(nodeId, weights, consumer);
+                forEachOutgoing(nodeId, consumer);
+                forEachIncoming(nodeId, consumer);
                 break;
         }
+    }
+
+    double weightOf(final int sourceNodeId, final int targetNodeId) {
+        if (outgoingWeights != null) {
+            float[] weights = outgoingWeights[sourceNodeId];
+            if (weights != null) {
+                int index = outgoingIndex(sourceNodeId, targetNodeId);
+                if (index >= 0 && index < weights.length) {
+                    return weights[index];
+                }
+            }
+        }
+        if (incomingWeights != null) {
+            float[] weights = incomingWeights[targetNodeId];
+            if (weights != null) {
+                int index = incomingIndex(targetNodeId, sourceNodeId);
+                if (index >= 0 && index < weights.length) {
+                    return weights[index];
+                }
+            }
+        }
+        return defaultWeight;
+    }
+
+    boolean hasWeights() {
+        return outgoingWeights != null || incomingWeights != null;
     }
 
     public int capacity() {
@@ -365,17 +554,6 @@ public class AdjacencyMatrix {
                 : inOffsets != null
                 ? inOffsets.length
                 : 0;
-    }
-
-    public void addMatrix(AdjacencyMatrix other, int offset, int length) {
-        if (other.outgoing != null) {
-            System.arraycopy(other.outgoing, 0, outgoing, offset, length);
-            System.arraycopy(other.outOffsets, 0, outOffsets, offset, length);
-        }
-        if (other.incoming != null) {
-            System.arraycopy(other.incoming, 0, incoming, offset, length);
-            System.arraycopy(other.inOffsets, 0, inOffsets, offset, length);
-        }
     }
 
     private void forEachOutgoing(int nodeId, RelationshipConsumer consumer) {
@@ -394,21 +572,45 @@ public class AdjacencyMatrix {
         }
     }
 
-    private void forEachOutgoing(int nodeId, WeightMapping weights, WeightedRelationshipConsumer consumer) {
+    private void forEachOutgoing(int nodeId, WeightedRelationshipConsumer consumer) {
+        float[] weights;
+        if (outgoingWeights == null || ((weights = outgoingWeights[nodeId]) == null)) {
+            forEachOutgoingDefaultWeight(nodeId, consumer);
+            return;
+        }
         final int degree = outOffsets[nodeId];
         final int[] outs = outgoing[nodeId];
         for (int i = 0; i < degree; i++) {
-            final long relationId = RawValues.combineIntInt(nodeId, outs[i]);
-            consumer.accept(nodeId, outs[i], weights.get(relationId));
+            consumer.accept(nodeId, outs[i], weights[i]);
         }
     }
 
-    private void forEachIncoming(int nodeId, WeightMapping weights, WeightedRelationshipConsumer consumer) {
+    private void forEachOutgoingDefaultWeight(int nodeId, WeightedRelationshipConsumer consumer) {
+        final int degree = outOffsets[nodeId];
+        final int[] outs = outgoing[nodeId];
+        for (int i = 0; i < degree; i++) {
+            consumer.accept(nodeId, outs[i], defaultWeight);
+        }
+    }
+
+    private void forEachIncoming(int nodeId, WeightedRelationshipConsumer consumer) {
+        float[] weights;
+        if (incomingWeights == null || ((weights = incomingWeights[nodeId]) == null)) {
+            forEachIncomingDefaultWeight(nodeId, consumer);
+            return;
+        }
         final int degree = inOffsets[nodeId];
         final int[] neighbours = incoming[nodeId];
         for (int i = 0; i < degree; i++) {
-            final long relationId = RawValues.combineIntInt(neighbours[i], nodeId);
-            consumer.accept(nodeId, neighbours[i], weights.get(relationId));
+            consumer.accept(nodeId, neighbours[i], weights[i]);
+        }
+    }
+
+    private void forEachIncomingDefaultWeight(int nodeId, WeightedRelationshipConsumer consumer) {
+        final int degree = inOffsets[nodeId];
+        final int[] neighbours = incoming[nodeId];
+        for (int i = 0; i < degree; i++) {
+            consumer.accept(nodeId, neighbours[i], defaultWeight);
         }
     }
 
@@ -421,18 +623,36 @@ public class AdjacencyMatrix {
     }
 
     public void sortIncoming(int node) {
-        Arrays.sort(incoming[node], 0, inOffsets[node]);
+        sortAny(node, inOffsets, incoming, incomingWeights);
     }
 
     public void sortOutgoing(int node) {
-        Arrays.sort(outgoing[node], 0, outOffsets[node]);
+        sortAny(node, outOffsets, outgoing, outgoingWeights);
+    }
+
+    private void sortAny(int node, int[] degrees, int[][] targets, float[][] weights) {
+        if (weights == null || weights[node] == null) {
+            Arrays.sort(targets[node], 0, degrees[node]);
+        } else {
+            int degree = degrees[node];
+            long[] targetsAndWeights = new long[degree];
+            IndirectIntSort.sortWithoutDeduplication(targets[node], weights[node], targetsAndWeights, degree);
+        }
     }
 
     public void sortAll(ExecutorService pool, int concurrency) {
-        ParallelUtil.iterateParallel(pool, outgoing.length, concurrency, node -> {
-            sortIncoming(node);
-            sortOutgoing(node);
-        });
+        int nodes = outgoing.length;
+        if (ParallelUtil.canRunInParallel(pool)) {
+            ParallelUtil.iterateParallel(pool, nodes, concurrency, node -> {
+                sortIncoming(node);
+                sortOutgoing(node);
+            });
+        } else {
+            for (int node = 0; node < nodes; ++node) {
+                sortIncoming(node);
+                sortOutgoing(node);
+            }
+        }
         sorted = true;
     }
 

@@ -37,7 +37,6 @@ public class HeavyCypherGraphFactory extends GraphFactory {
 
     static final int NO_BATCH = -1;
     static final int INITIAL_NODE_COUNT = 1_000_000;
-    static final int ESTIMATED_DEGREE = 3;
     static final String LIMIT = "limit";
     static final String SKIP = "skip";
     public static final String TYPE = "cypher";
@@ -68,7 +67,6 @@ public class HeavyCypherGraphFactory extends GraphFactory {
         return new HeavyGraph(
                 nodes.idMap,
                 relationships.matrix(),
-                relationships.weights(),
                 nodePropertyMappings);
     }
 }

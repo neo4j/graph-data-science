@@ -75,7 +75,6 @@ public class HarmonicCentralityProc {
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, configuration.getNodeLabelOrQuery(), configuration.getRelationshipOrQuery(), configuration)
                 .withoutNodeProperties()
-                .withConcurrency(configuration.getConcurrency())
                 .withDirection(Direction.BOTH)
                 .withAllocationTracker(tracker)
                 .load(configuration.getGraphImpl());
@@ -110,15 +109,17 @@ public class HarmonicCentralityProc {
         final CentralityProcResult.Builder builder = CentralityProcResult.builder();
 
         final AllocationTracker tracker = AllocationTracker.create();
-        final int concurrency = configuration.getConcurrency();
         final TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
 
         final Graph graph;
         try (ProgressTimer timer = builder.timeLoad()) {
             graph = new GraphLoader(api, Pools.DEFAULT)
-                    .init(log, configuration.getNodeLabelOrQuery(), configuration.getRelationshipOrQuery(), configuration)
+                    .init(
+                            log,
+                            configuration.getNodeLabelOrQuery(),
+                            configuration.getRelationshipOrQuery(),
+                            configuration)
                     .withoutNodeProperties()
-                    .withConcurrency(concurrency)
                     .withDirection(Direction.BOTH)
                     .withAllocationTracker(tracker)
                     .load(configuration.getGraphImpl());
@@ -143,7 +144,7 @@ public class HarmonicCentralityProc {
             builder.timeWrite(() -> {
                 Exporter exporter = Exporter.of(api, graph)
                         .withLog(log)
-                        .parallel(Pools.DEFAULT, concurrency, terminationFlag)
+                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), terminationFlag)
                         .build();
                 algo.export(writeProperty, exporter);
             });

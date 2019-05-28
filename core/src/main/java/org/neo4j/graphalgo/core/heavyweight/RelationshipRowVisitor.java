@@ -21,8 +21,6 @@ package org.neo4j.graphalgo.core.heavyweight;
 
 import org.neo4j.graphalgo.core.DuplicateRelationshipsStrategy;
 import org.neo4j.graphalgo.core.IntIdMap;
-import org.neo4j.graphalgo.core.WeightMap;
-import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphdb.Result;
 
 class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
@@ -31,14 +29,14 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private long rows = 0;
     private IntIdMap idMap;
     private boolean hasRelationshipWeights;
-    private WeightMap relWeights;
+    private double defaultWeight;
     private AdjacencyMatrix matrix;
     private DuplicateRelationshipsStrategy duplicateRelationshipsStrategy;
 
-    RelationshipRowVisitor(IntIdMap idMap, boolean hasRelationshipWeights, WeightMap relWeights, AdjacencyMatrix matrix, DuplicateRelationshipsStrategy duplicateRelationshipsStrategy) {
+    RelationshipRowVisitor(IntIdMap idMap, boolean hasRelationshipWeights, double defaultWeight, AdjacencyMatrix matrix, DuplicateRelationshipsStrategy duplicateRelationshipsStrategy) {
         this.idMap = idMap;
         this.hasRelationshipWeights = hasRelationshipWeights;
-        this.relWeights = relWeights;
+        this.defaultWeight = defaultWeight;
         this.matrix = matrix;
         this.duplicateRelationshipsStrategy = duplicateRelationshipsStrategy;
     }
@@ -63,7 +61,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
             return true;
         }
 
-        duplicateRelationshipsStrategy.handle(source, target, matrix, hasRelationshipWeights, relWeights, () -> extractWeight(row));
+        duplicateRelationshipsStrategy.handle(source, target, matrix, hasRelationshipWeights, defaultWeight, () -> extractWeight(row));
 
         return true;
     }

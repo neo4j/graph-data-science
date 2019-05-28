@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.heavyweight;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.DuplicateRelationshipsStrategy;
@@ -35,14 +34,12 @@ import static org.mockito.Mockito.mock;
 
 public class MergedRelationshipsTest {
 
-    public final WeightMap REL_WEIGHTS = new WeightMap(10, 0, 0);
-
     @Test
     public void byDefaultDontRemoveDuplicates() {
-        AdjacencyMatrix matrix = new AdjacencyMatrix(2, false, AllocationTracker.EMPTY);
+        AdjacencyMatrix matrix = new AdjacencyMatrix(2, false, 0d, false, AllocationTracker.EMPTY);
         matrix.addOutgoing(0, 1);
 
-        Relationships relationships = new Relationships(0, 5, matrix, REL_WEIGHTS, 0.0);
+        Relationships relationships = new Relationships(0, 5, matrix);
 
         MergedRelationships mergedRelationships = new MergedRelationships(5, new GraphSetup(), DuplicateRelationshipsStrategy.NONE);
 
@@ -54,10 +51,10 @@ public class MergedRelationshipsTest {
 
     @Test
     public void skipRemovesDuplicates() {
-        AdjacencyMatrix matrix = new AdjacencyMatrix(2, false, AllocationTracker.EMPTY);
+        AdjacencyMatrix matrix = new AdjacencyMatrix(2, false, 0d, false, AllocationTracker.EMPTY);
         matrix.addOutgoing(0, 1);
 
-        Relationships relationships = new Relationships(0, 5, matrix, REL_WEIGHTS, 0.0);
+        Relationships relationships = new Relationships(0, 5, matrix);
 
         MergedRelationships mergedRelationships = new MergedRelationships(5, new GraphSetup(), DuplicateRelationshipsStrategy.SKIP);
 
@@ -69,70 +66,64 @@ public class MergedRelationshipsTest {
 
     @Test
     public void sumRemovesDuplicates() {
-        AdjacencyMatrix matrix = new AdjacencyMatrix(2, false, AllocationTracker.EMPTY);
-        matrix.addOutgoing(0, 1);
-
         GraphSetup setup = graphSetupWithRelationships();
 
         MergedRelationships mergedRelationships = new MergedRelationships(5, setup, DuplicateRelationshipsStrategy.SUM);
 
-        WeightMap relWeights1 = new WeightMap(10, 0, 0);
-        relWeights1.put(RawValues.combineIntInt(0, 1), 3.0);
-        Relationships relationships1 = new Relationships(0, 5, matrix, relWeights1, 0.0);
+        AdjacencyMatrix matrix1 = new AdjacencyMatrix(1, true, 0d, false, AllocationTracker.EMPTY);
+        matrix1.addOutgoingWithWeight(0, 1, 3.0);
+        Relationships relationships1 = new Relationships(0, 5, matrix1);
 
-        WeightMap relWeights2 = new WeightMap(10, 0, 0);
-        relWeights2.put(RawValues.combineIntInt(0, 1), 7.0);
-        Relationships relationships2 = new Relationships(0, 5, matrix, relWeights2, 0.0);
+        AdjacencyMatrix matrix2 = new AdjacencyMatrix(1, true, 0d, false, AllocationTracker.EMPTY);
+        matrix1.addOutgoingWithWeight(0, 1, 7.0);
+        Relationships relationships2 = new Relationships(0, 5, matrix2);
 
         mergedRelationships.merge(relationships1);
         mergedRelationships.merge(relationships2);
 
-        assertEquals(1, mergedRelationships.matrix().degree(0, Direction.OUTGOING));
-        assertEquals(10.0, mergedRelationships.relWeights().get(RawValues.combineIntInt(0, 1)), 0.01);
+        AdjacencyMatrix matrix = mergedRelationships.matrix();
+        assertEquals(1, matrix.degree(0, Direction.OUTGOING));
+        assertEquals(10.0, matrix.getOutgoingWeight(0, matrix.outgoingIndex(0, 1)), 0.01);
     }
 
     @Test
     public void minPicksLowestWeight() {
-        AdjacencyMatrix matrix = new AdjacencyMatrix(2, false, AllocationTracker.EMPTY);
-        matrix.addOutgoing(0, 1);
-
         MergedRelationships mergedRelationships = new MergedRelationships(5, graphSetupWithRelationships(), DuplicateRelationshipsStrategy.MIN);
 
-        WeightMap relWeights1 = new WeightMap(10, 0, 0);
-        relWeights1.put(RawValues.combineIntInt(0, 1), 3.0);
-        Relationships relationships1 = new Relationships(0, 5, matrix, relWeights1, 0.0);
+        AdjacencyMatrix matrix1 = new AdjacencyMatrix(1, true, 0d, false, AllocationTracker.EMPTY);
+        matrix1.addOutgoingWithWeight(0, 1, 3.0);
+        Relationships relationships1 = new Relationships(0, 5, matrix1);
 
-        WeightMap relWeights2 = new WeightMap(10, 0, 0);
-        relWeights2.put(RawValues.combineIntInt(0, 1), 7.0);
-        Relationships relationships2 = new Relationships(0, 5, matrix, relWeights2, 0.0);
+        AdjacencyMatrix matrix2 = new AdjacencyMatrix(1, true, 0d, false, AllocationTracker.EMPTY);
+        matrix1.addOutgoingWithWeight(0, 1, 7.0);
+        Relationships relationships2 = new Relationships(0, 5, matrix2);
 
         mergedRelationships.merge(relationships1);
         mergedRelationships.merge(relationships2);
 
-        assertEquals(1, mergedRelationships.matrix().degree(0, Direction.OUTGOING));
-        assertEquals(3.0, mergedRelationships.relWeights().get(RawValues.combineIntInt(0, 1)), 0.01);
+        AdjacencyMatrix matrix = mergedRelationships.matrix();
+        assertEquals(1, matrix.degree(0, Direction.OUTGOING));
+        assertEquals(3.0, matrix.getOutgoingWeight(0, matrix.outgoingIndex(0, 1)), 0.01);
     }
 
     @Test
     public void maxPicksLargestWeight() {
-        AdjacencyMatrix matrix = new AdjacencyMatrix(2, false, AllocationTracker.EMPTY);
-        matrix.addOutgoing(0, 1);
-
         MergedRelationships mergedRelationships = new MergedRelationships(5, graphSetupWithRelationships(), DuplicateRelationshipsStrategy.MAX);
 
-        WeightMap relWeights1 = new WeightMap(10, 0, 0);
-        relWeights1.put(RawValues.combineIntInt(0, 1), 3.0);
-        Relationships relationships1 = new Relationships(0, 5, matrix, relWeights1, 0.0);
+        AdjacencyMatrix matrix1 = new AdjacencyMatrix(1, true, 0d, false, AllocationTracker.EMPTY);
+        matrix1.addOutgoingWithWeight(0, 1, 3.0);
+        Relationships relationships1 = new Relationships(0, 5, matrix1);
 
-        WeightMap relWeights2 = new WeightMap(10, 0, 0);
-        relWeights2.put(RawValues.combineIntInt(0, 1), 7.0);
-        Relationships relationships2 = new Relationships(0, 5, matrix, relWeights2, 0.0);
+        AdjacencyMatrix matrix2 = new AdjacencyMatrix(1, true, 0d, false, AllocationTracker.EMPTY);
+        matrix1.addOutgoingWithWeight(0, 1, 7.0);
+        Relationships relationships2 = new Relationships(0, 5, matrix2);
 
         mergedRelationships.merge(relationships1);
         mergedRelationships.merge(relationships2);
 
-        assertEquals(1, mergedRelationships.matrix().degree(0, Direction.OUTGOING));
-        assertEquals(7.0, mergedRelationships.relWeights().get(RawValues.combineIntInt(0, 1)), 0.01);
+        AdjacencyMatrix matrix = mergedRelationships.matrix();
+        assertEquals(1, matrix.degree(0, Direction.OUTGOING));
+        assertEquals(7.0, matrix.getOutgoingWeight(0, matrix.outgoingIndex(0, 1)), 0.01);
     }
 
     private GraphSetup graphSetupWithRelationships() {

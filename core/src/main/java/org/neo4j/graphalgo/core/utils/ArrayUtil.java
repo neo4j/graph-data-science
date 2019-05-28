@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
+import java.util.Arrays;
+
 public final class ArrayUtil {
 
     public static final int LINEAR_SEARCH_LIMIT = 64;
@@ -40,6 +42,23 @@ public final class ArrayUtil {
 
     }
 
+    public static int binarySearchIndex(int[] arr, int length, int key) {
+        int low = 0;
+        int high = length - 1;
+        while (high - low > LINEAR_SEARCH_LIMIT) {
+            int mid = (low + high) >>> 1;
+            int midVal = arr[mid];
+            if (midVal < key)
+                low = mid + 1;
+            else if (midVal > key)
+                high = mid - 1;
+            else
+                return mid;
+        }
+        return linearSearch2index(arr, low, high, key);
+
+    }
+
     // TODO eval
     public static boolean linearSearch2(int[] arr, int low, int high, int key) {
         for (int i = low; i <= high; i++) {
@@ -47,6 +66,15 @@ public final class ArrayUtil {
             if (arr[i] > key) return false;
         }
         return false;
+    }
+
+    // TODO eval
+    public static int linearSearch2index(int[] arr, int low, int high, int key) {
+        for (int i = low; i <= high; i++) {
+            if (arr[i] == key) return i;
+            if (arr[i] > key) return -i - 1;
+        }
+        return (-(high) - 1);
     }
 
     public static boolean linearSearch(int[] arr, int length, int key) {
@@ -63,6 +91,22 @@ public final class ArrayUtil {
             }
         }
         return false;
+    }
+
+    public static int linearSearchIndex(int[] arr, int length, int key) {
+        int i = 0;
+        for (; i < length - 4; i += 4) {
+            if (arr[i] == key) return i;
+            if (arr[i + 1] == key) return i;
+            if (arr[i + 2] == key) return i;
+            if (arr[i + 3] == key) return i;
+        }
+        for (; i < length; i++) {
+            if (arr[i] == key) {
+                return i;
+            }
+        }
+        return -length - 1;
     }
 
     private static boolean linearSearch(int[] arr, int low, int high, int key) {

@@ -141,7 +141,7 @@ public class PrimProc {
         }
 
         final int root = Math.toIntExact(graph.toMappedNodeId(startNode));
-        final Prim mstPrim = new Prim(graph, graph, graph)
+        final Prim mstPrim = new Prim(graph, graph)
                 .withProgressLogger(ProgressLogger.wrap(log, "Prim(MaximumSpanningTree)"))
                 .withTerminationFlag(TerminationFlag.wrap(transaction));
         builder.timeEval(() -> {

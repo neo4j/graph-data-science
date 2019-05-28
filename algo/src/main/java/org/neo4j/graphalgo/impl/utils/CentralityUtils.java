@@ -47,7 +47,7 @@ public class CentralityUtils {
                 Exporter exporter = Exporter
                         .of(api, graph)
                         .withLog(log)
-                        .parallel(Pools.DEFAULT, configuration.getConcurrency(), terminationFlag)
+                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), terminationFlag)
                         .build();
                 result.export(propertyName, exporter);
             }

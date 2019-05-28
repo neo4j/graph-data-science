@@ -175,11 +175,10 @@ public class Dijkstra {
             double costs = this.costs.getOrDefault(node, Double.MAX_VALUE);
             graph.forEachRelationship(
                     node,
-                    direction, longToIntConsumer((s, t) -> {
+                    direction, longToIntConsumer((s, t, w) -> {
                         if (!filter.accept(s, t)) {
                             return true;
                         }
-                        final double w = graph.weightOf(s, t);
                         final UpdateResult updateCosts = updateCosts(s, t, w + costs);
                         if (!visited.get(t)) {
                             switch (updateCosts) {

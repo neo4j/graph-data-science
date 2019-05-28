@@ -126,7 +126,7 @@ public final class LouvainGraph implements Graph {
 
     @Override
     public void forEachRelationship(long nodeId, Direction direction, WeightedRelationshipConsumer consumer) {
-        throw new UnsupportedOperationException("forEachRelationship is not supported.");
+        graph.forEach(nodeId, (s, t) -> consumer.accept(s, t, weights.getOrDefault(s, t)));
     }
 
     @Override

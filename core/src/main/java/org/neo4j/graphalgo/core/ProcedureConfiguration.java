@@ -262,6 +262,32 @@ public class ProcedureConfiguration {
         return Pools.allowedConcurrency(requestedConcurrency);
     }
 
+    public int getReadConcurrency() {
+        return getReadConcurrency(Pools.DEFAULT_CONCURRENCY);
+    }
+
+    public int getReadConcurrency(int defaultValue) {
+        Number readConcurrency = getNumber(
+                ProcedureConstants.READ_CONCURRENCY,
+                ProcedureConstants.CONCURRENCY,
+                defaultValue);
+        int requestedConcurrency = readConcurrency.intValue();
+        return Pools.allowedConcurrency(requestedConcurrency);
+    }
+
+    public int getWriteConcurrency() {
+        return getWriteConcurrency(Pools.DEFAULT_CONCURRENCY);
+    }
+
+    public int getWriteConcurrency(int defaultValue) {
+        Number writeConcurrency = getNumber(
+                ProcedureConstants.WRITE_CONCURRENCY,
+                ProcedureConstants.CONCURRENCY,
+                defaultValue);
+        int requestedConcurrency = writeConcurrency.intValue();
+        return Pools.allowedConcurrency(requestedConcurrency);
+    }
+
     public String getDirectionName() {
         return getDirectionName(ProcedureConstants.DIRECTION_DEFAULT);
     }
@@ -353,7 +379,6 @@ public class ProcedureConfiguration {
         return config.get(key);
     }
 
-    @SuppressWarnings("unchecked")
     public Number getNumber(String key, Number defaultValue) {
         Object value = config.get(key);
         if (null == value) {
@@ -361,6 +386,17 @@ public class ProcedureConfiguration {
         }
         if (!(value instanceof Number)) {
             throw new IllegalArgumentException("The value of " + key + " must Number type");
+        }
+        return (Number) value;
+    }
+
+    public Number getNumber(String key, String oldKey, Number defaultValue) {
+        Object value = get(key, oldKey, (Object) defaultValue);
+        if (null == value) {
+            return defaultValue;
+        }
+        if (!(value instanceof Number)) {
+            throw new IllegalArgumentException("The value of " + key + " must be a Number type");
         }
         return (Number) value;
     }

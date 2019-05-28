@@ -81,7 +81,7 @@ public class CypherRelationshipLoader {
             }
         } while (working);
 
-        return new Relationships(0, total, mergedRelationships.matrix(), mergedRelationships.relWeights(), setup.relationDefaultWeight);
+        return new Relationships(0, total, mergedRelationships.matrix());
     }
 
     private Relationships loadRelationships(long offset, int batchSize, Nodes nodes) {
@@ -89,16 +89,13 @@ public class CypherRelationshipLoader {
         IntIdMap idMap = nodes.idMap;
 
         int nodeCount = idMap.size();
-        int capacity = batchSize == NO_BATCH ? nodeCount : batchSize;
-
-        final AdjacencyMatrix matrix = new AdjacencyMatrix(nodeCount, false, setup.tracker);
 
         boolean hasRelationshipWeights = setup.shouldLoadRelationshipWeight();
-        final WeightMap relWeights = newWeightMapping(hasRelationshipWeights, setup.relationDefaultWeight, capacity);
+        final AdjacencyMatrix matrix = new AdjacencyMatrix(nodeCount, hasRelationshipWeights, setup.relationDefaultWeight, false, setup.tracker);
 
-        RelationshipRowVisitor visitor = new RelationshipRowVisitor(idMap, hasRelationshipWeights, relWeights, matrix, setup.duplicateRelationshipsStrategy);
+        RelationshipRowVisitor visitor = new RelationshipRowVisitor(idMap, hasRelationshipWeights, setup.relationDefaultWeight, matrix, setup.duplicateRelationshipsStrategy);
         api.execute(setup.relationshipType, CypherLoadingUtils.params(setup.params, offset, batchSize)).accept(visitor);
-        return new Relationships(offset, visitor.rows(), matrix, relWeights, setup.relationDefaultWeight);
+        return new Relationships(offset, visitor.rows(), matrix);
     }
 
 

@@ -107,7 +107,7 @@ public final class ShortestPathDeltaSteppingProcUndirectedTest {
     public static Collection<Object[]> data() {
         return Arrays.asList(
                 new Object[]{"Heavy"},
-                new Object[]{"Light"},
+                new Object[]{"Huge"},
                 new Object[]{"Kernel"}
         );
     }

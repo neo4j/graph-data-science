@@ -309,7 +309,7 @@ public final class UnionFindProcExec implements BiConsumer<String, Algorithm<?>>
                 .withLog(log)
                 .parallel(
                         Pools.DEFAULT,
-                        configuration.getConcurrency(),
+                        configuration.getWriteConcurrency(),
                         TerminationFlag.wrap(transaction))
                 .build();
         write(exporter, struct, writeProperty);

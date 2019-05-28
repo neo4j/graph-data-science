@@ -66,7 +66,7 @@ public class KSpanningTree extends Algorithm<KSpanningTree> {
         int startNode = Math.toIntExact(startNodeId);
 
         final ProgressLogger logger = getProgressLogger();
-        final Prim prim = new Prim(idMapping, relationshipIterator, weights)
+        final Prim prim = new Prim(idMapping, relationshipIterator)
                 .withProgressLogger(getProgressLogger())
                 .withTerminationFlag(getTerminationFlag());
 

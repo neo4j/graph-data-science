@@ -133,52 +133,52 @@ public class PrimTest {
 
     @Test
     public void testMaximumFromA() throws Exception {
-        assertMaximum(new Prim(graph, graph, graph).computeMaximumSpanningTree(a).getSpanningTree());
+        assertMaximum(new Prim(graph, graph).computeMaximumSpanningTree(a).getSpanningTree());
     }
 
     @Test
     public void testMaximumFromB() throws Exception {
-        assertMaximum(new Prim(graph, graph, graph).computeMaximumSpanningTree(b).getSpanningTree());
+        assertMaximum(new Prim(graph, graph).computeMaximumSpanningTree(b).getSpanningTree());
     }
 
     @Test
     public void testMaximumFromC() throws Exception {
-        assertMaximum(new Prim(graph, graph, graph).computeMaximumSpanningTree(c).getSpanningTree());
+        assertMaximum(new Prim(graph, graph).computeMaximumSpanningTree(c).getSpanningTree());
     }
 
     @Test
     public void testMaximumFromD() throws Exception {
-        assertMaximum(new Prim(graph, graph, graph).computeMaximumSpanningTree(d).getSpanningTree());
+        assertMaximum(new Prim(graph, graph).computeMaximumSpanningTree(d).getSpanningTree());
     }
 
     @Test
     public void testMaximumFromE() throws Exception {
-        assertMaximum(new Prim(graph, graph, graph).computeMaximumSpanningTree(e).getSpanningTree());
+        assertMaximum(new Prim(graph, graph).computeMaximumSpanningTree(e).getSpanningTree());
     }
 
     @Test
     public void testMinimumFromA() throws Exception {
-        assertMinimum(new Prim(graph, graph, graph).computeMinimumSpanningTree(a).getSpanningTree());
+        assertMinimum(new Prim(graph, graph).computeMinimumSpanningTree(a).getSpanningTree());
     }
 
     @Test
     public void testMinimumFromB() throws Exception {
-        assertMinimum(new Prim(graph, graph, graph).computeMinimumSpanningTree(b).getSpanningTree());
+        assertMinimum(new Prim(graph, graph).computeMinimumSpanningTree(b).getSpanningTree());
     }
 
     @Test
     public void testMinimumFromC() throws Exception {
-        assertMinimum(new Prim(graph, graph, graph).computeMinimumSpanningTree(c).getSpanningTree());
+        assertMinimum(new Prim(graph, graph).computeMinimumSpanningTree(c).getSpanningTree());
     }
 
     @Test
     public void testMinimumFromD() throws Exception {
-        assertMinimum(new Prim(graph, graph, graph).computeMinimumSpanningTree(d).getSpanningTree());
+        assertMinimum(new Prim(graph, graph).computeMinimumSpanningTree(d).getSpanningTree());
     }
 
     @Test
     public void testMinimumFromE() throws Exception {
-        assertMinimum(new Prim(graph, graph, graph).computeMinimumSpanningTree(d).getSpanningTree());
+        assertMinimum(new Prim(graph, graph).computeMinimumSpanningTree(d).getSpanningTree());
     }
 
     private void assertMinimum(SpanningTree mst) {

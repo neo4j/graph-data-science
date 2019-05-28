@@ -19,19 +19,17 @@
  */
 package org.neo4j.graphalgo.core.heavyweight;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
+import org.mockito.InOrder;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
+import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 
-import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 /**
  * @author mknobloch
@@ -39,40 +37,73 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class AdjacencyMatrixSortingTest {
 
-    private static RelationshipConsumer relationConsumer = mock(RelationshipConsumer.class);
-
-    @Before
-    public void resetMocks() {
-        Mockito.reset(relationConsumer);
-    }
-
-
     @Test
-    public void sortOutgoing() throws Exception {
-        AdjacencyMatrix matrix = new AdjacencyMatrix(3, false, AllocationTracker.EMPTY);
-        matrix.addOutgoing(0, 1);
+    public void sortOutgoing() {
+        RelationshipConsumer consumer = mock(RelationshipConsumer.class);
+        AdjacencyMatrix matrix = new AdjacencyMatrix(3, false, 0d, false, AllocationTracker.EMPTY);
         matrix.addOutgoing(0, 2);
+        matrix.addOutgoing(0, 1);
 
         matrix.sortOutgoing(0);
 
-        matrix.forEach(0, Direction.OUTGOING, relationConsumer);
+        matrix.forEach(0, Direction.OUTGOING, consumer);
 
-        verify(relationConsumer, times(1)).accept(eq(0L), eq(1L));
-        verify(relationConsumer, times(1)).accept(eq(0L), eq(2L));
+        InOrder order = inOrder(consumer);
+        order.verify(consumer).accept(0, 1);
+        order.verify(consumer).accept(0, 2);
+        order.verifyNoMoreInteractions();
     }
 
     @Test
-    public void sortIncoming() throws Exception {
-        AdjacencyMatrix matrix = new AdjacencyMatrix(3, false, AllocationTracker.EMPTY);
-        matrix.addIncoming(1, 0);
+    public void sortOutgoingWithWeights() {
+        WeightedRelationshipConsumer consumer = mock(WeightedRelationshipConsumer.class);
+
+        AdjacencyMatrix matrix = new AdjacencyMatrix(3, true, 0d, false, AllocationTracker.EMPTY);
+        matrix.addOutgoingWithWeight(0, 2, 2.0);
+        matrix.addOutgoingWithWeight(0, 1, 1.0);
+
+        matrix.sortOutgoing(0);
+
+        matrix.forEach(0, Direction.OUTGOING, consumer);
+
+        InOrder order = inOrder(consumer);
+        order.verify(consumer).accept(0, 1, 1.0);
+        order.verify(consumer).accept(0, 2, 2.0);
+        order.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void sortIncoming() {
+        RelationshipConsumer consumer = mock(RelationshipConsumer.class);
+        AdjacencyMatrix matrix = new AdjacencyMatrix(3, false, 0d, false, AllocationTracker.EMPTY);
         matrix.addIncoming(2, 0);
+        matrix.addIncoming(1, 0);
 
         matrix.sortIncoming(0);
 
-        matrix.forEach(0, Direction.INCOMING, relationConsumer);
+        matrix.forEach(0, Direction.INCOMING, consumer);
 
-        verify(relationConsumer, times(1)).accept(eq(0L), eq(1L));
-        verify(relationConsumer, times(1)).accept(eq(0L), eq(2L));
+        InOrder order = inOrder(consumer);
+        order.verify(consumer).accept(0, 1);
+        order.verify(consumer).accept(0, 2);
+        order.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void sortIncomingWithWeights() {
+        WeightedRelationshipConsumer consumer = mock(WeightedRelationshipConsumer.class);
+        AdjacencyMatrix matrix = new AdjacencyMatrix(3, true, 0d, false, AllocationTracker.EMPTY);
+        matrix.addIncomingWithWeight(2, 0, 2.0);
+        matrix.addIncomingWithWeight(1, 0, 1.0);
+
+        matrix.sortIncoming(0);
+
+        matrix.forEach(0, Direction.INCOMING, consumer);
+
+        InOrder order = inOrder(consumer);
+        order.verify(consumer).accept(0, 1, 1.0);
+        order.verify(consumer).accept(0, 2, 2.0);
+        order.verifyNoMoreInteractions();
     }
 
 }

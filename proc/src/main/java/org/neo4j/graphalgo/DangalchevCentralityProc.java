@@ -70,7 +70,6 @@ public class DangalchevCentralityProc {
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, configuration.getNodeLabelOrQuery(), configuration.getRelationshipOrQuery(), configuration)
                 .withoutNodeProperties()
-                .withConcurrency(configuration.getConcurrency())
                 .withAllocationTracker(tracker)
                 .asUndirected(true)
                 .load(configuration.getGraphImpl("huge"));
@@ -105,7 +104,6 @@ public class DangalchevCentralityProc {
         final CentralityProcResult.Builder builder = CentralityProcResult.builder();
 
         final AllocationTracker tracker = AllocationTracker.create();
-        final int concurrency = configuration.getConcurrency();
         final TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
 
         final Graph graph;
@@ -113,7 +111,6 @@ public class DangalchevCentralityProc {
             graph = new GraphLoader(api, Pools.DEFAULT)
                     .init(log, configuration.getNodeLabelOrQuery(), configuration.getRelationshipOrQuery(), configuration)
                     .withoutNodeProperties()
-                    .withConcurrency(concurrency)
                     .withAllocationTracker(tracker)
                     .asUndirected(true)
                     .load(configuration.getGraphImpl("huge"));
@@ -126,7 +123,7 @@ public class DangalchevCentralityProc {
             return Stream.of(builder.build());
         }
 
-        final DangalchevClosenessCentrality algo = new DangalchevClosenessCentrality(graph, concurrency, Pools.DEFAULT)
+        final DangalchevClosenessCentrality algo = new DangalchevClosenessCentrality(graph, configuration.getConcurrency(), Pools.DEFAULT)
                 .withProgressLogger(ProgressLogger.wrap(log, "DangalchevCentrality"))
                 .withTerminationFlag(TerminationFlag.wrap(transaction));
 
@@ -138,7 +135,7 @@ public class DangalchevCentralityProc {
             builder.timeWrite(() -> {
                 Exporter exporter = Exporter.of(api, graph)
                         .withLog(log)
-                        .parallel(Pools.DEFAULT, concurrency, terminationFlag)
+                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), terminationFlag)
                         .build();
                 algo.export(writeProperty, exporter);
             });

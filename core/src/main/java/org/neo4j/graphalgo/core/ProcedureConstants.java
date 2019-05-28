@@ -62,4 +62,8 @@ public class ProcedureConstants {
 
     public static final String CONCURRENCY = "concurrency";
 
+    public static final String READ_CONCURRENCY = "readConcurrency";
+
+    public static final String WRITE_CONCURRENCY = "writeConcurrency";
+
 }

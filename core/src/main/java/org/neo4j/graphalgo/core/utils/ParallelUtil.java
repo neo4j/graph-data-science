@@ -820,6 +820,9 @@ public final class ParallelUtil {
             int size,
             int concurrency,
             IntConsumer consumer) {
+        if (!canRunInParallel(executorService)) {
+            throw new IllegalArgumentException("no executor available to run the tasks in parallel");
+        }
         final List<Future<?>> futures = new ArrayList<>();
         final int batchSize = threadSize(concurrency, size);
         for (int i = 0; i < size; i += batchSize) {

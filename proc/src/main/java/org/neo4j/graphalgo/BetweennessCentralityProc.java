@@ -218,7 +218,7 @@ public class BetweennessCentralityProc {
                 final String writeProperty = configuration.getWriteProperty(DEFAULT_TARGET_PROPERTY);
                 Exporter.of(api, graph)
                         .withLog(log)
-                        .parallel(Pools.DEFAULT, configuration.getConcurrency(), terminationFlag)
+                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), terminationFlag)
                         .build()
                         .write(writeProperty, centrality, Translators.ATOMIC_DOUBLE_ARRAY_TRANSLATOR);
             });
@@ -273,7 +273,7 @@ public class BetweennessCentralityProc {
             final String writeProperty = configuration.getWriteProperty(DEFAULT_TARGET_PROPERTY);
             builder.timeWrite(() -> Exporter.of(api, graph)
                     .withLog(log)
-                    .parallel(Pools.DEFAULT, configuration.getConcurrency(), terminationFlag)
+                    .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), terminationFlag)
                     .build()
                     .write(
                             writeProperty,
@@ -333,7 +333,7 @@ public class BetweennessCentralityProc {
                 final String writeProperty = configuration.getWriteProperty(DEFAULT_TARGET_PROPERTY);
                 Exporter.of(api, graph)
                         .withLog(log)
-                        .parallel(Pools.DEFAULT, configuration.getConcurrency(), terminationFlag)
+                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), terminationFlag)
                         .build()
                         .write(writeProperty, centrality, Translators.ATOMIC_DOUBLE_ARRAY_TRANSLATOR);
             });
