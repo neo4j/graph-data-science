@@ -50,5 +50,25 @@ task shadowCopy(type: Copy) {
     into distributionDir
 }
 
-ci.finalizedBy shadowCopy
-cipr.finalizedBy shadowCopy
+task versionsJson {
+    ext.outFile = file("$distributionDir/versions.json")
+    def bucketUrl = "http://s3-eu-west-1.amazonaws.com/com.neo4j.graphalgorithms.dist"
+    def versionsJsonUrl = new URL("https://raw.githubusercontent.com/neo4j-contrib/neo4j-graph-algorithms/master/versions.json")
+    outputs.file(outFile)
+    doLast {
+        def versionsJson = new groovy.json.JsonSlurper().parse(versionsJsonUrl)
+        def indexedVersionsJson = versionsJson.collectEntries {
+            [(it.neo4j): it]
+        }
+        indexedVersionsJson[versions.neo4j] = [
+                'neo4j': versions.neo4j,
+                'version': project.version,
+                'url': "",
+                'jar': "$bucketUrl/${shadowJar.archiveName}",
+        ]
+        outFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(indexedVersionsJson.values()))
+    }
+}
+
+ci.finalizedBy shadowCopy, versionsJson
+cipr.finalizedBy shadowCopy, versionsJson
