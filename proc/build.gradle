@@ -50,29 +50,23 @@ task shadowCopy(type: Copy) {
     into distributionDir
 }
 
-import groovy.json.JsonSlurper
-import groovy.json.JsonOutput
-def updateVersionsJson(algoVersion, neo4jVersion) {
-    def bucketUrl = "http://s3-eu-west-1.amazonaws.com/com.neo4j.graphalgorithms.dist"
-    def url = new URL("https://raw.githubusercontent.com/neo4j-contrib/neo4j-graph-algorithms/master/versions.json")
-    def versionsJson = new JsonSlurper().parse(url)
-    def indexedVersionsJson = versionsJson.collectEntries {
-        [(it.neo4j): it]
-    }
-    indexedVersionsJson[neo4jVersion] = [
-            'neo4j': neo4jVersion,
-            'version': algoVersion,
-            'url': "",
-            'jar': "$bucketUrl/neo4j-graph-algorithms-$algoVersion-standalone.jar"
-    ]
-    JsonOutput.prettyPrint(JsonOutput.toJson(indexedVersionsJson.values()))
-}
-
 task versionsJson {
     ext.outFile = file("$distributionDir/versions.json")
-    outputs.file outFile
+    def bucketUrl = "http://s3-eu-west-1.amazonaws.com/com.neo4j.graphalgorithms.dist"
+    def versionsJsonUrl = new URL("https://raw.githubusercontent.com/neo4j-contrib/neo4j-graph-algorithms/master/versions.json")
+    outputs.file(outFile)
     doLast {
-        outFile.text = updateVersionsJson(project.version, versions.neo4j)
+        def versionsJson = new groovy.json.JsonSlurper().parse(versionsJsonUrl)
+        def indexedVersionsJson = versionsJson.collectEntries {
+            [(it.neo4j): it]
+        }
+        indexedVersionsJson[versions.neo4j] = [
+                'neo4j': versions.neo4j,
+                'version': project.version,
+                'url': "",
+                'jar': "$bucketUrl/${shadowJar.archiveName}",
+        ]
+        outFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(indexedVersionsJson.values()))
     }
 }
 
