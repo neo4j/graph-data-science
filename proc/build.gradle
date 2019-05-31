@@ -43,6 +43,7 @@ shadowJar {
     classifier = "standalone"
     minimize()
     exclude 'META-INF/versions/**/*'
+    from licenseFile
 }
 
 task shadowCopy(type: Copy) {
