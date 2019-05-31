@@ -44,6 +44,7 @@ shadowJar {
     minimize()
     exclude 'META-INF/versions/**/*'
     from licenseFile
+    from generateLicensesFiles
 }
 
 task shadowCopy(type: Copy) {
