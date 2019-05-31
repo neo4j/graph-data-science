@@ -21,10 +21,12 @@ package org.neo4j.graphalgo.algo;
 
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
-import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.AdditionalMatchers;
 import org.neo4j.graphalgo.BalancedTriadsProc;
+import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
@@ -77,16 +79,16 @@ public class BalancedTriadsIntegrationTest {
         DB.resolveDependency(Procedures.class).registerProcedure(BalancedTriadsProc.class);
     }
 
+    @Rule
+    public ExpectedException noSupportForHeavy = ExpectedException.none();
+
     @Test
-    @Ignore
     public void testHeavy() throws Exception {
+        noSupportForHeavy.expect(QueryExecutionException.class);
+        noSupportForHeavy.expectMessage("The graph algorithm only supports these graph types; [huge]");
         DB.execute(
-                "CALL algo.balancedTriads('Node', 'TYPE', {weightProperty:'w'}) YIELD loadMillis, computeMillis, writeMillis, nodeCount, balancedTriadCount, unbalancedTriadCount")
-                .accept(row -> {
-                    assertEquals(3L, row.getNumber("balancedTriadCount"));
-                    assertEquals(3L, row.getNumber("unbalancedTriadCount"));
-                    return true;
-                });
+                "CALL algo.balancedTriads('Node', 'TYPE', {weightProperty:'w', graph: 'heavy'}) YIELD loadMillis, computeMillis, writeMillis, nodeCount, balancedTriadCount, unbalancedTriadCount"
+        ).resultAsString();
     }
 
     @Test
@@ -101,18 +103,12 @@ public class BalancedTriadsIntegrationTest {
     }
 
     @Test
-    @Ignore
     public void testHeavyStream() throws Exception {
-        final BalancedTriadsConsumer mock = mock(BalancedTriadsConsumer.class);
-        DB.execute("CALL algo.balancedTriads.stream('Node', 'TYPE', {weightProperty:'w'}) YIELD nodeId, balanced, unbalanced")
-                .accept(row -> {
-                    final long nodeId = row.getNumber("nodeId").longValue();
-                    final double balanced = row.getNumber("balanced").doubleValue();
-                    final double unbalanced = row.getNumber("unbalanced").doubleValue();
-                    mock.consume(nodeId, balanced, unbalanced);
-                    return true;
-                });
-                verify(mock, times(7)).consume(anyLong(), AdditionalMatchers.eq(1.0, 3.0), AdditionalMatchers.eq(1.0, 3.0));
+        noSupportForHeavy.expect(QueryExecutionException.class);
+        noSupportForHeavy.expectMessage("The graph algorithm only supports these graph types; [huge]");
+        DB.execute(
+                "CALL algo.balancedTriads.stream('Node', 'TYPE', {weightProperty:'w', graph: 'heavy'}) YIELD nodeId, balanced, unbalanced"
+        ).resultAsString();
     }
 
     @Test

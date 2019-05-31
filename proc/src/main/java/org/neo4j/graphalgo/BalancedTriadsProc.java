@@ -23,6 +23,7 @@ import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.*;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
@@ -75,7 +76,7 @@ public class BalancedTriadsProc {
                 .withSort(true)
                 .withLog(log)
                 .asUndirected(true)
-                .load(configuration.getGraphImpl());
+                .load(configuration.getGraphImpl(HugeGraph.TYPE, HugeGraph.TYPE));
 
         // omit empty graphs
         if (graph.nodeCount() == 0) {
@@ -120,7 +121,7 @@ public class BalancedTriadsProc {
                     .withSort(true)
                     .withLog(log)
                     .asUndirected(true)
-                    .load(configuration.getGraphImpl());
+                    .load(configuration.getGraphImpl(HugeGraph.TYPE, HugeGraph.TYPE));
         }
 
         // compute
