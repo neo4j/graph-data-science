@@ -3,16 +3,16 @@ description = 'Neo4j Graph Algorithms :: Algorithms'
 dependencies {
     compile project(':community-core')
     
-    compile group: 'io.dropwizard.metrics',     name: 'metrics-core',       version: versions.metrics-core
-    compile group: 'org.hdrhistogram',          name: 'HdrHistogram',       version: versions.HdrHistogram
-    compile group: 'org.roaringbitmap',         name: 'RoaringBitmap',      version: versions.RoaringBitmap
+    compile group: 'io.dropwizard.metrics',     name: 'metrics-core',       version: versions.'metrics-core'
+    compile group: 'org.hdrhistogram',          name: 'HdrHistogram',       version: versions.'HdrHistogram'
+    compile group: 'org.roaringbitmap',         name: 'RoaringBitmap',      version: versions.'RoaringBitmap'
 
     testCompile project(':test-utils')
     
-    compileOnly group: 'org.neo4j',             name: 'neo4j',              version: versions.neo4j
-    testCompile group: 'org.neo4j.community',   name: 'it-test-support',    version: versions.neo4j
-    testCompile group: 'junit',                 name: 'junit',              version: versions.junit
-    testCompile group: 'org.hamcrest',          name: 'hamcrest-library',   version: versions.hamcrest
+    compileOnly group: 'org.neo4j',             name: 'neo4j',              version: versions.'neo4j'
+    testCompile group: 'org.neo4j.community',   name: 'it-test-support',    version: versions.'neo4j'
+    testCompile group: 'junit',                 name: 'junit',              version: versions.'junit'
+    testCompile group: 'org.hamcrest',          name: 'hamcrest-library',   version: versions.'hamcrest'
 }
 
 task javadocJar(type: Jar) {

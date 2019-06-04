@@ -12,21 +12,21 @@ repositories {
 dependencies {
     compile project(':proc')
 
-    jmh group: 'org.neo4j',            name: 'neo4j',              version: versions.neo4j
-    jmh group: 'org.neo4j',            name: 'neo4j-kernel',       version: versions.neo4j
-    jmh group: 'org.neo4j',            name: 'neo4j-io',           version: versions.neo4j
-    jmh group: 'org.neo4j.community',  name: 'it-test-support',    version: versions.neo4j
-    jmh group: 'org.neo4j',            name: 'procedure-compiler', version: versions.neo4j
-    jmh group: 'com.jprofiler',        name: 'jprofiler-agent',    version: versions.jprofiler-agent
+    jmh group: 'org.neo4j',            name: 'neo4j',              version: versions.'neo4j'
+    jmh group: 'org.neo4j',            name: 'neo4j-kernel',       version: versions.'neo4j'
+    jmh group: 'org.neo4j',            name: 'neo4j-io',           version: versions.'neo4j'
+    jmh group: 'org.neo4j.community',  name: 'it-test-support',    version: versions.'neo4j'
+    jmh group: 'org.neo4j',            name: 'procedure-compiler', version: versions.'neo4j'
+    jmh group: 'com.jprofiler',        name: 'jprofiler-agent',    version: versions.'jprofiler-agent'
     jmh("org.openjdk.jmh:jmh-core:${versions.jmh}") {
         exclude group: 'org.apache.commons', module: 'commons-math3'
     }
-    jmh group: 'org.openjdk.jmh',      name: 'jmh-core',         version: versions.jmh
-    jmh group: 'org.apache.commons',   name: 'commons-math3',    version: versions.commons-math3
-    jmh group: 'org.apache.commons',   name: 'commons-compress', version: versions.commons-compress
-    jmh group: 'org.mockito',          name: 'mockito-core',     version: versions.mockito
+    jmh group: 'org.openjdk.jmh',      name: 'jmh-core',         version: versions.'jmh'
+    jmh group: 'org.apache.commons',   name: 'commons-math3',    version: versions.'commons-math3'
+    jmh group: 'org.apache.commons',   name: 'commons-compress', version: versions.'commons-compress'
+    jmh group: 'org.mockito',          name: 'mockito-core',     version: versions.'mockito'
 
-    jmh group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: versions.jmh
+    jmh group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: versions.'jmh'
 }
 
 shadowJar {
