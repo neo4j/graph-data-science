@@ -23,9 +23,6 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 
 import java.util.function.Supplier;
 
-/**
- * @author mknblch
- */
 public class TestProgressLogger implements ProgressLogger {
 
     public static final ProgressLogger INSTANCE = new TestProgressLogger();
