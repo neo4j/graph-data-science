@@ -1,3 +1,5 @@
+description = 'Neo4j Graph Algorithms :: Procedures'
+
 apply plugin: 'com.github.johnrengelman.shadow'
 
 dependencies {
@@ -18,8 +20,6 @@ task javadocJar(type: Jar) {
     classifier = 'javadoc'
     from(javadoc.destinationDir)
 }
-
-description = 'Neo4j Graph Algorithms :: Procedures'
 
 tasks.withType(JavaCompile) {
     options.compilerArgs <<
