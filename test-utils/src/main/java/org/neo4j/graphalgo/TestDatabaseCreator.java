@@ -19,18 +19,12 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.Ignore;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
 import java.io.File;
 import java.util.UUID;
 
-/**
- * @author mh
- * @since 13.10.17
- */
-@Ignore
 public class TestDatabaseCreator {
 
     public static GraphDatabaseAPI createTestDatabase() {

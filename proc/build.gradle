@@ -5,6 +5,8 @@ dependencies {
 
     compileOnly group: 'org.neo4j',             name: 'neo4j',              version: versions.neo4j
 
+    testCompile project(':test-utils')
+
     testCompile group: 'org.neo4j.community',   name: 'it-test-support',    version: versions.neo4j
     testCompile group: 'junit',                 name: 'junit',              version: versions.junit
     testCompile group: 'org.hamcrest',          name: 'hamcrest-library',   version: versions.hamcrest

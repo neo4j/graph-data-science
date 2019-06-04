@@ -44,7 +44,7 @@ import static org.neo4j.graphdb.Direction.OUTGOING;
  * @author mknobloch
  */
 @RunWith(MockitoJUnitRunner.class)
-public abstract class SimpleGraphTestCase extends Neo4JTestCase {
+public abstract class SimpleGraphTestCase extends Neo4jTestCase {
 
     protected static Graph graph;
 

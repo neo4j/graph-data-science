@@ -1,5 +1,7 @@
 dependencies {
-    compile project(':test-utils')
+    compile project(':proc')
+    
+    testCompile project(':test-utils')
 }
 
 task javadocJar(type: Jar) {

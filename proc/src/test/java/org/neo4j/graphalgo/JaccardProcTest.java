@@ -20,8 +20,6 @@
 package org.neo4j.graphalgo;
 
 import org.junit.*;
-import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.JaccardProc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
