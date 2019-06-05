@@ -148,7 +148,9 @@ public final class LoadGraphProc {
 
     @Procedure(name = "algo.graph.info")
     @Description("CALL algo.graph.info(name:String, degreeDistribution:Boolean")
-    public Stream<GraphInfo> info(@Name("name") String name, @Name("degreeDistribution") Boolean degreeDistribution) {
+    public Stream<GraphInfo> info(
+            @Name("name") String name,
+            @Name(value = "degreeDistribution", defaultValue = "false") Boolean degreeDistribution) {
         Graph graph = LoadGraphFactory.get(name);
         final GraphInfo info;
         if (graph != null) {
