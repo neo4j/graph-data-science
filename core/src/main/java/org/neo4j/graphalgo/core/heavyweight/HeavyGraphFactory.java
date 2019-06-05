@@ -34,6 +34,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 /**
@@ -77,6 +78,7 @@ public class HeavyGraphFactory extends GraphFactory {
                 nodeCount,
                 concurrency,
                 batchSize);
+        AtomicLong relationshipCount = new AtomicLong();
         Collection<RelationshipImporter> tasks = ParallelUtil.readParallel(
                 concurrency,
                 actualBatchSize,
@@ -91,7 +93,8 @@ public class HeavyGraphFactory extends GraphFactory {
                         idMap,
                         matrix,
                         nodeIds,
-                        nodePropertySuppliers
+                        nodePropertySuppliers,
+                        relationshipCount
                 ),
                 threadPool);
 
@@ -99,6 +102,7 @@ public class HeavyGraphFactory extends GraphFactory {
                 matrix,
                 idMap,
                 nodePropertySuppliers,
+                relationshipCount.get(),
                 tasks);
 
         progressLogger.logDone(setup.tracker);
@@ -109,10 +113,11 @@ public class HeavyGraphFactory extends GraphFactory {
             final AdjacencyMatrix matrix,
             final IntIdMap idMap,
             final Map<String, Supplier<WeightMapping>> nodePropertySuppliers,
+            final long relationshipCount,
             Collection<RelationshipImporter> tasks) {
         if (tasks.size() == 1) {
             RelationshipImporter importer = tasks.iterator().next();
-            final Graph graph = importer.toGraph(idMap, matrix);
+            final Graph graph = importer.toGraph(idMap, matrix, relationshipCount);
             importer.release();
             return graph;
         }
@@ -128,6 +133,7 @@ public class HeavyGraphFactory extends GraphFactory {
         return new HeavyGraph(
                 idMap,
                 matrix,
+                relationshipCount,
                 nodeProperties);
     }
 

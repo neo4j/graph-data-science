@@ -108,6 +108,7 @@ public final class LoadGraphProc {
                     .asUndirected(stats.undirected)
                     .load(graphImpl);
             stats.nodes=graph.nodeCount();
+            stats.relationships=graph.relationshipCount();
             stats.loadMillis = timer.stop().getDuration();
             LoadGraphFactory.set(name, graph);
         }
@@ -119,7 +120,7 @@ public final class LoadGraphProc {
         public String name, graph, direction;
         public boolean undirected;
         public boolean sorted;
-        public long nodes, loadMillis;
+        public long nodes, relationships, loadMillis;
         public boolean alreadyLoaded;
         public String nodeWeight, relationshipWeight, nodeProperty, loadNodes, loadRelationships;
     }
@@ -133,6 +134,7 @@ public final class LoadGraphProc {
         if (graph != null) {
             info.type = graph.getType();
             info.nodes = graph.nodeCount();
+            info.relationships = graph.relationshipCount();
             info.exists = LoadGraphFactory.remove(name);
             info.removed = true;
         }
@@ -147,6 +149,7 @@ public final class LoadGraphProc {
         if (graph != null) {
             info.type = graph.getType();
             info.nodes = graph.nodeCount();
+            info.relationships = graph.relationshipCount();
             info.exists = true;
         }
         return Stream.of(info);
@@ -157,7 +160,7 @@ public final class LoadGraphProc {
         public String type;
         public boolean exists;
         public boolean removed;
-        public long nodes;
+        public long nodes, relationships;
 
         public GraphInfo(String name) {
             this.name = name;

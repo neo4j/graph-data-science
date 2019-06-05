@@ -158,6 +158,11 @@ public class GraphView implements Graph {
     }
 
     @Override
+    public long relationshipCount() {
+        return dimensions.maxRelCount();
+    }
+
+    @Override
     public void forEachNode(LongPredicate consumer) {
         idMapping.forEachNode(consumer);
     }

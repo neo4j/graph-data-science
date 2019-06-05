@@ -123,6 +123,11 @@ public class HugeGraph implements Graph {
     }
 
     @Override
+    public long relationshipCount() {
+        return -1L;
+    }
+
+    @Override
     public Collection<PrimitiveLongIterable> batchIterables(final int batchSize) {
         return idMapping.batchIterables(batchSize);
     }

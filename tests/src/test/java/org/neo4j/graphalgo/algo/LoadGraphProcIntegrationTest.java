@@ -108,6 +108,7 @@ public class LoadGraphProcIntegrationTest {
 
         runQuery(query, singletonMap("graph",graph), row -> {
             assertEquals(12, row.getNumber("nodes").intValue());
+            assertEquals(10, row.getNumber("relationships").intValue());
             assertEquals(graph, row.getString("graph"));
             assertFalse(row.getBoolean("alreadyLoaded"));
         });
@@ -164,6 +165,7 @@ public class LoadGraphProcIntegrationTest {
 
         runQuery("CALL algo.graph.info($name)", singletonMap("name","foo"), row -> {
             assertEquals(12, row.getNumber("nodes").intValue());
+            assertEquals(10, row.getNumber("relationships").intValue());
             assertEquals(graph, row.getString("type"));
             assertEquals("foo", row.getString("name"));
             assertFalse(row.getBoolean("removed"));
@@ -171,6 +173,7 @@ public class LoadGraphProcIntegrationTest {
         });
         runQuery("CALL algo.graph.remove($name)", singletonMap("name","foo"), row -> {
             assertEquals(12, row.getNumber("nodes").intValue());
+            assertEquals(10, row.getNumber("relationships").intValue());
             assertEquals(graph, row.getString("type"));
             assertEquals("foo", row.getString("name"));
             assertTrue(row.getBoolean("removed"));

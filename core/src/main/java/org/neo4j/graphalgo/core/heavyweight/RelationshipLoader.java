@@ -51,27 +51,31 @@ abstract class RelationshipLoader {
     abstract int load(NodeCursor sourceNode, int localNodeId);
 
     int readOutgoing(VisitRelationship visit, NodeCursor sourceNode, int localNodeId) {
-        final int outDegree = loadRelationships.degreeOut(sourceNode);
-        if (outDegree > 0) {
-            final int[] targets = matrix.armOut(localNodeId, outDegree);
-            final float[] weights = matrix.getOutWeights(localNodeId);
-            visit.prepareNextNode(localNodeId, targets, weights);
-            visitOut(sourceNode, visit);
-            matrix.setOutDegree(localNodeId, visit.flush());
+        int outDegree = loadRelationships.degreeOut(sourceNode);
+        if (outDegree <= 0) {
+            return outDegree;
         }
-        return outDegree;
+        final int[] targets = matrix.armOut(localNodeId, outDegree);
+        final float[] weights = matrix.getOutWeights(localNodeId);
+        visit.prepareNextNode(localNodeId, targets, weights);
+        visitOut(sourceNode, visit);
+        int finalOutDegree = visit.flush();
+        matrix.setOutDegree(localNodeId, finalOutDegree);
+        return finalOutDegree;
     }
 
     int readIncoming(VisitRelationship visit, NodeCursor sourceNode, int localNodeId) {
         final int inDegree = loadRelationships.degreeIn(sourceNode);
-        if (inDegree > 0) {
-            final int[] targets = matrix.armIn(localNodeId, inDegree);
-            final float[] weights = matrix.getInWeights(localNodeId);
-            visit.prepareNextNode(localNodeId, targets, weights);
-            visitIn(sourceNode, visit);
-            matrix.setInDegree(localNodeId, visit.flush());
+        if (inDegree <= 0) {
+            return inDegree;
         }
-        return inDegree;
+        final int[] targets = matrix.armIn(localNodeId, inDegree);
+        final float[] weights = matrix.getInWeights(localNodeId);
+        visit.prepareNextNode(localNodeId, targets, weights);
+        visitIn(sourceNode, visit);
+        int finalInDegree = visit.flush();
+        matrix.setInDegree(localNodeId, finalInDegree);
+        return finalInDegree;
     }
 
     int readUndirected(
@@ -80,16 +84,18 @@ abstract class RelationshipLoader {
             NodeCursor sourceNode,
             int localNodeId) {
         final int degree = loadRelationships.degreeUndirected(sourceNode);
-        if (degree > 0) {
-            final int[] targets = matrix.armOut(localNodeId, degree);
-            float[] weights = matrix.getOutWeights(localNodeId);
-            visitIn.prepareNextNode(localNodeId, targets, weights);
-            this.visitIn(sourceNode, visitIn);
-            visitOut.prepareNextNode(visitIn);
-            this.visitOut(sourceNode, visitOut);
-            matrix.setOutDegree(localNodeId, visitOut.flush());
+        if (degree <= 0) {
+            return degree;
         }
-        return degree;
+        final int[] targets = matrix.armOut(localNodeId, degree);
+        float[] weights = matrix.getOutWeights(localNodeId);
+        visitIn.prepareNextNode(localNodeId, targets, weights);
+        this.visitIn(sourceNode, visitIn);
+        visitOut.prepareNextNode(visitIn);
+        this.visitOut(sourceNode, visitOut);
+        int finalDegree = visitOut.flush();
+        matrix.setOutDegree(localNodeId, finalDegree);
+        return finalDegree;
     }
 
     void readNodeWeight(

@@ -56,6 +56,11 @@ public final class LouvainGraph implements Graph {
     }
 
     @Override
+    public long relationshipCount() {
+        return -1L;
+    }
+
+    @Override
     public void forEachRelationship(long nodeId, Direction direction, RelationshipConsumer consumer) {
         graph.forEach(nodeId, consumer);
     }

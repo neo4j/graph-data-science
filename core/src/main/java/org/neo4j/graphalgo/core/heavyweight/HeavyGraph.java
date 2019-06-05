@@ -48,6 +48,7 @@ public class HeavyGraph implements Graph {
     private final IntIdMap nodeIdMap;
     private AdjacencyMatrix container;
 
+    private final long relationshipCount;
     private Map<String, WeightMapping> nodePropertiesMapping;
 
     private boolean canRelease = true;
@@ -55,15 +56,22 @@ public class HeavyGraph implements Graph {
     public HeavyGraph(
             IntIdMap nodeIdMap,
             AdjacencyMatrix container,
+            long relationshipCount,
             Map<String, WeightMapping> nodePropertiesMapping) {
         this.nodeIdMap = nodeIdMap;
         this.container = container;
+        this.relationshipCount = relationshipCount;
         this.nodePropertiesMapping = nodePropertiesMapping;
     }
 
     @Override
     public long nodeCount() {
         return nodeIdMap.size();
+    }
+
+    @Override
+    public long relationshipCount() {
+        return relationshipCount;
     }
 
     @Override

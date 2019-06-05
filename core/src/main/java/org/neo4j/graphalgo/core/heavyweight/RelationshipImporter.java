@@ -23,8 +23,6 @@ import com.carrotsearch.hppc.LongDoubleMap;
 import com.carrotsearch.hppc.cursors.LongDoubleCursor;
 import org.neo4j.collection.primitive.PrimitiveIntIterable;
 import org.neo4j.collection.primitive.PrimitiveIntIterator;
-import org.neo4j.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.WeightMapping;
@@ -41,6 +39,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
@@ -59,22 +58,25 @@ final class RelationshipImporter extends StatementAction {
 
     private IntIdMap idMap;
     private AdjacencyMatrix matrix;
+    private final AtomicLong importedRelationships;
 
     private Map<String, WeightMapping> nodeProperties;
 
     RelationshipImporter(
-            GraphDatabaseAPI api,
-            GraphSetup setup,
-            GraphDimensions dimensions,
-            ImportProgress progress,
-            int batchSize,
-            int nodeOffset,
-            IntIdMap idMap,
-            AdjacencyMatrix matrix,
-            PrimitiveIntIterable nodes,
-            Map<String, Supplier<WeightMapping>> nodePropertiesSupplier) {
+            final GraphDatabaseAPI api,
+            final GraphSetup setup,
+            final GraphDimensions dimensions,
+            final ImportProgress progress,
+            final int batchSize,
+            final int nodeOffset,
+            final IntIdMap idMap,
+            final AdjacencyMatrix matrix,
+            final PrimitiveIntIterable nodes,
+            final Map<String, Supplier<WeightMapping>> nodePropertiesSupplier,
+            final AtomicLong importedRelationships) {
         super(api);
         this.matrix = matrix;
+        this.importedRelationships = importedRelationships;
         this.nodeSize = Math.min(batchSize, idMap.size() - nodeOffset);
         this.nodeOffset = nodeOffset;
         this.progress = progress;
@@ -101,6 +103,7 @@ final class RelationshipImporter extends StatementAction {
         CursorFactory cursors = transaction.cursors();
         final RelationshipLoader loader = prepare(transaction, readOp, cursors);
         PrimitiveIntIterator iterator = nodes.iterator();
+        long totalImported = 0L;
         try (NodeCursor nodeCursor = cursors.allocateNodeCursor()) {
             while (iterator.hasNext()) {
                 final int nodeId = iterator.next();
@@ -108,10 +111,13 @@ final class RelationshipImporter extends StatementAction {
                 readOp.singleNode(sourceNodeId, nodeCursor);
                 if (nodeCursor.next()) {
                     int imported = loader.load(nodeCursor, nodeId);
+                    // NOTE: imported is now how much we actualy stored, not how much read from the store
                     progress.relationshipsImported(imported);
+                    totalImported += imported;
                 }
             }
         }
+        importedRelationships.addAndGet(totalImported);
     }
 
     private RelationshipLoader prepare(
@@ -146,7 +152,13 @@ final class RelationshipImporter extends StatementAction {
         if (loadOutgoing) {
             final VisitRelationship visitor;
             if (shouldLoadWeights) {
-                visitor = new VisitOutgoingWithWeight(readOp, cursors, idMap, sort, relWeightId, setup.relationDefaultWeight);
+                visitor = new VisitOutgoingWithWeight(
+                        readOp,
+                        cursors,
+                        idMap,
+                        sort,
+                        relWeightId,
+                        setup.relationDefaultWeight);
             } else {
                 visitor = new VisitOutgoingNoWeight(idMap, sort);
             }
@@ -155,7 +167,13 @@ final class RelationshipImporter extends StatementAction {
         if (loadIncoming) {
             final VisitRelationship visitor;
             if (shouldLoadWeights) {
-                visitor = new VisitIncomingWithWeight(readOp, cursors, idMap, sort, relWeightId, setup.relationDefaultWeight);
+                visitor = new VisitIncomingWithWeight(
+                        readOp,
+                        cursors,
+                        idMap,
+                        sort,
+                        relWeightId,
+                        setup.relationDefaultWeight);
             } else {
                 visitor = new VisitIncomingNoWeight(idMap, sort);
             }
@@ -200,15 +218,15 @@ final class RelationshipImporter extends StatementAction {
         return new ReadUndirected(transaction, matrix, relationId, visitorOut, visitorIn);
     }
 
-    Graph toGraph(final IntIdMap idMap, final AdjacencyMatrix matrix) {
-
+    Graph toGraph(final IntIdMap idMap, final AdjacencyMatrix matrix, final long relationshipCount) {
         return new HeavyGraph(
                 idMap,
                 matrix,
+                relationshipCount,
                 nodeProperties);
     }
 
-    void writeInto(Map<String, WeightMapping> nodeProperties) {
+    void writeInto(final Map<String, WeightMapping> nodeProperties) {
         for (Map.Entry<String, WeightMapping> entry : this.nodeProperties.entrySet()) {
             combineMaps(nodeProperties.get(entry.getKey()), entry.getValue());
         }
@@ -220,7 +238,7 @@ final class RelationshipImporter extends StatementAction {
         this.nodeProperties = null;
     }
 
-    private void combineMaps(WeightMapping global, WeightMapping local) {
+    private void combineMaps(final WeightMapping global, final WeightMapping local) {
         if (global instanceof WeightMap && local instanceof WeightMap) {
             WeightMap localWeights = (WeightMap) local;
             final LongDoubleMap localMap = localWeights.weights();
