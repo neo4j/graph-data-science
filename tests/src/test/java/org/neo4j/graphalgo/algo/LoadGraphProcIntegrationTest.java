@@ -184,6 +184,35 @@ public class LoadGraphProcIntegrationTest {
         });
     }
 
+    @Test
+    public void degreeDistribution() {
+        db.execute("CALL algo.graph.load('foo',null,null,{graph:$graph})", singletonMap("graph",graph)).close();
+
+        runQuery("CALL algo.graph.info($name, true)", singletonMap("name","foo"), row -> {
+            assertEquals(5, row.getNumber("max").intValue());
+            assertEquals(0, row.getNumber("min").intValue());
+            assertEquals(0.8333333, row.getNumber("mean").doubleValue(), 1e-4);
+            assertEquals(0, row.getNumber("p50").intValue());
+            assertEquals(0, row.getNumber("p75").intValue());
+            assertEquals(5, row.getNumber("p90").intValue());
+            assertEquals(5, row.getNumber("p95").intValue());
+            assertEquals(5, row.getNumber("p99").intValue());
+            assertEquals(5, row.getNumber("p999").intValue());
+        });
+
+        runQuery("CALL algo.graph.info($name, false)", singletonMap("name","foo"), row -> {
+            assertEquals(0, row.getNumber("max").intValue());
+            assertEquals(0, row.getNumber("min").intValue());
+            assertEquals(0, row.getNumber("mean").intValue());
+            assertEquals(0, row.getNumber("p50").intValue());
+            assertEquals(0, row.getNumber("p75").intValue());
+            assertEquals(0, row.getNumber("p90").intValue());
+            assertEquals(0, row.getNumber("p95").intValue());
+            assertEquals(0, row.getNumber("p99").intValue());
+            assertEquals(0, row.getNumber("p999").intValue());
+        });
+    }
+
     private void runQuery(String query, Map<String, Object> params, Consumer<Result.ResultRow> check) {
         try (Result result = db.execute(query, params)) {
             result.accept(row -> {

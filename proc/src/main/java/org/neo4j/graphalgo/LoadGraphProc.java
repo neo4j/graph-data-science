@@ -19,12 +19,16 @@
  */
 package org.neo4j.graphalgo;
 
+import org.HdrHistogram.AtomicHistogram;
+import org.HdrHistogram.Histogram;
+import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
+import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -107,6 +111,7 @@ public final class LoadGraphProc {
                     .withSort(stats.sorted)
                     .asUndirected(stats.undirected)
                     .load(graphImpl);
+
             stats.nodes=graph.nodeCount();
             stats.relationships=graph.relationshipCount();
             stats.loadMillis = timer.stop().getDuration();
@@ -142,17 +147,50 @@ public final class LoadGraphProc {
     }
 
     @Procedure(name = "algo.graph.info")
-    @Description("CALL algo.graph.info(name:String")
-    public Stream<GraphInfo> info(@Name("name") String name) {
-        GraphInfo info = new GraphInfo(name);
+    @Description("CALL algo.graph.info(name:String, degreeDistribution:Boolean")
+    public Stream<GraphInfo> info(@Name("name") String name, @Name("degreeDistribution") Boolean degreeDistribution) {
         Graph graph = LoadGraphFactory.get(name);
+        final GraphInfo info;
         if (graph != null) {
+            if (Boolean.TRUE.equals(degreeDistribution)) {
+                // TODO: read concurrency and direction from config map
+                Histogram distribution = degreeDistribution(graph, Pools.DEFAULT_CONCURRENCY, Direction.OUTGOING);
+                info = new GraphInfo(name, distribution);
+            } else {
+                info = new GraphInfo(name);
+            }
             info.type = graph.getType();
             info.nodes = graph.nodeCount();
             info.relationships = graph.relationshipCount();
             info.exists = true;
+        } else {
+            info = new GraphInfo(name);
         }
         return Stream.of(info);
+    }
+
+    private Histogram degreeDistribution(Graph graph, final int concurrency, final Direction direction) {
+        int batchSize = Math.toIntExact(ParallelUtil.adjustBatchSize(
+                graph.nodeCount(),
+                concurrency,
+                ParallelUtil.DEFAULT_BATCH_SIZE));
+        AtomicHistogram histogram = new AtomicHistogram(graph.relationshipCount(), 3);
+
+        ParallelUtil.readParallel(
+                concurrency,
+                batchSize,
+                graph,
+                Pools.DEFAULT,
+                (nodeOffset, nodeIds) -> () -> {
+                    PrimitiveLongIterator iterator = nodeIds.iterator();
+                    while (iterator.hasNext()) {
+                        long nodeId = iterator.next();
+                        int degree = graph.degree(nodeId, direction);
+                        histogram.recordValue(degree);
+                    }
+                }
+        );
+        return histogram;
     }
 
     public static class GraphInfo {
@@ -161,9 +199,24 @@ public final class LoadGraphProc {
         public boolean exists;
         public boolean removed;
         public long nodes, relationships;
+        public long p50, p75, p90, p95, p99, p999, max, min;
+        public double mean;
 
         public GraphInfo(String name) {
             this.name = name;
+        }
+
+        public GraphInfo(String name, Histogram histogram) {
+            this.name = name;
+            this.max = histogram.getMaxValue();
+            this.min = histogram.getMinValue();
+            this.mean = histogram.getMean();
+            this.p50 = histogram.getValueAtPercentile(50);
+            this.p75 = histogram.getValueAtPercentile(75);
+            this.p90 = histogram.getValueAtPercentile(90);
+            this.p95 = histogram.getValueAtPercentile(95);
+            this.p99 = histogram.getValueAtPercentile(99);
+            this.p999 = histogram.getValueAtPercentile(99.9);
         }
     }
 }
