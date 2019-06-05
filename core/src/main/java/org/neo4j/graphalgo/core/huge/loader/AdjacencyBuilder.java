@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfObjectArray;
@@ -52,7 +53,8 @@ abstract class AdjacencyBuilder {
             HugeAdjacencyBuilder adjacency,
             int numPages,
             int pageSize,
-            AllocationTracker tracker) {
+            AllocationTracker tracker,
+            AtomicLong relationshipCount) {
         if (adjacency == null) {
             return NoAdjacency.INSTANCE;
         }
@@ -61,7 +63,7 @@ abstract class AdjacencyBuilder {
         final CompressedLongArray[][] targets = new CompressedLongArray[numPages][];
         LongsRef[] buffers = new LongsRef[numPages];
         long[][] degrees = new long[numPages][];
-        return new CompressingPagedAdjacency(adjacency, builders, targets, buffers, degrees, pageSize);
+        return new CompressingPagedAdjacency(adjacency, builders, targets, buffers, degrees, pageSize, relationshipCount);
     }
 
     private static final class CompressingPagedAdjacency extends AdjacencyBuilder {
@@ -76,6 +78,7 @@ abstract class AdjacencyBuilder {
         private final long pageMask;
         private final long sizeOfLongPage;
         private final long sizeOfObjectPage;
+        private final AtomicLong relationshipCount;
 
         private CompressingPagedAdjacency(
                 HugeAdjacencyBuilder adjacency,
@@ -83,7 +86,8 @@ abstract class AdjacencyBuilder {
                 CompressedLongArray[][] targets,
                 LongsRef[] buffers,
                 long[][] degrees,
-                int pageSize) {
+                int pageSize,
+                AtomicLong relationshipCount) {
             this.adjacency = adjacency;
             this.builders = builders;
             this.targets = targets;
@@ -94,6 +98,7 @@ abstract class AdjacencyBuilder {
             this.pageMask = (long) (pageSize - 1);
             sizeOfLongPage = sizeOfLongArray(pageSize);
             sizeOfObjectPage = sizeOfObjectArray(pageSize);
+            this.relationshipCount = relationshipCount;
         }
 
         @Override
@@ -159,7 +164,11 @@ abstract class AdjacencyBuilder {
                     compressedTargets.addDeltas(targets, startOffset, endOffset);
                     int currentDegree = compressedTargets.length();
                     if (currentDegree >= degree) {
-                        builder.applyVariableDeltaEncoding(compressedTargets, this.buffers[pageIndex], localId);
+                        int importedRelationships = builder.applyVariableDeltaEncoding(
+                                compressedTargets,
+                                this.buffers[pageIndex],
+                                localId);
+                        relationshipCount.addAndGet(importedRelationships);
                         this.targets[pageIndex][localId] = null;
                     }
 
@@ -179,13 +188,15 @@ abstract class AdjacencyBuilder {
                 HugeAdjacencyBuilder builder = builders[index];
                 CompressedLongArray[] allTargets = targets[index];
                 LongsRef buffer = buffers[index];
+                long importedRelationships = 0L;
                 for (int localId = 0; localId < allTargets.length; ++localId) {
                     CompressedLongArray target = allTargets[localId];
                     if (target != null) {
-                        builder.applyVariableDeltaEncoding(target, buffer, localId);
+                        importedRelationships += builder.applyVariableDeltaEncoding(target, buffer, localId);
                         allTargets[localId] = null;
                     }
                 }
+                relationshipCount.addAndGet(importedRelationships);
             });
             return Arrays.asList(runnables);
         }

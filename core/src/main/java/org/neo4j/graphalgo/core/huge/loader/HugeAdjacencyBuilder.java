@@ -89,7 +89,7 @@ class HugeAdjacencyBuilder {
         lock.unlock();
     }
 
-    final void applyVariableDeltaEncoding(
+    final int applyVariableDeltaEncoding(
             CompressedLongArray array,
             LongsRef buffer,
             int localId) {
@@ -100,6 +100,7 @@ class HugeAdjacencyBuilder {
         long address = copyIds(storage, requiredBytes, degree);
         offsets[localId] = address;
         array.release();
+        return degree;
     }
 
     private synchronized long copyIds(byte[] targets, int requiredBytes, int degree) {
@@ -122,7 +123,8 @@ class HugeAdjacencyBuilder {
             final HugeWeightMapping weights,
             final Map<String, HugeWeightMapping> nodeProperties,
             final HugeAdjacencyBuilder inAdjacency,
-            final HugeAdjacencyBuilder outAdjacency) {
+            final HugeAdjacencyBuilder outAdjacency,
+            final long relationshipCount) {
 
         HugeAdjacencyList outAdjacencyList = null;
         HugeAdjacencyOffsets outOffsets = null;
@@ -138,7 +140,7 @@ class HugeAdjacencyBuilder {
         }
 
         return new HugeGraph(
-                tracker, idMapping, weights, nodeProperties,
+                tracker, idMapping, weights, nodeProperties, relationshipCount,
                 inAdjacencyList, outAdjacencyList, inOffsets, outOffsets
         );
     }

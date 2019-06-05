@@ -86,6 +86,7 @@ public class HugeGraph implements Graph {
 
     private HugeWeightMapping weights;
     private Map<String, HugeWeightMapping> nodeProperties;
+    private final long relationshipCount;
     private HugeAdjacencyList inAdjacency;
     private HugeAdjacencyList outAdjacency;
     private HugeAdjacencyOffsets inOffsets;
@@ -100,6 +101,7 @@ public class HugeGraph implements Graph {
             final IdMap idMapping,
             final HugeWeightMapping weights,
             final Map<String, HugeWeightMapping> nodeProperties,
+            final long relationshipCount,
             final HugeAdjacencyList inAdjacency,
             final HugeAdjacencyList outAdjacency,
             final HugeAdjacencyOffsets inOffsets,
@@ -108,6 +110,7 @@ public class HugeGraph implements Graph {
         this.tracker = tracker;
         this.weights = weights;
         this.nodeProperties = nodeProperties;
+        this.relationshipCount = relationshipCount;
         this.inAdjacency = inAdjacency;
         this.outAdjacency = outAdjacency;
         this.inOffsets = inOffsets;
@@ -124,7 +127,7 @@ public class HugeGraph implements Graph {
 
     @Override
     public long relationshipCount() {
-        return -1L;
+        return relationshipCount;
     }
 
     @Override
@@ -270,7 +273,7 @@ public class HugeGraph implements Graph {
                 idMapping,
                 weights,
                 nodeProperties,
-                inAdjacency,
+                relationshipCount, inAdjacency,
                 outAdjacency,
                 inOffsets,
                 outOffsets

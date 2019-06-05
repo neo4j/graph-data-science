@@ -98,7 +98,6 @@ public final class UnionFindSafetyTest {
         }
     }
 
-
     private static final class FlakyGraph implements Graph {
         private final int nodes;
         private final int maxDegree;
@@ -119,6 +118,11 @@ public final class UnionFindSafetyTest {
         @Override
         public long nodeCount() {
             return (long) nodes;
+        }
+
+        @Override
+        public long relationshipCount() {
+            return - 1L;
         }
 
         @Override

@@ -28,9 +28,10 @@ import org.neo4j.kernel.impl.store.record.RelationshipRecord;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
 
 
-final class ScanningRelationshipsImporter extends ScanningRecordsImporter<RelationshipRecord, Void> {
+final class ScanningRelationshipsImporter extends ScanningRecordsImporter<RelationshipRecord, Long> {
 
     private final GraphSetup setup;
     private final ImportProgress progress;
@@ -40,6 +41,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
     private final boolean loadDegrees;
     private final HugeAdjacencyBuilder outAdjacency;
     private final HugeAdjacencyBuilder inAdjacency;
+    private final AtomicLong relationshipCount;
 
     ScanningRelationshipsImporter(
             GraphSetup setup,
@@ -69,6 +71,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         this.loadDegrees = loadDegrees;
         this.outAdjacency = outAdjacency;
         this.inAdjacency = inAdjacency;
+        this.relationshipCount = new AtomicLong();
     }
 
     @Override
@@ -81,8 +84,8 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         int numberOfPages = sizing.numberOfPages();
 
         WeightBuilder weightBuilder = WeightBuilder.of(weights, numberOfPages, pageSize, nodeCount, tracker);
-        AdjacencyBuilder outBuilder = AdjacencyBuilder.compressing(outAdjacency, numberOfPages, pageSize, tracker);
-        AdjacencyBuilder inBuilder = AdjacencyBuilder.compressing(inAdjacency, numberOfPages, pageSize, tracker);
+        AdjacencyBuilder outBuilder = AdjacencyBuilder.compressing(outAdjacency, numberOfPages, pageSize, tracker, relationshipCount);
+        AdjacencyBuilder inBuilder = AdjacencyBuilder.compressing(inAdjacency, numberOfPages, pageSize, tracker, relationshipCount);
 
         for (int idx = 0; idx < numberOfPages; idx++) {
             weightBuilder.addWeightImporter(idx);
@@ -100,7 +103,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
     }
 
     @Override
-    Void build() {
-        return null;
+    Long build() {
+        return relationshipCount.get();
     }
 }

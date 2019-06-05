@@ -115,7 +115,7 @@ public final class HugeGraphFactory extends GraphFactory {
                 ? new HugeWeightMapBuilder.NullBuilder(setup.relationDefaultWeight)
                 : new HugeWeightMapBuilder(tracker, weightProperty, setup.relationDefaultWeight);
 
-        new ScanningRelationshipsImporter(
+        long relationshipCount = new ScanningRelationshipsImporter(
                 setup, api, dimensions, progress, tracker, idsAndProperties.hugeIdMap, weightsBuilder,
                 LOAD_DEGREES, outAdjacency, inAdjacency, threadPool, concurrency)
                 .call(setup.log);
@@ -127,7 +127,8 @@ public final class HugeGraphFactory extends GraphFactory {
                 weights,
                 idsAndProperties.properties,
                 inAdjacency,
-                outAdjacency);
+                outAdjacency,
+                relationshipCount);
     }
 
 }
