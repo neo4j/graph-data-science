@@ -30,6 +30,11 @@ tasks.withType(JavaCompile) {
             '-ADocumentation.ExportGrouping=SINGLE'
 }
 
+test {
+    useJUnit()
+    maxHeapSize = "1G"
+}
+
 publishing {
     publications {
         algo(MavenPublication) {
