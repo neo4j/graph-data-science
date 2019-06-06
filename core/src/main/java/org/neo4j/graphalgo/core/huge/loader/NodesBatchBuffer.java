@@ -46,7 +46,7 @@ final class NodesBatchBuffer implements RecordConsumer<NodeRecord> {
 
     boolean scan(AbstractStorePageCacheScanner<NodeRecord>.Cursor cursor) {
         length = 0;
-        return cursor.bulkNext(this) && length > 0;
+        return cursor.bulkNext(this);
     }
 
     @Override

@@ -49,7 +49,7 @@ final class RelationshipsBatchBuffer implements RecordConsumer<RelationshipRecor
 
     boolean scan(AbstractStorePageCacheScanner<RelationshipRecord>.Cursor cursor) {
         length = 0;
-        return cursor.bulkNext(this) && length > 0;
+        return cursor.bulkNext(this);
     }
 
     @Override
