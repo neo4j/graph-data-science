@@ -48,9 +48,9 @@ abstract class RelationshipLoader {
         this.loadRelationships = other.loadRelationships;
     }
 
-    abstract int load(NodeCursor sourceNode, int localNodeId);
+    abstract long load(NodeCursor sourceNode, int localNodeId);
 
-    int readOutgoing(VisitRelationship visit, NodeCursor sourceNode, int localNodeId) {
+    long readOutgoing(VisitRelationship visit, NodeCursor sourceNode, int localNodeId) {
         int outDegree = loadRelationships.degreeOut(sourceNode);
         if (outDegree <= 0) {
             return outDegree;
@@ -61,10 +61,10 @@ abstract class RelationshipLoader {
         visitOut(sourceNode, visit);
         int finalOutDegree = visit.flush();
         matrix.setOutDegree(localNodeId, finalOutDegree);
-        return finalOutDegree;
+        return RawValues.combineIntInt(outDegree, finalOutDegree);
     }
 
-    int readIncoming(VisitRelationship visit, NodeCursor sourceNode, int localNodeId) {
+    long readIncoming(VisitRelationship visit, NodeCursor sourceNode, int localNodeId) {
         final int inDegree = loadRelationships.degreeIn(sourceNode);
         if (inDegree <= 0) {
             return inDegree;
@@ -75,10 +75,10 @@ abstract class RelationshipLoader {
         visitIn(sourceNode, visit);
         int finalInDegree = visit.flush();
         matrix.setInDegree(localNodeId, finalInDegree);
-        return finalInDegree;
+        return RawValues.combineIntInt(inDegree, finalInDegree);
     }
 
-    int readUndirected(
+    long readUndirected(
             VisitRelationship visitOut,
             VisitRelationship visitIn,
             NodeCursor sourceNode,
@@ -95,7 +95,7 @@ abstract class RelationshipLoader {
         this.visitOut(sourceNode, visitOut);
         int finalDegree = visitOut.flush();
         matrix.setOutDegree(localNodeId, finalDegree);
-        return finalDegree;
+        return RawValues.combineIntInt(degree, finalDegree);
     }
 
     void readNodeWeight(
@@ -138,7 +138,7 @@ final class ReadNothing extends RelationshipLoader {
     }
 
     @Override
-    int load(NodeCursor sourceNode, int localNodeId) {
+    long load(NodeCursor sourceNode, int localNodeId) {
         return 0;
     }
 }
@@ -156,7 +156,7 @@ final class ReadOutgoing extends RelationshipLoader {
     }
 
     @Override
-    int load(NodeCursor sourceNode, int localNodeId) {
+    long load(NodeCursor sourceNode, int localNodeId) {
         return readOutgoing(visitOutgoing, sourceNode, localNodeId);
     }
 }
@@ -174,7 +174,7 @@ final class ReadIncoming extends RelationshipLoader {
     }
 
     @Override
-    int load(NodeCursor sourceNode, int localNodeId) {
+    long load(NodeCursor sourceNode, int localNodeId) {
         return readIncoming(visitIncoming, sourceNode, localNodeId);
     }
 }
@@ -190,9 +190,13 @@ final class ReadBoth extends RelationshipLoader {
     }
 
     @Override
-    int load(NodeCursor sourceNode, int localNodeId) {
-        return readOutgoing(visitOutgoing, sourceNode, localNodeId)
-                + readIncoming(visitIncoming, sourceNode, localNodeId);
+    long load(NodeCursor sourceNode, int localNodeId) {
+        long out = readOutgoing(visitOutgoing, sourceNode, localNodeId);
+        long in = readIncoming(visitIncoming, sourceNode, localNodeId);
+        return RawValues.combineIntInt(
+                RawValues.getHead(out) + RawValues.getHead(in),
+                RawValues.getTail(out) + RawValues.getTail(in)
+        );
     }
 }
 
@@ -212,7 +216,7 @@ final class ReadUndirected extends RelationshipLoader {
     }
 
     @Override
-    int load(NodeCursor sourceNode, int localNodeId) {
+    long load(NodeCursor sourceNode, int localNodeId) {
         return readUndirected(visitOutgoing, visitIncoming, sourceNode, localNodeId);
     }
 }
@@ -230,8 +234,8 @@ final class ReadWithNodeProperties extends RelationshipLoader {
     }
 
     @Override
-    int load(NodeCursor sourceNode, int localNodeId) {
-        int imported = loader.load(sourceNode, localNodeId);
+    long load(NodeCursor sourceNode, int localNodeId) {
+        long imported = loader.load(sourceNode, localNodeId);
         for (WeightMap nodeProperty : nodeProperties) {
             readNodeWeight(sourceNode, localNodeId, nodeProperty, nodeProperty.propertyId());
         }

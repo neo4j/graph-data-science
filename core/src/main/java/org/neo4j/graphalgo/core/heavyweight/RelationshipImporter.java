@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.graphalgo.core.WeightMap;
 import org.neo4j.graphalgo.core.utils.ImportProgress;
+import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.StatementAction;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.NodeCursor;
@@ -110,10 +111,11 @@ final class RelationshipImporter extends StatementAction {
                 final long sourceNodeId = idMap.toOriginalNodeId(nodeId);
                 readOp.singleNode(sourceNodeId, nodeCursor);
                 if (nodeCursor.next()) {
-                    int imported = loader.load(nodeCursor, nodeId);
-                    // NOTE: imported is now how much we actualy stored, not how much read from the store
-                    progress.relationshipsImported(imported);
-                    totalImported += imported;
+                    long importedCombined = loader.load(nodeCursor, nodeId);
+                    int readRelationships = RawValues.getHead(importedCombined);
+                    int importedRelationships = RawValues.getTail(importedCombined);
+                    progress.relationshipsImported(readRelationships);
+                    totalImported += importedRelationships;
                 }
             }
         }

@@ -88,7 +88,6 @@ public class UnionFindsTest {
                 .withAnyLabel()
                 .withRelationshipType(RELATIONSHIP_TYPE)
                 .load(graphImpl);
-        System.out.println(graph.getClass().getSimpleName());
     }
 
     private static void createTestGraph(int... setSizes) {
