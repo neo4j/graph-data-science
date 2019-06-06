@@ -211,6 +211,47 @@ public class LoadGraphProcIntegrationTest {
             assertEquals(0, row.getNumber("p99").intValue());
             assertEquals(0, row.getNumber("p999").intValue());
         });
+
+        runQuery("CALL algo.graph.info($name, {})", singletonMap("name","foo"), row -> {
+            assertEquals(0, row.getNumber("max").intValue());
+            assertEquals(0, row.getNumber("min").intValue());
+            assertEquals(0, row.getNumber("mean").intValue());
+            assertEquals(0, row.getNumber("p50").intValue());
+            assertEquals(0, row.getNumber("p75").intValue());
+            assertEquals(0, row.getNumber("p90").intValue());
+            assertEquals(0, row.getNumber("p95").intValue());
+            assertEquals(0, row.getNumber("p99").intValue());
+            assertEquals(0, row.getNumber("p999").intValue());
+        });
+
+        runQuery("CALL algo.graph.info($name, null)", singletonMap("name","foo"), row -> {
+            assertEquals(0, row.getNumber("max").intValue());
+            assertEquals(0, row.getNumber("min").intValue());
+            assertEquals(0, row.getNumber("mean").intValue());
+            assertEquals(0, row.getNumber("p50").intValue());
+            assertEquals(0, row.getNumber("p75").intValue());
+            assertEquals(0, row.getNumber("p90").intValue());
+            assertEquals(0, row.getNumber("p95").intValue());
+            assertEquals(0, row.getNumber("p99").intValue());
+            assertEquals(0, row.getNumber("p999").intValue());
+        });
+    }
+
+    @Test
+    public void incomingDegreeDistribution() {
+        db.execute("CALL algo.graph.load('foo',null,null,{graph:$graph, direction:'IN'})", singletonMap("graph",graph)).close();
+
+        runQuery("CALL algo.graph.info($name, {direction:'IN'})", singletonMap("name","foo"), row -> {
+            assertEquals(1, row.getNumber("max").intValue());
+            assertEquals(0, row.getNumber("min").intValue());
+            assertEquals(0.8333333, row.getNumber("mean").doubleValue(), 1e-4);
+            assertEquals(1, row.getNumber("p50").intValue());
+            assertEquals(1, row.getNumber("p75").intValue());
+            assertEquals(1, row.getNumber("p90").intValue());
+            assertEquals(1, row.getNumber("p95").intValue());
+            assertEquals(1, row.getNumber("p99").intValue());
+            assertEquals(1, row.getNumber("p999").intValue());
+        });
     }
 
     private void runQuery(String query, Map<String, Object> params, Consumer<Result.ResultRow> check) {

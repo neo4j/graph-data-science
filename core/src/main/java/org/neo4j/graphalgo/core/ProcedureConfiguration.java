@@ -379,13 +379,24 @@ public class ProcedureConfiguration {
         return config.get(key);
     }
 
+    public Boolean getBool(String key, boolean defaultValue) {
+        Object value = config.get(key);
+        if (value == null) {
+            return defaultValue;
+        }
+        if (!(value instanceof Boolean)) {
+            throw new IllegalArgumentException("The value of " + key + " must be a boolean.");
+        }
+        return (Boolean) value;
+    }
+
     public Number getNumber(String key, Number defaultValue) {
         Object value = config.get(key);
         if (null == value) {
             return defaultValue;
         }
         if (!(value instanceof Number)) {
-            throw new IllegalArgumentException("The value of " + key + " must Number type");
+            throw new IllegalArgumentException("The value of " + key + " must be a Number type.");
         }
         return (Number) value;
     }

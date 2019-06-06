@@ -37,8 +37,12 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
-import org.neo4j.procedure.*;
+import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -76,9 +80,9 @@ public final class LoadGraphProc {
 
         LoadGraphStats stats = new LoadGraphStats();
         stats.name = name;
-        stats.graph = configuration.getString(ProcedureConstants.GRAPH_IMPL_PARAM,"heavy");
-        stats.undirected = configuration.get("undirected",false);
-        stats.sorted = configuration.get("sorted",false);
+        stats.graph = configuration.getString(ProcedureConstants.GRAPH_IMPL_PARAM, "heavy");
+        stats.undirected = configuration.get("undirected", false);
+        stats.sorted = configuration.get("sorted", false);
         stats.loadNodes = label;
         stats.loadRelationships = relationshipType;
         stats.direction = direction.name();
@@ -112,8 +116,8 @@ public final class LoadGraphProc {
                     .asUndirected(stats.undirected)
                     .load(graphImpl);
 
-            stats.nodes=graph.nodeCount();
-            stats.relationships=graph.relationshipCount();
+            stats.nodes = graph.nodeCount();
+            stats.relationships = graph.relationshipCount();
             stats.loadMillis = timer.stop().getDuration();
             LoadGraphFactory.set(name, graph);
         }
@@ -131,7 +135,7 @@ public final class LoadGraphProc {
     }
 
     @Procedure(name = "algo.graph.remove")
-    @Description("CALL algo.graph.remove(name:String")
+    @Description("CALL algo.graph.remove(name:String)")
     public Stream<GraphInfo> remove(@Name("name") String name) {
         GraphInfo info = new GraphInfo(name);
 
@@ -147,16 +151,34 @@ public final class LoadGraphProc {
     }
 
     @Procedure(name = "algo.graph.info")
-    @Description("CALL algo.graph.info(name:String, degreeDistribution:Boolean")
+    @Description("CALL algo.graph.info(name:String, " +
+            "degreeDistribution:bool | { direction:'OUT/IN/BOTH', concurrency:int }) " +
+            "YIELD name, type, exists, nodes, relationships")
     public Stream<GraphInfo> info(
             @Name("name") String name,
-            @Name(value = "degreeDistribution", defaultValue = "false") Boolean degreeDistribution) {
+            @Name(value = "degreeDistribution", defaultValue = "null") Object degreeDistribution) {
         Graph graph = LoadGraphFactory.get(name);
         final GraphInfo info;
         if (graph != null) {
+
+            final boolean calculatedegreeDistribution;
+            final ProcedureConfiguration configuration;
             if (Boolean.TRUE.equals(degreeDistribution)) {
-                // TODO: read concurrency and direction from config map
-                Histogram distribution = degreeDistribution(graph, Pools.DEFAULT_CONCURRENCY, Direction.OUTGOING);
+                calculatedegreeDistribution = true;
+                configuration = ProcedureConfiguration.create(Collections.emptyMap());
+            } else if (degreeDistribution instanceof Map) {
+                @SuppressWarnings("unchecked") Map<String, Object> config = (Map) degreeDistribution;
+                calculatedegreeDistribution = !config.isEmpty();
+                configuration = ProcedureConfiguration.create(config);
+            } else {
+                calculatedegreeDistribution = false;
+                configuration = null;
+            }
+
+            if (calculatedegreeDistribution) {
+                final Direction direction = configuration.getDirection(Direction.OUTGOING);
+                int concurrency = configuration.getReadConcurrency();
+                Histogram distribution = degreeDistribution(graph, concurrency, direction);
                 info = new GraphInfo(name, distribution);
             } else {
                 info = new GraphInfo(name);
@@ -209,7 +231,7 @@ public final class LoadGraphProc {
         }
 
         public GraphInfo(String name, Histogram histogram) {
-            this.name = name;
+            this(name);
             this.max = histogram.getMaxValue();
             this.min = histogram.getMinValue();
             this.mean = histogram.getMean();
