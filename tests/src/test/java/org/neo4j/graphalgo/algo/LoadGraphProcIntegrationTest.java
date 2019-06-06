@@ -26,10 +26,10 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.neo4j.graphalgo.LoadGraphProc;
-import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
 import org.neo4j.graphalgo.LabelPropagationProc;
+import org.neo4j.graphalgo.LoadGraphProc;
 import org.neo4j.graphalgo.PageRankProc;
+import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.graphdb.Result;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -72,6 +72,7 @@ public class LoadGraphProcIntegrationTest {
         return Arrays.asList(
                 new Object[]{"heavy"},
                 new Object[]{"huge"},
+                new Object[]{"cypher"},
                 new Object[]{"kernel"}
         );
     }
@@ -104,9 +105,11 @@ public class LoadGraphProcIntegrationTest {
 
     @Test
     public void shouldLoadGraph() {
-        String query = "CALL algo.graph.load('foo',null,null,{graph:$graph})";
+        String query = graph.equals("cypher")
+                ? "CALL algo.graph.load('foo', 'MATCH (n) return id(n) as id','MATCH (s)-->(t) RETURN id(s) as source, id(t) as target', {graph:$graph})"
+                : "CALL algo.graph.load('foo',null,null,{graph:$graph})";
 
-        runQuery(query, singletonMap("graph",graph), row -> {
+        runQuery(query, singletonMap("graph", graph), row -> {
             assertEquals(12, row.getNumber("nodes").intValue());
             assertEquals(10, row.getNumber("relationships").intValue());
             assertEquals(graph, row.getString("graph"));
@@ -116,32 +119,43 @@ public class LoadGraphProcIntegrationTest {
 
     @Test
     public void shouldUseLoadedGraph() {
-        db.execute("CALL algo.graph.load('foo',null,null,{graph:$graph})", singletonMap("graph",graph)).close();
+        String query = graph.equals("cypher")
+                ? "CALL algo.graph.load('foo', 'MATCH (n) return id(n) as id','MATCH (s)-->(t) RETURN id(s) as source, id(t) as target', {graph:$graph})"
+                : "CALL algo.graph.load('foo',null,null,{graph:$graph})";
 
-        String query = "CALL algo.pageRank(null,null,{graph:$name,write:false})";
-        runQuery(query, singletonMap("name","foo"), row -> {
+        db.execute(query, singletonMap("graph", graph)).close();
+
+        query = "CALL algo.pageRank(null,null,{graph:$name,write:false})";
+        runQuery(query, singletonMap("name", "foo"), row -> {
             assertEquals(12, row.getNumber("nodes").intValue());
         });
     }
 
     @Test
     public void multiUseLoadedGraph() {
-        db.execute("CALL algo.graph.load('foo',null,null,{graph:$graph})", singletonMap("graph",graph)).close();
+        String query = graph.equals("cypher")
+                ? "CALL algo.graph.load('foo', 'MATCH (n) return id(n) as id','MATCH (s)-->(t) RETURN id(s) as source, id(t) as target', {graph:$graph})"
+                : "CALL algo.graph.load('foo',null,null,{graph:$graph})";
 
-        String query = "CALL algo.pageRank(null,null,{graph:$name,write:false})";
-        runQuery(query, singletonMap("name","foo"), row -> {
+        db.execute(query, singletonMap("graph", graph)).close();
+
+        query = "CALL algo.pageRank(null,null,{graph:$name,write:false})";
+        runQuery(query, singletonMap("name", "foo"), row -> {
             assertEquals(12, row.getNumber("nodes").intValue());
         });
-        runQuery(query, singletonMap("name","foo"), row -> {
+        runQuery(query, singletonMap("name", "foo"), row -> {
             assertEquals(12, row.getNumber("nodes").intValue());
         });
     }
 
     @Test
     public void shouldWorkWithLimitedTypes() {
-        db.execute("CALL algo.graph.load('foo',null,null,{graph:$graph})", singletonMap("graph",graph)).close();
+        String query = graph.equals("cypher")
+                ? "CALL algo.graph.load('foo', 'MATCH (n) return id(n) as id','MATCH (s)-->(t) RETURN id(s) as source, id(t) as target', {graph:$graph})"
+                : "CALL algo.graph.load('foo',null,null,{graph:$graph})";
+        db.execute(query, singletonMap("graph", graph)).close();
 
-        String query = "CALL algo.labelPropagation(null,null,null,{graph:$name,write:false})";
+        query = "CALL algo.labelPropagation(null,null,null,{graph:$name,write:false})";
         try {
             runQuery(query, singletonMap("name", "foo"), row -> {
                 assertEquals(12, row.getNumber("nodes").intValue());
@@ -153,32 +167,40 @@ public class LoadGraphProcIntegrationTest {
 
     @Test
     public void dontDoubleLoad() {
-        String call = "CALL algo.graph.load('foo',null,null,{graph:$graph}) yield alreadyLoaded as loaded RETURN loaded";
+        String query = graph.equals("cypher")
+                ? "CALL algo.graph.load('foo', 'MATCH (n) return id(n) as id','MATCH (s)-->(t) RETURN id(s) as source, id(t) as target', {graph:$graph})"
+                : "CALL algo.graph.load('foo',null,null,{graph:$graph})";
+
+        query += " YIELD alreadyLoaded AS loaded RETURN loaded";
+
         Map<String, Object> params = singletonMap("graph", this.graph);
-        assertFalse(db.execute(call, params).<Boolean>columnAs("loaded").next());
-        assertTrue(db.execute(call, params).<Boolean>columnAs("loaded").next());
+        assertFalse(db.execute(query, params).<Boolean>columnAs("loaded").next());
+        assertTrue(db.execute(query, params).<Boolean>columnAs("loaded").next());
     }
 
     @Test
     public void removeGraph() {
-        db.execute("CALL algo.graph.load('foo',null,null,{graph:$graph})", singletonMap("graph",graph)).close();
+        String query = graph.equals("cypher")
+                ? "CALL algo.graph.load('foo', 'MATCH (n) return id(n) as id','MATCH (s)-->(t) RETURN id(s) as source, id(t) as target', {graph:$graph})"
+                : "CALL algo.graph.load('foo',null,null,{graph:$graph})";
+        db.execute(query, singletonMap("graph", graph)).close();
 
-        runQuery("CALL algo.graph.info($name)", singletonMap("name","foo"), row -> {
+        runQuery("CALL algo.graph.info($name)", singletonMap("name", "foo"), row -> {
             assertEquals(12, row.getNumber("nodes").intValue());
             assertEquals(10, row.getNumber("relationships").intValue());
-            assertEquals(graph, row.getString("type"));
+            assertEquals(graph.equals("cypher") ? "heavy" : graph, row.getString("type"));
             assertEquals("foo", row.getString("name"));
             assertFalse(row.getBoolean("removed"));
             assertTrue(row.getBoolean("exists"));
         });
-        runQuery("CALL algo.graph.remove($name)", singletonMap("name","foo"), row -> {
+        runQuery("CALL algo.graph.remove($name)", singletonMap("name", "foo"), row -> {
             assertEquals(12, row.getNumber("nodes").intValue());
             assertEquals(10, row.getNumber("relationships").intValue());
-            assertEquals(graph, row.getString("type"));
+            assertEquals(graph.equals("cypher") ? "heavy" : graph, row.getString("type"));
             assertEquals("foo", row.getString("name"));
             assertTrue(row.getBoolean("removed"));
         });
-        runQuery("CALL algo.graph.info($name)", singletonMap("name","foo"), row -> {
+        runQuery("CALL algo.graph.info($name)", singletonMap("name", "foo"), row -> {
             assertEquals("foo", row.getString("name"));
             assertFalse(row.getBoolean("exists"));
         });
@@ -186,9 +208,12 @@ public class LoadGraphProcIntegrationTest {
 
     @Test
     public void degreeDistribution() {
-        db.execute("CALL algo.graph.load('foo',null,null,{graph:$graph})", singletonMap("graph",graph)).close();
+        String query = graph.equals("cypher")
+                ? "CALL algo.graph.load('foo', 'MATCH (n) return id(n) as id','MATCH (s)-->(t) RETURN id(s) as source, id(t) as target', {graph:$graph})"
+                : "CALL algo.graph.load('foo',null,null,{graph:$graph})";
+        db.execute(query, singletonMap("graph", graph)).close();
 
-        runQuery("CALL algo.graph.info($name, true)", singletonMap("name","foo"), row -> {
+        runQuery("CALL algo.graph.info($name, true)", singletonMap("name", "foo"), row -> {
             assertEquals(5, row.getNumber("max").intValue());
             assertEquals(0, row.getNumber("min").intValue());
             assertEquals(0.8333333, row.getNumber("mean").doubleValue(), 1e-4);
@@ -200,7 +225,7 @@ public class LoadGraphProcIntegrationTest {
             assertEquals(5, row.getNumber("p999").intValue());
         });
 
-        runQuery("CALL algo.graph.info($name, false)", singletonMap("name","foo"), row -> {
+        runQuery("CALL algo.graph.info($name, false)", singletonMap("name", "foo"), row -> {
             assertEquals(0, row.getNumber("max").intValue());
             assertEquals(0, row.getNumber("min").intValue());
             assertEquals(0, row.getNumber("mean").intValue());
@@ -212,7 +237,7 @@ public class LoadGraphProcIntegrationTest {
             assertEquals(0, row.getNumber("p999").intValue());
         });
 
-        runQuery("CALL algo.graph.info($name, {})", singletonMap("name","foo"), row -> {
+        runQuery("CALL algo.graph.info($name, {})", singletonMap("name", "foo"), row -> {
             assertEquals(0, row.getNumber("max").intValue());
             assertEquals(0, row.getNumber("min").intValue());
             assertEquals(0, row.getNumber("mean").intValue());
@@ -224,7 +249,7 @@ public class LoadGraphProcIntegrationTest {
             assertEquals(0, row.getNumber("p999").intValue());
         });
 
-        runQuery("CALL algo.graph.info($name, null)", singletonMap("name","foo"), row -> {
+        runQuery("CALL algo.graph.info($name, null)", singletonMap("name", "foo"), row -> {
             assertEquals(0, row.getNumber("max").intValue());
             assertEquals(0, row.getNumber("min").intValue());
             assertEquals(0, row.getNumber("mean").intValue());
@@ -239,9 +264,15 @@ public class LoadGraphProcIntegrationTest {
 
     @Test
     public void incomingDegreeDistribution() {
-        db.execute("CALL algo.graph.load('foo',null,null,{graph:$graph, direction:'IN'})", singletonMap("graph",graph)).close();
+        String query = graph.equals("cypher")
+                ? "CALL algo.graph.load('foo', 'MATCH (n) return id(n) as id','MATCH (s)<--(t) RETURN id(s) as source, id(t) as target', {graph:$graph})"
+                : "CALL algo.graph.load('foo',null,null,{graph:$graph, direction:'IN'})";
+        db.execute(query, singletonMap("graph", graph)).close();
 
-        runQuery("CALL algo.graph.info($name, {direction:'IN'})", singletonMap("name","foo"), row -> {
+        query = graph.equals("cypher")
+                ? "CALL algo.graph.info($name, {direction:'OUT'})"
+                : "CALL algo.graph.info($name, {direction:'IN'})";
+        runQuery(query, singletonMap("name", "foo"), row -> {
             assertEquals(1, row.getNumber("max").intValue());
             assertEquals(0, row.getNumber("min").intValue());
             assertEquals(0.8333333, row.getNumber("mean").doubleValue(), 1e-4);

@@ -64,11 +64,10 @@ public class HeavyCypherGraphFactory extends GraphFactory {
             nodePropertyMappings.put(entry.getKey().propertyName, entry.getValue());
         }
 
-        // TODO: calculate relationships
         return new HeavyGraph(
                 nodes.idMap,
                 relationships.matrix(),
-                -1L,
+                relationshipLoader.importedRelationships(),
                 nodePropertyMappings);
     }
 }

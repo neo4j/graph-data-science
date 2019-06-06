@@ -27,6 +27,8 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Result;
 
+import java.util.concurrent.atomic.LongAdder;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -41,11 +43,13 @@ public class RelationshipRowVisitorTest {
         when(row1.getNumber("source")).thenReturn(0L);
         when(row1.getNumber("target")).thenReturn(1L);
 
-        RelationshipRowVisitor visitor = new RelationshipRowVisitor(idMap, false, 0d, matrix, DuplicateRelationshipsStrategy.NONE);
+        LongAdder relationshipCount = new LongAdder();
+        RelationshipRowVisitor visitor = new RelationshipRowVisitor(idMap, false, 0d, matrix, DuplicateRelationshipsStrategy.NONE, relationshipCount);
         visitor.visit(row1);
         visitor.visit(row1);
 
         assertEquals(2, matrix.degree(0, Direction.OUTGOING));
+        assertEquals(2, relationshipCount.sum());
     }
 
     @Test
@@ -56,11 +60,14 @@ public class RelationshipRowVisitorTest {
         when(row.getNumber("source")).thenReturn(0L);
         when(row.getNumber("target")).thenReturn(1L);
 
-        RelationshipRowVisitor visitor = new RelationshipRowVisitor(idMap(), false, 0d, matrix, DuplicateRelationshipsStrategy.SKIP);
+        LongAdder relationshipCount = new LongAdder();
+        RelationshipRowVisitor visitor = new RelationshipRowVisitor(idMap(), false, 0d, matrix, DuplicateRelationshipsStrategy.SKIP,
+                relationshipCount);
         visitor.visit(row);
         visitor.visit(row);
 
         assertEquals(1, matrix.degree(0, Direction.OUTGOING));
+        assertEquals(1, relationshipCount.sum());
     }
 
     @Test
@@ -72,12 +79,15 @@ public class RelationshipRowVisitorTest {
         when(row.getNumber("target")).thenReturn(1L);
         when(row.get("weight")).thenReturn(3.0, 7.0);
 
-        RelationshipRowVisitor visitor = new RelationshipRowVisitor(idMap(), true, 0d, matrix, DuplicateRelationshipsStrategy.SUM);
+        LongAdder relationshipCount = new LongAdder();
+        RelationshipRowVisitor visitor = new RelationshipRowVisitor(idMap(), true, 0d, matrix, DuplicateRelationshipsStrategy.SUM,
+                relationshipCount);
         visitor.visit(row);
         visitor.visit(row);
 
         assertEquals(1, matrix.degree(0, Direction.OUTGOING));
         assertEquals(10.0, matrix.getOutgoingWeight(0, matrix.outgoingIndex(0, 1)), 0.01);
+        assertEquals(1, relationshipCount.sum());
     }
 
     @Test
@@ -89,12 +99,15 @@ public class RelationshipRowVisitorTest {
         when(row.getNumber("target")).thenReturn(1L);
         when(row.get("weight")).thenReturn(3.0, 7.0);
 
-        RelationshipRowVisitor visitor = new RelationshipRowVisitor(idMap(), true, 0d, matrix, DuplicateRelationshipsStrategy.MIN);
+        LongAdder relationshipCount = new LongAdder();
+        RelationshipRowVisitor visitor = new RelationshipRowVisitor(idMap(), true, 0d, matrix, DuplicateRelationshipsStrategy.MIN,
+                relationshipCount);
         visitor.visit(row);
         visitor.visit(row);
 
         assertEquals(1, matrix.degree(0, Direction.OUTGOING));
         assertEquals(3.0, matrix.getOutgoingWeight(0, matrix.outgoingIndex(0, 1)), 0.01);
+        assertEquals(1, relationshipCount.sum());
     }
 
     @Test
@@ -106,12 +119,15 @@ public class RelationshipRowVisitorTest {
         when(row.getNumber("target")).thenReturn(1L);
         when(row.get("weight")).thenReturn(3.0, 7.0);
 
-        RelationshipRowVisitor visitor = new RelationshipRowVisitor(idMap(), true, 0d, matrix, DuplicateRelationshipsStrategy.MAX);
+        LongAdder relationshipCount = new LongAdder();
+        RelationshipRowVisitor visitor = new RelationshipRowVisitor(idMap(), true, 0d, matrix, DuplicateRelationshipsStrategy.MAX,
+                relationshipCount);
         visitor.visit(row);
         visitor.visit(row);
 
         assertEquals(1, matrix.degree(0, Direction.OUTGOING));
         assertEquals(7.0, matrix.getOutgoingWeight(0, matrix.outgoingIndex(0, 1)), 0.01);
+        assertEquals(1, relationshipCount.sum());
     }
 
     private IntIdMap idMap() {

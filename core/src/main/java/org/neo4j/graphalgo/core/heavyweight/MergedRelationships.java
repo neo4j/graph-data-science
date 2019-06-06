@@ -23,17 +23,22 @@ import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.DuplicateRelationshipsStrategy;
 import org.neo4j.graphdb.Direction;
 
+import java.util.concurrent.atomic.LongAdder;
+
 import static org.neo4j.graphalgo.core.heavyweight.HeavyGraph.checkSize;
 
 public class MergedRelationships {
     private final AdjacencyMatrix matrix;
+    private final LongAdder relationshipCount;
     private boolean hasRelationshipWeights;
     private DuplicateRelationshipsStrategy duplicateRelationshipsStrategy;
 
     public MergedRelationships(
             int nodeCount,
             GraphSetup setup,
-            DuplicateRelationshipsStrategy duplicateRelationshipsStrategy) {
+            DuplicateRelationshipsStrategy duplicateRelationshipsStrategy,
+            LongAdder relationshipCount) {
+        this.relationshipCount = relationshipCount;
         this.matrix = new AdjacencyMatrix(
                 nodeCount,
                 setup.shouldLoadRelationshipWeight(),
@@ -58,7 +63,9 @@ public class MergedRelationships {
                                 (int) target,
                                 matrix,
                                 hasRelationshipWeights,
-                                weight);
+                                weight,
+                                relationshipCount
+                        );
                         return true;
                     });
                     return true;

@@ -28,17 +28,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.LongAdder;
 
-import static org.neo4j.graphalgo.core.heavyweight.CypherLoadingUtils.newWeightMapping;
 import static org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory.NO_BATCH;
 
 public class CypherRelationshipLoader {
     private final GraphDatabaseAPI api;
     private final GraphSetup setup;
+    private final LongAdder relationshipCount;
 
     public CypherRelationshipLoader(GraphDatabaseAPI api, GraphSetup setup) {
         this.api = api;
         this.setup = setup;
+        relationshipCount = new LongAdder();
     }
 
     public Relationships load(Nodes nodes) {
@@ -53,7 +55,7 @@ public class CypherRelationshipLoader {
         int threads = setup.concurrency();
         int nodeCount = nodes.idMap.size();
 
-        MergedRelationships mergedRelationships = new MergedRelationships(nodeCount, setup, setup.duplicateRelationshipsStrategy);
+        MergedRelationships mergedRelationships = new MergedRelationships(nodeCount, setup, setup.duplicateRelationshipsStrategy, relationshipCount);
 
         long offset = 0;
         long lastOffset = 0;
@@ -93,10 +95,13 @@ public class CypherRelationshipLoader {
         boolean hasRelationshipWeights = setup.shouldLoadRelationshipWeight();
         final AdjacencyMatrix matrix = new AdjacencyMatrix(nodeCount, hasRelationshipWeights, setup.relationDefaultWeight, false, setup.tracker);
 
-        RelationshipRowVisitor visitor = new RelationshipRowVisitor(idMap, hasRelationshipWeights, setup.relationDefaultWeight, matrix, setup.duplicateRelationshipsStrategy);
+        RelationshipRowVisitor visitor = new RelationshipRowVisitor(idMap, hasRelationshipWeights, setup.relationDefaultWeight, matrix, setup.duplicateRelationshipsStrategy, relationshipCount);
         api.execute(setup.relationshipType, CypherLoadingUtils.params(setup.params, offset, batchSize)).accept(visitor);
         return new Relationships(offset, visitor.rows(), matrix);
     }
 
+    long importedRelationships() {
+        return relationshipCount.sum();
+    }
 
 }

@@ -23,6 +23,8 @@ import org.neo4j.graphalgo.core.DuplicateRelationshipsStrategy;
 import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.graphdb.Result;
 
+import java.util.concurrent.atomic.LongAdder;
+
 class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private long lastSourceId = -1, lastTargetId = -1;
     private int source = -1, target = -1;
@@ -32,13 +34,21 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private double defaultWeight;
     private AdjacencyMatrix matrix;
     private DuplicateRelationshipsStrategy duplicateRelationshipsStrategy;
+    private final LongAdder relationshipCount;
 
-    RelationshipRowVisitor(IntIdMap idMap, boolean hasRelationshipWeights, double defaultWeight, AdjacencyMatrix matrix, DuplicateRelationshipsStrategy duplicateRelationshipsStrategy) {
+    RelationshipRowVisitor(
+            IntIdMap idMap,
+            boolean hasRelationshipWeights,
+            double defaultWeight,
+            AdjacencyMatrix matrix,
+            DuplicateRelationshipsStrategy duplicateRelationshipsStrategy,
+            LongAdder relationshipCount) {
         this.idMap = idMap;
         this.hasRelationshipWeights = hasRelationshipWeights;
         this.defaultWeight = defaultWeight;
         this.matrix = matrix;
         this.duplicateRelationshipsStrategy = duplicateRelationshipsStrategy;
+        this.relationshipCount = relationshipCount;
     }
 
     @Override
@@ -61,14 +71,22 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
             return true;
         }
 
-        duplicateRelationshipsStrategy.handle(source, target, matrix, hasRelationshipWeights, defaultWeight, () -> extractWeight(row));
+        duplicateRelationshipsStrategy.handle(
+                source,
+                target,
+                matrix,
+                hasRelationshipWeights,
+                defaultWeight,
+                () -> extractWeight(row),
+                relationshipCount
+        );
 
         return true;
     }
 
     private Number extractWeight(Result.ResultRow row) {
         Object weight = CypherLoadingUtils.getProperty(row, "weight");
-        return weight instanceof  Number ? ((Number) weight).doubleValue() : null;
+        return weight instanceof Number ? ((Number) weight).doubleValue() : null;
     }
 
     public long rows() {
