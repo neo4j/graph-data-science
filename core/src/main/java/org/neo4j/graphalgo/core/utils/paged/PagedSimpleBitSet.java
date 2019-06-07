@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.utils.paged;
 
 import org.neo4j.graphalgo.core.utils.traverse.SimpleBitSet;
 
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.shallowSizeOfInstance;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
 /**
@@ -33,7 +33,7 @@ public class PagedSimpleBitSet extends PagedDataStructure<SimpleBitSet> {
 
     static {
         int pageSize = PageUtil.pageSizeFor(Double.BYTES);
-        long pageUsage = shallowSizeOfInstance(SimpleBitSet.class) + sizeOfLongArray(pageSize);
+        long pageUsage = sizeOfInstance(SimpleBitSet.class) + sizeOfLongArray(pageSize);
 
         ALLOCATOR_FACTORY = PageAllocator.of(
                 pageSize,

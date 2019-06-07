@@ -36,7 +36,7 @@ import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.core.heavyweight.HeavyGraph.checkSize;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.shallowSizeOfInstance;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
@@ -114,7 +114,7 @@ public class IntIdMap {
     }
 
     public void buildMappedIds(AllocationTracker tracker) {
-        tracker.add(shallowSizeOfInstance(IntIdMap.class));
+        tracker.add(sizeOfInstance(IntIdMap.class));
         tracker.add(sizeOfLongArray(nodeToGraphIds.keys.length));
         tracker.add(sizeOfIntArray(nodeToGraphIds.values.length));
         tracker.add(sizeOfLongArray(size()));

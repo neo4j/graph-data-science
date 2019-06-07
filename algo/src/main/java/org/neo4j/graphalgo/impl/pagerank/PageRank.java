@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.shallowSizeOfInstance;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.graphalgo.core.utils.paged.AllocationTracker.humanReadable;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
@@ -373,7 +373,7 @@ public class PageRank extends Algorithm<PageRank> {
     private static long estimateMemoryUsagePerThread(long nodeCount, int concurrency) {
         int nodesPerThread = (int) Math.ceil((double) nodeCount / (double) concurrency);
         long partitions = sizeOfIntArray(nodesPerThread) * (long) concurrency;
-        return shallowSizeOfInstance(BaseComputeStep.class) + partitions;
+        return sizeOfInstance(BaseComputeStep.class) + partitions;
     }
 
     private static long memoryUsageFor(
@@ -402,10 +402,10 @@ public class PageRank extends Algorithm<PageRank> {
         }
 
         perThreadUsage *= stepSize;
-        perThreadUsage += shallowSizeOfInstance(BaseComputeStep.class);
+        perThreadUsage += sizeOfInstance(BaseComputeStep.class);
         perThreadUsage += sizeOfObjectArray(stepSize);
 
-        sharedUsage += shallowSizeOfInstance(ComputeSteps.class);
+        sharedUsage += sizeOfInstance(ComputeSteps.class);
         sharedUsage += sizeOfLongArray(stepSize) << 1;
 
         return sharedUsage + perThreadUsage;

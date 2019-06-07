@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.utils.paged;
 
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.shallowSizeOfInstance;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
 
 public final class PagedAtomicDoubleArray extends PagedDataStructure<AtomicDoubleArray> {
@@ -30,7 +30,7 @@ public final class PagedAtomicDoubleArray extends PagedDataStructure<AtomicDoubl
 
     static {
         int pageSize = PageUtil.pageSizeFor(Double.BYTES);
-        long pageUsage = shallowSizeOfInstance(AtomicDoubleArray.class) + sizeOfIntArray(pageSize);
+        long pageUsage = sizeOfInstance(AtomicDoubleArray.class) + sizeOfIntArray(pageSize);
 
         ALLOCATOR_FACTORY = PageAllocator.of(
                 pageSize,

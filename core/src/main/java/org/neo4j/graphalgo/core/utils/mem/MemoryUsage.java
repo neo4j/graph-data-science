@@ -203,7 +203,7 @@ public final class MemoryUsage {
      *
      * @throws IllegalArgumentException if {@code clazz} is an array class.
      */
-    public static long shallowSizeOfInstance(Class<?> clazz) {
+    public static long sizeOfInstance(Class<?> clazz) {
         if (clazz.isArray()) {
             throw new IllegalArgumentException(
                     "This method does not work with array classes.");
