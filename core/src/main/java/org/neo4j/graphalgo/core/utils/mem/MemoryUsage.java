@@ -248,6 +248,25 @@ public final class MemoryUsage {
         return 1 << SHIFT_OBJECT_REF;
     }
 
+    private static final String[] UNITS = new String[]{" Bytes", " KiB", " MiB", " GiB", " TiB", " PiB", " EiB", " ZiB", " YiB"};
+
+    /**
+     * Returns <code>size</code> in human-readable units.
+     */
+    public static String humanReadable(long bytes) {
+        for (String unit : UNITS) {
+            // allow for a bit of overflow before going to the next unit to
+            // show a diff between, say, 1.1 and 1.2 MiB as 1150 KiB vs 1250 KiB
+            if (bytes >> 14 == 0) {
+                return bytes + unit;
+            }
+            bytes = bytes >> 10;
+        }
+        // we can never arrive here, longs are not large enough to
+        // represent > 16384 yobibytes
+        return null;
+    }
+
     private MemoryUsage() {
         throw new UnsupportedOperationException("No instances");
     }

@@ -56,7 +56,7 @@ import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.core.utils.paged.AllocationTracker.humanReadable;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
 
 class ScanningMain<Record extends AbstractBaseRecord> extends BaseMain {
 

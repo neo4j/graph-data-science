@@ -39,9 +39,9 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
-import static org.neo4j.graphalgo.core.utils.paged.AllocationTracker.humanReadable;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;

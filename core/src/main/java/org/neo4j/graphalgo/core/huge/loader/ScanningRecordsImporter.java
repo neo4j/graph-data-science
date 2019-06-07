@@ -31,7 +31,7 @@ import java.math.RoundingMode;
 import java.util.concurrent.ExecutorService;
 
 import static org.neo4j.graphalgo.core.huge.loader.AbstractStorePageCacheScanner.DEFAULT_PREFETCH_SIZE;
-import static org.neo4j.graphalgo.core.utils.paged.AllocationTracker.humanReadable;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
 
 
 abstract class ScanningRecordsImporter<Record extends AbstractBaseRecord, T> {
