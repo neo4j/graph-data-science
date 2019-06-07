@@ -23,8 +23,16 @@ import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.Algorithm;
-import org.neo4j.graphalgo.api.*;
+import org.neo4j.graphalgo.api.Degrees;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.api.NodeIterator;
+import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphalgo.impl.results.DoubleArrayResult;
@@ -39,6 +47,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 
+import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
@@ -165,6 +174,39 @@ public class PageRank extends Algorithm<PageRank> {
         this.dampingFactor = dampingFactor;
         this.sourceNodeIds = sourceNodeIds;
         this.pageRankVariant = pageRankVariant;
+    }
+
+    @Override
+    public MemoryEstimation memoryRequirements() {
+        return MemoryEstimations.builder(PageRank.class)
+                .add(MemoryEstimations.of("computeSteps", (dimensions, concurrency) -> {
+                    // adjust concurrency, if necessary
+                    long nodeCount = dimensions.nodeCount();
+                    long nodesPerThread = ceilDiv(nodeCount, concurrency);
+                    if (nodesPerThread > Partition.MAX_NODE_COUNT) {
+                        concurrency = (int) ceilDiv(nodeCount, Partition.MAX_NODE_COUNT);
+                        nodesPerThread = ceilDiv(nodeCount, concurrency);
+                        while (nodesPerThread > Partition.MAX_NODE_COUNT) {
+                            concurrency++;
+                            nodesPerThread = ceilDiv(nodeCount, concurrency);
+                        }
+                    }
+                    int partitionSize = (int) nodesPerThread;
+
+                    // single ComputeStep instance
+                    long perThreadUsage = pageRankVariant.estimateMemoryPerThread(concurrency, partitionSize);
+
+                    long instanceUsage = sizeOfInstance(ComputeSteps.class);
+                    // scores[] wrapper
+                    instanceUsage += sizeOfObjectArray(concurrency);
+                    // starts[] and lengths[]
+                    instanceUsage += 2 * sizeOfLongArray(concurrency);
+                    // list of computeSteps
+                    instanceUsage += sizeOfObjectArray(concurrency);
+
+                    return MemoryRange.of(instanceUsage + concurrency * perThreadUsage);
+                }))
+                .build();
     }
 
     /**
