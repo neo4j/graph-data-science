@@ -74,6 +74,10 @@ public abstract class GraphFactory {
         }
     }
 
+    public GraphDimensions dimensions() {
+        return this.dimensions;
+    }
+
     protected ImportProgress importProgress(
             ProgressLogger progressLogger,
             GraphDimensions dimensions,
