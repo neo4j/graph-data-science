@@ -665,7 +665,7 @@ public class AdjacencyMatrix {
             int[] neighboursB = outgoing[nodeB];
             int[] jointNeighbours = Intersections.getIntersection(neighboursA, outDegreeA, neighboursB, outDegreeB);
             for (int nodeC : jointNeighbours) {
-                if (nodeB < nodeC) consumer.accept(nodeA,nodeB,nodeC);
+                if (nodeB < nodeC) consumer.accept(nodeA, nodeB, nodeC);
             }
         }
     }

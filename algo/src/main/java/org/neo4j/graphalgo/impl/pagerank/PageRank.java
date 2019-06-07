@@ -328,7 +328,8 @@ public class PageRank extends Algorithm<PageRank> {
                 long required = memoryUsageFor(concurrency, partitions);
                 long newRequired = memoryUsageFor(maxConcurrency, partitions);
                 long available = availableMemory();
-                log.warn("Requested concurrency of %d would require %s Heap but only %s are available, PageRank will be throttled to a concurrency of %d to use only %s Heap.",
+                log.warn(
+                        "Requested concurrency of %d would require %s Heap but only %s are available, PageRank will be throttled to a concurrency of %d to use only %s Heap.",
                         concurrency,
                         humanReadable(required),
                         humanReadable(available),
@@ -527,7 +528,7 @@ public class PageRank extends Algorithm<PageRank> {
             }
 
             l2Norm = Math.sqrt(l2Norm);
-            l2Norm = l2Norm < 0 ? 1: l2Norm;
+            l2Norm = l2Norm < 0 ? 1 : l2Norm;
             return l2Norm;
         }
 
@@ -552,7 +553,7 @@ public class PageRank extends Algorithm<PageRank> {
         }
 
         private void release() {
-             if (AllocationTracker.isTracking(tracker)) {
+            if (AllocationTracker.isTracking(tracker)) {
                 tracker.remove((scores.length + 1) * sizeOfObjectArray(scores.length));
             }
             steps.clear();
