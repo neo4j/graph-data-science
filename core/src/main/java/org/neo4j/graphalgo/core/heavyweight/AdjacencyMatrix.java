@@ -21,9 +21,14 @@ package org.neo4j.graphalgo.core.heavyweight;
 
 import org.apache.lucene.util.ArrayUtil;
 import org.neo4j.collection.primitive.PrimitiveIntIterator;
-import org.neo4j.graphalgo.api.*;
+import org.neo4j.graphalgo.api.IntersectionConsumer;
+import org.neo4j.graphalgo.api.RelationshipConsumer;
+import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
+import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.Intersections;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 
@@ -164,6 +169,40 @@ public class AdjacencyMatrix {
             assert(outOffsets != null);
             return Direction.OUTGOING;
         }
+    }
+
+    public static MemoryEstimation memoryRequirements(
+            boolean incoming,
+            boolean outgoing,
+            boolean undirected,
+            boolean withWeights) {
+
+        return MemoryEstimations
+                .builder(AdjacencyMatrix.class)
+                .perGraphDimension("buffers", dim -> {
+                    int nodeCount = dim.nodeCount();
+                    long rels = undirected ? dim.maxRelCount() << 1 : dim.maxRelCount();
+                    int avgDegree = (int) Math.min(BitUtil.ceilDiv(rels, nodeCount), Integer.MAX_VALUE);
+                    long perDirection = 0L;
+                    perDirection += sizeOfIntArray(nodeCount);
+                    perDirection += sizeOfObjectArray(nodeCount);
+                    perDirection += nodeCount * sizeOfIntArray(avgDegree);
+                    if (withWeights) {
+                        perDirection += sizeOfObjectArray(nodeCount);
+                        perDirection += nodeCount * sizeOfFloatArray(avgDegree);
+                    }
+
+                    long usage = 0L;
+                    if (outgoing || undirected) {
+                        usage += perDirection;
+                    }
+                    if (incoming && !undirected) {
+                        usage += perDirection;
+                    }
+
+                    return usage;
+                })
+                .build();
     }
 
     /**

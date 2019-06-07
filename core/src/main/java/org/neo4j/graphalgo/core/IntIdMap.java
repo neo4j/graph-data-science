@@ -21,12 +21,15 @@ package org.neo4j.graphalgo.core;
 
 import com.carrotsearch.hppc.LongIntHashMap;
 import com.carrotsearch.hppc.LongIntMap;
+import com.carrotsearch.hppc.OpenHashContainers;
 import com.carrotsearch.hppc.cursors.LongIntCursor;
 import org.neo4j.collection.primitive.PrimitiveIntIterable;
 import org.neo4j.collection.primitive.PrimitiveIntIterator;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.util.Arrays;
@@ -45,6 +48,18 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
  * guaranteed that there is no ID greater then nextGraphId / capacity
  */
 public class IntIdMap {
+    private static final MemoryEstimation ESTIMATION = MemoryEstimations
+            .builder(IntIdMap.class)
+            .field("iter", IdIterator.class)
+            .perNode("graphIds", nodeCount -> sizeOfLongArray((int) nodeCount))
+            .startField("nodeToGraphIds", LongIntHashMap.class)
+            .perNode("buffers", nodeCount -> {
+                int bufferSize = OpenHashContainers.expectedBufferSize((int) nodeCount);
+                return sizeOfLongArray(bufferSize) +
+                        sizeOfIntArray(bufferSize);
+            })
+            .endField()
+            .build();
 
     /**
      * defines the lower bound of mapped node ids
@@ -62,6 +77,10 @@ public class IntIdMap {
     public IntIdMap(final int capacity) {
         nodeToGraphIds = new LongIntHashMap(capacity);
         iter = new IdIterator();
+    }
+
+    public static MemoryEstimation memoryRequirements() {
+        return ESTIMATION;
     }
 
     /**

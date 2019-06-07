@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.core;
 
 import org.neo4j.graphalgo.api.WeightMapping;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 
 /**
  * WeightMapping implementation which always returns
@@ -28,6 +30,8 @@ import org.neo4j.graphalgo.api.WeightMapping;
  * @author mknblch
  */
 public class NullWeightMap implements WeightMapping {
+
+    public static final MemoryEstimation MEMORY_USAGE = MemoryEstimations.of(NullWeightMap.class);
 
     private final double defaultValue;
 

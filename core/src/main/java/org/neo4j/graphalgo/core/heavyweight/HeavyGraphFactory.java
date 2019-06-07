@@ -28,6 +28,8 @@ import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.graphalgo.core.NullWeightMap;
 import org.neo4j.graphalgo.core.WeightMap;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.kernel.api.StatementConstants;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -51,6 +53,32 @@ public class HeavyGraphFactory extends GraphFactory {
     @Override
     public Graph importGraph() {
         return importGraph(setup.batchSize);
+    }
+
+    @Override
+    public final MemoryEstimation memoryRequirements() {
+        MemoryEstimations.Builder builder = MemoryEstimations
+                .builder(HeavyGraph.class)
+                .add("nodeIdMap", IntIdMap.memoryRequirements())
+                .add("container", AdjacencyMatrix.memoryRequirements(
+                        setup.loadIncoming,
+                        setup.loadOutgoing,
+                        setup.loadAsUndirected,
+                        dimensions.relWeightId() != StatementConstants.NO_SUCH_PROPERTY_KEY
+                ))
+                .startField("nodePropertiesMapping", Map.class);
+
+
+        for (PropertyMapping propertyMapping : setup.nodePropertyMappings) {
+            int propertyId = dimensions.nodePropertyKeyId(propertyMapping.propertyName);
+            if (propertyId == StatementConstants.NO_SUCH_PROPERTY_KEY) {
+                builder.add(NullWeightMap.MEMORY_USAGE);
+            } else {
+                builder.add(WeightMap.memoryRequirements());
+            }
+        }
+
+        return builder.endField().build();
     }
 
     private Graph importGraph(final int batchSize) {
