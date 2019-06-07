@@ -20,21 +20,27 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.impl.AlgoWithConfig;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
 import org.neo4j.graphalgo.impl.pagerank.PageRankFactory;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphalgo.impl.results.CentralityScore;
+import org.neo4j.graphalgo.impl.results.MemRecResult;
 import org.neo4j.graphalgo.impl.results.PageRankScore;
 import org.neo4j.graphalgo.impl.utils.CentralityUtils;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
+import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Mode;
+import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
@@ -44,13 +50,14 @@ import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public final class PageRankProc {
+public final class PageRankProc extends BaseAlgoProc<PageRank, PageRank.Config> {
 
     public static final String CONFIG_DAMPING = "dampingFactor";
 
@@ -60,14 +67,6 @@ public final class PageRankProc {
 
     public static final String CONFIG_WEIGHT_KEY = "weightProperty";
 
-    @Context
-    public GraphDatabaseAPI api;
-
-    @Context
-    public Log log;
-
-    @Context
-    public KernelTransaction transaction;
 
     @Procedure(value = "algo.pageRank", mode = Mode.WRITE)
     @Description("CALL algo.pageRank(label:String, relationship:String, " +
@@ -79,42 +78,22 @@ public final class PageRankProc {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
-
-        final String weightPropertyKey = configuration.getString(CONFIG_WEIGHT_KEY, null);
-
         PageRankScore.Stats.Builder statsBuilder = new PageRankScore.Stats.Builder();
         AllocationTracker tracker = AllocationTracker.create();
-        final Graph graph = load(
-                label,
-                relationship,
-                tracker,
-                configuration.getGraphImpl(),
-                statsBuilder,
-                configuration,
-                weightPropertyKey);
-
+        ProcedureConfiguration configuration = newConfig(label, relationship, config);
+        Graph graph = this.loadGraph(configuration, tracker, statsBuilder);
+        statsBuilder.withNodes(graph.nodeCount());
         if (graph.nodeCount() == 0) {
             graph.release();
             return Stream.of(statsBuilder.build());
         }
 
-        TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
-        CentralityResult scores = runAlgorithm(
-                graph,
-                tracker,
-                terminationFlag,
-                configuration,
-                statsBuilder,
-                weightPropertyKey);
-
-        log.info("PageRank: overall memory usage: %s", tracker.getUsageString());
-
+        CentralityResult scores = compute(statsBuilder, tracker, configuration, graph);
         CentralityUtils.write(
                 api,
                 log,
                 graph,
-                terminationFlag,
+                TerminationFlag.wrap(transaction),
                 scores,
                 configuration,
                 statsBuilder,
@@ -132,138 +111,113 @@ public final class PageRankProc {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
-
-        final String weightPropertyKey = configuration.getString(CONFIG_WEIGHT_KEY, null);
-
         PageRankScore.Stats.Builder statsBuilder = new PageRankScore.Stats.Builder();
         AllocationTracker tracker = AllocationTracker.create();
-        final Graph graph = load(
-                label,
-                relationship,
-                tracker,
-                configuration.getGraphImpl(),
-                statsBuilder,
-                configuration,
-                weightPropertyKey);
-
+        ProcedureConfiguration configuration = newConfig(label, relationship, config);
+        Graph graph = this.loadGraph(configuration, tracker, statsBuilder);
+        statsBuilder.withNodes(graph.nodeCount());
         if (graph.nodeCount() == 0) {
             graph.release();
             return Stream.empty();
         }
 
-        TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
-        CentralityResult scores = runAlgorithm(
-                graph,
-                tracker,
-                terminationFlag,
-                configuration,
-                statsBuilder,
-                weightPropertyKey);
-
-        log.info("PageRank: overall memory usage: %s", tracker.getUsageString());
-
+        CentralityResult scores = compute(statsBuilder, tracker, configuration, graph);
         return CentralityUtils.streamResults(graph, scores);
     }
 
-    private Graph load(
-            String label,
-            String relationship,
-            AllocationTracker tracker,
-            Class<? extends GraphFactory> graphFactory,
-            PageRankScore.Stats.Builder statsBuilder,
-            ProcedureConfiguration configuration,
-            String weightPropertyKey) {
-        GraphLoader graphLoader = new GraphLoader(api, Pools.DEFAULT)
-                .init(log, label, relationship, configuration)
-                .withAllocationTracker(tracker)
-                .withOptionalRelationshipWeightsFromProperty(
-                        weightPropertyKey,
-                        configuration.getWeightPropertyDefaultValue(0.0));
+    @Procedure(value = "algo.pageRank.memrec", mode = Mode.READ)
+    @Description("CALL algo.pageRank.memrec(label:String, relationship:String, {...properties}) " +
+            "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for PageRank")
+    public Stream<MemRecResult> pageRankMemrec(
+            @Name(value = "label", defaultValue = "") String label,
+            @Name(value = "relationship", defaultValue = "") String relationship,
+            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        Direction direction = configuration.getDirection(Direction.OUTGOING);
-        if (direction == Direction.BOTH) {
-            graphLoader.asUndirected(true);
-        } else {
-            graphLoader.withDirection(direction);
-        }
-
-        try (ProgressTimer timer = statsBuilder.timeLoad()) {
-            Graph graph = graphLoader.load(graphFactory);
-            statsBuilder.withNodes(graph.nodeCount());
-            return graph;
-        }
+        ProcedureConfiguration configuration = newConfig(label, relationship, config);
+        MemoryTree memoryEstimation = this.memoryEstimation(configuration);
+        return Stream.of(new MemRecResult(memoryEstimation));
     }
 
-    private CentralityResult runAlgorithm(
-            Graph graph,
-            AllocationTracker tracker,
-            TerminationFlag terminationFlag,
-            ProcedureConfiguration configuration,
-            PageRankScore.Stats.Builder statsBuilder,
-            String weightPropertyKey) {
+    @Override
+    GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
+        loader.withOptionalRelationshipWeightsFromProperty(
+                config.getString(CONFIG_WEIGHT_KEY, null),
+                config.getWeightPropertyDefaultValue(0.0));
 
-        double dampingFactor = configuration.get(CONFIG_DAMPING, DEFAULT_DAMPING);
-        int iterations = configuration.getIterations(DEFAULT_ITERATIONS);
-        final int batchSize = configuration.getBatchSize();
-        final int concurrency = configuration.getConcurrency();
-        log.debug("Computing page rank with damping of " + dampingFactor + " and " + iterations + " iterations.");
+        Direction direction = config.getDirection(Direction.OUTGOING);
+        if (direction == Direction.BOTH) {
+            loader.asUndirected(true);
+        } else {
+            loader.withDirection(direction);
+        }
 
-        List<Node> sourceNodes = configuration.get("sourceNodes", new ArrayList<>());
+        return loader;
+    }
+
+    @Override
+    PageRank.Config algoConfig(final ProcedureConfiguration config) {
+        double dampingFactor = config.get(CONFIG_DAMPING, DEFAULT_DAMPING);
+        int iterations = config.getIterations(DEFAULT_ITERATIONS);
+        return new PageRank.Config(iterations, dampingFactor);
+    }
+
+    @Override
+    PageRank algorithm(
+            final ProcedureConfiguration config,
+            final PageRank.Config algoConfig,
+            final AllocationTracker tracker,
+            final Optional<Graph> graph) {
+
+        final int batchSize = config.getBatchSize();
+        final int concurrency = config.getConcurrency();
+
+        List<Node> sourceNodes = config.get("sourceNodes", Collections.emptyList());
         LongStream sourceNodeIds = sourceNodes.stream().mapToLong(Node::getId);
 
-        PageRank prAlgo = selectAlgorithm(
-                graph,
-                tracker,
-                configuration,
-                weightPropertyKey,
-                dampingFactor,
-                batchSize,
-                concurrency,
-                sourceNodeIds);
+        // TODO: avoid null, maybe FakeGraph/EmptyGraph
+        Graph theGraph = graph.orElse(null);
+        final String weightPropertyKey = config.getString(CONFIG_WEIGHT_KEY, null);
 
-        Algorithm<?> algo = prAlgo
-                .withLog(log)
-                .withTerminationFlag(terminationFlag);
-
-        statsBuilder.timeEval(() -> prAlgo.compute(iterations));
-        statsBuilder.withIterations(iterations).withDampingFactor(dampingFactor);
-
-        final CentralityResult pageRank = prAlgo.result();
-        algo.release();
-        graph.release();
-        return pageRank;
-    }
-
-    private PageRank selectAlgorithm(
-            Graph graph,
-            AllocationTracker tracker,
-            ProcedureConfiguration configuration,
-            String weightPropertyKey,
-            double dampingFactor,
-            int batchSize,
-            int concurrency,
-            LongStream sourceNodeIds) {
         if (weightPropertyKey != null) {
-            final boolean cacheWeights = configuration.get("cacheWeights", false);
+            final boolean cacheWeights = config.get("cacheWeights", false);
             return PageRankFactory.weightedOf(
-                    graph,
-                    dampingFactor,
-                    sourceNodeIds,
                     tracker,
+                    theGraph,
+                    algoConfig.dampingFactor,
+                    sourceNodeIds,
                     Pools.DEFAULT,
                     concurrency,
                     batchSize,
                     cacheWeights);
         } else {
             return PageRankFactory.of(
-                    graph,
-                    dampingFactor,
-                    sourceNodeIds,
                     tracker,
+                    theGraph,
+                    algoConfig.dampingFactor,
+                    sourceNodeIds,
                     Pools.DEFAULT,
                     concurrency,
                     batchSize);
         }
+    }
+
+    private CentralityResult compute(
+            final PageRankScore.Stats.Builder statsBuilder,
+            final AllocationTracker tracker,
+            final ProcedureConfiguration configuration, final Graph graph) {
+        AlgoWithConfig<PageRank, PageRank.Config> prAlgo = newAlgorithm(configuration, tracker, Optional.of(graph));
+        PageRank algo = prAlgo.algo();
+        PageRank.Config conf = prAlgo.conf();
+
+        statsBuilder.timeEval(() -> algo.compute(conf.iterations));
+        statsBuilder.withIterations(conf.iterations).withDampingFactor(conf.dampingFactor);
+
+        final CentralityResult scores = algo.result();
+        algo.release();
+        graph.release();
+
+        log.info("PageRank: overall memory usage: %s", tracker.getUsageString());
+
+        return scores;
     }
 }

@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.impl.pagerank;
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.ConfiguredAlgorithm;
 import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
@@ -107,7 +107,7 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
  * [1]: <a href="http://delab.csd.auth.gr/~dimitris/courses/ir_spring06/page_rank_computing/01531136.pdf">An Efficient Partition-Based Parallel PageRank Algorithm</a><br>
  * [2]: <a href="https://www.cs.purdue.edu/homes/dgleich/publications/gleich2004-parallel.pdf">Fast Parallel PageRank: A Linear System Approach</a>
  */
-public class PageRank extends Algorithm<PageRank> {
+public class PageRank extends ConfiguredAlgorithm<PageRank, PageRank.Config> {
 
     private final ExecutorService executor;
     private final int concurrency;
@@ -125,6 +125,16 @@ public class PageRank extends Algorithm<PageRank> {
 
     private Log log;
     private ComputeSteps computeSteps;
+
+    public static final class Config {
+        public final int iterations;
+        public final double dampingFactor;
+
+        public Config(final int iterations, final double dampingFactor) {
+            this.iterations = iterations;
+            this.dampingFactor = dampingFactor;
+        }
+    }
 
     /**
      * Forces sequential use. If you want parallelism, prefer
@@ -177,7 +187,7 @@ public class PageRank extends Algorithm<PageRank> {
     }
 
     @Override
-    public MemoryEstimation memoryRequirements() {
+    public MemoryEstimation memoryEstimation() {
         return MemoryEstimations.builder(PageRank.class)
                 .add(MemoryEstimations.setup("computeSteps", (dimensions, concurrency) -> {
                     // adjust concurrency, if necessary

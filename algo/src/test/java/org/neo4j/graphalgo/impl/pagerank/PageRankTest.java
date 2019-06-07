@@ -255,4 +255,58 @@ public final class PageRankTest {
                 .compute(40);
         // should not throw
     }
+
+    @Test
+    public void shouldComputeMemoryRequirements1Thread() {
+        long nodeCount = 100_000L;
+        int concurrency = 1;
+        assertMemoryRequirements(nodeCount, concurrency);
+    }
+
+    @Test
+    public void shouldComputeMemoryRequirements4Threads() {
+        long nodeCount = 100_000L;
+        int concurrency = 4;
+        assertMemoryRequirements(nodeCount, concurrency);
+    }
+
+    @Test
+    public void shouldComputeMemoryRequirements42Threads() {
+        long nodeCount = 100_000L;
+        int concurrency = 42;
+        assertMemoryRequirements(nodeCount, concurrency);
+    }
+
+    private void assertMemoryRequirements(final long nodeCount, final int concurrency) {
+        GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(nodeCount).build();
+
+        final PageRank pageRank = PageRankFactory.of(
+                AllocationTracker.EMPTY,
+                null,
+                0.85,
+                LongStream.empty(),
+                Pools.DEFAULT,
+                Pools.DEFAULT_CONCURRENCY,
+                ParallelUtil.DEFAULT_BATCH_SIZE);
+
+        long partitionSize = BitUtil.ceilDiv(nodeCount, concurrency);
+        final MemoryRange actual = pageRank.memoryEstimation().apply(dimensions, concurrency).memoryUsage();
+        final MemoryRange expected = MemoryRange.of(
+                88L /* PageRank.class */ +
+                32L /* ComputeSteps.class */ +
+                BitUtil.align(16 + concurrency * 4, 8) /* scores[] wrapper */ +
+                BitUtil.align(16 + concurrency * 8, 8) /* starts[] */ +
+                BitUtil.align(16 + concurrency * 8, 8) /* lengths[] */ +
+                BitUtil.align(16 + concurrency * 4, 8) /* list of computeSteps */ +
+                        /* ComputeStep */
+                concurrency * (
+                        104L /* BaseComputeStep.class */ +
+                        BitUtil.align(16 + concurrency * 4, 8) /* nextScores[] wrapper */ +
+                        concurrency * BitUtil.align(16 + partitionSize * 4, 8) /* inner nextScores[][] */ +
+                        BitUtil.align(16 + partitionSize * 8, 8) /* pageRank[] */ +
+                        BitUtil.align(16 + partitionSize * 8, 8) /* deltas[] */
+                )
+        );
+        assertEquals(expected, actual);
+    }
 }
