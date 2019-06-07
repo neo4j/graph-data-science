@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.neo4j.graphalgo.core.utils.BitUtil;
+
 public final class PageUtil {
 
     // 32 KB page size

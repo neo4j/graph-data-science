@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.utils.paged;
 
 import com.carrotsearch.hppc.BitMixer;
 import com.carrotsearch.hppc.cursors.LongLongCursor;
+import org.neo4j.graphalgo.core.utils.BitUtil;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;

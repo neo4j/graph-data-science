@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.neo4j.graphalgo.core.utils.BitUtil;
+
 import java.lang.reflect.Array;
 import java.util.function.Supplier;
 

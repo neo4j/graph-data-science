@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
-import org.neo4j.graphalgo.core.utils.paged.BitUtil;
+import org.neo4j.graphalgo.core.utils.BitUtil;
 
 import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfObjectArray;

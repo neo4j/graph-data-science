@@ -17,12 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.utils.paged;
+package org.neo4j.graphalgo.core.utils;
 
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-import static org.neo4j.graphalgo.core.utils.paged.BitUtil.*;
+import static org.neo4j.graphalgo.core.utils.BitUtil.*;
 
 public final class BitUtilTest {
 
@@ -197,5 +197,22 @@ public final class BitUtilTest {
         assertEquals(-4L, align(-5L, 4));
         assertEquals(Long.MAX_VALUE - 3, align(Long.MAX_VALUE - 3, 4));
         assertEquals(Long.MIN_VALUE, align(Long.MAX_VALUE, 4));
+    }
+
+    @Test
+    public void ceilDivRoundsTowardsPositiveInfinity() {
+        assertEquals(0L, ceilDiv(0L, 1L));
+        assertEquals(1L, ceilDiv(1L, 1L));
+        assertEquals(1L, ceilDiv(1L, 2L));
+        assertEquals(1L, ceilDiv(1L, 3L));
+        assertEquals(1L, ceilDiv(1L, Long.MAX_VALUE));
+        assertEquals(42L, ceilDiv(42L, 1L));
+        assertEquals(21L, ceilDiv(42L, 2L));
+        assertEquals(14L, ceilDiv(42L, 3L));
+        assertEquals(11L, ceilDiv(42L, 4L));
+        assertEquals(9L, ceilDiv(42L, 5L));
+        assertEquals(7L, ceilDiv(42L, 6L));
+        assertEquals(1L, ceilDiv(Long.MAX_VALUE - 1L, Long.MAX_VALUE));
+        assertEquals(1L, ceilDiv(Long.MAX_VALUE, Long.MAX_VALUE));
     }
 }

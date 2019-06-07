@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.huge.loader;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.loading.ReadHelper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.BitUtil;
+import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;

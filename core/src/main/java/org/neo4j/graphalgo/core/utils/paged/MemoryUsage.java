@@ -29,7 +29,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 
 import static java.lang.Integer.numberOfTrailingZeros;
-import static org.neo4j.graphalgo.core.utils.paged.BitUtil.nextHighestPowerOfTwo;
+import static org.neo4j.graphalgo.core.utils.BitUtil.nextHighestPowerOfTwo;
 
 public final class MemoryUsage {
 

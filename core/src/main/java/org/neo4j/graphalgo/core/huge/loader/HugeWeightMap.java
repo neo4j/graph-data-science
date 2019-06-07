@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.huge.loader;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.utils.container.TrackingLongDoubleHashMap;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.BitUtil;
+import org.neo4j.graphalgo.core.utils.BitUtil;
 
 import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.shallowSizeOfInstance;
 import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfObjectArray;
