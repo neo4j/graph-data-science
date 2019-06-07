@@ -21,8 +21,8 @@ package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.core.utils.BitUtil;
 
-import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfLongArray;
-import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfObjectArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
 public abstract class HugeAdjacencyOffsets {
 

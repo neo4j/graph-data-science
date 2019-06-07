@@ -37,9 +37,9 @@ import static org.neo4j.graphalgo.core.utils.ArrayUtil.binarySearch;
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.binarySearchIndex;
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.linearSearch;
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.linearSearchIndex;
-import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfFloatArray;
-import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfIntArray;
-import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfObjectArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfFloatArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
 /**
  * Relation Container built of multiple arrays. The node capacity must be constant and the node IDs have to be

@@ -28,7 +28,6 @@ import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.MemoryUsage;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,6 +36,9 @@ import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.core.heavyweight.HeavyGraph.checkSize;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.shallowSizeOfInstance;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
 /**
  * This is basically a long to int mapper. It sorts the id's in ascending order so its
@@ -112,10 +114,10 @@ public class IntIdMap {
     }
 
     public void buildMappedIds(AllocationTracker tracker) {
-        tracker.add(MemoryUsage.shallowSizeOfInstance(IntIdMap.class));
-        tracker.add(MemoryUsage.sizeOfLongArray(nodeToGraphIds.keys.length));
-        tracker.add(MemoryUsage.sizeOfIntArray(nodeToGraphIds.values.length));
-        tracker.add(MemoryUsage.sizeOfLongArray(size()));
+        tracker.add(shallowSizeOfInstance(IntIdMap.class));
+        tracker.add(sizeOfLongArray(nodeToGraphIds.keys.length));
+        tracker.add(sizeOfIntArray(nodeToGraphIds.values.length));
+        tracker.add(sizeOfLongArray(size()));
         graphIds = new long[size()];
         for (final LongIntCursor cursor : nodeToGraphIds) {
             graphIds[cursor.value] = cursor.key;

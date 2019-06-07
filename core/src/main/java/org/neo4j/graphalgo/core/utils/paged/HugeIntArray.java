@@ -32,8 +32,8 @@ import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.exclusiveIndexOfPa
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.indexInPage;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.numberOfPages;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.pageIndex;
-import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfIntArray;
-import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfObjectArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
 /**
  * A long-indexable version of a primitive int array ({@code int[]}) that can contain more than 2 bn. elements.

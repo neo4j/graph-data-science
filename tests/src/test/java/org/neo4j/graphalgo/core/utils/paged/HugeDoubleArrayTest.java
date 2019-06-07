@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.utils.paged;
 
 import org.junit.Test;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
 import static org.junit.Assert.assertEquals;
 

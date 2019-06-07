@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.core.huge.loader.MutableIntValue;
-import org.neo4j.graphalgo.core.utils.paged.MemoryUsage;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
 import static org.neo4j.graphalgo.core.utils.paged.PageUtil.indexInPage;
 import static org.neo4j.graphalgo.core.utils.paged.PageUtil.pageIndex;
