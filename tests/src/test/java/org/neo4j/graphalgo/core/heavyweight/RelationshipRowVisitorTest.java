@@ -44,7 +44,13 @@ public class RelationshipRowVisitorTest {
         when(row1.getNumber("target")).thenReturn(1L);
 
         LongAdder relationshipCount = new LongAdder();
-        RelationshipRowVisitor visitor = new RelationshipRowVisitor(idMap, false, 0d, matrix, DuplicateRelationshipsStrategy.NONE, relationshipCount);
+        RelationshipRowVisitor visitor = new RelationshipRowVisitor(
+                idMap,
+                false,
+                0d,
+                matrix,
+                DuplicateRelationshipsStrategy.NONE,
+                relationshipCount);
         visitor.visit(row1);
         visitor.visit(row1);
 
@@ -61,7 +67,12 @@ public class RelationshipRowVisitorTest {
         when(row.getNumber("target")).thenReturn(1L);
 
         LongAdder relationshipCount = new LongAdder();
-        RelationshipRowVisitor visitor = new RelationshipRowVisitor(idMap(), false, 0d, matrix, DuplicateRelationshipsStrategy.SKIP,
+        RelationshipRowVisitor visitor = new RelationshipRowVisitor(
+                idMap(),
+                false,
+                0d,
+                matrix,
+                DuplicateRelationshipsStrategy.SKIP,
                 relationshipCount);
         visitor.visit(row);
         visitor.visit(row);
@@ -80,7 +91,12 @@ public class RelationshipRowVisitorTest {
         when(row.get("weight")).thenReturn(3.0, 7.0);
 
         LongAdder relationshipCount = new LongAdder();
-        RelationshipRowVisitor visitor = new RelationshipRowVisitor(idMap(), true, 0d, matrix, DuplicateRelationshipsStrategy.SUM,
+        RelationshipRowVisitor visitor = new RelationshipRowVisitor(
+                idMap(),
+                true,
+                0d,
+                matrix,
+                DuplicateRelationshipsStrategy.SUM,
                 relationshipCount);
         visitor.visit(row);
         visitor.visit(row);
@@ -100,7 +116,12 @@ public class RelationshipRowVisitorTest {
         when(row.get("weight")).thenReturn(3.0, 7.0);
 
         LongAdder relationshipCount = new LongAdder();
-        RelationshipRowVisitor visitor = new RelationshipRowVisitor(idMap(), true, 0d, matrix, DuplicateRelationshipsStrategy.MIN,
+        RelationshipRowVisitor visitor = new RelationshipRowVisitor(
+                idMap(),
+                true,
+                0d,
+                matrix,
+                DuplicateRelationshipsStrategy.MIN,
                 relationshipCount);
         visitor.visit(row);
         visitor.visit(row);
@@ -120,7 +141,12 @@ public class RelationshipRowVisitorTest {
         when(row.get("weight")).thenReturn(3.0, 7.0);
 
         LongAdder relationshipCount = new LongAdder();
-        RelationshipRowVisitor visitor = new RelationshipRowVisitor(idMap(), true, 0d, matrix, DuplicateRelationshipsStrategy.MAX,
+        RelationshipRowVisitor visitor = new RelationshipRowVisitor(
+                idMap(),
+                true,
+                0d,
+                matrix,
+                DuplicateRelationshipsStrategy.MAX,
                 relationshipCount);
         visitor.visit(row);
         visitor.visit(row);
