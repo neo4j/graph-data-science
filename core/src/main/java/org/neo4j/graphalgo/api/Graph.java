@@ -28,6 +28,13 @@ public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterab
 
     String TYPE = "huge";
 
+    long RELATIONSHIP_COUNT_NOT_SUPPORTED = -1L;
+
+    /**
+     * @return if supported, returns the total number of relationships in the graph, otherwise {@link Graph#RELATIONSHIP_COUNT_NOT_SUPPORTED}.
+     */
+    long relationshipCount();
+
     /**
      * release resources which are not part of the result or IdMapping
      */

@@ -57,7 +57,7 @@ public final class LouvainGraph implements Graph {
 
     @Override
     public long relationshipCount() {
-        return -1L;
+        return RELATIONSHIP_COUNT_NOT_SUPPORTED;
     }
 
     @Override
