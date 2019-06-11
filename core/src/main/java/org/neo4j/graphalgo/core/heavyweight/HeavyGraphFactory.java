@@ -78,7 +78,7 @@ public class HeavyGraphFactory extends GraphFactory {
                 nodeCount,
                 concurrency,
                 batchSize);
-        AtomicLong relationshipCount = new AtomicLong();
+        AtomicLong relationshipCounter = new AtomicLong();
         Collection<RelationshipImporter> tasks = ParallelUtil.readParallel(
                 concurrency,
                 actualBatchSize,
@@ -94,7 +94,7 @@ public class HeavyGraphFactory extends GraphFactory {
                         matrix,
                         nodeIds,
                         nodePropertySuppliers,
-                        relationshipCount
+                        relationshipCounter
                 ),
                 threadPool);
 
@@ -102,7 +102,7 @@ public class HeavyGraphFactory extends GraphFactory {
                 matrix,
                 idMap,
                 nodePropertySuppliers,
-                relationshipCount.get(),
+                relationshipCounter.get(),
                 tasks);
 
         progressLogger.logDone(setup.tracker);

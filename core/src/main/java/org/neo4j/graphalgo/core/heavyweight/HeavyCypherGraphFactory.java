@@ -67,7 +67,7 @@ public class HeavyCypherGraphFactory extends GraphFactory {
         return new HeavyGraph(
                 nodes.idMap,
                 relationships.matrix(),
-                relationshipLoader.importedRelationships(),
+                relationshipLoader.relationshipCount(),
                 nodePropertyMappings);
     }
 }

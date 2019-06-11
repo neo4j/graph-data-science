@@ -54,7 +54,7 @@ abstract class AdjacencyBuilder {
             int numPages,
             int pageSize,
             AllocationTracker tracker,
-            AtomicLong relationshipCount) {
+            AtomicLong relationshipCounter) {
         if (adjacency == null) {
             return NoAdjacency.INSTANCE;
         }
@@ -63,7 +63,7 @@ abstract class AdjacencyBuilder {
         final CompressedLongArray[][] targets = new CompressedLongArray[numPages][];
         LongsRef[] buffers = new LongsRef[numPages];
         long[][] degrees = new long[numPages][];
-        return new CompressingPagedAdjacency(adjacency, builders, targets, buffers, degrees, pageSize, relationshipCount);
+        return new CompressingPagedAdjacency(adjacency, builders, targets, buffers, degrees, pageSize, relationshipCounter);
     }
 
     private static final class CompressingPagedAdjacency extends AdjacencyBuilder {
@@ -78,7 +78,7 @@ abstract class AdjacencyBuilder {
         private final long pageMask;
         private final long sizeOfLongPage;
         private final long sizeOfObjectPage;
-        private final AtomicLong relationshipCount;
+        private final AtomicLong relationshipCounter;
 
         private CompressingPagedAdjacency(
                 HugeAdjacencyBuilder adjacency,
@@ -87,7 +87,7 @@ abstract class AdjacencyBuilder {
                 LongsRef[] buffers,
                 long[][] degrees,
                 int pageSize,
-                AtomicLong relationshipCount) {
+                AtomicLong relationshipCounter) {
             this.adjacency = adjacency;
             this.builders = builders;
             this.targets = targets;
@@ -98,7 +98,7 @@ abstract class AdjacencyBuilder {
             this.pageMask = (long) (pageSize - 1);
             sizeOfLongPage = sizeOfLongArray(pageSize);
             sizeOfObjectPage = sizeOfObjectArray(pageSize);
-            this.relationshipCount = relationshipCount;
+            this.relationshipCounter = relationshipCounter;
         }
 
         @Override
@@ -168,7 +168,7 @@ abstract class AdjacencyBuilder {
                                 compressedTargets,
                                 this.buffers[pageIndex],
                                 localId);
-                        relationshipCount.addAndGet(importedRelationships);
+                        relationshipCounter.addAndGet(importedRelationships);
                         this.targets[pageIndex][localId] = null;
                     }
 
@@ -196,7 +196,7 @@ abstract class AdjacencyBuilder {
                         allTargets[localId] = null;
                     }
                 }
-                relationshipCount.addAndGet(importedRelationships);
+                relationshipCounter.addAndGet(importedRelationships);
             });
             return Arrays.asList(runnables);
         }

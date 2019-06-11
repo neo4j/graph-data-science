@@ -57,12 +57,12 @@ public enum DuplicateRelationshipsStrategy {
 
     // TODO: This should not rely on the HeavyGraph implementation, but I don't want to propagate the int -> long
     //       change further down before I understand the implications.
-    public void handle(long source, long target, AdjacencyMatrix matrix, boolean hasRelationshipWeights, double defaultWeight, Supplier<Number> weightSupplier, LongAdder relationshipCount) {
+    public void handle(long source, long target, AdjacencyMatrix matrix, boolean hasRelationshipWeights, double defaultWeight, Supplier<Number> weightSupplier, LongAdder relationshipCounter) {
         checkSize(source, target);
-        handle((int) source, (int) target, matrix, hasRelationshipWeights, defaultWeight, weightSupplier, relationshipCount);
+        handle((int) source, (int) target, matrix, hasRelationshipWeights, defaultWeight, weightSupplier, relationshipCounter);
     }
 
-    public void handle(int source, int target, AdjacencyMatrix matrix, boolean hasRelationshipWeights, double defaultWeight, Supplier<Number> weightSupplier, LongAdder relationshipCount) {
+    public void handle(int source, int target, AdjacencyMatrix matrix, boolean hasRelationshipWeights, double defaultWeight, Supplier<Number> weightSupplier, LongAdder relationshipCounter) {
         double thisWeight = defaultWeight;
         if (hasRelationshipWeights) {
             Number weight = weightSupplier.get();
@@ -70,12 +70,12 @@ public enum DuplicateRelationshipsStrategy {
                 thisWeight = weight.doubleValue();
             }
         }
-        handle(source, target, matrix, hasRelationshipWeights, thisWeight, relationshipCount);
+        handle(source, target, matrix, hasRelationshipWeights, thisWeight, relationshipCounter);
     }
 
-    public void handle(int source, int target, AdjacencyMatrix matrix, boolean hasRelationshipWeights, double weight, LongAdder relationshipCount) {
+    public void handle(int source, int target, AdjacencyMatrix matrix, boolean hasRelationshipWeights, double weight, LongAdder relationshipCounter) {
         if (this == DuplicateRelationshipsStrategy.NONE) {
-            relationshipCount.increment();
+            relationshipCounter.increment();
             if (hasRelationshipWeights) {
                 matrix.addOutgoingWithWeight(source, target, weight);
             } else {
@@ -89,13 +89,13 @@ public enum DuplicateRelationshipsStrategy {
                     double newWeight = this.merge(oldWeight, weight);
                     matrix.addOutgoingWeight(source, relationshipIndex, newWeight);
                 } else {
-                    relationshipCount.increment();
+                    relationshipCounter.increment();
                     matrix.addOutgoingWithWeight(source, target, weight);
                 }
             } else {
                 boolean hasRelationship = matrix.hasOutgoing(source, target);
                 if (!hasRelationship) {
-                    relationshipCount.increment();
+                    relationshipCounter.increment();
                     matrix.addOutgoing(source, target);
                 }
             }

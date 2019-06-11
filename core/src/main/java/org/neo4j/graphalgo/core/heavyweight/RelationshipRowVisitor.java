@@ -34,7 +34,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private double defaultWeight;
     private AdjacencyMatrix matrix;
     private DuplicateRelationshipsStrategy duplicateRelationshipsStrategy;
-    private final LongAdder relationshipCount;
+    private final LongAdder relationshipCounter;
 
     RelationshipRowVisitor(
             IntIdMap idMap,
@@ -42,13 +42,13 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
             double defaultWeight,
             AdjacencyMatrix matrix,
             DuplicateRelationshipsStrategy duplicateRelationshipsStrategy,
-            LongAdder relationshipCount) {
+            LongAdder relationshipCounter) {
         this.idMap = idMap;
         this.hasRelationshipWeights = hasRelationshipWeights;
         this.defaultWeight = defaultWeight;
         this.matrix = matrix;
         this.duplicateRelationshipsStrategy = duplicateRelationshipsStrategy;
-        this.relationshipCount = relationshipCount;
+        this.relationshipCounter = relationshipCounter;
     }
 
     @Override
@@ -78,7 +78,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
                 hasRelationshipWeights,
                 defaultWeight,
                 () -> extractWeight(row),
-                relationshipCount
+                relationshipCounter
         );
 
         return true;

@@ -273,7 +273,8 @@ public class HugeGraph implements Graph {
                 idMapping,
                 weights,
                 nodeProperties,
-                relationshipCount, inAdjacency,
+                relationshipCount,
+                inAdjacency,
                 outAdjacency,
                 inOffsets,
                 outOffsets

@@ -29,7 +29,7 @@ import static org.neo4j.graphalgo.core.heavyweight.HeavyGraph.checkSize;
 
 public class MergedRelationships {
     private final AdjacencyMatrix matrix;
-    private final LongAdder relationshipCount;
+    private final LongAdder relationshipCounter;
     private boolean hasRelationshipWeights;
     private DuplicateRelationshipsStrategy duplicateRelationshipsStrategy;
 
@@ -37,8 +37,8 @@ public class MergedRelationships {
             int nodeCount,
             GraphSetup setup,
             DuplicateRelationshipsStrategy duplicateRelationshipsStrategy,
-            LongAdder relationshipCount) {
-        this.relationshipCount = relationshipCount;
+            LongAdder relationshipCounter) {
+        this.relationshipCounter = relationshipCounter;
         this.matrix = new AdjacencyMatrix(
                 nodeCount,
                 setup.shouldLoadRelationshipWeight(),
@@ -64,7 +64,7 @@ public class MergedRelationships {
                                 matrix,
                                 hasRelationshipWeights,
                                 weight,
-                                relationshipCount
+                                relationshipCounter
                         );
                         return true;
                     });

@@ -59,7 +59,7 @@ final class RelationshipImporter extends StatementAction {
 
     private IntIdMap idMap;
     private AdjacencyMatrix matrix;
-    private final AtomicLong importedRelationships;
+    private final AtomicLong relationshipsCounter;
 
     private Map<String, WeightMapping> nodeProperties;
 
@@ -74,10 +74,10 @@ final class RelationshipImporter extends StatementAction {
             final AdjacencyMatrix matrix,
             final PrimitiveIntIterable nodes,
             final Map<String, Supplier<WeightMapping>> nodePropertiesSupplier,
-            final AtomicLong importedRelationships) {
+            final AtomicLong relationshipsCounter) {
         super(api);
         this.matrix = matrix;
-        this.importedRelationships = importedRelationships;
+        this.relationshipsCounter = relationshipsCounter;
         this.nodeSize = Math.min(batchSize, idMap.size() - nodeOffset);
         this.nodeOffset = nodeOffset;
         this.progress = progress;
@@ -119,7 +119,7 @@ final class RelationshipImporter extends StatementAction {
                 }
             }
         }
-        importedRelationships.addAndGet(totalImported);
+        relationshipsCounter.addAndGet(totalImported);
     }
 
     private RelationshipLoader prepare(
