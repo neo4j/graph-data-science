@@ -380,25 +380,11 @@ public class ProcedureConfiguration {
     }
 
     public Boolean getBool(String key, boolean defaultValue) {
-        Object value = config.get(key);
-        if (value == null) {
-            return defaultValue;
-        }
-        if (!(value instanceof Boolean)) {
-            throw new IllegalArgumentException("The value of " + key + " must be a boolean.");
-        }
-        return (Boolean) value;
+        return getChecked(key, defaultValue, Boolean.class);
     }
 
     public Number getNumber(String key, Number defaultValue) {
-        Object value = config.get(key);
-        if (null == value) {
-            return defaultValue;
-        }
-        if (!(value instanceof Number)) {
-            throw new IllegalArgumentException("The value of " + key + " must be a Number type.");
-        }
-        return (Number) value;
+        return getChecked(key, defaultValue, Number.class);
     }
 
     public Number getNumber(String key, String oldKey, Number defaultValue) {
@@ -427,6 +413,26 @@ public class ProcedureConfiguration {
             return defaultValue;
         }
         return (V) value;
+    }
+
+    /**
+     * Get and convert the value under the given key to the given type.
+     *
+     * @return the found value under the key - if it is of the provided type,
+     *         or the provided default value if no entry for the key is found (or it's mapped to null).
+     * @throws IllegalArgumentException if a value was found, but it is not of the expected type.
+     */
+    public <V> V getChecked(String key, V defaultValue, Class<V> expectedType) {
+        Object value = config.get(key);
+        if (null == value) {
+            return defaultValue;
+        }
+        if (!expectedType.isInstance(value)) {
+            String template = "The value of %s must be a %s.";
+            String message = String.format(template, key, expectedType.getSimpleName());
+            throw new IllegalArgumentException(message);
+        }
+        return expectedType.cast(value);
     }
 
     public <V> V get(String newKey, String oldKey, V defaultValue) {
