@@ -159,23 +159,24 @@ public final class LoadGraphProc {
             @Name(value = "degreeDistribution", defaultValue = "null") Object degreeDistribution) {
         Graph graph = LoadGraphFactory.get(name);
         final GraphInfo info;
-        if (graph != null) {
-
-            final boolean calculatedegreeDistribution;
+        if (graph == null) {
+            info = new GraphInfo(name);
+        } else {
+            final boolean calculateDegreeDistribution;
             final ProcedureConfiguration configuration;
             if (Boolean.TRUE.equals(degreeDistribution)) {
-                calculatedegreeDistribution = true;
-                configuration = ProcedureConfiguration.create(Collections.emptyMap());
+                calculateDegreeDistribution = true;
+                configuration = ProcedureConfiguration.empty();
             } else if (degreeDistribution instanceof Map) {
                 @SuppressWarnings("unchecked") Map<String, Object> config = (Map) degreeDistribution;
-                calculatedegreeDistribution = !config.isEmpty();
+                calculateDegreeDistribution = !config.isEmpty();
                 configuration = ProcedureConfiguration.create(config);
             } else {
-                calculatedegreeDistribution = false;
-                configuration = null;
+                calculateDegreeDistribution = false;
+                configuration = ProcedureConfiguration.empty();
             }
 
-            if (calculatedegreeDistribution) {
+            if (calculateDegreeDistribution) {
                 final Direction direction = configuration.getDirection(Direction.OUTGOING);
                 int concurrency = configuration.getReadConcurrency();
                 Histogram distribution = degreeDistribution(graph, concurrency, direction);
@@ -187,8 +188,6 @@ public final class LoadGraphProc {
             info.nodes = graph.nodeCount();
             info.relationships = graph.relationshipCount();
             info.exists = true;
-        } else {
-            info = new GraphInfo(name);
         }
         return Stream.of(info);
     }

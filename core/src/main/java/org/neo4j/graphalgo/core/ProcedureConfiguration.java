@@ -450,6 +450,10 @@ public class ProcedureConfiguration {
         return new ProcedureConfiguration(config);
     }
 
+    public static ProcedureConfiguration empty() {
+        return new ProcedureConfiguration(Collections.emptyMap());
+    }
+
     private static String reverseGraphLookup(Class<? extends GraphFactory> cls) {
         if (HeavyGraphFactory.class.isAssignableFrom(cls)) {
             return "heavy";
