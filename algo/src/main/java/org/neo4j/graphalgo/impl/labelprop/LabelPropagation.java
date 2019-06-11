@@ -26,7 +26,11 @@ import com.carrotsearch.hppc.cursors.LongDoubleCursor;
 import org.neo4j.collection.primitive.PrimitiveIntIterator;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.Algorithm;
-import org.neo4j.graphalgo.api.*;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -46,6 +50,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import static com.carrotsearch.hppc.Containers.DEFAULT_EXPECTED_ELEMENTS;
 import static com.carrotsearch.hppc.HashContainers.DEFAULT_LOAD_FACTOR;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class LabelPropagation extends Algorithm<LabelPropagation> {
 
@@ -188,7 +193,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
             BaseStep task = new BaseStep(initStep);
             tasks.add(task);
         }
-        ParallelUtil.runWithConcurrency(concurrency, tasks, terminationFlag, executor);
+        ParallelUtil.runWithConcurrency(concurrency, tasks, 1, MILLISECONDS, terminationFlag, executor);
         return tasks;
     }
 
@@ -211,7 +216,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
 
         long currentIteration = 0L;
         while (running() && currentIteration < maxIterations) {
-            ParallelUtil.runWithConcurrency(concurrency, baseSteps, terminationFlag, executor);
+            ParallelUtil.runWithConcurrency(concurrency, baseSteps, 1, MILLISECONDS, terminationFlag, executor);
             ++currentIteration;
         }
 
