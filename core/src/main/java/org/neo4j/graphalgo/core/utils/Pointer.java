@@ -19,8 +19,10 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
-import java.util.function.DoubleToLongFunction;
-import java.util.function.Function;
+import java.util.function.DoubleUnaryOperator;
+import java.util.function.IntUnaryOperator;
+import java.util.function.LongUnaryOperator;
+import java.util.function.UnaryOperator;
 
 /**
  * @author mknblch
@@ -34,10 +36,15 @@ public class Pointer {
             this.v = v;
         }
 
-        public BoolPointer map(Function<Boolean, Boolean> function) {
-            v = function.apply(v);
+        public BoolPointer map(BooleanUnaryOperator function) {
+            v = function.applyAsBoolean(v);
             return this;
         }
+    }
+
+    @FunctionalInterface
+    public interface BooleanUnaryOperator {
+        boolean applyAsBoolean(boolean var1);
     }
 
     public static class IntPointer {
@@ -47,8 +54,8 @@ public class Pointer {
             this.v = v;
         }
 
-        public IntPointer map(Function<Integer, Integer> function) {
-            v = function.apply(v);
+        public IntPointer map(IntUnaryOperator function) {
+            v = function.applyAsInt(v);
             return this;
         }
     }
@@ -60,8 +67,8 @@ public class Pointer {
             this.v = v;
         }
 
-        public LongPointer map(Function<Long, Long> function) {
-            v = function.apply(v);
+        public LongPointer map(LongUnaryOperator function) {
+            v = function.applyAsLong(v);
             return this;
         }
     }
@@ -73,15 +80,10 @@ public class Pointer {
             this.v = v;
         }
 
-        public DoublePointer map(DoubleToDoubleFunction function) {
-            v = function.apply(v);
+        public DoublePointer map(DoubleUnaryOperator function) {
+            v = function.applyAsDouble(v);
             return this;
         }
-    }
-
-    @FunctionalInterface
-    public interface DoubleToDoubleFunction {
-        double apply(double var1);
     }
 
     public static class GenericPointer<G> {
@@ -91,7 +93,7 @@ public class Pointer {
             this.v = v;
         }
 
-        public GenericPointer<G> map(Function<G, G> function) {
+        public GenericPointer<G> map(UnaryOperator<G> function) {
             v = function.apply(v);
             return this;
         }
