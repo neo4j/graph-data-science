@@ -35,8 +35,8 @@ final class IntIntSubGraph extends SubGraph {
 
     void add(final int source, final int target, final float weight) {
         assert source < graph.length && target < graph.length;
-        putIfAbsent(graph, source).addTo(target, weight);
-        putIfAbsent(graph, target).addTo(source, weight);
+        putIfAbsent(source).addTo(target, weight);
+        putIfAbsent(target).addTo(source, weight);
     }
 
     @Override
@@ -69,11 +69,11 @@ final class IntIntSubGraph extends SubGraph {
         graph = null;
     }
 
-    private static IntFloatHashMap putIfAbsent(final IntFloatHashMap[] relationships, final int community) {
-        IntFloatHashMap targets = relationships[community];
+    private IntFloatHashMap putIfAbsent(final int communityId) {
+        IntFloatHashMap targets = graph[communityId];
         if (null == targets) {
             targets = new IntFloatHashMap();
-            relationships[community] = targets;
+            graph[communityId] = targets;
         }
         return targets;
     }
