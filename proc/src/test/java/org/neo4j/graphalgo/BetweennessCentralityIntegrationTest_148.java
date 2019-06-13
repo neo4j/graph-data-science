@@ -17,13 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.algo;
+package org.neo4j.graphalgo;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.AdditionalMatchers;
+import org.mockito.Matchers;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.neo4j.graphalgo.BetweennessCentralityProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
@@ -113,8 +114,8 @@ public class BetweennessCentralityIntegrationTest_148 {
             return true;
         });
 
-        verify(mock, times(4)).consume(anyString(), AdditionalMatchers.eq(0.0, 0.1));
-        verify(mock, times(1)).consume(eq("Bridget"), AdditionalMatchers.eq(5.0, 0.1));
+        verify(mock, times(4)).consume(Matchers.anyString(), AdditionalMatchers.eq(0.0, 0.1));
+        verify(mock, times(1)).consume(Matchers.eq("Bridget"), AdditionalMatchers.eq(5.0, 0.1));
     }
 
     interface Consumer {

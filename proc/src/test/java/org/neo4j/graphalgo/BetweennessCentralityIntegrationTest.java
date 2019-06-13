@@ -17,13 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.algo;
+package org.neo4j.graphalgo;
 
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.neo4j.graphalgo.BetweennessCentralityProc;
@@ -111,7 +112,7 @@ public class BetweennessCentralityIntegrationTest {
 
     @Before
     public void setupMocks() {
-        when(consumer.consume(anyLong(), anyDouble()))
+        when(consumer.consume(Matchers.anyLong(), Matchers.anyDouble()))
                 .thenReturn(true);
     }
 
@@ -126,8 +127,8 @@ public class BetweennessCentralityIntegrationTest {
         new BetweennessCentrality(graph)
                 .compute()
                 .forEach(consumer);
-        verify(consumer, times(10)).consume(anyLong(), eq(6.0));
-        verify(consumer, times(1)).consume(eq(centerNodeId), eq(25.0));
+        verify(consumer, times(10)).consume(Matchers.anyLong(), Matchers.eq(6.0));
+        verify(consumer, times(1)).consume(Matchers.eq(centerNodeId), Matchers.eq(25.0));
     }
 
     @Test
@@ -135,8 +136,8 @@ public class BetweennessCentralityIntegrationTest {
         new BetweennessCentralitySuccessorBrandes(graph, Pools.DEFAULT)
                 .compute()
                 .forEach(consumer);
-        verify(consumer, times(10)).consume(anyLong(), eq(6.0));
-        verify(consumer, times(1)).consume(eq(centerNodeId), eq(25.0));
+        verify(consumer, times(10)).consume(Matchers.anyLong(), Matchers.eq(6.0));
+        verify(consumer, times(1)).consume(Matchers.eq(centerNodeId), Matchers.eq(25.0));
     }
 
     @Test
@@ -146,8 +147,8 @@ public class BetweennessCentralityIntegrationTest {
                 .resultStream()
                 .forEach(r -> consumer.consume(r.nodeId, r.centrality));
 
-        verify(consumer, times(10)).consume(anyLong(), eq(6.0));
-        verify(consumer, times(1)).consume(eq(centerNodeId), eq(25.0));
+        verify(consumer, times(10)).consume(Matchers.anyLong(), Matchers.eq(6.0));
+        verify(consumer, times(1)).consume(Matchers.eq(centerNodeId), Matchers.eq(25.0));
     }
 
     @Test
@@ -161,8 +162,8 @@ public class BetweennessCentralityIntegrationTest {
                     return true;
                 });
 
-        verify(consumer, times(10)).consume(anyLong(), eq(6.0));
-        verify(consumer, times(1)).consume(eq(centerNodeId), eq(25.0));
+        verify(consumer, times(10)).consume(Matchers.anyLong(), Matchers.eq(6.0));
+        verify(consumer, times(1)).consume(Matchers.eq(centerNodeId), Matchers.eq(25.0));
     }
 
     @Test
@@ -176,8 +177,8 @@ public class BetweennessCentralityIntegrationTest {
                     return true;
                 });
 
-        verify(consumer, times(10)).consume(anyLong(), eq(6.0));
-        verify(consumer, times(1)).consume(eq(centerNodeId), eq(25.0));
+        verify(consumer, times(10)).consume(Matchers.anyLong(), Matchers.eq(6.0));
+        verify(consumer, times(1)).consume(Matchers.eq(centerNodeId), Matchers.eq(25.0));
     }
 
     @Test
@@ -301,8 +302,8 @@ public class BetweennessCentralityIntegrationTest {
                     return true;
                 });
 
-        verify(consumer, times(10)).consume(anyLong(), eq(6.0));
-        verify(consumer, times(1)).consume(eq(centerNodeId), eq(25.0));
+        verify(consumer, times(10)).consume(Matchers.anyLong(), Matchers.eq(6.0));
+        verify(consumer, times(1)).consume(Matchers.eq(centerNodeId), Matchers.eq(25.0));
     }
 
 
