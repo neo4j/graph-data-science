@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.algo;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.neo4j.graphalgo.LouvainProc;
 import org.neo4j.graphalgo.MemRecProc;
 import org.neo4j.graphalgo.PageRankProc;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
@@ -38,6 +39,8 @@ public class MemRecProcTest {
         Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class);
         procedures.registerProcedure(MemRecProc.class);
         procedures.registerProcedure(PageRankProc.class);
+        procedures.registerProcedure(UnionFindProc.class);
+        procedures.registerProcedure(LouvainProc.class);
     }
 
     @After
@@ -48,6 +51,9 @@ public class MemRecProcTest {
     @Test
     public void memrecProcedure() {
         db.execute("CALL algo.memrec(null, null, 'pageRank', {direction:'BOTH', concurrency:4}) YIELD requiredMemory, treeView")
+                .<String>columnAs("treeView")
+                .forEachRemaining(System.out::println);
+        db.execute("CALL algo.unionFind.memrec(null, null, {direction:'BOTH', concurrency:4}) YIELD requiredMemory, treeView")
                 .<String>columnAs("treeView")
                 .forEachRemaining(System.out::println);
     }

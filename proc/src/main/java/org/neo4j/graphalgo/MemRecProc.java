@@ -56,8 +56,7 @@ public final class MemRecProc {
             @Name(value = "config", defaultValue = "{}") Map<String, Object> configMap) {
 
         if (algo != null && !algo.isEmpty()) {
-            String[] algoNamespace = {"algo"};
-            QualifiedName name = new QualifiedName(Arrays.asList(algoNamespace), algo);
+            QualifiedName name = new QualifiedName(Arrays.asList("algo", algo), "memrec");
             Procedures procedures = api.getDependencyResolver().resolveDependency(Procedures.class);
             ProcedureHandle proc = null;
             try {
@@ -69,17 +68,23 @@ public final class MemRecProc {
             }
             if (proc == null) {
                 String available = procedures.getAllProcedures().stream()
-                        .filter(p -> Arrays.equals(p.name().namespace(), algoNamespace))
-                        .map(p -> p.name().name())
+                        .filter(p -> {
+                            String[] namespace = p.name().namespace();
+                            return namespace[0].equals("algo")
+                                    && namespace.length == 2
+                                    && p.name().name().equals("memrec");
+                        })
+                        .map(p -> p.name().namespace())
+                        .map(ns -> ns[ns.length - 1])
                         .distinct()
                         .collect(Collectors.joining(", ", "{", "}"));
                 throw new IllegalArgumentException(String.format(
-                        "No algo named [%s] found, the available algos are %s",
+                        "The algorithm [%s] does not support memrec or does not exist, the available and supported algos are %s.",
                         algo,
                         available));
             }
 
-            String query = " CALL " + proc.signature().name() + ".memrec($label, $relationship, $config)";
+            String query = " CALL " + proc.signature().name() + "($label, $relationship, $config)";
 
             Stream.Builder<MemRecResult> builder = Stream.builder();
             api.execute(query, MapUtil.map(
