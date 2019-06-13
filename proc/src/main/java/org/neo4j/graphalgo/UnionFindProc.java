@@ -298,7 +298,9 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
     }
 
     @Override
-    Double algoConfig(final ProcedureConfiguration config) {
+    Double algoConfig(
+            final ProcedureConfiguration config,
+            final Optional<Graph> graph) {
         return config.get(CONFIG_THRESHOLD, Double.NaN);
     }
 

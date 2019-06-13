@@ -34,6 +34,8 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pointer;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -56,6 +58,20 @@ import java.util.function.LongPredicate;
  * @author mknblch
  */
 public final class ModularityOptimization extends Algorithm<ModularityOptimization> {
+
+    private static final MemoryEstimation MEMORY_ESTIMATION_TASK = MemoryEstimations
+            .builder(Task.class)
+            .perNode("sTot", HugeDoubleArray::memoryEstimation)
+            .perNode("sIn", HugeDoubleArray::memoryEstimation)
+            .perNode("localCommunities", HugeLongArray::memoryEstimation)
+            .build();
+
+    private static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations
+            .builder(ModularityOptimization.class)
+            .perNode("communities", HugeLongArray::memoryEstimation)
+            .perNode("ki", HugeDoubleArray::memoryEstimation)
+            .perThread("tasks", MEMORY_ESTIMATION_TASK)
+            .build();
 
     private static final double MINIMUM_MODULARITY = -1.0;
     /**
@@ -94,6 +110,15 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
         ki = HugeDoubleArray.newArray(nodeCount, tracker);
         communities = HugeLongArray.newArray(nodeCount, tracker);
+    }
+
+    @Override
+    public MemoryEstimation memoryEstimation() {
+        return MEMORY_ESTIMATION;
+    }
+
+    public static MemoryEstimation estimateMemory() {
+        return MEMORY_ESTIMATION;
     }
 
     ModularityOptimization withRandomNeighborOptimization(final boolean randomNeighborSelection) {
@@ -277,6 +302,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
      */
     private final class Task implements Runnable {
 
+
         final HugeDoubleArray sTot, sIn;
         final HugeLongArray localCommunities;
         final RelationshipIterator rels;
@@ -296,6 +322,10 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             rels = graph.concurrentCopy();
             ki.copyTo(sTot, nodeCount);
             communities.copyTo(localCommunities, nodeCount);
+        }
+
+        public MemoryEstimation memoryEstimation() {
+            return MEMORY_ESTIMATION_TASK;
         }
 
         /**

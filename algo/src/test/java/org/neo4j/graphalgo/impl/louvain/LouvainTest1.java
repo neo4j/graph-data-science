@@ -28,9 +28,11 @@ import org.neo4j.graphalgo.HeavyHugeTester;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
@@ -41,7 +43,9 @@ import org.neo4j.test.rule.ImpermanentDatabaseRule;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * (a)-(b)-(d)
@@ -162,6 +166,23 @@ public class LouvainTest1 extends HeavyHugeTester {
             assertArrayEquals(expected, communityIds);
         }
     }
+
+    @Test
+    public void testMemoryRequirementComputation() {
+        Louvain.Config config = new Louvain.Config(10, 10);
+        GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
+        assertEquals(MemoryRange.of(592, 1056), new Louvain().memoryEstimation(config).apply(dimensions0, 1).memoryUsage());
+        assertEquals(MemoryRange.of(1096, 1560), new Louvain().memoryEstimation(config).apply(dimensions0, 4).memoryUsage());
+
+        GraphDimensions dimensions100 = new GraphDimensions.Builder().setNodeCount(100).build();
+        assertEquals(MemoryRange.of(6992, 14656), new Louvain().memoryEstimation(config).apply(dimensions100, 1).memoryUsage());
+        assertEquals(MemoryRange.of(14696, 22360), new Louvain().memoryEstimation(config).apply(dimensions100, 4).memoryUsage());
+
+        GraphDimensions dimensions100B = new GraphDimensions.Builder().setNodeCount(100_000_000_000L).build();
+        assertEquals(MemoryRange.of(6400976563216L, 13602075196632L), new Louvain().memoryEstimation(config).apply(dimensions100B, 1).memoryUsage());
+        assertEquals(MemoryRange.of(13602075196672L, 20803173830088L), new Louvain().memoryEstimation(config).apply(dimensions100B, 4).memoryUsage());
+    }
+
 
     public void assertCommunities(Louvain louvain) {
         assertUnion(new String[]{"a", "b", "c"}, louvain.getCommunityIds());

@@ -20,20 +20,28 @@
 package org.neo4j.graphalgo;
 
 import org.HdrHistogram.Histogram;
-import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
-import org.neo4j.graphalgo.core.utils.*;
+import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.Exporter;
+import org.neo4j.graphalgo.impl.AlgoWithConfig;
 import org.neo4j.graphalgo.impl.louvain.Louvain;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
+import org.neo4j.graphalgo.impl.results.MemRecResult;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
-import org.neo4j.procedure.*;
+import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Mode;
+import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +55,7 @@ import java.util.stream.Stream;
  *
  * @author mknblch
  */
-public class LouvainProc {
+public class LouvainProc extends BaseAlgoProc<Louvain, Louvain.Config> {
 
     public static final String INTERMEDIATE_COMMUNITIES_WRITE_PROPERTY = "intermediateCommunitiesWriteProperty";
     public static final String DEFAULT_CLUSTER_PROPERTY = "communityProperty";
@@ -56,6 +64,9 @@ public class LouvainProc {
     private static final String CLUSTERING_IDENTIFIER = "clustering";
     public static final String INNER_ITERATIONS = "innerIterations";
     public static final String COMMUNITY_SELECTION = "communitySelection";
+    public static final int DEFAULT_CONCURRENCY = 1;
+    public static final int DEFAULT_MAX_LEVEL = 10;
+    public static final long DEFAULT_MAX_ITERATIONS = 10L;
 
     @Context
     public GraphDatabaseAPI api;
@@ -75,24 +86,17 @@ public class LouvainProc {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
-                .overrideNodeLabelOrQuery(label)
-                .overrideRelationshipTypeOrQuery(relationship);
-
         final Builder builder = new Builder();
-
         AllocationTracker tracker = AllocationTracker.create();
-        final Graph graph;
-        try (ProgressTimer timer = builder.timeLoad()) {
-            graph = graph(label, relationship, configuration, tracker);
-        }
+        ProcedureConfiguration configuration = newConfig(label, relationship, config);
+        final Graph graph = this.loadGraph(configuration, tracker, builder);
 
         if (graph.nodeCount() == 0) {
             graph.release();
             return Stream.of(LouvainResult.EMPTY);
         }
 
-        Louvain louvain = eval(builder, configuration, graph, tracker, 1);
+        Louvain louvain = compute(builder, tracker, configuration, graph);
 
         if (configuration.isWriteFlag()) {
             builder.timeWrite(() -> {
@@ -120,7 +124,8 @@ public class LouvainProc {
         builder.withIterations(louvain.getLevel());
         builder.withModularities(louvain.getModularities());
         builder.withFinalModularity(louvain.getFinalModularity());
-        return Stream.of(builder.build(louvain.communityCount(), tracker, graph.nodeCount(), louvain::communityIdOf));
+        return Stream.of(builder.build(louvain.communityCount(), tracker, graph.nodeCount(), louvain::communityIdOf))
+                .onClose(louvain::release);
     }
 
     @Procedure(value = "algo.louvain.stream")
@@ -132,12 +137,10 @@ public class LouvainProc {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
-                .overrideNodeLabelOrQuery(label)
-                .overrideRelationshipTypeOrQuery(relationship);
-
+        final Builder builder = new Builder();
         AllocationTracker tracker = AllocationTracker.create();
-        final Graph graph = graph(label, relationship, configuration, tracker);
+        ProcedureConfiguration configuration = newConfig(label, relationship, config);
+        final Graph graph = this.loadGraph(configuration, tracker, builder);
 
         if (graph.nodeCount() == 0) {
             graph.release();
@@ -145,71 +148,82 @@ public class LouvainProc {
         }
 
         // evaluation
-        Louvain louvain = eval(configuration, graph, tracker, configuration.getConcurrency());
+        Louvain louvain = compute(builder, tracker, configuration, graph);
         return louvain.dendrogramStream(configuration.get(INCLUDE_INTERMEDIATE_COMMUNITIES, false));
     }
 
-    public Graph graph(
-            String label,
-            String relationship,
-            ProcedureConfiguration config,
-            AllocationTracker tracker) {
+    @Procedure(value = "algo.louvain.memrec", mode = Mode.READ)
+    @Description("CALL algo.louvain.memrec(label:String, relationship:String, {...properties}) " +
+            "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for Louvain")
+    public Stream<MemRecResult> louvainMemrec(
+            @Name(value = "label", defaultValue = "") String label,
+            @Name(value = "relationship", defaultValue = "") String relationship,
+            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        GraphLoader graphLoader = new GraphLoader(api, Pools.DEFAULT)
-                .init(log, label, relationship, config)
-                .withAllocationTracker(tracker)
-                .withNodeStatement(config.getNodeLabelOrQuery())
-                .withRelationshipStatement(config.getRelationshipOrQuery())
-                .withOptionalRelationshipWeightsFromProperty(
+        ProcedureConfiguration configuration = newConfig(label, relationship, config);
+        MemoryTree memoryEstimation = this.memoryEstimation(configuration);
+        return Stream.of(new MemRecResult(memoryEstimation));
+    }
+
+    @Override
+    GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
+        loader.withOptionalRelationshipWeightsFromProperty(
                         config.getWeightProperty(),
                         config.getWeightPropertyDefaultValue(1.0));
 
         config.getString(DEFAULT_CLUSTER_PROPERTY).ifPresent(propertyIdentifier -> {
             // configure predefined clustering if set
-            graphLoader.withOptionalNodeProperties(PropertyMapping.of(CLUSTERING_IDENTIFIER, propertyIdentifier, -1));
+            loader.withOptionalNodeProperties(PropertyMapping.of(CLUSTERING_IDENTIFIER, propertyIdentifier, -1));
         });
 
-        return graphLoader
-                .asUndirected(true)
-                .load(config.getGraphImpl());
+        return loader.asUndirected(true);
     }
 
-    private Louvain eval(
-            Builder builder,
-            ProcedureConfiguration configuration,
-            Graph graph,
-            AllocationTracker tracker,
-            int concurrency) {
-        try (ProgressTimer ignored = builder.timeEval()) {
-            return eval(configuration, graph, tracker, concurrency);
-        }
+    @Override
+    Louvain.Config algoConfig(
+            final ProcedureConfiguration config,
+            final Optional<Graph> graph) {
+        final int maxLevel = config.getIterations(DEFAULT_MAX_LEVEL);
+        final int maxIterations = config.getNumber(INNER_ITERATIONS, DEFAULT_MAX_ITERATIONS).intValue();
+        final boolean randomNeighbor = config.get(COMMUNITY_SELECTION, "classic").equalsIgnoreCase("random");
+        Optional<String> clusterProperty = config.getString(DEFAULT_CLUSTER_PROPERTY);
+
+        HugeWeightMapping communityMap = clusterProperty
+                .flatMap(name -> graph.map(g -> g.nodeProperties(CLUSTERING_IDENTIFIER)))
+                .orElse(null);
+
+        return new Louvain.Config(communityMap, maxLevel, maxIterations, randomNeighbor);
     }
 
-    private Louvain eval(
-            ProcedureConfiguration configuration,
-            Graph graph,
-            AllocationTracker tracker,
-            int concurrency) {
-        final int iterations = configuration.getIterations(10);
-        final int maxIterations = configuration.getNumber(INNER_ITERATIONS, 10L).intValue();
-        final boolean randomNeighbor = configuration.get(COMMUNITY_SELECTION, "classic").equalsIgnoreCase("random");
-        Optional<String> clusterProperty = configuration.getString(DEFAULT_CLUSTER_PROPERTY);
+    @Override
+    Louvain algorithm(
+            final ProcedureConfiguration config,
+            final Louvain.Config algoConfig,
+            final AllocationTracker tracker,
+            final Optional<Graph> graph) {
 
-        if (clusterProperty.isPresent()) {
-            // use predefined clustering
-            HugeWeightMapping communityMap = graph.nodeProperties(CLUSTERING_IDENTIFIER);
-            Louvain louvain = new Louvain(graph, Pools.DEFAULT, concurrency, tracker)
-                    .withProgressLogger(ProgressLogger.wrap(log, "Louvain"))
-                    .withTerminationFlag(TerminationFlag.wrap(transaction));
-            louvain.compute(communityMap, iterations, maxIterations, randomNeighbor);
-            return louvain;
-        } else {
-            Louvain louvain = new Louvain(graph, Pools.DEFAULT, concurrency, tracker)
-                    .withProgressLogger(ProgressLogger.wrap(log, "Louvain"))
-                    .withTerminationFlag(TerminationFlag.wrap(transaction));
-            louvain.compute(iterations, maxIterations, randomNeighbor);
-            return louvain;
-        }
+        return graph.map(g -> new Louvain(g, Pools.DEFAULT, config.getConcurrency(DEFAULT_CONCURRENCY), tracker)).orElseGet(Louvain::new);
+    }
+
+    private Louvain compute(
+            final Builder statsBuilder,
+            final AllocationTracker tracker,
+            final ProcedureConfiguration configuration,
+            final Graph graph) {
+
+        AlgoWithConfig<Louvain, Louvain.Config> prAlgo = newAlgorithm(configuration, tracker, Optional.of(graph));
+        Louvain algo = prAlgo.algo();
+        Louvain.Config conf = prAlgo.conf();
+
+        final Louvain louvain = statsBuilder.timeEval(() -> algo.compute(conf));
+        statsBuilder.randomNeighbor(conf.rnd);
+
+        graph.release();
+
+        log.info("Louvain: overall memory usage: %s", tracker.getUsageString());
+
+        return louvain;
+
     }
 
     private Exporter exporter(

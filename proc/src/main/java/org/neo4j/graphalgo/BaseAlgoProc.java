@@ -57,7 +57,9 @@ public abstract class BaseAlgoProc<A extends ConfiguredAlgorithm<A, Conf>, Conf>
             GraphLoader loader,
             ProcedureConfiguration config);
 
-    abstract Conf algoConfig(ProcedureConfiguration config);
+    abstract Conf algoConfig(
+            ProcedureConfiguration config,
+            final Optional<Graph> graph);
 
     abstract A algorithm(
             ProcedureConfiguration config,
@@ -150,7 +152,7 @@ public abstract class BaseAlgoProc<A extends ConfiguredAlgorithm<A, Conf>, Conf>
             final AllocationTracker tracker,
             final Optional<Graph> graph) {
         TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
-        Conf conf = algoConfig(config);
+        Conf conf = algoConfig(config, graph);
         A algorithm = algorithm(config, conf, tracker, graph);
         A algo = algorithm
                 .withLog(log)

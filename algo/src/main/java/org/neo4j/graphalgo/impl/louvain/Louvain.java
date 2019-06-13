@@ -22,11 +22,14 @@ package org.neo4j.graphalgo.impl.louvain;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.DoubleArrayList;
 import com.carrotsearch.hppc.ObjectArrayList;
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.ConfiguredAlgorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
@@ -43,6 +46,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
+
 /**
  * Louvain Clustering Algorithm.
  * <p>
@@ -55,7 +61,7 @@ import java.util.stream.Stream;
  *
  * @author mknblch
  */
-public final class Louvain extends Algorithm<Louvain> {
+public final class Louvain extends ConfiguredAlgorithm<Louvain, Louvain.Config> {
 
     private static final PropertyTranslator<HugeLongArray[]> HUGE_COMMUNITIES_TRANSLATOR =
             (propertyId, allCommunities, nodeId) -> {
@@ -95,6 +101,47 @@ public final class Louvain extends Algorithm<Louvain> {
         nodeWeights = HugeDoubleArray.newArray(rootNodeCount, tracker);
         communityCount = rootNodeCount;
         communities.setAll(i -> i);
+    }
+
+    public Louvain() {
+        this.root = null;
+        this.pool = null;
+        this.concurrency = 0;
+        this.tracker = null;
+        rootNodeCount = 0;
+        communities = null;
+        nodeWeights = null;
+        communityCount = rootNodeCount;
+    }
+
+    @Override
+    public MemoryEstimation memoryEstimation(final Config config) {
+        return MemoryEstimations.builder(Louvain.class)
+                .perNode("communities", HugeLongArray::memoryEstimation)
+                .perNode("nodeWeights", HugeDoubleArray::memoryEstimation)
+                .rangePerNode("dendrogram", (nodeCount) -> {
+                    final long communityArraySize = HugeLongArray.memoryEstimation(nodeCount);
+
+                    final MemoryRange innerCommunities = MemoryRange.of(
+                            communityArraySize,
+                            communityArraySize * config.maxLevel);
+
+                    final MemoryRange communityArrayLength = MemoryRange.of(sizeOfObjectArray(1), sizeOfObjectArray(config.maxLevel));
+
+                    return innerCommunities.add(communityArrayLength);
+                })
+                .fixed("modularities", MemoryRange.of(sizeOfDoubleArray(1), sizeOfDoubleArray(config.maxLevel)))
+                .add("modularityOptimization", ModularityOptimization.estimateMemory())
+                .build();
+
+    }
+
+    public Louvain compute(final Louvain.Config config) {
+        if(config.communityMap != null) {
+            return compute(config.communityMap, config.maxLevel, config.maxIterations, config.rnd);
+        } else {
+            return compute(config.maxLevel, config.maxIterations, config.rnd);
+        }
     }
 
     public Louvain compute(final int maxLevel, final int maxIterations) {
@@ -437,6 +484,31 @@ public final class Louvain extends Algorithm<Louvain> {
             this.nodeId = nodeId;
             this.communities = communities;
             this.community = community;
+        }
+    }
+
+    public static class Config {
+
+        public final HugeWeightMapping communityMap;
+        public final int maxLevel;
+        public final int maxIterations;
+        public final boolean rnd;
+
+        public Config(
+                final int maxLevel,
+                final int maxIterations) {
+            this(null, maxLevel, maxIterations, false);
+        }
+
+        public Config(
+                final HugeWeightMapping communityMap,
+                final int maxLevel,
+                final int maxIterations,
+                final boolean rnd) {
+            this.communityMap = communityMap;
+            this.maxLevel = maxLevel;
+            this.maxIterations = maxIterations;
+            this.rnd = rnd;
         }
     }
 }

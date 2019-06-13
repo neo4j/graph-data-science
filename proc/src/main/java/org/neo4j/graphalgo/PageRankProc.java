@@ -24,7 +24,6 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.AlgoWithConfig;
@@ -155,7 +154,9 @@ public final class PageRankProc extends BaseAlgoProc<PageRank, PageRank.Config> 
     }
 
     @Override
-    PageRank.Config algoConfig(final ProcedureConfiguration config) {
+    PageRank.Config algoConfig(
+            final ProcedureConfiguration config,
+            final Optional<Graph> graph) {
         double dampingFactor = config.get(CONFIG_DAMPING, DEFAULT_DAMPING);
         int iterations = config.getIterations(DEFAULT_ITERATIONS);
         return new PageRank.Config(iterations, dampingFactor);
@@ -204,7 +205,8 @@ public final class PageRankProc extends BaseAlgoProc<PageRank, PageRank.Config> 
     private CentralityResult compute(
             final PageRankScore.Stats.Builder statsBuilder,
             final AllocationTracker tracker,
-            final ProcedureConfiguration configuration, final Graph graph) {
+            final ProcedureConfiguration configuration,
+            final Graph graph) {
         AlgoWithConfig<PageRank, PageRank.Config> prAlgo = newAlgorithm(configuration, tracker, Optional.of(graph));
         PageRank algo = prAlgo.algo();
         PageRank.Config conf = prAlgo.conf();
