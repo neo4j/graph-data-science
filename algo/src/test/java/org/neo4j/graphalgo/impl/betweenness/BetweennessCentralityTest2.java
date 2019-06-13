@@ -21,18 +21,19 @@ package org.neo4j.graphalgo.impl.betweenness;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
+import org.neo4j.graphalgo.HeavyHugeTester;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.concurrent.atomic.AtomicIntegerArray;
@@ -54,8 +55,10 @@ import static org.mockito.Mockito.verify;
  *   .0                 .0
  * @author mknblch
  */
-@RunWith(MockitoJUnitRunner.class)
-public class BetweennessCentralityTest2 {
+public class BetweennessCentralityTest2 extends HeavyHugeTester {
+
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
 
     private static GraphDatabaseAPI db;
     private static Graph graph;
@@ -68,7 +71,7 @@ public class BetweennessCentralityTest2 {
     private TestConsumer testConsumer;
 
     @BeforeClass
-    public static void setupGraph() throws KernelException {
+    public static void setupGraph() {
 
         final String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
@@ -95,18 +98,22 @@ public class BetweennessCentralityTest2 {
             db.execute(cypher);
             tx.success();
         }
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        if (db != null) db.shutdown();
+        graph = null;
+    }
+
+    public BetweennessCentralityTest2(final Class<? extends GraphFactory> graphImpl, String name) {
+        super(graphImpl);
 
         graph = new GraphLoader(db)
                 .withAnyRelationshipType()
                 .withAnyLabel()
                 .withoutNodeProperties()
-                .load(HeavyGraphFactory.class);
-    }
-
-    @AfterClass
-    public static void tearDown() throws Exception {
-        if (db != null) db.shutdown();
-        graph = null;
+                .load(graphImpl);
     }
 
     private String name(long id) {
@@ -120,7 +127,7 @@ public class BetweennessCentralityTest2 {
     }
 
     @Test
-    public void testBC() throws Exception {
+    public void testBC() {
 
         new BetweennessCentrality(graph)
                 .compute()
@@ -131,7 +138,7 @@ public class BetweennessCentralityTest2 {
     }
 
     @Test
-    public void testPBC() throws Exception {
+    public void testPBC() {
 
         new ParallelBetweennessCentrality(graph, Pools.DEFAULT, 4)
                 .compute()
@@ -153,7 +160,7 @@ public class BetweennessCentralityTest2 {
 
 
     @Test
-    public void testIterateParallel() throws Exception {
+    public void testIterateParallel() {
 
         final AtomicIntegerArray ai = new AtomicIntegerArray(1001);
 

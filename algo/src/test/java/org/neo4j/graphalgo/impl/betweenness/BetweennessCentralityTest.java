@@ -22,13 +22,13 @@ package org.neo4j.graphalgo.impl.betweenness;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.neo4j.graphalgo.HeavyHugeTester;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 /**
@@ -37,14 +37,13 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
  *
  * @author mknblch
  */
-public class BetweennessCentralityTest {
+public class BetweennessCentralityTest extends HeavyHugeTester {
 
     private static GraphDatabaseAPI db;
     private static Graph graph;
 
     @BeforeClass
-    public static void setupGraph() throws KernelException {
-
+    public static void setupGraph() {
         final String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
                         "CREATE (b:Node {name:'b'})\n" +
@@ -64,19 +63,22 @@ public class BetweennessCentralityTest {
             db.execute(cypher);
             tx.success();
         }
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        if (db != null) db.shutdown();
+        graph = null;
+    }
+
+    public BetweennessCentralityTest(final Class<? extends GraphFactory> graphImpl, String name) {
+        super(graphImpl);
 
         graph = new GraphLoader(db)
                 .withAnyRelationshipType()
                 .withAnyLabel()
                 .withoutNodeProperties()
-                .load(HeavyGraphFactory.class);
-
-    }
-
-    @AfterClass
-    public static void tearDown() throws Exception {
-        if (db != null) db.shutdown();
-        graph = null;
+                .load(graphImpl);
     }
 
     private String name(long id) {
@@ -90,7 +92,7 @@ public class BetweennessCentralityTest {
     }
 
     @Test
-    public void testBC() throws Exception {
+    public void testBC() {
 
         new BetweennessCentrality(graph)
                 .compute()
@@ -99,7 +101,7 @@ public class BetweennessCentralityTest {
     }
 
     @Test
-    public void testRABrandes() throws Exception {
+    public void testRABrandes() {
 
         new RABrandesBetweennessCentrality(graph, Pools.DEFAULT, 3, new RandomSelectionStrategy(graph, 0.3))
                 .compute()
@@ -108,7 +110,7 @@ public class BetweennessCentralityTest {
     }
 
     @Test
-    public void testPBC() throws Exception {
+    public void testPBC() {
 
         new ParallelBetweennessCentrality(graph, Pools.DEFAULT, 4)
                 .compute()
