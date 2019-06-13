@@ -25,26 +25,23 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.neo4j.graphalgo.BetweennessCentralityProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.impl.betweenness.BetweennessCentrality;
 import org.neo4j.graphalgo.impl.betweenness.BetweennessCentralitySuccessorBrandes;
-import org.neo4j.graphalgo.impl.betweenness.ParallelBetweennessCentrality;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  *   .0                 .0
@@ -100,10 +97,6 @@ public class BetweennessCentralityTest2 {
             tx.success();
         }
 
-        db.getDependencyResolver()
-                .resolveDependency(Procedures.class)
-                .registerProcedure(BetweennessCentralityProc.class);
-
         graph = new GraphLoader(db)
                 .withAnyRelationshipType()
                 .withAnyLabel()
@@ -125,28 +118,6 @@ public class BetweennessCentralityTest2 {
                     return false;
                 });
         return name[0];
-    }
-
-    @Test
-    public void testBC() throws Exception {
-
-        new BetweennessCentrality(graph)
-                .compute()
-                .resultStream()
-                .forEach(r -> testConsumer.accept(name(r.nodeId), r.centrality));
-
-        verifyMock(testConsumer);
-    }
-
-    @Test
-    public void testPBC() throws Exception {
-
-        new ParallelBetweennessCentrality(graph, Pools.DEFAULT, 4)
-                .compute()
-                .resultStream()
-                .forEach(r -> testConsumer.accept(name(r.nodeId), r.centrality));
-
-        verifyMock(testConsumer);
     }
 
     @Test

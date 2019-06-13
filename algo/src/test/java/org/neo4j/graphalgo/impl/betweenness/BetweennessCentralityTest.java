@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl;
+package org.neo4j.graphalgo.impl.betweenness;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -26,18 +26,10 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
-import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.impl.betweenness.BetweennessCentralitySuccessorBrandes;
-import org.neo4j.graphalgo.impl.betweenness.MaxDepthBetweennessCentrality;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 /**
  *  (A)-->(B)-->(C)-->(D)-->(E)
@@ -98,41 +90,29 @@ public class BetweennessCentralityTest {
     }
 
     @Test
-    public void testMBC() throws Exception {
+    public void testBC() throws Exception {
 
-        new MaxDepthBetweennessCentrality(graph, 3)
+        new BetweennessCentrality(graph)
                 .compute()
                 .resultStream()
                 .forEach(r -> System.out.println(name(r.nodeId) + " -> " + r.centrality));
     }
 
     @Test
-    public void testSuccessorBrandes() throws Exception {
+    public void testRABrandes() throws Exception {
 
-        final TestConsumer mock = mock(TestConsumer.class);
-
-        final BetweennessCentralitySuccessorBrandes bc =
-                new BetweennessCentralitySuccessorBrandes(graph, Pools.DEFAULT)
-                        .compute();
-
-        final AtomicDoubleArray centrality = bc.getCentrality();
-
-
-        for (int i = 0; i < centrality.length(); i++) {
-            System.out.println(i + ":" + centrality.get(i));
-        }
-
-        bc.resultStream().forEach(r -> mock.consume(name(r.nodeId), r.centrality));
-
-        verify(mock, times(1)).consume(eq("a"), eq(0.0));
-        verify(mock, times(1)).consume(eq("b"), eq(3.0));
-        verify(mock, times(1)).consume(eq("c"), eq(4.0));
-        verify(mock, times(1)).consume(eq("d"), eq(3.0));
-        verify(mock, times(1)).consume(eq("e"), eq(0.0));
+        new RABrandesBetweennessCentrality(graph, Pools.DEFAULT, 3, new RandomSelectionStrategy(graph, 0.3))
+                .compute()
+                .resultStream()
+                .forEach(r -> System.out.println(name(r.nodeId) + " -> " + r.centrality));
     }
 
-    interface TestConsumer {
+    @Test
+    public void testPBC() throws Exception {
 
-        void consume(String name, double centrality);
+        new ParallelBetweennessCentrality(graph, Pools.DEFAULT, 4)
+                .compute()
+                .resultStream()
+                .forEach(r -> System.out.println(name(r.nodeId) + " -> " + r.centrality));
     }
 }
