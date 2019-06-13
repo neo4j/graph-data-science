@@ -9,11 +9,17 @@ import java.util.function.IntToLongFunction;
 import java.util.function.LongFunction;
 import java.util.function.LongUnaryOperator;
 import java.util.function.ToLongFunction;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 
 public final class MemoryEstimations {
+
+    @FunctionalInterface
+    public interface MemoryRangeModifier {
+        MemoryRange apply(MemoryRange range, GraphDimensions dimensions, int concurrency);
+    }
 
     public static MemoryEstimation empty() {
         return NULL_ESTIMATION;
@@ -105,6 +111,11 @@ public final class MemoryEstimations {
             return this;
         }
 
+        public Builder perNode(final String description, final MemoryEstimation subComponent) {
+            components.add(new AndThenEstimation(description, subComponent, (mem, dim, concurrency) -> mem.times(dim.hugeNodeCount())));
+            return this;
+        }
+
         public Builder perGraphDimension(final String description, final ToLongFunction<GraphDimensions> fn) {
             components.add(new LeafEstimation(description, MemoryResidents.perDim(fn)));
             return this;
@@ -117,6 +128,11 @@ public final class MemoryEstimations {
 
         public Builder perThread(final String description, final IntToLongFunction fn) {
             components.add(new LeafEstimation(description, MemoryResidents.perThread(fn)));
+            return this;
+        }
+
+        public Builder perThread(final String description, final MemoryEstimation subComponent) {
+            components.add(new AndThenEstimation(description, subComponent, (mem, dim, concurrency) -> mem.times(concurrency)));
             return this;
         }
 
@@ -177,6 +193,40 @@ final class LeafEstimation extends BaseEstimation {
     public MemoryTree apply(final GraphDimensions dimensions, final int concurrency) {
         MemoryRange memoryRange = resident.estimateMemoryUsage(dimensions, concurrency);
         return new LeafTree(description(), memoryRange);
+    }
+}
+
+final class AndThenEstimation extends BaseEstimation {
+    private final MemoryEstimation delegate;
+    private final MemoryEstimations.MemoryRangeModifier andThen;
+
+    AndThenEstimation(
+            final String description,
+            final MemoryEstimation delegate,
+            final MemoryEstimations.MemoryRangeModifier andThen) {
+        super(description);
+        this.delegate = delegate;
+        this.andThen = andThen;
+    }
+
+    @Override
+    public Collection<MemoryEstimation> components() {
+        return delegate.components();
+    }
+
+    @Override
+    public MemoryResident resident() {
+        return (dimensions, concurrency) -> {
+            MemoryResident resident = delegate.resident();
+            MemoryRange memoryRange = resident.estimateMemoryUsage(dimensions, concurrency);
+            return andThen.apply(memoryRange, dimensions, concurrency);
+        };
+    }
+
+    @Override
+    public MemoryTree apply(final GraphDimensions dimensions, final int concurrency) {
+        MemoryTree memoryTree = delegate.apply(dimensions, concurrency);
+        return new AndThenTree(description(), memoryTree, range -> andThen.apply(range, dimensions, concurrency));
     }
 }
 
@@ -269,6 +319,31 @@ final class LeafTree extends BaseTree {
         return range;
     }
 }
+
+final class AndThenTree extends BaseTree {
+    private final MemoryTree delegate;
+    private final UnaryOperator<MemoryRange> andThen;
+
+    AndThenTree(
+            final String description,
+            final MemoryTree delegate,
+            final UnaryOperator<MemoryRange> andThen) {
+        super(description);
+        this.delegate = delegate;
+        this.andThen = andThen;
+    }
+
+    @Override
+    public MemoryRange memoryUsage() {
+        return andThen.apply(delegate.memoryUsage());
+    }
+
+    @Override
+    public Collection<MemoryTree> components() {
+        return delegate.components();
+    }
+}
+
 
 final class CompositeTree extends BaseTree {
     private final Collection<MemoryTree> components;

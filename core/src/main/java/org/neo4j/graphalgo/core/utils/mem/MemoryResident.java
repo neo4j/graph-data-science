@@ -13,6 +13,6 @@ public interface MemoryResident {
      */
     MemoryRange estimateMemoryUsage(
             GraphDimensions dimensions,
-            int concurrecny
+            int concurrency
     );
 }
