@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.impl;
 
 import com.carrotsearch.hppc.*;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.*;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;

@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.impl;
 
+import org.neo4j.graphalgo.Algorithm;
+
 import java.util.stream.Stream;
 
 public abstract class MSBFSASPAlgorithm<ME extends MSBFSASPAlgorithm<ME>> extends Algorithm<ME> {

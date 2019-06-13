@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.IntScatterSet;
 import com.carrotsearch.hppc.IntSet;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.traverse.ParallelLocalQueueBFS;
-import org.neo4j.graphalgo.impl.Algorithm;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphdb.Direction;
 
 import java.util.concurrent.ExecutorService;
