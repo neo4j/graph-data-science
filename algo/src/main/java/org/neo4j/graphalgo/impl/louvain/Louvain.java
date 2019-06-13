@@ -19,7 +19,10 @@
  */
 package org.neo4j.graphalgo.impl.louvain;
 
-import com.carrotsearch.hppc.*;
+import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.DoubleArrayList;
+import com.carrotsearch.hppc.ObjectArrayList;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -29,6 +32,9 @@ import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.write.Exporter;
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
+import org.neo4j.graphdb.Direction;
+import org.neo4j.values.storable.Values;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,7 +55,17 @@ import java.util.stream.Stream;
  *
  * @author mknblch
  */
-public final class Louvain extends LouvainAlgo<Louvain> {
+public final class Louvain extends Algorithm<Louvain> {
+
+    private static final PropertyTranslator<HugeLongArray[]> HUGE_COMMUNITIES_TRANSLATOR =
+            (propertyId, allCommunities, nodeId) -> {
+                // build int array
+                final long[] data = new long[allCommunities.length];
+                for (int i = 0; i < data.length; i++) {
+                    data[i] = allCommunities[i].get(nodeId);
+                }
+                return Values.longArray(data);
+            };
 
     private final long rootNodeCount;
     private int level;
@@ -66,10 +82,10 @@ public final class Louvain extends LouvainAlgo<Louvain> {
     private long communityCount;
 
     public Louvain(
-            Graph graph,
-            ExecutorService pool,
-            int concurrency,
-            AllocationTracker tracker) {
+            final Graph graph,
+            final ExecutorService pool,
+            final int concurrency,
+            final AllocationTracker tracker) {
         this.root = graph;
         this.pool = pool;
         this.concurrency = concurrency;
@@ -81,15 +97,19 @@ public final class Louvain extends LouvainAlgo<Louvain> {
         communities.setAll(i -> i);
     }
 
-    public Louvain compute(int maxLevel, int maxIterations) {
+    public Louvain compute(final int maxLevel, final int maxIterations) {
         return compute(maxLevel, maxIterations, false);
     }
 
-    public Louvain compute(int maxLevel, int maxIterations, boolean rnd) {
+    public Louvain compute(final int maxLevel, final int maxIterations, final boolean rnd) {
         return computeOf(root, rootNodeCount, maxLevel, maxIterations, rnd);
     }
 
-    public Louvain compute(HugeWeightMapping communityMap, int maxLevel, int maxIterations, boolean rnd) {
+    public Louvain compute(
+            final HugeWeightMapping communityMap,
+            final int maxLevel,
+            final int maxIterations,
+            final boolean rnd) {
         BitSet comCount = new BitSet();
         communities.setAll(i -> {
             final long t = (long) communityMap.nodeWeight(i, -1.0);
@@ -106,11 +126,11 @@ public final class Louvain extends LouvainAlgo<Louvain> {
     }
 
     private Louvain computeOf(
-            Graph rootGraph,
-            long rootNodeCount,
-            int maxLevel,
-            int maxIterations,
-            boolean rnd) {
+            final Graph rootGraph,
+            final long rootNodeCount,
+            final int maxLevel,
+            final int maxIterations,
+            final boolean rnd) {
 
         // result arrays, start with small buffers in case we don't require max iterations to converge
         ObjectArrayList<HugeLongArray> dendrogram = new ObjectArrayList<>(0);
@@ -122,11 +142,13 @@ public final class Louvain extends LouvainAlgo<Louvain> {
         for (int level = 0; level < maxLevel && running(); level++) {
             // start modularity optimization
             final ModularityOptimization modularityOptimization =
-                    new ModularityOptimization(graph,
+                    new ModularityOptimization(
+                            graph,
                             nodeWeights::get,
                             pool,
                             concurrency,
-                            tracker, System.currentTimeMillis())
+                            tracker
+                    )
                             .withProgressLogger(progressLogger)
                             .withTerminationFlag(terminationFlag)
                             .withRandomNeighborOptimization(rnd)
@@ -167,18 +189,15 @@ public final class Louvain extends LouvainAlgo<Louvain> {
      * @param communityIds community structure
      * @return a new graph built from a community structure
      */
-    private Graph rebuildGraph(Graph graph, HugeLongArray communityIds, long communityCount) {
-        // count and normalize community structure
-        final long nodeCount = communityIds.size();
-
-        if (nodeCount < MAX_MAP_ENTRIES) {
-            return rebuildSmallerGraph(graph, communityIds, (int) nodeCount, communityCount);
+    private Graph rebuildGraph(final Graph graph, final HugeLongArray communityIds, final long communityCount) {
+        if (communityCount < MAX_MAP_ENTRIES) {
+            return rebuildSmallerGraph(graph, communityIds, (int) communityCount);
         }
 
+        HugeDoubleArray nodeWeights = this.nodeWeights;
+
         // bag of nodeId->{nodeId, ..}
-        LongLongSubGraph subGraph = new LongLongSubGraph(nodeCount, tracker);
-        // accumulated weights
-        LongLongSubWeights subWeights = new LongLongSubWeights(nodeCount, tracker);
+        LongLongSubGraph subGraph = new LongLongSubGraph(communityCount, tracker);
 
         // for each node in the current graph
         HugeCursor<long[]> cursor = communityIds.cursor(communityIds.newCursor());
@@ -186,14 +205,14 @@ public final class Louvain extends LouvainAlgo<Louvain> {
             long[] communities = cursor.array;
             int start = cursor.offset;
             int end = cursor.limit;
-            long nodeId = cursor.base + start;
+            long base = cursor.base;
 
             while (start < end) {
                 // map node nodeId to community nodeId
                 final long sourceCommunity = communities[start];
 
                 // get transitions from current node
-                graph.forEachOutgoing(nodeId, (s, t) -> {
+                graph.forEachOutgoing(base + start, (s, t) -> {
                     // mapping
                     final long targetCommunity = communityIds.get(t);
                     final double value = graph.weightOf(s, t);
@@ -202,34 +221,30 @@ public final class Louvain extends LouvainAlgo<Louvain> {
                     }
 
                     // add IN and OUT relation and weights
-                    subGraph.add(sourceCommunity, targetCommunity);
-                    subWeights.add(sourceCommunity, targetCommunity, value / 2.0); // TODO validate
+                    subGraph.add(sourceCommunity, targetCommunity, (float) (value / 2.0)); // TODO validate
                     return true;
                 });
 
                 ++start;
-                ++nodeId;
             }
         }
 
-        if (graph instanceof LouvainGraph) {
+        if (graph instanceof SubGraph) {
             graph.release();
         }
 
         // create temporary graph
-        return new LouvainGraph(communityCount, subGraph, subWeights);
+        return subGraph;
     }
 
     private Graph rebuildSmallerGraph(
-        Graph graph,
-        HugeLongArray communityIds,
-        int nodeCount,
-        long communityCount) {
+            final Graph graph,
+            final HugeLongArray communityIds,
+            final int communityCount) {
+        HugeDoubleArray nodeWeights = this.nodeWeights;
 
         // bag of nodeId->{nodeId, ..}
-        final IntIntSubGraph subGraph = new IntIntSubGraph(nodeCount);
-        // accumulated weights
-        final IntIntSubWeights subWeights = new IntIntSubWeights(nodeCount);
+        final IntIntSubGraph subGraph = new IntIntSubGraph(communityCount);
 
         // for each node in the current graph
         HugeCursor<long[]> cursor = communityIds.cursor(communityIds.newCursor());
@@ -237,44 +252,51 @@ public final class Louvain extends LouvainAlgo<Louvain> {
             long[] communities = cursor.array;
             int start = cursor.offset;
             int end = cursor.limit;
-            long nodeId = cursor.base + start;
+            long base = cursor.base;
 
             while (start < end) {
                 // map node nodeId to community nodeId
                 final int sourceCommunity = (int) communities[start];
 
                 // get transitions from current node
-                graph.forEachOutgoing(nodeId, (s, t) -> {
+                graph.forEachRelationship(base + start, Direction.OUTGOING, (s, t, value) -> {
                     // mapping
                     final int targetCommunity = (int) communityIds.get(t);
-                    final double value = graph.weightOf(s, t);
                     if (sourceCommunity == targetCommunity) {
                         nodeWeights.addTo(sourceCommunity, value);
                     }
 
                     // add IN and OUT relation and weights
-                    subGraph.add(sourceCommunity, targetCommunity);
-                    subWeights.add(sourceCommunity, targetCommunity, value / 2.0); // TODO validate
+                    subGraph.add(sourceCommunity, targetCommunity, (float) (value / 2.0)); // TODO validate
                     return true;
                 });
 
                 ++start;
-                ++nodeId;
             }
         }
 
+        if (graph instanceof SubGraph) {
+            graph.release();
+        }
+
         // create temporary graph
-        return new LouvainGraph(communityCount, subGraph, subWeights);
+        return subGraph;
     }
 
-    private HugeLongArray rebuildCommunityStructure(HugeLongArray communityIds) {
+    private HugeLongArray rebuildCommunityStructure(final HugeLongArray communityIds) {
         // rebuild community array
-        this.communities.setAll(i -> communityIds.get(communities.get(i)));
+        try (HugeCursor<long[]> cursor = communities.cursor(communities.newCursor())) {
+            while (cursor.next()) {
+                long[] array = cursor.array;
+                int limit = Math.min(cursor.limit, array.length);
+                for (int i = cursor.offset; i < limit; ++i) {
+                    array[i] = communityIds.get(array[i]);
+                }
+            }
+        }
         // the communities are stored in the dendrogram, one per level
         // so we have to copy the current state and return it as a snapshot
-        HugeLongArray copy = HugeLongArray.newArray(rootNodeCount, tracker);
-        this.communities.copyTo(copy, rootNodeCount);
-        return copy;
+        return communities.copyOf(rootNodeCount, tracker);
     }
 
     /**
@@ -290,7 +312,6 @@ public final class Louvain extends LouvainAlgo<Louvain> {
         return dendrogram;
     }
 
-    @Override
     public double[] getModularities() {
         return Arrays.copyOfRange(modularities, 0, level);
     }
@@ -300,7 +321,6 @@ public final class Louvain extends LouvainAlgo<Louvain> {
      *
      * @return
      */
-    @Override
     public int getLevel() {
         return level;
     }
@@ -310,12 +330,10 @@ public final class Louvain extends LouvainAlgo<Louvain> {
      *
      * @return
      */
-    @Override
     public long communityCount() {
         return communityCount;
     }
 
-    @Override
     public long communityIdOf(final long node) {
         return communities.get(node);
     }
@@ -330,7 +348,7 @@ public final class Louvain extends LouvainAlgo<Louvain> {
                 .mapToObj(i -> new Result(i, communities.get(i)));
     }
 
-    public Stream<StreamingResult> dendrogramStream(boolean includeIntermediateCommunities) {
+    public Stream<StreamingResult> dendrogramStream(final boolean includeIntermediateCommunities) {
         return LongStream.range(0L, rootNodeCount)
                 .mapToObj(i -> {
                     List<Long> communitiesList = null;
@@ -345,12 +363,11 @@ public final class Louvain extends LouvainAlgo<Louvain> {
                 });
     }
 
-    @Override
     public void export(
-            Exporter exporter,
-            String propertyName,
-            boolean includeIntermediateCommunities,
-            String intermediateCommunitiesPropertyName) {
+            final Exporter exporter,
+            final String propertyName,
+            final boolean includeIntermediateCommunities,
+            final String intermediateCommunitiesPropertyName) {
         if (includeIntermediateCommunities) {
             exporter.write(
                     propertyName,
@@ -377,24 +394,50 @@ public final class Louvain extends LouvainAlgo<Louvain> {
     }
 
     @Override
-    public Louvain withProgressLogger(ProgressLogger progressLogger) {
+    public Louvain withProgressLogger(final ProgressLogger progressLogger) {
         this.progressLogger = progressLogger;
         return this;
     }
 
     @Override
-    public Louvain withTerminationFlag(TerminationFlag terminationFlag) {
+    public Louvain withTerminationFlag(final TerminationFlag terminationFlag) {
         this.terminationFlag = terminationFlag;
         return this;
     }
 
-    static IntScatterSet putIfAbsent(IntObjectMap<IntScatterSet> relationships, int community) {
-        final IntScatterSet intCursors = relationships.get(community);
-        if (null == intCursors) {
-            final IntScatterSet newSet = new IntScatterSet();
-            relationships.put(community, newSet);
-            return newSet;
+    public double getFinalModularity() {
+        double[] modularities = getModularities();
+        return modularities.length > 0 ? modularities[modularities.length - 1] : 0.0d;
+    }
+
+    @Override
+    public final Louvain me() {
+        return this;
+    }
+
+    /**
+     * result object
+     */
+    public static final class Result {
+
+        public final long nodeId;
+        public final long community;
+
+        public Result(final long id, final long community) {
+            this.nodeId = id;
+            this.community = community;
         }
-        return intCursors;
+    }
+
+    public static final class StreamingResult {
+        public final long nodeId;
+        public final List<Long> communities;
+        public final long community;
+
+        StreamingResult(final long nodeId, final List<Long> communities, final long community) {
+            this.nodeId = nodeId;
+            this.communities = communities;
+            this.community = community;
+        }
     }
 }

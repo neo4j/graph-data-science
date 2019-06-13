@@ -1,28 +1,15 @@
+description = 'Neo4j Graph Algorithms :: Tests'
+
 dependencies {
     compile project(':proc')
-//    compile project(':enterprise-core')
-
-    compile group: 'org.neo4j.community',   name: 'it-test-support', version: versions.neo4j
-    compile group: 'io.dropwizard.metrics', name: 'metrics-core',    version: '4.0.2'
-
-    testCompile group: 'org.neo4j',                          name: 'neo4j',                    version: versions.neo4j
-    testCompile group: 'org.neo4j',                          name: 'neo4j-common',             version: versions.neo4j
-    testCompile group: 'org.neo4j',                          name: 'neo4j-io',                 version: versions.neo4j
-    testCompile group: 'org.mockito',                        name: 'mockito-core',             version: '1.10.19'
-    testCompile group: 'org.hamcrest',                       name: 'hamcrest-library',         version: versions.hamcrest
-    testCompile group: 'org.neo4j',                          name: 'neo4j-kernel-api',         version: versions.neo4j, classifier: 'tests'
-    testCompile group: 'org.neo4j',                          name: 'neo4j-kernel',             version: versions.neo4j
-    testCompile group: 'org.neo4j',                          name: 'procedure-compiler',       version: versions.neo4j
-    testCompile group: 'junit',                              name: 'junit',                    version: versions.junit
-    testCompile group: 'com.carrotsearch.randomizedtesting', name: 'randomizedtesting-runner', version: '2.5.0'
+    
+    testCompile project(':test-utils')
 }
 
 task javadocJar(type: Jar) {
     classifier = 'javadoc'
     from(javadoc.destinationDir)
 }
-
-description = 'Neo4j Graph Algorithms :: Tests'
 
 // TODO: Make sure we ported all settings from the maven config
 test {

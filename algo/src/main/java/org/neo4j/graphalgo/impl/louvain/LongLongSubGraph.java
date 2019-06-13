@@ -19,53 +19,57 @@
  */
 package org.neo4j.graphalgo.impl.louvain;
 
-import org.neo4j.graphalgo.api.RelationshipConsumer;
+import com.carrotsearch.hppc.LongFloatHashMap;
+import com.carrotsearch.hppc.cursors.LongFloatCursor;
+import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.roaringbitmap.longlong.LongIterator;
-import org.roaringbitmap.longlong.Roaring64NavigableMap;
 
 final class LongLongSubGraph extends SubGraph {
 
-    private HugeObjectArray<Roaring64NavigableMap> nodes;
+    private HugeObjectArray<LongFloatHashMap> graph;
+    private final long nodeCount;
     private final AllocationTracker tracker;
 
-    LongLongSubGraph(long nodeCount, AllocationTracker tracker) {
+    LongLongSubGraph(final long nodeCount, final AllocationTracker tracker) {
+        this.nodeCount = nodeCount;
         this.tracker = tracker;
-        nodes = HugeObjectArray.newArray(Roaring64NavigableMap.class, nodeCount, tracker);
+        graph = HugeObjectArray.newArray(LongFloatHashMap.class, nodeCount, tracker);
     }
 
-    void add(long source, long target) {
-        nodes.putIfAbsent(source, Roaring64NavigableMap::new).addLong(target);
-        nodes.putIfAbsent(target, Roaring64NavigableMap::new).addLong(source);
+    void add(final long source, final long target, final float weight) {
+        assert source < graph.size() && target < graph.size();
+        graph.putIfAbsent(source, LongFloatHashMap::new).addTo(target, weight);
+        graph.putIfAbsent(target, LongFloatHashMap::new).addTo(source, weight);
     }
 
     @Override
-    void forEach(final long nodeId, final RelationshipConsumer consumer) {
-        Roaring64NavigableMap map = nodes.get(nodeId);
-        if (map == null) {
-            return;
-        }
-        LongIterator ints = map.getLongIterator();
-        while (ints.hasNext()) {
-            if (!consumer.accept(nodeId, ints.next())) {
-                return;
+    public long nodeCount() {
+        return nodeCount;
+    }
+
+    @Override
+    void forEach(final long nodeId, final WeightedRelationshipConsumer consumer) {
+        LongFloatHashMap targets = graph.get(nodeId);
+        if (targets != null) {
+            for (LongFloatCursor cursor : targets) {
+                if (!consumer.accept(nodeId, cursor.key, cursor.value)) {
+                    return;
+                }
             }
         }
     }
 
     @Override
-    int degree(long nodeId) {
-        Roaring64NavigableMap map = nodes.get(nodeId);
-        if (map == null) {
-            return 0;
-        }
-        return map.getIntCardinality();
+    int degree(final long nodeId) {
+        assert nodeId < graph.size();
+        LongFloatHashMap targets = graph.get(nodeId);
+        return null == targets ? 0 : targets.size();
     }
 
     @Override
-    void release() {
-        tracker.remove(nodes.release());
-        nodes = null;
+    public void release() {
+        tracker.remove(graph.release());
+        graph = null;
     }
 }

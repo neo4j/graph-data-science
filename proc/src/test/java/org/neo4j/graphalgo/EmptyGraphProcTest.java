@@ -17,30 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.algo;
+package org.neo4j.graphalgo;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.neo4j.graphalgo.AllShortestPathsProc;
-import org.neo4j.graphalgo.BetweennessCentralityProc;
-import org.neo4j.graphalgo.ClosenessCentralityProc;
-import org.neo4j.graphalgo.DangalchevCentralityProc;
-import org.neo4j.graphalgo.HarmonicCentralityProc;
-import org.neo4j.graphalgo.KShortestPathsProc;
-import org.neo4j.graphalgo.KSpanningTreeProc;
-import org.neo4j.graphalgo.MSColoringProc;
-import org.neo4j.graphalgo.PrimProc;
-import org.neo4j.graphalgo.ShortestPathDeltaSteppingProc;
-import org.neo4j.graphalgo.ShortestPathProc;
-import org.neo4j.graphalgo.ShortestPathsProc;
-import org.neo4j.graphalgo.StronglyConnectedComponentsProc;
-import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TriangleProc;
-import org.neo4j.graphalgo.LabelPropagationProc;
-import org.neo4j.graphalgo.LouvainProc;
-import org.neo4j.graphalgo.PageRankProc;
-import org.neo4j.graphalgo.UnionFindProc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
@@ -52,7 +33,7 @@ import static org.junit.Assert.assertFalse;
 /**
  * @author mknblch
  */
-public class EmptyGraphIntegrationTest {
+public class EmptyGraphProcTest {
 
     private static GraphDatabaseAPI db;
 

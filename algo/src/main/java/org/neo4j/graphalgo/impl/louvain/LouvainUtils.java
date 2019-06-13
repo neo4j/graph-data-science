@@ -26,7 +26,9 @@ import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedLongDoubleMap;
 
-public class LouvainUtils {
+final class LouvainUtils {
+
+    private LouvainUtils() {}
 
     /**
      * normalize nodeToCommunity-Array. Maps community IDs

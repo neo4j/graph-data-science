@@ -18,19 +18,18 @@
  */
 package org.neo4j.graphalgo.bench;
 
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
-import org.neo4j.graphalgo.LouvainProc;
-import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
+import org.neo4j.graphalgo.impl.louvain.Louvain;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
@@ -45,90 +44,59 @@ import org.openjdk.jmh.annotations.Warmup;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 /**
  * @author mknobloch
  */
 @Threads(1)
-@Fork(value = 1, jvmArgs = {"-Xms4g", "-Xmx4g", "-XX:+UseG1GC"})
-@Warmup(iterations = 1, time = 1)
-@Measurement(iterations = 1, time = 1)
+@Fork(value = 1, jvmArgs = {"-Xms16g", "-Xmx16g", "-XX:+UseG1GC"})
+@Warmup(iterations = 2, time = 10)
+@Measurement(iterations = 4, time = 10)
 @State(Scope.Benchmark)
-@BenchmarkMode(Mode.SingleShotTime)
+@BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.SECONDS)
 @Timeout(time = 2, timeUnit = TimeUnit.HOURS)
 public class LouvainBenchmarkLdbc {
 
-    private GraphDatabaseAPI db;
-    private Transaction tx;
+    @Param({"1"})
+    int iterations;
 
-    @Param({"HEAVY", "HUGE"})
-    GraphImpl graph;
-
-    @Param({"1", "4"})
+    @Param({"1"})
     int threads;
 
+    @Param({"L01"})
+    String db;
+
+    @Param({"HUGE"})
+    GraphImpl graph;
+
+    private Graph g;
+    private GraphDatabaseAPI gdb;
+
     @Setup
-    public void setup() throws KernelException, IOException {
-        db = LdbcDownloader.openDb();
-
-        Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class);
-        procedures.registerProcedure(LouvainProc.class);
-    }
-
-    @Setup(Level.Invocation)
-    public void startTx() {
-        tx = db.beginTx();
+    public void setup() throws IOException {
+        gdb = LdbcDownloader.openDb(db);
+        g = new GraphLoader(gdb)
+                .withConcurrency(Pools.DEFAULT_CONCURRENCY)
+                .withExecutorService(Pools.DEFAULT)
+                .withAnyLabel()
+                .withAnyRelationshipType()
+                .withOptionalRelationshipWeightsFromProperty(null, 1.0)
+                .asUndirected(true)
+                .load(graph.impl);
     }
 
     @TearDown
     public void shutdown() {
-        db.shutdown();
+        gdb.shutdown();
         Pools.DEFAULT.shutdownNow();
     }
 
-    @TearDown(Level.Invocation)
-    public void failTx() {
-        tx.failure();
-        tx.close();
-    }
-
     @Benchmark
-    public Object _01_louvainParallel() {
-        return runQuery(
-                db,
-                "CALL algo.louvain(null, null, {maxIterations:1, concurrency: $threads, graph: $graph}) "
-                        + "YIELD loadMillis, computeMillis, writeMillis, nodes, communityCount, iterations"
-                , r -> {
-                    long load = r.getNumber("loadMillis").longValue();
-                    long compute = r.getNumber("computeMillis").longValue();
-                    long write = r.getNumber("writeMillis").longValue();
-                    long count = r.getNumber("communityCount").longValue();
-                    long iter = r.getNumber("iterations").longValue();
-                    long nodes = r.getNumber("nodes").longValue();
-
-                    System.out.println("communities = " + count);
-                    System.out.println("iter = " + iter);
-                    System.out.println("nodes = " + nodes);
-                    System.out.println("load = " + load);
-                    System.out.println("compute = " + compute);
-                    System.out.println("write = " + write);
-
-                }
-        );
-    }
-
-    private Object runQuery(
-            GraphDatabaseAPI db,
-            String query,
-            Consumer<Result.ResultRow> action) {
-        try (Result result = db.execute(query, MapUtil.map("threads", threads, "graph", graph.name()))) {
-            result.accept(r -> {
-                action.accept(r);
-                return true;
-            });
-        }
-        return db;
+    public Louvain louvain() {
+        return new Louvain(g, Pools.DEFAULT, threads, AllocationTracker.EMPTY)
+                .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
+                .withProgressLogger(ProgressLogger.NULL_LOGGER)
+                .compute(iterations, iterations);
     }
 }

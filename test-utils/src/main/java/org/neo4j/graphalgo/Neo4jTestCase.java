@@ -33,10 +33,7 @@ import org.neo4j.test.TestGraphDatabaseFactory;
 import java.io.File;
 import java.util.UUID;
 
-/**
- * @author mknblch
- */
-public abstract class Neo4JTestCase {
+public abstract class Neo4jTestCase {
 
     public static final String LABEL = "Node";
     public static final String WEIGHT_PROPERTY = "weight";

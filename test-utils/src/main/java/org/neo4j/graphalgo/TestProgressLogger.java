@@ -19,23 +19,29 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.Ignore;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.test.TestGraphDatabaseFactory;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 
-import java.io.File;
-import java.util.UUID;
+import java.util.function.Supplier;
 
-/**
- * @author mh
- * @since 13.10.17
- */
-@Ignore
-public class TestDatabaseCreator {
+public class TestProgressLogger implements ProgressLogger {
 
-    public static GraphDatabaseAPI createTestDatabase() {
-        return (GraphDatabaseAPI)new TestGraphDatabaseFactory()
-                .newImpermanentDatabaseBuilder(new File(UUID.randomUUID().toString()))
-                .newGraphDatabase();
+    public static final ProgressLogger INSTANCE = new TestProgressLogger();
+
+    public static final long TIMEOUT = 3000;
+
+    private long lastLog = 0;
+
+    @Override
+    public void logProgress(double percentDone, Supplier<String> msg) {
+        final long now = System.currentTimeMillis();
+        if (lastLog + TIMEOUT < now) {
+            lastLog = now;
+            System.out.printf("[%s] %.0f%% (%s)%n", Thread.currentThread().getName(), percentDone * 100, msg.get());
+        }
+    }
+
+    @Override
+    public void log(Supplier<String> msg) {
+        System.out.println(msg.get());
     }
 }

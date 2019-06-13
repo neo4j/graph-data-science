@@ -19,13 +19,120 @@
  */
 package org.neo4j.graphalgo.impl.louvain;
 
+import org.neo4j.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.collection.primitive.PrimitiveLongIterator;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
+import org.neo4j.graphalgo.api.RelationshipIntersect;
+import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
+import org.neo4j.graphalgo.core.huge.loader.IdMap;
+import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
+import org.neo4j.graphdb.Direction;
 
-abstract class SubGraph {
+import java.util.Collection;
+import java.util.Set;
+import java.util.function.LongPredicate;
 
-  abstract void forEach(long nodeId, RelationshipConsumer consumer);
+abstract class SubGraph implements Graph {
 
-  abstract int degree(long nodeId);
+    abstract int degree(long nodeId);
 
-  abstract void release();
+    @Override
+    public final int degree(long nodeId, Direction direction) {
+        return degree(nodeId);
+    }
+
+    abstract void forEach(long nodeId, WeightedRelationshipConsumer consumer);
+
+    @Override
+    public final void forEachRelationship(
+            final long nodeId,
+            final Direction direction,
+            final WeightedRelationshipConsumer consumer) {
+        forEach(nodeId, consumer);
+    }
+
+    @Override
+    public final Collection<PrimitiveLongIterable> batchIterables(int batchSize) {
+        return LazyBatchCollection.of(
+                nodeCount(),
+                batchSize,
+                IdMap.IdIterable::new);
+    }
+
+    @Override
+    public long relationshipCount() {
+        return RELATIONSHIP_COUNT_NOT_SUPPORTED;
+    }
+
+    @Override
+    public final void forEachRelationship(long nodeId, Direction direction, RelationshipConsumer consumer) {
+        throw new UnsupportedOperationException("forEachRelationship is not supported.");
+    }
+
+    @Override
+    public final double weightOf(long sourceNodeId, long targetNodeId) {
+        throw new UnsupportedOperationException("weightOf is not supported.");
+    }
+
+    @Override
+    public final boolean contains(long nodeId) {
+        throw new UnsupportedOperationException("contains is not supported.");
+    }
+
+    @Override
+    public final RelationshipIntersect intersection() {
+        throw new UnsupportedOperationException("intersection is not supported.");
+    }
+
+    @Override
+    public final long toMappedNodeId(long nodeId) {
+        throw new UnsupportedOperationException("toHugeMappedNodeId is not supported.");
+    }
+
+    @Override
+    public final long toOriginalNodeId(long nodeId) {
+        throw new UnsupportedOperationException("toOriginalNodeId is not supported.");
+    }
+
+    @Override
+    public final void forEachNode(LongPredicate consumer) {
+        throw new UnsupportedOperationException("forEachNode is not supported.");
+    }
+
+    @Override
+    public final PrimitiveLongIterator nodeIterator() {
+        throw new UnsupportedOperationException("hugeNodeIterator is not supported.");
+    }
+
+    @Override
+    public final HugeWeightMapping nodeProperties(String type) {
+        throw new UnsupportedOperationException("hugeNodeProperties is not supported.");
+    }
+
+    @Override
+    public final long getTarget(long nodeId, long index, Direction direction) {
+        throw new UnsupportedOperationException("getTarget is not supported.");
+    }
+
+    @Override
+    public final boolean exists(long sourceNodeId, long targetNodeId, Direction direction) {
+        throw new UnsupportedOperationException("exists is not supported.");
+    }
+
+    @Override
+    public final Set<String> availableNodeProperties() {
+        throw new UnsupportedOperationException("availableNodeProperties is not supported.");
+    }
+
+    @Override
+    public final String getType() {
+        throw new UnsupportedOperationException("getType is not supported.");
+    }
+
+    @Override
+    public final void canRelease(boolean canRelease) {
+        throw new UnsupportedOperationException("canRelease is not supported.");
+    }
 }
