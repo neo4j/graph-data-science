@@ -50,6 +50,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import static com.carrotsearch.hppc.Containers.DEFAULT_EXPECTED_ELEMENTS;
 import static com.carrotsearch.hppc.HashContainers.DEFAULT_LOAD_FACTOR;
+import static java.util.concurrent.TimeUnit.MICROSECONDS;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class LabelPropagation extends Algorithm<LabelPropagation> {
@@ -216,7 +217,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
 
         long currentIteration = 0L;
         while (running() && currentIteration < maxIterations) {
-            ParallelUtil.runWithConcurrency(concurrency, baseSteps, 1, MILLISECONDS, terminationFlag, executor);
+            ParallelUtil.runWithConcurrency(concurrency, baseSteps, 1L, MICROSECONDS, terminationFlag, executor);
             ++currentIteration;
         }
 
