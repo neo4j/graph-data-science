@@ -79,7 +79,7 @@ public class DegreeProcIssue848IntegrationTest {
     public void multipleBatches() throws Exception {
         final Map<Long, Double> actual = new HashMap<>();
         runQuery(
-                "CALL algo.degree.stream(\"Node\", \"REL\", {direction: \"incoming\"})\n" +
+                "CALL algo.degree.stream(\"Node\", '', {direction: \"incoming\"})\n" +
                         "YIELD nodeId, score\n",
                 row -> actual.put(
                         (Long)row.get("nodeId"),

@@ -210,7 +210,6 @@ public class GraphLoader {
 
     /**
      * Instructs the loader to load only nodes with the given label name.
-     * If the label is not found, every node will be loaded.
      *
      * @param label May not be null; to remove a label filter, use {@link #withAnyLabel()} instead.
      * @return itself to enable fluent interface
@@ -222,7 +221,6 @@ public class GraphLoader {
 
     /**
      * Instructs the loader to load only nodes with the given label name.
-     * If the label is not found, every node will be loaded. TODO review that
      *
      * @param label May be null
      * @return itself to enable fluent interface
@@ -234,7 +232,6 @@ public class GraphLoader {
 
     /**
      * Instructs the loader to load only nodes with the given {@link Label}.
-     * If the label is not found, every node will be loaded.
      *
      * @param label May not be null; to remove a label filter, use {@link #withAnyLabel()} instead.
      * @return itself to enable fluent interface
@@ -256,7 +253,6 @@ public class GraphLoader {
 
     /**
      * Instructs the loader to load only relationships with the given type name.
-     * If the type is not found, every relationship will be loaded. TODO review that
      *
      * @param relation May not be null; to remove a type filter, use {@link #withAnyRelationshipType()} instead.
      * @return itself to enable fluent interface
@@ -280,7 +276,6 @@ public class GraphLoader {
 
     /**
      * Instructs the loader to load only relationships with the given {@link RelationshipType}.
-     * If the type is not found, every relationship will be loaded.
      *
      * @param relation May not be null; to remove a type filter, use {@link #withAnyRelationshipType()} instead.
      * @return itself to enable fluent interface

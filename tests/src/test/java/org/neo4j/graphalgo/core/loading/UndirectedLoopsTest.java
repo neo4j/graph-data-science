@@ -63,8 +63,8 @@ public final class UndirectedLoopsTest {
     @Test
     public void undirectedWithMultipleLoopsShouldSucceed() {
         Graph graph = new GraphLoader(DB)
-                .withLabel("Foo|Bar")
-                .withRelationshipType("Bar|Foo")
+                .withLabel("")
+                .withRelationshipType("")
                 .withRelationshipWeightsFromProperty("cost", Double.MAX_VALUE)
                 .withDirection(Direction.OUTGOING)
                 .asUndirected(true)

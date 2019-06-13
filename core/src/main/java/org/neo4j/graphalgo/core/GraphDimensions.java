@@ -127,7 +127,6 @@ public final class GraphDimensions extends StatementFunction<GraphDimensions> {
     public GraphDimensions apply(final KernelTransaction transaction) throws RuntimeException {
         TokenRead tokenRead = transaction.tokenRead();
         Read dataRead = transaction.dataRead();
-        // TODO: if the label (and type and property) is not found, we default to all labels, which is probably not what we want
         labelId = setup.loadAnyLabel() ? Read.ANY_LABEL : tokenRead.nodeLabel(setup.startLabel);
         if (!setup.loadAnyRelationshipType()) {
             int relId = tokenRead.relationshipType(setup.relationshipType);

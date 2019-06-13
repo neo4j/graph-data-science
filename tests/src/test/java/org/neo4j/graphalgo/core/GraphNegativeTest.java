@@ -78,7 +78,7 @@ public final class GraphNegativeTest extends RandomGraphTestCase {
         final Graph graph = new GraphLoader(RandomGraphTestCase.db)
                 .withLabel("foo")
                 .load(graphImpl);
-        assertEquals(graph.nodeCount(), NODE_COUNT);
+        assertEquals(graph.nodeCount(), 0);
     }
 
     @Test
@@ -86,7 +86,7 @@ public final class GraphNegativeTest extends RandomGraphTestCase {
         final Graph graph = new GraphLoader(RandomGraphTestCase.db)
                 .withLabel(Label.label("foo"))
                 .load(graphImpl);
-        assertEquals(graph.nodeCount(), NODE_COUNT);
+        assertEquals(graph.nodeCount(), 0);
     }
 
     @Test
@@ -94,7 +94,7 @@ public final class GraphNegativeTest extends RandomGraphTestCase {
         final Graph graph = new GraphLoader(RandomGraphTestCase.db)
                 .withRelationshipType("foo")
                 .load(graphImpl);
-        testRelationships(graph);
+        assertEquals(graph.relationshipCount(), 0);
     }
 
     @Test
@@ -102,7 +102,7 @@ public final class GraphNegativeTest extends RandomGraphTestCase {
         final Graph graph = new GraphLoader(RandomGraphTestCase.db)
                 .withRelationshipType(RelationshipType.withName("foo"))
                 .load(graphImpl);
-        testRelationships(graph);
+        assertEquals(graph.relationshipCount(), 0);
     }
 
     @Test

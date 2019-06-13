@@ -113,7 +113,7 @@ public class BFSDFSIntegrationTest {
 
     @Test
     public void testFindAnyOf() {
-        final String cypher = "MATCH (n:Node {name:'a'}) WITH id(n) as s CALL algo.dfs.stream('Node', 'Type', '>', s, {targetNodes:[4,5]}) YIELD nodeIds RETURN nodeIds";
+        final String cypher = "MATCH (n:Node {name:'a'}) WITH id(n) as s CALL algo.dfs.stream('Node', 'TYPE', '>', s, {targetNodes:[4,5]}) YIELD nodeIds RETURN nodeIds";
         db.execute(cypher).accept(row -> {
             List<Long> nodeIds = (List<Long>) row.get("nodeIds");
             assertEquals(4, nodeIds.size());
@@ -123,7 +123,7 @@ public class BFSDFSIntegrationTest {
 
     @Test
     public void testMaxDepthOut() {
-        final String cypher = "MATCH (n:Node {name:'a'}) WITH id(n) as s CALL algo.dfs.stream('Node', 'Type', '>', s, {maxDepth:2}) YIELD nodeIds RETURN nodeIds";
+        final String cypher = "MATCH (n:Node {name:'a'}) WITH id(n) as s CALL algo.dfs.stream('Node', 'TYPE', '>', s, {maxDepth:2}) YIELD nodeIds RETURN nodeIds";
         db.execute(cypher).accept(row -> {
             List<Long> nodeIds = (List<Long>) row.get("nodeIds");
             assertContains(new String[]{"a", "b", "c", "d"}, nodeIds);
@@ -133,7 +133,7 @@ public class BFSDFSIntegrationTest {
 
     @Test
     public void testMaxDepthIn() {
-        final String cypher = "MATCH (n:Node {name:'g'}) WITH id(n) as s CALL algo.dfs.stream('Node', 'Type', '<', s, {maxDepth:2}) YIELD nodeIds RETURN nodeIds";
+        final String cypher = "MATCH (n:Node {name:'g'}) WITH id(n) as s CALL algo.dfs.stream('Node', 'TYPE', '<', s, {maxDepth:2}) YIELD nodeIds RETURN nodeIds";
         db.execute(cypher).accept(row -> {
             List<Long> nodeIds = (List<Long>) row.get("nodeIds");
             assertContains(new String[]{"g", "e", "f", "d"}, nodeIds);

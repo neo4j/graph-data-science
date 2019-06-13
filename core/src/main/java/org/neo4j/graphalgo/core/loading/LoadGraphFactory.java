@@ -37,7 +37,7 @@ public final class LoadGraphFactory extends GraphFactory {
     }
 
     @Override
-    public Graph build() {
+    public Graph importGraph() {
         return get(setup.name);
     }
 

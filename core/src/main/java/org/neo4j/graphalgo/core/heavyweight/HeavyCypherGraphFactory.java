@@ -51,7 +51,13 @@ public class HeavyCypherGraphFactory extends GraphFactory {
         this.relationshipLoader = new CypherRelationshipLoader(api, setup);
     }
 
-    public Graph build() {
+    @Override
+    protected boolean isValidPredicate() {
+        return true;
+    }
+
+    @Override
+    public Graph importGraph() {
         Nodes nodes = nodeLoader.load();
         Relationships relationships = relationshipLoader.load(nodes);
 

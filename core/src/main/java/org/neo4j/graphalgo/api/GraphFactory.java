@@ -19,9 +19,10 @@
  */
 package org.neo4j.graphalgo.api;
 
+import org.neo4j.graphalgo.core.EmptyGraph;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.NodeImporter;
 import org.neo4j.graphalgo.core.IntIdMap;
+import org.neo4j.graphalgo.core.NodeImporter;
 import org.neo4j.graphalgo.core.utils.ApproximatedImportProgress;
 import org.neo4j.graphalgo.core.utils.ImportProgress;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -30,6 +31,8 @@ import org.neo4j.logging.Log;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import static org.neo4j.internal.kernel.api.Read.ANY_LABEL;
 
 /**
  * The Abstract Factory defines the construction of the graph
@@ -58,7 +61,27 @@ public abstract class GraphFactory {
         progress = importProgress(progressLogger, dimensions, setup);
     }
 
-    public abstract Graph build();
+    public Graph build() {
+        if (!isValidPredicate()) {
+            return new EmptyGraph();
+        } else {
+            return importGraph();
+        }
+    }
+
+    protected abstract Graph importGraph();
+
+    protected boolean isValidPredicate() {
+        return isValidNodePredicate() && isValidRelationshipTypePredicate();
+    }
+
+    private boolean isValidNodePredicate() {
+        return (setup.startLabel == null || setup.startLabel.isEmpty()) || dimensions.labelId() != ANY_LABEL;
+    }
+
+    private boolean isValidRelationshipTypePredicate() {
+        return (setup.relationshipType == null || setup.relationshipType.isEmpty()) || dimensions.singleRelationshipTypeId() != ANY_LABEL;
+    }
 
     protected ImportProgress importProgress(
             ProgressLogger progressLogger,

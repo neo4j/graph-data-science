@@ -41,11 +41,6 @@ public final class HugeGraphFactory extends GraphFactory {
     }
 
     @Override
-    public Graph build() {
-        return importGraph();
-    }
-
-    @Override
     protected ImportProgress importProgress(
             final ProgressLogger progressLogger,
             final GraphDimensions dimensions,
@@ -70,7 +65,8 @@ public final class HugeGraphFactory extends GraphFactory {
         );
     }
 
-    private Graph importGraph() {
+    @Override
+    public Graph importGraph() {
         GraphDimensions dimensions = this.dimensions;
         int concurrency = setup.concurrency();
         AllocationTracker tracker = setup.tracker;

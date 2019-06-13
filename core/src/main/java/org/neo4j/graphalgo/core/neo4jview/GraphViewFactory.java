@@ -37,7 +37,7 @@ public final class GraphViewFactory extends GraphFactory {
     }
 
     @Override
-    public Graph build() {
+    public Graph importGraph() {
         GraphDimensions dimensions = new GraphDimensions(api, setup).call();
         IntIdMap idMap = new NodeImporter(
                 api,

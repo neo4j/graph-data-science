@@ -75,7 +75,7 @@ public class GraphSetup {
     // concurrency level
     public final int concurrency;
     /**
-     * batchSize for parallel compuation
+     * batchSize for parallel computation
      */
     public final int batchSize;
 
@@ -219,7 +219,7 @@ public class GraphSetup {
     }
 
     public boolean loadAnyLabel() {
-        return startLabel == null;
+        return startLabel == null || startLabel.isEmpty();
     }
 
     public boolean loadAnyRelationshipType() {

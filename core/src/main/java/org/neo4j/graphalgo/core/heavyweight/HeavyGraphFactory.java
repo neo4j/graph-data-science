@@ -49,7 +49,7 @@ public class HeavyGraphFactory extends GraphFactory {
     }
 
     @Override
-    public Graph build() {
+    public Graph importGraph() {
         return importGraph(setup.batchSize);
     }
 
