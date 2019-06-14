@@ -19,8 +19,8 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
 public class IllegalLabelsProcTest extends HeavyHugeTester {
 
@@ -37,7 +37,11 @@ public class IllegalLabelsProcTest extends HeavyHugeTester {
             "CREATE (b:B {id: 1}) " +
             "CREATE (a)-[:X]->(b)";
 
-    private static GraphDatabaseAPI db;
+    @Rule
+    public ExpectedException expected = ExpectedException.none();
+
+    @ClassRule
+    public static ImpermanentDatabaseRule db = new ImpermanentDatabaseRule();
 
     private final String graphName;
 
@@ -48,18 +52,9 @@ public class IllegalLabelsProcTest extends HeavyHugeTester {
 
     @BeforeClass
     public static void setup() throws KernelException {
-        db = TestDatabaseCreator.createTestDatabase();
         db.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(UnionFindProc.class);
         db.execute(DB_CYPHER);
     }
-
-    @AfterClass
-    public static void tearDown() {
-        if (db != null) db.shutdown();
-    }
-
-    @Rule
-    public ExpectedException expected = ExpectedException.none();
 
     @Test
     public void testUnionFindStreamWithInvalidNodeLabel() {
