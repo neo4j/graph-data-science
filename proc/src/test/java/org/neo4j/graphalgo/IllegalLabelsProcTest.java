@@ -24,18 +24,13 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Arrays;
-import java.util.Collection;
-
-@RunWith(Parameterized.class)
-public class EmptySubgraphProcTest {
+public class IllegalLabelsProcTest extends HeavyHugeTester {
 
     private static final String DB_CYPHER = "" +
             "CREATE (a:A {id: 0}) " +
@@ -43,6 +38,13 @@ public class EmptySubgraphProcTest {
             "CREATE (a)-[:X]->(b)";
 
     private static GraphDatabaseAPI db;
+
+    private final String graphName;
+
+    public IllegalLabelsProcTest(final Class<? extends GraphFactory> graphImpl, String name) {
+        super(graphImpl);
+        graphName = name;
+    }
 
     @BeforeClass
     public static void setup() throws KernelException {
@@ -56,18 +58,6 @@ public class EmptySubgraphProcTest {
         if (db != null) db.shutdown();
     }
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(
-                new Object[]{"Heavy"},
-                new Object[]{"Huge"},
-                new Object[]{"Kernel"}
-        );
-    }
-
-    @Parameterized.Parameter
-    public String graphImpl;
-
     @Rule
     public ExpectedException expected = ExpectedException.none();
 
@@ -75,20 +65,20 @@ public class EmptySubgraphProcTest {
     public void testUnionFindStreamWithInvalidNodeLabel() {
         expected.expect(QueryExecutionException.class);
         expected.expectMessage("Node label not found: 'C'");
-        db.execute(String.format("CALL algo.unionFind.stream('C', '',{graph:'%s'})", graphImpl));
+        db.execute(String.format("CALL algo.unionFind.stream('C', '',{graph:'%s'})", graphName));
     }
 
     @Test
     public void testUnionFindStreamWithInvalidRelType() {
         expected.expect(QueryExecutionException.class);
         expected.expectMessage("Relationship type not found: 'Y'");
-        db.execute(String.format("CALL algo.unionFind.stream('', 'Y',{graph:'%s'})", graphImpl));
+        db.execute(String.format("CALL algo.unionFind.stream('', 'Y',{graph:'%s'})", graphName));
     }
 
     @Test
     public void testUnionFindStreamWithValidNodeLabelAndInvalidRelType() {
         expected.expect(QueryExecutionException.class);
         expected.expectMessage("Relationship type not found: 'Y'");
-        db.execute(String.format("CALL algo.unionFind.stream('A', 'Y',{graph:'%s'})", graphImpl));
+        db.execute(String.format("CALL algo.unionFind.stream('A', 'Y',{graph:'%s'})", graphName));
     }
 }
