@@ -19,10 +19,14 @@
  */
 package org.neo4j.graphalgo.core.utils.dss;
 
+import com.carrotsearch.hppc.IntIntMap;
 import com.carrotsearch.hppc.LongLongMap;
+import com.carrotsearch.hppc.cursors.IntIntCursor;
 import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.junit.Before;
 import org.junit.Test;
+import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
 
@@ -129,6 +133,18 @@ public class PagedDisjointSetStructTest {
         a.merge(b);
         assertEquals(2, a.getSetCount());
         System.out.println(a);
+    }
+
+    @Test
+    public void shouldComputeMemoryEstimation() {
+        GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
+        assertEquals(MemoryRange.of(112), PagedDisjointSetStruct.memoryRequirements().apply(dimensions0, 1).memoryUsage());
+
+        GraphDimensions dimensions100 = new GraphDimensions.Builder().setNodeCount(100).build();
+        assertEquals(MemoryRange.of(1712), PagedDisjointSetStruct.memoryRequirements().apply(dimensions100, 1).memoryUsage());
+
+        GraphDimensions dimensions100B = new GraphDimensions.Builder().setNodeCount(100_000_000_000L).build();
+        assertEquals(MemoryRange.of(1600244140768L), PagedDisjointSetStruct.memoryRequirements().apply(dimensions100B, 1).memoryUsage());
     }
 
     public static int[] set(int... elements) {

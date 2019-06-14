@@ -43,7 +43,6 @@ import java.util.function.LongPredicate;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertSame;
-import static org.neo4j.graphalgo.impl.unionfind.UnionFindAlgo.NOTHING;
 
 @RunWith(Parameterized.class)
 public final class UnionFindSafetyTest {
@@ -71,8 +70,7 @@ public final class UnionFindSafetyTest {
                     AllocationTracker.EMPTY,
                     10,
                     10,
-                    Double.NaN,
-                    NOTHING
+                    Double.NaN
             );
         } catch (Throwable e) {
             assertSame(error, Exceptions.rootCause(e));
@@ -90,8 +88,7 @@ public final class UnionFindSafetyTest {
                     AllocationTracker.EMPTY,
                     10,
                     10,
-                    Double.NaN,
-                    NOTHING
+                    Double.NaN
             );
         } catch (Throwable e) {
             assertSame(error, Exceptions.rootCause(e));

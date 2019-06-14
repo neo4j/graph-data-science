@@ -19,14 +19,14 @@
  */
 package org.neo4j.graphalgo.impl.unionfind;
 
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.ConfiguredAlgorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
 
 /**
  * unified parent for all unionfind implementations
  */
-public abstract class GraphUnionFindAlgo<ME extends GraphUnionFindAlgo<ME>> extends Algorithm<ME> {
+public abstract class GraphUnionFindAlgo<ME extends GraphUnionFindAlgo<ME>> extends ConfiguredAlgorithm<ME, Double> {
 
     protected Graph graph;
 

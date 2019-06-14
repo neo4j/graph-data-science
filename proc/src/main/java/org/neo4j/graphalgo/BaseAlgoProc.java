@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.AlgoWithConfig;
+import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.AbstractResultBuilder;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -109,6 +110,15 @@ public abstract class BaseAlgoProc<A extends ConfiguredAlgorithm<A, Conf>, Conf>
             final ProcedureConfiguration config,
             final AllocationTracker tracker,
             final AbstractResultBuilder<R> result) {
+        try (ProgressTimer ignored = result.timeLoad()) {
+            return loadGraph(config, tracker);
+        }
+    }
+
+    final <R> Graph loadGraph(
+            final ProcedureConfiguration config,
+            final AllocationTracker tracker,
+            final AbstractCommunityResultBuilder<R> result) {
         try (ProgressTimer ignored = result.timeLoad()) {
             return loadGraph(config, tracker);
         }

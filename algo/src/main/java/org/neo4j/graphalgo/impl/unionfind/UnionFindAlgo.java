@@ -19,13 +19,11 @@
  */
 package org.neo4j.graphalgo.impl.unionfind;
 
-import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.function.BiConsumer;
 
 /**
  * this class is basically a helper to instantiate different
@@ -38,98 +36,66 @@ public enum UnionFindAlgo implements UnionFindAlgoInterface {
 
     QUEUE {
         @Override
-        public PagedDisjointSetStruct run(
-                Graph graph,
-                ExecutorService executor,
-                AllocationTracker tracker,
-                int minBatchSize,
-                int concurrency,
-                double threshold,
-                BiConsumer<String, Algorithm<?>> prepare) {
+        public GraphUnionFindAlgo<?> algo(
+                final Optional<Graph> graph,
+                final ExecutorService executor,
+                final AllocationTracker tracker,
+                final int minBatchSize,
+                final int concurrency) {
 
-            ParallelUnionFindQueue algo = new ParallelUnionFindQueue(
+            return new ParallelUnionFindQueue(
                     graph,
                     executor,
                     minBatchSize,
                     concurrency,
                     tracker);
-            prepare.accept("CC(ParallelUnionFindQueue)", algo);
-            PagedDisjointSetStruct struct = Double.isFinite(threshold)
-                    ? algo.compute(threshold)
-                    : algo.compute();
-            algo.release();
-            return struct;
         }
     },
     FORK_JOIN {
         @Override
-        public PagedDisjointSetStruct run(
-                Graph graph,
-                ExecutorService executor,
-                AllocationTracker tracker,
-                int minBatchSize,
-                int concurrency,
-                double threshold,
-                BiConsumer<String, Algorithm<?>> prepare) {
-            ParallelUnionFindForkJoin algo = new ParallelUnionFindForkJoin(
+        public GraphUnionFindAlgo<?> algo(
+                final Optional<Graph> graph,
+                final ExecutorService executor,
+                final AllocationTracker tracker,
+                final int minBatchSize,
+                final int concurrency) {
+
+            return new ParallelUnionFindForkJoin(
                     graph,
                     tracker,
                     minBatchSize,
                     concurrency);
-            prepare.accept("CC(ParallelUnionFindForkJoin)", algo);
-            PagedDisjointSetStruct struct = Double.isFinite(threshold)
-                    ? algo.compute(threshold)
-                    : algo.compute();
-            algo.release();
-            return struct;
         }
     },
     FJ_MERGE {
         @Override
-        public PagedDisjointSetStruct run(
-                Graph graph,
-                ExecutorService executor,
-                AllocationTracker tracker,
-                int minBatchSize,
-                int concurrency,
-                double threshold,
-                BiConsumer<String, Algorithm<?>> prepare) {
-            ParallelUnionFindFJMerge algo = new ParallelUnionFindFJMerge(
+        public GraphUnionFindAlgo<?> algo(
+                final Optional<Graph> graph,
+                final ExecutorService executor,
+                final AllocationTracker tracker,
+                final int minBatchSize,
+                final int concurrency) {
+
+            return new ParallelUnionFindFJMerge(
                     graph,
                     executor,
                     tracker,
                     minBatchSize,
                     concurrency);
-            prepare.accept("CC(ParallelUnionFindFJMerge)", algo);
-            PagedDisjointSetStruct struct = Double.isFinite(threshold)
-                    ? algo.compute(threshold)
-                    : algo.compute();
-            algo.release();
-            return struct;
         }
     },
     SEQ {
         @Override
-        public PagedDisjointSetStruct run(
-                Graph graph,
-                ExecutorService executor,
-                AllocationTracker tracker,
-                int minBatchSize,
-                int concurrency,
-                double threshold,
-                BiConsumer<String, Algorithm<?>> prepare) {
-            GraphUnionFind algo = new GraphUnionFind(
+        public GraphUnionFindAlgo<?> algo(
+                final Optional<Graph> graph,
+                final ExecutorService executor,
+                final AllocationTracker tracker,
+                final int minBatchSize,
+                final int concurrency) {
+
+            return new GraphUnionFind(
                     graph,
                     AllocationTracker.EMPTY);
-            prepare.accept("CC(HugeSequentialUnionFind)", algo);
-            PagedDisjointSetStruct struct = Double.isFinite(threshold)
-                    ? algo.compute(threshold)
-                    : algo.compute();
-            algo.release();
-            return struct;
         }
-    };
-
-    public static BiConsumer<String, Algorithm<?>> NOTHING = (s, a) -> {
-    };
+    }
 }

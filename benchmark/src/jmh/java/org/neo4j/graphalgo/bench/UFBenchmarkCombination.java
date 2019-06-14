@@ -21,9 +21,11 @@ package org.neo4j.graphalgo.bench;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
+import org.neo4j.graphalgo.impl.unionfind.GraphUnionFindAlgo;
 import org.neo4j.graphalgo.impl.unionfind.UnionFindAlgo;
 
-import static org.neo4j.graphalgo.impl.unionfind.UnionFindAlgo.NOTHING;
+import java.util.Optional;
 
 public enum UFBenchmarkCombination {
 
@@ -46,13 +48,17 @@ public enum UFBenchmarkCombination {
     }
 
     public Object run(Graph graph) {
-        return algo.run(
-                graph,
+        double threshold = Double.NaN;
+        GraphUnionFindAlgo<?> unionFindAlgo = algo.algo(
+                Optional.of(graph),
                 Pools.DEFAULT,
                 AllocationTracker.EMPTY,
                 (int) (graph.nodeCount() / Pools.DEFAULT_CONCURRENCY),
-                Pools.DEFAULT_CONCURRENCY,
-                Double.NaN,
-                NOTHING);
+                Pools.DEFAULT_CONCURRENCY);
+        PagedDisjointSetStruct communities = Double.isFinite(threshold)
+                ? unionFindAlgo.compute(threshold)
+                : unionFindAlgo.compute();
+        unionFindAlgo.release();
+        return communities;
     }
 }

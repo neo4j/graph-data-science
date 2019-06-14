@@ -19,23 +19,37 @@
  */
 package org.neo4j.graphalgo.impl.unionfind;
 
-import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.function.BiConsumer;
 
 public interface UnionFindAlgoInterface
 {
-    PagedDisjointSetStruct run(
+
+    default PagedDisjointSetStruct run(
             Graph graph,
             ExecutorService executor,
             AllocationTracker tracker,
             int minBatchSize,
             int concurrency,
-            double threshold,
-            BiConsumer<String, Algorithm<?>> prepare);
+            double threshold) {
+
+        GraphUnionFindAlgo<?> algo = algo(Optional.of(graph), executor, tracker, minBatchSize, concurrency);
+        PagedDisjointSetStruct communities = Double.isFinite(threshold)
+                ? algo.compute(threshold)
+                : algo.compute();
+        algo.release();
+        return communities;
+    }
+
+    GraphUnionFindAlgo<?> algo(
+            Optional<Graph> graph,
+            ExecutorService executor,
+            AllocationTracker tracker,
+            int minBatchSize,
+            int concurrency);
 
 }
