@@ -31,8 +31,6 @@ import org.neo4j.logging.Log;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static org.neo4j.internal.kernel.api.Read.ANY_LABEL;
-
 /**
  * The Abstract Factory defines the construction of the graph
  *
@@ -68,20 +66,12 @@ public abstract class GraphFactory {
     protected abstract Graph importGraph();
 
     protected void checkLabelPredicates() {
-        if (!isValidNodePredicate()) {
+        if (!dimensions.isValidNodePredicate()) {
             throw new IllegalArgumentException(String.format("Node label not found: '%s'", setup.startLabel));
         }
-        if (!isValidRelationshipTypePredicate()) {
+        if (!dimensions.isValidRelationshipTypePredicate()) {
             throw new IllegalArgumentException(String.format("Relationship type not found: '%s'", setup.relationshipType));
         }
-    }
-
-    private boolean isValidNodePredicate() {
-        return (setup.startLabel == null || setup.startLabel.isEmpty()) || dimensions.labelId() != ANY_LABEL;
-    }
-
-    private boolean isValidRelationshipTypePredicate() {
-        return (setup.relationshipType == null || setup.relationshipType.isEmpty()) || dimensions.singleRelationshipTypeId() != ANY_LABEL;
     }
 
     protected ImportProgress importProgress(

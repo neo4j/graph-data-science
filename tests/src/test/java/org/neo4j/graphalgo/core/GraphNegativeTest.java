@@ -64,7 +64,7 @@ public final class GraphNegativeTest extends RandomGraphTestCase {
     }
 
     @Test
-    public void shouldLoadAllNodesForNonExistingStringLabel() {
+    public void shouldThrowForNonExistingStringLabel() {
         expected.expect(IllegalArgumentException.class);
         expected.expectMessage("Node label not found: 'foo'");
         new GraphLoader(RandomGraphTestCase.db)
@@ -73,7 +73,7 @@ public final class GraphNegativeTest extends RandomGraphTestCase {
     }
 
     @Test
-    public void shouldLoadAllNodesForNonExistingLabel() {
+    public void shouldThrowForNonExistingLabel() {
         expected.expect(IllegalArgumentException.class);
         expected.expectMessage("Node label not found: 'foo'");
         new GraphLoader(RandomGraphTestCase.db)
@@ -82,7 +82,7 @@ public final class GraphNegativeTest extends RandomGraphTestCase {
     }
 
     @Test
-    public void shouldLoadRelationshipsNodesForNonExistingStringTypes() {
+    public void shouldThrowForNonExistingStringRelType() {
         expected.expect(IllegalArgumentException.class);
         expected.expectMessage("Relationship type not found: 'foo'");
         new GraphLoader(RandomGraphTestCase.db)
@@ -91,31 +91,11 @@ public final class GraphNegativeTest extends RandomGraphTestCase {
     }
 
     @Test
-    public void shouldLoadRelationshipsNodesForNonExistingTypes() {
+    public void shouldThrowForNonExistingRelType() {
         expected.expect(IllegalArgumentException.class);
         expected.expectMessage("Relationship type not found: 'foo'");
         new GraphLoader(RandomGraphTestCase.db)
                 .withRelationshipType(RelationshipType.withName("foo"))
-                .load(graphImpl);
-    }
-
-    @Test
-    public void shouldLoadWeightedRelationshipsNodesForNonExistingStringTypes() {
-        expected.expect(IllegalArgumentException.class);
-        expected.expectMessage("Relationship type not found: 'foo'");
-        new GraphLoader(RandomGraphTestCase.db)
-                .withRelationshipType("foo")
-                .withRelationshipWeightsFromProperty("weight", 42.0)
-                .load(graphImpl);
-    }
-
-    @Test
-    public void shouldLoadWeightedRelationshipsNodesForNonExistingTypes() {
-        expected.expect(IllegalArgumentException.class);
-        expected.expectMessage("Relationship type not found: 'foo'");
-        new GraphLoader(RandomGraphTestCase.db)
-                .withRelationshipType(RelationshipType.withName("foo"))
-                .withRelationshipWeightsFromProperty("weight", 42.0)
                 .load(graphImpl);
     }
 }

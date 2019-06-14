@@ -28,6 +28,8 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.newapi.InternalReadOps;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import static org.neo4j.internal.kernel.api.Read.ANY_LABEL;
+
 public final class GraphDimensions extends StatementFunction<GraphDimensions> {
     private final GraphSetup setup;
 
@@ -121,6 +123,14 @@ public final class GraphDimensions extends StatementFunction<GraphDimensions> {
             }
         }
         return 0.0;
+    }
+
+    public boolean isValidNodePredicate() {
+        return (setup.startLabel == null || setup.startLabel.isEmpty()) || labelId() != ANY_LABEL;
+    }
+
+    public boolean isValidRelationshipTypePredicate() {
+        return (setup.relationshipType == null || setup.relationshipType.isEmpty()) || singleRelationshipTypeId() != ANY_LABEL;
     }
 
     @Override
