@@ -344,7 +344,7 @@ public class HugeGraph implements Graph {
                 index,
                 direction,
                 // HugeGraph interface make no promises about thread-safety (that's what concurrentCopy is for)
-                true
+                false
         );
     }
 

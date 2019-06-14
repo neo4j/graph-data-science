@@ -24,7 +24,7 @@ package org.neo4j.graphalgo.api;
  *
  * @author mknblch
  */
-public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterable, RelationshipIterator, RelationshipWeights, RelationshipPredicate, RelationshipAccess, NodeProperties {
+public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterable, RelationshipIterator, RelationshipWeights, RelationshipAccess, NodeProperties {
 
     String TYPE = "huge";
 

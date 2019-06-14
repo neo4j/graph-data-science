@@ -110,7 +110,7 @@ public class SCCTarjan extends Algorithm<SCCTarjan> {
         indices[node] = index++;
         stack.push(node);
         onStack.set(node);
-        graph.forEachRelationship(node, Direction.OUTGOING, longToIntConsumer(this::accept));
+        graph.concurrentCopy().forEachRelationship(node, Direction.OUTGOING, longToIntConsumer(this::accept));
         if (indices[node] == lowLink[node]) {
             relax(node);
         }

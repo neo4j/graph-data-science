@@ -26,6 +26,7 @@ import com.carrotsearch.hppc.IntStack;
 import com.carrotsearch.hppc.cursors.IntCursor;
 import com.carrotsearch.hppc.procedures.IntProcedure;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.container.AtomicBitSet;
 import org.neo4j.graphalgo.core.utils.container.FlipStack;
 import org.neo4j.graphdb.Direction;
@@ -159,13 +160,14 @@ public class MultiStepColoring {
      * @return container with nodes which must be processed in the next step
      */
     private IntContainer msColorTask(IntContainer nodes) {
+        RelationshipIterator localRelationshipIterator = graph.concurrentCopy();
 
         final IntStack levelQueue = new IntStack(nodes.size());
 
         nodes.forEach((IntProcedure) node -> {
             final int nodeColor = colors.get(node);
             final boolean[] change = {false};
-            graph.forEachRelationship(node, Direction.OUTGOING, (sourceNodeId, target) -> {
+            localRelationshipIterator.forEachRelationship(node, Direction.OUTGOING, (sourceNodeId, target) -> {
                 int targetNodeId = Math.toIntExact(target);
                 if (cas(targetNodeId, nodeColor)) {
                     if (!visited.get(targetNodeId)) {
@@ -191,6 +193,7 @@ public class MultiStepColoring {
      * @param nodes
      */
     private void msColorSequential(IntSet nodes) {
+        RelationshipIterator localRelationshipIterator = graph.concurrentCopy();
 
         final FlipStack queue = new FlipStack(nodes.size());
         queue.addAll(nodes);
@@ -200,7 +203,7 @@ public class MultiStepColoring {
             queue.forEach(node -> {
                 final int nodeColor = colors.get(node);
                 final boolean[] change = {false};
-                graph.forEachRelationship(node, Direction.OUTGOING, (sourceNodeId, targetNodeId) -> {
+                localRelationshipIterator.forEachRelationship(node, Direction.OUTGOING, (sourceNodeId, targetNodeId) -> {
                     int nodeId = Math.toIntExact(targetNodeId);
                     if (cas(nodeId, nodeColor)) {
                         if (!visited.get(nodeId)) {
@@ -228,6 +231,7 @@ public class MultiStepColoring {
      * @param nodes
      */
     private void simpleColor(IntSet nodes) {
+        RelationshipIterator localRelationshipIterator = graph.concurrentCopy();
 
         final boolean[] changed = {false};
         do {
@@ -235,7 +239,7 @@ public class MultiStepColoring {
             nodes.forEach((IntProcedure) node -> {
                 final int nodeColor = colors.get(node);
                 // for each <v, u> in E(V) (direction not specified)
-                graph.forEachRelationship(node, Direction.OUTGOING, (sourceNodeId, targetNodeId) -> {
+                localRelationshipIterator.forEachRelationship(node, Direction.OUTGOING, (sourceNodeId, targetNodeId) -> {
                     int target = Math.toIntExact(targetNodeId);
                     if (cas(target, nodeColor)) {
                         changed[0] = true;

@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.utils.traverse;
 
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.container.AtomicBitSet;
 import org.neo4j.graphalgo.core.utils.queue.LongPriorityQueue;
@@ -104,6 +105,7 @@ public class ParallelLocalQueueBFS implements BFS {
         if (!predicate.test(startNodeId)) {
             return this;
         }
+        RelationshipIterator localRelationshipIterator = graph.concurrentCopy();
         final LongPriorityQueue queue = LongPriorityQueue.max();
         queue.add(startNodeId, 0d);
         while (!queue.isEmpty()) {
@@ -114,7 +116,7 @@ public class ParallelLocalQueueBFS implements BFS {
             }
             visitor.accept(node);
 
-            graph.forEachRelationship(node, direction, (sourceNodeId, targetNodeId) -> {
+            localRelationshipIterator.forEachRelationship(node, direction, (sourceNodeId, targetNodeId) -> {
                 // should we visit this node?
                 if (!predicate.test(targetNodeId)) {
                     return true;

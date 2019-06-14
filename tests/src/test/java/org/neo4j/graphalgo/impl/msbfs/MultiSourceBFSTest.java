@@ -265,6 +265,11 @@ public final class MultiSourceBFSTest extends HeavyHugeTester {
             public void forEachRelationship(long nodeId, Direction direction, WeightedRelationshipConsumer consumer) {
 
             }
+
+            @Override
+            public boolean exists(final long sourceNodeId, final long targetNodeId, final Direction direction) {
+                return false;
+            }
         } ;
 
         final long[] sources = new long[sourceCount];

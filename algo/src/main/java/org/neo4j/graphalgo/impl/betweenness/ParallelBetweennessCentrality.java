@@ -21,11 +21,12 @@ package org.neo4j.graphalgo.impl.betweenness;
 
 import com.carrotsearch.hppc.IntArrayDeque;
 import com.carrotsearch.hppc.IntStack;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.container.Paths;
-import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
@@ -159,6 +160,7 @@ public class ParallelBetweennessCentrality extends Algorithm<ParallelBetweenness
      */
     private class BCTask implements Runnable {
 
+        private final RelationshipIterator localRelationshipIterator;
         // path map
         private final Paths paths;
         // stack to keep visited nodes
@@ -171,6 +173,7 @@ public class ParallelBetweennessCentrality extends Algorithm<ParallelBetweenness
         private final int[] distance;
 
         private BCTask() {
+            this.localRelationshipIterator = graph.concurrentCopy();
             this.paths = new Paths();
             this.stack = new IntStack();
             this.queue = new IntArrayDeque();
@@ -208,7 +211,7 @@ public class ParallelBetweennessCentrality extends Algorithm<ParallelBetweenness
             while (!queue.isEmpty()) {
                 int node = queue.removeFirst();
                 stack.push(node);
-                graph.forEachRelationship(node, direction, (source, targetId) -> {
+                localRelationshipIterator.forEachRelationship(node, direction, (source, targetId) -> {
                     // This will break for very large graphs
                     int target = (int) targetId;
 

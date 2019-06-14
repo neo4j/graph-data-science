@@ -134,7 +134,7 @@ public class BetweennessCentralitySuccessorBrandes extends Algorithm<Betweenness
             futures.clear();
             phaseQueue.forEach(futures, phase, v -> { // in parallel
                 successors.clear(v);
-                graph.forEachRelationship(
+                graph.concurrentCopy().forEachRelationship(
                         v,
                         direction,
                         (sourceNodeId, target) -> {

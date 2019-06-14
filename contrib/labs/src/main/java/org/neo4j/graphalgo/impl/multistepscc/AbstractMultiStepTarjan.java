@@ -74,7 +74,7 @@ public abstract class AbstractMultiStepTarjan {
         index++;
         stack.push(node);
         onStack.set(node);
-        graph.forEachRelationship(node, Direction.OUTGOING, this::accept);
+        graph.concurrentCopy().forEachRelationship(node, Direction.OUTGOING, this::accept);
         if (indices.get(node) == lowLink.get(node)) {
             relax(node);
         }

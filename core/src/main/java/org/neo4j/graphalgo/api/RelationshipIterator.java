@@ -48,6 +48,12 @@ public interface RelationshipIterator {
         forEachRelationship(nodeId, Direction.OUTGOING, consumer);
     }
 
+    boolean exists(long sourceNodeId, long targetNodeId, Direction direction);
+
+    default boolean exists(long sourceNodeId, long targetNodeId) {
+        return exists(sourceNodeId, targetNodeId, Direction.OUTGOING);
+    }
+
     /**
      * @return a copy of this iterator that reuses new cursors internally,
      *         so that iterations happen independent from other iterations.

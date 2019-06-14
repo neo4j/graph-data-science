@@ -29,10 +29,11 @@ import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.IntObjectScatterMap;
 import com.carrotsearch.hppc.IntStack;
 import com.carrotsearch.hppc.cursors.IntCursor;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
@@ -188,6 +189,7 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
      */
     private class BCTask implements Runnable {
 
+        private final RelationshipIterator localRelationshipIterator;
         // we have to keep all paths during eval (memory intensive)
         private final IntObjectMap<IntArrayList> paths;
         /**
@@ -205,6 +207,7 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
         private final int[] distance;
 
         private BCTask() {
+            this.localRelationshipIterator = graph.concurrentCopy();
             this.paths = new IntObjectScatterMap<>(expectedNodeCount);
             this.pivots = new IntStack();
             this.queue = new IntArrayDeque();
@@ -246,7 +249,7 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
                         continue;
                     }
                     pivots.push(node);
-                    graph.forEachRelationship(node, direction, (source, targetId) -> {
+                    localRelationshipIterator.forEachRelationship(node, direction, (source, targetId) -> {
                         // This will break for very large graphs
                         int target = (int) targetId;
 

@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.IntBinaryPredicate;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.QueueBasedSpliterator;
@@ -152,9 +153,8 @@ public class NodeWalker {
 
         private double[] buildProbabilityDistribution(int currentNodeId, int previousNodeId,
                                                       double returnParam, double inOutParam, int degree) {
-
             ProbabilityDistributionComputer consumer = new ProbabilityDistributionComputer(degree, currentNodeId, previousNodeId, returnParam, inOutParam);
-            graph.forEachRelationship(currentNodeId, Direction.BOTH, longToIntConsumer(consumer));
+            graph.concurrentCopy().forEachRelationship(currentNodeId, Direction.BOTH, longToIntConsumer(consumer));
             return consumer.probabilities();
         }
 
