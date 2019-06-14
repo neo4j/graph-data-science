@@ -50,7 +50,7 @@ import static org.neo4j.graphalgo.core.utils.ParallelUtil.awaitTermination;
  *
  * @author mknblch
  */
-public class ParallelUnionFindQueue extends GraphUnionFindAlgo<Graph, PagedDisjointSetStruct, ParallelUnionFindQueue>
+public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFindQueue>
 {
 
     private final ExecutorService executor;

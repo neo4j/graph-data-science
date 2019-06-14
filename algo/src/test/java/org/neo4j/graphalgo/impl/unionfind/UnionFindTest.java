@@ -49,7 +49,7 @@ import static org.junit.Assert.assertEquals;
  * @author mknblch
  */
 @RunWith(Parameterized.class)
-public class UnionFindsTest {
+public class UnionFindTest {
 
     private static final RelationshipType RELATIONSHIP_TYPE = RelationshipType.withName("TYPE");
 
@@ -80,7 +80,7 @@ public class UnionFindsTest {
 
     private Graph graph;
 
-    public UnionFindsTest(
+    public UnionFindTest(
             Class<? extends GraphFactory> graphImpl,
             String name) {
         graph = new GraphLoader(DB)
@@ -127,7 +127,6 @@ public class UnionFindsTest {
         test(UnionFindAlgo.FJ_MERGE);
     }
 
-
     private void test(UnionFindAlgo uf) {
         PagedDisjointSetStruct result = run(uf);
 
@@ -135,8 +134,9 @@ public class UnionFindsTest {
         long[] setRegions = new long[setsCount];
         Arrays.fill(setRegions, -1);
 
-        result.forEach(graph, (nodeId, setId) -> {
+        graph.forEachNode((nodeId) -> {
             long expectedSetRegion = nodeId / setSize;
+            final long setId = result.find(nodeId);
             int setRegion = (int) (setId / setSize);
             assertEquals(
                     "Node " + nodeId + " in unexpected set: " + setId,

@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.impl.unionfind;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
 import org.neo4j.graphdb.Direction;
@@ -32,7 +31,7 @@ import org.neo4j.graphdb.Direction;
  * <p>
  * The algorithm computes sets of weakly connected components.
  * <p>
- * The impl. is based on the {@link DisjointSetStruct}. It iterates over all relationships once
+ * The impl. is based on the {@link PagedDisjointSetStruct}. It iterates over all relationships once
  * within a single forEach loop and adds each source-target pair to the struct. Therefore buffering
  * would introduce an overhead (a SingleRun-RelationshipIterable might be used here).
  * <p>
@@ -42,7 +41,7 @@ import org.neo4j.graphdb.Direction;
  *
  * @author mknblch
  */
-public class GraphUnionFind extends GraphUnionFindAlgo<Graph, PagedDisjointSetStruct, GraphUnionFind>
+public class GraphUnionFind extends GraphUnionFindAlgo<GraphUnionFind>
 {
 
     private PagedDisjointSetStruct dss;

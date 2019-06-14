@@ -19,10 +19,12 @@
  */
 package org.neo4j.graphalgo.core.utils.dss;
 
-import com.carrotsearch.hppc.IntIntMap;
-import com.carrotsearch.hppc.cursors.IntIntCursor;
+import com.carrotsearch.hppc.LongLongMap;
+import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.junit.Before;
 import org.junit.Test;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -32,9 +34,9 @@ import static org.mockito.Mockito.*;
 /**
  * @author mknblch
  */
-public class DisjointSetStructTest {
+public class PagedDisjointSetStructTest {
 
-    private DisjointSetStruct struct = new DisjointSetStruct(7);
+    private PagedDisjointSetStruct struct = new PagedDisjointSetStruct(7, AllocationTracker.EMPTY);
 
     @Before
     public void setup() {
@@ -96,33 +98,33 @@ public class DisjointSetStructTest {
         assertFalse(struct.connected(4, 6));
         assertFalse(struct.connected(5, 6));
 
-        final IntIntMap setSize = struct.getSetSize();
+        final LongLongMap setSize = struct.getSetSize();
         System.out.println(setSize);
         assertEquals(2, setSize.size());
-        for (IntIntCursor cursor : setSize) {
+        for (LongLongCursor cursor : setSize) {
             assertTrue(cursor.value == 6 || cursor.value == 1);
         }
     }
 
     @Test
     public void testDefault() throws Exception {
-        DisjointSetStruct.Consumer consumer = mock(DisjointSetStruct.Consumer.class);
-        when(consumer.consume(anyInt(), anyInt())).thenReturn(true);
+        PagedDisjointSetStruct.Consumer consumer = mock(PagedDisjointSetStruct.Consumer.class);
+        when(consumer.consume(anyLong(), anyLong())).thenReturn(true);
         struct.forEach(consumer);
-        verify(consumer, times(7)).consume(anyInt(), anyInt());
-        verify(consumer, times(1)).consume(eq(0), eq(0));
-        verify(consumer, times(1)).consume(eq(1), eq(1));
-        verify(consumer, times(1)).consume(eq(2), eq(2));
-        verify(consumer, times(1)).consume(eq(3), eq(3));
-        verify(consumer, times(1)).consume(eq(4), eq(4));
-        verify(consumer, times(1)).consume(eq(5), eq(5));
-        verify(consumer, times(1)).consume(eq(6), eq(6));
+        verify(consumer, times(7)).consume(anyLong(), anyLong());
+        verify(consumer, times(1)).consume(eq(0L), eq(0L));
+        verify(consumer, times(1)).consume(eq(1L), eq(1L));
+        verify(consumer, times(1)).consume(eq(2L), eq(2L));
+        verify(consumer, times(1)).consume(eq(3L), eq(3L));
+        verify(consumer, times(1)).consume(eq(4L), eq(4L));
+        verify(consumer, times(1)).consume(eq(5L), eq(5L));
+        verify(consumer, times(1)).consume(eq(6L), eq(6L));
     }
 
     @Test
     public void testMergeDSS() throws Exception {
-        final DisjointSetStruct a = create(10, set(0, 1, 2, 3), set(4, 5, 6), set(7, 8), set(9));
-        final DisjointSetStruct b = create(10, set(0, 5), set(7, 9));
+        final PagedDisjointSetStruct a = create(10, set(0, 1, 2, 3), set(4, 5, 6), set(7, 8), set(9));
+        final PagedDisjointSetStruct b = create(10, set(0, 5), set(7, 9));
         assertEquals(4, a.getSetCount());
         a.merge(b);
         assertEquals(2, a.getSetCount());
@@ -133,8 +135,8 @@ public class DisjointSetStructTest {
         return elements;
     }
 
-    private static DisjointSetStruct create(int size, int[]... sets) {
-        final DisjointSetStruct dss = new DisjointSetStruct(size).reset();
+    private static PagedDisjointSetStruct create(int size, int[]... sets) {
+        final PagedDisjointSetStruct dss = new PagedDisjointSetStruct(size, AllocationTracker.EMPTY).reset();
         for (int[] set : sets) {
             if (set.length < 1) {
                 throw new IllegalArgumentException("Sets must contain at least one element");
@@ -148,6 +150,6 @@ public class DisjointSetStructTest {
 
     @Test
     public void test() throws Exception {
-        System.out.println(new DisjointSetStruct(5).reset());
+        System.out.println(new PagedDisjointSetStruct(5, AllocationTracker.EMPTY).reset());
     }
 }

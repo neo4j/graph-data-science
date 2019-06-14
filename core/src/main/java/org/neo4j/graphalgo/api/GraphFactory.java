@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.api;
 
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.GraphDimensionsReader;
 import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.graphalgo.core.NodeImporter;
 import org.neo4j.graphalgo.core.utils.ApproximatedImportProgress;
@@ -54,7 +55,7 @@ public abstract class GraphFactory {
         this.setup = setup;
         this.log = setup.log;
         this.progressLogger = progressLogger(log, setup.logMillis);
-        dimensions = new GraphDimensions(api, setup).call();
+        dimensions = new GraphDimensionsReader(api, setup).call();
         progress = importProgress(progressLogger, dimensions, setup);
     }
 

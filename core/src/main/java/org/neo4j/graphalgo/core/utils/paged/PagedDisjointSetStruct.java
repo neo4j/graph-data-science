@@ -20,45 +20,87 @@
 package org.neo4j.graphalgo.core.utils.paged;
 
 
+import com.carrotsearch.hppc.LongLongMap;
+import com.carrotsearch.hppc.LongLongScatterMap;
 import com.carrotsearch.hppc.LongScatterSet;
-import com.carrotsearch.hppc.predicates.LongLongPredicate;
 import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.api.NodeIterator;
-import org.neo4j.graphalgo.core.utils.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+/**
+ * disjoint-set-struct is a data structure that keeps track of a set
+ * of elements partitioned into a number of disjoint (non-overlapping) subsets.
+ * <p>
+ * More info:
+ * <p>
+ * <a href="https://en.wikipedia.org/wiki/Disjoint-set_data_structure">Wiki</a>
+ */
 public final class PagedDisjointSetStruct {
 
     private final HugeLongArray parent;
     private final HugeLongArray depth;
     private final long capacity;
 
+    /**
+     * Initialize the struct with the given capacity.
+     * Note: the struct must be {@link PagedDisjointSetStruct#reset()} prior use!
+     *
+     * @param capacity the capacity (maximum node id)
+     */
     public PagedDisjointSetStruct(long capacity, AllocationTracker tracker) {
         parent = HugeLongArray.newArray(capacity, tracker);
         depth = HugeLongArray.newArray(capacity, tracker);
         this.capacity = capacity;
     }
 
+    /**
+     * reset the container
+     */
     public PagedDisjointSetStruct reset() {
         parent.fill(-1);
         return this;
     }
 
+    /**
+     * element (node) count
+     *
+     * @return the element count
+     */
     public long capacity() {
         return capacity;
     }
 
+    /**
+     * check if p and q belong to the same set
+     *
+     * @param p a set item
+     * @param q a set item
+     * @return true if both items belong to the same set, false otherwise
+     */
     public boolean connected(long p, long q) {
         return find(p) == find(q);
     }
 
+    /**
+     * find setId of element p.
+     *
+     * @param p the element in the set we are looking for
+     * @return an id of the set it belongs to
+     */
     public long find(long p) {
         return findPC(p);
     }
 
+    /**
+     * find setId of element p.
+     * <p>
+     * find-impl using a recursive path compression logic
+     *
+     * @param p the element in the set we are looking for
+     * @return an id of the set it belongs to
+     */
     private long findPC(long p) {
         long pv = parent.get(p);
         if (pv == -1L) {
@@ -71,6 +113,14 @@ public final class PagedDisjointSetStruct {
         return value;
     }
 
+    /**
+     * join set of p (Sp) with set of q (Sq) so that {@link PagedDisjointSetStruct#connected(long, long)}
+     * for any pair of (Spi, Sqj) evaluates to true. Some optimizations exists
+     * which automatically balance the tree, the "weighted union rule" is used here.
+     *
+     * @param p an item of Sp
+     * @param q an item of Sq
+     */
     public void union(long p, long q) {
         final long pSet = find(p);
         final long qSet = find(q);
@@ -114,6 +164,12 @@ public final class PagedDisjointSetStruct {
         return this;
     }
 
+    /**
+     * find setId of element p without balancing optimization.
+     *
+     * @param nodeId the element in the set we are looking for
+     * @return an id of the set it belongs to
+     */
     public long findNoOpt(final long nodeId) {
         long p = nodeId;
         long np;
@@ -123,6 +179,11 @@ public final class PagedDisjointSetStruct {
         return p;
     }
 
+    /**
+     * evaluate number of sets
+     *
+     * @return
+     */
     public int getSetCount() {
         LongScatterSet set = new LongScatterSet();
         for (long i = 0L; i < capacity; ++i) {
@@ -132,17 +193,53 @@ public final class PagedDisjointSetStruct {
         return set.size();
     }
 
-    public Stream<DisjointSetStruct.Result> resultStream(IdMapping idMapping) {
+    /**
+     * evaluate the size of each set.
+     *
+     * @return a map which maps setId to setSize
+     */
+    public LongLongMap getSetSize() {
+        final LongLongScatterMap map = new LongLongScatterMap();
+
+        for (long i = parent.size() - 1; i >= 0; i--) {
+            map.addTo(find(i), 1);
+        }
+        return map;
+    }
+
+    public Stream<Result> resultStream(IdMapping idMapping) {
 
         return LongStream.range(IdMapping.START_NODE_ID, idMapping.nodeCount())
                 .mapToObj(mappedId ->
-                        new DisjointSetStruct.Result(
+                        new Result(
                                 idMapping.toOriginalNodeId(mappedId),
                                 find(mappedId)));
     }
 
-    public void forEach(NodeIterator nodes, LongLongPredicate consumer) {
-        nodes.forEachNode(nodeId -> consumer.apply(nodeId, find(nodeId)));
+    /**
+     * iterate each node and find its setId
+     *
+     * @param consumer the consumer
+     */
+    public void forEach(PagedDisjointSetStruct.Consumer consumer) {
+        for (long i = parent.size() - 1; i >= 0; i--) {
+            if (!consumer.consume(i, find(i))) {
+                break;
+            }
+        }
+    }
+
+    /**
+     * Consumer interface for c
+     */
+    @FunctionalInterface
+    public interface Consumer {
+        /**
+         * @param nodeId the mapped node id
+         * @param setId  the set id where the node belongs to
+         * @return true to continue the iteration, false to stop
+         */
+        boolean consume(long nodeId, long setId);
     }
 
     public static final class Translator implements PropertyTranslator.OfLong<PagedDisjointSetStruct> {
@@ -153,5 +250,42 @@ public final class PagedDisjointSetStruct {
         public long toLong(final PagedDisjointSetStruct data, final long nodeId) {
             return data.findNoOpt(nodeId);
         }
+    }
+
+    /**
+     * union find result type
+     */
+    public static class Result {
+
+        /**
+         * the mapped node id
+         */
+        public final long nodeId;
+
+        /**
+         * set id
+         */
+        public final long setId;
+
+        public Result(long nodeId, int setId) {
+            this.nodeId = nodeId;
+            this.setId = (long) setId;
+        }
+
+        public Result(long nodeId, long setId) {
+            this.nodeId = nodeId;
+            this.setId = setId;
+        }
+    }
+
+    public static class Cursor {
+        /**
+         * the mapped node id
+         */
+        int nodeId;
+        /**
+         * the set id of the node
+         */
+        int setId;
     }
 }
