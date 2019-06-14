@@ -32,7 +32,7 @@ import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphalgo.impl.results.DoubleArrayResult;
@@ -179,7 +179,7 @@ public class PageRank extends Algorithm<PageRank> {
     @Override
     public MemoryEstimation memoryRequirements() {
         return MemoryEstimations.builder(PageRank.class)
-                .add(MemoryEstimations.of("computeSteps", (dimensions, concurrency) -> {
+                .add(MemoryEstimations.setup("computeSteps", (dimensions, concurrency) -> {
                     // adjust concurrency, if necessary
                     long nodeCount = dimensions.nodeCount();
                     long nodesPerThread = ceilDiv(nodeCount, concurrency);
@@ -193,18 +193,13 @@ public class PageRank extends Algorithm<PageRank> {
                     }
                     int partitionSize = (int) nodesPerThread;
 
-                    // single ComputeStep instance
-                    long perThreadUsage = pageRankVariant.estimateMemoryPerThread(concurrency, partitionSize);
-
-                    long instanceUsage = sizeOfInstance(ComputeSteps.class);
-                    // scores[] wrapper
-                    instanceUsage += sizeOfObjectArray(concurrency);
-                    // starts[] and lengths[]
-                    instanceUsage += 2 * sizeOfLongArray(concurrency);
-                    // list of computeSteps
-                    instanceUsage += sizeOfObjectArray(concurrency);
-
-                    return MemoryRange.of(instanceUsage + concurrency * perThreadUsage);
+                    return MemoryEstimations
+                            .builder(ComputeSteps.class)
+                            .perThread("scores[] wrapper", MemoryUsage::sizeOfObjectArray)
+                            .perThread("starts[] and lengths[]", c -> 2 * sizeOfLongArray(c))
+                            .perThread("list of computeSteps", MemoryUsage::sizeOfObjectArray)
+                            .perThread("ComputeStep", c -> pageRankVariant.estimateMemoryPerThread(c, partitionSize))
+                            .build();
                 }))
                 .build();
     }
