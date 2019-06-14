@@ -8,7 +8,6 @@ public class MemRecResult {
     public final String requiredMemory;
     public final String treeView;
     public final long bytesMin, bytesMax;
-    public int[] foo;
 
     public MemRecResult(final MemoryTree memoryRequirements) {
         this(memoryRequirements.render(), memoryRequirements.memoryUsage());
