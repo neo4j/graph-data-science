@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import java.util.function.IntUnaryOperator;
 import java.util.function.LongToIntFunction;
 import java.util.function.LongUnaryOperator;
+import java.util.function.Supplier;
 
 /**
  * @author mknblch
@@ -109,6 +110,12 @@ public abstract class AbstractCommunityResultBuilder<T> {
     public void timeEval(Runnable runnable) {
         try (ProgressTimer timer = timeEval()) {
             runnable.run();
+        }
+    }
+
+    public <U> U timeEval(Supplier<U> supplier) {
+        try (ProgressTimer timer = timeEval()) {
+            return supplier.get();
         }
     }
 
