@@ -41,11 +41,8 @@ public class TriangleStreamTest_451 {
         DB.resolveDependency(Procedures.class).registerProcedure(TriangleProc.class);
     }
 
-
     @Test
-    public void testEmptySet() throws Exception {
-        DB.execute("CALL algo.triangleCount.stream('Foo', 'Bar') YIELD nodeId, triangles");
-
+    public void testEmptySet() {
+        DB.execute("CALL algo.triangleCount.stream('', '') YIELD nodeId, triangles");
     }
-
 }

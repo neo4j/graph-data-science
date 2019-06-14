@@ -53,7 +53,7 @@ public class ClosenessCentralityIntegrationTest_546 {
     }
 
     @Test
-    public void test547() throws Exception {
+    public void test547() {
 
         String importQuery =
                 "CREATE (alice:Person{id:\"Alice\"}),\n" +
@@ -88,7 +88,7 @@ public class ClosenessCentralityIntegrationTest_546 {
     }
 
     @Test
-    public void test547_residual() throws Exception {
+    public void test547_residual() {
 
         String importQuery =
                 "CREATE (alice:Person{id:\"Alice\"}),\n" +
@@ -123,7 +123,7 @@ public class ClosenessCentralityIntegrationTest_546 {
     }
 
     @Test
-    public void test546() throws Exception {
+    public void test546() {
 
         String importQuery =
                 "CREATE (nAlice:User {id:'Alice'})\n" +
@@ -141,8 +141,8 @@ public class ClosenessCentralityIntegrationTest_546 {
         db.execute(importQuery);
 
         final Graph graph = new GraphLoader(db, Pools.DEFAULT)
-                .withLabel("Person")
-                .withRelationshipType("KNOWS")
+                .withLabel("User")
+                .withRelationshipType("FRIEND")
                 .asUndirected(true)
                 .load(HugeGraphFactory.class);
 
@@ -155,7 +155,7 @@ public class ClosenessCentralityIntegrationTest_546 {
     }
 
     @Test
-    public void test546_residual() throws Exception {
+    public void test546_residual() {
 
         String importQuery =
                 "CREATE (nAlice:User {id:'Alice'})\n" +
@@ -173,8 +173,8 @@ public class ClosenessCentralityIntegrationTest_546 {
         db.execute(importQuery);
 
         final Graph graph = new GraphLoader(db, Pools.DEFAULT)
-                .withLabel("Person")
-                .withRelationshipType("KNOWS")
+                .withLabel("User")
+                .withRelationshipType("FRIEND")
                 .asUndirected(true)
                 .load(HugeGraphFactory.class);
 

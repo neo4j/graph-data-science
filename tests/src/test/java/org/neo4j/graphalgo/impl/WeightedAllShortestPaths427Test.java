@@ -419,7 +419,7 @@ public class WeightedAllShortestPaths427Test {
             String ignoreParamOnlyForTestNaming) {
         graph = new GraphLoader(DB, Pools.DEFAULT)
                 .withLabel("Node")
-                .withRelationshipType("TYPE")
+                .withRelationshipType("LINK")
                 .withRelationshipWeightsFromProperty("weight", 1.0)
                 .withDirection(Direction.OUTGOING)
                 .withConcurrency(Pools.DEFAULT_CONCURRENCY)

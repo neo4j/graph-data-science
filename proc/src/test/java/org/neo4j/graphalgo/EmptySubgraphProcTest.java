@@ -21,18 +21,18 @@ package org.neo4j.graphalgo;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.neo4j.graphdb.Result;
+import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
 import java.util.Collection;
-
-import static org.junit.Assert.assertFalse;
 
 @RunWith(Parameterized.class)
 public class EmptySubgraphProcTest {
@@ -46,24 +46,8 @@ public class EmptySubgraphProcTest {
 
     @BeforeClass
     public static void setup() throws KernelException {
-
         db = TestDatabaseCreator.createTestDatabase();
-
-        Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class);
-        procedures.registerProcedure(UnionFindProc.class);
-        procedures.registerProcedure(MSColoringProc.class);
-        procedures.registerProcedure(StronglyConnectedComponentsProc.class);
-        procedures.registerProcedure(BetweennessCentralityProc.class);
-        procedures.registerProcedure(ClosenessCentralityProc.class);
-        procedures.registerProcedure(TriangleProc.class);
-        procedures.registerProcedure(DangalchevCentralityProc.class);
-        procedures.registerProcedure(HarmonicCentralityProc.class);
-        procedures.registerProcedure(KSpanningTreeProc.class);
-        procedures.registerProcedure(LabelPropagationProc.class);
-        procedures.registerProcedure(LouvainProc.class);
-        procedures.registerProcedure(PageRankProc.class);
-        procedures.registerProcedure(PrimProc.class);
-
+        db.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(UnionFindProc.class);
         db.execute(DB_CYPHER);
     }
 
@@ -76,6 +60,7 @@ public class EmptySubgraphProcTest {
     public static Collection<Object[]> data() {
         return Arrays.asList(
                 new Object[]{"Heavy"},
+                new Object[]{"Huge"},
                 new Object[]{"Kernel"}
         );
     }
@@ -83,163 +68,27 @@ public class EmptySubgraphProcTest {
     @Parameterized.Parameter
     public String graphImpl;
 
+    @Rule
+    public ExpectedException expected = ExpectedException.none();
+
     @Test
-    public void testUnionFindStream() {
-        Result result = db.execute(String.format("CALL algo.unionFind.stream('C', '',{graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.unionFind.stream('', 'Y',{graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.unionFind.stream('C', 'Y',{graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
+    public void testUnionFindStreamWithInvalidNodeLabel() {
+        expected.expect(QueryExecutionException.class);
+        expected.expectMessage("Node label not found: 'C'");
+        db.execute(String.format("CALL algo.unionFind.stream('C', '',{graph:'%s'})", graphImpl));
     }
 
     @Test
-    public void testUnionFindMSColoringStream() {
-        Result result = db.execute(String.format("CALL algo.unionFind.mscoloring.stream('C', '',{graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.unionFind.mscoloring.stream('C', 'Y',{graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.unionFind.mscoloring.stream('C', 'Y',{graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
+    public void testUnionFindStreamWithInvalidRelType() {
+        expected.expect(QueryExecutionException.class);
+        expected.expectMessage("Relationship type not found: 'Y'");
+        db.execute(String.format("CALL algo.unionFind.stream('', 'Y',{graph:'%s'})", graphImpl));
     }
 
     @Test
-    public void testStronglyConnectedComponentsStream() {
-        Result result = db.execute(String.format("CALL algo.scc.stream('C', '',{graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.scc.stream('', 'Y',{graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.scc.stream('C', 'Y',{graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-    }
-
-    @Test
-    public void testStronglyConnectedComponentsMultiStepStream() {
-        Result result = db.execute(String.format("CALL algo.scc.stream('C', '',{graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.scc.stream('', 'Y',{graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.scc.stream('C', 'Y',{graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-    }
-
-    @Test
-    public void testStronglyConnectedComponentsTunedTarjanStream() {
-        Result result = db.execute(String.format("CALL algo.scc.recursive.tunedTarjan.stream('C', '', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.scc.recursive.tunedTarjan.stream('', 'Y', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.scc.recursive.tunedTarjan.stream('C', 'Y', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-    }
-
-    @Test
-    public void testForwardBackwardStronglyConnectedComponentsStream() {
-        Result result = db.execute(String.format("CALL algo.scc.forwardBackward.stream(0, 'C', '', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.scc.forwardBackward.stream(0, '', 'Y', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.scc.forwardBackward.stream(0, 'C', 'Y', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-    }
-
-    @Test
-    public void testBetweennessCentralityStream() {
-        Result result = db.execute(String.format("CALL algo.betweenness.stream('C', '', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.betweenness.stream('', 'Y', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.betweenness.stream('C', 'Y', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-    }
-
-    @Test
-    public void testSampledBetweennessCentralityStream() {
-        Result result = db.execute(String.format("CALL algo.betweenness.sampled.stream('C', '', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.betweenness.sampled.stream('', 'Y', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.betweenness.sampled.stream('C', 'Y', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-    }
-
-    @Test
-    public void testClosenessCentralityStream() {
-        Result result = db.execute(String.format("CALL algo.closeness.stream('C', '', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.closeness.stream('', 'Y', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.closeness.stream('C', 'Y', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-    }
-
-    @Test
-    public void testTriangleCountStream() {
-        Result result = db.execute(String.format("CALL algo.triangleCount.stream('C', '', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.triangleCount.stream('', 'Y', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.triangleCount.stream('C', 'Y', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-    }
-
-    @Test
-    public void testTriangleStream() {
-        Result result = db.execute(String.format("CALL algo.triangle.stream('C', '', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.triangle.stream('', 'Y', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.triangle.stream('C', 'Y', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-    }
-
-    @Test
-    public void testDangelchevCentralityStream() {
-        Result result = db.execute(String.format("CALL algo.closeness.dangalchev.stream('C', '', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.closeness.dangalchev.stream('', 'Y', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.closeness.dangalchev.stream('C', 'Y', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-    }
-
-    @Test
-    public void testHarmonicCentralityStream() {
-        Result result = db.execute(String.format("CALL algo.closeness.harmonic.stream('C', '', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.closeness.harmonic.stream('', 'Y', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.closeness.harmonic.stream('C', 'Y', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-    }
-
-    @Test
-    public void testLabelPropagationStream() {
-        Result result = db.execute(String.format("CALL algo.labelPropagation.stream('C', '', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.labelPropagation.stream('', 'Y', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.labelPropagation.stream('C', 'Y', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-    }
-
-    @Test
-    public void testLouvainStream() {
-        Result result = db.execute(String.format("CALL algo.louvain.stream('C', '', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.louvain.stream('', 'Y', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.louvain.stream('C', 'Y', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-    }
-
-    @Test
-    public void testPageRankStream() {
-        Result result = db.execute(String.format("CALL algo.pageRank.stream('C', '', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.pageRank.stream('', 'Y', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
-        result = db.execute(String.format("CALL algo.pageRank.stream('C', 'Y', {graph:'%s'})", graphImpl));
-        assertFalse(result.hasNext());
+    public void testUnionFindStreamWithValidNodeLabelAndInvalidRelType() {
+        expected.expect(QueryExecutionException.class);
+        expected.expectMessage("Relationship type not found: 'Y'");
+        db.execute(String.format("CALL algo.unionFind.stream('A', 'Y',{graph:'%s'})", graphImpl));
     }
 }

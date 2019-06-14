@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.api;
 
-import org.neo4j.graphalgo.core.EmptyGraph;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.graphalgo.core.NodeImporter;
@@ -62,17 +61,19 @@ public abstract class GraphFactory {
     }
 
     public Graph build() {
-        if (!isValidPredicate()) {
-            return new EmptyGraph();
-        } else {
-            return importGraph();
-        }
+        checkLabelPredicates();
+        return importGraph();
     }
 
     protected abstract Graph importGraph();
 
-    protected boolean isValidPredicate() {
-        return isValidNodePredicate() && isValidRelationshipTypePredicate();
+    protected void checkLabelPredicates() {
+        if (!isValidNodePredicate()) {
+            throw new IllegalArgumentException(String.format("Node label not found: '%s'", setup.startLabel));
+        }
+        if (!isValidRelationshipTypePredicate()) {
+            throw new IllegalArgumentException(String.format("Relationship type not found: '%s'", setup.relationshipType));
+        }
     }
 
     private boolean isValidNodePredicate() {
