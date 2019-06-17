@@ -356,6 +356,11 @@ public final class MemoryEstimations {
             return this;
         }
 
+        public Builder perNode(final String description, final MemoryEstimation subComponent) {
+            components.add(new AndThenEstimation(description, subComponent, (mem, dim, concurrency) -> mem.times(dim.nodeCount())));
+            return this;
+        }
+
         /**
          * Adds a new sub-component to the builder.
          *
