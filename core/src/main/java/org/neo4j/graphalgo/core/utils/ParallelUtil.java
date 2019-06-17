@@ -138,21 +138,6 @@ public final class ParallelUtil {
         return executor != null && !(executor.isShutdown() || executor.isTerminated());
     }
 
-    public static int availableThreads(ExecutorService executor) {
-        if (!canRunInParallel(executor)) {
-            return 0;
-        }
-        if (executor instanceof ThreadPoolExecutor) {
-            ThreadPoolExecutor pool = (ThreadPoolExecutor) executor;
-            // TPE only increases to max threads if the queue is full, (see their JavaDoc)
-            // so the number of threads available that are guaranteed to start immediately is
-            // only based on the number of core threads.
-            return pool.getCorePoolSize() - pool.getActiveCount();
-        }
-        // If we have another pool, we just have to hope for the best (or, maybe throw?)
-        return Integer.MAX_VALUE;
-    }
-
     /**
      * Executes read operations in parallel, based on the given batch size
      * and executor.
@@ -189,45 +174,6 @@ public final class ParallelUtil {
             runWithConcurrency(concurrency, tasks, executor);
             return tasks;
         }
-    }
-
-    /**
-     * Executes read operations in parallel, based on the given batch size
-     * and executor.
-     */
-    public static <T extends Runnable> List<T> readParallel(
-            int concurrency,
-            int batchSize,
-            BatchNodeIterable idMapping,
-            ExecutorService executor,
-            HugeParallelGraphImporter<T> importer) {
-
-        Collection<PrimitiveLongIterable> iterators =
-                idMapping.batchIterables(batchSize);
-
-        int threads = iterators.size();
-
-        final List<T> tasks = new ArrayList<>(threads);
-        if (!canRunInParallel(executor) || threads == 1) {
-            long nodeOffset = 0L;
-            for (PrimitiveLongIterable iterator : iterators) {
-                final T task = importer.newImporter(nodeOffset, iterator);
-                tasks.add(task);
-                task.run();
-                nodeOffset += batchSize;
-            }
-        } else {
-            AtomicLong nodeOffset = new AtomicLong();
-            Collection<T> importers = LazyMappingCollection.of(
-                    iterators,
-                    it -> {
-                        T task = importer.newImporter(nodeOffset.getAndAdd(batchSize), it);
-                        tasks.add(task);
-                        return task;
-                    });
-            runWithConcurrency(concurrency, importers, executor);
-        }
-        return tasks;
     }
 
     public static Collection<Runnable> tasks(
@@ -836,27 +782,6 @@ public final class ParallelUtil {
         }
         awaitTermination(futures);
     }
-
-
-    public static void iterateParallelHuge(
-            ExecutorService executorService,
-            long size,
-            int concurrency,
-            LongConsumer consumer) {
-        final List<Future<?>> futures = new ArrayList<>();
-        final long batchSize = threadSize(concurrency, size);
-        for (long i = 0; i < size; i += batchSize) {
-            final long start = i;
-            final long end = Math.min(size, start + batchSize);
-            futures.add(executorService.submit(() -> {
-                for (long j = start; j < end; j++) {
-                    consumer.accept(j);
-                }
-            }));
-        }
-        awaitTermination(futures);
-    }
-
 
     /**
      * Copied from {@link java.util.concurrent.ExecutorCompletionService}
