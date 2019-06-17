@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.utils.paged;
+package org.neo4j.graphalgo.core.utils.mem;
 
 import com.carrotsearch.hppc.ObjectLongIdentityHashMap;
 import com.carrotsearch.hppc.ObjectLongMap;
@@ -29,33 +29,33 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 
 import static java.lang.Integer.numberOfTrailingZeros;
-import static org.neo4j.graphalgo.core.utils.paged.BitUtil.nextHighestPowerOfTwo;
+import static org.neo4j.graphalgo.core.utils.BitUtil.nextHighestPowerOfTwo;
 
 public final class MemoryUsage {
 
-    private final static int SHIFT_BYTE = numberOfTrailingZeros(Byte.BYTES);
-    private final static int SHIFT_CHAR = numberOfTrailingZeros(Character.BYTES);
-    private final static int SHIFT_SHORT = numberOfTrailingZeros(Short.BYTES);
-    private final static int SHIFT_INT = numberOfTrailingZeros(Integer.BYTES);
-    private final static int SHIFT_FLOAT = numberOfTrailingZeros(Float.BYTES);
-    private final static int SHIFT_LONG = numberOfTrailingZeros(Long.BYTES);
-    private final static int SHIFT_DOUBLE = numberOfTrailingZeros(Double.BYTES);
-    private final static int SHIFT_OBJECT_REF;
+    private static final int SHIFT_BYTE = numberOfTrailingZeros(Byte.BYTES);
+    private static final int SHIFT_CHAR = numberOfTrailingZeros(Character.BYTES);
+    private static final int SHIFT_SHORT = numberOfTrailingZeros(Short.BYTES);
+    private static final int SHIFT_INT = numberOfTrailingZeros(Integer.BYTES);
+    private static final int SHIFT_FLOAT = numberOfTrailingZeros(Float.BYTES);
+    private static final int SHIFT_LONG = numberOfTrailingZeros(Long.BYTES);
+    private static final int SHIFT_DOUBLE = numberOfTrailingZeros(Double.BYTES);
+    private static final int SHIFT_OBJECT_REF;
 
-    public final static int BYTES_OBJECT_REF;
+    public static final int BYTES_OBJECT_REF;
 
     /**
      * Number of bytes to represent an object header (no fields, no alignments).
      */
-    private final static int BYTES_OBJECT_HEADER;
+    private static final int BYTES_OBJECT_HEADER;
 
     /**
      * Number of bytes to represent an array header (no content, but with alignments).
      */
-    private final static int BYTES_ARRAY_HEADER;
+    private static final int BYTES_ARRAY_HEADER;
 
-    private final static int MASK1_OBJECT_ALIGNMENT;
-    private final static int MASK2_OBJECT_ALIGNMENT;
+    private static final int MASK1_OBJECT_ALIGNMENT;
+    private static final int MASK2_OBJECT_ALIGNMENT;
 
     /**
      * Sizes of primitive classes.
@@ -156,43 +156,43 @@ public final class MemoryUsage {
         }
     }
 
-    public static long sizeOfByteArray(int length) {
+    public static long sizeOfByteArray(final int length) {
         return alignObjectSize((long) BYTES_ARRAY_HEADER + ((long) length << SHIFT_BYTE));
     }
 
-    public static long sizeOfCharArray(int length) {
+    public static long sizeOfCharArray(final int length) {
         return alignObjectSize((long) BYTES_ARRAY_HEADER + ((long) length << SHIFT_CHAR));
     }
 
-    public static long sizeOfShortArray(int length) {
+    public static long sizeOfShortArray(final int length) {
         return alignObjectSize((long) BYTES_ARRAY_HEADER + ((long) length << SHIFT_SHORT));
     }
 
-    public static long sizeOfIntArray(int length) {
+    public static long sizeOfIntArray(final int length) {
         return alignObjectSize((long) BYTES_ARRAY_HEADER + ((long) length << SHIFT_INT));
     }
 
-    public static long sizeOfFloatArray(int length) {
+    public static long sizeOfFloatArray(final int length) {
         return alignObjectSize((long) BYTES_ARRAY_HEADER + ((long) length << SHIFT_FLOAT));
     }
 
-    public static long sizeOfLongArray(int length) {
+    public static long sizeOfLongArray(final int length) {
         return alignObjectSize((long) BYTES_ARRAY_HEADER + ((long) length << SHIFT_LONG));
     }
 
-    public static long sizeOfDoubleArray(int length) {
+    public static long sizeOfDoubleArray(final int length) {
         return alignObjectSize((long) BYTES_ARRAY_HEADER + ((long) length << SHIFT_DOUBLE));
     }
 
-    public static long sizeOfObjectArray(int length) {
+    public static long sizeOfObjectArray(final int length) {
         return alignObjectSize((long) BYTES_ARRAY_HEADER + ((long) length << SHIFT_OBJECT_REF));
     }
 
-    public static long sizeOfObjectArrayElements(int length) {
+    public static long sizeOfObjectArrayElements(final int length) {
         return alignObjectSize((long) length << SHIFT_OBJECT_REF);
     }
 
-    public static long sizeOfArray(int length, long bytesPerElement) {
+    public static long sizeOfArray(final int length, final long bytesPerElement) {
         return alignObjectSize((long) BYTES_ARRAY_HEADER + (long) length * bytesPerElement);
     }
 
@@ -203,7 +203,7 @@ public final class MemoryUsage {
      *
      * @throws IllegalArgumentException if {@code clazz} is an array class.
      */
-    public static long shallowSizeOfInstance(Class<?> clazz) {
+    public static long sizeOfInstance(Class<?> clazz) {
         if (clazz.isArray()) {
             throw new IllegalArgumentException(
                     "This method does not work with array classes.");
@@ -229,7 +229,7 @@ public final class MemoryUsage {
     /**
      * Aligns an object size to be the next multiple of object alignment bytes.
      */
-    private static long alignObjectSize(long size) {
+    private static long alignObjectSize(final long size) {
         return (size + MASK1_OBJECT_ALIGNMENT) & MASK2_OBJECT_ALIGNMENT;
     }
 
@@ -246,6 +246,25 @@ public final class MemoryUsage {
             return primitiveSizes.get(type);
         }
         return 1 << SHIFT_OBJECT_REF;
+    }
+
+    private static final String[] UNITS = new String[]{" Bytes", " KiB", " MiB", " GiB", " TiB", " PiB", " EiB", " ZiB", " YiB"};
+
+    /**
+     * Returns <code>size</code> in human-readable units.
+     */
+    public static String humanReadable(long bytes) {
+        for (String unit : UNITS) {
+            // allow for a bit of overflow before going to the next unit to
+            // show a diff between, say, 1.1 and 1.2 MiB as 1150 KiB vs 1250 KiB
+            if (bytes >> 14 == 0) {
+                return bytes + unit;
+            }
+            bytes = bytes >> 10;
+        }
+        // we can never arrive here, longs are not large enough to
+        // represent > 16384 yobibytes
+        return null;
     }
 
     private MemoryUsage() {

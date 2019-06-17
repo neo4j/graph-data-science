@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.utils.paged;
+package org.neo4j.graphalgo.core.utils;
 
 public final class BitUtil {
 
@@ -98,6 +98,10 @@ public final class BitUtil {
     public static long align(long value, int alignment) {
         assert isPowerOfTwo(alignment) : "alignment must be a power of 2:" + alignment;
         return value + (long) (alignment - 1) & (long) (~(alignment - 1));
+    }
+
+    public static long ceilDiv(long dividend, long divisor) {
+        return 1L + (-1L + dividend) / divisor;
     }
 
     private BitUtil() {

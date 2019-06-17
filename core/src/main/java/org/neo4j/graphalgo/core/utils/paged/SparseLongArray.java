@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
+
 import java.util.Arrays;
 
 public final class SparseLongArray {
@@ -40,7 +42,7 @@ public final class SparseLongArray {
         int numPages = PageUtil.numPagesFor(size, PAGE_SHIFT, (int) PAGE_MASK);
         long capacity = PageUtil.capacityFor(numPages, PAGE_SHIFT);
         long[][] pages = new long[numPages][];
-        tracker.add(MemoryUsage.shallowSizeOfInstance(SparseLongArray.class));
+        tracker.add(MemoryUsage.sizeOfInstance(SparseLongArray.class));
         tracker.add(MemoryUsage.sizeOfObjectArray(numPages));
         return new SparseLongArray(capacity, pages, tracker);
     }

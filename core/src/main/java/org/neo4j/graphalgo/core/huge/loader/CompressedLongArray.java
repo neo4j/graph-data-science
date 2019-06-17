@@ -28,7 +28,7 @@ import static org.neo4j.graphalgo.core.huge.loader.ZigZagLongDecoding.zigZagUnco
 import static org.neo4j.graphalgo.core.huge.loader.VarLongEncoding.encodeVLongs;
 import static org.neo4j.graphalgo.core.huge.loader.VarLongEncoding.encodedVLongSize;
 import static org.neo4j.graphalgo.core.huge.loader.VarLongEncoding.zigZag;
-import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfByteArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfByteArray;
 
 final class CompressedLongArray {
 

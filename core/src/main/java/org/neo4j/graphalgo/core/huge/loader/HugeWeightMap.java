@@ -22,10 +22,10 @@ package org.neo4j.graphalgo.core.huge.loader;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.utils.container.TrackingLongDoubleHashMap;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.BitUtil;
+import org.neo4j.graphalgo.core.utils.BitUtil;
 
-import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.shallowSizeOfInstance;
-import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfObjectArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
 
 abstract class HugeWeightMap {
@@ -43,7 +43,7 @@ abstract class HugeWeightMap {
     }
 
     static final class Page implements HugeWeightMapping {
-        private static final long CLASS_MEMORY = shallowSizeOfInstance(Page.class);
+        private static final long CLASS_MEMORY = sizeOfInstance(Page.class);
 
         private TrackingLongDoubleHashMap[] data;
         private final AllocationTracker tracker;
@@ -105,7 +105,7 @@ abstract class HugeWeightMap {
 
     private static final class PagedHugeWeightMap implements HugeWeightMapping {
 
-        private static final long CLASS_MEMORY = shallowSizeOfInstance(PagedHugeWeightMap.class);
+        private static final long CLASS_MEMORY = sizeOfInstance(PagedHugeWeightMap.class);
 
         private final int pageShift;
         private final long pageMask;

@@ -30,9 +30,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import static org.neo4j.graphalgo.core.huge.HugeAdjacencyList.PAGE_MASK;
 import static org.neo4j.graphalgo.core.huge.HugeAdjacencyList.PAGE_SHIFT;
 import static org.neo4j.graphalgo.core.huge.HugeAdjacencyList.PAGE_SIZE;
-import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfByteArray;
-import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfObjectArray;
-import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfObjectArrayElements;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfByteArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArrayElements;
 
 
 final class HugeAdjacencyListBuilder {

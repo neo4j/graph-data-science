@@ -28,8 +28,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfLongArray;
-import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfObjectArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
 abstract class AdjacencyBuilder {
 

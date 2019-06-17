@@ -23,8 +23,8 @@ import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
-import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.shallowSizeOfInstance;
-import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfIntArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
 
 public final class PagedAtomicIntegerArray extends PagedDataStructure<AtomicIntegerArray> {
 
@@ -32,7 +32,7 @@ public final class PagedAtomicIntegerArray extends PagedDataStructure<AtomicInte
 
     static {
         int pageSize = PageUtil.pageSizeFor(Integer.BYTES);
-        long pageUsage = shallowSizeOfInstance(AtomicIntegerArray.class) + sizeOfIntArray(pageSize);
+        long pageUsage = sizeOfInstance(AtomicIntegerArray.class) + sizeOfIntArray(pageSize);
 
         ALLOCATOR_FACTORY = PageAllocator.of(
                 pageSize,

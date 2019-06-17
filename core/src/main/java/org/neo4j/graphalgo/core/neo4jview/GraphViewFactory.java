@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.GraphDimensionsReader;
 import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.graphalgo.core.NodeImporter;
 import org.neo4j.graphalgo.core.utils.ImportProgress;
@@ -38,7 +39,7 @@ public final class GraphViewFactory extends GraphFactory {
 
     @Override
     public Graph importGraph() {
-        GraphDimensions dimensions = new GraphDimensions(api, setup).call();
+        GraphDimensions dimensions = new GraphDimensionsReader(api, setup).call();
         IntIdMap idMap = new NodeImporter(
                 api,
                 setup.tracker,

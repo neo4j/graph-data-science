@@ -26,8 +26,8 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import java.util.Arrays;
 import java.util.stream.LongStream;
 
-import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfDoubleArray;
-import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfFloatArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfFloatArray;
 
 public abstract class BaseComputeStep implements ComputeStep {
     private static final int S_INIT = 0;

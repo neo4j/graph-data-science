@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.randomizedtesting.RandomizedTest;
 import com.carrotsearch.randomizedtesting.annotations.ThreadLeakScope;
+import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.collection.primitive.PrimitiveIntIterable;
 import org.neo4j.collection.primitive.PrimitiveIntIterator;
@@ -35,12 +36,18 @@ import static org.junit.Assert.*;
 @ThreadLeakScope(ThreadLeakScope.Scope.NONE)
 public final class IntIdMapTest extends RandomizedTest {
 
+    private IntIdMap idMap;
+    private long[] ids;
+
+    @Before
+    public void beforeEach() {
+        idMap = new IntIdMap(20);
+        ids = addRandomIds(idMap);
+        idMap.buildMappedIds(AllocationTracker.EMPTY);
+    }
+
     @Test
     public void shouldReturnSingleIteratorForLargeBatchSize() throws Exception {
-        IntIdMap idMap = new IntIdMap(20);
-        long[] ids = addRandomIds(idMap);
-        idMap.buildMappedIds(AllocationTracker.EMPTY);
-
         Collection<PrimitiveIntIterable> iterables = idMap.batchIterables(100);
         assertEquals(1, iterables.size());
 
@@ -49,10 +56,6 @@ public final class IntIdMapTest extends RandomizedTest {
 
     @Test
     public void shouldReturnMultipleIteratorsForSmallBatchSize() throws Exception {
-        IntIdMap idMap = new IntIdMap(20);
-        long[] ids = addRandomIds(idMap);
-        idMap.buildMappedIds(AllocationTracker.EMPTY);
-
         int expectedBatches = ids.length / 3;
         if (ids.length % 3 != 0) {
             expectedBatches++;
@@ -66,10 +69,6 @@ public final class IntIdMapTest extends RandomizedTest {
 
     @Test
     public void shouldFailForZeroBatchSize() throws Exception {
-        IntIdMap idMap = new IntIdMap(20);
-        addRandomIds(idMap);
-        idMap.buildMappedIds(AllocationTracker.EMPTY);
-
         try {
             idMap.batchIterables(0);
             fail();
@@ -80,10 +79,6 @@ public final class IntIdMapTest extends RandomizedTest {
 
     @Test
     public void shouldFailForNegativeBatchSize() throws Exception {
-        IntIdMap idMap = new IntIdMap(20);
-        addRandomIds(idMap);
-        idMap.buildMappedIds(AllocationTracker.EMPTY);
-
         int batchSize = between(Integer.MIN_VALUE, -1);
 
         try {

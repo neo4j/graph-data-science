@@ -48,7 +48,7 @@ import java.util.concurrent.RecursiveTask;
  *
  * @author mknblch
  */
-public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<Graph, PagedDisjointSetStruct, ParallelUnionFindFJMerge>
+public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFindFJMerge>
 {
 
     private final ExecutorService executor;

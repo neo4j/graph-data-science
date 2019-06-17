@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.utils;
 
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.graphalgo.core.utils.paged.BitUtil;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;

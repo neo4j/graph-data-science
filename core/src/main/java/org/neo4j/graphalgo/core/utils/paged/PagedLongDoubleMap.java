@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.core.utils.container.TrackingIntDoubleHashMap;
 
 import java.util.Arrays;
 
-import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfObjectArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
 public final class PagedLongDoubleMap {
 

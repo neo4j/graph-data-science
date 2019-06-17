@@ -112,8 +112,7 @@ public final class Louvain extends Algorithm<Louvain> {
             final boolean rnd) {
         BitSet comCount = new BitSet();
         communities.setAll(i -> {
-            final long t = (long) communityMap.nodeWeight(i, -1.0);
-            final long c = t == -1L ? i : t;
+            final long c = (long) communityMap.nodeWeight(i, i);
             comCount.set(c);
             return c;
         });

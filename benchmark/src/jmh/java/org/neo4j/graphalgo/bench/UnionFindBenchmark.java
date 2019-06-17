@@ -49,7 +49,7 @@ import java.util.concurrent.TimeUnit;
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
 public class UnionFindBenchmark {
 
-    @Param({"HEAVY_QUEUE", "HEAVY_FORK_JOIN", "HEAVY_FJ_MERGE", "HEAVY_SEQ", "HUGE_QUEUE", "HUGE_FORK_JOIN", "HUGE_FJ_MERGE", "HUGE_SEQ", "HUGE_HUGE_QUEUE", "HUGE_HUGE_FORK_JOIN", "HUGE_HUGE_FJ_MERGE", "HUGE_HUGE_SEQ"})
+    @Param({"HEAVY_QUEUE", "HEAVY_FORK_JOIN", "HEAVY_FJ_MERGE", "HEAVY_SEQ", "HUGE_QUEUE", "HUGE_FORK_JOIN", "HUGE_FJ_MERGE", "HUGE_SEQ"})
     UFBenchmarkCombination uf;
 
     private Graph theGraph;

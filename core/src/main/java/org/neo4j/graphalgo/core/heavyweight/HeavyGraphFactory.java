@@ -59,8 +59,8 @@ public class HeavyGraphFactory extends GraphFactory {
         Map<String, Supplier<WeightMapping>> nodePropertySuppliers = new HashMap<>();
         for (PropertyMapping propertyMapping : setup.nodePropertyMappings) {
             nodePropertySuppliers.put(propertyMapping.propertyName, () -> newWeightMap(
-                    dimensions.nodePropertyKeyId(propertyMapping.propertyName),
-                    dimensions.nodePropertyDefaultValue(propertyMapping.propertyName)));
+                    dimensions.nodePropertyKeyId(propertyMapping.propertyName, setup),
+                    dimensions.nodePropertyDefaultValue(propertyMapping.propertyName, setup)));
         }
 
         int concurrency = setup.concurrency();

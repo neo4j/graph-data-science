@@ -25,15 +25,15 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import static com.carrotsearch.hppc.Containers.DEFAULT_EXPECTED_ELEMENTS;
 import static com.carrotsearch.hppc.HashContainers.DEFAULT_LOAD_FACTOR;
-import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfDoubleArray;
-import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.shallowSizeOfInstance;
-import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
 
 public final class TrackingLongDoubleHashMap extends LongDoubleHashMap {
     private final AllocationTracker tracker;
 
-    private static final long CLASS_MEMORY = shallowSizeOfInstance(TrackingLongDoubleHashMap.class);
+    private static final long CLASS_MEMORY = sizeOfInstance(TrackingLongDoubleHashMap.class);
 
     public TrackingLongDoubleHashMap(AllocationTracker tracker) {
         super(DEFAULT_EXPECTED_ELEMENTS, DEFAULT_LOAD_FACTOR, HashOrderMixing.defaultStrategy());

@@ -19,11 +19,13 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.neo4j.graphalgo.core.utils.BitUtil;
+
 import java.lang.reflect.Array;
 import java.util.function.Supplier;
 
-import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.shallowSizeOfInstance;
-import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.sizeOfArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfArray;
 
 public abstract class PageAllocator<T> {
 
@@ -61,7 +63,7 @@ public abstract class PageAllocator<T> {
         Class<?> componentType = arrayClass.getComponentType();
         assert componentType != null && componentType.isPrimitive();
 
-        long bytesPerElement = shallowSizeOfInstance(componentType);
+        long bytesPerElement = sizeOfInstance(componentType);
         int pageSize = PageUtil.pageSizeFor((int) bytesPerElement);
 
         long bytesPerPage = sizeOfArray(pageSize, bytesPerElement);
@@ -80,7 +82,7 @@ public abstract class PageAllocator<T> {
         Class<?> componentType = arrayClass.getComponentType();
         assert componentType != null && componentType.isPrimitive();
 
-        long bytesPerElement = shallowSizeOfInstance(componentType);
+        long bytesPerElement = sizeOfInstance(componentType);
         long bytesPerPage = sizeOfArray(pageSize, bytesPerElement);
 
         T[] emptyPages = (T[]) Array.newInstance(componentType, 0, 0);
@@ -116,7 +118,7 @@ public abstract class PageAllocator<T> {
         }
 
         public long estimateMemoryUsage(long size, Class<?> container) {
-            return shallowSizeOfInstance(container) + estimateMemoryUsage(size);
+            return sizeOfInstance(container) + estimateMemoryUsage(size);
         }
 
         int pageSize() {

@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.utils.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
 import org.neo4j.graphalgo.core.write.Exporter;
@@ -208,7 +207,7 @@ public final class UnionFindProcExec implements BiConsumer<String, Algorithm<?>>
         }
     }
 
-    public static Stream<DisjointSetStruct.Result> stream(
+    public static Stream<PagedDisjointSetStruct.Result> stream(
             ProcedureConfiguration configuration,
             Supplier<UnionFindProcExec> unionFind) {
 
@@ -319,15 +318,6 @@ public final class UnionFindProcExec implements BiConsumer<String, Algorithm<?>>
     public void accept(final String name, final Algorithm<?> algorithm) {
         algorithm.withProgressLogger(ProgressLogger.wrap(log, name))
                 .withTerminationFlag(TerminationFlag.wrap(transaction));
-    }
-
-    private void write(
-            Exporter exporter,
-            DisjointSetStruct struct, String writeProperty) {
-        exporter.write(
-                writeProperty,
-                struct,
-                DisjointSetStruct.Translator.INSTANCE);
     }
 
     private void write(

@@ -19,7 +19,8 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
-import static org.neo4j.graphalgo.core.utils.paged.BitUtil.previousPowerOfTwo;
+import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
+import static org.neo4j.graphalgo.core.utils.BitUtil.previousPowerOfTwo;
 
 final class ImportSizing {
 
@@ -95,9 +96,5 @@ final class ImportSizing {
 
     int numberOfPages() {
         return numberOfPages;
-    }
-
-    private static long ceilDiv(long dividend, long divisor) {
-        return 1L + (-1L + dividend) / divisor;
     }
 }

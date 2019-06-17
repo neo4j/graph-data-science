@@ -39,8 +39,12 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 
-import static org.neo4j.graphalgo.core.utils.paged.AllocationTracker.humanReadable;
-import static org.neo4j.graphalgo.core.utils.paged.MemoryUsage.*;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
 
 /**
@@ -324,7 +328,8 @@ public class PageRank extends Algorithm<PageRank> {
                 long required = memoryUsageFor(concurrency, partitions);
                 long newRequired = memoryUsageFor(maxConcurrency, partitions);
                 long available = availableMemory();
-                log.warn("Requested concurrency of %d would require %s Heap but only %s are available, PageRank will be throttled to a concurrency of %d to use only %s Heap.",
+                log.warn(
+                        "Requested concurrency of %d would require %s Heap but only %s are available, PageRank will be throttled to a concurrency of %d to use only %s Heap.",
                         concurrency,
                         humanReadable(required),
                         humanReadable(available),
@@ -369,7 +374,7 @@ public class PageRank extends Algorithm<PageRank> {
     private static long estimateMemoryUsagePerThread(long nodeCount, int concurrency) {
         int nodesPerThread = (int) Math.ceil((double) nodeCount / (double) concurrency);
         long partitions = sizeOfIntArray(nodesPerThread) * (long) concurrency;
-        return shallowSizeOfInstance(BaseComputeStep.class) + partitions;
+        return sizeOfInstance(BaseComputeStep.class) + partitions;
     }
 
     private static long memoryUsageFor(
@@ -398,10 +403,10 @@ public class PageRank extends Algorithm<PageRank> {
         }
 
         perThreadUsage *= stepSize;
-        perThreadUsage += shallowSizeOfInstance(BaseComputeStep.class);
+        perThreadUsage += sizeOfInstance(BaseComputeStep.class);
         perThreadUsage += sizeOfObjectArray(stepSize);
 
-        sharedUsage += shallowSizeOfInstance(ComputeSteps.class);
+        sharedUsage += sizeOfInstance(ComputeSteps.class);
         sharedUsage += sizeOfLongArray(stepSize) << 1;
 
         return sharedUsage + perThreadUsage;
@@ -523,7 +528,7 @@ public class PageRank extends Algorithm<PageRank> {
             }
 
             l2Norm = Math.sqrt(l2Norm);
-            l2Norm = l2Norm < 0 ? 1: l2Norm;
+            l2Norm = l2Norm < 0 ? 1 : l2Norm;
             return l2Norm;
         }
 
@@ -548,7 +553,7 @@ public class PageRank extends Algorithm<PageRank> {
         }
 
         private void release() {
-             if (AllocationTracker.isTracking(tracker)) {
+            if (AllocationTracker.isTracking(tracker)) {
                 tracker.remove((scores.length + 1) * sizeOfObjectArray(scores.length));
             }
             steps.clear();

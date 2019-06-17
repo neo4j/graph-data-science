@@ -468,6 +468,14 @@ public class GraphLoader {
     }
 
     /**
+     * Returns an instance of the factory that can be used to load the graph.
+     */
+    public final <T extends GraphFactory> T build(final Class<T> factoryType) {
+        final MethodHandle constructor = findConstructor(factoryType);
+        return factoryType.cast(invokeConstructor(constructor));
+    }
+
+    /**
      * Loads the graph using the provided GraphFactory, passing the built
      * configuration as parameters.
      * <p>
@@ -477,8 +485,7 @@ public class GraphLoader {
      * @return the freshly loaded graph
      */
     public Graph load(Class<? extends GraphFactory> factoryType) {
-        final MethodHandle constructor = findConstructor(factoryType);
-        return invokeConstructor(constructor).build();
+        return build(factoryType).build();
     }
 
     private MethodHandle findConstructor(Class<?> factoryType) {

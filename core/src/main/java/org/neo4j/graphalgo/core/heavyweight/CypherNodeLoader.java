@@ -142,7 +142,7 @@ class CypherNodeLoader {
         Map<PropertyMapping, WeightMap> nodeProperties = new HashMap<>();
         for (PropertyMapping propertyMapping : setup.nodePropertyMappings) {
             nodeProperties.put(propertyMapping,
-                    CypherLoadingUtils.newWeightMapping(true, dimensions.nodePropertyDefaultValue(propertyMapping.propertyName), capacity));
+                    CypherLoadingUtils.newWeightMapping(true, dimensions.nodePropertyDefaultValue(propertyMapping.propertyName, setup), capacity));
         }
         return nodeProperties;
     }
