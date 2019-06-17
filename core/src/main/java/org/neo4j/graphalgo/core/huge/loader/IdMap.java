@@ -50,6 +50,10 @@ public final class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
     private HugeLongArray graphIds;
     private SparseNodeMapping nodeToGraphIds;
 
+    public static MemoryEstimation memoryRequirements() {
+        return ESTIMATION;
+    }
+
     /**
      * initialize the map with pre-built sub arrays
      */
