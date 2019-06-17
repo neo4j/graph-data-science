@@ -130,19 +130,14 @@ task docbook {
             into outputDir
         }
     }
-    finalizedBy 'preprocess'
+    // Inject document ID as xml:id into DocBook XML
+    doLast {
+        def outFile = file("$outputDir/index.xml")
+        outFile.text = outFile.text.replaceFirst("<book", "<book xml:id=\"$docId\"")
+    }
+    // Fail if Asciidoctor logs warnings or errors
     attachFailOnOutputString(it, 'asciidoctor: WARNING')
     attachFailOnOutputString(it, 'asciidoctor: ERROR')
-}
-
-preprocess {
-    dependsOn docbook
-    def sourceFile = "${buildDir}/docbook/${versions.graphAlgoDocs}/index.xml"
-    input sourceFile
-    outFile sourceFile
-    parameters([
-        "book-id": "$docId"
-    ])
 }
 
 task makeToc(type: XsltTask, dependsOn: docbook) {
