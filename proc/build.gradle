@@ -5,15 +5,19 @@ apply plugin: 'com.github.johnrengelman.shadow'
 dependencies {
     compile project(':labs')
 
-    compileOnly group: 'org.neo4j',             name: 'neo4j',              version: versions.'neo4j'
+    compileOnly group: 'org.neo4j',                   name: 'neo4j',                version: versions.'neo4j'
 
     testCompile project(':test-utils')
 
-    testCompile group: 'org.neo4j.community',   name: 'it-test-support',    version: versions.'neo4j'
-    testCompile group: 'junit',                 name: 'junit',              version: versions.'junit'
-    testCompile group: 'org.hamcrest',          name: 'hamcrest-library',   version: versions.'hamcrest'
-    testCompile group: 'org.mockito',           name: 'mockito-core',       version: versions.'mockito'
-    testCompile group: 'org.mockito',           name: 'mockito-inline',     version: versions.'mockito'
+    testCompile group: 'org.neo4j.community',         name: 'it-test-support',      version: versions.'neo4j'
+    testCompile group: 'junit',                       name: 'junit',                version: versions.'junit'
+    testCompile group: 'org.hamcrest',                name: 'hamcrest-library',     version: versions.'hamcrest'
+    testCompile group: 'org.mockito',                 name: 'mockito-core',         version: versions.'mockito'
+    testCompile group: 'org.mockito',                 name: 'mockito-inline',       version: versions.'mockito'
+
+    // This configuration is used by the neo4j-sproc-compiler
+    annotationProcessor group: 'net.biville.florent', name: 'neo4j-sproc-compiler', version: versions.'neo4j-sproc-compiler'
+    annotationProcessor group: 'org.neo4j',           name: 'neo4j',                version: versions.'neo4j'
 }
 
 task javadocJar(type: Jar) {
@@ -24,12 +28,16 @@ task javadocJar(type: Jar) {
 tasks.withType(JavaCompile) {
     options.compilerArgs <<
             '-AIgnoreContextWarnings' <<
-            '-AGeneratedDocumentationPath=target/generated-documentation' <<
+            "-AGeneratedDocumentationPath=$generatedDocumentationDir" <<
             '-ADocumentation.FieldDelimiter=¦' <<
             '-ADocumentation.ExportedHeaders=qualified name¦description¦type' <<
             '-ADocumentation.QuotedFields=false' <<
             '-ADocumentation.DelimitedFirstField=true' <<
             '-ADocumentation.ExportGrouping=SINGLE'
+}
+
+compileJava {
+    outputs.file procedureListFile
 }
 
 test {

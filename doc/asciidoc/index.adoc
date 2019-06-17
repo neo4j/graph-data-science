@@ -46,31 +46,38 @@ The guide covers the following areas:
 This chapter provides an introduction to the available graph algorithms, and instructions for installation and use.
 --
 
-include::../../readme.adoc[tags=algorithms-intro,leveloffset=1]
+include::../../contrib/readme.adoc[tags=algorithms-intro,leveloffset=1]
 
 include::algorithms-centrality.adoc[tags=header,leveloffset=3]
+
 include::algorithms-centrality.adoc[tags=summary,leveloffset=3]
 
 include::algorithms-community.adoc[tags=header,leveloffset=3]
+
 include::algorithms-community.adoc[tags=summary,leveloffset=3]
 
-
 include::algorithms-path-finding.adoc[tags=header,leveloffset=3]
+
 include::algorithms-path-finding.adoc[tags=summary,leveloffset=3]
 
 include::algorithms-similarity.adoc[tags=header,leveloffset=3]
+
 include::algorithms-similarity.adoc[tags=summary,leveloffset=3]
 
 include::algorithms-link-prediction.adoc[tags=header,leveloffset=3]
+
 include::algorithms-link-prediction.adoc[tags=summary,leveloffset=3]
 
 include::algorithms-preprocessing.adoc[tags=header,leveloffset=3]
+
 include::algorithms-preprocessing.adoc[tags=summary,leveloffset=3]
 
-include::../../readme.adoc[tags=installation,leveloffset=1]
-include::../../readme.adoc[tags=usage,leveloffset=1]
+include::../../contrib/readme.adoc[tags=installation,leveloffset=1]
+
+include::../../contrib/readme.adoc[tags=usage,leveloffset=1]
 
 include::projected-graph-model.adoc[leveloffset=1]
+
 
 [[yelp-example]]
 == The Yelp example
@@ -95,14 +102,19 @@ This chapter contains a reference of all the procedures in the Neo4j Graph Algor
 [[table-all]]
 [separator=¦,opts=header,cols="1m,5m,1m"]
 |===
-include::../../target/generated-documentation/documentation.csv[]
+include::{procedure-list-file}[]
 |===
 
 include::algorithms-centrality.adoc[leveloffset=1]
+
 include::algorithms-community.adoc[leveloffset=1]
+
 include::algorithms-path-finding.adoc[leveloffset=1]
+
 include::algorithms-similarity.adoc[leveloffset=1]
+
 include::algorithms-link-prediction.adoc[leveloffset=1]
+
 include::algorithms-preprocessing.adoc[leveloffset=1]
 
 
