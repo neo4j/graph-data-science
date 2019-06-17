@@ -18,7 +18,7 @@ buildscript {
         classpath "org.asciidoctor:asciidoctorj-diagram:$asciidoctorjDiagramVersion"
         classpath "org.asciidoctor:asciidoctorj-groovy-dsl:$asciidoctorGroovyDslVersion"
         classpath 'net.sf.docbook:docbook-xsl:1.79.1:ns-resources@zip'
-        classpath fileTree(dir: "${rootProject.projectDir}/lib", include: '*.jar')
+        classpath fileTree(dir: "$projectDir/lib", include: '*.jar')
         classpath files(catalogDir)
         classpath "org.dom4j:dom4j:2.1.1"
         classpath "jaxen:jaxen:1.1.6"
@@ -189,6 +189,8 @@ task sitemap() {
 
 
 html {
+    group = 'Documentation'
+    description = 'Build HTML documentation outputs from DocBook.'
     dependsOn docbook
     ext.sourceDir = docbook.outputDir
     ext.sourceFile = "$sourceDir/index.xml"
