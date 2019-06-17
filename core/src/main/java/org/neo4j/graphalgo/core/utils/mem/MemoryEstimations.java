@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.IntToLongFunction;
 import java.util.function.LongFunction;
 import java.util.function.LongUnaryOperator;
@@ -131,11 +132,16 @@ public final class MemoryEstimations {
         }
 
         public Builder perNode(final String description, final MemoryEstimation subComponent) {
-            components.add(new AndThenEstimation(description, subComponent, (mem, dim, concurrency) -> mem.times(dim.hugeNodeCount())));
+            components.add(new AndThenEstimation(description, subComponent, (mem, dim, concurrency) -> mem.times(dim.nodeCount())));
             return this;
         }
 
         public Builder perGraphDimension(final String description, final ToLongFunction<GraphDimensions> fn) {
+            components.add(new LeafEstimation(description, MemoryResidents.perDim(fn)));
+            return this;
+        }
+
+        public Builder rangePerGraphDimension(final String description, final Function<GraphDimensions, MemoryRange> fn) {
             components.add(new LeafEstimation(description, MemoryResidents.perDim(fn)));
             return this;
         }

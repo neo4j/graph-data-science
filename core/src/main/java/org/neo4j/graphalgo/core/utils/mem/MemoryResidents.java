@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.utils.mem;
 
 import org.neo4j.graphalgo.core.GraphDimensions;
 
+import java.util.function.Function;
 import java.util.function.IntToLongFunction;
 import java.util.function.LongFunction;
 import java.util.function.LongUnaryOperator;
@@ -33,7 +34,7 @@ final class MemoryResidents {
     }
 
     static MemoryResident fixed(final MemoryRange range) {
-        return (dimensions, concurrecny) -> range;
+        return (dimensions, concurrency) -> range;
     }
 
     static MemoryResident perNode(final MemoryRange range) {
@@ -41,15 +42,19 @@ final class MemoryResidents {
     }
 
     static MemoryResident perNode(final LongUnaryOperator fn) {
-        return (dimensions, concurrecny) -> MemoryRange.of(fn.applyAsLong(dimensions.hugeNodeCount()));
+        return (dimensions, concurrency) -> MemoryRange.of(fn.applyAsLong(dimensions.nodeCount()));
     }
 
     static MemoryResident perNode(final LongFunction<MemoryRange> fn) {
-        return (dimensions, concurrecny) -> fn.apply(dimensions.hugeNodeCount());
+        return (dimensions, concurrency) -> fn.apply(dimensions.nodeCount());
     }
 
     static MemoryResident perDim(final ToLongFunction<GraphDimensions> fn) {
-        return (dimensions, concurrecny) -> MemoryRange.of(fn.applyAsLong(dimensions));
+        return (dimensions, concurrency) -> MemoryRange.of(fn.applyAsLong(dimensions));
+    }
+
+    static MemoryResident perDim(final Function<GraphDimensions, MemoryRange> fn) {
+        return (dimensions, concurrency) -> fn.apply(dimensions);
     }
 
     static MemoryResident perThread(final MemoryRange range) {
@@ -57,20 +62,20 @@ final class MemoryResidents {
     }
 
     static MemoryResident perThread(final IntToLongFunction fn) {
-        return (dimensions, concurrecny) -> MemoryRange.of(fn.applyAsLong(concurrecny));
+        return (dimensions, concurrency) -> MemoryRange.of(fn.applyAsLong(concurrency));
     }
 
     static MemoryResident composite(final Iterable<MemoryResident> components) {
-        return (dimensions, concurrecny) -> {
+        return (dimensions, concurrency) -> {
             MemoryRange range = MemoryRange.empty();
             for (MemoryResident component : components) {
-                range = range.add(component.estimateMemoryUsage(dimensions, concurrecny));
+                range = range.add(component.estimateMemoryUsage(dimensions, concurrency));
             }
             return range;
         };
     }
 
-    private static final MemoryResident NULL_RESIDENT = (dimensions, concurrecny) -> MemoryRange.empty();
+    private static final MemoryResident NULL_RESIDENT = (dimensions, concurrency) -> MemoryRange.empty();
 
     private MemoryResidents() {
         throw new UnsupportedOperationException("No instances");
