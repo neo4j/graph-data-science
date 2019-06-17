@@ -83,6 +83,20 @@ ext {
     docId = 'graph-algorithms'
 }
 
+static def attachFailOnOutputString(Task task, String match) {
+    def listener = {
+        if (it.contains(match)) {
+            throw new GradleException("Encountered '$match' - treating as ERROR")
+        }
+    } as StandardOutputListener
+    task.doFirst {
+        task.logging.addStandardErrorListener(listener)
+    }
+    task.doLast {
+        task.logging.removeStandardErrorListener(listener)
+    }
+}
+
 def getAsciidoctor() {
     if (!project.hasProperty('adoc')) {
         ext.adoc = org.asciidoctor.Asciidoctor.Factory.create()
@@ -117,6 +131,8 @@ task docbook {
         }
     }
     finalizedBy 'preprocess'
+    attachFailOnOutputString(it, 'asciidoctor: WARNING')
+    attachFailOnOutputString(it, 'asciidoctor: ERROR')
 }
 
 preprocess {
@@ -312,6 +328,8 @@ task pdf {
         getAsciidoctor().convertFile(sourceFile, opts.get())
         file("$outputDir/index.pdf").renameTo(outputFile)   // workaround
     }
+    attachFailOnOutputString(it, 'asciidoctor: WARNING')
+    attachFailOnOutputString(it, 'asciidoctor: ERROR')
 }
 
 task packagePdf(type: Copy) {
