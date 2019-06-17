@@ -32,12 +32,9 @@ plugins {
 
 description = 'Neo4j Graph Algorithms :: Docs'
 
-if (!project.hasProperty('graphAlgoVersion')) { ext.graphAlgoVersion = '3.5.0.0' }
-
 ext {
-    versionParts = graphAlgoVersion.split('-')
+    versionParts = version.split('-')
     versions = [
-        'graphAlgo' : graphAlgoVersion,
         'graphAlgoDocs' : versionParts[0].split('\\.')[0..1].join('.'),
     ]
     if (1 < versionParts.size()) { versions.graphAlgoDocs += '-preview' }
