@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.ApproximatedImportProgress;
 import org.neo4j.graphalgo.core.utils.ImportProgress;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.kernel.api.StatementConstants;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -60,7 +61,7 @@ public final class HugeGraphFactory extends GraphFactory {
         return new ApproximatedImportProgress(
                 progressLogger,
                 setup.tracker,
-                dimensions.hugeNodeCount(),
+                dimensions.nodeCount(),
                 relOperations
         );
     }

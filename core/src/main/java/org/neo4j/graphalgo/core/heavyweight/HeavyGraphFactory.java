@@ -92,7 +92,7 @@ public class HeavyGraphFactory extends GraphFactory {
         }
 
         int concurrency = setup.concurrency();
-        final int nodeCount = dimensions.nodeCount();
+        final int nodeCount = dimensions.nodeCountAsInt();
         final AdjacencyMatrix matrix = new AdjacencyMatrix(
                 nodeCount,
                 setup.loadIncoming && !setup.loadAsUndirected,
@@ -168,6 +168,6 @@ public class HeavyGraphFactory extends GraphFactory {
     private WeightMapping newWeightMap(int propertyId, double defaultValue) {
         return propertyId == StatementConstants.NO_SUCH_PROPERTY_KEY
                 ? new NullWeightMap(defaultValue)
-                : new WeightMap(dimensions.nodeCount(), defaultValue, propertyId);
+                : new WeightMap(dimensions.nodeCountAsInt(), defaultValue, propertyId);
     }
 }

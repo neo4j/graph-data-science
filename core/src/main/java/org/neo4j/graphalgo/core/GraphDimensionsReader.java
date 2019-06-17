@@ -86,7 +86,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         );
         return new GraphDimensions.Builder()
                 .setNodeCount(nodeCount)
-                .setAllNodesCount(allNodesCount)
+                .setHighestNeoId(allNodesCount)
                 .setMaxRelCount(maxRelCount)
                 .setLabelId(labelId)
                 .setRelationId(relationId)

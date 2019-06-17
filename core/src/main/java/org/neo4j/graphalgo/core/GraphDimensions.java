@@ -29,7 +29,7 @@ import static org.neo4j.internal.kernel.api.Read.ANY_LABEL;
 public final class GraphDimensions {
 
     private final long nodeCount;
-    private final long allNodesCount;
+    private final long highestNeoId;
     private final long maxRelCount;
     private final int labelId;
     private final int[] relationId;
@@ -41,14 +41,14 @@ public final class GraphDimensions {
 
     public GraphDimensions(
             final long nodeCount,
-            final long allNodesCount,
+            final long highestNeoId,
             final long maxRelCount,
             final int labelId,
             final int[] relationId,
             final int relWeightId,
             final int nodeWeightId, final int nodePropId, final int[] nodePropIds) {
         this.nodeCount = nodeCount;
-        this.allNodesCount = allNodesCount;
+        this.highestNeoId = highestNeoId;
         this.maxRelCount = maxRelCount;
         this.labelId = labelId;
         this.relationId = relationId;
@@ -58,16 +58,15 @@ public final class GraphDimensions {
         this.nodePropIds = nodePropIds;
     }
 
-
-    public long hugeNodeCount() {
+    public long nodeCount() {
         return nodeCount;
     }
 
-    public long allNodesCount() {
-        return allNodesCount;
+    public long highestNeoId() {
+        return highestNeoId;
     }
 
-    public int nodeCount() {
+    public int nodeCountAsInt() {
         return Math.toIntExact(nodeCount);
     }
 
@@ -139,7 +138,7 @@ public final class GraphDimensions {
 
     public static class Builder {
         private long nodeCount;
-        private long allNodesCount;
+        private long highestNeoId;
         private long maxRelCount;
         private int labelId;
         private int[] relationId;
@@ -153,8 +152,8 @@ public final class GraphDimensions {
             return this;
         }
 
-        public Builder setAllNodesCount(final long allNodesCount) {
-            this.allNodesCount = allNodesCount;
+        public Builder setHighestNeoId(final long highestNeoId) {
+            this.highestNeoId = highestNeoId;
             return this;
         }
 
@@ -196,7 +195,7 @@ public final class GraphDimensions {
         public GraphDimensions build() {
             return new GraphDimensions(
                     nodeCount,
-                    allNodesCount,
+                    highestNeoId,
                     maxRelCount,
                     labelId,
                     relationId,

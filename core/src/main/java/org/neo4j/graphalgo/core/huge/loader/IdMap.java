@@ -25,6 +25,8 @@ import org.neo4j.graphalgo.api.BatchNodeIterable;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeIterator;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.Collection;
@@ -35,6 +37,14 @@ import java.util.function.LongPredicate;
  * guaranteed that there is no ID greater then nextGraphId / capacity
  */
 public final class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
+
+    private static final MemoryEstimation ESTIMATION = MemoryEstimations
+            .builder(IdMap.class)
+            .perNode("Neo4j identifiers", HugeLongArray::memoryRequirements)
+            .rangePerGraphDimension(
+                    "Mapping from Neo4j identifiers to internal identifiers",
+                     graphDimension -> SparseLongArray.memoryRequirements(graphDimension.highestNeoId(), graphDimension.nodeCount()))
+            .build();
 
     private long nodeCount;
     private HugeLongArray graphIds;

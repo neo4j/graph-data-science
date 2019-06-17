@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.neo4j.graphalgo.core.utils.PrivateLookup;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 
 import java.lang.invoke.MethodHandle;
 import java.util.concurrent.atomic.AtomicReferenceArray;
@@ -157,6 +158,30 @@ public final class SparseNodeMappingTest extends RandomizedTest {
 
         long tracked = tracker.tracked();
         assertEquals(sizeOfObjectArray(2) + sizeOfLongArray(PS), tracked);
+    }
+
+    @Test
+    public void shouldComputeMemoryEstimationForBestCase() {
+        long size = randomInt(Integer.MAX_VALUE);
+        final MemoryRange memoryRange = SparseLongArray.memoryRequirements(size, size);
+        assertEquals(memoryRange.min, memoryRange.max);
+    }
+
+    @Test
+    public void shouldComputeMemoryEstimationForWorstCase() {
+        long size = randomInt(Integer.MAX_VALUE);
+        long highestId = between(size + 4096, size * 4096);
+        final MemoryRange memoryRange = SparseLongArray.memoryRequirements(highestId, size);
+        assertTrue(memoryRange.min < memoryRange.max);
+    }
+
+    @Test
+    public void shouldComputeMemoryEstimation() {
+        assertEquals(MemoryRange.of(48L), SparseLongArray.memoryRequirements(0L, 0L));
+        assertEquals(MemoryRange.of(32840L), SparseLongArray.memoryRequirements(100L, 100L));
+        assertEquals(MemoryRange.of(97_689_088L), SparseLongArray.memoryRequirements(100_000_000_000L, 1L));
+        assertEquals(MemoryRange.of(177_714_832L, 327_937_656_304L), SparseLongArray.memoryRequirements(100_000_000_000L, 10_000_000L));
+        assertEquals(MemoryRange.of(898_077_664L, 800_488_297_696L), SparseLongArray.memoryRequirements(100_000_000_000L, 100_000_000L));
     }
 
     @SuppressWarnings("unchecked")

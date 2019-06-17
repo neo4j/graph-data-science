@@ -180,7 +180,7 @@ public class AdjacencyMatrix {
         return MemoryEstimations
                 .builder(AdjacencyMatrix.class)
                 .perGraphDimension("buffers", dim -> {
-                    int nodeCount = dim.nodeCount();
+                    int nodeCount = dim.nodeCountAsInt();
                     long rels = undirected ? dim.maxRelCount() << 1 : dim.maxRelCount();
                     int avgDegree = (int) Math.min(BitUtil.ceilDiv(rels, nodeCount), Integer.MAX_VALUE);
                     long perDirection = 0L;

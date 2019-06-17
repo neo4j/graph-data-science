@@ -99,7 +99,7 @@ public abstract class GraphFactory {
         return new ApproximatedImportProgress(
                 progressLogger,
                 setup.tracker,
-                dimensions.hugeNodeCount(),
+                dimensions.nodeCount(),
                 relOperations
         );
     }
@@ -109,7 +109,7 @@ public abstract class GraphFactory {
                 api,
                 setup.tracker,
                 progress,
-                dimensions.nodeCount(),
+                dimensions.nodeCountAsInt(),
                 dimensions.labelId());
         return nodeImporter.call();
     }

@@ -61,7 +61,7 @@ abstract class ScanningRecordsImporter<Record extends AbstractBaseRecord, T> {
     }
 
     final T call(Log log) {
-        long nodeCount = dimensions.hugeNodeCount();
+        long nodeCount = dimensions.nodeCount();
         final ImportSizing sizing = ImportSizing.of(concurrency, nodeCount);
         int numberOfThreads = sizing.numberOfThreads();
 
