@@ -80,7 +80,6 @@ ext {
         ]
     ]
     asciidocSourceDir = "$projectDir/asciidoc"
-    distDir = "$buildDir/distributions"
     docId = 'graph-algorithms'
 }
 
@@ -272,7 +271,7 @@ task packageHtml(type: Tar, dependsOn: [html, sitemap]) {
     from { html }
     from { sitemap }
     into "$baseName/$version"
-    destinationDir file(distDir)
+    destinationDir file(distributionDir)
 }
 
 task pdf {
@@ -314,5 +313,15 @@ task pdf {
         file("$outputDir/index.pdf").renameTo(outputFile)   // workaround
     }
 }
+
+task packagePdf(type: Copy) {
+    from tasks.pdf
+    into distributionDir
+}
+
+tasks.assemble.dependsOn packageHtml, packagePdf
+
+tasks.ci.dependsOn assemble
+tasks.cipr.dependsOn assemble
 
 // vim: set fdm=expr:
