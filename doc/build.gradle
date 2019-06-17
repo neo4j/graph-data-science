@@ -265,33 +265,6 @@ html {
     }
 }
 
-task asciidoctorHtml {
-    description 'Build HTML'
-    ext.sourceDir = asciidocSourceDir
-    ext.sourceFile = file("$sourceDir/index.adoc")
-    ext.outputDir = "$buildDir/asciidoctor-html/${versions.graphAlgoDocs}"
-    inputs.dir sourceDir
-    outputs.dir outputDir
-    doLast {
-        def attrs = asciidoctorAttributes.common + asciidoctorAttributes.html
-        def opts = org.asciidoctor.OptionsBuilder.options()
-                .backend('html5')
-                .safe(org.asciidoctor.SafeMode.UNSAFE)
-                .toDir(file(outputDir))
-                .mkDirs(true)
-                .attributes(attrs)
-        getAsciidoctor().convertFile(sourceFile, opts.get())
-    }
-    doLast {
-        copy {
-            from(projectDir) {
-                include 'images/**'
-            }
-            into outputDir
-        }
-    }
-}
-
 task packageHtml(type: Tar, dependsOn: [html, sitemap]) {
     description 'Package HTML for distribution, including sitemap.'
     baseName 'graph-algorithms'
