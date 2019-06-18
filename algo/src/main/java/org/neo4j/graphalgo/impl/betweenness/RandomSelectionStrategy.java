@@ -36,19 +36,20 @@ public class RandomSelectionStrategy implements RABrandesBetweennessCentrality.S
     private final SimpleBitSet bitSet;
     private final int size;
 
-    public RandomSelectionStrategy(Graph graph) {
-        this(graph, Math.log10(graph.nodeCount()) / Math.exp(2));
+    public RandomSelectionStrategy(Graph graph, double probability, long seed) {
+        this.bitSet = new SimpleBitSet(Math.toIntExact(graph.nodeCount()));
+        final SecureRandom random = new SecureRandom();
+        random.setSeed(seed);
+        for (int i = 0; i < graph.nodeCount(); i++) {
+            if (random.nextDouble() < probability) {
+                this.bitSet.put(i);
+            }
+        }
+        this.size = this.bitSet.size();
     }
 
     public RandomSelectionStrategy(Graph graph, double probability) {
-        bitSet = new SimpleBitSet(Math.toIntExact(graph.nodeCount()));
-        final SecureRandom random = new SecureRandom();
-        for (int i = 0; i < graph.nodeCount(); i++) {
-            if (random.nextDouble() <= probability) {
-                bitSet.put(i);
-            }
-        }
-        size = bitSet.size();
+        this(graph, probability, 0);
     }
 
     @Override

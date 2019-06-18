@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.impl.scc;
 import com.carrotsearch.hppc.IntStack;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.impl.Algorithm;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.results.SCCStreamResult;
 import org.neo4j.graphdb.Direction;
 

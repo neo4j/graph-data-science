@@ -23,6 +23,8 @@ import com.carrotsearch.hppc.IntStack;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IntersectionConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
+import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.api.RelationshipPredicate;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -111,6 +113,9 @@ public class TriangleCountForkJoin extends TriangleCountBase<AtomicDoubleArray, 
      */
     private class TriangleTask extends RecursiveTask<Long> {
 
+        private final RelationshipIterator localRelationshipIterator = graph.concurrentCopy();
+        private final RelationshipIterator localRelationshipPredicate = graph.concurrentCopy();
+
         private final int start;
         private final int end;
 
@@ -139,7 +144,7 @@ public class TriangleCountForkJoin extends TriangleCountBase<AtomicDoubleArray, 
             final TerminationFlag flag = getTerminationFlag();
             final int[] head = {-1};
             for (head[0] = start; head[0] < end; head[0]++) {
-                graph.forEachRelationship(head[0], D, longToIntConsumer((s, t) -> {
+                localRelationshipIterator.forEachRelationship(head[0], D, longToIntConsumer((s, t) -> {
                     if (t > s) {
                         nodes.push(t);
                     }
@@ -147,8 +152,8 @@ public class TriangleCountForkJoin extends TriangleCountBase<AtomicDoubleArray, 
                 }));
                 while (!nodes.isEmpty()) {
                     final int node = nodes.pop();
-                    graph.forEachRelationship(node, D, longToIntConsumer((s, t) -> {
-                        if (t > s && graph.exists(t, head[0], D)) {
+                    localRelationshipIterator.forEachRelationship(node, D, longToIntConsumer((s, t) -> {
+                        if (t > s && localRelationshipPredicate.exists(t, head[0], D)) {
                             exportTriangle(head[0], s, t);
                             triangles[0]++;
                         }

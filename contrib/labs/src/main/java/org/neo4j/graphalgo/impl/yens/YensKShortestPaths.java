@@ -24,7 +24,7 @@ import com.carrotsearch.hppc.LongScatterSet;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.RawValues;
-import org.neo4j.graphalgo.impl.Algorithm;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;

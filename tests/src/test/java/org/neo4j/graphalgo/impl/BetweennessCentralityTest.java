@@ -22,17 +22,16 @@ package org.neo4j.graphalgo.impl;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.neo4j.graphalgo.BetweennessCentralityProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.impl.betweenness.*;
+import org.neo4j.graphalgo.impl.betweenness.BetweennessCentralitySuccessorBrandes;
+import org.neo4j.graphalgo.impl.betweenness.MaxDepthBetweennessCentrality;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.mockito.Matchers.eq;
@@ -74,10 +73,6 @@ public class BetweennessCentralityTest {
             tx.success();
         }
 
-        db.getDependencyResolver()
-                .resolveDependency(Procedures.class)
-                .registerProcedure(BetweennessCentralityProc.class);
-
         graph = new GraphLoader(db)
                 .withAnyRelationshipType()
                 .withAnyLabel()
@@ -103,37 +98,9 @@ public class BetweennessCentralityTest {
     }
 
     @Test
-    public void testBC() throws Exception {
-
-        new BetweennessCentrality(graph)
-                .compute()
-                .resultStream()
-                .forEach(r -> System.out.println(name(r.nodeId) + " -> " + r.centrality));
-    }
-
-    @Test
     public void testMBC() throws Exception {
 
         new MaxDepthBetweennessCentrality(graph, 3)
-                .compute()
-                .resultStream()
-                .forEach(r -> System.out.println(name(r.nodeId) + " -> " + r.centrality));
-    }
-
-
-    @Test
-    public void testRABrandes() throws Exception {
-
-        new RABrandesBetweennessCentrality(graph, Pools.DEFAULT, 3, new RandomSelectionStrategy(graph, 0.3))
-                .compute()
-                .resultStream()
-                .forEach(r -> System.out.println(name(r.nodeId) + " -> " + r.centrality));
-    }
-
-    @Test
-    public void testPBC() throws Exception {
-
-        new ParallelBetweennessCentrality(graph, Pools.DEFAULT, 4)
                 .compute()
                 .resultStream()
                 .forEach(r -> System.out.println(name(r.nodeId) + " -> " + r.centrality));

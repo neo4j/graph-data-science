@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.impl.scc;
 
 import com.carrotsearch.hppc.IntStack;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.impl.Algorithm;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Arrays;
@@ -110,7 +110,7 @@ public class SCCTarjan extends Algorithm<SCCTarjan> {
         indices[node] = index++;
         stack.push(node);
         onStack.set(node);
-        graph.forEachRelationship(node, Direction.OUTGOING, longToIntConsumer(this::accept));
+        graph.concurrentCopy().forEachRelationship(node, Direction.OUTGOING, longToIntConsumer(this::accept));
         if (indices[node] == lowLink[node]) {
             relax(node);
         }

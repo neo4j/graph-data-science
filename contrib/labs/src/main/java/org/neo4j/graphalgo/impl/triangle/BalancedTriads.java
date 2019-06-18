@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
-import org.neo4j.graphalgo.impl.Algorithm;
+import org.neo4j.graphalgo.Algorithm;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;

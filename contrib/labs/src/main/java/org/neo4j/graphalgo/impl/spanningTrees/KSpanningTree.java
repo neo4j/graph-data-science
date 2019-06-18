@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.container.UndirectedTree;
 import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
-import org.neo4j.graphalgo.impl.Algorithm;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.results.AbstractResultBuilder;
 
 /**

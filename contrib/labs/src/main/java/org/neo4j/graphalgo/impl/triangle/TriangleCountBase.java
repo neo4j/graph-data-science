@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.impl.triangle;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.impl.Algorithm;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphdb.Direction;
 
 import java.util.concurrent.atomic.AtomicInteger;
