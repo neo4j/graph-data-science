@@ -56,7 +56,7 @@ public class HeavyGraphFactory extends GraphFactory {
     }
 
     @Override
-    public final MemoryEstimation memoryRequirements() {
+    public final MemoryEstimation memoryEstimation() {
         MemoryEstimations.Builder builder = MemoryEstimations
                 .builder(HeavyGraph.class)
                 .add("nodeIdMap", IntIdMap.memoryRequirements())
@@ -70,7 +70,7 @@ public class HeavyGraphFactory extends GraphFactory {
 
 
         for (PropertyMapping propertyMapping : setup.nodePropertyMappings) {
-            int propertyId = dimensions.nodePropertyKeyId(propertyMapping.propertyName);
+            int propertyId = dimensions.nodePropertyKeyId(propertyMapping.propertyName, setup);
             if (propertyId == StatementConstants.NO_SUCH_PROPERTY_KEY) {
                 builder.add(NullWeightMap.MEMORY_USAGE);
             } else {

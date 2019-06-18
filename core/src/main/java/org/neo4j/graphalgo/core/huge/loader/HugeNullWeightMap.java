@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.core.huge.loader;
 
 import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 
 /**
  * WeightMapping implementation which always returns
@@ -28,6 +30,8 @@ import org.neo4j.graphalgo.api.HugeWeightMapping;
  * @author mknblch
  */
 public class HugeNullWeightMap implements HugeWeightMapping {
+
+    static final MemoryEstimation MEMORY_USAGE = MemoryEstimations.of(HugeNullWeightMap.class);
 
     private final double defaultValue;
 

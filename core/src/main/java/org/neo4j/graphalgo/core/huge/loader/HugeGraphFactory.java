@@ -19,15 +19,18 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
+import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.ApproximatedImportProgress;
 import org.neo4j.graphalgo.core.utils.ImportProgress;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.kernel.api.StatementConstants;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -39,6 +42,24 @@ public final class HugeGraphFactory extends GraphFactory {
 
     public HugeGraphFactory(GraphDatabaseAPI api, GraphSetup setup) {
         super(api, setup);
+    }
+
+    @Override
+    public MemoryEstimation memoryEstimation() {
+        MemoryEstimations.Builder builder = MemoryEstimations
+                .builder(HugeGraph.class)
+                .add("nodeIdMap", IdMap.memoryRequirements());
+
+        for (PropertyMapping propertyMapping : setup.nodePropertyMappings) {
+            int propertyId = dimensions.nodePropertyKeyId(propertyMapping.propertyName, setup);
+            if (propertyId == StatementConstants.NO_SUCH_PROPERTY_KEY) {
+                builder.add(HugeNullWeightMap.MEMORY_USAGE);
+            } else  {
+                builder.add(HugeNodePropertyMap.memoryRequirements());
+            }
+        }
+
+        return builder.endField().build();
     }
 
     @Override
