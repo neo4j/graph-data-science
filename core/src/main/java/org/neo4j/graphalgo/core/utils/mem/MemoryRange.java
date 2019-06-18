@@ -91,6 +91,10 @@ public final class MemoryRange {
         return new MemoryRange(newMin, newMax);
     }
 
+    public MemoryRange union(MemoryRange other) {
+        return MemoryRange.of(Math.min(this.min, other.min), Math.max(this.max, other.max));
+    }
+
     public boolean isEmpty() {
         return this == NULL_RANGE || (min == 0 && max == 0);
     }

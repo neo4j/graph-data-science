@@ -41,6 +41,11 @@ public final class MemoryEstimations {
         MemoryRange apply(MemoryRange range, GraphDimensions dimensions, int concurrency);
     }
 
+    @FunctionalInterface
+    public interface MemoryEstimationSetup {
+        MemoryEstimation apply(GraphDimensions dimensions, int concurrency);
+    }
+
     public static MemoryEstimation empty() {
         return NULL_ESTIMATION;
     }
@@ -55,6 +60,30 @@ public final class MemoryEstimations {
 
     private static MemoryEstimation of(final String description, final Collection<MemoryEstimation> components) {
         return new CompositeEstimation(description, components);
+    }
+
+    public static MemoryEstimation setup(final String description, MemoryEstimationSetup setup) {
+        return new SetupEstimation(description, setup);
+    }
+
+    public static MemoryEstimation setup(final String description, Function<GraphDimensions, MemoryEstimation> fn) {
+        return new SetupEstimation(description, (dimensions, concurrency) -> fn.apply(dimensions));
+    }
+
+    public static MemoryEstimation andThen(MemoryEstimation delegate, MemoryRangeModifier andThen) {
+        return andThen(delegate.description(), delegate, andThen);
+    }
+
+    public static MemoryEstimation andThen(MemoryEstimation delegate, UnaryOperator<MemoryRange> andThen) {
+        return andThen(delegate.description(), delegate, (range, dimensions, concurrency) -> andThen.apply(range));
+    }
+
+    public static MemoryEstimation andThen(final String description, MemoryEstimation delegate, MemoryRangeModifier andThen) {
+        return new AndThenEstimation(description, delegate, andThen);
+    }
+
+    public static Builder builder() {
+        return new Builder("");
     }
 
     public static Builder builder(final String description) {
@@ -213,6 +242,22 @@ final class LeafEstimation extends BaseEstimation {
     public MemoryTree apply(final GraphDimensions dimensions, final int concurrency) {
         MemoryRange memoryRange = resident.estimateMemoryUsage(dimensions, concurrency);
         return new LeafTree(description(), memoryRange);
+    }
+}
+
+
+final class SetupEstimation extends BaseEstimation {
+    private final MemoryEstimations.MemoryEstimationSetup setup;
+
+    SetupEstimation(final String description, final MemoryEstimations.MemoryEstimationSetup setup) {
+        super(description);
+        this.setup = setup;
+    }
+
+    @Override
+    public MemoryTree apply(final GraphDimensions dimensions, final int concurrency) {
+        MemoryEstimation estimation = setup.apply(dimensions, concurrency);
+        return estimation.apply(dimensions, concurrency);
     }
 }
 

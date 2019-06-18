@@ -155,6 +155,18 @@ public final class MemoryRangeTest {
         assertEquals(MemoryRange.empty(), MemoryRange.empty().times(42));
     }
 
+    @Test
+    public void unionCombinesTwoRanges() {
+        MemoryRange range1 = MemoryRange.of(42);
+        MemoryRange range2 = MemoryRange.of(1337);
+        MemoryRange range3 = MemoryRange.of(42, 1337);
+        MemoryRange range4 = MemoryRange.of(4242, 13371337);
+        assertEquals(MemoryRange.of(0L, 42L), range1.union(MemoryRange.empty()));
+        assertEquals(MemoryRange.of(0L, 1337L), range2.union(MemoryRange.empty()));
+        assertEquals(range3, range1.union(range2));
+        assertEquals(MemoryRange.of(42, 13371337), range3.union(range4));
+    }
+
     @Test(expected = ArithmeticException.class)
     public void timesFailsOnOverflow() {
         MemoryRange.of(Long.MAX_VALUE / 2).times(3);
