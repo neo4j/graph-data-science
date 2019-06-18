@@ -35,11 +35,6 @@ public interface MemoryEstimation {
     String description();
 
     /**
-     * @return The resident memory of this component.
-     */
-    MemoryResident resident();
-
-    /**
      * @return nested resources of this component.
      */
     default Collection<MemoryEstimation> components() {

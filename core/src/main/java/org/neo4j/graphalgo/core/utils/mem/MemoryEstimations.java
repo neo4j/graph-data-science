@@ -167,11 +167,6 @@ public final class MemoryEstimations {
         }
 
         @Override
-        public MemoryResident resident() {
-            return MemoryResidents.empty();
-        }
-
-        @Override
         public MemoryTree apply(final GraphDimensions dimensions, final int concurrency) {
             return MemoryTree.empty();
         }
@@ -230,16 +225,9 @@ final class AndThenEstimation extends BaseEstimation {
 
     @Override
     public Collection<MemoryEstimation> components() {
-        return delegate.components();
-    }
-
-    @Override
-    public MemoryResident resident() {
-        return (dimensions, concurrency) -> {
-            MemoryResident resident = delegate.resident();
-            MemoryRange memoryRange = resident.estimateMemoryUsage(dimensions, concurrency);
-            return andThen.apply(memoryRange, dimensions, concurrency);
-        };
+        return delegate.components().stream()
+                .map(e -> new AndThenEstimation(e.description(), e, andThen))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -265,16 +253,6 @@ final class CompositeEstimation extends BaseEstimation {
     }
 
     @Override
-    public MemoryResident resident() {
-        return components.stream()
-                .map(MemoryEstimation::resident)
-                .collect(Collectors.collectingAndThen(
-                        Collectors.toList(),
-                        MemoryResidents::composite
-                ));
-    }
-
-    @Override
     public MemoryTree apply(final GraphDimensions dimensions, final int concurrency) {
         List<MemoryTree> newComponent = components.stream()
                 .map(e -> e.apply(dimensions, concurrency))
@@ -294,11 +272,6 @@ final class DelegateEstimation extends BaseEstimation {
     @Override
     public Collection<MemoryEstimation> components() {
         return delegate.components();
-    }
-
-    @Override
-    public MemoryResident resident() {
-        return delegate.resident();
     }
 
     @Override
