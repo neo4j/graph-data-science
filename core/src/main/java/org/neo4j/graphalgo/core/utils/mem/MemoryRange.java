@@ -71,8 +71,8 @@ public final class MemoryRange {
         if (other.isEmpty()) {
             return this;
         }
-        long newMin = this.min + other.min;
-        long newMax = this.max + other.max;
+        long newMin = Math.addExact(this.min, other.min);
+        long newMax = Math.addExact(this.max, other.max);
         if (newMin == min && newMax == max) {
             return this;
         }
@@ -80,8 +80,11 @@ public final class MemoryRange {
     }
 
     public MemoryRange times(final long count) {
-        if (this.isEmpty() || count == 0L || count == 1L) {
+        if (this.isEmpty() || count == 1L) {
             return this;
+        }
+        if (count == 0L) {
+            return NULL_RANGE;
         }
         long newMin = Math.multiplyExact(this.min, count);
         long newMax = Math.multiplyExact(this.max, count);
