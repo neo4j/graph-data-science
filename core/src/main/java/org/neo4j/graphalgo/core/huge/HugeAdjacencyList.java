@@ -20,8 +20,14 @@
 package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.core.huge.loader.MutableIntValue;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
+import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
+import static org.neo4j.graphalgo.core.huge.loader.VarLongEncoding.encodedVLongSize;
+import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 import static org.neo4j.graphalgo.core.utils.paged.PageUtil.indexInPage;
 import static org.neo4j.graphalgo.core.utils.paged.PageUtil.pageIndex;
 
@@ -33,6 +39,48 @@ public final class HugeAdjacencyList {
 
     private final long allocatedMemory;
     private byte[][] pages;
+
+    public static MemoryEstimation memoryRequirements(boolean undirected) {
+
+        return MemoryEstimations
+                .builder(HugeAdjacencyList.class)
+                .rangePerGraphDimension("pages", dim -> {
+                    long nodeCount = dim.nodeCount();
+                    long relCount = undirected ? dim.maxRelCount() << 1 : dim.maxRelCount();
+                    long avgDegree = (nodeCount > 0) ? ceilDiv(relCount, nodeCount) : 0L;
+
+                    // Best case scenario:
+                    // Difference between node identifiers in each adjacency list is 1.
+                    // This leads to ideal compression through delta encoding.
+                    int deltaBestCase = 1;
+                    long bestCaseAdjacencySize = computeAdjacencyByteSize(avgDegree, nodeCount, deltaBestCase);
+
+                    // Worst case scenario:
+                    // Relationships are equally distributed across nodes, i.e. each node has the same number of rels.
+                    // Within each adjacency list, all identifiers have the highest possible difference between each other.
+                    // Highest possible difference is the number of nodes divided by the average degree.
+                    long deltaWorstCase = (avgDegree > 0) ? ceilDiv(nodeCount, avgDegree) : 0L;
+                    long worstCaseAdjacencySize = computeAdjacencyByteSize(avgDegree, nodeCount, deltaWorstCase);
+
+                    int minPages = PageUtil.numPagesFor(bestCaseAdjacencySize, PAGE_SHIFT, PAGE_MASK);
+                    int maxPages = PageUtil.numPagesFor(worstCaseAdjacencySize, PAGE_SHIFT, PAGE_MASK);
+
+                    long bytesPerPage = MemoryUsage.sizeOfByteArray(PAGE_SIZE);
+                    long minMemoryReqs = minPages * bytesPerPage + MemoryUsage.sizeOfObjectArray(minPages);
+                    long maxMemoryReqs = maxPages * bytesPerPage + MemoryUsage.sizeOfObjectArray(maxPages);
+
+                    return MemoryRange.of(minMemoryReqs, maxMemoryReqs);
+                })
+                .build();
+    }
+
+    /* test private */ static long computeAdjacencyByteSize(long avgDegree, long nodeCount, long delta) {
+        long firstAdjacencyIdAvgByteSize = (avgDegree > 0) ? ceilDiv(encodedVLongSize(nodeCount), 2) : 0L;
+        int relationshipByteSize = encodedVLongSize(delta);
+        int degreeByteSize = Integer.BYTES;
+        long compressedAdjacencyByteSize = relationshipByteSize * Math.max(0, (avgDegree - 1));
+        return (degreeByteSize + firstAdjacencyIdAvgByteSize + compressedAdjacencyByteSize) * nodeCount;
+    }
 
     public HugeAdjacencyList(byte[][] pages) {
         this.pages = pages;

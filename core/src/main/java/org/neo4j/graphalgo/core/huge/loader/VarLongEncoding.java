@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
-final class VarLongEncoding {
+public final class VarLongEncoding {
 
     static int encodeVLongs(long[] values, int limit, byte[] out, int into) {
         return encodeVLongs(values, 0, limit, out, into);
@@ -100,7 +100,12 @@ final class VarLongEncoding {
         }
     }
 
-    static int encodedVLongSize(final long val) {
+    /**
+     * The values are equivalent to:
+     *
+     * {@code BitUtil.ceilDiv(64 - Long.numberOfLeadingZeros(nodeCount - 1), 7)}
+     */
+    public static int encodedVLongSize(final long val) {
         if (val < 128L) {
             return 1;
         } else if (val < 16384L) {
