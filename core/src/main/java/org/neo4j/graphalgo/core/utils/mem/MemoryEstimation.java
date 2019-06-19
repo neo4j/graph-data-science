@@ -41,5 +41,9 @@ public interface MemoryEstimation {
         return Collections.emptyList();
     }
 
+    default MemoryEstimation times(long factor) {
+        return MemoryEstimations.andThen(this, memoryRange -> memoryRange.times(factor));
+    }
+
     MemoryTree apply(GraphDimensions dimensions, int concurrency);
 }
