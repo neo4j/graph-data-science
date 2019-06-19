@@ -50,5 +50,6 @@ shadowJar {
 }
 
 ci {
-    dependsOn tasks.compileJmhJava
+tasks.ci.dependsOn tasks.shadowJar
+tasks.cipr.dependsOn tasks.shadowJar
 }
