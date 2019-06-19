@@ -48,3 +48,7 @@ shadowJar {
     exclude 'META-INF/*.DSA'
     exclude 'META-INF/*.RSA'
 }
+
+ci {
+    dependsOn tasks.compileJmhJava
+}
