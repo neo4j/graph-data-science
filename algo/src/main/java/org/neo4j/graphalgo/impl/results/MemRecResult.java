@@ -19,8 +19,10 @@
  */
 package org.neo4j.graphalgo.impl.results;
 
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
+import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphdb.Result;
 
 import java.util.Map;
@@ -30,16 +32,30 @@ public class MemRecResult {
     public final String treeView;
     public final Map<String, Object> mapView;
     public final long bytesMin, bytesMax;
+    public long nodes, relationships;
 
-    public MemRecResult(final MemoryTree memoryRequirements) {
-        this(memoryRequirements.render(), memoryRequirements.renderMap(), memoryRequirements.memoryUsage());
+    public MemRecResult(final MemoryTreeWithDimensions memoryRequirements) {
+        this(memoryRequirements.memoryTree, memoryRequirements.graphDimensions);
+    }
+
+    private MemRecResult(final MemoryTree memoryRequirements, final GraphDimensions dimensions) {
+        this(memoryRequirements.render(), memoryRequirements.renderMap(), memoryRequirements.memoryUsage(), dimensions);
     }
 
     private MemRecResult(
             final String treeView,
             final Map<String, Object> mapView,
-            final MemoryRange estimateMemoryUsage) {
-        this(estimateMemoryUsage.toString(), treeView, mapView, estimateMemoryUsage.min, estimateMemoryUsage.max);
+            final MemoryRange estimateMemoryUsage,
+            final GraphDimensions dimensions) {
+        this(
+                estimateMemoryUsage.toString(),
+                treeView,
+                mapView,
+                estimateMemoryUsage.min,
+                estimateMemoryUsage.max,
+                dimensions.nodeCount(),
+                dimensions.maxRelCount()
+        );
     }
 
     private MemRecResult(
@@ -47,12 +63,16 @@ public class MemRecResult {
             final String treeView,
             final Map<String, Object> mapView,
             final long bytesMin,
-            final long bytesMax) {
+            final long bytesMax,
+            final long nodes,
+            final long relationships) {
         this.requiredMemory = requiredMemory;
         this.treeView = treeView;
         this.mapView = mapView;
         this.bytesMin = bytesMin;
         this.bytesMax = bytesMax;
+        this.nodes = nodes;
+        this.relationships = relationships;
     }
 
     public MemRecResult(final Result.ResultRow row) {
@@ -61,7 +81,9 @@ public class MemRecResult {
                 row.getString("treeView"),
                 (Map<String, Object>) row.get("mapView"),
                 row.getNumber("bytesMin").longValue(),
-                row.getNumber("bytesMax").longValue()
+                row.getNumber("bytesMax").longValue(),
+                row.getNumber("nodes").longValue(),
+                row.getNumber("relationships").longValue()
         );
     }
 }

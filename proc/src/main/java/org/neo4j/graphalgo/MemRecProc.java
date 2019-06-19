@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
+import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
 import org.neo4j.graphdb.Direction;
@@ -120,13 +121,13 @@ public final class MemRecProc {
         ProcedureConfiguration config = ProcedureConfiguration.create(configMap)
                 .overrideNodeLabelOrQuery(label)
                 .overrideRelationshipTypeOrQuery(relationship);
-        MemoryTree memoryRequirements = gatherMemoryRequirements(config);
+        MemoryTreeWithDimensions memoryRequirements = gatherMemoryRequirements(config);
         return Stream.of(new MemRecResult(memoryRequirements));
     }
 
     // best effort guess at loading a graph with probably settings
     // since we don't have an algo to delegate to
-    private MemoryTree gatherMemoryRequirements(ProcedureConfiguration config) {
+    private MemoryTreeWithDimensions gatherMemoryRequirements(ProcedureConfiguration config) {
         final Direction direction = config.getDirection(Direction.OUTGOING);
         final String nodeWeight = config.getString("nodeWeight", null);
         final String nodeProperty = config.getString("nodeProperty", null);
@@ -154,6 +155,7 @@ public final class MemRecProc {
         GraphDimensions dimensions = factory.dimensions();
         int concurrency = config.getReadConcurrency();
         MemoryEstimation estimation = factory.memoryEstimation();
-        return estimation.apply(dimensions, concurrency);
+        MemoryTree memoryTree = estimation.apply(dimensions, concurrency);
+        return new MemoryTreeWithDimensions(memoryTree, dimensions);
     }
 }

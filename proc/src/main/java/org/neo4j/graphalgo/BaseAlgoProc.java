@@ -29,8 +29,8 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
+import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.AlgoWithConfig;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.AbstractResultBuilder;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -135,7 +135,7 @@ public abstract class BaseAlgoProc<A extends ConfiguredAlgorithm<A, Conf>, Conf>
         }
     }
 
-    final MemoryTree memoryEstimation(final ProcedureConfiguration config) {
+    final MemoryTreeWithDimensions memoryEstimation(final ProcedureConfiguration config) {
         GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
         GraphFactory graphFactory = loader.build(config.getGraphImpl());
         AlgoWithConfig<A, Conf> algoWithConfig = newAlgorithm(config, AllocationTracker.EMPTY, Optional.empty());
@@ -144,7 +144,8 @@ public abstract class BaseAlgoProc<A extends ConfiguredAlgorithm<A, Conf>, Conf>
                 .add(algo.memoryEstimation(algoWithConfig.conf()))
                 .add(graphFactory.memoryEstimation())
                 .build();
-        return estimation.estimate(graphFactory.dimensions(), config.getConcurrency());
+        MemoryTree memoryTree = estimation.estimate(graphFactory.dimensions(), config.getConcurrency());
+        return new MemoryTreeWithDimensions(memoryTree, graphFactory.dimensions());
     }
 
     final AlgoWithConfig<A, Conf> newAlgorithm(
