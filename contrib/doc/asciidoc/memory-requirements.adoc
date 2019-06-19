@@ -54,9 +54,29 @@ Algorithm specific parameters can also be provided as config.
 | mapView | Map  | A breakdown of the memory used by different components involved in the execution of a graph algorithm.
 |===
 
+== `algo.memrec` sample
 
+This sample will explain the `algo.memrec` procedure, using a Game of Thrones graphs.
 
-== Heavy graph projection
+.The following creates a graph containing Game of Thrones characters and the interactions between them.
+[source, cypher]
+----
+CREATE CONSTRAINT ON (c:Character) ASSERT c.id IS UNIQUE;
+
+UNWIND range(1,7) AS season
+LOAD CSV WITH HEADERS FROM "https://github.com/neo4j-apps/neuler/raw/master/sample-data/got/got-s" + season + "-nodes.csv" AS row
+MERGE (c:Character {id: row.Id})
+ON CREATE SET c.name = row.Label`;
+
+UNWIND range(1,7) AS season
+LOAD CSV WITH HEADERS FROM "https://github.com/neo4j-apps/neuler/raw/master/sample-data/got/got-s" + season + "-edges.csv" AS row
+MATCH (source:Character {id: row.Source})
+MATCH (target:Character {id: row.Target})
+CALL apoc.merge.relationship(source, "INTERACTS_SEASON" + season, {}, {}, target) YIELD rel
+SET rel.weight = toInteger(row.Weight);
+----
+
+=== Heavy graph projection
 
 This is the default graph projection, and supports graphs up to 2 billion nodes and 2 billion relationships.
 It uses 32 bits (4 bytes) per node, and the amount of memory required can be computed using the following formula:
@@ -66,9 +86,10 @@ It uses 32 bits (4 bytes) per node, and the amount of memory required can be com
 (4 bytes * nodes) + (8 bytes * nodes) + (4 bytes * rels)
 ----
 
-The amount of memory will be twice this if we use the `direction: "BOTH"` parameter.
 
-We can call the `algo.memrec` procedure
+The amount of memory used for relationships will be twice this if we use the `direction: "BOTH"` parameter.
+
+.The following computes the amount of memory required by the heavy in memory graph for any node label and any relationship type:
 [source,cypher]
 ----
 CALL algo.memrec()
@@ -80,9 +101,38 @@ RETURN requiredMemory, bytesMin, bytesMax
 [opts="header",cols="1,1,1"]
 |===
 | Required Memory | Bytes Min | Bytes Max
-| 10288 Bytes  | 10288    | 10288
+| 40 KiB  | 41456    | 41456
 |===
 
+.The following computes the amount of memory required by the heavy in memory graph for node label `Character` and relationship type `INTERACTS_SEASON1`:
+[source,cypher]
+----
+CALL algo.memrec("Character", "INTERACTS_SEASON1", null)
+YIELD requiredMemory, bytesMin, bytesMax
+RETURN requiredMemory, bytesMin, bytesMax
+----
+
+.Results
+[opts="header",cols="1,1,1"]
+|===
+| Required Memory | Bytes Min | Bytes Max
+| 27 KiB  | 28656    | 28656
+|===
+
+.The following computes the amount of memory required by the heavy in memory graph for node label `Character`, relationship type `INTERACTS_SEASON1`, and direction `BOTH`:
+[source,cypher]
+----
+CALL algo.memrec("Character", "INTERACTS_SEASON1", null, {direction: "BOTH"})
+YIELD requiredMemory, bytesMin, bytesMax
+RETURN requiredMemory, bytesMin, bytesMax
+----
+
+.Results
+[opts="header",cols="1,1,1"]
+|===
+| Required Memory | Bytes Min | Bytes Max
+| 40 KiB  | 41488    | 41488
+|===
 
 
 == Huge graph projection
@@ -91,13 +141,47 @@ This graph projection supports graphs with more than 2 billion nodes or 2 billio
 It stores data in a compressed structure, based on delta encoded sorted id-ranges, which uses a maximum of 64 bits (8 bytes) per node.
 
 
-
-.The following will run the algorithm and write back results:
-[source, cypher]
+.The following computes the amount of memory required by the huge in memory graph for any node label and any relationship type:
+[source,cypher]
 ----
-CALL algo.memrec(null, null, "pageRank")
-YIELD mapView
-RETURN mapView["memoryUsage"] AS totalMemoryUsage,
-       [item in mapView["components"] | {name: item.name, memoryUsage: item.memoryUsage}] AS components
+CALL algo.memrec(null, null, null, {graph: "huge"})
+YIELD requiredMemory, bytesMin, bytesMax
+RETURN requiredMemory, bytesMin, bytesMax
 ----
 
+.Results
+[opts="header",cols="1,1,1"]
+|===
+| Required Memory | Bytes Min | Bytes Max
+| 40 KiB  | 41456    | 41456
+|===
+
+.The following computes the amount of memory required by the huge in memory graph for node label `Character` and relationship type `INTERACTS_SEASON1`:
+[source,cypher]
+----
+CALL algo.memrec("Character", "INTERACTS_SEASON1", null, {graph: "huge"})
+YIELD requiredMemory, bytesMin, bytesMax
+RETURN requiredMemory, bytesMin, bytesMax
+----
+
+.Results
+[opts="header",cols="1,1,1"]
+|===
+| Required Memory | Bytes Min | Bytes Max
+| 27 KiB  | 28656    | 28656
+|===
+
+.The following computes the amount of memory required by the huge in memory graph for node label `Character`, relationship type `INTERACTS_SEASON1`, and direction `BOTH`:
+[source,cypher]
+----
+CALL algo.memrec("Character", "INTERACTS_SEASON1", null, {direction: "BOTH", graph: "huge"})
+YIELD requiredMemory, bytesMin, bytesMax
+RETURN requiredMemory, bytesMin, bytesMax
+----
+
+.Results
+[opts="header",cols="1,1,1"]
+|===
+| Required Memory | Bytes Min | Bytes Max
+| 40 KiB  | 41488    | 41488
+|===
