@@ -25,6 +25,8 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.huge.HugeAdjacencyList;
+import org.neo4j.graphalgo.core.huge.HugeAdjacencyOffsets;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.ApproximatedImportProgress;
 import org.neo4j.graphalgo.core.utils.ImportProgress;
@@ -50,6 +52,7 @@ public final class HugeGraphFactory extends GraphFactory {
                 .builder(HugeGraph.class)
                 .add("nodeIdMap", IdMap.memoryRequirements());
 
+        // Node properties
         for (PropertyMapping propertyMapping : setup.nodePropertyMappings) {
             String propertyKey = propertyMapping.propertyName;
             int propertyId = dimensions.nodePropertyKeyId(propertyKey, setup);
@@ -60,15 +63,26 @@ public final class HugeGraphFactory extends GraphFactory {
             }
         }
 
+        // Relationship weight properties
         if (dimensions.relWeightId() == StatementConstants.NO_SUCH_PROPERTY_KEY) {
             builder.add(setup.relationWeightPropertyName, HugeNullWeightMap.MEMORY_USAGE);
         } else {
             builder.add(
                     setup.relationWeightPropertyName,
-                    MemoryEstimations.setup(setup.relationWeightPropertyName, (dimensions, concurrency) -> {
-                        ImportSizing importSizing = ImportSizing.of(concurrency, dimensions.nodeCount());
-                        return HugeWeightMap.memoryRequirements(importSizing.pageSize(), importSizing.numberOfPages());
-                    }));
+                    HugeWeightMap.memoryRequirements(setup.relationWeightPropertyName));
+        }
+
+        // Adjacency lists and Adjacency offsets
+        MemoryEstimation adjacencyListSize = HugeAdjacencyList.memoryRequirements(setup.loadAsUndirected);
+        MemoryEstimation adjacencyOffsetsSetup = HugeAdjacencyOffsets.memoryRequirements();
+        if (this.setup.loadOutgoing || this.setup.loadAsUndirected) {
+            builder.add("outgoing", adjacencyListSize);
+            builder.add("outgoing offsets", adjacencyOffsetsSetup);
+
+        }
+        if (this.setup.loadIncoming && !this.setup.loadAsUndirected) {
+            builder.add("incoming", adjacencyListSize);
+            builder.add("incoming offsets", adjacencyOffsetsSetup);
         }
 
         return builder.build();

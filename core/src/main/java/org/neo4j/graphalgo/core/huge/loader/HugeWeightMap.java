@@ -49,6 +49,14 @@ abstract class HugeWeightMap {
         }
     }
 
+    static MemoryEstimation memoryRequirements(String description) {
+        return MemoryEstimations.setup(description, (dimensions, concurrency) -> {
+            ImportSizing importSizing = ImportSizing.of(concurrency, dimensions.nodeCount());
+            return HugeWeightMap.memoryRequirements(importSizing.pageSize(), importSizing.numberOfPages());
+        });
+
+    }
+
     private HugeWeightMap() {
     }
 
@@ -76,11 +84,11 @@ abstract class HugeWeightMap {
             return weight(source, target, defaultValue);
         }
 
-         @Override
-         public double weight(final long source, final long target, final double defaultValue) {
-             int localIndex = (int) source;
-             return get(localIndex, target, defaultValue);
-         }
+        @Override
+        public double weight(final long source, final long target, final double defaultValue) {
+            int localIndex = (int) source;
+            return get(localIndex, target, defaultValue);
+        }
 
         double get(int localIndex, long target, double defaultValue) {
             TrackingLongDoubleHashMap map = data[localIndex];

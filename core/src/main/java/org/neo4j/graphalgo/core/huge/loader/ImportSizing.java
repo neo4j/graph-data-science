@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.huge.loader;
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 import static org.neo4j.graphalgo.core.utils.BitUtil.previousPowerOfTwo;
 
-final class ImportSizing {
+public final class ImportSizing {
 
     // batch size is used to pre-size multiple arrays, so it must fit in an integer
     // 1B elements might even be too much as arrays need to be allocated with
@@ -46,7 +46,7 @@ final class ImportSizing {
         this.numberOfPages = numberOfPages;
     }
 
-    static ImportSizing of(int concurrency, long nodeCount) {
+    public static ImportSizing of(int concurrency, long nodeCount) {
         return determineBestThreadSize(nodeCount, (long) concurrency);
     }
 
@@ -90,11 +90,11 @@ final class ImportSizing {
         return totalThreads;
     }
 
-    int pageSize() {
+    public int pageSize() {
         return pageSize;
     }
 
-    int numberOfPages() {
+    public int numberOfPages() {
         return numberOfPages;
     }
 }
