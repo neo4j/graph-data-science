@@ -24,7 +24,7 @@ import org.neo4j.graphdb.Direction;
 /**
  * @author mknblch
  */
-public interface RelationshipIterator {
+public interface RelationshipIterator extends RelationshipPredicate {
 
     void forEachRelationship(
             long nodeId,
@@ -46,12 +46,6 @@ public interface RelationshipIterator {
             long nodeId,
             RelationshipConsumer consumer) {
         forEachRelationship(nodeId, Direction.OUTGOING, consumer);
-    }
-
-    boolean exists(long sourceNodeId, long targetNodeId, Direction direction);
-
-    default boolean exists(long sourceNodeId, long targetNodeId) {
-        return exists(sourceNodeId, targetNodeId, Direction.OUTGOING);
     }
 
     /**

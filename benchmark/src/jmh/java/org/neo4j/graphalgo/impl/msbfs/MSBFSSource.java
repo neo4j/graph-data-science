@@ -88,6 +88,11 @@ public enum MSBFSSource {
         @Override
         public void forEachRelationship(long nodeId, Direction direction, WeightedRelationshipConsumer consumer) {
         }
+
+        @Override
+        public boolean exists(final long sourceNodeId, final long targetNodeId, final Direction direction) {
+            return false;
+        }
     }
 
     private static final class HugeAllNodes implements RelationshipIterator {
@@ -116,6 +121,11 @@ public enum MSBFSSource {
                 Direction direction,
                 WeightedRelationshipConsumer consumer) {
             forEachRelationship(nodeId, direction, (s, t) -> consumer.accept(s, t, Double.NaN));
+        }
+
+        @Override
+        public boolean exists(final long sourceNodeId, final long targetNodeId, final Direction direction) {
+            return false;
         }
     }
 }
