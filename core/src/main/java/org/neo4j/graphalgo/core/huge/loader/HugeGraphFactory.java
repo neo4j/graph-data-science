@@ -51,15 +51,27 @@ public final class HugeGraphFactory extends GraphFactory {
                 .add("nodeIdMap", IdMap.memoryRequirements());
 
         for (PropertyMapping propertyMapping : setup.nodePropertyMappings) {
-            int propertyId = dimensions.nodePropertyKeyId(propertyMapping.propertyName, setup);
+            String propertyKey = propertyMapping.propertyName;
+            int propertyId = dimensions.nodePropertyKeyId(propertyKey, setup);
             if (propertyId == StatementConstants.NO_SUCH_PROPERTY_KEY) {
-                builder.add(HugeNullWeightMap.MEMORY_USAGE);
-            } else  {
-                builder.add(HugeNodePropertyMap.memoryRequirements());
+                builder.add(propertyKey, HugeNullWeightMap.MEMORY_USAGE);
+            } else {
+                builder.add(propertyKey, HugeNodePropertyMap.memoryRequirements());
             }
         }
 
-        return builder.endField().build();
+        if (dimensions.relWeightId() == StatementConstants.NO_SUCH_PROPERTY_KEY) {
+            builder.add(setup.relationWeightPropertyName, HugeNullWeightMap.MEMORY_USAGE);
+        } else {
+            builder.add(
+                    setup.relationWeightPropertyName,
+                    MemoryEstimations.setup(setup.relationWeightPropertyName, (dimensions, concurrency) -> {
+                        ImportSizing importSizing = ImportSizing.of(concurrency, dimensions.nodeCount());
+                        return HugeWeightMap.memoryRequirements(importSizing.pageSize(), importSizing.numberOfPages());
+                    }));
+        }
+
+        return builder.build();
     }
 
     @Override

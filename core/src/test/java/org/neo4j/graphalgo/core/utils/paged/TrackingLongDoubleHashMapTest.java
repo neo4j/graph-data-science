@@ -7,13 +7,13 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 
 import static org.junit.Assert.*;
 
-public class TrackingIntDoubleHashMapTest {
+public class TrackingLongDoubleHashMapTest {
 
     @Test
     public void shouldComputeMemoryRequirementsForSinglePage() {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100).build();
-        MemoryRange memoryRange = TrackingIntDoubleHashMap
-                .memoryRequirements()
+        MemoryRange memoryRange = TrackingLongDoubleHashMap
+                .memoryRequirements(4096)
                 .apply(dimensions, 1)
                 .memoryUsage();
 
@@ -21,12 +21,12 @@ public class TrackingIntDoubleHashMapTest {
         long maxBufferSize = 257;
 
         long min =
-                64 /* TrackingIntDoubleHashMap.class */ +
-                BitUtil.align(16 + minBufferSize * 4, 8) /* sizeOfIntArray(minBufferSize) */ +
+                56 /* TrackingIntDoubleHashMap.class */ +
+                BitUtil.align(16 + minBufferSize * 8, 8) /* sizeOfLongArray(minBufferSize) */ +
                 BitUtil.align(16 + minBufferSize * 8, 8) /* sizeOfDoubleArray(minBufferSize) */;
         long max =
-                64 /* TrackingIntDoubleHashMap.class */ +
-                BitUtil.align(16 + maxBufferSize * 4, 8) /* sizeOfIntArray(maxBufferSize) */ +
+                56 /* TrackingIntDoubleHashMap.class */ +
+                BitUtil.align(16 + maxBufferSize * 8, 8) /* sizeOfLongArray(maxBufferSize) */ +
                 BitUtil.align(16 + maxBufferSize * 8, 8) /* sizeOfDoubleArray(maxBufferSize) */;
 
         assertEquals(MemoryRange.of(min, max), memoryRange);
@@ -35,21 +35,21 @@ public class TrackingIntDoubleHashMapTest {
     @Test
     public void shouldComputeMemoryRequirementsForMultiplePages() {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100_000).build();
-        MemoryRange memoryRange = TrackingIntDoubleHashMap
-                .memoryRequirements()
+        MemoryRange memoryRange = TrackingLongDoubleHashMap
+                .memoryRequirements(4096)
                 .apply(dimensions, 1)
                 .memoryUsage();
 
         long minBufferSize = 9L;
-        long maxBufferSize = 32769L;
+        long maxBufferSize = 8193L;
 
         long min =
-                64 /* TrackingIntDoubleHashMap.class */ +
-                BitUtil.align(16 + minBufferSize * 4, 8) /* sizeOfIntArray(minBufferSize) */ +
+                56 /* TrackingIntDoubleHashMap.class */ +
+                BitUtil.align(16 + minBufferSize * 8, 8) /* sizeOfLongArray(minBufferSize) */ +
                 BitUtil.align(16 + minBufferSize * 8, 8) /* sizeOfDoubleArray(minBufferSize) */;
         long max =
-                64 /* TrackingIntDoubleHashMap.class */ +
-                BitUtil.align(16 + maxBufferSize * 4, 8) /* sizeOfIntArray(maxBufferSize) */ +
+                56 /* TrackingIntDoubleHashMap.class */ +
+                BitUtil.align(16 + maxBufferSize * 8, 8) /* sizeOfLongArray(maxBufferSize) */ +
                 BitUtil.align(16 + maxBufferSize * 8, 8) /* sizeOfDoubleArray(maxBufferSize) */;
 
         assertEquals(MemoryRange.of(min, max), memoryRange);

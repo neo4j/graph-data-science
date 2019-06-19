@@ -20,7 +20,9 @@
 package org.neo4j.graphalgo.core.huge.loader;
 
 import org.neo4j.graphalgo.api.HugeWeightMapping;
-import org.neo4j.graphalgo.core.utils.container.TrackingLongDoubleHashMap;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.paged.TrackingLongDoubleHashMap;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 
@@ -39,6 +41,14 @@ abstract class HugeWeightMap {
         return new PagedHugeWeightMap(pages, pageSize, defaultValue, tracker);
     }
 
+    static MemoryEstimation memoryRequirements(int pageSize, int numberOfPages) {
+        if (numberOfPages == 1) {
+            return Page.memoryRequirements(pageSize);
+        } else {
+            return PagedHugeWeightMap.memoryRequirements(pageSize, numberOfPages);
+        }
+    }
+
     private HugeWeightMap() {
     }
 
@@ -48,6 +58,12 @@ abstract class HugeWeightMap {
         private TrackingLongDoubleHashMap[] data;
         private final AllocationTracker tracker;
         private double defaultValue;
+
+        static MemoryEstimation memoryRequirements(int pageSize) {
+            return MemoryEstimations.builder(Page.class)
+                    .add("data", TrackingLongDoubleHashMap.memoryRequirements(pageSize))
+                    .build();
+        }
 
         Page(int pageSize, AllocationTracker tracker) {
             this.data = new TrackingLongDoubleHashMap[pageSize];
@@ -113,6 +129,13 @@ abstract class HugeWeightMap {
         private final double defaultValue;
 
         private Page[] pages;
+
+        static MemoryEstimation memoryRequirements(int pageSize, int numberOfPages) {
+            return MemoryEstimations.builder(PagedHugeWeightMap.class)
+                    .fixed("pages wrapper", sizeOfObjectArray(numberOfPages))
+                    .add("page[]", Page.memoryRequirements(pageSize).times(numberOfPages))
+                    .build();
+        }
 
         PagedHugeWeightMap(Page[] pages, int pageSize, double defaultValue, AllocationTracker tracker) {
             assert pageSize == 0 || BitUtil.isPowerOfTwo(pageSize);
