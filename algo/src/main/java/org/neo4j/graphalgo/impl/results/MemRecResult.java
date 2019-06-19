@@ -23,28 +23,34 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphdb.Result;
 
+import java.util.Map;
+
 public class MemRecResult {
     public final String requiredMemory;
     public final String treeView;
+    public final Map<String, Object> mapView;
     public final long bytesMin, bytesMax;
 
     public MemRecResult(final MemoryTree memoryRequirements) {
-        this(memoryRequirements.render(), memoryRequirements.memoryUsage());
+        this(memoryRequirements.render(), memoryRequirements.renderMap(), memoryRequirements.memoryUsage());
     }
 
     private MemRecResult(
             final String treeView,
+            final Map<String, Object> mapView,
             final MemoryRange estimateMemoryUsage) {
-        this(estimateMemoryUsage.toString(), treeView, estimateMemoryUsage.min, estimateMemoryUsage.max);
+        this(estimateMemoryUsage.toString(), treeView, mapView, estimateMemoryUsage.min, estimateMemoryUsage.max);
     }
 
     private MemRecResult(
             final String requiredMemory,
             final String treeView,
+            final Map<String, Object> mapView,
             final long bytesMin,
             final long bytesMax) {
         this.requiredMemory = requiredMemory;
         this.treeView = treeView;
+        this.mapView = mapView;
         this.bytesMin = bytesMin;
         this.bytesMax = bytesMax;
     }
@@ -53,6 +59,7 @@ public class MemRecResult {
         this(
                 row.getString("requiredMemory"),
                 row.getString("treeView"),
+                (Map<String, Object>) row.get("mapView"),
                 row.getNumber("bytesMin").longValue(),
                 row.getNumber("bytesMax").longValue()
         );
