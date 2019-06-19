@@ -49,7 +49,5 @@ shadowJar {
     exclude 'META-INF/*.RSA'
 }
 
-ci {
 tasks.ci.dependsOn tasks.shadowJar
 tasks.cipr.dependsOn tasks.shadowJar
-}
