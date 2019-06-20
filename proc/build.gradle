@@ -14,30 +14,11 @@ dependencies {
     testCompile group: 'org.hamcrest',                name: 'hamcrest-library',     version: versions.'hamcrest'
     testCompile group: 'org.mockito',                 name: 'mockito-core',         version: versions.'mockito'
     testCompile group: 'org.mockito',                 name: 'mockito-inline',       version: versions.'mockito'
-
-    // This configuration is used by the neo4j-sproc-compiler
-    annotationProcessor group: 'net.biville.florent', name: 'neo4j-sproc-compiler', version: versions.'neo4j-sproc-compiler'
-    annotationProcessor group: 'org.neo4j',           name: 'neo4j',                version: versions.'neo4j'
 }
 
 task javadocJar(type: Jar) {
     classifier = 'javadoc'
     from(javadoc.destinationDir)
-}
-
-tasks.withType(JavaCompile) {
-    options.compilerArgs <<
-            '-AIgnoreContextWarnings' <<
-            "-AGeneratedDocumentationPath=$generatedDocumentationDir" <<
-            '-ADocumentation.FieldDelimiter=¦' <<
-            '-ADocumentation.ExportedHeaders=qualified name¦description¦type' <<
-            '-ADocumentation.QuotedFields=false' <<
-            '-ADocumentation.DelimitedFirstField=true' <<
-            '-ADocumentation.ExportGrouping=SINGLE'
-}
-
-compileJava {
-    outputs.file procedureListFile
 }
 
 test {

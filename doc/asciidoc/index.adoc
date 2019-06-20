@@ -102,7 +102,7 @@ This chapter contains a reference of all the procedures in the Neo4j Graph Algor
 [[table-all]]
 [separator=¦,opts=header,cols="1m,5m,1m"]
 |===
-include::{procedure-list-file}[]
+include::csv/procedures.csv[]
 |===
 
 include::algorithms-centrality.adoc[leveloffset=1]

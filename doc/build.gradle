@@ -30,16 +30,6 @@ plugins {
     id 'org.neo4j.doc.build.docbook' version '1.0-alpha11'
 }
 
-configurations {
-    generateDocumentation {
-        description 'Configuration for documentation generation'
-    }
-}
-
-dependencies {
-    generateDocumentation project(":proc")
-}
-
 description = 'Neo4j Graph Algorithms :: Docs'
 
 ext {
@@ -71,8 +61,7 @@ ext {
             'docs-version'       : versions.graphAlgoDocs,
             'copyright-year'     : copyrightYear,
             'copyright'          : "${copyrightYear} Neo4j, Inc.",
-            'common-license-page-uri': "$docsBaseUri/license/",
-            'procedure-list-file': procedureListFile,
+            'common-license-page-uri': "$docsBaseUri/license/"
         ],
         'docbook': [
             'imagesdir'          : 'images',
@@ -117,7 +106,6 @@ def getAsciidoctor() {
 }
 
 task docbook {
-    dependsOn configurations.generateDocumentation
     description 'Build DocBook.'
     ext.sourceDir = asciidocSourceDir
     ext.sourceFile = file("$sourceDir/index.adoc")
@@ -298,7 +286,6 @@ task packageHtml(type: Tar, dependsOn: [html, sitemap]) {
 }
 
 task pdf {
-    dependsOn configurations.generateDocumentation
     description 'Build PDF.'
     ext.sourceDir = asciidocSourceDir
     ext.sourceFile = file("$sourceDir/index.adoc")
