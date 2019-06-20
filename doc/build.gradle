@@ -275,14 +275,14 @@ html {
 
 task packageHtml(type: Tar, dependsOn: [html, sitemap]) {
     description 'Package HTML for distribution, including sitemap.'
-    baseName 'graph-algorithms'
+    baseName 'graph-algorithms-user-guide'
     extension 'tar.gz'
     version versions.graphAlgoDocs
     compression = Compression.GZIP
     from { html }
     from { sitemap }
     into "$baseName/$version"
-    destinationDir file(distributionDir)
+    destinationDir file("$distributionDir/documentation")
 }
 
 task pdf {
@@ -290,7 +290,7 @@ task pdf {
     ext.sourceDir = asciidocSourceDir
     ext.sourceFile = file("$sourceDir/index.adoc")
     ext.outputDir = "$buildDir/pdf"
-    ext.outputFilename = "neo4j-graph-algorithms-${versions.graphAlgoDocs}.pdf"
+    ext.outputFilename = "neo4j-graph-algorithms-user-guide-${versions.graphAlgoDocs}.pdf"
     ext.outputFile = "$outputDir/$outputFilename"
     ext.imagesDir = "$outputDir/images"
     ext.imagesOutDir = imagesDir
@@ -329,7 +329,7 @@ task pdf {
 
 task packagePdf(type: Copy) {
     from tasks.pdf
-    into distributionDir
+    into "$distributionDir/documentation"
 }
 
 tasks.assemble.dependsOn packageHtml, packagePdf
