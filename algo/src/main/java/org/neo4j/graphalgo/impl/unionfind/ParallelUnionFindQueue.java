@@ -61,7 +61,7 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFind
             .builder(ParallelUnionFindQueue.class)
             .startField("computeStep", HugeUnionFindTask.class)
             .add(MemoryEstimations.of("dss", (dimensions, concurrency) ->
-                    PagedDisjointSetStruct.memoryRequirements()
+                    PagedDisjointSetStruct.memoryEstimation()
                             .apply(dimensions, concurrency)
                             .memoryUsage()
                             .times(concurrency)))

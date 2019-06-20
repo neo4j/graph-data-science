@@ -34,12 +34,12 @@ public class MemRecResult {
     public final long bytesMin, bytesMax;
     public long nodes, relationships;
 
-    public MemRecResult(final MemoryTreeWithDimensions memoryRequirements) {
-        this(memoryRequirements.memoryTree, memoryRequirements.graphDimensions);
+    public MemRecResult(final MemoryTreeWithDimensions memory) {
+        this(memory.memoryTree, memory.graphDimensions);
     }
 
-    private MemRecResult(final MemoryTree memoryRequirements, final GraphDimensions dimensions) {
-        this(memoryRequirements.render(), memoryRequirements.renderMap(), memoryRequirements.memoryUsage(), dimensions);
+    private MemRecResult(final MemoryTree memory, final GraphDimensions dimensions) {
+        this(memory.render(), memory.renderMap(), memory.memoryUsage(), dimensions);
     }
 
     private MemRecResult(

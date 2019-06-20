@@ -53,7 +53,7 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionF
     private static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations.builder(ParallelUnionFindForkJoin.class)
             .startField("computeStep", ThresholdUFTask.class)
             .add(MemoryEstimations.of("dss", (dimensions, concurrency) ->
-                    PagedDisjointSetStruct.memoryRequirements()
+                    PagedDisjointSetStruct.memoryEstimation()
                             .apply(dimensions, concurrency)
                             .memoryUsage()
                             .times(concurrency)))

@@ -263,27 +263,27 @@ public final class PageRankTest {
     }
 
     @Test
-    public void shouldComputeMemoryRequirements1Thread() {
+    public void shouldComputeMemoryEstimation1Thread() {
         long nodeCount = 100_000L;
         int concurrency = 1;
-        assertMemoryRequirements(nodeCount, concurrency);
+        assertMemoryEstimation(nodeCount, concurrency);
     }
 
     @Test
-    public void shouldComputeMemoryRequirements4Threads() {
+    public void shouldComputeMemoryEstimation4Threads() {
         long nodeCount = 100_000L;
         int concurrency = 4;
-        assertMemoryRequirements(nodeCount, concurrency);
+        assertMemoryEstimation(nodeCount, concurrency);
     }
 
     @Test
-    public void shouldComputeMemoryRequirements42Threads() {
+    public void shouldComputeMemoryEstimation42Threads() {
         long nodeCount = 100_000L;
         int concurrency = 42;
-        assertMemoryRequirements(nodeCount, concurrency);
+        assertMemoryEstimation(nodeCount, concurrency);
     }
 
-    private void assertMemoryRequirements(final long nodeCount, final int concurrency) {
+    private void assertMemoryEstimation(final long nodeCount, final int concurrency) {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(nodeCount).build();
 
         final PageRank pageRank = PageRankFactory.of(

@@ -57,7 +57,7 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
     private static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations.builder(ParallelUnionFindFJMerge.class)
             .startField("computeStep", TUFProcess.class)
             .add(MemoryEstimations.of("dss", (dimensions, concurrency) ->
-                    PagedDisjointSetStruct.memoryRequirements()
+                    PagedDisjointSetStruct.memoryEstimation()
                             .apply(dimensions, concurrency)
                             .memoryUsage()
                             .times(concurrency)))

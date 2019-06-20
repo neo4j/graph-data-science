@@ -168,7 +168,7 @@ public class LouvainTest1 extends HeavyHugeTester {
     }
 
     @Test
-    public void testMemoryRequirementComputation() {
+    public void testMemoryEstimationComputation() {
         Louvain.Config config = new Louvain.Config(10, 10);
         GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
         assertEquals(MemoryRange.of(592, 1056), new Louvain().memoryEstimation(config).apply(dimensions0, 1).memoryUsage());

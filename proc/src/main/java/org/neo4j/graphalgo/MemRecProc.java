@@ -121,13 +121,13 @@ public final class MemRecProc {
         ProcedureConfiguration config = ProcedureConfiguration.create(configMap)
                 .overrideNodeLabelOrQuery(label)
                 .overrideRelationshipTypeOrQuery(relationship);
-        MemoryTreeWithDimensions memoryRequirements = gatherMemoryRequirements(config);
-        return Stream.of(new MemRecResult(memoryRequirements));
+        MemoryTreeWithDimensions memoryEstimation = gatherMemoryEstimation(config);
+        return Stream.of(new MemRecResult(memoryEstimation));
     }
 
     // best effort guess at loading a graph with probably settings
     // since we don't have an algo to delegate to
-    private MemoryTreeWithDimensions gatherMemoryRequirements(ProcedureConfiguration config) {
+    private MemoryTreeWithDimensions gatherMemoryEstimation(ProcedureConfiguration config) {
         final Direction direction = config.getDirection(Direction.OUTGOING);
         final String nodeWeight = config.getString("nodeWeight", null);
         final String nodeProperty = config.getString("nodeProperty", null);

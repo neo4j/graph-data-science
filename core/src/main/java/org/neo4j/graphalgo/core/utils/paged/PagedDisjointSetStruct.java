@@ -70,7 +70,7 @@ public final class PagedDisjointSetStruct {
         return this;
     }
 
-    public static MemoryEstimation memoryRequirements() {
+    public static MemoryEstimation memoryEstimation() {
         return MEMORY_ESTIMATION;
     }
 
