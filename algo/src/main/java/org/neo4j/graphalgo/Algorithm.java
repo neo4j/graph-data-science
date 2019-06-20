@@ -21,6 +21,8 @@ package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.logging.Log;
 
 /**
@@ -35,6 +37,10 @@ public abstract class Algorithm<ME extends Algorithm<ME>> implements Termination
     public abstract ME me();
 
     public abstract ME release();
+
+    public MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.empty();
+    }
 
     public ME withLog(Log log) {
         return withProgressLogger(ProgressLogger.wrap(log, getClass().getSimpleName()));

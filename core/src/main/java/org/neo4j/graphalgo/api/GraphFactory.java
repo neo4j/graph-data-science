@@ -26,6 +26,8 @@ import org.neo4j.graphalgo.core.NodeImporter;
 import org.neo4j.graphalgo.core.utils.ApproximatedImportProgress;
 import org.neo4j.graphalgo.core.utils.ImportProgress;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 
@@ -77,6 +79,10 @@ public abstract class GraphFactory {
 
     public GraphDimensions dimensions() {
         return this.dimensions;
+    }
+
+    public MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.empty();
     }
 
     protected ImportProgress importProgress(
