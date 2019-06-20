@@ -81,6 +81,7 @@ ext {
     ]
     asciidocSourceDir = "$projectDir/asciidoc"
     docId = 'graph-algorithms'
+    docsArtifactsName = 'neo4j-graph-algorithms-user-guide'
 }
 
 static def attachFailOnOutputString(Task task, String match) {
@@ -275,7 +276,7 @@ html {
 
 task packageHtml(type: Tar, dependsOn: [html, sitemap]) {
     description 'Package HTML for distribution, including sitemap.'
-    baseName 'graph-algorithms-user-guide'
+    baseName docsArtifactsName
     extension 'tar.gz'
     version versions.graphAlgoDocs
     compression = Compression.GZIP
@@ -290,7 +291,7 @@ task pdf {
     ext.sourceDir = asciidocSourceDir
     ext.sourceFile = file("$sourceDir/index.adoc")
     ext.outputDir = "$buildDir/pdf"
-    ext.outputFilename = "neo4j-graph-algorithms-user-guide-${versions.graphAlgoDocs}.pdf"
+    ext.outputFilename = "${docsArtifactsName}-${versions.graphAlgoDocs}.pdf"
     ext.outputFile = "$outputDir/$outputFilename"
     ext.imagesDir = "$outputDir/images"
     ext.imagesOutDir = imagesDir
