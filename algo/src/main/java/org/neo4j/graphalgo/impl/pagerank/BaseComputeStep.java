@@ -22,6 +22,9 @@ package org.neo4j.graphalgo.impl.pagerank;
 import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 
@@ -30,8 +33,6 @@ import java.util.stream.LongStream;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfFloatArray;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
 public abstract class BaseComputeStep implements ComputeStep {
     private static final int S_INIT = 0;
@@ -83,18 +84,15 @@ public abstract class BaseComputeStep implements ComputeStep {
         state = S_INIT;
     }
 
-    static long estimateMemory(
-            final int concurrency,
+    static MemoryEstimation estimateMemory(
             final int partitionSize,
-            final Class<? extends ComputeStep> computeStep) {
-        long usage = sizeOfInstance(computeStep);
-        // nextScores[]
-        usage += sizeOfObjectArray(concurrency);
-        // inner nextScores[][]
-        usage += concurrency * sizeOfFloatArray(partitionSize);
-        // pageRank[] and deltas[]
-        usage += 2 * sizeOfDoubleArray(partitionSize);
-        return usage;
+            final Class<?> computeStep) {
+        return MemoryEstimations.builder(computeStep)
+                .perThread("nextScores[] wrapper", MemoryUsage::sizeOfObjectArray)
+                .perThread("inner nextScores[][]", sizeOfFloatArray(partitionSize))
+                .fixed("pageRank[]", sizeOfDoubleArray(partitionSize))
+                .fixed("deltas[]", sizeOfDoubleArray(partitionSize))
+                .build();
     }
 
     public void setStarts(long[] starts, int[] lengths) {
@@ -110,7 +108,7 @@ public abstract class BaseComputeStep implements ComputeStep {
         } else if (state == S_SYNC) {
             combineScores();
             state = S_NORM;
-        } else if(state == S_NORM) {
+        } else if (state == S_NORM) {
             normalizeDeltas();
             state = S_CALC;
         } else if (state == S_INIT) {
@@ -133,10 +131,10 @@ public abstract class BaseComputeStep implements ComputeStep {
 
         double[] partitionRank = new double[partitionSize];
         double initialValue = initialValue();
-        if(sourceNodeIds.length == 0) {
+        if (sourceNodeIds.length == 0) {
             Arrays.fill(partitionRank, initialValue);
         } else {
-            Arrays.fill(partitionRank,0.0);
+            Arrays.fill(partitionRank, 0.0);
 
             long[] partitionSourceNodeIds = LongStream.of(sourceNodeIds)
                     .filter(sourceNodeId -> sourceNodeId >= startNode && sourceNodeId < endNode)

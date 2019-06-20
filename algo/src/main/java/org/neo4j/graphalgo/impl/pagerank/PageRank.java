@@ -206,9 +206,10 @@ public class PageRank extends ConfiguredAlgorithm<PageRank, PageRank.Config> {
                     return MemoryEstimations
                             .builder(ComputeSteps.class)
                             .perThread("scores[] wrapper", MemoryUsage::sizeOfObjectArray)
-                            .perThread("starts[] and lengths[]", c -> 2 * sizeOfLongArray(c))
+                            .perThread("starts[]", MemoryUsage::sizeOfLongArray)
+                            .perThread("lengths[]", MemoryUsage::sizeOfLongArray)
                             .perThread("list of computeSteps", MemoryUsage::sizeOfObjectArray)
-                            .perThread("ComputeStep", c -> pageRankVariant.estimateMemoryPerThread(c, partitionSize))
+                            .perThread("ComputeStep", pageRankVariant.estimateMemoryPerThread(partitionSize))
                             .build();
                 }))
                 .build();

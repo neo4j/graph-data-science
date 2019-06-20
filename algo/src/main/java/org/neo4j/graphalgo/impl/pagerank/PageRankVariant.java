@@ -38,8 +38,9 @@ public interface PageRankVariant {
 
     DegreeComputer degreeComputer( Graph graph );
 
-    default long estimateMemoryPerThread(final int concurrency, final int partitionSize) {
-        return BaseComputeStep.estimateMemory(concurrency, partitionSize, BaseComputeStep.class);
+    default MemoryEstimation estimateMemoryPerThread(final int partitionSize) {
+        // TODO: Use specific variant instead of BaseComputeStep.class to be more precise on memory requirements
+        return BaseComputeStep.estimateMemory(partitionSize, BaseComputeStep.class);
     }
 }
 
