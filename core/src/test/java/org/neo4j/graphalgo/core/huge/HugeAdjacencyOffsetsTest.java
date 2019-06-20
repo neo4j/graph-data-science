@@ -11,10 +11,10 @@ import static org.junit.Assert.assertEquals;
 public class HugeAdjacencyOffsetsTest {
 
     @Test
-    public void shouldComputeMemoryRequirementsForSinglePage() {
+    public void shouldComputeMemoryEstimationForSinglePage() {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100).build();
         MemoryTree memRec = HugeAdjacencyOffsets
-                .memoryRequirements(4096, 1)
+                .memoryEstimation(4096, 1)
                 .apply(dimensions, 1);
         MemoryRange expected = MemoryRange.of(16L /* Page.class */ + BitUtil.align(16 + 4096 * 8, 8) /* data */);
 
@@ -22,11 +22,11 @@ public class HugeAdjacencyOffsetsTest {
     }
 
     @Test
-    public void shouldComputeMemoryRequirementsForMultiplePages() {
+    public void shouldComputeMemoryEstimationForMultiplePages() {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100_000).build();
         int numberOfPages = (int) BitUtil.ceilDiv(100_000, 4096);
         MemoryTree memRec = HugeAdjacencyOffsets
-                .memoryRequirements(4096, numberOfPages)
+                .memoryEstimation(4096, numberOfPages)
                 .apply(dimensions, 1);
 
         MemoryRange expected = MemoryRange.of(

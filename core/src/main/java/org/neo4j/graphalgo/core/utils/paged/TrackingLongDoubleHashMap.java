@@ -39,7 +39,7 @@ public final class TrackingLongDoubleHashMap extends LongDoubleHashMap {
 
     private static final long CLASS_MEMORY = sizeOfInstance(TrackingLongDoubleHashMap.class);
 
-    public static MemoryEstimation memoryRequirements(int pageSize) {
+    public static MemoryEstimation memoryEstimation(int pageSize) {
         return MemoryEstimations
                 .builder(TrackingLongDoubleHashMap.class)
                 .rangePerNode("map buffers", nodeCount -> {

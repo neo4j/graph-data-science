@@ -59,8 +59,8 @@ public class HeavyGraphFactory extends GraphFactory {
     public final MemoryEstimation memoryEstimation() {
         MemoryEstimations.Builder builder = MemoryEstimations
                 .builder(HeavyGraph.class)
-                .add("nodeIdMap", IntIdMap.memoryRequirements())
-                .add("container", AdjacencyMatrix.memoryRequirements(
+                .add("nodeIdMap", IntIdMap.memoryEstimation())
+                .add("container", AdjacencyMatrix.memoryEstimation(
                         setup.loadIncoming,
                         setup.loadOutgoing,
                         setup.loadAsUndirected,
@@ -74,7 +74,7 @@ public class HeavyGraphFactory extends GraphFactory {
             if (propertyId == StatementConstants.NO_SUCH_PROPERTY_KEY) {
                 builder.add(NullWeightMap.MEMORY_USAGE);
             } else {
-                builder.add(WeightMap.memoryRequirements());
+                builder.add(WeightMap.memoryEstimation());
             }
         }
 

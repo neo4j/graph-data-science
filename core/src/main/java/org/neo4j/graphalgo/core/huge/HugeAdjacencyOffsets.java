@@ -40,20 +40,20 @@ public abstract class HugeAdjacencyOffsets {
         return new PagedOffsets(pages, pageSize);
     }
 
-    static MemoryEstimation memoryRequirements(int pageSize, int numberOfPages) {
+    static MemoryEstimation memoryEstimation(int pageSize, int numberOfPages) {
         if (numberOfPages == 1) {
-            return SinglePageOffsets.memoryRequirements(pageSize);
+            return SinglePageOffsets.memoryEstimation(pageSize);
         } else {
-            return PagedOffsets.memoryRequirements(pageSize, numberOfPages);
+            return PagedOffsets.memoryEstimation(pageSize, numberOfPages);
         }
     }
 
-    public static MemoryEstimation memoryRequirements() {
+    public static MemoryEstimation memoryEstimation() {
         return MemoryEstimations.setup(
                 "adjacency offsets",
                 (dimensions, concurrency) -> {
                     ImportSizing importSizing = ImportSizing.of(concurrency, dimensions.nodeCount());
-                    return HugeAdjacencyOffsets.memoryRequirements(
+                    return HugeAdjacencyOffsets.memoryEstimation(
                             importSizing.pageSize(),
                             importSizing.numberOfPages());
                 });
@@ -69,7 +69,7 @@ public abstract class HugeAdjacencyOffsets {
         private final long pageMask;
         private long[][] pages;
 
-        static MemoryEstimation memoryRequirements(int pageSize, int numberOfPages) {
+        static MemoryEstimation memoryEstimation(int pageSize, int numberOfPages) {
             return MemoryEstimations.builder(PagedOffsets.class)
                     .fixed("pages wrapper", sizeOfObjectArray(numberOfPages))
                     .fixed("page[]", sizeOfLongArray(pageSize) * numberOfPages)
@@ -108,7 +108,7 @@ public abstract class HugeAdjacencyOffsets {
 
         private long[] page;
 
-        static MemoryEstimation memoryRequirements(int pageSize) {
+        static MemoryEstimation memoryEstimation(int pageSize) {
             return MemoryEstimations.builder(SinglePageOffsets.class)
                     .fixed("page", sizeOfLongArray(pageSize))
                     .build();

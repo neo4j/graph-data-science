@@ -210,7 +210,7 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
         return PagedHugeLongArray.of(size, tracker);
     }
 
-    public static long memoryRequirements(long size) {
+    public static long memoryEstimation(long size) {
         assert size >= 0;
 
         if (size <= SINGLE_PAGE_SIZE) {

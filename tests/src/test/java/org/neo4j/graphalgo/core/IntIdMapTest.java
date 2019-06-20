@@ -26,9 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.collection.primitive.PrimitiveIntIterable;
 import org.neo4j.collection.primitive.PrimitiveIntIterator;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
-import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.util.Collection;
@@ -93,9 +91,9 @@ public final class IntIdMapTest extends RandomizedTest {
     }
 
     @Test
-    public void shouldComputeMemoryRequirements() throws Exception {
+    public void shouldComputeMemoryEstimation() throws Exception {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100).build();
-        MemoryTree memRec = IntIdMap.memoryRequirements().apply(dimensions, 1);
+        MemoryTree memRec = IntIdMap.memoryEstimation().apply(dimensions, 1);
 
         assertEquals(memRec.memoryUsage().min, 4048L);
         assertEquals(memRec.memoryUsage().max, 4048L);

@@ -171,7 +171,7 @@ public class AdjacencyMatrix {
         }
     }
 
-    public static MemoryEstimation memoryRequirements(
+    public static MemoryEstimation memoryEstimation(
             boolean incoming,
             boolean outgoing,
             boolean undirected,

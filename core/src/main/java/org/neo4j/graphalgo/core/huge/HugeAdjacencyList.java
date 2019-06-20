@@ -40,7 +40,7 @@ public final class HugeAdjacencyList {
     private final long allocatedMemory;
     private byte[][] pages;
 
-    public static MemoryEstimation memoryRequirements(boolean undirected) {
+    public static MemoryEstimation memoryEstimation(boolean undirected) {
 
         return MemoryEstimations
                 .builder(HugeAdjacencyList.class)

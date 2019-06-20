@@ -164,7 +164,7 @@ public final class SparseNodeMappingTest extends RandomizedTest {
     @Test
     public void shouldComputeMemoryEstimationForBestCase() {
         long size = randomInt(Integer.MAX_VALUE);
-        final MemoryRange memoryRange = SparseLongArray.memoryRequirements(size, size);
+        final MemoryRange memoryRange = SparseLongArray.memoryEstimation(size, size);
         assertEquals(memoryRange.min, memoryRange.max);
     }
 
@@ -172,7 +172,7 @@ public final class SparseNodeMappingTest extends RandomizedTest {
     public void shouldComputeMemoryEstimationForWorstCase() {
         long size = randomInt(Integer.MAX_VALUE);
         long highestId = between(size + 4096, size * 4096);
-        final MemoryRange memoryRange = SparseLongArray.memoryRequirements(highestId, size);
+        final MemoryRange memoryRange = SparseLongArray.memoryEstimation(highestId, size);
         assertTrue(memoryRange.min < memoryRange.max);
     }
 
@@ -218,19 +218,19 @@ public final class SparseNodeMappingTest extends RandomizedTest {
         long min = classSize + pagesSize + minRequirements;
         long max = classSize + pagesSize + maxRequirements;
 
-        assertEquals(MemoryRange.of(min, max), SparseLongArray.memoryRequirements(size, maxEntries));
+        assertEquals(MemoryRange.of(min, max), SparseLongArray.memoryEstimation(size, maxEntries));
     }
 
     @Test
     public void shouldComputeMemoryEstimation() {
-        assertEquals(MemoryRange.of(48L), SparseLongArray.memoryRequirements(0L, 0L));
-        assertEquals(MemoryRange.of(97_689_088L), SparseLongArray.memoryRequirements(100_000_000_000L, 1L));
+        assertEquals(MemoryRange.of(48L), SparseLongArray.memoryEstimation(0L, 0L));
+        assertEquals(MemoryRange.of(97_689_088L), SparseLongArray.memoryEstimation(100_000_000_000L, 1L));
         assertEquals(
                 MemoryRange.of(177_714_832L, 327_937_656_304L),
-                SparseLongArray.memoryRequirements(100_000_000_000L, 10_000_000L));
+                SparseLongArray.memoryEstimation(100_000_000_000L, 10_000_000L));
         assertEquals(
                 MemoryRange.of(898_077_664L, 800_488_297_696L),
-                SparseLongArray.memoryRequirements(100_000_000_000L, 100_000_000L));
+                SparseLongArray.memoryEstimation(100_000_000_000L, 100_000_000L));
     }
 
     @SuppressWarnings("unchecked")

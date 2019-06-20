@@ -28,14 +28,14 @@ final class HugeNodePropertyMap implements HugeWeightMapping {
 
     private static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations
             .builder(HugeNodePropertyMap.class)
-            .add("properties", PagedLongDoubleMap.memoryRequirements())
+            .add("properties", PagedLongDoubleMap.memoryEstimation())
             .build();
 
     private PagedLongDoubleMap properties;
     private final double defaultValue;
     private final int propertyId;
 
-    static MemoryEstimation memoryRequirements() {
+    static MemoryEstimation memoryEstimation() {
         return MEMORY_ESTIMATION;
     }
 

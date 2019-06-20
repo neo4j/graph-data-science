@@ -79,7 +79,7 @@ public class IntIdMap {
         iter = new IdIterator();
     }
 
-    public static MemoryEstimation memoryRequirements() {
+    public static MemoryEstimation memoryEstimation() {
         return ESTIMATION;
     }
 

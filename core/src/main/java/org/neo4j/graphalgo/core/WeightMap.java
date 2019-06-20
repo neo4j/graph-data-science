@@ -74,7 +74,7 @@ public final class WeightMap implements WeightMapping {
         this.propertyId = propertyId;
     }
 
-    public static MemoryEstimation memoryRequirements() {
+    public static MemoryEstimation memoryEstimation() {
         return MEMORY_ESTIMATION;
     }
 

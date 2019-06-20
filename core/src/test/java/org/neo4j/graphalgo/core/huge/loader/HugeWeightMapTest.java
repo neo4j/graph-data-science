@@ -15,9 +15,9 @@ public class HugeWeightMapTest {
      * Uses {@link org.neo4j.graphalgo.core.huge.loader.HugeWeightMap.Page}
      **/
     @Test
-    public void shouldComputeMemoryRequirementsForSinglePage() {
+    public void shouldComputeMemoryEstimationForSinglePage() {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100).build();
-        MemoryTree memRec = HugeWeightMap.memoryRequirements(4096, 1).apply(dimensions, 1);
+        MemoryTree memRec = HugeWeightMap.memoryEstimation(4096, 1).apply(dimensions, 1);
 
         MemoryRange expected = MemoryRange.of(
                 32L /* Page.class */ + 232L /* data */,
@@ -30,20 +30,20 @@ public class HugeWeightMapTest {
      * Uses {@link org.neo4j.graphalgo.core.huge.loader.HugeWeightMap.PagedHugeWeightMap}
      **/
     @Test
-    public void shouldComputeMemoryRequirementsForMultiplePages() {
+    public void shouldComputeMemoryEstimationForMultiplePages() {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100_000).build();
         int numberOfPages = (int) BitUtil.ceilDiv(100_000, 4096);
-        MemoryTree memRec = HugeWeightMap.memoryRequirements(4096, numberOfPages).apply(dimensions, 1);
+        MemoryTree memRec = HugeWeightMap.memoryEstimation(4096, numberOfPages).apply(dimensions, 1);
 
         long min =
                 40 /* PagedHugeWeightMap.class */ +
                 align(16 + numberOfPages * 4, 8) /* sizeOfObjectArray(numberOfPages) */ +
-                numberOfPages * (32 + 232) /* Page.memoryRequirements(pageSize).times(numberOfPages)) */;
+                numberOfPages * (32 + 232) /* Page.memoryEstimation(pageSize).times(numberOfPages)) */;
 
         long max =
                 40 /* PagedHugeWeightMap.class */ +
                 align(16 + numberOfPages * 4, 8) /* sizeOfObjectArray(numberOfPages) */ +
-                numberOfPages * (32 + 131176) /* Page.memoryRequirements(pageSize).times(numberOfPages)) */;
+                numberOfPages * (32 + 131176) /* Page.memoryEstimation(pageSize).times(numberOfPages)) */;
 
         assertEquals(MemoryRange.of(min, max), memRec.memoryUsage());
     }

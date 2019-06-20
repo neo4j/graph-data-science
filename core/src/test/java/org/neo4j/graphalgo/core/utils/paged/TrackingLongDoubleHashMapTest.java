@@ -10,10 +10,10 @@ import static org.junit.Assert.*;
 public class TrackingLongDoubleHashMapTest {
 
     @Test
-    public void shouldComputeMemoryRequirementsForSinglePage() {
+    public void shouldComputeMemoryEstimationForSinglePage() {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100).build();
         MemoryRange memoryRange = TrackingLongDoubleHashMap
-                .memoryRequirements(4096)
+                .memoryEstimation(4096)
                 .apply(dimensions, 1)
                 .memoryUsage();
 
@@ -33,10 +33,10 @@ public class TrackingLongDoubleHashMapTest {
     }
 
     @Test
-    public void shouldComputeMemoryRequirementsForMultiplePages() {
+    public void shouldComputeMemoryEstimationForMultiplePages() {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100_000).build();
         MemoryRange memoryRange = TrackingLongDoubleHashMap
-                .memoryRequirements(4096)
+                .memoryEstimation(4096)
                 .apply(dimensions, 1)
                 .memoryUsage();
 

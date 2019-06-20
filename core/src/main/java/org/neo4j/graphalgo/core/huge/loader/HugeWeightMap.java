@@ -41,18 +41,18 @@ abstract class HugeWeightMap {
         return new PagedHugeWeightMap(pages, pageSize, defaultValue, tracker);
     }
 
-    static MemoryEstimation memoryRequirements(int pageSize, int numberOfPages) {
+    static MemoryEstimation memoryEstimation(int pageSize, int numberOfPages) {
         if (numberOfPages == 1) {
-            return Page.memoryRequirements(pageSize);
+            return Page.memoryEstimation(pageSize);
         } else {
-            return PagedHugeWeightMap.memoryRequirements(pageSize, numberOfPages);
+            return PagedHugeWeightMap.memoryEstimation(pageSize, numberOfPages);
         }
     }
 
-    static MemoryEstimation memoryRequirements(String description) {
+    static MemoryEstimation memoryEstimation(String description) {
         return MemoryEstimations.setup(description, (dimensions, concurrency) -> {
             ImportSizing importSizing = ImportSizing.of(concurrency, dimensions.nodeCount());
-            return HugeWeightMap.memoryRequirements(importSizing.pageSize(), importSizing.numberOfPages());
+            return HugeWeightMap.memoryEstimation(importSizing.pageSize(), importSizing.numberOfPages());
         });
 
     }
@@ -67,9 +67,9 @@ abstract class HugeWeightMap {
         private final AllocationTracker tracker;
         private double defaultValue;
 
-        static MemoryEstimation memoryRequirements(int pageSize) {
+        static MemoryEstimation memoryEstimation(int pageSize) {
             return MemoryEstimations.builder(Page.class)
-                    .add("data", TrackingLongDoubleHashMap.memoryRequirements(pageSize))
+                    .add("data", TrackingLongDoubleHashMap.memoryEstimation(pageSize))
                     .build();
         }
 
@@ -138,10 +138,10 @@ abstract class HugeWeightMap {
 
         private Page[] pages;
 
-        static MemoryEstimation memoryRequirements(int pageSize, int numberOfPages) {
+        static MemoryEstimation memoryEstimation(int pageSize, int numberOfPages) {
             return MemoryEstimations.builder(PagedHugeWeightMap.class)
                     .fixed("pages wrapper", sizeOfObjectArray(numberOfPages))
-                    .add("page[]", Page.memoryRequirements(pageSize).times(numberOfPages))
+                    .add("page[]", Page.memoryEstimation(pageSize).times(numberOfPages))
                     .build();
         }
 

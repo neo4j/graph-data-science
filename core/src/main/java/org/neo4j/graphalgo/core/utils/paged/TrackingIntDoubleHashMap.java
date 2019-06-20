@@ -50,7 +50,7 @@ final class TrackingIntDoubleHashMap extends IntDoubleHashMap {
     private final AllocationTracker tracker;
     private final LongAdder instanceSize;
 
-    static MemoryEstimation memoryRequirements() {
+    static MemoryEstimation memoryEstimation() {
         return MEMORY_ESTIMATION;
     }
 

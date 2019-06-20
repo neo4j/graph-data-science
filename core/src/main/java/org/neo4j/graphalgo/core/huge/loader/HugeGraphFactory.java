@@ -50,7 +50,7 @@ public final class HugeGraphFactory extends GraphFactory {
     public MemoryEstimation memoryEstimation() {
         MemoryEstimations.Builder builder = MemoryEstimations
                 .builder(HugeGraph.class)
-                .add("nodeIdMap", IdMap.memoryRequirements());
+                .add("nodeIdMap", IdMap.memoryEstimation());
 
         // Node properties
         for (PropertyMapping propertyMapping : setup.nodePropertyMappings) {
@@ -59,7 +59,7 @@ public final class HugeGraphFactory extends GraphFactory {
             if (propertyId == StatementConstants.NO_SUCH_PROPERTY_KEY) {
                 builder.add(propertyKey, HugeNullWeightMap.MEMORY_USAGE);
             } else {
-                builder.add(propertyKey, HugeNodePropertyMap.memoryRequirements());
+                builder.add(propertyKey, HugeNodePropertyMap.memoryEstimation());
             }
         }
 
@@ -69,12 +69,12 @@ public final class HugeGraphFactory extends GraphFactory {
         } else {
             builder.add(
                     setup.relationWeightPropertyName,
-                    HugeWeightMap.memoryRequirements(setup.relationWeightPropertyName));
+                    HugeWeightMap.memoryEstimation(setup.relationWeightPropertyName));
         }
 
         // Adjacency lists and Adjacency offsets
-        MemoryEstimation adjacencyListSize = HugeAdjacencyList.memoryRequirements(setup.loadAsUndirected);
-        MemoryEstimation adjacencyOffsetsSetup = HugeAdjacencyOffsets.memoryRequirements();
+        MemoryEstimation adjacencyListSize = HugeAdjacencyList.memoryEstimation(setup.loadAsUndirected);
+        MemoryEstimation adjacencyOffsetsSetup = HugeAdjacencyOffsets.memoryEstimation();
         if (this.setup.loadOutgoing || this.setup.loadAsUndirected) {
             builder.add("outgoing", adjacencyListSize);
             builder.add("outgoing offsets", adjacencyOffsetsSetup);

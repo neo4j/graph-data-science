@@ -40,7 +40,7 @@ public final class PagedLongDoubleMap {
                 int numPages = PageUtil.numPagesFor(dimensions.nodeCount(), PAGE_SHIFT, PAGE_MASK);
                 long pagesArraySize = sizeOfObjectArray(numPages);
                 MemoryEstimation pagesSize = MemoryEstimations.andThen(
-                        TrackingIntDoubleHashMap.memoryRequirements(),
+                        TrackingIntDoubleHashMap.memoryEstimation(),
                         range -> range.times(numPages).union(MemoryRange.empty()));
                 return MemoryEstimations.builder()
                         .add(pagesSize)
@@ -58,7 +58,7 @@ public final class PagedLongDoubleMap {
     private final AllocationTracker tracker;
     private TrackingIntDoubleHashMap[] pages;
 
-    public static MemoryEstimation memoryRequirements() {
+    public static MemoryEstimation memoryEstimation() {
         return MEMORY_REQUIREMENTS;
     }
 
