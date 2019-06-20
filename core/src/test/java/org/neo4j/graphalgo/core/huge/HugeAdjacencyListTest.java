@@ -55,8 +55,8 @@ public class HugeAdjacencyListTest {
         MemoryTree memRec = HugeAdjacencyList.memoryRequirements(false).apply(dimensions, 1);
 
         long classSize = 24;
-        long bestCaseAdjacencySize = 500;
-        long worstCaseAdjacencySize = 500;
+        long bestCaseAdjacencySize = 100_500_000_000L;
+        long worstCaseAdjacencySize = 300_300_000_000L;
 
         // PageUtil.numPagesFor(bestCaseAdjacencySize, PAGE_SHIFT, PAGE_MASK)
         int minPages = PageUtil.numPagesFor(bestCaseAdjacencySize, PAGE_SHIFT, PAGE_MASK);
