@@ -55,7 +55,7 @@ public class MemoryEstimationsTest {
                 .add(MemoryEstimations.of(Foo.class))
                 .build();
 
-        assertEquals(MemoryRange.of(84L), memoryEstimation.apply(DIMENSIONS_100_NODES, 4).memoryUsage());
+        assertEquals(MemoryRange.of(80L), memoryEstimation.apply(DIMENSIONS_100_NODES, 4).memoryUsage());
     }
 
     @Test
@@ -115,7 +115,7 @@ public class MemoryEstimationsTest {
                         .build());
 
         assertEquals(
-                MemoryRange.of(100 * 4),
+                MemoryRange.of(100 * 100),
                 memoryEstimation.apply(DIMENSIONS_100_NODES, 4).memoryUsage());
     }
 
