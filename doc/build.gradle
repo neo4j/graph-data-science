@@ -332,7 +332,7 @@ task pdf {
 
 task packagePdf(type: Copy) {
     from tasks.pdf
-    into "$distributionDir/documentation"
+    into "$distributionDir/documentation/pdf"
 }
 
 tasks.assemble.dependsOn packageHtml, packagePdf
