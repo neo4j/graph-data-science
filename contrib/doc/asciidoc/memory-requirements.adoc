@@ -66,7 +66,7 @@ CREATE CONSTRAINT ON (c:Character) ASSERT c.id IS UNIQUE;
 UNWIND range(1,7) AS season
 LOAD CSV WITH HEADERS FROM "https://github.com/neo4j-apps/neuler/raw/master/sample-data/got/got-s" + season + "-nodes.csv" AS row
 MERGE (c:Character {id: row.Id})
-ON CREATE SET c.name = row.Label`;
+ON CREATE SET c.name = row.Label;
 
 UNWIND range(1,7) AS season
 LOAD CSV WITH HEADERS FROM "https://github.com/neo4j-apps/neuler/raw/master/sample-data/got/got-s" + season + "-edges.csv" AS row
@@ -93,45 +93,45 @@ The amount of memory used for relationships will be twice this if we use the `di
 [source,cypher]
 ----
 CALL algo.memrec()
-YIELD requiredMemory, bytesMin, bytesMax
-RETURN requiredMemory, bytesMin, bytesMax
+YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax
+RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
 ----
 
 .Results
-[opts="header",cols="1,1,1"]
+[opts="header",cols="1,1,1,1,1"]
 |===
-| Required Memory | Bytes Min | Bytes Max
-| 40 KiB  | 41456    | 41456
+| Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
+| 400 | 3551 | 40 KiB  | 41456    | 41456
 |===
 
 .The following computes the amount of memory required by the heavy in memory graph for node label `Character` and relationship type `INTERACTS_SEASON1`:
 [source,cypher]
 ----
 CALL algo.memrec("Character", "INTERACTS_SEASON1", null)
-YIELD requiredMemory, bytesMin, bytesMax
-RETURN requiredMemory, bytesMin, bytesMax
+YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax
+RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
 ----
 
 .Results
-[opts="header",cols="1,1,1"]
+[opts="header",cols="1,1,1,1,1"]
 |===
-| Required Memory | Bytes Min | Bytes Max
-| 27 KiB  | 28656    | 28656
+| Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
+| 400 | 550 | 27 KiB  | 28656    | 28656
 |===
 
 .The following computes the amount of memory required by the heavy in memory graph for node label `Character`, relationship type `INTERACTS_SEASON1`, and direction `BOTH`:
 [source,cypher]
 ----
 CALL algo.memrec("Character", "INTERACTS_SEASON1", null, {direction: "BOTH"})
-YIELD requiredMemory, bytesMin, bytesMax
-RETURN requiredMemory, bytesMin, bytesMax
+YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax
+RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
 ----
 
 .Results
-[opts="header",cols="1,1,1"]
+[opts="header",cols="1,1,1,1,1"]
 |===
-| Required Memory | Bytes Min | Bytes Max
-| 40 KiB  | 41488    | 41488
+| Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
+| 400 | 550 | 40 KiB  | 41488    | 41488
 |===
 
 
@@ -145,43 +145,43 @@ It stores data in a compressed structure, based on delta encoded sorted id-range
 [source,cypher]
 ----
 CALL algo.memrec(null, null, null, {graph: "huge"})
-YIELD requiredMemory, bytesMin, bytesMax
-RETURN requiredMemory, bytesMin, bytesMax
+YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax
+RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
 ----
 
 .Results
-[opts="header",cols="1,1,1"]
+[opts="header",cols="1,1,1,1,1"]
 |===
-| Required Memory | Bytes Min | Bytes Max
-| 40 KiB  | 41456    | 41456
+| Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
+| 400 | 3551 | 299 KiB  | 306688    | 306688
 |===
 
 .The following computes the amount of memory required by the huge in memory graph for node label `Character` and relationship type `INTERACTS_SEASON1`:
 [source,cypher]
 ----
 CALL algo.memrec("Character", "INTERACTS_SEASON1", null, {graph: "huge"})
-YIELD requiredMemory, bytesMin, bytesMax
-RETURN requiredMemory, bytesMin, bytesMax
+YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax
+RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
 ----
 
 .Results
-[opts="header",cols="1,1,1"]
+[opts="header",cols="1,1,1,1,1"]
 |===
-| Required Memory | Bytes Min | Bytes Max
-| 27 KiB  | 28656    | 28656
+| Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
+| 400 | 550 | 299 KiB  | 306688    | 306688
 |===
 
 .The following computes the amount of memory required by the huge in memory graph for node label `Character`, relationship type `INTERACTS_SEASON1`, and direction `BOTH`:
 [source,cypher]
 ----
 CALL algo.memrec("Character", "INTERACTS_SEASON1", null, {direction: "BOTH", graph: "huge"})
-YIELD requiredMemory, bytesMin, bytesMax
-RETURN requiredMemory, bytesMin, bytesMax
+YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax
+RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
 ----
 
 .Results
-[opts="header",cols="1,1,1"]
+[opts="header",cols="1,1,1,1,1"]
 |===
-| Required Memory | Bytes Min | Bytes Max
-| 40 KiB  | 41488    | 41488
+| Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
+| 400 | 550 | 563 KiB  | 577120    | 577120
 |===
