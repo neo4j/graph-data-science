@@ -45,6 +45,16 @@ CALL algo.graph.info('my-graph')
 YIELD name, type, exists, removed, nodes;
 ----
 
+Besides node and relationship counts, the output contains information about degree distributions, i.e. the number of relationships per node.
+By default, the distribution values are not computed.
+
+.The following will enable computing information about degree distributions:
+[source,cypher]
+----
+CALL algo.graph.info('my-graph', true)
+YIELD name, type, exists, removed, nodes;
+----
+
 
 == Using a named graph
 
