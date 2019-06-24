@@ -282,7 +282,9 @@ task packageHtml(type: Tar, dependsOn: [html, sitemap]) {
     compression = Compression.GZIP
     from { html }
     from { sitemap }
-    into "$baseName/$version"
+    // The 'into' path will end up being the URL scheme for the HTML pages on the website.
+    // It must follow Docs team's layout of `(neo4j.com/docs/)$publication/$version`
+    into "graph-algorithms/$version"
     destinationDir file("$distributionDir/documentation")
 }
 
