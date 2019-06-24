@@ -189,12 +189,11 @@ public class LoadGraphProcIntegrationTest {
                 : String.format(queryTemplate, "null", "null");
         db.execute(query, singletonMap("graph", graph)).close();
 
-        runQuery("CALL algo.graph.info($name)", singletonMap("name", "foo"), row -> {
+        runQuery("CALL algo.graph.info($name, true)", singletonMap("name", "foo"), row -> {
             assertEquals(12, row.getNumber("nodes").intValue());
             assertEquals(10, row.getNumber("relationships").intValue());
             assertEquals(graph.equals("cypher") ? "heavy" : graph, row.getString("type"));
             assertEquals("foo", row.getString("name"));
-            assertFalse(row.getBoolean("removed"));
             assertTrue(row.getBoolean("exists"));
         });
         runQuery("CALL algo.graph.remove($name)", singletonMap("name", "foo"), row -> {

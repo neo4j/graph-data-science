@@ -42,7 +42,6 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -154,13 +153,13 @@ public final class LoadGraphProc {
     @Description("CALL algo.graph.info(name:String, " +
             "degreeDistribution:bool | { direction:'OUT/IN/BOTH', concurrency:int }) " +
             "YIELD name, type, exists, nodes, relationships")
-    public Stream<GraphInfo> info(
+    public Stream<GraphInfoWithHistogram> info(
             @Name("name") String name,
             @Name(value = "degreeDistribution", defaultValue = "null") Object degreeDistribution) {
         Graph graph = LoadGraphFactory.get(name);
-        final GraphInfo info;
+        final GraphInfoWithHistogram info;
         if (graph == null) {
-            info = new GraphInfo(name);
+            info = new GraphInfoWithHistogram(name);
         } else {
             final boolean calculateDegreeDistribution;
             final ProcedureConfiguration configuration;
@@ -180,9 +179,9 @@ public final class LoadGraphProc {
                 final Direction direction = configuration.getDirection(Direction.OUTGOING);
                 int concurrency = configuration.getReadConcurrency();
                 Histogram distribution = degreeDistribution(graph, concurrency, direction);
-                info = new GraphInfo(name, distribution);
+                info = new GraphInfoWithHistogram(name, distribution);
             } else {
-                info = new GraphInfo(name);
+                info = new GraphInfoWithHistogram(name);
             }
             info.type = graph.getType();
             info.nodes = graph.nodeCount();
@@ -222,14 +221,27 @@ public final class LoadGraphProc {
         public boolean exists;
         public boolean removed;
         public long nodes, relationships;
-        public long p50, p75, p90, p95, p99, p999, max, min;
-        public double mean;
 
         public GraphInfo(String name) {
             this.name = name;
         }
+    }
 
-        public GraphInfo(String name, Histogram histogram) {
+    public static class GraphInfoWithHistogram {
+        public final String name;
+        public String type;
+        public boolean exists;
+        public long nodes, relationships;
+
+        public long max, min;
+        public double mean;
+        public long p50, p75, p90, p95, p99, p999;
+
+        public GraphInfoWithHistogram(String name) {
+            this.name = name;
+        }
+
+        public GraphInfoWithHistogram(String name, Histogram histogram) {
             this(name);
             this.max = histogram.getMaxValue();
             this.min = histogram.getMinValue();
