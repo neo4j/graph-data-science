@@ -419,6 +419,17 @@ public class HugeGraph implements Graph {
         weights = null;
     }
 
+    @Override
+    public Direction getLoadDirection() {
+        if (inOffsets != null && outOffsets != null) {
+            return Direction.BOTH;
+        } else if (inOffsets != null) {
+            return Direction.INCOMING;
+        } else {
+            return Direction.OUTGOING;
+        }
+    }
+
     private HugeAdjacencyList.Cursor newCursor(final HugeAdjacencyList adjacency) {
         return adjacency != null ? adjacency.newCursor() : null;
     }

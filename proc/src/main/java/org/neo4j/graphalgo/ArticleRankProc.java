@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo;
 
-import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -39,7 +38,11 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
-import org.neo4j.procedure.*;
+import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Mode;
+import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,9 +82,15 @@ public final class ArticleRankProc {
 
         PageRankScore.Stats.Builder statsBuilder = new PageRankScore.Stats.Builder();
         AllocationTracker tracker = AllocationTracker.create();
-        final Graph graph = load(label, relationship, tracker, configuration.getGraphImpl(), statsBuilder, configuration);
+        final Graph graph = load(
+                label,
+                relationship,
+                tracker,
+                configuration.getGraphImpl(),
+                statsBuilder,
+                configuration);
 
-        if(graph.nodeCount() == 0) {
+        if (graph.nodeCount() == 0) {
             graph.release();
             return Stream.of(statsBuilder.build());
         }
@@ -91,7 +100,15 @@ public final class ArticleRankProc {
 
         log.info("ArticleRank: overall memory usage: %s", tracker.getUsageString());
 
-        CentralityUtils.write(api, log, graph, terminationFlag, scores, configuration, statsBuilder, DEFAULT_SCORE_PROPERTY);
+        CentralityUtils.write(
+                api,
+                log,
+                graph,
+                terminationFlag,
+                scores,
+                configuration,
+                statsBuilder,
+                DEFAULT_SCORE_PROPERTY);
 
         return Stream.of(statsBuilder.build());
     }
@@ -109,9 +126,15 @@ public final class ArticleRankProc {
 
         PageRankScore.Stats.Builder statsBuilder = new PageRankScore.Stats.Builder();
         AllocationTracker tracker = AllocationTracker.create();
-        final Graph graph = load(label, relationship, tracker, configuration.getGraphImpl(), statsBuilder, configuration);
+        final Graph graph = load(
+                label,
+                relationship,
+                tracker,
+                configuration.getGraphImpl(),
+                statsBuilder,
+                configuration);
 
-        if(graph.nodeCount() == 0) {
+        if (graph.nodeCount() == 0) {
             graph.release();
             return Stream.empty();
         }
@@ -167,19 +190,15 @@ public final class ArticleRankProc {
         List<Node> sourceNodes = configuration.get("sourceNodes", new ArrayList<>());
         LongStream sourceNodeIds = sourceNodes.stream().mapToLong(Node::getId);
 
-        Direction direction = (configuration.getDirection(Direction.OUTGOING) == Direction.BOTH) ?
-                Direction.OUTGOING :
-                configuration.getDirection(Direction.OUTGOING);
-
-        PageRank prAlgo = PageRankFactory.articleRankOf(
-                tracker,
-                graph,
-                direction,
-                dampingFactor,
-                sourceNodeIds,
-                Pools.DEFAULT,
-                concurrency,
-                batchSize);
+        PageRank prAlgo = PageRankFactory
+                .articleRankOf(
+                        graph,
+                        dampingFactor,
+                        sourceNodeIds,
+                        tracker,
+                        Pools.DEFAULT,
+                        concurrency,
+                        batchSize);
 
         Algorithm<?> algo = prAlgo
                 .withLog(log)

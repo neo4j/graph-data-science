@@ -110,7 +110,6 @@ public class PageRank extends Algorithm<PageRank> {
     private final Degrees degrees;
     private final double dampingFactor;
     private final Graph graph;
-    private final Direction direction;
     private final RelationshipWeights relationshipWeights;
     private LongStream sourceNodeIds;
     private PageRankVariant pageRankVariant;
@@ -120,12 +119,11 @@ public class PageRank extends Algorithm<PageRank> {
 
     /**
      * Forces sequential use. If you want parallelism, prefer
-     * {@link #PageRank(ExecutorService, int, int, AllocationTracker, Graph, Direction, double, LongStream, PageRankVariant)}
+     * {@link #PageRank(ExecutorService, int, int, AllocationTracker, Graph, double, LongStream, PageRankVariant)}
      */
     PageRank(
             AllocationTracker tracker,
             Graph graph,
-            final Direction direction,
             double dampingFactor,
             LongStream sourceNodeIds,
             PageRankVariant pageRankVariant) {
@@ -135,7 +133,7 @@ public class PageRank extends Algorithm<PageRank> {
                 ParallelUtil.DEFAULT_BATCH_SIZE,
                 tracker,
                 graph,
-                direction, dampingFactor,
+                dampingFactor,
                 sourceNodeIds,
                 pageRankVariant);
     }
@@ -151,7 +149,6 @@ public class PageRank extends Algorithm<PageRank> {
             int batchSize,
             AllocationTracker tracker,
             Graph graph,
-            final Direction direction,
             double dampingFactor,
             LongStream sourceNodeIds,
             PageRankVariant pageRankVariant) {
@@ -165,7 +162,6 @@ public class PageRank extends Algorithm<PageRank> {
         this.degrees = graph;
         this.graph = graph;
         this.relationshipWeights = graph;
-        this.direction = direction;
         this.dampingFactor = dampingFactor;
         this.sourceNodeIds = sourceNodeIds;
         this.pageRankVariant = pageRankVariant;
@@ -231,6 +227,7 @@ public class PageRank extends Algorithm<PageRank> {
         PrimitiveLongIterator nodes = nodeIterator.nodeIterator();
         List<Partition> partitions = new ArrayList<>();
         long start = 0L;
+        Direction direction = graph.getLoadDirection();
         while (nodes.hasNext()) {
             Partition partition = new Partition(
                     nodes,
@@ -266,7 +263,7 @@ public class PageRank extends Algorithm<PageRank> {
                 partitions.size());
         Iterator<Partition> parts = partitions.iterator();
 
-        DegreeComputer degreeComputer = pageRankVariant.degreeComputer(graph, direction);
+        DegreeComputer degreeComputer = pageRankVariant.degreeComputer(graph);
         DegreeCache degreeCache = degreeComputer.degree(pool, concurrency);
 
         while (parts.hasNext()) {
@@ -287,9 +284,7 @@ public class PageRank extends Algorithm<PageRank> {
 
             computeSteps.add(pageRankVariant.createComputeStep(dampingFactor,
                     sourceNodeIds,
-                    relationshipIterator,
-                    degrees,
-                    direction,
+                    graph,
                     relationshipWeights,
                     tracker,
                     partitionSize,

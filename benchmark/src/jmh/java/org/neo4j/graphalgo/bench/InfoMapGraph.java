@@ -75,11 +75,7 @@ public class InfoMapGraph {
 
 
         CentralityResult pr = PageRankFactory.of(
-                tracker,
-                graph,
-                Direction.OUTGOING,
-                1.0 - tau,
-                LongStream.empty(),
+                graph, 1.0 - tau, LongStream.empty(), tracker,
                 Pools.DEFAULT,
                 concurrency,
                 ParallelUtil.DEFAULT_BATCH_SIZE

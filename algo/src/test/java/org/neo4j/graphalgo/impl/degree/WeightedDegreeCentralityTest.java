@@ -184,9 +184,7 @@ public final class WeightedDegreeCentralityTest {
                     .load(graphImpl);
         }
 
-        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph,
-                Direction.OUTGOING,
-                Pools.DEFAULT, 1);
+        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph, Pools.DEFAULT, 1);
         degreeCentrality.compute(true);
 
         IntStream.range(0, expected.size()).forEach(i -> {

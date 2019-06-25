@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.impl.pagerank;
 
 import org.neo4j.graphalgo.api.Degrees;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
@@ -63,17 +64,16 @@ public abstract class BaseComputeStep implements ComputeStep {
     BaseComputeStep(
             double dampingFactor,
             long[] sourceNodeIds,
-            RelationshipIterator relationshipIterator,
-            Degrees degrees,
-            final Direction direction, AllocationTracker tracker,
+            Graph graph,
+            AllocationTracker tracker,
             int partitionSize,
             long startNode) {
         this.dampingFactor = dampingFactor;
         this.alpha = 1.0 - dampingFactor;
         this.sourceNodeIds = sourceNodeIds;
-        this.relationshipIterator = relationshipIterator.concurrentCopy();
-        this.degrees = degrees;
-        this.direction = direction;
+        this.relationshipIterator = graph.concurrentCopy();
+        this.degrees = graph;
+        this.direction = graph.getLoadDirection();
         this.tracker = tracker;
         this.partitionSize = partitionSize;
         this.startNode = startNode;

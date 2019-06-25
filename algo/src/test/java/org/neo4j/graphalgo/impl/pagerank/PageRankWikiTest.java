@@ -147,10 +147,11 @@ public final class PageRankWikiTest {
         final Graph graph = new GraphLoader(db)
                 .withLabel("Node")
                 .withRelationshipType("TYPE")
+                .withDirection(Direction.OUTGOING)
                 .load(graphImpl);
 
         final CentralityResult rankResult = PageRankFactory
-                .of(graph, Direction.OUTGOING, 0.85, LongStream.empty())
+                .of(graph, 0.85, LongStream.empty())
                 .compute(40)
                 .result();
 

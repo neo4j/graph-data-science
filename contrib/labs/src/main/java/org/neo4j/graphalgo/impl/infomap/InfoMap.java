@@ -24,6 +24,7 @@ import com.carrotsearch.hppc.BitSetIterator;
 import com.carrotsearch.hppc.IntDoubleMap;
 import com.carrotsearch.hppc.IntDoubleScatterMap;
 import com.carrotsearch.hppc.cursors.IntDoubleCursor;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeWeights;
 import org.neo4j.graphalgo.api.RelationshipWeights;
@@ -33,7 +34,6 @@ import org.neo4j.graphalgo.core.utils.Pointer;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.impl.pagerank.PageRankFactory;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphdb.Direction;
@@ -97,7 +97,6 @@ public class InfoMap extends Algorithm<InfoMap> {
      */
     public static InfoMap weighted(
             Graph graph,
-            Direction direction,
             int prIterations,
             RelationshipWeights weights,
             double threshold,
@@ -111,23 +110,55 @@ public class InfoMap extends Algorithm<InfoMap> {
         // use parallel PR if concurrency is >1
         if (concurrency > 1) {
             pageRankResult = PageRankFactory
-                    .weightedOf(AllocationTracker.create(), graph, direction, 1. - tau, LongStream.empty(), pool, concurrency, PAGE_RANK_BATCH_SIZE, PAGE_RANK_CACHE_WEIGHTS)
+                    .weightedOf(
+                            graph,
+                            1. - tau,
+                            LongStream.empty(),
+                            AllocationTracker.create(),
+                            pool, concurrency, PAGE_RANK_BATCH_SIZE, PAGE_RANK_CACHE_WEIGHTS)
                     .compute(prIterations)
                     .result();
-            return weighted(graph, pageRankResult::score, weights, threshold, tau, pool, concurrency, logger, terminationFlag);
+            return weighted(
+                    graph,
+                    pageRankResult::score,
+                    weights,
+                    threshold,
+                    tau,
+                    pool,
+                    concurrency,
+                    logger,
+                    terminationFlag);
         } else {
-            pageRankResult = PageRankFactory.weightedOf(graph, direction, 1. - tau, LongStream.empty())
+            pageRankResult = PageRankFactory.weightedOf(graph, 1. - tau, LongStream.empty())
                     .compute(prIterations)
                     .result();
         }
 
-        return weighted(graph, pageRankResult::score, weights, threshold, tau, pool, concurrency, logger, terminationFlag);
+        return weighted(
+                graph,
+                pageRankResult::score,
+                weights,
+                threshold,
+                tau,
+                pool,
+                concurrency,
+                logger,
+                terminationFlag);
     }
 
     /**
      * create a weighted InfoMap algo instance with pageRanks
      */
-    public static InfoMap weighted(Graph graph, NodeWeights pageRanks, RelationshipWeights weights, double threshold, double tau, ForkJoinPool pool, int concurrency, ProgressLogger logger, TerminationFlag terminationFlag) {
+    public static InfoMap weighted(
+            Graph graph,
+            NodeWeights pageRanks,
+            RelationshipWeights weights,
+            double threshold,
+            double tau,
+            ForkJoinPool pool,
+            int concurrency,
+            ProgressLogger logger,
+            TerminationFlag terminationFlag) {
         return new InfoMap(
                 graph,
                 pageRanks,
@@ -139,17 +170,31 @@ public class InfoMap extends Algorithm<InfoMap> {
     /**
      * create an unweighted InfoMap algo instance
      */
-    public static InfoMap unweighted(Graph graph, int prIterations, double threshold, double tau, ForkJoinPool pool, int concurrency, ProgressLogger logger, TerminationFlag terminationFlag) {
+    public static InfoMap unweighted(
+            Graph graph,
+            int prIterations,
+            double threshold,
+            double tau,
+            ForkJoinPool pool,
+            int concurrency,
+            ProgressLogger logger,
+            TerminationFlag terminationFlag) {
         final CentralityResult pageRankResult;
 
         // use parallel PR if concurrency is >1
         if (concurrency > 1) {
             final AllocationTracker tracker = AllocationTracker.create();
-            pageRankResult = PageRankFactory.of(tracker, graph, Direction.OUTGOING, 1. - tau, LongStream.empty(), pool, concurrency, PAGE_RANK_BATCH_SIZE)
+            pageRankResult = PageRankFactory
+                    .of(
+                            graph,
+                            1. - tau,
+                            LongStream.empty(),
+                            tracker,
+                            pool, concurrency, PAGE_RANK_BATCH_SIZE)
                     .compute(prIterations)
                     .result();
         } else {
-            pageRankResult = PageRankFactory.of(graph, Direction.OUTGOING, 1. - tau, LongStream.empty())
+            pageRankResult = PageRankFactory.of(graph, 1. - tau, LongStream.empty())
                     .compute(prIterations)
                     .result();
         }
@@ -159,7 +204,15 @@ public class InfoMap extends Algorithm<InfoMap> {
     /**
      * create an unweighted InfoMap algo instance
      */
-    public static InfoMap unweighted(Graph graph, NodeWeights pageRanks, double threshold, double tau, ForkJoinPool pool, int concurrency, ProgressLogger logger, TerminationFlag terminationFlag) {
+    public static InfoMap unweighted(
+            Graph graph,
+            NodeWeights pageRanks,
+            double threshold,
+            double tau,
+            ForkJoinPool pool,
+            int concurrency,
+            ProgressLogger logger,
+            TerminationFlag terminationFlag) {
         return new InfoMap(
                 graph,
                 pageRanks,
@@ -179,7 +232,16 @@ public class InfoMap extends Algorithm<InfoMap> {
      * @param logger            log
      * @param terminationFlag   running flag
      */
-    private InfoMap(Graph graph, NodeWeights pageRank, RelationshipWeights normalizedWeights, double threshold, double tau, ForkJoinPool pool, int concurrency, ProgressLogger logger, TerminationFlag terminationFlag) {
+    private InfoMap(
+            Graph graph,
+            NodeWeights pageRank,
+            RelationshipWeights normalizedWeights,
+            double threshold,
+            double tau,
+            ForkJoinPool pool,
+            int concurrency,
+            ProgressLogger logger,
+            TerminationFlag terminationFlag) {
         this.weights = normalizedWeights;
         this.nodeCount = Math.toIntExact(graph.nodeCount());
         this.tau = tau;

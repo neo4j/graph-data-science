@@ -21,95 +21,85 @@ package org.neo4j.graphalgo.impl.pagerank;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphdb.Direction;
 
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 
 public class PageRankFactory{
 
-    public static PageRank eigenvectorCentralityOf(Graph graph, Direction direction, LongStream sourceNodeIds) {
+    public static PageRank eigenvectorCentralityOf(Graph graph, LongStream sourceNodeIds) {
         PageRankVariant pageRankVariant = new EigenvectorCentralityVariant();
 
-        return new PageRank(AllocationTracker.EMPTY, graph, direction, 1.0, sourceNodeIds, pageRankVariant);
+        return new PageRank(AllocationTracker.EMPTY, graph, 1.0, sourceNodeIds, pageRankVariant);
     }
 
     public static PageRank weightedOf(
             Graph graph,
-            Direction direction,
             double dampingFactor,
-            LongStream sourceNodeIds
-    ) {
-        return weightedOf(AllocationTracker.EMPTY, dampingFactor, sourceNodeIds, graph, direction, false);
+            LongStream sourceNodeIds) {
+        return weightedOf(graph, dampingFactor, sourceNodeIds, AllocationTracker.EMPTY, false);
     }
 
     public static PageRank weightedOf(
-            AllocationTracker tracker,
+            Graph graph,
             double dampingFactor,
             LongStream sourceNodeIds,
-            Graph graph,
-            Direction direction,
+            AllocationTracker tracker,
             boolean cacheWeights) {
         PageRankVariant pageRankVariant = new WeightedPageRankVariant(cacheWeights);
 
-        return new PageRank(tracker, graph, direction, dampingFactor, sourceNodeIds, pageRankVariant);
+        return new PageRank(tracker, graph, dampingFactor, sourceNodeIds, pageRankVariant);
     }
 
     public static PageRank articleRankOf(
             Graph graph,
-            Direction direction,
             double dampingFactor,
             LongStream sourceNodeIds) {
-        return articleRankOf(AllocationTracker.EMPTY, dampingFactor, sourceNodeIds, graph, direction);
+        return articleRankOf(graph, dampingFactor, sourceNodeIds, AllocationTracker.EMPTY);
     }
 
     public static PageRank articleRankOf(
-            AllocationTracker tracker,
+            Graph graph,
             double dampingFactor,
             LongStream sourceNodeIds,
-            Graph graph,
-            Direction direction) {
+            AllocationTracker tracker) {
         PageRankVariant pageRankVariant = new ArticleRankVariant();
 
-        return new PageRank(tracker, graph, direction, dampingFactor, sourceNodeIds, pageRankVariant);
+        return new PageRank(tracker, graph, dampingFactor, sourceNodeIds, pageRankVariant);
     }
 
     public static PageRank of(
             Graph graph,
-            Direction direction,
             double dampingFactor,
             LongStream sourceNodeIds) {
-        return of(AllocationTracker.EMPTY, dampingFactor, sourceNodeIds, graph, direction);
+        return of(graph, dampingFactor, sourceNodeIds, AllocationTracker.EMPTY);
     }
 
     public static PageRank of(
-            AllocationTracker tracker,
+            Graph graph,
             double dampingFactor,
             LongStream sourceNodeIds,
-            Graph graph,
-            Direction direction) {
+            AllocationTracker tracker) {
         PageRankVariant computeStepFactory = new NonWeightedPageRankVariant();
 
-        return new PageRank(tracker, graph, direction, dampingFactor, sourceNodeIds, computeStepFactory);
+        return new PageRank(tracker, graph, dampingFactor, sourceNodeIds, computeStepFactory);
     }
 
     public static PageRank of(
             Graph graph,
-            Direction direction,
             double dampingFactor,
             LongStream sourceNodeIds,
             ExecutorService pool,
             int concurrency,
             int batchSize) {
-        return of(AllocationTracker.EMPTY, graph, direction, dampingFactor, sourceNodeIds, pool, concurrency, batchSize);
+        return of(graph, dampingFactor, sourceNodeIds, AllocationTracker.EMPTY, pool, concurrency, batchSize);
     }
 
     public static PageRank of(
-            AllocationTracker tracker,
             Graph graph,
-            Direction direction,
             double dampingFactor,
             LongStream sourceNodeIds,
+            AllocationTracker tracker,
             ExecutorService pool,
             int concurrency,
             int batchSize) {
@@ -120,18 +110,17 @@ public class PageRankFactory{
                 batchSize,
                 tracker,
                 graph,
-                direction, dampingFactor,
+                dampingFactor,
                 sourceNodeIds,
                 pageRankVariant
         );
     }
 
     public static PageRank weightedOf(
-            AllocationTracker tracker,
             Graph graph,
-            Direction direction,
             double dampingFactor,
             LongStream sourceNodeIds,
+            AllocationTracker tracker,
             ExecutorService pool,
             int concurrency,
             int batchSize,
@@ -144,18 +133,17 @@ public class PageRankFactory{
                 batchSize,
                 tracker,
                 graph,
-                direction, dampingFactor,
+                dampingFactor,
                 sourceNodeIds,
                 pageRankVariant
         );
     }
 
     public static PageRank articleRankOf(
-            AllocationTracker tracker,
             Graph graph,
-            Direction direction,
             double dampingFactor,
             LongStream sourceNodeIds,
+            AllocationTracker tracker,
             ExecutorService pool,
             int concurrency,
             int batchSize) {
@@ -167,18 +155,16 @@ public class PageRankFactory{
                 batchSize,
                 tracker,
                 graph,
-                direction, dampingFactor,
+                dampingFactor,
                 sourceNodeIds,
                 pageRankVariant
         );
-
     }
 
     public static PageRank eigenvectorCentralityOf(
-            AllocationTracker tracker,
             Graph graph,
-            Direction direction,
             LongStream sourceNodeIds,
+            AllocationTracker tracker,
             ExecutorService pool,
             int concurrency,
             int batchSize
@@ -191,7 +177,7 @@ public class PageRankFactory{
                 batchSize,
                 tracker,
                 graph,
-                direction, 1.0,
+                1.0,
                 sourceNodeIds,
                 variant
         );

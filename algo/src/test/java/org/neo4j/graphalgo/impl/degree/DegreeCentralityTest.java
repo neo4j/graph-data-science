@@ -227,9 +227,7 @@ public final class DegreeCentralityTest {
                     .load(graphImpl);
         }
 
-        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph,
-                Direction.OUTGOING,
-                Pools.DEFAULT, 1);
+        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph, Pools.DEFAULT, 1);
         degreeCentrality.compute(false);
 
         IntStream.range(0, expected.size()).forEach(i -> {
@@ -278,9 +276,7 @@ public final class DegreeCentralityTest {
                     .load(graphImpl);
         }
 
-        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph,
-                Direction.OUTGOING,
-                Pools.DEFAULT, 1);
+        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph, Pools.DEFAULT, 1);
         degreeCentrality.compute(false);
 
         IntStream.range(0, expected.size()).forEach(i -> {
@@ -391,7 +387,7 @@ public final class DegreeCentralityTest {
                     .load(graphImpl);
         }
 
-        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph, direction, Pools.DEFAULT, 4);
+        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph, Pools.DEFAULT, 4);
         degreeCentrality.compute(false);
 
         IntStream.range(0, expected.size()).forEach(i -> {

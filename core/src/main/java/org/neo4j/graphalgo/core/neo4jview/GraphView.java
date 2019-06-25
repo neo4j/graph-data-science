@@ -65,6 +65,7 @@ public class GraphView implements Graph {
     private final TransactionWrapper tx;
 
     private final GraphDimensions dimensions;
+    private final Direction loadDirection;
     private final double propertyDefaultWeight;
     private final IntIdMap idMapping;
     private boolean loadAsUndirected;
@@ -72,10 +73,12 @@ public class GraphView implements Graph {
     GraphView(
             GraphDatabaseAPI db,
             GraphDimensions dimensions,
+            Direction loadDirection,
             IntIdMap idMapping,
             double propertyDefaultWeight, boolean loadAsUndirected) {
         this.tx = new TransactionWrapper(db);
         this.dimensions = dimensions;
+        this.loadDirection = loadDirection;
         this.propertyDefaultWeight = propertyDefaultWeight;
         this.idMapping = idMapping;
         this.loadAsUndirected = loadAsUndirected;
@@ -304,6 +307,11 @@ public class GraphView implements Graph {
     @Override
     public String getType() {
         return TYPE;
+    }
+
+    @Override
+    public Direction getLoadDirection() {
+        return loadDirection;
     }
 
     @Override

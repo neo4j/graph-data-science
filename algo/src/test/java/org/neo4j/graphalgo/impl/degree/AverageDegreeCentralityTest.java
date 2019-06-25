@@ -180,9 +180,7 @@ public final class AverageDegreeCentralityTest {
                     .load(graphImpl);
         }
 
-        AverageDegreeCentrality degreeCentrality = new AverageDegreeCentrality(graph,
-                Direction.OUTGOING,
-                Pools.DEFAULT, 4);
+        AverageDegreeCentrality degreeCentrality = new AverageDegreeCentrality(graph, Pools.DEFAULT, 4);
         degreeCentrality.compute();
 
         assertEquals(0.9, degreeCentrality.average(), 0.01);
@@ -222,9 +220,7 @@ public final class AverageDegreeCentralityTest {
                     .load(graphImpl);
         }
 
-        AverageDegreeCentrality degreeCentrality = new AverageDegreeCentrality(graph,
-                Direction.INCOMING,
-                Pools.DEFAULT, 4);
+        AverageDegreeCentrality degreeCentrality = new AverageDegreeCentrality(graph, Pools.DEFAULT, 4);
         degreeCentrality.compute();
 
         assertEquals(0.9, degreeCentrality.average(), 0.01);
@@ -267,9 +263,7 @@ public final class AverageDegreeCentralityTest {
                     .load(graphImpl);
         }
 
-        AverageDegreeCentrality degreeCentrality = new AverageDegreeCentrality(graph,
-                Direction.OUTGOING,
-                Pools.DEFAULT, 4);
+        AverageDegreeCentrality degreeCentrality = new AverageDegreeCentrality(graph, Pools.DEFAULT, 4);
         degreeCentrality.compute();
 
         assertEquals(1.4, degreeCentrality.average(), 0.01);

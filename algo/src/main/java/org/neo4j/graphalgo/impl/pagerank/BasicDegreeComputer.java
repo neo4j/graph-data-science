@@ -21,22 +21,19 @@ package org.neo4j.graphalgo.impl.pagerank;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.impl.degree.AverageDegreeCentrality;
-import org.neo4j.graphdb.Direction;
 
 import java.util.concurrent.ExecutorService;
 
 public class BasicDegreeComputer implements DegreeComputer {
     private Graph graph;
-    private final Direction direction;
 
-    public BasicDegreeComputer(Graph graph, Direction direction) {
+    public BasicDegreeComputer(Graph graph) {
         this.graph = graph;
-        this.direction = direction;
     }
 
     @Override
     public DegreeCache degree(ExecutorService executor, int concurrency) {
-        AverageDegreeCentrality degreeCentrality = new AverageDegreeCentrality(graph, direction, executor, concurrency);
+        AverageDegreeCentrality degreeCentrality = new AverageDegreeCentrality(graph, executor, concurrency);
         degreeCentrality.compute();
         return new DegreeCache(new double[0], new double[0][], degreeCentrality.average());
     }

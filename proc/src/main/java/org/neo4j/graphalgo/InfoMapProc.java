@@ -106,7 +106,6 @@ public class InfoMapProc {
                         .load(config.getGraphImpl());
                 infoMap = InfoMap.weighted(
                         graph,
-                        Direction.OUTGOING,
                         pageRankIterations,
                         graph,
                         config.getNumber("threshold", InfoMap.THRESHOLD).doubleValue(),
@@ -239,7 +238,6 @@ public class InfoMapProc {
 
                     infoMap = InfoMap.weighted(
                             graph,
-                            Direction.OUTGOING,
                             pageRankIterations,
                             graph,
                             config.getNumber("threshold", InfoMap.THRESHOLD).doubleValue(),

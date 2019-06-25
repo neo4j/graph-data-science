@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +33,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class AverageDegreeCentrality extends Algorithm<AverageDegreeCentrality> {
     private final long nodeCount;
-    private Direction direction;
     private Graph graph;
     private final ExecutorService executor;
     private final int concurrency;
@@ -43,7 +41,6 @@ public class AverageDegreeCentrality extends Algorithm<AverageDegreeCentrality> 
 
     public AverageDegreeCentrality(
             Graph graph,
-            Direction direction,
             ExecutorService executor,
             int concurrency
     ) {
@@ -55,7 +52,6 @@ public class AverageDegreeCentrality extends Algorithm<AverageDegreeCentrality> 
         this.executor = executor;
         this.concurrency = concurrency;
         nodeCount = graph.nodeCount();
-        this.direction = direction;
         MetricRegistry doubleRecorder = new MetricRegistry();
         this.histogram = doubleRecorder.histogram("stats");
     }
@@ -92,7 +88,7 @@ public class AverageDegreeCentrality extends Algorithm<AverageDegreeCentrality> 
                     return;
                 }
 
-                int degree = graph.degree(nodeId, direction);
+                int degree = graph.degree(nodeId, graph.getLoadDirection());
                 histogram.update(degree);
             }
         }

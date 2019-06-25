@@ -21,19 +21,16 @@ package org.neo4j.graphalgo.impl.pagerank;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.impl.degree.WeightedDegreeCentrality;
-import org.neo4j.graphdb.Direction;
 
 import java.util.concurrent.ExecutorService;
 
 public class WeightedDegreeComputer implements DegreeComputer {
 
     private Graph graph;
-    private final Direction direction;
     private boolean cacheWeights;
 
-    public WeightedDegreeComputer(Graph graph, Direction direction, boolean cacheWeights) {
+    public WeightedDegreeComputer(Graph graph, boolean cacheWeights) {
         this.graph = graph;
-        this.direction = direction;
         this.cacheWeights = cacheWeights;
     }
 
@@ -41,7 +38,6 @@ public class WeightedDegreeComputer implements DegreeComputer {
     //Does this work for Huge graphs??
     public DegreeCache degree(ExecutorService executor, int concurrency) {
         WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph,
-                direction,
                 executor, concurrency);
         degreeCentrality.compute(cacheWeights);
         return new DegreeCache(degreeCentrality.degrees(), degreeCentrality.weights(), -1D);

@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo;
 
-import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -28,19 +27,23 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.utils.CentralityUtils;
-import org.neo4j.graphalgo.impl.utils.Normalization;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
 import org.neo4j.graphalgo.impl.pagerank.PageRankFactory;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphalgo.impl.results.CentralityScore;
 import org.neo4j.graphalgo.impl.results.PageRankScore;
+import org.neo4j.graphalgo.impl.utils.CentralityUtils;
+import org.neo4j.graphalgo.impl.utils.Normalization;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
-import org.neo4j.procedure.*;
+import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Mode;
+import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,9 +78,15 @@ public final class EigenvectorCentralityProc {
 
         PageRankScore.Stats.Builder statsBuilder = new PageRankScore.Stats.Builder();
         AllocationTracker tracker = AllocationTracker.create();
-        final Graph graph = load(label, relationship, tracker, configuration.getGraphImpl(), statsBuilder, configuration);
+        final Graph graph = load(
+                label,
+                relationship,
+                tracker,
+                configuration.getGraphImpl(),
+                statsBuilder,
+                configuration);
 
-        if(graph.nodeCount() == 0) {
+        if (graph.nodeCount() == 0) {
             graph.release();
             return Stream.of(statsBuilder.build());
         }
@@ -87,7 +96,15 @@ public final class EigenvectorCentralityProc {
 
         log.info("Eigenvector Centrality: overall memory usage: %s", tracker.getUsageString());
 
-        CentralityUtils.write(api, log, graph, terminationFlag, scores, configuration, statsBuilder, DEFAULT_SCORE_PROPERTY);
+        CentralityUtils.write(
+                api,
+                log,
+                graph,
+                terminationFlag,
+                scores,
+                configuration,
+                statsBuilder,
+                DEFAULT_SCORE_PROPERTY);
 
         return Stream.of(statsBuilder.build());
     }
@@ -105,9 +122,15 @@ public final class EigenvectorCentralityProc {
 
         PageRankScore.Stats.Builder statsBuilder = new PageRankScore.Stats.Builder();
         AllocationTracker tracker = AllocationTracker.create();
-        final Graph graph = load(label, relationship, tracker, configuration.getGraphImpl(), statsBuilder, configuration);
+        final Graph graph = load(
+                label,
+                relationship,
+                tracker,
+                configuration.getGraphImpl(),
+                statsBuilder,
+                configuration);
 
-        if(graph.nodeCount() == 0) {
+        if (graph.nodeCount() == 0) {
             graph.release();
             return Stream.empty();
         }
@@ -168,11 +191,7 @@ public final class EigenvectorCentralityProc {
         List<Node> sourceNodes = configuration.get("sourceNodes", new ArrayList<>());
         LongStream sourceNodeIds = sourceNodes.stream().mapToLong(Node::getId);
 
-        Direction direction = (configuration.getDirection(Direction.OUTGOING) == Direction.BOTH) ?
-                Direction.OUTGOING :
-                configuration.getDirection(Direction.OUTGOING);
-
-        PageRank prAlgo = selectAlgorithm(graph, direction, tracker, batchSize, concurrency, sourceNodeIds);
+        PageRank prAlgo = selectAlgorithm(graph, tracker, batchSize, concurrency, sourceNodeIds);
 
         Algorithm<?> algo = prAlgo
                 .withLog(log)
@@ -189,16 +208,14 @@ public final class EigenvectorCentralityProc {
 
     private PageRank selectAlgorithm(
             Graph graph,
-            Direction direction,
             AllocationTracker tracker,
             int batchSize,
             int concurrency,
             LongStream sourceNodeIds) {
         return PageRankFactory.eigenvectorCentralityOf(
-                tracker,
                 graph,
-                direction,
                 sourceNodeIds,
+                tracker,
                 Pools.DEFAULT,
                 concurrency,
                 batchSize);

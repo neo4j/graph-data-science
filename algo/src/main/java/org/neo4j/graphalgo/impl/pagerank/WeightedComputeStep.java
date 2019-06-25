@@ -19,12 +19,11 @@
  */
 package org.neo4j.graphalgo.impl.pagerank;
 
-import org.neo4j.graphalgo.api.Degrees;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphdb.Direction;
 
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.binaryLookup;
 
@@ -37,9 +36,7 @@ public class WeightedComputeStep extends BaseComputeStep implements Relationship
     WeightedComputeStep(
             double dampingFactor,
             long[] sourceNodeIds,
-            RelationshipIterator relationshipIterator,
-            Degrees degrees,
-            Direction direction,
+            Graph graph,
             RelationshipWeights relationshipWeights,
             AllocationTracker tracker,
             int partitionSize,
@@ -47,9 +44,7 @@ public class WeightedComputeStep extends BaseComputeStep implements Relationship
             DegreeCache degreeCache) {
         super(dampingFactor,
                 sourceNodeIds,
-                relationshipIterator,
-                degrees,
-                direction,
+                graph,
                 tracker,
                 partitionSize,
                 startNode);

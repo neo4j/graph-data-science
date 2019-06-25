@@ -35,7 +35,6 @@ import java.util.stream.Stream;
 
 public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality> implements DegreeCentralityAlgorithm {
     private final int nodeCount;
-    private Direction direction;
     private Graph graph;
     private final ExecutorService executor;
     private final int concurrency;
@@ -46,7 +45,6 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
 
     public WeightedDegreeCentrality(
             Graph graph,
-            Direction direction,
             ExecutorService executor,
             int concurrency
     ) {
@@ -58,7 +56,6 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
         this.executor = executor;
         this.concurrency = concurrency;
         nodeCount = Math.toIntExact(graph.nodeCount());
-        this.direction = direction;
         degrees = new double[nodeCount];
         weights = new double[nodeCount][];
     }
@@ -111,6 +108,7 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
     private class DegreeTask implements Runnable {
         @Override
         public void run() {
+            Direction loadDirection = graph.getLoadDirection();
             for (; ; ) {
                 final int nodeId = nodeQueue.getAndIncrement();
                 if (nodeId >= nodeCount || !running()) {
@@ -118,7 +116,7 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
                 }
 
                 double[] weightedDegree = new double[1];
-                graph.forEachRelationship(nodeId, direction, (sourceNodeId, targetNodeId, weight) -> {
+                graph.forEachRelationship(nodeId, loadDirection, (sourceNodeId, targetNodeId, weight) -> {
                     if(weight > 0) {
                         weightedDegree[0] += weight;
                     }
@@ -135,17 +133,18 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
     private class CacheDegreeTask implements Runnable {
         @Override
         public void run() {
+            Direction loadDirection = graph.getLoadDirection();
             for (; ; ) {
                 final int nodeId = nodeQueue.getAndIncrement();
                 if (nodeId >= nodeCount || !running()) {
                     return;
                 }
 
-                weights[nodeId] = new double[graph.degree(nodeId, direction)];
+                weights[nodeId] = new double[graph.degree(nodeId, loadDirection)];
 
                 int[] index = {0};
                 double[] weightedDegree = new double[1];
-                graph.forEachRelationship(nodeId, direction, (sourceNodeId, targetNodeId, weight) -> {
+                graph.forEachRelationship(nodeId, loadDirection, (sourceNodeId, targetNodeId, weight) -> {
                     if(weight > 0) {
                         weightedDegree[0] += weight;
                     }
