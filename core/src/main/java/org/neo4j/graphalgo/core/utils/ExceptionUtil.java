@@ -24,6 +24,26 @@ import org.neo4j.kernel.api.exceptions.Status;
 
 public final class ExceptionUtil {
 
+    /**
+     * Returns the root cause of an exception.
+     *
+     * Copied from {@link org.neo4j.helpers.Exceptions#rootCause(Throwable)} due to deprecation.
+     *
+     * @param caughtException exception to find the root cause of.
+     * @return the root cause.
+     * @throws IllegalArgumentException if the provided exception is null.
+     */
+    public static Throwable rootCause(Throwable caughtException) {
+        if (null == caughtException) {
+            throw new IllegalArgumentException("Cannot obtain rootCause from (null)");
+        }
+        Throwable root = caughtException;
+        while (root.getCause() != null) {
+            root = root.getCause();
+        }
+        return root;
+    }
+
     public static RuntimeException asUnchecked(final Throwable exception) {
         if (exception instanceof RuntimeException) {
             return (RuntimeException) exception;

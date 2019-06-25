@@ -22,10 +22,10 @@ package org.neo4j.graphalgo;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
@@ -75,9 +75,9 @@ public final class MemRecProc {
             @Name(value = "algo", defaultValue = "") String algo,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> configMap) {
 
+        Procedures procedures = api.getDependencyResolver().resolveDependency(Procedures.class);
         if (algo != null && !algo.isEmpty()) {
             QualifiedName name = new QualifiedName(Arrays.asList("algo", algo), "memrec");
-            Procedures procedures = api.getDependencyResolver().resolveDependency(Procedures.class);
             ProcedureHandle proc = null;
             try {
                 proc = procedures.procedure(name);
@@ -86,43 +86,46 @@ public final class MemRecProc {
                     throw ExceptionUtil.asUnchecked(e);
                 }
             }
-            if (proc == null) {
-                String available = procedures.getAllProcedures().stream()
-                        .filter(p -> {
-                            String[] namespace = p.name().namespace();
-                            return namespace[0].equals("algo")
-                                    && namespace.length == 2
-                                    && p.name().name().equals("memrec");
-                        })
-                        .map(p -> p.name().namespace())
-                        .map(ns -> ns[ns.length - 1])
-                        .distinct()
-                        .collect(Collectors.joining(", ", "{", "}"));
-                throw new IllegalArgumentException(String.format(
-                        "The algorithm [%s] does not support memrec or does not exist, the available and supported algos are %s.",
-                        algo,
-                        available));
+            if (proc != null) {
+                String query = " CALL " + proc.signature().name() + "($label, $relationship, $config)";
+
+                Stream.Builder<MemRecResult> builder = Stream.builder();
+                api.execute(query, MapUtil.map(
+                        "label", label,
+                        "relationship", relationship,
+                        "config", configMap
+                )).accept(row -> {
+                    builder.add(new MemRecResult(row));
+                    return true;
+                });
+                return builder.build();
             }
-
-            String query = " CALL " + proc.signature().name() + "($label, $relationship, $config)";
-
-            Stream.Builder<MemRecResult> builder = Stream.builder();
-            api.execute(query, MapUtil.map(
-                    "label", label,
-                    "relationship", relationship,
-                    "config", configMap
-            )).accept(row -> {
-                builder.add(new MemRecResult(row));
-                return true;
-            });
-            return builder.build();
         }
 
-        ProcedureConfiguration config = ProcedureConfiguration.create(configMap)
-                .overrideNodeLabelOrQuery(label)
-                .overrideRelationshipTypeOrQuery(relationship);
-        MemoryTreeWithDimensions memoryEstimation = gatherMemoryEstimation(config);
-        return Stream.of(new MemRecResult(memoryEstimation));
+        String available = procedures.getAllProcedures().stream()
+                .filter(p -> {
+                    String[] namespace = p.name().namespace();
+                    return namespace[0].equals("algo")
+                           && namespace.length == 2
+                           && p.name().name().equals("memrec");
+                })
+                .map(p -> p.name().namespace())
+                .map(ns -> ns[ns.length - 1])
+                .distinct()
+                .collect(Collectors.joining(", ", "{", "}"));
+        final String message;
+        if (algo == null || algo.isEmpty()) {
+            message = String.format(
+                    "Missing procedure parameter, the available and supported procedures are %s.",
+                    available);
+        } else {
+            message = String.format(
+                    "The procedure [%s] does not support memrec or does not exist, the available and supported procedures are %s.",
+                    algo,
+                    available);
+        }
+
+        throw new IllegalArgumentException(message);
     }
 
     // best effort guess at loading a graph with probably settings
