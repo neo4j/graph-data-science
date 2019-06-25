@@ -55,6 +55,11 @@ CALL algo.graph.info('my-graph', true)
 YIELD name, type, exists, removed, nodes, min, max, mean, p50, p75, p90, p95, p99, p999;
 ----
 
+.In order to set the direction and concurrency for the degree computation, we can provide a parameter map instead:
+----
+CALL algo.graph.info('my-graph', {direction: 'OUTGOING', concurrency: 8 })
+YIELD name, type, exists, removed, nodes, min, max, mean, p50, p75, p90, p95, p99, p999;
+----
 
 == Using a named graph
 
