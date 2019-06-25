@@ -27,14 +27,16 @@ import java.util.concurrent.ExecutorService;
 
 public class BasicDegreeComputer implements DegreeComputer {
     private Graph graph;
+    private final Direction direction;
 
-    public BasicDegreeComputer(Graph graph) {
+    public BasicDegreeComputer(Graph graph, Direction direction) {
         this.graph = graph;
+        this.direction = direction;
     }
 
     @Override
     public DegreeCache degree(ExecutorService executor, int concurrency) {
-        AverageDegreeCentrality degreeCentrality = new AverageDegreeCentrality(graph, executor, concurrency, Direction.OUTGOING);
+        AverageDegreeCentrality degreeCentrality = new AverageDegreeCentrality(graph, direction, executor, concurrency);
         degreeCentrality.compute();
         return new DegreeCache(new double[0], new double[0][], degreeCentrality.average());
     }

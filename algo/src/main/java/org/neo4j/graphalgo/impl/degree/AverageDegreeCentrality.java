@@ -43,9 +43,9 @@ public class AverageDegreeCentrality extends Algorithm<AverageDegreeCentrality> 
 
     public AverageDegreeCentrality(
             Graph graph,
+            Direction direction,
             ExecutorService executor,
-            int concurrency,
-            Direction direction
+            int concurrency
     ) {
         if (concurrency <= 0) {
             concurrency = Pools.DEFAULT_CONCURRENCY;

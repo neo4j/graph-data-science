@@ -151,7 +151,7 @@ public final class PersonalizedPageRankTest {
         }
 
         final CentralityResult rankResult = PageRankFactory
-                .of(graph,0.85, sourceNodeIds, Pools.DEFAULT, 2, 1)
+                .of(graph, Direction.OUTGOING,0.85, sourceNodeIds, Pools.DEFAULT, 2, 1)
                 .compute(40)
                 .result();
 

@@ -126,7 +126,7 @@ public final class PageRankTest {
     }
 
     @Test
-    public void test() {
+    public void testOnOutgoingRelationships() {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -160,7 +160,7 @@ public final class PageRankTest {
         }
 
         final CentralityResult rankResult = PageRankFactory
-                .of(graph, 0.85, LongStream.empty())
+                .of(graph, Direction.OUTGOING, 0.85, LongStream.empty())
                 .compute(40)
                 .result();
 
@@ -174,6 +174,62 @@ public final class PageRankTest {
             );
         });
     }
+
+    @Test
+    public void testOnIncomingRelationships() {
+        final Label label = Label.label("Label1");
+        final Map<Long, Double> expected = new HashMap<>();
+
+        try (Transaction tx = db.beginTx()) {
+            expected.put(db.findNode(label, "name", "a").getId(), 0.15);
+            expected.put(db.findNode(label, "name", "b").getId(), 0.3386727);
+            expected.put(db.findNode(label, "name", "c").getId(), 0.2219679);
+            expected.put(db.findNode(label, "name", "d").getId(), 0.3494679);
+            expected.put(db.findNode(label, "name", "e").getId(), 2.5463981);
+            expected.put(db.findNode(label, "name", "f").getId(), 2.3858317);
+            expected.put(db.findNode(label, "name", "g").getId(), 0.15);
+            expected.put(db.findNode(label, "name", "h").getId(), 0.15);
+            expected.put(db.findNode(label, "name", "i").getId(), 0.15);
+            expected.put(db.findNode(label, "name", "j").getId(), 0.15);
+            tx.close();
+        }
+
+        final Graph graph;
+        final CentralityResult rankResult;
+        if (graphImpl.isAssignableFrom(HeavyCypherGraphFactory.class)) {
+            graph = new GraphLoader(db)
+                    .withLabel("MATCH (n:Label1) RETURN id(n) as id")
+                    .withRelationshipType("MATCH (n:Label1)<-[:TYPE1]-(m:Label1) RETURN id(n) as source,id(m) as target")
+                    .load(graphImpl);
+
+            rankResult = PageRankFactory
+                    .of(graph, Direction.OUTGOING, 0.85, LongStream.empty())
+                    .compute(40)
+                    .result();
+        } else {
+            graph = new GraphLoader(db)
+                    .withLabel(label)
+                    .withRelationshipType("TYPE1")
+                    .withDirection(Direction.INCOMING)
+                    .load(graphImpl);
+
+            rankResult = PageRankFactory
+                    .of(graph, Direction.INCOMING, 0.85, LongStream.empty())
+                    .compute(40)
+                    .result();
+        }
+
+        IntStream.range(0, expected.size()).forEach(i -> {
+            final long nodeId = graph.toOriginalNodeId(i);
+            assertEquals(
+                    "Node#" + nodeId,
+                    expected.get(nodeId),
+                    rankResult.score(i),
+                    1e-2
+            );
+        });
+    }
+
 
     @Test
     public void correctPartitionBoundariesForAllNodes() {
@@ -195,7 +251,7 @@ public final class PageRankTest {
 
         // explicitly list all source nodes to prevent the 'we got everything' optimization
         PageRank algorithm = PageRankFactory
-                .of(graph, 0.85, LongStream.range(0L, graph.nodeCount()), null, 1, 1)
+                .of(graph, Direction.OUTGOING,0.85, LongStream.range(0L, graph.nodeCount()), null, 1, 1)
                 .compute(40);
         // should not throw
     }

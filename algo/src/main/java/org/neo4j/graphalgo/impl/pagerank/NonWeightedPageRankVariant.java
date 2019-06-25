@@ -21,16 +21,29 @@ package org.neo4j.graphalgo.impl.pagerank;
 
 import org.neo4j.graphalgo.api.*;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphdb.Direction;
 
 public class NonWeightedPageRankVariant implements PageRankVariant {
 
     @Override
-    public NonWeightedComputeStep createComputeStep(double dampingFactor, long[] sourceNodeIds, RelationshipIterator relationshipIterator, Degrees degrees, RelationshipWeights relationshipWeights, AllocationTracker tracker, int partitionSize, long start, DegreeCache aggregatedDegrees, long nodeCount) {
+    public NonWeightedComputeStep createComputeStep(
+            double dampingFactor,
+            long[] sourceNodeIds,
+            RelationshipIterator relationshipIterator,
+            Degrees degrees,
+            Direction direction,
+            RelationshipWeights relationshipWeights,
+            AllocationTracker tracker,
+            int partitionSize,
+            long start,
+            DegreeCache aggregatedDegrees,
+            long nodeCount) {
         return new NonWeightedComputeStep(
                 dampingFactor,
                 sourceNodeIds,
                 relationshipIterator,
                 degrees,
+                direction,
                 tracker,
                 partitionSize,
                 start
@@ -38,7 +51,7 @@ public class NonWeightedPageRankVariant implements PageRankVariant {
     }
 
     @Override
-    public DegreeComputer degreeComputer(Graph graph) {
+    public DegreeComputer degreeComputer(Graph graph, Direction direction) {
         return new NoOpDegreeComputer();
     }
 }

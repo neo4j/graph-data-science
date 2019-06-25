@@ -167,14 +167,19 @@ public final class ArticleRankProc {
         List<Node> sourceNodes = configuration.get("sourceNodes", new ArrayList<>());
         LongStream sourceNodeIds = sourceNodes.stream().mapToLong(Node::getId);
 
+        Direction direction = (configuration.getDirection(Direction.OUTGOING) == Direction.BOTH) ?
+                Direction.OUTGOING :
+                configuration.getDirection(Direction.OUTGOING);
+
         PageRank prAlgo = PageRankFactory.articleRankOf(
-                    tracker,
-                    graph,
-                    dampingFactor,
-                    sourceNodeIds,
-                    Pools.DEFAULT,
-                    concurrency,
-                    batchSize);
+                tracker,
+                graph,
+                direction,
+                dampingFactor,
+                sourceNodeIds,
+                Pools.DEFAULT,
+                concurrency,
+                batchSize);
 
         Algorithm<?> algo = prAlgo
                 .withLog(log)

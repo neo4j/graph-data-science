@@ -92,6 +92,7 @@ public class PageRankBenchmarkLdbc {
         return PageRankFactory.of(
                 AllocationTracker.EMPTY,
                 grph,
+                Direction.OUTGOING,
                 0.85,
                 LongStream.empty(),
                 Pools.DEFAULT,

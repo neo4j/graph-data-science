@@ -173,7 +173,20 @@ public final class PageRankProc {
         List<Node> sourceNodes = configuration.get("sourceNodes", new ArrayList<>());
         LongStream sourceNodeIds = sourceNodes.stream().mapToLong(Node::getId);
 
-        PageRank prAlgo = selectAlgorithm(graph, tracker, configuration, weightPropertyKey, dampingFactor, batchSize, concurrency, sourceNodeIds);
+        Direction direction = (configuration.getDirection(Direction.OUTGOING) == Direction.BOTH) ?
+                Direction.OUTGOING :
+                configuration.getDirection(Direction.OUTGOING);
+
+        PageRank prAlgo = selectAlgorithm(
+                graph,
+                direction,
+                tracker,
+                configuration,
+                weightPropertyKey,
+                dampingFactor,
+                batchSize,
+                concurrency,
+                sourceNodeIds);
 
         Algorithm<?> algo = prAlgo
                 .withLog(log)
@@ -188,12 +201,22 @@ public final class PageRankProc {
         return pageRank;
     }
 
-    private PageRank selectAlgorithm(Graph graph, AllocationTracker tracker, ProcedureConfiguration configuration, String weightPropertyKey, double dampingFactor, int batchSize, int concurrency, LongStream sourceNodeIds) {
-        if(weightPropertyKey != null) {
+    private PageRank selectAlgorithm(
+            Graph graph,
+            Direction direction,
+            AllocationTracker tracker,
+            ProcedureConfiguration configuration,
+            String weightPropertyKey,
+            double dampingFactor,
+            int batchSize,
+            int concurrency,
+            LongStream sourceNodeIds) {
+        if (weightPropertyKey != null) {
             final boolean cacheWeights = configuration.get("cacheWeights", false);
             return PageRankFactory.weightedOf(
                     tracker,
                     graph,
+                    direction,
                     dampingFactor,
                     sourceNodeIds,
                     Pools.DEFAULT,
@@ -204,6 +227,7 @@ public final class PageRankProc {
             return PageRankFactory.of(
                     tracker,
                     graph,
+                    direction,
                     dampingFactor,
                     sourceNodeIds,
                     Pools.DEFAULT,

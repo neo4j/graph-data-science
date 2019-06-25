@@ -46,9 +46,9 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
 
     public WeightedDegreeCentrality(
             Graph graph,
+            Direction direction,
             ExecutorService executor,
-            int concurrency,
-            Direction direction
+            int concurrency
     ) {
         if (concurrency <= 0) {
             concurrency = Pools.DEFAULT_CONCURRENCY;

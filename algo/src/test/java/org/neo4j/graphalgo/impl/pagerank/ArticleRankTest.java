@@ -163,7 +163,7 @@ public final class ArticleRankTest {
         }
 
         final CentralityResult rankResult = PageRankFactory
-                .articleRankOf(graph, 0.85, LongStream.empty())
+                .articleRankOf(graph, Direction.OUTGOING, 0.85, LongStream.empty())
                 .compute(40)
                 .result();
 

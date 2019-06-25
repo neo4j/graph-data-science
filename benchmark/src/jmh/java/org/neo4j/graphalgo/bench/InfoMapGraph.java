@@ -77,6 +77,7 @@ public class InfoMapGraph {
         CentralityResult pr = PageRankFactory.of(
                 tracker,
                 graph,
+                Direction.OUTGOING,
                 1.0 - tau,
                 LongStream.empty(),
                 Pools.DEFAULT,

@@ -184,7 +184,7 @@ public final class WeightedPageRankTest {
         }
 
         final CentralityResult rankResult = PageRankFactory
-                .weightedOf(graph, 0.85, LongStream.empty())
+                .weightedOf(graph, Direction.OUTGOING,0.85, LongStream.empty())
                 .compute(40)
                 .result();
 
@@ -236,7 +236,7 @@ public final class WeightedPageRankTest {
         }
 
         final CentralityResult rankResult = PageRankFactory
-                .weightedOf(graph, 0.85, LongStream.empty())
+                .weightedOf(graph, Direction.OUTGOING, 0.85, LongStream.empty())
                 .compute(40)
                 .result();
 
@@ -288,7 +288,7 @@ public final class WeightedPageRankTest {
         }
 
         final CentralityResult rankResult = PageRankFactory
-                .weightedOf(graph, 0.85, LongStream.empty())
+                .weightedOf(graph, Direction.OUTGOING, 0.85, LongStream.empty())
                 .compute(40)
                 .result();
 
@@ -340,7 +340,7 @@ public final class WeightedPageRankTest {
         }
 
         final CentralityResult rankResult = PageRankFactory
-                .weightedOf(graph, 0.85, LongStream.empty())
+                .weightedOf(graph, Direction.OUTGOING, 0.85, LongStream.empty())
                 .compute(40)
                 .result();
 
@@ -392,7 +392,7 @@ public final class WeightedPageRankTest {
         }
 
         final CentralityResult rankResult = PageRankFactory
-                .weightedOf(graph, 0.85, LongStream.empty())
+                .weightedOf(graph, Direction.OUTGOING, 0.85, LongStream.empty())
                 .compute(40)
                 .result();
 

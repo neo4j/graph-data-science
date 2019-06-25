@@ -36,6 +36,7 @@ final class EigenvectorCentralityComputeStep extends BaseComputeStep implements 
             long[] sourceNodeIds,
             RelationshipIterator relationshipIterator,
             Degrees degrees,
+            Direction direction,
             AllocationTracker tracker,
             int partitionSize,
             long startNode,
@@ -44,6 +45,7 @@ final class EigenvectorCentralityComputeStep extends BaseComputeStep implements 
                 sourceNodeIds,
                 relationshipIterator,
                 degrees,
+                direction,
                 tracker,
                 partitionSize,
                 startNode);
@@ -62,10 +64,10 @@ final class EigenvectorCentralityComputeStep extends BaseComputeStep implements 
         for (long nodeId = startNode; nodeId < endNode; ++nodeId) {
             double delta = deltas[(int) (nodeId - startNode)];
             if (delta > 0.0) {
-                int degree = degrees.degree(nodeId, Direction.OUTGOING);
+                int degree = degrees.degree(nodeId, direction);
                 if (degree > 0) {
                     srcRankDelta = (float) delta;
-                    rels.forEachRelationship(nodeId, Direction.OUTGOING, this);
+                    rels.forEachRelationship(nodeId, direction, this);
                 }
             }
         }

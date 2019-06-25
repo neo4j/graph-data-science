@@ -120,6 +120,7 @@ public class WeightedPageRankBenchmarkLdbc {
         return PageRankFactory.weightedOf(
                 AllocationTracker.EMPTY,
                 grph,
+                Direction.OUTGOING,
                 0.85,
                 LongStream.empty(),
                 Pools.DEFAULT,

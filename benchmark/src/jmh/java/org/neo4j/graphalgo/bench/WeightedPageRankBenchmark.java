@@ -117,7 +117,7 @@ public class WeightedPageRankBenchmark {
                 .load(impl.impl);
         try {
             return PageRankFactory
-                    .weightedOf(graph, 0.85, LongStream.empty())
+                    .weightedOf(graph, Direction.OUTGOING, 0.85, LongStream.empty())
                     .compute(iterations)
                     .result();
         } finally {

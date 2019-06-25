@@ -95,18 +95,28 @@ public class InfoMap extends Algorithm<InfoMap> {
     /**
      * create a weighted InfoMap algo instance
      */
-    public static InfoMap weighted(Graph graph, int prIterations, RelationshipWeights weights, double threshold, double tau, ForkJoinPool pool, int concurrency, ProgressLogger logger, TerminationFlag terminationFlag) {
+    public static InfoMap weighted(
+            Graph graph,
+            Direction direction,
+            int prIterations,
+            RelationshipWeights weights,
+            double threshold,
+            double tau,
+            ForkJoinPool pool,
+            int concurrency,
+            ProgressLogger logger,
+            TerminationFlag terminationFlag) {
 
         final CentralityResult pageRankResult;
         // use parallel PR if concurrency is >1
         if (concurrency > 1) {
             pageRankResult = PageRankFactory
-                    .weightedOf(AllocationTracker.create(), graph, 1. - tau, LongStream.empty(), pool, concurrency, PAGE_RANK_BATCH_SIZE, PAGE_RANK_CACHE_WEIGHTS)
+                    .weightedOf(AllocationTracker.create(), graph, direction, 1. - tau, LongStream.empty(), pool, concurrency, PAGE_RANK_BATCH_SIZE, PAGE_RANK_CACHE_WEIGHTS)
                     .compute(prIterations)
                     .result();
             return weighted(graph, pageRankResult::score, weights, threshold, tau, pool, concurrency, logger, terminationFlag);
         } else {
-            pageRankResult = PageRankFactory.weightedOf(graph, 1. - tau, LongStream.empty())
+            pageRankResult = PageRankFactory.weightedOf(graph, direction, 1. - tau, LongStream.empty())
                     .compute(prIterations)
                     .result();
         }
@@ -135,11 +145,11 @@ public class InfoMap extends Algorithm<InfoMap> {
         // use parallel PR if concurrency is >1
         if (concurrency > 1) {
             final AllocationTracker tracker = AllocationTracker.create();
-            pageRankResult = PageRankFactory.of(tracker, graph, 1. - tau, LongStream.empty(), pool, concurrency, PAGE_RANK_BATCH_SIZE)
+            pageRankResult = PageRankFactory.of(tracker, graph, Direction.OUTGOING, 1. - tau, LongStream.empty(), pool, concurrency, PAGE_RANK_BATCH_SIZE)
                     .compute(prIterations)
                     .result();
         } else {
-            pageRankResult = PageRankFactory.of(graph, 1. - tau, LongStream.empty())
+            pageRankResult = PageRankFactory.of(graph, Direction.OUTGOING, 1. - tau, LongStream.empty())
                     .compute(prIterations)
                     .result();
         }

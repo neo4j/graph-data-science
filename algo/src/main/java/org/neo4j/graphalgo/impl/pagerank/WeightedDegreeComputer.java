@@ -28,17 +28,21 @@ import java.util.concurrent.ExecutorService;
 public class WeightedDegreeComputer implements DegreeComputer {
 
     private Graph graph;
+    private final Direction direction;
     private boolean cacheWeights;
 
-    public WeightedDegreeComputer(Graph graph, boolean cacheWeights) {
+    public WeightedDegreeComputer(Graph graph, Direction direction, boolean cacheWeights) {
         this.graph = graph;
+        this.direction = direction;
         this.cacheWeights = cacheWeights;
     }
 
     @Override
     //Does this work for Huge graphs??
     public DegreeCache degree(ExecutorService executor, int concurrency) {
-        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph, executor, concurrency, Direction.OUTGOING);
+        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph,
+                direction,
+                executor, concurrency);
         degreeCentrality.compute(cacheWeights);
         return new DegreeCache(degreeCentrality.degrees(), degreeCentrality.weights(), -1D);
     }
