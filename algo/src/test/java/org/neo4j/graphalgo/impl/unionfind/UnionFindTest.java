@@ -133,70 +133,70 @@ public class UnionFindTest {
     @Test
     public void memRecSeq() {
         GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
-        assertEquals(MemoryRange.of(152), algo(UnionFindAlgo.SEQ).memoryEstimation().apply(dimensions0, 1).memoryUsage());
+        assertEquals(MemoryRange.of(160), algo(UnionFindAlgo.SEQ).memoryEstimation().apply(dimensions0, 1).memoryUsage());
 
         GraphDimensions dimensions100 = new GraphDimensions.Builder().setNodeCount(100).build();
-        assertEquals(MemoryRange.of(1752), algo(UnionFindAlgo.SEQ).memoryEstimation().apply(dimensions100, 1).memoryUsage());
+        assertEquals(MemoryRange.of(1760), algo(UnionFindAlgo.SEQ).memoryEstimation().apply(dimensions100, 1).memoryUsage());
 
         GraphDimensions dimensions100B = new GraphDimensions.Builder().setNodeCount(100_000_000_000L).build();
-        assertEquals(MemoryRange.of(1600244140808L), algo(UnionFindAlgo.SEQ).memoryEstimation().apply(dimensions100B, 1).memoryUsage());
+        assertEquals(MemoryRange.of(1600244140816L), algo(UnionFindAlgo.SEQ).memoryEstimation().apply(dimensions100B, 1).memoryUsage());
     }
 
     @Test
     public void memRecQueue() {
         GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
 
-        assertEquals(MemoryRange.of(216), algo(UnionFindAlgo.QUEUE).memoryEstimation().apply(dimensions0, 1).memoryUsage());
-        assertEquals(MemoryRange.of(1000), algo(UnionFindAlgo.QUEUE).memoryEstimation().apply(dimensions0, 8).memoryUsage());
-        assertEquals(MemoryRange.of(7272), algo(UnionFindAlgo.QUEUE).memoryEstimation().apply(dimensions0, 64).memoryUsage());
+        assertEquals(MemoryRange.of(224), algo(UnionFindAlgo.QUEUE).memoryEstimation().apply(dimensions0, 1).memoryUsage());
+        assertEquals(MemoryRange.of(1008), algo(UnionFindAlgo.QUEUE).memoryEstimation().apply(dimensions0, 8).memoryUsage());
+        assertEquals(MemoryRange.of(7280), algo(UnionFindAlgo.QUEUE).memoryEstimation().apply(dimensions0, 64).memoryUsage());
 
         GraphDimensions dimensions100 = new GraphDimensions.Builder().setNodeCount(100).build();
-        assertEquals(MemoryRange.of(1816), algo(UnionFindAlgo.QUEUE).memoryEstimation().apply(dimensions100, 1).memoryUsage());
-        assertEquals(MemoryRange.of(13800), algo(UnionFindAlgo.QUEUE).memoryEstimation().apply(dimensions100, 8).memoryUsage());
-        assertEquals(MemoryRange.of(109672), algo(UnionFindAlgo.QUEUE).memoryEstimation().apply(dimensions100, 64).memoryUsage());
+        assertEquals(MemoryRange.of(1824), algo(UnionFindAlgo.QUEUE).memoryEstimation().apply(dimensions100, 1).memoryUsage());
+        assertEquals(MemoryRange.of(13808), algo(UnionFindAlgo.QUEUE).memoryEstimation().apply(dimensions100, 8).memoryUsage());
+        assertEquals(MemoryRange.of(109680), algo(UnionFindAlgo.QUEUE).memoryEstimation().apply(dimensions100, 64).memoryUsage());
 
         GraphDimensions dimensions100B = new GraphDimensions.Builder().setNodeCount(100_000_000_000L).build();
-        assertEquals(MemoryRange.of(1600244140872L), algo(UnionFindAlgo.QUEUE).memoryEstimation().apply(dimensions100B, 1).memoryUsage());
-        assertEquals(MemoryRange.of(12801953126248L), algo(UnionFindAlgo.QUEUE).memoryEstimation().apply(dimensions100B, 8).memoryUsage());
-        assertEquals(MemoryRange.of(102415625009256L), algo(UnionFindAlgo.QUEUE).memoryEstimation().apply(dimensions100B, 64).memoryUsage());
+        assertEquals(MemoryRange.of(1600244140880L), algo(UnionFindAlgo.QUEUE).memoryEstimation().apply(dimensions100B, 1).memoryUsage());
+        assertEquals(MemoryRange.of(12801953126256L), algo(UnionFindAlgo.QUEUE).memoryEstimation().apply(dimensions100B, 8).memoryUsage());
+        assertEquals(MemoryRange.of(102415625009264L), algo(UnionFindAlgo.QUEUE).memoryEstimation().apply(dimensions100B, 64).memoryUsage());
     }
 
     @Test
     public void memRecForkJoin() {
         GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
 
-        assertEquals(MemoryRange.of(216), algo(UnionFindAlgo.FORK_JOIN).memoryEstimation().apply(dimensions0, 1).memoryUsage());
-        assertEquals(MemoryRange.of(1000), algo(UnionFindAlgo.FORK_JOIN).memoryEstimation().apply(dimensions0, 8).memoryUsage());
-        assertEquals(MemoryRange.of(7272), algo(UnionFindAlgo.FORK_JOIN).memoryEstimation().apply(dimensions0, 64).memoryUsage());
+        assertEquals(MemoryRange.of(224), algo(UnionFindAlgo.FORK_JOIN).memoryEstimation().apply(dimensions0, 1).memoryUsage());
+        assertEquals(MemoryRange.of(1008), algo(UnionFindAlgo.FORK_JOIN).memoryEstimation().apply(dimensions0, 8).memoryUsage());
+        assertEquals(MemoryRange.of(7280), algo(UnionFindAlgo.FORK_JOIN).memoryEstimation().apply(dimensions0, 64).memoryUsage());
 
         GraphDimensions dimensions100 = new GraphDimensions.Builder().setNodeCount(100).build();
-        assertEquals(MemoryRange.of(1816), algo(UnionFindAlgo.FORK_JOIN).memoryEstimation().apply(dimensions100, 1).memoryUsage());
-        assertEquals(MemoryRange.of(13800), algo(UnionFindAlgo.FORK_JOIN).memoryEstimation().apply(dimensions100, 8).memoryUsage());
-        assertEquals(MemoryRange.of(109672), algo(UnionFindAlgo.FORK_JOIN).memoryEstimation().apply(dimensions100, 64).memoryUsage());
+        assertEquals(MemoryRange.of(1824), algo(UnionFindAlgo.FORK_JOIN).memoryEstimation().apply(dimensions100, 1).memoryUsage());
+        assertEquals(MemoryRange.of(13808), algo(UnionFindAlgo.FORK_JOIN).memoryEstimation().apply(dimensions100, 8).memoryUsage());
+        assertEquals(MemoryRange.of(109680), algo(UnionFindAlgo.FORK_JOIN).memoryEstimation().apply(dimensions100, 64).memoryUsage());
 
         GraphDimensions dimensions100B = new GraphDimensions.Builder().setNodeCount(100_000_000_000L).build();
-        assertEquals(MemoryRange.of(1600244140872L), algo(UnionFindAlgo.FORK_JOIN).memoryEstimation().apply(dimensions100B, 1).memoryUsage());
-        assertEquals(MemoryRange.of(12801953126248L), algo(UnionFindAlgo.FORK_JOIN).memoryEstimation().apply(dimensions100B, 8).memoryUsage());
-        assertEquals(MemoryRange.of(102415625009256L), algo(UnionFindAlgo.FORK_JOIN).memoryEstimation().apply(dimensions100B, 64).memoryUsage());
+        assertEquals(MemoryRange.of(1600244140880L), algo(UnionFindAlgo.FORK_JOIN).memoryEstimation().apply(dimensions100B, 1).memoryUsage());
+        assertEquals(MemoryRange.of(12801953126256L), algo(UnionFindAlgo.FORK_JOIN).memoryEstimation().apply(dimensions100B, 8).memoryUsage());
+        assertEquals(MemoryRange.of(102415625009264L), algo(UnionFindAlgo.FORK_JOIN).memoryEstimation().apply(dimensions100B, 64).memoryUsage());
     }
 
     @Test
     public void memRecFJMerge() {
         GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
 
-        assertEquals(MemoryRange.of(224), algo(UnionFindAlgo.FJ_MERGE).memoryEstimation().apply(dimensions0, 1).memoryUsage());
-        assertEquals(MemoryRange.of(1008), algo(UnionFindAlgo.FJ_MERGE).memoryEstimation().apply(dimensions0, 8).memoryUsage());
-        assertEquals(MemoryRange.of(7280), algo(UnionFindAlgo.FJ_MERGE).memoryEstimation().apply(dimensions0, 64).memoryUsage());
+        assertEquals(MemoryRange.of(232), algo(UnionFindAlgo.FJ_MERGE).memoryEstimation().apply(dimensions0, 1).memoryUsage());
+        assertEquals(MemoryRange.of(1016), algo(UnionFindAlgo.FJ_MERGE).memoryEstimation().apply(dimensions0, 8).memoryUsage());
+        assertEquals(MemoryRange.of(7288), algo(UnionFindAlgo.FJ_MERGE).memoryEstimation().apply(dimensions0, 64).memoryUsage());
 
         GraphDimensions dimensions100 = new GraphDimensions.Builder().setNodeCount(100).build();
-        assertEquals(MemoryRange.of(1824), algo(UnionFindAlgo.FJ_MERGE).memoryEstimation().apply(dimensions100, 1).memoryUsage());
-        assertEquals(MemoryRange.of(13808), algo(UnionFindAlgo.FJ_MERGE).memoryEstimation().apply(dimensions100, 8).memoryUsage());
-        assertEquals(MemoryRange.of(109680), algo(UnionFindAlgo.FJ_MERGE).memoryEstimation().apply(dimensions100, 64).memoryUsage());
+        assertEquals(MemoryRange.of(1832), algo(UnionFindAlgo.FJ_MERGE).memoryEstimation().apply(dimensions100, 1).memoryUsage());
+        assertEquals(MemoryRange.of(13816), algo(UnionFindAlgo.FJ_MERGE).memoryEstimation().apply(dimensions100, 8).memoryUsage());
+        assertEquals(MemoryRange.of(109688), algo(UnionFindAlgo.FJ_MERGE).memoryEstimation().apply(dimensions100, 64).memoryUsage());
 
         GraphDimensions dimensions100B = new GraphDimensions.Builder().setNodeCount(100_000_000_000L).build();
-        assertEquals(MemoryRange.of(1600244140880L), algo(UnionFindAlgo.FJ_MERGE).memoryEstimation().apply(dimensions100B, 1).memoryUsage());
-        assertEquals(MemoryRange.of(12801953126256L), algo(UnionFindAlgo.FJ_MERGE).memoryEstimation().apply(dimensions100B, 8).memoryUsage());
-        assertEquals(MemoryRange.of(102415625009264L), algo(UnionFindAlgo.FJ_MERGE).memoryEstimation().apply(dimensions100B, 64).memoryUsage());
+        assertEquals(MemoryRange.of(1600244140888L), algo(UnionFindAlgo.FJ_MERGE).memoryEstimation().apply(dimensions100B, 1).memoryUsage());
+        assertEquals(MemoryRange.of(12801953126264L), algo(UnionFindAlgo.FJ_MERGE).memoryEstimation().apply(dimensions100B, 8).memoryUsage());
+        assertEquals(MemoryRange.of(102415625009272L), algo(UnionFindAlgo.FJ_MERGE).memoryEstimation().apply(dimensions100B, 64).memoryUsage());
     }
 
     private void test(UnionFindAlgo uf) {
@@ -234,7 +234,8 @@ public class UnionFindTest {
                 Pools.DEFAULT,
                 AllocationTracker.EMPTY,
                 setSize / Pools.DEFAULT_CONCURRENCY,
-                Pools.DEFAULT_CONCURRENCY
+                Pools.DEFAULT_CONCURRENCY,
+                Double.NaN
         );
     }
 

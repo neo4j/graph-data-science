@@ -42,6 +42,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.neo4j.graphalgo.impl.louvain.LouvainTest.DEFAULT_CONFIG;
 
 /**
  * (a)-(b)---(e)-(f)
@@ -130,10 +131,10 @@ public class LouvainWeightedGraphTest extends HeavyHugeTester {
     public void testWeightedLouvain() throws Exception {
         setup(unidirectional);
         final Louvain louvain =
-                new Louvain(graph,Pools.DEFAULT, 1, AllocationTracker.EMPTY)
+                new Louvain(graph,Pools.DEFAULT, 1, AllocationTracker.EMPTY, DEFAULT_CONFIG)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                         .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
-                .compute(10, 10);
+                .compute();
 
         final HugeLongArray[] dendogram = louvain.getDendrogram();
         for (int i = 0; i < dendogram.length; i++) {
@@ -153,10 +154,10 @@ public class LouvainWeightedGraphTest extends HeavyHugeTester {
     public void testWeightedRandomNeighborLouvain() throws Exception {
         setup(unidirectional);
         final Louvain louvain =
-                new Louvain(graph,Pools.DEFAULT, 1, AllocationTracker.EMPTY)
+                new Louvain(graph,Pools.DEFAULT, 1, AllocationTracker.EMPTY, DEFAULT_CONFIG)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                         .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
-                .compute(10, 10, true);
+                .compute();
 
         final HugeLongArray[] dendogram = louvain.getDendrogram();
         for (int i = 0; i < dendogram.length; i++) {

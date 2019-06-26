@@ -181,34 +181,36 @@ public final class ArticleRankProc {
             ProcedureConfiguration configuration,
             PageRankScore.Stats.Builder statsBuilder) {
 
-        double dampingFactor = configuration.get(CONFIG_DAMPING, DEFAULT_DAMPING);
-        int iterations = configuration.getIterations(DEFAULT_ITERATIONS);
+        PageRank.Config algoConfig = new PageRank.Config(
+                configuration.getIterations(DEFAULT_ITERATIONS),
+                configuration.get(CONFIG_DAMPING, DEFAULT_DAMPING)
+        );
+
         final int batchSize = configuration.getBatchSize();
         final int concurrency = configuration.getConcurrency();
-        log.debug("Computing article rank with damping of " + dampingFactor + " and " + iterations + " iterations.");
+
+        log.debug("Computing article rank with damping of %f and %d iterations.",
+                algoConfig.dampingFactor,
+                algoConfig.iterations);
 
         List<Node> sourceNodes = configuration.get("sourceNodes", new ArrayList<>());
         LongStream sourceNodeIds = sourceNodes.stream().mapToLong(Node::getId);
 
-        PageRank prAlgo = PageRankFactory
-                .articleRankOf(
-                        graph,
-                        dampingFactor,
-                        sourceNodeIds,
-                        tracker,
-                        Pools.DEFAULT,
-                        concurrency,
-                        batchSize);
+        PageRank prAlgo = PageRankFactory.articleRankOf(
+                    graph,
+                    dampingFactor,
+                    sourceNodeIds,
+                    tracker,
+                    Pools.DEFAULT,
+                    concurrency,
+                    batchSize);
 
         Algorithm<?> algo = prAlgo
                 .withLog(log)
                 .withTerminationFlag(terminationFlag);
 
-        statsBuilder.timeEval(() -> prAlgo.compute(iterations));
-
-        statsBuilder
-                .withIterations(iterations)
-                .withDampingFactor(dampingFactor);
+        statsBuilder.timeEval(prAlgo::compute);
+        statsBuilder.withIterations(algoConfig.iterations).withDampingFactor(algoConfig.dampingFactor);
 
         final CentralityResult pageRank = prAlgo.result();
         algo.release();

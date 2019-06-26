@@ -81,8 +81,9 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
             ExecutorService executor,
             AllocationTracker tracker,
             int minBatchSize,
-            int concurrency) {
-        super(graph.orElse(null));
+            int concurrency,
+            double threshold) {
+        super(graph.orElse(null), threshold);
         this.executor = executor;
         this.tracker = tracker;
 
@@ -98,20 +99,22 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
                 minBatchSize);
     }
 
-    public PagedDisjointSetStruct compute() {
-
-        final ArrayList<UFProcess> ufProcesses = new ArrayList<>();
+    @Override
+    public PagedDisjointSetStruct compute(double threshold) {
+        final Collection<TUFProcess> ufProcesses = new ArrayList<>();
         for (long i = 0L; i < nodeCount; i += batchSize) {
-            ufProcesses.add(new UFProcess(i, batchSize));
+            ufProcesses.add(new TUFProcess(i, batchSize, threshold));
         }
         merge(ufProcesses);
         return getStruct();
     }
 
-    public PagedDisjointSetStruct compute(double threshold) {
-        final Collection<TUFProcess> ufProcesses = new ArrayList<>();
+    @Override
+    public PagedDisjointSetStruct computeUnrestricted() {
+
+        final ArrayList<UFProcess> ufProcesses = new ArrayList<>();
         for (long i = 0L; i < nodeCount; i += batchSize) {
-            ufProcesses.add(new TUFProcess(i, batchSize, threshold));
+            ufProcesses.add(new UFProcess(i, batchSize));
         }
         merge(ufProcesses);
         return getStruct();

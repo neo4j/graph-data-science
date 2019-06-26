@@ -50,6 +50,8 @@ import static org.junit.Assert.assertEquals;
 @RunWith(Parameterized.class)
 public final class EigenvectorCentralityTest {
 
+    static PageRank.Config DEFAULT_EIGENVECTOR_CONFIG = new PageRank.Config(40, 1);
+
     private Class<? extends GraphFactory> graphImpl;
 
     @Parameterized.Parameters(name = "{1}")
@@ -164,11 +166,9 @@ public final class EigenvectorCentralityTest {
         }
 
         final CentralityResult rankResult = PageRankFactory
-                .eigenvectorCentralityOf(graph, LongStream.empty())
-                .compute(40)
+                .eigenvectorCentralityOf(graph, DEFAULT_EIGENVECTOR_CONFIG, LongStream.empty())
+                .compute()
                 .result();
-
-
 
         IntStream.range(0, expected.size()).forEach(i -> {
             final long nodeId = graph.toOriginalNodeId(i);

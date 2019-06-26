@@ -20,6 +20,7 @@ package org.neo4j.graphalgo.bench;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.impl.pagerank.PageRank;
 import org.neo4j.graphalgo.impl.pagerank.PageRankFactory;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphdb.Direction;
@@ -117,8 +118,8 @@ public class WeightedPageRankBenchmark {
                 .load(impl.impl);
         try {
             return PageRankFactory
-                    .weightedOf(graph, 0.85, LongStream.empty())
-                    .compute(iterations)
+                    .weightedOf(graph, new PageRank.Config(iterations, 0.85), LongStream.empty())
+                    .compute()
                     .result();
         } finally {
             graph.release();

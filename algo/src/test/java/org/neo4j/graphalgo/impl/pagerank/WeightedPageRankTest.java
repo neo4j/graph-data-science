@@ -46,6 +46,7 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.junit.Assert.assertEquals;
+import static org.neo4j.graphalgo.impl.pagerank.PageRankTest.DEFAULT_CONFIG;
 
 @RunWith(Parameterized.class)
 public final class WeightedPageRankTest {
@@ -184,8 +185,8 @@ public final class WeightedPageRankTest {
         }
 
         final CentralityResult rankResult = PageRankFactory
-                .weightedOf(graph, 0.85, LongStream.empty())
-                .compute(40)
+                .weightedOf(graph, DEFAULT_CONFIG, LongStream.empty())
+                .compute()
                 .result();
 
         IntStream.range(0, expected.size()).forEach(i -> {
@@ -236,8 +237,8 @@ public final class WeightedPageRankTest {
         }
 
         final CentralityResult rankResult = PageRankFactory
-                .weightedOf(graph, 0.85, LongStream.empty())
-                .compute(40)
+                .weightedOf(graph, DEFAULT_CONFIG, LongStream.empty())
+                .compute()
                 .result();
 
         IntStream.range(0, expected.size()).forEach(i -> {
@@ -288,8 +289,8 @@ public final class WeightedPageRankTest {
         }
 
         final CentralityResult rankResult = PageRankFactory
-                .weightedOf(graph, 0.85, LongStream.empty())
-                .compute(40)
+                .weightedOf(graph, DEFAULT_CONFIG, LongStream.empty())
+                .compute()
                 .result();
 
         IntStream.range(0, expected.size()).forEach(i -> {
@@ -340,8 +341,8 @@ public final class WeightedPageRankTest {
         }
 
         final CentralityResult rankResult = PageRankFactory
-                .weightedOf(graph, 0.85, LongStream.empty())
-                .compute(40)
+                .weightedOf(graph, DEFAULT_CONFIG, LongStream.empty())
+                .compute()
                 .result();
 
         IntStream.range(0, expected.size()).forEach(i -> {
@@ -392,8 +393,8 @@ public final class WeightedPageRankTest {
         }
 
         final CentralityResult rankResult = PageRankFactory
-                .weightedOf(graph, 0.85, LongStream.empty())
-                .compute(40)
+                .weightedOf(graph, DEFAULT_CONFIG, LongStream.empty())
+                .compute()
                 .result();
 
         IntStream.range(0, expected.size()).forEach(i -> {

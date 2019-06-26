@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
+import org.neo4j.graphalgo.impl.pagerank.PageRank;
 import org.neo4j.graphalgo.impl.pagerank.PageRankFactory;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphdb.Direction;
@@ -123,7 +124,7 @@ public class WeightedPageRankBenchmarkLdbc {
                         Pools.DEFAULT_CONCURRENCY,
                         batchSize,
                         cacheWeights)
-                .compute(iterations)
+                .compute()
                 .result();
     }
 }

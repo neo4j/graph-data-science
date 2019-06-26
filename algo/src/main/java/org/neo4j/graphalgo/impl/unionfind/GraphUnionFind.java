@@ -45,8 +45,7 @@ import java.util.Optional;
  *
  * @author mknblch
  */
-public class GraphUnionFind extends GraphUnionFindAlgo<GraphUnionFind>
-{
+public class GraphUnionFind extends GraphUnionFindAlgo<GraphUnionFind> {
 
     private static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations.builder(GraphUnionFind.class)
             .add("dss", PagedDisjointSetStruct.MEMORY_ESTIMATION)
@@ -58,8 +57,10 @@ public class GraphUnionFind extends GraphUnionFindAlgo<GraphUnionFind>
 
     public GraphUnionFind(
             Optional<Graph> graph,
-            AllocationTracker tracker) {
-        super(graph.orElse(null));
+            AllocationTracker tracker,
+            double threshold) {
+        super(graph.orElse(null), threshold);
+        this.threshold = threshold;
         if (graph.isPresent()) {
             this.graph = graph.get();
             nodeCount = this.graph.nodeCount();
@@ -82,17 +83,7 @@ public class GraphUnionFind extends GraphUnionFindAlgo<GraphUnionFind>
     }
 
     /**
-     * compute unions of connected nodes
-     *
-     * @return a DSS
-     */
-    @Override
-    public PagedDisjointSetStruct compute() {
-        return compute(unrestricted);
-    }
-
-    /**
-     * compute unions if relationship weight exceeds threshold
+     * Compute unions if relationship weight exceeds threshold
      *
      * @param threshold the minimum threshold
      * @return a DSS
@@ -100,6 +91,16 @@ public class GraphUnionFind extends GraphUnionFindAlgo<GraphUnionFind>
     @Override
     public PagedDisjointSetStruct compute(final double threshold) {
         return compute(new WithThreshold(threshold));
+    }
+
+    /**
+     * Compute unions of connected nodes
+     *
+     * @return a DSS
+     */
+    @Override
+    public PagedDisjointSetStruct computeUnrestricted() {
+        return compute(unrestricted);
     }
 
     @Override

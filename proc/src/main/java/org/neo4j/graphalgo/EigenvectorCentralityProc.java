@@ -182,23 +182,24 @@ public final class EigenvectorCentralityProc {
             TerminationFlag terminationFlag,
             ProcedureConfiguration configuration,
             PageRankScore.Stats.Builder statsBuilder) {
-        double dampingFactor = 1.0;
-        int iterations = configuration.getIterations(DEFAULT_ITERATIONS);
+
+        PageRank.Config algoConfig = new PageRank.Config(configuration.getIterations(DEFAULT_ITERATIONS), 1.0);
         final int batchSize = configuration.getBatchSize();
         final int concurrency = configuration.getConcurrency();
-        log.debug("Computing eigenvector centrality with " + iterations + " iterations.");
+
+        log.debug("Computing eigenvector centrality with %d iterations.", algoConfig.iterations);
 
         List<Node> sourceNodes = configuration.get("sourceNodes", new ArrayList<>());
         LongStream sourceNodeIds = sourceNodes.stream().mapToLong(Node::getId);
 
-        PageRank prAlgo = selectAlgorithm(graph, tracker, batchSize, concurrency, sourceNodeIds);
+        PageRank prAlgo = selectAlgorithm(graph, algoConfig, tracker, batchSize, concurrency, sourceNodeIds);
 
         Algorithm<?> algo = prAlgo
                 .withLog(log)
                 .withTerminationFlag(terminationFlag);
 
-        statsBuilder.timeEval(() -> prAlgo.compute(iterations));
-        statsBuilder.withIterations(iterations).withDampingFactor(dampingFactor);
+        statsBuilder.timeEval(prAlgo::compute);
+        statsBuilder.withIterations(prAlgo.iterations()).withDampingFactor(prAlgo.dampingFactor());
 
         final CentralityResult results = prAlgo.result();
         algo.release();
@@ -206,14 +207,10 @@ public final class EigenvectorCentralityProc {
         return normalization(configuration).apply(results);
     }
 
-    private PageRank selectAlgorithm(
-            Graph graph,
-            AllocationTracker tracker,
-            int batchSize,
-            int concurrency,
-            LongStream sourceNodeIds) {
+    private PageRank selectAlgorithm(Graph graph, PageRank.Config algoConfig, AllocationTracker tracker, int batchSize, int concurrency, LongStream sourceNodeIds) {
         return PageRankFactory.eigenvectorCentralityOf(
                 graph,
+                algoConfig,
                 sourceNodeIds,
                 tracker,
                 Pools.DEFAULT,

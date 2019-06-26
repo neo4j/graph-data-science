@@ -56,6 +56,8 @@ import static org.junit.Assert.assertEquals;
 @RunWith(Parameterized.class)
 public final class PageRankTest {
 
+    static PageRank.Config DEFAULT_CONFIG = new PageRank.Config(40, 0.85);
+
     private Class<? extends GraphFactory> graphImpl;
 
     @Parameterized.Parameters(name = "{1}")
@@ -166,8 +168,8 @@ public final class PageRankTest {
         }
 
         final CentralityResult rankResult = PageRankFactory
-                .of(graph, 0.85, LongStream.empty())
-                .compute(40)
+                .of(graph, DEFAULT_CONFIG, LongStream.empty())
+                .compute()
                 .result();
 
         IntStream.range(0, expected.size()).forEach(i -> {
@@ -257,8 +259,8 @@ public final class PageRankTest {
 
         // explicitly list all source nodes to prevent the 'we got everything' optimization
         PageRank algorithm = PageRankFactory
-                .of(graph, 0.85, LongStream.range(0L, graph.nodeCount()), null, 1, 1)
-                .compute(40);
+                .of(graph, DEFAULT_CONFIG, LongStream.range(0L, graph.nodeCount()), null, 1, 1)
+                .compute();
         // should not throw
     }
 
@@ -289,7 +291,7 @@ public final class PageRankTest {
         final PageRank pageRank = PageRankFactory.of(
                 AllocationTracker.EMPTY,
                 null,
-                0.85,
+                DEFAULT_CONFIG,
                 LongStream.empty(),
                 Pools.DEFAULT,
                 Pools.DEFAULT_CONCURRENCY,

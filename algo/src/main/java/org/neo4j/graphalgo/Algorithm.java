@@ -30,7 +30,7 @@ import org.neo4j.logging.Log;
 /**
  * @author mknblch
  */
-public abstract class Algorithm<ME extends Algorithm<ME>> implements TerminationFlag {
+public abstract class Algorithm<ME extends Algorithm<ME>> implements TerminationFlag, Assessable {
 
     protected ProgressLogger progressLogger = ProgressLogger.NULL_LOGGER;
 

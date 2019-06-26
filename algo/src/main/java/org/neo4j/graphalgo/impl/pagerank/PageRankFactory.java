@@ -27,10 +27,9 @@ import java.util.stream.LongStream;
 
 public class PageRankFactory{
 
-    public static PageRank eigenvectorCentralityOf(Graph graph, LongStream sourceNodeIds) {
+    public static PageRank eigenvectorCentralityOf(Graph graph, PageRank.Config algoConfig, LongStream sourceNodeIds) {
         PageRankVariant pageRankVariant = new EigenvectorCentralityVariant();
-
-        return new PageRank(AllocationTracker.EMPTY, graph, 1.0, sourceNodeIds, pageRankVariant);
+        return new PageRank(AllocationTracker.EMPTY, graph, algoConfig, sourceNodeIds, pageRankVariant);
     }
 
     public static PageRank weightedOf(
@@ -47,7 +46,6 @@ public class PageRankFactory{
             AllocationTracker tracker,
             boolean cacheWeights) {
         PageRankVariant pageRankVariant = new WeightedPageRankVariant(cacheWeights);
-
         return new PageRank(tracker, graph, dampingFactor, sourceNodeIds, pageRankVariant);
     }
 
@@ -64,7 +62,6 @@ public class PageRankFactory{
             LongStream sourceNodeIds,
             AllocationTracker tracker) {
         PageRankVariant pageRankVariant = new ArticleRankVariant();
-
         return new PageRank(tracker, graph, dampingFactor, sourceNodeIds, pageRankVariant);
     }
 
@@ -81,7 +78,6 @@ public class PageRankFactory{
             LongStream sourceNodeIds,
             AllocationTracker tracker) {
         PageRankVariant computeStepFactory = new NonWeightedPageRankVariant();
-
         return new PageRank(tracker, graph, dampingFactor, sourceNodeIds, computeStepFactory);
     }
 

@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
+import org.neo4j.graphalgo.impl.pagerank.PageRank;
 import org.neo4j.graphalgo.impl.pagerank.PageRankFactory;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphdb.Direction;
@@ -90,14 +91,15 @@ public class PageRankBenchmarkLdbc {
     @Benchmark
     public CentralityResult run() {
         return PageRankFactory
-                .of(grph,
-                        0.85,
-                        LongStream.empty(),
+                .of(
                         AllocationTracker.EMPTY,
+                        grph,
+                        new PageRank.Config(iterations, 0.85),
+                        LongStream.empty(),
                         Pools.DEFAULT,
                         Pools.DEFAULT_CONCURRENCY,
                         batchSize)
-                .compute(iterations)
+                .compute()
                 .result();
     }
 }

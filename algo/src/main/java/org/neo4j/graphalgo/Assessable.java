@@ -20,10 +20,12 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 
-public abstract class ConfiguredAlgorithm<Self extends ConfiguredAlgorithm<Self, Conf>, Conf> extends Algorithm<Self> {
+public interface Assessable {
 
-    public MemoryEstimation memoryEstimation(Conf conf) {
-        return this.memoryEstimation();
+    default MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.empty();
     }
+
 }

@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.impl.pagerank;
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.graphalgo.ConfiguredAlgorithm;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
@@ -107,7 +107,7 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
  * [1]: <a href="http://delab.csd.auth.gr/~dimitris/courses/ir_spring06/page_rank_computing/01531136.pdf">An Efficient Partition-Based Parallel PageRank Algorithm</a><br>
  * [2]: <a href="https://www.cs.purdue.edu/homes/dgleich/publications/gleich2004-parallel.pdf">Fast Parallel PageRank: A Linear System Approach</a>
  */
-public class PageRank extends ConfiguredAlgorithm<PageRank, PageRank.Config> {
+public class PageRank extends Algorithm<PageRank> {
 
     private final ExecutorService executor;
     private final int concurrency;
@@ -118,6 +118,7 @@ public class PageRank extends ConfiguredAlgorithm<PageRank, PageRank.Config> {
     private final RelationshipIterator relationshipIterator;
     private final Degrees degrees;
     private final double dampingFactor;
+    private final int iterations;
     private final Graph graph;
     private final RelationshipWeights relationshipWeights;
     private LongStream sourceNodeIds;
@@ -138,12 +139,12 @@ public class PageRank extends ConfiguredAlgorithm<PageRank, PageRank.Config> {
 
     /**
      * Forces sequential use. If you want parallelism, prefer
-     * {@link #PageRank(ExecutorService, int, int, AllocationTracker, Graph, double, LongStream, PageRankVariant)}
+     * {@link #PageRank(ExecutorService, int, int, AllocationTracker, Graph, PageRank.Config, LongStream, PageRankVariant)}
      */
     PageRank(
             AllocationTracker tracker,
             Graph graph,
-            double dampingFactor,
+            PageRank.Config algoConfig,
             LongStream sourceNodeIds,
             PageRankVariant pageRankVariant) {
         this(
@@ -152,7 +153,7 @@ public class PageRank extends ConfiguredAlgorithm<PageRank, PageRank.Config> {
                 ParallelUtil.DEFAULT_BATCH_SIZE,
                 tracker,
                 graph,
-                dampingFactor,
+                algoConfig,
                 sourceNodeIds,
                 pageRankVariant);
     }
@@ -168,7 +169,7 @@ public class PageRank extends ConfiguredAlgorithm<PageRank, PageRank.Config> {
             int batchSize,
             AllocationTracker tracker,
             Graph graph,
-            double dampingFactor,
+            PageRank.Config algoConfig,
             LongStream sourceNodeIds,
             PageRankVariant pageRankVariant) {
         this.executor = executor;
@@ -181,9 +182,19 @@ public class PageRank extends ConfiguredAlgorithm<PageRank, PageRank.Config> {
         this.degrees = graph;
         this.graph = graph;
         this.relationshipWeights = graph;
-        this.dampingFactor = dampingFactor;
+        this.dampingFactor = algoConfig.dampingFactor;
+        assert algoConfig.iterations >= 1;
+        this.iterations = algoConfig.iterations;
         this.sourceNodeIds = sourceNodeIds;
         this.pageRankVariant = pageRankVariant;
+    }
+
+    public int iterations() {
+        return iterations;
+    }
+
+    public double dampingFactor() {
+        return dampingFactor;
     }
 
     @Override
@@ -218,8 +229,7 @@ public class PageRank extends ConfiguredAlgorithm<PageRank, PageRank.Config> {
     /**
      * compute pageRank for n iterations
      */
-    public PageRank compute(int iterations) {
-        assert iterations >= 1;
+    public PageRank compute() {
         initializeSteps();
         computeSteps.run(iterations);
         return this;

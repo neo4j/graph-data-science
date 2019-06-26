@@ -37,10 +37,8 @@ public interface UnionFindAlgoInterface
             int concurrency,
             double threshold) {
 
-        GraphUnionFindAlgo<?> algo = algo(Optional.of(graph), executor, tracker, minBatchSize, concurrency);
-        PagedDisjointSetStruct communities = Double.isFinite(threshold)
-                ? algo.compute(threshold)
-                : algo.compute();
+        GraphUnionFindAlgo<?> algo = algo(Optional.of(graph), executor, tracker, minBatchSize, concurrency, threshold);
+        PagedDisjointSetStruct communities = algo.compute();
         algo.release();
         return communities;
     }
@@ -50,6 +48,7 @@ public interface UnionFindAlgoInterface
             ExecutorService executor,
             AllocationTracker tracker,
             int minBatchSize,
-            int concurrency);
+            int concurrency,
+            double threshold);
 
 }

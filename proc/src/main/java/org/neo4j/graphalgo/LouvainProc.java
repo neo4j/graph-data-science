@@ -27,11 +27,9 @@ import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.Exporter;
-import org.neo4j.graphalgo.impl.AlgoWithConfig;
 import org.neo4j.graphalgo.impl.louvain.Louvain;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
@@ -49,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
@@ -56,7 +55,7 @@ import java.util.stream.Stream;
  *
  * @author mknblch
  */
-public class LouvainProc extends BaseAlgoProc<Louvain, Louvain.Config> {
+public class LouvainProc extends BaseAlgoProc<Louvain> {
 
     public static final String INTERMEDIATE_COMMUNITIES_WRITE_PROPERTY = "intermediateCommunitiesWriteProperty";
     public static final String DEFAULT_CLUSTER_PROPERTY = "communityProperty";
@@ -80,8 +79,8 @@ public class LouvainProc extends BaseAlgoProc<Louvain, Louvain.Config> {
 
     @Procedure(value = "algo.louvain", mode = Mode.WRITE)
     @Description("CALL algo.louvain(label:String, relationship:String, " +
-            "{weightProperty:'weight', defaultValue:1.0, write: true, writeProperty:'community', concurrency:4, communityProperty:'propertyOfPredefinedCommunity', innerIterations:10, communitySelection:'classic'}) " +
-            "YIELD nodes, communityCount, iterations, loadMillis, computeMillis, writeMillis")
+                 "{weightProperty:'weight', defaultValue:1.0, write: true, writeProperty:'community', concurrency:4, communityProperty:'propertyOfPredefinedCommunity', innerIterations:10, communitySelection:'classic'}) " +
+                 "YIELD nodes, communityCount, iterations, loadMillis, computeMillis, writeMillis")
     public Stream<LouvainResult> louvain(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
@@ -131,8 +130,8 @@ public class LouvainProc extends BaseAlgoProc<Louvain, Louvain.Config> {
 
     @Procedure(value = "algo.louvain.stream")
     @Description("CALL algo.louvain.stream(label:String, relationship:String, " +
-            "{weightProperty:'propertyName', defaultValue:1.0, concurrency:4, communityProperty:'propertyOfPredefinedCommunity', innerIterations:10, communitySelection:'classic') " +
-            "YIELD nodeId, community - yields a setId to each node id")
+                 "{weightProperty:'propertyName', defaultValue:1.0, concurrency:4, communityProperty:'propertyOfPredefinedCommunity', innerIterations:10, communitySelection:'classic') " +
+                 "YIELD nodeId, community - yields a setId to each node id")
     public Stream<Louvain.StreamingResult> louvainStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
@@ -155,7 +154,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain, Louvain.Config> {
 
     @Procedure(value = "algo.louvain.memrec", mode = Mode.READ)
     @Description("CALL algo.louvain.memrec(label:String, relationship:String, {...properties}) " +
-            "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for Louvain")
+                 "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for Louvain")
     public Stream<MemRecResult> louvainMemrec(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
@@ -169,8 +168,8 @@ public class LouvainProc extends BaseAlgoProc<Louvain, Louvain.Config> {
     @Override
     GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
         loader.withOptionalRelationshipWeightsFromProperty(
-                        config.getWeightProperty(),
-                        config.getWeightPropertyDefaultValue(1.0));
+                config.getWeightProperty(),
+                config.getWeightPropertyDefaultValue(1.0));
 
         config.getString(DEFAULT_CLUSTER_PROPERTY).ifPresent(propertyIdentifier -> {
             // configure predefined clustering if set
@@ -181,29 +180,24 @@ public class LouvainProc extends BaseAlgoProc<Louvain, Louvain.Config> {
     }
 
     @Override
-    Louvain.Config algoConfig(
-            final ProcedureConfiguration config,
+    Louvain procedure(
+            final ProcedureConfiguration procedureConfig,
+            final AllocationTracker tracker,
             final Optional<Graph> graph) {
-        final int maxLevel = config.getIterations(DEFAULT_MAX_LEVEL);
-        final int maxIterations = config.getNumber(INNER_ITERATIONS, DEFAULT_MAX_ITERATIONS).intValue();
-        final boolean randomNeighbor = config.get(COMMUNITY_SELECTION, "classic").equalsIgnoreCase("random");
-        Optional<String> clusterProperty = config.getString(DEFAULT_CLUSTER_PROPERTY);
+
+        final int maxLevel = procedureConfig.getIterations(DEFAULT_MAX_LEVEL);
+        final int maxIterations = procedureConfig.getNumber(INNER_ITERATIONS, DEFAULT_MAX_ITERATIONS).intValue();
+        final boolean randomNeighbor = procedureConfig.get(COMMUNITY_SELECTION, "classic").equalsIgnoreCase("random");
+        Optional<String> clusterProperty = procedureConfig.getString(DEFAULT_CLUSTER_PROPERTY);
 
         HugeWeightMapping communityMap = clusterProperty
                 .flatMap(name -> graph.map(g -> g.nodeProperties(CLUSTERING_IDENTIFIER)))
                 .orElse(null);
 
-        return new Louvain.Config(communityMap, maxLevel, maxIterations, randomNeighbor);
-    }
-
-    @Override
-    Louvain algorithm(
-            final ProcedureConfiguration config,
-            final Louvain.Config algoConfig,
-            final AllocationTracker tracker,
-            final Optional<Graph> graph) {
-
-        return graph.map(g -> new Louvain(g, Pools.DEFAULT, config.getConcurrency(DEFAULT_CONCURRENCY), tracker)).orElseGet(Louvain::new);
+        Louvain.Config algoConfig = new Louvain.Config(communityMap, maxLevel, maxIterations, randomNeighbor);
+        return graph
+                .map(g -> new Louvain(g, Pools.DEFAULT, procedureConfig.getConcurrency(DEFAULT_CONCURRENCY), tracker, algoConfig))
+                .orElseGet(() -> new Louvain(algoConfig));
     }
 
     private Louvain compute(
@@ -212,19 +206,16 @@ public class LouvainProc extends BaseAlgoProc<Louvain, Louvain.Config> {
             final ProcedureConfiguration configuration,
             final Graph graph) {
 
-        AlgoWithConfig<Louvain, Louvain.Config> prAlgo = newAlgorithm(configuration, tracker, Optional.of(graph));
-        Louvain algo = prAlgo.algo();
-        Louvain.Config conf = prAlgo.conf();
+        Louvain algo = newAlgorithm(configuration, tracker, Optional.of(graph));
 
-        final Louvain louvain = statsBuilder.timeEval(() -> algo.compute(conf));
-        statsBuilder.randomNeighbor(conf.rnd);
+        final Louvain louvain = statsBuilder.timeEval((Supplier<Louvain>) algo::compute);
+        statsBuilder.randomNeighbor(algo.randomNeighborSelection());
 
         graph.release();
 
         log.info("Louvain: overall memory usage: %s", tracker.getUsageString());
 
         return louvain;
-
     }
 
     private Exporter exporter(

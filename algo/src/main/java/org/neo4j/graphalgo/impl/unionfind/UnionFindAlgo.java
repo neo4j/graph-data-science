@@ -41,13 +41,15 @@ public enum UnionFindAlgo implements UnionFindAlgoInterface {
                 final ExecutorService executor,
                 final AllocationTracker tracker,
                 final int minBatchSize,
-                final int concurrency) {
+                final int concurrency,
+                final double threshold) {
 
             return new ParallelUnionFindQueue(
                     graph,
                     executor,
                     minBatchSize,
                     concurrency,
+                    threshold,
                     tracker);
         }
     },
@@ -58,13 +60,15 @@ public enum UnionFindAlgo implements UnionFindAlgoInterface {
                 final ExecutorService executor,
                 final AllocationTracker tracker,
                 final int minBatchSize,
-                final int concurrency) {
+                final int concurrency,
+                final double threshold) {
 
             return new ParallelUnionFindForkJoin(
                     graph,
                     tracker,
                     minBatchSize,
-                    concurrency);
+                    concurrency,
+                    threshold);
         }
     },
     FJ_MERGE {
@@ -74,14 +78,16 @@ public enum UnionFindAlgo implements UnionFindAlgoInterface {
                 final ExecutorService executor,
                 final AllocationTracker tracker,
                 final int minBatchSize,
-                final int concurrency) {
+                final int concurrency,
+                final double threshold) {
 
             return new ParallelUnionFindFJMerge(
                     graph,
                     executor,
                     tracker,
                     minBatchSize,
-                    concurrency);
+                    concurrency,
+                    threshold);
         }
     },
     SEQ {
@@ -91,11 +97,13 @@ public enum UnionFindAlgo implements UnionFindAlgoInterface {
                 final ExecutorService executor,
                 final AllocationTracker tracker,
                 final int minBatchSize,
-                final int concurrency) {
+                final int concurrency,
+                final double threshold) {
 
             return new GraphUnionFind(
                     graph,
-                    AllocationTracker.EMPTY);
+                    AllocationTracker.EMPTY, threshold
+            );
         }
     }
 }

@@ -54,10 +54,9 @@ public enum UFBenchmarkCombination {
                 Pools.DEFAULT,
                 AllocationTracker.EMPTY,
                 (int) (graph.nodeCount() / Pools.DEFAULT_CONCURRENCY),
-                Pools.DEFAULT_CONCURRENCY);
-        PagedDisjointSetStruct communities = Double.isFinite(threshold)
-                ? unionFindAlgo.compute(threshold)
-                : unionFindAlgo.compute();
+                Pools.DEFAULT_CONCURRENCY,
+                threshold);
+        PagedDisjointSetStruct communities = unionFindAlgo.compute();
         unionFindAlgo.release();
         return communities;
     }

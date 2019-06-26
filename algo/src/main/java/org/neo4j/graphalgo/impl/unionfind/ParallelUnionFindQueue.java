@@ -54,8 +54,7 @@ import static org.neo4j.graphalgo.core.utils.ParallelUtil.awaitTermination;
  *
  * @author mknblch
  */
-public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFindQueue>
-{
+public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFindQueue> {
 
     private static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations
             .builder(ParallelUnionFindQueue.class)
@@ -82,8 +81,9 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFind
             ExecutorService executor,
             int minBatchSize,
             int concurrency,
+            double threshold,
             AllocationTracker tracker) {
-        super(graph.orElse(null));
+        super(graph.orElse(null), threshold);
         this.executor = executor;
         this.tracker = tracker;
 
@@ -107,6 +107,17 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFind
 
     @Override
     public PagedDisjointSetStruct compute() {
+        return computeUnrestricted();
+    }
+
+    @Override
+    public PagedDisjointSetStruct compute(double threshold) {
+        throw new IllegalArgumentException(
+                "Parallel UnionFind with threshold not implemented, please use either `concurrency:1` or one of the exp* variants of UnionFind");
+    }
+
+    @Override
+    public PagedDisjointSetStruct computeUnrestricted() {
         final List<Future<?>> futures = new ArrayList<>(2 * stepSize);
         final BlockingQueue<PagedDisjointSetStruct> queue = new ArrayBlockingQueue<>(stepSize);
         AtomicInteger expectedStructs = new AtomicInteger();
@@ -122,12 +133,6 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFind
 
         awaitTermination(futures);
         return getStruct(queue);
-    }
-
-    @Override
-    public PagedDisjointSetStruct compute(double threshold) {
-        throw new IllegalArgumentException(
-                "Parallel UnionFind with threshold not implemented, please use either `concurrency:1` or one of the exp* variants of UnionFind");
     }
 
     @Override

@@ -47,8 +47,7 @@ import java.util.concurrent.RecursiveTask;
  *
  * @author mknblch
  */
-public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionFindForkJoin>
-{
+public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionFindForkJoin> {
 
     private static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations.builder(ParallelUnionFindForkJoin.class)
             .startField("computeStep", ThresholdUFTask.class)
@@ -73,8 +72,9 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionF
             Optional<Graph> graph,
             AllocationTracker tracker,
             int minBatchSize,
-            int concurrency) {
-        super(graph.orElse(null));
+            int concurrency,
+            double threshold) {
+        super(graph.orElse(null), threshold);
 
         if (graph.isPresent()) {
             nodeCount = graph.get().nodeCount();
@@ -90,15 +90,14 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionF
 
     }
 
-    public PagedDisjointSetStruct compute() {
-        return ForkJoinPool.commonPool().invoke(new UnionFindTask(0));
+    @Override
+    public PagedDisjointSetStruct compute(final double threshold) {
+        return ForkJoinPool.commonPool().invoke(new ThresholdUFTask(0, threshold));
     }
 
-
-    public PagedDisjointSetStruct compute(double threshold) {
-        return ForkJoinPool
-                .commonPool()
-                .invoke(new ThresholdUFTask(0, threshold));
+    @Override
+    public PagedDisjointSetStruct computeUnrestricted() {
+        return ForkJoinPool.commonPool().invoke(new UnionFindTask(0));
     }
 
     @Override

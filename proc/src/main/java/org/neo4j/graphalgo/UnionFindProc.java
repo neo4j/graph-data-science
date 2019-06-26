@@ -26,12 +26,10 @@ import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
 import org.neo4j.graphalgo.core.write.Exporter;
-import org.neo4j.graphalgo.impl.AlgoWithConfig;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
 import org.neo4j.graphalgo.impl.unionfind.GraphUnionFindAlgo;
@@ -57,7 +55,7 @@ import java.util.stream.Stream;
 /**
  * @author mknblch
  */
-public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc<T, Double> {
+public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc<T> {
 
     private static final String CONFIG_THRESHOLD = "threshold";
     private static final String CONFIG_PARALLEL_ALGO = "parallel_algo";
@@ -272,12 +270,9 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
             final Builder builder,
             final AllocationTracker tracker,
             final ProcedureConfiguration configuration, final Graph graph) {
-        AlgoWithConfig<T, Double> ufAlgo = newAlgorithm(configuration, tracker, Optional.of(graph));
-        T algo = ufAlgo.algo();
-        Double threshold = ufAlgo.conf();
-
-        final PagedDisjointSetStruct algoResult = builder.timeEval(() -> Double.isFinite(threshold)
-                ? algo.compute(threshold)
+        T algo = newAlgorithm(configuration, tracker, Optional.of(graph));
+        final PagedDisjointSetStruct algoResult = builder.timeEval(() -> Double.isFinite(algo.threshold())
+                ? algo.compute(algo.threshold())
                 : algo.compute());
 
         log.info("UnionFind: overall memory usage: %s", tracker.getUsageString());
@@ -298,27 +293,20 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
                 .withDirection(Direction.OUTGOING);
     }
 
-    @Override
-    Double algoConfig(
-            final ProcedureConfiguration config,
-            final Optional<Graph> graph) {
-        return config.get(CONFIG_THRESHOLD, Double.NaN);
-    }
-
     @SuppressWarnings("unchecked")
     @Override
-    T algorithm(
+    T procedure(
             final ProcedureConfiguration config,
-            final Double threshold,
             final AllocationTracker tracker,
             final Optional<Graph> graph) {
 
         int concurrency = config.getConcurrency();
         int minBatchSize = config.getBatchSize();
+        double threshold = config.get(CONFIG_THRESHOLD, Double.NaN);
 
         final UnionFindAlgoInterface uf = getAlgoByConfig(config);
 
-        return (T) uf.algo(graph, Pools.DEFAULT, tracker, minBatchSize, concurrency);
+        return (T) uf.algo(graph, Pools.DEFAULT, tracker, minBatchSize, concurrency, threshold);
     }
 
     private UnionFindAlgo getAlgoByConfig(ProcedureConfiguration config) {
