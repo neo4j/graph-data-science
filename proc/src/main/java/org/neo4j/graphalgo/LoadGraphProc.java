@@ -148,14 +148,14 @@ public final class LoadGraphProc extends BaseProc {
         LoadGraphStats(String graphName, ProcedureConfiguration configuration) {
             name = graphName;
             graph = configuration.getString(ProcedureConstants.GRAPH_IMPL_PARAM, "heavy");
-            undirected = configuration.get("undirected", false);
-            sorted = configuration.get("sorted", false);
+            undirected = configuration.get(ProcedureConstants.UNDIRECTED, false);
+            sorted = configuration.get(ProcedureConstants.SORTED, false);
             loadNodes = configuration.getNodeLabelOrQuery();
             loadRelationships = configuration.getRelationshipOrQuery();
             direction = configuration.getDirection(Direction.OUTGOING).name();
-            nodeWeight = configuration.getString("nodeWeight", null);
-            nodeProperty = configuration.getString("nodeProperty", null);;
-            relationshipWeight = configuration.getString("relationshipWeight", null);;
+            nodeWeight = configuration.getString(ProcedureConstants.NODE_WEIGHT, null);
+            nodeProperty = configuration.getString(ProcedureConstants.NODE_PROPERTY, null);;
+            relationshipWeight = configuration.getString(ProcedureConstants.RELATIONSHIP_WEIGHT, null);;
         }
     }
 
