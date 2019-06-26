@@ -426,6 +426,7 @@ public class HugeGraph implements Graph {
         } else if (inOffsets != null) {
             return Direction.INCOMING;
         } else {
+            assert(outOffsets != null);
             return Direction.OUTGOING;
         }
     }

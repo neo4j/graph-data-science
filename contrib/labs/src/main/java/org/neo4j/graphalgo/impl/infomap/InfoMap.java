@@ -112,7 +112,7 @@ public class InfoMap extends Algorithm<InfoMap> {
             pageRankResult = PageRankFactory
                     .weightedOf(
                             graph,
-                            1. - tau,
+                            1.0 - tau,
                             LongStream.empty(),
                             AllocationTracker.create(),
                             pool, concurrency, PAGE_RANK_BATCH_SIZE, PAGE_RANK_CACHE_WEIGHTS)
@@ -129,7 +129,7 @@ public class InfoMap extends Algorithm<InfoMap> {
                     logger,
                     terminationFlag);
         } else {
-            pageRankResult = PageRankFactory.weightedOf(graph, 1. - tau, LongStream.empty())
+            pageRankResult = PageRankFactory.weightedOf(graph, 1.0 - tau, LongStream.empty())
                     .compute(prIterations)
                     .result();
         }
@@ -187,14 +187,14 @@ public class InfoMap extends Algorithm<InfoMap> {
             pageRankResult = PageRankFactory
                     .of(
                             graph,
-                            1. - tau,
+                            1.0 - tau,
                             LongStream.empty(),
                             tracker,
                             pool, concurrency, PAGE_RANK_BATCH_SIZE)
                     .compute(prIterations)
                     .result();
         } else {
-            pageRankResult = PageRankFactory.of(graph, 1. - tau, LongStream.empty())
+            pageRankResult = PageRankFactory.of(graph, 1.0 - tau, LongStream.empty())
                     .compute(prIterations)
                     .result();
         }
@@ -252,7 +252,7 @@ public class InfoMap extends Algorithm<InfoMap> {
         this.terminationFlag = terminationFlag;
         this.modules = new IndexMap<>(MODULE_POS, Module.class, nodeCount);
         this.communities = new int[nodeCount];
-        this.tau1 = 1. - tau;
+        this.tau1 = 1.0 - tau;
         this.n1 = nodeCount - 1.;
         this.sQi = 0.0;
         Arrays.setAll(communities, i -> i);

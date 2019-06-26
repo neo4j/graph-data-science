@@ -35,7 +35,8 @@ public class WeightedDegreeComputer implements DegreeComputer {
     }
 
     @Override
-    //Does this work for Huge graphs??
+    // TODO: This does not work for huge graphs with more than Int.MAX_VALUE nodes
+    // https://trello.com/c/aALx63XZ/137-weighted-pagerank-does-not-work-for-hugegraph-with-more-than-integermaxvalue-nodes
     public DegreeCache degree(ExecutorService executor, int concurrency) {
         WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph,
                 executor, concurrency);

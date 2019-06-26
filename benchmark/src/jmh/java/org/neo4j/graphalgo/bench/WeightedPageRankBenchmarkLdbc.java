@@ -57,21 +57,16 @@ import java.util.stream.LongStream;
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 public class WeightedPageRankBenchmarkLdbc {
 
-    //    @Param({"HEAVY", "HUGE"})
     @Param({"HEAVY"})
     GraphImpl graph;
 
-    //        @Param({"true", "false"})
     @Param({"false"})
     boolean parallel;
 
-    //    @Param({"L01", "L10"})
     @Param({"L01"})
     String graphId;
-    ;
 
     @Param({"5", "20"})
-//    @Param({"5"})
     int iterations;
 
     @Param({"true", "false"})

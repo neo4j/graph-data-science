@@ -161,6 +161,7 @@ public class AdjacencyMatrix {
         } else if (inOffsets != null) {
             return Direction.INCOMING;
         } else {
+            assert(outOffsets != null);
             return Direction.OUTGOING;
         }
     }
