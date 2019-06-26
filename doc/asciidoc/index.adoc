@@ -37,6 +37,13 @@ The guide covers the following areas:
 * <<algorithms-linkprediction>> -- A detailed guide to each of the link prediction algorithms, including use-cases and examples.
 * <<algorithms-preprocessing>> -- A detailed guide to each of the preprocessing functions and procedures.
 
+====
+image::download_book.png[Graph Algorithms,200]
+
+Graph Algorithms: Practical Examples in Apache Spark and Neo4j, by Mark Needham & Amy E. Hodler and published by O'Reilly Media is available now.
+
+Download it for free at https://neo4j.com/graph-algorithms-book/[neo4j.com/graph-algorithms-book/].
+====
 
 [[introduction]]
 == Introduction
