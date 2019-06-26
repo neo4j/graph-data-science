@@ -251,7 +251,7 @@ public final class PageRankTest {
 
         // explicitly list all source nodes to prevent the 'we got everything' optimization
         PageRank algorithm = PageRankFactory
-                .of(graph,0.85, LongStream.range(0L, graph.nodeCount()), null, 1, 1)
+                .of(graph, 0.85, LongStream.range(0L, graph.nodeCount()), null, 1, 1)
                 .compute(40);
         // should not throw
     }

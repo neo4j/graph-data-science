@@ -72,7 +72,7 @@ public class WeightedPageRankBenchmarkLdbc {
 
     @Param({"5", "20"})
 //    @Param({"5"})
-            int iterations;
+    int iterations;
 
     @Param({"true", "false"})
     boolean cacheWeights;
