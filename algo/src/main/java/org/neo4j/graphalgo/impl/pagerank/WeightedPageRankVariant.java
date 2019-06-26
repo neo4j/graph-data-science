@@ -19,7 +19,8 @@
  */
 package org.neo4j.graphalgo.impl.pagerank;
 
-import org.neo4j.graphalgo.api.*;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 public class WeightedPageRankVariant implements PageRankVariant {
@@ -30,15 +31,20 @@ public class WeightedPageRankVariant implements PageRankVariant {
     }
 
     @Override
-    public ComputeStep createComputeStep(double dampingFactor, long[] sourceNodeIds,
-                                                 RelationshipIterator relationshipIterator, Degrees degrees,
-                                                 RelationshipWeights relationshipWeights, AllocationTracker tracker,
-                                                 int partitionCount, long start, DegreeCache aggregatedDegrees, long nodeCount) {
+    public ComputeStep createComputeStep(
+            double dampingFactor,
+            long[] sourceNodeIds,
+            Graph graph,
+            RelationshipWeights relationshipWeights,
+            AllocationTracker tracker,
+            int partitionCount,
+            long start,
+            DegreeCache aggregatedDegrees,
+            long nodeCount) {
         return new WeightedComputeStep(
                 dampingFactor,
                 sourceNodeIds,
-                relationshipIterator,
-                degrees,
+                graph,
                 relationshipWeights,
                 tracker,
                 partitionCount,

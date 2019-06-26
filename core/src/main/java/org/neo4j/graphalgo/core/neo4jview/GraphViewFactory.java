@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.GraphDimensionsReader;
 import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.graphalgo.core.NodeImporter;
 import org.neo4j.graphalgo.core.utils.ImportProgress;
+import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 public final class GraphViewFactory extends GraphFactory {
@@ -47,6 +48,15 @@ public final class GraphViewFactory extends GraphFactory {
                 dimensions.nodeCount(),
                 dimensions.labelId()
         ).call();
-        return new GraphView(api, dimensions, idMap, setup.relationDefaultWeight, setup.loadAsUndirected);
+
+        Direction loadDirection;
+        if (setup.loadAsUndirected) {
+            loadDirection = Direction.BOTH;
+        } else if (setup.loadOutgoing) {
+            loadDirection = Direction.OUTGOING;
+        } else {
+            loadDirection = Direction.INCOMING;
+        }
+        return new GraphView(api, dimensions, loadDirection, idMap, setup.relationDefaultWeight, setup.loadAsUndirected);
     }
 }

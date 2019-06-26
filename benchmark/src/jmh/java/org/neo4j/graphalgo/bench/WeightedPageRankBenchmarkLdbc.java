@@ -57,21 +57,16 @@ import java.util.stream.LongStream;
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 public class WeightedPageRankBenchmarkLdbc {
 
-    //    @Param({"HEAVY", "HUGE"})
     @Param({"HEAVY"})
     GraphImpl graph;
 
-//        @Param({"true", "false"})
     @Param({"false"})
     boolean parallel;
 
-    //    @Param({"L01", "L10"})
     @Param({"L01"})
     String graphId;
-    ;
 
-        @Param({"5", "20"})
-//    @Param({"5"})
+    @Param({"5", "20"})
     int iterations;
 
     @Param({"true", "false"})
@@ -91,8 +86,9 @@ public class WeightedPageRankBenchmarkLdbc {
             long startNodeId = relationship.getStartNodeId();
             long endNodeId = relationship.getEndNodeId();
             relationship.setProperty("weight", startNodeId + endNodeId % 100);
-            if(++ count % 100000 == 0) {
-                tx.success(); tx.close();
+            if (++count % 100000 == 0) {
+                tx.success();
+                tx.close();
                 tx = db.beginTx();
             }
         }
@@ -117,15 +113,16 @@ public class WeightedPageRankBenchmarkLdbc {
 
     @Benchmark
     public CentralityResult run() throws Exception {
-        return PageRankFactory.weightedOf(
-                AllocationTracker.EMPTY,
-                grph,
-                0.85,
-                LongStream.empty(),
-                Pools.DEFAULT,
-                Pools.DEFAULT_CONCURRENCY,
-                batchSize,
-                cacheWeights)
+        return PageRankFactory
+                .weightedOf(
+                        grph,
+                        0.85,
+                        LongStream.empty(),
+                        AllocationTracker.EMPTY,
+                        Pools.DEFAULT,
+                        Pools.DEFAULT_CONCURRENCY,
+                        batchSize,
+                        cacheWeights)
                 .compute(iterations)
                 .result();
     }

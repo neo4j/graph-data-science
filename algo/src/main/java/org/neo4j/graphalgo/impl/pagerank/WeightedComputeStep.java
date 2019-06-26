@@ -19,12 +19,11 @@
  */
 package org.neo4j.graphalgo.impl.pagerank;
 
-import org.neo4j.graphalgo.api.Degrees;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphdb.Direction;
 
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.binaryLookup;
 
@@ -37,8 +36,7 @@ public class WeightedComputeStep extends BaseComputeStep implements Relationship
     WeightedComputeStep(
             double dampingFactor,
             long[] sourceNodeIds,
-            RelationshipIterator relationshipIterator,
-            Degrees degrees,
+            Graph graph,
             RelationshipWeights relationshipWeights,
             AllocationTracker tracker,
             int partitionSize,
@@ -46,8 +44,7 @@ public class WeightedComputeStep extends BaseComputeStep implements Relationship
             DegreeCache degreeCache) {
         super(dampingFactor,
                 sourceNodeIds,
-                relationshipIterator,
-                degrees,
+                graph,
                 tracker,
                 partitionSize,
                 startNode);
@@ -62,10 +59,10 @@ public class WeightedComputeStep extends BaseComputeStep implements Relationship
         for (long nodeId = startNode; nodeId < endNode; ++nodeId) {
             delta = deltas[(int) (nodeId - startNode)];
             if (delta > 0.0) {
-                int degree = degrees.degree(nodeId, Direction.OUTGOING);
+                int degree = degrees.degree(nodeId, direction);
                 if (degree > 0) {
                     sumOfWeights = aggregatedDegrees[(int) nodeId];
-                    rels.forEachRelationship(nodeId, Direction.OUTGOING, this);
+                    rels.forEachRelationship(nodeId, direction, this);
                 }
             }
         }

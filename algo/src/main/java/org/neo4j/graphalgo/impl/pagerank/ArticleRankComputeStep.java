@@ -19,41 +19,33 @@
  */
 package org.neo4j.graphalgo.impl.pagerank;
 
-import org.neo4j.graphalgo.api.Degrees;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphdb.Direction;
 
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.binaryLookup;
 
 final class ArticleRankComputeStep extends BaseComputeStep implements RelationshipConsumer {
-    private final RelationshipIterator relationshipIterator;
     private double averageDegree;
+    private float srcRankDelta;
 
     ArticleRankComputeStep(
             double dampingFactor,
             long[] sourceNodeIds,
-            RelationshipIterator relationshipIterator,
-            Degrees degrees,
+            Graph graph,
             AllocationTracker tracker,
             int partitionSize,
             long startNode,
             DegreeCache degreeCache) {
         super(dampingFactor,
                 sourceNodeIds,
-                relationshipIterator,
-                degrees,
+                graph,
                 tracker,
                 partitionSize,
                 startNode);
-        this.relationshipIterator = relationshipIterator;
         this.averageDegree = degreeCache.average();
     }
-
-
-    private float srcRankDelta;
-
 
     void singleIteration() {
         long startNode = this.startNode;
@@ -62,10 +54,10 @@ final class ArticleRankComputeStep extends BaseComputeStep implements Relationsh
         for (long nodeId = startNode; nodeId < endNode; ++nodeId) {
             double delta = deltas[(int) (nodeId - startNode)];
             if (delta > 0) {
-                int degree = degrees.degree(nodeId, Direction.OUTGOING);
+                int degree = degrees.degree(nodeId, direction);
                 if (degree > 0) {
                     srcRankDelta = (float) (delta / (degree + averageDegree));
-                    rels.forEachRelationship(nodeId, Direction.OUTGOING, this);
+                    rels.forEachRelationship(nodeId, direction, this);
                 }
             }
         }

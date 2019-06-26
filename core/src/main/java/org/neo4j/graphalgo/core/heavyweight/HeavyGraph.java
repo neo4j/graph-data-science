@@ -205,6 +205,11 @@ public class HeavyGraph implements Graph {
     }
 
     @Override
+    public Direction getLoadDirection() {
+        return container.getLoadDirection();
+    }
+
+    @Override
     public void canRelease(boolean canRelease) {
         this.canRelease = canRelease;
     }

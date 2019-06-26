@@ -155,6 +155,17 @@ public class AdjacencyMatrix {
         this.tracker = tracker;
     }
 
+    public Direction getLoadDirection() {
+        if (inOffsets != null && outOffsets != null) {
+            return Direction.BOTH;
+        } else if (inOffsets != null) {
+            return Direction.INCOMING;
+        } else {
+            assert(outOffsets != null);
+            return Direction.OUTGOING;
+        }
+    }
+
     /**
      * initialize array for outgoing connections
      */

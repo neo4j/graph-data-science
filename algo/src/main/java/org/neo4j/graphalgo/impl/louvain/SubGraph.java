@@ -72,6 +72,11 @@ abstract class SubGraph implements Graph {
     }
 
     @Override
+    public Direction getLoadDirection() {
+        throw new UnsupportedOperationException("getLoadDirection is not supported.");
+    }
+
+    @Override
     public final double weightOf(long sourceNodeId, long targetNodeId) {
         throw new UnsupportedOperationException("weightOf is not supported.");
     }

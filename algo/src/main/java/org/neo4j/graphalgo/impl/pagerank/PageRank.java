@@ -227,10 +227,12 @@ public class PageRank extends Algorithm<PageRank> {
         PrimitiveLongIterator nodes = nodeIterator.nodeIterator();
         List<Partition> partitions = new ArrayList<>();
         long start = 0L;
+        Direction direction = graph.getLoadDirection();
         while (nodes.hasNext()) {
             Partition partition = new Partition(
                     nodes,
                     degrees,
+                    direction,
                     start,
                     (long) batchSize);
             partitions.add(partition);
@@ -282,8 +284,7 @@ public class PageRank extends Algorithm<PageRank> {
 
             computeSteps.add(pageRankVariant.createComputeStep(dampingFactor,
                     sourceNodeIds,
-                    relationshipIterator,
-                    degrees,
+                    graph,
                     relationshipWeights,
                     tracker,
                     partitionSize,
@@ -435,6 +436,7 @@ public class PageRank extends Algorithm<PageRank> {
         Partition(
                 PrimitiveLongIterator nodes,
                 Degrees degrees,
+                Direction direction,
                 long startNode,
                 long batchSize) {
             assert batchSize > 0L;
@@ -443,7 +445,7 @@ public class PageRank extends Algorithm<PageRank> {
             while (nodes.hasNext() && partitionSize < batchSize && nodeCount < MAX_NODE_COUNT) {
                 long nodeId = nodes.next();
                 ++nodeCount;
-                partitionSize += ((long) degrees.degree(nodeId, Direction.OUTGOING));
+                partitionSize += ((long) degrees.degree(nodeId, direction));
             }
             this.startNode = startNode;
             this.nodeCount = nodeCount;

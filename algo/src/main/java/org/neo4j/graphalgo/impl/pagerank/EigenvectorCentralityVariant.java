@@ -19,22 +19,27 @@
  */
 package org.neo4j.graphalgo.impl.pagerank;
 
-import org.neo4j.graphalgo.api.*;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 public class EigenvectorCentralityVariant implements PageRankVariant {
 
     @Override
     public ComputeStep createComputeStep(
-            double dampingFactor, long[] sourceNodeIds,
-            RelationshipIterator relationshipIterator, Degrees degrees,
-            RelationshipWeights relationshipWeights, AllocationTracker tracker,
-            int partitionCount, long start, DegreeCache degreeCache, long nodeCount) {
+            double dampingFactor,
+            long[] sourceNodeIds,
+            Graph graph,
+            RelationshipWeights relationshipWeights,
+            AllocationTracker tracker,
+            int partitionCount,
+            long start,
+            DegreeCache degreeCache,
+            long nodeCount) {
         return new EigenvectorCentralityComputeStep(
                 dampingFactor,
                 sourceNodeIds,
-                relationshipIterator,
-                degrees,
+                graph,
                 tracker,
                 partitionCount,
                 start,

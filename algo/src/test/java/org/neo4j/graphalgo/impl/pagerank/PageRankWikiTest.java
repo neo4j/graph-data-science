@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
+import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -146,6 +147,7 @@ public final class PageRankWikiTest {
         final Graph graph = new GraphLoader(db)
                 .withLabel("Node")
                 .withRelationshipType("TYPE")
+                .withDirection(Direction.OUTGOING)
                 .load(graphImpl);
 
         final CentralityResult rankResult = PageRankFactory

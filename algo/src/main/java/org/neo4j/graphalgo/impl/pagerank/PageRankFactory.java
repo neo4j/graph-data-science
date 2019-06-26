@@ -36,16 +36,15 @@ public class PageRankFactory{
     public static PageRank weightedOf(
             Graph graph,
             double dampingFactor,
-            LongStream sourceNodeIds
-    ) {
-        return weightedOf(AllocationTracker.EMPTY, dampingFactor, sourceNodeIds, graph, false);
+            LongStream sourceNodeIds) {
+        return weightedOf(graph, dampingFactor, sourceNodeIds, AllocationTracker.EMPTY, false);
     }
 
     public static PageRank weightedOf(
-            AllocationTracker tracker,
+            Graph graph,
             double dampingFactor,
             LongStream sourceNodeIds,
-            Graph graph,
+            AllocationTracker tracker,
             boolean cacheWeights) {
         PageRankVariant pageRankVariant = new WeightedPageRankVariant(cacheWeights);
 
@@ -56,14 +55,14 @@ public class PageRankFactory{
             Graph graph,
             double dampingFactor,
             LongStream sourceNodeIds) {
-        return articleRankOf(AllocationTracker.EMPTY, dampingFactor, sourceNodeIds, graph);
+        return articleRankOf(graph, dampingFactor, sourceNodeIds, AllocationTracker.EMPTY);
     }
 
     public static PageRank articleRankOf(
-            AllocationTracker tracker,
+            Graph graph,
             double dampingFactor,
             LongStream sourceNodeIds,
-            Graph graph) {
+            AllocationTracker tracker) {
         PageRankVariant pageRankVariant = new ArticleRankVariant();
 
         return new PageRank(tracker, graph, dampingFactor, sourceNodeIds, pageRankVariant);
@@ -73,14 +72,14 @@ public class PageRankFactory{
             Graph graph,
             double dampingFactor,
             LongStream sourceNodeIds) {
-        return of(AllocationTracker.EMPTY, dampingFactor, sourceNodeIds, graph);
+        return of(graph, dampingFactor, sourceNodeIds, AllocationTracker.EMPTY);
     }
 
     public static PageRank of(
-            AllocationTracker tracker,
+            Graph graph,
             double dampingFactor,
             LongStream sourceNodeIds,
-            Graph graph) {
+            AllocationTracker tracker) {
         PageRankVariant computeStepFactory = new NonWeightedPageRankVariant();
 
         return new PageRank(tracker, graph, dampingFactor, sourceNodeIds, computeStepFactory);
@@ -93,14 +92,14 @@ public class PageRankFactory{
             ExecutorService pool,
             int concurrency,
             int batchSize) {
-        return of(AllocationTracker.EMPTY, graph, dampingFactor, sourceNodeIds, pool, concurrency, batchSize);
+        return of(graph, dampingFactor, sourceNodeIds, AllocationTracker.EMPTY, pool, concurrency, batchSize);
     }
 
     public static PageRank of(
-            AllocationTracker tracker,
             Graph graph,
             double dampingFactor,
             LongStream sourceNodeIds,
+            AllocationTracker tracker,
             ExecutorService pool,
             int concurrency,
             int batchSize) {
@@ -118,10 +117,10 @@ public class PageRankFactory{
     }
 
     public static PageRank weightedOf(
-            AllocationTracker tracker,
             Graph graph,
             double dampingFactor,
             LongStream sourceNodeIds,
+            AllocationTracker tracker,
             ExecutorService pool,
             int concurrency,
             int batchSize,
@@ -141,10 +140,10 @@ public class PageRankFactory{
     }
 
     public static PageRank articleRankOf(
-            AllocationTracker tracker,
             Graph graph,
             double dampingFactor,
             LongStream sourceNodeIds,
+            AllocationTracker tracker,
             ExecutorService pool,
             int concurrency,
             int batchSize) {
@@ -160,13 +159,12 @@ public class PageRankFactory{
                 sourceNodeIds,
                 pageRankVariant
         );
-
     }
 
     public static PageRank eigenvectorCentralityOf(
-            AllocationTracker tracker,
             Graph graph,
             LongStream sourceNodeIds,
+            AllocationTracker tracker,
             ExecutorService pool,
             int concurrency,
             int batchSize

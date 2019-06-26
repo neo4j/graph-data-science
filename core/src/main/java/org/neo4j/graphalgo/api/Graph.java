@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.api;
 
+import org.neo4j.graphdb.Direction;
+
 /**
  * Composition of often used source interfaces
  *
@@ -43,6 +45,8 @@ public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterab
     default String getType() {
         return TYPE;
     }
+
+    Direction getLoadDirection();
 
     void canRelease(boolean canRelease);
 

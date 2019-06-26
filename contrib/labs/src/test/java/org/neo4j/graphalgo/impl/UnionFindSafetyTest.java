@@ -126,6 +126,11 @@ public final class UnionFindSafetyTest {
         }
 
         @Override
+        public Direction getLoadDirection() {
+            return Direction.OUTGOING;
+        }
+
+        @Override
         public void forEachRelationship(
                 final long nodeId,
                 final Direction direction,
