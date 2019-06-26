@@ -20,21 +20,45 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
+import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.util.Optional;
 
-public abstract class BaseAlgoProc<A extends Algorithm<A>> extends BaseProc<A> {
+public abstract class BaseAlgoProc<A extends Algorithm<A>> extends BaseProc {
 
     final A newAlgorithm(
             final ProcedureConfiguration config,
             final AllocationTracker tracker,
             final Optional<Graph> graph) {
         TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
-        return procedure(config, tracker, graph)
+        return algorithm(config, tracker, graph)
                 .withLog(log)
                 .withTerminationFlag(terminationFlag);
+    }
+
+    abstract A algorithm(
+            ProcedureConfiguration config,
+            AllocationTracker tracker,
+            Optional<Graph> graph
+    );
+
+    MemoryTreeWithDimensions memoryEstimation(final ProcedureConfiguration config) {
+        GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
+        GraphFactory graphFactory = loader.build(config.getGraphImpl());
+        A procedure = algorithm(config, AllocationTracker.EMPTY, Optional.empty());
+        MemoryEstimation estimation = MemoryEstimations.builder("graph with procedure")
+                .add(procedure.memoryEstimation())
+                .add(graphFactory.memoryEstimation())
+                .build();
+        MemoryTree memoryTree = estimation.apply(graphFactory.dimensions(), config.getConcurrency());
+        return new MemoryTreeWithDimensions(memoryTree, graphFactory.dimensions());
     }
 }

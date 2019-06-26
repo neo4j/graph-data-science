@@ -20,15 +20,10 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
-import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.AbstractResultBuilder;
@@ -38,10 +33,9 @@ import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Supplier;
 
-public abstract class BaseProc<P extends Assessable> {
+public abstract class BaseProc {
 
     @Context
     public GraphDatabaseAPI api;
@@ -55,12 +49,6 @@ public abstract class BaseProc<P extends Assessable> {
     abstract GraphLoader configureLoader(
             GraphLoader loader,
             ProcedureConfiguration config);
-
-    abstract P procedure(
-            ProcedureConfiguration config,
-            AllocationTracker tracker,
-            Optional<Graph> graph
-    );
 
     final ProcedureConfiguration newConfig(
             final String label,
@@ -127,18 +115,6 @@ public abstract class BaseProc<P extends Assessable> {
         try (ProgressTimer ignored = timer.get()) {
             return loadGraph(config, tracker);
         }
-    }
-
-    final MemoryTreeWithDimensions memoryEstimation(final ProcedureConfiguration config) {
-        GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
-        GraphFactory graphFactory = loader.build(config.getGraphImpl());
-        P procedure = procedure(config, AllocationTracker.EMPTY, Optional.empty());
-        MemoryEstimation estimation = MemoryEstimations.builder("graph with procedure")
-                .add(procedure.memoryEstimation())
-                .add(graphFactory.memoryEstimation())
-                .build();
-        MemoryTree memoryTree = estimation.apply(graphFactory.dimensions(), config.getConcurrency());
-        return new MemoryTreeWithDimensions(memoryTree, graphFactory.dimensions());
     }
 
 }

@@ -19,18 +19,8 @@
  */
 package org.neo4j.graphalgo;
 
-import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
-import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
-import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
-import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.ProcedureHandle;
@@ -126,39 +116,5 @@ public final class MemRecProc {
         }
 
         throw new IllegalArgumentException(message);
-    }
-
-    // best effort guess at loading a graph with probably settings
-    // since we don't have an algo to delegate to
-    private MemoryTreeWithDimensions gatherMemoryEstimation(ProcedureConfiguration config) {
-        final Direction direction = config.getDirection(Direction.OUTGOING);
-        final String nodeWeight = config.getString("nodeWeight", null);
-        final String nodeProperty = config.getString("nodeProperty", null);
-        boolean undirected = config.get("undirected", false);
-        boolean sorted = config.get("sorted", false);
-
-        GraphLoader graphLoader = new GraphLoader(api, Pools.DEFAULT)
-                .init(log, config.getNodeLabelOrQuery(), config.getRelationshipOrQuery(), config)
-                .withNodeStatement(config.getNodeLabelOrQuery())
-                .withRelationshipStatement(config.getRelationshipOrQuery())
-                .withOptionalRelationshipWeightsFromProperty(
-                        config.getWeightProperty(),
-                        config.getWeightPropertyDefaultValue(1.0))
-                .withOptionalNodeProperty(nodeProperty, 0.0d)
-                .withOptionalNodeWeightsFromProperty(nodeWeight, 1.0d)
-                .withOptionalNodeProperties(
-                        PropertyMapping.of(LabelPropagation.PARTITION_TYPE, nodeProperty, 0.0d),
-                        PropertyMapping.of(LabelPropagation.WEIGHT_TYPE, nodeWeight, 1.0d)
-                )
-                .withDirection(direction)
-                .withSort(sorted)
-                .asUndirected(undirected);
-
-        GraphFactory factory = graphLoader.build(config.getGraphImpl());
-        GraphDimensions dimensions = factory.dimensions();
-        int concurrency = config.getReadConcurrency();
-        MemoryEstimation estimation = factory.memoryEstimation();
-        MemoryTree memoryTree = estimation.apply(dimensions, concurrency);
-        return new MemoryTreeWithDimensions(memoryTree, dimensions);
     }
 }

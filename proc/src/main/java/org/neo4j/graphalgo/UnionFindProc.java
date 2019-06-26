@@ -295,7 +295,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
 
     @SuppressWarnings("unchecked")
     @Override
-    T procedure(
+    T algorithm(
             final ProcedureConfiguration config,
             final AllocationTracker tracker,
             final Optional<Graph> graph) {

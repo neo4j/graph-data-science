@@ -31,8 +31,11 @@ import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
+import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
+import org.neo4j.graphalgo.impl.results.MemRecResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -45,7 +48,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public final class LoadGraphProc {
+public final class LoadGraphProc extends BaseProc {
 
     @Context
     public GraphDatabaseAPI dbAPI;
@@ -72,22 +75,7 @@ public final class LoadGraphProc {
                 .overrideNodeLabelOrQuery(label)
                 .overrideRelationshipTypeOrQuery(relationshipType);
 
-        final Direction direction = configuration.getDirection(Direction.OUTGOING);
-        final String relationshipWeight = configuration.getString("relationshipWeight", null);
-        final String nodeWeight = configuration.getString("nodeWeight", null);
-        final String nodeProperty = configuration.getString("nodeProperty", null);
-
-        LoadGraphStats stats = new LoadGraphStats();
-        stats.name = name;
-        stats.graph = configuration.getString(ProcedureConstants.GRAPH_IMPL_PARAM, "heavy");
-        stats.undirected = configuration.get("undirected", false);
-        stats.sorted = configuration.get("sorted", false);
-        stats.loadNodes = label;
-        stats.loadRelationships = relationshipType;
-        stats.direction = direction.name();
-        stats.nodeWeight = nodeWeight;
-        stats.nodeProperty = nodeProperty;
-        stats.relationshipWeight = relationshipWeight;
+        LoadGraphStats stats = new LoadGraphStats(name, configuration);
 
         if (LoadGraphFactory.check(name)) {
             // return already loaded
@@ -97,23 +85,8 @@ public final class LoadGraphProc {
 
         try (ProgressTimer timer = ProgressTimer.start()) {
             Class<? extends GraphFactory> graphImpl = configuration.getGraphImpl();
-
-            Graph graph = new GraphLoader(dbAPI, Pools.DEFAULT)
-                    .init(log, configuration.getNodeLabelOrQuery(),
-                            configuration.getRelationshipOrQuery(), configuration)
-                    .withName(name)
-                    .withAllocationTracker(new AllocationTracker())
-                    .withOptionalRelationshipWeightsFromProperty(relationshipWeight, 1.0d)
-                    .withOptionalNodeProperty(nodeProperty, 0.0d)
-                    .withOptionalNodeWeightsFromProperty(nodeWeight, 1.0d)
-                    .withOptionalNodeProperties(
-                            PropertyMapping.of(LabelPropagation.PARTITION_TYPE, nodeProperty, 0.0d),
-                            PropertyMapping.of(LabelPropagation.WEIGHT_TYPE, nodeWeight, 1.0d)
-                    )
-                    .withDirection(direction)
-                    .withSort(stats.sorted)
-                    .asUndirected(stats.undirected)
-                    .load(graphImpl);
+            GraphLoader loader = newLoader(configuration, AllocationTracker.EMPTY);
+            Graph graph = loader.load(graphImpl);
 
             stats.nodes = graph.nodeCount();
             stats.relationships = graph.relationshipCount();
@@ -124,6 +97,46 @@ public final class LoadGraphProc {
         return Stream.of(stats);
     }
 
+    @Procedure(name = "algo.graph.load.memrec")
+    @Description("CALL algo.graph.load.memrec(" +
+                 "label:String, relationship:String" +
+                 "{direction:'OUT/IN/BOTH', undirected:true/false, sorted:true/false, nodeProperty:'value', nodeWeight:'weight', relationshipWeight: 'weight', graph:'heavy/huge'}) " +
+                 "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for the graph")
+    public Stream<MemRecResult> loadMemRec(
+            @Name(value = "label", defaultValue = "") String label,
+            @Name(value = "relationship", defaultValue = "") String relationshipType,
+            @Name(value = "config", defaultValue = "{}") Map<String, Object> configuration) {
+        ProcedureConfiguration config = newConfig(label, relationshipType, configuration);
+        GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
+        GraphFactory graphFactory = loader.build(config.getGraphImpl());
+        MemoryTree memoryTree = graphFactory.memoryEstimation().apply(graphFactory.dimensions(), config.getConcurrency());
+        return Stream.of(new MemRecResult(new MemoryTreeWithDimensions(memoryTree, graphFactory.dimensions())));
+    }
+
+    @Override
+    GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
+        final Direction direction = config.getDirection(Direction.OUTGOING);
+        final String nodeWeight = config.getString("nodeWeight", null);
+        final String nodeProperty = config.getString("nodeProperty", null);
+        final Boolean sorted = config.get("sorted", false);
+        final Boolean undirected = config.get("undirected", false);
+        return loader
+                .withNodeStatement(config.getNodeLabelOrQuery())
+                .withRelationshipStatement(config.getRelationshipOrQuery())
+                .withOptionalRelationshipWeightsFromProperty(
+                        config.getWeightProperty(),
+                        config.getWeightPropertyDefaultValue(1.0))
+                .withOptionalNodeProperty(nodeProperty, 0.0d)
+                .withOptionalNodeWeightsFromProperty(nodeWeight, 1.0d)
+                .withOptionalNodeProperties(
+                        PropertyMapping.of(LabelPropagation.PARTITION_TYPE, nodeProperty, 0.0d),
+                        PropertyMapping.of(LabelPropagation.WEIGHT_TYPE, nodeWeight, 1.0d)
+                )
+                .withDirection(direction)
+                .withSort(sorted)
+                .asUndirected(undirected);
+    }
+
     public static class LoadGraphStats {
         public String name, graph, direction;
         public boolean undirected;
@@ -131,6 +144,19 @@ public final class LoadGraphProc {
         public long nodes, relationships, loadMillis;
         public boolean alreadyLoaded;
         public String nodeWeight, relationshipWeight, nodeProperty, loadNodes, loadRelationships;
+
+        LoadGraphStats(String graphName, ProcedureConfiguration configuration) {
+            name = graphName;
+            graph = configuration.getString(ProcedureConstants.GRAPH_IMPL_PARAM, "heavy");
+            undirected = configuration.get("undirected", false);
+            sorted = configuration.get("sorted", false);
+            loadNodes = configuration.getNodeLabelOrQuery();
+            loadRelationships = configuration.getRelationshipOrQuery();
+            direction = configuration.getDirection(Direction.OUTGOING).name();
+            nodeWeight = configuration.getString("nodeWeight", null);
+            nodeProperty = configuration.getString("nodeProperty", null);;
+            relationshipWeight = configuration.getString("relationshipWeight", null);;
+        }
     }
 
     @Procedure(name = "algo.graph.remove")

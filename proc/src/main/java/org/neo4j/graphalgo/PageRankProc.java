@@ -106,12 +106,12 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
             "YIELD node, score - calculates page rank and streams results")
     public Stream<CentralityScore> pageRankStream(
             @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationship,
+            @Name(value = "relationship", defaultValue = "") String relationshipType,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         PageRankScore.Stats.Builder statsBuilder = new PageRankScore.Stats.Builder();
         AllocationTracker tracker = AllocationTracker.create();
-        ProcedureConfiguration configuration = newConfig(label, relationship, config);
+        ProcedureConfiguration configuration = newConfig(label, relationshipType, config);
         Graph graph = this.loadGraph(configuration, tracker, statsBuilder);
         statsBuilder.withNodes(graph.nodeCount());
         if (graph.nodeCount() == 0) {
@@ -128,10 +128,10 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
             "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for PageRank")
     public Stream<MemRecResult> pageRankMemrec(
             @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationship,
+            @Name(value = "relationship", defaultValue = "") String relationshipType,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        ProcedureConfiguration configuration = newConfig(label, relationship, config);
+        ProcedureConfiguration configuration = newConfig(label, relationshipType, config);
         MemoryTreeWithDimensions memoryEstimation = this.memoryEstimation(configuration);
         return Stream.of(new MemRecResult(memoryEstimation));
     }
@@ -153,7 +153,7 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
     }
 
     @Override
-    PageRank procedure(
+    PageRank algorithm(
             final ProcedureConfiguration config,
             final AllocationTracker tracker,
             final Optional<Graph> graph) {

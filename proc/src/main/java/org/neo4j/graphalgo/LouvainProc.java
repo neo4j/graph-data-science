@@ -180,7 +180,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
     }
 
     @Override
-    Louvain procedure(
+    Louvain algorithm(
             final ProcedureConfiguration procedureConfig,
             final AllocationTracker tracker,
             final Optional<Graph> graph) {
