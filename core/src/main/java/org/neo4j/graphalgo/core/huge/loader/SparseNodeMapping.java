@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
@@ -42,6 +43,27 @@ public final class SparseNodeMapping {
     private SparseNodeMapping(long capacity, long[][] pages) {
         this.capacity = capacity;
         this.pages = pages;
+    }
+
+    /**
+     * @param size highest id that we need to represent
+     *             (equals size in {@link SparseNodeMapping.Builder#create(long, AllocationTracker)})
+     * @param maxEntries number of identifiers we need to store
+     */
+    public static MemoryRange memoryEstimation(long size, long maxEntries) {
+        assert(maxEntries <= size);
+        int numPagesForSize = PageUtil.numPagesFor(size, PAGE_SHIFT, (int) PAGE_MASK);
+        int numPagesForMaxEntriesBestCase = PageUtil.numPagesFor(maxEntries, PAGE_SHIFT, (int) PAGE_MASK);
+
+        // Worst-case distribution assumes at least one entry per page
+        final long maxEntriesForWorstCase = Math.min(size, maxEntries * PAGE_SIZE);
+        int numPagesForMaxEntriesWorstCase = PageUtil.numPagesFor(maxEntriesForWorstCase, PAGE_SHIFT, (int) PAGE_MASK);
+
+        long classSize = MemoryUsage.sizeOfInstance(SparseNodeMapping.class);
+        long pagesSize = MemoryUsage.sizeOfObjectArray(numPagesForSize);
+        long minRequirements = numPagesForMaxEntriesBestCase * PAGE_SIZE_IN_BYTES;
+        long maxRequirements = numPagesForMaxEntriesWorstCase * PAGE_SIZE_IN_BYTES;
+        return MemoryRange.of(classSize + pagesSize).add(MemoryRange.of(minRequirements, maxRequirements));
     }
 
     public long get(long index) {

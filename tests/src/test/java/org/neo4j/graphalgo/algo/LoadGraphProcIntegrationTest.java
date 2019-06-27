@@ -140,13 +140,12 @@ public class LoadGraphProcIntegrationTest {
         String queryTemplate = "CALL algo.graph.load.memrec(%s, %s, {graph: $graph}) YIELD bytesMin, bytesMax";
         String query = String.format(queryTemplate, "null", "null");
 
-        System.out.println(db.execute(query, singletonMap("graph", graph)).resultAsString());
         runQuery(
                 query,
                 singletonMap("graph", graph),
                 row -> {
-                    assertEquals(303584, row.getNumber("bytesMin").longValue());
-                    assertEquals(303584, row.getNumber("bytesMax").longValue());
+                    assertEquals(303576, row.getNumber("bytesMin").longValue());
+                    assertEquals(303576, row.getNumber("bytesMax").longValue());
                 });
     }
 

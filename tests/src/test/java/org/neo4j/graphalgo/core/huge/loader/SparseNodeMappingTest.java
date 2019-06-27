@@ -164,7 +164,7 @@ public final class SparseNodeMappingTest extends RandomizedTest {
     @Test
     public void shouldComputeMemoryEstimationForBestCase() {
         long size = randomInt(Integer.MAX_VALUE);
-        final MemoryRange memoryRange = SparseLongArray.memoryEstimation(size, size);
+        final MemoryRange memoryRange = SparseNodeMapping.memoryEstimation(size, size);
         assertEquals(memoryRange.min, memoryRange.max);
     }
 
@@ -172,17 +172,17 @@ public final class SparseNodeMappingTest extends RandomizedTest {
     public void shouldComputeMemoryEstimationForWorstCase() {
         long size = randomInt(Integer.MAX_VALUE);
         long highestId = between(size + 4096, size * 4096);
-        final MemoryRange memoryRange = SparseLongArray.memoryEstimation(highestId, size);
+        final MemoryRange memoryRange = SparseNodeMapping.memoryEstimation(highestId, size);
         assertTrue(memoryRange.min < memoryRange.max);
     }
 
     @Test
     public void shouldComputeMemoryEstimation() {
-        assertEquals(MemoryRange.of(48L), SparseLongArray.memoryEstimation(0L, 0L));
-        assertEquals(MemoryRange.of(32840L), SparseLongArray.memoryEstimation(100L, 100L));
-        assertEquals(MemoryRange.of(97_689_088L), SparseLongArray.memoryEstimation(100_000_000_000L, 1L));
-        assertEquals(MemoryRange.of(177_714_832L, 327_937_656_304L), SparseLongArray.memoryEstimation(100_000_000_000L, 10_000_000L));
-        assertEquals(MemoryRange.of(898_077_664L, 800_488_297_696L), SparseLongArray.memoryEstimation(100_000_000_000L, 100_000_000L));
+        assertEquals(MemoryRange.of(40L), SparseNodeMapping.memoryEstimation(0L, 0L));
+        assertEquals(MemoryRange.of(32832L), SparseNodeMapping.memoryEstimation(100L, 100L));
+        assertEquals(MemoryRange.of(97_689_080L), SparseNodeMapping.memoryEstimation(100_000_000_000L, 1L));
+        assertEquals(MemoryRange.of(177_714_824L, 327_937_656_296L), SparseNodeMapping.memoryEstimation(100_000_000_000L, 10_000_000L));
+        assertEquals(MemoryRange.of(898_077_656L, 800_488_297_688L), SparseNodeMapping.memoryEstimation(100_000_000_000L, 100_000_000L));
     }
 
     @Test
@@ -201,14 +201,13 @@ public final class SparseNodeMappingTest extends RandomizedTest {
         // int numPagesForMaxEntriesWorstCase = PageUtil.numPagesFor(maxEntriesForWorstCase, PAGE_SHIFT, (int) PAGE_MASK);
         int numPagesForMaxEntriesWorstCase = (int) Math.ceil((double) maxEntriesWorstCase / pageSize);
 
-        //long classSize = MemoryUsage.sizeOfInstance(SparseLongArray.class);
+        //long classSize = MemoryUsage.sizeOfInstance(SparseNodeMapping.class);
         //  private final long capacity;
         //  private final long[][] pages;
         //  private final AllocationTracker tracker;
         long classSizeComponents =
                 8L /* capacity */ +
                 4L /* ref for long[][] array */ +
-                4L /* ref for tracker */ +
                 12L /* object header */;
 
         long classSize = BitUtil.align(classSizeComponents, 8 /* object alignment */);
@@ -227,7 +226,7 @@ public final class SparseNodeMappingTest extends RandomizedTest {
         long min = classSize + pagesSize + minRequirements;
         long max = classSize + pagesSize + maxRequirements;
 
-        assertEquals(MemoryRange.of(min, max), SparseLongArray.memoryEstimation(size, maxEntries));
+        assertEquals(MemoryRange.of(min, max), SparseNodeMapping.memoryEstimation(size, maxEntries));
     }
 
     @SuppressWarnings("unchecked")

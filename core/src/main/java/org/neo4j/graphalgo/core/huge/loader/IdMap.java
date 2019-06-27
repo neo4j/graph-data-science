@@ -43,7 +43,7 @@ public final class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
             .perNode("Neo4j identifiers", HugeLongArray::memoryEstimation)
             .rangePerGraphDimension(
                     "Mapping from Neo4j identifiers to internal identifiers",
-                     graphDimension -> SparseLongArray.memoryEstimation(graphDimension.highestNeoId(), graphDimension.nodeCount()))
+                     graphDimension -> SparseNodeMapping.memoryEstimation(graphDimension.highestNeoId(), graphDimension.nodeCount()))
             .build();
 
     private long nodeCount;
