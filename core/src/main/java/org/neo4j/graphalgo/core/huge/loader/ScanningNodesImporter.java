@@ -43,7 +43,6 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
 
     private Map<String, HugeNodePropertiesBuilder> builders;
     private HugeLongArrayBuilder idMapBuilder;
-    private SparseNodeMapping.Builder nodeMappingBuilder;
 
     ScanningNodesImporter(
             GraphDatabaseAPI api,
@@ -62,11 +61,9 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     @Override
     ImportingThreadPool.CreateScanner creator(
             long nodeCount,
-            long highestNodeId,
             ImportSizing sizing,
             AbstractStorePageCacheScanner<NodeRecord> scanner) {
         idMapBuilder = HugeLongArrayBuilder.of(nodeCount, tracker);
-        nodeMappingBuilder = SparseNodeMapping.Builder.create(highestNodeId, tracker);
         builders = propertyBuilders(nodeCount);
         return NodesScanner.of(
                 api,
@@ -74,13 +71,16 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
                 dimensions.labelId(),
                 progress,
                 idMapBuilder,
-                nodeMappingBuilder,
                 builders.values());
     }
 
     @Override
     IdsAndProperties build() {
-        IdMap hugeIdMap = HugeIdMapBuilder.build(idMapBuilder, nodeMappingBuilder);
+        IdMap hugeIdMap = HugeIdMapBuilder.build(
+                idMapBuilder,
+                dimensions.allNodesCount(),
+                concurrency,
+                tracker);
         Map<String, HugeWeightMapping> nodeProperties = new HashMap<>();
         for (PropertyMapping propertyMapping : propertyMappings) {
             HugeNodePropertiesBuilder builder = builders.get(propertyMapping.propertyName);

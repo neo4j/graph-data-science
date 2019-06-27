@@ -45,7 +45,6 @@ final class NodesScanner extends StatementAction implements RecordScanner {
             int label,
             ImportProgress progress,
             HugeLongArrayBuilder idMapBuilder,
-            SparseNodeMapping.Builder nodeMappingBuilder,
             Collection<HugeNodePropertiesBuilder> nodePropertyBuilders) {
         return new NodesScanner.Creator(
                 api,
@@ -53,7 +52,6 @@ final class NodesScanner extends StatementAction implements RecordScanner {
                 label,
                 progress,
                 idMapBuilder,
-                nodeMappingBuilder,
                 nodePropertyBuilders
         );
     }
@@ -64,7 +62,6 @@ final class NodesScanner extends StatementAction implements RecordScanner {
         private final int label;
         private final ImportProgress progress;
         private final HugeLongArrayBuilder idMapBuilder;
-        private final SparseNodeMapping.Builder nodeMappingBuilder;
         private final IntObjectMap<HugeNodePropertiesBuilder> nodePropertyBuilders;
 
         Creator(
@@ -73,14 +70,12 @@ final class NodesScanner extends StatementAction implements RecordScanner {
                 int label,
                 ImportProgress progress,
                 HugeLongArrayBuilder idMapBuilder,
-                SparseNodeMapping.Builder nodeMappingBuilder,
                 Collection<HugeNodePropertiesBuilder> nodePropertyBuilders) {
             this.api = api;
             this.scanner = scanner;
             this.label = label;
             this.progress = progress;
             this.idMapBuilder = idMapBuilder;
-            this.nodeMappingBuilder = nodeMappingBuilder;
             this.nodePropertyBuilders = mapBuilders(nodePropertyBuilders);
         }
 
@@ -93,7 +88,6 @@ final class NodesScanner extends StatementAction implements RecordScanner {
                     index,
                     progress,
                     idMapBuilder,
-                    nodeMappingBuilder,
                     nodePropertyBuilders
             );
         }
@@ -121,7 +115,6 @@ final class NodesScanner extends StatementAction implements RecordScanner {
     private final int scannerIndex;
     private final ImportProgress progress;
     private final HugeLongArrayBuilder idMapBuilder;
-    private final SparseNodeMapping.Builder nodeMappingBuilder;
     private final IntObjectMap<HugeNodePropertiesBuilder> nodePropertyBuilders;
 
     private volatile long relationshipsImported;
@@ -133,7 +126,6 @@ final class NodesScanner extends StatementAction implements RecordScanner {
             int threadIndex,
             ImportProgress progress,
             HugeLongArrayBuilder idMapBuilder,
-            SparseNodeMapping.Builder nodeMappingBuilder,
             IntObjectMap<HugeNodePropertiesBuilder> nodePropertyBuilders) {
         super(api);
         this.nodeStore = (NodeStore) scanner.store();
@@ -142,7 +134,6 @@ final class NodesScanner extends StatementAction implements RecordScanner {
         this.scannerIndex = threadIndex;
         this.progress = progress;
         this.idMapBuilder = idMapBuilder;
-        this.nodeMappingBuilder = nodeMappingBuilder;
         this.nodePropertyBuilders = nodePropertyBuilders;
     }
 
@@ -192,20 +183,12 @@ final class NodesScanner extends StatementAction implements RecordScanner {
             return 0;
         }
 
-        SparseNodeMapping.Builder neoToGraphIds = this.nodeMappingBuilder;
         long[] batch = buffer.batch();
         long[] properties = buffer.properties();
         int batchOffset = 0;
         while (adder.nextBuffer()) {
             int length = adder.length;
             System.arraycopy(batch, batchOffset, adder.buffer, adder.offset, length);
-
-            long batchStart = adder.start;
-            for (int i = 0; i < length; i++) {
-                long graphId = batchOffset + i + batchStart;
-                long neoId = batch[batchOffset + i];
-                neoToGraphIds.set(neoId, graphId);
-            }
 
             if (properties != null) {
                 long start = adder.start;

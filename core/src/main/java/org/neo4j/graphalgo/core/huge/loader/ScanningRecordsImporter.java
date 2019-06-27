@@ -43,7 +43,7 @@ abstract class ScanningRecordsImporter<Record extends AbstractBaseRecord, T> {
     final GraphDatabaseAPI api;
     final GraphDimensions dimensions;
     private final ExecutorService threadPool;
-    private final int concurrency;
+    final int concurrency;
 
     ScanningRecordsImporter(
             AbstractStorePageCacheScanner.Access<Record> access,
@@ -68,7 +68,7 @@ abstract class ScanningRecordsImporter<Record extends AbstractBaseRecord, T> {
         AbstractStorePageCacheScanner<Record> scanner =
                 new AbstractStorePageCacheScanner<>(DEFAULT_PREFETCH_SIZE, api, access);
 
-        ImportingThreadPool.CreateScanner creator = creator(nodeCount, dimensions.allNodesCount(), sizing, scanner);
+        ImportingThreadPool.CreateScanner creator = creator(nodeCount, sizing, scanner);
         ImportingThreadPool pool = new ImportingThreadPool(numberOfThreads, creator);
         ImportResult importResult = pool.run(threadPool);
 
@@ -100,7 +100,6 @@ abstract class ScanningRecordsImporter<Record extends AbstractBaseRecord, T> {
 
     abstract ImportingThreadPool.CreateScanner creator(
             long nodeCount,
-            long highestNodeId,
             ImportSizing sizing,
             AbstractStorePageCacheScanner<Record> scanner);
 
