@@ -96,7 +96,7 @@ public final class MemoryRange {
     }
 
     public boolean isEmpty() {
-        return this == NULL_RANGE || (min == 0 && max == 0);
+        return min == 0 && max == 0;
     }
 
     @Override
