@@ -298,7 +298,7 @@ public final class PageRankTest {
                 ParallelUtil.DEFAULT_BATCH_SIZE);
 
         long partitionSize = BitUtil.ceilDiv(nodeCount, concurrency);
-        final MemoryRange actual = pageRank.memoryEstimation().apply(dimensions, concurrency).memoryUsage();
+        final MemoryRange actual = pageRank.memoryEstimation().estimate(dimensions, concurrency).memoryUsage();
         final MemoryRange expected = MemoryRange.of(
                 88L /* PageRank.class */ +
                 32L /* ComputeSteps.class */ +

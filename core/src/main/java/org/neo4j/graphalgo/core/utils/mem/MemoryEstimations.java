@@ -356,11 +356,6 @@ public final class MemoryEstimations {
             return this;
         }
 
-        public Builder perNode(final String description, final MemoryEstimation subComponent) {
-            components.add(new AndThenEstimation(description, subComponent, (mem, dim, concurrency) -> mem.times(dim.nodeCount())));
-            return this;
-        }
-
         /**
          * Adds a new sub-component to the builder.
          *
@@ -411,6 +406,22 @@ public final class MemoryEstimations {
             components.add(new LeafEstimation(
                     description,
                     (dimensions, concurrency) -> fn.apply(dimensions)));
+            return this;
+        }
+
+        /**
+         * Adds a new sub-component to the builder.
+         *
+         * The memory consumption is being computed by multiplying the given bytes with the number of threads.
+         *
+         * @param description description of the sub-component
+         * @param bytes       memory consumption in bytes
+         * @return this builder
+         */
+        public Builder perThread(final String description, final long bytes) {
+            components.add(new LeafEstimation(
+                    description,
+                    (dimensions, concurrency) -> MemoryRange.of(concurrency * bytes)));
             return this;
         }
 

@@ -19,10 +19,33 @@
  */
 package org.neo4j.graphalgo.core.utils.mem;
 
+import org.neo4j.graphalgo.core.GraphDimensions;
+
 public interface Assessable {
 
+    /**
+     * Returns an estimation about the memory consumption of that algorithm. The memory estimation can be used to
+     * compute the actual consumption depending on {@link GraphDimensions} and concurrency.
+     *
+     * @return memory estimation
+     * @see MemoryEstimations
+     * @see MemoryEstimation#estimate(GraphDimensions, int)
+     */
     default MemoryEstimation memoryEstimation() {
         return MemoryEstimations.empty();
+    }
+
+    /**
+     * Computes the memory consumption for the algorithm depending on the given {@link GraphDimensions} and concurrency.
+     *
+     * This is shorthand for {@link MemoryEstimation#estimate(GraphDimensions, int)}.
+     *
+     * @param dimensions  graph dimensions
+     * @param concurrency concurrency which is used to run the algorithm
+     * @return memory requirements
+     */
+    default MemoryTree memoryEstimation(GraphDimensions dimensions, int concurrency) {
+        return memoryEstimation().estimate(dimensions, concurrency);
     }
 
 }

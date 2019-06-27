@@ -58,7 +58,7 @@ public abstract class BaseAlgoProc<A extends Algorithm<A>> extends BaseProc {
                 .add(procedure.memoryEstimation())
                 .add(graphFactory.memoryEstimation())
                 .build();
-        MemoryTree memoryTree = estimation.apply(graphFactory.dimensions(), config.getConcurrency());
+        MemoryTree memoryTree = estimation.estimate(graphFactory.dimensions(), config.getConcurrency());
         return new MemoryTreeWithDimensions(memoryTree, graphFactory.dimensions());
     }
 }

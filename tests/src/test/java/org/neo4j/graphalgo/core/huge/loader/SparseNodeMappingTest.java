@@ -178,11 +178,11 @@ public final class SparseNodeMappingTest extends RandomizedTest {
 
     @Test
     public void shouldComputeMemoryEstimation() {
-        assertEquals(MemoryRange.of(48L), SparseLongArray.memoryRequirements(0L, 0L));
-        assertEquals(MemoryRange.of(32840L), SparseLongArray.memoryRequirements(100L, 100L));
-        assertEquals(MemoryRange.of(97_689_088L), SparseLongArray.memoryRequirements(100_000_000_000L, 1L));
-        assertEquals(MemoryRange.of(177_714_832L, 327_937_656_304L), SparseLongArray.memoryRequirements(100_000_000_000L, 10_000_000L));
-        assertEquals(MemoryRange.of(898_077_664L, 800_488_297_696L), SparseLongArray.memoryRequirements(100_000_000_000L, 100_000_000L));
+        assertEquals(MemoryRange.of(48L), SparseLongArray.memoryEstimation(0L, 0L));
+        assertEquals(MemoryRange.of(32840L), SparseLongArray.memoryEstimation(100L, 100L));
+        assertEquals(MemoryRange.of(97_689_088L), SparseLongArray.memoryEstimation(100_000_000_000L, 1L));
+        assertEquals(MemoryRange.of(177_714_832L, 327_937_656_304L), SparseLongArray.memoryEstimation(100_000_000_000L, 10_000_000L));
+        assertEquals(MemoryRange.of(898_077_664L, 800_488_297_696L), SparseLongArray.memoryEstimation(100_000_000_000L, 100_000_000L));
     }
 
     @Test

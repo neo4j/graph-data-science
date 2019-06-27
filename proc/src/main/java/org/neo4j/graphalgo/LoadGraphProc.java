@@ -109,7 +109,7 @@ public final class LoadGraphProc extends BaseProc {
         ProcedureConfiguration config = newConfig(label, relationshipType, configuration);
         GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
         GraphFactory graphFactory = loader.build(config.getGraphImpl());
-        MemoryTree memoryTree = graphFactory.memoryEstimation().apply(graphFactory.dimensions(), config.getConcurrency());
+        MemoryTree memoryTree = graphFactory.memoryEstimation().estimate(graphFactory.dimensions(), config.getConcurrency());
         return Stream.of(new MemRecResult(new MemoryTreeWithDimensions(memoryTree, graphFactory.dimensions())));
     }
 

@@ -136,13 +136,13 @@ public class PagedDisjointSetStructTest {
     @Test
     public void shouldComputeMemoryEstimation() {
         GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
-        assertEquals(MemoryRange.of(112), PagedDisjointSetStruct.memoryEstimation().apply(dimensions0, 1).memoryUsage());
+        assertEquals(MemoryRange.of(112), PagedDisjointSetStruct.memoryEstimation().estimate(dimensions0, 1).memoryUsage());
 
         GraphDimensions dimensions100 = new GraphDimensions.Builder().setNodeCount(100).build();
-        assertEquals(MemoryRange.of(1712), PagedDisjointSetStruct.memoryEstimation().apply(dimensions100, 1).memoryUsage());
+        assertEquals(MemoryRange.of(1712), PagedDisjointSetStruct.memoryEstimation().estimate(dimensions100, 1).memoryUsage());
 
         GraphDimensions dimensions100B = new GraphDimensions.Builder().setNodeCount(100_000_000_000L).build();
-        assertEquals(MemoryRange.of(1600244140768L), PagedDisjointSetStruct.memoryEstimation().apply(dimensions100B, 1).memoryUsage());
+        assertEquals(MemoryRange.of(1600244140768L), PagedDisjointSetStruct.memoryEstimation().estimate(dimensions100B, 1).memoryUsage());
     }
 
     public static int[] set(int... elements) {

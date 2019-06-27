@@ -64,14 +64,14 @@ public final class HugeLongArrayTest extends HugeArrayTestBase<long[], Long, Hug
 
     @Test
     public void shouldComputeMemoryEstimation() {
-        assertEquals(40, HugeLongArray.memoryRequirements(0L));
-        assertEquals(840, HugeLongArray.memoryRequirements(100L));
-        assertEquals(800_122_070_368L, HugeLongArray.memoryRequirements(100_000_000_000L));
+        assertEquals(40, HugeLongArray.memoryEstimation(0L));
+        assertEquals(840, HugeLongArray.memoryEstimation(100L));
+        assertEquals(800_122_070_368L, HugeLongArray.memoryEstimation(100_000_000_000L));
     }
 
     @Test(expected = AssertionError.class)
     public void shouldFailForNegativeMemRecSize() {
-        HugeLongArray.memoryRequirements(-1L);
+        HugeLongArray.memoryEstimation(-1L);
     }
 
     @Override
