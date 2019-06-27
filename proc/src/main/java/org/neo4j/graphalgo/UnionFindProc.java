@@ -257,9 +257,11 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
             final AllocationTracker tracker,
             final ProcedureConfiguration configuration, final Graph graph) {
         T algo = newAlgorithm(graph, configuration, tracker);
-        final PagedDisjointSetStruct algoResult = builder.timeEval(() -> Double.isFinite(algo.threshold())
-                ? algo.compute(algo.threshold())
-                : algo.compute());
+        final PagedDisjointSetStruct algoResult = runWithExceptionLogging(
+                "Union failed",
+                () -> builder.timeEval(() -> Double.isFinite(algo.threshold())
+                        ? algo.compute(algo.threshold())
+                        : algo.compute()));
 
         log.info("UnionFind: overall memory usage: %s", tracker.getUsageString());
 

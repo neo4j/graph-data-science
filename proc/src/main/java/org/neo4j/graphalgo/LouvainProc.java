@@ -184,7 +184,10 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
 
         Louvain algo = newAlgorithm(graph, configuration, tracker);
 
-        final Louvain louvain = statsBuilder.timeEval((Supplier<Louvain>) algo::compute);
+        final Louvain louvain = runWithExceptionLogging(
+                "Louvain failed",
+                () -> statsBuilder.timeEval((Supplier<Louvain>) algo::compute));
+
         statsBuilder.randomNeighbor(algo.randomNeighborSelection());
 
         graph.release();
