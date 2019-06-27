@@ -99,7 +99,7 @@ public abstract class BaseAlgoProc<A extends ConfiguredAlgorithm<A, Conf>, Conf>
         return newLoader(newConfig(label, relationship, config), tracker);
     }
 
-    final Graph loadGraph(
+    private Graph loadGraph(
             final ProcedureConfiguration config,
             final AllocationTracker tracker) {
         return newLoader(config, tracker).load(config.getGraphImpl());
