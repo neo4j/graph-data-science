@@ -132,7 +132,7 @@ public abstract class BaseAlgoProc<A extends ConfiguredAlgorithm<A, Conf>, Conf>
                 .add(algo.memoryEstimation(algoWithConfig.conf()))
                 .add(graphFactory.memoryEstimation())
                 .build();
-        return estimation.apply(graphFactory.dimensions(), config.getConcurrency());
+        return estimation.estimate(graphFactory.dimensions(), config.getConcurrency());
     }
 
     final AlgoWithConfig<A, Conf> newAlgorithm(

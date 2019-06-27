@@ -45,5 +45,5 @@ public interface MemoryEstimation {
         return MemoryEstimations.andThen(this, memoryRange -> memoryRange.times(factor));
     }
 
-    MemoryTree apply(GraphDimensions dimensions, int concurrency);
+    MemoryTree estimate(GraphDimensions dimensions, int concurrency);
 }

@@ -38,12 +38,12 @@ public final class MemoryEstimations {
 
     @FunctionalInterface
     public interface MemoryRangeModifier {
-        MemoryRange apply(MemoryRange range, GraphDimensions dimensions, int concurrency);
+        MemoryRange modify(MemoryRange range, GraphDimensions dimensions, int concurrency);
     }
 
     @FunctionalInterface
     public interface MemoryEstimationSetup {
-        MemoryEstimation apply(GraphDimensions dimensions, int concurrency);
+        MemoryEstimation setup(GraphDimensions dimensions, int concurrency);
     }
 
     public static MemoryEstimation empty() {
@@ -57,7 +57,9 @@ public final class MemoryEstimations {
      * @return memory estimation
      */
     public static MemoryEstimation of(final Class<?> instanceType) {
-        return new LeafEstimation("instance", MemoryResidents.fixed(MemoryRange.of(sizeOfInstance(instanceType))));
+        return new LeafEstimation(
+                "instance",
+                (dimensions, concurrency) -> MemoryRange.of(sizeOfInstance(instanceType)));
     }
 
     /**
@@ -66,7 +68,7 @@ public final class MemoryEstimations {
      * Inputs to that function are the {@link GraphDimensions} and the number of available threads.
      *
      * @param description description of the sub-component
-     * @param resident function to compute a {@link MemoryRange}
+     * @param resident    function to compute a {@link MemoryRange}
      * @return memory estimation
      */
     public static MemoryEstimation of(final String description, final MemoryResident resident) {
@@ -77,7 +79,7 @@ public final class MemoryEstimations {
      * Creates a {@link MemoryEstimation} for a given collection of sub-components.
      *
      * @param description description of the sub-component
-     * @param components sub-components to add
+     * @param components  sub-components to add
      * @return memory estimation
      */
     private static MemoryEstimation of(final String description, final Collection<MemoryEstimation> components) {
@@ -90,7 +92,7 @@ public final class MemoryEstimations {
      * Inputs to that function are the {@link GraphDimensions} and the number of available threads.
      *
      * @param description description of the sub-component
-     * @param setup function to compute a {@link MemoryEstimation}
+     * @param setup       function to compute a {@link MemoryEstimation}
      * @return memory estimation
      */
     public static MemoryEstimation setup(final String description, MemoryEstimationSetup setup) {
@@ -98,12 +100,12 @@ public final class MemoryEstimations {
     }
 
     /**
-     * Creates a {@link MemoryEstimation} using the given {@link MemoryEstimationSetup} function.
+     * Creates a {@link MemoryEstimation} using the given function.
      *
      * Inputs to that function are the {@link GraphDimensions}.
      *
      * @param description description of the sub-component
-     * @param fn function to compute a {@link MemoryEstimation}
+     * @param fn          function to compute a {@link MemoryEstimation}
      * @return memory estimation
      */
     public static MemoryEstimation setup(final String description, Function<GraphDimensions, MemoryEstimation> fn) {
@@ -116,7 +118,7 @@ public final class MemoryEstimations {
      * The description is inherited from {@code delegate.description()}.
      *
      * @param delegate memory estimation to modify
-     * @param andThen function to update the memory estimation
+     * @param andThen  function to update the memory estimation
      * @return updated memory estimation
      */
     public static MemoryEstimation andThen(MemoryEstimation delegate, MemoryRangeModifier andThen) {
@@ -129,7 +131,7 @@ public final class MemoryEstimations {
      * The description is inherited from {@code delegate.description()}.
      *
      * @param delegate memory estimation to modify
-     * @param andThen function to update the memory range of the delegate
+     * @param andThen  function to update the memory range of the delegate
      * @return updated memory estimation
      */
     public static MemoryEstimation andThen(MemoryEstimation delegate, UnaryOperator<MemoryRange> andThen) {
@@ -140,11 +142,14 @@ public final class MemoryEstimations {
      * Updates a given {@link MemoryEstimation} by applying a {@link MemoryRangeModifier}.
      *
      * @param description new description of the memory estimation
-     * @param delegate memory estimation to modify
-     * @param andThen function to update the memory estimation
+     * @param delegate    memory estimation to modify
+     * @param andThen     function to update the memory estimation
      * @return updated memory estimation
      */
-    public static MemoryEstimation andThen(final String description, MemoryEstimation delegate, MemoryRangeModifier andThen) {
+    public static MemoryEstimation andThen(
+            final String description,
+            MemoryEstimation delegate,
+            MemoryRangeModifier andThen) {
         return new AndThenEstimation(description, delegate, andThen);
     }
 
@@ -181,7 +186,7 @@ public final class MemoryEstimations {
      * Creates a new {@link Builder} using the given description and class type.
      *
      * @param description description of the component
-     * @param type class type
+     * @param type        class type
      * @return builder
      */
     public static Builder builder(final String description, final Class<?> type) {
@@ -279,11 +284,13 @@ public final class MemoryEstimations {
          * </pre>
          *
          * @param description description of the sub-component
-         * @param type class type
+         * @param type        class type
          * @return this builder
          */
         public Builder field(final String description, final Class<?> type) {
-            components.add(new LeafEstimation(description, MemoryResidents.fixed(MemoryRange.of(sizeOfInstance(type)))));
+            components.add(new LeafEstimation(
+                    description,
+                    (dimensions, concurrency) -> MemoryRange.of(sizeOfInstance(type))));
             return this;
         }
 
@@ -291,11 +298,13 @@ public final class MemoryEstimations {
          * Adds a fixed amount of memory consumption in bytes to the builder.
          *
          * @param description description of the sub-component
-         * @param bytes memory consumption in bytes
+         * @param bytes       memory consumption in bytes
          * @return this builder
          */
         public Builder fixed(final String description, final long bytes) {
-            components.add(new LeafEstimation(description, MemoryResidents.fixed(MemoryRange.of(bytes))));
+            components.add(new LeafEstimation(
+                    description,
+                    (dimensions, concurrency) -> MemoryRange.of(bytes)));
             return this;
         }
 
@@ -303,11 +312,13 @@ public final class MemoryEstimations {
          * Adds a fixed memory range to the builder.
          *
          * @param description description of the sub-component
-         * @param range memory range
+         * @param range       memory range
          * @return this builder
          */
         public Builder fixed(final String description, final MemoryRange range) {
-            components.add(new LeafEstimation(description, MemoryResidents.fixed(range)));
+            components.add(new LeafEstimation(
+                    description,
+                    (dimensions, concurrency) -> range));
             return this;
         }
 
@@ -317,11 +328,14 @@ public final class MemoryEstimations {
          * The given memory estimation is multiplied by the number of nodes in the graph.
          *
          * @param description description of the sub-component
-         * @param estimation new sub-component
+         * @param estimation  new sub-component
          * @return this builder
          */
         public Builder perNode(final String description, final MemoryEstimation estimation) {
-            components.add(new AndThenEstimation(description, estimation, (mem, dim, concurrency) -> mem.times(dim.hugeNodeCount())));
+            components.add(new AndThenEstimation(
+                    description,
+                    estimation,
+                    (mem, dim, concurrency) -> mem.times(dim.hugeNodeCount())));
             return this;
         }
 
@@ -332,11 +346,13 @@ public final class MemoryEstimations {
          * The input to that function is the number of nodes within the graph.
          *
          * @param description description of the sub-component
-         * @param fn function to compute memory consumption in bytes
+         * @param fn          function to compute memory consumption in bytes
          * @return this builder
          */
         public Builder perNode(final String description, final LongUnaryOperator fn) {
-            components.add(new LeafEstimation(description, MemoryResidents.perNode(fn)));
+            components.add(new LeafEstimation(
+                    description,
+                    (dimensions, concurrency) -> MemoryRange.of(fn.applyAsLong(dimensions.nodeCount()))));
             return this;
         }
 
@@ -347,11 +363,13 @@ public final class MemoryEstimations {
          * The input to that function is the number of nodes within the graph.
          *
          * @param description description of the sub-component
-         * @param fn function to compute memory consumption
+         * @param fn          function to compute memory consumption
          * @return this builder
          */
         public Builder rangePerNode(final String description, final LongFunction<MemoryRange> fn) {
-            components.add(new LeafEstimation(description, MemoryResidents.perNode(fn)));
+            components.add(new LeafEstimation(
+                    description,
+                    (dimensions, concurrency) -> fn.apply(dimensions.nodeCount())));
             return this;
         }
 
@@ -362,11 +380,13 @@ public final class MemoryEstimations {
          * The input to that function are the {@link GraphDimensions} of the graph.
          *
          * @param description description of the sub-component
-         * @param fn function to compute memory consumption in bytes
+         * @param fn          function to compute memory consumption in bytes
          * @return this builder
          */
         public Builder perGraphDimension(final String description, final ToLongFunction<GraphDimensions> fn) {
-            components.add(new LeafEstimation(description, MemoryResidents.perDim(fn)));
+            components.add(new LeafEstimation(
+                    description,
+                    (dimensions, concurrency) -> MemoryRange.of(fn.applyAsLong(dimensions))));
             return this;
         }
 
@@ -377,11 +397,15 @@ public final class MemoryEstimations {
          * The input to that function are the {@link GraphDimensions} of the graph.
          *
          * @param description description of the sub-component
-         * @param fn function to compute memory consumption
+         * @param fn          function to compute memory consumption
          * @return this builder
          */
-        public Builder rangePerGraphDimension(final String description, final Function<GraphDimensions, MemoryRange> fn) {
-            components.add(new LeafEstimation(description, MemoryResidents.perDim(fn)));
+        public Builder rangePerGraphDimension(
+                final String description,
+                final Function<GraphDimensions, MemoryRange> fn) {
+            components.add(new LeafEstimation(
+                    description,
+                    (dimensions, concurrency) -> fn.apply(dimensions)));
             return this;
         }
 
@@ -392,11 +416,13 @@ public final class MemoryEstimations {
          * The input to that function is the number of available threads.
          *
          * @param description description of the sub-component
-         * @param fn function to compute memory consumption in bytes
+         * @param fn          function to compute memory consumption in bytes
          * @return this builder
          */
         public Builder perThread(final String description, final IntToLongFunction fn) {
-            components.add(new LeafEstimation(description, MemoryResidents.perThread(fn)));
+            components.add(new LeafEstimation(
+                    description,
+                    (dimensions, concurrency) -> MemoryRange.of(fn.applyAsLong(concurrency))));
             return this;
         }
 
@@ -406,11 +432,14 @@ public final class MemoryEstimations {
          * The given memory estimation is multiplied by the number of available threads.
          *
          * @param description description of the sub-component
-         * @param estimation new sub-component
+         * @param estimation  new sub-component
          * @return this builder
          */
         public Builder perThread(final String description, final MemoryEstimation estimation) {
-            components.add(new AndThenEstimation(description, estimation, (mem, dim, concurrency) -> mem.times(concurrency)));
+            components.add(new AndThenEstimation(
+                    description,
+                    estimation,
+                    (mem, dim, concurrency) -> mem.times(concurrency)));
             return this;
         }
 
@@ -426,7 +455,7 @@ public final class MemoryEstimations {
         }
 
         @Override
-        public MemoryTree apply(final GraphDimensions dimensions, final int concurrency) {
+        public MemoryTree estimate(final GraphDimensions dimensions, final int concurrency) {
             return MemoryTree.empty();
         }
     };
@@ -463,7 +492,7 @@ final class LeafEstimation extends BaseEstimation {
     }
 
     @Override
-    public MemoryTree apply(final GraphDimensions dimensions, final int concurrency) {
+    public MemoryTree estimate(final GraphDimensions dimensions, final int concurrency) {
         MemoryRange memoryRange = resident.estimateMemoryUsage(dimensions, concurrency);
         return new LeafTree(description(), memoryRange);
     }
@@ -479,9 +508,9 @@ final class SetupEstimation extends BaseEstimation {
     }
 
     @Override
-    public MemoryTree apply(final GraphDimensions dimensions, final int concurrency) {
-        MemoryEstimation estimation = setup.apply(dimensions, concurrency);
-        return estimation.apply(dimensions, concurrency);
+    public MemoryTree estimate(final GraphDimensions dimensions, final int concurrency) {
+        MemoryEstimation estimation = setup.setup(dimensions, concurrency);
+        return estimation.estimate(dimensions, concurrency);
     }
 }
 
@@ -506,9 +535,9 @@ final class AndThenEstimation extends BaseEstimation {
     }
 
     @Override
-    public MemoryTree apply(final GraphDimensions dimensions, final int concurrency) {
-        MemoryTree memoryTree = delegate.apply(dimensions, concurrency);
-        return new AndThenTree(description(), memoryTree, range -> andThen.apply(range, dimensions, concurrency));
+    public MemoryTree estimate(final GraphDimensions dimensions, final int concurrency) {
+        MemoryTree memoryTree = delegate.estimate(dimensions, concurrency);
+        return new AndThenTree(description(), memoryTree, range -> andThen.modify(range, dimensions, concurrency));
     }
 }
 
@@ -528,9 +557,9 @@ final class CompositeEstimation extends BaseEstimation {
     }
 
     @Override
-    public MemoryTree apply(final GraphDimensions dimensions, final int concurrency) {
+    public MemoryTree estimate(final GraphDimensions dimensions, final int concurrency) {
         List<MemoryTree> newComponent = components.stream()
-                .map(e -> e.apply(dimensions, concurrency))
+                .map(e -> e.estimate(dimensions, concurrency))
                 .collect(Collectors.toList());
         return new CompositeTree(description(), newComponent);
     }
@@ -550,8 +579,8 @@ final class DelegateEstimation extends BaseEstimation {
     }
 
     @Override
-    public MemoryTree apply(final GraphDimensions dimensions, final int concurrency) {
-        return new DelegateTree(delegate.apply(dimensions, concurrency), description());
+    public MemoryTree estimate(final GraphDimensions dimensions, final int concurrency) {
+        return new DelegateTree(delegate.estimate(dimensions, concurrency), description());
     }
 }
 

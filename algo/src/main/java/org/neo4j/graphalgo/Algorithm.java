@@ -19,10 +19,12 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.logging.Log;
 
 /**
@@ -38,8 +40,29 @@ public abstract class Algorithm<ME extends Algorithm<ME>> implements Termination
 
     public abstract ME release();
 
+    /**
+     * Returns an estimation about the memory consumption of that algorithm. The memory estimation can be used to
+     * compute the actual consumption depending on {@link GraphDimensions} and concurrency.
+     *
+     * @return memory estimation
+     * @see MemoryEstimations
+     * @see MemoryEstimation#estimate(GraphDimensions, int)
+     */
     public MemoryEstimation memoryEstimation() {
         return MemoryEstimations.empty();
+    }
+
+    /**
+     * Computes the memory consumption for the algorithm depending on the given {@link GraphDimensions} and concurrency.
+     *
+     * This is shorthand for {@link MemoryEstimation#estimate(GraphDimensions, int)}.
+     *
+     * @param dimensions  graph dimensions
+     * @param concurrency concurrency which is used to run the algorithm
+     * @return memory requirements
+     */
+    public MemoryTree memoryEstimation(GraphDimensions dimensions, int concurrency) {
+        return memoryEstimation().estimate(dimensions, concurrency);
     }
 
     public ME withLog(Log log) {

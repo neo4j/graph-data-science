@@ -35,7 +35,7 @@ public class MemoryEstimationsTest {
         assertTrue(empty.components().isEmpty());
         assertEquals(
                 MemoryRange.empty(),
-                empty.apply(DIMENSIONS_100_NODES, 4).memoryUsage());
+                empty.estimate(DIMENSIONS_100_NODES, 4).memoryUsage());
     }
 
     @Test
@@ -51,10 +51,10 @@ public class MemoryEstimationsTest {
                 .endField()
                 .build();
         MemoryEstimation memoryEstimation4 = MemoryEstimations.of(Foo.class);
-        assertEquals(MemoryRange.of(40L), memoryEstimation1.apply(DIMENSIONS_100_NODES, 4).memoryUsage());
-        assertEquals(MemoryRange.of(40L), memoryEstimation2.apply(DIMENSIONS_100_NODES, 4).memoryUsage());
-        assertEquals(MemoryRange.of(40L), memoryEstimation3.apply(DIMENSIONS_100_NODES, 4).memoryUsage());
-        assertEquals(MemoryRange.of(40L), memoryEstimation4.apply(DIMENSIONS_100_NODES, 4).memoryUsage());
+        assertEquals(MemoryRange.of(40L), memoryEstimation1.estimate(DIMENSIONS_100_NODES, 4).memoryUsage());
+        assertEquals(MemoryRange.of(40L), memoryEstimation2.estimate(DIMENSIONS_100_NODES, 4).memoryUsage());
+        assertEquals(MemoryRange.of(40L), memoryEstimation3.estimate(DIMENSIONS_100_NODES, 4).memoryUsage());
+        assertEquals(MemoryRange.of(40L), memoryEstimation4.estimate(DIMENSIONS_100_NODES, 4).memoryUsage());
     }
 
     @Test
@@ -64,7 +64,7 @@ public class MemoryEstimationsTest {
                 .fixed("baz", MemoryRange.of(19))
                 .build();
 
-        assertEquals(MemoryRange.of(42L), memoryEstimation.apply(DIMENSIONS_100_NODES, 4).memoryUsage());
+        assertEquals(MemoryRange.of(42L), memoryEstimation.estimate(DIMENSIONS_100_NODES, 4).memoryUsage());
     }
 
     @Test
@@ -74,7 +74,7 @@ public class MemoryEstimationsTest {
                 .add(MemoryEstimations.of(Foo.class))
                 .build();
 
-        assertEquals(MemoryRange.of(80L), memoryEstimation.apply(DIMENSIONS_100_NODES, 4).memoryUsage());
+        assertEquals(MemoryRange.of(80L), memoryEstimation.estimate(DIMENSIONS_100_NODES, 4).memoryUsage());
     }
 
     @Test
@@ -87,7 +87,7 @@ public class MemoryEstimationsTest {
 
         assertEquals(
                 MemoryRange.of(100 * (42 + 40 + 23)),
-                memoryEstimation.apply(DIMENSIONS_100_NODES, 4).memoryUsage());
+                memoryEstimation.estimate(DIMENSIONS_100_NODES, 4).memoryUsage());
     }
 
     @Test
@@ -97,7 +97,7 @@ public class MemoryEstimationsTest {
                 .perThread("bar", MemoryEstimations.of(Foo.class))
                 .build();
 
-        assertEquals(MemoryRange.of(4 * (42 + 40)), memoryEstimation.apply(DIMENSIONS_100_NODES, 4).memoryUsage());
+        assertEquals(MemoryRange.of(4 * (42 + 40)), memoryEstimation.estimate(DIMENSIONS_100_NODES, 4).memoryUsage());
     }
 
     @Test
@@ -109,7 +109,7 @@ public class MemoryEstimationsTest {
 
         assertEquals(
                 MemoryRange.of(100 * 42 + 100 * 23),
-                memoryEstimation.apply(DIMENSIONS_100_NODES, 4).memoryUsage());
+                memoryEstimation.estimate(DIMENSIONS_100_NODES, 4).memoryUsage());
     }
 
     @Test
@@ -122,7 +122,7 @@ public class MemoryEstimationsTest {
 
         assertEquals(
                 MemoryRange.of(100 * 4),
-                memoryEstimation.apply(DIMENSIONS_100_NODES, 4).memoryUsage());
+                memoryEstimation.estimate(DIMENSIONS_100_NODES, 4).memoryUsage());
     }
 
     @Test
@@ -135,7 +135,7 @@ public class MemoryEstimationsTest {
 
         assertEquals(
                 MemoryRange.of(100 * 100),
-                memoryEstimation.apply(DIMENSIONS_100_NODES, 4).memoryUsage());
+                memoryEstimation.estimate(DIMENSIONS_100_NODES, 4).memoryUsage());
     }
 
     // Note that the memory consumption will be aligned (see BitUtil.align)
