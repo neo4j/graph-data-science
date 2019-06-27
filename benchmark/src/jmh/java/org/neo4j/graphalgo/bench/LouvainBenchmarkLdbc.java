@@ -94,7 +94,7 @@ public class LouvainBenchmarkLdbc {
 
     @Benchmark
     public Louvain louvain() {
-        return new Louvain(g, Pools.DEFAULT, threads, AllocationTracker.EMPTY, new Louvain.Config(iterations))
+        return new Louvain(g, new Louvain.Config(iterations), Pools.DEFAULT, threads, AllocationTracker.EMPTY)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
                 .withProgressLogger(ProgressLogger.NULL_LOGGER)
                 .compute(iterations, iterations);

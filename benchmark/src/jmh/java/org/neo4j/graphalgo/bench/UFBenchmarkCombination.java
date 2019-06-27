@@ -52,10 +52,11 @@ public enum UFBenchmarkCombination {
         GraphUnionFindAlgo<?> unionFindAlgo = algo.algo(
                 Optional.of(graph),
                 Pools.DEFAULT,
-                AllocationTracker.EMPTY,
                 (int) (graph.nodeCount() / Pools.DEFAULT_CONCURRENCY),
                 Pools.DEFAULT_CONCURRENCY,
-                threshold);
+                threshold,
+                AllocationTracker.EMPTY
+        );
         PagedDisjointSetStruct communities = unionFindAlgo.compute();
         unionFindAlgo.release();
         return communities;

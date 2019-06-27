@@ -67,10 +67,10 @@ public final class UnionFindSafetyTest {
             unionFindAlgo.run(
                     graph,
                     Pools.DEFAULT,
-                    AllocationTracker.EMPTY,
                     10,
                     10,
-                    Double.NaN
+                    Double.NaN,
+                    AllocationTracker.EMPTY
             );
         } catch (Throwable e) {
             assertSame(error, Exceptions.rootCause(e));
@@ -85,10 +85,10 @@ public final class UnionFindSafetyTest {
             unionFindAlgo.run(
                     graph,
                     Pools.DEFAULT,
-                    AllocationTracker.EMPTY,
                     10,
                     10,
-                    Double.NaN
+                    Double.NaN,
+                    AllocationTracker.EMPTY
             );
         } catch (Throwable e) {
             assertSame(error, Exceptions.rootCause(e));

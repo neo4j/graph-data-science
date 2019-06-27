@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphdb.DependencyResolver.SelectionStrategy.FIRST;
 import static org.neo4j.procedure.Mode.READ;
 
 @SuppressWarnings("unused")
@@ -65,7 +66,7 @@ public final class MemRecProc {
             @Name(value = "algo", defaultValue = "") String algo,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> configMap) {
 
-        Procedures procedures = api.getDependencyResolver().resolveDependency(Procedures.class);
+        Procedures procedures = api.getDependencyResolver().resolveDependency(Procedures.class, FIRST);
         if (algo != null && !algo.isEmpty()) {
             QualifiedName name = new QualifiedName(Arrays.asList("algo", algo), "memrec");
             ProcedureHandle proc = null;

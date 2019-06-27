@@ -39,10 +39,10 @@ public enum UnionFindAlgo implements UnionFindAlgoInterface {
         public GraphUnionFindAlgo<?> algo(
                 final Optional<Graph> graph,
                 final ExecutorService executor,
-                final AllocationTracker tracker,
                 final int minBatchSize,
                 final int concurrency,
-                final double threshold) {
+                final double threshold,
+                final AllocationTracker tracker) {
 
             return new ParallelUnionFindQueue(
                     graph,
@@ -58,10 +58,10 @@ public enum UnionFindAlgo implements UnionFindAlgoInterface {
         public GraphUnionFindAlgo<?> algo(
                 final Optional<Graph> graph,
                 final ExecutorService executor,
-                final AllocationTracker tracker,
                 final int minBatchSize,
                 final int concurrency,
-                final double threshold) {
+                final double threshold,
+                final AllocationTracker tracker) {
 
             return new ParallelUnionFindForkJoin(
                     graph,
@@ -76,10 +76,10 @@ public enum UnionFindAlgo implements UnionFindAlgoInterface {
         public GraphUnionFindAlgo<?> algo(
                 final Optional<Graph> graph,
                 final ExecutorService executor,
-                final AllocationTracker tracker,
                 final int minBatchSize,
                 final int concurrency,
-                final double threshold) {
+                final double threshold,
+                final AllocationTracker tracker) {
 
             return new ParallelUnionFindFJMerge(
                     graph,
@@ -95,10 +95,10 @@ public enum UnionFindAlgo implements UnionFindAlgoInterface {
         public GraphUnionFindAlgo<?> algo(
                 final Optional<Graph> graph,
                 final ExecutorService executor,
-                final AllocationTracker tracker,
                 final int minBatchSize,
                 final int concurrency,
-                final double threshold) {
+                final double threshold,
+                final AllocationTracker tracker) {
 
             return new GraphUnionFind(
                     graph,

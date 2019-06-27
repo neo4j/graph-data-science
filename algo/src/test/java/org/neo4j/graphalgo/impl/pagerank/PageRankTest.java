@@ -211,8 +211,8 @@ public final class PageRankTest {
                     .load(graphImpl);
 
             rankResult = PageRankFactory
-                    .of(graph, 0.85, LongStream.empty())
-                    .compute(40)
+                    .of(graph, DEFAULT_CONFIG, LongStream.empty())
+                    .compute()
                     .result();
         } else {
             graph = new GraphLoader(db)
@@ -222,8 +222,8 @@ public final class PageRankTest {
                     .load(graphImpl);
 
             rankResult = PageRankFactory
-                    .of(graph, 0.85, LongStream.empty())
-                    .compute(40)
+                    .of(graph, DEFAULT_CONFIG, LongStream.empty())
+                    .compute()
                     .result();
         }
 
@@ -289,13 +289,13 @@ public final class PageRankTest {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(nodeCount).build();
 
         final PageRank pageRank = PageRankFactory.of(
-                AllocationTracker.EMPTY,
-                null,
-                DEFAULT_CONFIG,
+                null, DEFAULT_CONFIG,
                 LongStream.empty(),
                 Pools.DEFAULT,
                 Pools.DEFAULT_CONCURRENCY,
-                ParallelUtil.DEFAULT_BATCH_SIZE);
+                ParallelUtil.DEFAULT_BATCH_SIZE,
+                AllocationTracker.EMPTY
+        );
 
         long partitionSize = BitUtil.ceilDiv(nodeCount, concurrency);
         final MemoryRange actual = pageRank.memoryEstimation().estimate(dimensions, concurrency).memoryUsage();

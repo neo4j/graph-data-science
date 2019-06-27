@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.PageRankProc;
 import org.neo4j.graphalgo.UnionFindProc;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
+import org.neo4j.graphdb.DependencyResolver;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -43,7 +44,9 @@ public class MemRecProcTest {
     @Before
     public void setUp() throws Exception {
         db = LdbcDownloader.openDb("Yelp");
-        Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class);
+        Procedures procedures = db
+                .getDependencyResolver()
+                .resolveDependency(Procedures.class, DependencyResolver.SelectionStrategy.FIRST);
         procedures.registerProcedure(MemRecProc.class);
         procedures.registerProcedure(PageRankProc.class);
         procedures.registerProcedure(UnionFindProc.class);

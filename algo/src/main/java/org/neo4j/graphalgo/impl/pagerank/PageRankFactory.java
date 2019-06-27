@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 
-public class PageRankFactory{
+public class PageRankFactory {
 
     public static PageRank eigenvectorCentralityOf(Graph graph, PageRank.Config algoConfig, LongStream sourceNodeIds) {
         PageRankVariant pageRankVariant = new EigenvectorCentralityVariant();
@@ -34,71 +34,71 @@ public class PageRankFactory{
 
     public static PageRank weightedOf(
             Graph graph,
-            double dampingFactor,
+            PageRank.Config algoConfig,
             LongStream sourceNodeIds) {
-        return weightedOf(graph, dampingFactor, sourceNodeIds, AllocationTracker.EMPTY, false);
+        return weightedOf(graph, algoConfig, sourceNodeIds, false, AllocationTracker.EMPTY);
     }
 
     public static PageRank weightedOf(
             Graph graph,
-            double dampingFactor,
+            PageRank.Config algoConfig,
             LongStream sourceNodeIds,
-            AllocationTracker tracker,
-            boolean cacheWeights) {
+            boolean cacheWeights,
+            AllocationTracker tracker) {
         PageRankVariant pageRankVariant = new WeightedPageRankVariant(cacheWeights);
-        return new PageRank(tracker, graph, dampingFactor, sourceNodeIds, pageRankVariant);
+        return new PageRank(tracker, graph, algoConfig, sourceNodeIds, pageRankVariant);
     }
 
     public static PageRank articleRankOf(
             Graph graph,
-            double dampingFactor,
+            PageRank.Config algoConfig,
             LongStream sourceNodeIds) {
-        return articleRankOf(graph, dampingFactor, sourceNodeIds, AllocationTracker.EMPTY);
+        return articleRankOf(graph, algoConfig, sourceNodeIds, AllocationTracker.EMPTY);
     }
 
     public static PageRank articleRankOf(
             Graph graph,
-            double dampingFactor,
+            PageRank.Config algoConfig,
             LongStream sourceNodeIds,
             AllocationTracker tracker) {
         PageRankVariant pageRankVariant = new ArticleRankVariant();
-        return new PageRank(tracker, graph, dampingFactor, sourceNodeIds, pageRankVariant);
+        return new PageRank(tracker, graph, algoConfig, sourceNodeIds, pageRankVariant);
     }
 
     public static PageRank of(
             Graph graph,
-            double dampingFactor,
+            PageRank.Config algoConfig,
             LongStream sourceNodeIds) {
-        return of(graph, dampingFactor, sourceNodeIds, AllocationTracker.EMPTY);
+        return of(graph, algoConfig, sourceNodeIds, AllocationTracker.EMPTY);
     }
 
     public static PageRank of(
             Graph graph,
-            double dampingFactor,
+            PageRank.Config algoConfig,
             LongStream sourceNodeIds,
             AllocationTracker tracker) {
         PageRankVariant computeStepFactory = new NonWeightedPageRankVariant();
-        return new PageRank(tracker, graph, dampingFactor, sourceNodeIds, computeStepFactory);
+        return new PageRank(tracker, graph, algoConfig, sourceNodeIds, computeStepFactory);
     }
 
     public static PageRank of(
             Graph graph,
-            double dampingFactor,
+            PageRank.Config algoConfig,
             LongStream sourceNodeIds,
             ExecutorService pool,
             int concurrency,
             int batchSize) {
-        return of(graph, dampingFactor, sourceNodeIds, AllocationTracker.EMPTY, pool, concurrency, batchSize);
+        return of(graph, algoConfig, sourceNodeIds, pool, concurrency, batchSize, AllocationTracker.EMPTY);
     }
 
     public static PageRank of(
             Graph graph,
-            double dampingFactor,
+            PageRank.Config algoConfig,
             LongStream sourceNodeIds,
-            AllocationTracker tracker,
             ExecutorService pool,
             int concurrency,
-            int batchSize) {
+            int batchSize,
+            AllocationTracker tracker) {
         PageRankVariant pageRankVariant = new NonWeightedPageRankVariant();
         return new PageRank(
                 pool,
@@ -106,7 +106,7 @@ public class PageRankFactory{
                 batchSize,
                 tracker,
                 graph,
-                dampingFactor,
+                algoConfig,
                 sourceNodeIds,
                 pageRankVariant
         );
@@ -114,22 +114,21 @@ public class PageRankFactory{
 
     public static PageRank weightedOf(
             Graph graph,
-            double dampingFactor,
+            PageRank.Config algoConfig,
             LongStream sourceNodeIds,
-            AllocationTracker tracker,
             ExecutorService pool,
             int concurrency,
             int batchSize,
-            boolean cacheWeights) {
+            boolean cacheWeights,
+            AllocationTracker tracker) {
         PageRankVariant pageRankVariant = new WeightedPageRankVariant(cacheWeights);
-
         return new PageRank(
                 pool,
                 concurrency,
                 batchSize,
                 tracker,
                 graph,
-                dampingFactor,
+                algoConfig,
                 sourceNodeIds,
                 pageRankVariant
         );
@@ -137,43 +136,42 @@ public class PageRankFactory{
 
     public static PageRank articleRankOf(
             Graph graph,
-            double dampingFactor,
+            PageRank.Config algoConfig,
             LongStream sourceNodeIds,
-            AllocationTracker tracker,
             ExecutorService pool,
             int concurrency,
-            int batchSize) {
+            int batchSize,
+            AllocationTracker tracker) {
         PageRankVariant pageRankVariant = new ArticleRankVariant();
-
         return new PageRank(
                 pool,
                 concurrency,
                 batchSize,
                 tracker,
                 graph,
-                dampingFactor,
+                algoConfig,
                 sourceNodeIds,
                 pageRankVariant
         );
+
     }
 
     public static PageRank eigenvectorCentralityOf(
             Graph graph,
+            PageRank.Config algoConfig,
             LongStream sourceNodeIds,
-            AllocationTracker tracker,
             ExecutorService pool,
             int concurrency,
-            int batchSize
-    ) {
+            int batchSize,
+            AllocationTracker tracker) {
         PageRankVariant variant = new EigenvectorCentralityVariant();
-
         return new PageRank(
                 pool,
                 concurrency,
                 batchSize,
                 tracker,
                 graph,
-                1.0,
+                algoConfig,
                 sourceNodeIds,
                 variant
         );

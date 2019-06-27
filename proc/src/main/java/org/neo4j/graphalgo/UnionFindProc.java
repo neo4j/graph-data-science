@@ -63,15 +63,6 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
     private static final String CONFIG_OLD_CLUSTER_PROPERTY = "partitionProperty";
     private static final String DEFAULT_CLUSTER_PROPERTY = "partition";
 
-    @Context
-    public GraphDatabaseAPI api;
-
-    @Context
-    public Log log;
-
-    @Context
-    public KernelTransaction transaction;
-
     @Procedure(value = "algo.unionFind", mode = Mode.WRITE)
     @Description("CALL algo.unionFind(label:String, relationship:String, " +
             "{weightProperty:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition'}) " +
@@ -306,7 +297,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
 
         final UnionFindAlgoInterface uf = getAlgoByConfig(config);
 
-        return (T) uf.algo(graph, Pools.DEFAULT, tracker, minBatchSize, concurrency, threshold);
+        return (T) uf.algo(graph, Pools.DEFAULT, minBatchSize, concurrency, threshold, tracker);
     }
 
     private UnionFindAlgo getAlgoByConfig(ProcedureConfiguration config) {

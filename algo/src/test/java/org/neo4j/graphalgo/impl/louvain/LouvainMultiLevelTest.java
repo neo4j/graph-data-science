@@ -106,7 +106,7 @@ public class LouvainMultiLevelTest extends HeavyHugeTester {
     @Test
     public void testComplex() {
         setup(COMPLEX_CYPHER);
-        final Louvain algorithm = new Louvain(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY, DEFAULT_CONFIG)
+        final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
                 .compute();
@@ -127,7 +127,7 @@ public class LouvainMultiLevelTest extends HeavyHugeTester {
     @Test
     public void testComplexRNL() {
         setup(COMPLEX_CYPHER);
-        final Louvain algorithm = new Louvain(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY, DEFAULT_CONFIG)
+        final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
                 .compute(10, 10, true);

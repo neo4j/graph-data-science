@@ -44,6 +44,22 @@ public final class ExceptionUtil {
         return root;
     }
 
+    /**
+     * Adds the current exception to the initial exception as suppressed.
+     *
+     * Copied from {@link org.neo4j.helpers.Exceptions#chain(Throwable, Throwable)} due to deprecation.
+     */
+    public static <T extends Throwable> T chain(T initial, T current) {
+        if (initial == null) {
+            return current;
+        }
+
+        if (current != null) {
+            initial.addSuppressed(current);
+        }
+        return initial;
+    }
+
     public static RuntimeException asUnchecked(final Throwable exception) {
         if (exception instanceof RuntimeException) {
             return (RuntimeException) exception;

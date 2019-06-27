@@ -27,6 +27,7 @@ import com.carrotsearch.hppc.cursors.IntCursor;
 import com.carrotsearch.hppc.procedures.IntProcedure;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.core.utils.container.AtomicBitSet;
 import org.neo4j.graphalgo.core.utils.container.FlipStack;
 import org.neo4j.graphdb.Direction;
@@ -306,13 +307,13 @@ public class MultiStepColoring {
                 try {
                     future.get().forEach((IntProcedure) ret::add);
                 } catch (ExecutionException ee) {
-                    error = Exceptions.chain(error, ee.getCause());
+                    error = ExceptionUtil.chain(error, ee.getCause());
                 } catch (CancellationException ignore) {
                 }
             }
             done = true;
         } catch (InterruptedException e) {
-            error = Exceptions.chain(e, error);
+            error = ExceptionUtil.chain(e, error);
         } finally {
             if (!done) {
                 for (final Future<?> future : futures) {

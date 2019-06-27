@@ -77,13 +77,14 @@ public class InfoMapGraph {
 
         CentralityResult pr = PageRankFactory
                 .of(
-                        tracker,
                         graph,
                         new PageRank.Config(iterations, 1.0 - tau),
                         LongStream.empty(),
                         Pools.DEFAULT,
                         concurrency,
-                        ParallelUtil.DEFAULT_BATCH_SIZE)
+                        ParallelUtil.DEFAULT_BATCH_SIZE,
+                        tracker
+                )
                 .compute()
                 .result();
 

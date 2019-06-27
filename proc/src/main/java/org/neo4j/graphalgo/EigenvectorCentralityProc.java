@@ -136,7 +136,6 @@ public final class EigenvectorCentralityProc {
         }
 
         TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
-
         CentralityResult scores = runAlgorithm(graph, tracker, terminationFlag, configuration, statsBuilder);
 
         log.info("Eigenvector Centrality: overall memory usage: %s", tracker.getUsageString());
@@ -212,10 +211,10 @@ public final class EigenvectorCentralityProc {
                 graph,
                 algoConfig,
                 sourceNodeIds,
-                tracker,
                 Pools.DEFAULT,
                 concurrency,
-                batchSize);
+                batchSize,
+                tracker);
     }
 
 

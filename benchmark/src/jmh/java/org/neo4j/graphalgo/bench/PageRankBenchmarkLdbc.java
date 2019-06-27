@@ -92,13 +92,14 @@ public class PageRankBenchmarkLdbc {
     public CentralityResult run() {
         return PageRankFactory
                 .of(
-                        AllocationTracker.EMPTY,
                         grph,
                         new PageRank.Config(iterations, 0.85),
                         LongStream.empty(),
                         Pools.DEFAULT,
                         Pools.DEFAULT_CONCURRENCY,
-                        batchSize)
+                        batchSize,
+                        AllocationTracker.EMPTY
+                )
                 .compute()
                 .result();
     }

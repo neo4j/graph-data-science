@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.impl.louvain.Louvain;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
 import org.neo4j.graphalgo.impl.pagerank.PageRankFactory;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.TestGraphDatabaseFactory;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -117,7 +116,7 @@ public class ClusteringBenchmark {
     @Benchmark
     public Object _01_louvain() {
         Louvain.Config algoConfig = new Louvain.Config(99, 99999);
-        return new Louvain(g, Pools.DEFAULT, concurrency, AllocationTracker.EMPTY, algoConfig)
+        return new Louvain(g, algoConfig, Pools.DEFAULT, concurrency, AllocationTracker.EMPTY)
                 .withProgressLogger(ProgressLogger.NULL_LOGGER)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
                 .compute()

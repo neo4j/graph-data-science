@@ -68,15 +68,6 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
     public static final int DEFAULT_MAX_LEVEL = 10;
     public static final long DEFAULT_MAX_ITERATIONS = 10L;
 
-    @Context
-    public GraphDatabaseAPI api;
-
-    @Context
-    public Log log;
-
-    @Context
-    public KernelTransaction transaction;
-
     @Procedure(value = "algo.louvain", mode = Mode.WRITE)
     @Description("CALL algo.louvain(label:String, relationship:String, " +
                  "{weightProperty:'weight', defaultValue:1.0, write: true, writeProperty:'community', concurrency:4, communityProperty:'propertyOfPredefinedCommunity', innerIterations:10, communitySelection:'classic'}) " +
@@ -196,7 +187,9 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
 
         Louvain.Config algoConfig = new Louvain.Config(communityMap, maxLevel, maxIterations, randomNeighbor);
         return graph
-                .map(g -> new Louvain(g, Pools.DEFAULT, procedureConfig.getConcurrency(DEFAULT_CONCURRENCY), tracker, algoConfig))
+                .map(g -> new Louvain(g,
+                        algoConfig,
+                        Pools.DEFAULT, procedureConfig.getConcurrency(DEFAULT_CONCURRENCY), tracker))
                 .orElseGet(() -> new Louvain(algoConfig));
     }
 

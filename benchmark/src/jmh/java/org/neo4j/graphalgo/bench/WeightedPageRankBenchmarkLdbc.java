@@ -117,13 +117,14 @@ public class WeightedPageRankBenchmarkLdbc {
         return PageRankFactory
                 .weightedOf(
                         grph,
-                        0.85,
+                        new PageRank.Config(iterations, 0.85),
                         LongStream.empty(),
-                        AllocationTracker.EMPTY,
                         Pools.DEFAULT,
                         Pools.DEFAULT_CONCURRENCY,
                         batchSize,
-                        cacheWeights)
+                        cacheWeights,
+                        AllocationTracker.EMPTY
+                )
                 .compute()
                 .result();
     }

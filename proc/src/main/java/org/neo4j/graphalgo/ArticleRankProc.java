@@ -197,13 +197,14 @@ public final class ArticleRankProc {
         LongStream sourceNodeIds = sourceNodes.stream().mapToLong(Node::getId);
 
         PageRank prAlgo = PageRankFactory.articleRankOf(
-                    graph,
-                    dampingFactor,
-                    sourceNodeIds,
-                    tracker,
-                    Pools.DEFAULT,
-                    concurrency,
-                    batchSize);
+                graph,
+                algoConfig,
+                sourceNodeIds,
+                Pools.DEFAULT,
+                concurrency,
+                batchSize,
+                tracker
+        );
 
         Algorithm<?> algo = prAlgo
                 .withLog(log)

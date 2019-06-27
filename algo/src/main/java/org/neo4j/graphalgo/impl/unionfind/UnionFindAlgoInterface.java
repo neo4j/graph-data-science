@@ -26,18 +26,17 @@ import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
-public interface UnionFindAlgoInterface
-{
+public interface UnionFindAlgoInterface {
 
     default PagedDisjointSetStruct run(
             Graph graph,
             ExecutorService executor,
-            AllocationTracker tracker,
             int minBatchSize,
             int concurrency,
-            double threshold) {
+            double threshold,
+            AllocationTracker tracker) {
 
-        GraphUnionFindAlgo<?> algo = algo(Optional.of(graph), executor, tracker, minBatchSize, concurrency, threshold);
+        GraphUnionFindAlgo<?> algo = algo(Optional.of(graph), executor, minBatchSize, concurrency, threshold, tracker);
         PagedDisjointSetStruct communities = algo.compute();
         algo.release();
         return communities;
@@ -46,9 +45,9 @@ public interface UnionFindAlgoInterface
     GraphUnionFindAlgo<?> algo(
             Optional<Graph> graph,
             ExecutorService executor,
-            AllocationTracker tracker,
             int minBatchSize,
             int concurrency,
-            double threshold);
+            double threshold,
+            AllocationTracker tracker);
 
 }

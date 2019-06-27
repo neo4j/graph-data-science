@@ -94,10 +94,10 @@ public final class Louvain extends Algorithm<Louvain> {
 
     public Louvain(
             final Graph graph,
+            final Config config,
             final ExecutorService pool,
             final int concurrency,
-            final AllocationTracker tracker,
-            final Louvain.Config config) {
+            final AllocationTracker tracker) {
         this.root = graph;
         this.pool = pool;
         this.concurrency = concurrency;

@@ -110,7 +110,7 @@ public class LouvainTest extends HeavyHugeTester {
     @Test
     public void testRunner() throws Exception {
         setup(unidirectional);
-        final Louvain algorithm = new Louvain(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY, DEFAULT_CONFIG)
+        final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
                 .compute();
@@ -126,7 +126,7 @@ public class LouvainTest extends HeavyHugeTester {
     @Test
     public void testRandomNeighborLouvain() throws Exception {
         setup(unidirectional);
-        final Louvain algorithm = new Louvain(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY, DEFAULT_CONFIG)
+        final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
                 .compute();
@@ -156,7 +156,7 @@ public class LouvainTest extends HeavyHugeTester {
                 .load(graphImpl);
 
         Louvain.Config config = new Louvain.Config(99, 99999);
-        Louvain algorithm = new Louvain(graph, Pools.DEFAULT, 4, AllocationTracker.EMPTY, config)
+        Louvain algorithm = new Louvain(graph, config, Pools.DEFAULT, 4, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
                 .compute(99, 99999);

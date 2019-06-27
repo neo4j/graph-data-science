@@ -39,14 +39,6 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
-import org.neo4j.procedure.Context;
-import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Mode;
-import org.neo4j.procedure.Name;
-import org.neo4j.procedure.Procedure;
 
 import java.util.Collections;
 import java.util.List;
@@ -175,23 +167,25 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
         if (weightPropertyKey != null) {
             final boolean cacheWeights = config.get("cacheWeights", false);
             return PageRankFactory.weightedOf(
-                    tracker,
                     theGraph,
                     algoConfig,
                     sourceNodeIds,
                     Pools.DEFAULT,
                     concurrency,
                     batchSize,
-                    cacheWeights);
+                    cacheWeights,
+                    tracker
+            );
         } else {
             return PageRankFactory.of(
-                    tracker,
                     theGraph,
                     algoConfig,
                     sourceNodeIds,
                     Pools.DEFAULT,
                     concurrency,
-                    batchSize);
+                    batchSize,
+                    tracker
+            );
         }
     }
 

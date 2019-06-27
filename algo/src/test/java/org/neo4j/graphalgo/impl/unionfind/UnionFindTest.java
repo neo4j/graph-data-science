@@ -232,10 +232,10 @@ public class UnionFindTest {
         return uf.algo(
                 Optional.of(graph),
                 Pools.DEFAULT,
-                AllocationTracker.EMPTY,
                 setSize / Pools.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT_CONCURRENCY,
-                Double.NaN
+                Double.NaN,
+                AllocationTracker.EMPTY
         );
     }
 
@@ -243,10 +243,10 @@ public class UnionFindTest {
         return uf.run(
                 graph,
                 Pools.DEFAULT,
-                AllocationTracker.EMPTY,
                 setSize / Pools.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT_CONCURRENCY,
-                Double.NaN
+                Double.NaN,
+                AllocationTracker.EMPTY
         );
     }
 }
