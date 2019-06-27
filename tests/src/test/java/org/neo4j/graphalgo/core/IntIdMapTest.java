@@ -93,7 +93,7 @@ public final class IntIdMapTest extends RandomizedTest {
     @Test
     public void shouldComputeMemoryEstimation() throws Exception {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100).build();
-        MemoryTree memRec = IntIdMap.memoryEstimation().apply(dimensions, 1);
+        MemoryTree memRec = IntIdMap.memoryEstimation().estimate(dimensions, 1);
 
         assertEquals(memRec.memoryUsage().min, 4048L);
         assertEquals(memRec.memoryUsage().max, 4048L);

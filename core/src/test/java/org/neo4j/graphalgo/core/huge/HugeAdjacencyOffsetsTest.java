@@ -34,7 +34,7 @@ public class HugeAdjacencyOffsetsTest {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100).build();
         MemoryTree memRec = HugeAdjacencyOffsets
                 .memoryEstimation(4096, 1)
-                .apply(dimensions, 1);
+                .estimate(dimensions, 1);
         MemoryRange expected = MemoryRange.of(16L /* Page.class */ + BitUtil.align(16 + 4096 * 8, 8) /* data */);
 
         assertEquals(expected, memRec.memoryUsage());
@@ -46,7 +46,7 @@ public class HugeAdjacencyOffsetsTest {
         int numberOfPages = (int) BitUtil.ceilDiv(100_000, 4096);
         MemoryTree memRec = HugeAdjacencyOffsets
                 .memoryEstimation(4096, numberOfPages)
-                .apply(dimensions, 1);
+                .estimate(dimensions, 1);
 
         MemoryRange expected = MemoryRange.of(
                 32L /* PagedOffsets.class */ +

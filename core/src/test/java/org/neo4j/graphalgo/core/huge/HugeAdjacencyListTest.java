@@ -42,7 +42,7 @@ public class HugeAdjacencyListTest {
                 .setMaxRelCount(100)
                 .build();
 
-        MemoryTree memRec = HugeAdjacencyList.memoryEstimation(false).apply(dimensions, 1);
+        MemoryTree memRec = HugeAdjacencyList.memoryEstimation(false).estimate(dimensions, 1);
 
         long classSize = 24;
         long bestCaseAdjacencySize = 500;
@@ -71,7 +71,7 @@ public class HugeAdjacencyListTest {
                 .setMaxRelCount(100_000_000_000L)
                 .build();
 
-        MemoryTree memRec = HugeAdjacencyList.memoryEstimation(false).apply(dimensions, 1);
+        MemoryTree memRec = HugeAdjacencyList.memoryEstimation(false).estimate(dimensions, 1);
 
         long classSize = 24;
         long bestCaseAdjacencySize = 100_500_000_000L;

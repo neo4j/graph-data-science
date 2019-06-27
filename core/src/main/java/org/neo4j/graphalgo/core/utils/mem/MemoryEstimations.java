@@ -335,7 +335,7 @@ public final class MemoryEstimations {
             components.add(new AndThenEstimation(
                     description,
                     estimation,
-                    (mem, dim, concurrency) -> mem.times(dim.hugeNodeCount())));
+                    (mem, dim, concurrency) -> mem.times(dim.nodeCount())));
             return this;
         }
 

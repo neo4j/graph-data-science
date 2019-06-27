@@ -33,7 +33,7 @@ public class TrackingIntDoubleHashMapTest {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100).build();
         MemoryRange memoryRange = TrackingIntDoubleHashMap
                 .memoryEstimation()
-                .apply(dimensions, 1)
+                .estimate(dimensions, 1)
                 .memoryUsage();
 
         long minBufferSize = 9L;
@@ -56,7 +56,7 @@ public class TrackingIntDoubleHashMapTest {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100_000).build();
         MemoryRange memoryRange = TrackingIntDoubleHashMap
                 .memoryEstimation()
-                .apply(dimensions, 1)
+                .estimate(dimensions, 1)
                 .memoryUsage();
 
         long minBufferSize = 9L;

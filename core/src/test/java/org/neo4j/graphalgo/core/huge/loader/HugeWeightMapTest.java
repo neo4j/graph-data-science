@@ -36,7 +36,7 @@ public class HugeWeightMapTest {
     @Test
     public void shouldComputeMemoryEstimationForSinglePage() {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100).build();
-        MemoryTree memRec = HugeWeightMap.memoryEstimation(4096, 1).apply(dimensions, 1);
+        MemoryTree memRec = HugeWeightMap.memoryEstimation(4096, 1).estimate(dimensions, 1);
 
         MemoryRange expected = MemoryRange.of(
                 32L /* Page.class */ + 232L /* data */,
@@ -52,7 +52,7 @@ public class HugeWeightMapTest {
     public void shouldComputeMemoryEstimationForMultiplePages() {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100_000).build();
         int numberOfPages = (int) BitUtil.ceilDiv(100_000, 4096);
-        MemoryTree memRec = HugeWeightMap.memoryEstimation(4096, numberOfPages).apply(dimensions, 1);
+        MemoryTree memRec = HugeWeightMap.memoryEstimation(4096, numberOfPages).estimate(dimensions, 1);
 
         long min =
                 40 /* PagedHugeWeightMap.class */ +
