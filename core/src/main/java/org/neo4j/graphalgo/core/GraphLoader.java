@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLoggerAdapter;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
@@ -486,6 +487,14 @@ public class GraphLoader {
      */
     public Graph load(Class<? extends GraphFactory> factoryType) {
         return build(factoryType).build();
+    }
+
+    /**
+     * Calculates the required memory to load the graph.
+     * @return
+     */
+    public MemoryEstimation memoryEstimation(Class<? extends GraphFactory> factoryType) {
+        return build(factoryType).memoryEstimation();
     }
 
     private MethodHandle findConstructor(Class<?> factoryType) {
