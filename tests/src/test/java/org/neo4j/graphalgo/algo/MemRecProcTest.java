@@ -19,8 +19,8 @@
  */
 package org.neo4j.graphalgo.algo;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.neo4j.graphalgo.MemRecProc;
 import org.neo4j.graphalgo.PageRankProc;
@@ -39,10 +39,10 @@ import static org.junit.Assert.fail;
 
 public class MemRecProcTest {
 
-    private GraphDatabaseAPI db;
+    private static GraphDatabaseAPI db;
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeClass
+    public static void setUp() throws Exception {
         db = LdbcDownloader.openDb("Yelp");
         Procedures procedures = db
                 .getDependencyResolver()
@@ -52,8 +52,8 @@ public class MemRecProcTest {
         procedures.registerProcedure(UnionFindProc.class);
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterClass
+    public static void tearDown() throws Exception {
         db.shutdown();
     }
 
