@@ -22,7 +22,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.NewHugeArrays;
-import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
+import org.neo4j.graphalgo.core.huge.loader.SparseNodeMapping;
 import org.neo4j.unsafe.impl.batchimport.cache.ChunkedHeapFactory;
 import org.neo4j.unsafe.impl.batchimport.cache.DynamicLongArray;
 import org.neo4j.unsafe.impl.batchimport.cache.OffHeapLongArray;
@@ -200,7 +200,7 @@ public class LongArrayBenchmark {
     @Benchmark
     public long sparse_get(LongArrays arrays) {
         final int size = arrays.size;
-        final SparseLongArray array = arrays.sparse;
+        final SparseNodeMapping array = arrays.sparse;
         long res = 0;
         for (int i = 0; i < size; i++) {
             res += array.get(i);
@@ -209,16 +209,16 @@ public class LongArrayBenchmark {
     }
 
     @Benchmark
-    public SparseLongArray sparse_set(LongArrays arrays) {
+    public SparseNodeMapping sparse_set(LongArrays arrays) {
         long[] values = arrays.primitive;
-        final SparseLongArray array = SparseLongArray.newArray(values.length, AllocationTracker.EMPTY);
+        final SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(values.length, AllocationTracker.EMPTY);
         for (int i = 0; i < values.length; i++) {
             long value = values[i];
             if (value >= 0) {
                 array.set(i, value);
             }
         }
-        return array;
+        return array.build();
     }
 
     @Benchmark

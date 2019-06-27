@@ -43,7 +43,7 @@ abstract class ScanningRecordsImporter<Record extends AbstractBaseRecord, T> {
     final GraphDatabaseAPI api;
     final GraphDimensions dimensions;
     private final ExecutorService threadPool;
-    private final int concurrency;
+    final int concurrency;
 
     ScanningRecordsImporter(
             AbstractStorePageCacheScanner.Access<Record> access,

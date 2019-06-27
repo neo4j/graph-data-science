@@ -46,7 +46,14 @@ final class NodesScanner extends StatementAction implements RecordScanner {
             ImportProgress progress,
             HugeLongArrayBuilder idMapBuilder,
             Collection<HugeNodePropertiesBuilder> nodePropertyBuilders) {
-        return new NodesScanner.Creator(api, scanner, label, progress, idMapBuilder, nodePropertyBuilders);
+        return new NodesScanner.Creator(
+                api,
+                scanner,
+                label,
+                progress,
+                idMapBuilder,
+                nodePropertyBuilders
+        );
     }
 
     static final class Creator implements ImportingThreadPool.CreateScanner {
@@ -74,7 +81,15 @@ final class NodesScanner extends StatementAction implements RecordScanner {
 
         @Override
         public RecordScanner create(final int index) {
-            return new NodesScanner(api, scanner, label, index, progress, idMapBuilder, nodePropertyBuilders);
+            return new NodesScanner(
+                    api,
+                    scanner,
+                    label,
+                    index,
+                    progress,
+                    idMapBuilder,
+                    nodePropertyBuilders
+            );
         }
 
         @Override
@@ -154,7 +169,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
     }
 
     private int importNodes(
-            NodesBatchBuffer buffer,
+            final NodesBatchBuffer buffer,
             final Read read,
             final CursorFactory cursors) {
 
@@ -163,7 +178,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
             return 0;
         }
 
-        HugeLongArrayBuilder.BulkAdder adder = idMapBuilder.allocate((long) (batchLength));
+        HugeLongArrayBuilder.BulkAdder<long[]> adder = idMapBuilder.allocate((long) (batchLength));
         if (adder == null) {
             return 0;
         }

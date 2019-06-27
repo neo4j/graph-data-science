@@ -18,10 +18,10 @@
  */
 package org.neo4j.graphalgo.utils;
 
+import org.neo4j.graphalgo.core.huge.loader.SparseNodeMapping;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.NewHugeArrays;
-import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
 import org.neo4j.unsafe.impl.batchimport.cache.ChunkedHeapFactory;
 import org.neo4j.unsafe.impl.batchimport.cache.DynamicLongArray;
 import org.neo4j.unsafe.impl.batchimport.cache.OffHeapLongArray;
@@ -52,7 +52,7 @@ public class LongArrays {
     long[] primitive;
     HugeLongArray paged;
     HugeLongArray single;
-    SparseLongArray sparse;
+    SparseNodeMapping sparse;
     OffHeapLongArray offHeap;
     DynamicLongArray chunked;
 
@@ -114,15 +114,15 @@ public class LongArrays {
         return array;
     }
 
-    static SparseLongArray createSparse(long[] values) {
-        final SparseLongArray array = SparseLongArray.newArray(values.length, AllocationTracker.EMPTY);
+    static SparseNodeMapping createSparse(long[] values) {
+        final SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(values.length, AllocationTracker.EMPTY);
         for (int i = 0; i < values.length; i++) {
             long value = values[i];
             if (value >= 0) {
                 array.set(i, value);
             }
         }
-        return array;
+        return array.build();
     }
 
     static OffHeapLongArray createOffHeap(long[] values) {

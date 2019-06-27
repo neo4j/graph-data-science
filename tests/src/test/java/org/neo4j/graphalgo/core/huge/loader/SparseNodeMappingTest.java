@@ -17,14 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.utils.paged;
+package org.neo4j.graphalgo.core.huge.loader;
 
 import com.carrotsearch.randomizedtesting.RandomizedTest;
 import com.carrotsearch.randomizedtesting.annotations.ThreadLeakScope;
 import org.junit.Test;
 import org.neo4j.graphalgo.core.utils.PrivateLookup;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
 import java.lang.invoke.MethodHandle;
+import java.util.concurrent.atomic.AtomicReferenceArray;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -32,25 +35,28 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
+
 
 @ThreadLeakScope(ThreadLeakScope.Scope.NONE)
-public final class SparseLongArrayTest extends RandomizedTest {
+public final class SparseNodeMappingTest extends RandomizedTest {
 
     private static final int PS = PageUtil.pageSizeFor(Long.BYTES);
-    private static final MethodHandle PAGES = PrivateLookup.field(SparseLongArray.class, long[][].class, "pages");
+    private static final MethodHandle PAGES = PrivateLookup.field(SparseNodeMapping.Builder.class, AtomicReferenceArray.class, "pages");
 
     @Test
     public void shouldSetAndGet() {
-        SparseLongArray array = SparseLongArray.newArray(10, AllocationTracker.EMPTY);
+        SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(10, AllocationTracker.EMPTY);
         int index = between(2, 8);
         int value = between(42, 1337);
         array.set(index, value);
-        assertEquals(value, array.get(index));
+        assertEquals(value, array.build().get(index));
     }
 
     @Test
     public void shouldSetValuesInPageSizedChunks() {
-        SparseLongArray array = SparseLongArray.newArray(10, AllocationTracker.EMPTY);
+        SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(10, AllocationTracker.EMPTY);
         // larger than the desired size, but still within a single page
         array.set(between(11, PS -1), 1337);
         // doesn't fail - good
@@ -59,7 +65,7 @@ public final class SparseLongArrayTest extends RandomizedTest {
     // capacity check is only an assert
     @Test
     public void shouldUseCapacityInPageSizedChunks() {
-        SparseLongArray array = SparseLongArray.newArray(10, AllocationTracker.EMPTY);
+        SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(10, AllocationTracker.EMPTY);
         // larger than the desired size, but still within a single page
         try {
             array.set(between(PS, 2 * PS - 1), 1337);
@@ -70,28 +76,30 @@ public final class SparseLongArrayTest extends RandomizedTest {
 
     @Test
     public void shouldHaveContains() {
-        SparseLongArray array = SparseLongArray.newArray(10, AllocationTracker.EMPTY);
+        SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(10, AllocationTracker.EMPTY);
         int index = between(2, 8);
         int value = between(42, 1337);
         array.set(index, value);
+        SparseNodeMapping longArray = array.build();
         for (int i = 0; i < 10; i++) {
             if (i == index) {
-                assertTrue("Expected index " + i + " to be contained, but it was not", array.contains(i));
+                assertTrue("Expected index " + i + " to be contained, but it was not", longArray.contains(i));
             } else {
-                assertFalse("Expected index " + i + " not to be contained, but it actually was", array.contains(i));
+                assertFalse("Expected index " + i + " not to be contained, but it actually was", longArray.contains(i));
             }
         }
     }
 
     @Test
     public void shouldReturnNegativeOneForMissingValues() {
-        SparseLongArray array = SparseLongArray.newArray(10, AllocationTracker.EMPTY);
+        SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(10, AllocationTracker.EMPTY);
         int index = between(2, 8);
         int value = between(42, 1337);
         array.set(index, value);
+        SparseNodeMapping longArray = array.build();
         for (int i = 0; i < 10; i++) {
             boolean expectedContains = i == index;
-            long actual = array.get(i);
+            long actual = longArray.get(i);
             String message = expectedContains
                     ? "Expected value at index " + i + " to be set to " + value + ", but got " + actual + " instead"
                     : "Expected value at index " + i + " to be missing (-1), but got " + actual + " instead";
@@ -101,56 +109,58 @@ public final class SparseLongArrayTest extends RandomizedTest {
 
     @Test
     public void shouldReturnNegativeOneForOutOfRangeValues() {
-        SparseLongArray array = SparseLongArray.newArray(10, AllocationTracker.EMPTY);
+        SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(10, AllocationTracker.EMPTY);
         array.set(between(2, 8), between(42, 1337));
-        assertEquals(-1L, array.get(between(100, 200)));
+        assertEquals(-1L, array.build().get(between(100, 200)));
     }
 
     @Test
     public void shouldReturnNegativeOneForUnsetPages() {
-        SparseLongArray array = SparseLongArray.newArray(PS + 10, AllocationTracker.EMPTY);
+        SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(PS + 10, AllocationTracker.EMPTY);
         array.set(5000, between(42, 1337));
-        assertEquals(-1L, array.get(between(100, 200)));
+        assertEquals(-1L, array.build().get(between(100, 200)));
     }
 
     @Test
     public void shouldNotCreateAnyPagesOnInitialization() throws Throwable {
         AllocationTracker tracker = AllocationTracker.create();
-        SparseLongArray array = SparseLongArray.newArray(2 * PS, tracker);
+        SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(2 * PS, tracker);
 
-        final long[][] pages = getPages(array);
-        for (long[] page : pages) {
+        final AtomicReferenceArray<long[]> pages = getPages(array);
+        for (int i = 0; i < pages.length(); i++) {
+            long[] page = pages.get(i);
             assertNull(page);
         }
 
         long tracked = tracker.tracked();
         // allow some bytes for the container type and
-        assertEquals(50.0, tracked, 50.0);
+        assertEquals(sizeOfObjectArray(2), tracked);
     }
 
     @Test
     public void shouldCreateAndTrackSparsePagesOnDemand() throws Throwable {
         AllocationTracker tracker = AllocationTracker.create();
-        SparseLongArray array = SparseLongArray.newArray(2 * PS, tracker);
+        SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(2 * PS, tracker);
 
         int index = between(PS, 2 * PS - 1);
         int value = between(42, 1337);
         array.set(index, value);
 
-        final long[][] pages = getPages(array);
-        for (int i = 0; i < pages.length; i++) {
+        final AtomicReferenceArray<long[]> pages = getPages(array);
+        for (int i = 0; i < pages.length(); i++) {
             if (i == 1) {
-                assertNotNull(pages[i]);
+                assertNotNull(pages.get(i));
             } else {
-                assertNull(pages[i]);
+                assertNull(pages.get(i));
             }
         }
 
         long tracked = tracker.tracked();
-        assertEquals(PS * Long.BYTES, tracked, 200.0);
+        assertEquals(sizeOfObjectArray(2) + sizeOfLongArray(PS), tracked);
     }
 
-    private static long[][] getPages(SparseLongArray array) throws Throwable {
-        return (long[][]) PAGES.invoke(array);
+    @SuppressWarnings("unchecked")
+    private static AtomicReferenceArray<long[]> getPages(SparseNodeMapping.Builder array) throws Throwable {
+        return (AtomicReferenceArray<long[]>) PAGES.invoke(array);
     }
 }

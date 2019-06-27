@@ -76,7 +76,11 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
 
     @Override
     IdsAndProperties build() {
-        IdMap hugeIdMap = HugeIdMapBuilder.build(idMapBuilder, dimensions.allNodesCount(), tracker);
+        IdMap hugeIdMap = HugeIdMapBuilder.build(
+                idMapBuilder,
+                dimensions.allNodesCount(),
+                concurrency,
+                tracker);
         Map<String, HugeWeightMapping> nodeProperties = new HashMap<>();
         for (PropertyMapping propertyMapping : propertyMappings) {
             HugeNodePropertiesBuilder builder = builders.get(propertyMapping.propertyName);

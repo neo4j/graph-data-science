@@ -26,7 +26,15 @@ import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.graphalgo.core.huge.loader.IdMap;
 import org.neo4j.helpers.Exceptions;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CancellationException;
@@ -42,7 +50,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.IntConsumer;
-import java.util.function.LongConsumer;
 import java.util.function.Supplier;
 
 public final class ParallelUtil {
@@ -213,6 +220,29 @@ public final class ParallelUtil {
             runWithConcurrency(concurrency, importers, executor);
         }
         return tasks;
+    }
+
+    public static void readParallel(
+            int concurrency,
+            long size,
+            ExecutorService executor,
+            BiLongConsumer task) {
+
+        long batchSize = threadSize(concurrency, size);
+        if (!canRunInParallel(executor) || concurrency == 1) {
+            for (long start = 0L; start < size; start += batchSize) {
+                long end = Math.min(size, start + batchSize);
+                task.apply(start, end);
+            }
+        } else {
+            List<Runnable> threads = new ArrayList<>(concurrency);
+            for (long start = 0L; start < size; start += batchSize) {
+                long end = Math.min(size, start + batchSize);
+                final long finalStart = start;
+                threads.add(() -> task.apply(finalStart, end));
+            }
+            run(threads, executor);
+        }
     }
 
     public static Collection<Runnable> tasks(
