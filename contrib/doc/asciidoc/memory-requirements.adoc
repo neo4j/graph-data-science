@@ -201,20 +201,33 @@ RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
 [[memory-requirements-sample-graphs]]
 == Memory Requirements of Sample Graphs
 
-The following show the memory requirements for various sample datasets.
+Below are the memory requirements for various sample datasets.
+These numbers are computed by running the following queries:
+
+.Heavy Graph
+[source,cypher]
+----
+CALL algo.memrec(null, null, "graph.load", {graph: "heavy"})
+----
+
+.Huge Graph
+[source,cypher]
+----
+CALL algo.memrec(null, null, "graph.load", {graph: "huge"})
+----
 
 === Dbpedia
 
-.Heavy Graph
-[opts="header",cols="1,1,1,1,1"]
+[opts="header", cols="1,3,1"]
 |===
-| Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
-| 11,474,730 | 116,601,029 | 1855 MiB  | 1945485952    | 1945485952
+| Name | Description | Link
+| Dbpedia | This dataset contains Wikipedia pages and the links between them. | https://github.com/jexp/graphipedia
 |===
 
-.Huge Graph
-[opts="header",cols="1,1,1,1,1"]
+.Memory Usage
+[opts="header", cols="1,1,1,2,1,1"]
 |===
-| Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
-| 11,474,730 | 116,601,029 | 	[963 MiB ... 1182 MiB]  | 1010512856    | 1239939136
+| Graph Type | Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
+| Heavy | 11,474,730 | 116,601,029 | 1067 MiB  | 1119305360    | 1119305360
+| Huge | 11,474,730 | 116,601,029 | 	[438 MiB...657 MiB]  | 459722704    | 689148984
 |===
