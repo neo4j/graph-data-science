@@ -368,7 +368,8 @@ We can use the <<algo-memrec-procedure>> to compute the memory requirements of g
 [source,cypher]
 ----
 CALL algo.memrec(null, null, "pageRank", {graph: "huge", concurrency: 8})
-YIELD nodes, relationships, requiredMemory;
+YIELD nodes, relationships, requiredMemory
+RETURN nodes, relationships, requiredMemory;
 ----
 
 .Results
@@ -382,7 +383,8 @@ YIELD nodes, relationships, requiredMemory;
 [source,cypher]
 ----
 CALL algo.memrec(null, null, "pageRank", {graph: "huge", concurrency: 8})
-YIELD nodes, relationships, requiredMemory;
+YIELD nodes, relationships, requiredMemory
+RETURN nodes, relationships, requiredMemory;
 ----
 
 .Results
