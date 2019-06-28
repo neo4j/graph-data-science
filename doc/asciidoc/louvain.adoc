@@ -368,16 +368,13 @@ The Louvain algorithm supports the following graph types:
 
 [[louvain-memory-requirements]]
 == Memory Requirements for the Louvain algorithm
+:algorithm: "louvain"
 
 We can use the <<algo-memrec-procedure>> to compute the memory requirements of running graph algorithms.
 
 .The following returns the memory requirements for running Louvain on the Heavy Graph:
-[source,cypher]
-----
-CALL algo.memrec(null, null, "louvain", {graph: "huge", concurrency: 8})
-YIELD nodes, relationships, requiredMemory
-RETURN nodes, relationships, requiredMemory;
-----
+:graph: "heavy"
+include::memrec.adoc[tags=overview]
 
 .Results
 [opts="header",cols="1,1,2"]
@@ -387,12 +384,8 @@ RETURN nodes, relationships, requiredMemory;
 |===
 
 .The following returns the memory requirements for running Louvain on the Heavy Graph:
-[source,cypher]
-----
-CALL algo.memrec(null, null, "louvain", {graph: "huge", concurrency: 8})
-YIELD nodes, relationships, requiredMemory
-RETURN nodes, relationships, requiredMemory;
-----
+:graph: "huge"
+include::memrec.adoc[tags=overview]
 
 .Results
 [opts="header",cols="1,1,2"]
@@ -404,13 +397,8 @@ RETURN nodes, relationships, requiredMemory;
 We can also get a break down of where that memory is assigned from the `mapView` field.
 
 .The following returns the memory break down for running Louvain on the Heavy Graph:
-[source,cypher]
-----
-CALL algo.memrec(null, null, "louvain", {graph: "heavy", concurrency: 8})
-YIELD mapView
-UNWIND mapView.components AS component
-RETURN component.name AS component, component.memoryUsage AS memoryUsage
-----
+:graph: "heavy"
+include::memrec.adoc[tags=component]
 
 .Results
 [opts="header",cols="1,2"]
@@ -421,13 +409,8 @@ RETURN component.name AS component, component.memoryUsage AS memoryUsage
 |===
 
 .The following returns the memory break down for running Louvain on the Huge Graph:
-[source,cypher]
-----
-CALL algo.memrec(null, null, "louvain", {graph: "huge", concurrency: 8})
-YIELD mapView
-UNWIND mapView.components AS component
-RETURN component.name AS component, component.memoryUsage AS memoryUsage
-----
+:graph: "huge"
+include::memrec.adoc[tags=component]
 
 .Results
 [opts="header",cols="1,2"]

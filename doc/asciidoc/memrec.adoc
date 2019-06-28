@@ -1,0 +1,19 @@
+//tag::component[]
+[source,cypher,subs=attributes]
+----
+CALL algo.memrec(null, null, {algorithm}, {graph: {graph}, concurrency: 8})
+YIELD mapView
+UNWIND mapView.components AS component
+RETURN component.name AS component, component.memoryUsage AS memoryUsage
+----
+//end::component[]
+
+
+//tag::overview[]
+[source,cypher,subs=attributes]
+----
+CALL algo.memrec(null, null, {algorithm}, {graph: {graph}, concurrency: 8})
+YIELD nodes, relationships, requiredMemory
+RETURN nodes, relationships, requiredMemory;
+----
+//end::overview[]
