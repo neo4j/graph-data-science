@@ -26,6 +26,7 @@ This section includes:
 * <<algorithms-louvain-cp, Cypher projection>>
 * <<algorithms-louvain-syntax, Syntax>>
 * <<algorithms-louvain-support, Graph type support>>
+* <<algorithms-louvain-memory-requirements, Memory Requirements>>
 
 
 [[algorithms-louvain-context]]
@@ -366,7 +367,7 @@ The Louvain algorithm supports the following graph types:
 * [x] undirected, weighted
 ** weightProperty : 'weight'
 
-[[louvain-memory-requirements]]
+[[algorithms-louvain-memory-requirements]]
 == Memory Requirements for the Louvain algorithm
 :algorithm: "louvain"
 

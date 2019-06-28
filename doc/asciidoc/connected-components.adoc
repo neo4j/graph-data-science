@@ -24,6 +24,7 @@ This section includes:
 * <<algorithms-connected-components-cp, Cypher projection>>
 * <<algorithms-connected-components-syntax, Syntax>>
 * <<algorithms-connected-components-imp, Implementations>>
+* <<algorithms-unionfind-memory-requirements, Memory Requirements>>
 
 
 [[algorithms-connected-components-context]]
@@ -312,7 +313,7 @@ YIELD nodeId, setId - yields a setId to each node id
 
 * Coloring based parallel algorithm
 
-[[unionfind-memory-requirements]]
+[[algorithms-unionfind-memory-requirements]]
 == Memory Requirements for the Union Find algorithm
 :algorithm: "unionFind"
 

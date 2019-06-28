@@ -27,6 +27,7 @@ This section includes:
 * <<algorithms-pagerank-cp, Cypher projection>>
 * <<algorithms-pagerank-syntax, Syntax>>
 * <<algorithms-pagerank-support, Graph type support>>
+* <<algorithms-pagerank-memory-requirements, Memory Requirements>>
 
 
 [[algorithms-pagerank-context]]
@@ -359,7 +360,7 @@ The PageRank algorithm supports the following graph types:
 * [x] undirected, weighted
 ** direction: 'BOTH', weightProperty: 'weight'
 
-[[page-rank-memory-requirements]]
+[[algorithms-pagerank-memory-requirements]]
 == Memory Requirements for the PageRank algorithm
 :algorithm: "pageRank"
 
