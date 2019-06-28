@@ -448,8 +448,8 @@ Instructions for importing this dataset are available from https://github.com/je
 [opts="header", cols="1,1,1,2,1,1"]
 |===
 | Graph Type | Nodes | Relationships | Required Memory | In Memory Graph | Algorithm
-| Heavy | 11,474,730 | 116,601,029 | 1592 MiB | 1067 MiB | 525 MiB
-| Huge | 11,474,730 | 116,601,029 | 	[963 MiB...1182 MiB] | [438 MiB...657 MiB] | 525 MiB
+| Heavy | 11,474,730 | 116,601,029 | [4043 MiB...4831 MiB] | 1505 MiB | [2538 MiB...3326 MiB]
+| Huge | 11,474,730 | 116,601,029 | 	[3086 MiB...4312 MiB] | [438 MiB...657 MiB] | [2538 MiB...3326 MiB]
 |===
 
 
