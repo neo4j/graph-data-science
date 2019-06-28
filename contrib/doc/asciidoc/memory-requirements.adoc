@@ -19,6 +19,12 @@ The model contains three types of data:
 
 Memory configuration depends on the graph projection that we're using.
 
+This section includes:
+
+* <<algo-memrec-procedure>>
+* <<algo-memrec-sample>>
+
+[[algo-memrec-procedure]]
 == `algo.memrec` procedure
 
 The `algo.memrec` procedure returns an estimate of the amount of memory required to run graph algorithms.
@@ -59,6 +65,7 @@ Algorithm specific parameters can also be provided as config.
 `algo.memrec(label, relationship, algorithm, config)` maps to `algo.<algorithm>.memrec(label, relationship, config)`, which means that `CALL algo.memrec(null, null, "pageRank")` is equivalent to `CALL algo.pageRank.memrec(null, null)`
 ====
 
+[[algo-memrec-sample]]
 == `algo.memrec` sample
 
 This sample will explain the `algo.memrec` procedure, using a Game of Thrones graphs.
