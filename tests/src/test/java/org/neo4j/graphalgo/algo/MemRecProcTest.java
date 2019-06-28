@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.algo;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.neo4j.graphalgo.LoadGraphProc;
 import org.neo4j.graphalgo.MemRecProc;
 import org.neo4j.graphalgo.PageRankProc;
 import org.neo4j.graphalgo.UnionFindProc;
@@ -50,6 +51,7 @@ public class MemRecProcTest {
         procedures.registerProcedure(MemRecProc.class);
         procedures.registerProcedure(PageRankProc.class);
         procedures.registerProcedure(UnionFindProc.class);
+        procedures.registerProcedure(LoadGraphProc.class);
     }
 
     @AfterClass
@@ -61,14 +63,16 @@ public class MemRecProcTest {
     public void memrecProcedure() {
         test(
                 "algo.memrec(null, null, null, {direction: 'BOTH', graph: 'huge'})",
-                "Missing procedure parameter, the available and supported procedures are {unionFind, pageRank}.");
+                "Missing procedure parameter, the available and supported procedures are {graph.load, pageRank, unionFind}.");
         test(
                 "algo.memrec(null, null, 'doesNotExist', {direction: 'BOTH', graph: 'huge'})",
-                "The procedure [doesNotExist] does not support memrec or does not exist, the available and supported procedures are {unionFind, pageRank}.");
+                "The procedure [doesNotExist] does not support memrec or does not exist, the available and supported procedures are {graph.load, pageRank, unionFind}.");
 
         test("algo.memrec(null, null, 'pageRank', {direction: 'BOTH', graph: 'huge'})");
         test("algo.pageRank.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
         test("algo.pageRank.memrec(null, null, { graph: 'huge'})");
+        test("algo.memrec(null, null, 'graph.load')");
+        test("algo.graph.load.memrec(null, null)");
     }
 
     private void test(final String s, final String expectedMessage) {

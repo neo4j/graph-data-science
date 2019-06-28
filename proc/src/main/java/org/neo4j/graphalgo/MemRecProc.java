@@ -37,14 +37,17 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphdb.DependencyResolver.SelectionStrategy.FIRST;
 import static org.neo4j.procedure.Mode.READ;
 
-@SuppressWarnings("unused")
 public final class MemRecProc {
+
+    private static final String DELIMITER = ".";
+    private static final Pattern DELIMITER_PATTERN = Pattern.compile(Pattern.quote(DELIMITER));
 
     @Context
     public Log log;
@@ -68,7 +71,10 @@ public final class MemRecProc {
 
         Procedures procedures = api.getDependencyResolver().resolveDependency(Procedures.class, FIRST);
         if (algo != null && !algo.isEmpty()) {
-            QualifiedName name = new QualifiedName(Arrays.asList("algo", algo), "memrec");
+            String[] namespace = Stream
+                    .concat(Stream.of("algo"), DELIMITER_PATTERN.splitAsStream(algo))
+                    .toArray(String[]::new);
+            QualifiedName name = new QualifiedName(namespace, "memrec");
             ProcedureHandle proc = null;
             try {
                 proc = procedures.procedure(name);
@@ -97,12 +103,13 @@ public final class MemRecProc {
                 .filter(p -> {
                     String[] namespace = p.name().namespace();
                     return namespace[0].equals("algo")
-                           && namespace.length == 2
+                           && namespace.length >= 2
                            && p.name().name().equals("memrec");
                 })
                 .map(p -> p.name().namespace())
-                .map(ns -> ns[ns.length - 1])
+                .map(ns -> Arrays.stream(ns).skip(1).collect(Collectors.joining(DELIMITER)))
                 .distinct()
+                .sorted()
                 .collect(Collectors.joining(", ", "{", "}"));
         final String message;
         if (algo == null || algo.isEmpty()) {
