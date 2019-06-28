@@ -35,7 +35,7 @@ CALL algo.memrec(label, relationship, algorithm, config)
 | Name          | Type    | Default        | Optional | Description
 | label         | string  | null           | yes      | The label to load from the graph. If null, load all nodes
 | relationship  | string  | null           | yes      | The relationship-type to load from the graph. If null, load all relationships
-| algorithm | string  | null     | yes      | The name of a graph algorithm.
+| algorithm | string  | null     | yes      | The name of a graph algorithm or `graph.load` to return the memory requirements for the in memory graph only.
 h| Config ||||
 | direction     | string  | 'OUTGOING'     | yes      | The relationship-direction to use in the algorithm
 | graph         | string  | 'heavy'        | yes      | Use 'heavy' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
@@ -53,6 +53,11 @@ Algorithm specific parameters can also be provided as config.
 | bytesMax | int   | The maximum number of bytes required.
 | mapView | Map  | A breakdown of the memory used by different components involved in the execution of a graph algorithm.
 |===
+
+[NOTE]
+====
+`algo.memrec(label, relationship, algorithm, config)` maps to `algo.<algorithm>.memrec(label, relationship, config)`, which means that `CALL algo.memrec(null, null, "pageRank")` is equivalent to `CALL algo.pageRank.memrec(null, null)`
+====
 
 == `algo.memrec` sample
 
@@ -92,7 +97,7 @@ The amount of memory used for relationships will be twice this if we use the `di
 .The following computes the amount of memory required by the heavy in memory graph for any node label and any relationship type:
 [source,cypher]
 ----
-CALL algo.memrec()
+CALL algo.memrec(null, null, "graph.load")
 YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax
 RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
 ----
@@ -107,7 +112,7 @@ RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
 .The following computes the amount of memory required by the heavy in memory graph for node label `Character` and relationship type `INTERACTS_SEASON1`:
 [source,cypher]
 ----
-CALL algo.memrec("Character", "INTERACTS_SEASON1", null)
+CALL algo.memrec("Character", "INTERACTS_SEASON1", "graph.load")
 YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax
 RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
 ----
@@ -122,7 +127,7 @@ RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
 .The following computes the amount of memory required by the heavy in memory graph for node label `Character`, relationship type `INTERACTS_SEASON1`, and direction `BOTH`:
 [source,cypher]
 ----
-CALL algo.memrec("Character", "INTERACTS_SEASON1", null, {direction: "BOTH"})
+CALL algo.memrec("Character", "INTERACTS_SEASON1", "graph.load", {direction: "BOTH"})
 YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax
 RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
 ----
@@ -140,11 +145,10 @@ RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
 This graph projection supports graphs with more than 2 billion nodes or 2 billion relationships.
 It stores data in a compressed structure, based on delta encoded sorted id-ranges, which uses a maximum of 64 bits (8 bytes) per node.
 
-
 .The following computes the amount of memory required by the huge in memory graph for any node label and any relationship type:
 [source,cypher]
 ----
-CALL algo.memrec(null, null, null, {graph: "huge"})
+CALL algo.memrec(null, null, "graph.load", {graph: "huge"})
 YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax
 RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
 ----
@@ -159,7 +163,7 @@ RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
 .The following computes the amount of memory required by the huge in memory graph for node label `Character` and relationship type `INTERACTS_SEASON1`:
 [source,cypher]
 ----
-CALL algo.memrec("Character", "INTERACTS_SEASON1", null, {graph: "huge"})
+CALL algo.memrec("Character", "INTERACTS_SEASON1", "graph.load", {graph: "huge"})
 YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax
 RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
 ----
@@ -168,7 +172,7 @@ RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
 [opts="header",cols="1,1,1,1,1"]
 |===
 | Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
-| 400 | 550 | 299 KiB  | 306688    | 306688
+| 400 | 550 | 299 KiB  | 306680    | 306680
 |===
 
 .The following computes the amount of memory required by the huge in memory graph for node label `Character`, relationship type `INTERACTS_SEASON1`, and direction `BOTH`:
@@ -183,5 +187,5 @@ RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
 [opts="header",cols="1,1,1,1,1"]
 |===
 | Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
-| 400 | 550 | 563 KiB  | 577120    | 577120
+| 400 | 550 | 563 KiB  | 577112    | 577112
 |===
