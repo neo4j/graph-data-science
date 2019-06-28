@@ -359,10 +359,10 @@ The PageRank algorithm supports the following graph types:
 * [x] undirected, weighted
 ** direction: 'BOTH', weightProperty: 'weight'
 
-[[page-rank-memory-requirements-sample-graphs]]
-== Memory Requirements on Sample Graphs
+[[page-rank-memory-requirements]]
+== Memory Requirements for the PageRank algorithm
 
-We can use the <<algo-memrec-procedure>> to compute the memory requirements of graph algorithms.
+We can use the <<algo-memrec-procedure>> to compute the memory requirements of running graph algorithms.
 
 .The following returns the memory requirements for running PageRank on the Heavy Graph:
 [source,cypher]
