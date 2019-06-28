@@ -312,6 +312,75 @@ YIELD nodeId, setId - yields a setId to each node id
 
 * Coloring based parallel algorithm
 
+[[unionfind-memory-requirements]]
+== Memory Requirements for the Union Find algorithm
+:algorithm: "unionFind"
+
+We can use the <<algo-memrec-procedure>> to compute the memory requirements of running graph algorithms.
+
+.The following returns the memory requirements for running Louvain on the Heavy Graph:
+:graph: "heavy"
+include::memrec.adoc[tags=overview]
+
+.Results
+[opts="header",cols="1,1,2"]
+|===
+| Nodes | Relationships | Required Memory
+| 6 | 7 | [3880 Bytes ... 4776 Bytes]
+|===
+
+.The following returns the memory requirements for running Louvain on the Heavy Graph:
+:graph: "huge"
+include::memrec.adoc[tags=overview]
+
+.Results
+[opts="header",cols="1,1,2"]
+|===
+| Nodes | Relationships | Required Memory
+| 6 | 7 | [299 KiB ... 300 KiB]
+|===
+
+We can also get a break down of where that memory is assigned from the `mapView` field.
+
+.The following returns the memory break down for running Louvain on the Heavy Graph:
+:graph: "heavy"
+include::memrec.adoc[tags=component]
+
+.Results
+[opts="header",cols="1,2"]
+|===
+| Component | Memory Usage
+| Louvain | [3176 Bytes ... 4072 Bytes]
+| HeavyGraph | 704 Bytes
+|===
+
+.The following returns the memory break down for running Louvain on the Huge Graph:
+:graph: "huge"
+include::memrec.adoc[tags=component]
+
+.Results
+[opts="header",cols="1,2"]
+|===
+| Component | Memory Usage
+| Louvain | [3176 Bytes ... 4072 Bytes]
+| HugeGraph | 296 KiB
+|===
+
+Below are the memory requirements for various sample datasets.
+
+=== Dbpedia
+
+This dataset contains Wikipedia pages and the links between them.
+Instructions for importing this dataset are available from https://github.com/jexp/graphipedia[jexp/graphipedia^].
+
+.Memory Usage
+[opts="header", cols="1,1,1,2,1,1"]
+|===
+| Graph Type | Nodes | Relationships | Required Memory | In Memory Graph | Algorithm
+| Heavy | 11,474,730 | 116,601,029 | 2468 MiB | 1067 MiB | 1400 MiB
+| Huge | 11,474,730 | 116,601,029 | 	[1839 MiB...2057 MiB] | [438 MiB...657 MiB] | 1400 MiB
+|===
+
 
 ifndef::env-docs[]
 == References
