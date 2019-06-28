@@ -23,6 +23,7 @@ This section includes:
 
 * <<algo-memrec-procedure>>
 * <<algo-memrec-sample>>
+* <<memory-requirements-sample-graphs>>
 
 [[algo-memrec-procedure]]
 == `algo.memrec` procedure
@@ -195,4 +196,25 @@ RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
 |===
 | Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
 | 400 | 550 | 563 KiB  | 577112    | 577112
+|===
+
+[[memory-requirements-sample-graphs]]
+== Memory Requirements of Sample Graphs
+
+The following show the memory requirements for various sample datasets.
+
+=== Dbpedia
+
+.Heavy Graph
+[opts="header",cols="1,1,1,1,1"]
+|===
+| Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
+| 11,474,730 | 116,601,029 | 1855 MiB  | 1945485952    | 1945485952
+|===
+
+.Huge Graph
+[opts="header",cols="1,1,1,1,1"]
+|===
+| Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
+| 11,474,730 | 116,601,029 | 	[963 MiB ... 1182 MiB]  | 1010512856    | 1239939136
 |===
