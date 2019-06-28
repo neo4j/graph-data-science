@@ -359,6 +359,91 @@ The PageRank algorithm supports the following graph types:
 * [x] undirected, weighted
 ** direction: 'BOTH', weightProperty: 'weight'
 
+[[page-rank-memory-requirements-sample-graphs]]
+== Memory Requirements on Sample Graphs
+
+We can use the <<algo-memrec-procedure>> to compute the memory requirements of graph algorithms.
+
+.The following returns the memory requirements for running PageRank on the Heavy Graph:
+[source,cypher]
+----
+CALL algo.memrec(null, null, "pageRank", {graph: "huge", concurrency: 8})
+YIELD nodes, relationships, requiredMemory;
+----
+
+.Results
+[opts="header",cols="1,1,2"]
+|===
+| Nodes | Relationships | Required Memory
+| 8 | 14 | 4344 Bytes
+|===
+
+.The following returns the memory requirements for running PageRank on the Heavy Graph:
+[source,cypher]
+----
+CALL algo.memrec(null, null, "pageRank", {graph: "huge", concurrency: 8})
+YIELD nodes, relationships, requiredMemory;
+----
+
+.Results
+[opts="header",cols="1,1,2"]
+|===
+| Nodes | Relationships | Required Memory
+| 8 | 14 | 299 KiB
+|===
+
+We can also get a break down of where that memory is assigned from the `mapView` field.
+
+.The following returns the memory break down for running PageRank on the Heavy Graph:
+[source,cypher]
+----
+CALL algo.memrec(null, null, "pageRank", {graph: "heavy", concurrency: 8})
+YIELD mapView
+UNWIND mapView.components AS component
+RETURN component.name AS component, component.memoryUsage AS memoryUsage
+----
+
+.Results
+[opts="header",cols="1,2"]
+|===
+| Component | Memory Usage
+| PageRank | 3512 Bytes
+| HeavyGraph | 832 Bytes
+|===
+
+.The following returns the memory break down for running PageRank on the Huge Graph:
+[source,cypher]
+----
+CALL algo.memrec(null, null, "pageRank", {graph: "huge", concurrency: 8})
+YIELD mapView
+UNWIND mapView.components AS component
+RETURN component.name AS component, component.memoryUsage AS memoryUsage
+----
+
+.Results
+[opts="header",cols="1,2"]
+|===
+| Component | Memory Usage
+| PageRank | 3512 Bytes
+| HugeGraph | 296 KiB
+|===
+
+Below are the memory requirements for various sample datasets.
+
+=== Dbpedia
+
+This dataset contains Wikipedia pages and the links between them.
+Instructions for importing this dataset are available from https://github.com/jexp/graphipedia[jexp/graphipedia^].
+
+.Memory Usage
+[opts="header", cols="1,1,1,2,1,1"]
+|===
+| Graph Type | Nodes | Relationships | Required Memory | In Memory Graph | Algorithm
+| Heavy | 11,474,730 | 116,601,029 | 1592 MiB | 1067 MiB | 525 MiB
+| Huge | 11,474,730 | 116,601,029 | 	[963 MiB...1182 MiB] | [438 MiB...657 MiB] | 525 MiB
+|===
+
+
 ifndef::env-docs[]
 == References
 

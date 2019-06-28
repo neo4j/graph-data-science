@@ -198,8 +198,8 @@ RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
 | 400 | 550 | 563 KiB  | 577112    | 577112
 |===
 
-[[memory-requirements-sample-graphs]]
-== Memory Requirements of Sample Graphs
+[[graph-load-memory-requirements-sample-graphs]]
+== Memory Requirements on Sample Graphs
 
 Below are the memory requirements for various sample datasets.
 These numbers are computed by running the following queries:
