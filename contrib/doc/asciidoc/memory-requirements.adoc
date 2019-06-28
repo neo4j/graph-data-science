@@ -218,11 +218,8 @@ CALL algo.memrec(null, null, "graph.load", {graph: "huge"})
 
 === Dbpedia
 
-[opts="header", cols="1,3,1"]
-|===
-| Name | Description | Link
-| Dbpedia | This dataset contains Wikipedia pages and the links between them. | https://github.com/jexp/graphipedia
-|===
+This dataset contains Wikipedia pages and the links between them.
+Instructions for importing this dataset are available from https://github.com/jexp/graphipedia[jexp/graphipedia^].
 
 .Memory Usage
 [opts="header", cols="1,1,1,2,1,1"]
