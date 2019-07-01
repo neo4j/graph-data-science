@@ -46,7 +46,7 @@ public final class HugeAdjacencyList {
                 .builder(HugeAdjacencyList.class)
                 .rangePerGraphDimension("pages", dim -> {
                     long nodeCount = dim.nodeCount();
-                    long relCount = undirected ? dim.maxRelCount() << 1 : dim.maxRelCount();
+                    long relCount = undirected ? dim.maxRelCount() * 2 : dim.maxRelCount();
                     long avgDegree = (nodeCount > 0) ? ceilDiv(relCount, nodeCount) : 0L;
 
                     // Best case scenario:

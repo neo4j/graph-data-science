@@ -68,7 +68,6 @@ public class HeavyGraphFactory extends GraphFactory {
                 ))
                 .startField("nodePropertiesMapping", Map.class);
 
-
         for (PropertyMapping propertyMapping : setup.nodePropertyMappings) {
             int propertyId = dimensions.nodePropertyKeyId(propertyMapping.propertyName, setup);
             if (propertyId == StatementConstants.NO_SUCH_PROPERTY_KEY) {

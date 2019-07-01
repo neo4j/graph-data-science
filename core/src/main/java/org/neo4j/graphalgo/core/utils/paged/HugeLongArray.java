@@ -65,8 +65,6 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
  */
 public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArray> {
 
-
-
     /**
      * @return the long value at the given index
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}

@@ -31,6 +31,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 public final class MemoryTreeTest {
+
     @Test
     public void renderLeaf() {
         MemoryTree memoryTree = new LeafTree("description", MemoryRange.of(12L));

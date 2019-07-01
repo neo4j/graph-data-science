@@ -302,7 +302,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
      */
     private final class Task implements Runnable {
 
-
         final HugeDoubleArray sTot, sIn;
         final HugeLongArray localCommunities;
         final RelationshipIterator rels;

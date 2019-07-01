@@ -63,17 +63,17 @@ public class GraphUnionFind extends GraphUnionFindAlgo<GraphUnionFind> {
         this.threshold = threshold;
         if (graph.isPresent()) {
             this.graph = graph.get();
-            nodeCount = this.graph.nodeCount();
+            this.nodeCount = this.graph.nodeCount();
             this.dss = new PagedDisjointSetStruct(nodeCount, tracker);
-            unrestricted = (source, target) -> {
+            this.unrestricted = (source, target) -> {
                 dss.union(source, target);
                 return true;
             };
         } else {
             this.graph = null;
-            nodeCount = 0;
+            this.nodeCount = 0;
             this.dss = null;
-            unrestricted = (source, target) -> true;
+            this.unrestricted = (source, target) -> true;
         }
     }
 

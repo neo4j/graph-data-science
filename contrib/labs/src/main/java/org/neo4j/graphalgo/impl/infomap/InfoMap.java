@@ -107,7 +107,7 @@ public class InfoMap extends Algorithm<InfoMap> {
             ProgressLogger logger,
             TerminationFlag terminationFlag) {
 
-        final PageRank.Config algoConfig = new PageRank.Config(prIterations, 1. - tau);
+        final PageRank.Config algoConfig = new PageRank.Config(prIterations, 1.0 - tau);
         final CentralityResult pageRankResult;
 
         // use parallel PR if concurrency is >1

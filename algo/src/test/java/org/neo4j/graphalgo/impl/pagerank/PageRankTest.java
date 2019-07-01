@@ -289,7 +289,8 @@ public final class PageRankTest {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(nodeCount).build();
 
         final PageRank pageRank = PageRankFactory.of(
-                null, DEFAULT_CONFIG,
+                null, 
+                DEFAULT_CONFIG,
                 LongStream.empty(),
                 Pools.DEFAULT,
                 Pools.DEFAULT_CONCURRENCY,

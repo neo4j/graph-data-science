@@ -153,11 +153,10 @@ public final class Louvain extends Algorithm<Louvain> {
                 .fixed("modularities", MemoryRange.of(sizeOfDoubleArray(1), sizeOfDoubleArray(maxLevel)))
                 .add("modularityOptimization", ModularityOptimization.estimateMemory())
                 .build();
-
     }
 
     public Louvain compute() {
-        if(communityMap != null) {
+        if (communityMap != null) {
             return compute(communityMap, maxLevel, maxIterations, randomNeighborSelection);
         } else {
             return compute(maxLevel, maxIterations, randomNeighborSelection);

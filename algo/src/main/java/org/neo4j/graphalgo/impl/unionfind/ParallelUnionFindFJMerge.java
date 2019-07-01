@@ -101,7 +101,7 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
 
     @Override
     public PagedDisjointSetStruct compute(double threshold) {
-        final Collection<TUFProcess> ufProcesses = new ArrayList<>();
+        final ArrayList<TUFProcess> ufProcesses = new ArrayList<>();
         for (long i = 0L; i < nodeCount; i += batchSize) {
             ufProcesses.add(new TUFProcess(i, batchSize, threshold));
         }
@@ -111,7 +111,6 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
 
     @Override
     public PagedDisjointSetStruct computeUnrestricted() {
-
         final ArrayList<UFProcess> ufProcesses = new ArrayList<>();
         for (long i = 0L; i < nodeCount; i += batchSize) {
             ufProcesses.add(new UFProcess(i, batchSize));
