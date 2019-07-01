@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.bench;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
-import org.neo4j.graphalgo.impl.pagerank.PageRankFactory;
+import org.neo4j.graphalgo.impl.pagerank.PageRankAlgorithmType;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Transaction;
@@ -117,8 +117,9 @@ public class WeightedPageRankBenchmark {
                 .withRelationshipWeightsFromProperty("weight", 0.0)
                 .load(impl.impl);
         try {
-            return new PageRankFactory(new PageRank.Config(iterations, 0.85))
-                    .weightedOf(graph, LongStream.empty())
+            final PageRank.Config algoConfig = new PageRank.Config(iterations, 0.85);
+            return PageRankAlgorithmType.WEIGHTED
+                    .create(graph, algoConfig, LongStream.empty())
                     .compute()
                     .result();
         } finally {

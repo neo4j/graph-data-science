@@ -60,6 +60,16 @@ public interface PageRankAlgorithm extends Assessable {
             int batchSize,
             int concurrency,
             PageRank.Config algoConfig,
+            LongStream sourceNodeIds) {
+        return create(graph, executor, batchSize, concurrency, algoConfig, sourceNodeIds, AllocationTracker.EMPTY);
+    }
+
+    default PageRank create(
+            Graph graph,
+            ExecutorService executor,
+            int batchSize,
+            int concurrency,
+            PageRank.Config algoConfig,
             LongStream sourceNodeIds,
             AllocationTracker tracker) {
         return new PageRank(executor, concurrency, batchSize, tracker, graph, algoConfig, sourceNodeIds, variant(algoConfig));

@@ -166,8 +166,8 @@ public final class EigenvectorCentralityTest {
                     .load(graphImpl);
         }
 
-        final CentralityResult rankResult = new PageRankFactory(DEFAULT_CONFIG)
-                .eigenvectorCentralityOf(graph, LongStream.empty())
+        final CentralityResult rankResult = PageRankAlgorithmType.EIGENVECTOR_CENTRALITY
+                .create(graph, DEFAULT_CONFIG, LongStream.empty())
                 .compute()
                 .result();
 

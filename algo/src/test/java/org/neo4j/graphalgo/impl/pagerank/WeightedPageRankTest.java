@@ -184,8 +184,8 @@ public final class WeightedPageRankTest {
                     .load(graphImpl);
         }
 
-        final CentralityResult rankResult = new PageRankFactory(DEFAULT_CONFIG)
-                .weightedOf(graph, LongStream.empty())
+        final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
+                .create(graph, DEFAULT_CONFIG, LongStream.empty())
                 .compute()
                 .result();
 
@@ -236,8 +236,8 @@ public final class WeightedPageRankTest {
                     .load(graphImpl);
         }
 
-        final CentralityResult rankResult = new PageRankFactory(DEFAULT_CONFIG)
-                .weightedOf(graph, LongStream.empty())
+        final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
+                .create(graph, DEFAULT_CONFIG, LongStream.empty())
                 .compute()
                 .result();
 
@@ -288,8 +288,8 @@ public final class WeightedPageRankTest {
                     .load(graphImpl);
         }
 
-        final CentralityResult rankResult = new PageRankFactory(DEFAULT_CONFIG)
-                .weightedOf(graph, LongStream.empty())
+        final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
+                .create(graph, DEFAULT_CONFIG, LongStream.empty())
                 .compute()
                 .result();
 
@@ -340,8 +340,8 @@ public final class WeightedPageRankTest {
                     .load(graphImpl);
         }
 
-        final CentralityResult rankResult = new PageRankFactory(DEFAULT_CONFIG)
-                .weightedOf(graph, LongStream.empty())
+        final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
+                .create(graph, DEFAULT_CONFIG, LongStream.empty())
                 .compute()
                 .result();
 
@@ -392,8 +392,8 @@ public final class WeightedPageRankTest {
                     .load(graphImpl);
         }
 
-        final CentralityResult rankResult = new PageRankFactory(DEFAULT_CONFIG)
-                .weightedOf(graph, LongStream.empty())
+        final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
+                .create(graph, DEFAULT_CONFIG, LongStream.empty())
                 .compute()
                 .result();
 

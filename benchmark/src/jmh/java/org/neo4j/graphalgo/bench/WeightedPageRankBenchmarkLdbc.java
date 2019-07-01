@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
-import org.neo4j.graphalgo.impl.pagerank.PageRankFactory;
+import org.neo4j.graphalgo.impl.pagerank.PageRankAlgorithmType;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Relationship;
@@ -114,13 +114,14 @@ public class WeightedPageRankBenchmarkLdbc {
 
     @Benchmark
     public CentralityResult run() throws Exception {
-        return new PageRankFactory(new PageRank.Config(iterations, 0.85, cacheWeights))
-                .weightedOf(
+        return PageRankAlgorithmType.WEIGHTED
+                .create(
                         grph,
-                        LongStream.empty(),
                         Pools.DEFAULT,
                         Pools.DEFAULT_CONCURRENCY,
                         batchSize,
+                        new PageRank.Config(iterations, 0.85, cacheWeights),
+                        LongStream.empty(),
                         AllocationTracker.EMPTY
                 )
                 .compute()

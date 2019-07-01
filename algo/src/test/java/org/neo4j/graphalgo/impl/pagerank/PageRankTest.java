@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
@@ -121,7 +122,7 @@ public final class PageRankTest {
 
     @AfterClass
     public static void shutdownGraph() {
-        if (db!=null) db.shutdown();
+        if (db != null) db.shutdown();
     }
 
     public PageRankTest(
@@ -164,8 +165,8 @@ public final class PageRankTest {
                     .load(graphImpl);
         }
 
-        final CentralityResult rankResult = new PageRankFactory(DEFAULT_CONFIG)
-                .nonWeightedOf(graph, LongStream.empty())
+        final CentralityResult rankResult = PageRankAlgorithmType.NON_WEIGHTED
+                .create(graph, DEFAULT_CONFIG, LongStream.empty())
                 .compute()
                 .result();
 
@@ -207,8 +208,8 @@ public final class PageRankTest {
                     .withRelationshipType("MATCH (n:Label1)<-[:TYPE1]-(m:Label1) RETURN id(n) as source,id(m) as target")
                     .load(graphImpl);
 
-            rankResult = new PageRankFactory(DEFAULT_CONFIG)
-                    .nonWeightedOf(graph, LongStream.empty())
+            rankResult = PageRankAlgorithmType.NON_WEIGHTED
+                    .create(graph, DEFAULT_CONFIG, LongStream.empty())
                     .compute()
                     .result();
         } else {
@@ -218,8 +219,8 @@ public final class PageRankTest {
                     .withDirection(Direction.INCOMING)
                     .load(graphImpl);
 
-            rankResult = new PageRankFactory(DEFAULT_CONFIG)
-                    .nonWeightedOf(graph, LongStream.empty())
+            rankResult = PageRankAlgorithmType.NON_WEIGHTED
+                    .create(graph, DEFAULT_CONFIG, LongStream.empty())
                     .compute()
                     .result();
         }
@@ -255,8 +256,15 @@ public final class PageRankTest {
         }
 
         // explicitly list all source nodes to prevent the 'we got everything' optimization
-        PageRank algorithm = new PageRankFactory(DEFAULT_CONFIG)
-                .nonWeightedOf(graph, LongStream.range(0L, graph.nodeCount()), null, 1, 1)
+        PageRank algorithm = PageRankAlgorithmType.NON_WEIGHTED
+                .create(
+                        graph,
+                        null,
+                        1,
+                        1,
+                        DEFAULT_CONFIG,
+                        LongStream.range(0L, graph.nodeCount()),
+                        AllocationTracker.EMPTY)
                 .compute();
         // should not throw
     }

@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
-import org.neo4j.graphalgo.impl.pagerank.PageRankFactory;
+import org.neo4j.graphalgo.impl.pagerank.PageRankAlgorithmType;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -75,13 +75,15 @@ public class InfoMapGraph {
                 .load(HeavyGraphFactory.class);
 
 
-        CentralityResult pr = new PageRankFactory(new PageRank.Config(iterations, 1.0 - tau))
-                .nonWeightedOf(
+        final PageRank.Config algoConfig = new PageRank.Config(iterations, 1.0 - tau);
+        CentralityResult pr = PageRankAlgorithmType.NON_WEIGHTED
+                .create(
                         graph,
-                        LongStream.empty(),
                         Pools.DEFAULT,
                         concurrency,
                         ParallelUtil.DEFAULT_BATCH_SIZE,
+                        algoConfig,
+                        LongStream.empty(),
                         tracker
                 )
                 .compute()

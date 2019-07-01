@@ -57,7 +57,9 @@ public class LouvainFactory extends AlgorithmFactory<Louvain> {
         return new Louvain(graph,
                 config,
                 communityMap,
-                Pools.DEFAULT, configuration.getConcurrency(), tracker);
+                Pools.DEFAULT,
+                configuration.getConcurrency(),
+                tracker);
     }
 
     @Override

@@ -35,7 +35,7 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
-import org.neo4j.graphalgo.impl.pagerank.PageRankFactory;
+import org.neo4j.graphalgo.impl.pagerank.PageRankAlgorithmType;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphdb.Direction;
 
@@ -112,13 +112,14 @@ public class InfoMap extends Algorithm<InfoMap> {
 
         // use parallel PR if concurrency is >1
         if (concurrency > 1) {
-            pageRankResult = new PageRankFactory(algoConfig)
-                    .weightedOf(
+            pageRankResult = PageRankAlgorithmType.WEIGHTED
+                    .create(
                             graph,
-                            LongStream.empty(),
                             pool,
                             concurrency,
                             PAGE_RANK_BATCH_SIZE,
+                            algoConfig,
+                            LongStream.empty(),
                             AllocationTracker.create())
                     .compute()
                     .result();
@@ -133,7 +134,8 @@ public class InfoMap extends Algorithm<InfoMap> {
                     logger,
                     terminationFlag);
         } else {
-            pageRankResult = new PageRankFactory(algoConfig).weightedOf(graph, LongStream.empty())
+            pageRankResult = PageRankAlgorithmType.WEIGHTED
+                    .create(graph, algoConfig, LongStream.empty())
                     .compute()
                     .result();
         }
@@ -190,14 +192,21 @@ public class InfoMap extends Algorithm<InfoMap> {
         // use parallel PR if concurrency is >1
         if (concurrency > 1) {
             final AllocationTracker tracker = AllocationTracker.create();
-            pageRankResult = new PageRankFactory(algoConfig).nonWeightedOf(
-                    graph,
-                    LongStream.empty(), pool, concurrency, PAGE_RANK_BATCH_SIZE, tracker
-            )
+            pageRankResult = PageRankAlgorithmType.NON_WEIGHTED
+                    .create(
+                            graph,
+                            pool,
+                            concurrency,
+                            PAGE_RANK_BATCH_SIZE,
+                            algoConfig,
+                            LongStream.empty(),
+                            tracker
+                    )
                     .compute()
                     .result();
         } else {
-            pageRankResult = new PageRankFactory(algoConfig).nonWeightedOf(graph, LongStream.empty())
+            pageRankResult = PageRankAlgorithmType.NON_WEIGHTED
+                    .create(graph, algoConfig, LongStream.empty())
                     .compute()
                     .result();
         }

@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
-import org.neo4j.graphalgo.impl.pagerank.PageRankFactory;
+import org.neo4j.graphalgo.impl.pagerank.PageRankAlgorithmType;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphalgo.impl.results.CentralityScore;
 import org.neo4j.graphalgo.impl.results.PageRankScore;
@@ -196,14 +196,16 @@ public final class ArticleRankProc {
         List<Node> sourceNodes = configuration.get("sourceNodes", new ArrayList<>());
         LongStream sourceNodeIds = sourceNodes.stream().mapToLong(Node::getId);
 
-        PageRank prAlgo = new PageRankFactory(algoConfig).articleRankOf(
-                graph,
-                sourceNodeIds,
-                Pools.DEFAULT,
-                concurrency,
-                batchSize,
-                tracker
-        );
+        PageRank prAlgo = PageRankAlgorithmType.ARTICLE_RANK
+                .create(
+                        graph,
+                        Pools.DEFAULT,
+                        concurrency,
+                        batchSize,
+                        algoConfig,
+                        sourceNodeIds,
+                        tracker
+                );
 
         Algorithm<?> algo = prAlgo
                 .withLog(log)

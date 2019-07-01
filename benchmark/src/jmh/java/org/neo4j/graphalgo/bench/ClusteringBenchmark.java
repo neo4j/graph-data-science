@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.impl.infomap.InfoMap;
 import org.neo4j.graphalgo.impl.louvain.Louvain;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
-import org.neo4j.graphalgo.impl.pagerank.PageRankFactory;
+import org.neo4j.graphalgo.impl.pagerank.PageRankAlgorithmType;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.TestGraphDatabaseFactory;
@@ -101,7 +101,9 @@ public class ClusteringBenchmark {
                 .asUndirected(true)
                 .load(HugeGraphFactory.class);
 
-        pageRankResult = new PageRankFactory(new PageRank.Config(10, 1.0 - InfoMap.TAU)).nonWeightedOf(g, LongStream.empty())
+        final PageRank.Config algoConfig = new PageRank.Config(10, 1.0 - InfoMap.TAU);
+        pageRankResult = PageRankAlgorithmType.NON_WEIGHTED
+                .create(g, algoConfig, LongStream.empty())
                 .compute()
                 .result();
     }

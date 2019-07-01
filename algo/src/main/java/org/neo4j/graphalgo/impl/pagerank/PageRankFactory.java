@@ -31,7 +31,6 @@ import org.neo4j.graphdb.Node;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
@@ -48,103 +47,6 @@ public class PageRankFactory extends AlgorithmFactory<PageRank> {
     public PageRankFactory(PageRankAlgorithmType algorithmType, PageRank.Config algoConfig) {
         this.algorithmType = algorithmType;
         this.algoConfig = algoConfig;
-    }
-
-    public PageRank nonWeightedOf(Graph graph, LongStream sourceNodeIds) {
-        return nonWeightedOf(graph, sourceNodeIds, AllocationTracker.EMPTY);
-    }
-
-    public PageRank nonWeightedOf(Graph graph, LongStream sourceNodeIds, AllocationTracker tracker) {
-        return PageRankAlgorithmType.NON_WEIGHTED.create(graph, algoConfig, sourceNodeIds, tracker);
-    }
-
-    public PageRank nonWeightedOf(
-            Graph graph,
-            LongStream sourceNodeIds,
-            ExecutorService pool,
-            int concurrency,
-            int batchSize) {
-        return nonWeightedOf(graph, sourceNodeIds, pool, concurrency, batchSize, AllocationTracker.EMPTY);
-    }
-
-    public PageRank nonWeightedOf(
-            Graph graph,
-            LongStream sourceNodeIds,
-            ExecutorService pool,
-            int concurrency,
-            int batchSize,
-            AllocationTracker tracker) {
-        return PageRankAlgorithmType.NON_WEIGHTED.create(
-                graph,
-                pool,
-                batchSize,
-                concurrency,
-                algoConfig,
-                sourceNodeIds,
-                tracker);
-    }
-
-    public PageRank weightedOf(Graph graph, LongStream sourceNodeIds) {
-        return PageRankAlgorithmType.WEIGHTED.create(graph, algoConfig, sourceNodeIds);
-    }
-
-    public PageRank weightedOf(
-            Graph graph,
-            LongStream sourceNodeIds,
-            ExecutorService pool,
-            int concurrency,
-            int batchSize,
-            AllocationTracker tracker) {
-        return PageRankAlgorithmType.WEIGHTED.create(
-                graph,
-                pool,
-                batchSize,
-                concurrency,
-                algoConfig,
-                sourceNodeIds,
-                tracker);
-    }
-
-    public PageRank articleRankOf(Graph graph, LongStream sourceNodeIds) {
-        return PageRankAlgorithmType.WEIGHTED.create(graph, algoConfig, sourceNodeIds);
-    }
-
-    public PageRank articleRankOf(
-            Graph graph,
-            LongStream sourceNodeIds,
-            ExecutorService pool,
-            int concurrency,
-            int batchSize,
-            AllocationTracker tracker) {
-        return PageRankAlgorithmType.ARTICLE_RANK.create(
-                graph,
-                pool,
-                batchSize,
-                concurrency,
-                algoConfig,
-                sourceNodeIds,
-                tracker);
-    }
-
-    public PageRank eigenvectorCentralityOf(Graph graph, LongStream sourceNodeIds) {
-        return PageRankAlgorithmType.EIGENVECTOR_CENTRALITY.create(graph, algoConfig, sourceNodeIds);
-    }
-
-    public PageRank eigenvectorCentralityOf(
-            Graph graph,
-            LongStream sourceNodeIds,
-            ExecutorService pool,
-            int concurrency,
-            int batchSize,
-            AllocationTracker tracker) {
-        return PageRankAlgorithmType.EIGENVECTOR_CENTRALITY.create(
-                graph,
-                pool,
-                batchSize,
-                concurrency,
-                algoConfig,
-                sourceNodeIds,
-                tracker);
     }
 
     @Override

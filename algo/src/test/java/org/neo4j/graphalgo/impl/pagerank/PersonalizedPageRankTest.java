@@ -151,8 +151,8 @@ public final class PersonalizedPageRankTest {
             sourceNodeIds = LongStream.of(node.getId());
         }
 
-        final CentralityResult rankResult = new PageRankFactory(DEFAULT_CONFIG)
-                .nonWeightedOf(graph, sourceNodeIds, Pools.DEFAULT, 2, 1)
+        final CentralityResult rankResult = PageRankAlgorithmType.NON_WEIGHTED
+                .create(graph, Pools.DEFAULT, 2, 1, DEFAULT_CONFIG, sourceNodeIds)
                 .compute()
                 .result();
 

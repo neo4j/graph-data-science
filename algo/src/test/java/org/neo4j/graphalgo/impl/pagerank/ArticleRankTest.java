@@ -164,8 +164,8 @@ public final class ArticleRankTest {
                     .load(graphImpl);
         }
 
-        final CentralityResult rankResult = new PageRankFactory(DEFAULT_CONFIG)
-                .articleRankOf(graph, LongStream.empty())
+        final CentralityResult rankResult = PageRankAlgorithmType.ARTICLE_RANK
+                .create(graph, DEFAULT_CONFIG, LongStream.empty())
                 .compute()
                 .result();
 
