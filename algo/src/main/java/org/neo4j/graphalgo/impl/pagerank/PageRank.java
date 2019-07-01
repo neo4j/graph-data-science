@@ -197,34 +197,7 @@ public class PageRank extends Algorithm<PageRank> {
         return dampingFactor;
     }
 
-    @Override
-    public MemoryEstimation memoryEstimation() {
-        return MemoryEstimations.builder(PageRank.class)
-                .add(MemoryEstimations.setup("computeSteps", (dimensions, concurrency) -> {
-                    // adjust concurrency, if necessary
-                    long nodeCount = dimensions.nodeCount();
-                    long nodesPerThread = ceilDiv(nodeCount, concurrency);
-                    if (nodesPerThread > Partition.MAX_NODE_COUNT) {
-                        concurrency = (int) ceilDiv(nodeCount, Partition.MAX_NODE_COUNT);
-                        nodesPerThread = ceilDiv(nodeCount, concurrency);
-                        while (nodesPerThread > Partition.MAX_NODE_COUNT) {
-                            concurrency++;
-                            nodesPerThread = ceilDiv(nodeCount, concurrency);
-                        }
-                    }
-                    int partitionSize = (int) nodesPerThread;
 
-                    return MemoryEstimations
-                            .builder(ComputeSteps.class)
-                            .perThread("scores[] wrapper", MemoryUsage::sizeOfObjectArray)
-                            .perThread("starts[]", MemoryUsage::sizeOfLongArray)
-                            .perThread("lengths[]", MemoryUsage::sizeOfLongArray)
-                            .perThread("list of computeSteps", MemoryUsage::sizeOfObjectArray)
-                            .perThread("ComputeStep", pageRankVariant.estimateMemoryPerThread(partitionSize))
-                            .build();
-                }))
-                .build();
-    }
 
     /**
      * compute pageRank for n iterations
@@ -482,11 +455,11 @@ public class PageRank extends Algorithm<PageRank> {
         return this;
     }
 
-    private static final class Partition {
+    static final class Partition {
 
         // rough estimate of what capacity would still yield acceptable performance
         // per thread
-        private static final int MAX_NODE_COUNT = (Integer.MAX_VALUE - 32) >> 1;
+        public static final int MAX_NODE_COUNT = (Integer.MAX_VALUE - 32) >> 1;
 
         private final long startNode;
         private final int nodeCount;
@@ -514,7 +487,7 @@ public class PageRank extends Algorithm<PageRank> {
         }
     }
 
-    private final class ComputeSteps {
+    final class ComputeSteps {
         private List<ComputeStep> steps;
         private final ExecutorService pool;
         private float[][][] scores;

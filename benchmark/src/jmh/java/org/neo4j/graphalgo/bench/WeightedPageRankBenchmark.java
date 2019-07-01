@@ -117,8 +117,8 @@ public class WeightedPageRankBenchmark {
                 .withRelationshipWeightsFromProperty("weight", 0.0)
                 .load(impl.impl);
         try {
-            return PageRankFactory
-                    .weightedOf(graph, new PageRank.Config(iterations, 0.85), LongStream.empty())
+            return new PageRankFactory(new PageRank.Config(iterations, 0.85))
+                    .weightedOf(graph, LongStream.empty())
                     .compute()
                     .result();
         } finally {

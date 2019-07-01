@@ -112,10 +112,9 @@ public class InfoMap extends Algorithm<InfoMap> {
 
         // use parallel PR if concurrency is >1
         if (concurrency > 1) {
-            pageRankResult = PageRankFactory
+            pageRankResult = new PageRankFactory(algoConfig)
                     .weightedOf(
                             graph,
-                            algoConfig,
                             LongStream.empty(),
                             pool,
                             concurrency,
@@ -135,7 +134,7 @@ public class InfoMap extends Algorithm<InfoMap> {
                     logger,
                     terminationFlag);
         } else {
-            pageRankResult = PageRankFactory.weightedOf(graph, algoConfig, LongStream.empty())
+            pageRankResult = new PageRankFactory(algoConfig).weightedOf(graph, LongStream.empty())
                     .compute()
                     .result();
         }
@@ -184,15 +183,14 @@ public class InfoMap extends Algorithm<InfoMap> {
         // use parallel PR if concurrency is >1
         if (concurrency > 1) {
             final AllocationTracker tracker = AllocationTracker.create();
-            pageRankResult = PageRankFactory.of(
+            pageRankResult = new PageRankFactory(algoConfig).of(
                     graph,
-                    algoConfig,
                     LongStream.empty(), pool, concurrency, PAGE_RANK_BATCH_SIZE, tracker
             )
                     .compute()
                     .result();
         } else {
-            pageRankResult = PageRankFactory.of(graph, algoConfig, LongStream.empty())
+            pageRankResult = new PageRankFactory(algoConfig).of(graph, LongStream.empty())
                     .compute()
                     .result();
         }

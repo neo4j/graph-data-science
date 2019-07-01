@@ -114,10 +114,9 @@ public class WeightedPageRankBenchmarkLdbc {
 
     @Benchmark
     public CentralityResult run() throws Exception {
-        return PageRankFactory
+        return new PageRankFactory(new PageRank.Config(iterations, 0.85))
                 .weightedOf(
                         grph,
-                        new PageRank.Config(iterations, 0.85),
                         LongStream.empty(),
                         Pools.DEFAULT,
                         Pools.DEFAULT_CONCURRENCY,

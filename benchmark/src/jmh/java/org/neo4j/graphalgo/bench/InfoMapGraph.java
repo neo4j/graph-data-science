@@ -75,10 +75,9 @@ public class InfoMapGraph {
                 .load(HeavyGraphFactory.class);
 
 
-        CentralityResult pr = PageRankFactory
+        CentralityResult pr = new PageRankFactory(new PageRank.Config(iterations, 1.0 - tau))
                 .of(
                         graph,
-                        new PageRank.Config(iterations, 1.0 - tau),
                         LongStream.empty(),
                         Pools.DEFAULT,
                         concurrency,

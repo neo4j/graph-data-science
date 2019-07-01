@@ -46,6 +46,7 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.junit.Assert.assertEquals;
+import static org.neo4j.graphalgo.impl.pagerank.PageRankTest.DEFAULT_CONFIG;
 
 @RunWith(Parameterized.class)
 public final class EigenvectorCentralityTest {
@@ -165,8 +166,8 @@ public final class EigenvectorCentralityTest {
                     .load(graphImpl);
         }
 
-        final CentralityResult rankResult = PageRankFactory
-                .eigenvectorCentralityOf(graph, DEFAULT_EIGENVECTOR_CONFIG, LongStream.empty())
+        final CentralityResult rankResult = new PageRankFactory(DEFAULT_CONFIG)
+                .eigenvectorCentralityOf(graph, LongStream.empty())
                 .compute()
                 .result();
 

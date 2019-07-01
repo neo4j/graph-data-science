@@ -34,10 +34,7 @@ import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.BitUtil;
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
@@ -167,8 +164,8 @@ public final class PageRankTest {
                     .load(graphImpl);
         }
 
-        final CentralityResult rankResult = PageRankFactory
-                .of(graph, DEFAULT_CONFIG, LongStream.empty())
+        final CentralityResult rankResult = new PageRankFactory(DEFAULT_CONFIG)
+                .of(graph, LongStream.empty())
                 .compute()
                 .result();
 
@@ -210,8 +207,8 @@ public final class PageRankTest {
                     .withRelationshipType("MATCH (n:Label1)<-[:TYPE1]-(m:Label1) RETURN id(n) as source,id(m) as target")
                     .load(graphImpl);
 
-            rankResult = PageRankFactory
-                    .of(graph, DEFAULT_CONFIG, LongStream.empty())
+            rankResult = new PageRankFactory(DEFAULT_CONFIG)
+                    .of(graph, LongStream.empty())
                     .compute()
                     .result();
         } else {
@@ -221,8 +218,8 @@ public final class PageRankTest {
                     .withDirection(Direction.INCOMING)
                     .load(graphImpl);
 
-            rankResult = PageRankFactory
-                    .of(graph, DEFAULT_CONFIG, LongStream.empty())
+            rankResult = new PageRankFactory(DEFAULT_CONFIG)
+                    .of(graph, LongStream.empty())
                     .compute()
                     .result();
         }
@@ -258,8 +255,8 @@ public final class PageRankTest {
         }
 
         // explicitly list all source nodes to prevent the 'we got everything' optimization
-        PageRank algorithm = PageRankFactory
-                .of(graph, DEFAULT_CONFIG, LongStream.range(0L, graph.nodeCount()), null, 1, 1)
+        PageRank algorithm = new PageRankFactory(DEFAULT_CONFIG)
+                .of(graph, LongStream.range(0L, graph.nodeCount()), null, 1, 1)
                 .compute();
         // should not throw
     }
@@ -288,15 +285,7 @@ public final class PageRankTest {
     private void assertMemoryEstimation(final long nodeCount, final int concurrency) {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(nodeCount).build();
 
-        final PageRank pageRank = PageRankFactory.of(
-                null, 
-                DEFAULT_CONFIG,
-                LongStream.empty(),
-                Pools.DEFAULT,
-                Pools.DEFAULT_CONCURRENCY,
-                ParallelUtil.DEFAULT_BATCH_SIZE,
-                AllocationTracker.EMPTY
-        );
+        final PageRankFactory pageRank = new PageRankFactory(DEFAULT_CONFIG);
 
         long partitionSize = BitUtil.ceilDiv(nodeCount, concurrency);
         final MemoryRange actual = pageRank.memoryEstimation().estimate(dimensions, concurrency).memoryUsage();

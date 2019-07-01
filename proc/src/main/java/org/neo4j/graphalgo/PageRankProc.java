@@ -22,7 +22,6 @@ package org.neo4j.graphalgo;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
-import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -34,17 +33,12 @@ import org.neo4j.graphalgo.impl.results.MemRecResult;
 import org.neo4j.graphalgo.impl.results.PageRankScore;
 import org.neo4j.graphalgo.impl.utils.CentralityUtils;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.Node;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public final class PageRankProc extends BaseAlgoProc<PageRank> {
@@ -145,48 +139,12 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
     }
 
     @Override
-    PageRank algorithm(
-            final ProcedureConfiguration config,
-            final AllocationTracker tracker,
-            final Optional<Graph> graph) {
-
-        final int batchSize = config.getBatchSize();
-        final int concurrency = config.getConcurrency();
-
+    PageRankFactory algorithmFactory(final ProcedureConfiguration config) {
         double dampingFactor = config.get(CONFIG_DAMPING, DEFAULT_DAMPING);
         int iterations = config.getIterations(DEFAULT_ITERATIONS);
         PageRank.Config algoConfig = new PageRank.Config(iterations, dampingFactor);
 
-        List<Node> sourceNodes = config.get("sourceNodes", Collections.emptyList());
-        LongStream sourceNodeIds = sourceNodes.stream().mapToLong(Node::getId);
-
-        // TODO: avoid null, maybe FakeGraph/EmptyGraph
-        Graph theGraph = graph.orElse(null);
-        final String weightPropertyKey = config.getString(CONFIG_WEIGHT_KEY, null);
-
-        if (weightPropertyKey != null) {
-            final boolean cacheWeights = config.get("cacheWeights", false);
-            return PageRankFactory.weightedOf(
-                    theGraph,
-                    algoConfig,
-                    sourceNodeIds,
-                    Pools.DEFAULT,
-                    concurrency,
-                    batchSize,
-                    cacheWeights,
-                    tracker
-            );
-        } else {
-            return PageRankFactory.of(
-                    theGraph,
-                    algoConfig,
-                    sourceNodeIds,
-                    Pools.DEFAULT,
-                    concurrency,
-                    batchSize,
-                    tracker
-            );
-        }
+        return new PageRankFactory(algoConfig);
     }
 
     private CentralityResult compute(
@@ -194,7 +152,7 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
             final AllocationTracker tracker,
             final ProcedureConfiguration configuration,
             final Graph graph) {
-        PageRank algo = newAlgorithm(Optional.of(graph), configuration, tracker);
+        PageRank algo = newAlgorithm(graph, configuration, tracker);
 
         statsBuilder.timeEval(algo::compute);
         statsBuilder.withIterations(algo.iterations()).withDampingFactor(algo.dampingFactor());

@@ -151,8 +151,8 @@ public final class PageRankWikiTest {
                 .withDirection(Direction.OUTGOING)
                 .load(graphImpl);
 
-        final CentralityResult rankResult = PageRankFactory
-                .of(graph, DEFAULT_CONFIG, LongStream.empty())
+        final CentralityResult rankResult = new PageRankFactory(DEFAULT_CONFIG)
+                .of(graph, LongStream.empty())
                 .compute()
                 .result();
 

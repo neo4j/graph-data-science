@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.impl.pagerank;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipWeights;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 public interface PageRankVariant {
@@ -38,11 +37,6 @@ public interface PageRankVariant {
             long nodeCount);
 
     DegreeComputer degreeComputer( Graph graph );
-
-    default MemoryEstimation estimateMemoryPerThread(final int partitionSize) {
-        // TODO: Use specific variant instead of BaseComputeStep.class to be more precise on memory requirements
-        return BaseComputeStep.estimateMemory(partitionSize, BaseComputeStep.class);
-    }
 }
 
 

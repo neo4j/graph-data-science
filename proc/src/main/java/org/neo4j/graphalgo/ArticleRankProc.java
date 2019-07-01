@@ -196,9 +196,8 @@ public final class ArticleRankProc {
         List<Node> sourceNodes = configuration.get("sourceNodes", new ArrayList<>());
         LongStream sourceNodeIds = sourceNodes.stream().mapToLong(Node::getId);
 
-        PageRank prAlgo = PageRankFactory.articleRankOf(
+        PageRank prAlgo = new PageRankFactory(algoConfig).articleRankOf(
                 graph,
-                algoConfig,
                 sourceNodeIds,
                 Pools.DEFAULT,
                 concurrency,

@@ -191,9 +191,8 @@ public final class EigenvectorCentralityProc {
         List<Node> sourceNodes = configuration.get("sourceNodes", new ArrayList<>());
         LongStream sourceNodeIds = sourceNodes.stream().mapToLong(Node::getId);
 
-        PageRank prAlgo = PageRankFactory.eigenvectorCentralityOf(
+        PageRank prAlgo = new PageRankFactory(algoConfig).eigenvectorCentralityOf(
                 graph,
-                algoConfig,
                 sourceNodeIds,
                 Pools.DEFAULT,
                 concurrency,
