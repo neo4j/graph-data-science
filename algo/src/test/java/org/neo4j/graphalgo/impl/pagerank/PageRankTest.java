@@ -165,7 +165,7 @@ public final class PageRankTest {
         }
 
         final CentralityResult rankResult = new PageRankFactory(DEFAULT_CONFIG)
-                .of(graph, LongStream.empty())
+                .nonWeightedOf(graph, LongStream.empty())
                 .compute()
                 .result();
 
@@ -208,7 +208,7 @@ public final class PageRankTest {
                     .load(graphImpl);
 
             rankResult = new PageRankFactory(DEFAULT_CONFIG)
-                    .of(graph, LongStream.empty())
+                    .nonWeightedOf(graph, LongStream.empty())
                     .compute()
                     .result();
         } else {
@@ -219,7 +219,7 @@ public final class PageRankTest {
                     .load(graphImpl);
 
             rankResult = new PageRankFactory(DEFAULT_CONFIG)
-                    .of(graph, LongStream.empty())
+                    .nonWeightedOf(graph, LongStream.empty())
                     .compute()
                     .result();
         }
@@ -256,7 +256,7 @@ public final class PageRankTest {
 
         // explicitly list all source nodes to prevent the 'we got everything' optimization
         PageRank algorithm = new PageRankFactory(DEFAULT_CONFIG)
-                .of(graph, LongStream.range(0L, graph.nodeCount()), null, 1, 1)
+                .nonWeightedOf(graph, LongStream.range(0L, graph.nodeCount()), null, 1, 1)
                 .compute();
         // should not throw
     }

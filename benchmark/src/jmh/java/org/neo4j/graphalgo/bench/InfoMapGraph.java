@@ -76,7 +76,7 @@ public class InfoMapGraph {
 
 
         CentralityResult pr = new PageRankFactory(new PageRank.Config(iterations, 1.0 - tau))
-                .of(
+                .nonWeightedOf(
                         graph,
                         LongStream.empty(),
                         Pools.DEFAULT,

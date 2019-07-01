@@ -91,7 +91,7 @@ public class PageRankBenchmarkLdbc {
     @Benchmark
     public CentralityResult run() {
         return new PageRankFactory(new PageRank.Config(iterations, 0.85))
-                .of(
+                .nonWeightedOf(
                         grph,
                         LongStream.empty(),
                         Pools.DEFAULT,

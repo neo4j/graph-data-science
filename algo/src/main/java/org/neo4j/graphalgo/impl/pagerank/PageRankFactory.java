@@ -38,76 +38,54 @@ import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 
 public class PageRankFactory extends AlgorithmFactory<PageRank> {
 
-    public static final String CONFIG_WEIGHT_KEY = "weightProperty";
-
+    private final PageRankAlgorithmType algorithmType;
     private final PageRank.Config algoConfig;
 
-    public PageRank eigenvectorCentralityOf(Graph graph, LongStream sourceNodeIds) {
-        PageRankVariant pageRankVariant = new EigenvectorCentralityVariant();
-        return new PageRank(AllocationTracker.EMPTY, graph, algoConfig, sourceNodeIds, pageRankVariant);
+    public PageRankFactory(PageRank.Config algoConfig) {
+        this(PageRankAlgorithmType.NON_WEIGHTED, algoConfig);
     }
 
-    public PageRank weightedOf(Graph graph, LongStream sourceNodeIds) {
-        return weightedOf(graph, sourceNodeIds, false, AllocationTracker.EMPTY);
+    public PageRankFactory(PageRankAlgorithmType algorithmType, PageRank.Config algoConfig) {
+        this.algorithmType = algorithmType;
+        this.algoConfig = algoConfig;
     }
 
-    private PageRank weightedOf(
-            Graph graph,
-            LongStream sourceNodeIds,
-            boolean cacheWeights,
-            AllocationTracker tracker) {
-        PageRankVariant pageRankVariant = new WeightedPageRankVariant(cacheWeights);
-        return new PageRank(tracker, graph, algoConfig, sourceNodeIds, pageRankVariant);
+    public PageRank nonWeightedOf(Graph graph, LongStream sourceNodeIds) {
+        return nonWeightedOf(graph, sourceNodeIds, AllocationTracker.EMPTY);
     }
 
-    public PageRank articleRankOf(Graph graph, LongStream sourceNodeIds) {
-        return articleRankOf(graph, sourceNodeIds, AllocationTracker.EMPTY);
+    public PageRank nonWeightedOf(Graph graph, LongStream sourceNodeIds, AllocationTracker tracker) {
+        return PageRankAlgorithmType.NON_WEIGHTED.create(graph, algoConfig, sourceNodeIds, tracker);
     }
 
-    public PageRank articleRankOf(
-            Graph graph,
-            LongStream sourceNodeIds,
-            AllocationTracker tracker) {
-        PageRankVariant pageRankVariant = new ArticleRankVariant();
-        return new PageRank(tracker, graph, algoConfig, sourceNodeIds, pageRankVariant);
-    }
-
-    public PageRank of(Graph graph, LongStream sourceNodeIds) {
-        return of(graph, sourceNodeIds, AllocationTracker.EMPTY);
-    }
-
-    public PageRank of(Graph graph, LongStream sourceNodeIds, AllocationTracker tracker) {
-        PageRankVariant computeStepFactory = new NonWeightedPageRankVariant();
-        return new PageRank(tracker, graph, algoConfig, sourceNodeIds, computeStepFactory);
-    }
-
-    public PageRank of(
+    public PageRank nonWeightedOf(
             Graph graph,
             LongStream sourceNodeIds,
             ExecutorService pool,
             int concurrency,
             int batchSize) {
-        return of(graph, sourceNodeIds, pool, concurrency, batchSize, AllocationTracker.EMPTY);
+        return nonWeightedOf(graph, sourceNodeIds, pool, concurrency, batchSize, AllocationTracker.EMPTY);
     }
 
-    public PageRank of(
+    public PageRank nonWeightedOf(
             Graph graph,
             LongStream sourceNodeIds,
             ExecutorService pool,
             int concurrency,
             int batchSize,
             AllocationTracker tracker) {
-        PageRankVariant pageRankVariant = new NonWeightedPageRankVariant();
-        return new PageRank(
-                pool,
-                concurrency,
-                batchSize,
-                tracker,
+        return PageRankAlgorithmType.NON_WEIGHTED.create(
                 graph,
+                pool,
+                batchSize,
+                concurrency,
                 algoConfig,
                 sourceNodeIds,
-                pageRankVariant
-        );
+                tracker);
+    }
+
+    public PageRank weightedOf(Graph graph, LongStream sourceNodeIds) {
+        return PageRankAlgorithmType.WEIGHTED.create(graph, algoConfig, sourceNodeIds);
     }
 
     public PageRank weightedOf(
@@ -116,19 +94,19 @@ public class PageRankFactory extends AlgorithmFactory<PageRank> {
             ExecutorService pool,
             int concurrency,
             int batchSize,
-            boolean cacheWeights,
             AllocationTracker tracker) {
-        PageRankVariant pageRankVariant = new WeightedPageRankVariant(cacheWeights);
-        return new PageRank(
-                pool,
-                concurrency,
-                batchSize,
-                tracker,
+        return PageRankAlgorithmType.WEIGHTED.create(
                 graph,
+                pool,
+                batchSize,
+                concurrency,
                 algoConfig,
                 sourceNodeIds,
-                pageRankVariant
-        );
+                tracker);
+    }
+
+    public PageRank articleRankOf(Graph graph, LongStream sourceNodeIds) {
+        return PageRankAlgorithmType.WEIGHTED.create(graph, algoConfig, sourceNodeIds);
     }
 
     public PageRank articleRankOf(
@@ -138,18 +116,18 @@ public class PageRankFactory extends AlgorithmFactory<PageRank> {
             int concurrency,
             int batchSize,
             AllocationTracker tracker) {
-        PageRankVariant pageRankVariant = new ArticleRankVariant();
-        return new PageRank(
-                pool,
-                concurrency,
-                batchSize,
-                tracker,
+        return PageRankAlgorithmType.ARTICLE_RANK.create(
                 graph,
+                pool,
+                batchSize,
+                concurrency,
                 algoConfig,
                 sourceNodeIds,
-                pageRankVariant
-        );
+                tracker);
+    }
 
+    public PageRank eigenvectorCentralityOf(Graph graph, LongStream sourceNodeIds) {
+        return PageRankAlgorithmType.EIGENVECTOR_CENTRALITY.create(graph, algoConfig, sourceNodeIds);
     }
 
     public PageRank eigenvectorCentralityOf(
@@ -159,52 +137,35 @@ public class PageRankFactory extends AlgorithmFactory<PageRank> {
             int concurrency,
             int batchSize,
             AllocationTracker tracker) {
-        PageRankVariant variant = new EigenvectorCentralityVariant();
-        return new PageRank(
-                pool,
-                concurrency,
-                batchSize,
-                tracker,
+        return PageRankAlgorithmType.EIGENVECTOR_CENTRALITY.create(
                 graph,
+                pool,
+                batchSize,
+                concurrency,
                 algoConfig,
                 sourceNodeIds,
-                variant
-        );
-    }
-
-    public PageRankFactory(PageRank.Config algoConfig) {
-        this.algoConfig = algoConfig;
+                tracker);
     }
 
     @Override
-    public PageRank build(final Graph graph, final ProcedureConfiguration configuration, final AllocationTracker tracker) {
+    public PageRank build(
+            final Graph graph,
+            final ProcedureConfiguration configuration,
+            final AllocationTracker tracker) {
         final int batchSize = configuration.getBatchSize();
         final int concurrency = configuration.getConcurrency();
         List<Node> sourceNodes = configuration.get("sourceNodes", Collections.emptyList());
         LongStream sourceNodeIds = sourceNodes.stream().mapToLong(Node::getId);
-        final String weightPropertyKey = configuration.getString(CONFIG_WEIGHT_KEY, null);
 
-        if (weightPropertyKey != null) {
-            final boolean cacheWeights = configuration.get("cacheWeights", false);
-            return weightedOf(
-                    graph,
-                    sourceNodeIds,
-                    Pools.DEFAULT,
-                    concurrency,
-                    batchSize,
-                    cacheWeights,
-                    tracker
-            );
-        } else {
-            return of(
-                    graph,
-                    sourceNodeIds,
-                    Pools.DEFAULT,
-                    concurrency,
-                    batchSize,
-                    tracker
-            );
-        }
+        return algorithmType.create(
+                graph,
+                Pools.DEFAULT,
+                batchSize,
+                concurrency,
+                algoConfig,
+                sourceNodeIds,
+                tracker
+        );
     }
 
     @Override
@@ -230,8 +191,9 @@ public class PageRankFactory extends AlgorithmFactory<PageRank> {
                             .perThread("starts[]", MemoryUsage::sizeOfLongArray)
                             .perThread("lengths[]", MemoryUsage::sizeOfLongArray)
                             .perThread("list of computeSteps", MemoryUsage::sizeOfObjectArray)
-                            // TODO: Use specific variant instead of BaseComputeStep.class to be more precise on memory requirements
-                            .perThread("ComputeStep", BaseComputeStep.estimateMemory(partitionSize, BaseComputeStep.class))
+                            .perThread(
+                                    "ComputeStep",
+                                    BaseComputeStep.estimateMemory(partitionSize, BaseComputeStep.class))
                             .build();
                 }))
                 .build();

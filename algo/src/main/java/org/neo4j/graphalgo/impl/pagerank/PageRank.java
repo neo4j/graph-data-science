@@ -30,9 +30,6 @@ import org.neo4j.graphalgo.api.NodeIterator;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphalgo.impl.results.DoubleArrayResult;
@@ -47,7 +44,6 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 
-import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
@@ -130,32 +126,17 @@ public class PageRank extends Algorithm<PageRank> {
     public static final class Config {
         public final int iterations;
         public final double dampingFactor;
+        public final boolean cacheWeights;
 
         public Config(final int iterations, final double dampingFactor) {
+            this(iterations, dampingFactor, false);
+        }
+
+        public Config(final int iterations, final double dampingFactor, boolean cacheWeights) {
             this.iterations = iterations;
             this.dampingFactor = dampingFactor;
+            this.cacheWeights = cacheWeights;
         }
-    }
-
-    /**
-     * Forces sequential use. If you want parallelism, prefer
-     * {@link #PageRank(ExecutorService, int, int, AllocationTracker, Graph, PageRank.Config, LongStream, PageRankVariant)}
-     */
-    PageRank(
-            AllocationTracker tracker,
-            Graph graph,
-            PageRank.Config algoConfig,
-            LongStream sourceNodeIds,
-            PageRankVariant pageRankVariant) {
-        this(
-                null,
-                -1,
-                ParallelUtil.DEFAULT_BATCH_SIZE,
-                tracker,
-                graph,
-                algoConfig,
-                sourceNodeIds,
-                pageRankVariant);
     }
 
     /**

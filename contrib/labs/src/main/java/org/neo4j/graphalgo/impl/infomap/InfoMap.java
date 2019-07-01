@@ -107,7 +107,7 @@ public class InfoMap extends Algorithm<InfoMap> {
             ProgressLogger logger,
             TerminationFlag terminationFlag) {
 
-        final PageRank.Config algoConfig = new PageRank.Config(prIterations, 1.0 - tau);
+        final PageRank.Config algoConfig = new PageRank.Config(prIterations, 1.0 - tau, PAGE_RANK_CACHE_WEIGHTS);
         final CentralityResult pageRankResult;
 
         // use parallel PR if concurrency is >1
@@ -119,7 +119,6 @@ public class InfoMap extends Algorithm<InfoMap> {
                             pool,
                             concurrency,
                             PAGE_RANK_BATCH_SIZE,
-                            PAGE_RANK_CACHE_WEIGHTS,
                             AllocationTracker.create())
                     .compute()
                     .result();
@@ -175,7 +174,15 @@ public class InfoMap extends Algorithm<InfoMap> {
     /**
      * create an unweighted InfoMap algo instance
      */
-    public static InfoMap unweighted(Graph graph, int prIterations, double threshold, double tau, ForkJoinPool pool, int concurrency, ProgressLogger logger, TerminationFlag terminationFlag) {
+    public static InfoMap unweighted(
+            Graph graph,
+            int prIterations,
+            double threshold,
+            double tau,
+            ForkJoinPool pool,
+            int concurrency,
+            ProgressLogger logger,
+            TerminationFlag terminationFlag) {
 
         final PageRank.Config algoConfig = new PageRank.Config(prIterations, 1. - tau);
         final CentralityResult pageRankResult;
@@ -183,14 +190,14 @@ public class InfoMap extends Algorithm<InfoMap> {
         // use parallel PR if concurrency is >1
         if (concurrency > 1) {
             final AllocationTracker tracker = AllocationTracker.create();
-            pageRankResult = new PageRankFactory(algoConfig).of(
+            pageRankResult = new PageRankFactory(algoConfig).nonWeightedOf(
                     graph,
                     LongStream.empty(), pool, concurrency, PAGE_RANK_BATCH_SIZE, tracker
             )
                     .compute()
                     .result();
         } else {
-            pageRankResult = new PageRankFactory(algoConfig).of(graph, LongStream.empty())
+            pageRankResult = new PageRankFactory(algoConfig).nonWeightedOf(graph, LongStream.empty())
                     .compute()
                     .result();
         }
@@ -362,13 +369,13 @@ public class InfoMap extends Algorithm<InfoMap> {
         double pi = j.p + k.p;
         double qi = tau * pi * (nodeCount - ((double) (j.n + k.n))) / n1 + tau1 * (j.w + k.w - j.wil(k));
         return plogp(qi - j.q - k.q + sQi)
-                - plogp(sQi)
-                - 2 * plogp(qi)
-                + 2 * plogp(j.q)
-                + 2 * plogp(k.q)
-                + plogp(pi + qi)
-                - plogp(j.p + j.q)
-                - plogp(k.p + k.q);
+               - plogp(sQi)
+               - 2 * plogp(qi)
+               + 2 * plogp(j.q)
+               + 2 * plogp(k.q)
+               + plogp(pi + qi)
+               - plogp(j.p + j.q)
+               - plogp(k.p + k.q);
     }
 
     private class Task extends RecursiveTask<MergePair> {

@@ -101,7 +101,7 @@ public class ClusteringBenchmark {
                 .asUndirected(true)
                 .load(HugeGraphFactory.class);
 
-        pageRankResult = new PageRankFactory(new PageRank.Config(10, 1.0 - InfoMap.TAU)).of(g, LongStream.empty())
+        pageRankResult = new PageRankFactory(new PageRank.Config(10, 1.0 - InfoMap.TAU)).nonWeightedOf(g, LongStream.empty())
                 .compute()
                 .result();
     }

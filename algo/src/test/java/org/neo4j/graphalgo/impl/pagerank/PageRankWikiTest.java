@@ -152,7 +152,7 @@ public final class PageRankWikiTest {
                 .load(graphImpl);
 
         final CentralityResult rankResult = new PageRankFactory(DEFAULT_CONFIG)
-                .of(graph, LongStream.empty())
+                .nonWeightedOf(graph, LongStream.empty())
                 .compute()
                 .result();
 

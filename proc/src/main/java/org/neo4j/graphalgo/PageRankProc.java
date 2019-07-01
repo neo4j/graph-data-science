@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
+import org.neo4j.graphalgo.impl.pagerank.PageRankAlgorithmType;
 import org.neo4j.graphalgo.impl.pagerank.PageRankFactory;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphalgo.impl.results.CentralityScore;
@@ -44,19 +45,18 @@ import java.util.stream.Stream;
 public final class PageRankProc extends BaseAlgoProc<PageRank> {
 
     public static final String CONFIG_DAMPING = "dampingFactor";
-
+    public static final String CONFIG_WEIGHT_PROPERTY = "weightProperty";
+    public static final String CONFIG_CACHE_WEIGHTS = "cacheWeights";
     public static final Double DEFAULT_DAMPING = 0.85;
     public static final Integer DEFAULT_ITERATIONS = 20;
     public static final String DEFAULT_SCORE_PROPERTY = "pagerank";
 
-    public static final String CONFIG_WEIGHT_KEY = "weightProperty";
-
 
     @Procedure(value = "algo.pageRank", mode = Mode.WRITE)
     @Description("CALL algo.pageRank(label:String, relationship:String, " +
-            "{iterations:5, dampingFactor:0.85, weightProperty: null, write: true, writeProperty:'pagerank', concurrency:4}) " +
-            "YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, dampingFactor, write, writeProperty" +
-            " - calculates page rank and potentially writes back")
+                 "{iterations:5, dampingFactor:0.85, weightProperty: null, write: true, writeProperty:'pagerank', concurrency:4}) " +
+                 "YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, dampingFactor, write, writeProperty" +
+                 " - calculates page rank and potentially writes back")
     public Stream<PageRankScore.Stats> pageRank(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
@@ -88,8 +88,8 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
 
     @Procedure(value = "algo.pageRank.stream", mode = Mode.READ)
     @Description("CALL algo.pageRank.stream(label:String, relationship:String, " +
-            "{iterations:20, dampingFactor:0.85, weightProperty: null, concurrency:4}) " +
-            "YIELD node, score - calculates page rank and streams results")
+                 "{iterations:20, dampingFactor:0.85, weightProperty: null, concurrency:4}) " +
+                 "YIELD node, score - calculates page rank and streams results")
     public Stream<CentralityScore> pageRankStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationshipType,
@@ -111,7 +111,7 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
 
     @Procedure(value = "algo.pageRank.memrec", mode = Mode.READ)
     @Description("CALL algo.pageRank.memrec(label:String, relationship:String, {...properties}) " +
-            "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for PageRank")
+                 "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for PageRank")
     public Stream<MemRecResult> pageRankMemrec(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationshipType,
@@ -125,7 +125,7 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
     @Override
     GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
         loader.withOptionalRelationshipWeightsFromProperty(
-                config.getString(CONFIG_WEIGHT_KEY, null),
+                config.getString(CONFIG_WEIGHT_PROPERTY, null),
                 config.getWeightPropertyDefaultValue(0.0));
 
         Direction direction = config.getDirection(Direction.OUTGOING);
@@ -142,9 +142,16 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
     PageRankFactory algorithmFactory(final ProcedureConfiguration config) {
         double dampingFactor = config.get(CONFIG_DAMPING, DEFAULT_DAMPING);
         int iterations = config.getIterations(DEFAULT_ITERATIONS);
-        PageRank.Config algoConfig = new PageRank.Config(iterations, dampingFactor);
+        boolean cacheWeights = config.get(CONFIG_CACHE_WEIGHTS, false);
+        PageRank.Config algoConfig = new PageRank.Config(iterations, dampingFactor, cacheWeights);
 
-        return new PageRankFactory(algoConfig);
+        boolean weighted = config.getString(CONFIG_WEIGHT_PROPERTY, null) != null;
+
+        if (weighted) {
+            return new PageRankFactory(PageRankAlgorithmType.WEIGHTED, algoConfig);
+        } else {
+            return new PageRankFactory(PageRankAlgorithmType.NON_WEIGHTED, algoConfig);
+        }
     }
 
     private CentralityResult compute(
