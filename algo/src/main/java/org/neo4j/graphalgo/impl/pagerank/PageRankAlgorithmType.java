@@ -26,12 +26,22 @@ public enum PageRankAlgorithmType implements PageRankAlgorithm {
         public PageRankVariant variant(PageRank.Config config) {
             return new EigenvectorCentralityVariant();
         }
+
+        @Override
+        public Class computeStepClass() {
+            return EigenvectorCentralityComputeStep.class;
+        }
     },
 
     WEIGHTED {
         @Override
         public PageRankVariant variant(final PageRank.Config config) {
             return new WeightedPageRankVariant(config.cacheWeights);
+        }
+
+        @Override
+        public Class computeStepClass() {
+            return WeightedComputeStep.class;
         }
     },
 
@@ -40,12 +50,22 @@ public enum PageRankAlgorithmType implements PageRankAlgorithm {
         public PageRankVariant variant(final PageRank.Config config) {
             return new ArticleRankVariant();
         }
+
+        @Override
+        public Class computeStepClass() {
+            return ArticleRankComputeStep.class;
+        }
     },
 
     NON_WEIGHTED {
         @Override
         public PageRankVariant variant(final PageRank.Config config) {
             return new NonWeightedPageRankVariant();
+        }
+
+        @Override
+        public Class computeStepClass() {
+            return NonWeightedComputeStep.class;
         }
     }
 }

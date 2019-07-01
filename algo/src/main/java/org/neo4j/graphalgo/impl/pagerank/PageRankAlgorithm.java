@@ -22,10 +22,14 @@ package org.neo4j.graphalgo.impl.pagerank;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.Assessable;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
+
+import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 
 public interface PageRankAlgorithm extends Assessable {
 
@@ -76,4 +80,15 @@ public interface PageRankAlgorithm extends Assessable {
     }
 
     PageRankVariant variant(PageRank.Config config);
+
+    Class computeStepClass();
+
+    @Override
+    default MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.setup("ComputeStep", (dimensions, concurrency) -> {
+            long nodeCount = dimensions.nodeCount();
+            long nodesPerThread = ceilDiv(nodeCount, concurrency);
+            return BaseComputeStep.estimateMemory((int) nodesPerThread, computeStepClass());
+        });
+    }
 }

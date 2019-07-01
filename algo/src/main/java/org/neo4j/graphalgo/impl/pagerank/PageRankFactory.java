@@ -85,7 +85,6 @@ public class PageRankFactory extends AlgorithmFactory<PageRank> {
                             nodesPerThread = ceilDiv(nodeCount, concurrency);
                         }
                     }
-                    int partitionSize = (int) nodesPerThread;
 
                     return MemoryEstimations
                             .builder(PageRank.ComputeSteps.class)
@@ -93,9 +92,7 @@ public class PageRankFactory extends AlgorithmFactory<PageRank> {
                             .perThread("starts[]", MemoryUsage::sizeOfLongArray)
                             .perThread("lengths[]", MemoryUsage::sizeOfLongArray)
                             .perThread("list of computeSteps", MemoryUsage::sizeOfObjectArray)
-                            .perThread(
-                                    "ComputeStep",
-                                    BaseComputeStep.estimateMemory(partitionSize, BaseComputeStep.class))
+                            .perThread("ComputeStep", algorithmType.memoryEstimation())
                             .build();
                 }))
                 .build();
