@@ -191,7 +191,14 @@ public final class EigenvectorCentralityProc {
         List<Node> sourceNodes = configuration.get("sourceNodes", new ArrayList<>());
         LongStream sourceNodeIds = sourceNodes.stream().mapToLong(Node::getId);
 
-        PageRank prAlgo = selectAlgorithm(graph, algoConfig, tracker, batchSize, concurrency, sourceNodeIds);
+        PageRank prAlgo = PageRankFactory.eigenvectorCentralityOf(
+                graph,
+                algoConfig,
+                sourceNodeIds,
+                Pools.DEFAULT,
+                concurrency,
+                batchSize,
+                tracker);
 
         Algorithm<?> algo = prAlgo
                 .withLog(log)
@@ -205,17 +212,5 @@ public final class EigenvectorCentralityProc {
         graph.release();
         return normalization(configuration).apply(results);
     }
-
-    private PageRank selectAlgorithm(Graph graph, PageRank.Config algoConfig, AllocationTracker tracker, int batchSize, int concurrency, LongStream sourceNodeIds) {
-        return PageRankFactory.eigenvectorCentralityOf(
-                graph,
-                algoConfig,
-                sourceNodeIds,
-                Pools.DEFAULT,
-                concurrency,
-                batchSize,
-                tracker);
-    }
-
 
 }

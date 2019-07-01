@@ -50,23 +50,16 @@ public interface MemoryTree {
 
     default Map<String, Object> renderMap() {
         Map<String, Object> root = new HashMap<>();
-        renderMap(root, this);
-        return root;
-    }
-
-    default void renderMap(
-            final Map<String, Object> map,
-            final MemoryTree estimation) {
-        map.put("name", estimation.description());
-        map.put("memoryUsage", estimation.memoryUsage().toString());
-        List<Map<String, Object>> components = estimation
-                .components()
+        root.put("name", description());
+        root.put("memoryUsage", memoryUsage().toString());
+        List<Map<String, Object>> components = components()
                 .stream()
                 .map(MemoryTree::renderMap)
                 .collect(Collectors.toList());
         if (!components.isEmpty()) {
-            map.put("components", components);
+            root.put("components", components);
         }
+        return root;
     }
 
     /**

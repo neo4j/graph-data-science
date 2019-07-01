@@ -53,9 +53,9 @@ public abstract class BaseAlgoProc<A extends Algorithm<A>> extends BaseProc {
     MemoryTreeWithDimensions memoryEstimation(final ProcedureConfiguration config) {
         GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
         GraphFactory graphFactory = loader.build(config.getGraphImpl());
-        A procedure = algorithm(config, AllocationTracker.EMPTY, Optional.empty());
+        A algorithm = algorithm(config, AllocationTracker.EMPTY, Optional.empty());
         MemoryEstimation estimation = MemoryEstimations.builder("graph with procedure")
-                .add(procedure.memoryEstimation())
+                .add(algorithm.memoryEstimation())
                 .add(graphFactory.memoryEstimation())
                 .build();
         MemoryTree memoryTree = estimation.estimate(graphFactory.dimensions(), config.getConcurrency());

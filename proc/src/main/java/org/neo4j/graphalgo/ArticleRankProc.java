@@ -211,7 +211,7 @@ public final class ArticleRankProc {
                 .withTerminationFlag(terminationFlag);
 
         statsBuilder.timeEval(prAlgo::compute);
-        statsBuilder.withIterations(algoConfig.iterations).withDampingFactor(algoConfig.dampingFactor);
+        statsBuilder.withConfig(algoConfig);
 
         final CentralityResult pageRank = prAlgo.result();
         algo.release();

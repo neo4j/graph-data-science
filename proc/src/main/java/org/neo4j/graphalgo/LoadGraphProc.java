@@ -37,10 +37,6 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -49,16 +45,6 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public final class LoadGraphProc extends BaseProc {
-
-    @Context
-    public GraphDatabaseAPI dbAPI;
-
-    @Context
-    public Log log;
-
-    @Context
-    public KernelTransaction transaction;
-
     @Procedure(name = "algo.graph.load")
     @Description("CALL algo.graph.load(" +
             "name:String, label:String, relationship:String" +

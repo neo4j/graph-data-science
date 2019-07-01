@@ -48,15 +48,10 @@ public class HugeAdjacencyListTest {
         long bestCaseAdjacencySize = 500;
         long worstCaseAdjacencySize = 500;
 
-        // PageUtil.numPagesFor(bestCaseAdjacencySize, PAGE_SHIFT, PAGE_MASK)
         int minPages = PageUtil.numPagesFor(bestCaseAdjacencySize, PAGE_SHIFT, PAGE_MASK);
-        // PageUtil.numPagesFor(worstCaseAdjacencySize, PAGE_SHIFT, PAGE_MASK);
         int maxPages = PageUtil.numPagesFor(worstCaseAdjacencySize, PAGE_SHIFT, PAGE_MASK);
-        // long bytesPerPage = MemoryUsage.sizeOfByteArray(PAGE_SIZE);
         long bytesPerPage = BitUtil.align(16 + 262144L, 8);
-        // long minMemoryReqs = minPages * bytesPerPage + MemoryUsage.sizeOfObjectArray(minPages);
         long minMemoryReqs = minPages * bytesPerPage + BitUtil.align(16 + minPages * 4, 8);
-        // long maxMemoryReqs = maxPages * bytesPerPage + MemoryUsage.sizeOfObjectArray(maxPages);
         long maxMemoryReqs = maxPages * bytesPerPage + BitUtil.align(16 + maxPages * 4, 8);
 
         MemoryRange expected = MemoryRange.of(minMemoryReqs + classSize, maxMemoryReqs + classSize);
@@ -77,15 +72,10 @@ public class HugeAdjacencyListTest {
         long bestCaseAdjacencySize = 100_500_000_000L;
         long worstCaseAdjacencySize = 300_300_000_000L;
 
-        // PageUtil.numPagesFor(bestCaseAdjacencySize, PAGE_SHIFT, PAGE_MASK)
         int minPages = PageUtil.numPagesFor(bestCaseAdjacencySize, PAGE_SHIFT, PAGE_MASK);
-        // PageUtil.numPagesFor(worstCaseAdjacencySize, PAGE_SHIFT, PAGE_MASK);
         int maxPages = PageUtil.numPagesFor(worstCaseAdjacencySize, PAGE_SHIFT, PAGE_MASK);
-        // long bytesPerPage = MemoryUsage.sizeOfByteArray(PAGE_SIZE);
         long bytesPerPage = BitUtil.align(16 + 262144L, 8);
-        // long minMemoryReqs = minPages * bytesPerPage + MemoryUsage.sizeOfObjectArray(minPages);
         long minMemoryReqs = minPages * bytesPerPage + BitUtil.align(16 + minPages * 4, 8);
-        // long maxMemoryReqs = maxPages * bytesPerPage + MemoryUsage.sizeOfObjectArray(maxPages);
         long maxMemoryReqs = maxPages * bytesPerPage + BitUtil.align(16 + maxPages * 4, 8);
 
         MemoryRange expected = MemoryRange.of(minMemoryReqs + classSize, maxMemoryReqs + classSize);
@@ -98,15 +88,12 @@ public class HugeAdjacencyListTest {
         long avgDegree = 1000;
         long nodeCount = 100_000_000;
         long delta = 100_000;
-        // long firstAdjacencyIdAvgByteSize = ceilDiv(encodedVLongSize(nodeCount), 2);
         long firstAdjacencyIdAvgByteSize = ceilDiv(ceilDiv(64 - Long.numberOfLeadingZeros(nodeCount - 1), 7), 2);
         // int relationshipByteSize = encodedVLongSize(delta);
         long relationshipByteSize = ceilDiv(64 - Long.numberOfLeadingZeros(delta - 1), 7);
         // int degreeByteSize = Integer.BYTES;
         int degreeByteSize = 4;
-        // long compressedAdjacencyByteSize = relationshipByteSize * (avgDegree - 1);
         long compressedAdjacencyByteSize = relationshipByteSize * (avgDegree - 1);
-        // return (degreeByteSize + firstAdjacencyIdAvgByteSize + compressedAdjacencyByteSize) * nodeCount;
         long expected = (degreeByteSize + firstAdjacencyIdAvgByteSize + compressedAdjacencyByteSize) * nodeCount;
 
         Assert.assertEquals(expected, computeAdjacencyByteSize(avgDegree, nodeCount, delta));

@@ -34,7 +34,7 @@ public final class SparseNodeMapping {
 
     private static final int PAGE_SHIFT = 12;
     private static final int PAGE_SIZE = 1 << PAGE_SHIFT;
-    private static final long PAGE_MASK = (long) (PAGE_SIZE - 1);
+    private static final int PAGE_MASK = PAGE_SIZE - 1;
     private static final long PAGE_SIZE_IN_BYTES = MemoryUsage.sizeOfLongArray(PAGE_SIZE);
 
     private final long capacity;
@@ -46,18 +46,18 @@ public final class SparseNodeMapping {
     }
 
     /**
-     * @param size highest id that we need to represent
+     * @param maxId highest id that we need to represent
      *             (equals size in {@link SparseNodeMapping.Builder#create(long, AllocationTracker)})
      * @param maxEntries number of identifiers we need to store
      */
-    public static MemoryRange memoryEstimation(long size, long maxEntries) {
-        assert(maxEntries <= size);
-        int numPagesForSize = PageUtil.numPagesFor(size, PAGE_SHIFT, (int) PAGE_MASK);
-        int numPagesForMaxEntriesBestCase = PageUtil.numPagesFor(maxEntries, PAGE_SHIFT, (int) PAGE_MASK);
+    public static MemoryRange memoryEstimation(long maxId, long maxEntries) {
+        assert(maxEntries <= maxId);
+        int numPagesForSize = PageUtil.numPagesFor(maxId, PAGE_SHIFT, PAGE_MASK);
+        int numPagesForMaxEntriesBestCase = PageUtil.numPagesFor(maxEntries, PAGE_SHIFT, PAGE_MASK);
 
         // Worst-case distribution assumes at least one entry per page
-        final long maxEntriesForWorstCase = Math.min(size, maxEntries * PAGE_SIZE);
-        int numPagesForMaxEntriesWorstCase = PageUtil.numPagesFor(maxEntriesForWorstCase, PAGE_SHIFT, (int) PAGE_MASK);
+        final long maxEntriesForWorstCase = Math.min(maxId, maxEntries * PAGE_SIZE);
+        int numPagesForMaxEntriesWorstCase = PageUtil.numPagesFor(maxEntriesForWorstCase, PAGE_SHIFT, PAGE_MASK);
 
         long classSize = MemoryUsage.sizeOfInstance(SparseNodeMapping.class);
         long pagesSize = MemoryUsage.sizeOfObjectArray(numPagesForSize);
@@ -105,7 +105,7 @@ public final class SparseNodeMapping {
         public static Builder create(
                 long size,
                 AllocationTracker tracker) {
-            int numPages = PageUtil.numPagesFor(size, PAGE_SHIFT, (int) PAGE_MASK);
+            int numPages = PageUtil.numPagesFor(size, PAGE_SHIFT, PAGE_MASK);
             long capacity = PageUtil.capacityFor(numPages, PAGE_SHIFT);
             AtomicReferenceArray<long[]> pages = new AtomicReferenceArray<>(numPages);
             tracker.add(MemoryUsage.sizeOfObjectArray(numPages));
