@@ -121,7 +121,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         return MEMORY_ESTIMATION;
     }
 
-    ModularityOptimization withRandomNeighborOptimization(final boolean randomNeighborSelection) {
+    ModularityOptimization withRandomNeighborSelection(final boolean randomNeighborSelection) {
         this.randomNeighborSelection = randomNeighborSelection;
         return this;
     }
