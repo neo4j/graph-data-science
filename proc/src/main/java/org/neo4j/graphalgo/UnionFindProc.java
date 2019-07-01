@@ -33,24 +33,19 @@ import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
 import org.neo4j.graphalgo.impl.unionfind.GraphUnionFindAlgo;
-import org.neo4j.graphalgo.impl.unionfind.UnionFindAlgo;
-import org.neo4j.graphalgo.impl.unionfind.UnionFindAlgoInterface;
+import org.neo4j.graphalgo.impl.unionfind.UnionFindAlgorithmType;
+import org.neo4j.graphalgo.impl.unionfind.UnionFindFactory;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Arrays;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static org.neo4j.graphalgo.impl.unionfind.UnionFindFactory.CONFIG_PARALLEL_ALGO;
 
 /**
  * @author mknblch
@@ -58,7 +53,7 @@ import java.util.stream.Stream;
 public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc<T> {
 
     private static final String CONFIG_THRESHOLD = "threshold";
-    private static final String CONFIG_PARALLEL_ALGO = "parallel_algo";
+
     private static final String CONFIG_CLUSTER_PROPERTY = "writeProperty";
     private static final String CONFIG_OLD_CLUSTER_PROPERTY = "partitionProperty";
     private static final String DEFAULT_CLUSTER_PROPERTY = "partition";
@@ -72,7 +67,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        return run(label, relationship, config, UnionFindAlgo.QUEUE);
+        return run(label, relationship, config, UnionFindAlgorithmType.QUEUE);
     }
 
     @Procedure(value = "algo.unionFind.stream")
@@ -84,7 +79,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        return stream(label, relationship, config, UnionFindAlgo.QUEUE);
+        return stream(label, relationship, config, UnionFindAlgorithmType.QUEUE);
     }
 
     @Procedure(value = "algo.unionFind.memrec", mode = Mode.READ)
@@ -109,7 +104,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        return run(label, relationship, config, UnionFindAlgo.QUEUE);
+        return run(label, relationship, config, UnionFindAlgorithmType.QUEUE);
     }
 
     @Procedure(value = "algo.unionFind.queue.stream")
@@ -121,7 +116,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        return stream(label, relationship, config, UnionFindAlgo.QUEUE);
+        return stream(label, relationship, config, UnionFindAlgorithmType.QUEUE);
     }
 
     @Procedure(value = "algo.unionFind.forkJoinMerge", mode = Mode.WRITE)
@@ -133,7 +128,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        return run(label, relationship, config, UnionFindAlgo.FJ_MERGE);
+        return run(label, relationship, config, UnionFindAlgorithmType.FJ_MERGE);
     }
 
     @Procedure(value = "algo.unionFind.forkJoinMerge.stream")
@@ -145,7 +140,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        return stream(label, relationship, config, UnionFindAlgo.FJ_MERGE);
+        return stream(label, relationship, config, UnionFindAlgorithmType.FJ_MERGE);
     }
 
     @Procedure(value = "algo.unionFind.forkJoin", mode = Mode.WRITE)
@@ -157,7 +152,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        return run(label, relationship, config, UnionFindAlgo.FORK_JOIN);
+        return run(label, relationship, config, UnionFindAlgorithmType.FORK_JOIN);
     }
 
     @Procedure(value = "algo.unionFind.forkJoin.stream")
@@ -169,14 +164,14 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        return stream(label, relationship, config, UnionFindAlgo.FORK_JOIN);
+        return stream(label, relationship, config, UnionFindAlgorithmType.FORK_JOIN);
     }
 
     public Stream<PagedDisjointSetStruct.Result> stream(
             String label,
             String relationship,
             Map<String, Object> config,
-            UnionFindAlgo algoImpl) {
+            UnionFindAlgorithmType algoImpl) {
 
         final Builder builder = new Builder();
 
@@ -199,7 +194,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
             String label,
             String relationship,
             Map<String, Object> config,
-            UnionFindAlgo algoImpl) {
+            UnionFindAlgorithmType algoImpl) {
 
         final Builder builder = new Builder();
 
@@ -261,7 +256,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
             final Builder builder,
             final AllocationTracker tracker,
             final ProcedureConfiguration configuration, final Graph graph) {
-        T algo = newAlgorithm(configuration, tracker, Optional.of(graph));
+        T algo = newAlgorithm(graph, configuration, tracker);
         final PagedDisjointSetStruct algoResult = builder.timeEval(() -> Double.isFinite(algo.threshold())
                 ? algo.compute(algo.threshold())
                 : algo.compute());
@@ -284,47 +279,9 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
                 .withDirection(Direction.OUTGOING);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    T algorithm(
-            final ProcedureConfiguration config,
-            final AllocationTracker tracker,
-            final Optional<Graph> graph) {
-
-        int concurrency = config.getConcurrency();
-        int minBatchSize = config.getBatchSize();
-        double threshold = config.get(CONFIG_THRESHOLD, Double.NaN);
-
-        final UnionFindAlgoInterface uf = getAlgoByConfig(config);
-
-        return (T) uf.algo(graph, Pools.DEFAULT, minBatchSize, concurrency, threshold, tracker);
-    }
-
-    private UnionFindAlgo getAlgoByConfig(ProcedureConfiguration config) {
-        if (config.getConcurrency() <= 1) {
-            return UnionFindAlgo.SEQ;
-        } else {
-            final String algoName = config.getString(CONFIG_PARALLEL_ALGO, UnionFindAlgo.QUEUE.name()).toUpperCase();
-
-            UnionFindAlgo algoImpl;
-            try {
-                algoImpl = UnionFindAlgo.valueOf(algoName);
-            } catch (IllegalArgumentException e) {
-                algoImpl = UnionFindAlgo.SEQ;
-            }
-
-            if (algoImpl == UnionFindAlgo.SEQ) {
-                String errorMsg = String.format("Parallel configuration %s is invalid. Valid names are %s", algoName,
-                        Arrays.stream(UnionFindAlgo.values())
-                                .filter(ufa -> ufa != UnionFindAlgo.SEQ)
-                                .map(UnionFindAlgo::name)
-                                .collect(Collectors.joining(", ")));
-
-                throw new IllegalArgumentException(errorMsg);
-            }
-
-            return algoImpl;
-        }
+    AlgorithmFactory<T> algorithmFactory(final ProcedureConfiguration config) {
+        return UnionFindFactory.create(config, config.get(CONFIG_THRESHOLD, Double.NaN));
     }
 
     public static class UnionFindResult {

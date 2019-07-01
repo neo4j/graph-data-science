@@ -194,7 +194,7 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
             final AllocationTracker tracker,
             final ProcedureConfiguration configuration,
             final Graph graph) {
-        PageRank algo = newAlgorithm(configuration, tracker, Optional.of(graph));
+        PageRank algo = newAlgorithm(Optional.of(graph), configuration, tracker);
 
         statsBuilder.timeEval(algo::compute);
         statsBuilder.withIterations(algo.iterations()).withDampingFactor(algo.dampingFactor());

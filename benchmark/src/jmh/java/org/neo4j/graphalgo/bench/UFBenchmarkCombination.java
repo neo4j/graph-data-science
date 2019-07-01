@@ -23,34 +23,34 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
 import org.neo4j.graphalgo.impl.unionfind.GraphUnionFindAlgo;
-import org.neo4j.graphalgo.impl.unionfind.UnionFindAlgo;
+import org.neo4j.graphalgo.impl.unionfind.UnionFindAlgorithmType;
 
 import java.util.Optional;
 
 public enum UFBenchmarkCombination {
 
-    HEAVY_QUEUE(GraphImpl.HEAVY, UnionFindAlgo.QUEUE),
-    HEAVY_FORK_JOIN(GraphImpl.HEAVY, UnionFindAlgo.FORK_JOIN),
-    HEAVY_FJ_MERGE(GraphImpl.HEAVY, UnionFindAlgo.FJ_MERGE),
-    HEAVY_SEQ(GraphImpl.HEAVY, UnionFindAlgo.SEQ),
+    HEAVY_QUEUE(GraphImpl.HEAVY, UnionFindAlgorithmType.QUEUE),
+    HEAVY_FORK_JOIN(GraphImpl.HEAVY, UnionFindAlgorithmType.FORK_JOIN),
+    HEAVY_FJ_MERGE(GraphImpl.HEAVY, UnionFindAlgorithmType.FJ_MERGE),
+    HEAVY_SEQ(GraphImpl.HEAVY, UnionFindAlgorithmType.SEQ),
 
-    HUGE_QUEUE(GraphImpl.HUGE, UnionFindAlgo.QUEUE),
-    HUGE_FORK_JOIN(GraphImpl.HUGE, UnionFindAlgo.FORK_JOIN),
-    HUGE_FJ_MERGE(GraphImpl.HUGE, UnionFindAlgo.FJ_MERGE),
-    HUGE_SEQ(GraphImpl.HUGE, UnionFindAlgo.SEQ);
+    HUGE_QUEUE(GraphImpl.HUGE, UnionFindAlgorithmType.QUEUE),
+    HUGE_FORK_JOIN(GraphImpl.HUGE, UnionFindAlgorithmType.FORK_JOIN),
+    HUGE_FJ_MERGE(GraphImpl.HUGE, UnionFindAlgorithmType.FJ_MERGE),
+    HUGE_SEQ(GraphImpl.HUGE, UnionFindAlgorithmType.SEQ);
 
     final GraphImpl graph;
-    final UnionFindAlgo algo;
+    final UnionFindAlgorithmType algo;
 
-    UFBenchmarkCombination(GraphImpl graph, UnionFindAlgo algo) {
+    UFBenchmarkCombination(GraphImpl graph, UnionFindAlgorithmType algo) {
         this.graph = graph;
         this.algo = algo;
     }
 
     public Object run(Graph graph) {
         double threshold = Double.NaN;
-        GraphUnionFindAlgo<?> unionFindAlgo = algo.algo(
-                Optional.of(graph),
+        GraphUnionFindAlgo<?> unionFindAlgo = algo.create(
+                graph,
                 Pools.DEFAULT,
                 (int) (graph.nodeCount() / Pools.DEFAULT_CONCURRENCY),
                 Pools.DEFAULT_CONCURRENCY,

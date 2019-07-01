@@ -30,32 +30,27 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
-import java.util.Optional;
-
 public abstract class BaseAlgoProc<A extends Algorithm<A>> extends BaseProc {
 
     final A newAlgorithm(
+            final Graph graph,
             final ProcedureConfiguration config,
-            final AllocationTracker tracker,
-            final Optional<Graph> graph) {
+            final AllocationTracker tracker) {
         TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
-        return algorithm(config, tracker, graph)
+        return algorithmFactory(config)
+                .build(graph, config, tracker)
                 .withLog(log)
                 .withTerminationFlag(terminationFlag);
     }
 
-    abstract A algorithm(
-            ProcedureConfiguration config,
-            AllocationTracker tracker,
-            Optional<Graph> graph
-    );
+    abstract AlgorithmFactory<A> algorithmFactory(ProcedureConfiguration config);
 
     MemoryTreeWithDimensions memoryEstimation(final ProcedureConfiguration config) {
         GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
         GraphFactory graphFactory = loader.build(config.getGraphImpl());
-        A algorithm = algorithm(config, AllocationTracker.EMPTY, Optional.empty());
+        AlgorithmFactory<A> algorithmFactory = algorithmFactory(config);
         MemoryEstimation estimation = MemoryEstimations.builder("graph with procedure")
-                .add(algorithm.memoryEstimation())
+                .add(algorithmFactory.memoryEstimation())
                 .add(graphFactory.memoryEstimation())
                 .build();
         MemoryTree memoryTree = estimation.estimate(graphFactory.dimensions(), config.getConcurrency());

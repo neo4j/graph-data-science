@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.unionfind.UnionFindAlgo;
+import org.neo4j.graphalgo.impl.unionfind.UnionFindAlgorithmType;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.Exceptions;
 
@@ -50,21 +50,21 @@ public final class UnionFindSafetyTest {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(
-                new Object[]{UnionFindAlgo.QUEUE},
-                new Object[]{UnionFindAlgo.FORK_JOIN},
-                new Object[]{UnionFindAlgo.FJ_MERGE}
+                new Object[]{UnionFindAlgorithmType.QUEUE},
+                new Object[]{UnionFindAlgorithmType.FORK_JOIN},
+                new Object[]{UnionFindAlgorithmType.FJ_MERGE}
         );
     }
 
     @Parameterized.Parameter
-    public UnionFindAlgo unionFindAlgo;
+    public UnionFindAlgorithmType unionFindAlgorithmType;
 
     @Test(timeout = 10_000L)
     public void testUnionFindSafetyUnderFailure() {
         IllegalStateException error = new IllegalStateException("some error");
         Graph graph = new FlakyGraph(100, 10, new Random(42L), error);
         try {
-            unionFindAlgo.run(
+            unionFindAlgorithmType.run(
                     graph,
                     Pools.DEFAULT,
                     10,
@@ -82,7 +82,7 @@ public final class UnionFindSafetyTest {
         IllegalStateException error = new IllegalStateException("some error");
         Graph graph = new FlakyGraph(100, 10, new Random(42L), error);
         try {
-            unionFindAlgo.run(
+            unionFindAlgorithmType.run(
                     graph,
                     Pools.DEFAULT,
                     10,

@@ -31,7 +31,6 @@ import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.Stack;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
@@ -51,24 +50,25 @@ import java.util.concurrent.RecursiveTask;
  *
  * @author mknblch
  */
-public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFindFJMerge>
-{
-
-    private static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations.builder(ParallelUnionFindFJMerge.class)
-            .startField("computeStep", TUFProcess.class)
-            .add(MemoryEstimations.of("dss", (dimensions, concurrency) ->
-                    PagedDisjointSetStruct.memoryEstimation()
-                            .estimate(dimensions, concurrency)
-                            .memoryUsage()
-                            .times(concurrency)))
-            .endField()
-            .build();
+public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFindFJMerge> {
 
     private final ExecutorService executor;
     private final AllocationTracker tracker;
     private final long nodeCount;
     private final long batchSize;
     private PagedDisjointSetStruct struct;
+
+    public static MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.builder(ParallelUnionFindFJMerge.class)
+                .startField("computeStep", TUFProcess.class)
+                .add(MemoryEstimations.of("dss", (dimensions, concurrency) ->
+                        PagedDisjointSetStruct.memoryEstimation()
+                                .estimate(dimensions, concurrency)
+                                .memoryUsage()
+                                .times(concurrency)))
+                .endField()
+                .build();
+    }
 
     /**
      * initialize UF
@@ -77,22 +77,17 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
      * @param executor
      */
     public ParallelUnionFindFJMerge(
-            Optional<Graph> graph,
+            Graph graph,
             ExecutorService executor,
             AllocationTracker tracker,
             int minBatchSize,
             int concurrency,
             double threshold) {
-        super(graph.orElse(null), threshold);
+        super(graph, threshold);
+
+        this.nodeCount = graph.nodeCount();
         this.executor = executor;
         this.tracker = tracker;
-
-        if (graph.isPresent()) {
-            nodeCount = graph.get().nodeCount();
-        } else {
-            nodeCount = 0;
-        }
-
         this.batchSize = ParallelUtil.adjustBatchSize(
                 nodeCount,
                 concurrency,
@@ -137,11 +132,6 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
     public ParallelUnionFindFJMerge release() {
         struct = null;
         return super.release();
-    }
-
-    @Override
-    public MemoryEstimation memoryEstimation() {
-        return MEMORY_ESTIMATION;
     }
 
     private abstract class UFTask implements Runnable {

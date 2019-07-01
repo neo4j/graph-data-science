@@ -20,9 +20,9 @@
 package org.neo4j.graphalgo.impl.unionfind;
 
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -32,12 +32,12 @@ import java.util.concurrent.ExecutorService;
  * Some benchmarks exist to measure the difference between
  * forkjoin & queue approaches and huge/heavy
  */
-public enum UnionFindAlgo implements UnionFindAlgoInterface {
+public enum UnionFindAlgorithmType implements UnionFindAlgorithm {
 
     QUEUE {
         @Override
-        public GraphUnionFindAlgo<?> algo(
-                final Optional<Graph> graph,
+        public GraphUnionFindAlgo<?> create(
+                final Graph graph,
                 final ExecutorService executor,
                 final int minBatchSize,
                 final int concurrency,
@@ -52,11 +52,16 @@ public enum UnionFindAlgo implements UnionFindAlgoInterface {
                     threshold,
                     tracker);
         }
+
+        @Override
+        public MemoryEstimation memoryEstimation() {
+            return ParallelUnionFindQueue.memoryEstimation();
+        }
     },
     FORK_JOIN {
         @Override
-        public GraphUnionFindAlgo<?> algo(
-                final Optional<Graph> graph,
+        public GraphUnionFindAlgo<?> create(
+                final Graph graph,
                 final ExecutorService executor,
                 final int minBatchSize,
                 final int concurrency,
@@ -70,11 +75,16 @@ public enum UnionFindAlgo implements UnionFindAlgoInterface {
                     concurrency,
                     threshold);
         }
+
+        @Override
+        public MemoryEstimation memoryEstimation() {
+            return ParallelUnionFindForkJoin.memoryEstimation();
+        }
     },
     FJ_MERGE {
         @Override
-        public GraphUnionFindAlgo<?> algo(
-                final Optional<Graph> graph,
+        public GraphUnionFindAlgo<?> create(
+                final Graph graph,
                 final ExecutorService executor,
                 final int minBatchSize,
                 final int concurrency,
@@ -89,11 +99,16 @@ public enum UnionFindAlgo implements UnionFindAlgoInterface {
                     concurrency,
                     threshold);
         }
+
+        @Override
+        public MemoryEstimation memoryEstimation() {
+            return ParallelUnionFindFJMerge.memoryEstimation();
+        }
     },
     SEQ {
         @Override
-        public GraphUnionFindAlgo<?> algo(
-                final Optional<Graph> graph,
+        public GraphUnionFindAlgo<?> create(
+                final Graph graph,
                 final ExecutorService executor,
                 final int minBatchSize,
                 final int concurrency,
@@ -104,6 +119,11 @@ public enum UnionFindAlgo implements UnionFindAlgoInterface {
                     graph,
                     AllocationTracker.EMPTY, threshold
             );
+        }
+
+        @Override
+        public MemoryEstimation memoryEstimation() {
+            return GraphUnionFind.memoryEstimation();
         }
     }
 }

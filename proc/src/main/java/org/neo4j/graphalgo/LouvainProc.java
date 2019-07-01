@@ -21,7 +21,6 @@ package org.neo4j.graphalgo;
 
 import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
@@ -31,12 +30,9 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.impl.louvain.Louvain;
+import org.neo4j.graphalgo.impl.louvain.LouvainFactory;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -45,10 +41,12 @@ import org.neo4j.procedure.Procedure;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import static org.neo4j.graphalgo.impl.louvain.LouvainFactory.CLUSTERING_IDENTIFIER;
+import static org.neo4j.graphalgo.impl.louvain.LouvainFactory.DEFAULT_CLUSTER_PROPERTY;
 
 /**
  * modularity based community detection algorithm
@@ -58,10 +56,7 @@ import java.util.stream.Stream;
 public class LouvainProc extends BaseAlgoProc<Louvain> {
 
     public static final String INTERMEDIATE_COMMUNITIES_WRITE_PROPERTY = "intermediateCommunitiesWriteProperty";
-    public static final String DEFAULT_CLUSTER_PROPERTY = "communityProperty";
     public static final String INCLUDE_INTERMEDIATE_COMMUNITIES = "includeIntermediateCommunities";
-
-    private static final String CLUSTERING_IDENTIFIER = "clustering";
     public static final String INNER_ITERATIONS = "innerIterations";
     public static final String COMMUNITY_SELECTION = "communitySelection";
     public static final int DEFAULT_CONCURRENCY = 1;
@@ -171,26 +166,14 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
     }
 
     @Override
-    Louvain algorithm(
-            final ProcedureConfiguration procedureConfig,
-            final AllocationTracker tracker,
-            final Optional<Graph> graph) {
+    LouvainFactory algorithmFactory(final ProcedureConfiguration procedureConfig) {
 
         final int maxLevel = procedureConfig.getIterations(DEFAULT_MAX_LEVEL);
         final int maxIterations = procedureConfig.getNumber(INNER_ITERATIONS, DEFAULT_MAX_ITERATIONS).intValue();
         final boolean randomNeighbor = procedureConfig.get(COMMUNITY_SELECTION, "classic").equalsIgnoreCase("random");
-        Optional<String> clusterProperty = procedureConfig.getString(DEFAULT_CLUSTER_PROPERTY);
 
-        HugeWeightMapping communityMap = clusterProperty
-                .flatMap(name -> graph.map(g -> g.nodeProperties(CLUSTERING_IDENTIFIER)))
-                .orElse(null);
-
-        Louvain.Config algoConfig = new Louvain.Config(communityMap, maxLevel, maxIterations, randomNeighbor);
-        return graph
-                .map(g -> new Louvain(g,
-                        algoConfig,
-                        Pools.DEFAULT, procedureConfig.getConcurrency(DEFAULT_CONCURRENCY), tracker))
-                .orElseGet(() -> new Louvain(algoConfig));
+        Louvain.Config algoConfig = new Louvain.Config(maxLevel, maxIterations, randomNeighbor);
+        return new LouvainFactory(algoConfig);
     }
 
     private Louvain compute(
@@ -199,7 +182,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
             final ProcedureConfiguration configuration,
             final Graph graph) {
 
-        Louvain algo = newAlgorithm(configuration, tracker, Optional.of(graph));
+        Louvain algo = newAlgorithm(graph, configuration, tracker);
 
         final Louvain louvain = statsBuilder.timeEval((Supplier<Louvain>) algo::compute);
         statsBuilder.randomNeighbor(algo.randomNeighborSelection());

@@ -179,43 +179,43 @@ public class ParallelUnionFindBenchmark {
 
     @Benchmark
     public Object parallelUnionFindQueue_200000() {
-        return new ParallelUnionFindQueue(Optional.ofNullable(graph), Pools.DEFAULT, 200_000, 8, threshold, AllocationTracker.EMPTY)
+        return new ParallelUnionFindQueue(graph, Pools.DEFAULT, 200_000, 8, threshold, AllocationTracker.EMPTY)
                 .compute();
     }
 
     @Benchmark
     public Object parallelUnionFindQueue_400000() {
-        return new ParallelUnionFindQueue(Optional.ofNullable(graph), Pools.DEFAULT, 400_000, 8, threshold, AllocationTracker.EMPTY)
+        return new ParallelUnionFindQueue(graph, Pools.DEFAULT, 400_000, 8, threshold, AllocationTracker.EMPTY)
                 .compute();
     }
 
     @Benchmark
     public Object parallelUnionFindQueue_800000() {
-        return new ParallelUnionFindQueue(Optional.ofNullable(graph), Pools.DEFAULT, 800_000, 8, threshold, AllocationTracker.EMPTY)
+        return new ParallelUnionFindQueue(graph, Pools.DEFAULT, 800_000, 8, threshold, AllocationTracker.EMPTY)
                 .compute();
     }
 
     @Benchmark
     public Object parallelUnionFindForkJoinMerge_400000() {
-        return new ParallelUnionFindFJMerge(Optional.ofNullable(graph), Pools.DEFAULT, AllocationTracker.EMPTY, 400_000, 8, threshold)
+        return new ParallelUnionFindFJMerge(graph, Pools.DEFAULT, AllocationTracker.EMPTY, 400_000, 8, threshold)
                 .compute();
     }
 
     @Benchmark
     public Object parallelUnionFindForkJoinMerge_800000() {
-        return new ParallelUnionFindFJMerge(Optional.ofNullable(graph), Pools.DEFAULT, AllocationTracker.EMPTY, 800_000, 8, threshold)
+        return new ParallelUnionFindFJMerge(graph, Pools.DEFAULT, AllocationTracker.EMPTY, 800_000, 8, threshold)
                 .compute();
     }
 
     @Benchmark
     public Object parallelUnionFindForkJoin_400000() {
-        return new ParallelUnionFindForkJoin(Optional.ofNullable(graph), AllocationTracker.EMPTY,400_000, 8, threshold)
+        return new ParallelUnionFindForkJoin(graph, AllocationTracker.EMPTY,400_000, 8, threshold)
                 .compute();
     }
 
     @Benchmark
     public Object parallelUnionFindForkJoin_800000() {
-        return new ParallelUnionFindForkJoin(Optional.ofNullable(graph), AllocationTracker.EMPTY, 800_000, 8, threshold)
+        return new ParallelUnionFindForkJoin(graph, AllocationTracker.EMPTY, 800_000, 8, threshold)
                 .compute();
     }
 
@@ -228,7 +228,7 @@ public class ParallelUnionFindBenchmark {
 
     @Benchmark
     public Object sequentialUnionFind() {
-        return new GraphUnionFind(Optional.ofNullable(graph), AllocationTracker.EMPTY, threshold)
+        return new GraphUnionFind(graph, AllocationTracker.EMPTY, threshold)
                 .compute();
 
     }

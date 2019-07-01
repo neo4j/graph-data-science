@@ -19,19 +19,14 @@
  */
 package org.neo4j.graphalgo;
 
-import org.neo4j.graphalgo.core.utils.mem.Assessable;
-import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.logging.Log;
 
 /**
  * @author mknblch
  */
-public abstract class Algorithm<ME extends Algorithm<ME>> implements TerminationFlag, Assessable {
+public abstract class Algorithm<ME extends Algorithm<ME>> implements TerminationFlag {
 
     protected ProgressLogger progressLogger = ProgressLogger.NULL_LOGGER;
 

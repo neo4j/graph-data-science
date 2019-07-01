@@ -94,6 +94,10 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private final AtomicInteger counter = new AtomicInteger(0);
     private boolean randomNeighborSelection = false;
 
+    public static MemoryEstimation memoryEstimation() {
+        return MEMORY_ESTIMATION;
+    }
+
     ModularityOptimization(
             final Graph graph,
             final HugeNodeWeights nodeWeights,
@@ -110,15 +114,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
         ki = HugeDoubleArray.newArray(nodeCount, tracker);
         communities = HugeLongArray.newArray(nodeCount, tracker);
-    }
-
-    @Override
-    public MemoryEstimation memoryEstimation() {
-        return MEMORY_ESTIMATION;
-    }
-
-    public static MemoryEstimation estimateMemory() {
-        return MEMORY_ESTIMATION;
     }
 
     ModularityOptimization withRandomNeighborSelection(final boolean randomNeighborSelection) {

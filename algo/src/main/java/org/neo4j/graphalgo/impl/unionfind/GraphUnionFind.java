@@ -28,8 +28,6 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
 import org.neo4j.graphdb.Direction;
 
-import java.util.Optional;
-
 /**
  * Sequential UnionFind:
  * <p>
@@ -47,39 +45,29 @@ import java.util.Optional;
  */
 public class GraphUnionFind extends GraphUnionFindAlgo<GraphUnionFind> {
 
-    private static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations.builder(GraphUnionFind.class)
-            .add("dss", PagedDisjointSetStruct.MEMORY_ESTIMATION)
-            .build();
-
     private PagedDisjointSetStruct dss;
     private final long nodeCount;
     private RelationshipConsumer unrestricted;
 
-    public GraphUnionFind(
-            Optional<Graph> graph,
-            AllocationTracker tracker,
-            double threshold) {
-        super(graph.orElse(null), threshold);
-        this.threshold = threshold;
-        if (graph.isPresent()) {
-            this.graph = graph.get();
-            this.nodeCount = this.graph.nodeCount();
-            this.dss = new PagedDisjointSetStruct(nodeCount, tracker);
-            this.unrestricted = (source, target) -> {
-                dss.union(source, target);
-                return true;
-            };
-        } else {
-            this.graph = null;
-            this.nodeCount = 0;
-            this.dss = null;
-            this.unrestricted = (source, target) -> true;
-        }
+    public static MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.builder(GraphUnionFind.class)
+                .add("dss", PagedDisjointSetStruct.MEMORY_ESTIMATION)
+                .build();
     }
 
-    @Override
-    public MemoryEstimation memoryEstimation() {
-        return MEMORY_ESTIMATION;
+    public GraphUnionFind(
+            Graph graph,
+            AllocationTracker tracker,
+            double threshold) {
+        super(graph, threshold);
+
+        this.threshold = threshold;
+        this.nodeCount = graph.nodeCount();
+        this.dss = new PagedDisjointSetStruct(nodeCount, tracker);
+        this.unrestricted = (source, target) -> {
+            dss.union(source, target);
+            return true;
+        };
     }
 
     /**

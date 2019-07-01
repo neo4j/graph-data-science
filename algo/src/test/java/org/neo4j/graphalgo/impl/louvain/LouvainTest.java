@@ -172,17 +172,19 @@ public class LouvainTest extends HeavyHugeTester {
 
     @Test
     public void testMemoryEstimationComputation() {
+        LouvainFactory factory = new LouvainFactory(DEFAULT_CONFIG);
+
         GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
-        assertEquals(MemoryRange.of(608, 1072), new Louvain(DEFAULT_CONFIG).memoryEstimation().estimate(dimensions0, 1).memoryUsage());
-        assertEquals(MemoryRange.of(1112, 1576), new Louvain(DEFAULT_CONFIG).memoryEstimation().estimate(dimensions0, 4).memoryUsage());
+        assertEquals(MemoryRange.of(608, 1072), factory.memoryEstimation().estimate(dimensions0, 1).memoryUsage());
+        assertEquals(MemoryRange.of(1112, 1576), factory.memoryEstimation().estimate(dimensions0, 4).memoryUsage());
 
         GraphDimensions dimensions100 = new GraphDimensions.Builder().setNodeCount(100).build();
-        assertEquals(MemoryRange.of(7008, 14672), new Louvain(DEFAULT_CONFIG).memoryEstimation().estimate(dimensions100, 1).memoryUsage());
-        assertEquals(MemoryRange.of(14712, 22376), new Louvain(DEFAULT_CONFIG).memoryEstimation().estimate(dimensions100, 4).memoryUsage());
+        assertEquals(MemoryRange.of(7008, 14672), factory.memoryEstimation().estimate(dimensions100, 1).memoryUsage());
+        assertEquals(MemoryRange.of(14712, 22376), factory.memoryEstimation().estimate(dimensions100, 4).memoryUsage());
 
         GraphDimensions dimensions100B = new GraphDimensions.Builder().setNodeCount(100_000_000_000L).build();
-        assertEquals(MemoryRange.of(6400976563232L, 13602075196648L), new Louvain(DEFAULT_CONFIG).memoryEstimation().estimate(dimensions100B, 1).memoryUsage());
-        assertEquals(MemoryRange.of(13602075196688L, 20803173830104L), new Louvain(DEFAULT_CONFIG).memoryEstimation().estimate(dimensions100B, 4).memoryUsage());
+        assertEquals(MemoryRange.of(6400976563232L, 13602075196648L), factory.memoryEstimation().estimate(dimensions100B, 1).memoryUsage());
+        assertEquals(MemoryRange.of(13602075196688L, 20803173830104L), factory.memoryEstimation().estimate(dimensions100B, 4).memoryUsage());
     }
 
     private void assertCommunities(Louvain louvain) {

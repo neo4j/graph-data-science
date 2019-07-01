@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.impl.unionfind;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -31,7 +30,6 @@ import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -56,38 +54,40 @@ import static org.neo4j.graphalgo.core.utils.ParallelUtil.awaitTermination;
  */
 public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFindQueue> {
 
-    private static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations
-            .builder(ParallelUnionFindQueue.class)
-            .startField("computeStep", HugeUnionFindTask.class)
-            .add(MemoryEstimations.of("dss", (dimensions, concurrency) ->
-                    PagedDisjointSetStruct.memoryEstimation()
-                            .estimate(dimensions, concurrency)
-                            .memoryUsage()
-                            .times(concurrency)))
-            .endField()
-            .build();
-
     private final ExecutorService executor;
     private final AllocationTracker tracker;
     private final long nodeCount;
     private final long batchSize;
     private final int stepSize;
 
+    public static MemoryEstimation memoryEstimation() {
+        return MemoryEstimations
+                .builder(ParallelUnionFindQueue.class)
+                .startField("computeStep", HugeUnionFindTask.class)
+                .add(MemoryEstimations.of("dss", (dimensions, concurrency) ->
+                        PagedDisjointSetStruct.memoryEstimation()
+                                .estimate(dimensions, concurrency)
+                                .memoryUsage()
+                                .times(concurrency)))
+                .endField()
+                .build();
+    }
+
     /**
      * initialize parallel UF
      */
     public ParallelUnionFindQueue(
-            Optional<Graph> graph,
+            Graph graph,
             ExecutorService executor,
             int minBatchSize,
             int concurrency,
             double threshold,
             AllocationTracker tracker) {
-        super(graph.orElse(null), threshold);
+        super(graph, threshold);
         this.executor = executor;
         this.tracker = tracker;
 
-        this.nodeCount = graph.map(IdMapping::nodeCount).orElse(0L);
+        this.nodeCount = graph.nodeCount();
 
         this.batchSize = ParallelUtil.adjustBatchSize(
                 nodeCount,
@@ -133,11 +133,6 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFind
 
         awaitTermination(futures);
         return getStruct(queue);
-    }
-
-    @Override
-    public MemoryEstimation memoryEstimation() {
-        return MEMORY_ESTIMATION;
     }
 
     private PagedDisjointSetStruct getStruct(final BlockingQueue<PagedDisjointSetStruct> queue) {

@@ -27,9 +27,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
@@ -45,9 +42,6 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
-
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
 /**
  * Louvain Clustering Algorithm.
@@ -93,8 +87,16 @@ public final class Louvain extends Algorithm<Louvain> {
     private final boolean randomNeighborSelection;
 
     public Louvain(
+        final Graph graph,
+        final Config config,
+        final ExecutorService pool,
+        final int concurrency,
+        final AllocationTracker tracker) {this(graph, config, null, pool, concurrency, tracker);}
+
+    public Louvain(
             final Graph graph,
             final Config config,
+            final HugeWeightMapping communityMap,
             final ExecutorService pool,
             final int concurrency,
             final AllocationTracker tracker) {
@@ -105,8 +107,7 @@ public final class Louvain extends Algorithm<Louvain> {
         rootNodeCount = graph.nodeCount();
         communities = HugeLongArray.newArray(rootNodeCount, tracker);
         nodeWeights = HugeDoubleArray.newArray(rootNodeCount, tracker);
-
-        communityMap = config.communityMap;
+        this. communityMap = communityMap;
         maxLevel = config.maxLevel;
         maxIterations = config.maxIterations;
         randomNeighborSelection = config.randomNeighborSelection;
@@ -114,45 +115,8 @@ public final class Louvain extends Algorithm<Louvain> {
         communities.setAll(i -> i);
     }
 
-    public Louvain(final Louvain.Config config) {
-        this.root = null;
-        this.pool = null;
-        this.concurrency = 0;
-        this.tracker = null;
-        rootNodeCount = 0;
-        communityCount = 0;
-        communities = null;
-        nodeWeights = null;
-
-        communityMap = config.communityMap;
-        maxLevel = config.maxLevel;
-        maxIterations = config.maxIterations;
-        randomNeighborSelection = config.randomNeighborSelection;
-    }
-
     public boolean randomNeighborSelection() {
         return randomNeighborSelection;
-    }
-
-    @Override
-    public MemoryEstimation memoryEstimation() {
-        return MemoryEstimations.builder(Louvain.class)
-                .perNode("communities", HugeLongArray::memoryEstimation)
-                .perNode("nodeWeights", HugeDoubleArray::memoryEstimation)
-                .rangePerNode("dendrogram", (nodeCount) -> {
-                    final long communityArraySize = HugeLongArray.memoryEstimation(nodeCount);
-
-                    final MemoryRange innerCommunities = MemoryRange.of(
-                            communityArraySize,
-                            communityArraySize * maxLevel);
-
-                    final MemoryRange communityArrayLength = MemoryRange.of(sizeOfObjectArray(1), sizeOfObjectArray(maxLevel));
-
-                    return innerCommunities.add(communityArrayLength);
-                })
-                .fixed("modularities", MemoryRange.of(sizeOfDoubleArray(1), sizeOfDoubleArray(maxLevel)))
-                .add("modularityOptimization", ModularityOptimization.estimateMemory())
-                .build();
     }
 
     public Louvain compute() {
