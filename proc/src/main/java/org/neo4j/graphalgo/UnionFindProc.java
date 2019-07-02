@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
@@ -76,7 +76,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
     @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
             "{weightProperty:'propertyName', threshold:0.42, defaultValue:1.0) " +
             "YIELD nodeId, setId - yields a setId to each node id")
-    public Stream<PagedDisjointSetStruct.Result> unionFindStream(
+    public Stream<DisjointSetStruct.Result> unionFindStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
@@ -113,7 +113,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
     @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
             "{property:'propertyName', threshold:0.42, defaultValue:1.0, concurrency:4}) " +
             "YIELD nodeId, setId - yields a setId to each node id")
-    public Stream<PagedDisjointSetStruct.Result> unionFindQueueStream(
+    public Stream<DisjointSetStruct.Result> unionFindQueueStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
@@ -137,7 +137,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
     @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
             "{property:'propertyName', threshold:0.42, defaultValue:1.0, concurrency:4}) " +
             "YIELD nodeId, setId - yields a setId to each node id")
-    public Stream<PagedDisjointSetStruct.Result> unionFindForkJoinMergeStream(
+    public Stream<DisjointSetStruct.Result> unionFindForkJoinMergeStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
@@ -161,7 +161,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
     @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
             "{property:'propertyName', threshold:0.42, defaultValue:1.0,concurrency:4}) " +
             "YIELD nodeId, setId - yields a setId to each node id")
-    public Stream<PagedDisjointSetStruct.Result> unionFindForJoinStream(
+    public Stream<DisjointSetStruct.Result> unionFindForJoinStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
@@ -169,7 +169,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
         return stream(label, relationship, config, UnionFindAlgorithmType.FORK_JOIN);
     }
 
-    public Stream<PagedDisjointSetStruct.Result> stream(
+    public Stream<DisjointSetStruct.Result> stream(
             String label,
             String relationship,
             Map<String, Object> config,
@@ -187,7 +187,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
             return Stream.empty();
         }
 
-        PagedDisjointSetStruct communities = compute(builder, tracker, configuration, graph);
+        DisjointSetStruct communities = compute(builder, tracker, configuration, graph);
         graph.release();
         return communities.resultStream(graph);
     }
@@ -210,7 +210,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
             return Stream.of(UnionFindResult.EMPTY);
         }
 
-        PagedDisjointSetStruct communities = compute(builder, tracker, configuration, graph);
+        DisjointSetStruct communities = compute(builder, tracker, configuration, graph);
 
         if (configuration.isWriteFlag()) {
             String writeProperty = configuration.get(
@@ -229,7 +229,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
     private void write(
             Supplier<ProgressTimer> timer,
             Graph graph,
-            PagedDisjointSetStruct struct,
+            DisjointSetStruct struct,
             ProcedureConfiguration configuration, String writeProperty) {
         try (ProgressTimer ignored = timer.get()) {
             write(graph, struct, configuration, writeProperty);
@@ -238,7 +238,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
 
     private void write(
             Graph graph,
-            PagedDisjointSetStruct struct,
+            DisjointSetStruct struct,
             ProcedureConfiguration configuration, String writeProperty) {
         log.debug("Writing results");
         Exporter exporter = Exporter.of(api, graph)
@@ -251,16 +251,16 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
         exporter.write(
                 writeProperty,
                 struct,
-                PagedDisjointSetStruct.Translator.INSTANCE);
+                DisjointSetStruct.Translator.INSTANCE);
     }
 
-    private PagedDisjointSetStruct compute(
+    private DisjointSetStruct compute(
             final Builder builder,
             final AllocationTracker tracker,
             final ProcedureConfiguration configuration, final Graph graph) {
         T algo = newAlgorithm(graph, configuration, tracker);
-        final PagedDisjointSetStruct algoResult = runWithExceptionLogging(
-                "Union failed",
+        final DisjointSetStruct algoResult = runWithExceptionLogging(
+                "UnionFind failed",
                 () -> builder.timeEval(() -> Double.isFinite(algo.threshold())
                         ? algo.compute(algo.threshold())
                         : algo.compute()));

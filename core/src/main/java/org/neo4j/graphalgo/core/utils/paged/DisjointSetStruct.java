@@ -39,9 +39,9 @@ import java.util.stream.Stream;
  * <p>
  * <a href="https://en.wikipedia.org/wiki/Disjoint-set_data_structure">Wiki</a>
  */
-public final class PagedDisjointSetStruct {
+public final class DisjointSetStruct {
 
-    public static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations.builder(PagedDisjointSetStruct.class)
+    public static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations.builder(DisjointSetStruct.class)
             .perNode("parent", HugeLongArray::memoryEstimation)
             .perNode("depth", HugeLongArray::memoryEstimation)
             .build();
@@ -52,11 +52,11 @@ public final class PagedDisjointSetStruct {
 
     /**
      * Initialize the struct with the given capacity.
-     * Note: the struct must be {@link PagedDisjointSetStruct#reset()} prior use!
+     * Note: the struct must be {@link DisjointSetStruct#reset()} prior use!
      *
      * @param capacity the capacity (maximum node id)
      */
-    public PagedDisjointSetStruct(long capacity, AllocationTracker tracker) {
+    public DisjointSetStruct(long capacity, AllocationTracker tracker) {
         parent = HugeLongArray.newArray(capacity, tracker);
         depth = HugeLongArray.newArray(capacity, tracker);
         this.capacity = capacity;
@@ -65,7 +65,7 @@ public final class PagedDisjointSetStruct {
     /**
      * reset the container
      */
-    public PagedDisjointSetStruct reset() {
+    public DisjointSetStruct reset() {
         parent.fill(-1);
         return this;
     }
@@ -125,7 +125,7 @@ public final class PagedDisjointSetStruct {
     }
 
     /**
-     * join set of p (Sp) with set of q (Sq) so that {@link PagedDisjointSetStruct#connected(long, long)}
+     * join set of p (Sp) with set of q (Sq) so that {@link DisjointSetStruct#connected(long, long)}
      * for any pair of (Spi, Sqj) evaluates to true. Some optimizations exists
      * which automatically balance the tree, the "weighted union rule" is used here.
      *
@@ -148,11 +148,11 @@ public final class PagedDisjointSetStruct {
             parent.set(qSet, pSet);
         } else {
             parent.set(qSet, pSet);
-            depth.addTo(pSet, depth.get(qSet) + 1);
+            depth.addTo(pSet, dq + 1);
         }
     }
 
-    public PagedDisjointSetStruct merge(PagedDisjointSetStruct other) {
+    public DisjointSetStruct merge(DisjointSetStruct other) {
 
         if (other.capacity != this.capacity) {
             throw new IllegalArgumentException("Different Capacity");
@@ -232,7 +232,7 @@ public final class PagedDisjointSetStruct {
      *
      * @param consumer the consumer
      */
-    public void forEach(PagedDisjointSetStruct.Consumer consumer) {
+    public void forEach(DisjointSetStruct.Consumer consumer) {
         for (long i = parent.size() - 1; i >= 0; i--) {
             if (!consumer.consume(i, find(i))) {
                 break;
@@ -253,12 +253,12 @@ public final class PagedDisjointSetStruct {
         boolean consume(long nodeId, long setId);
     }
 
-    public static final class Translator implements PropertyTranslator.OfLong<PagedDisjointSetStruct> {
+    public static final class Translator implements PropertyTranslator.OfLong<DisjointSetStruct> {
 
-        public static final PropertyTranslator<PagedDisjointSetStruct> INSTANCE = new Translator();
+        public static final PropertyTranslator<DisjointSetStruct> INSTANCE = new Translator();
 
         @Override
-        public long toLong(final PagedDisjointSetStruct data, final long nodeId) {
+        public long toLong(final DisjointSetStruct data, final long nodeId) {
             return data.findNoOpt(nodeId);
         }
     }

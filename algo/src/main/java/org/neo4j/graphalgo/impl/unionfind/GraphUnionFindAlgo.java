@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.impl.unionfind;
 
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
 
 /**
  * unified parent for all unionfind implementations
@@ -42,15 +42,15 @@ public abstract class GraphUnionFindAlgo<ME extends GraphUnionFindAlgo<ME>> exte
     }
 
     /**
-     * compute connected componens
+     * compute connected components
      */
-    public PagedDisjointSetStruct compute() {
+    public DisjointSetStruct compute() {
         return Double.isFinite(threshold) ? compute(threshold) : computeUnrestricted();
     }
 
-    public abstract PagedDisjointSetStruct compute(double threshold);
+    public abstract DisjointSetStruct compute(double threshold);
 
-    public abstract PagedDisjointSetStruct computeUnrestricted();
+    public abstract DisjointSetStruct computeUnrestricted();
 
     /**
      * method reference for self

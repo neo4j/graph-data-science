@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
@@ -56,13 +56,13 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
     private final AllocationTracker tracker;
     private final long nodeCount;
     private final long batchSize;
-    private PagedDisjointSetStruct struct;
+    private DisjointSetStruct struct;
 
     public static MemoryEstimation memoryEstimation() {
         return MemoryEstimations.builder(ParallelUnionFindFJMerge.class)
                 .startField("computeStep", TUFProcess.class)
                 .add(MemoryEstimations.of("dss", (dimensions, concurrency) ->
-                        PagedDisjointSetStruct.memoryEstimation()
+                        DisjointSetStruct.memoryEstimation()
                                 .estimate(dimensions, concurrency)
                                 .memoryUsage()
                                 .times(concurrency)))
@@ -95,7 +95,7 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
     }
 
     @Override
-    public PagedDisjointSetStruct compute(double threshold) {
+    public DisjointSetStruct compute(double threshold) {
         final ArrayList<TUFProcess> ufProcesses = new ArrayList<>();
         for (long i = 0L; i < nodeCount; i += batchSize) {
             ufProcesses.add(new TUFProcess(i, batchSize, threshold));
@@ -105,7 +105,7 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
     }
 
     @Override
-    public PagedDisjointSetStruct computeUnrestricted() {
+    public DisjointSetStruct computeUnrestricted() {
         final ArrayList<UFProcess> ufProcesses = new ArrayList<>();
         for (long i = 0L; i < nodeCount; i += batchSize) {
             ufProcesses.add(new UFProcess(i, batchSize));
@@ -119,12 +119,12 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
         if (!running()) {
             return;
         }
-        final Stack<PagedDisjointSetStruct> temp = new Stack<>();
+        final Stack<DisjointSetStruct> temp = new Stack<>();
         ufProcesses.forEach(uf -> temp.add(uf.struct()));
         struct = ForkJoinPool.commonPool().invoke(new Merge(temp));
     }
 
-    public PagedDisjointSetStruct getStruct() {
+    public DisjointSetStruct getStruct() {
         return struct;
     }
 
@@ -135,7 +135,7 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
     }
 
     private abstract class UFTask implements Runnable {
-        abstract PagedDisjointSetStruct struct();
+        abstract DisjointSetStruct struct();
     }
 
     /**
@@ -145,13 +145,13 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
 
         private final long offset;
         private final long end;
-        private final PagedDisjointSetStruct struct;
+        private final DisjointSetStruct struct;
         private final RelationshipIterator rels;
 
         UFProcess(long offset, long length) {
             this.offset = offset;
             this.end = offset + length;
-            struct = new PagedDisjointSetStruct(nodeCount, tracker).reset();
+            struct = new DisjointSetStruct(nodeCount, tracker).reset();
             rels = graph.concurrentCopy();
         }
 
@@ -174,7 +174,7 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
         }
 
         @Override
-        PagedDisjointSetStruct struct() {
+        DisjointSetStruct struct() {
             return struct;
         }
     }
@@ -186,7 +186,7 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
 
         private final long offset;
         private final long end;
-        private final PagedDisjointSetStruct struct;
+        private final DisjointSetStruct struct;
         private final RelationshipIterator rels;
         private final double threshold;
 
@@ -194,7 +194,7 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
             this.offset = offset;
             this.end = offset + length;
             this.threshold = threshold;
-            struct = new PagedDisjointSetStruct(nodeCount, tracker).reset();
+            struct = new DisjointSetStruct(nodeCount, tracker).reset();
             rels = graph.concurrentCopy();
         }
 
@@ -217,21 +217,21 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
         }
 
         @Override
-        PagedDisjointSetStruct struct() {
+        DisjointSetStruct struct() {
             return struct;
         }
     }
 
-    private class Merge extends RecursiveTask<PagedDisjointSetStruct> {
+    private class Merge extends RecursiveTask<DisjointSetStruct> {
 
-        private final Stack<PagedDisjointSetStruct> structs;
+        private final Stack<DisjointSetStruct> structs;
 
-        private Merge(Stack<PagedDisjointSetStruct> structs) {
+        private Merge(Stack<DisjointSetStruct> structs) {
             this.structs = structs;
         }
 
         @Override
-        protected PagedDisjointSetStruct compute() {
+        protected DisjointSetStruct compute() {
             final int size = structs.size();
             if (size == 1) {
                 return structs.pop();
@@ -242,13 +242,13 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
             if (size == 2) {
                 return structs.pop().merge(structs.pop());
             }
-            final Stack<PagedDisjointSetStruct> list = new Stack<>();
+            final Stack<DisjointSetStruct> list = new Stack<>();
             list.push(structs.pop());
             list.push(structs.pop());
             final Merge mergeA = new Merge(structs);
             final Merge mergeB = new Merge(list);
             mergeA.fork();
-            final PagedDisjointSetStruct computed = mergeB.compute();
+            final DisjointSetStruct computed = mergeB.compute();
             return mergeA.join().merge(computed);
         }
     }

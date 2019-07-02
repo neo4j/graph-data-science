@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
@@ -65,7 +65,7 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFind
                 .builder(ParallelUnionFindQueue.class)
                 .startField("computeStep", HugeUnionFindTask.class)
                 .add(MemoryEstimations.of("dss", (dimensions, concurrency) ->
-                        PagedDisjointSetStruct.memoryEstimation()
+                        DisjointSetStruct.memoryEstimation()
                                 .estimate(dimensions, concurrency)
                                 .memoryUsage()
                                 .times(concurrency)))
@@ -106,20 +106,20 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFind
     }
 
     @Override
-    public PagedDisjointSetStruct compute() {
+    public DisjointSetStruct compute() {
         return computeUnrestricted();
     }
 
     @Override
-    public PagedDisjointSetStruct compute(double threshold) {
+    public DisjointSetStruct compute(double threshold) {
         throw new IllegalArgumentException(
                 "Parallel UnionFind with threshold not implemented, please use either `concurrency:1` or one of the exp* variants of UnionFind");
     }
 
     @Override
-    public PagedDisjointSetStruct computeUnrestricted() {
+    public DisjointSetStruct computeUnrestricted() {
         final List<Future<?>> futures = new ArrayList<>(2 * stepSize);
-        final BlockingQueue<PagedDisjointSetStruct> queue = new ArrayBlockingQueue<>(stepSize);
+        final BlockingQueue<DisjointSetStruct> queue = new ArrayBlockingQueue<>(stepSize);
         AtomicInteger expectedStructs = new AtomicInteger();
 
         for (long i = 0L; i < nodeCount; i += batchSize) {
@@ -128,17 +128,17 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFind
         int steps = futures.size();
 
         for (int i = 1; i < steps; ++i) {
-            futures.add(executor.submit(() -> mergeTask(queue, expectedStructs, PagedDisjointSetStruct::merge)));
+            futures.add(executor.submit(() -> mergeTask(queue, expectedStructs, DisjointSetStruct::merge)));
         }
 
         awaitTermination(futures);
         return getStruct(queue);
     }
 
-    private PagedDisjointSetStruct getStruct(final BlockingQueue<PagedDisjointSetStruct> queue) {
-        PagedDisjointSetStruct set = queue.poll();
+    private DisjointSetStruct getStruct(final BlockingQueue<DisjointSetStruct> queue) {
+        DisjointSetStruct set = queue.poll();
         if (set == null) {
-            set = new PagedDisjointSetStruct(nodeCount, tracker);
+            set = new DisjointSetStruct(nodeCount, tracker);
         }
         return set;
     }
@@ -180,13 +180,13 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFind
     private class HugeUnionFindTask implements Runnable {
 
         private final RelationshipIterator rels;
-        private final BlockingQueue<PagedDisjointSetStruct> queue;
+        private final BlockingQueue<DisjointSetStruct> queue;
         private final AtomicInteger expectedStructs;
         private final long offset;
         private final long end;
 
         HugeUnionFindTask(
-                BlockingQueue<PagedDisjointSetStruct> queue,
+                BlockingQueue<DisjointSetStruct> queue,
                 long offset,
                 AtomicInteger expectedStructs) {
             this.rels = graph.concurrentCopy();
@@ -201,7 +201,7 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFind
         public void run() {
             boolean pushed = false;
             try {
-                final PagedDisjointSetStruct struct = new PagedDisjointSetStruct(
+                final DisjointSetStruct struct = new DisjointSetStruct(
                         nodeCount,
                         tracker).reset();
                 for (long node = offset; node < end; node++) {

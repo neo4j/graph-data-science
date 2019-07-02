@@ -22,13 +22,13 @@ package org.neo4j.graphalgo.impl.unionfind;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.mem.Assessable;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
 
 import java.util.concurrent.ExecutorService;
 
 public interface UnionFindAlgorithm extends Assessable {
 
-    default PagedDisjointSetStruct run(
+    default DisjointSetStruct run(
             Graph graph,
             ExecutorService executor,
             int minBatchSize,
@@ -37,7 +37,7 @@ public interface UnionFindAlgorithm extends Assessable {
             AllocationTracker tracker) {
 
         GraphUnionFindAlgo<?> algo = create(graph, executor, minBatchSize, concurrency, threshold, tracker);
-        PagedDisjointSetStruct communities = algo.compute();
+        DisjointSetStruct communities = algo.compute();
         algo.release();
         return communities;
     }

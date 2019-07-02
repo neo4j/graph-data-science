@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
 import org.neo4j.graphdb.Direction;
 
 /**
@@ -33,7 +33,7 @@ import org.neo4j.graphdb.Direction;
  * <p>
  * The algorithm computes sets of weakly connected components.
  * <p>
- * The impl. is based on the {@link PagedDisjointSetStruct}. It iterates over all relationships once
+ * The impl. is based on the {@link DisjointSetStruct}. It iterates over all relationships once
  * within a single forEach loop and adds each source-target pair to the struct. Therefore buffering
  * would introduce an overhead (a SingleRun-RelationshipIterable might be used here).
  * <p>
@@ -45,13 +45,13 @@ import org.neo4j.graphdb.Direction;
  */
 public class GraphUnionFind extends GraphUnionFindAlgo<GraphUnionFind> {
 
-    private PagedDisjointSetStruct dss;
+    private DisjointSetStruct dss;
     private final long nodeCount;
     private RelationshipConsumer unrestricted;
 
     public static MemoryEstimation memoryEstimation() {
         return MemoryEstimations.builder(GraphUnionFind.class)
-                .add("dss", PagedDisjointSetStruct.MEMORY_ESTIMATION)
+                .add("dss", DisjointSetStruct.MEMORY_ESTIMATION)
                 .build();
     }
 
@@ -63,7 +63,7 @@ public class GraphUnionFind extends GraphUnionFindAlgo<GraphUnionFind> {
 
         this.threshold = threshold;
         this.nodeCount = graph.nodeCount();
-        this.dss = new PagedDisjointSetStruct(nodeCount, tracker);
+        this.dss = new DisjointSetStruct(nodeCount, tracker);
         this.unrestricted = (source, target) -> {
             dss.union(source, target);
             return true;
@@ -77,7 +77,7 @@ public class GraphUnionFind extends GraphUnionFindAlgo<GraphUnionFind> {
      * @return a DSS
      */
     @Override
-    public PagedDisjointSetStruct compute(final double threshold) {
+    public DisjointSetStruct compute(final double threshold) {
         return compute(new WithThreshold(threshold));
     }
 
@@ -87,7 +87,7 @@ public class GraphUnionFind extends GraphUnionFindAlgo<GraphUnionFind> {
      * @return a DSS
      */
     @Override
-    public PagedDisjointSetStruct computeUnrestricted() {
+    public DisjointSetStruct computeUnrestricted() {
         return compute(unrestricted);
     }
 
@@ -98,7 +98,7 @@ public class GraphUnionFind extends GraphUnionFindAlgo<GraphUnionFind> {
         return super.release();
     }
 
-    private PagedDisjointSetStruct compute(RelationshipConsumer consumer) {
+    private DisjointSetStruct compute(RelationshipConsumer consumer) {
         dss.reset();
         final ProgressLogger progressLogger = getProgressLogger();
         graph.forEachNode((long node) -> {

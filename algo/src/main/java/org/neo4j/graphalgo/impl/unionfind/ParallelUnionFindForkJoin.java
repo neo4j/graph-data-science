@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
 import org.neo4j.graphdb.Direction;
 
 import java.util.concurrent.ForkJoinPool;
@@ -56,7 +56,7 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionF
         return MemoryEstimations.builder(ParallelUnionFindForkJoin.class)
                 .startField("computeStep", ThresholdUFTask.class)
                 .add(MemoryEstimations.of("dss", (dimensions, concurrency) ->
-                        PagedDisjointSetStruct.memoryEstimation()
+                        DisjointSetStruct.memoryEstimation()
                                 .estimate(dimensions, concurrency)
                                 .memoryUsage()
                                 .times(concurrency)))
@@ -87,16 +87,16 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionF
     }
 
     @Override
-    public PagedDisjointSetStruct compute(final double threshold) {
+    public DisjointSetStruct compute(final double threshold) {
         return ForkJoinPool.commonPool().invoke(new ThresholdUFTask(0, threshold));
     }
 
     @Override
-    public PagedDisjointSetStruct computeUnrestricted() {
+    public DisjointSetStruct computeUnrestricted() {
         return ForkJoinPool.commonPool().invoke(new UnionFindTask(0));
     }
 
-    private class UnionFindTask extends RecursiveTask<PagedDisjointSetStruct> {
+    private class UnionFindTask extends RecursiveTask<DisjointSetStruct> {
 
         private final long offset;
         private final long end;
@@ -109,7 +109,7 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionF
         }
 
         @Override
-        protected PagedDisjointSetStruct compute() {
+        protected DisjointSetStruct compute() {
             if (nodeCount - end >= batchSize && running()) {
                 final UnionFindTask process = new UnionFindTask(end);
                 process.fork();
@@ -118,8 +118,8 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionF
             return run();
         }
 
-        protected PagedDisjointSetStruct run() {
-            final PagedDisjointSetStruct struct = new PagedDisjointSetStruct(
+        protected DisjointSetStruct run() {
+            final DisjointSetStruct struct = new DisjointSetStruct(
                     nodeCount,
                     tracker).reset();
             for (long node = offset; node < end && running(); node++) {
@@ -137,7 +137,7 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionF
         }
     }
 
-    private class ThresholdUFTask extends RecursiveTask<PagedDisjointSetStruct> {
+    private class ThresholdUFTask extends RecursiveTask<DisjointSetStruct> {
 
         private final long offset;
         private final long end;
@@ -152,7 +152,7 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionF
         }
 
         @Override
-        protected PagedDisjointSetStruct compute() {
+        protected DisjointSetStruct compute() {
             if (nodeCount - end >= batchSize && running()) {
                 final ThresholdUFTask process = new ThresholdUFTask(
                         offset,
@@ -163,8 +163,8 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionF
             return run();
         }
 
-        protected PagedDisjointSetStruct run() {
-            final PagedDisjointSetStruct struct = new PagedDisjointSetStruct(
+        protected DisjointSetStruct run() {
+            final DisjointSetStruct struct = new DisjointSetStruct(
                     nodeCount,
                     tracker).reset();
             for (long node = offset; node < end && running(); node++) {

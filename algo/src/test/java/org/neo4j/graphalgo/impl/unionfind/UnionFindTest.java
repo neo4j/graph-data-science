@@ -36,7 +36,7 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
@@ -199,7 +199,7 @@ public class UnionFindTest {
     }
 
     private void test(UnionFindAlgorithmType uf) {
-        PagedDisjointSetStruct result = run(uf);
+        DisjointSetStruct result = run(uf);
 
         Assert.assertEquals(setsCount, result.getSetCount());
         long[] setRegions = new long[setsCount];
@@ -227,7 +227,7 @@ public class UnionFindTest {
         });
     }
 
-    private PagedDisjointSetStruct run(final UnionFindAlgorithmType uf) {
+    private DisjointSetStruct run(final UnionFindAlgorithmType uf) {
         return uf.run(
                 graph,
                 Pools.DEFAULT,

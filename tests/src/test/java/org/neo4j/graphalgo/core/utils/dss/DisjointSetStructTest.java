@@ -26,7 +26,7 @@ import org.junit.Test;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -36,9 +36,9 @@ import static org.mockito.Mockito.*;
 /**
  * @author mknblch
  */
-public class PagedDisjointSetStructTest {
+public class DisjointSetStructTest {
 
-    private PagedDisjointSetStruct struct = new PagedDisjointSetStruct(7, AllocationTracker.EMPTY);
+    private DisjointSetStruct struct = new DisjointSetStruct(7, AllocationTracker.EMPTY);
 
     @Before
     public void setup() {
@@ -110,7 +110,7 @@ public class PagedDisjointSetStructTest {
 
     @Test
     public void testDefault() throws Exception {
-        PagedDisjointSetStruct.Consumer consumer = mock(PagedDisjointSetStruct.Consumer.class);
+        DisjointSetStruct.Consumer consumer = mock(DisjointSetStruct.Consumer.class);
         when(consumer.consume(anyLong(), anyLong())).thenReturn(true);
         struct.forEach(consumer);
         verify(consumer, times(7)).consume(anyLong(), anyLong());
@@ -125,8 +125,8 @@ public class PagedDisjointSetStructTest {
 
     @Test
     public void testMergeDSS() throws Exception {
-        final PagedDisjointSetStruct a = create(10, set(0, 1, 2, 3), set(4, 5, 6), set(7, 8), set(9));
-        final PagedDisjointSetStruct b = create(10, set(0, 5), set(7, 9));
+        final DisjointSetStruct a = create(10, set(0, 1, 2, 3), set(4, 5, 6), set(7, 8), set(9));
+        final DisjointSetStruct b = create(10, set(0, 5), set(7, 9));
         assertEquals(4, a.getSetCount());
         a.merge(b);
         assertEquals(2, a.getSetCount());
@@ -136,21 +136,21 @@ public class PagedDisjointSetStructTest {
     @Test
     public void shouldComputeMemoryEstimation() {
         GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
-        assertEquals(MemoryRange.of(112), PagedDisjointSetStruct.memoryEstimation().estimate(dimensions0, 1).memoryUsage());
+        assertEquals(MemoryRange.of(112), DisjointSetStruct.memoryEstimation().estimate(dimensions0, 1).memoryUsage());
 
         GraphDimensions dimensions100 = new GraphDimensions.Builder().setNodeCount(100).build();
-        assertEquals(MemoryRange.of(1712), PagedDisjointSetStruct.memoryEstimation().estimate(dimensions100, 1).memoryUsage());
+        assertEquals(MemoryRange.of(1712), DisjointSetStruct.memoryEstimation().estimate(dimensions100, 1).memoryUsage());
 
         GraphDimensions dimensions100B = new GraphDimensions.Builder().setNodeCount(100_000_000_000L).build();
-        assertEquals(MemoryRange.of(1600244140768L), PagedDisjointSetStruct.memoryEstimation().estimate(dimensions100B, 1).memoryUsage());
+        assertEquals(MemoryRange.of(1600244140768L), DisjointSetStruct.memoryEstimation().estimate(dimensions100B, 1).memoryUsage());
     }
 
     public static int[] set(int... elements) {
         return elements;
     }
 
-    private static PagedDisjointSetStruct create(int size, int[]... sets) {
-        final PagedDisjointSetStruct dss = new PagedDisjointSetStruct(size, AllocationTracker.EMPTY).reset();
+    private static DisjointSetStruct create(int size, int[]... sets) {
+        final DisjointSetStruct dss = new DisjointSetStruct(size, AllocationTracker.EMPTY).reset();
         for (int[] set : sets) {
             if (set.length < 1) {
                 throw new IllegalArgumentException("Sets must contain at least one element");
@@ -164,6 +164,6 @@ public class PagedDisjointSetStructTest {
 
     @Test
     public void test() throws Exception {
-        System.out.println(new PagedDisjointSetStruct(5, AllocationTracker.EMPTY).reset());
+        System.out.println(new DisjointSetStruct(5, AllocationTracker.EMPTY).reset());
     }
 }

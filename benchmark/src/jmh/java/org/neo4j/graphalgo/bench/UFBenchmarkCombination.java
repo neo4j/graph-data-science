@@ -21,11 +21,9 @@ package org.neo4j.graphalgo.bench;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
 import org.neo4j.graphalgo.impl.unionfind.GraphUnionFindAlgo;
 import org.neo4j.graphalgo.impl.unionfind.UnionFindAlgorithmType;
-
-import java.util.Optional;
 
 public enum UFBenchmarkCombination {
 
@@ -57,7 +55,7 @@ public enum UFBenchmarkCombination {
                 threshold,
                 AllocationTracker.EMPTY
         );
-        PagedDisjointSetStruct communities = unionFindAlgo.compute();
+        DisjointSetStruct communities = unionFindAlgo.compute();
         unionFindAlgo.release();
         return communities;
     }
