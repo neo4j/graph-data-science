@@ -216,6 +216,19 @@ CALL algo.memrec(null, null, "graph.load", {graph: "heavy"})
 CALL algo.memrec(null, null, "graph.load", {graph: "huge"})
 ----
 
+=== Pokec
+
+This dataset contains people and friends relationships from https://snap.stanford.edu/data/soc-Pokec.html[Pokec^], the most popular online social network in Slovakia.
+
+.Memory Usage
+[opts="header", cols="1,1,1,2,1,1"]
+|===
+| Graph Type | Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
+| Heavy | 1,632,803 | 30,622,564 | 222 MiB  | 233205960    | 233205960
+| Huge | 1,632,803 | 30,622,564 | 	[74 MiB...130 MiB]  | 78560176    | 137284912
+|===
+
+
 === Dbpedia
 
 This dataset contains Wikipedia pages and the links between them.
@@ -228,3 +241,28 @@ Instructions for importing this dataset are available from https://github.com/je
 | Heavy | 11,474,730 | 116,601,029 | 1067 MiB  | 1119305360    | 1119305360
 | Huge | 11,474,730 | 116,601,029 | 	[438 MiB...657 MiB]  | 459722704    | 689148984
 |===
+
+=== Twitter 2010
+
+This dataset contains users and followers from a crawl of Twitter presented by Haewoon Kwak, Changhyun Lee, Hosung Park, and Sue Moon in “What is Twitter, a Social Network or a News Media?”
+
+.Memory Usage
+[opts="header", cols="1,1,1,2,1,1"]
+|===
+| Graph Type | Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
+| Heavy | 41,652,230 | 1,468,365,182 | 7759 MiB  | 8136099216    | 8136099216
+| Huge | 41,652,230 | 1,468,365,182 | 	[2582 MiB...5363 MiB]  | 2708130496    | 5623918504
+|===
+
+=== Friendster
+
+This dataset contains people and friends relationships from https://snap.stanford.edu/data/com-Friendster.html[Friendster^], the online gaming network.
+
+.Memory Usage
+[opts="header", cols="1,1,1,2,1,1"]
+|===
+| Graph Type | Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
+| Heavy | 65,608,366 | 1,806,067,135 | 10545 MiB  | 11058217808    | 11058217808
+| Huge | 65,608,366 | 1,806,067,135 | 	[3567 MiB...8635 MiB]  | 3740896712    | 9055485320
+|===
+
