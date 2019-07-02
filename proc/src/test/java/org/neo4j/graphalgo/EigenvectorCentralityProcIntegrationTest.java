@@ -46,11 +46,6 @@ public class EigenvectorCentralityProcIntegrationTest {
     private static Map<Long, Double> expected = new HashMap<>();
     private static Map<Long, Double> weightedExpected = new HashMap<>();
 
-    @AfterClass
-    public static void tearDown() throws Exception {
-        if (db != null) db.shutdown();
-    }
-
     @BeforeClass
     public static void setup() throws KernelException {
         ClassLoader classLoader = EigenvectorCentralityProcIntegrationTest.class.getClassLoader();
@@ -64,6 +59,7 @@ public class EigenvectorCentralityProcIntegrationTest {
         try (Transaction tx = db.beginTx()) {
             db.execute("CREATE CONSTRAINT ON (c:Character)\n" +
                     "ASSERT c.id IS UNIQUE;").close();
+            tx.success();
         }
 
         try (Transaction tx = db.beginTx()) {
@@ -99,6 +95,11 @@ public class EigenvectorCentralityProcIntegrationTest {
             expected.put(db.findNode(label, "name", "Sansa").getId(), 71.56470401574803);
             tx.success();
         }
+    }
+
+    @AfterClass
+    public static void tearDown() throws Exception {
+        if (db != null) db.shutdown();
     }
 
     @Parameterized.Parameters(name = "{0}")

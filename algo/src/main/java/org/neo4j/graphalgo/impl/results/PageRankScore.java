@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.results;
 
-import org.neo4j.graphalgo.impl.results.AbstractWriteBuilder;
+import org.neo4j.graphalgo.impl.pagerank.PageRank;
 
 public class PageRankScore {
 
@@ -64,6 +64,12 @@ public class PageRankScore {
             private double dampingFactor;
             private boolean write;
             private String writeProperty;
+
+            public Builder withConfig(PageRank.Config config) {
+                this.dampingFactor = config.dampingFactor;
+                this.iterations = config.iterations;
+                return this;
+            }
 
             public Builder withNodes(long nodes) {
                 this.nodes = nodes;

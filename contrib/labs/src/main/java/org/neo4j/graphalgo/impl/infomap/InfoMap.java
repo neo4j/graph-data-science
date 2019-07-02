@@ -34,7 +34,8 @@ import org.neo4j.graphalgo.core.utils.Pointer;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.pagerank.PageRankFactory;
+import org.neo4j.graphalgo.impl.pagerank.PageRank;
+import org.neo4j.graphalgo.impl.pagerank.PageRankAlgorithmType;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphdb.Direction;
 
@@ -106,17 +107,21 @@ public class InfoMap extends Algorithm<InfoMap> {
             ProgressLogger logger,
             TerminationFlag terminationFlag) {
 
+        final PageRank.Config algoConfig = new PageRank.Config(prIterations, 1.0 - tau, PAGE_RANK_CACHE_WEIGHTS);
         final CentralityResult pageRankResult;
+
         // use parallel PR if concurrency is >1
         if (concurrency > 1) {
-            pageRankResult = PageRankFactory
-                    .weightedOf(
+            pageRankResult = PageRankAlgorithmType.WEIGHTED
+                    .create(
                             graph,
-                            1.0 - tau,
+                            pool,
+                            concurrency,
+                            PAGE_RANK_BATCH_SIZE,
+                            algoConfig,
                             LongStream.empty(),
-                            AllocationTracker.create(),
-                            pool, concurrency, PAGE_RANK_BATCH_SIZE, PAGE_RANK_CACHE_WEIGHTS)
-                    .compute(prIterations)
+                            AllocationTracker.create())
+                    .compute()
                     .result();
             return weighted(
                     graph,
@@ -129,8 +134,9 @@ public class InfoMap extends Algorithm<InfoMap> {
                     logger,
                     terminationFlag);
         } else {
-            pageRankResult = PageRankFactory.weightedOf(graph, 1.0 - tau, LongStream.empty())
-                    .compute(prIterations)
+            pageRankResult = PageRankAlgorithmType.WEIGHTED
+                    .create(graph, algoConfig, LongStream.empty())
+                    .compute()
                     .result();
         }
 
@@ -179,23 +185,29 @@ public class InfoMap extends Algorithm<InfoMap> {
             int concurrency,
             ProgressLogger logger,
             TerminationFlag terminationFlag) {
+
+        final PageRank.Config algoConfig = new PageRank.Config(prIterations, 1. - tau);
         final CentralityResult pageRankResult;
 
         // use parallel PR if concurrency is >1
         if (concurrency > 1) {
             final AllocationTracker tracker = AllocationTracker.create();
-            pageRankResult = PageRankFactory
-                    .of(
+            pageRankResult = PageRankAlgorithmType.NON_WEIGHTED
+                    .create(
                             graph,
-                            1.0 - tau,
+                            pool,
+                            concurrency,
+                            PAGE_RANK_BATCH_SIZE,
+                            algoConfig,
                             LongStream.empty(),
-                            tracker,
-                            pool, concurrency, PAGE_RANK_BATCH_SIZE)
-                    .compute(prIterations)
+                            tracker
+                    )
+                    .compute()
                     .result();
         } else {
-            pageRankResult = PageRankFactory.of(graph, 1.0 - tau, LongStream.empty())
-                    .compute(prIterations)
+            pageRankResult = PageRankAlgorithmType.NON_WEIGHTED
+                    .create(graph, algoConfig, LongStream.empty())
+                    .compute()
                     .result();
         }
         return unweighted(graph, pageRankResult::score, threshold, tau, pool, concurrency, logger, terminationFlag);
@@ -366,13 +378,13 @@ public class InfoMap extends Algorithm<InfoMap> {
         double pi = j.p + k.p;
         double qi = tau * pi * (nodeCount - ((double) (j.n + k.n))) / n1 + tau1 * (j.w + k.w - j.wil(k));
         return plogp(qi - j.q - k.q + sQi)
-                - plogp(sQi)
-                - 2 * plogp(qi)
-                + 2 * plogp(j.q)
-                + 2 * plogp(k.q)
-                + plogp(pi + qi)
-                - plogp(j.p + j.q)
-                - plogp(k.p + k.q);
+               - plogp(sQi)
+               - 2 * plogp(qi)
+               + 2 * plogp(j.q)
+               + 2 * plogp(k.q)
+               + plogp(pi + qi)
+               - plogp(j.p + j.q)
+               - plogp(k.p + k.q);
     }
 
     private class Task extends RecursiveTask<MergePair> {

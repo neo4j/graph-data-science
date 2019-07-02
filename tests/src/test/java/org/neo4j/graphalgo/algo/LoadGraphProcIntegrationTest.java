@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.algo;
 
 import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -30,6 +31,7 @@ import org.neo4j.graphalgo.LabelPropagationProc;
 import org.neo4j.graphalgo.LoadGraphProc;
 import org.neo4j.graphalgo.PageRankProc;
 import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.graphdb.Result;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -116,6 +118,35 @@ public class LoadGraphProcIntegrationTest {
             assertEquals(graph, row.getString("graph"));
             assertFalse(row.getBoolean("alreadyLoaded"));
         });
+    }
+
+    @Test
+    public void shouldComputeMemoryEstimationForHeavy() {
+        Assume.assumeTrue(graph.equals("heavy"));
+
+        String queryTemplate = "CALL algo.graph.load.memrec(%s, %s, {graph: $graph}) YIELD requiredMemory";
+        String query = String.format(queryTemplate, "null", "null");
+
+        runQuery(
+                query,
+                singletonMap("graph", graph),
+                row -> assertEquals(MemoryUsage.humanReadable(1040), row.getString("requiredMemory")));
+    }
+
+    @Test
+    public void shouldComputeMemoryEstimationForHuge() {
+        Assume.assumeTrue(graph.equals("huge"));
+
+        String queryTemplate = "CALL algo.graph.load.memrec(%s, %s, {graph: $graph}) YIELD bytesMin, bytesMax";
+        String query = String.format(queryTemplate, "null", "null");
+
+        runQuery(
+                query,
+                singletonMap("graph", graph),
+                row -> {
+                    assertEquals(303576, row.getNumber("bytesMin").longValue());
+                    assertEquals(303576, row.getNumber("bytesMax").longValue());
+                });
     }
 
     @Test

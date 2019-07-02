@@ -26,6 +26,9 @@ import java.util.function.IntToDoubleFunction;
 import java.util.function.LongFunction;
 import java.util.function.LongToDoubleFunction;
 
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SHIFT;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SIZE;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.SINGLE_PAGE_SIZE;
@@ -33,8 +36,6 @@ import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.exclusiveIndexOfPa
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.indexInPage;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.numberOfPages;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.pageIndex;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
 /**
  * A long-indexable version of a primitive double array ({@code double[]}) that can contain more than 2 bn. elements.
@@ -188,6 +189,24 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
             return SingleHugeDoubleArray.of(size, tracker);
         }
         return PagedHugeDoubleArray.of(size, tracker);
+    }
+
+    public static long memoryEstimation(long size) {
+        assert size >= 0;
+
+        if (size <= SINGLE_PAGE_SIZE) {
+            return sizeOfInstance(SingleHugeDoubleArray.class) + sizeOfDoubleArray((int)size);
+        }
+        long sizeOfInstance = sizeOfInstance(PagedHugeDoubleArray.class);
+
+        int numPages = numberOfPages(size);
+
+        long memoryUsed = sizeOfObjectArray(numPages);
+        final long pageBytes = sizeOfDoubleArray(PAGE_SIZE);
+        memoryUsed += (numPages - 1) * pageBytes;
+        final int lastPageSize = exclusiveIndexOfPage(size);
+
+        return sizeOfInstance + memoryUsed + sizeOfDoubleArray(lastPageSize);
     }
 
     public static HugeDoubleArray of(final double... values) {

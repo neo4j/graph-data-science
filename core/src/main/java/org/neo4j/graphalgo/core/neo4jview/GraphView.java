@@ -157,7 +157,7 @@ public class GraphView implements Graph {
 
     @Override
     public long nodeCount() {
-        return dimensions.hugeNodeCount();
+        return dimensions.nodeCount();
     }
 
     @Override
@@ -177,7 +177,7 @@ public class GraphView implements Graph {
 
     @Override
     public Collection<PrimitiveLongIterable> batchIterables(final int batchSize) {
-        int nodeCount = dimensions.nodeCount();
+        int nodeCount = dimensions.nodeCountAsInt();
         int numberOfBatches = (int) Math.ceil(nodeCount / (double) batchSize);
         if (numberOfBatches == 1) {
             return Collections.singleton(this::nodeIterator);

@@ -45,7 +45,7 @@ public final class GraphViewFactory extends GraphFactory {
                 api,
                 setup.tracker,
                 ImportProgress.EMPTY,
-                dimensions.nodeCount(),
+                dimensions.nodeCountAsInt(),
                 dimensions.labelId()
         ).call();
 

@@ -28,9 +28,11 @@ import org.neo4j.graphalgo.HeavyHugeTester;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
@@ -41,7 +43,9 @@ import org.neo4j.test.rule.ImpermanentDatabaseRule;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * (a)-(b)-(d)
@@ -50,7 +54,9 @@ import static org.junit.Assert.*;
  *
  * @author mknblch
  */
-public class LouvainTest1 extends HeavyHugeTester {
+public class LouvainTest extends HeavyHugeTester {
+
+    static Louvain.Config DEFAULT_CONFIG = new Louvain.Config(10, 10, false);
 
     private static final String unidirectional =
             "CREATE (a:Node {name:'a'})\n" +
@@ -75,7 +81,7 @@ public class LouvainTest1 extends HeavyHugeTester {
     private Graph graph;
     private final Map<String, Integer> nameMap;
 
-    public LouvainTest1(Class<? extends GraphFactory> graphImpl, String name) {
+    public LouvainTest(Class<? extends GraphFactory> graphImpl, String name) {
         super(graphImpl);
         nameMap = new HashMap<>();
     }
@@ -104,10 +110,10 @@ public class LouvainTest1 extends HeavyHugeTester {
     @Test
     public void testRunner() throws Exception {
         setup(unidirectional);
-        final Louvain algorithm = new Louvain(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
+        final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
-                .compute(10, 10);
+                .compute();
         final HugeLongArray[] dendogram = algorithm.getDendrogram();
         for (int i = 1; i <= dendogram.length; i++) {
             if (null == dendogram[i - 1]) {
@@ -120,10 +126,10 @@ public class LouvainTest1 extends HeavyHugeTester {
     @Test
     public void testRandomNeighborLouvain() throws Exception {
         setup(unidirectional);
-        final Louvain algorithm = new Louvain(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
+        final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
-                .compute(10, 10, true);
+                .compute();
         final HugeLongArray[] dendogram = algorithm.getDendrogram();
         for (int i = 1; i <= dendogram.length; i++) {
             if (null == dendogram[i - 1]) {
@@ -149,7 +155,8 @@ public class LouvainTest1 extends HeavyHugeTester {
                 .asUndirected(true)
                 .load(graphImpl);
 
-        Louvain algorithm = new Louvain(graph, Pools.DEFAULT, 4, AllocationTracker.EMPTY)
+        Louvain.Config config = new Louvain.Config(99, 99999);
+        Louvain algorithm = new Louvain(graph, config, Pools.DEFAULT, 4, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
                 .compute(99, 99999);
@@ -163,7 +170,24 @@ public class LouvainTest1 extends HeavyHugeTester {
         }
     }
 
-    public void assertCommunities(Louvain louvain) {
+    @Test
+    public void testMemoryEstimationComputation() {
+        LouvainFactory factory = new LouvainFactory(DEFAULT_CONFIG);
+
+        GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
+        assertEquals(MemoryRange.of(608, 1072), factory.memoryEstimation().estimate(dimensions0, 1).memoryUsage());
+        assertEquals(MemoryRange.of(1112, 1576), factory.memoryEstimation().estimate(dimensions0, 4).memoryUsage());
+
+        GraphDimensions dimensions100 = new GraphDimensions.Builder().setNodeCount(100).build();
+        assertEquals(MemoryRange.of(7008, 14672), factory.memoryEstimation().estimate(dimensions100, 1).memoryUsage());
+        assertEquals(MemoryRange.of(14712, 22376), factory.memoryEstimation().estimate(dimensions100, 4).memoryUsage());
+
+        GraphDimensions dimensions100B = new GraphDimensions.Builder().setNodeCount(100_000_000_000L).build();
+        assertEquals(MemoryRange.of(6400976563232L, 13602075196648L), factory.memoryEstimation().estimate(dimensions100B, 1).memoryUsage());
+        assertEquals(MemoryRange.of(13602075196688L, 20803173830104L), factory.memoryEstimation().estimate(dimensions100B, 4).memoryUsage());
+    }
+
+    private void assertCommunities(Louvain louvain) {
         assertUnion(new String[]{"a", "b", "c"}, louvain.getCommunityIds());
         assertDisjoint(new String[]{"a", "d"}, louvain.getCommunityIds());
     }

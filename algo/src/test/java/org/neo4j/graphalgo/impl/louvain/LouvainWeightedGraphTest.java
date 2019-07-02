@@ -42,42 +42,43 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.neo4j.graphalgo.impl.louvain.LouvainTest.DEFAULT_CONFIG;
 
 /**
  * (a)-(b)---(e)-(f)
- *  | X |     | X |   (z)
+ * | X |     | X |   (z)
  * (c)-(d)   (g)-(h)
  *
- *  @author mknblch
+ * @author mknblch
  */
 public class LouvainWeightedGraphTest extends HeavyHugeTester {
 
     private static final String unidirectional =
             "CREATE (a:Node {name:'a'})\n" +
-                    "CREATE (b:Node {name:'b'})\n" +
-                    "CREATE (c:Node {name:'c'})\n" +
-                    "CREATE (d:Node {name:'d'})\n" +
-                    "CREATE (e:Node {name:'e'})\n" +
-                    "CREATE (f:Node {name:'f'})\n" +
-                    "CREATE (g:Node {name:'g'})\n" +
-                    "CREATE (h:Node {name:'h'})\n" +
-                    "CREATE (z:Node {name:'z'})\n" +
-                    "CREATE" +
-                    " (a)-[:TYPE]->(b),\n" +
-                    " (a)-[:TYPE]->(c),\n" +
-                    " (a)-[:TYPE]->(d),\n" +
-                    " (c)-[:TYPE]->(d),\n" +
-                    " (c)-[:TYPE]->(b),\n" +
-                    " (b)-[:TYPE]->(d),\n" +
+            "CREATE (b:Node {name:'b'})\n" +
+            "CREATE (c:Node {name:'c'})\n" +
+            "CREATE (d:Node {name:'d'})\n" +
+            "CREATE (e:Node {name:'e'})\n" +
+            "CREATE (f:Node {name:'f'})\n" +
+            "CREATE (g:Node {name:'g'})\n" +
+            "CREATE (h:Node {name:'h'})\n" +
+            "CREATE (z:Node {name:'z'})\n" +
+            "CREATE" +
+            " (a)-[:TYPE]->(b),\n" +
+            " (a)-[:TYPE]->(c),\n" +
+            " (a)-[:TYPE]->(d),\n" +
+            " (c)-[:TYPE]->(d),\n" +
+            " (c)-[:TYPE]->(b),\n" +
+            " (b)-[:TYPE]->(d),\n" +
 
-                    " (e)-[:TYPE]->(f),\n" +
-                    " (e)-[:TYPE]->(g),\n" +
-                    " (e)-[:TYPE]->(h),\n" +
-                    " (f)-[:TYPE]->(h),\n" +
-                    " (f)-[:TYPE]->(g),\n" +
-                    " (g)-[:TYPE]->(h),\n" +
+            " (e)-[:TYPE]->(f),\n" +
+            " (e)-[:TYPE]->(g),\n" +
+            " (e)-[:TYPE]->(h),\n" +
+            " (f)-[:TYPE]->(h),\n" +
+            " (f)-[:TYPE]->(g),\n" +
+            " (g)-[:TYPE]->(h),\n" +
 
-                    " (e)-[:TYPE {w:4}]->(b)";
+            " (e)-[:TYPE {w:4}]->(b)";
 
 
     private static final int MAX_ITERATIONS = 10;
@@ -130,10 +131,10 @@ public class LouvainWeightedGraphTest extends HeavyHugeTester {
     public void testWeightedLouvain() throws Exception {
         setup(unidirectional);
         final Louvain louvain =
-                new Louvain(graph,Pools.DEFAULT, 1, AllocationTracker.EMPTY)
-                .withProgressLogger(TestProgressLogger.INSTANCE)
+                new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
+                        .withProgressLogger(TestProgressLogger.INSTANCE)
                         .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
-                .compute(10, 10);
+                        .compute();
 
         final HugeLongArray[] dendogram = louvain.getDendrogram();
         for (int i = 0; i < dendogram.length; i++) {
@@ -146,17 +147,17 @@ public class LouvainWeightedGraphTest extends HeavyHugeTester {
         System.out.println("louvain.getRuns() = " + louvain.getLevel());
         System.out.println("louvain.communityCount() = " + louvain.communityCount());
         assertCommunities(louvain);
-        assertTrue("Maximum iterations > " + MAX_ITERATIONS,louvain.getLevel() < MAX_ITERATIONS);
+        assertTrue("Maximum iterations > " + MAX_ITERATIONS, louvain.getLevel() < MAX_ITERATIONS);
     }
 
     @Test
     public void testWeightedRandomNeighborLouvain() throws Exception {
         setup(unidirectional);
         final Louvain louvain =
-                new Louvain(graph,Pools.DEFAULT, 1, AllocationTracker.EMPTY)
-                .withProgressLogger(TestProgressLogger.INSTANCE)
+                new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
+                        .withProgressLogger(TestProgressLogger.INSTANCE)
                         .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
-                .compute(10, 10, true);
+                        .compute();
 
         final HugeLongArray[] dendogram = louvain.getDendrogram();
         for (int i = 0; i < dendogram.length; i++) {
@@ -188,7 +189,10 @@ public class LouvainWeightedGraphTest extends HeavyHugeTester {
             if (current == -1L) {
                 current = communityIds[id];
             } else {
-                assertEquals("Node " + name + " belongs to wrong community " + communityIds[id], current, communityIds[id]);
+                assertEquals(
+                        "Node " + name + " belongs to wrong community " + communityIds[id],
+                        current,
+                        communityIds[id]);
             }
         }
     }

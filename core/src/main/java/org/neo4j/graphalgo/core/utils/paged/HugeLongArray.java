@@ -26,6 +26,7 @@ import java.util.function.IntToLongFunction;
 import java.util.function.LongFunction;
 import java.util.function.LongUnaryOperator;
 
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SHIFT;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SIZE;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.SINGLE_PAGE_SIZE;
@@ -205,6 +206,24 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
             return SingleHugeLongArray.of(size, tracker);
         }
         return PagedHugeLongArray.of(size, tracker);
+    }
+
+    public static long memoryEstimation(long size) {
+        assert size >= 0;
+
+        if (size <= SINGLE_PAGE_SIZE) {
+            return sizeOfInstance(SingleHugeLongArray.class) + sizeOfLongArray((int)size);
+        }
+        long sizeOfInstance = sizeOfInstance(PagedHugeLongArray.class);
+
+        int numPages = numberOfPages(size);
+
+        long memoryUsed = sizeOfObjectArray(numPages);
+        final long pageBytes = sizeOfLongArray(PAGE_SIZE);
+        memoryUsed += (numPages - 1) * pageBytes;
+        final int lastPageSize = exclusiveIndexOfPage(size);
+
+        return sizeOfInstance + memoryUsed + sizeOfLongArray(lastPageSize);
     }
 
     public static HugeLongArray of(final long... values) {

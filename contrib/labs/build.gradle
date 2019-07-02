@@ -10,7 +10,9 @@ dependencies {
 
     compileOnly group: 'org.neo4j',             name: 'neo4j',                  version: versions.'neo4j'
     compileOnly group: 'org.neo4j',             name: 'neo4j-slf4j',            version: versions.'neo4j'
-    compileOnly group: 'net.biville.florent',   name: 'neo4j-sproc-compiler',   version: versions.'neo4j-sproc-compiler'
+    
+    // TODO: enable and fix annotation processor
+//    annotationProcessor group: 'net.biville.florent',   name: 'neo4j-sproc-compiler',   version: versions.'neo4j-sproc-compiler'
 
     testCompile project(':test-utils')
     testCompile group: 'com.pholser',   name: 'junit-quickcheck-core',          version: versions.'junit-quickcheck-core'

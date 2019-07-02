@@ -22,9 +22,11 @@ package org.neo4j.graphalgo.core.huge.loader;
 import com.carrotsearch.randomizedtesting.RandomizedTest;
 import com.carrotsearch.randomizedtesting.annotations.ThreadLeakScope;
 import org.junit.Test;
+import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.PrivateLookup;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 
 import java.lang.invoke.MethodHandle;
 import java.util.concurrent.atomic.AtomicReferenceArray;
@@ -58,7 +60,7 @@ public final class SparseNodeMappingTest extends RandomizedTest {
     public void shouldSetValuesInPageSizedChunks() {
         SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(10, AllocationTracker.EMPTY);
         // larger than the desired size, but still within a single page
-        array.set(between(11, PS -1), 1337);
+        array.set(between(11, PS - 1), 1337);
         // doesn't fail - good
     }
 
@@ -157,6 +159,74 @@ public final class SparseNodeMappingTest extends RandomizedTest {
 
         long tracked = tracker.tracked();
         assertEquals(sizeOfObjectArray(2) + sizeOfLongArray(PS), tracked);
+    }
+
+    @Test
+    public void shouldComputeMemoryEstimationForBestCase() {
+        long size = randomInt(Integer.MAX_VALUE);
+        final MemoryRange memoryRange = SparseNodeMapping.memoryEstimation(size, size);
+        assertEquals(memoryRange.min, memoryRange.max);
+    }
+
+    @Test
+    public void shouldComputeMemoryEstimationForWorstCase() {
+        long size = randomInt(Integer.MAX_VALUE);
+        long highestId = between(size + 4096, size * 4096);
+        final MemoryRange memoryRange = SparseNodeMapping.memoryEstimation(highestId, size);
+        assertTrue(memoryRange.min < memoryRange.max);
+    }
+
+    @Test
+    public void shouldComputeMemoryEstimation() {
+        assertEquals(MemoryRange.of(40L), SparseNodeMapping.memoryEstimation(0L, 0L));
+        assertEquals(MemoryRange.of(32832L), SparseNodeMapping.memoryEstimation(100L, 100L));
+        assertEquals(MemoryRange.of(97_689_080L), SparseNodeMapping.memoryEstimation(100_000_000_000L, 1L));
+        assertEquals(MemoryRange.of(177_714_824L, 327_937_656_296L), SparseNodeMapping.memoryEstimation(100_000_000_000L, 10_000_000L));
+        assertEquals(MemoryRange.of(898_077_656L, 800_488_297_688L), SparseNodeMapping.memoryEstimation(100_000_000_000L, 100_000_000L));
+    }
+
+    @Test
+    public void shouldComputeMemoryEstimationDocumented() {
+        int pageSize = 4096;
+        // int numPagesForSize = PageUtil.numPagesFor(size, PAGE_SHIFT, (int) PAGE_MASK);
+        int size = 10_000;
+        int numPagesForSize = (int) Math.ceil((double) size / pageSize);
+
+        // int numPagesForMaxEntriesBestCase = PageUtil.numPagesFor(maxEntries, PAGE_SHIFT, (int) PAGE_MASK);
+        int maxEntries = 100;
+        int numPagesForMaxEntriesBestCase = (int) Math.ceil((double) maxEntries / pageSize);
+
+        // final long maxEntriesForWorstCase = Math.min(size, maxEntries * PAGE_SIZE);
+        int maxEntriesWorstCase = Math.min(size, maxEntries * pageSize);
+        // int numPagesForMaxEntriesWorstCase = PageUtil.numPagesFor(maxEntriesForWorstCase, PAGE_SHIFT, (int) PAGE_MASK);
+        int numPagesForMaxEntriesWorstCase = (int) Math.ceil((double) maxEntriesWorstCase / pageSize);
+
+        //long classSize = MemoryUsage.sizeOfInstance(SparseNodeMapping.class);
+        //  private final long capacity;
+        //  private final long[][] pages;
+        //  private final AllocationTracker tracker;
+        long classSizeComponents =
+                8L /* capacity */ +
+                4L /* ref for long[][] array */ +
+                12L /* object header */;
+
+        long classSize = BitUtil.align(classSizeComponents, 8 /* object alignment */);
+
+        // long pagesSize = MemoryUsage.sizeOfObjectArray(numPagesForSize);
+        //  alignObjectSize((long) BYTES_ARRAY_HEADER + ((long) length << SHIFT_OBJECT_REF));
+        long pagesSizeComponents =
+                16L /* BYTES_ARRAY_HEADER = object header (8 byte + object ref) + int (length) */ +
+                numPagesForSize * 4; /* length << SHIFT_OBJECT_REF (2) */
+        long pagesSize = BitUtil.align(pagesSizeComponents, 8 /* object alignment */);
+
+        // long minRequirements = numPagesForMaxEntriesBestCase * PAGE_SIZE_IN_BYTES;
+        long minRequirements = numPagesForMaxEntriesBestCase * (4096 * 8 + 16) /* byte array header*/;
+        // long maxRequirements = numPagesForMaxEntriesWorstCase * PAGE_SIZE_IN_BYTES;
+        long maxRequirements = numPagesForMaxEntriesWorstCase * (4096 * 8 + 16) /* byte array header*/;
+        long min = classSize + pagesSize + minRequirements;
+        long max = classSize + pagesSize + maxRequirements;
+
+        assertEquals(MemoryRange.of(min, max), SparseNodeMapping.memoryEstimation(size, maxEntries));
     }
 
     @SuppressWarnings("unchecked")

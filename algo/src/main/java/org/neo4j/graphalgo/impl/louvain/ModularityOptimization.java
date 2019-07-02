@@ -34,6 +34,8 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pointer;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -57,6 +59,20 @@ import java.util.function.LongPredicate;
  */
 public final class ModularityOptimization extends Algorithm<ModularityOptimization> {
 
+    private static final MemoryEstimation MEMORY_ESTIMATION_TASK = MemoryEstimations
+            .builder(Task.class)
+            .perNode("sTot", HugeDoubleArray::memoryEstimation)
+            .perNode("sIn", HugeDoubleArray::memoryEstimation)
+            .perNode("localCommunities", HugeLongArray::memoryEstimation)
+            .build();
+
+    private static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations
+            .builder(ModularityOptimization.class)
+            .perNode("communities", HugeLongArray::memoryEstimation)
+            .perNode("ki", HugeDoubleArray::memoryEstimation)
+            .perThread("tasks", MEMORY_ESTIMATION_TASK)
+            .build();
+
     private static final double MINIMUM_MODULARITY = -1.0;
     /**
      * only outgoing directions are visited since the graph itself must be loaded using {@code .asUndirected(true) } !
@@ -78,6 +94,10 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private final AtomicInteger counter = new AtomicInteger(0);
     private boolean randomNeighborSelection = false;
 
+    public static MemoryEstimation memoryEstimation() {
+        return MEMORY_ESTIMATION;
+    }
+
     ModularityOptimization(
             final Graph graph,
             final HugeNodeWeights nodeWeights,
@@ -96,7 +116,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         communities = HugeLongArray.newArray(nodeCount, tracker);
     }
 
-    ModularityOptimization withRandomNeighborOptimization(final boolean randomNeighborSelection) {
+    ModularityOptimization withRandomNeighborSelection(final boolean randomNeighborSelection) {
         this.randomNeighborSelection = randomNeighborSelection;
         return this;
     }
@@ -296,6 +316,10 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             rels = graph.concurrentCopy();
             ki.copyTo(sTot, nodeCount);
             communities.copyTo(localCommunities, nodeCount);
+        }
+
+        public MemoryEstimation memoryEstimation() {
+            return MEMORY_ESTIMATION_TASK;
         }
 
         /**

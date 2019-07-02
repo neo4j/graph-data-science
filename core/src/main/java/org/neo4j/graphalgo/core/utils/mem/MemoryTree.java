@@ -21,6 +21,10 @@ package org.neo4j.graphalgo.core.utils.mem;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * A tree shaped description of an object that has resources residing in memory.
@@ -42,6 +46,20 @@ public interface MemoryTree {
      */
     default Collection<MemoryTree> components() {
         return Collections.emptyList();
+    }
+
+    default Map<String, Object> renderMap() {
+        Map<String, Object> root = new HashMap<>();
+        root.put("name", description());
+        root.put("memoryUsage", memoryUsage().toString());
+        List<Map<String, Object>> components = components()
+                .stream()
+                .map(MemoryTree::renderMap)
+                .collect(Collectors.toList());
+        if (!components.isEmpty()) {
+            root.put("components", components);
+        }
+        return root;
     }
 
     /**

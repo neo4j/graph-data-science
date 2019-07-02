@@ -17,13 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package com.carrotsearch.hppc;
 
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+public final class OpenHashContainers {
 
-public abstract class ConfiguredAlgorithm<Self extends ConfiguredAlgorithm<Self, Conf>, Conf> extends Algorithm<Self> {
+    public static int emptyBufferSize() {
+        return expectedBufferSize(Containers.DEFAULT_EXPECTED_ELEMENTS);
+    }
 
-    public MemoryEstimation memoryEstimation(Conf conf) {
-        return this.memoryEstimation();
+    public static int expectedBufferSize(final int elements) {
+        return HashContainers.minBufferSize(elements, (double) HashContainers.DEFAULT_LOAD_FACTOR) + 1;
+    }
+
+    private OpenHashContainers() {
+        throw new UnsupportedOperationException("No instances");
     }
 }

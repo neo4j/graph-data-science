@@ -22,6 +22,8 @@ package org.neo4j.graphalgo.impl.unionfind;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
 import org.neo4j.graphdb.Direction;
@@ -41,38 +43,35 @@ import org.neo4j.graphdb.Direction;
  *
  * @author mknblch
  */
-public class GraphUnionFind extends GraphUnionFindAlgo<GraphUnionFind>
-{
+public class GraphUnionFind extends GraphUnionFindAlgo<GraphUnionFind> {
 
     private PagedDisjointSetStruct dss;
     private final long nodeCount;
     private RelationshipConsumer unrestricted;
 
+    public static MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.builder(GraphUnionFind.class)
+                .add("dss", PagedDisjointSetStruct.MEMORY_ESTIMATION)
+                .build();
+    }
+
     public GraphUnionFind(
             Graph graph,
-            AllocationTracker tracker) {
-        super(graph);
-        this.graph = graph;
-        nodeCount = graph.nodeCount();
+            AllocationTracker tracker,
+            double threshold) {
+        super(graph, threshold);
+
+        this.threshold = threshold;
+        this.nodeCount = graph.nodeCount();
         this.dss = new PagedDisjointSetStruct(nodeCount, tracker);
-        unrestricted = (source, target) -> {
+        this.unrestricted = (source, target) -> {
             dss.union(source, target);
             return true;
         };
     }
 
     /**
-     * compute unions of connected nodes
-     *
-     * @return a DSS
-     */
-    @Override
-    public PagedDisjointSetStruct compute() {
-        return compute(unrestricted);
-    }
-
-    /**
-     * compute unions if relationship weight exceeds threshold
+     * Compute unions if relationship weight exceeds threshold
      *
      * @param threshold the minimum threshold
      * @return a DSS
@@ -80,6 +79,16 @@ public class GraphUnionFind extends GraphUnionFindAlgo<GraphUnionFind>
     @Override
     public PagedDisjointSetStruct compute(final double threshold) {
         return compute(new WithThreshold(threshold));
+    }
+
+    /**
+     * Compute unions of connected nodes
+     *
+     * @return a DSS
+     */
+    @Override
+    public PagedDisjointSetStruct computeUnrestricted() {
+        return compute(unrestricted);
     }
 
     @Override

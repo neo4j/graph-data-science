@@ -35,6 +35,7 @@ import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.neo4j.graphalgo.impl.louvain.LouvainTest.DEFAULT_CONFIG;
 
 /**
  * (a)-(b)--(g)-(h)
@@ -105,10 +106,10 @@ public class LouvainMultiLevelTest extends HeavyHugeTester {
     @Test
     public void testComplex() {
         setup(COMPLEX_CYPHER);
-        final Louvain algorithm = new Louvain(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
+        final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
-                .compute(10, 10);
+                .compute();
         final HugeLongArray[] dendogram = algorithm.getDendrogram();
         for (int i = 1; i <= dendogram.length; i++) {
             if (null == dendogram[i - 1]) {
@@ -126,7 +127,7 @@ public class LouvainMultiLevelTest extends HeavyHugeTester {
     @Test
     public void testComplexRNL() {
         setup(COMPLEX_CYPHER);
-        final Louvain algorithm = new Louvain(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
+        final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
                 .compute(10, 10, true);

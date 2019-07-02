@@ -28,6 +28,8 @@ import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.graphalgo.core.NullWeightMap;
 import org.neo4j.graphalgo.core.WeightMap;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.kernel.api.StatementConstants;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -53,6 +55,31 @@ public class HeavyGraphFactory extends GraphFactory {
         return importGraph(setup.batchSize);
     }
 
+    @Override
+    public final MemoryEstimation memoryEstimation() {
+        MemoryEstimations.Builder builder = MemoryEstimations
+                .builder(HeavyGraph.class)
+                .add("nodeIdMap", IntIdMap.memoryEstimation())
+                .add("container", AdjacencyMatrix.memoryEstimation(
+                        setup.loadIncoming,
+                        setup.loadOutgoing,
+                        setup.loadAsUndirected,
+                        dimensions.relWeightId() != StatementConstants.NO_SUCH_PROPERTY_KEY
+                ))
+                .startField("nodePropertiesMapping", Map.class);
+
+        for (PropertyMapping propertyMapping : setup.nodePropertyMappings) {
+            int propertyId = dimensions.nodePropertyKeyId(propertyMapping.propertyName, setup);
+            if (propertyId == StatementConstants.NO_SUCH_PROPERTY_KEY) {
+                builder.add(NullWeightMap.MEMORY_USAGE);
+            } else {
+                builder.add(WeightMap.memoryEstimation());
+            }
+        }
+
+        return builder.endField().build();
+    }
+
     private Graph importGraph(final int batchSize) {
         final IntIdMap idMap = loadIdMap();
 
@@ -64,7 +91,7 @@ public class HeavyGraphFactory extends GraphFactory {
         }
 
         int concurrency = setup.concurrency();
-        final int nodeCount = dimensions.nodeCount();
+        final int nodeCount = dimensions.nodeCountAsInt();
         final AdjacencyMatrix matrix = new AdjacencyMatrix(
                 nodeCount,
                 setup.loadIncoming && !setup.loadAsUndirected,
@@ -140,6 +167,6 @@ public class HeavyGraphFactory extends GraphFactory {
     private WeightMapping newWeightMap(int propertyId, double defaultValue) {
         return propertyId == StatementConstants.NO_SUCH_PROPERTY_KEY
                 ? new NullWeightMap(defaultValue)
-                : new WeightMap(dimensions.nodeCount(), defaultValue, propertyId);
+                : new WeightMap(dimensions.nodeCountAsInt(), defaultValue, propertyId);
     }
 }

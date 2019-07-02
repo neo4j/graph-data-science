@@ -25,6 +25,8 @@ import org.neo4j.graphalgo.api.BatchNodeIterable;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeIterator;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.Collection;
@@ -36,9 +38,21 @@ import java.util.function.LongPredicate;
  */
 public final class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
 
+    private static final MemoryEstimation ESTIMATION = MemoryEstimations
+            .builder(IdMap.class)
+            .perNode("Neo4j identifiers", HugeLongArray::memoryEstimation)
+            .rangePerGraphDimension(
+                    "Mapping from Neo4j identifiers to internal identifiers",
+                     graphDimension -> SparseNodeMapping.memoryEstimation(graphDimension.highestNeoId(), graphDimension.nodeCount()))
+            .build();
+
     private long nodeCount;
     private HugeLongArray graphIds;
     private SparseNodeMapping nodeToGraphIds;
+
+    public static MemoryEstimation memoryEstimation() {
+        return ESTIMATION;
+    }
 
     /**
      * initialize the map with pre-built sub arrays

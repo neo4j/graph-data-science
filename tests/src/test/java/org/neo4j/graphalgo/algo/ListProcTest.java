@@ -24,8 +24,8 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.neo4j.graphalgo.ListProc;
-import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
 import org.neo4j.graphalgo.PageRankProc;
+import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
@@ -48,10 +48,21 @@ import static org.junit.Assert.assertEquals;
 public class ListProcTest {
     @ClassRule
     public static ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
-    public static final List<String> PROCEDURES = asList("algo.pageRank", "algo.pageRank.stream");
-    public static final List<String> FUNCTIONS = Arrays.asList("algo.linkprediction.adamicAdar", "algo.linkprediction.commonNeighbors", "algo.linkprediction.preferentialAttachment", "algo.linkprediction.resourceAllocation", "algo.linkprediction.sameCommunity",
+    public static final List<String> PROCEDURES = asList(
+            "algo.pageRank",
+            "algo.pageRank.memrec",
+            "algo.pageRank.stream");
+    public static final List<String> FUNCTIONS = Arrays.asList(
+            "algo.linkprediction.adamicAdar",
+            "algo.linkprediction.commonNeighbors",
+            "algo.linkprediction.preferentialAttachment",
+            "algo.linkprediction.resourceAllocation",
+            "algo.linkprediction.sameCommunity",
             "algo.linkprediction.totalNeighbors");
-    public static final List<String> ALL = Stream.of(PROCEDURES, FUNCTIONS).flatMap(Collection::stream).collect(Collectors.toList());
+    public static final List<String> ALL = Stream
+            .of(PROCEDURES, FUNCTIONS)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
 
     @BeforeClass
     public static void setUp() throws Exception {

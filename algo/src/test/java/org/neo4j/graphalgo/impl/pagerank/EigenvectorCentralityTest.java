@@ -46,9 +46,12 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.junit.Assert.assertEquals;
+import static org.neo4j.graphalgo.impl.pagerank.PageRankTest.DEFAULT_CONFIG;
 
 @RunWith(Parameterized.class)
 public final class EigenvectorCentralityTest {
+
+    static PageRank.Config DEFAULT_EIGENVECTOR_CONFIG = new PageRank.Config(40, 1);
 
     private Class<? extends GraphFactory> graphImpl;
 
@@ -163,12 +166,10 @@ public final class EigenvectorCentralityTest {
                     .load(graphImpl);
         }
 
-        final CentralityResult rankResult = PageRankFactory
-                .eigenvectorCentralityOf(graph, LongStream.empty())
-                .compute(40)
+        final CentralityResult rankResult = PageRankAlgorithmType.EIGENVECTOR_CENTRALITY
+                .create(graph, DEFAULT_EIGENVECTOR_CONFIG, LongStream.empty())
+                .compute()
                 .result();
-
-
 
         IntStream.range(0, expected.size()).forEach(i -> {
             final long nodeId = graph.toOriginalNodeId(i);

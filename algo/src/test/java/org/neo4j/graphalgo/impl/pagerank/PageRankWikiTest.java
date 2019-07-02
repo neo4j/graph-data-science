@@ -45,6 +45,7 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.junit.Assert.assertEquals;
+import static org.neo4j.graphalgo.impl.pagerank.PageRankTest.DEFAULT_CONFIG;
 
 @RunWith(Parameterized.class)
 public final class PageRankWikiTest {
@@ -150,9 +151,9 @@ public final class PageRankWikiTest {
                 .withDirection(Direction.OUTGOING)
                 .load(graphImpl);
 
-        final CentralityResult rankResult = PageRankFactory
-                .of(graph, 0.85, LongStream.empty())
-                .compute(40)
+        final CentralityResult rankResult = PageRankAlgorithmType.NON_WEIGHTED
+                .create(graph, DEFAULT_CONFIG, LongStream.empty())
+                .compute()
                 .result();
 
         IntStream.range(0, expected.size()).forEach(i -> {

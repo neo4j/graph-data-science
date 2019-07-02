@@ -23,6 +23,8 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
 import org.neo4j.graphdb.Direction;
@@ -48,14 +50,25 @@ import java.util.concurrent.RecursiveTask;
  *
  * @author mknblch
  */
-public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFindFJMerge>
-{
+public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFindFJMerge> {
 
     private final ExecutorService executor;
     private final AllocationTracker tracker;
     private final long nodeCount;
     private final long batchSize;
     private PagedDisjointSetStruct struct;
+
+    public static MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.builder(ParallelUnionFindFJMerge.class)
+                .startField("computeStep", TUFProcess.class)
+                .add(MemoryEstimations.of("dss", (dimensions, concurrency) ->
+                        PagedDisjointSetStruct.memoryEstimation()
+                                .estimate(dimensions, concurrency)
+                                .memoryUsage()
+                                .times(concurrency)))
+                .endField()
+                .build();
+    }
 
     /**
      * initialize UF
@@ -68,31 +81,34 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
             ExecutorService executor,
             AllocationTracker tracker,
             int minBatchSize,
-            int concurrency) {
-        super(graph);
+            int concurrency,
+            double threshold) {
+        super(graph, threshold);
+
+        this.nodeCount = graph.nodeCount();
         this.executor = executor;
         this.tracker = tracker;
-        nodeCount = graph.nodeCount();
         this.batchSize = ParallelUtil.adjustBatchSize(
                 nodeCount,
                 concurrency,
                 minBatchSize);
     }
 
-    public PagedDisjointSetStruct compute() {
-
-        final ArrayList<UFProcess> ufProcesses = new ArrayList<>();
+    @Override
+    public PagedDisjointSetStruct compute(double threshold) {
+        final ArrayList<TUFProcess> ufProcesses = new ArrayList<>();
         for (long i = 0L; i < nodeCount; i += batchSize) {
-            ufProcesses.add(new UFProcess(i, batchSize));
+            ufProcesses.add(new TUFProcess(i, batchSize, threshold));
         }
         merge(ufProcesses);
         return getStruct();
     }
 
-    public PagedDisjointSetStruct compute(double threshold) {
-        final Collection<TUFProcess> ufProcesses = new ArrayList<>();
+    @Override
+    public PagedDisjointSetStruct computeUnrestricted() {
+        final ArrayList<UFProcess> ufProcesses = new ArrayList<>();
         for (long i = 0L; i < nodeCount; i += batchSize) {
-            ufProcesses.add(new TUFProcess(i, batchSize, threshold));
+            ufProcesses.add(new UFProcess(i, batchSize));
         }
         merge(ufProcesses);
         return getStruct();

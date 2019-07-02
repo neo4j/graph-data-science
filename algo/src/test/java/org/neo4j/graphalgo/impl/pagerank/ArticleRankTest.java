@@ -45,6 +45,8 @@ import java.util.Map;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
+import static org.neo4j.graphalgo.impl.pagerank.PageRankTest.DEFAULT_CONFIG;
+
 @RunWith(Parameterized.class)
 public final class ArticleRankTest {
 
@@ -162,9 +164,9 @@ public final class ArticleRankTest {
                     .load(graphImpl);
         }
 
-        final CentralityResult rankResult = PageRankFactory
-                .articleRankOf(graph, 0.85, LongStream.empty())
-                .compute(40)
+        final CentralityResult rankResult = PageRankAlgorithmType.ARTICLE_RANK
+                .create(graph, DEFAULT_CONFIG, LongStream.empty())
+                .compute()
                 .result();
 
         IntStream.range(0, expected.size()).forEach(i -> {

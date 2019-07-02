@@ -17,11 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.utils.container;
+package org.neo4j.graphalgo.core.utils.paged;
 
 import com.carrotsearch.hppc.HashOrderMixing;
 import com.carrotsearch.hppc.IntDoubleHashMap;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import com.carrotsearch.hppc.OpenHashContainers;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 
 import java.util.concurrent.atomic.LongAdder;
 
@@ -31,9 +34,25 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
 
 
-public final class TrackingIntDoubleHashMap extends IntDoubleHashMap {
+final class TrackingIntDoubleHashMap extends IntDoubleHashMap {
+
+    private static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations
+            .builder(TrackingIntDoubleHashMap.class)
+            .rangePerNode("map buffers", nodeCount -> {
+                int minBufferSize = OpenHashContainers.emptyBufferSize();
+                int maxBufferSize = OpenHashContainers.expectedBufferSize((int) Math.min(PagedLongDoubleMap.PAGE_SIZE, nodeCount));
+                long min = sizeOfIntArray(minBufferSize) + sizeOfDoubleArray(minBufferSize);
+                long max = sizeOfIntArray(maxBufferSize) + sizeOfDoubleArray(maxBufferSize);
+                return MemoryRange.of(min, max);
+            })
+            .build();
+
     private final AllocationTracker tracker;
     private final LongAdder instanceSize;
+
+    static MemoryEstimation memoryEstimation() {
+        return MEMORY_ESTIMATION;
+    }
 
     public TrackingIntDoubleHashMap(AllocationTracker tracker) {
         super(DEFAULT_EXPECTED_ELEMENTS, DEFAULT_LOAD_FACTOR, HashOrderMixing.defaultStrategy());

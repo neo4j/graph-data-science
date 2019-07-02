@@ -23,7 +23,12 @@ import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.Algorithm;
-import org.neo4j.graphalgo.api.*;
+import org.neo4j.graphalgo.api.Degrees;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.api.NodeIterator;
+import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
@@ -109,6 +114,7 @@ public class PageRank extends Algorithm<PageRank> {
     private final RelationshipIterator relationshipIterator;
     private final Degrees degrees;
     private final double dampingFactor;
+    private final int iterations;
     private final Graph graph;
     private final RelationshipWeights relationshipWeights;
     private LongStream sourceNodeIds;
@@ -117,25 +123,20 @@ public class PageRank extends Algorithm<PageRank> {
     private Log log;
     private ComputeSteps computeSteps;
 
-    /**
-     * Forces sequential use. If you want parallelism, prefer
-     * {@link #PageRank(ExecutorService, int, int, AllocationTracker, Graph, double, LongStream, PageRankVariant)}
-     */
-    PageRank(
-            AllocationTracker tracker,
-            Graph graph,
-            double dampingFactor,
-            LongStream sourceNodeIds,
-            PageRankVariant pageRankVariant) {
-        this(
-                null,
-                -1,
-                ParallelUtil.DEFAULT_BATCH_SIZE,
-                tracker,
-                graph,
-                dampingFactor,
-                sourceNodeIds,
-                pageRankVariant);
+    public static final class Config {
+        public final int iterations;
+        public final double dampingFactor;
+        public final boolean cacheWeights;
+
+        public Config(final int iterations, final double dampingFactor) {
+            this(iterations, dampingFactor, false);
+        }
+
+        public Config(final int iterations, final double dampingFactor, boolean cacheWeights) {
+            this.iterations = iterations;
+            this.dampingFactor = dampingFactor;
+            this.cacheWeights = cacheWeights;
+        }
     }
 
     /**
@@ -149,7 +150,7 @@ public class PageRank extends Algorithm<PageRank> {
             int batchSize,
             AllocationTracker tracker,
             Graph graph,
-            double dampingFactor,
+            PageRank.Config algoConfig,
             LongStream sourceNodeIds,
             PageRankVariant pageRankVariant) {
         this.executor = executor;
@@ -162,16 +163,27 @@ public class PageRank extends Algorithm<PageRank> {
         this.degrees = graph;
         this.graph = graph;
         this.relationshipWeights = graph;
-        this.dampingFactor = dampingFactor;
+        this.dampingFactor = algoConfig.dampingFactor;
+        assert algoConfig.iterations >= 1;
+        this.iterations = algoConfig.iterations;
         this.sourceNodeIds = sourceNodeIds;
         this.pageRankVariant = pageRankVariant;
     }
 
+    public int iterations() {
+        return iterations;
+    }
+
+    public double dampingFactor() {
+        return dampingFactor;
+    }
+
+
+
     /**
      * compute pageRank for n iterations
      */
-    public PageRank compute(int iterations) {
-        assert iterations >= 1;
+    public PageRank compute() {
         initializeSteps();
         computeSteps.run(iterations);
         return this;
@@ -424,11 +436,11 @@ public class PageRank extends Algorithm<PageRank> {
         return this;
     }
 
-    private static final class Partition {
+    static final class Partition {
 
         // rough estimate of what capacity would still yield acceptable performance
         // per thread
-        private static final int MAX_NODE_COUNT = (Integer.MAX_VALUE - 32) >> 1;
+        public static final int MAX_NODE_COUNT = (Integer.MAX_VALUE - 32) >> 1;
 
         private final long startNode;
         private final int nodeCount;
@@ -456,7 +468,7 @@ public class PageRank extends Algorithm<PageRank> {
         }
     }
 
-    private final class ComputeSteps {
+    final class ComputeSteps {
         private List<ComputeStep> steps;
         private final ExecutorService pool;
         private float[][][] scores;

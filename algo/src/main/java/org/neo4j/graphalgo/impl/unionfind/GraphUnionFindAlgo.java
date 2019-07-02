@@ -30,23 +30,27 @@ public abstract class GraphUnionFindAlgo<ME extends GraphUnionFindAlgo<ME>> exte
 
     protected Graph graph;
 
-    protected GraphUnionFindAlgo(final Graph graph) {
+    protected double threshold;
+
+    protected GraphUnionFindAlgo(final Graph graph, final double threshold) {
         this.graph = graph;
+        this.threshold = threshold;
+    }
+
+    public double threshold() {
+        return threshold;
     }
 
     /**
      * compute connected componens
      */
-    public abstract PagedDisjointSetStruct compute();
+    public PagedDisjointSetStruct compute() {
+        return Double.isFinite(threshold) ? compute(threshold) : computeUnrestricted();
+    }
 
-
-    /**
-     * compute connected components using a threshold
-     *
-     * @param threshold
-     * @return
-     */
     public abstract PagedDisjointSetStruct compute(double threshold);
+
+    public abstract PagedDisjointSetStruct computeUnrestricted();
 
     /**
      * method reference for self

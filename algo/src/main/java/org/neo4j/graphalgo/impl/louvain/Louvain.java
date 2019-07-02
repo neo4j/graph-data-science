@@ -81,8 +81,22 @@ public final class Louvain extends Algorithm<Louvain> {
     private final Graph root;
     private long communityCount;
 
+    private final HugeWeightMapping communityMap;
+    private final int maxLevel;
+    private final int maxIterations;
+    private final boolean randomNeighborSelection;
+
+    public Louvain(
+        final Graph graph,
+        final Config config,
+        final ExecutorService pool,
+        final int concurrency,
+        final AllocationTracker tracker) {this(graph, config, null, pool, concurrency, tracker);}
+
     public Louvain(
             final Graph graph,
+            final Config config,
+            final HugeWeightMapping communityMap,
             final ExecutorService pool,
             final int concurrency,
             final AllocationTracker tracker) {
@@ -93,23 +107,39 @@ public final class Louvain extends Algorithm<Louvain> {
         rootNodeCount = graph.nodeCount();
         communities = HugeLongArray.newArray(rootNodeCount, tracker);
         nodeWeights = HugeDoubleArray.newArray(rootNodeCount, tracker);
+        this. communityMap = communityMap;
+        maxLevel = config.maxLevel;
+        maxIterations = config.maxIterations;
+        randomNeighborSelection = config.randomNeighborSelection;
         communityCount = rootNodeCount;
         communities.setAll(i -> i);
+    }
+
+    public boolean randomNeighborSelection() {
+        return randomNeighborSelection;
+    }
+
+    public Louvain compute() {
+        if (communityMap != null) {
+            return compute(communityMap, maxLevel, maxIterations, randomNeighborSelection);
+        } else {
+            return compute(maxLevel, maxIterations, randomNeighborSelection);
+        }
     }
 
     public Louvain compute(final int maxLevel, final int maxIterations) {
         return compute(maxLevel, maxIterations, false);
     }
 
-    public Louvain compute(final int maxLevel, final int maxIterations, final boolean rnd) {
-        return computeOf(root, rootNodeCount, maxLevel, maxIterations, rnd);
+    public Louvain compute(final int maxLevel, final int maxIterations, final boolean randomNeighborSelection) {
+        return computeOf(root, rootNodeCount, maxLevel, maxIterations, randomNeighborSelection);
     }
 
     public Louvain compute(
             final HugeWeightMapping communityMap,
             final int maxLevel,
             final int maxIterations,
-            final boolean rnd) {
+            final boolean randomNeighborSelection) {
         BitSet comCount = new BitSet();
         communities.setAll(i -> {
             final long c = (long) communityMap.nodeWeight(i, i);
@@ -121,7 +151,7 @@ public final class Louvain extends Algorithm<Louvain> {
         LouvainUtils.normalize(communities);
         Graph graph = rebuildGraph(this.root, communities, nodeCount);
 
-        return computeOf(graph, nodeCount, maxLevel, maxIterations, rnd);
+        return computeOf(graph, nodeCount, maxLevel, maxIterations, randomNeighborSelection);
     }
 
     private Louvain computeOf(
@@ -129,7 +159,7 @@ public final class Louvain extends Algorithm<Louvain> {
             final long rootNodeCount,
             final int maxLevel,
             final int maxIterations,
-            final boolean rnd) {
+            final boolean randomNeighborSelection) {
 
         // result arrays, start with small buffers in case we don't require max iterations to converge
         ObjectArrayList<HugeLongArray> dendrogram = new ObjectArrayList<>(0);
@@ -150,7 +180,7 @@ public final class Louvain extends Algorithm<Louvain> {
                     )
                             .withProgressLogger(progressLogger)
                             .withTerminationFlag(terminationFlag)
-                            .withRandomNeighborOptimization(rnd)
+                            .withRandomNeighborSelection(randomNeighborSelection)
                             .compute(maxIterations);
             // rebuild graph based on the community structure
             final HugeLongArray communityIds = modularityOptimization.getCommunityIds();
@@ -437,6 +467,42 @@ public final class Louvain extends Algorithm<Louvain> {
             this.nodeId = nodeId;
             this.communities = communities;
             this.community = community;
+        }
+    }
+
+    public static class Config {
+
+        public final HugeWeightMapping communityMap;
+        public final int maxLevel;
+        public final int maxIterations;
+        public final boolean randomNeighborSelection;
+
+        public Config(final int maxLevel) {
+            this(maxLevel, maxLevel);
+        }
+
+        public Config(
+                final int maxLevel,
+                final int maxIterations) {
+            this(null, maxLevel, maxIterations, false);
+        }
+
+        public Config(
+                final int maxLevel,
+                final int maxIterations,
+                final boolean randomNeighborSelection) {
+            this(null, maxLevel, maxIterations, randomNeighborSelection);
+        }
+
+        public Config(
+                final HugeWeightMapping communityMap,
+                final int maxLevel,
+                final int maxIterations,
+                final boolean randomNeighborSelection) {
+            this.communityMap = communityMap;
+            this.maxLevel = maxLevel;
+            this.maxIterations = maxIterations;
+            this.randomNeighborSelection = randomNeighborSelection;
         }
     }
 }

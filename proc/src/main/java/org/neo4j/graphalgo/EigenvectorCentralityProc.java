@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
-import org.neo4j.graphalgo.impl.pagerank.PageRankFactory;
+import org.neo4j.graphalgo.impl.pagerank.PageRankAlgorithmType;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphalgo.impl.results.CentralityScore;
 import org.neo4j.graphalgo.impl.results.PageRankScore;
@@ -136,7 +136,6 @@ public final class EigenvectorCentralityProc {
         }
 
         TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
-
         CentralityResult scores = runAlgorithm(graph, tracker, terminationFlag, configuration, statsBuilder);
 
         log.info("Eigenvector Centrality: overall memory usage: %s", tracker.getUsageString());
@@ -182,44 +181,37 @@ public final class EigenvectorCentralityProc {
             TerminationFlag terminationFlag,
             ProcedureConfiguration configuration,
             PageRankScore.Stats.Builder statsBuilder) {
-        double dampingFactor = 1.0;
-        int iterations = configuration.getIterations(DEFAULT_ITERATIONS);
+
+        PageRank.Config algoConfig = new PageRank.Config(configuration.getIterations(DEFAULT_ITERATIONS), 1.0);
         final int batchSize = configuration.getBatchSize();
         final int concurrency = configuration.getConcurrency();
-        log.debug("Computing eigenvector centrality with " + iterations + " iterations.");
+
+        log.debug("Computing eigenvector centrality with %d iterations.", algoConfig.iterations);
 
         List<Node> sourceNodes = configuration.get("sourceNodes", new ArrayList<>());
         LongStream sourceNodeIds = sourceNodes.stream().mapToLong(Node::getId);
 
-        PageRank prAlgo = selectAlgorithm(graph, tracker, batchSize, concurrency, sourceNodeIds);
+        PageRank prAlgo = PageRankAlgorithmType.EIGENVECTOR_CENTRALITY
+                .create(
+                        graph,
+                        Pools.DEFAULT,
+                        concurrency,
+                        batchSize,
+                        algoConfig,
+                        sourceNodeIds,
+                        tracker);
 
         Algorithm<?> algo = prAlgo
                 .withLog(log)
                 .withTerminationFlag(terminationFlag);
 
-        statsBuilder.timeEval(() -> prAlgo.compute(iterations));
-        statsBuilder.withIterations(iterations).withDampingFactor(dampingFactor);
+        statsBuilder.timeEval(prAlgo::compute);
+        statsBuilder.withIterations(prAlgo.iterations()).withDampingFactor(prAlgo.dampingFactor());
 
         final CentralityResult results = prAlgo.result();
         algo.release();
         graph.release();
         return normalization(configuration).apply(results);
     }
-
-    private PageRank selectAlgorithm(
-            Graph graph,
-            AllocationTracker tracker,
-            int batchSize,
-            int concurrency,
-            LongStream sourceNodeIds) {
-        return PageRankFactory.eigenvectorCentralityOf(
-                graph,
-                sourceNodeIds,
-                tracker,
-                Pools.DEFAULT,
-                concurrency,
-                batchSize);
-    }
-
 
 }

@@ -20,7 +20,9 @@
 package org.neo4j.graphalgo.core.utils.paged;
 
 import com.carrotsearch.hppc.IntDoubleMap;
-import org.neo4j.graphalgo.core.utils.container.TrackingIntDoubleHashMap;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 
 import java.util.Arrays;
 
@@ -29,8 +31,22 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 public final class PagedLongDoubleMap {
 
     private static final int PAGE_SHIFT = 14;
-    private static final int PAGE_SIZE = 1 << PAGE_SHIFT;
+    static final int PAGE_SIZE = 1 << PAGE_SHIFT;
     private static final long PAGE_MASK = (long) (PAGE_SIZE - 1);
+
+    private static final MemoryEstimation MEMORY_REQUIREMENTS = MemoryEstimations
+            .builder(PagedLongDoubleMap.class)
+            .add(MemoryEstimations.setup("pages[]", dimensions -> {
+                int numPages = PageUtil.numPagesFor(dimensions.nodeCount(), PAGE_SHIFT, PAGE_MASK);
+                long pagesArraySize = sizeOfObjectArray(numPages);
+                MemoryEstimation pagesSize = MemoryEstimations.andThen(
+                        TrackingIntDoubleHashMap.memoryEstimation(),
+                        range -> range.times(numPages).union(MemoryRange.empty()));
+                return MemoryEstimations.builder()
+                        .add(pagesSize)
+                        .fixed("pages wrapper", pagesArraySize)
+                        .build();
+            })).build();
 
     public static PagedLongDoubleMap of(long size, AllocationTracker tracker) {
         int numPages = PageUtil.numPagesFor(size, PAGE_SHIFT, PAGE_MASK);
@@ -41,6 +57,10 @@ public final class PagedLongDoubleMap {
 
     private final AllocationTracker tracker;
     private TrackingIntDoubleHashMap[] pages;
+
+    public static MemoryEstimation memoryEstimation() {
+        return MEMORY_REQUIREMENTS;
+    }
 
     private PagedLongDoubleMap(
             TrackingIntDoubleHashMap[] pages,

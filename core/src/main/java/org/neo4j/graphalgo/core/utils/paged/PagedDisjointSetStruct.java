@@ -24,6 +24,8 @@ import com.carrotsearch.hppc.LongLongMap;
 import com.carrotsearch.hppc.LongLongScatterMap;
 import com.carrotsearch.hppc.LongScatterSet;
 import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
 import java.util.stream.LongStream;
@@ -38,6 +40,11 @@ import java.util.stream.Stream;
  * <a href="https://en.wikipedia.org/wiki/Disjoint-set_data_structure">Wiki</a>
  */
 public final class PagedDisjointSetStruct {
+
+    public static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations.builder(PagedDisjointSetStruct.class)
+            .perNode("parent", HugeLongArray::memoryEstimation)
+            .perNode("depth", HugeLongArray::memoryEstimation)
+            .build();
 
     private final HugeLongArray parent;
     private final HugeLongArray depth;
@@ -61,6 +68,10 @@ public final class PagedDisjointSetStruct {
     public PagedDisjointSetStruct reset() {
         parent.fill(-1);
         return this;
+    }
+
+    public static MemoryEstimation memoryEstimation() {
+        return MEMORY_ESTIMATION;
     }
 
     /**

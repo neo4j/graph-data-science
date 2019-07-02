@@ -62,6 +62,18 @@ public final class HugeLongArrayTest extends HugeArrayTestBase<long[], Long, Hug
         });
     }
 
+    @Test
+    public void shouldComputeMemoryEstimation() {
+        assertEquals(40, HugeLongArray.memoryEstimation(0L));
+        assertEquals(840, HugeLongArray.memoryEstimation(100L));
+        assertEquals(800_122_070_368L, HugeLongArray.memoryEstimation(100_000_000_000L));
+    }
+
+    @Test(expected = AssertionError.class)
+    public void shouldFailForNegativeMemRecSize() {
+        HugeLongArray.memoryEstimation(-1L);
+    }
+
     @Override
     HugeLongArray singleArray(final int size) {
         return HugeLongArray.newSingleArray(size, AllocationTracker.EMPTY);

@@ -20,7 +20,9 @@
 package org.neo4j.graphalgo.core.huge.loader;
 
 import org.neo4j.graphalgo.api.HugeWeightMapping;
-import org.neo4j.graphalgo.core.utils.container.TrackingLongDoubleHashMap;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.paged.TrackingLongDoubleHashMap;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 
@@ -39,6 +41,22 @@ abstract class HugeWeightMap {
         return new PagedHugeWeightMap(pages, pageSize, defaultValue, tracker);
     }
 
+    static MemoryEstimation memoryEstimation(int pageSize, int numberOfPages) {
+        if (numberOfPages == 1) {
+            return Page.memoryEstimation(pageSize);
+        } else {
+            return PagedHugeWeightMap.memoryEstimation(pageSize, numberOfPages);
+        }
+    }
+
+    static MemoryEstimation memoryEstimation(String description) {
+        return MemoryEstimations.setup(description, (dimensions, concurrency) -> {
+            ImportSizing importSizing = ImportSizing.of(concurrency, dimensions.nodeCount());
+            return HugeWeightMap.memoryEstimation(importSizing.pageSize(), importSizing.numberOfPages());
+        });
+
+    }
+
     private HugeWeightMap() {
     }
 
@@ -48,6 +66,12 @@ abstract class HugeWeightMap {
         private TrackingLongDoubleHashMap[] data;
         private final AllocationTracker tracker;
         private double defaultValue;
+
+        static MemoryEstimation memoryEstimation(int pageSize) {
+            return MemoryEstimations.builder(Page.class)
+                    .add("data", TrackingLongDoubleHashMap.memoryEstimation(pageSize))
+                    .build();
+        }
 
         Page(int pageSize, AllocationTracker tracker) {
             this.data = new TrackingLongDoubleHashMap[pageSize];
@@ -60,11 +84,11 @@ abstract class HugeWeightMap {
             return weight(source, target, defaultValue);
         }
 
-         @Override
-         public double weight(final long source, final long target, final double defaultValue) {
-             int localIndex = (int) source;
-             return get(localIndex, target, defaultValue);
-         }
+        @Override
+        public double weight(final long source, final long target, final double defaultValue) {
+            int localIndex = (int) source;
+            return get(localIndex, target, defaultValue);
+        }
 
         double get(int localIndex, long target, double defaultValue) {
             TrackingLongDoubleHashMap map = data[localIndex];
@@ -113,6 +137,13 @@ abstract class HugeWeightMap {
         private final double defaultValue;
 
         private Page[] pages;
+
+        static MemoryEstimation memoryEstimation(int pageSize, int numberOfPages) {
+            return MemoryEstimations.builder(PagedHugeWeightMap.class)
+                    .fixed("pages wrapper", sizeOfObjectArray(numberOfPages))
+                    .add("page[]", Page.memoryEstimation(pageSize).times(numberOfPages))
+                    .build();
+        }
 
         PagedHugeWeightMap(Page[] pages, int pageSize, double defaultValue, AllocationTracker tracker) {
             assert pageSize == 0 || BitUtil.isPowerOfTwo(pageSize);

@@ -21,12 +21,32 @@ package org.neo4j.graphalgo.core;
 
 import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.LongDoubleMap;
+import com.carrotsearch.hppc.OpenHashContainers;
 import org.neo4j.graphalgo.api.WeightMapping;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
+
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
 /**
  * single weight cache
  */
 public final class WeightMap implements WeightMapping {
+
+    private static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations
+            .builder(WeightMap.class)
+            .startField("weights", LongDoubleHashMap.class)
+            .rangePerNode("map buffers", nodeCount -> {
+                int minBufferSize = OpenHashContainers.emptyBufferSize();
+                int maxBufferSize = OpenHashContainers.expectedBufferSize((int) nodeCount);
+                long min = sizeOfLongArray(minBufferSize) + sizeOfDoubleArray(minBufferSize);
+                long max = sizeOfLongArray(maxBufferSize) + sizeOfDoubleArray(maxBufferSize);
+                return MemoryRange.of(min, max);
+            })
+            .endField()
+            .build();
 
     private final int capacity;
     private LongDoubleMap weights;
@@ -52,6 +72,10 @@ public final class WeightMap implements WeightMapping {
         this.weights = weights;
         this.defaultValue = defaultValue;
         this.propertyId = propertyId;
+    }
+
+    public static MemoryEstimation memoryEstimation() {
+        return MEMORY_ESTIMATION;
     }
 
     /**

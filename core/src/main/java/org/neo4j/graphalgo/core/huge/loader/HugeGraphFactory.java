@@ -19,14 +19,20 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
+import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.huge.HugeAdjacencyList;
+import org.neo4j.graphalgo.core.huge.HugeAdjacencyOffsets;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.ApproximatedImportProgress;
 import org.neo4j.graphalgo.core.utils.ImportProgress;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.kernel.api.StatementConstants;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -38,6 +44,48 @@ public final class HugeGraphFactory extends GraphFactory {
 
     public HugeGraphFactory(GraphDatabaseAPI api, GraphSetup setup) {
         super(api, setup);
+    }
+
+    @Override
+    public MemoryEstimation memoryEstimation() {
+        MemoryEstimations.Builder builder = MemoryEstimations
+                .builder(HugeGraph.class)
+                .add("nodeIdMap", IdMap.memoryEstimation());
+
+        // Node properties
+        for (PropertyMapping propertyMapping : setup.nodePropertyMappings) {
+            String propertyKey = propertyMapping.propertyName;
+            int propertyId = dimensions.nodePropertyKeyId(propertyKey, setup);
+            if (propertyId == StatementConstants.NO_SUCH_PROPERTY_KEY) {
+                builder.add(propertyKey, HugeNullWeightMap.MEMORY_USAGE);
+            } else {
+                builder.add(propertyKey, HugeNodePropertyMap.memoryEstimation());
+            }
+        }
+
+        // Relationship weight properties
+        if (dimensions.relWeightId() == StatementConstants.NO_SUCH_PROPERTY_KEY) {
+            builder.add(setup.relationWeightPropertyName, HugeNullWeightMap.MEMORY_USAGE);
+        } else {
+            builder.add(
+                    setup.relationWeightPropertyName,
+                    HugeWeightMap.memoryEstimation(setup.relationWeightPropertyName));
+        }
+
+        // Adjacency lists and Adjacency offsets
+        MemoryEstimation adjacencyListSize = HugeAdjacencyList.memoryEstimation(setup.loadAsUndirected);
+        MemoryEstimation adjacencyOffsetsSetup = HugeAdjacencyOffsets.memoryEstimation();
+        if (this.setup.loadOutgoing || this.setup.loadAsUndirected) {
+            builder.add("outgoing", adjacencyListSize);
+            builder.add("outgoing offsets", adjacencyOffsetsSetup);
+
+        }
+        if (this.setup.loadIncoming && !this.setup.loadAsUndirected) {
+            builder.add("incoming", adjacencyListSize);
+            builder.add("incoming offsets", adjacencyOffsetsSetup);
+        }
+
+        return builder.build();
     }
 
     @Override
@@ -60,7 +108,7 @@ public final class HugeGraphFactory extends GraphFactory {
         return new ApproximatedImportProgress(
                 progressLogger,
                 setup.tracker,
-                dimensions.hugeNodeCount(),
+                dimensions.nodeCount(),
                 relOperations
         );
     }

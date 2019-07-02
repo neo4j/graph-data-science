@@ -19,167 +19,82 @@
  */
 package org.neo4j.graphalgo.impl.pagerank;
 
+import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.ProcedureConfiguration;
+import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphdb.Node;
 
-import java.util.concurrent.ExecutorService;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.LongStream;
 
-public class PageRankFactory{
+import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 
-    public static PageRank eigenvectorCentralityOf(Graph graph, LongStream sourceNodeIds) {
-        PageRankVariant pageRankVariant = new EigenvectorCentralityVariant();
+public class PageRankFactory extends AlgorithmFactory<PageRank> {
 
-        return new PageRank(AllocationTracker.EMPTY, graph, 1.0, sourceNodeIds, pageRankVariant);
+    private final PageRankAlgorithmType algorithmType;
+    private final PageRank.Config algoConfig;
+
+    public PageRankFactory(PageRank.Config algoConfig) {
+        this(PageRankAlgorithmType.NON_WEIGHTED, algoConfig);
     }
 
-    public static PageRank weightedOf(
-            Graph graph,
-            double dampingFactor,
-            LongStream sourceNodeIds) {
-        return weightedOf(graph, dampingFactor, sourceNodeIds, AllocationTracker.EMPTY, false);
+    public PageRankFactory(PageRankAlgorithmType algorithmType, PageRank.Config algoConfig) {
+        this.algorithmType = algorithmType;
+        this.algoConfig = algoConfig;
     }
 
-    public static PageRank weightedOf(
-            Graph graph,
-            double dampingFactor,
-            LongStream sourceNodeIds,
-            AllocationTracker tracker,
-            boolean cacheWeights) {
-        PageRankVariant pageRankVariant = new WeightedPageRankVariant(cacheWeights);
+    @Override
+    public PageRank build(
+            final Graph graph,
+            final ProcedureConfiguration configuration,
+            final AllocationTracker tracker) {
+        final int batchSize = configuration.getBatchSize();
+        final int concurrency = configuration.getConcurrency();
+        List<Node> sourceNodes = configuration.get("sourceNodes", Collections.emptyList());
+        LongStream sourceNodeIds = sourceNodes.stream().mapToLong(Node::getId);
 
-        return new PageRank(tracker, graph, dampingFactor, sourceNodeIds, pageRankVariant);
-    }
-
-    public static PageRank articleRankOf(
-            Graph graph,
-            double dampingFactor,
-            LongStream sourceNodeIds) {
-        return articleRankOf(graph, dampingFactor, sourceNodeIds, AllocationTracker.EMPTY);
-    }
-
-    public static PageRank articleRankOf(
-            Graph graph,
-            double dampingFactor,
-            LongStream sourceNodeIds,
-            AllocationTracker tracker) {
-        PageRankVariant pageRankVariant = new ArticleRankVariant();
-
-        return new PageRank(tracker, graph, dampingFactor, sourceNodeIds, pageRankVariant);
-    }
-
-    public static PageRank of(
-            Graph graph,
-            double dampingFactor,
-            LongStream sourceNodeIds) {
-        return of(graph, dampingFactor, sourceNodeIds, AllocationTracker.EMPTY);
-    }
-
-    public static PageRank of(
-            Graph graph,
-            double dampingFactor,
-            LongStream sourceNodeIds,
-            AllocationTracker tracker) {
-        PageRankVariant computeStepFactory = new NonWeightedPageRankVariant();
-
-        return new PageRank(tracker, graph, dampingFactor, sourceNodeIds, computeStepFactory);
-    }
-
-    public static PageRank of(
-            Graph graph,
-            double dampingFactor,
-            LongStream sourceNodeIds,
-            ExecutorService pool,
-            int concurrency,
-            int batchSize) {
-        return of(graph, dampingFactor, sourceNodeIds, AllocationTracker.EMPTY, pool, concurrency, batchSize);
-    }
-
-    public static PageRank of(
-            Graph graph,
-            double dampingFactor,
-            LongStream sourceNodeIds,
-            AllocationTracker tracker,
-            ExecutorService pool,
-            int concurrency,
-            int batchSize) {
-        PageRankVariant pageRankVariant = new NonWeightedPageRankVariant();
-        return new PageRank(
-                pool,
-                concurrency,
-                batchSize,
-                tracker,
+        return algorithmType.create(
                 graph,
-                dampingFactor,
+                Pools.DEFAULT,
+                batchSize,
+                concurrency,
+                algoConfig,
                 sourceNodeIds,
-                pageRankVariant
+                tracker
         );
     }
 
-    public static PageRank weightedOf(
-            Graph graph,
-            double dampingFactor,
-            LongStream sourceNodeIds,
-            AllocationTracker tracker,
-            ExecutorService pool,
-            int concurrency,
-            int batchSize,
-            boolean cacheWeights) {
-        PageRankVariant pageRankVariant = new WeightedPageRankVariant(cacheWeights);
+    @Override
+    public MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.builder(PageRank.class)
+                .add(MemoryEstimations.setup("computeSteps", (dimensions, concurrency) -> {
+                    // adjust concurrency, if necessary
+                    long nodeCount = dimensions.nodeCount();
+                    long nodesPerThread = ceilDiv(nodeCount, concurrency);
+                    if (nodesPerThread > PageRank.Partition.MAX_NODE_COUNT) {
+                        concurrency = (int) ceilDiv(nodeCount, PageRank.Partition.MAX_NODE_COUNT);
+                        nodesPerThread = ceilDiv(nodeCount, concurrency);
+                        while (nodesPerThread > PageRank.Partition.MAX_NODE_COUNT) {
+                            concurrency++;
+                            nodesPerThread = ceilDiv(nodeCount, concurrency);
+                        }
+                    }
 
-        return new PageRank(
-                pool,
-                concurrency,
-                batchSize,
-                tracker,
-                graph,
-                dampingFactor,
-                sourceNodeIds,
-                pageRankVariant
-        );
-    }
-
-    public static PageRank articleRankOf(
-            Graph graph,
-            double dampingFactor,
-            LongStream sourceNodeIds,
-            AllocationTracker tracker,
-            ExecutorService pool,
-            int concurrency,
-            int batchSize) {
-        PageRankVariant pageRankVariant = new ArticleRankVariant();
-
-        return new PageRank(
-                pool,
-                concurrency,
-                batchSize,
-                tracker,
-                graph,
-                dampingFactor,
-                sourceNodeIds,
-                pageRankVariant
-        );
-    }
-
-    public static PageRank eigenvectorCentralityOf(
-            Graph graph,
-            LongStream sourceNodeIds,
-            AllocationTracker tracker,
-            ExecutorService pool,
-            int concurrency,
-            int batchSize
-    ) {
-        PageRankVariant variant = new EigenvectorCentralityVariant();
-
-        return new PageRank(
-                pool,
-                concurrency,
-                batchSize,
-                tracker,
-                graph,
-                1.0,
-                sourceNodeIds,
-                variant
-        );
+                    return MemoryEstimations
+                            .builder(PageRank.ComputeSteps.class)
+                            .perThread("scores[] wrapper", MemoryUsage::sizeOfObjectArray)
+                            .perThread("starts[]", MemoryUsage::sizeOfLongArray)
+                            .perThread("lengths[]", MemoryUsage::sizeOfLongArray)
+                            .perThread("list of computeSteps", MemoryUsage::sizeOfObjectArray)
+                            .perThread("ComputeStep", algorithmType.memoryEstimation())
+                            .build();
+                }))
+                .build();
     }
 }

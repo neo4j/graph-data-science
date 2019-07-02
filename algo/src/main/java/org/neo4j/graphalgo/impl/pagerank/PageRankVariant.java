@@ -23,8 +23,8 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
-public interface PageRankVariant
-{
+public interface PageRankVariant {
+
     ComputeStep createComputeStep(
             double dampingFactor,
             long[] sourceNodeIds,
@@ -36,7 +36,7 @@ public interface PageRankVariant
             DegreeCache aggregatedDegrees,
             long nodeCount);
 
-    DegreeComputer degreeComputer(Graph graph);
+    DegreeComputer degreeComputer( Graph graph );
 }
 
 

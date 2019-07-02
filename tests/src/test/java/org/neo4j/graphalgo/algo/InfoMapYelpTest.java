@@ -19,10 +19,10 @@
  */
 package org.neo4j.graphalgo.algo;
 
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.neo4j.graphalgo.InfoMapProc;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -38,13 +38,16 @@ public class InfoMapYelpTest {
 
     private static GraphDatabaseService db;
 
-    private static Graph graph;
-
     @BeforeClass
-    public static void setupGraph() throws KernelException, IOException {
+    public static void setUp() throws KernelException, IOException {
         db = LdbcDownloader.openDb("Yelp");
         Procedures proceduresService = ((GraphDatabaseAPI) db).getDependencyResolver().resolveDependency(Procedures.class);
         proceduresService.registerProcedure(InfoMapProc.class, true);
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        db.shutdown();
     }
 
     @Test

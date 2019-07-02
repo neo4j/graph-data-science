@@ -45,7 +45,6 @@ abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, Self>> {
      */
     abstract public long size();
 
-
     /**
      * @return the amount of memory used by the instance of this array, in bytes.
      * This should be the same as returned from {@link #release()} without actually releasing the array.

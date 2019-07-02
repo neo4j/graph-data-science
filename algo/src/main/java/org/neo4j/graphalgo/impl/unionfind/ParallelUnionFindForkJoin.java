@@ -22,6 +22,8 @@ package org.neo4j.graphalgo.impl.unionfind;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
 import org.neo4j.graphdb.Direction;
@@ -44,12 +46,23 @@ import java.util.concurrent.RecursiveTask;
  *
  * @author mknblch
  */
-public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionFindForkJoin>
-{
+public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionFindForkJoin> {
 
     private final AllocationTracker tracker;
     private final long nodeCount;
     private final long batchSize;
+
+    public static MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.builder(ParallelUnionFindForkJoin.class)
+                .startField("computeStep", ThresholdUFTask.class)
+                .add(MemoryEstimations.of("dss", (dimensions, concurrency) ->
+                        PagedDisjointSetStruct.memoryEstimation()
+                                .estimate(dimensions, concurrency)
+                                .memoryUsage()
+                                .times(concurrency)))
+                .endField()
+                .build();
+    }
 
     /**
      * initialize parallel UF
@@ -60,9 +73,11 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionF
             Graph graph,
             AllocationTracker tracker,
             int minBatchSize,
-            int concurrency) {
-        super(graph);
-        nodeCount = graph.nodeCount();
+            int concurrency,
+            double threshold) {
+        super(graph, threshold);
+
+        this.nodeCount = graph.nodeCount();
         this.tracker = tracker;
         this.batchSize = ParallelUtil.adjustBatchSize(
                 nodeCount,
@@ -71,15 +86,14 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionF
 
     }
 
-    public PagedDisjointSetStruct compute() {
-        return ForkJoinPool.commonPool().invoke(new UnionFindTask(0));
+    @Override
+    public PagedDisjointSetStruct compute(final double threshold) {
+        return ForkJoinPool.commonPool().invoke(new ThresholdUFTask(0, threshold));
     }
 
-
-    public PagedDisjointSetStruct compute(double threshold) {
-        return ForkJoinPool
-                .commonPool()
-                .invoke(new ThresholdUFTask(0, threshold));
+    @Override
+    public PagedDisjointSetStruct computeUnrestricted() {
+        return ForkJoinPool.commonPool().invoke(new UnionFindTask(0));
     }
 
     private class UnionFindTask extends RecursiveTask<PagedDisjointSetStruct> {

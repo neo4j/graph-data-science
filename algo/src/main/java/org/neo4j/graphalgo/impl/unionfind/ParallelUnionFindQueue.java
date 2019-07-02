@@ -22,6 +22,8 @@ package org.neo4j.graphalgo.impl.unionfind;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
 import org.neo4j.graphdb.Direction;
@@ -50,14 +52,26 @@ import static org.neo4j.graphalgo.core.utils.ParallelUtil.awaitTermination;
  *
  * @author mknblch
  */
-public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFindQueue>
-{
+public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFindQueue> {
 
     private final ExecutorService executor;
     private final AllocationTracker tracker;
     private final long nodeCount;
     private final long batchSize;
     private final int stepSize;
+
+    public static MemoryEstimation memoryEstimation() {
+        return MemoryEstimations
+                .builder(ParallelUnionFindQueue.class)
+                .startField("computeStep", HugeUnionFindTask.class)
+                .add(MemoryEstimations.of("dss", (dimensions, concurrency) ->
+                        PagedDisjointSetStruct.memoryEstimation()
+                                .estimate(dimensions, concurrency)
+                                .memoryUsage()
+                                .times(concurrency)))
+                .endField()
+                .build();
+    }
 
     /**
      * initialize parallel UF
@@ -67,11 +81,14 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFind
             ExecutorService executor,
             int minBatchSize,
             int concurrency,
+            double threshold,
             AllocationTracker tracker) {
-        super(graph);
+        super(graph, threshold);
         this.executor = executor;
         this.tracker = tracker;
+
         this.nodeCount = graph.nodeCount();
+
         this.batchSize = ParallelUtil.adjustBatchSize(
                 nodeCount,
                 concurrency,
@@ -90,6 +107,17 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFind
 
     @Override
     public PagedDisjointSetStruct compute() {
+        return computeUnrestricted();
+    }
+
+    @Override
+    public PagedDisjointSetStruct compute(double threshold) {
+        throw new IllegalArgumentException(
+                "Parallel UnionFind with threshold not implemented, please use either `concurrency:1` or one of the exp* variants of UnionFind");
+    }
+
+    @Override
+    public PagedDisjointSetStruct computeUnrestricted() {
         final List<Future<?>> futures = new ArrayList<>(2 * stepSize);
         final BlockingQueue<PagedDisjointSetStruct> queue = new ArrayBlockingQueue<>(stepSize);
         AtomicInteger expectedStructs = new AtomicInteger();
@@ -105,12 +133,6 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFind
 
         awaitTermination(futures);
         return getStruct(queue);
-    }
-
-    @Override
-    public PagedDisjointSetStruct compute(double threshold) {
-        throw new IllegalArgumentException(
-                "Parallel UnionFind with threshold not implemented, please use either `concurrency:1` or one of the exp* variants of UnionFind");
     }
 
     private PagedDisjointSetStruct getStruct(final BlockingQueue<PagedDisjointSetStruct> queue) {

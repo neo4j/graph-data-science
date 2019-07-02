@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
-import org.neo4j.graphalgo.impl.pagerank.PageRankFactory;
+import org.neo4j.graphalgo.impl.pagerank.PageRankAlgorithmType;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphalgo.impl.results.CentralityScore;
 import org.neo4j.graphalgo.impl.results.PageRankScore;
@@ -181,34 +181,38 @@ public final class ArticleRankProc {
             ProcedureConfiguration configuration,
             PageRankScore.Stats.Builder statsBuilder) {
 
-        double dampingFactor = configuration.get(CONFIG_DAMPING, DEFAULT_DAMPING);
-        int iterations = configuration.getIterations(DEFAULT_ITERATIONS);
+        PageRank.Config algoConfig = new PageRank.Config(
+                configuration.getIterations(DEFAULT_ITERATIONS),
+                configuration.get(CONFIG_DAMPING, DEFAULT_DAMPING)
+        );
+
         final int batchSize = configuration.getBatchSize();
         final int concurrency = configuration.getConcurrency();
-        log.debug("Computing article rank with damping of " + dampingFactor + " and " + iterations + " iterations.");
+
+        log.debug("Computing article rank with damping of %f and %d iterations.",
+                algoConfig.dampingFactor,
+                algoConfig.iterations);
 
         List<Node> sourceNodes = configuration.get("sourceNodes", new ArrayList<>());
         LongStream sourceNodeIds = sourceNodes.stream().mapToLong(Node::getId);
 
-        PageRank prAlgo = PageRankFactory
-                .articleRankOf(
+        PageRank prAlgo = PageRankAlgorithmType.ARTICLE_RANK
+                .create(
                         graph,
-                        dampingFactor,
-                        sourceNodeIds,
-                        tracker,
                         Pools.DEFAULT,
                         concurrency,
-                        batchSize);
+                        batchSize,
+                        algoConfig,
+                        sourceNodeIds,
+                        tracker
+                );
 
         Algorithm<?> algo = prAlgo
                 .withLog(log)
                 .withTerminationFlag(terminationFlag);
 
-        statsBuilder.timeEval(() -> prAlgo.compute(iterations));
-
-        statsBuilder
-                .withIterations(iterations)
-                .withDampingFactor(dampingFactor);
+        statsBuilder.timeEval(prAlgo::compute);
+        statsBuilder.withConfig(algoConfig);
 
         final CentralityResult pageRank = prAlgo.result();
         algo.release();

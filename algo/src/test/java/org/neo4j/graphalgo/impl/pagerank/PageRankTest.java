@@ -27,11 +27,15 @@ import org.junit.runners.Parameterized;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
+import org.neo4j.graphalgo.core.utils.BitUtil;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
@@ -49,6 +53,8 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
 public final class PageRankTest {
+
+    static PageRank.Config DEFAULT_CONFIG = new PageRank.Config(40, 0.85);
 
     private Class<? extends GraphFactory> graphImpl;
 
@@ -116,7 +122,7 @@ public final class PageRankTest {
 
     @AfterClass
     public static void shutdownGraph() {
-        if (db!=null) db.shutdown();
+        if (db != null) db.shutdown();
     }
 
     public PageRankTest(
@@ -159,9 +165,9 @@ public final class PageRankTest {
                     .load(graphImpl);
         }
 
-        final CentralityResult rankResult = PageRankFactory
-                .of(graph, 0.85, LongStream.empty())
-                .compute(40)
+        final CentralityResult rankResult = PageRankAlgorithmType.NON_WEIGHTED
+                .create(graph, DEFAULT_CONFIG, LongStream.empty())
+                .compute()
                 .result();
 
         IntStream.range(0, expected.size()).forEach(i -> {
@@ -202,9 +208,9 @@ public final class PageRankTest {
                     .withRelationshipType("MATCH (n:Label1)<-[:TYPE1]-(m:Label1) RETURN id(n) as source,id(m) as target")
                     .load(graphImpl);
 
-            rankResult = PageRankFactory
-                    .of(graph, 0.85, LongStream.empty())
-                    .compute(40)
+            rankResult = PageRankAlgorithmType.NON_WEIGHTED
+                    .create(graph, DEFAULT_CONFIG, LongStream.empty())
+                    .compute()
                     .result();
         } else {
             graph = new GraphLoader(db)
@@ -213,9 +219,9 @@ public final class PageRankTest {
                     .withDirection(Direction.INCOMING)
                     .load(graphImpl);
 
-            rankResult = PageRankFactory
-                    .of(graph, 0.85, LongStream.empty())
-                    .compute(40)
+            rankResult = PageRankAlgorithmType.NON_WEIGHTED
+                    .create(graph, DEFAULT_CONFIG, LongStream.empty())
+                    .compute()
                     .result();
         }
 
@@ -250,9 +256,63 @@ public final class PageRankTest {
         }
 
         // explicitly list all source nodes to prevent the 'we got everything' optimization
-        PageRank algorithm = PageRankFactory
-                .of(graph, 0.85, LongStream.range(0L, graph.nodeCount()), null, 1, 1)
-                .compute(40);
+        PageRank algorithm = PageRankAlgorithmType.NON_WEIGHTED
+                .create(
+                        graph,
+                        null,
+                        1,
+                        1,
+                        DEFAULT_CONFIG,
+                        LongStream.range(0L, graph.nodeCount()),
+                        AllocationTracker.EMPTY)
+                .compute();
         // should not throw
+    }
+
+    @Test
+    public void shouldComputeMemoryEstimation1Thread() {
+        long nodeCount = 100_000L;
+        int concurrency = 1;
+        assertMemoryEstimation(nodeCount, concurrency);
+    }
+
+    @Test
+    public void shouldComputeMemoryEstimation4Threads() {
+        long nodeCount = 100_000L;
+        int concurrency = 4;
+        assertMemoryEstimation(nodeCount, concurrency);
+    }
+
+    @Test
+    public void shouldComputeMemoryEstimation42Threads() {
+        long nodeCount = 100_000L;
+        int concurrency = 42;
+        assertMemoryEstimation(nodeCount, concurrency);
+    }
+
+    private void assertMemoryEstimation(final long nodeCount, final int concurrency) {
+        GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(nodeCount).build();
+
+        final PageRankFactory pageRank = new PageRankFactory(DEFAULT_CONFIG);
+
+        long partitionSize = BitUtil.ceilDiv(nodeCount, concurrency);
+        final MemoryRange actual = pageRank.memoryEstimation().estimate(dimensions, concurrency).memoryUsage();
+        final MemoryRange expected = MemoryRange.of(
+                88L /* PageRank.class */ +
+                32L /* ComputeSteps.class */ +
+                BitUtil.align(16 + concurrency * 4, 8) /* scores[] wrapper */ +
+                BitUtil.align(16 + concurrency * 8, 8) /* starts[] */ +
+                BitUtil.align(16 + concurrency * 8, 8) /* lengths[] */ +
+                BitUtil.align(16 + concurrency * 4, 8) /* list of computeSteps */ +
+                        /* ComputeStep */
+                concurrency * (
+                        112L /* NonWeightedComputeStep.class */ +
+                        BitUtil.align(16 + concurrency * 4, 8) /* nextScores[] wrapper */ +
+                        concurrency * BitUtil.align(16 + partitionSize * 4, 8) /* inner nextScores[][] */ +
+                        BitUtil.align(16 + partitionSize * 8, 8) /* pageRank[] */ +
+                        BitUtil.align(16 + partitionSize * 8, 8) /* deltas[] */
+                )
+        );
+        assertEquals(expected, actual);
     }
 }
