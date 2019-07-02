@@ -171,17 +171,23 @@ public final class LabelPropagationTest {
         // it will never happen. It's RNG after all: http://dilbert.com/strip/2001-10-25
         if (lp.didConverge()) {
             assertTrue("expected at least 2 iterations, got " + lp.ranIterations(), 2L <= lp.ranIterations());
-            assertEquals(2L, (long) cluster.size());
-            for (IntObjectCursor<IntArrayList> cursor : cluster) {
-                int[] ids = cursor.value.toArray();
+            if (cluster.size() == 1) {
+                int[] ids = cluster.values().iterator().next().value.toArray();
                 Arrays.sort(ids);
-                if (cursor.key == 0 || cursor.key == 1 || cursor.key == 5) {
-                    assertArrayEquals(new int[]{0, 1, 5}, ids);
-                } else if (cursor.key == 2) {
-                    if (ids[0] == 0) {
+                assertArrayEquals(new int[]{0, 1, 2, 3, 4, 5}, ids);
+            } else {
+                assertEquals(2L, (long) cluster.size());
+                for (IntObjectCursor<IntArrayList> cursor : cluster) {
+                    int[] ids = cursor.value.toArray();
+                    Arrays.sort(ids);
+                    if (cursor.key == 0 || cursor.key == 1 || cursor.key == 5) {
                         assertArrayEquals(new int[]{0, 1, 5}, ids);
-                    } else {
-                        assertArrayEquals(new int[]{2, 3, 4}, ids);
+                    } else if (cursor.key == 2) {
+                        if (ids[0] == 0) {
+                            assertArrayEquals(new int[]{0, 1, 5}, ids);
+                        } else {
+                            assertArrayEquals(new int[]{2, 3, 4}, ids);
+                        }
                     }
                 }
             }
