@@ -21,12 +21,14 @@ package org.neo4j.graphalgo.bench;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
+import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.MSColoring;
 import org.neo4j.graphalgo.impl.unionfind.GraphUnionFind;
+import org.neo4j.graphalgo.impl.unionfind.GraphUnionFindAlgo;
 import org.neo4j.graphalgo.impl.unionfind.ParallelUnionFindFJMerge;
 import org.neo4j.graphalgo.impl.unionfind.ParallelUnionFindForkJoin;
 import org.neo4j.graphalgo.impl.unionfind.ParallelUnionFindQueue;
@@ -86,10 +88,13 @@ public class ParallelUnionFindBenchmark {
 
     private static File storeDir = new File(GRAPH_DIRECTORY);
 
-//    @Param({"5", "10", "20", "50"})
-    public static int numSets = 20;
+    private final GraphUnionFind.Config algoConfig = new GraphUnionFindAlgo.Config(
+            new HugeNullWeightMap(-1L),
+            Double.NaN
+    );
 
-    private static final double threshold = Double.NaN;
+    //    @Param({"5", "10", "20", "50"})
+    public static int numSets = 20;
 
     @Setup
     public static void setup() throws Exception {
@@ -179,43 +184,43 @@ public class ParallelUnionFindBenchmark {
 
     @Benchmark
     public Object parallelUnionFindQueue_200000() {
-        return new ParallelUnionFindQueue(graph, Pools.DEFAULT, 200_000, 8, threshold, AllocationTracker.EMPTY)
+        return new ParallelUnionFindQueue(graph, Pools.DEFAULT, 200_000, 8, algoConfig, AllocationTracker.EMPTY)
                 .compute();
     }
 
     @Benchmark
     public Object parallelUnionFindQueue_400000() {
-        return new ParallelUnionFindQueue(graph, Pools.DEFAULT, 400_000, 8, threshold, AllocationTracker.EMPTY)
+        return new ParallelUnionFindQueue(graph, Pools.DEFAULT, 400_000, 8, algoConfig, AllocationTracker.EMPTY)
                 .compute();
     }
 
     @Benchmark
     public Object parallelUnionFindQueue_800000() {
-        return new ParallelUnionFindQueue(graph, Pools.DEFAULT, 800_000, 8, threshold, AllocationTracker.EMPTY)
+        return new ParallelUnionFindQueue(graph, Pools.DEFAULT, 800_000, 8, algoConfig, AllocationTracker.EMPTY)
                 .compute();
     }
 
     @Benchmark
     public Object parallelUnionFindForkJoinMerge_400000() {
-        return new ParallelUnionFindFJMerge(graph, Pools.DEFAULT, AllocationTracker.EMPTY, 400_000, 8, threshold)
+        return new ParallelUnionFindFJMerge(graph, Pools.DEFAULT, AllocationTracker.EMPTY, 400_000, 8, algoConfig)
                 .compute();
     }
 
     @Benchmark
     public Object parallelUnionFindForkJoinMerge_800000() {
-        return new ParallelUnionFindFJMerge(graph, Pools.DEFAULT, AllocationTracker.EMPTY, 800_000, 8, threshold)
+        return new ParallelUnionFindFJMerge(graph, Pools.DEFAULT, AllocationTracker.EMPTY, 800_000, 8, algoConfig)
                 .compute();
     }
 
     @Benchmark
     public Object parallelUnionFindForkJoin_400000() {
-        return new ParallelUnionFindForkJoin(graph, AllocationTracker.EMPTY,400_000, 8, threshold)
+        return new ParallelUnionFindForkJoin(graph, AllocationTracker.EMPTY,400_000, 8, algoConfig)
                 .compute();
     }
 
     @Benchmark
     public Object parallelUnionFindForkJoin_800000() {
-        return new ParallelUnionFindForkJoin(graph, AllocationTracker.EMPTY, 800_000, 8, threshold)
+        return new ParallelUnionFindForkJoin(graph, AllocationTracker.EMPTY, 800_000, 8, algoConfig)
                 .compute();
     }
 
@@ -228,7 +233,7 @@ public class ParallelUnionFindBenchmark {
 
     @Benchmark
     public Object sequentialUnionFind() {
-        return new GraphUnionFind(graph, AllocationTracker.EMPTY, threshold)
+        return new GraphUnionFind(graph, algoConfig, AllocationTracker.EMPTY)
                 .compute();
 
     }

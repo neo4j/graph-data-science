@@ -33,10 +33,10 @@ public interface UnionFindAlgorithm extends Assessable {
             ExecutorService executor,
             int minBatchSize,
             int concurrency,
-            double threshold,
+            final GraphUnionFindAlgo.Config config,
             AllocationTracker tracker) {
 
-        GraphUnionFindAlgo<?> algo = create(graph, executor, minBatchSize, concurrency, threshold, tracker);
+        GraphUnionFindAlgo<?> algo = create(graph, executor, minBatchSize, concurrency, config, tracker);
         DisjointSetStruct communities = algo.compute();
         algo.release();
         return communities;
@@ -47,7 +47,7 @@ public interface UnionFindAlgorithm extends Assessable {
             ExecutorService executor,
             int minBatchSize,
             int concurrency,
-            double threshold,
+            final GraphUnionFindAlgo.Config config,
             AllocationTracker tracker);
 
 }

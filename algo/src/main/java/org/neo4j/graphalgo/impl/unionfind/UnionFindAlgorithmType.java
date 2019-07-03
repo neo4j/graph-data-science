@@ -41,7 +41,7 @@ public enum UnionFindAlgorithmType implements UnionFindAlgorithm {
                 final ExecutorService executor,
                 final int minBatchSize,
                 final int concurrency,
-                final double threshold,
+                final GraphUnionFindAlgo.Config config,
                 final AllocationTracker tracker) {
 
             return new ParallelUnionFindQueue(
@@ -49,7 +49,7 @@ public enum UnionFindAlgorithmType implements UnionFindAlgorithm {
                     executor,
                     minBatchSize,
                     concurrency,
-                    threshold,
+                    config,
                     tracker);
         }
 
@@ -65,7 +65,7 @@ public enum UnionFindAlgorithmType implements UnionFindAlgorithm {
                 final ExecutorService executor,
                 final int minBatchSize,
                 final int concurrency,
-                final double threshold,
+                final GraphUnionFindAlgo.Config config,
                 final AllocationTracker tracker) {
 
             return new ParallelUnionFindForkJoin(
@@ -73,7 +73,7 @@ public enum UnionFindAlgorithmType implements UnionFindAlgorithm {
                     tracker,
                     minBatchSize,
                     concurrency,
-                    threshold);
+                    config);
         }
 
         @Override
@@ -88,7 +88,7 @@ public enum UnionFindAlgorithmType implements UnionFindAlgorithm {
                 final ExecutorService executor,
                 final int minBatchSize,
                 final int concurrency,
-                final double threshold,
+                final GraphUnionFindAlgo.Config config,
                 final AllocationTracker tracker) {
 
             return new ParallelUnionFindFJMerge(
@@ -97,7 +97,7 @@ public enum UnionFindAlgorithmType implements UnionFindAlgorithm {
                     tracker,
                     minBatchSize,
                     concurrency,
-                    threshold);
+                    config);
         }
 
         @Override
@@ -112,12 +112,13 @@ public enum UnionFindAlgorithmType implements UnionFindAlgorithm {
                 final ExecutorService executor,
                 final int minBatchSize,
                 final int concurrency,
-                final double threshold,
+                final GraphUnionFindAlgo.Config config,
                 final AllocationTracker tracker) {
 
             return new GraphUnionFind(
                     graph,
-                    AllocationTracker.EMPTY, threshold
+                    config,
+                    AllocationTracker.EMPTY
             );
         }
 
@@ -125,5 +126,5 @@ public enum UnionFindAlgorithmType implements UnionFindAlgorithm {
         public MemoryEstimation memoryEstimation() {
             return GraphUnionFind.memoryEstimation();
         }
-    }
+    },
 }

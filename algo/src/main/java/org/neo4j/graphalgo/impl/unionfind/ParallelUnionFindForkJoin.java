@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.RankedDisjointSetStruct;
 import org.neo4j.graphdb.Direction;
 
 import java.util.concurrent.ForkJoinPool;
@@ -56,7 +57,7 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionF
         return MemoryEstimations.builder(ParallelUnionFindForkJoin.class)
                 .startField("computeStep", ThresholdUFTask.class)
                 .add(MemoryEstimations.of("dss", (dimensions, concurrency) ->
-                        DisjointSetStruct.memoryEstimation()
+                        RankedDisjointSetStruct.memoryEstimation()
                                 .estimate(dimensions, concurrency)
                                 .memoryUsage()
                                 .times(concurrency)))
@@ -65,7 +66,7 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionF
     }
 
     /**
-     * initialize parallel UF
+     * Initialize parallel UF.
      *
      * @param graph
      */
@@ -74,8 +75,8 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionF
             AllocationTracker tracker,
             int minBatchSize,
             int concurrency,
-            double threshold) {
-        super(graph, threshold);
+            GraphUnionFind.Config algoConfig) {
+        super(graph, algoConfig);
 
         this.nodeCount = graph.nodeCount();
         this.tracker = tracker;
@@ -119,7 +120,7 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionF
         }
 
         protected DisjointSetStruct run() {
-            final DisjointSetStruct struct = new DisjointSetStruct(
+            final DisjointSetStruct struct = new RankedDisjointSetStruct(
                     nodeCount,
                     tracker).reset();
             for (long node = offset; node < end && running(); node++) {
@@ -164,7 +165,7 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionF
         }
 
         protected DisjointSetStruct run() {
-            final DisjointSetStruct struct = new DisjointSetStruct(
+            final DisjointSetStruct struct = new RankedDisjointSetStruct(
                     nodeCount,
                     tracker).reset();
             for (long node = offset; node < end && running(); node++) {

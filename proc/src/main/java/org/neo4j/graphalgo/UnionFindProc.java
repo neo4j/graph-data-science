@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
@@ -59,11 +60,12 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
     private static final String CONFIG_CLUSTER_PROPERTY = "writeProperty";
     private static final String CONFIG_OLD_CLUSTER_PROPERTY = "partitionProperty";
     private static final String DEFAULT_CLUSTER_PROPERTY = "partition";
+    private static final String CONFIG_COMMUNITY_PROPERTY = "communityProperty";
 
     @Procedure(value = "algo.unionFind", mode = Mode.WRITE)
     @Description("CALL algo.unionFind(label:String, relationship:String, " +
-            "{weightProperty:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition'}) " +
-            "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
+                 "{weightProperty:'weight', threshold:0.42, defaultValue:1.0, write: true, writeProperty:'community', communityProperty:'oldCommunity'}) " +
+                 "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
     public Stream<UnionFindResult> unionFind(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
@@ -74,8 +76,8 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
 
     @Procedure(value = "algo.unionFind.stream")
     @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
-            "{weightProperty:'propertyName', threshold:0.42, defaultValue:1.0) " +
-            "YIELD nodeId, setId - yields a setId to each node id")
+                 "{weightProperty:'propertyName', threshold:0.42, defaultValue:1.0) " +
+                 "YIELD nodeId, setId - yields a setId to each node id")
     public Stream<DisjointSetStruct.Result> unionFindStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
@@ -86,7 +88,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
 
     @Procedure(value = "algo.unionFind.memrec", mode = Mode.READ)
     @Description("CALL algo.unionFind.memrec(label:String, relationship:String, {...properties}) " +
-            "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for UnionFind")
+                 "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for UnionFind")
     public Stream<MemRecResult> unionFindMemRec(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
@@ -99,8 +101,8 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
 
     @Procedure(value = "algo.unionFind.queue", mode = Mode.WRITE)
     @Description("CALL algo.unionFind(label:String, relationship:String, " +
-            "{property:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition',concurrency:4}) " +
-            "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
+                 "{property:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition',concurrency:4}) " +
+                 "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
     public Stream<UnionFindResult> unionFindQueue(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
@@ -111,8 +113,8 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
 
     @Procedure(value = "algo.unionFind.queue.stream")
     @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
-            "{property:'propertyName', threshold:0.42, defaultValue:1.0, concurrency:4}) " +
-            "YIELD nodeId, setId - yields a setId to each node id")
+                 "{property:'propertyName', threshold:0.42, defaultValue:1.0, concurrency:4}) " +
+                 "YIELD nodeId, setId - yields a setId to each node id")
     public Stream<DisjointSetStruct.Result> unionFindQueueStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
@@ -123,8 +125,8 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
 
     @Procedure(value = "algo.unionFind.forkJoinMerge", mode = Mode.WRITE)
     @Description("CALL algo.unionFind(label:String, relationship:String, " +
-            "{property:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition', concurrency:4}) " +
-            "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
+                 "{property:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition', concurrency:4}) " +
+                 "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
     public Stream<UnionFindResult> unionFindForkJoinMerge(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
@@ -135,8 +137,8 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
 
     @Procedure(value = "algo.unionFind.forkJoinMerge.stream")
     @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
-            "{property:'propertyName', threshold:0.42, defaultValue:1.0, concurrency:4}) " +
-            "YIELD nodeId, setId - yields a setId to each node id")
+                 "{property:'propertyName', threshold:0.42, defaultValue:1.0, concurrency:4}) " +
+                 "YIELD nodeId, setId - yields a setId to each node id")
     public Stream<DisjointSetStruct.Result> unionFindForkJoinMergeStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
@@ -147,8 +149,8 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
 
     @Procedure(value = "algo.unionFind.forkJoin", mode = Mode.WRITE)
     @Description("CALL algo.unionFind(label:String, relationship:String, " +
-            "{property:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition',concurrency:4}) " +
-            "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
+                 "{property:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition',concurrency:4}) " +
+                 "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
     public Stream<UnionFindResult> unionFindForkJoin(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
@@ -159,8 +161,8 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
 
     @Procedure(value = "algo.unionFind.forkJoin.stream")
     @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
-            "{property:'propertyName', threshold:0.42, defaultValue:1.0,concurrency:4}) " +
-            "YIELD nodeId, setId - yields a setId to each node id")
+                 "{property:'propertyName', threshold:0.42, defaultValue:1.0,concurrency:4}) " +
+                 "YIELD nodeId, setId - yields a setId to each node id")
     public Stream<DisjointSetStruct.Result> unionFindForJoinStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
@@ -202,8 +204,9 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
 
         config.put(CONFIG_PARALLEL_ALGO, algoImpl.name());
 
-        AllocationTracker tracker = AllocationTracker.create();
         ProcedureConfiguration configuration = newConfig(label, relationship, config);
+
+        AllocationTracker tracker = AllocationTracker.create();
         Graph graph = this.loadGraph(configuration, tracker, builder);
         if (graph.nodeCount() == 0) {
             graph.release();
@@ -224,6 +227,12 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
         }
 
         return Stream.of(builder.build(tracker, graph.nodeCount(), communities::find));
+    }
+
+    private PropertyMapping[] createPropertyMappings(String communityProperty) {
+        return new PropertyMapping[]{
+                PropertyMapping.of(GraphUnionFindAlgo.COMMUNITY_TYPE, communityProperty, -1),
+        };
     }
 
     private void write(
@@ -257,13 +266,13 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
     private DisjointSetStruct compute(
             final Builder builder,
             final AllocationTracker tracker,
-            final ProcedureConfiguration configuration, final Graph graph) {
+            final ProcedureConfiguration configuration,
+            final Graph graph) {
+
         T algo = newAlgorithm(graph, configuration, tracker);
         final DisjointSetStruct algoResult = runWithExceptionLogging(
                 "UnionFind failed",
-                () -> builder.timeEval(() -> Double.isFinite(algo.threshold())
-                        ? algo.compute(algo.threshold())
-                        : algo.compute()));
+                () -> builder.timeEval((Supplier<DisjointSetStruct>) algo::compute));
 
         log.info("UnionFind: overall memory usage: %s", tracker.getUsageString());
 
@@ -275,6 +284,13 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
 
     @Override
     GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
+
+        final String communityProperty = config.getString(CONFIG_COMMUNITY_PROPERTY, null);
+
+        if (communityProperty != null) {
+            loader.withOptionalNodeProperties(createPropertyMappings(communityProperty));
+        }
+
         return loader
                 .withOptionalRelationshipWeightsFromProperty(
                         config.getWeightProperty(),

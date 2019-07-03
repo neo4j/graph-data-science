@@ -135,6 +135,11 @@ public class HeavyGraph implements Graph {
     @Override
     public HugeWeightMapping nodeProperties(String type) {
         WeightMapping weightMapping = nodePropertiesMapping.get(type);
+
+        if (weightMapping == null) {
+            return null;
+        }
+
         return new HugeWeightMapping() {
 
             @Override

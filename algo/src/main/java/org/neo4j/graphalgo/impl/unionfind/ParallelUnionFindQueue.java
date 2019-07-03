@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.RankedDisjointSetStruct;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
@@ -65,7 +66,7 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFind
                 .builder(ParallelUnionFindQueue.class)
                 .startField("computeStep", HugeUnionFindTask.class)
                 .add(MemoryEstimations.of("dss", (dimensions, concurrency) ->
-                        DisjointSetStruct.memoryEstimation()
+                        RankedDisjointSetStruct.memoryEstimation()
                                 .estimate(dimensions, concurrency)
                                 .memoryUsage()
                                 .times(concurrency)))
@@ -74,16 +75,16 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFind
     }
 
     /**
-     * initialize parallel UF
+     * Initialize parallel UF.
      */
     public ParallelUnionFindQueue(
             Graph graph,
             ExecutorService executor,
             int minBatchSize,
             int concurrency,
-            double threshold,
+            GraphUnionFind.Config algoConfig,
             AllocationTracker tracker) {
-        super(graph, threshold);
+        super(graph, algoConfig);
         this.executor = executor;
         this.tracker = tracker;
 
@@ -138,7 +139,7 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFind
     private DisjointSetStruct getStruct(final BlockingQueue<DisjointSetStruct> queue) {
         DisjointSetStruct set = queue.poll();
         if (set == null) {
-            set = new DisjointSetStruct(nodeCount, tracker);
+            set = new RankedDisjointSetStruct(nodeCount, tracker);
         }
         return set;
     }
@@ -201,7 +202,7 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFind
         public void run() {
             boolean pushed = false;
             try {
-                final DisjointSetStruct struct = new DisjointSetStruct(
+                final DisjointSetStruct struct = new RankedDisjointSetStruct(
                         nodeCount,
                         tracker).reset();
                 for (long node = offset; node < end; node++) {

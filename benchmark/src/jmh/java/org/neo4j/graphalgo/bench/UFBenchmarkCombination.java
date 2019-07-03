@@ -19,9 +19,12 @@
 package org.neo4j.graphalgo.bench;
 
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.RankedDisjointSetStruct;
+import org.neo4j.graphalgo.impl.unionfind.GraphUnionFind;
 import org.neo4j.graphalgo.impl.unionfind.GraphUnionFindAlgo;
 import org.neo4j.graphalgo.impl.unionfind.UnionFindAlgorithmType;
 
@@ -46,13 +49,17 @@ public enum UFBenchmarkCombination {
     }
 
     public Object run(Graph graph) {
-        double threshold = Double.NaN;
+        GraphUnionFind.Config algoConfig = new GraphUnionFindAlgo.Config(
+                new HugeNullWeightMap(-1L),
+                Double.NaN
+        );
+
         GraphUnionFindAlgo<?> unionFindAlgo = algo.create(
                 graph,
                 Pools.DEFAULT,
                 (int) (graph.nodeCount() / Pools.DEFAULT_CONCURRENCY),
                 Pools.DEFAULT_CONCURRENCY,
-                threshold,
+                algoConfig,
                 AllocationTracker.EMPTY
         );
         DisjointSetStruct communities = unionFindAlgo.compute();

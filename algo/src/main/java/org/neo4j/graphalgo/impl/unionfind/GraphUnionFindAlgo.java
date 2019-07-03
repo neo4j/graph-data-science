@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.impl.unionfind;
 
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
 
 /**
@@ -30,22 +31,24 @@ public abstract class GraphUnionFindAlgo<ME extends GraphUnionFindAlgo<ME>> exte
 
     protected Graph graph;
 
-    protected double threshold;
+    protected final GraphUnionFindAlgo.Config algoConfig;
 
-    protected GraphUnionFindAlgo(final Graph graph, final double threshold) {
+    public static final String COMMUNITY_TYPE = "community";
+
+    protected GraphUnionFindAlgo(final Graph graph, final GraphUnionFindAlgo.Config algoConfig) {
         this.graph = graph;
-        this.threshold = threshold;
+        this.algoConfig = algoConfig;
     }
 
     public double threshold() {
-        return threshold;
+        return algoConfig.threshold;
     }
 
     /**
      * compute connected components
      */
     public DisjointSetStruct compute() {
-        return Double.isFinite(threshold) ? compute(threshold) : computeUnrestricted();
+        return Double.isFinite(threshold()) ? compute(threshold()) : computeUnrestricted();
     }
 
     public abstract DisjointSetStruct compute(double threshold);
@@ -72,5 +75,18 @@ public abstract class GraphUnionFindAlgo<ME extends GraphUnionFindAlgo<ME>> exte
     public ME release() {
         graph = null;
         return me();
+    }
+
+    public static class Config {
+
+        public final HugeWeightMapping communityMap;
+        public final double threshold;
+
+        public Config(
+                final HugeWeightMapping communityMap,
+                final double threshold) {
+            this.communityMap = communityMap;
+            this.threshold = threshold;
+        }
     }
 }

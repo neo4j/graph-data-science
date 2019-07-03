@@ -29,8 +29,11 @@ import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
+import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.impl.unionfind.GraphUnionFind;
+import org.neo4j.graphalgo.impl.unionfind.GraphUnionFindAlgo;
 import org.neo4j.graphalgo.impl.unionfind.UnionFindAlgorithmType;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.Exceptions;
@@ -59,6 +62,11 @@ public final class UnionFindSafetyTest {
     @Parameterized.Parameter
     public UnionFindAlgorithmType unionFindAlgorithmType;
 
+    GraphUnionFind.Config algoConfig = new GraphUnionFindAlgo.Config(
+            new HugeNullWeightMap(-1),
+            Double.NaN
+    );
+
     @Test(timeout = 10_000L)
     public void testUnionFindSafetyUnderFailure() {
         IllegalStateException error = new IllegalStateException("some error");
@@ -69,9 +77,8 @@ public final class UnionFindSafetyTest {
                     Pools.DEFAULT,
                     10,
                     10,
-                    Double.NaN,
-                    AllocationTracker.EMPTY
-            );
+                    algoConfig,
+                    AllocationTracker.EMPTY);
         } catch (Throwable e) {
             assertSame(error, Exceptions.rootCause(e));
         }
@@ -87,9 +94,8 @@ public final class UnionFindSafetyTest {
                     Pools.DEFAULT,
                     10,
                     10,
-                    Double.NaN,
-                    AllocationTracker.EMPTY
-            );
+                    algoConfig,
+                    AllocationTracker.EMPTY);
         } catch (Throwable e) {
             assertSame(error, Exceptions.rootCause(e));
         }

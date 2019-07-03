@@ -26,6 +26,8 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.IncrementalDisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.RankedDisjointSetStruct;
 import org.neo4j.graphdb.Direction;
 
 /**
@@ -33,7 +35,7 @@ import org.neo4j.graphdb.Direction;
  * <p>
  * The algorithm computes sets of weakly connected components.
  * <p>
- * The impl. is based on the {@link DisjointSetStruct}. It iterates over all relationships once
+ * The impl. is based on a {@link DisjointSetStruct}. It iterates over all relationships once
  * within a single forEach loop and adds each source-target pair to the struct. Therefore buffering
  * would introduce an overhead (a SingleRun-RelationshipIterable might be used here).
  * <p>
@@ -50,20 +52,23 @@ public class GraphUnionFind extends GraphUnionFindAlgo<GraphUnionFind> {
     private RelationshipConsumer unrestricted;
 
     public static MemoryEstimation memoryEstimation() {
+        // TODO use incremental or ranked
         return MemoryEstimations.builder(GraphUnionFind.class)
-                .add("dss", DisjointSetStruct.MEMORY_ESTIMATION)
+                .add("dss", RankedDisjointSetStruct.MEMORY_ESTIMATION)
                 .build();
     }
 
     public GraphUnionFind(
             Graph graph,
-            AllocationTracker tracker,
-            double threshold) {
-        super(graph, threshold);
+            GraphUnionFindAlgo.Config algoConfig,
+            AllocationTracker tracker) {
+        super(graph, algoConfig);
 
-        this.threshold = threshold;
         this.nodeCount = graph.nodeCount();
-        this.dss = new DisjointSetStruct(nodeCount, tracker);
+        this.dss = algoConfig.communityMap == null ?
+                new RankedDisjointSetStruct(nodeCount, tracker) :
+                new IncrementalDisjointSetStruct(nodeCount, algoConfig.communityMap, tracker);
+
         this.unrestricted = (source, target) -> {
             dss.union(source, target);
             return true;

@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.impl.unionfind;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
+import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -30,13 +31,41 @@ import org.neo4j.logging.Log;
 public class UnionFindFactory<A extends GraphUnionFindAlgo<A>> extends AlgorithmFactory<A> {
 
     public static final String CONFIG_PARALLEL_ALGO = "parallel_algo";
+    public static final String CONFIG_THRESHOLD = "threshold";
 
     private final UnionFindAlgorithmType algorithmType;
-    private final double threshold;
 
-    public UnionFindFactory(UnionFindAlgorithmType algorithmType, double threshold) {
+    public UnionFindFactory(UnionFindAlgorithmType algorithmType) {
         this.algorithmType = algorithmType;
-        this.threshold = threshold;
+    }
+
+    public static <T extends GraphUnionFindAlgo<T>> UnionFindFactory<T> create(ProcedureConfiguration configuration) {
+        UnionFindAlgorithmType result;
+        if (configuration.getConcurrency() <= 1) {
+            result = UnionFindAlgorithmType.SEQ;
+        } else {
+            final String algoName = configuration
+                    .getString(CONFIG_PARALLEL_ALGO, UnionFindAlgorithmType.QUEUE.name())
+                    .toUpperCase();
+
+            UnionFindAlgorithmType algoImpl;
+            try {
+                algoImpl = UnionFindAlgorithmType.valueOf(algoName);
+            } catch (IllegalArgumentException e) {
+                algoImpl = UnionFindAlgorithmType.SEQ;
+            }
+
+            if (algoImpl == UnionFindAlgorithmType.SEQ) {
+                String errorMsg = String.format("Parallel configuration %s is invalid. Valid names are %s", algoName,
+                        Arrays.stream(UnionFindAlgorithmType.values())
+                                .filter(ufa -> ufa != UnionFindAlgorithmType.SEQ)
+                                .map(UnionFindAlgorithmType::name)
+                                .collect(Collectors.joining(", ")));
+                throw new IllegalArgumentException(errorMsg);
+            }
+            result = algoImpl;
+        }
+        return new UnionFindFactory<>(result);
     }
 
     @SuppressWarnings("unchecked")
@@ -48,12 +77,18 @@ public class UnionFindFactory<A extends GraphUnionFindAlgo<A>> extends Algorithm
             final Log log) {
         int concurrency = configuration.getConcurrency();
         int minBatchSize = configuration.getBatchSize();
+
+        GraphUnionFindAlgo.Config algoConfig = new GraphUnionFindAlgo.Config(
+                graph.nodeProperties(GraphUnionFindAlgo.COMMUNITY_TYPE),
+                configuration.get(CONFIG_THRESHOLD, Double.NaN)
+        );
+
         final GraphUnionFindAlgo<?> algo = algorithmType.create(
                 graph,
                 Pools.DEFAULT,
                 minBatchSize,
                 concurrency,
-                threshold,
+                algoConfig,
                 tracker);
         return (A) algo;
     }

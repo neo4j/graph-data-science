@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.RankedDisjointSetStruct;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
@@ -62,7 +63,7 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
         return MemoryEstimations.builder(ParallelUnionFindFJMerge.class)
                 .startField("computeStep", TUFProcess.class)
                 .add(MemoryEstimations.of("dss", (dimensions, concurrency) ->
-                        DisjointSetStruct.memoryEstimation()
+                        RankedDisjointSetStruct.memoryEstimation()
                                 .estimate(dimensions, concurrency)
                                 .memoryUsage()
                                 .times(concurrency)))
@@ -82,8 +83,8 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
             AllocationTracker tracker,
             int minBatchSize,
             int concurrency,
-            double threshold) {
-        super(graph, threshold);
+            GraphUnionFind.Config algoConfig) {
+        super(graph, algoConfig);
 
         this.nodeCount = graph.nodeCount();
         this.executor = executor;
@@ -151,7 +152,7 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
         UFProcess(long offset, long length) {
             this.offset = offset;
             this.end = offset + length;
-            struct = new DisjointSetStruct(nodeCount, tracker).reset();
+            struct = new RankedDisjointSetStruct(nodeCount, tracker).reset();
             rels = graph.concurrentCopy();
         }
 
@@ -194,7 +195,7 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
             this.offset = offset;
             this.end = offset + length;
             this.threshold = threshold;
-            struct = new DisjointSetStruct(nodeCount, tracker).reset();
+            struct = new RankedDisjointSetStruct(nodeCount, tracker).reset();
             rels = graph.concurrentCopy();
         }
 
