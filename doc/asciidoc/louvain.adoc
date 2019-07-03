@@ -423,17 +423,30 @@ include::memrec.adoc[tags=component]
 
 Below are the memory requirements for various sample datasets.
 
+=== Pokec
+
+This dataset contains people and friends relationships from https://snap.stanford.edu/data/soc-Pokec.html[Pokec^], the most popular online social network in Slovakia.
+
+.Memory Usage
+[opts="header", cols="1,1,1,2,2,2"]
+|===
+| Graph Type | Nodes | Relationships | Required Memory | In Memory Graph | Algorithm
+| Heavy | 1,632,803 | 30,622,564 | [695 MiB...807 MiB]| 334 MiB    | [361 MiB...473 MiB]
+| Huge | 1,632,803 | 30,622,564 | 	[465 MiB...693 MiB] | [104 MiB...219 MiB] | [361 MiB...473 MiB]
+|===
+
+
 === Dbpedia
 
 This dataset contains Wikipedia pages and the links between them.
 Instructions for importing this dataset are available from https://github.com/jexp/graphipedia[jexp/graphipedia^].
 
 .Memory Usage
-[opts="header", cols="1,1,1,2,1,1"]
+[opts="header", cols="1,1,1,2,2,2"]
 |===
 | Graph Type | Nodes | Relationships | Required Memory | In Memory Graph | Algorithm
 | Heavy | 11,474,730 | 116,601,029 | [4043 MiB...4831 MiB] | 1505 MiB | [2538 MiB...3326 MiB]
-| Huge | 11,474,730 | 116,601,029 | 	[3086 MiB...4312 MiB] | [438 MiB...657 MiB] | [2538 MiB...3326 MiB]
+| Huge | 11,474,730 | 116,601,029 | 	[3086 MiB...4312 MiB] | [547 MiB...985 MiB] | [2538 MiB...3326 MiB]
 |===
 
 
