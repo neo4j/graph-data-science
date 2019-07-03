@@ -127,7 +127,7 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
         int blockPos, blockEnd;
         long[] keysBlock;
         long existing;
-        keys.cursor(cursor, start, end);
+        keys.initCursor(cursor, start, end);
         while (cursor.next()) {
             keysBlock = cursor.array;
             blockPos = cursor.offset;
@@ -326,8 +326,8 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
         }
 
         EntryIterator(HugeLongArray keys, HugeLongArray values) {
-            keyCursor = keys.cursor(keys.newCursor());
-            valueCursor = values.cursor(values.newCursor());
+            keyCursor = keys.initCursor(keys.newCursor());
+            valueCursor = values.initCursor(values.newCursor());
             cursor = new LongLongCursor();
         }
 
@@ -336,8 +336,8 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
         }
 
         EntryIterator reset(HugeLongArray keys, HugeLongArray values) {
-            keyCursor = keys.cursor(keyCursor);
-            valueCursor = values.cursor(valueCursor);
+            keyCursor = keys.initCursor(keyCursor);
+            valueCursor = values.initCursor(valueCursor);
             pos = 0;
             end = 0;
             hasNext = false;

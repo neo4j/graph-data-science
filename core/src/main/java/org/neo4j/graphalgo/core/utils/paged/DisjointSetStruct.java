@@ -74,7 +74,29 @@ public interface DisjointSetStruct {
      * @param other DisjointSetStruct to merge with
      * @return merged DisjointSetStruct
      */
-    DisjointSetStruct merge(DisjointSetStruct other);
+    default DisjointSetStruct merge(DisjointSetStruct other) {
+        if (other.capacity() != this.capacity()) {
+            throw new IllegalArgumentException("Different Capacity");
+        }
+
+        final HugeCursor<long[]> others = other.parent().initCursor(other.parent().newCursor());
+        long nodeId = 0L;
+        while (others.next()) {
+            long[] parentPage = others.array;
+            int offset = others.offset;
+            int limit = others.limit;
+            while (offset < limit) {
+                // Skip root nodes
+                if (parentPage[offset] != -1L) {
+                    union(nodeId, other.find(nodeId));
+                }
+                ++offset;
+                ++nodeId;
+            }
+        }
+
+        return this;
+    }
 
     /**
      * Find set Id of element p without balancing optimization.

@@ -133,30 +133,6 @@ public final class IncrementalDisjointSetStruct implements DisjointSetStruct {
         }
     }
 
-    public IncrementalDisjointSetStruct merge(DisjointSetStruct other) {
-//        if (other.capacity() != this.capacity) {
-//            throw new IllegalArgumentException("Different Capacity");
-//        }
-//
-//        final HugeCursor<long[]> others = other.parent.cursor(other.parent.newCursor());
-//        long i = 0L;
-//        while (others.next()) {
-//            long[] parentPage = others.array;
-//            int offset = others.offset;
-//            int limit = others.limit;
-//            while (offset < limit) {
-//                // Skip root nodes
-//                if (parentPage[offset] != -1L) {
-//                    union(i, other.find(i));
-//                }
-//                ++offset;
-//                ++i;
-//            }
-//        }
-
-        return this;
-    }
-
     /**
      * find setId of element p without balancing optimization.
      *

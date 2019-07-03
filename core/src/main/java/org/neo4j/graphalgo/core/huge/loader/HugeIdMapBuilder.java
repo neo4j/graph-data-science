@@ -41,7 +41,7 @@ final class HugeIdMapBuilder {
                 graphIds.size(),
                 Pools.DEFAULT,
                 (start, end) -> {
-                    try (HugeCursor<long[]> cursor = graphIds.cursor(graphIds.newCursor(), start, end)) {
+                    try (HugeCursor<long[]> cursor = graphIds.initCursor(graphIds.newCursor(), start, end)) {
                         while (cursor.next()) {
                             long[] array = cursor.array;
                             int offset = cursor.offset;

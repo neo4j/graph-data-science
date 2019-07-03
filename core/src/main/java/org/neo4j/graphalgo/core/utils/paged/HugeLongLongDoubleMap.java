@@ -130,7 +130,7 @@ public final class HugeLongLongDoubleMap {
         int blockPos, blockEnd;
         long[] keysBlock;
         long existing;
-        keys1.cursor(cursor, start, end);
+        keys1.initCursor(cursor, start, end);
         while (cursor.next()) {
             keysBlock = cursor.array;
             blockPos = cursor.offset;
@@ -184,9 +184,9 @@ public final class HugeLongLongDoubleMap {
         final StringBuilder buffer = new StringBuilder();
         buffer.append('[');
 
-        HugeCursor<long[]> keys1 = this.keys1.cursor(this.keys1.newCursor());
-        HugeCursor<long[]> keys2 = this.keys2.cursor(this.keys2.newCursor());
-        HugeCursor<double[]> values = this.values.cursor(this.values.newCursor());
+        HugeCursor<long[]> keys1 = this.keys1.initCursor(this.keys1.newCursor());
+        HugeCursor<long[]> keys2 = this.keys2.initCursor(this.keys2.newCursor());
+        HugeCursor<double[]> values = this.values.initCursor(this.values.newCursor());
 
         long key1;
         while (keys1.next()) {
@@ -273,9 +273,9 @@ public final class HugeLongLongDoubleMap {
         final HugeDoubleArray newValues = this.values;
         final long mask = this.mask;
 
-        HugeCursor<long[]> keys1 = fromKeys1.cursor(fromKeys1.newCursor());
-        HugeCursor<long[]> keys2 = fromKeys2.cursor(fromKeys2.newCursor());
-        HugeCursor<double[]> values = fromValues.cursor(fromValues.newCursor());
+        HugeCursor<long[]> keys1 = fromKeys1.initCursor(fromKeys1.newCursor());
+        HugeCursor<long[]> keys2 = fromKeys2.initCursor(fromKeys2.newCursor());
+        HugeCursor<double[]> values = fromValues.initCursor(fromValues.newCursor());
 
         long key1, key2, slot;
         while (keys1.next()) {

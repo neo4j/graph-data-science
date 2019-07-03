@@ -62,7 +62,7 @@ final class LouvainUtils {
     static long normalize(HugeLongArray communities) {
         PagedLongDoubleMap map = PagedLongDoubleMap.of(communities.size(), AllocationTracker.EMPTY);
         long c = 0L;
-        HugeCursor<long[]> cursor = communities.cursor(communities.newCursor());
+        HugeCursor<long[]> cursor = communities.initCursor(communities.newCursor());
         while (cursor.next()) {
             long[] array = cursor.array;
             for (int i = cursor.offset; i < cursor.limit; i++) {
