@@ -19,185 +19,109 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
-
 import com.carrotsearch.hppc.LongLongMap;
 import com.carrotsearch.hppc.LongLongScatterMap;
 import com.carrotsearch.hppc.LongScatterSet;
 import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 /**
- * disjoint-set-struct is a data structure that keeps track of a set
+ * Disjoint-set-struct is a data structure that keeps track of a set
  * of elements partitioned into a number of disjoint (non-overlapping) subsets.
- * <p>
- * More info:
- * <p>
- * <a href="https://en.wikipedia.org/wiki/Disjoint-set_data_structure">Wiki</a>
+ *
+ * @see <a href="https://en.wikipedia.org/wiki/Disjoint-set_data_structure">Wiki</a>
  */
-public final class DisjointSetStruct {
+public interface DisjointSetStruct {
 
-    public static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations.builder(DisjointSetStruct.class)
-            .perNode("parent", HugeLongArray::memoryEstimation)
-            .perNode("depth", HugeLongArray::memoryEstimation)
-            .build();
-
-    private final HugeLongArray parent;
-    private final HugeLongArray depth;
-    private final long capacity;
+    HugeLongArray parent();
 
     /**
-     * Initialize the struct with the given capacity.
-     * Note: the struct must be {@link DisjointSetStruct#reset()} prior use!
+     * Initializes the data structure.
+     */
+    DisjointSetStruct reset();
+
+    /**
+     * Number of elements stored in the data structure.
      *
-     * @param capacity the capacity (maximum node id)
+     * @return element count
      */
-    public DisjointSetStruct(long capacity, AllocationTracker tracker) {
-        parent = HugeLongArray.newArray(capacity, tracker);
-        depth = HugeLongArray.newArray(capacity, tracker);
-        this.capacity = capacity;
-    }
+    long capacity();
 
     /**
-     * reset the container
-     */
-    public DisjointSetStruct reset() {
-        parent.fill(-1);
-        return this;
-    }
-
-    public static MemoryEstimation memoryEstimation() {
-        return MEMORY_ESTIMATION;
-    }
-
-    /**
-     * element (node) count
+     * Find set Id of element p.
      *
-     * @return the element count
+     * @param p the set element
+     * @return returns the representative member of the set to which p belongs
      */
-    public long capacity() {
-        return capacity;
-    }
+    long find(long p);
 
     /**
-     * check if p and q belong to the same set
+     * Joins the set of p (Sp) with set of q (Sq) such that
+     * {@link DisjointSetStruct#connected(long, long)}
+     * for any pair of (Spi, Sqj) evaluates to true.
+     *
+     * @param p an item of Sp
+     * @param q an item of Sq
+     */
+    void union(long p, long q);
+
+    /**
+     * Merges the given DisjointSetStruct into this one.
+     *
+     * @param other DisjointSetStruct to merge with
+     * @return merged DisjointSetStruct
+     */
+    DisjointSetStruct merge(DisjointSetStruct other);
+
+    /**
+     * Find set Id of element p without balancing optimization.
+     *
+     * @param nodeId the element in the set we are looking for
+     * @return an id of the set it belongs to
+     */
+    long findNoOpt(long nodeId);
+
+    /**
+     * Check if p and q belong to the same set.
      *
      * @param p a set item
      * @param q a set item
      * @return true if both items belong to the same set, false otherwise
      */
-    public boolean connected(long p, long q) {
+    default boolean connected(long p, long q) {
         return find(p) == find(q);
     }
 
     /**
-     * find setId of element p.
-     *
-     * @param p the element in the set we are looking for
-     * @return an id of the set it belongs to
-     */
-    public long find(long p) {
-        return findPC(p);
-    }
-
-    /**
-     * find setId of element p.
+     * Find set Id of element p.
      * <p>
-     * find-impl using a recursive path compression logic
+     * This method uses recursive path compression logic.
      *
-     * @param p the element in the set we are looking for
-     * @return an id of the set it belongs to
+     * @param p the set element
+     * @return returns the representative member of the set to which p belongs
      */
-    private long findPC(long p) {
-        long pv = parent.get(p);
+    default long findPC(long p) {
+        long pv = parent().get(p);
         if (pv == -1L) {
             return p;
         }
         // path compression optimization
-        // TODO
-        long value = find(pv);
-        parent.set(p, value);
+        long value = findPC(pv);
+        parent().set(p, value);
         return value;
     }
 
     /**
-     * join set of p (Sp) with set of q (Sq) so that {@link DisjointSetStruct#connected(long, long)}
-     * for any pair of (Spi, Sqj) evaluates to true. Some optimizations exists
-     * which automatically balance the tree, the "weighted union rule" is used here.
+     * Compute number of sets present.
      *
-     * @param p an item of Sp
-     * @param q an item of Sq
+     * @note This is very expensive.
      */
-    public void union(long p, long q) {
-        final long pSet = find(p);
-        final long qSet = find(q);
-        if (pSet == qSet) {
-            return;
-        }
-        // weighted union rule optimization
-        long dq = depth.get(qSet);
-        long dp = depth.get(pSet);
-        if (dp < dq) {
-            // attach the smaller tree to the root of the bigger tree
-            parent.set(pSet, qSet);
-        } else if (dp > dq) {
-            parent.set(qSet, pSet);
-        } else {
-            parent.set(qSet, pSet);
-            depth.addTo(pSet, dq + 1);
-        }
-    }
-
-    public DisjointSetStruct merge(DisjointSetStruct other) {
-
-        if (other.capacity != this.capacity) {
-            throw new IllegalArgumentException("Different Capacity");
-        }
-
-        final HugeCursor<long[]> others = other.parent.cursor(other.parent.newCursor());
-        long i = 0L;
-        while (others.next()) {
-            long[] array = others.array;
-            int offset = others.offset;
-            int limit = others.limit;
-            while (offset < limit) {
-                if (array[offset++] != -1L) {
-                    union(i, other.find(i));
-                }
-                ++i;
-            }
-        }
-
-        return this;
-    }
-
-    /**
-     * find setId of element p without balancing optimization.
-     *
-     * @param nodeId the element in the set we are looking for
-     * @return an id of the set it belongs to
-     */
-    public long findNoOpt(final long nodeId) {
-        long p = nodeId;
-        long np;
-        while ((np = parent.get(p)) != -1) {
-            p = np;
-        }
-        return p;
-    }
-
-    /**
-     * evaluate number of sets
-     *
-     * @return
-     */
-    public int getSetCount() {
+    default int getSetCount() {
         LongScatterSet set = new LongScatterSet();
-        for (long i = 0L; i < capacity; ++i) {
+        for (long i = 0L; i < capacity(); ++i) {
             long setId = find(i);
             set.add(setId);
         }
@@ -205,20 +129,27 @@ public final class DisjointSetStruct {
     }
 
     /**
-     * evaluate the size of each set.
+     * Compute the size of each set.
      *
      * @return a map which maps setId to setSize
      */
-    public LongLongMap getSetSize() {
+    default LongLongMap getSetSize() {
         final LongLongScatterMap map = new LongLongScatterMap();
 
-        for (long i = parent.size() - 1; i >= 0; i--) {
+        for (long i = parent().size() - 1; i >= 0; i--) {
             map.addTo(find(i), 1);
         }
         return map;
     }
 
-    public Stream<Result> resultStream(IdMapping idMapping) {
+    /**
+     * Computes the result stream based on a given ID mapping by using
+     * {@link #find(long)} to look up the set representative for each node id.
+     *
+     * @param idMapping mapping between internal ids and Neo4j ids
+     * @return tuples of Neo4j ids and their set ids
+     */
+    default Stream<Result> resultStream(IdMapping idMapping) {
 
         return LongStream.range(IdMapping.START_NODE_ID, idMapping.nodeCount())
                 .mapToObj(mappedId ->
@@ -228,12 +159,12 @@ public final class DisjointSetStruct {
     }
 
     /**
-     * iterate each node and find its setId
+     * Iterate each node and find its setId.
      *
      * @param consumer the consumer
      */
-    public void forEach(DisjointSetStruct.Consumer consumer) {
-        for (long i = parent.size() - 1; i >= 0; i--) {
+    default void forEach(Consumer consumer) {
+        for (long i = parent().size() - 1; i >= 0; i--) {
             if (!consumer.consume(i, find(i))) {
                 break;
             }
@@ -241,10 +172,10 @@ public final class DisjointSetStruct {
     }
 
     /**
-     * Consumer interface for c
+     * Consumer interface for {@link #forEach(Consumer)}.
      */
     @FunctionalInterface
-    public interface Consumer {
+    interface Consumer {
         /**
          * @param nodeId the mapped node id
          * @param setId  the set id where the node belongs to
@@ -253,7 +184,10 @@ public final class DisjointSetStruct {
         boolean consume(long nodeId, long setId);
     }
 
-    public static final class Translator implements PropertyTranslator.OfLong<DisjointSetStruct> {
+    /**
+     * Responsible for writing back the set ids to Neo4j.
+     */
+    final class Translator implements PropertyTranslator.OfLong<DisjointSetStruct> {
 
         public static final PropertyTranslator<DisjointSetStruct> INSTANCE = new Translator();
 
@@ -264,9 +198,9 @@ public final class DisjointSetStruct {
     }
 
     /**
-     * union find result type
+     * Union find result type.
      */
-    public static class Result {
+    class Result {
 
         /**
          * the mapped node id
@@ -287,16 +221,5 @@ public final class DisjointSetStruct {
             this.nodeId = nodeId;
             this.setId = setId;
         }
-    }
-
-    public static class Cursor {
-        /**
-         * the mapped node id
-         */
-        int nodeId;
-        /**
-         * the set id of the node
-         */
-        int setId;
     }
 }
