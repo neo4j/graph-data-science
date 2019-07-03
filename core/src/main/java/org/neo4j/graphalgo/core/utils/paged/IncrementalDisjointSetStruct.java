@@ -123,9 +123,10 @@ public final class IncrementalDisjointSetStruct implements DisjointSetStruct {
      * @param q an item of Sq
      */
     public void union(long p, long q) {
-        final long pSet = find(p);
-        final long qSet = find(q);
+        unionSets(find(p), find(q));
+    }
 
+    private void unionSets(long pSet, long qSet) {
         if (pSet < qSet) {
             parent.set(qSet, pSet);
         } else if (qSet < pSet) {
@@ -146,6 +147,27 @@ public final class IncrementalDisjointSetStruct implements DisjointSetStruct {
             p = np;
         }
         return p;
+    }
+
+    @Override
+    public DisjointSetStruct merge(DisjointSetStruct other) {
+        if (!(other instanceof IncrementalDisjointSetStruct)) {
+            throw new IllegalArgumentException(String.format(
+                    "Expected: %s Actual: %s",
+                    getClass().getSimpleName(),
+                    other.getClass().getSimpleName()));
+        }
+        if (other.capacity() != this.capacity()) {
+            throw new IllegalArgumentException("Different Capacity");
+        }
+
+        for (int nodeId = 0; nodeId < capacity(); nodeId++) {
+            long leftSetId = find(nodeId);
+            long rightSetId = other.find(nodeId);
+            unionSets(leftSetId, rightSetId);
+        }
+
+        return this;
     }
 
 }
