@@ -139,7 +139,7 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFind
     private DisjointSetStruct getStruct(final BlockingQueue<DisjointSetStruct> queue) {
         DisjointSetStruct set = queue.poll();
         if (set == null) {
-            set = new RankedDisjointSetStruct(nodeCount, tracker);
+            set = initDisjointSetStruct(nodeCount, tracker);
         }
         return set;
     }
@@ -202,9 +202,7 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFind
         public void run() {
             boolean pushed = false;
             try {
-                final DisjointSetStruct struct = new RankedDisjointSetStruct(
-                        nodeCount,
-                        tracker).reset();
+                final DisjointSetStruct struct = initDisjointSetStruct(nodeCount, tracker).reset();
                 for (long node = offset; node < end; node++) {
                     rels.forEachRelationship(
                             node,

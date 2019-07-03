@@ -65,9 +65,7 @@ public class GraphUnionFind extends GraphUnionFindAlgo<GraphUnionFind> {
         super(graph, algoConfig);
 
         this.nodeCount = graph.nodeCount();
-        this.dss = algoConfig.communityMap == null ?
-                new RankedDisjointSetStruct(nodeCount, tracker) :
-                new IncrementalDisjointSetStruct(nodeCount, algoConfig.communityMap, tracker);
+        this.dss = initDisjointSetStruct(nodeCount, tracker);
 
         this.unrestricted = (source, target) -> {
             dss.union(source, target);

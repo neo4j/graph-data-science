@@ -30,7 +30,6 @@ import org.junit.runners.Parameterized;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
@@ -85,11 +84,12 @@ public class IncrementalUnionFindTest {
         }
     }
 
-    private Graph graph;
+    private final Graph graph;
+    private final GraphUnionFindAlgo.Config config;
 
-    public IncrementalUnionFindTest(
-            Class<? extends GraphFactory> graphImpl,
-            String name) {
+    private LongToIntFunction communityFunction = id -> (int) id / setSize * 2 + 1;
+
+    public IncrementalUnionFindTest(Class<? extends GraphFactory> graphImpl, String name) {
         graph = new GraphLoader(DB)
                 .withExecutorService(Pools.DEFAULT)
                 .withAnyLabel()
@@ -98,6 +98,11 @@ public class IncrementalUnionFindTest {
                 )
                 .withRelationshipType(RELATIONSHIP_TYPE)
                 .load(graphImpl);
+
+        config = new GraphUnionFindAlgo.Config(
+                graph.nodeProperties(COMMUNITY_PROPERTY),
+                Double.NaN
+        );
     }
 
     private static void createTestGraph(int... setSizes) {
@@ -135,38 +140,24 @@ public class IncrementalUnionFindTest {
         source.createRelationshipTo(target, RELATIONSHIP_TYPE);
     }
 
-//    @Test
-//    public void testSeq() {
-//        test(UnionFindAlgorithmType.SEQ);
-//    }
-//
-//    @Test
-//    public void testQueue() {
-//        test(UnionFindAlgorithmType.QUEUE);
-//    }
-//
-//    @Test
-//    public void testForkJoin() {
-//        test(UnionFindAlgorithmType.FORK_JOIN);
-//    }
-//
-//    @Test
-//    public void testFJMerge() {
-//        test(UnionFindAlgorithmType.FJ_MERGE);
-//    }
-
     @Test
     public void testSeq() {
-        LongToIntFunction communityFunction = id -> (int) id / setSize * 2 + 1;
-
-        HugeWeightMapping mapping = graph.nodeProperties(COMMUNITY_PROPERTY);
-
-        GraphUnionFindAlgo.Config config = new GraphUnionFindAlgo.Config(
-                mapping,
-                Double.NaN
-        );
-
         test(UnionFindAlgorithmType.SEQ, communityFunction, config);
+    }
+
+    @Test
+    public void testQueue() {
+        test(UnionFindAlgorithmType.QUEUE, communityFunction, config);
+    }
+
+    @Test
+    public void testForkJoin() {
+        test(UnionFindAlgorithmType.FORK_JOIN, communityFunction, config);
+    }
+
+    @Test
+    public void testFJMerge() {
+        test(UnionFindAlgorithmType.FJ_MERGE, communityFunction, config);
     }
 
 //    @Test

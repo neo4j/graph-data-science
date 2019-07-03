@@ -22,7 +22,10 @@ package org.neo4j.graphalgo.impl.unionfind;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.IncrementalDisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.RankedDisjointSetStruct;
 
 /**
  * unified parent for all unionfind implementations
@@ -42,6 +45,12 @@ public abstract class GraphUnionFindAlgo<ME extends GraphUnionFindAlgo<ME>> exte
 
     public double threshold() {
         return algoConfig.threshold;
+    }
+
+    DisjointSetStruct initDisjointSetStruct(long nodeCount, AllocationTracker tracker) {
+        return algoConfig.communityMap == null ?
+                new RankedDisjointSetStruct(nodeCount, tracker) :
+                new IncrementalDisjointSetStruct(nodeCount, algoConfig.communityMap, tracker);
     }
 
     /**

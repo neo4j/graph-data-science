@@ -57,7 +57,7 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
     private final AllocationTracker tracker;
     private final long nodeCount;
     private final long batchSize;
-    private DisjointSetStruct struct;
+    private DisjointSetStruct dss;
 
     public static MemoryEstimation memoryEstimation() {
         return MemoryEstimations.builder(ParallelUnionFindFJMerge.class)
@@ -89,6 +89,7 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
         this.nodeCount = graph.nodeCount();
         this.executor = executor;
         this.tracker = tracker;
+        this.dss = initDisjointSetStruct(nodeCount, tracker);
         this.batchSize = ParallelUtil.adjustBatchSize(
                 nodeCount,
                 concurrency,
@@ -102,7 +103,7 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
             ufProcesses.add(new TUFProcess(i, batchSize, threshold));
         }
         merge(ufProcesses);
-        return getStruct();
+        return getDss();
     }
 
     @Override
@@ -112,7 +113,7 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
             ufProcesses.add(new UFProcess(i, batchSize));
         }
         merge(ufProcesses);
-        return getStruct();
+        return getDss();
     }
 
     private void merge(Collection<? extends UFTask> ufProcesses) {
@@ -122,16 +123,16 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
         }
         final Stack<DisjointSetStruct> temp = new Stack<>();
         ufProcesses.forEach(uf -> temp.add(uf.struct()));
-        struct = ForkJoinPool.commonPool().invoke(new Merge(temp));
+        dss = ForkJoinPool.commonPool().invoke(new Merge(temp));
     }
 
-    public DisjointSetStruct getStruct() {
-        return struct;
+    public DisjointSetStruct getDss() {
+        return dss;
     }
 
     @Override
     public ParallelUnionFindFJMerge release() {
-        struct = null;
+        dss = null;
         return super.release();
     }
 
@@ -152,7 +153,7 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
         UFProcess(long offset, long length) {
             this.offset = offset;
             this.end = offset + length;
-            struct = new RankedDisjointSetStruct(nodeCount, tracker).reset();
+            struct = initDisjointSetStruct(nodeCount, tracker).reset();
             rels = graph.concurrentCopy();
         }
 
