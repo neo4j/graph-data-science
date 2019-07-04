@@ -141,7 +141,7 @@ public final class IncrementalDisjointSetStruct implements DisjointSetStruct {
      * @return an id of the set it belongs to
      */
     public long findNoOpt(final long nodeId) {
-        long p = nodeId;
+        long p = idCommunityMapping.get(nodeId);
         long np;
         while ((np = parent.get(p)) != -1L) {
             p = np;
