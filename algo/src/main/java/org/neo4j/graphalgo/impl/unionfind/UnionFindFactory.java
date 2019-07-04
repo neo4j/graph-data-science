@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.impl.unionfind;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
-import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -32,11 +31,17 @@ public class UnionFindFactory<A extends GraphUnionFindAlgo<A>> extends Algorithm
 
     public static final String CONFIG_PARALLEL_ALGO = "parallel_algo";
     public static final String CONFIG_THRESHOLD = "threshold";
+    public static final String CONFIG_COMMUNITY_PROPERTY = "communityProperty";
+
+    public static final String COMMUNITY_TYPE = "community";
 
     private final UnionFindAlgorithmType algorithmType;
 
-    public UnionFindFactory(UnionFindAlgorithmType algorithmType) {
+    private final boolean incremental;
+
+    public UnionFindFactory(final UnionFindAlgorithmType algorithmType, final boolean incremental) {
         this.algorithmType = algorithmType;
+        this.incremental = incremental;
     }
 
     public static <T extends GraphUnionFindAlgo<T>> UnionFindFactory<T> create(ProcedureConfiguration configuration) {
@@ -65,7 +70,8 @@ public class UnionFindFactory<A extends GraphUnionFindAlgo<A>> extends Algorithm
             }
             result = algoImpl;
         }
-        return new UnionFindFactory<>(result);
+        boolean incremental = configuration.getString(CONFIG_COMMUNITY_PROPERTY).isPresent();
+        return new UnionFindFactory<>(result, incremental);
     }
 
     @SuppressWarnings("unchecked")
@@ -79,7 +85,7 @@ public class UnionFindFactory<A extends GraphUnionFindAlgo<A>> extends Algorithm
         int minBatchSize = configuration.getBatchSize();
 
         GraphUnionFindAlgo.Config algoConfig = new GraphUnionFindAlgo.Config(
-                graph.nodeProperties(GraphUnionFindAlgo.COMMUNITY_TYPE),
+                graph.nodeProperties(COMMUNITY_TYPE),
                 configuration.get(CONFIG_THRESHOLD, Double.NaN)
         );
 
@@ -95,6 +101,6 @@ public class UnionFindFactory<A extends GraphUnionFindAlgo<A>> extends Algorithm
 
     @Override
     public MemoryEstimation memoryEstimation() {
-        return algorithmType.memoryEstimation();
+        return algorithmType.memoryEstimation(incremental);
     }
 }

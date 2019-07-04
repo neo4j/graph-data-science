@@ -81,7 +81,7 @@ public interface PageRankAlgorithm extends Assessable {
 
     PageRankVariant variant(PageRank.Config config);
 
-    Class computeStepClass();
+    Class<?> computeStepClass();
 
     @Override
     default MemoryEstimation memoryEstimation() {

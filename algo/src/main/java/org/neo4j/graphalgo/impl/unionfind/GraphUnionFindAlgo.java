@@ -36,8 +36,6 @@ public abstract class GraphUnionFindAlgo<ME extends GraphUnionFindAlgo<ME>> exte
 
     protected final GraphUnionFindAlgo.Config algoConfig;
 
-    public static final String COMMUNITY_TYPE = "community";
-
     protected GraphUnionFindAlgo(final Graph graph, final GraphUnionFindAlgo.Config algoConfig) {
         this.graph = graph;
         this.algoConfig = algoConfig;

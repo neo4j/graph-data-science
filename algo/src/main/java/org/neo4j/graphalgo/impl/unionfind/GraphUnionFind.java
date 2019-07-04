@@ -51,10 +51,13 @@ public class GraphUnionFind extends GraphUnionFindAlgo<GraphUnionFind> {
     private final long nodeCount;
     private RelationshipConsumer unrestricted;
 
-    public static MemoryEstimation memoryEstimation() {
-        // TODO use incremental or ranked
+    public static MemoryEstimation memoryEstimation(final boolean incremental) {
         return MemoryEstimations.builder(GraphUnionFind.class)
-                .add("dss", RankedDisjointSetStruct.MEMORY_ESTIMATION)
+                .add(
+                        "DisjointSetStruct",
+                        (incremental) ?
+                                IncrementalDisjointSetStruct.MEMORY_ESTIMATION :
+                                RankedDisjointSetStruct.MEMORY_ESTIMATION)
                 .build();
     }
 

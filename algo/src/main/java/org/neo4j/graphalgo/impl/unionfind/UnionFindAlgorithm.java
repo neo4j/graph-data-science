@@ -20,13 +20,13 @@
 package org.neo4j.graphalgo.impl.unionfind;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.mem.Assessable;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
 
 import java.util.concurrent.ExecutorService;
 
-public interface UnionFindAlgorithm extends Assessable {
+public interface UnionFindAlgorithm {
 
     default DisjointSetStruct run(
             Graph graph,
@@ -49,5 +49,11 @@ public interface UnionFindAlgorithm extends Assessable {
             int concurrency,
             final GraphUnionFindAlgo.Config config,
             AllocationTracker tracker);
+
+    default MemoryEstimation memoryEstimation() {
+        return memoryEstimation(false);
+    }
+
+    MemoryEstimation memoryEstimation(final boolean incremental);
 
 }

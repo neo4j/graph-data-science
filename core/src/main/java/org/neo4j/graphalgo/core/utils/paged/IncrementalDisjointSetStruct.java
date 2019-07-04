@@ -45,7 +45,7 @@ public final class IncrementalDisjointSetStruct implements DisjointSetStruct {
     private final HugeWeightMapping communityMapping;
     private long maxCommunity;
 
-    static MemoryEstimation memoryEstimation() {
+    public static MemoryEstimation memoryEstimation() {
         return IncrementalDisjointSetStruct.MEMORY_ESTIMATION;
     }
 

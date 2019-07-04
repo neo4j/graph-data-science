@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.IncrementalDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.RankedDisjointSetStruct;
 import org.neo4j.graphdb.Direction;
 
@@ -61,15 +62,19 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFind
     private final long batchSize;
     private final int stepSize;
 
-    public static MemoryEstimation memoryEstimation() {
+    public static MemoryEstimation memoryEstimation(final boolean incremental) {
         return MemoryEstimations
                 .builder(ParallelUnionFindQueue.class)
                 .startField("computeStep", HugeUnionFindTask.class)
-                .add(MemoryEstimations.of("dss", (dimensions, concurrency) ->
-                        RankedDisjointSetStruct.memoryEstimation()
-                                .estimate(dimensions, concurrency)
-                                .memoryUsage()
-                                .times(concurrency)))
+                .add(MemoryEstimations.of("DisjointSetStruct", (dimensions, concurrency) -> {
+                    MemoryEstimation dssEstimation = (incremental) ?
+                            IncrementalDisjointSetStruct.memoryEstimation() :
+                            RankedDisjointSetStruct.memoryEstimation();
+                    return dssEstimation
+                            .estimate(dimensions, concurrency)
+                            .memoryUsage()
+                            .times(concurrency);
+                }))
                 .endField()
                 .build();
     }

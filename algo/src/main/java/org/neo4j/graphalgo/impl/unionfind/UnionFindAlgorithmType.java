@@ -54,8 +54,8 @@ public enum UnionFindAlgorithmType implements UnionFindAlgorithm {
         }
 
         @Override
-        public MemoryEstimation memoryEstimation() {
-            return ParallelUnionFindQueue.memoryEstimation();
+        public MemoryEstimation memoryEstimation(final boolean incremental) {
+            return ParallelUnionFindQueue.memoryEstimation(incremental);
         }
     },
     FORK_JOIN {
@@ -77,8 +77,8 @@ public enum UnionFindAlgorithmType implements UnionFindAlgorithm {
         }
 
         @Override
-        public MemoryEstimation memoryEstimation() {
-            return ParallelUnionFindForkJoin.memoryEstimation();
+        public MemoryEstimation memoryEstimation(final boolean incremental) {
+            return ParallelUnionFindForkJoin.memoryEstimation(incremental);
         }
     },
     FJ_MERGE {
@@ -101,8 +101,8 @@ public enum UnionFindAlgorithmType implements UnionFindAlgorithm {
         }
 
         @Override
-        public MemoryEstimation memoryEstimation() {
-            return ParallelUnionFindFJMerge.memoryEstimation();
+        public MemoryEstimation memoryEstimation(final boolean incremental) {
+            return ParallelUnionFindFJMerge.memoryEstimation(incremental);
         }
     },
     SEQ {
@@ -123,8 +123,8 @@ public enum UnionFindAlgorithmType implements UnionFindAlgorithm {
         }
 
         @Override
-        public MemoryEstimation memoryEstimation() {
-            return GraphUnionFind.memoryEstimation();
+        public MemoryEstimation memoryEstimation(final boolean incremental) {
+            return GraphUnionFind.memoryEstimation(incremental);
         }
     },
 }

@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
-import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
@@ -48,6 +47,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.impl.unionfind.UnionFindFactory.COMMUNITY_TYPE;
+import static org.neo4j.graphalgo.impl.unionfind.UnionFindFactory.CONFIG_COMMUNITY_PROPERTY;
 import static org.neo4j.graphalgo.impl.unionfind.UnionFindFactory.CONFIG_PARALLEL_ALGO;
 
 /**
@@ -60,7 +61,6 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
     private static final String CONFIG_CLUSTER_PROPERTY = "writeProperty";
     private static final String CONFIG_OLD_CLUSTER_PROPERTY = "partitionProperty";
     private static final String DEFAULT_CLUSTER_PROPERTY = "partition";
-    private static final String CONFIG_COMMUNITY_PROPERTY = "communityProperty";
 
     @Procedure(value = "algo.unionFind", mode = Mode.WRITE)
     @Description("CALL algo.unionFind(label:String, relationship:String, " +
@@ -231,7 +231,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
 
     private PropertyMapping[] createPropertyMappings(String communityProperty) {
         return new PropertyMapping[]{
-                PropertyMapping.of(GraphUnionFindAlgo.COMMUNITY_TYPE, communityProperty, -1),
+                PropertyMapping.of(COMMUNITY_TYPE, communityProperty, -1),
         };
     }
 
