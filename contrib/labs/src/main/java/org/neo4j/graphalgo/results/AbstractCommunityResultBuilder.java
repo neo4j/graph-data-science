@@ -125,7 +125,7 @@ public abstract class AbstractCommunityResultBuilder<T> {
 
     public T buildfromKnownSizes(int nodeCount, IntUnaryOperator sizeForNode) {
         final ProgressTimer timer = ProgressTimer.start();
-        final Histogram histogram = new Histogram(2);
+        final Histogram histogram = new Histogram(5);
         for (int nodeId = 0; nodeId < nodeCount; nodeId++) {
             final int communitySize = sizeForNode.applyAsInt(nodeId);
             histogram.recordValue(communitySize);
@@ -146,7 +146,7 @@ public abstract class AbstractCommunityResultBuilder<T> {
 
     public T buildfromKnownLongSizes(long nodeCount, LongToIntFunction sizeForNode) {
         final ProgressTimer timer = ProgressTimer.start();
-        final Histogram histogram = new Histogram(2);
+        final Histogram histogram = new Histogram(5);
         for (long nodeId = 0L; nodeId < nodeCount; nodeId++) {
             final int communitySize = sizeForNode.applyAsInt(nodeId);
             histogram.recordValue(communitySize);

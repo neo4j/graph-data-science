@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 public class CommunityHistogram {
 
     public static Histogram buildFrom(HugeLongLongMap communitySizeMap) {
-        final Histogram histogram = new Histogram(2);
+        final Histogram histogram = new Histogram(5);
 
         for (LongLongCursor cursor : communitySizeMap) {
             histogram.recordValue(cursor.value);
