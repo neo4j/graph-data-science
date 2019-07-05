@@ -226,7 +226,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
             write(builder::timeWrite, graph, communities, configuration, writeProperty);
         }
 
-        return Stream.of(builder.build(tracker, graph.nodeCount(), communities::find));
+        return Stream.of(builder.build(tracker, graph.nodeCount(), communities::setIdOf));
     }
 
     private PropertyMapping[] createPropertyMappings(String communityProperty) {

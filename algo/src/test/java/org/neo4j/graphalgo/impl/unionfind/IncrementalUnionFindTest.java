@@ -44,7 +44,6 @@ import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.function.LongToIntFunction;
 
 import static org.junit.Assert.assertEquals;
 
@@ -86,8 +85,6 @@ public class IncrementalUnionFindTest {
 
     private final Graph graph;
     private final GraphUnionFindAlgo.Config config;
-
-    private LongToIntFunction communityFunction = id -> (int) id / setSize * 2 + 1;
 
     public IncrementalUnionFindTest(Class<? extends GraphFactory> graphImpl, String name) {
         graph = new GraphLoader(DB)
@@ -142,22 +139,22 @@ public class IncrementalUnionFindTest {
 
     @Test
     public void testSeq() {
-        test(UnionFindAlgorithmType.SEQ, communityFunction, config);
+        test(UnionFindAlgorithmType.SEQ, config);
     }
 
     @Test
     public void testQueue() {
-        test(UnionFindAlgorithmType.QUEUE, communityFunction, config);
+        test(UnionFindAlgorithmType.QUEUE, config);
     }
 
     @Test
     public void testForkJoin() {
-        test(UnionFindAlgorithmType.FORK_JOIN, communityFunction, config);
+        test(UnionFindAlgorithmType.FORK_JOIN, config);
     }
 
     @Test
     public void testFJMerge() {
-        test(UnionFindAlgorithmType.FJ_MERGE, communityFunction, config);
+        test(UnionFindAlgorithmType.FJ_MERGE, config);
     }
 
 //    @Test
@@ -292,7 +289,6 @@ public class IncrementalUnionFindTest {
 
     private void test(
             UnionFindAlgorithmType uf,
-            LongToIntFunction communityFunction,
             GraphUnionFindAlgo.Config config) {
         DisjointSetStruct result = run(uf, config);
 
@@ -301,7 +297,7 @@ public class IncrementalUnionFindTest {
 
         graph.forEachNode((nodeId) -> {
             int expectedSetRegion = ((int) nodeId / (2 * setSize) * 2) * 2 + 1;
-            final long setId = result.find(nodeId);
+            final long setId = result.setIdOf(nodeId);
             int setRegion = (int) setId;
             assertEquals(
                     "Node " + nodeId + " in unexpected set: " + setId,

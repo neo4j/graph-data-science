@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
-import org.neo4j.graphalgo.core.utils.paged.IncrementalDisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.RemappingDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.RankedDisjointSetStruct;
 import org.neo4j.graphdb.Direction;
 
@@ -65,7 +65,7 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
                 .startField("computeStep", TUFProcess.class)
                 .add(MemoryEstimations.of("DisjointSetStruct", (dimensions, concurrency) -> {
                             MemoryEstimation dssEstimation = (incremental) ?
-                                    IncrementalDisjointSetStruct.memoryEstimation() :
+                                    RemappingDisjointSetStruct.memoryEstimation() :
                                     RankedDisjointSetStruct.memoryEstimation();
                             return dssEstimation
                                     .estimate(dimensions, concurrency)

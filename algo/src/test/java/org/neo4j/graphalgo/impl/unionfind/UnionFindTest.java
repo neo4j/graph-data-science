@@ -213,7 +213,7 @@ public class UnionFindTest {
 
         graph.forEachNode((nodeId) -> {
             long expectedSetRegion = nodeId / SET_SIZE;
-            final long setId = result.find(nodeId);
+            final long setId = result.setIdOf(nodeId);
             int setRegion = (int) (setId / SET_SIZE);
             assertEquals(
                     "Node " + nodeId + " in unexpected set: " + setId,

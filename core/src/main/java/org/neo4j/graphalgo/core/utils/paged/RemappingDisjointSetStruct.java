@@ -20,11 +20,16 @@
 package org.neo4j.graphalgo.core.utils.paged;
 
 
+import com.carrotsearch.hppc.LongLongHashMap;
+import com.carrotsearch.hppc.LongLongMap;
+import com.carrotsearch.hppc.OpenHashContainers;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 
-import java.util.stream.LongStream;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
 /**
  * Implements {@link DisjointSetStruct} with support for incremental computation based on a previously computed mapping
@@ -32,39 +37,40 @@ import java.util.stream.LongStream;
  * Note that this does not use <a href=https://en.wikipedia.org/wiki/Disjoint-set_data_structure#by_rank">Union by Rank</a>
  * but prefers the minimum set id instead when merging two sets.
  */
-public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
+public final class RemappingDisjointSetStruct extends DisjointSetStruct {
 
-    public static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations.builder(IncrementalDisjointSetStruct.class)
+    public static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations.builder(
+            RemappingDisjointSetStruct.class)
             .perNode("parent", HugeLongArray::memoryEstimation)
-            .perNode("idCommunityMapping", HugeLongArray::memoryEstimation)
+            .rangePerNode("internalToProvidedIds", nodeCount -> {
+                int minBufferSize = OpenHashContainers.emptyBufferSize();
+                int maxBufferSize = OpenHashContainers.expectedBufferSize((int) nodeCount);
+                long min = sizeOfLongArray(minBufferSize) + sizeOfDoubleArray(minBufferSize);
+                long max = sizeOfLongArray(maxBufferSize) + sizeOfDoubleArray(maxBufferSize);
+                return MemoryRange.of(min, max);
+            })
             .build();
 
     private final HugeLongArray parent;
-    private final HugeLongArray idCommunityMapping;
-    private final long capacity;
+    private final LongLongHashMap internalToProvidedIds;
     private final HugeWeightMapping communityMapping;
-    private long maxCommunity;
+    private final long capacity;
 
     public static MemoryEstimation memoryEstimation() {
-        return IncrementalDisjointSetStruct.MEMORY_ESTIMATION;
+        return RemappingDisjointSetStruct.MEMORY_ESTIMATION;
     }
 
     /**
      * Initialize the struct with the given capacity.
-     * Note: the struct must be {@link IncrementalDisjointSetStruct#reset()} prior use!
+     * Note: the struct must be {@link RemappingDisjointSetStruct#reset()} prior use!
      *
      * @param capacity the capacity (maximum node id)
      */
-    public IncrementalDisjointSetStruct(long capacity, HugeWeightMapping communityMapping, AllocationTracker tracker) {
-        parent = HugeLongArray.newArray(capacity, tracker);
-        idCommunityMapping = HugeLongArray.newArray(capacity, tracker);
-        this.capacity = capacity;
+    public RemappingDisjointSetStruct(long capacity, HugeWeightMapping communityMapping, AllocationTracker tracker) {
+        this.parent = HugeLongArray.newArray(capacity, tracker);
+        this.internalToProvidedIds = new LongLongHashMap();
         this.communityMapping = communityMapping;
-
-        maxCommunity = LongStream
-                .range(0, capacity)
-                .map(id -> (long) communityMapping.nodeWeight(id, -1))
-                .max().orElse(0);
+        this.capacity = capacity;
     }
 
     @Override
@@ -76,11 +82,21 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
      * reset the container
      */
     @Override
-    public IncrementalDisjointSetStruct reset() {
-        parent.fill(-1);
-        idCommunityMapping.setAll(nodeId -> {
-            long communityId = (long) communityMapping.nodeWeight(nodeId, -1);
-            return communityId == -1 ? ++maxCommunity : communityId;
+    public RemappingDisjointSetStruct reset() {
+        final LongLongMap internalMapping = new LongLongHashMap();
+        internalToProvidedIds.clear();
+        parent.setAll(nodeId -> {
+            double communityIdValue = communityMapping.nodeWeight(nodeId, Double.NaN);
+            if (!Double.isNaN(communityIdValue)) {
+                long communityId = (long) communityIdValue;
+                int idIndex = internalMapping.indexOf(communityId);
+                if (internalMapping.indexExists(idIndex)) {
+                    return internalMapping.indexGet(idIndex);
+                }
+                internalMapping.indexInsert(idIndex, communityId, nodeId);
+                internalToProvidedIds.put(nodeId, communityId);
+            }
+            return -1L;
         });
         return this;
     }
@@ -103,11 +119,11 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
      */
     @Override
     public long find(long p) {
-        return findPC(idCommunityMapping.get(p));
+        return findPC(p);
     }
 
     /**
-     * join set of p (Sp) with set of q (Sq) so that {@link IncrementalDisjointSetStruct#connected(long, long)}
+     * join set of p (Sp) with set of q (Sq) so that {@link RemappingDisjointSetStruct#connected(long, long)}
      * for any pair of (Spi, Sqj) evaluates to true. Some optimizations exists
      * which automatically balance the tree, the "weighted union rule" is used here.
      *
@@ -116,10 +132,9 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
      */
     @Override
     public void union(long p, long q) {
-        unionSets(find(p), find(q));
-    }
+        long pSet = find(p);
+        long qSet = find(q);
 
-    private void unionSets(long pSet, long qSet) {
         if (pSet < qSet) {
             parent.set(qSet, pSet);
         } else if (qSet < pSet) {
@@ -135,7 +150,7 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
      */
     @Override
     long findNoOpt(final long nodeId) {
-        long p = idCommunityMapping.get(nodeId);
+        long p = nodeId;
         long np;
         while ((np = parent.get(p)) != -1L) {
             p = np;
@@ -144,24 +159,8 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
     }
 
     @Override
-    public DisjointSetStruct merge(DisjointSetStruct other) {
-        if (!(other instanceof IncrementalDisjointSetStruct)) {
-            throw new IllegalArgumentException(String.format(
-                    "Expected: %s Actual: %s",
-                    getClass().getSimpleName(),
-                    other.getClass().getSimpleName()));
-        }
-        if (other.capacity() != this.capacity()) {
-            throw new IllegalArgumentException("Different Capacity");
-        }
-
-        for (int nodeId = 0; nodeId < capacity(); nodeId++) {
-            long leftSetId = find(nodeId);
-            long rightSetId = other.find(nodeId);
-            unionSets(leftSetId, rightSetId);
-        }
-
-        return this;
+    public long setIdOf(final long nodeId) {
+        long setId = findNoOpt(nodeId);
+        return internalToProvidedIds.getOrDefault(setId, setId);
     }
-
 }

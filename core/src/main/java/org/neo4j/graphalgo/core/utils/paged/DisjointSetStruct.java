@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongLongMap;
 import com.carrotsearch.hppc.LongLongScatterMap;
-import com.carrotsearch.hppc.LongScatterSet;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
@@ -34,29 +34,12 @@ import java.util.stream.Stream;
  *
  * @see <a href="https://en.wikipedia.org/wiki/Disjoint-set_data_structure">Wiki</a>
  */
-public interface DisjointSetStruct {
-
-    HugeLongArray parent();
+public abstract class DisjointSetStruct {
 
     /**
      * Initializes the data structure.
      */
-    DisjointSetStruct reset();
-
-    /**
-     * Number of elements stored in the data structure.
-     *
-     * @return element count
-     */
-    long capacity();
-
-    /**
-     * Find set Id of element p.
-     *
-     * @param p the set element
-     * @return returns the representative member of the set to which p belongs
-     */
-    long find(long p);
+    public abstract DisjointSetStruct reset();
 
     /**
      * Joins the set of p (Sp) with set of q (Sq) such that
@@ -66,7 +49,42 @@ public interface DisjointSetStruct {
      * @param p an item of Sp
      * @param q an item of Sq
      */
-    void union(long p, long q);
+    public abstract void union(long p, long q);
+
+    /**
+     * Find set Id of element p.
+     *
+     * @param nodeId the element in the set we are looking for
+     * @return an id of the set it belongs to
+     */
+    public long setIdOf(long nodeId) {
+        return findNoOpt(nodeId);
+    }
+
+    abstract HugeLongArray parent();
+
+    /**
+     * Number of elements stored in the data structure.
+     *
+     * @return element count
+     */
+    abstract long capacity();
+
+    /**
+     * Find set Id of element p.
+     *
+     * @param p the set element
+     * @return returns the representative member of the set to which p belongs
+     */
+    abstract long find(long p);
+
+    /**
+     * Find set Id of element p without balancing optimization.
+     *
+     * @param nodeId the element in the set we are looking for
+     * @return an id of the set it belongs to
+     */
+    abstract long findNoOpt(long nodeId);
 
     /**
      * Merges the given DisjointSetStruct into this one.
@@ -74,7 +92,14 @@ public interface DisjointSetStruct {
      * @param other DisjointSetStruct to merge with
      * @return merged DisjointSetStruct
      */
-    default DisjointSetStruct merge(DisjointSetStruct other) {
+    public DisjointSetStruct merge(DisjointSetStruct other) {
+        if (!getClass().equals(other.getClass())) {
+            throw new IllegalArgumentException(String.format(
+                    "Expected: %s Actual: %s",
+                    getClass().getSimpleName(),
+                    other.getClass().getSimpleName()));
+        }
+
         if (other.capacity() != this.capacity()) {
             throw new IllegalArgumentException("Different Capacity");
         }
@@ -99,21 +124,13 @@ public interface DisjointSetStruct {
     }
 
     /**
-     * Find set Id of element p without balancing optimization.
-     *
-     * @param nodeId the element in the set we are looking for
-     * @return an id of the set it belongs to
-     */
-    long findNoOpt(long nodeId);
-
-    /**
      * Check if p and q belong to the same set.
      *
      * @param p a set item
      * @param q a set item
      * @return true if both items belong to the same set, false otherwise
      */
-    default boolean connected(long p, long q) {
+    public final boolean connected(long p, long q) {
         return find(p) == find(q);
     }
 
@@ -125,7 +142,7 @@ public interface DisjointSetStruct {
      * @param p the set element
      * @return returns the representative member of the set to which p belongs
      */
-    default long findPC(long p) {
+    final long findPC(long p) {
         long pv = parent().get(p);
         if (pv == -1L) {
             return p;
@@ -141,13 +158,14 @@ public interface DisjointSetStruct {
      *
      * @note This is very expensive.
      */
-    default int getSetCount() {
-        LongScatterSet set = new LongScatterSet();
-        for (long i = 0L; i < capacity(); ++i) {
+    public final long getSetCount() {
+        long capacity = capacity();
+        BitSet sets = new BitSet(capacity);
+        for (long i = 0L; i < capacity; i++) {
             long setId = find(i);
-            set.add(setId);
+            sets.set(setId);
         }
-        return set.size();
+        return sets.cardinality();
     }
 
     /**
@@ -155,11 +173,10 @@ public interface DisjointSetStruct {
      *
      * @return a map which maps setId to setSize
      */
-    default LongLongMap getSetSize() {
-        final LongLongScatterMap map = new LongLongScatterMap();
-
+    public final LongLongMap getSetSize() {
+        final LongLongMap map = new LongLongScatterMap();
         for (long i = parent().size() - 1; i >= 0; i--) {
-            map.addTo(find(i), 1);
+            map.addTo(setIdOf(i), 1);
         }
         return map;
     }
@@ -171,13 +188,13 @@ public interface DisjointSetStruct {
      * @param idMapping mapping between internal ids and Neo4j ids
      * @return tuples of Neo4j ids and their set ids
      */
-    default Stream<Result> resultStream(IdMapping idMapping) {
+    public final Stream<Result> resultStream(IdMapping idMapping) {
 
         return LongStream.range(IdMapping.START_NODE_ID, idMapping.nodeCount())
                 .mapToObj(mappedId ->
                         new Result(
                                 idMapping.toOriginalNodeId(mappedId),
-                                find(mappedId)));
+                                setIdOf(mappedId)));
     }
 
     /**
@@ -185,7 +202,7 @@ public interface DisjointSetStruct {
      *
      * @param consumer the consumer
      */
-    default void forEach(Consumer consumer) {
+    public final void forEach(Consumer consumer) {
         for (long i = parent().size() - 1; i >= 0; i--) {
             if (!consumer.consume(i, find(i))) {
                 break;
@@ -197,6 +214,7 @@ public interface DisjointSetStruct {
      * Consumer interface for {@link #forEach(Consumer)}.
      */
     @FunctionalInterface
+    public
     interface Consumer {
         /**
          * @param nodeId the mapped node id
@@ -209,20 +227,20 @@ public interface DisjointSetStruct {
     /**
      * Responsible for writing back the set ids to Neo4j.
      */
-    final class Translator implements PropertyTranslator.OfLong<DisjointSetStruct> {
+    public static final class Translator implements PropertyTranslator.OfLong<DisjointSetStruct> {
 
         public static final PropertyTranslator<DisjointSetStruct> INSTANCE = new Translator();
 
         @Override
         public long toLong(final DisjointSetStruct data, final long nodeId) {
-            return data.findNoOpt(nodeId);
+            return data.setIdOf(nodeId);
         }
     }
 
     /**
      * Union find result type.
      */
-    class Result {
+    public static class Result {
 
         /**
          * the mapped node id

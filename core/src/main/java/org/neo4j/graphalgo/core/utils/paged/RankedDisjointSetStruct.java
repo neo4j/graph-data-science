@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 /**
  * Implementation of {@link DisjointSetStruct} uses Union by Rank and Path compression.
  */
-public class RankedDisjointSetStruct implements DisjointSetStruct {
+public final class RankedDisjointSetStruct extends DisjointSetStruct {
 
     public static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations.builder(RankedDisjointSetStruct.class)
             .perNode("parent", HugeLongArray::memoryEstimation)
@@ -104,7 +104,7 @@ public class RankedDisjointSetStruct implements DisjointSetStruct {
     }
 
     @Override
-    public long findNoOpt(final long nodeId) {
+    long findNoOpt(final long nodeId) {
         long p = nodeId;
         long np;
         while ((np = parent.get(p)) != -1L) {
