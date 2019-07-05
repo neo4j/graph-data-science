@@ -66,7 +66,8 @@ abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, Self>> {
 
     /**
      * Returns a new {@link HugeCursor} for this array. The cursor is not positioned and in an invalid state.
-     * You must call {@link HugeCursor#next()} first to position the cursor to a valid state.
+     * You must call {@link #initCursor(HugeCursor)} or {@link #initCursor(HugeCursor, long, long)} first to position
+     * and call {@link HugeCursor#next()} to put the cursor in a valid state.
      *
      * Obtaining a {@link HugeCursor} for an empty array (where {@link #size()} returns {@code 0}) is undefined and
      * might result in a {@link NullPointerException} or another {@link RuntimeException}.
