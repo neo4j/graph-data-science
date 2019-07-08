@@ -24,34 +24,35 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
-import org.neo4j.graphalgo.core.utils.paged.RankedDisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.IncrementalDisjointSetStruct;
 
 import static org.junit.Assert.assertEquals;
 
 /**
  * @author mknblch
  */
-public class RankedDisjointSetStructTest extends DisjointSetStructTest {
+public class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
 
     @Override
     DisjointSetStruct newSet(final int capacity) {
-        return new RankedDisjointSetStruct(capacity, AllocationTracker.EMPTY);
+        TestWeightMapping communities = new TestWeightMapping();
+        return new IncrementalDisjointSetStruct(capacity, communities, AllocationTracker.EMPTY);
     }
 
     @Test
     public void shouldComputeMemoryEstimation() {
         GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
         assertEquals(
-                MemoryRange.of(112),
-                RankedDisjointSetStruct.memoryEstimation().estimate(dimensions0, 1).memoryUsage());
+                MemoryRange.of(120),
+                IncrementalDisjointSetStruct.memoryEstimation().estimate(dimensions0, 1).memoryUsage());
 
         GraphDimensions dimensions100 = new GraphDimensions.Builder().setNodeCount(100).build();
         assertEquals(
-                MemoryRange.of(1712),
-                RankedDisjointSetStruct.memoryEstimation().estimate(dimensions100, 1).memoryUsage());
+                MemoryRange.of(1720),
+                IncrementalDisjointSetStruct.memoryEstimation().estimate(dimensions100, 1).memoryUsage());
 
         GraphDimensions dimensions100B = new GraphDimensions.Builder().setNodeCount(100_000_000_000L).build();
-        assertEquals(MemoryRange.of(1600244140768L), RankedDisjointSetStruct
+        assertEquals(MemoryRange.of(1600244140776L), IncrementalDisjointSetStruct
                 .memoryEstimation().estimate(dimensions100B, 1).memoryUsage());
     }
 }

@@ -45,6 +45,10 @@ public final class RemappingDisjointSetStruct extends DisjointSetStruct {
             .rangePerNode("internalToProvidedIds", nodeCount -> {
                 int minBufferSize = OpenHashContainers.emptyBufferSize();
                 int maxBufferSize = OpenHashContainers.expectedBufferSize((int) nodeCount);
+                if (maxBufferSize < minBufferSize) {
+                    minBufferSize = maxBufferSize;
+                    maxBufferSize = OpenHashContainers.emptyBufferSize();
+                }
                 long min = sizeOfLongArray(minBufferSize) + sizeOfDoubleArray(minBufferSize);
                 long max = sizeOfLongArray(maxBufferSize) + sizeOfDoubleArray(maxBufferSize);
                 return MemoryRange.of(min, max);
