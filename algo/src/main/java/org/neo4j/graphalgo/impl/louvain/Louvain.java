@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
+import org.neo4j.graphalgo.impl.utils.CommunityUtils;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.values.storable.Values;
 
@@ -148,7 +149,7 @@ public final class Louvain extends Algorithm<Louvain> {
         });
         // temporary graph
         long nodeCount = comCount.cardinality();
-        LouvainUtils.normalize(communities);
+        CommunityUtils.normalize(communities);
         Graph graph = rebuildGraph(this.root, communities, nodeCount);
 
         return computeOf(graph, nodeCount, maxLevel, maxIterations, randomNeighborSelection);
@@ -184,7 +185,7 @@ public final class Louvain extends Algorithm<Louvain> {
                             .compute(maxIterations);
             // rebuild graph based on the community structure
             final HugeLongArray communityIds = modularityOptimization.getCommunityIds();
-            communityCount = LouvainUtils.normalize(communityIds);
+            communityCount = CommunityUtils.normalize(communityIds);
             progressLogger.log(
                     "level: " + (level + 1) +
                             " communities: " + communityCount +

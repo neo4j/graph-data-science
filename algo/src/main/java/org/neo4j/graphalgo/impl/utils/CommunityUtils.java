@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.louvain;
+package org.neo4j.graphalgo.impl.utils;
 
 import com.carrotsearch.hppc.IntIntMap;
 import com.carrotsearch.hppc.IntIntScatterMap;
@@ -26,9 +26,9 @@ import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedLongDoubleMap;
 
-final class LouvainUtils {
+public final class CommunityUtils {
 
-    private LouvainUtils() {}
+    private CommunityUtils() {}
 
     /**
      * normalize nodeToCommunity-Array. Maps community IDs
@@ -37,7 +37,7 @@ final class LouvainUtils {
      * @param communities
      * @return number of communities
      */
-    static int normalize(int[] communities) {
+    public static int normalize(int[] communities) {
         final IntIntMap map = new IntIntScatterMap(communities.length);
         int c = 0;
         for (int i = 0; i < communities.length; i++) {
@@ -59,7 +59,7 @@ final class LouvainUtils {
      * @param communities
      * @return number of communities
      */
-    static long normalize(HugeLongArray communities) {
+    public static long normalize(HugeLongArray communities) {
         PagedLongDoubleMap map = PagedLongDoubleMap.of(communities.size(), AllocationTracker.EMPTY);
         long c = 0L;
         HugeCursor<long[]> cursor = communities.initCursor(communities.newCursor());
