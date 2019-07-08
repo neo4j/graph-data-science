@@ -198,33 +198,6 @@ public abstract class DisjointSetStruct {
     }
 
     /**
-     * Iterate each node and find its setId.
-     *
-     * @param consumer the consumer
-     */
-    public final void forEach(Consumer consumer) {
-        for (long i = parent().size() - 1; i >= 0; i--) {
-            if (!consumer.consume(i, find(i))) {
-                break;
-            }
-        }
-    }
-
-    /**
-     * Consumer interface for {@link #forEach(Consumer)}.
-     */
-    @FunctionalInterface
-    public
-    interface Consumer {
-        /**
-         * @param nodeId the mapped node id
-         * @param setId  the set id where the node belongs to
-         * @return true to continue the iteration, false to stop
-         */
-        boolean consume(long nodeId, long setId);
-    }
-
-    /**
      * Responsible for writing back the set ids to Neo4j.
      */
     public static final class Translator implements PropertyTranslator.OfLong<DisjointSetStruct> {

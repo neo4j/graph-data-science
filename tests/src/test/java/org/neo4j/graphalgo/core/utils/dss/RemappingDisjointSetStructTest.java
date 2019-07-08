@@ -36,6 +36,11 @@ public class RemappingDisjointSetStructTest extends DisjointSetStructTest {
         return new RemappingDisjointSetStruct(capacity, communities, AllocationTracker.EMPTY);
     }
 
+    @Override
+    DisjointSetStruct newSet(final int capacity, final TestWeightMapping weightMapping) {
+        return new RemappingDisjointSetStruct(capacity, weightMapping, AllocationTracker.EMPTY);
+    }
+
     @Test
     public void shouldComputeMemoryEstimation() {
         GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();

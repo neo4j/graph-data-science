@@ -21,30 +21,109 @@ package org.neo4j.graphalgo.core.utils.dss;
 
 import com.carrotsearch.hppc.LongLongMap;
 import com.carrotsearch.hppc.cursors.LongLongCursor;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
-import org.neo4j.graphalgo.core.utils.paged.IncrementalDisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.RankedDisjointSetStruct;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
+@RunWith(Parameterized.class)
 public abstract class DisjointSetStructTest {
 
     private DisjointSetStruct struct;
 
+    private static final int CAPACITY = 7;
+
+    @Parameterized.Parameters(name = "{1}")
+    public static Collection<Object[]> data() {
+        return Arrays.asList(
+                new Object[]{new TestWeightMapping(), "Empty"},
+                new Object[]{new TestWeightMapping(IntStream.range(0, CAPACITY).flatMap(i -> IntStream.of(i, i)).toArray()), "Ordered"},
+                new Object[]{new TestWeightMapping(IntStream.range(0, CAPACITY).flatMap(i -> IntStream.of(i, CAPACITY - i - 1)).toArray()), "Reversed"}
+        );
+    }
+
+    @Parameterized.Parameter()
+    public TestWeightMapping weightMapping;
+
+    @Parameterized.Parameter(1)
+    public String name;
+
     abstract DisjointSetStruct newSet(int capacity);
+
+    abstract DisjointSetStruct newSet(int capacity, TestWeightMapping weightMapping);
 
     @Before
     public final void setup() {
-        struct = newSet(7).reset();
+        struct = newSet(CAPACITY, weightMapping).reset();
+    }
+
+    @Test
+    public final void testInitialCommunities() {
+        Assume.assumeFalse(struct instanceof RankedDisjointSetStruct);
+
+        // {0,1}{2,3}{4}{5}{6}
+        DisjointSetStruct localDss = newSet(
+                CAPACITY,
+                new TestWeightMapping(0, 0, 1, 0, 2, 1, 3, 1, 4, 4, 5, 5, 6, 6))
+                .reset();
+
+        assertTrue(localDss.connected(2, 3));
+        assertFalse(localDss.connected(0, 2));
+        assertFalse(localDss.connected(0, 3));
+        assertFalse(localDss.connected(1, 2));
+        assertFalse(localDss.connected(1, 3));
+        assertEquals(5, localDss.getSetSize().size());
+
+        localDss.union(3, 0);
+        // {0,1,2,3}{4}{5}{6}
+        assertTrue(localDss.connected(0, 2));
+        assertTrue(localDss.connected(0, 3));
+        assertTrue(localDss.connected(1, 2));
+        assertTrue(localDss.connected(1, 3));
+        assertFalse(localDss.connected(4, 5));
+        assertEquals(4, localDss.getSetSize().size());
+
+        localDss.union(4, 5);
+        // {0,1,2,3}{4,5}{6}
+        assertTrue(localDss.connected(4, 5));
+        assertFalse(localDss.connected(0, 4));
+        assertEquals(3, localDss.getSetSize().size());
+
+        localDss.union(0, 4);
+        // {0,1,2,3,4,5}{6}
+        assertTrue(localDss.connected(0, 4));
+        assertTrue(localDss.connected(0, 5));
+        assertTrue(localDss.connected(1, 4));
+        assertTrue(localDss.connected(1, 5));
+        assertTrue(localDss.connected(2, 4));
+        assertTrue(localDss.connected(2, 5));
+        assertTrue(localDss.connected(3, 4));
+        assertTrue(localDss.connected(3, 5));
+        assertTrue(localDss.connected(4, 5));
+        assertFalse(localDss.connected(0, 6));
+        assertFalse(localDss.connected(1, 6));
+        assertFalse(localDss.connected(2, 6));
+        assertFalse(localDss.connected(3, 6));
+        assertFalse(localDss.connected(4, 6));
+        assertFalse(localDss.connected(5, 6));
+
+        final LongLongMap setSize = localDss.getSetSize();
+        assertEquals(2, setSize.size());
+        for (LongLongCursor cursor : setSize) {
+            assertTrue(cursor.value == 6 || cursor.value == 1);
+        }
+
     }
 
     @Test
@@ -107,21 +186,6 @@ public abstract class DisjointSetStructTest {
         for (LongLongCursor cursor : setSize) {
             assertTrue(cursor.value == 6 || cursor.value == 1);
         }
-    }
-
-    @Test
-    public final void testDefault() {
-        IncrementalDisjointSetStruct.Consumer consumer = mock(IncrementalDisjointSetStruct.Consumer.class);
-        when(consumer.consume(anyLong(), anyLong())).thenReturn(true);
-        struct.forEach(consumer);
-        verify(consumer, times(7)).consume(anyLong(), anyLong());
-        verify(consumer, times(1)).consume(eq(0L), eq(0L));
-        verify(consumer, times(1)).consume(eq(1L), eq(1L));
-        verify(consumer, times(1)).consume(eq(2L), eq(2L));
-        verify(consumer, times(1)).consume(eq(3L), eq(3L));
-        verify(consumer, times(1)).consume(eq(4L), eq(4L));
-        verify(consumer, times(1)).consume(eq(5L), eq(5L));
-        verify(consumer, times(1)).consume(eq(6L), eq(6L));
     }
 
     @Test

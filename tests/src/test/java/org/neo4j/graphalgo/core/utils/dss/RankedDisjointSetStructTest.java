@@ -38,6 +38,11 @@ public class RankedDisjointSetStructTest extends DisjointSetStructTest {
         return new RankedDisjointSetStruct(capacity, AllocationTracker.EMPTY);
     }
 
+    @Override
+    DisjointSetStruct newSet(final int capacity, final TestWeightMapping weightMapping) {
+        return new RankedDisjointSetStruct(capacity, AllocationTracker.EMPTY);
+    }
+
     @Test
     public void shouldComputeMemoryEstimation() {
         GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();

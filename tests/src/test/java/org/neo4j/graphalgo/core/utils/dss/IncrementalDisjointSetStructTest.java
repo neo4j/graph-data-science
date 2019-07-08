@@ -39,6 +39,11 @@ public class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
         return new IncrementalDisjointSetStruct(capacity, communities, AllocationTracker.EMPTY);
     }
 
+    @Override
+    DisjointSetStruct newSet(final int capacity, TestWeightMapping weightMapping) {
+        return new IncrementalDisjointSetStruct(capacity, weightMapping, AllocationTracker.EMPTY);
+    }
+
     @Test
     public void shouldComputeMemoryEstimation() {
         GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();

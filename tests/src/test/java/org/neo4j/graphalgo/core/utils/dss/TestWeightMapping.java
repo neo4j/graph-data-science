@@ -33,7 +33,7 @@ public final class TestWeightMapping implements HugeWeightMapping {
     @Override
     public double weight(final long source, final long target, final double defaultValue) {
         assert target == -1L;
-        int key = Math.toIntExact(target);
+        int key = Math.toIntExact(source);
         int index = weights.indexOf(key);
         if (weights.indexExists(index)) {
             return weights.indexGet(index);
@@ -44,5 +44,9 @@ public final class TestWeightMapping implements HugeWeightMapping {
     @Override
     public long release() {
         return 0;
+    }
+
+    public int size() {
+        return weights.size();
     }
 }
