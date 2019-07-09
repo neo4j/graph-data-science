@@ -37,7 +37,6 @@ import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.RandomLongIterable;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
@@ -46,9 +45,7 @@ import org.neo4j.graphdb.Direction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadLocalRandom;
 
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -127,91 +124,6 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
     }
 
     public LabelPropagation compute(Direction direction, long maxIterations) {
-        return compute(direction, maxIterations, DefaultRandom.NO_RANDOMNESS);
-    }
-
-    public LabelPropagation compute(Direction direction, long maxIterations, long randomSeed) {
-        return compute(direction, maxIterations, new Random(randomSeed));
-    }
-
-    public LabelPropagation compute(Direction direction, long maxIterations, Random random) {
-        return compute(direction, maxIterations, new ProvidedRandom(random));
-    }
-
-    private Labels initialLabels(final long nodeCount, final AllocationTracker tracker) {
-        return new Labels(HugeLongArray.newArray(nodeCount, tracker));
-    }
-
-    private InitStep initStep(
-            final Graph graph,
-            final Labels labels,
-            final HugeWeightMapping nodeProperties,
-            final HugeWeightMapping nodeWeights,
-            final Direction direction,
-            final ProgressLogger progressLogger,
-            final RandomProvider randomProvider,
-            final PrimitiveLongIterable nodes) {
-        return new InitStep(
-                nodeProperties,
-                labels,
-                nodes,
-                graph,
-                graph,
-                nodeWeights,
-                progressLogger,
-                direction,
-                graph.nodeCount() - 1L,
-                randomProvider
-        );
-    }
-
-    private long adjustBatchSize(long nodeCount, long batchSize) {
-        if (batchSize <= 0L) {
-            batchSize = 1L;
-        }
-        batchSize = BitUtil.nextHighestPowerOfTwo(batchSize);
-        while (((nodeCount + batchSize + 1L) / batchSize) > (long) Integer.MAX_VALUE) {
-            batchSize = batchSize << 1;
-        }
-        return batchSize;
-    }
-
-    private List<BaseStep> baseSteps(Direction direction, RandomProvider randomProvider) {
-
-        long nodeCount = graph.nodeCount();
-        long batchSize = adjustBatchSize(nodeCount, (long) this.batchSize);
-
-        Collection<PrimitiveLongIterable> nodeBatches = LazyBatchCollection.of(
-                nodeCount,
-                batchSize,
-                (start, length) -> randomProvider.isRandom()
-                        ? new RandomLongIterable(start, start + length, randomProvider.randomForNewIteration())
-                        : () -> PrimitiveLongCollections.range(start, start + length -1L));
-
-        int threads = nodeBatches.size();
-        List<BaseStep> tasks = new ArrayList<>(threads);
-        for (PrimitiveLongIterable iter : nodeBatches) {
-            InitStep initStep = initStep(
-                    graph,
-                    labels,
-                    nodeProperties,
-                    nodeWeights,
-                    direction,
-                    getProgressLogger(),
-                    randomProvider,
-                    iter
-            );
-            BaseStep task = new BaseStep(initStep);
-            tasks.add(task);
-        }
-        ParallelUtil.runWithConcurrency(concurrency, tasks, 1, MILLISECONDS, terminationFlag, executor);
-        return tasks;
-    }
-
-    private LabelPropagation compute(
-            Direction direction,
-            long maxIterations,
-            RandomProvider randomProvider) {
         if (maxIterations <= 0L) {
             throw new IllegalArgumentException("Must iterate at least 1 time");
         }
@@ -223,7 +135,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         ranIterations = 0L;
         didConverge = false;
 
-        List<BaseStep> baseSteps = baseSteps(direction, randomProvider);
+        List<BaseStep> baseSteps = baseSteps(direction);
 
         long currentIteration = 0L;
         while (running() && currentIteration < maxIterations) {
@@ -249,6 +161,71 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         didConverge = converged;
 
         return me();
+    }
+
+    private Labels initialLabels(final long nodeCount, final AllocationTracker tracker) {
+        return new Labels(HugeLongArray.newArray(nodeCount, tracker));
+    }
+
+    private InitStep initStep(
+            final Graph graph,
+            final Labels labels,
+            final HugeWeightMapping nodeProperties,
+            final HugeWeightMapping nodeWeights,
+            final Direction direction,
+            final ProgressLogger progressLogger,
+            final PrimitiveLongIterable nodes) {
+        return new InitStep(
+                nodeProperties,
+                labels,
+                nodes,
+                graph,
+                graph,
+                nodeWeights,
+                progressLogger,
+                direction,
+                graph.nodeCount() - 1L
+        );
+    }
+
+    private long adjustBatchSize(long nodeCount, long batchSize) {
+        if (batchSize <= 0L) {
+            batchSize = 1L;
+        }
+        batchSize = BitUtil.nextHighestPowerOfTwo(batchSize);
+        while (((nodeCount + batchSize + 1L) / batchSize) > (long) Integer.MAX_VALUE) {
+            batchSize = batchSize << 1;
+        }
+        return batchSize;
+    }
+
+    private List<BaseStep> baseSteps(Direction direction) {
+
+        long nodeCount = graph.nodeCount();
+        long batchSize = adjustBatchSize(nodeCount, (long) this.batchSize);
+
+        Collection<PrimitiveLongIterable> nodeBatches = LazyBatchCollection.of(
+                nodeCount,
+                batchSize,
+                (start, length) -> () -> PrimitiveLongCollections.range(start, start + length -1L));
+
+        int threads = nodeBatches.size();
+        List<BaseStep> tasks = new ArrayList<>(threads);
+        for (PrimitiveLongIterable iter : nodeBatches) {
+            InitStep initStep = initStep(
+                    graph,
+                    labels,
+                    nodeProperties,
+                    nodeWeights,
+                    direction,
+                    getProgressLogger(),
+                    iter
+            );
+            BaseStep task = new BaseStep(initStep);
+            tasks.add(task);
+        }
+        ParallelUtil.runWithConcurrency(concurrency, tasks, 1, MILLISECONDS, terminationFlag, executor);
+        return tasks;
     }
 
     // Labels
@@ -316,7 +293,6 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         private final ProgressLogger progressLogger;
         private final Direction direction;
         private final long maxNode;
-        private final RandomProvider randomProvider;
 
         private InitStep(
                 HugeWeightMapping nodeProperties,
@@ -327,8 +303,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
                 HugeWeightMapping nodeWeights,
                 ProgressLogger progressLogger,
                 Direction direction,
-                long maxNode,
-                RandomProvider randomProvider) {
+                long maxNode) {
             this.nodeProperties = nodeProperties;
             this.existingLabels = existingLabels;
             this.nodes = nodes;
@@ -338,7 +313,6 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
             this.progressLogger = progressLogger;
             this.direction = direction;
             this.maxNode = maxNode;
-            this.randomProvider = randomProvider;
         }
 
         @Override
@@ -352,13 +326,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         }
 
         void setExistingLabels() {
-            final PrimitiveLongIterator iterator;
-            if (nodes instanceof RandomLongIterable) {
-                RandomLongIterable randomIter = (RandomLongIterable) nodes;
-                iterator = randomIter.iterator(randomProvider.randomForNewIteration());
-            } else {
-                iterator = nodes.iterator();
-            }
+            final PrimitiveLongIterator iterator = nodes.iterator();
             while (iterator.hasNext()) {
                 long nodeId = iterator.next();
                 long existingLabel = (long) nodeProperties.nodeWeight(nodeId, (double) idMapping.toOriginalNodeId(nodeId));
@@ -374,15 +342,13 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
                     direction,
                     maxNode,
                     existingLabels,
-                    nodes,
-                    randomProvider
+                    nodes
             );
         }
     }
 
     private static final class ComputeStep implements Step, WeightedRelationshipConsumer {
 
-        private final RandomProvider randomProvider;
         private final RelationshipIterator localRelationshipIterator;
         private final Direction direction;
         private final HugeWeightMapping nodeWeights;
@@ -399,12 +365,10 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
                 Direction direction,
                 final long maxNode,
                 Labels existingLabels,
-                PrimitiveLongIterable nodes,
-                RandomProvider randomProvider) {
+                PrimitiveLongIterable nodes) {
             this.existingLabels = existingLabels;
             this.progressLogger = progressLogger;
             this.maxNode = (double) maxNode;
-            this.randomProvider = randomProvider;
             this.localRelationshipIterator = graph.concurrentCopy();
             this.nodeWeights = nodeWeights;
             this.direction = direction;
@@ -427,13 +391,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         }
 
         boolean computeAll() {
-            final PrimitiveLongIterator iterator;
-            if (nodes instanceof RandomLongIterable) {
-                RandomLongIterable randomIter = (RandomLongIterable) nodes;
-                iterator = randomIter.iterator(randomProvider.randomForNewIteration());
-            } else {
-                iterator = nodes.iterator();
-            }
+            final PrimitiveLongIterator iterator = nodes.iterator();
             return iterateAll(iterator);
         }
 
@@ -519,62 +477,5 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
             }
         }
 
-    }
-
-    // Randoms
-
-    interface RandomProvider {
-        Random randomForNewIteration();
-
-        boolean isRandom();
-    }
-
-    private static final class ProvidedRandom implements RandomProvider {
-        private final Random random;
-
-        private ProvidedRandom(final Random random) {
-            this.random = random;
-        }
-
-        @Override
-        public Random randomForNewIteration() {
-            return random;
-        }
-
-        @Override
-        public boolean isRandom() {
-            return true;
-        }
-    }
-
-    private enum DefaultRandom implements RandomProvider {
-        NO_RANDOMNESS {
-            @Override
-            public Random randomForNewIteration() {
-                return new Random() {
-                    @Override
-                    public long nextLong() {
-                        return 0L;
-                    }
-                };
-            }
-
-            @Override
-            public boolean isRandom() {
-                return false;
-            }
-        },
-
-        INSTANCE {
-            @Override
-            public Random randomForNewIteration() {
-                return ThreadLocalRandom.current();
-            }
-
-            @Override
-            public boolean isRandom() {
-                return true;
-            }
-        }
     }
 }

@@ -45,7 +45,6 @@ import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Random;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -164,7 +163,7 @@ public final class LabelPropagationTest {
                 Pools.DEFAULT,
                 AllocationTracker.EMPTY
         );
-        lp.compute(Direction.OUTGOING, 10L, new Random());
+        lp.compute(Direction.OUTGOING, 10L);
         LabelPropagation.Labels labels = lp.labels();
         assertNotNull(labels);
         IntObjectMap<IntArrayList> cluster = groupByPartitionInt(labels);
