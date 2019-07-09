@@ -131,7 +131,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         return new HugeLabelArray(HugeLongArray.newArray(nodeCount, tracker));
     }
 
-    private Initialization initStep(
+    private InitStep initStep(
             final Graph graph,
             final Labels labels,
             final HugeWeightMapping nodeProperties,
@@ -165,7 +165,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         return batchSize;
     }
 
-    private List<BaseStep> baseSteps(Direction direction, RandomProvider random) {
+    private List<BaseStep> baseSteps(Direction direction, RandomProvider randomProvider) {
 
         long nodeCount = graph.nodeCount();
         long batchSize = adjustBatchSize(nodeCount, (long) this.batchSize);
@@ -173,21 +173,21 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         Collection<PrimitiveLongIterable> nodeBatches = LazyBatchCollection.of(
                 nodeCount,
                 batchSize,
-                (start, length) -> random.isRandom()
-                        ? new RandomLongIterable(start, start + length, random.randomForNewIteration())
+                (start, length) -> randomProvider.isRandom()
+                        ? new RandomLongIterable(start, start + length, randomProvider.randomForNewIteration())
                         : () -> PrimitiveLongCollections.range(start, start + length));
 
         int threads = nodeBatches.size();
         List<BaseStep> tasks = new ArrayList<>(threads);
         for (PrimitiveLongIterable iter : nodeBatches) {
-            Initialization initStep = initStep(
+            InitStep initStep = initStep(
                     graph,
                     labels,
                     nodeProperties,
                     nodeWeights,
                     direction,
                     getProgressLogger(),
-                    random,
+                    randomProvider,
                     iter
             );
             BaseStep task = new BaseStep(initStep);
@@ -200,7 +200,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
     private LabelPropagation compute(
             Direction direction,
             long maxIterations,
-            RandomProvider random) {
+            RandomProvider randomProvider) {
         if (maxIterations <= 0L) {
             throw new IllegalArgumentException("Must iterate at least 1 time");
         }
@@ -212,7 +212,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         ranIterations = 0L;
         didConverge = false;
 
-        List<BaseStep> baseSteps = baseSteps(direction, random);
+        List<BaseStep> baseSteps = baseSteps(direction, randomProvider);
 
         long currentIteration = 0L;
         while (running() && currentIteration < maxIterations) {
@@ -224,8 +224,8 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         boolean converged = true;
         for (BaseStep baseStep : baseSteps) {
             Step current = baseStep.current;
-            if (current instanceof Computation) {
-                Computation step = (Computation) current;
+            if (current instanceof ComputeStep) {
+                ComputeStep step = (ComputeStep) current;
                 if (step.iteration > maxIteration) {
                     maxIteration = step.iteration;
                 }
@@ -280,6 +280,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         void run();
 
         Step next();
+
     }
 
     static final class BaseStep implements Runnable {
@@ -297,23 +298,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         }
     }
 
-    static abstract class Initialization implements Step {
-        abstract void setExistingLabels();
-
-        abstract Computation computeStep();
-
-        @Override
-        public final void run() {
-            setExistingLabels();
-        }
-
-        @Override
-        public final Step next() {
-            return computeStep();
-        }
-    }
-
-    private static final class InitStep extends Initialization {
+    private static final class InitStep implements Step {
 
         private final HugeWeightMapping nodeProperties;
         private final Labels existingLabels;
@@ -324,7 +309,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         private final ProgressLogger progressLogger;
         private final Direction direction;
         private final long maxNode;
-        private final RandomProvider random;
+        private final RandomProvider randomProvider;
 
         private InitStep(
                 HugeWeightMapping nodeProperties,
@@ -336,7 +321,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
                 ProgressLogger progressLogger,
                 Direction direction,
                 long maxNode,
-                RandomProvider random) {
+                RandomProvider randomProvider) {
             this.nodeProperties = nodeProperties;
             this.existingLabels = existingLabels;
             this.nodes = nodes;
@@ -346,15 +331,24 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
             this.progressLogger = progressLogger;
             this.direction = direction;
             this.maxNode = maxNode;
-            this.random = random;
+            this.randomProvider = randomProvider;
         }
 
         @Override
+        public final void run() {
+            setExistingLabels();
+        }
+
+        @Override
+        public final Step next() {
+            return computeStep();
+        }
+
         void setExistingLabels() {
             final PrimitiveLongIterator iterator;
             if (nodes instanceof RandomLongIterable) {
                 RandomLongIterable randomIter = (RandomLongIterable) nodes;
-                iterator = randomIter.iterator(random.randomForNewIteration());
+                iterator = randomIter.iterator(randomProvider.randomForNewIteration());
             } else {
                 iterator = nodes.iterator();
             }
@@ -365,8 +359,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
             }
         }
 
-        @Override
-        Computation computeStep() {
+        ComputeStep computeStep() {
             return new ComputeStep(
                     graph,
                     nodeWeights,
@@ -375,17 +368,22 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
                     maxNode,
                     existingLabels,
                     nodes,
-                    random
+                    randomProvider
             );
         }
     }
 
-    private static final class ComputeStep extends Computation implements WeightedRelationshipConsumer {
+    private static final class ComputeStep implements Step, WeightedRelationshipConsumer {
 
-        private final HugeWeightMapping nodeWeights;
+        private final RandomProvider randomProvider;
+        private final RelationshipIterator localRelationshipIterator;
         private final Direction direction;
+        private final HugeWeightMapping nodeWeights;
+        private final Labels existingLabels;
+        private final LongDoubleScatterMap votes;
         private final PrimitiveLongIterable nodes;
-        private RelationshipIterator localRelationshipIterator;
+        private final ProgressLogger progressLogger;
+        private final double maxNode;
 
         private ComputeStep(
                 Graph graph,
@@ -395,15 +393,32 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
                 final long maxNode,
                 Labels existingLabels,
                 PrimitiveLongIterable nodes,
-                RandomProvider random) {
-            super(existingLabels, progressLogger, maxNode, random);
+                RandomProvider randomProvider) {
+            this.existingLabels = existingLabels;
+            this.progressLogger = progressLogger;
+            this.maxNode = (double) maxNode;
+            this.randomProvider = randomProvider;
             this.localRelationshipIterator = graph.concurrentCopy();
             this.nodeWeights = nodeWeights;
             this.direction = direction;
             this.nodes = nodes;
+            this.votes = new LongDoubleScatterMap();
         }
 
+        private boolean didChange = true;
+        long iteration = 0L;
+
         @Override
+        public final void run() {
+            if (this.didChange) {
+                iteration++;
+                this.didChange = computeAll();
+                if (!this.didChange) {
+                    release();
+                }
+            }
+        }
+
         boolean computeAll() {
             final PrimitiveLongIterator iterator;
             if (nodes instanceof RandomLongIterable) {
@@ -415,12 +430,10 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
             return iterateAll(iterator);
         }
 
-        @Override
         void forEach(final long nodeId) {
             localRelationshipIterator.forEachRelationship(nodeId, direction, this);
         }
 
-        @Override
         double weightOf(final long nodeId, final long candidate, final double relationshipWeight) {
             double nodeWeight = nodeWeights.nodeWeight(candidate);
             return relationshipWeight * nodeWeight;
@@ -431,46 +444,10 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
             castVote(sourceNodeId, targetNodeId, weight);
             return true;
         }
-    }
-
-    static abstract class Computation implements Step {
-
-        final RandomProvider randomProvider;
-        private final Labels existingLabels;
-        private final ProgressLogger progressLogger;
-        private final double maxNode;
-        private final LongDoubleScatterMap votes;
-
-        private boolean didChange = true;
-        long iteration = 0L;
-
-        Computation(
-                final Labels existingLabels,
-                final ProgressLogger progressLogger,
-                final long maxNode,
-                final RandomProvider randomProvider) {
-            this.randomProvider = randomProvider;
-            this.existingLabels = existingLabels;
-            this.progressLogger = progressLogger;
-            this.maxNode = (double) maxNode;
-            this.votes = new LongDoubleScatterMap();
-        }
-
-        abstract boolean computeAll();
-
-        abstract void forEach(long nodeId);
-
-        abstract double weightOf(long nodeId, long candidate, double relationshipWeight);
 
         @Override
-        public final void run() {
-            if (this.didChange) {
-                iteration++;
-                this.didChange = computeAll();
-                if (!this.didChange) {
-                    release();
-                }
-            }
+        public final Step next() {
+            return this;
         }
 
         final boolean iterateAll(PrimitiveIntIterator nodeIds) {
@@ -491,6 +468,12 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
                 progressLogger.logProgress((double) nodeId, maxNode);
             }
             return didChange;
+        }
+
+        final void castVote(long nodeId, long candidate, double weight) {
+            weight = weightOf(nodeId, candidate, weight);
+            long label = existingLabels.labelFor(candidate);
+            votes.addTo(label, weight);
         }
 
         final boolean compute(long nodeId, boolean didChange) {
@@ -516,17 +499,6 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
             return didChange;
         }
 
-        final void castVote(long nodeId, long candidate, double weight) {
-            weight = weightOf(nodeId, candidate, weight);
-            long label = existingLabels.labelFor(candidate);
-            votes.addTo(label, weight);
-        }
-
-        @Override
-        public final Step next() {
-            return this;
-        }
-
         final void release() {
             // the HPPC release() method allocates new arrays
             // the clear() method overwrite the existing keys with the default value
@@ -539,6 +511,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
                 votes.values = null;
             }
         }
+
     }
 
     // Randoms
