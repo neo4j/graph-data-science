@@ -70,8 +70,6 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
     private final int concurrency;
     private final ExecutorService executor;
 
-    private final ThreadLocal<RelationshipIterator> localGraphs;
-
     private Graph graph;
     private Labels labels;
     private long ranIterations;
@@ -92,7 +90,6 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         this.tracker = tracker;
         this.nodeProperties = nodeProperties.nodeProperties(LABEL_TYPE);
         this.nodeWeights = nodeProperties.nodeProperties(WEIGHT_TYPE);
-        localGraphs = ThreadLocal.withInitial(graph::concurrentCopy);
     }
 
     @Override
@@ -148,7 +145,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
                 labels,
                 nodes,
                 graph,
-                localGraphs,
+                graph,
                 nodeWeights,
                 progressLogger,
                 direction,
@@ -322,7 +319,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         private final Labels existingLabels;
         private final PrimitiveLongIterable nodes;
         private final IdMapping idMapping;
-        private final ThreadLocal<RelationshipIterator> graph;
+        private final Graph graph;
         private final HugeWeightMapping nodeWeights;
         private final ProgressLogger progressLogger;
         private final Direction direction;
@@ -334,7 +331,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
                 Labels existingLabels,
                 PrimitiveLongIterable nodes,
                 IdMapping idMapping,
-                ThreadLocal<RelationshipIterator> graph,
+                Graph graph,
                 HugeWeightMapping nodeWeights,
                 ProgressLogger progressLogger,
                 Direction direction,
@@ -385,14 +382,13 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
 
     private static final class ComputeStep extends Computation implements WeightedRelationshipConsumer {
 
-        private final ThreadLocal<RelationshipIterator> graphs;
         private final HugeWeightMapping nodeWeights;
         private final Direction direction;
         private final PrimitiveLongIterable nodes;
-        private RelationshipIterator graph;
+        private RelationshipIterator localRelationshipIterator;
 
         private ComputeStep(
-                ThreadLocal<RelationshipIterator> graphs,
+                Graph graph,
                 HugeWeightMapping nodeWeights,
                 ProgressLogger progressLogger,
                 Direction direction,
@@ -401,7 +397,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
                 PrimitiveLongIterable nodes,
                 RandomProvider random) {
             super(existingLabels, progressLogger, maxNode, random);
-            this.graphs = graphs;
+            this.localRelationshipIterator = graph.concurrentCopy();
             this.nodeWeights = nodeWeights;
             this.direction = direction;
             this.nodes = nodes;
@@ -409,7 +405,6 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
 
         @Override
         boolean computeAll() {
-            graph = graphs.get();
             final PrimitiveLongIterator iterator;
             if (nodes instanceof RandomLongIterable) {
                 RandomLongIterable randomIter = (RandomLongIterable) nodes;
@@ -422,7 +417,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
 
         @Override
         void forEach(final long nodeId) {
-            graph.forEachRelationship(nodeId, direction, this);
+            localRelationshipIterator.forEachRelationship(nodeId, direction, this);
         }
 
         @Override
@@ -471,8 +466,8 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         public final void run() {
             if (this.didChange) {
                 iteration++;
-                didChange = computeAll();
-                if (!didChange) {
+                this.didChange = computeAll();
+                if (!this.didChange) {
                     release();
                 }
             }
