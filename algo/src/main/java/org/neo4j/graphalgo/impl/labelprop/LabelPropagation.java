@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo.impl.labelprop;
 
-import com.carrotsearch.hppc.HashOrderMixing;
-import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.LongDoubleScatterMap;
 import com.carrotsearch.hppc.cursors.LongDoubleCursor;
 import org.neo4j.collection.primitive.PrimitiveIntIterator;
@@ -28,6 +26,7 @@ import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
@@ -48,8 +47,6 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static com.carrotsearch.hppc.Containers.DEFAULT_EXPECTED_ELEMENTS;
-import static com.carrotsearch.hppc.HashContainers.DEFAULT_LOAD_FACTOR;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
@@ -148,6 +145,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
                 nodeProperties,
                 labels,
                 nodes,
+                graph,
                 localGraphs,
                 nodeWeights,
                 progressLogger,
@@ -319,6 +317,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         private final HugeWeightMapping nodeProperties;
         private final Labels existingLabels;
         private final RandomLongIterable nodes;
+        private final IdMapping idMapping;
         private final ThreadLocal<RelationshipIterator> graph;
         private final HugeWeightMapping nodeWeights;
         private final ProgressLogger progressLogger;
@@ -330,6 +329,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
                 HugeWeightMapping nodeProperties,
                 Labels existingLabels,
                 RandomLongIterable nodes,
+                IdMapping idMapping,
                 ThreadLocal<RelationshipIterator> graph,
                 HugeWeightMapping nodeWeights,
                 ProgressLogger progressLogger,
@@ -339,6 +339,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
             this.nodeProperties = nodeProperties;
             this.existingLabels = existingLabels;
             this.nodes = nodes;
+            this.idMapping = idMapping;
             this.graph = graph;
             this.nodeWeights = nodeWeights;
             this.progressLogger = progressLogger;
@@ -352,7 +353,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
             PrimitiveLongIterator iterator = nodes.iterator(random.randomForNewIteration());
             while (iterator.hasNext()) {
                 long nodeId = iterator.next();
-                long existingLabel = (long) nodeProperties.nodeWeight(nodeId, (double) nodeId);
+                long existingLabel = (long) nodeProperties.nodeWeight(nodeId, (double) idMapping.toOriginalNodeId(nodeId));
                 existingLabels.setLabelFor(nodeId, existingLabel);
             }
         }
@@ -426,7 +427,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         private final Labels existingLabels;
         private final ProgressLogger progressLogger;
         private final double maxNode;
-        private final LongDoubleHashMap votes;
+        private final LongDoubleScatterMap votes;
 
         private boolean didChange = true;
         long iteration = 0L;
@@ -440,15 +441,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
             this.existingLabels = existingLabels;
             this.progressLogger = progressLogger;
             this.maxNode = (double) maxNode;
-            if (randomProvider.isRandom()) {
-                Random random = randomProvider.randomForNewIteration();
-                this.votes = new LongDoubleHashMap(
-                        DEFAULT_EXPECTED_ELEMENTS,
-                        (double) DEFAULT_LOAD_FACTOR,
-                        HashOrderMixing.constant(random.nextLong()));
-            } else {
-                this.votes = new LongDoubleScatterMap();
-            }
+            this.votes = new LongDoubleScatterMap();
         }
 
         abstract boolean computeAll();
@@ -498,6 +491,10 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
                 if (weight < vote.value) {
                     weight = vote.value;
                     label = vote.key;
+                } else if (weight == vote.value) {
+                    if (label > vote.key) {
+                        label = vote.key;
+                    }
                 }
             }
             if (label != previous) {
