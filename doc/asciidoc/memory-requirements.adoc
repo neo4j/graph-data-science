@@ -13,7 +13,7 @@ image::graph-model-memory.png[width=500]
 
 The model contains three types of data:
 
-* Node ids - up to 2bn for `graph: "heavy"` and up to 35bn for `graph: "huge"`
+* Node ids - up to 2^31^ ("2 billion") for `graph: "heavy"` and up to 2^45^ ("35 trillion") for `graph: "huge"`
 * Relationships - pairs of node ids. Relationships are stored twice if `direction: "BOTH"` config provided.
 * Weights - stored as floats (4 bytes per node) in an array (`graph: "heavy"`) and in a https://github.com/carrotsearch/hppc[HPPC^] map (`graph: "huge"`)
 
