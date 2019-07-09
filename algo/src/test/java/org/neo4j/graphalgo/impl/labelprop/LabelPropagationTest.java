@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.impl.labelprop;
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
-import com.carrotsearch.hppc.ObjectIntHashMap;
 import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -60,21 +59,21 @@ public final class LabelPropagationTest {
 
     private static final String GRAPH =
             "CREATE (nAlice:User {id:'Alice',label:2})\n" +
-                    ",(nBridget:User {id:'Bridget',label:3})\n" +
-                    ",(nCharles:User {id:'Charles',label:4})\n" +
-                    ",(nDoug:User {id:'Doug',label:3})\n" +
-                    ",(nMark:User {id:'Mark',label: 4})\n" +
-                    ",(nMichael:User {id:'Michael',label:2})\n" +
-                    "CREATE (nAlice)-[:FOLLOW]->(nBridget)\n" +
-                    ",(nAlice)-[:FOLLOW]->(nCharles)\n" +
-                    ",(nMark)-[:FOLLOW]->(nDoug)\n" +
-                    ",(nBridget)-[:FOLLOW]->(nMichael)\n" +
-                    ",(nDoug)-[:FOLLOW]->(nMark)\n" +
-                    ",(nMichael)-[:FOLLOW]->(nAlice)\n" +
-                    ",(nAlice)-[:FOLLOW]->(nMichael)\n" +
-                    ",(nBridget)-[:FOLLOW]->(nAlice)\n" +
-                    ",(nMichael)-[:FOLLOW]->(nBridget)\n" +
-                    ",(nCharles)-[:FOLLOW]->(nDoug)";
+            ",(nBridget:User {id:'Bridget',label:3})\n" +
+            ",(nCharles:User {id:'Charles',label:4})\n" +
+            ",(nDoug:User {id:'Doug',label:3})\n" +
+            ",(nMark:User {id:'Mark',label: 4})\n" +
+            ",(nMichael:User {id:'Michael',label:2})\n" +
+            "CREATE (nAlice)-[:FOLLOW]->(nBridget)\n" +
+            ",(nAlice)-[:FOLLOW]->(nCharles)\n" +
+            ",(nMark)-[:FOLLOW]->(nDoug)\n" +
+            ",(nBridget)-[:FOLLOW]->(nMichael)\n" +
+            ",(nDoug)-[:FOLLOW]->(nMark)\n" +
+            ",(nMichael)-[:FOLLOW]->(nAlice)\n" +
+            ",(nAlice)-[:FOLLOW]->(nMichael)\n" +
+            ",(nBridget)-[:FOLLOW]->(nAlice)\n" +
+            ",(nMichael)-[:FOLLOW]->(nBridget)\n" +
+            ",(nCharles)-[:FOLLOW]->(nDoug)";
 
     @Parameterized.Parameters(name = "graph={0}")
     public static Collection<Object[]> data() {
@@ -118,7 +117,7 @@ public final class LabelPropagationTest {
             graphLoader
                     .withLabel("MATCH (u:User) RETURN id(u) as id")
                     .withRelationshipType("MATCH (u1:User)-[rel:FOLLOW]->(u2:User) \n" +
-                            "RETURN id(u1) as source,id(u2) as target")
+                                          "RETURN id(u1) as source,id(u2) as target")
                     .withName("cypher");
         } else {
             graphLoader
@@ -150,15 +149,13 @@ public final class LabelPropagationTest {
     }
 
     private void testClustering(int batchSize) {
-        ObjectIntHashMap<String> counter = new ObjectIntHashMap<>();
         for (int i = 0; i < 20; i++) {
-            testLPClustering(batchSize, counter);
+            testLPClustering(batchSize);
         }
-        System.out.println(counter);
     }
 
     // possible bad seed: -2300107887844480632
-    private void testLPClustering(int batchSize, ObjectIntHashMap<String> counter) {
+    private void testLPClustering(int batchSize) {
         LabelPropagation lp = new LabelPropagation(
                 graph,
                 graph,
@@ -173,50 +170,21 @@ public final class LabelPropagationTest {
         IntObjectMap<IntArrayList> cluster = groupByPartitionInt(labels);
         assertNotNull(cluster);
 
-        // It could happen that the labels for Charles, Doug, and Mark oscillate,
-        // i.e they assign each others' label in every iteration and the graph won't converge.
-        // LPA runs asynchronous and shuffles the order of iteration a bit to try
-        // to minimize the oscillations, but it cannot be guaranteed that
-        // it will never happen. It's RNG after all: http://dilbert.com/strip/2001-10-25
-        if (lp.didConverge()) {
-            assertTrue("expected at least 2 iterations, got " + lp.ranIterations(), 2L <= lp.ranIterations());
-            if (cluster.size() == 1) {
-                int[] ids = cluster.values().iterator().next().value.toArray();
-                Arrays.sort(ids);
-                assertArrayEquals(new int[]{0, 1, 2, 3, 4, 5}, ids);
-                counter.addTo("single cluster", 1);
-            } else {
-                assertEquals(2L, (long) cluster.size());
-                for (IntObjectCursor<IntArrayList> cursor : cluster) {
-                    int[] ids = cursor.value.toArray();
-                    Arrays.sort(ids);
-                    if (cursor.key == 0 || cursor.key == 1 || cursor.key == 5) {
-                        assertArrayEquals(new int[]{0, 1, 5}, ids);
-                        counter.addTo("multiple cluster #3", 1);
-                    } else if (cursor.key == 2) {
-                        if (ids[0] == 0) {
-                            assertArrayEquals(new int[]{0, 1, 5}, ids);
-                            counter.addTo("multiple cluster #1", 1);
-                        } else {
-                            assertArrayEquals(new int[]{2, 3, 4}, ids);
-                            counter.addTo("multiple cluster #2", 1);
-                        }
-                    }
-                }
-            }
-        } else {
-            counter.addTo("nonConverging", 1);
-            assertEquals((long) 10, lp.ranIterations());
-            System.out.println("non-converged cluster = " + cluster);
-            IntArrayList cluster5 = cluster.get(5);
-            assertNotNull(cluster5);
-            int[] ids = cluster5.toArray();
+        assertTrue(lp.didConverge());
+        assertTrue("expected at least 2 iterations, got " + lp.ranIterations(), 2L <= lp.ranIterations());
+        assertEquals(2L, (long) cluster.size());
+        for (IntObjectCursor<IntArrayList> cursor : cluster) {
+            int[] ids = cursor.value.toArray();
             Arrays.sort(ids);
-            assertArrayEquals(new int[]{0, 1, 5}, ids);
+            if (cursor.key == 0 || cursor.key == 1 || cursor.key == 5) {
+                assertArrayEquals(new int[]{0, 1, 5}, ids);
+            } else {
+                assertArrayEquals(new int[]{2, 3, 4}, ids);
+            }
         }
     }
 
-    private static IntObjectMap<IntArrayList> groupByPartitionInt( LabelPropagation.Labels labels) {
+    private static IntObjectMap<IntArrayList> groupByPartitionInt(LabelPropagation.Labels labels) {
         if (labels == null) {
             return null;
         }
