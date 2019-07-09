@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
-import org.neo4j.graphalgo.impl.labelprop.LabelPropagation.Labels;
 import org.neo4j.graphalgo.impl.results.LabelPropagationStats;
 import org.neo4j.graphalgo.impl.results.LabelPropagationStats.StreamResult;
 import org.neo4j.graphdb.Direction;
@@ -208,7 +207,7 @@ public final class LabelPropagationProc {
                 .withOptionalNodeProperties(propertyMappings);
     }
 
-    private Labels compute(
+    private LabelPropagation.Labels compute(
             ProcedureConfiguration configuration,
             Direction direction,
             int iterations,
@@ -224,7 +223,7 @@ public final class LabelPropagationProc {
         }
     }
 
-    private Labels compute(
+    private LabelPropagation.Labels compute(
             Direction direction,
             int iterations,
             int batchSize,
@@ -243,7 +242,7 @@ public final class LabelPropagationProc {
                     .withTerminationFlag(TerminationFlag.wrap(transaction))
                     .compute(direction, iterations);
 
-            final Labels result = labelPropagation.labels();
+            final LabelPropagation.Labels result = labelPropagation.labels();
 
             stats.iterations(labelPropagation.ranIterations());
             stats.didConverge(labelPropagation.didConverge());
@@ -258,7 +257,7 @@ public final class LabelPropagationProc {
             int concurrency,
             String labelKey,
             Graph graph,
-            Labels labels,
+            LabelPropagation.Labels labels,
             LabelPropagationStats.Builder stats) {
         try (ProgressTimer ignored = stats.timeWrite()) {
             Exporter.of(dbAPI, graph)

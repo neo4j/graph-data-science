@@ -138,8 +138,8 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         return compute(direction, maxIterations, new ProvidedRandom(random));
     }
 
-    private HugeLabelArray initialLabels(final long nodeCount, final AllocationTracker tracker) {
-        return new HugeLabelArray(HugeLongArray.newArray(nodeCount, tracker));
+    private Labels initialLabels(final long nodeCount, final AllocationTracker tracker) {
+        return new Labels(HugeLongArray.newArray(nodeCount, tracker));
     }
 
     private InitStep initStep(
@@ -253,39 +253,28 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
 
     // Labels
 
-    public interface Labels {
-        long labelFor(long nodeId);
-
-        void setLabelFor(long nodeId, long label);
-
-        long size();
-    }
-
-    static final class HugeLabelArray implements Labels {
+    public static final class Labels {
         final HugeLongArray labels;
 
-        HugeLabelArray(final HugeLongArray labels) {
+        Labels(final HugeLongArray labels) {
             this.labels = labels;
         }
 
-        @Override
         public long labelFor(final long nodeId) {
             return labels.get(nodeId);
         }
 
-        @Override
         public void setLabelFor(final long nodeId, final long label) {
             labels.set(nodeId, label);
         }
 
-        @Override
         public long size() {
             return labels.size();
         }
 
         @Override
         public String toString() {
-            return "HugeLabelArray{" +
+            return "Labels{" +
                    "labels=" + labels +
                    '}';
         }
