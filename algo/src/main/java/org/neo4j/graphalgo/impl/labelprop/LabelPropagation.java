@@ -175,7 +175,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
                 batchSize,
                 (start, length) -> randomProvider.isRandom()
                         ? new RandomLongIterable(start, start + length, randomProvider.randomForNewIteration())
-                        : () -> PrimitiveLongCollections.range(start, start + length));
+                        : () -> PrimitiveLongCollections.range(start, start + length -1L));
 
         int threads = nodeBatches.size();
         List<BaseStep> tasks = new ArrayList<>(threads);
