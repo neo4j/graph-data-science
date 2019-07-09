@@ -22,6 +22,8 @@ package org.neo4j.graphalgo.impl.labelprop;
 import com.carrotsearch.hppc.LongDoubleScatterMap;
 import com.carrotsearch.hppc.cursors.LongDoubleCursor;
 import org.neo4j.collection.primitive.PrimitiveIntIterator;
+import org.neo4j.collection.primitive.PrimitiveLongCollections;
+import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
@@ -117,7 +119,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
     }
 
     public LabelPropagation compute(Direction direction, long maxIterations) {
-        return compute(direction, maxIterations, DefaultRandom.INSTANCE);
+        return compute(direction, maxIterations, DefaultRandom.NO_RANDOMNESS);
     }
 
     public LabelPropagation compute(Direction direction, long maxIterations, long randomSeed) {
@@ -140,7 +142,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
             final Direction direction,
             final ProgressLogger progressLogger,
             final RandomProvider randomProvider,
-            final RandomLongIterable nodes) {
+            final PrimitiveLongIterable nodes) {
         return new InitStep(
                 nodeProperties,
                 labels,
@@ -171,14 +173,16 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         long nodeCount = graph.nodeCount();
         long batchSize = adjustBatchSize(nodeCount, (long) this.batchSize);
 
-        Collection<RandomLongIterable> nodeBatches = LazyBatchCollection.of(
+        Collection<PrimitiveLongIterable> nodeBatches = LazyBatchCollection.of(
                 nodeCount,
                 batchSize,
-                (start, length) -> new RandomLongIterable(start, start + length, random.randomForNewIteration()));
+                (start, length) -> random.isRandom()
+                        ? new RandomLongIterable(start, start + length, random.randomForNewIteration())
+                        : () -> PrimitiveLongCollections.range(start, start + length));
 
         int threads = nodeBatches.size();
         List<BaseStep> tasks = new ArrayList<>(threads);
-        for (RandomLongIterable iter : nodeBatches) {
+        for (PrimitiveLongIterable iter : nodeBatches) {
             Initialization initStep = initStep(
                     graph,
                     labels,
@@ -316,7 +320,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
 
         private final HugeWeightMapping nodeProperties;
         private final Labels existingLabels;
-        private final RandomLongIterable nodes;
+        private final PrimitiveLongIterable nodes;
         private final IdMapping idMapping;
         private final ThreadLocal<RelationshipIterator> graph;
         private final HugeWeightMapping nodeWeights;
@@ -328,7 +332,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         private InitStep(
                 HugeWeightMapping nodeProperties,
                 Labels existingLabels,
-                RandomLongIterable nodes,
+                PrimitiveLongIterable nodes,
                 IdMapping idMapping,
                 ThreadLocal<RelationshipIterator> graph,
                 HugeWeightMapping nodeWeights,
@@ -350,7 +354,13 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
 
         @Override
         void setExistingLabels() {
-            PrimitiveLongIterator iterator = nodes.iterator(random.randomForNewIteration());
+            final PrimitiveLongIterator iterator;
+            if (nodes instanceof RandomLongIterable) {
+                RandomLongIterable randomIter = (RandomLongIterable) nodes;
+                iterator = randomIter.iterator(random.randomForNewIteration());
+            } else {
+                iterator = nodes.iterator();
+            }
             while (iterator.hasNext()) {
                 long nodeId = iterator.next();
                 long existingLabel = (long) nodeProperties.nodeWeight(nodeId, (double) idMapping.toOriginalNodeId(nodeId));
@@ -378,7 +388,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         private final ThreadLocal<RelationshipIterator> graphs;
         private final HugeWeightMapping nodeWeights;
         private final Direction direction;
-        private final RandomLongIterable nodes;
+        private final PrimitiveLongIterable nodes;
         private RelationshipIterator graph;
 
         private ComputeStep(
@@ -388,7 +398,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
                 Direction direction,
                 final long maxNode,
                 Labels existingLabels,
-                RandomLongIterable nodes,
+                PrimitiveLongIterable nodes,
                 RandomProvider random) {
             super(existingLabels, progressLogger, maxNode, random);
             this.graphs = graphs;
@@ -400,7 +410,14 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         @Override
         boolean computeAll() {
             graph = graphs.get();
-            return iterateAll(nodes.iterator(randomProvider.randomForNewIteration()));
+            final PrimitiveLongIterator iterator;
+            if (nodes instanceof RandomLongIterable) {
+                RandomLongIterable randomIter = (RandomLongIterable) nodes;
+                iterator = randomIter.iterator(randomProvider.randomForNewIteration());
+            } else {
+                iterator = nodes.iterator();
+            }
+            return iterateAll(iterator);
         }
 
         @Override
@@ -556,6 +573,23 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
     }
 
     private enum DefaultRandom implements RandomProvider {
+        NO_RANDOMNESS {
+            @Override
+            public Random randomForNewIteration() {
+                return new Random() {
+                    @Override
+                    public long nextLong() {
+                        return 0L;
+                    }
+                };
+            }
+
+            @Override
+            public boolean isRandom() {
+                return false;
+            }
+        },
+
         INSTANCE {
             @Override
             public Random randomForNewIteration() {
