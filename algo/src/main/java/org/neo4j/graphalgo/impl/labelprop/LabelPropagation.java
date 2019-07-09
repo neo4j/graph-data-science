@@ -271,6 +271,13 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         public long size() {
             return labels.size();
         }
+
+        @Override
+        public String toString() {
+            return "HugeLabelArray{" +
+                   "labels=" + labels +
+                   '}';
+        }
     }
 
     // Steps

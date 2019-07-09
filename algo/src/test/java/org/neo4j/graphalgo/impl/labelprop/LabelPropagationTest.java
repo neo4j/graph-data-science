@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.impl.labelprop;
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
+import com.carrotsearch.hppc.ObjectIntHashMap;
 import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -45,6 +46,7 @@ import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Random;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -148,24 +150,24 @@ public final class LabelPropagationTest {
     }
 
     private void testClustering(int batchSize) {
-        testClustering(new LabelPropagation(
+        ObjectIntHashMap<String> counter = new ObjectIntHashMap<>();
+        for (int i = 0; i < 20; i++) {
+            testLPClustering(batchSize, counter);
+        }
+        System.out.println(counter);
+    }
+
+    // possible bad seed: -2300107887844480632
+    private void testLPClustering(int batchSize, ObjectIntHashMap<String> counter) {
+        LabelPropagation lp = new LabelPropagation(
                 graph,
                 graph,
                 batchSize,
                 Pools.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT,
                 AllocationTracker.EMPTY
-        ));
-    }
-
-    // possible bad seed: -2300107887844480632
-    private void testClustering(LabelPropagation lp) {
-        Long seed = Long.getLong("tests.seed");
-        if (seed != null) {
-            lp.compute(Direction.OUTGOING, 10L, seed);
-        } else {
-            lp.compute(Direction.OUTGOING, 10L);
-        }
+        );
+        lp.compute(Direction.OUTGOING, 10L, new Random());
         LabelPropagation.Labels labels = lp.labels();
         assertNotNull(labels);
         IntObjectMap<IntArrayList> cluster = groupByPartitionInt(labels);
@@ -182,6 +184,7 @@ public final class LabelPropagationTest {
                 int[] ids = cluster.values().iterator().next().value.toArray();
                 Arrays.sort(ids);
                 assertArrayEquals(new int[]{0, 1, 2, 3, 4, 5}, ids);
+                counter.addTo("single cluster", 1);
             } else {
                 assertEquals(2L, (long) cluster.size());
                 for (IntObjectCursor<IntArrayList> cursor : cluster) {
@@ -189,16 +192,20 @@ public final class LabelPropagationTest {
                     Arrays.sort(ids);
                     if (cursor.key == 0 || cursor.key == 1 || cursor.key == 5) {
                         assertArrayEquals(new int[]{0, 1, 5}, ids);
+                        counter.addTo("multiple cluster #3", 1);
                     } else if (cursor.key == 2) {
                         if (ids[0] == 0) {
                             assertArrayEquals(new int[]{0, 1, 5}, ids);
+                            counter.addTo("multiple cluster #1", 1);
                         } else {
                             assertArrayEquals(new int[]{2, 3, 4}, ids);
+                            counter.addTo("multiple cluster #2", 1);
                         }
                     }
                 }
             }
         } else {
+            counter.addTo("nonConverging", 1);
             assertEquals((long) 10, lp.ranIterations());
             System.out.println("non-converged cluster = " + cluster);
             IntArrayList cluster5 = cluster.get(5);
