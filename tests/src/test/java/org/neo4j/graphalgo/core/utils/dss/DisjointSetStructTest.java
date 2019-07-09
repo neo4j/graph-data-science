@@ -133,7 +133,7 @@ public abstract class DisjointSetStructTest {
     }
 
     private DisjointSetStruct create(int size, int[]... sets) {
-        DisjointSetStruct dss = newSet(size).reset();
+        DisjointSetStruct dss = newSet(size);
         for (int[] set : sets) {
             if (set.length < 1) {
                 throw new IllegalArgumentException("Sets must contain at least one element");

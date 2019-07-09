@@ -43,7 +43,6 @@ public final class RankedDisjointSetStruct extends DisjointSetStruct {
 
     /**
      * Initialize the struct with the given capacity.
-     * Note: the struct must be {@link RankedDisjointSetStruct#reset()} prior use!
      *
      * @param capacity the capacity (maximum node id)
      */
@@ -51,17 +50,12 @@ public final class RankedDisjointSetStruct extends DisjointSetStruct {
         parent = HugeLongArray.newArray(capacity, tracker);
         depth = HugeLongArray.newArray(capacity, tracker);
         this.capacity = capacity;
+        parent.fill(-1L);
     }
 
     @Override
     public HugeLongArray parent() {
         return parent;
-    }
-
-    @Override
-    public RankedDisjointSetStruct reset() {
-        parent.fill(-1L);
-        return this;
     }
 
     @Override

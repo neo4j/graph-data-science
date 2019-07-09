@@ -37,11 +37,6 @@ import java.util.stream.Stream;
 public abstract class DisjointSetStruct {
 
     /**
-     * Initializes the data structure.
-     */
-    public abstract DisjointSetStruct reset();
-
-    /**
      * Joins the set of p (Sp) with set of q (Sq) such that
      * {@link DisjointSetStruct#connected(long, long)}
      * for any pair of (Spi, Sqj) evaluates to true.

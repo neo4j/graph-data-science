@@ -69,7 +69,6 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
 
     /**
      * Initialize the struct with the given capacity.
-     * Note: the struct must be {@link IncrementalDisjointSetStruct#reset()} prior use!
      *
      * @param capacity the capacity (maximum node id)
      */
@@ -79,10 +78,7 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
         this.communityMapping = communityMapping;
         this.capacity = capacity;
 
-        maxCommunity = LongStream
-                .range(0, capacity)
-                .map(id -> (long) communityMapping.nodeWeight(id, -1))
-                .max().orElse(0);
+        init();
     }
 
     @Override
@@ -93,8 +89,12 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
     /**
      * reset the container
      */
-    @Override
-    public IncrementalDisjointSetStruct reset() {
+    private void init() {
+        this.maxCommunity = LongStream
+                .range(0, capacity)
+                .map(id -> (long) communityMapping.nodeWeight(id, -1))
+                .max().orElse(0);
+
         final LongLongMap internalMapping = new LongLongHashMap();
         internalToProvidedIds.clear();
         parent.setAll(nodeId -> {
@@ -112,7 +112,6 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
             }
             return -1L;
         });
-        return this;
     }
 
     /**

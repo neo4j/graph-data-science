@@ -207,7 +207,7 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFind
         public void run() {
             boolean pushed = false;
             try {
-                final DisjointSetStruct struct = initDisjointSetStruct(nodeCount, tracker).reset();
+                final DisjointSetStruct struct = initDisjointSetStruct(nodeCount, tracker);
                 for (long node = offset; node < end; node++) {
                     rels.forEachRelationship(
                             node,

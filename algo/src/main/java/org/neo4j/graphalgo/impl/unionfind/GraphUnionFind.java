@@ -105,7 +105,6 @@ public class GraphUnionFind extends GraphUnionFindAlgo<GraphUnionFind> {
     }
 
     private DisjointSetStruct compute(RelationshipConsumer consumer) {
-        dss.reset();
         final ProgressLogger progressLogger = getProgressLogger();
         graph.forEachNode((long node) -> {
             if (!running()) {

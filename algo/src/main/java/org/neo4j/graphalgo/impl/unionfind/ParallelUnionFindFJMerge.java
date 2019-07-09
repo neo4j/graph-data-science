@@ -159,7 +159,7 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
         UFProcess(long offset, long length) {
             this.offset = offset;
             this.end = offset + length;
-            struct = initDisjointSetStruct(nodeCount, tracker).reset();
+            struct = initDisjointSetStruct(nodeCount, tracker);
             rels = graph.concurrentCopy();
         }
 
@@ -202,7 +202,7 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
             this.offset = offset;
             this.end = offset + length;
             this.threshold = threshold;
-            struct = new RankedDisjointSetStruct(nodeCount, tracker).reset();
+            struct = new RankedDisjointSetStruct(nodeCount, tracker);
             rels = graph.concurrentCopy();
         }
 

@@ -38,7 +38,7 @@ public class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
     }
 
     DisjointSetStruct newSet(final int capacity, final TestWeightMapping weightMapping) {
-        return new IncrementalDisjointSetStruct(capacity, weightMapping, AllocationTracker.EMPTY).reset();
+        return new IncrementalDisjointSetStruct(capacity, weightMapping, AllocationTracker.EMPTY);
     }
 
     @Test

@@ -125,7 +125,7 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionF
         }
 
         protected DisjointSetStruct run() {
-            final DisjointSetStruct struct = initDisjointSetStruct(nodeCount, tracker).reset();
+            final DisjointSetStruct struct = initDisjointSetStruct(nodeCount, tracker);
             for (long node = offset; node < end && running(); node++) {
                 rels.forEachRelationship(
                         node,
@@ -168,7 +168,7 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionF
         }
 
         protected DisjointSetStruct run() {
-            final DisjointSetStruct struct = initDisjointSetStruct(nodeCount, tracker).reset();
+            final DisjointSetStruct struct = initDisjointSetStruct(nodeCount, tracker);
             for (long node = offset; node < end && running(); node++) {
                 rels.forEachRelationship(
                         node,
