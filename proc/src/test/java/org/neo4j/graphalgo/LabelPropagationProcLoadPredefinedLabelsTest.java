@@ -45,16 +45,16 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertThat;
 
 @RunWith(Parameterized.class)
-public class LabelPropagationProcLoadPredefinedPartitionsTest {
+public class LabelPropagationProcLoadPredefinedLabelsTest {
 
     private static final String DB_CYPHER = "" +
-            "CREATE (a:A {id: 0, partition: 42})\n" +
-            "CREATE (b:B {id: 1, partition: 42})\n" +
-            "CREATE (c:C {id: 2, partition: 42})\n" +
-            "CREATE (d:D {id: 3, partition: 29})\n" +
-            "CREATE (e:E {id: 4, partition: 29})\n" +
-            "CREATE (f:F {id: 5, partition: 29})\n" +
-            "CREATE (g:G {id: 6, partition: 29}) ";
+            "CREATE (a:A {id: 0, label: 42})\n" +
+            "CREATE (b:B {id: 1, label: 42})\n" +
+            "CREATE (c:C {id: 2, label: 42})\n" +
+            "CREATE (d:D {id: 3, label: 29})\n" +
+            "CREATE (e:E {id: 4, label: 29})\n" +
+            "CREATE (f:F {id: 5, label: 29})\n" +
+            "CREATE (g:G {id: 6, label: 29}) ";
 
     @Parameterized.Parameters(name = "parallel={0}, graph={1}")
     public static Collection<Object[]> data() {
@@ -74,7 +74,7 @@ public class LabelPropagationProcLoadPredefinedPartitionsTest {
     private final boolean parallel;
     private final String graphImpl;
 
-    public LabelPropagationProcLoadPredefinedPartitionsTest(boolean parallel, String graphImpl) {
+    public LabelPropagationProcLoadPredefinedLabelsTest(boolean parallel, String graphImpl) {
         this.parallel = parallel;
         this.graphImpl = graphImpl;
     }

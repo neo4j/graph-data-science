@@ -61,7 +61,7 @@ YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, write, writePro
 // tag::write-existing-label-sample-graph[]
 
 CALL algo.labelPropagation('User', 'FOLLOW',
-  {iterations:10,partitionProperty:'seed_label', writeProperty: "partition", write:true, direction: 'OUTGOING'})
+  {iterations:10,labelProperty:'seed_label', writeProperty: "partition", write:true, direction: 'OUTGOING'})
 YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, write, writeProperty;
 
 // end::write-existing-label-sample-graph[]

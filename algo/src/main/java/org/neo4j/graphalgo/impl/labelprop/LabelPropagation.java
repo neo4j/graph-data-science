@@ -31,12 +31,12 @@ import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
+import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.RandomLongIterable;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphdb.Direction;
@@ -57,7 +57,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
 
     private static final long[] EMPTY_LONGS = new long[0];
 
-    public static final String PARTITION_TYPE = "property";
+    public static final String LABEL_TYPE = "property";
     public static final String WEIGHT_TYPE = "weight";
 
     public static final PropertyTranslator.OfLong<Labels> LABEL_TRANSLATOR =
@@ -91,7 +91,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         this.concurrency = concurrency;
         this.executor = executor;
         this.tracker = tracker;
-        this.nodeProperties = nodeProperties.nodeProperties(PARTITION_TYPE);
+        this.nodeProperties = nodeProperties.nodeProperties(LABEL_TYPE);
         this.nodeWeights = nodeProperties.nodeProperties(WEIGHT_TYPE);
         localGraphs = ThreadLocal.withInitial(graph::concurrentCopy);
     }
@@ -490,18 +490,18 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
 
         final boolean compute(long nodeId, boolean didChange) {
             votes.clear();
-            long partition = existingLabels.labelFor(nodeId);
-            long previous = partition;
+            long label = existingLabels.labelFor(nodeId);
+            long previous = label;
             forEach(nodeId);
             double weight = Double.NEGATIVE_INFINITY;
             for (LongDoubleCursor vote : votes) {
                 if (weight < vote.value) {
                     weight = vote.value;
-                    partition = vote.key;
+                    label = vote.key;
                 }
             }
-            if (partition != previous) {
-                existingLabels.setLabelFor(nodeId, partition);
+            if (label != previous) {
+                existingLabels.setLabelFor(nodeId, label);
                 return true;
             }
             return didChange;
@@ -509,8 +509,8 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
 
         final void castVote(long nodeId, long candidate, double weight) {
             weight = weightOf(nodeId, candidate, weight);
-            long partition = existingLabels.labelFor(candidate);
-            votes.addTo(partition, weight);
+            long label = existingLabels.labelFor(candidate);
+            votes.addTo(label, weight);
         }
 
         @Override

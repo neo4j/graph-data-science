@@ -25,7 +25,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.neo4j.graphalgo.LabelPropagationProc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -46,20 +45,20 @@ import static org.junit.Assert.assertTrue;
 public class LabelPropagationProcTest {
 
     private static final String DB_CYPHER = "" +
-            "CREATE (a:A {id: 0, partition: 42}) " +
-            "CREATE (b:B {id: 1, partition: 42}) " +
+            "CREATE (a:A {id: 0, label: 42}) " +
+            "CREATE (b:B {id: 1, label: 42}) " +
 
-            "CREATE (a)-[:X]->(:A {id: 2, weight: 1.0, partition: 1}) " +
-            "CREATE (a)-[:X]->(:A {id: 3, weight: 2.0, partition: 1}) " +
-            "CREATE (a)-[:X]->(:A {id: 4, weight: 1.0, partition: 1}) " +
-            "CREATE (a)-[:X]->(:A {id: 5, weight: 1.0, partition: 1}) " +
-            "CREATE (a)-[:X]->(:A {id: 6, weight: 8.0, partition: 2}) " +
+            "CREATE (a)-[:X]->(:A {id: 2, weight: 1.0, label: 1}) " +
+            "CREATE (a)-[:X]->(:A {id: 3, weight: 2.0, label: 1}) " +
+            "CREATE (a)-[:X]->(:A {id: 4, weight: 1.0, label: 1}) " +
+            "CREATE (a)-[:X]->(:A {id: 5, weight: 1.0, label: 1}) " +
+            "CREATE (a)-[:X]->(:A {id: 6, weight: 8.0, label: 2}) " +
 
-            "CREATE (b)-[:X]->(:B {id: 7, weight: 1.0, partition: 1}) " +
-            "CREATE (b)-[:X]->(:B {id: 8, weight: 2.0, partition: 1}) " +
-            "CREATE (b)-[:X]->(:B {id: 9, weight: 1.0, partition: 1}) " +
-            "CREATE (b)-[:X]->(:B {id: 10, weight: 1.0, partition: 1})" +
-            "CREATE (b)-[:X]->(:B {id: 11, weight: 8.0, partition: 2})";
+            "CREATE (b)-[:X]->(:B {id: 7, weight: 1.0, label: 1}) " +
+            "CREATE (b)-[:X]->(:B {id: 8, weight: 2.0, label: 1}) " +
+            "CREATE (b)-[:X]->(:B {id: 9, weight: 1.0, label: 1}) " +
+            "CREATE (b)-[:X]->(:B {id: 10, weight: 1.0, label: 1})" +
+            "CREATE (b)-[:X]->(:B {id: 11, weight: 8.0, label: 2})";
 
     @Parameterized.Parameters(name = "parallel={0}, graph={1}")
     public static Collection<Object[]> data() {
@@ -98,8 +97,8 @@ public class LabelPropagationProcTest {
         runQuery(query, row -> {
             assertEquals(1, row.getNumber("iterations").intValue());
             assertEquals("weight", row.getString("weightProperty"));
-            assertEquals("partition", row.getString("partitionProperty"));
-            assertEquals("partition", row.getString("writeProperty"));
+            assertEquals("label", row.getString("labelProperty"));
+            assertEquals("label", row.getString("writeProperty"));
             assertTrue(row.getBoolean("write"));
         });
     }
@@ -111,7 +110,7 @@ public class LabelPropagationProcTest {
         runQuery(query, row -> {
             assertEquals(1, row.getNumber("iterations").intValue());
             assertEquals("weight", row.getString("weightProperty"));
-            assertEquals("partition", row.getString("partitionProperty"));
+            assertEquals("label", row.getString("labelProperty"));
             assertEquals("lpa", row.getString("writeProperty"));
             assertTrue(row.getBoolean("write"));
         });
@@ -119,21 +118,21 @@ public class LabelPropagationProcTest {
 
     @Test
     public void shouldTakeParametersFromConfig() {
-        String query = "CALL algo.labelPropagation(null, null, null, {iterations:5,write:false,weightProperty:'score',partitionProperty:'key'})";
+        String query = "CALL algo.labelPropagation(null, null, null, {iterations:5,write:false,weightProperty:'score',labelProperty:'key'})";
 
         runQuery(query, row -> {
             assertTrue(5 >= row.getNumber("iterations").intValue());
             assertTrue(row.getBoolean("didConverge"));
             assertFalse(row.getBoolean("write"));
             assertEquals("score", row.getString("weightProperty"));
-            assertEquals("key", row.getString("partitionProperty"));
+            assertEquals("key", row.getString("labelProperty"));
         });
     }
 
     @Test
     public void shouldRunLabelPropagation() {
         String query = "CALL algo.labelPropagation(null, 'X', 'OUTGOING', {batchSize:$batchSize,concurrency:$concurrency,graph:$graph})";
-        String check = "MATCH (n) WHERE n.id IN [0,1] RETURN n.partition AS partition";
+        String check = "MATCH (n) WHERE n.id IN [0,1] RETURN n.label AS label";
 
         runQuery(query, parParams(), row -> {
             assertEquals(12, row.getNumber("nodes").intValue());
@@ -150,66 +149,66 @@ public class LabelPropagationProcTest {
                     row.getNumber("writeMillis").intValue() >= 0);
         });
         runQuery(check, row ->
-                assertEquals(2, row.getNumber("partition").intValue()));
+                assertEquals(2, row.getNumber("label").intValue()));
     }
 
     @Test
-    public void shouldFallbackToNodeIdsForNonExistingPartitionKey() {
-        String query = "CALL algo.labelPropagation(null, 'X', 'OUTGOING', {partitionProperty:'foobar',batchSize:$batchSize,concurrency:$concurrency,graph:$graph})";
-        String checkA = "MATCH (n) WHERE n.id = 0 RETURN n.foobar as partition";
-        String checkB = "MATCH (n) WHERE n.id = 1 RETURN n.foobar as partition";
+    public void shouldFallbackToNodeIdsForNonExistinglabelKey() {
+        String query = "CALL algo.labelPropagation(null, 'X', 'OUTGOING', {labelProperty:'foobar',batchSize:$batchSize,concurrency:$concurrency,graph:$graph})";
+        String checkA = "MATCH (n) WHERE n.id = 0 RETURN n.foobar as label";
+        String checkB = "MATCH (n) WHERE n.id = 1 RETURN n.foobar as label";
 
         runQuery(query, parParams(), row ->
-                assertEquals("foobar", row.getString("partitionProperty")));
+                assertEquals("foobar", row.getString("labelProperty")));
         runQuery(checkA, row ->
-                assertEquals(6, row.getNumber("partition").intValue()));
+                assertEquals(6, row.getNumber("label").intValue()));
         runQuery(checkB, row ->
-                assertEquals(11, row.getNumber("partition").intValue()));
+                assertEquals(11, row.getNumber("label").intValue()));
     }
 
     @Test
     public void shouldFilterByLabel() {
         String query = "CALL algo.labelPropagation('A', 'X', 'OUTGOING', {batchSize:$batchSize,concurrency:$concurrency,graph:$graph})";
-        String checkA = "MATCH (n) WHERE n.id = 0 RETURN n.partition as partition";
-        String checkB = "MATCH (n) WHERE n.id = 1 RETURN n.partition as partition";
+        String checkA = "MATCH (n) WHERE n.id = 0 RETURN n.label as label";
+        String checkB = "MATCH (n) WHERE n.id = 1 RETURN n.label as label";
 
         runQuery(query, parParams());
         runQuery(checkA, row ->
-                assertEquals(2, row.getNumber("partition").intValue()));
+                assertEquals(2, row.getNumber("label").intValue()));
         runQuery(checkB, row ->
-                assertEquals(42, row.getNumber("partition").intValue()));
+                assertEquals(42, row.getNumber("label").intValue()));
     }
 
     @Test
     public void shouldPropagateIncoming() {
         String query = "CALL algo.labelPropagation('A', 'X', 'INCOMING', {batchSize:$batchSize,concurrency:$concurrency,graph:$graph})";
-        String check = "MATCH (n:A) WHERE n.id <> 0 RETURN n.partition as partition";
+        String check = "MATCH (n:A) WHERE n.id <> 0 RETURN n.label as label";
 
         runQuery(query, parParams());
         runQuery(check, row ->
-                assertEquals(42, row.getNumber("partition").intValue()));
+                assertEquals(42, row.getNumber("label").intValue()));
     }
 
     @Test
     public void shouldAllowCypherGraph() {
-        String query = "CALL algo.labelPropagation('MATCH (n) RETURN id(n) as id, n.weight as weight, n.partition as value', 'MATCH (s)-[r:X]->(t) RETURN id(s) as source, id(t) as target, r.weight as weight', 'OUTGOING', {graph:'cypher',batchSize:$batchSize,concurrency:$concurrency})";
+        String query = "CALL algo.labelPropagation('MATCH (n) RETURN id(n) as id, n.weight as weight, n.label as value', 'MATCH (s)-[r:X]->(t) RETURN id(s) as source, id(t) as target, r.weight as weight', 'OUTGOING', {graph:'cypher',batchSize:$batchSize,concurrency:$concurrency})";
         runQuery(query, parParams(), row -> assertEquals(12, row.getNumber("nodes").intValue()));
     }
 
     @Test
     public void shouldStreamResults() {
         // this one deliberately tests the streaming and non streaming versions against each other to check we get the same results
-        // we intentionally start with no labels defined for any nodes (hence partitionProperty = {lpa, lpa2})
+        // we intentionally start with no labels defined for any nodes (hence labelProperty = {lpa, lpa2})
 
-        runQuery("CALL algo.labelPropagation(null, null, 'OUTGOING', {iterations: 20, partitionProperty: 'lpa'})", row -> {});
+        runQuery("CALL algo.labelPropagation(null, null, 'OUTGOING', {iterations: 20, labelProperty: 'lpa'})", row -> {});
 
-        String query = "CALL algo.labelPropagation.stream(null, null, {iterations: 20, direction: 'OUTGOING', partitionProperty: 'lpa2'}) " +
+        String query = "CALL algo.labelPropagation.stream(null, null, {iterations: 20, direction: 'OUTGOING', labelProperty: 'lpa2'}) " +
                 "YIELD nodeId, label " +
                 "MATCH (node) WHERE id(node) = nodeId " +
-                "RETURN node.id AS id, id(node) AS internalNodeId, node.lpa AS partition, label";
+                "RETURN node.id AS id, id(node) AS internalNodeId, node.lpa AS labelProperty, label";
 
         runQuery(query, row -> {
-            assertEquals(row.getNumber("partition").intValue(), row.getNumber("label").intValue());
+            assertEquals(row.getNumber("labelProperty").intValue(), row.getNumber("label").intValue());
         });
     }
 
