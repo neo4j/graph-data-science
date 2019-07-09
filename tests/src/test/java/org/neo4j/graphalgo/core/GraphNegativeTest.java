@@ -26,6 +26,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
@@ -98,4 +99,14 @@ public final class GraphNegativeTest extends RandomGraphTestCase {
                 .withRelationshipType(RelationshipType.withName("foo"))
                 .load(graphImpl);
     }
+
+    @Test
+    public void shouldThrowForNonExistingNodeProperty() {
+        expected.expect(IllegalArgumentException.class);
+        expected.expectMessage("Node property not found: 'foo'");
+        new GraphLoader(RandomGraphTestCase.db)
+                .withOptionalNodeProperties(new PropertyMapping("foo", "foo", 0.0))
+                .load(graphImpl);
+    }
+
 }

@@ -68,12 +68,9 @@ public abstract class GraphFactory implements Assessable {
     protected abstract Graph importGraph();
 
     protected void checkLabelPredicates() {
-        if (!dimensions.isValidNodePredicate(setup)) {
-            throw new IllegalArgumentException(String.format("Node label not found: '%s'", setup.startLabel));
-        }
-        if (!dimensions.isValidRelationshipTypePredicate(setup)) {
-            throw new IllegalArgumentException(String.format("Relationship type not found: '%s'", setup.relationshipType));
-        }
+        dimensions.checkValidNodePredicate(setup);
+        dimensions.checkValidRelationshipTypePredicate(setup);
+        dimensions.checkValidNodeProperty(setup);
     }
 
     public GraphDimensions dimensions() {
