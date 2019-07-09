@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
+import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
@@ -88,8 +89,18 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         this.concurrency = concurrency;
         this.executor = executor;
         this.tracker = tracker;
-        this.nodeProperties = nodeProperties.nodeProperties(LABEL_TYPE);
-        this.nodeWeights = nodeProperties.nodeProperties(WEIGHT_TYPE);
+
+        HugeWeightMapping labelProperty = nodeProperties.nodeProperties(LABEL_TYPE);
+        if (labelProperty == null) {
+            labelProperty = new HugeNullWeightMap(0.0);
+        }
+        this.nodeProperties = labelProperty;
+
+        HugeWeightMapping weightProperty = nodeProperties.nodeProperties(WEIGHT_TYPE);
+        if (weightProperty == null) {
+            weightProperty = new HugeNullWeightMap(1.0);
+        }
+        this.nodeWeights = weightProperty;
     }
 
     @Override

@@ -44,6 +44,7 @@ import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
@@ -112,7 +113,7 @@ public final class LabelPropagationProc {
                 .writeProperty(writeProperty)
                 .weightProperty(weightProperty);
 
-        GraphLoader graphLoader = graphLoader(configuration, labelProperty, weightProperty, createPropertyMappings(labelProperty, weightProperty));
+        GraphLoader graphLoader = graphLoader(configuration, weightProperty, createPropertyMappings(labelProperty, weightProperty));
         Direction direction = configuration.getDirection(Direction.OUTGOING);
         if (direction == Direction.BOTH) {
             graphLoader.asUndirected(true);
@@ -129,7 +130,7 @@ public final class LabelPropagationProc {
             return Stream.of(LabelPropagationStats.EMPTY);
         }
 
-        final Labels labels = compute(configuration, direction, iterations, batchSize, configuration.getConcurrency(), graph, tracker, stats);
+        final LabelPropagation.Labels labels = compute(configuration, direction, iterations, batchSize, configuration.getConcurrency(), graph, tracker, stats);
         if (configuration.isWriteFlag(DEFAULT_WRITE) && writeProperty != null) {
             stats.withWrite(true);
             write(configuration.getWriteConcurrency(), writeProperty, graph, labels, stats);
@@ -152,12 +153,12 @@ public final class LabelPropagationProc {
 
         final int iterations = configuration.getIterations(DEFAULT_ITERATIONS);
         final int batchSize = configuration.getBatchSize();
-        final String labelProperty = configuration.getString(CONFIG_LABEL_KEY, DEFAULT_LABEL_KEY);
-        final String weightProperty = configuration.getString(CONFIG_WEIGHT_KEY, DEFAULT_WEIGHT_KEY);
+        final String labelProperty = configuration.getString(CONFIG_LABEL_KEY, null);
+        final String weightProperty = configuration.getString(CONFIG_WEIGHT_KEY, null);
 
         PropertyMapping[] propertyMappings = createPropertyMappings(labelProperty, weightProperty);
 
-        GraphLoader graphLoader = graphLoader(configuration, labelProperty, weightProperty, propertyMappings);
+        GraphLoader graphLoader = graphLoader(configuration, weightProperty, propertyMappings);
         Direction direction = configuration.getDirection(Direction.OUTGOING);
         if (direction == Direction.BOTH) {
             graphLoader.asUndirected(true);
@@ -175,7 +176,7 @@ public final class LabelPropagationProc {
             return Stream.empty();
         }
 
-        Labels result = compute(configuration, direction, iterations, batchSize, configuration.getConcurrency(), graph, tracker, stats);
+        LabelPropagation.Labels result = compute(configuration, direction, iterations, batchSize, configuration.getConcurrency(), graph, tracker, stats);
 
         return LongStream.range(0L, result.size())
                 .mapToObj(i -> new StreamResult(graph.toOriginalNodeId(i), result.labelFor(i)));
@@ -183,10 +184,14 @@ public final class LabelPropagationProc {
     }
 
     private PropertyMapping[] createPropertyMappings(String labelProperty, String weightProperty) {
-        return new PropertyMapping[] {
-                PropertyMapping.of(LabelPropagation.LABEL_TYPE, labelProperty, 0d),
-                PropertyMapping.of(LabelPropagation.WEIGHT_TYPE, weightProperty, 1d)
-        };
+        ArrayList<PropertyMapping> propertyMappings = new ArrayList<>();
+        if (labelProperty != null) {
+            propertyMappings.add(PropertyMapping.of(LabelPropagation.LABEL_TYPE, labelProperty, 0d));
+        }
+        if (weightProperty != null) {
+            propertyMappings.add(PropertyMapping.of(LabelPropagation.WEIGHT_TYPE, weightProperty, 1d));
+        }
+        return propertyMappings.toArray(new PropertyMapping[0]);
     }
 
     private Graph load(GraphLoader graphLoader, ProcedureConfiguration config, LabelPropagationStats.Builder stats) {
@@ -196,13 +201,11 @@ public final class LabelPropagationProc {
         }
     }
 
-    private GraphLoader graphLoader(ProcedureConfiguration config,  String labelProperty, String weightKey, PropertyMapping... propertyMappings) {
+    private GraphLoader graphLoader(ProcedureConfiguration config, String weightKey, PropertyMapping... propertyMappings) {
         return new GraphLoader(dbAPI, Pools.DEFAULT)
                 .init(log, config.getNodeLabelOrQuery(), config.getRelationshipOrQuery(), config)
                 .withOptionalRelationshipWeightsFromProperty(weightKey, 1.0d)
-                .withOptionalNodeProperties(propertyMappings)
-                .withOptionalNodeWeightsFromProperty(weightKey, 1.0d)
-                .withOptionalNodeProperty(labelProperty, 0.0d);
+                .withOptionalNodeProperties(propertyMappings);
     }
 
     private Labels compute(
