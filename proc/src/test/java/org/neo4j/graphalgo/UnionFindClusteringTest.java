@@ -71,16 +71,16 @@ public final class UnionFindClusteringTest {
                                            "CREATE (u28:User:Multi {expectedId:$id10})\n" +
                                            "CREATE (u29:User:Multi {expectedId:$id10})\n" +
                                            "CREATE (u30:User:Multi {expectedId:$id10})\n" +
-                                           "CREATE (n1:Ohter:Multi {expectedId:$id1})\n" +
-                                           "CREATE (n2:Ohter:Multi {expectedId:$id2})\n" +
-                                           "CREATE (n3:Ohter:Multi {expectedId:$id3})\n" +
-                                           "CREATE (n4:Ohter:Multi {expectedId:$id4})\n" +
-                                           "CREATE (n5:Ohter:Multi {expectedId:$id5})\n" +
-                                           "CREATE (n6:Ohter:Multi {expectedId:$id6})\n" +
-                                           "CREATE (n7:Ohter:Multi {expectedId:$id7})\n" +
-                                           "CREATE (n8:Ohter:Multi {expectedId:$id8})\n" +
-                                           "CREATE (n9:Ohter:Multi {expectedId:$id9})\n" +
-                                           "CREATE (n10:Ohter:Multi {expectedId:$id10})\n" +
+                                           "CREATE (n1:Other:Multi {expectedId:$id1})\n" +
+                                           "CREATE (n2:Other:Multi {expectedId:$id2})\n" +
+                                           "CREATE (n3:Other:Multi {expectedId:$id3})\n" +
+                                           "CREATE (n4:Other:Multi {expectedId:$id4})\n" +
+                                           "CREATE (n5:Other:Multi {expectedId:$id5})\n" +
+                                           "CREATE (n6:Other:Multi {expectedId:$id6})\n" +
+                                           "CREATE (n7:Other:Multi {expectedId:$id7})\n" +
+                                           "CREATE (n8:Other:Multi {expectedId:$id8})\n" +
+                                           "CREATE (n9:Other:Multi {expectedId:$id9})\n" +
+                                           "CREATE (n10:Other:Multi {expectedId:$id10})\n" +
                                            "CREATE\n" +
                                            "  (u1)-[:OBSERVED_WITH]->(n1)<-[:OBSERVED_WITH]-(u2),\n" +
                                            "  (u1)-[:OBSERVED_WITH]->(n1)<-[:OBSERVED_WITH]-(u3),\n" +
