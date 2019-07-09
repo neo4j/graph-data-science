@@ -27,37 +27,74 @@ import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.IncrementalDisjointSetStruct;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
-/**
- * @author mknblch
- */
 public class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
 
     @Override
     DisjointSetStruct newSet(final int capacity) {
         TestWeightMapping communities = new TestWeightMapping();
-        return new IncrementalDisjointSetStruct(capacity, communities, AllocationTracker.EMPTY);
+        return newSet(capacity, communities);
     }
 
-    @Override
-    DisjointSetStruct newSet(final int capacity, TestWeightMapping weightMapping) {
-        return new IncrementalDisjointSetStruct(capacity, weightMapping, AllocationTracker.EMPTY);
+    DisjointSetStruct newSet(final int capacity, final TestWeightMapping weightMapping) {
+        return new IncrementalDisjointSetStruct(capacity, weightMapping, AllocationTracker.EMPTY).reset();
+    }
+
+    @Test
+    public void shouldRunWithLessInitialCommunities() {
+        TestWeightMapping communities = new TestWeightMapping(0, 0, 1, 0);
+        DisjointSetStruct dss = newSet(4, communities);
+
+        assertEquals(3, dss.getSetCount());
+        assertEquals(dss.setIdOf(0), dss.setIdOf(1));
+        assertEquals(dss.setIdOf(0), dss.setIdOf(1));
+        assertNotEquals(dss.setIdOf(0), dss.setIdOf(2));
+        assertNotEquals(dss.setIdOf(0), dss.setIdOf(3));
+        assertNotEquals(dss.setIdOf(2), dss.setIdOf(3));
+    }
+
+    @Test
+    public void shouldRunWithLessInitialCommunitiesAndLargerIdSpace() {
+        TestWeightMapping communities = new TestWeightMapping(0, 10, 1, 10);
+        DisjointSetStruct dss = newSet(4, communities);
+
+        assertEquals(3, dss.getSetCount());
+        assertEquals(dss.setIdOf(0), dss.setIdOf(1));
+        assertEquals(dss.setIdOf(0), dss.setIdOf(1));
+        assertNotEquals(dss.setIdOf(0), dss.setIdOf(2));
+        assertNotEquals(dss.setIdOf(0), dss.setIdOf(3));
+        assertNotEquals(dss.setIdOf(2), dss.setIdOf(3));
+    }
+
+    @Test
+    public void shouldRunWithLessInitialCommunitiesAndOverlappingIdSpace() {
+        TestWeightMapping communities = new TestWeightMapping(0, 3, 1, 3);
+        DisjointSetStruct dss = newSet(4, communities);
+
+        assertEquals(3, dss.getSetCount());
+        assertEquals(dss.setIdOf(0), dss.setIdOf(1));
+        assertEquals(dss.setIdOf(0), dss.setIdOf(1));
+        assertNotEquals(dss.setIdOf(0), dss.setIdOf(2));
+        assertNotEquals(dss.setIdOf(0), dss.setIdOf(3));
+        assertNotEquals(dss.setIdOf(2), dss.setIdOf(3));
     }
 
     @Test
     public void shouldComputeMemoryEstimation() {
         GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
         assertEquals(
-                MemoryRange.of(120),
+                MemoryRange.of(192, 256),
                 IncrementalDisjointSetStruct.memoryEstimation().estimate(dimensions0, 1).memoryUsage());
 
         GraphDimensions dimensions100 = new GraphDimensions.Builder().setNodeCount(100).build();
         assertEquals(
-                MemoryRange.of(1720),
+                MemoryRange.of(1056, 5024),
                 IncrementalDisjointSetStruct.memoryEstimation().estimate(dimensions100, 1).memoryUsage());
 
-        GraphDimensions dimensions100B = new GraphDimensions.Builder().setNodeCount(100_000_000_000L).build();
-        assertEquals(MemoryRange.of(1600244140776L), IncrementalDisjointSetStruct
-                .memoryEstimation().estimate(dimensions100B, 1).memoryUsage());
+        // TODO: >int not supported yet
+//        GraphDimensions dimensions100B = new GraphDimensions.Builder().setNodeCount(100_000_000_000L).build();
+//        assertEquals(MemoryRange.of(1600244140776L), IncrementalDisjointSetStruct
+//                .memoryEstimation().estimate(dimensions100B, 1).memoryUsage());
     }
 }

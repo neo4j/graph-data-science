@@ -20,11 +20,18 @@
 package org.neo4j.graphalgo.core.utils.paged;
 
 
+import com.carrotsearch.hppc.LongLongHashMap;
+import com.carrotsearch.hppc.LongLongMap;
+import com.carrotsearch.hppc.OpenHashContainers;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 
 import java.util.stream.LongStream;
+
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
 /**
  * Implements {@link DisjointSetStruct} with support for incremental computation based on a previously computed mapping
@@ -34,15 +41,26 @@ import java.util.stream.LongStream;
  */
 public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
 
-    public static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations.builder(IncrementalDisjointSetStruct.class)
+    public static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations.builder(
+            IncrementalDisjointSetStruct.class)
             .perNode("parent", HugeLongArray::memoryEstimation)
-            .perNode("idCommunityMapping", HugeLongArray::memoryEstimation)
+            .rangePerNode("internalToProvidedIds", nodeCount -> {
+                int minBufferSize = OpenHashContainers.emptyBufferSize();
+                int maxBufferSize = OpenHashContainers.expectedBufferSize((int) nodeCount);
+                if (maxBufferSize < minBufferSize) {
+                    minBufferSize = maxBufferSize;
+                    maxBufferSize = OpenHashContainers.emptyBufferSize();
+                }
+                long min = sizeOfLongArray(minBufferSize) + sizeOfDoubleArray(minBufferSize);
+                long max = sizeOfLongArray(maxBufferSize) + sizeOfDoubleArray(maxBufferSize);
+                return MemoryRange.of(min, max);
+            })
             .build();
 
     private final HugeLongArray parent;
-    private final HugeLongArray idCommunityMapping;
-    private final long capacity;
+    private final LongLongHashMap internalToProvidedIds;
     private final HugeWeightMapping communityMapping;
+    private final long capacity;
     private long maxCommunity;
 
     public static MemoryEstimation memoryEstimation() {
@@ -56,10 +74,10 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
      * @param capacity the capacity (maximum node id)
      */
     public IncrementalDisjointSetStruct(long capacity, HugeWeightMapping communityMapping, AllocationTracker tracker) {
-        parent = HugeLongArray.newArray(capacity, tracker);
-        idCommunityMapping = HugeLongArray.newArray(capacity, tracker);
-        this.capacity = capacity;
+        this.parent = HugeLongArray.newArray(capacity, tracker);
+        this.internalToProvidedIds = new LongLongHashMap();
         this.communityMapping = communityMapping;
+        this.capacity = capacity;
 
         maxCommunity = LongStream
                 .range(0, capacity)
@@ -77,10 +95,22 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
      */
     @Override
     public IncrementalDisjointSetStruct reset() {
-        parent.fill(-1);
-        idCommunityMapping.setAll(nodeId -> {
-            long communityId = (long) communityMapping.nodeWeight(nodeId, -1);
-            return communityId == -1 ? ++maxCommunity : communityId;
+        final LongLongMap internalMapping = new LongLongHashMap();
+        internalToProvidedIds.clear();
+        parent.setAll(nodeId -> {
+            double communityIdValue = communityMapping.nodeWeight(nodeId, Double.NaN);
+            if (!Double.isNaN(communityIdValue)) {
+                long communityId = (long) communityIdValue;
+                int idIndex = internalMapping.indexOf(communityId);
+                if (internalMapping.indexExists(idIndex)) {
+                    return internalMapping.indexGet(idIndex);
+                }
+                internalMapping.indexInsert(idIndex, communityId, nodeId);
+                internalToProvidedIds.put(nodeId, communityId);
+            } else {
+                internalToProvidedIds.put(nodeId, ++maxCommunity);
+            }
+            return -1L;
         });
         return this;
     }
@@ -103,7 +133,7 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
      */
     @Override
     public long find(long p) {
-        return findPC(idCommunityMapping.get(p));
+        return findPC(p);
     }
 
     /**
@@ -116,10 +146,9 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
      */
     @Override
     public void union(long p, long q) {
-        unionSets(find(p), find(q));
-    }
+        long pSet = find(p);
+        long qSet = find(q);
 
-    private void unionSets(long pSet, long qSet) {
         if (pSet < qSet) {
             parent.set(qSet, pSet);
         } else if (qSet < pSet) {
@@ -135,7 +164,7 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
      */
     @Override
     long findNoOpt(final long nodeId) {
-        long p = idCommunityMapping.get(nodeId);
+        long p = nodeId;
         long np;
         while ((np = parent.get(p)) != -1L) {
             p = np;
@@ -144,24 +173,8 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
     }
 
     @Override
-    public DisjointSetStruct merge(DisjointSetStruct other) {
-        if (!(other instanceof IncrementalDisjointSetStruct)) {
-            throw new IllegalArgumentException(String.format(
-                    "Expected: %s Actual: %s",
-                    getClass().getSimpleName(),
-                    other.getClass().getSimpleName()));
-        }
-        if (other.capacity() != this.capacity()) {
-            throw new IllegalArgumentException("Different Capacity");
-        }
-
-        for (int nodeId = 0; nodeId < capacity(); nodeId++) {
-            long leftSetId = find(nodeId);
-            long rightSetId = other.find(nodeId);
-            unionSets(leftSetId, rightSetId);
-        }
-
-        return this;
+    public long setIdOf(final long nodeId) {
+        long setId = findNoOpt(nodeId);
+        return internalToProvidedIds.get(setId);
     }
-
 }

@@ -21,117 +21,40 @@ package org.neo4j.graphalgo.core.utils.dss;
 
 import com.carrotsearch.hppc.LongLongMap;
 import com.carrotsearch.hppc.cursors.LongLongCursor;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
-import org.neo4j.graphalgo.core.utils.paged.RankedDisjointSetStruct;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
-@RunWith(Parameterized.class)
 public abstract class DisjointSetStructTest {
 
     private DisjointSetStruct struct;
 
     private static final int CAPACITY = 7;
 
-    @Parameterized.Parameters(name = "{1}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(
-                new Object[]{new TestWeightMapping(), "Empty"},
-                new Object[]{new TestWeightMapping(IntStream.range(0, CAPACITY).flatMap(i -> IntStream.of(i, i)).toArray()), "Ordered"},
-                new Object[]{new TestWeightMapping(IntStream.range(0, CAPACITY).flatMap(i -> IntStream.of(i, CAPACITY - i - 1)).toArray()), "Reversed"}
-        );
-    }
-
-    @Parameterized.Parameter()
-    public TestWeightMapping weightMapping;
-
-    @Parameterized.Parameter(1)
-    public String name;
-
     abstract DisjointSetStruct newSet(int capacity);
-
-    abstract DisjointSetStruct newSet(int capacity, TestWeightMapping weightMapping);
 
     @Before
     public final void setup() {
-        struct = newSet(CAPACITY, weightMapping).reset();
-    }
-
-    @Test
-    public final void testInitialCommunities() {
-        Assume.assumeFalse(struct instanceof RankedDisjointSetStruct);
-
-        // {0,1}{2,3}{4}{5}{6}
-        DisjointSetStruct localDss = newSet(
-                CAPACITY,
-                new TestWeightMapping(0, 0, 1, 0, 2, 1, 3, 1, 4, 4, 5, 5, 6, 6))
-                .reset();
-
-        assertTrue(localDss.connected(2, 3));
-        assertFalse(localDss.connected(0, 2));
-        assertFalse(localDss.connected(0, 3));
-        assertFalse(localDss.connected(1, 2));
-        assertFalse(localDss.connected(1, 3));
-        assertEquals(5, localDss.getSetSize().size());
-
-        localDss.union(3, 0);
-        // {0,1,2,3}{4}{5}{6}
-        assertTrue(localDss.connected(0, 2));
-        assertTrue(localDss.connected(0, 3));
-        assertTrue(localDss.connected(1, 2));
-        assertTrue(localDss.connected(1, 3));
-        assertFalse(localDss.connected(4, 5));
-        assertEquals(4, localDss.getSetSize().size());
-
-        localDss.union(4, 5);
-        // {0,1,2,3}{4,5}{6}
-        assertTrue(localDss.connected(4, 5));
-        assertFalse(localDss.connected(0, 4));
-        assertEquals(3, localDss.getSetSize().size());
-
-        localDss.union(0, 4);
-        // {0,1,2,3,4,5}{6}
-        assertTrue(localDss.connected(0, 4));
-        assertTrue(localDss.connected(0, 5));
-        assertTrue(localDss.connected(1, 4));
-        assertTrue(localDss.connected(1, 5));
-        assertTrue(localDss.connected(2, 4));
-        assertTrue(localDss.connected(2, 5));
-        assertTrue(localDss.connected(3, 4));
-        assertTrue(localDss.connected(3, 5));
-        assertTrue(localDss.connected(4, 5));
-        assertFalse(localDss.connected(0, 6));
-        assertFalse(localDss.connected(1, 6));
-        assertFalse(localDss.connected(2, 6));
-        assertFalse(localDss.connected(3, 6));
-        assertFalse(localDss.connected(4, 6));
-        assertFalse(localDss.connected(5, 6));
-
-        final LongLongMap setSize = localDss.getSetSize();
-        assertEquals(2, setSize.size());
-        for (LongLongCursor cursor : setSize) {
-            assertTrue(cursor.value == 6 || cursor.value == 1);
-        }
-
+        struct = newSet(CAPACITY);
     }
 
     @Test
     public final void testSetUnion() {
-
         // {0}{1}{2}{3}{4}{5}{6}
         assertFalse(struct.connected(0, 1));
         assertEquals(7, struct.getSetSize().size());
+        assertEquals(0, struct.setIdOf(0));
+        assertEquals(1, struct.setIdOf(1));
+        assertEquals(2, struct.setIdOf(2));
+        assertEquals(3, struct.setIdOf(3));
+        assertEquals(4, struct.setIdOf(4));
+        assertEquals(5, struct.setIdOf(5));
+        assertEquals(6, struct.setIdOf(6));
 
         struct.union(0, 1);
         // {0,1}{2}{3}{4}{5}{6}
@@ -180,6 +103,13 @@ public abstract class DisjointSetStructTest {
         assertFalse(struct.connected(3, 6));
         assertFalse(struct.connected(4, 6));
         assertFalse(struct.connected(5, 6));
+
+        assertEquals(struct.setIdOf(0), struct.setIdOf(1));
+        assertEquals(struct.setIdOf(0), struct.setIdOf(2));
+        assertEquals(struct.setIdOf(0), struct.setIdOf(3));
+        assertEquals(struct.setIdOf(0), struct.setIdOf(4));
+        assertEquals(struct.setIdOf(0), struct.setIdOf(5));
+        assertNotEquals(struct.setIdOf(0), struct.setIdOf(6));
 
         final LongLongMap setSize = struct.getSetSize();
         assertEquals(2, setSize.size());

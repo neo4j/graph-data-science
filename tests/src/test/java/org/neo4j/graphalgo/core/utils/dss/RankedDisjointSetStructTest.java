@@ -35,12 +35,7 @@ public class RankedDisjointSetStructTest extends DisjointSetStructTest {
 
     @Override
     DisjointSetStruct newSet(final int capacity) {
-        return new RankedDisjointSetStruct(capacity, AllocationTracker.EMPTY);
-    }
-
-    @Override
-    DisjointSetStruct newSet(final int capacity, final TestWeightMapping weightMapping) {
-        return new RankedDisjointSetStruct(capacity, AllocationTracker.EMPTY);
+        return new RankedDisjointSetStruct(capacity, AllocationTracker.EMPTY).reset();
     }
 
     @Test

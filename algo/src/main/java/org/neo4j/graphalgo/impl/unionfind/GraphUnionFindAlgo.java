@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
-import org.neo4j.graphalgo.core.utils.paged.RemappingDisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.IncrementalDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.RankedDisjointSetStruct;
 
 /**
@@ -48,7 +48,7 @@ public abstract class GraphUnionFindAlgo<ME extends GraphUnionFindAlgo<ME>> exte
     DisjointSetStruct initDisjointSetStruct(long nodeCount, AllocationTracker tracker) {
         return algoConfig.communityMap == null ?
                 new RankedDisjointSetStruct(nodeCount, tracker) :
-                new RemappingDisjointSetStruct(nodeCount, algoConfig.communityMap, tracker);
+                new IncrementalDisjointSetStruct(nodeCount, algoConfig.communityMap, tracker);
     }
 
     /**
