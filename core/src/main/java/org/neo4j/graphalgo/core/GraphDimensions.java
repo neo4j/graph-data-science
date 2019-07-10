@@ -129,7 +129,7 @@ public final class GraphDimensions {
     }
 
     public void checkValidNodePredicate(GraphSetup setup) {
-        if (!(setup.startLabel == null || setup.startLabel.isEmpty() && labelId() == ANY_LABEL)) {
+        if (!(setup.startLabel == null || setup.startLabel.isEmpty()) && labelId() == ANY_LABEL) {
             throw new IllegalArgumentException(String.format("Node label not found: '%s'", setup.startLabel));
         }
     }
