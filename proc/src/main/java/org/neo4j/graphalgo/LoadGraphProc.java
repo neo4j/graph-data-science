@@ -58,8 +58,8 @@ public final class LoadGraphProc extends BaseProc {
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
-                .overrideNodeLabelOrQuery(label)
-                .overrideRelationshipTypeOrQuery(relationshipType);
+                .setNodeLabelOrQuery(label)
+                .setRelationshipTypeOrQuery(relationshipType);
 
         LoadGraphStats stats = new LoadGraphStats(name, configuration);
 

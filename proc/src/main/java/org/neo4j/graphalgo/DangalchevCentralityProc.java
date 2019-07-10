@@ -62,8 +62,8 @@ public class DangalchevCentralityProc {
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
-                .overrideNodeLabelOrQuery(label)
-                .overrideRelationshipTypeOrQuery(relationship);
+                .setNodeLabelOrQuery(label)
+                .setRelationshipTypeOrQuery(relationship);
 
         final AllocationTracker tracker = AllocationTracker.create();
 
@@ -98,8 +98,8 @@ public class DangalchevCentralityProc {
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
-                .overrideNodeLabelOrQuery(label)
-                .overrideRelationshipTypeOrQuery(relationship);
+                .setNodeLabelOrQuery(label)
+                .setRelationshipTypeOrQuery(relationship);
 
         final CentralityProcResult.Builder builder = CentralityProcResult.builder();
 

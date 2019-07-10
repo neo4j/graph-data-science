@@ -61,8 +61,8 @@ public class MSColoringProc {
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
-                .overrideNodeLabelOrQuery(label)
-                .overrideRelationshipTypeOrQuery(relationship);
+                .setNodeLabelOrQuery(label)
+                .setRelationshipTypeOrQuery(relationship);
 
         final UnionFindProc.Builder builder = new UnionFindProc.Builder();
 
@@ -103,8 +103,8 @@ public class MSColoringProc {
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
-                .overrideNodeLabelOrQuery(label)
-                .overrideRelationshipTypeOrQuery(relationship);
+                .setNodeLabelOrQuery(label)
+                .setRelationshipTypeOrQuery(relationship);
 
         // loading
         AllocationTracker tracker = AllocationTracker.create();

@@ -64,8 +64,8 @@ public class BalancedTriadsProc {
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
-                .overrideNodeLabelOrQuery(label)
-                .overrideRelationshipTypeOrQuery(relationship);
+                .setNodeLabelOrQuery(label)
+                .setRelationshipTypeOrQuery(relationship);
 
         // load
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
@@ -106,8 +106,8 @@ public class BalancedTriadsProc {
         final BalancedTriads balancedTriads;
 
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
-                .overrideNodeLabelOrQuery(label)
-                .overrideRelationshipTypeOrQuery(relationship);
+                .setNodeLabelOrQuery(label)
+                .setRelationshipTypeOrQuery(relationship);
 
         final BalancedTriadsResultBuilder builder = new BalancedTriadsResultBuilder();
 

@@ -289,7 +289,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
 
         UnionFindAlgorithmType algorithmType = null;
 
-        if (config.getConcurrency() <= 1) {
+        if (config.isSingleThreaded()) {
             algorithmType = UnionFindAlgorithmType.SEQ;
         } else {
             for (final UnionFindAlgorithmType algoType : UnionFindAlgorithmType.values()) {

@@ -57,10 +57,10 @@ public abstract class BaseProc {
 
         ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
         if (label != null && !label.isEmpty()) {
-            configuration.overrideNodeLabelOrQuery(label);
+            configuration.setNodeLabelOrQuery(label);
         }
         if (relationship != null && !relationship.isEmpty()) {
-            configuration.overrideRelationshipTypeOrQuery(relationship);
+            configuration.setRelationshipTypeOrQuery(relationship);
         }
         return configuration;
     }

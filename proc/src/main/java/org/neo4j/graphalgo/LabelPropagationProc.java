@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo;
 
-import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -90,11 +89,11 @@ public final class LabelPropagationProc {
         }
 
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(rawConfig)
-                .overrideNodeLabelOrQuery(label)
-                .overrideRelationshipTypeOrQuery(relationshipType);
+                .setNodeLabelOrQuery(label)
+                .setRelationshipTypeOrQuery(relationshipType);
 
         if(directionOrConfig instanceof String) {
-            configuration.overrideDirection((String) directionOrConfig);
+            configuration.setDirection((String) directionOrConfig);
         }
 
         final int iterations = configuration.getIterations(DEFAULT_ITERATIONS);
@@ -144,8 +143,8 @@ public final class LabelPropagationProc {
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
-                .overrideNodeLabelOrQuery(label)
-                .overrideRelationshipTypeOrQuery(relationship);
+                .setNodeLabelOrQuery(label)
+                .setRelationshipTypeOrQuery(relationship);
 
         final int iterations = configuration.getIterations(DEFAULT_ITERATIONS);
         final int batchSize = configuration.getBatchSize();
