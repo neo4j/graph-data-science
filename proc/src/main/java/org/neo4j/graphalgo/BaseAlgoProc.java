@@ -38,7 +38,7 @@ public abstract class BaseAlgoProc<A extends Algorithm<A>> extends BaseProc {
             final AllocationTracker tracker) {
         TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
         return algorithmFactory(config)
-                .build(graph, config, tracker)
+                .build(graph, config, tracker, log)
                 .withLog(log)
                 .withTerminationFlag(terminationFlag);
     }

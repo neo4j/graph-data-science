@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.logging.Log;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -70,7 +71,11 @@ public class UnionFindFactory<A extends GraphUnionFindAlgo<A>> extends Algorithm
 
     @SuppressWarnings("unchecked")
     @Override
-    public A build(final Graph graph, final ProcedureConfiguration configuration, final AllocationTracker tracker) {
+    public A build(
+            final Graph graph,
+            final ProcedureConfiguration configuration,
+            final AllocationTracker tracker,
+            final Log log) {
         int concurrency = configuration.getConcurrency();
         int minBatchSize = configuration.getBatchSize();
         final GraphUnionFindAlgo<?> algo = algorithmType.create(
