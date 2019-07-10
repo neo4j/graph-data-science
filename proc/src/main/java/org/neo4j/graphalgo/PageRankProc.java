@@ -161,7 +161,7 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
             final Graph graph) {
         PageRank algo = newAlgorithm(graph, configuration, tracker);
 
-        statsBuilder.timeEval(algo::compute);
+        runWithExceptionLogging("PageRank failed", () -> statsBuilder.timeEval(algo::compute));
         statsBuilder.withIterations(algo.iterations()).withDampingFactor(algo.dampingFactor());
 
         final CentralityResult scores = algo.result();

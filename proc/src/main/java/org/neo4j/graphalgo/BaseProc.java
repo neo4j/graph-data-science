@@ -84,10 +84,30 @@ public abstract class BaseProc {
         return newLoader(newConfig(label, relationship, config), tracker);
     }
 
-    final Graph loadGraph(
+    void runWithExceptionLogging(String message, Runnable runnable) {
+        try {
+            runnable.run();
+        } catch (Exception e) {
+            log.debug(message, e);
+            throw e;
+        }
+    }
+
+    <R> R runWithExceptionLogging(String message, Supplier<R> supplier) {
+        try {
+            return supplier.get();
+        } catch (Exception e) {
+            log.debug(message, e);
+            throw e;
+        }
+    }
+
+    private Graph loadGraph(
             final ProcedureConfiguration config,
             final AllocationTracker tracker) {
-        return newLoader(config, tracker).load(config.getGraphImpl());
+        return runWithExceptionLogging(
+                "Loading failed",
+                () -> newLoader(config, tracker).load(config.getGraphImpl()));
     }
 
     final <R> Graph loadGraph(
