@@ -101,14 +101,14 @@ public final class LabelPropagationTest {
     @Before
     public void setup() {
         GraphLoader graphLoader = new GraphLoader(DB, Pools.DEFAULT)
-                .withDirection(Direction.BOTH)
+                .withDirection(Direction.OUTGOING)
                 .withConcurrency(Pools.DEFAULT_CONCURRENCY);
 
         if (graphImpl == HeavyCypherGraphFactory.class) {
             graphLoader
-                    .withLabel("MATCH (u:User) RETURN id(u) as id")
+                    .withLabel("MATCH (u:User) RETURN id(u) AS id")
                     .withRelationshipType("MATCH (u1:User)-[rel:FOLLOW]->(u2:User) \n" +
-                                          "RETURN id(u1) as source,id(u2) as target")
+                                          "RETURN id(u1) AS source, id(u2) AS target")
                     .withName("cypher");
         } else {
             graphLoader
@@ -117,6 +117,21 @@ public final class LabelPropagationTest {
                     .withName(graphImpl.getSimpleName());
         }
         graph = graphLoader.load(graphImpl);
+    }
+
+    @Test
+    public void testUsesNeo4jNodeIdWhenLabelPropertyIsMissing() {
+        LabelPropagation lp = new LabelPropagation(
+                graph,
+                graph,
+                10000,
+                Pools.DEFAULT_CONCURRENCY,
+                Pools.DEFAULT,
+                AllocationTracker.EMPTY
+        );
+        lp.compute(Direction.OUTGOING, 1L);
+        LabelPropagation.Labels labels = lp.labels();
+        assertArrayEquals("Incorrect result assuming initila labels are neo4j id", new long[]{1, 1, 3, 4, 4, 1}, labels.labels.toArray());
     }
 
     @Test

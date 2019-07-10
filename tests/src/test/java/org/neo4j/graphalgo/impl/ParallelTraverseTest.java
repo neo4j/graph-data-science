@@ -52,7 +52,6 @@ import static org.mockito.Mockito.verify;
 public class ParallelTraverseTest {
 
 
-    private static final String PROPERTY = "property";
     private static final String LABEL = "Node";
     private static final String RELATIONSHIP = "REL";
 
@@ -82,7 +81,7 @@ public class ParallelTraverseTest {
             graph = new GraphLoader(db)
                     .withLabel(LABEL)
                     .withRelationshipType(RELATIONSHIP)
-                    .withRelationshipWeightsFromProperty(PROPERTY, 1.0)
+                    .withOptionalRelationshipWeightsFromProperty(null, 1.0)
                     .load(HeavyGraphFactory.class);
 
             nodeCount = (int) graph.nodeCount();
@@ -101,7 +100,7 @@ public class ParallelTraverseTest {
 
 
     @Test
-    public void testTraverseLocal() throws Exception {
+    public void testTraverseLocal() {
 
         final ParallelLocalQueueBFS traverse = new ParallelLocalQueueBFS(graph, Pools.DEFAULT, 10);
 
@@ -117,7 +116,7 @@ public class ParallelTraverseTest {
     }
 
     @Test
-    public void testTraverseLocal2() throws Exception {
+    public void testTraverseLocal2() {
 
         final ParallelLocalQueueBFS traverse = new ParallelLocalQueueBFS(graph, Pools.DEFAULT, 10);
         final AtomicInteger ai = new AtomicInteger(0);
