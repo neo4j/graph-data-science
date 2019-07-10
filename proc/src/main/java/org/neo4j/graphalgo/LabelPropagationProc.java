@@ -102,9 +102,13 @@ public final class LabelPropagationProc {
 
         final int iterations = configuration.getIterations(DEFAULT_ITERATIONS);
         final int batchSize = configuration.getBatchSize();
-        final String labelProperty = configuration.getString(CONFIG_LABEL_KEY, DEFAULT_LABEL_KEY);
-        final String writeProperty = configuration.get(CONFIG_WRITE_KEY, CONFIG_LABEL_KEY, DEFAULT_LABEL_KEY);
-        final String weightProperty = configuration.getString(CONFIG_WEIGHT_KEY, DEFAULT_WEIGHT_KEY);
+        final String labelProperty = configuration.getString(CONFIG_LABEL_KEY, null);
+        final String writeProperty = configuration.get(CONFIG_WRITE_KEY, CONFIG_LABEL_KEY, null);
+        final String weightProperty = configuration.getString(CONFIG_WEIGHT_KEY, null);
+
+        if (configuration.isWriteFlag(DEFAULT_WRITE) && writeProperty == null) {
+            throw new IllegalArgumentException("Write property not specified");
+        }
 
         LabelPropagationStats.Builder stats = new LabelPropagationStats.Builder()
                 .iterations(iterations)
@@ -130,7 +134,7 @@ public final class LabelPropagationProc {
         }
 
         final LabelPropagation.Labels labels = compute(configuration, direction, iterations, batchSize, configuration.getConcurrency(), graph, tracker, stats);
-        if (configuration.isWriteFlag(DEFAULT_WRITE) && writeProperty != null) {
+        if (configuration.isWriteFlag(DEFAULT_WRITE)) {
             stats.withWrite(true);
             write(configuration.getWriteConcurrency(), writeProperty, graph, labels, stats);
         }

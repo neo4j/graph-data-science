@@ -31,7 +31,6 @@ import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -50,8 +49,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.neo4j.graphalgo.impl.labelprop.LabelPropagation.LABEL_TYPE;
-import static org.neo4j.graphalgo.impl.labelprop.LabelPropagation.WEIGHT_TYPE;
 
 @RunWith(Parameterized.class)
 public final class LabelPropagationTest {
@@ -104,11 +101,6 @@ public final class LabelPropagationTest {
     @Before
     public void setup() {
         GraphLoader graphLoader = new GraphLoader(DB, Pools.DEFAULT)
-                .withRelationshipWeightsFromProperty("weight", 1.0)
-                .withOptionalNodeProperties(
-                        PropertyMapping.of(WEIGHT_TYPE, WEIGHT_TYPE, 1.0),
-                        PropertyMapping.of(LABEL_TYPE, LABEL_TYPE, 0.0)
-                )
                 .withDirection(Direction.BOTH)
                 .withConcurrency(Pools.DEFAULT_CONCURRENCY);
 

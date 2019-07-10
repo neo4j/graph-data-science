@@ -136,16 +136,29 @@ public final class GraphDimensions {
 
     public void checkValidRelationshipTypePredicate(GraphSetup setup) {
         if (!(setup.relationshipType == null || setup.relationshipType.isEmpty()) && singleRelationshipTypeId() == ANY_LABEL) {
-            throw new IllegalArgumentException(String.format("Relationship type not found: '%s'", setup.relationshipType));
+            throw new IllegalArgumentException(String.format(
+                    "Relationship type not found: '%s'",
+                    setup.relationshipType));
         }
     }
 
     public void checkValidNodeProperty(GraphSetup setup) {
         for (int i = 0; i < nodePropIds.length; i++) {
             int id = nodePropIds[i];
-            if (id == StatementConstants.NO_SUCH_PROPERTY_KEY) {
-                throw new IllegalArgumentException(String.format("Node property not found: '%s'", setup.nodePropertyMappings[i].propertyKey));
+            if (!(setup.nodePropertyMappings[i].propertyKey == null || setup.nodePropertyMappings[i].propertyKey.isEmpty())
+                && id == StatementConstants.NO_SUCH_PROPERTY_KEY) {
+                throw new IllegalArgumentException(String.format(
+                        "Node property not found: '%s'",
+                        setup.nodePropertyMappings[i].propertyKey));
             }
+        }
+    }
+
+    public void checkValidRelationshipProperty(GraphSetup setup) {
+        if (!(setup.relationWeightPropertyName == null || setup.relationWeightPropertyName.isEmpty()) && relWeightId == StatementConstants.NO_SUCH_PROPERTY_KEY) {
+            throw new IllegalArgumentException(String.format(
+                    "Relationship property not found: '%s'",
+                    setup.relationWeightPropertyName));
         }
     }
 

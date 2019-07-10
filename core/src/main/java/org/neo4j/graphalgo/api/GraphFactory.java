@@ -61,16 +61,17 @@ public abstract class GraphFactory implements Assessable {
     }
 
     public Graph build() {
-        checkLabelPredicates();
+        validateTokens();
         return importGraph();
     }
 
     protected abstract Graph importGraph();
 
-    protected void checkLabelPredicates() {
+    protected void validateTokens() {
         dimensions.checkValidNodePredicate(setup);
         dimensions.checkValidRelationshipTypePredicate(setup);
         dimensions.checkValidNodeProperty(setup);
+        dimensions.checkValidRelationshipProperty(setup);
     }
 
     public GraphDimensions dimensions() {
