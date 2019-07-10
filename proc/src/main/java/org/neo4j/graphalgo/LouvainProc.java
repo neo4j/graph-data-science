@@ -167,13 +167,11 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
 
     @Override
     LouvainFactory algorithmFactory(final ProcedureConfiguration procedureConfig) {
+        int maxLevel = procedureConfig.getIterations(DEFAULT_MAX_LEVEL);
+        int maxIterations = procedureConfig.getNumber(INNER_ITERATIONS, DEFAULT_MAX_ITERATIONS).intValue();
+        boolean randomNeighbor = procedureConfig.get(COMMUNITY_SELECTION, "classic").equalsIgnoreCase("random");
 
-        final int maxLevel = procedureConfig.getIterations(DEFAULT_MAX_LEVEL);
-        final int maxIterations = procedureConfig.getNumber(INNER_ITERATIONS, DEFAULT_MAX_ITERATIONS).intValue();
-        final boolean randomNeighbor = procedureConfig.get(COMMUNITY_SELECTION, "classic").equalsIgnoreCase("random");
-
-        Louvain.Config algoConfig = new Louvain.Config(maxLevel, maxIterations, randomNeighbor);
-        return new LouvainFactory(algoConfig);
+        return new LouvainFactory(new Louvain.Config(maxLevel, maxIterations, randomNeighbor));
     }
 
     private Louvain compute(
