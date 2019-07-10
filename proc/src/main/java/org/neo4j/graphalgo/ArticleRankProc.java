@@ -208,7 +208,7 @@ public final class ArticleRankProc {
                 );
 
         Algorithm<?> algo = prAlgo
-                .withLog(log)
+                .withProgressLogger(log)
                 .withTerminationFlag(terminationFlag);
 
         statsBuilder.timeEval(prAlgo::compute);

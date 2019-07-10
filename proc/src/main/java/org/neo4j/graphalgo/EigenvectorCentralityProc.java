@@ -202,7 +202,7 @@ public final class EigenvectorCentralityProc {
                         tracker);
 
         Algorithm<?> algo = prAlgo
-                .withLog(log)
+                .withProgressLogger(log)
                 .withTerminationFlag(terminationFlag);
 
         statsBuilder.timeEval(prAlgo::compute);

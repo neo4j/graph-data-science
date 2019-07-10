@@ -194,8 +194,8 @@ public class PageRank extends Algorithm<PageRank> {
     }
 
     @Override
-    public PageRank withLog(final Log log) {
-        super.withLog(log);
+    public PageRank withProgressLogger(final Log log) {
+        super.withProgressLogger(log);
         this.log = log;
         return this;
     }
