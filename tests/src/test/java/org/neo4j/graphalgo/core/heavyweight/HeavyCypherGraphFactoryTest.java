@@ -110,8 +110,8 @@ public class HeavyCypherGraphFactoryTest {
         });
         assertEquals(6, total.get());
 
-        assertEquals(6.0D, graph.nodeProperties("partition").get((long) node1), 0.01);
-        assertEquals(5.0D, graph.nodeProperties("foo").get((long) node1), 0.01);
-        assertEquals(4.0D, graph.nodeProperties("foo").get((long) node2), 0.01);
+        assertEquals(6.0D, graph.nodeProperties("partition").nodeWeight((long) node1), 0.01);
+        assertEquals(5.0D, graph.nodeProperties("foo").nodeWeight((long) node1), 0.01);
+        assertEquals(4.0D, graph.nodeProperties("foo").nodeWeight((long) node2), 0.01);
     }
 }
