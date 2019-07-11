@@ -41,11 +41,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
-/**
- * @author mknblch
- */
 @RunWith(Parameterized.class)
-public class UnionFindProcIntegrationTest {
+public class UnionFindProcTest {
 
     private static GraphDatabaseAPI db;
 
@@ -63,18 +60,14 @@ public class UnionFindProcIntegrationTest {
                 "CREATE (nI { nodeId : 8 })\n" +
                 "CREATE (nJ { nodeId : 9 })\n" +
                 "CREATE\n" +
-
                 // {A, B, C, D}
                 "  (nA)-[:TYPE]->(nB),\n" +
                 "  (nB)-[:TYPE]->(nC),\n" +
                 "  (nC)-[:TYPE]->(nD),\n" +
-
                 "  (nD)-[:TYPE {cost:4.2}]->(nE),\n" + // threshold UF should split here
-
                 // {E, F, G}
                 "  (nE)-[:TYPE]->(nF),\n" +
                 "  (nF)-[:TYPE]->(nG),\n" +
-
                 // {H, I}
                 "  (nH)-[:TYPE]->(nI)";
 

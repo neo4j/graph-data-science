@@ -33,8 +33,8 @@ import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
 import org.neo4j.graphalgo.impl.unionfind.UnionFind;
-import org.neo4j.graphalgo.impl.unionfind.UnionFindType;
 import org.neo4j.graphalgo.impl.unionfind.UnionFindFactory;
+import org.neo4j.graphalgo.impl.unionfind.UnionFindType;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -47,16 +47,11 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.impl.unionfind.UnionFindFactory.SEED_TYPE;
-import static org.neo4j.graphalgo.impl.unionfind.UnionFindFactory.CONFIG_SEED_PROPERTY;
 import static org.neo4j.graphalgo.impl.unionfind.UnionFindFactory.CONFIG_PARALLEL_ALGO;
+import static org.neo4j.graphalgo.impl.unionfind.UnionFindFactory.CONFIG_SEED_PROPERTY;
+import static org.neo4j.graphalgo.impl.unionfind.UnionFindFactory.SEED_TYPE;
 
-/**
- * @author mknblch
- */
 public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
-
-    private static final String CONFIG_THRESHOLD = "threshold";
 
     private static final String CONFIG_CLUSTER_PROPERTY = "writeProperty";
     private static final String CONFIG_OLD_CLUSTER_PROPERTY = "partitionProperty";
