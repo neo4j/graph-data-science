@@ -48,13 +48,13 @@ import static org.junit.Assert.assertThat;
 public class LabelPropagationProcLoadPredefinedLabelsTest {
 
     private static final String DB_CYPHER = "" +
-            "CREATE (a:A {id: 0, label: 42})\n" +
-            "CREATE (b:B {id: 1, label: 42})\n" +
-            "CREATE (c:C {id: 2, label: 42})\n" +
-            "CREATE (d:D {id: 3, label: 29})\n" +
-            "CREATE (e:E {id: 4, label: 29})\n" +
-            "CREATE (f:F {id: 5, label: 29})\n" +
-            "CREATE (g:G {id: 6, label: 29}) ";
+            "CREATE (a:A {id: 0, community: 42})\n" +
+            "CREATE (b:B {id: 1, community: 42})\n" +
+            "CREATE (c:C {id: 2, community: 42})\n" +
+            "CREATE (d:D {id: 3, community: 29})\n" +
+            "CREATE (e:E {id: 4, community: 29})\n" +
+            "CREATE (f:F {id: 5, community: 29})\n" +
+            "CREATE (g:G {id: 6, community: 29}) ";
 
     @Parameterized.Parameters(name = "parallel={0}, graph={1}")
     public static Collection<Object[]> data() {
@@ -102,14 +102,14 @@ public class LabelPropagationProcLoadPredefinedLabelsTest {
 
     @Test
     public void shouldUseDefaultValues() {
-        String query = "CALL algo.labelPropagation.stream(null, null, {batchSize:$batchSize,concurrency:$concurrency,graph:$graph,labelProperty:'label'}) " +
-                "YIELD nodeId, label " +
-                "RETURN algo.asNode(nodeId) AS id, label " +
+        String query = "CALL algo.labelPropagation.stream(null, null, {batchSize:$batchSize,concurrency:$concurrency,graph:$graph,seedProperty:'community'}) " +
+                "YIELD nodeId, community " +
+                "RETURN algo.asNode(nodeId) AS id, community " +
                 "ORDER BY id";
 
         Result result = DB.execute(query, parParams());
 
-        List<Integer> labels = result.columnAs("label").stream()
+        List<Integer> labels = result.columnAs("community").stream()
                 .mapToInt(value -> ((Long)value).intValue()).boxed().collect(Collectors.toList());
         assertThat(labels, Matchers.is(Arrays.asList(42, 42, 42, 29, 29, 29,29)));
     }

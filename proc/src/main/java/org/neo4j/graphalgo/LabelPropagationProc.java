@@ -53,11 +53,10 @@ public final class LabelPropagationProc {
 
     private static final String CONFIG_WEIGHT_KEY = "weightProperty";
     private static final String CONFIG_WRITE_KEY = "writeProperty";
-    private static final String CONFIG_LABEL_KEY = "labelProperty";
+    private static final String CONFIG_SEED_KEY = "seedProperty";
+    private static final String CONFIG_OLD_SEED_KEY = "partitionProperty";
     private static final Integer DEFAULT_ITERATIONS = 1;
     private static final Boolean DEFAULT_WRITE = Boolean.TRUE;
-    private static final String DEFAULT_WEIGHT_KEY = "weight";
-    private static final String DEFAULT_LABEL_KEY = "label";
 
     @SuppressWarnings("WeakerAccess")
     @Context
@@ -74,8 +73,8 @@ public final class LabelPropagationProc {
     @Procedure(name = "algo.labelPropagation", mode = Mode.WRITE)
     @Description("CALL algo.labelPropagation(" +
             "label:String, relationship:String, direction:String, " +
-            "{iterations:1, weightProperty:'weight', labelProperty:'label', write:true, concurrency:4}) " +
-            "YIELD nodes, iterations, didConverge, loadMillis, computeMillis, writeMillis, write, weightProperty, labelProperty - " +
+            "{iterations: 1, weightProperty: 'weight', seedProperty: 'seed', write: true, concurrency: 4}) " +
+            "YIELD nodes, iterations, didConverge, loadMillis, computeMillis, writeMillis, write, weightProperty, seedProperty - " +
             "simple label propagation kernel")
     public Stream<LabelPropagationStats> labelPropagation(
             @Name(value = "label", defaultValue = "") String label,
@@ -101,8 +100,8 @@ public final class LabelPropagationProc {
 
         final int iterations = configuration.getIterations(DEFAULT_ITERATIONS);
         final int batchSize = configuration.getBatchSize();
-        final String labelProperty = configuration.getString(CONFIG_LABEL_KEY, null);
-        final String writeProperty = configuration.get(CONFIG_WRITE_KEY, CONFIG_LABEL_KEY, null);
+        final String seedProperty = configuration.getString(CONFIG_SEED_KEY, null, CONFIG_OLD_SEED_KEY);
+        final String writeProperty = configuration.getString(CONFIG_WRITE_KEY, null, CONFIG_OLD_SEED_KEY);
         final String weightProperty = configuration.getString(CONFIG_WEIGHT_KEY, null);
 
         if (configuration.isWriteFlag(DEFAULT_WRITE) && writeProperty == null) {
@@ -111,11 +110,11 @@ public final class LabelPropagationProc {
 
         LabelPropagationStats.Builder stats = new LabelPropagationStats.Builder()
                 .iterations(iterations)
-                .labelProperty(labelProperty)
+                .seedProperty(seedProperty)
                 .writeProperty(writeProperty)
                 .weightProperty(weightProperty);
 
-        GraphLoader graphLoader = graphLoader(configuration, weightProperty, createPropertyMappings(labelProperty, weightProperty));
+        GraphLoader graphLoader = graphLoader(configuration, weightProperty, createPropertyMappings(seedProperty, weightProperty));
         Direction direction = configuration.getDirection(Direction.OUTGOING);
         if (direction == Direction.BOTH) {
             graphLoader.asUndirected(true);
@@ -155,10 +154,10 @@ public final class LabelPropagationProc {
 
         final int iterations = configuration.getIterations(DEFAULT_ITERATIONS);
         final int batchSize = configuration.getBatchSize();
-        final String labelProperty = configuration.getString(CONFIG_LABEL_KEY, null);
+        final String seedProperty = configuration.getString(CONFIG_SEED_KEY, null);
         final String weightProperty = configuration.getString(CONFIG_WEIGHT_KEY, null);
 
-        PropertyMapping[] propertyMappings = createPropertyMappings(labelProperty, weightProperty);
+        PropertyMapping[] propertyMappings = createPropertyMappings(seedProperty, weightProperty);
 
         GraphLoader graphLoader = graphLoader(configuration, weightProperty, propertyMappings);
         Direction direction = configuration.getDirection(Direction.OUTGOING);
@@ -185,10 +184,10 @@ public final class LabelPropagationProc {
 
     }
 
-    private PropertyMapping[] createPropertyMappings(String labelProperty, String weightProperty) {
+    private PropertyMapping[] createPropertyMappings(String seedProperty, String weightProperty) {
         ArrayList<PropertyMapping> propertyMappings = new ArrayList<>();
-        if (labelProperty != null) {
-            propertyMappings.add(PropertyMapping.of(LabelPropagation.LABEL_TYPE, labelProperty, 0d));
+        if (seedProperty != null) {
+            propertyMappings.add(PropertyMapping.of(LabelPropagation.LABEL_TYPE, seedProperty, 0d));
         }
         if (weightProperty != null) {
             propertyMappings.add(PropertyMapping.of(LabelPropagation.WEIGHT_TYPE, weightProperty, 1d));

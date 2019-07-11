@@ -49,14 +49,14 @@ public class NonStabilizingLabelPropagationTest {
 
     private static final String GRAPH =
             "CREATE " +
-            " (a {label:1})" +
-            ",(b {label:1})" +
-            ",(c {label:1})" +
-            ",(d {label:2})" +
-            ",(e {label:2})" +
-            ",(f {label:2})" +
-            ",(g {label:3})" +
-            ",(h {label:4})" +
+            " (a {community:1})" +
+            ",(b {community:1})" +
+            ",(c {community:1})" +
+            ",(d {community:2})" +
+            ",(e {community:2})" +
+            ",(f {community:2})" +
+            ",(g {community:3})" +
+            ",(h {community:4})" +
             "CREATE " +
             " (g)-[:R]->(a)" +
             ",(a)-[:R]->(d)" +

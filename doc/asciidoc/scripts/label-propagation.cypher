@@ -52,7 +52,7 @@ CALL algo.labelPropagation.stream("User", "FOLLOW",
 // tag::write-sample-graph[]
 
 CALL algo.labelPropagation('User', 'FOLLOW',
-  {iterations:10, writeProperty:'partition', write:true, direction: 'OUTGOING'})
+  {iterations: 10, writeProperty: 'community', write: true, direction: 'OUTGOING'})
 YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, write, writeProperty;
 
 // end::write-sample-graph[]
@@ -61,7 +61,7 @@ YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, write, writePro
 // tag::write-existing-label-sample-graph[]
 
 CALL algo.labelPropagation('User', 'FOLLOW',
-  {iterations:10,labelProperty:'seed_label', writeProperty: "partition", write:true, direction: 'OUTGOING'})
+  {iterations: 10, seedProperty: 'seed_label', writeProperty: 'community', write: true, direction: 'OUTGOING'})
 YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, write, writeProperty;
 
 // end::write-existing-label-sample-graph[]
@@ -69,10 +69,10 @@ YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, write, writePro
 // tag::cypher-loading[]
 
 CALL algo.labelPropagation(
-  'MATCH (p:User) RETURN id(p) as id, p.weight as weight, id(p) as value',
+  'MATCH (p:User) RETURN id(p) AS id, p.weight AS weight, id(p) AS value',
   'MATCH (p1:User)-[f:FRIEND]->(p2:User)
-   RETURN id(p1) as source, id(p2) as target, f.weight as weight',
-  {graph:'cypher',write:true});
+   RETURN id(p1) AS source, id(p2) AS target, f.weight AS weight',
+  {graph: 'cypher', write: true});
 
 // end::cypher-loading[]
 

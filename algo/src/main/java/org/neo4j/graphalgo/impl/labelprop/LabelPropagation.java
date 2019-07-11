@@ -83,11 +83,11 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         this.executor = executor;
         this.tracker = tracker;
 
-        HugeWeightMapping labelProperty = graph.nodeProperties(LABEL_TYPE);
-        if (labelProperty == null) {
-            labelProperty = new HugeNullWeightMap(0.0);
+        HugeWeightMapping seedProperty = graph.nodeProperties(LABEL_TYPE);
+        if (seedProperty == null) {
+            seedProperty = new HugeNullWeightMap(0.0);
         }
-        this.nodeProperties = labelProperty;
+        this.nodeProperties = seedProperty;
 
         HugeWeightMapping weightProperty = graph.nodeProperties(WEIGHT_TYPE);
         if (weightProperty == null) {

@@ -54,12 +54,12 @@ import static org.junit.Assert.assertTrue;
 public final class LabelPropagationTest {
 
     private static final String GRAPH =
-            "CREATE (nAlice:User {id:'Alice',label:2})\n" +
-            ",(nBridget:User {id:'Bridget',label:3})\n" +
-            ",(nCharles:User {id:'Charles',label:4})\n" +
-            ",(nDoug:User {id:'Doug',label:3})\n" +
-            ",(nMark:User {id:'Mark',label: 4})\n" +
-            ",(nMichael:User {id:'Michael',label:2})\n" +
+            "CREATE (nAlice:User {id:'Alice',seed:2})\n" +
+            ",(nBridget:User {id:'Bridget',seed:3})\n" +
+            ",(nCharles:User {id:'Charles',seed:4})\n" +
+            ",(nDoug:User {id:'Doug',seed:3})\n" +
+            ",(nMark:User {id:'Mark',seed: 4})\n" +
+            ",(nMichael:User {id:'Michael',seed:2})\n" +
             "CREATE (nAlice)-[:FOLLOW]->(nBridget)\n" +
             ",(nAlice)-[:FOLLOW]->(nCharles)\n" +
             ",(nMark)-[:FOLLOW]->(nDoug)\n" +
@@ -120,26 +120,26 @@ public final class LabelPropagationTest {
         int seededLabel = 1;
         // When
         String query = "CREATE " +
-                       " (a:Pet {type: 'cat',   label: $label}) " +
-                       ",(b:Pet {type: 'okapi', label: $label}) " +
+                       " (a:Pet {type: 'cat',   seed: $seed}) " +
+                       ",(b:Pet {type: 'okapi', seed: $seed}) " +
                        ",(c:Pet {type: 'koala'}) " +
                        ",(d:Pet {type: 'python'}) " +
                        ",(a)<-[:REL]-(c) " +
                        ",(b)<-[:REL]-(c) " +
                        "RETURN id(d) AS maxId";
 
-        // (c) will get label 1
-        // (d) will get label id(d) + 1
-        long maxId = (Long) DB.execute(query, Collections.singletonMap("label", seededLabel)).next().get("maxId");
+        // (c) will get seed 1
+        // (d) will get seed id(d) + 1
+        long maxId = (Long) DB.execute(query, Collections.singletonMap("seed", seededLabel)).next().get("maxId");
 
         GraphLoader graphLoader = new GraphLoader(DB, Pools.DEFAULT)
-                .withOptionalNodeProperties(new PropertyMapping(LabelPropagation.LABEL_TYPE, "label", 0.0))
+                .withOptionalNodeProperties(new PropertyMapping(LabelPropagation.LABEL_TYPE, "seed", 0.0))
                 .withDirection(Direction.OUTGOING)
                 .withConcurrency(Pools.DEFAULT_CONCURRENCY);
 
         if (graphImpl == HeavyCypherGraphFactory.class) {
             graphLoader
-                    .withLabel("MATCH (u:Pet) RETURN id(u) AS id, u.label AS label")
+                    .withLabel("MATCH (u:Pet) RETURN id(u) AS id, u.seed AS seed")
                     .withRelationshipType("MATCH (u1:Pet)-[rel:REL]->(u2:Pet) " +
                                           "RETURN id(u1) AS source, id(u2) AS target")
                     .withName("cypher");
@@ -163,7 +163,7 @@ public final class LabelPropagationTest {
     }
 
     @Test
-    public void testUsesNeo4jNodeIdWhenLabelPropertyIsMissing() {
+    public void testUsesNeo4jNodeIdWhenSeedPropertyIsMissing() {
         LabelPropagation lp = new LabelPropagation(
                 graph,
                 10000,

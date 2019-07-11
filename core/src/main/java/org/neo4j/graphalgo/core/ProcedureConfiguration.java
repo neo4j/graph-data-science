@@ -368,6 +368,10 @@ public class ProcedureConfiguration {
         return (null == value || "".equals(value)) ? defaultValue : value;
     }
 
+    public String getString(String key, String defaultValue, String... oldKeys) {
+        return getChecked(key, defaultValue, String.class, oldKeys);
+    }
+
     public Optional<String> getString(String key) {
         if (config.containsKey(key)) {
             return Optional.of((String) get(key));
@@ -388,7 +392,7 @@ public class ProcedureConfiguration {
     }
 
     public Number getNumber(String key, String oldKey, Number defaultValue) {
-        Object value = get(key, oldKey, (Object) defaultValue);
+        Object value = get(key, (Object) defaultValue, oldKey);
         if (null == value) {
             return defaultValue;
         }
@@ -424,6 +428,29 @@ public class ProcedureConfiguration {
      */
     public <V> V getChecked(String key, V defaultValue, Class<V> expectedType) {
         Object value = config.get(key);
+        return checkValue(key, defaultValue, expectedType, value);
+    }
+
+    public <V> V get(String newKey, V defaultValue, String... oldKeys) {
+        Object value = config.get(newKey);
+        if (null == value) {
+            for (String oldKey : oldKeys) {
+                value = config.get(oldKey);
+                if (null != value) {
+                    return (V) value;
+                }
+            }
+            return defaultValue;
+        }
+        return (V) value;
+    }
+
+    public <V> V getChecked(String key, V defaultValue, Class<V> expectedType, String... oldKeys) {
+        Object value = get(key, null, oldKeys);
+        return checkValue(key, defaultValue, expectedType, value);
+    }
+
+    private <V> V checkValue(final String key, final V defaultValue, final Class<V> expectedType, final Object value) {
         if (null == value) {
             return defaultValue;
         }
@@ -433,17 +460,6 @@ public class ProcedureConfiguration {
             throw new IllegalArgumentException(message);
         }
         return expectedType.cast(value);
-    }
-
-    public <V> V get(String newKey, String oldKey, V defaultValue) {
-        Object value = config.get(newKey);
-        if (null == value) {
-            value = config.get(oldKey);
-            if (null == value) {
-                return defaultValue;
-            }
-        }
-        return (V) value;
     }
 
     public static ProcedureConfiguration create(Map<String, Object> config) {
