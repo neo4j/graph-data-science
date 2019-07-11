@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.utils.paged;
 
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.logging.Log;
 
 /**
  * Implementation of {@link DisjointSetStruct} uses Union by Rank and Path compression.
@@ -46,7 +47,8 @@ public final class RankedDisjointSetStruct extends DisjointSetStruct {
      *
      * @param capacity the capacity (maximum node id)
      */
-    public RankedDisjointSetStruct(long capacity, AllocationTracker tracker) {
+    public RankedDisjointSetStruct(long capacity, AllocationTracker tracker, Log log) {
+        super(log);
         parent = HugeLongArray.newArray(capacity, tracker);
         depth = HugeLongArray.newArray(capacity, tracker);
         this.capacity = capacity;

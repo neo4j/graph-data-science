@@ -84,12 +84,12 @@ public class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
     public void shouldComputeMemoryEstimation() {
         GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
         assertEquals(
-                MemoryRange.of(192, 256),
+                MemoryRange.of(200, 264),
                 IncrementalDisjointSetStruct.memoryEstimation().estimate(dimensions0, 1).memoryUsage());
 
         GraphDimensions dimensions100 = new GraphDimensions.Builder().setNodeCount(100).build();
         assertEquals(
-                MemoryRange.of(1056, 5024),
+                MemoryRange.of(1064, 5032),
                 IncrementalDisjointSetStruct.memoryEstimation().estimate(dimensions100, 1).memoryUsage());
 
         // TODO: >int not supported yet

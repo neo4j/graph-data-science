@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.IncrementalDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.RankedDisjointSetStruct;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.logging.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +62,7 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFind
     private final long nodeCount;
     private final long batchSize;
     private final int stepSize;
+    private final Log log;
 
     public static MemoryEstimation memoryEstimation(final boolean incremental) {
         return MemoryEstimations
@@ -88,10 +90,12 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFind
             int minBatchSize,
             int concurrency,
             GraphUnionFind.Config algoConfig,
-            AllocationTracker tracker) {
+            AllocationTracker tracker,
+            Log log) {
         super(graph, algoConfig);
         this.executor = executor;
         this.tracker = tracker;
+        this.log = log;
 
         this.nodeCount = graph.nodeCount();
 
@@ -144,7 +148,7 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFind
     private DisjointSetStruct getStruct(final BlockingQueue<DisjointSetStruct> queue) {
         DisjointSetStruct set = queue.poll();
         if (set == null) {
-            set = initDisjointSetStruct(nodeCount, tracker);
+            set = initDisjointSetStruct(nodeCount, tracker, log);
         }
         return set;
     }
@@ -207,7 +211,7 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFind
         public void run() {
             boolean pushed = false;
             try {
-                final DisjointSetStruct struct = initDisjointSetStruct(nodeCount, tracker);
+                final DisjointSetStruct struct = initDisjointSetStruct(nodeCount, tracker, log);
                 for (long node = offset; node < end; node++) {
                     rels.forEachRelationship(
                             node,

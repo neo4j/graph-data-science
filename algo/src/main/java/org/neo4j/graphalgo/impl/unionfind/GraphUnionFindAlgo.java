@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.IncrementalDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.RankedDisjointSetStruct;
+import org.neo4j.logging.Log;
 
 /**
  * unified parent for all unionfind implementations
@@ -45,10 +46,10 @@ public abstract class GraphUnionFindAlgo<ME extends GraphUnionFindAlgo<ME>> exte
         return algoConfig.threshold;
     }
 
-    DisjointSetStruct initDisjointSetStruct(long nodeCount, AllocationTracker tracker) {
+    DisjointSetStruct initDisjointSetStruct(long nodeCount, AllocationTracker tracker, Log log) {
         return algoConfig.communityMap == null ?
-                new RankedDisjointSetStruct(nodeCount, tracker) :
-                new IncrementalDisjointSetStruct(nodeCount, algoConfig.communityMap, tracker);
+                new RankedDisjointSetStruct(nodeCount, tracker, log) :
+                new IncrementalDisjointSetStruct(nodeCount, algoConfig.communityMap, tracker, log);
     }
 
     /**

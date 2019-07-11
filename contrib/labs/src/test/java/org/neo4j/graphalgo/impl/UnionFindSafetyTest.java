@@ -37,6 +37,7 @@ import org.neo4j.graphalgo.impl.unionfind.GraphUnionFindAlgo;
 import org.neo4j.graphalgo.impl.unionfind.UnionFindAlgorithmType;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.Exceptions;
+import org.neo4j.logging.NullLog;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -78,7 +79,8 @@ public final class UnionFindSafetyTest {
                     10,
                     10,
                     algoConfig,
-                    AllocationTracker.EMPTY);
+                    AllocationTracker.EMPTY,
+                    NullLog.getInstance());
         } catch (Throwable e) {
             assertSame(error, Exceptions.rootCause(e));
         }
@@ -95,7 +97,8 @@ public final class UnionFindSafetyTest {
                     10,
                     10,
                     algoConfig,
-                    AllocationTracker.EMPTY);
+                    AllocationTracker.EMPTY,
+                    NullLog.getInstance());
         } catch (Throwable e) {
             assertSame(error, Exceptions.rootCause(e));
         }

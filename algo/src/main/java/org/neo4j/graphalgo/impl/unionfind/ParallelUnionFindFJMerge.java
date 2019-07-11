@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.IncrementalDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.RankedDisjointSetStruct;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.logging.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,6 +60,7 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
     private final long nodeCount;
     private final long batchSize;
     private DisjointSetStruct dss;
+    private final Log log;
 
     public static MemoryEstimation memoryEstimation(final boolean incremental) {
         return MemoryEstimations.builder(ParallelUnionFindFJMerge.class)
@@ -86,16 +88,18 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
     public ParallelUnionFindFJMerge(
             Graph graph,
             ExecutorService executor,
-            AllocationTracker tracker,
             int minBatchSize,
             int concurrency,
-            GraphUnionFind.Config algoConfig) {
+            Config algoConfig,
+            AllocationTracker tracker,
+            Log log) {
         super(graph, algoConfig);
 
         this.nodeCount = graph.nodeCount();
         this.executor = executor;
         this.tracker = tracker;
-        this.dss = initDisjointSetStruct(nodeCount, tracker);
+        this.log = log;
+        this.dss = initDisjointSetStruct(nodeCount, tracker, log);
         this.batchSize = ParallelUtil.adjustBatchSize(
                 nodeCount,
                 concurrency,
@@ -159,7 +163,7 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
         UFProcess(long offset, long length) {
             this.offset = offset;
             this.end = offset + length;
-            struct = initDisjointSetStruct(nodeCount, tracker);
+            struct = initDisjointSetStruct(nodeCount, tracker, log);
             rels = graph.concurrentCopy();
         }
 

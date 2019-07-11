@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.impl.unionfind;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.logging.Log;
 
 import java.util.concurrent.ExecutorService;
 
@@ -42,7 +43,8 @@ public enum UnionFindAlgorithmType implements UnionFindAlgorithm {
                 final int minBatchSize,
                 final int concurrency,
                 final GraphUnionFindAlgo.Config config,
-                final AllocationTracker tracker) {
+                final AllocationTracker tracker,
+                final Log log) {
 
             return new ParallelUnionFindQueue(
                     graph,
@@ -50,7 +52,8 @@ public enum UnionFindAlgorithmType implements UnionFindAlgorithm {
                     minBatchSize,
                     concurrency,
                     config,
-                    tracker);
+                    tracker,
+                    log);
         }
 
         @Override
@@ -66,14 +69,17 @@ public enum UnionFindAlgorithmType implements UnionFindAlgorithm {
                 final int minBatchSize,
                 final int concurrency,
                 final GraphUnionFindAlgo.Config config,
-                final AllocationTracker tracker) {
+                final AllocationTracker tracker,
+                final Log log) {
 
             return new ParallelUnionFindForkJoin(
                     graph,
-                    tracker,
                     minBatchSize,
                     concurrency,
-                    config);
+                    config,
+                    tracker,
+                    log
+            );
         }
 
         @Override
@@ -89,19 +95,21 @@ public enum UnionFindAlgorithmType implements UnionFindAlgorithm {
                 final int minBatchSize,
                 final int concurrency,
                 final GraphUnionFindAlgo.Config config,
-                final AllocationTracker tracker) {
+                final AllocationTracker tracker,
+                final Log log) {
 
             return new ParallelUnionFindFJMerge(
                     graph,
                     executor,
-                    tracker,
                     minBatchSize,
                     concurrency,
-                    config);
+                    config,
+                    tracker,
+                    log);
         }
 
         @Override
-        public MemoryEstimation memoryEstimation(final boolean incremental) {
+        public MemoryEstimation memoryEstimation(boolean incremental) {
             return ParallelUnionFindFJMerge.memoryEstimation(incremental);
         }
     },
@@ -113,12 +121,14 @@ public enum UnionFindAlgorithmType implements UnionFindAlgorithm {
                 final int minBatchSize,
                 final int concurrency,
                 final GraphUnionFindAlgo.Config config,
-                final AllocationTracker tracker) {
+                final AllocationTracker tracker,
+                final Log log) {
 
             return new GraphUnionFind(
                     graph,
                     config,
-                    AllocationTracker.EMPTY
+                    AllocationTracker.EMPTY,
+                    log
             );
         }
 

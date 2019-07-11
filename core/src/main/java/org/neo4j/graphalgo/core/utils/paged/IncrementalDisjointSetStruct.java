@@ -27,6 +27,8 @@ import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
+import org.neo4j.logging.Log;
+import org.neo4j.logging.NullLog;
 
 import java.util.stream.LongStream;
 
@@ -67,17 +69,20 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
         return IncrementalDisjointSetStruct.MEMORY_ESTIMATION;
     }
 
+    public IncrementalDisjointSetStruct(long capacity, HugeWeightMapping communityMapping, AllocationTracker tracker) {
+        this(capacity, communityMapping, tracker, NullLog.getInstance());
+    }
     /**
      * Initialize the struct with the given capacity.
      *
      * @param capacity the capacity (maximum node id)
      */
-    public IncrementalDisjointSetStruct(long capacity, HugeWeightMapping communityMapping, AllocationTracker tracker) {
+    public IncrementalDisjointSetStruct(long capacity, HugeWeightMapping communityMapping, AllocationTracker tracker, Log log) {
+        super(log);
         this.parent = HugeLongArray.newArray(capacity, tracker);
         this.internalToProvidedIds = new LongLongHashMap();
         this.communityMapping = communityMapping;
         this.capacity = capacity;
-
         init();
     }
 
@@ -95,23 +100,35 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
                 .map(id -> (long) communityMapping.nodeWeight(id, -1))
                 .max().orElse(0);
 
+        log.debug("[%s] Capacity: %d", getClass().getSimpleName(), capacity);
+        log.debug("[%s] Max community id (before init): %d", getClass().getSimpleName(), maxCommunity);
+
         final LongLongMap internalMapping = new LongLongHashMap();
-        internalToProvidedIds.clear();
-        parent.setAll(nodeId -> {
+        this.internalToProvidedIds.clear();
+
+        this.parent.setAll(nodeId -> {
+            long parentValue = -1;
             double communityIdValue = communityMapping.nodeWeight(nodeId, Double.NaN);
+
             if (!Double.isNaN(communityIdValue)) {
                 long communityId = (long) communityIdValue;
+
                 int idIndex = internalMapping.indexOf(communityId);
                 if (internalMapping.indexExists(idIndex)) {
-                    return internalMapping.indexGet(idIndex);
+                    parentValue = internalMapping.indexGet(idIndex);
+                } else {
+                    internalToProvidedIds.put(nodeId, communityId);
+                    internalMapping.indexInsert(idIndex, communityId, nodeId);
                 }
-                internalMapping.indexInsert(idIndex, communityId, nodeId);
-                internalToProvidedIds.put(nodeId, communityId);
             } else {
                 internalToProvidedIds.put(nodeId, ++maxCommunity);
             }
-            return -1L;
+            return parentValue;
         });
+
+        log.debug("[%s] Internal mapping size: %d", getClass().getSimpleName(), internalMapping.size());
+        log.debug("[%s] Internal to provided ids size (after init): %d", getClass().getSimpleName(), internalToProvidedIds.size());
+        log.debug("[%s] Max community id (after init): %d", getClass().getSimpleName(), maxCommunity);
     }
 
     /**

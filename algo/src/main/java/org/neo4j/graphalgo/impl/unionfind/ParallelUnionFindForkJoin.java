@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.IncrementalDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.RankedDisjointSetStruct;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.logging.Log;
 
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
@@ -51,6 +52,7 @@ import java.util.concurrent.RecursiveTask;
 public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionFindForkJoin> {
 
     private final AllocationTracker tracker;
+    private final Log log;
     private final long nodeCount;
     private final long batchSize;
 
@@ -77,14 +79,16 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionF
      */
     public ParallelUnionFindForkJoin(
             Graph graph,
-            AllocationTracker tracker,
             int minBatchSize,
             int concurrency,
-            GraphUnionFind.Config algoConfig) {
+            Config algoConfig,
+            AllocationTracker tracker,
+            Log log) {
         super(graph, algoConfig);
 
         this.nodeCount = graph.nodeCount();
         this.tracker = tracker;
+        this.log = log;
         this.batchSize = ParallelUtil.adjustBatchSize(
                 nodeCount,
                 concurrency,
@@ -125,7 +129,7 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionF
         }
 
         protected DisjointSetStruct run() {
-            final DisjointSetStruct struct = initDisjointSetStruct(nodeCount, tracker);
+            final DisjointSetStruct struct = initDisjointSetStruct(nodeCount, tracker, log);
             for (long node = offset; node < end && running(); node++) {
                 rels.forEachRelationship(
                         node,
@@ -168,7 +172,7 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionF
         }
 
         protected DisjointSetStruct run() {
-            final DisjointSetStruct struct = initDisjointSetStruct(nodeCount, tracker);
+            final DisjointSetStruct struct = initDisjointSetStruct(nodeCount, tracker, log);
             for (long node = offset; node < end && running(); node++) {
                 rels.forEachRelationship(
                         node,

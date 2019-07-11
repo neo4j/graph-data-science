@@ -44,36 +44,6 @@ public class UnionFindFactory<A extends GraphUnionFindAlgo<A>> extends Algorithm
         this.incremental = incremental;
     }
 
-    public static <T extends GraphUnionFindAlgo<T>> UnionFindFactory<T> create(ProcedureConfiguration configuration) {
-        UnionFindAlgorithmType result;
-        if (configuration.getConcurrency() <= 1) {
-            result = UnionFindAlgorithmType.SEQ;
-        } else {
-            final String algoName = configuration
-                    .getString(CONFIG_PARALLEL_ALGO, UnionFindAlgorithmType.QUEUE.name())
-                    .toUpperCase();
-
-            UnionFindAlgorithmType algoImpl;
-            try {
-                algoImpl = UnionFindAlgorithmType.valueOf(algoName);
-            } catch (IllegalArgumentException e) {
-                algoImpl = UnionFindAlgorithmType.SEQ;
-            }
-
-            if (algoImpl == UnionFindAlgorithmType.SEQ) {
-                String errorMsg = String.format("Parallel configuration %s is invalid. Valid names are %s", algoName,
-                        Arrays.stream(UnionFindAlgorithmType.values())
-                                .filter(ufa -> ufa != UnionFindAlgorithmType.SEQ)
-                                .map(UnionFindAlgorithmType::name)
-                                .collect(Collectors.joining(", ")));
-                throw new IllegalArgumentException(errorMsg);
-            }
-            result = algoImpl;
-        }
-        boolean incremental = configuration.getString(CONFIG_COMMUNITY_PROPERTY).isPresent();
-        return new UnionFindFactory<>(result, incremental);
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public A build(
@@ -95,7 +65,8 @@ public class UnionFindFactory<A extends GraphUnionFindAlgo<A>> extends Algorithm
                 minBatchSize,
                 concurrency,
                 algoConfig,
-                tracker);
+                tracker,
+                log);
         return (A) algo;
     }
 

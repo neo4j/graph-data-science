@@ -300,7 +300,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
 
     @Override
     UnionFindFactory<T> algorithmFactory(final ProcedureConfiguration config) {
-        double threshold = config.get(CONFIG_THRESHOLD, Double.NaN);
+        boolean incremental = config.getString(CONFIG_COMMUNITY_PROPERTY).isPresent();
         String algoName = config.getString(CONFIG_PARALLEL_ALGO, UnionFindAlgorithmType.QUEUE.name());
 
         UnionFindAlgorithmType algorithmType = null;
@@ -322,7 +322,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
                 throw new IllegalArgumentException(errorMsg);
             }
         }
-        return new UnionFindFactory<>(algorithmType, threshold);
+        return new UnionFindFactory<>(algorithmType, incremental);
     }
 
     public static class UnionFindResult {

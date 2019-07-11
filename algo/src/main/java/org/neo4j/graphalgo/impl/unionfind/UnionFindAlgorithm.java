@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
+import org.neo4j.logging.Log;
 
 import java.util.concurrent.ExecutorService;
 
@@ -34,9 +35,10 @@ public interface UnionFindAlgorithm {
             int minBatchSize,
             int concurrency,
             final GraphUnionFindAlgo.Config config,
-            AllocationTracker tracker) {
+            AllocationTracker tracker,
+            Log log) {
 
-        GraphUnionFindAlgo<?> algo = create(graph, executor, minBatchSize, concurrency, config, tracker);
+        GraphUnionFindAlgo<?> algo = create(graph, executor, minBatchSize, concurrency, config, tracker, log);
         DisjointSetStruct communities = algo.compute();
         algo.release();
         return communities;
@@ -48,7 +50,8 @@ public interface UnionFindAlgorithm {
             int minBatchSize,
             int concurrency,
             final GraphUnionFindAlgo.Config config,
-            AllocationTracker tracker);
+            AllocationTracker tracker,
+            final Log log);
 
     default MemoryEstimation memoryEstimation() {
         return memoryEstimation(false);

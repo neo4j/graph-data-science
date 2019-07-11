@@ -45,6 +45,7 @@ import org.neo4j.io.fs.FileUtils;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.core.ThreadToStatementContextBridge;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.logging.NullLog;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -61,7 +62,6 @@ import org.openjdk.jmh.annotations.Warmup;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -184,43 +184,43 @@ public class ParallelUnionFindBenchmark {
 
     @Benchmark
     public Object parallelUnionFindQueue_200000() {
-        return new ParallelUnionFindQueue(graph, Pools.DEFAULT, 200_000, 8, algoConfig, AllocationTracker.EMPTY)
+        return new ParallelUnionFindQueue(graph, Pools.DEFAULT, 200_000, 8, algoConfig, AllocationTracker.EMPTY, NullLog.getInstance())
                 .compute();
     }
 
     @Benchmark
     public Object parallelUnionFindQueue_400000() {
-        return new ParallelUnionFindQueue(graph, Pools.DEFAULT, 400_000, 8, algoConfig, AllocationTracker.EMPTY)
+        return new ParallelUnionFindQueue(graph, Pools.DEFAULT, 400_000, 8, algoConfig, AllocationTracker.EMPTY, NullLog.getInstance())
                 .compute();
     }
 
     @Benchmark
     public Object parallelUnionFindQueue_800000() {
-        return new ParallelUnionFindQueue(graph, Pools.DEFAULT, 800_000, 8, algoConfig, AllocationTracker.EMPTY)
+        return new ParallelUnionFindQueue(graph, Pools.DEFAULT, 800_000, 8, algoConfig, AllocationTracker.EMPTY, NullLog.getInstance())
                 .compute();
     }
 
     @Benchmark
     public Object parallelUnionFindForkJoinMerge_400000() {
-        return new ParallelUnionFindFJMerge(graph, Pools.DEFAULT, AllocationTracker.EMPTY, 400_000, 8, algoConfig)
+        return new ParallelUnionFindFJMerge(graph, Pools.DEFAULT, 400_000, 8, algoConfig, AllocationTracker.EMPTY, NullLog.getInstance())
                 .compute();
     }
 
     @Benchmark
     public Object parallelUnionFindForkJoinMerge_800000() {
-        return new ParallelUnionFindFJMerge(graph, Pools.DEFAULT, AllocationTracker.EMPTY, 800_000, 8, algoConfig)
+        return new ParallelUnionFindFJMerge(graph, Pools.DEFAULT, 800_000, 8, algoConfig, AllocationTracker.EMPTY, NullLog.getInstance())
                 .compute();
     }
 
     @Benchmark
     public Object parallelUnionFindForkJoin_400000() {
-        return new ParallelUnionFindForkJoin(graph, AllocationTracker.EMPTY,400_000, 8, algoConfig)
+        return new ParallelUnionFindForkJoin(graph, 400_000, 8, algoConfig, AllocationTracker.EMPTY, NullLog.getInstance())
                 .compute();
     }
 
     @Benchmark
     public Object parallelUnionFindForkJoin_800000() {
-        return new ParallelUnionFindForkJoin(graph, AllocationTracker.EMPTY, 800_000, 8, algoConfig)
+        return new ParallelUnionFindForkJoin(graph, 800_000, 8, algoConfig, AllocationTracker.EMPTY, NullLog.getInstance())
                 .compute();
     }
 
@@ -233,7 +233,7 @@ public class ParallelUnionFindBenchmark {
 
     @Benchmark
     public Object sequentialUnionFind() {
-        return new GraphUnionFind(graph, algoConfig, AllocationTracker.EMPTY)
+        return new GraphUnionFind(graph, algoConfig, AllocationTracker.EMPTY, NullLog.getInstance())
                 .compute();
 
     }

@@ -24,6 +24,7 @@ import com.carrotsearch.hppc.LongLongMap;
 import com.carrotsearch.hppc.LongLongScatterMap;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
+import org.neo4j.logging.Log;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -35,6 +36,12 @@ import java.util.stream.Stream;
  * @see <a href="https://en.wikipedia.org/wiki/Disjoint-set_data_structure">Wiki</a>
  */
 public abstract class DisjointSetStruct {
+
+    protected final Log log;
+
+    public DisjointSetStruct(Log log) {
+        this.log = log;
+    }
 
     /**
      * Joins the set of p (Sp) with set of q (Sq) such that

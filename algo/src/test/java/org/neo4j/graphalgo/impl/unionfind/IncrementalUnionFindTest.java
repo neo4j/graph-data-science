@@ -40,6 +40,7 @@ import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.logging.NullLog;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
 import java.util.Arrays;
@@ -324,6 +325,7 @@ public class IncrementalUnionFindTest {
                 setSize / Pools.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT_CONCURRENCY,
                 config,
-                AllocationTracker.EMPTY);
+                AllocationTracker.EMPTY,
+                NullLog.getInstance());
     }
 }
