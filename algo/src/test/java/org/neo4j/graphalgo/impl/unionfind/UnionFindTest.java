@@ -60,7 +60,7 @@ public class UnionFindTest {
     private static final int SETS_COUNT = 16;
     private static final int SET_SIZE = 10;
 
-    private static final GraphUnionFind.Config DEFAULT_CONFIG = new GraphUnionFindAlgo.Config(
+    private static final UnionFindSeq.Config DEFAULT_CONFIG = new UnionFindAlgorithm.Config(
             new HugeNullWeightMap(-1),
             Double.NaN
     );

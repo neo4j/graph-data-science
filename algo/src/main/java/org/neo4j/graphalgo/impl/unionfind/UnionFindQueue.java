@@ -55,7 +55,7 @@ import static org.neo4j.graphalgo.core.utils.ParallelUtil.awaitTermination;
  *
  * @author mknblch
  */
-public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFindQueue> {
+public class UnionFindQueue extends UnionFindAlgorithm<UnionFindQueue> {
 
     private final ExecutorService executor;
     private final AllocationTracker tracker;
@@ -66,7 +66,7 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFind
 
     public static MemoryEstimation memoryEstimation(final boolean incremental) {
         return MemoryEstimations
-                .builder(ParallelUnionFindQueue.class)
+                .builder(UnionFindQueue.class)
                 .startField("computeStep", HugeUnionFindTask.class)
                 .add(MemoryEstimations.of("DisjointSetStruct", (dimensions, concurrency) -> {
                     MemoryEstimation dssEstimation = (incremental) ?
@@ -84,12 +84,12 @@ public class ParallelUnionFindQueue extends GraphUnionFindAlgo<ParallelUnionFind
     /**
      * Initialize parallel UF.
      */
-    public ParallelUnionFindQueue(
+    public UnionFindQueue(
             Graph graph,
             ExecutorService executor,
             int minBatchSize,
             int concurrency,
-            GraphUnionFind.Config algoConfig,
+            UnionFindSeq.Config algoConfig,
             AllocationTracker tracker,
             Log log) {
         super(graph, algoConfig);

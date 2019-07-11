@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedLongDoubleMap;
 import org.neo4j.kernel.api.StatementConstants;
 
-final class HugeNodePropertiesBuilder {
+public final class HugeNodePropertiesBuilder {
 
     private final double defaultValue;
     private final int propertyId;
@@ -57,11 +57,11 @@ final class HugeNodePropertiesBuilder {
         return propertyId;
     }
 
-    void set(long index, double value) {
+    public void set(long index, double value) {
         properties.put(index, value);
     }
 
-    HugeWeightMapping build() {
+    public HugeWeightMapping build() {
         return new HugeNodePropertyMap(properties, defaultValue, propertyId);
     }
 }

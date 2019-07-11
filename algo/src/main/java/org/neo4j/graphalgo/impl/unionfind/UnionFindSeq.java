@@ -46,14 +46,14 @@ import org.neo4j.logging.Log;
  *
  * @author mknblch
  */
-public class GraphUnionFind extends GraphUnionFindAlgo<GraphUnionFind> {
+public class UnionFindSeq extends UnionFindAlgorithm<UnionFindSeq> {
 
     private DisjointSetStruct dss;
     private final long nodeCount;
     private RelationshipConsumer unrestricted;
 
     public static MemoryEstimation memoryEstimation(final boolean incremental) {
-        return MemoryEstimations.builder(GraphUnionFind.class)
+        return MemoryEstimations.builder(UnionFindSeq.class)
                 .add(
                         "DisjointSetStruct",
                         (incremental) ?
@@ -62,9 +62,9 @@ public class GraphUnionFind extends GraphUnionFindAlgo<GraphUnionFind> {
                 .build();
     }
 
-    public GraphUnionFind(
+    public UnionFindSeq(
             Graph graph,
-            GraphUnionFindAlgo.Config algoConfig,
+            UnionFindAlgorithm.Config algoConfig,
             AllocationTracker tracker,
             Log log) {
         super(graph, algoConfig);
@@ -100,7 +100,7 @@ public class GraphUnionFind extends GraphUnionFindAlgo<GraphUnionFind> {
     }
 
     @Override
-    public GraphUnionFind release() {
+    public UnionFindSeq release() {
         dss = null;
         unrestricted = null;
         return super.release();

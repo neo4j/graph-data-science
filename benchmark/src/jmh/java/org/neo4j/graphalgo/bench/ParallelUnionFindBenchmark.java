@@ -27,11 +27,11 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.MSColoring;
-import org.neo4j.graphalgo.impl.unionfind.GraphUnionFind;
-import org.neo4j.graphalgo.impl.unionfind.GraphUnionFindAlgo;
-import org.neo4j.graphalgo.impl.unionfind.ParallelUnionFindFJMerge;
-import org.neo4j.graphalgo.impl.unionfind.ParallelUnionFindForkJoin;
-import org.neo4j.graphalgo.impl.unionfind.ParallelUnionFindQueue;
+import org.neo4j.graphalgo.impl.unionfind.UnionFindSeq;
+import org.neo4j.graphalgo.impl.unionfind.UnionFindAlgorithm;
+import org.neo4j.graphalgo.impl.unionfind.UnionFindFJMerge;
+import org.neo4j.graphalgo.impl.unionfind.UnionFindForkJoin;
+import org.neo4j.graphalgo.impl.unionfind.UnionFindQueue;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
@@ -88,7 +88,7 @@ public class ParallelUnionFindBenchmark {
 
     private static File storeDir = new File(GRAPH_DIRECTORY);
 
-    private final GraphUnionFind.Config algoConfig = new GraphUnionFindAlgo.Config(
+    private final UnionFindSeq.Config algoConfig = new UnionFindAlgorithm.Config(
             new HugeNullWeightMap(-1L),
             Double.NaN
     );
@@ -184,43 +184,43 @@ public class ParallelUnionFindBenchmark {
 
     @Benchmark
     public Object parallelUnionFindQueue_200000() {
-        return new ParallelUnionFindQueue(graph, Pools.DEFAULT, 200_000, 8, algoConfig, AllocationTracker.EMPTY, NullLog.getInstance())
+        return new UnionFindQueue(graph, Pools.DEFAULT, 200_000, 8, algoConfig, AllocationTracker.EMPTY, NullLog.getInstance())
                 .compute();
     }
 
     @Benchmark
     public Object parallelUnionFindQueue_400000() {
-        return new ParallelUnionFindQueue(graph, Pools.DEFAULT, 400_000, 8, algoConfig, AllocationTracker.EMPTY, NullLog.getInstance())
+        return new UnionFindQueue(graph, Pools.DEFAULT, 400_000, 8, algoConfig, AllocationTracker.EMPTY, NullLog.getInstance())
                 .compute();
     }
 
     @Benchmark
     public Object parallelUnionFindQueue_800000() {
-        return new ParallelUnionFindQueue(graph, Pools.DEFAULT, 800_000, 8, algoConfig, AllocationTracker.EMPTY, NullLog.getInstance())
+        return new UnionFindQueue(graph, Pools.DEFAULT, 800_000, 8, algoConfig, AllocationTracker.EMPTY, NullLog.getInstance())
                 .compute();
     }
 
     @Benchmark
     public Object parallelUnionFindForkJoinMerge_400000() {
-        return new ParallelUnionFindFJMerge(graph, Pools.DEFAULT, 400_000, 8, algoConfig, AllocationTracker.EMPTY, NullLog.getInstance())
+        return new UnionFindFJMerge(graph, Pools.DEFAULT, 400_000, 8, algoConfig, AllocationTracker.EMPTY, NullLog.getInstance())
                 .compute();
     }
 
     @Benchmark
     public Object parallelUnionFindForkJoinMerge_800000() {
-        return new ParallelUnionFindFJMerge(graph, Pools.DEFAULT, 800_000, 8, algoConfig, AllocationTracker.EMPTY, NullLog.getInstance())
+        return new UnionFindFJMerge(graph, Pools.DEFAULT, 800_000, 8, algoConfig, AllocationTracker.EMPTY, NullLog.getInstance())
                 .compute();
     }
 
     @Benchmark
     public Object parallelUnionFindForkJoin_400000() {
-        return new ParallelUnionFindForkJoin(graph, 400_000, 8, algoConfig, AllocationTracker.EMPTY, NullLog.getInstance())
+        return new UnionFindForkJoin(graph, 400_000, 8, algoConfig, AllocationTracker.EMPTY, NullLog.getInstance())
                 .compute();
     }
 
     @Benchmark
     public Object parallelUnionFindForkJoin_800000() {
-        return new ParallelUnionFindForkJoin(graph, 800_000, 8, algoConfig, AllocationTracker.EMPTY, NullLog.getInstance())
+        return new UnionFindForkJoin(graph, 800_000, 8, algoConfig, AllocationTracker.EMPTY, NullLog.getInstance())
                 .compute();
     }
 
@@ -233,7 +233,7 @@ public class ParallelUnionFindBenchmark {
 
     @Benchmark
     public Object sequentialUnionFind() {
-        return new GraphUnionFind(graph, algoConfig, AllocationTracker.EMPTY, NullLog.getInstance())
+        return new UnionFindSeq(graph, algoConfig, AllocationTracker.EMPTY, NullLog.getInstance())
                 .compute();
 
     }

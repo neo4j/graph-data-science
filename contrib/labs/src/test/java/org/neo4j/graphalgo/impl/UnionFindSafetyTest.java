@@ -32,8 +32,8 @@ import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.unionfind.GraphUnionFind;
-import org.neo4j.graphalgo.impl.unionfind.GraphUnionFindAlgo;
+import org.neo4j.graphalgo.impl.unionfind.UnionFindSeq;
+import org.neo4j.graphalgo.impl.unionfind.UnionFindAlgorithm;
 import org.neo4j.graphalgo.impl.unionfind.UnionFindAlgorithmType;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.Exceptions;
@@ -63,7 +63,7 @@ public final class UnionFindSafetyTest {
     @Parameterized.Parameter
     public UnionFindAlgorithmType unionFindAlgorithmType;
 
-    GraphUnionFind.Config algoConfig = new GraphUnionFindAlgo.Config(
+    UnionFindSeq.Config algoConfig = new UnionFindAlgorithm.Config(
             new HugeNullWeightMap(-1),
             Double.NaN
     );

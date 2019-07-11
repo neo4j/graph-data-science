@@ -22,31 +22,25 @@ package org.neo4j.graphalgo.impl.unionfind;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
 import org.neo4j.logging.Log;
 
 import java.util.concurrent.ExecutorService;
 
-/**
- * this class is basically a helper to instantiate different
- * versions of the same algorithm. There are multiple impls.
- * of union find due to performance optimizations.
- * Some benchmarks exist to measure the difference between
- * forkjoin & queue approaches and huge/heavy
- */
-public enum UnionFindAlgorithmType implements UnionFindAlgorithm {
+public enum UnionFindAlgorithmType {
 
     QUEUE {
         @Override
-        public GraphUnionFindAlgo<?> create(
+        public UnionFindAlgorithm<?> create(
                 final Graph graph,
                 final ExecutorService executor,
                 final int minBatchSize,
                 final int concurrency,
-                final GraphUnionFindAlgo.Config config,
+                final UnionFindAlgorithm.Config config,
                 final AllocationTracker tracker,
                 final Log log) {
 
-            return new ParallelUnionFindQueue(
+            return new UnionFindQueue(
                     graph,
                     executor,
                     minBatchSize,
@@ -58,21 +52,21 @@ public enum UnionFindAlgorithmType implements UnionFindAlgorithm {
 
         @Override
         public MemoryEstimation memoryEstimation(final boolean incremental) {
-            return ParallelUnionFindQueue.memoryEstimation(incremental);
+            return UnionFindQueue.memoryEstimation(incremental);
         }
     },
     FORK_JOIN {
         @Override
-        public GraphUnionFindAlgo<?> create(
+        public UnionFindAlgorithm<?> create(
                 final Graph graph,
                 final ExecutorService executor,
                 final int minBatchSize,
                 final int concurrency,
-                final GraphUnionFindAlgo.Config config,
+                final UnionFindAlgorithm.Config config,
                 final AllocationTracker tracker,
                 final Log log) {
 
-            return new ParallelUnionFindForkJoin(
+            return new UnionFindForkJoin(
                     graph,
                     minBatchSize,
                     concurrency,
@@ -84,21 +78,21 @@ public enum UnionFindAlgorithmType implements UnionFindAlgorithm {
 
         @Override
         public MemoryEstimation memoryEstimation(final boolean incremental) {
-            return ParallelUnionFindForkJoin.memoryEstimation(incremental);
+            return UnionFindForkJoin.memoryEstimation(incremental);
         }
     },
     FJ_MERGE {
         @Override
-        public GraphUnionFindAlgo<?> create(
+        public UnionFindAlgorithm<?> create(
                 final Graph graph,
                 final ExecutorService executor,
                 final int minBatchSize,
                 final int concurrency,
-                final GraphUnionFindAlgo.Config config,
+                final UnionFindAlgorithm.Config config,
                 final AllocationTracker tracker,
                 final Log log) {
 
-            return new ParallelUnionFindFJMerge(
+            return new UnionFindFJMerge(
                     graph,
                     executor,
                     minBatchSize,
@@ -110,21 +104,21 @@ public enum UnionFindAlgorithmType implements UnionFindAlgorithm {
 
         @Override
         public MemoryEstimation memoryEstimation(boolean incremental) {
-            return ParallelUnionFindFJMerge.memoryEstimation(incremental);
+            return UnionFindFJMerge.memoryEstimation(incremental);
         }
     },
     SEQ {
         @Override
-        public GraphUnionFindAlgo<?> create(
+        public UnionFindAlgorithm<?> create(
                 final Graph graph,
                 final ExecutorService executor,
                 final int minBatchSize,
                 final int concurrency,
-                final GraphUnionFindAlgo.Config config,
+                final UnionFindAlgorithm.Config config,
                 final AllocationTracker tracker,
                 final Log log) {
 
-            return new GraphUnionFind(
+            return new UnionFindSeq(
                     graph,
                     config,
                     AllocationTracker.EMPTY,
@@ -134,7 +128,37 @@ public enum UnionFindAlgorithmType implements UnionFindAlgorithm {
 
         @Override
         public MemoryEstimation memoryEstimation(final boolean incremental) {
-            return GraphUnionFind.memoryEstimation(incremental);
+            return UnionFindSeq.memoryEstimation(incremental);
         }
-    },
+    };
+
+    public DisjointSetStruct run(
+            Graph graph,
+            ExecutorService executor,
+            int minBatchSize,
+            int concurrency,
+            final UnionFindAlgorithm.Config config,
+            AllocationTracker tracker,
+            Log log) {
+
+        UnionFindAlgorithm<?> algo = create(graph, executor, minBatchSize, concurrency, config, tracker, log);
+        DisjointSetStruct communities = algo.compute();
+        algo.release();
+        return communities;
+    }
+
+    public abstract UnionFindAlgorithm<?> create(
+            Graph graph,
+            ExecutorService executor,
+            int minBatchSize,
+            int concurrency,
+            final UnionFindAlgorithm.Config config,
+            AllocationTracker tracker,
+            final Log log);
+
+    MemoryEstimation memoryEstimation() {
+        return memoryEstimation(false);
+    }
+
+    abstract MemoryEstimation memoryEstimation(final boolean incremental);
 }

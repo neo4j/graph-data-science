@@ -19,44 +19,79 @@
  */
 package org.neo4j.graphalgo.impl.unionfind;
 
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.IncrementalDisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.RankedDisjointSetStruct;
 import org.neo4j.logging.Log;
 
-import java.util.concurrent.ExecutorService;
+public abstract class UnionFindAlgorithm<ME extends UnionFindAlgorithm<ME>> extends Algorithm<ME> {
 
-public interface UnionFindAlgorithm {
+    protected Graph graph;
 
-    default DisjointSetStruct run(
-            Graph graph,
-            ExecutorService executor,
-            int minBatchSize,
-            int concurrency,
-            final GraphUnionFindAlgo.Config config,
-            AllocationTracker tracker,
-            Log log) {
+    protected final UnionFindAlgorithm.Config algoConfig;
 
-        GraphUnionFindAlgo<?> algo = create(graph, executor, minBatchSize, concurrency, config, tracker, log);
-        DisjointSetStruct communities = algo.compute();
-        algo.release();
-        return communities;
+    protected UnionFindAlgorithm(final Graph graph, final UnionFindAlgorithm.Config algoConfig) {
+        this.graph = graph;
+        this.algoConfig = algoConfig;
     }
 
-    GraphUnionFindAlgo<?> create(
-            Graph graph,
-            ExecutorService executor,
-            int minBatchSize,
-            int concurrency,
-            final GraphUnionFindAlgo.Config config,
-            AllocationTracker tracker,
-            final Log log);
-
-    default MemoryEstimation memoryEstimation() {
-        return memoryEstimation(false);
+    public double threshold() {
+        return algoConfig.threshold;
     }
 
-    MemoryEstimation memoryEstimation(final boolean incremental);
+    DisjointSetStruct initDisjointSetStruct(long nodeCount, AllocationTracker tracker, Log log) {
+        return algoConfig.communityMap == null ?
+                new RankedDisjointSetStruct(nodeCount, tracker, log) :
+                new IncrementalDisjointSetStruct(nodeCount, algoConfig.communityMap, tracker, log);
+    }
 
+    /**
+     * compute connected components
+     */
+    public DisjointSetStruct compute() {
+        return Double.isFinite(threshold()) ? compute(threshold()) : computeUnrestricted();
+    }
+
+    public abstract DisjointSetStruct compute(double threshold);
+
+    public abstract DisjointSetStruct computeUnrestricted();
+
+    /**
+     * method reference for self
+     *
+     * @return
+     */
+    @Override
+    public ME me() {
+        //noinspection unchecked
+        return (ME) this;
+    }
+
+    /**
+     * release internal datastructures
+     *
+     * @return
+     */
+    @Override
+    public ME release() {
+        graph = null;
+        return me();
+    }
+
+    public static class Config {
+
+        public final HugeWeightMapping communityMap;
+        public final double threshold;
+
+        public Config(
+                final HugeWeightMapping communityMap,
+                final double threshold) {
+            this.communityMap = communityMap;
+            this.threshold = threshold;
+        }
+    }
 }

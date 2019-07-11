@@ -32,7 +32,7 @@ import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
-import org.neo4j.graphalgo.impl.unionfind.GraphUnionFindAlgo;
+import org.neo4j.graphalgo.impl.unionfind.UnionFindAlgorithm;
 import org.neo4j.graphalgo.impl.unionfind.UnionFindAlgorithmType;
 import org.neo4j.graphalgo.impl.unionfind.UnionFindFactory;
 import org.neo4j.graphdb.Direction;
@@ -47,14 +47,14 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.impl.unionfind.UnionFindFactory.COMMUNITY_TYPE;
-import static org.neo4j.graphalgo.impl.unionfind.UnionFindFactory.CONFIG_COMMUNITY_PROPERTY;
+import static org.neo4j.graphalgo.impl.unionfind.UnionFindFactory.SEED_TYPE;
+import static org.neo4j.graphalgo.impl.unionfind.UnionFindFactory.CONFIG_SEED_PROPERTY;
 import static org.neo4j.graphalgo.impl.unionfind.UnionFindFactory.CONFIG_PARALLEL_ALGO;
 
 /**
  * @author mknblch
  */
-public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc<T> {
+public class UnionFindProc<T extends UnionFindAlgorithm<T>> extends BaseAlgoProc<T> {
 
     private static final String CONFIG_THRESHOLD = "threshold";
 
@@ -64,7 +64,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
 
     @Procedure(value = "algo.unionFind", mode = Mode.WRITE)
     @Description("CALL algo.unionFind(label:String, relationship:String, " +
-                 "{weightProperty:'weight', threshold:0.42, defaultValue:1.0, write: true, writeProperty:'community', communityProperty:'oldCommunity'}) " +
+                 "{weightProperty:'weight', threshold:0.42, defaultValue:1.0, write: true, writeProperty:'community', seedProperty:'oldCommunity'}) " +
                  "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
     public Stream<UnionFindResult> unionFind(
             @Name(value = "label", defaultValue = "") String label,
@@ -76,7 +76,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
 
     @Procedure(value = "algo.unionFind.stream")
     @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
-                 "{weightProperty:'propertyName', threshold:0.42, defaultValue:1.0) " +
+                 "{weightProperty:'propertyName', threshold:0.42, defaultValue:1.0, seedProperty:'oldCommunity'}} " +
                  "YIELD nodeId, setId - yields a setId to each node id")
     public Stream<DisjointSetStruct.Result> unionFindStream(
             @Name(value = "label", defaultValue = "") String label,
@@ -101,7 +101,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
 
     @Procedure(value = "algo.unionFind.queue", mode = Mode.WRITE)
     @Description("CALL algo.unionFind(label:String, relationship:String, " +
-                 "{property:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition',concurrency:4}) " +
+                 "{property:'weight', threshold:0.42, defaultValue:1.0, write: true, writeProperty:'community', seedProperty:'oldCommunity'}, concurrency:4}) " +
                  "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
     public Stream<UnionFindResult> unionFindQueue(
             @Name(value = "label", defaultValue = "") String label,
@@ -113,7 +113,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
 
     @Procedure(value = "algo.unionFind.queue.stream")
     @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
-                 "{property:'propertyName', threshold:0.42, defaultValue:1.0, concurrency:4}) " +
+                 "{property:'propertyName', threshold:0.42, defaultValue:1.0, seedProperty:'oldCommunity'}, concurrency:4}) " +
                  "YIELD nodeId, setId - yields a setId to each node id")
     public Stream<DisjointSetStruct.Result> unionFindQueueStream(
             @Name(value = "label", defaultValue = "") String label,
@@ -125,7 +125,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
 
     @Procedure(value = "algo.unionFind.forkJoinMerge", mode = Mode.WRITE)
     @Description("CALL algo.unionFind(label:String, relationship:String, " +
-                 "{property:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition', concurrency:4}) " +
+                 "{property:'weight', threshold:0.42, defaultValue:1.0, write: true, writeProperty:'community', seedProperty:'oldCommunity'}, concurrency:4}) " +
                  "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
     public Stream<UnionFindResult> unionFindForkJoinMerge(
             @Name(value = "label", defaultValue = "") String label,
@@ -137,7 +137,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
 
     @Procedure(value = "algo.unionFind.forkJoinMerge.stream")
     @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
-                 "{property:'propertyName', threshold:0.42, defaultValue:1.0, concurrency:4}) " +
+                 "{property:'propertyName', threshold:0.42, defaultValue:1.0, seedProperty:'oldCommunity'}, concurrency:4}) " +
                  "YIELD nodeId, setId - yields a setId to each node id")
     public Stream<DisjointSetStruct.Result> unionFindForkJoinMergeStream(
             @Name(value = "label", defaultValue = "") String label,
@@ -149,7 +149,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
 
     @Procedure(value = "algo.unionFind.forkJoin", mode = Mode.WRITE)
     @Description("CALL algo.unionFind(label:String, relationship:String, " +
-                 "{property:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition',concurrency:4}) " +
+                 "{property:'weight', threshold:0.42, defaultValue:1.0, write: true, writeProperty:'community', seedProperty:'oldCommunity'}, concurrency:4}) " +
                  "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
     public Stream<UnionFindResult> unionFindForkJoin(
             @Name(value = "label", defaultValue = "") String label,
@@ -161,7 +161,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
 
     @Procedure(value = "algo.unionFind.forkJoin.stream")
     @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
-                 "{property:'propertyName', threshold:0.42, defaultValue:1.0,concurrency:4}) " +
+                 "{property:'propertyName', threshold:0.42, defaultValue:1.0, seedProperty:'oldCommunity'}, concurrency:4}) " +
                  "YIELD nodeId, setId - yields a setId to each node id")
     public Stream<DisjointSetStruct.Result> unionFindForJoinStream(
             @Name(value = "label", defaultValue = "") String label,
@@ -231,7 +231,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
 
     private PropertyMapping[] createPropertyMappings(String communityProperty) {
         return new PropertyMapping[]{
-                PropertyMapping.of(COMMUNITY_TYPE, communityProperty, -1),
+                PropertyMapping.of(SEED_TYPE, communityProperty, -1),
         };
     }
 
@@ -285,7 +285,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
     @Override
     GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
 
-        final String communityProperty = config.getString(CONFIG_COMMUNITY_PROPERTY, null);
+        final String communityProperty = config.getString(CONFIG_SEED_PROPERTY, null);
 
         if (communityProperty != null) {
             loader.withOptionalNodeProperties(createPropertyMappings(communityProperty));
@@ -300,7 +300,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
 
     @Override
     UnionFindFactory<T> algorithmFactory(final ProcedureConfiguration config) {
-        boolean incremental = config.getString(CONFIG_COMMUNITY_PROPERTY).isPresent();
+        boolean incremental = config.getString(CONFIG_SEED_PROPERTY).isPresent();
         String algoName = config.getString(CONFIG_PARALLEL_ALGO, UnionFindAlgorithmType.QUEUE.name());
 
         UnionFindAlgorithmType algorithmType = null;

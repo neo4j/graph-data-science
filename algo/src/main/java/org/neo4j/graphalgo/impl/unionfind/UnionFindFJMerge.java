@@ -45,7 +45,7 @@ import java.util.concurrent.RecursiveTask;
  * Implementation based on the idea that DisjointSetStruct can be built using
  * just a partition of the nodes which then can be merged pairwise.
  * <p>
- * Like in {@link ParallelUnionFindForkJoin} the resulting DSS of each node-partition
+ * Like in {@link UnionFindForkJoin} the resulting DSS of each node-partition
  * is merged by the ForkJoin pool while calculating the DSS is done by the
  * ExecutorService.
  * <p>
@@ -53,7 +53,7 @@ import java.util.concurrent.RecursiveTask;
  *
  * @author mknblch
  */
-public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFindFJMerge> {
+public class UnionFindFJMerge extends UnionFindAlgorithm<UnionFindFJMerge> {
 
     private final ExecutorService executor;
     private final AllocationTracker tracker;
@@ -63,7 +63,7 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
     private final Log log;
 
     public static MemoryEstimation memoryEstimation(final boolean incremental) {
-        return MemoryEstimations.builder(ParallelUnionFindFJMerge.class)
+        return MemoryEstimations.builder(UnionFindFJMerge.class)
                 .startField("computeStep", TUFProcess.class)
                 .add(MemoryEstimations.of("DisjointSetStruct", (dimensions, concurrency) -> {
                             MemoryEstimation dssEstimation = (incremental) ?
@@ -85,7 +85,7 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
      * @param graph
      * @param executor
      */
-    public ParallelUnionFindFJMerge(
+    public UnionFindFJMerge(
             Graph graph,
             ExecutorService executor,
             int minBatchSize,
@@ -141,7 +141,7 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
     }
 
     @Override
-    public ParallelUnionFindFJMerge release() {
+    public UnionFindFJMerge release() {
         dss = null;
         return super.release();
     }
@@ -206,7 +206,7 @@ public class ParallelUnionFindFJMerge extends GraphUnionFindAlgo<ParallelUnionFi
             this.offset = offset;
             this.end = offset + length;
             this.threshold = threshold;
-            struct = new RankedDisjointSetStruct(nodeCount, tracker);
+            struct = new RankedDisjointSetStruct(nodeCount, tracker, log);
             rels = graph.concurrentCopy();
         }
 

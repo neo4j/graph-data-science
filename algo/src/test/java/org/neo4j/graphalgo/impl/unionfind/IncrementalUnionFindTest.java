@@ -85,7 +85,7 @@ public class IncrementalUnionFindTest {
     }
 
     private final Graph graph;
-    private final GraphUnionFindAlgo.Config config;
+    private final UnionFindAlgorithm.Config config;
 
     public IncrementalUnionFindTest(Class<? extends GraphFactory> graphImpl, String name) {
         graph = new GraphLoader(DB)
@@ -97,7 +97,7 @@ public class IncrementalUnionFindTest {
                 .withRelationshipType(RELATIONSHIP_TYPE)
                 .load(graphImpl);
 
-        config = new GraphUnionFindAlgo.Config(
+        config = new UnionFindAlgorithm.Config(
                 graph.nodeProperties(COMMUNITY_PROPERTY),
                 Double.NaN
         );
@@ -290,7 +290,7 @@ public class IncrementalUnionFindTest {
 
     private void test(
             UnionFindAlgorithmType uf,
-            GraphUnionFindAlgo.Config config) {
+            UnionFindAlgorithm.Config config) {
         DisjointSetStruct result = run(uf, config);
 
         Assert.assertEquals(setsCount / 2, result.getSetCount());
@@ -318,7 +318,7 @@ public class IncrementalUnionFindTest {
         });
     }
 
-    private DisjointSetStruct run(final UnionFindAlgorithmType uf, GraphUnionFindAlgo.Config config) {
+    private DisjointSetStruct run(final UnionFindAlgorithmType uf, UnionFindAlgorithm.Config config) {
         return uf.run(
                 graph,
                 Pools.DEFAULT,

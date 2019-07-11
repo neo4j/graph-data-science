@@ -23,8 +23,8 @@ import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
-import org.neo4j.graphalgo.impl.unionfind.GraphUnionFind;
-import org.neo4j.graphalgo.impl.unionfind.GraphUnionFindAlgo;
+import org.neo4j.graphalgo.impl.unionfind.UnionFindSeq;
+import org.neo4j.graphalgo.impl.unionfind.UnionFindAlgorithm;
 import org.neo4j.graphalgo.impl.unionfind.UnionFindAlgorithmType;
 import org.neo4j.logging.NullLog;
 
@@ -49,12 +49,12 @@ public enum UFBenchmarkCombination {
     }
 
     public Object run(Graph graph) {
-        GraphUnionFind.Config algoConfig = new GraphUnionFindAlgo.Config(
+        UnionFindSeq.Config algoConfig = new UnionFindAlgorithm.Config(
                 new HugeNullWeightMap(-1L),
                 Double.NaN
         );
 
-        GraphUnionFindAlgo<?> unionFindAlgo = algo.create(
+        UnionFindAlgorithm<?> unionFindAlgo = algo.create(
                 graph,
                 Pools.DEFAULT,
                 (int) (graph.nodeCount() / Pools.DEFAULT_CONCURRENCY),

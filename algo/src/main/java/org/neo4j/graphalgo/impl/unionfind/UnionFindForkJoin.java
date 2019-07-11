@@ -49,7 +49,7 @@ import java.util.concurrent.RecursiveTask;
  *
  * @author mknblch
  */
-public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionFindForkJoin> {
+public class UnionFindForkJoin extends UnionFindAlgorithm<UnionFindForkJoin> {
 
     private final AllocationTracker tracker;
     private final Log log;
@@ -57,7 +57,7 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionF
     private final long batchSize;
 
     public static MemoryEstimation memoryEstimation(final boolean incremental) {
-        return MemoryEstimations.builder(ParallelUnionFindForkJoin.class)
+        return MemoryEstimations.builder(UnionFindForkJoin.class)
                 .startField("computeStep", ThresholdUFTask.class)
                 .add(MemoryEstimations.of("DisjointSetStruct", (dimensions, concurrency) -> {
                     MemoryEstimation dssEstimation = (incremental) ?
@@ -77,7 +77,7 @@ public class ParallelUnionFindForkJoin extends GraphUnionFindAlgo<ParallelUnionF
      *
      * @param graph
      */
-    public ParallelUnionFindForkJoin(
+    public UnionFindForkJoin(
             Graph graph,
             int minBatchSize,
             int concurrency,

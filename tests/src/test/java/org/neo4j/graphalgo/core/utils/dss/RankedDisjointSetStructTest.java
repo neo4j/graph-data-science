@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.RankedDisjointSetStruct;
+import org.neo4j.logging.NullLog;
 
 import static org.junit.Assert.assertEquals;
 
@@ -35,7 +36,7 @@ public class RankedDisjointSetStructTest extends DisjointSetStructTest {
 
     @Override
     DisjointSetStruct newSet(final int capacity) {
-        return new RankedDisjointSetStruct(capacity, AllocationTracker.EMPTY);
+        return new RankedDisjointSetStruct(capacity, AllocationTracker.EMPTY, NullLog.getInstance());
     }
 
     @Test
