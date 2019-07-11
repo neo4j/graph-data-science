@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.LongLongMap;
 import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

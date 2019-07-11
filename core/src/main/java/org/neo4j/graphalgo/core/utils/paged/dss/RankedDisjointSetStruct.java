@@ -17,11 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.utils.paged;
+package org.neo4j.graphalgo.core.utils.paged.dss;
 
 
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.logging.Log;
 
 /**
@@ -35,7 +37,6 @@ public final class RankedDisjointSetStruct extends DisjointSetStruct {
             .build();
 
     private final HugeLongArray parent;
-    private final HugeLongArray depth;
     private final long capacity;
 
     public static MemoryEstimation memoryEstimation() {
@@ -47,10 +48,9 @@ public final class RankedDisjointSetStruct extends DisjointSetStruct {
      *
      * @param capacity the capacity (maximum node id)
      */
-    public RankedDisjointSetStruct(long capacity, AllocationTracker tracker, Log log) {
-        super(log);
+    public RankedDisjointSetStruct(long capacity, UnionStrategy unionStrategy, AllocationTracker tracker, Log log) {
+        super(unionStrategy, log);
         parent = HugeLongArray.newArray(capacity, tracker);
-        depth = HugeLongArray.newArray(capacity, tracker);
         this.capacity = capacity;
         parent.fill(-1L);
     }
@@ -70,35 +70,6 @@ public final class RankedDisjointSetStruct extends DisjointSetStruct {
         return findPC(p);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * Uses <a href="https://en.wikipedia.org/wiki/Disjoint-set_data_structure#by_rank%22&gt;Rank&lt;/a&gt;">rank based tree balancing.</a>
-     *
-     * @param p an item of Sp
-     * @param q an item of Sq
-     */
-    @Override
-    public void union(long p, long q) {
-        final long pSet = find(p);
-        final long qSet = find(q);
-        if (pSet == qSet) {
-            return;
-        }
-        // weighted union rule optimization
-        long dq = depth.get(qSet);
-        long dp = depth.get(pSet);
-        if (dp < dq) {
-            // attach the smaller tree to the root of the bigger tree
-            parent.set(pSet, qSet);
-        } else if (dp > dq) {
-            parent.set(qSet, pSet);
-        } else {
-            parent.set(qSet, pSet);
-            depth.addTo(pSet, dq + 1);
-        }
-    }
-
     @Override
     long findNoOpt(final long nodeId) {
         long p = nodeId;
@@ -107,5 +78,15 @@ public final class RankedDisjointSetStruct extends DisjointSetStruct {
             p = np;
         }
         return p;
+    }
+
+    @Override
+    public long setIdOf(final long nodeId) {
+        return findNoOpt(nodeId);
+    }
+
+    @Override
+    long setIdOfRoot(final long rootId) {
+        return rootId;
     }
 }

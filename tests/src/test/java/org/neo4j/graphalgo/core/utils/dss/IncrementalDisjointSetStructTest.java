@@ -23,8 +23,10 @@ import org.junit.Test;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
-import org.neo4j.graphalgo.core.utils.paged.IncrementalDisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.dss.IncrementalDisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.dss.UnionStrategy;
+import org.neo4j.logging.NullLog;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -38,7 +40,12 @@ public class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
     }
 
     DisjointSetStruct newSet(final int capacity, final TestWeightMapping weightMapping) {
-        return new IncrementalDisjointSetStruct(capacity, weightMapping, AllocationTracker.EMPTY);
+        return new IncrementalDisjointSetStruct(
+                capacity,
+                weightMapping,
+                new UnionStrategy.ByMin(),
+                AllocationTracker.EMPTY,
+                NullLog.getInstance());
     }
 
     @Test

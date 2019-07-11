@@ -22,7 +22,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.impl.unionfind.UnionFindSeq;
 import org.neo4j.graphalgo.impl.unionfind.UnionFind;
 import org.neo4j.graphalgo.impl.unionfind.UnionFindType;

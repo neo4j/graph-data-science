@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.utils.paged;
+package org.neo4j.graphalgo.core.utils.paged.dss;
 
 
 import com.carrotsearch.hppc.LongLongHashMap;
@@ -27,8 +27,9 @@ import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.logging.Log;
-import org.neo4j.logging.NullLog;
 
 import java.util.stream.LongStream;
 
@@ -69,16 +70,18 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
         return IncrementalDisjointSetStruct.MEMORY_ESTIMATION;
     }
 
-    public IncrementalDisjointSetStruct(long capacity, HugeWeightMapping communityMapping, AllocationTracker tracker) {
-        this(capacity, communityMapping, tracker, NullLog.getInstance());
-    }
     /**
      * Initialize the struct with the given capacity.
      *
      * @param capacity the capacity (maximum node id)
      */
-    public IncrementalDisjointSetStruct(long capacity, HugeWeightMapping communityMapping, AllocationTracker tracker, Log log) {
-        super(log);
+    public IncrementalDisjointSetStruct(
+            long capacity,
+            HugeWeightMapping communityMapping,
+            UnionStrategy unionStrategy,
+            AllocationTracker tracker,
+            Log log) {
+        super(unionStrategy, log);
         this.parent = HugeLongArray.newArray(capacity, tracker);
         this.internalToProvidedIds = new LongLongHashMap();
         this.communityMapping = communityMapping;
@@ -153,26 +156,6 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
     }
 
     /**
-     * join set of p (Sp) with set of q (Sq) so that {@link IncrementalDisjointSetStruct#connected(long, long)}
-     * for any pair of (Spi, Sqj) evaluates to true. Some optimizations exists
-     * which automatically balance the tree, the "weighted union rule" is used here.
-     *
-     * @param p an item of Sp
-     * @param q an item of Sq
-     */
-    @Override
-    public void union(long p, long q) {
-        long pSet = find(p);
-        long qSet = find(q);
-
-        if (pSet < qSet) {
-            parent.set(qSet, pSet);
-        } else if (qSet < pSet) {
-            parent.set(pSet, qSet);
-        }
-    }
-
-    /**
      * find setId of element p without balancing optimization.
      *
      * @param nodeId the element in the set we are looking for
@@ -191,6 +174,11 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
     @Override
     public long setIdOf(final long nodeId) {
         long setId = findNoOpt(nodeId);
-        return internalToProvidedIds.get(setId);
+        return setIdOfRoot(setId);
+    }
+
+    @Override
+    long setIdOfRoot(final long rootId) {
+        return internalToProvidedIds.get(rootId);
     }
 }

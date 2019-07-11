@@ -17,12 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.utils.paged;
+package org.neo4j.graphalgo.core.utils.paged.dss;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongLongMap;
 import com.carrotsearch.hppc.LongLongScatterMap;
 import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.logging.Log;
 
@@ -37,9 +39,11 @@ import java.util.stream.Stream;
  */
 public abstract class DisjointSetStruct {
 
+    private final UnionStrategy unionStrategy;
     protected final Log log;
 
-    public DisjointSetStruct(Log log) {
+    public DisjointSetStruct(UnionStrategy unionStrategy, Log log) {
+        this.unionStrategy = unionStrategy;
         this.log = log;
     }
 
@@ -51,7 +55,9 @@ public abstract class DisjointSetStruct {
      * @param p an item of Sp
      * @param q an item of Sq
      */
-    public abstract void union(long p, long q);
+    public final void union(long p, long q) {
+        unionStrategy.union(p, q, this);
+    }
 
     /**
      * Find set Id of element p.
@@ -59,9 +65,9 @@ public abstract class DisjointSetStruct {
      * @param nodeId the element in the set we are looking for
      * @return an id of the set it belongs to
      */
-    public long setIdOf(long nodeId) {
-        return findNoOpt(nodeId);
-    }
+    public abstract long setIdOf(long nodeId);
+
+    abstract long setIdOfRoot(long rootId);
 
     abstract HugeLongArray parent();
 

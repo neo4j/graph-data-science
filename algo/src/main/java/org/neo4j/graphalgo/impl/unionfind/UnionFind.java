@@ -23,9 +23,10 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
-import org.neo4j.graphalgo.core.utils.paged.IncrementalDisjointSetStruct;
-import org.neo4j.graphalgo.core.utils.paged.RankedDisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.dss.IncrementalDisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.dss.RankedDisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.dss.UnionStrategy;
 import org.neo4j.logging.Log;
 
 public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> {
@@ -45,8 +46,8 @@ public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> 
 
     DisjointSetStruct initDisjointSetStruct(long nodeCount, AllocationTracker tracker, Log log) {
         return algoConfig.communityMap == null ?
-                new RankedDisjointSetStruct(nodeCount, tracker, log) :
-                new IncrementalDisjointSetStruct(nodeCount, algoConfig.communityMap, tracker, log);
+                new RankedDisjointSetStruct(nodeCount, new UnionStrategy.ByRank(nodeCount, tracker), tracker, log) :
+                new IncrementalDisjointSetStruct(nodeCount, algoConfig.communityMap, new UnionStrategy.ByMin(), tracker, log);
     }
 
     /**
@@ -86,12 +87,19 @@ public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> 
 
         public final HugeWeightMapping communityMap;
         public final double threshold;
+        public final boolean unionByRank;
+
+        public Config(final HugeWeightMapping communityMap, final double threshold) {
+            this(communityMap, threshold, true);
+        }
 
         public Config(
                 final HugeWeightMapping communityMap,
-                final double threshold) {
+                final double threshold,
+                final boolean unionByRank) {
             this.communityMap = communityMap;
             this.threshold = threshold;
+            this.unionByRank = unionByRank;
         }
     }
 }

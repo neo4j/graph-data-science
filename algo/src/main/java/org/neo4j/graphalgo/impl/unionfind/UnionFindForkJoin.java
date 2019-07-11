@@ -25,9 +25,9 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
-import org.neo4j.graphalgo.core.utils.paged.IncrementalDisjointSetStruct;
-import org.neo4j.graphalgo.core.utils.paged.RankedDisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.dss.IncrementalDisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.dss.RankedDisjointSetStruct;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
 
