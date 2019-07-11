@@ -24,13 +24,12 @@ import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -44,6 +43,7 @@ import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -80,13 +80,8 @@ public final class LabelPropagationTest {
         );
     }
 
-    @ClassRule
-    public static final ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
-
-    @BeforeClass
-    public static void setupGraph() {
-        DB.execute(GRAPH).close();
-    }
+    @Rule
+    public final ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
 
     @Rule
     public ErrorCollector collector = new ErrorCollector();
@@ -100,6 +95,7 @@ public final class LabelPropagationTest {
 
     @Before
     public void setup() {
+        DB.execute(GRAPH).close();
         GraphLoader graphLoader = new GraphLoader(DB, Pools.DEFAULT)
                 .withDirection(Direction.OUTGOING)
                 .withConcurrency(Pools.DEFAULT_CONCURRENCY);
@@ -120,9 +116,55 @@ public final class LabelPropagationTest {
     }
 
     @Test
-    public void testUsesNeo4jNodeIdWhenLabelPropertyIsMissing() {
+    public void testGeneratedAndProvidedLabelsDontConflict() {
+        int seededLabel = 1;
+        // When
+        String query = "CREATE " +
+                       " (a:Pet {type: 'cat',   label: $label}) " +
+                       ",(b:Pet {type: 'okapi', label: $label}) " +
+                       ",(c:Pet {type: 'koala'}) " +
+                       ",(d:Pet {type: 'python'}) " +
+                       ",(a)<-[:REL]-(c) " +
+                       ",(b)<-[:REL]-(c) " +
+                       "RETURN id(d) AS maxId";
+
+        // (c) will get label 1
+        // (d) will get label id(d) + 1
+        long maxId = (Long) DB.execute(query, Collections.singletonMap("label", seededLabel)).next().get("maxId");
+
+        GraphLoader graphLoader = new GraphLoader(DB, Pools.DEFAULT)
+                .withOptionalNodeProperties(new PropertyMapping(LabelPropagation.LABEL_TYPE, "label", 0.0))
+                .withDirection(Direction.OUTGOING)
+                .withConcurrency(Pools.DEFAULT_CONCURRENCY);
+
+        if (graphImpl == HeavyCypherGraphFactory.class) {
+            graphLoader
+                    .withLabel("MATCH (u:Pet) RETURN id(u) AS id, u.label AS label")
+                    .withRelationshipType("MATCH (u1:Pet)-[rel:REL]->(u2:Pet) " +
+                                          "RETURN id(u1) AS source, id(u2) AS target")
+                    .withName("cypher");
+        } else {
+            graphLoader
+                    .withLabel("Pet")
+                    .withRelationshipType("REL")
+                    .withName(graphImpl.getSimpleName());
+        }
+        graph = graphLoader.load(graphImpl);
         LabelPropagation lp = new LabelPropagation(
                 graph,
+                10000,
+                Pools.DEFAULT_CONCURRENCY,
+                Pools.DEFAULT,
+                AllocationTracker.EMPTY
+        );
+        lp.compute(Direction.OUTGOING, 1L);
+        LabelPropagation.Labels labels = lp.labels();
+        assertArrayEquals("Incorrect result assuming initial labels are neo4j id", new long[]{1, 1, 1, maxId + seededLabel + 1}, labels.labels.toArray());
+    }
+
+    @Test
+    public void testUsesNeo4jNodeIdWhenLabelPropertyIsMissing() {
+        LabelPropagation lp = new LabelPropagation(
                 graph,
                 10000,
                 Pools.DEFAULT_CONCURRENCY,
@@ -163,7 +205,6 @@ public final class LabelPropagationTest {
     // possible bad seed: -2300107887844480632
     private void testLPClustering(int batchSize) {
         LabelPropagation lp = new LabelPropagation(
-                graph,
                 graph,
                 batchSize,
                 Pools.DEFAULT_CONCURRENCY,

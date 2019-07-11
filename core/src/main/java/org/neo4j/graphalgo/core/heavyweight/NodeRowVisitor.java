@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.heavyweight;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.graphalgo.core.WeightMap;
+import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphdb.Result;
 
 import java.util.Map;
@@ -40,12 +41,12 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
     public boolean visit(Result.ResultRow row) throws RuntimeException {
         rows++;
         long id = row.getNumber("id").longValue();
-        idMap.add(id);
+        int graphId = idMap.add(id);
 
         for (Map.Entry<PropertyMapping, WeightMap> entry : nodeProperties.entrySet()) {
             Object value = CypherLoadingUtils.getProperty(row, entry.getKey().propertyKey);
             if (value instanceof Number) {
-                entry.getValue().put(id, ((Number) value).doubleValue());
+                entry.getValue().put(RawValues.combineIntInt(graphId, -1), ((Number) value).doubleValue());
             }
         }
 

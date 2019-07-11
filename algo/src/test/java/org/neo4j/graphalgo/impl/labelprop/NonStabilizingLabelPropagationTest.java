@@ -119,11 +119,10 @@ public class NonStabilizingLabelPropagationTest {
     // [1]: https://arxiv.org/pdf/0709.2938.pdf, page 5
     @Test
     public void testLabelPropagationDoesStabilize() {
-        LabelPropagation labelPropagation = new LabelPropagation(graph, graph, ParallelUtil.DEFAULT_BATCH_SIZE, Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT, AllocationTracker.EMPTY);
+        LabelPropagation labelPropagation = new LabelPropagation(graph, ParallelUtil.DEFAULT_BATCH_SIZE, Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT, AllocationTracker.EMPTY);
         LabelPropagation compute = labelPropagation.compute(Direction.OUTGOING, 10);
         LabelPropagation.Labels result = compute.labels();
         assertTrue("Should converge", compute.didConverge());
     }
-
 
 }

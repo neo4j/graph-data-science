@@ -21,7 +21,6 @@ package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -221,7 +220,7 @@ public final class LabelPropagationProc {
             AllocationTracker tracker,
             LabelPropagationStats.Builder stats) {
         try {
-            return compute(direction, iterations, batchSize, concurrency, graph, graph, tracker, stats);
+            return compute(direction, iterations, batchSize, concurrency, graph, tracker, stats);
         } finally {
             graph.release();
         }
@@ -233,13 +232,12 @@ public final class LabelPropagationProc {
             int batchSize,
             int concurrency,
             Graph graph,
-            NodeProperties nodeProperties,
             AllocationTracker tracker,
             LabelPropagationStats.Builder stats) {
 
         ExecutorService pool = batchSize > 0 ? Pools.DEFAULT : null;
         batchSize = Math.max(1, batchSize);
-        LabelPropagation labelPropagation = new LabelPropagation(graph, nodeProperties, batchSize, concurrency, pool, tracker);
+        LabelPropagation labelPropagation = new LabelPropagation(graph, batchSize, concurrency, pool, tracker);
         try (ProgressTimer ignored = stats.timeEval()) {
             labelPropagation
                     .withProgressLogger(ProgressLogger.wrap(log, "LabelPropagation"))

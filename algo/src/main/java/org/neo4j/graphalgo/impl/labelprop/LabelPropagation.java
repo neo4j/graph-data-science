@@ -27,8 +27,6 @@ import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
-import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
@@ -45,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.LongStream;
 
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -68,12 +67,12 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
 
     private Graph graph;
     private Labels labels;
+    private final long maxLabelId;
     private long ranIterations;
     private boolean didConverge;
 
     public LabelPropagation(
             Graph graph,
-            NodeProperties nodeProperties,
             int batchSize,
             int concurrency,
             ExecutorService executor,
@@ -85,17 +84,21 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         this.executor = executor;
         this.tracker = tracker;
 
-        HugeWeightMapping labelProperty = nodeProperties.nodeProperties(LABEL_TYPE);
+        HugeWeightMapping labelProperty = graph.nodeProperties(LABEL_TYPE);
         if (labelProperty == null) {
             labelProperty = new HugeNullWeightMap(0.0);
         }
         this.nodeProperties = labelProperty;
 
-        HugeWeightMapping weightProperty = nodeProperties.nodeProperties(WEIGHT_TYPE);
+        HugeWeightMapping weightProperty = graph.nodeProperties(WEIGHT_TYPE);
         if (weightProperty == null) {
             weightProperty = new HugeNullWeightMap(1.0);
         }
         this.nodeWeights = weightProperty;
+        maxLabelId = LongStream
+                .range(0, graph.nodeCount())
+                .map(id -> (long) nodeProperties.nodeWeight(id, -1L))
+                .max().orElse(0L);
     }
 
     @Override
@@ -177,7 +180,6 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
     }
 
     private List<BaseStep> baseSteps(Direction direction) {
-
         long nodeCount = graph.nodeCount();
         long batchSize = adjustBatchSize(nodeCount, (long) this.batchSize);
 
@@ -196,7 +198,8 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
                     iter,
                     labels,
                     getProgressLogger(),
-                    direction
+                    direction,
+                    maxLabelId
             );
             BaseStep task = new BaseStep(initStep);
             tasks.add(task);
@@ -268,6 +271,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         private final HugeWeightMapping nodeWeights;
         private final ProgressLogger progressLogger;
         private final Direction direction;
+        private final long maxLabelId;
 
         private InitStep(
                 Graph graph,
@@ -276,7 +280,8 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
                 PrimitiveLongIterable nodes,
                 Labels existingLabels,
                 ProgressLogger progressLogger,
-                Direction direction) {
+                Direction direction,
+                long maxLabelId) {
             this.nodeProperties = nodeProperties;
             this.existingLabels = existingLabels;
             this.nodes = nodes;
@@ -284,6 +289,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
             this.nodeWeights = nodeWeights;
             this.progressLogger = progressLogger;
             this.direction = direction;
+            this.maxLabelId = maxLabelId;
         }
 
         @Override
@@ -291,7 +297,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
             final PrimitiveLongIterator iterator = nodes.iterator();
             while (iterator.hasNext()) {
                 long nodeId = iterator.next();
-                long existingLabel = (long) nodeProperties.nodeWeight(nodeId, (double) graph.toOriginalNodeId(nodeId));
+                long existingLabel = (long) nodeProperties.nodeWeight(nodeId, (double) maxLabelId + graph.toOriginalNodeId(nodeId) + 1L);
                 existingLabels.setLabelFor(nodeId, existingLabel);
             }
         }

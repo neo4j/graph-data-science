@@ -92,7 +92,6 @@ public class LabelPropagationBenchmarkLdbc {
     public LabelPropagation lpa() {
         return new LabelPropagation(
                 graph,
-                graph,
                 ParallelUtil.DEFAULT_BATCH_SIZE,
                 Pools.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT,
