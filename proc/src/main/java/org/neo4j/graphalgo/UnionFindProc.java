@@ -213,8 +213,8 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
         if (configuration.isWriteFlag()) {
             String writeProperty = configuration.get(
                     CONFIG_CLUSTER_PROPERTY,
-                    CONFIG_OLD_CLUSTER_PROPERTY,
-                    DEFAULT_CLUSTER_PROPERTY);
+                    DEFAULT_CLUSTER_PROPERTY,
+                    CONFIG_OLD_CLUSTER_PROPERTY);
             builder.withWrite(true);
             builder.withPartitionProperty(writeProperty).withWriteProperty(writeProperty);
 
