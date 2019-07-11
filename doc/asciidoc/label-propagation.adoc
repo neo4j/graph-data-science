@@ -18,7 +18,6 @@ This section includes:
 
 * <<algorithms-label-propagation-context, History and explanation>>
 * <<algorithms-label-propagation-usecase, Use-cases - when to use the Label Propagation algorithm>>
-* <<algorithms-label-propagation-limitations, Constraints - when not to use the Label Propagation algorithm>>
 * <<algorithms-label-propagation-sample, Label Propagation algorithm sample>>
 ** <<algorithms-label-propagation-sample-seed_label, Using seed labels>>
 * <<algorithms-label-propagation-cp, Cypher projection>>
