@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.MSColoring;
 import org.neo4j.graphalgo.impl.unionfind.UnionFindSeq;
-import org.neo4j.graphalgo.impl.unionfind.UnionFindAlgorithm;
+import org.neo4j.graphalgo.impl.unionfind.UnionFind;
 import org.neo4j.graphalgo.impl.unionfind.UnionFindFJMerge;
 import org.neo4j.graphalgo.impl.unionfind.UnionFindForkJoin;
 import org.neo4j.graphalgo.impl.unionfind.UnionFindQueue;
@@ -88,7 +88,7 @@ public class ParallelUnionFindBenchmark {
 
     private static File storeDir = new File(GRAPH_DIRECTORY);
 
-    private final UnionFindSeq.Config algoConfig = new UnionFindAlgorithm.Config(
+    private final UnionFindSeq.Config algoConfig = new UnionFind.Config(
             new HugeNullWeightMap(-1L),
             Double.NaN
     );

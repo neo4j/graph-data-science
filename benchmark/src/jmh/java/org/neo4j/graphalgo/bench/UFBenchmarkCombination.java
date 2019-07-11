@@ -24,37 +24,37 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
 import org.neo4j.graphalgo.impl.unionfind.UnionFindSeq;
-import org.neo4j.graphalgo.impl.unionfind.UnionFindAlgorithm;
-import org.neo4j.graphalgo.impl.unionfind.UnionFindAlgorithmType;
+import org.neo4j.graphalgo.impl.unionfind.UnionFind;
+import org.neo4j.graphalgo.impl.unionfind.UnionFindType;
 import org.neo4j.logging.NullLog;
 
 public enum UFBenchmarkCombination {
 
-    HEAVY_QUEUE(GraphImpl.HEAVY, UnionFindAlgorithmType.QUEUE),
-    HEAVY_FORK_JOIN(GraphImpl.HEAVY, UnionFindAlgorithmType.FORK_JOIN),
-    HEAVY_FJ_MERGE(GraphImpl.HEAVY, UnionFindAlgorithmType.FJ_MERGE),
-    HEAVY_SEQ(GraphImpl.HEAVY, UnionFindAlgorithmType.SEQ),
+    HEAVY_QUEUE(GraphImpl.HEAVY, UnionFindType.QUEUE),
+    HEAVY_FORK_JOIN(GraphImpl.HEAVY, UnionFindType.FORK_JOIN),
+    HEAVY_FJ_MERGE(GraphImpl.HEAVY, UnionFindType.FJ_MERGE),
+    HEAVY_SEQ(GraphImpl.HEAVY, UnionFindType.SEQ),
 
-    HUGE_QUEUE(GraphImpl.HUGE, UnionFindAlgorithmType.QUEUE),
-    HUGE_FORK_JOIN(GraphImpl.HUGE, UnionFindAlgorithmType.FORK_JOIN),
-    HUGE_FJ_MERGE(GraphImpl.HUGE, UnionFindAlgorithmType.FJ_MERGE),
-    HUGE_SEQ(GraphImpl.HUGE, UnionFindAlgorithmType.SEQ);
+    HUGE_QUEUE(GraphImpl.HUGE, UnionFindType.QUEUE),
+    HUGE_FORK_JOIN(GraphImpl.HUGE, UnionFindType.FORK_JOIN),
+    HUGE_FJ_MERGE(GraphImpl.HUGE, UnionFindType.FJ_MERGE),
+    HUGE_SEQ(GraphImpl.HUGE, UnionFindType.SEQ);
 
     final GraphImpl graph;
-    final UnionFindAlgorithmType algo;
+    final UnionFindType algo;
 
-    UFBenchmarkCombination(GraphImpl graph, UnionFindAlgorithmType algo) {
+    UFBenchmarkCombination(GraphImpl graph, UnionFindType algo) {
         this.graph = graph;
         this.algo = algo;
     }
 
     public Object run(Graph graph) {
-        UnionFindSeq.Config algoConfig = new UnionFindAlgorithm.Config(
+        UnionFindSeq.Config algoConfig = new UnionFind.Config(
                 new HugeNullWeightMap(-1L),
                 Double.NaN
         );
 
-        UnionFindAlgorithm<?> unionFindAlgo = algo.create(
+        UnionFind<?> unionFindAlgo = algo.create(
                 graph,
                 Pools.DEFAULT,
                 (int) (graph.nodeCount() / Pools.DEFAULT_CONCURRENCY),

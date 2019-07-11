@@ -84,7 +84,7 @@ public class IncrementalUnionFindTest {
     }
 
     private final Graph graph;
-    private final UnionFindAlgorithm.Config config;
+    private final UnionFind.Config config;
 
     public IncrementalUnionFindTest(Class<? extends GraphFactory> graphImpl, String name) {
         graph = new GraphLoader(DB)
@@ -96,7 +96,7 @@ public class IncrementalUnionFindTest {
                 .withRelationshipType(RELATIONSHIP_TYPE)
                 .load(graphImpl);
 
-        config = new UnionFindAlgorithm.Config(
+        config = new UnionFind.Config(
                 graph.nodeProperties(COMMUNITY_PROPERTY),
                 Double.NaN
         );
@@ -139,22 +139,22 @@ public class IncrementalUnionFindTest {
 
     @Test
     public void testSeq() {
-        test(UnionFindAlgorithmType.SEQ, config);
+        test(UnionFindType.SEQ, config);
     }
 
     @Test
     public void testQueue() {
-        test(UnionFindAlgorithmType.QUEUE, config);
+        test(UnionFindType.QUEUE, config);
     }
 
     @Test
     public void testForkJoin() {
-        test(UnionFindAlgorithmType.FORK_JOIN, config);
+        test(UnionFindType.FORK_JOIN, config);
     }
 
     @Test
     public void testFJMerge() {
-        test(UnionFindAlgorithmType.FJ_MERGE, config);
+        test(UnionFindType.FJ_MERGE, config);
     }
 
 //    @Test
@@ -162,17 +162,17 @@ public class IncrementalUnionFindTest {
 //        GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
 //        assertEquals(
 //                MemoryRange.of(160),
-//                UnionFindAlgorithmType.SEQ.memoryEstimation().estimate(dimensions0, 1).memoryUsage());
+//                UnionFindType.SEQ.memoryEstimation().estimate(dimensions0, 1).memoryUsage());
 //
 //        GraphDimensions dimensions100 = new GraphDimensions.Builder().setNodeCount(100).build();
 //        assertEquals(
 //                MemoryRange.of(1760),
-//                UnionFindAlgorithmType.SEQ.memoryEstimation().estimate(dimensions100, 1).memoryUsage());
+//                UnionFindType.SEQ.memoryEstimation().estimate(dimensions100, 1).memoryUsage());
 //
 //        GraphDimensions dimensions100B = new GraphDimensions.Builder().setNodeCount(100_000_000_000L).build();
 //        assertEquals(
 //                MemoryRange.of(1600244140816L),
-//                UnionFindAlgorithmType.SEQ.memoryEstimation().estimate(dimensions100B, 1).memoryUsage());
+//                UnionFindType.SEQ.memoryEstimation().estimate(dimensions100B, 1).memoryUsage());
 //    }
 //
 //    @Test
@@ -181,35 +181,35 @@ public class IncrementalUnionFindTest {
 //
 //        assertEquals(
 //                MemoryRange.of(224),
-//                UnionFindAlgorithmType.QUEUE.memoryEstimation().estimate(dimensions0, 1).memoryUsage());
+//                UnionFindType.QUEUE.memoryEstimation().estimate(dimensions0, 1).memoryUsage());
 //        assertEquals(
 //                MemoryRange.of(1008),
-//                UnionFindAlgorithmType.QUEUE.memoryEstimation().estimate(dimensions0, 8).memoryUsage());
+//                UnionFindType.QUEUE.memoryEstimation().estimate(dimensions0, 8).memoryUsage());
 //        assertEquals(
 //                MemoryRange.of(7280),
-//                UnionFindAlgorithmType.QUEUE.memoryEstimation().estimate(dimensions0, 64).memoryUsage());
+//                UnionFindType.QUEUE.memoryEstimation().estimate(dimensions0, 64).memoryUsage());
 //
 //        GraphDimensions dimensions100 = new GraphDimensions.Builder().setNodeCount(100).build();
 //        assertEquals(
 //                MemoryRange.of(1824),
-//                UnionFindAlgorithmType.QUEUE.memoryEstimation().estimate(dimensions100, 1).memoryUsage());
+//                UnionFindType.QUEUE.memoryEstimation().estimate(dimensions100, 1).memoryUsage());
 //        assertEquals(
 //                MemoryRange.of(13808),
-//                UnionFindAlgorithmType.QUEUE.memoryEstimation().estimate(dimensions100, 8).memoryUsage());
+//                UnionFindType.QUEUE.memoryEstimation().estimate(dimensions100, 8).memoryUsage());
 //        assertEquals(
 //                MemoryRange.of(109680),
-//                UnionFindAlgorithmType.QUEUE.memoryEstimation().estimate(dimensions100, 64).memoryUsage());
+//                UnionFindType.QUEUE.memoryEstimation().estimate(dimensions100, 64).memoryUsage());
 //
 //        GraphDimensions dimensions100B = new GraphDimensions.Builder().setNodeCount(100_000_000_000L).build();
 //        assertEquals(
 //                MemoryRange.of(1600244140880L),
-//                UnionFindAlgorithmType.QUEUE.memoryEstimation().estimate(dimensions100B, 1).memoryUsage());
+//                UnionFindType.QUEUE.memoryEstimation().estimate(dimensions100B, 1).memoryUsage());
 //        assertEquals(
 //                MemoryRange.of(12801953126256L),
-//                UnionFindAlgorithmType.QUEUE.memoryEstimation().estimate(dimensions100B, 8).memoryUsage());
+//                UnionFindType.QUEUE.memoryEstimation().estimate(dimensions100B, 8).memoryUsage());
 //        assertEquals(
 //                MemoryRange.of(102415625009264L),
-//                UnionFindAlgorithmType.QUEUE.memoryEstimation().estimate(dimensions100B, 64).memoryUsage());
+//                UnionFindType.QUEUE.memoryEstimation().estimate(dimensions100B, 64).memoryUsage());
 //    }
 //
 //    @Test
@@ -218,35 +218,35 @@ public class IncrementalUnionFindTest {
 //
 //        assertEquals(
 //                MemoryRange.of(224),
-//                UnionFindAlgorithmType.FORK_JOIN.memoryEstimation().estimate(dimensions0, 1).memoryUsage());
+//                UnionFindType.FORK_JOIN.memoryEstimation().estimate(dimensions0, 1).memoryUsage());
 //        assertEquals(
 //                MemoryRange.of(1008),
-//                UnionFindAlgorithmType.FORK_JOIN.memoryEstimation().estimate(dimensions0, 8).memoryUsage());
+//                UnionFindType.FORK_JOIN.memoryEstimation().estimate(dimensions0, 8).memoryUsage());
 //        assertEquals(
 //                MemoryRange.of(7280),
-//                UnionFindAlgorithmType.FORK_JOIN.memoryEstimation().estimate(dimensions0, 64).memoryUsage());
+//                UnionFindType.FORK_JOIN.memoryEstimation().estimate(dimensions0, 64).memoryUsage());
 //
 //        GraphDimensions dimensions100 = new GraphDimensions.Builder().setNodeCount(100).build();
 //        assertEquals(
 //                MemoryRange.of(1824),
-//                UnionFindAlgorithmType.FORK_JOIN.memoryEstimation().estimate(dimensions100, 1).memoryUsage());
+//                UnionFindType.FORK_JOIN.memoryEstimation().estimate(dimensions100, 1).memoryUsage());
 //        assertEquals(
 //                MemoryRange.of(13808),
-//                UnionFindAlgorithmType.FORK_JOIN.memoryEstimation().estimate(dimensions100, 8).memoryUsage());
+//                UnionFindType.FORK_JOIN.memoryEstimation().estimate(dimensions100, 8).memoryUsage());
 //        assertEquals(
 //                MemoryRange.of(109680),
-//                UnionFindAlgorithmType.FORK_JOIN.memoryEstimation().estimate(dimensions100, 64).memoryUsage());
+//                UnionFindType.FORK_JOIN.memoryEstimation().estimate(dimensions100, 64).memoryUsage());
 //
 //        GraphDimensions dimensions100B = new GraphDimensions.Builder().setNodeCount(100_000_000_000L).build();
 //        assertEquals(
 //                MemoryRange.of(1600244140880L),
-//                UnionFindAlgorithmType.FORK_JOIN.memoryEstimation().estimate(dimensions100B, 1).memoryUsage());
+//                UnionFindType.FORK_JOIN.memoryEstimation().estimate(dimensions100B, 1).memoryUsage());
 //        assertEquals(
 //                MemoryRange.of(12801953126256L),
-//                UnionFindAlgorithmType.FORK_JOIN.memoryEstimation().estimate(dimensions100B, 8).memoryUsage());
+//                UnionFindType.FORK_JOIN.memoryEstimation().estimate(dimensions100B, 8).memoryUsage());
 //        assertEquals(
 //                MemoryRange.of(102415625009264L),
-//                UnionFindAlgorithmType.FORK_JOIN.memoryEstimation().estimate(dimensions100B, 64).memoryUsage());
+//                UnionFindType.FORK_JOIN.memoryEstimation().estimate(dimensions100B, 64).memoryUsage());
 //    }
 //
 //    @Test
@@ -255,41 +255,41 @@ public class IncrementalUnionFindTest {
 //
 //        assertEquals(
 //                MemoryRange.of(232),
-//                UnionFindAlgorithmType.FJ_MERGE.memoryEstimation().estimate(dimensions0, 1).memoryUsage());
+//                UnionFindType.FJ_MERGE.memoryEstimation().estimate(dimensions0, 1).memoryUsage());
 //        assertEquals(
 //                MemoryRange.of(1016),
-//                UnionFindAlgorithmType.FJ_MERGE.memoryEstimation().estimate(dimensions0, 8).memoryUsage());
+//                UnionFindType.FJ_MERGE.memoryEstimation().estimate(dimensions0, 8).memoryUsage());
 //        assertEquals(
 //                MemoryRange.of(7288),
-//                UnionFindAlgorithmType.FJ_MERGE.memoryEstimation().estimate(dimensions0, 64).memoryUsage());
+//                UnionFindType.FJ_MERGE.memoryEstimation().estimate(dimensions0, 64).memoryUsage());
 //
 //        GraphDimensions dimensions100 = new GraphDimensions.Builder().setNodeCount(100).build();
 //        assertEquals(
 //                MemoryRange.of(1832),
-//                UnionFindAlgorithmType.FJ_MERGE.memoryEstimation().estimate(dimensions100, 1).memoryUsage());
+//                UnionFindType.FJ_MERGE.memoryEstimation().estimate(dimensions100, 1).memoryUsage());
 //        assertEquals(
 //                MemoryRange.of(13816),
-//                UnionFindAlgorithmType.FJ_MERGE.memoryEstimation().estimate(dimensions100, 8).memoryUsage());
+//                UnionFindType.FJ_MERGE.memoryEstimation().estimate(dimensions100, 8).memoryUsage());
 //        assertEquals(
 //                MemoryRange.of(109688),
-//                UnionFindAlgorithmType.FJ_MERGE.memoryEstimation().estimate(dimensions100, 64).memoryUsage());
+//                UnionFindType.FJ_MERGE.memoryEstimation().estimate(dimensions100, 64).memoryUsage());
 //
 //        GraphDimensions dimensions100B = new GraphDimensions.Builder().setNodeCount(100_000_000_000L).build();
 //        assertEquals(
 //                MemoryRange.of(1600244140888L),
-//                UnionFindAlgorithmType.FJ_MERGE.memoryEstimation().estimate(dimensions100B, 1).memoryUsage());
+//                UnionFindType.FJ_MERGE.memoryEstimation().estimate(dimensions100B, 1).memoryUsage());
 //        assertEquals(
 //                MemoryRange.of(12801953126264L),
-//                UnionFindAlgorithmType.FJ_MERGE.memoryEstimation().estimate(dimensions100B, 8).memoryUsage());
+//                UnionFindType.FJ_MERGE.memoryEstimation().estimate(dimensions100B, 8).memoryUsage());
 //        assertEquals(
 //                MemoryRange.of(102415625009272L),
-//                UnionFindAlgorithmType.FJ_MERGE.memoryEstimation().estimate(dimensions100B, 64).memoryUsage());
+//                UnionFindType.FJ_MERGE.memoryEstimation().estimate(dimensions100B, 64).memoryUsage());
 //    }
 
 
     private void test(
-            UnionFindAlgorithmType uf,
-            UnionFindAlgorithm.Config config) {
+            UnionFindType uf,
+            UnionFind.Config config) {
         DisjointSetStruct result = run(uf, config);
 
         Assert.assertEquals(SETS_COUNT / 2, result.getSetCount());
@@ -317,7 +317,7 @@ public class IncrementalUnionFindTest {
         });
     }
 
-    private DisjointSetStruct run(final UnionFindAlgorithmType uf, UnionFindAlgorithm.Config config) {
+    private DisjointSetStruct run(final UnionFindType uf, UnionFind.Config config) {
         return UnionFindHelper.run(
                 uf,
                 graph,

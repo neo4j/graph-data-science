@@ -50,16 +50,16 @@ public final class UnionFindSafetyTest {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(
-                new Object[]{UnionFindAlgorithmType.QUEUE},
-                new Object[]{UnionFindAlgorithmType.FORK_JOIN},
-                new Object[]{UnionFindAlgorithmType.FJ_MERGE}
+                new Object[]{UnionFindType.QUEUE},
+                new Object[]{UnionFindType.FORK_JOIN},
+                new Object[]{UnionFindType.FJ_MERGE}
         );
     }
 
     @Parameterized.Parameter
-    public UnionFindAlgorithmType unionFindAlgorithmType;
+    public UnionFindType unionFindType;
 
-    UnionFindSeq.Config algoConfig = new UnionFindAlgorithm.Config(
+    UnionFindSeq.Config algoConfig = new UnionFind.Config(
             new HugeNullWeightMap(-1),
             Double.NaN
     );
@@ -70,7 +70,7 @@ public final class UnionFindSafetyTest {
         Graph graph = new FlakyGraph(100, 10, new Random(42L), error);
         try {
             UnionFindHelper.run(
-                    unionFindAlgorithmType,
+                    unionFindType,
                     graph,
                     Pools.DEFAULT,
                     10,
@@ -88,7 +88,7 @@ public final class UnionFindSafetyTest {
         Graph graph = new FlakyGraph(100, 10, new Random(42L), error);
         try {
             UnionFindHelper.run(
-                    unionFindAlgorithmType,
+                    unionFindType,
                     graph,
                     Pools.DEFAULT,
                     10,

@@ -10,15 +10,15 @@ import java.util.concurrent.ExecutorService;
 public class UnionFindHelper {
 
     public static DisjointSetStruct run(
-            UnionFindAlgorithmType algorithmType,
+            UnionFindType algorithmType,
             Graph graph,
             ExecutorService executor,
             int minBatchSize,
             int concurrency,
-            final UnionFindAlgorithm.Config config,
+            final UnionFind.Config config,
             AllocationTracker tracker) {
 
-        UnionFindAlgorithm<?> algo = algorithmType
+        UnionFind<?> algo = algorithmType
                 .create(graph, executor, minBatchSize, concurrency, config, tracker, NullLog.getInstance());
         DisjointSetStruct communities = algo.compute();
         algo.release();

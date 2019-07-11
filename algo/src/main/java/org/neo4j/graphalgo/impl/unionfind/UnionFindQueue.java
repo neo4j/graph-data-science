@@ -55,7 +55,7 @@ import static org.neo4j.graphalgo.core.utils.ParallelUtil.awaitTermination;
  *
  * @author mknblch
  */
-public class UnionFindQueue extends UnionFindAlgorithm<UnionFindQueue> {
+public class UnionFindQueue extends UnionFind<UnionFindQueue> {
 
     private final ExecutorService executor;
     private final AllocationTracker tracker;

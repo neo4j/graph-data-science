@@ -46,7 +46,7 @@ import org.neo4j.logging.Log;
  *
  * @author mknblch
  */
-public class UnionFindSeq extends UnionFindAlgorithm<UnionFindSeq> {
+public class UnionFindSeq extends UnionFind<UnionFindSeq> {
 
     private DisjointSetStruct dss;
     private final long nodeCount;
@@ -64,7 +64,7 @@ public class UnionFindSeq extends UnionFindAlgorithm<UnionFindSeq> {
 
     public UnionFindSeq(
             Graph graph,
-            UnionFindAlgorithm.Config algoConfig,
+            UnionFind.Config algoConfig,
             AllocationTracker tracker,
             Log log) {
         super(graph, algoConfig);

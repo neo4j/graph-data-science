@@ -49,7 +49,7 @@ import java.util.concurrent.RecursiveTask;
  *
  * @author mknblch
  */
-public class UnionFindForkJoin extends UnionFindAlgorithm<UnionFindForkJoin> {
+public class UnionFindForkJoin extends UnionFind<UnionFindForkJoin> {
 
     private final AllocationTracker tracker;
     private final Log log;

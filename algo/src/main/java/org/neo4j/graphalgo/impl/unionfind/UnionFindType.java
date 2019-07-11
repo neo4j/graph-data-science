@@ -22,21 +22,20 @@ package org.neo4j.graphalgo.impl.unionfind;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
 import org.neo4j.logging.Log;
 
 import java.util.concurrent.ExecutorService;
 
-public enum UnionFindAlgorithmType {
+public enum UnionFindType {
 
     QUEUE {
         @Override
-        public UnionFindAlgorithm<?> create(
+        public UnionFind<?> create(
                 final Graph graph,
                 final ExecutorService executor,
                 final int minBatchSize,
                 final int concurrency,
-                final UnionFindAlgorithm.Config config,
+                final UnionFind.Config config,
                 final AllocationTracker tracker,
                 final Log log) {
 
@@ -57,12 +56,12 @@ public enum UnionFindAlgorithmType {
     },
     FORK_JOIN {
         @Override
-        public UnionFindAlgorithm<?> create(
+        public UnionFind<?> create(
                 final Graph graph,
                 final ExecutorService executor,
                 final int minBatchSize,
                 final int concurrency,
-                final UnionFindAlgorithm.Config config,
+                final UnionFind.Config config,
                 final AllocationTracker tracker,
                 final Log log) {
 
@@ -83,12 +82,12 @@ public enum UnionFindAlgorithmType {
     },
     FJ_MERGE {
         @Override
-        public UnionFindAlgorithm<?> create(
+        public UnionFind<?> create(
                 final Graph graph,
                 final ExecutorService executor,
                 final int minBatchSize,
                 final int concurrency,
-                final UnionFindAlgorithm.Config config,
+                final UnionFind.Config config,
                 final AllocationTracker tracker,
                 final Log log) {
 
@@ -109,12 +108,12 @@ public enum UnionFindAlgorithmType {
     },
     SEQ {
         @Override
-        public UnionFindAlgorithm<?> create(
+        public UnionFind<?> create(
                 final Graph graph,
                 final ExecutorService executor,
                 final int minBatchSize,
                 final int concurrency,
-                final UnionFindAlgorithm.Config config,
+                final UnionFind.Config config,
                 final AllocationTracker tracker,
                 final Log log) {
 
@@ -132,12 +131,12 @@ public enum UnionFindAlgorithmType {
         }
     };
 
-    public abstract UnionFindAlgorithm<?> create(
+    public abstract UnionFind<?> create(
             Graph graph,
             ExecutorService executor,
             int minBatchSize,
             int concurrency,
-            final UnionFindAlgorithm.Config config,
+            final UnionFind.Config config,
             AllocationTracker tracker,
             final Log log);
 

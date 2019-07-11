@@ -28,13 +28,13 @@ import org.neo4j.graphalgo.core.utils.paged.IncrementalDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.RankedDisjointSetStruct;
 import org.neo4j.logging.Log;
 
-public abstract class UnionFindAlgorithm<ME extends UnionFindAlgorithm<ME>> extends Algorithm<ME> {
+public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> {
 
     protected Graph graph;
 
-    protected final UnionFindAlgorithm.Config algoConfig;
+    protected final UnionFind.Config algoConfig;
 
-    protected UnionFindAlgorithm(final Graph graph, final UnionFindAlgorithm.Config algoConfig) {
+    protected UnionFind(final Graph graph, final UnionFind.Config algoConfig) {
         this.graph = graph;
         this.algoConfig = algoConfig;
     }

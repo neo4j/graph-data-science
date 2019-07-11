@@ -53,7 +53,7 @@ import java.util.concurrent.RecursiveTask;
  *
  * @author mknblch
  */
-public class UnionFindFJMerge extends UnionFindAlgorithm<UnionFindFJMerge> {
+public class UnionFindFJMerge extends UnionFind<UnionFindFJMerge> {
 
     private final ExecutorService executor;
     private final AllocationTracker tracker;
