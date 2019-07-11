@@ -173,7 +173,7 @@ public final class LabelPropagationTest {
         );
         lp.compute(Direction.OUTGOING, 1L);
         LabelPropagation.Labels labels = lp.labels();
-        assertArrayEquals("Incorrect result assuming initila labels are neo4j id", new long[]{1, 1, 3, 4, 4, 1}, labels.labels.toArray());
+        assertArrayEquals("Incorrect result assuming initial labels are neo4j id", new long[]{1, 1, 3, 4, 4, 1}, labels.labels.toArray());
     }
 
     @Test

@@ -43,7 +43,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.LongStream;
 
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -95,10 +94,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
             weightProperty = new HugeNullWeightMap(1.0);
         }
         this.nodeWeights = weightProperty;
-        maxLabelId = LongStream
-                .range(0, graph.nodeCount())
-                .map(id -> (long) nodeProperties.nodeWeight(id, -1L))
-                .max().orElse(0L);
+        maxLabelId = nodeProperties.getMaxValue();
     }
 
     @Override
@@ -297,7 +293,10 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
             final PrimitiveLongIterator iterator = nodes.iterator();
             while (iterator.hasNext()) {
                 long nodeId = iterator.next();
-                long existingLabel = (long) nodeProperties.nodeWeight(nodeId, (double) maxLabelId + graph.toOriginalNodeId(nodeId) + 1L);
+                double existingLabelValue = nodeProperties.nodeWeight(nodeId, Double.NaN);
+                long existingLabel = Double.isNaN(existingLabelValue)
+                        ? maxLabelId + graph.toOriginalNodeId(nodeId) + 1L
+                        : (long) existingLabelValue;
                 existingLabels.setLabelFor(nodeId, existingLabel);
             }
         }

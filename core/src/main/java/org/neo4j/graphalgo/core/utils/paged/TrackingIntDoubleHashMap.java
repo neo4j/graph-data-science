@@ -27,6 +27,8 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 
 import java.util.concurrent.atomic.LongAdder;
+import java.util.stream.DoubleStream;
+import java.util.stream.StreamSupport;
 
 import static com.carrotsearch.hppc.Containers.DEFAULT_EXPECTED_ELEMENTS;
 import static com.carrotsearch.hppc.HashContainers.DEFAULT_LOAD_FACTOR;
@@ -73,6 +75,12 @@ final class TrackingIntDoubleHashMap extends IntDoubleHashMap {
         int lengthAfter = keys.length;
         long addedMemory = bufferUsage(lengthAfter) - bufferUsage(lengthBefore);
         trackUsage(addedMemory);
+    }
+
+    public DoubleStream getValuesAsStream() {
+        return StreamSupport
+                .stream(values().spliterator(), false)
+                .mapToDouble(c -> c.value);
     }
 
     private long bufferUsage(int length) {

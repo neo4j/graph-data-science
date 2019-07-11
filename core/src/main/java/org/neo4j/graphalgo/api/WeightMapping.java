@@ -47,4 +47,8 @@ public interface WeightMapping {
     default double get(int id, double defaultValue) {
         return get(RawValues.combineIntInt(id, -1), defaultValue);
     }
+
+    default long getMaxValue() {
+        return -1L;
+    }
 }
