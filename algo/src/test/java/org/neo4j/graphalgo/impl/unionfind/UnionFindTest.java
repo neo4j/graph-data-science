@@ -34,7 +34,6 @@ import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
 import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
@@ -48,9 +47,6 @@ import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
 
-/**
- * @author mknblch
- */
 @RunWith(Parameterized.class)
 public class UnionFindTest {
 
@@ -58,11 +54,6 @@ public class UnionFindTest {
 
     private static final int SETS_COUNT = 16;
     private static final int SET_SIZE = 10;
-
-    private static final UnionFindSeq.Config DEFAULT_CONFIG = new UnionFind.Config(
-            new HugeNullWeightMap(-1),
-            Double.NaN
-    );
 
     @Parameterized.Parameters(name = "{1}")
     public static Collection<Object[]> data() {
@@ -78,24 +69,9 @@ public class UnionFindTest {
 
     @BeforeClass
     public static void setupGraph() {
-        try (ProgressTimer timer = ProgressTimer.start(l -> System.out.println(
-                "creating test graph took " + l + " ms"))) {
-            int[] setSizes = new int[SETS_COUNT];
-            Arrays.fill(setSizes, SET_SIZE);
-            createTestGraph(setSizes);
-        }
-    }
-
-    private Graph graph;
-
-    public UnionFindTest(
-            Class<? extends GraphFactory> graphImpl,
-            String name) {
-        graph = new GraphLoader(DB)
-                .withExecutorService(Pools.DEFAULT)
-                .withAnyLabel()
-                .withRelationshipType(RELATIONSHIP_TYPE)
-                .load(graphImpl);
+        int[] setSizes = new int[SETS_COUNT];
+        Arrays.fill(setSizes, SET_SIZE);
+        createTestGraph(setSizes);
     }
 
     private static void createTestGraph(int... setSizes) {
@@ -113,6 +89,22 @@ public class UnionFindTest {
             temp.createRelationshipTo(t, RELATIONSHIP_TYPE);
             temp = t;
         }
+    }
+
+    private final Graph graph;
+    private final UnionFind.Config config;
+
+    public UnionFindTest(Class<? extends GraphFactory> graphImpl, String name) {
+        graph = new GraphLoader(DB)
+                .withExecutorService(Pools.DEFAULT)
+                .withAnyLabel()
+                .withRelationshipType(RELATIONSHIP_TYPE)
+                .load(graphImpl);
+
+        config = new UnionFind.Config(
+                new HugeNullWeightMap(-1),
+                Double.NaN
+        );
     }
 
     @Test
@@ -300,7 +292,7 @@ public class UnionFindTest {
                 Pools.DEFAULT,
                 SET_SIZE / Pools.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT_CONCURRENCY,
-                DEFAULT_CONFIG,
+                config,
                 AllocationTracker.EMPTY);
     }
 }

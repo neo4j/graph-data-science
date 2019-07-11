@@ -19,22 +19,11 @@
  */
 package org.neo4j.graphalgo.core.utils.dss;
 
-import com.carrotsearch.hppc.LongLongHashMap;
 import com.carrotsearch.hppc.LongLongMap;
 import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.graphalgo.api.HugeWeightMapping;
-import org.neo4j.graphalgo.core.huge.loader.HugeNodePropertiesBuilder;
-import org.neo4j.graphalgo.core.utils.BitUtil;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -54,74 +43,74 @@ public abstract class DisjointSetStructTest {
         struct = newSet(CAPACITY);
     }
 
-    long maxCommunity = 3;
-
-    @Test
-    public void customMapping() {
-
-        long nodeCount = 10_000L;
-
-        final AllocationTracker tracker = AllocationTracker.EMPTY;
-        final HugeNodePropertiesBuilder builder = HugeNodePropertiesBuilder.of(
-                nodeCount,
-                tracker,
-                -1.0,
-                0);
-
-        final List<Long> longs = LongStream.range(0, nodeCount).boxed().collect(Collectors.toList());
-        Collections.shuffle(longs);
-        longs.parallelStream().forEach(i -> builder.set(i, (long) (Math.random() * nodeCount)));
-
-        System.out.println(String.format("Max hat Gebuuuuuuuuurtstag"));
-
-        final HugeWeightMapping communityMapping = builder.build();
-
-        this.maxCommunity = LongStream
-                .range(0, nodeCount)
-                .map(id -> (long) communityMapping.nodeWeight(id, -1))
-                .max().orElse(0);
-        System.out.println(String.format("Max community id (before init): %d", maxCommunity));
-
-        HugeLongArray parent = HugeLongArray.newArray(nodeCount, tracker);
-        LongLongHashMap internalToProvidedIds = new LongLongHashMap();
-        internalToProvidedIds.clear();
-
-
-        final LongLongMap internalMapping = new LongLongHashMap();
-
-        parent.setAll(nodeId -> {
-            long parentValue = -1;
-            double communityIdValue = communityMapping.nodeWeight(nodeId, Double.NaN);
-
-            if (!Double.isNaN(communityIdValue)) {
-                long communityId = (long) communityIdValue;
-
-                int idIndex = internalMapping.indexOf(communityId);
-                if (internalMapping.indexExists(idIndex)) {
-                    parentValue = internalMapping.indexGet(idIndex);
-                } else {
-                    internalToProvidedIds.put(nodeId, communityId);
-                    internalMapping.indexInsert(idIndex, communityId, nodeId);
-                }
-            } else {
-                internalToProvidedIds.put(nodeId, ++maxCommunity);
-            }
-            return parentValue;
-        });
-
-        System.out.println(String.format("Internal mapping size: %d", internalMapping.size()));
-        System.out.println(String.format("Internal to provided ids size: %d", internalToProvidedIds.size()));
-        System.out.println(String.format("Max community id (after init): %d", maxCommunity));
-    }
-
-    @Test
-    public void bitshiftTests() {
-        System.out.println(2 << 1);
-        System.out.println(2 << 2);
-        System.out.println(2 << 3);
-
-        System.out.println(BitUtil.previousPowerOfTwo(10));
-    }
+//    long maxCommunity = 3;
+//
+//    @Test
+//    public void customMapping() {
+//
+//        long nodeCount = 10_000L;
+//
+//        final AllocationTracker tracker = AllocationTracker.EMPTY;
+//        final HugeNodePropertiesBuilder builder = HugeNodePropertiesBuilder.of(
+//                nodeCount,
+//                tracker,
+//                -1.0,
+//                0);
+//
+//        final List<Long> longs = LongStream.range(0, nodeCount).boxed().collect(Collectors.toList());
+//        Collections.shuffle(longs);
+//        longs.parallelStream().forEach(i -> builder.set(i, (long) (Math.random() * nodeCount)));
+//
+//        System.out.println(String.format("Max hat Gebuuuuuuuuurtstag"));
+//
+//        final HugeWeightMapping communityMapping = builder.build();
+//
+//        this.maxCommunity = LongStream
+//                .range(0, nodeCount)
+//                .map(id -> (long) communityMapping.nodeWeight(id, -1))
+//                .max().orElse(0);
+//        System.out.println(String.format("Max community id (before init): %d", maxCommunity));
+//
+//        HugeLongArray parent = HugeLongArray.newArray(nodeCount, tracker);
+//        LongLongHashMap internalToProvidedIds = new LongLongHashMap();
+//        internalToProvidedIds.clear();
+//
+//
+//        final LongLongMap internalMapping = new LongLongHashMap();
+//
+//        parent.setAll(nodeId -> {
+//            long parentValue = -1;
+//            double communityIdValue = communityMapping.nodeWeight(nodeId, Double.NaN);
+//
+//            if (!Double.isNaN(communityIdValue)) {
+//                long communityId = (long) communityIdValue;
+//
+//                int idIndex = internalMapping.indexOf(communityId);
+//                if (internalMapping.indexExists(idIndex)) {
+//                    parentValue = internalMapping.indexGet(idIndex);
+//                } else {
+//                    internalToProvidedIds.put(nodeId, communityId);
+//                    internalMapping.indexInsert(idIndex, communityId, nodeId);
+//                }
+//            } else {
+//                internalToProvidedIds.put(nodeId, ++maxCommunity);
+//            }
+//            return parentValue;
+//        });
+//
+//        System.out.println(String.format("Internal mapping size: %d", internalMapping.size()));
+//        System.out.println(String.format("Internal to provided ids size: %d", internalToProvidedIds.size()));
+//        System.out.println(String.format("Max community id (after init): %d", maxCommunity));
+//    }
+//
+//    @Test
+//    public void bitshiftTests() {
+//        System.out.println(2 << 1);
+//        System.out.println(2 << 2);
+//        System.out.println(2 << 3);
+//
+//        System.out.println(BitUtil.previousPowerOfTwo(10));
+//    }
 
     @Test
     public final void testSetUnion() {
