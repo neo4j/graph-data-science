@@ -79,8 +79,8 @@ public class TriangleProc {
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
-                .overrideNodeLabelOrQuery(label)
-                .overrideRelationshipTypeOrQuery(relationship);
+                .setNodeLabelOrQuery(label)
+                .setRelationshipTypeOrQuery(relationship);
 
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .withOptionalLabel(configuration.getNodeLabelOrQuery())
@@ -114,8 +114,8 @@ public class TriangleProc {
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
-                .overrideNodeLabelOrQuery(label)
-                .overrideRelationshipTypeOrQuery(relationship);
+                .setNodeLabelOrQuery(label)
+                .setRelationshipTypeOrQuery(relationship);
 
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .withOptionalLabel(configuration.getNodeLabelOrQuery())
@@ -154,8 +154,8 @@ public class TriangleProc {
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
-                .overrideNodeLabelOrQuery(label)
-                .overrideRelationshipTypeOrQuery(relationship);
+                .setNodeLabelOrQuery(label)
+                .setRelationshipTypeOrQuery(relationship);
 
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .withOptionalLabel(configuration.getNodeLabelOrQuery())
@@ -192,8 +192,8 @@ public class TriangleProc {
         final IntersectingTriangleCount triangleCount;
 
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
-                .overrideNodeLabelOrQuery(label)
-                .overrideRelationshipTypeOrQuery(relationship);
+                .setNodeLabelOrQuery(label)
+                .setRelationshipTypeOrQuery(relationship);
         final TriangleCountResultBuilder builder = new TriangleCountResultBuilder();
 
         try (ProgressTimer timer = builder.timeLoad()) {
@@ -312,8 +312,8 @@ public class TriangleProc {
         final AtomicDoubleArray clusteringCoefficients;
 
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
-                .overrideNodeLabelOrQuery(label)
-                .overrideRelationshipTypeOrQuery(relationship);
+                .setNodeLabelOrQuery(label)
+                .setRelationshipTypeOrQuery(relationship);
         final TriangleCountResultBuilder builder = new TriangleCountResultBuilder();
 
         try (ProgressTimer timer = builder.timeLoad()) {

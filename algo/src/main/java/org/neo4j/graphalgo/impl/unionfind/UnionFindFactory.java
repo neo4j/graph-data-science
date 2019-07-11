@@ -25,9 +25,7 @@ import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-
-import java.util.Arrays;
-import java.util.stream.Collectors;
+import org.neo4j.logging.Log;
 
 public class UnionFindFactory<A extends GraphUnionFindAlgo<A>> extends AlgorithmFactory<A> {
 
@@ -41,36 +39,13 @@ public class UnionFindFactory<A extends GraphUnionFindAlgo<A>> extends Algorithm
         this.threshold = threshold;
     }
 
-    public static <T extends GraphUnionFindAlgo<T>> UnionFindFactory<T> create(ProcedureConfiguration configuration, double threshold) {
-        UnionFindAlgorithmType result;
-        if (configuration.getConcurrency() <= 1) {
-            result = UnionFindAlgorithmType.SEQ;
-        } else {
-            final String algoName = configuration.getString(CONFIG_PARALLEL_ALGO, UnionFindAlgorithmType.QUEUE.name()).toUpperCase();
-
-            UnionFindAlgorithmType algoImpl;
-            try {
-                algoImpl = UnionFindAlgorithmType.valueOf(algoName);
-            } catch (IllegalArgumentException e) {
-                algoImpl = UnionFindAlgorithmType.SEQ;
-            }
-
-            if (algoImpl == UnionFindAlgorithmType.SEQ) {
-                String errorMsg = String.format("Parallel configuration %s is invalid. Valid names are %s", algoName,
-                        Arrays.stream(UnionFindAlgorithmType.values())
-                                .filter(ufa -> ufa != UnionFindAlgorithmType.SEQ)
-                                .map(UnionFindAlgorithmType::name)
-                                .collect(Collectors.joining(", ")));
-                throw new IllegalArgumentException(errorMsg);
-            }
-            result = algoImpl;
-        }
-        return new UnionFindFactory<>(result, threshold);
-    }
-
     @SuppressWarnings("unchecked")
     @Override
-    public A build(final Graph graph, final ProcedureConfiguration configuration, final AllocationTracker tracker) {
+    public A build(
+            final Graph graph,
+            final ProcedureConfiguration configuration,
+            final AllocationTracker tracker,
+            final Log log) {
         int concurrency = configuration.getConcurrency();
         int minBatchSize = configuration.getBatchSize();
         final GraphUnionFindAlgo<?> algo = algorithmType.create(

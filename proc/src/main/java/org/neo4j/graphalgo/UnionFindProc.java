@@ -41,8 +41,10 @@ import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.impl.unionfind.UnionFindFactory.CONFIG_PARALLEL_ALGO;
@@ -257,9 +259,11 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
             final AllocationTracker tracker,
             final ProcedureConfiguration configuration, final Graph graph) {
         T algo = newAlgorithm(graph, configuration, tracker);
-        final PagedDisjointSetStruct algoResult = builder.timeEval(() -> Double.isFinite(algo.threshold())
-                ? algo.compute(algo.threshold())
-                : algo.compute());
+        final PagedDisjointSetStruct algoResult = runWithExceptionLogging(
+                "Union failed",
+                () -> builder.timeEval(() -> Double.isFinite(algo.threshold())
+                        ? algo.compute(algo.threshold())
+                        : algo.compute()));
 
         log.info("UnionFind: overall memory usage: %s", tracker.getUsageString());
 
@@ -270,8 +274,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
     }
 
     @Override
-    GraphLoader configureLoader(
-            final GraphLoader loader, final ProcedureConfiguration config) {
+    GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
         return loader
                 .withOptionalRelationshipWeightsFromProperty(
                         config.getWeightProperty(),
@@ -280,8 +283,30 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
     }
 
     @Override
-    AlgorithmFactory<T> algorithmFactory(final ProcedureConfiguration config) {
-        return UnionFindFactory.create(config, config.get(CONFIG_THRESHOLD, Double.NaN));
+    UnionFindFactory<T> algorithmFactory(final ProcedureConfiguration config) {
+        double threshold = config.get(CONFIG_THRESHOLD, Double.NaN);
+        String algoName = config.getString(CONFIG_PARALLEL_ALGO, UnionFindAlgorithmType.QUEUE.name());
+
+        UnionFindAlgorithmType algorithmType = null;
+
+        if (config.isSingleThreaded()) {
+            algorithmType = UnionFindAlgorithmType.SEQ;
+        } else {
+            for (final UnionFindAlgorithmType algoType : UnionFindAlgorithmType.values()) {
+                if (algoType.name().equalsIgnoreCase(algoName)) {
+                    algorithmType = algoType;
+                }
+            }
+            if (algorithmType == null) {
+                String errorMsg = String.format("Parallel configuration %s is invalid. Valid names are %s", algoName,
+                        Arrays.stream(UnionFindAlgorithmType.values())
+                                .filter(ufa -> ufa != UnionFindAlgorithmType.SEQ)
+                                .map(UnionFindAlgorithmType::name)
+                                .collect(Collectors.joining(", ")));
+                throw new IllegalArgumentException(errorMsg);
+            }
+        }
+        return new UnionFindFactory<>(algorithmType, threshold);
     }
 
     public static class UnionFindResult {

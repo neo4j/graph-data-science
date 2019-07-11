@@ -167,13 +167,11 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
 
     @Override
     LouvainFactory algorithmFactory(final ProcedureConfiguration procedureConfig) {
+        int maxLevel = procedureConfig.getIterations(DEFAULT_MAX_LEVEL);
+        int maxIterations = procedureConfig.getNumber(INNER_ITERATIONS, DEFAULT_MAX_ITERATIONS).intValue();
+        boolean randomNeighbor = procedureConfig.get(COMMUNITY_SELECTION, "classic").equalsIgnoreCase("random");
 
-        final int maxLevel = procedureConfig.getIterations(DEFAULT_MAX_LEVEL);
-        final int maxIterations = procedureConfig.getNumber(INNER_ITERATIONS, DEFAULT_MAX_ITERATIONS).intValue();
-        final boolean randomNeighbor = procedureConfig.get(COMMUNITY_SELECTION, "classic").equalsIgnoreCase("random");
-
-        Louvain.Config algoConfig = new Louvain.Config(maxLevel, maxIterations, randomNeighbor);
-        return new LouvainFactory(algoConfig);
+        return new LouvainFactory(new Louvain.Config(maxLevel, maxIterations, randomNeighbor));
     }
 
     private Louvain compute(
@@ -184,7 +182,10 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
 
         Louvain algo = newAlgorithm(graph, configuration, tracker);
 
-        final Louvain louvain = statsBuilder.timeEval((Supplier<Louvain>) algo::compute);
+        final Louvain louvain = runWithExceptionLogging(
+                "Louvain failed",
+                () -> statsBuilder.timeEval((Supplier<Louvain>) algo::compute));
+
         statsBuilder.randomNeighbor(algo.randomNeighborSelection());
 
         graph.release();

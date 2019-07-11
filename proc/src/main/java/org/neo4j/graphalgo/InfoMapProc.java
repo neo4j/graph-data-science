@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.impl.infomap.InfoMap;
 import org.neo4j.graphalgo.results.AbstractResultBuilder;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
@@ -70,15 +69,15 @@ public class InfoMapProc {
             @Name(value = "config", defaultValue = "{}") Map<String, Object> configuration) {
 
         final ProcedureConfiguration config = ProcedureConfiguration.create(configuration)
-                .overrideNodeLabelOrQuery(label)
-                .overrideRelationshipTypeOrQuery(relationshipType);
+                .setNodeLabelOrQuery(label)
+                .setRelationshipTypeOrQuery(relationshipType);
 
         final Setup setup;
         if (config.hasWeightProperty()) {
-            if (config.containsKeys(PAGE_RANK_PROPERTY)) setup = Setup.WEIGHTED_EXT_PR;
+            if (config.containsKey(PAGE_RANK_PROPERTY)) setup = Setup.WEIGHTED_EXT_PR;
             else setup = Setup.WEIGHTED;
         } else {
-            if (config.containsKeys(PAGE_RANK_PROPERTY)) setup = Setup.UNWEIGHTED_EXT_PR;
+            if (config.containsKey(PAGE_RANK_PROPERTY)) setup = Setup.UNWEIGHTED_EXT_PR;
             else setup = Setup.UNWEIGHTED;
         }
 
@@ -197,16 +196,16 @@ public class InfoMapProc {
             @Name(value = "config", defaultValue = "{}") Map<String, Object> configuration) {
 
         final ProcedureConfiguration config = ProcedureConfiguration.create(configuration)
-                .overrideNodeLabelOrQuery(label)
-                .overrideRelationshipTypeOrQuery(relationshipType);
+                .setNodeLabelOrQuery(label)
+                .setRelationshipTypeOrQuery(relationshipType);
 
 
         final Setup setup;
         if (config.hasWeightProperty()) {
-            if (config.containsKeys(PAGE_RANK_PROPERTY)) setup = Setup.WEIGHTED_EXT_PR;
+            if (config.containsKey(PAGE_RANK_PROPERTY)) setup = Setup.WEIGHTED_EXT_PR;
             else setup = Setup.WEIGHTED;
         } else {
-            if (config.containsKeys(PAGE_RANK_PROPERTY)) setup = Setup.UNWEIGHTED_EXT_PR;
+            if (config.containsKey(PAGE_RANK_PROPERTY)) setup = Setup.UNWEIGHTED_EXT_PR;
             else setup = Setup.UNWEIGHTED;
         }
 

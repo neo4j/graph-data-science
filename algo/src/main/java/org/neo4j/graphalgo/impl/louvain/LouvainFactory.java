@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.logging.Log;
 
 import java.util.Optional;
 
@@ -48,7 +49,11 @@ public class LouvainFactory extends AlgorithmFactory<Louvain> {
     }
 
     @Override
-    public Louvain build(final Graph graph, ProcedureConfiguration configuration, AllocationTracker tracker) {
+    public Louvain build(
+            final Graph graph,
+            final ProcedureConfiguration configuration,
+            final AllocationTracker tracker,
+            final Log log) {
         Optional<String> clusterProperty = configuration.getString(DEFAULT_CLUSTER_PROPERTY);
         HugeWeightMapping communityMap = clusterProperty
                 .map(name -> graph.nodeProperties(CLUSTERING_IDENTIFIER))

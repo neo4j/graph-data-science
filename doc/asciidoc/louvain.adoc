@@ -26,6 +26,7 @@ This section includes:
 * <<algorithms-louvain-cp, Cypher projection>>
 * <<algorithms-louvain-syntax, Syntax>>
 * <<algorithms-louvain-support, Graph type support>>
+* <<algorithms-louvain-memory-requirements, Memory Requirements>>
 
 
 [[algorithms-louvain-context]]
@@ -365,6 +366,112 @@ The Louvain algorithm supports the following graph types:
 ** weightProperty: null
 * [x] undirected, weighted
 ** weightProperty : 'weight'
+
+[[algorithms-louvain-memory-requirements]]
+== Memory Requirements for the Louvain algorithm
+:algorithm: "louvain"
+
+We can use the <<algo-memrec-procedure>> to compute the memory requirements of running graph algorithms.
+
+.The following returns the memory requirements for running Louvain on the Heavy Graph:
+:graph: "heavy"
+include::memrec.adoc[tags=overview]
+
+.Results
+[opts="header",cols="1,1,2"]
+|===
+| Nodes | Relationships | Required Memory
+| 6 | 7 | [3880 Bytes ... 4776 Bytes]
+|===
+
+.The following returns the memory requirements for running Louvain on the Heavy Graph:
+:graph: "huge"
+include::memrec.adoc[tags=overview]
+
+.Results
+[opts="header",cols="1,1,2"]
+|===
+| Nodes | Relationships | Required Memory
+| 6 | 7 | [299 KiB ... 300 KiB]
+|===
+
+We can also get a break down of where that memory is assigned from the `mapView` field.
+
+.The following returns the memory break down for running Louvain on the Heavy Graph:
+:graph: "heavy"
+include::memrec.adoc[tags=component]
+
+.Results
+[opts="header",cols="1,2"]
+|===
+| Component | Memory Usage
+| Louvain | [3176 Bytes ... 4072 Bytes]
+| HeavyGraph | 704 Bytes
+|===
+
+.The following returns the memory break down for running Louvain on the Huge Graph:
+:graph: "huge"
+include::memrec.adoc[tags=component]
+
+.Results
+[opts="header",cols="1,2"]
+|===
+| Component | Memory Usage
+| Louvain | [3176 Bytes ... 4072 Bytes]
+| HugeGraph | 296 KiB
+|===
+
+Below are the memory requirements for various sample datasets.
+
+=== Pokec
+
+This dataset contains people and friends relationships from https://snap.stanford.edu/data/soc-Pokec.html[Pokec^], the most popular online social network in Slovakia.
+
+.Memory Usage
+[opts="header", cols="1,1,1,2,2,2"]
+|===
+| Graph Type | Nodes | Relationships | Required Memory | In Memory Graph | Algorithm
+| Heavy | 1,632,803 | 30,622,564 | [695 MiB...807 MiB]| 334 MiB    | [361 MiB...473 MiB]
+| Huge | 1,632,803 | 30,622,564 | 	[465 MiB...693 MiB] | [104 MiB...219 MiB] | [361 MiB...473 MiB]
+|===
+
+
+=== Dbpedia
+
+This dataset contains Wikipedia pages and the links between them.
+Instructions for importing this dataset are available from https://github.com/jexp/graphipedia[jexp/graphipedia^].
+
+.Memory Usage
+[opts="header", cols="1,1,1,2,2,2"]
+|===
+| Graph Type | Nodes | Relationships | Required Memory | In Memory Graph | Algorithm
+| Heavy | 11,474,730 | 116,601,029 | [4043 MiB...4831 MiB] | 1505 MiB | [2538 MiB...3326 MiB]
+| Huge | 11,474,730 | 116,601,029 | 	[3086 MiB...4312 MiB] | [547 MiB...985 MiB] | [2538 MiB...3326 MiB]
+|===
+
+=== Twitter 2010
+
+This dataset contains users and followers from a crawl of Twitter presented by Haewoon Kwak, Changhyun Lee, Hosung Park, and Sue Moon in “What is Twitter, a Social Network or a News Media?”
+
+.Memory Usage
+[opts="header", cols="1,1,1,2,2,2"]
+|===
+| Graph Type | Nodes | Relationships | Required Memory | In Memory Graph | Algorithm
+| Heavy | 41,652,230 | 1,468,365,182 | [22 GiB...24 GiB]  | 13479 MiB    | [9215 MiB...12075 MiB]
+| Huge | 41,652,230 | 1,468,365,182 | 	[13190 MiB...21 GiB]  | [3975 MiB...9536 MiB]    | [9215 MiB...12075 MiB]
+|===
+
+=== Friendster
+
+This dataset contains people and friends relationships from https://snap.stanford.edu/data/com-Friendster.html[Friendster^], the online gaming network.
+
+.Memory Usage
+[opts="header", cols="1,1,1,2,2,2"]
+|===
+| Graph Type | Nodes | Relationships | Required Memory | In Memory Graph | Algorithm
+| Heavy | 65,608,366 | 1,806,067,135 | [31 GiB...35 GiB]  | 17 GiB    | [14516 MiB...18 GiB]
+| Huge | 65,608,366 | 1,806,067,135 | 	[19 GiB...30 GiB]  | [5322 MiB...12205 MiB]    | [14516 MiB...18 GiB]
+|===
 
 
 ifndef::env-docs[]

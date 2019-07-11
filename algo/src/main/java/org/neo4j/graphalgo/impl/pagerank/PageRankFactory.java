@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Node;
+import org.neo4j.logging.Log;
 
 import java.util.Collections;
 import java.util.List;
@@ -53,7 +54,8 @@ public class PageRankFactory extends AlgorithmFactory<PageRank> {
     public PageRank build(
             final Graph graph,
             final ProcedureConfiguration configuration,
-            final AllocationTracker tracker) {
+            final AllocationTracker tracker,
+            final Log log) {
         final int batchSize = configuration.getBatchSize();
         final int concurrency = configuration.getConcurrency();
         List<Node> sourceNodes = configuration.get("sourceNodes", Collections.emptyList());

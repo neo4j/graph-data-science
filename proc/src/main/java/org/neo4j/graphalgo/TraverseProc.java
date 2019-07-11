@@ -64,9 +64,9 @@ public class TraverseProc {
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
-                .overrideDirection(direction)
-                .overrideNodeLabelOrQuery(label)
-                .overrideRelationshipTypeOrQuery(relationship);
+                .setDirection(direction)
+                .setNodeLabelOrQuery(label)
+                .setRelationshipTypeOrQuery(relationship);
 
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .withOptionalLabel(label)
@@ -98,7 +98,7 @@ public class TraverseProc {
             aggregatorFunction = (s, t, w) -> w + 1.;
 
         // maxCost & weightProperty given; aggregate nodes with lower cost then maxCost
-        } else if (configuration.hasWeightProperty() && configuration.containsKeys("maxCost")) {
+        } else if (configuration.hasWeightProperty() && configuration.containsKey("maxCost")) {
             final double maxCost = configuration.getNumber("maxCost", 1.).doubleValue();
             exitFunction = (s, t, w) -> w >= maxCost ? Traverse.ExitPredicate.Result.CONTINUE : Traverse.ExitPredicate.Result.FOLLOW;
             aggregatorFunction = (s, t, w) -> w + graph.weightOf(s, t);
@@ -129,9 +129,9 @@ public class TraverseProc {
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         final ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
-                .overrideDirection(direction)
-                .overrideNodeLabelOrQuery(label)
-                .overrideRelationshipTypeOrQuery(relationship);
+                .setDirection(direction)
+                .setNodeLabelOrQuery(label)
+                .setRelationshipTypeOrQuery(relationship);
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .withOptionalLabel(label)
                 .withOptionalRelationshipType(relationship)
@@ -163,7 +163,7 @@ public class TraverseProc {
             aggregatorFunction = (s, t, w) -> w + 1.;
 
         // maxCost & weightProperty given; aggregate nodes with lower cost then maxCost
-        } else if (configuration.hasWeightProperty() && configuration.containsKeys("maxCost")) {
+        } else if (configuration.hasWeightProperty() && configuration.containsKey("maxCost")) {
             final double maxCost = configuration.getNumber("maxCost", 1.).doubleValue();
             exitFunction = (s, t, w) -> w >= maxCost ? Traverse.ExitPredicate.Result.CONTINUE : Traverse.ExitPredicate.Result.FOLLOW;
             aggregatorFunction = (s, t, w) -> w + graph.weightOf(s, t);

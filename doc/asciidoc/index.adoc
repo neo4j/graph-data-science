@@ -83,6 +83,8 @@ include::../../contrib/readme.adoc[tags=installation,leveloffset=1]
 
 include::../../contrib/readme.adoc[tags=usage,leveloffset=1]
 
+include::system-requirements.adoc[leveloffset=2]
+
 include::projected-graph-model.adoc[leveloffset=1]
 
 

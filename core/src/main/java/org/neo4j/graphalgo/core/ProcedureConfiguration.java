@@ -60,61 +60,73 @@ public class ProcedureConfiguration {
     }
 
     /**
-     * check if all given keys exist
+     * Checks if the given key exists in the configuration.
      *
-     * @param keys one or many keys
-     * @return true if key is known, false otherwise
+     * @param key key to look for
+     * @return true, iff the key exists
      */
-    public boolean containsKeys(String... keys) {
-        for (String key : keys) {
-            if (!config.containsKey(key)) {
-                return false;
-            }
-        }
-        return true;
+    public boolean containsKey(String key) {
+        return this.config.containsKey(key);
     }
 
     /**
-     * override the nodeOrLabelQuery param
+     * Sets the nodeOrLabelQuery parameter.
+     *
+     * If the parameters is already set, it's overriden.
      *
      * @param nodeLabelOrQuery the query or identifier
-     * @return self
+     * @return this configuration
      */
-    public ProcedureConfiguration overrideNodeLabelOrQuery(String nodeLabelOrQuery) {
+    public ProcedureConfiguration setNodeLabelOrQuery(String nodeLabelOrQuery) {
         config.put(ProcedureConstants.NODE_LABEL_QUERY_PARAM, nodeLabelOrQuery);
         return this;
     }
 
     /**
-     * override relationshipOrQuery param
+     * Sets the relationshipOrQuery parameter.
+     *
+     * If the parameters is already set, it's overriden.
      *
      * @param relationshipTypeOrQuery the relationshipQuery or Identifier
-     * @return self
+     * @return this configuration
      */
-    public ProcedureConfiguration overrideRelationshipTypeOrQuery(String relationshipTypeOrQuery) {
+    public ProcedureConfiguration setRelationshipTypeOrQuery(String relationshipTypeOrQuery) {
         config.put(ProcedureConstants.RELATIONSHIP_QUERY_PARAM, relationshipTypeOrQuery);
         return this;
     }
 
     /**
+     * Sets the direction parameter.
      *
+     * If the parameters is already set, it's overriden.
+     *
+     * @return this configuration
      */
-    public ProcedureConfiguration overrideDirection(String direction) {
+    public ProcedureConfiguration setDirection(String direction) {
         config.put(ProcedureConstants.DIRECTION, direction);
         return this;
     }
 
-    public ProcedureConfiguration overrideDirection(Direction direction) {
+    /**
+     * Sets the direction parameter.
+     *
+     * If the parameters is already set, it's overriden.
+     *
+     * @return this configuration
+     */
+    public ProcedureConfiguration setDirection(Direction direction) {
         config.put(ProcedureConstants.DIRECTION, direction.name());
         return this;
     }
 
     /**
-     * override property param
+     * Sets the weight parameter.
      *
-     * @return self
+     * If the parameters is already set, it's overriden.
+     *
+     * @return this configuration
      */
-    public ProcedureConfiguration overrideWeightProperty(String weightProperty) {
+    public ProcedureConfiguration setWeightProperty(String weightProperty) {
         config.put(ProcedureConstants.PROPERTY_PARAM, weightProperty);
         return this;
     }
@@ -219,7 +231,7 @@ public class ProcedureConfiguration {
     }
 
     public boolean hasWeightProperty() {
-        return containsKeys(ProcedureConstants.PROPERTY_PARAM);
+        return containsKey(ProcedureConstants.PROPERTY_PARAM);
     }
 
     public String getWeightProperty() {
@@ -251,6 +263,10 @@ public class ProcedureConfiguration {
 
     public int getBatchSize(int defaultValue) {
         return getNumber(ProcedureConstants.BATCH_SIZE_PARAM, defaultValue).intValue();
+    }
+
+    public boolean isSingleThreaded() {
+        return getConcurrency() <= 1;
     }
 
     public int getConcurrency() {

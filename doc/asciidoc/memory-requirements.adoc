@@ -1,0 +1,258 @@
+[[memory-requirements]]
+= Memory Requirements
+
+[abstract]
+--
+This section describes memory requirements for the projected graph model used by the Neo4j Graph Algorithms Library.
+--
+
+The graph algorithms library operates completely on the heap, which means we'll need to configure our Neo4j Server with a much larger heap size than we would for transactional workloads.
+The diagram belows shows how memory is used by the projected graph model:
+
+image::graph-model-memory.png[width=500]
+
+The model contains three types of data:
+
+* Node ids - up to 2^31^ ("2 billion") for `graph: "heavy"` and up to 2^45^ ("35 trillion") for `graph: "huge"`
+* Relationships - pairs of node ids. Relationships are stored twice if `direction: "BOTH"` config provided.
+* Weights - stored as floats (4 bytes per node) in an array (`graph: "heavy"`) and in a https://github.com/carrotsearch/hppc[HPPC^] map (`graph: "huge"`)
+
+Memory configuration depends on the graph projection that we're using.
+
+This section includes:
+
+* <<algo-memrec-procedure>>
+* <<algo-memrec-sample>>
+* <<memory-requirements-sample-graphs>>
+
+[[algo-memrec-procedure]]
+== `algo.memrec` procedure
+
+The `algo.memrec` procedure returns an estimate of the amount of memory required to run graph algorithms.
+
+.Syntax
+[source, cypher]
+----
+CALL algo.memrec(label, relationship, algorithm, config)
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name          | Type    | Default        | Optional | Description
+| label         | string  | null           | yes      | The label to load from the graph. If null, load all nodes
+| relationship  | string  | null           | yes      | The relationship-type to load from the graph. If null, load all relationships
+| algorithm | string  | null     | yes      | The name of a graph algorithm or `graph.load` to return the memory requirements for the in memory graph only.
+h| Config ||||
+| direction     | string  | 'OUTGOING'     | yes      | The relationship-direction to use in the algorithm
+| graph         | string  | 'heavy'        | yes      | Use 'heavy' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
+| concurrency   | int     | available CPUs | yes      | The number of concurrent threads
+|===
+
+Algorithm specific parameters can also be provided as config.
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name          | Type    | Description
+| requiredMemory         | int     | The required memory in human readable format.
+| bytesMin    | int     | The minimum number of bytes required.
+| bytesMax | int   | The maximum number of bytes required.
+| mapView | Map  | A breakdown of the memory used by different components involved in the execution of a graph algorithm.
+|===
+
+[NOTE]
+====
+`algo.memrec(label, relationship, algorithm, config)` maps to `algo.<algorithm>.memrec(label, relationship, config)`, which means that `CALL algo.memrec(null, null, "pageRank")` is equivalent to `CALL algo.pageRank.memrec(null, null)`
+====
+
+[[algo-memrec-sample]]
+== `algo.memrec` sample
+
+This sample will explain the `algo.memrec` procedure, using a Game of Thrones graphs.
+
+.The following creates a graph containing Game of Thrones characters and the interactions between them.
+[source, cypher]
+----
+CREATE CONSTRAINT ON (c:Character) ASSERT c.id IS UNIQUE;
+
+UNWIND range(1,7) AS season
+LOAD CSV WITH HEADERS FROM "https://github.com/neo4j-apps/neuler/raw/master/sample-data/got/got-s" + season + "-nodes.csv" AS row
+MERGE (c:Character {id: row.Id})
+ON CREATE SET c.name = row.Label;
+
+UNWIND range(1,7) AS season
+LOAD CSV WITH HEADERS FROM "https://github.com/neo4j-apps/neuler/raw/master/sample-data/got/got-s" + season + "-edges.csv" AS row
+MATCH (source:Character {id: row.Source})
+MATCH (target:Character {id: row.Target})
+CALL apoc.merge.relationship(source, "INTERACTS_SEASON" + season, {}, {}, target) YIELD rel
+SET rel.weight = toInteger(row.Weight);
+----
+
+=== Heavy graph projection
+
+This is the default graph projection, and supports graphs up to 2 billion nodes and 2 billion relationships.
+
+.The following computes the amount of memory required by the heavy in memory graph for any node label and any relationship type:
+[source,cypher]
+----
+CALL algo.memrec(null, null, "graph.load")
+YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax
+RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
+| 400 | 3551 | 40 KiB  | 41456    | 41456
+|===
+
+.The following computes the amount of memory required by the heavy in memory graph for node label `Character` and relationship type `INTERACTS_SEASON1`:
+[source,cypher]
+----
+CALL algo.memrec("Character", "INTERACTS_SEASON1", "graph.load")
+YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax
+RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
+| 400 | 550 | 27 KiB  | 28656    | 28656
+|===
+
+.The following computes the amount of memory required by the heavy in memory graph for node label `Character`, relationship type `INTERACTS_SEASON1`, and direction `BOTH`:
+[source,cypher]
+----
+CALL algo.memrec("Character", "INTERACTS_SEASON1", "graph.load", {direction: "BOTH"})
+YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax
+RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
+| 400 | 550 | 40 KiB  | 41488    | 41488
+|===
+
+
+=== Huge graph projection
+
+This graph projection supports graphs with more than 2 billion nodes or 2 billion relationships.
+
+.The following computes the amount of memory required by the huge in memory graph for any node label and any relationship type:
+[source,cypher]
+----
+CALL algo.memrec(null, null, "graph.load", {graph: "huge"})
+YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax
+RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
+| 400 | 3551 | 299 KiB  | 306688    | 306688
+|===
+
+.The following computes the amount of memory required by the huge in memory graph for node label `Character` and relationship type `INTERACTS_SEASON1`:
+[source,cypher]
+----
+CALL algo.memrec("Character", "INTERACTS_SEASON1", "graph.load", {graph: "huge"})
+YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax
+RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
+| 400 | 550 | 299 KiB  | 306680    | 306680
+|===
+
+.The following computes the amount of memory required by the huge in memory graph for node label `Character`, relationship type `INTERACTS_SEASON1`, and direction `BOTH`:
+[source,cypher]
+----
+CALL algo.memrec("Character", "INTERACTS_SEASON1", "graph.load", {direction: "BOTH", graph: "huge"})
+YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax
+RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
+| 400 | 550 | 563 KiB  | 577112    | 577112
+|===
+
+[[memory-requirements-sample-graphs]]
+== Memory Requirements on Sample Graphs
+
+Below are the memory requirements for various sample datasets.
+These numbers are computed by running the following queries:
+
+.Heavy Graph
+[source,cypher]
+----
+CALL algo.memrec(null, null, "graph.load", {graph: "heavy"})
+----
+
+.Huge Graph
+[source,cypher]
+----
+CALL algo.memrec(null, null, "graph.load", {graph: "huge"})
+----
+
+=== Pokec
+
+This dataset contains people and friends relationships from https://snap.stanford.edu/data/soc-Pokec.html[Pokec^], the most popular online social network in Slovakia.
+
+.Memory Usage
+[opts="header", cols="1,1,1,2,1,1"]
+|===
+| Graph Type | Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
+| Heavy | 1,632,803 | 30,622,564 | 222 MiB  | 233205960    | 233205960
+| Huge | 1,632,803 | 30,622,564 | 	[74 MiB...130 MiB]  | 78560176    | 137284912
+|===
+
+
+=== Dbpedia
+
+This dataset contains Wikipedia pages and the links between them.
+Instructions for importing this dataset are available from https://github.com/jexp/graphipedia[jexp/graphipedia^].
+
+.Memory Usage
+[opts="header", cols="1,1,1,2,1,1"]
+|===
+| Graph Type | Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
+| Heavy | 11,474,730 | 116,601,029 | 1067 MiB  | 1119305360    | 1119305360
+| Huge | 11,474,730 | 116,601,029 | 	[438 MiB...657 MiB]  | 459722704    | 689148984
+|===
+
+=== Twitter 2010
+
+This dataset contains users and followers from a crawl of Twitter presented by Haewoon Kwak, Changhyun Lee, Hosung Park, and Sue Moon in “What is Twitter, a Social Network or a News Media?”
+
+.Memory Usage
+[opts="header", cols="1,1,1,2,1,1"]
+|===
+| Graph Type | Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
+| Heavy | 41,652,230 | 1,468,365,182 | 7759 MiB  | 8136099216    | 8136099216
+| Huge | 41,652,230 | 1,468,365,182 | 	[2582 MiB...5363 MiB]  | 2708130496    | 5623918504
+|===
+
+=== Friendster
+
+This dataset contains people and friends relationships from https://snap.stanford.edu/data/com-Friendster.html[Friendster^], the online gaming network.
+
+.Memory Usage
+[opts="header", cols="1,1,1,2,1,1"]
+|===
+| Graph Type | Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
+| Heavy | 65,608,366 | 1,806,067,135 | 10545 MiB  | 11058217808    | 11058217808
+| Huge | 65,608,366 | 1,806,067,135 | 	[3567 MiB...8635 MiB]  | 3740896712    | 9055485320
+|===
+
