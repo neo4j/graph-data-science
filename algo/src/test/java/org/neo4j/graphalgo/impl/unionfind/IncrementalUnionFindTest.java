@@ -40,7 +40,6 @@ import org.neo4j.graphalgo.core.utils.paged.DisjointSetStruct;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.logging.NullLog;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
 import java.util.Arrays;
@@ -58,8 +57,8 @@ public class IncrementalUnionFindTest {
 
     private static String COMMUNITY_PROPERTY = "community";
 
-    private static final int setsCount = 16;
-    private static final int setSize = 10;
+    private static final int SETS_COUNT = 16;
+    private static final int SET_SIZE = 10;
 
     @Parameterized.Parameters(name = "{1}")
     public static Collection<Object[]> data() {
@@ -78,8 +77,8 @@ public class IncrementalUnionFindTest {
     public static void setupGraph() {
         try (ProgressTimer timer = ProgressTimer.start(l -> System.out.println(
                 "creating test graph took " + l + " ms"))) {
-            int[] setSizes = new int[setsCount];
-            Arrays.fill(setSizes, setSize);
+            int[] setSizes = new int[SETS_COUNT];
+            Arrays.fill(setSizes, SET_SIZE);
             createTestGraph(setSizes);
         }
     }
@@ -293,11 +292,11 @@ public class IncrementalUnionFindTest {
             UnionFindAlgorithm.Config config) {
         DisjointSetStruct result = run(uf, config);
 
-        Assert.assertEquals(setsCount / 2, result.getSetCount());
+        Assert.assertEquals(SETS_COUNT / 2, result.getSetCount());
         IntLongMap setRegions = new IntLongHashMap();
 
         graph.forEachNode((nodeId) -> {
-            int expectedSetRegion = ((int) nodeId / (2 * setSize) * 2) * 2 + 1;
+            int expectedSetRegion = ((int) nodeId / (2 * SET_SIZE) * 2) * 2 + 1;
             final long setId = result.setIdOf(nodeId);
             int setRegion = (int) setId;
             assertEquals(
@@ -319,13 +318,13 @@ public class IncrementalUnionFindTest {
     }
 
     private DisjointSetStruct run(final UnionFindAlgorithmType uf, UnionFindAlgorithm.Config config) {
-        return uf.run(
+        return UnionFindHelper.run(
+                uf,
                 graph,
                 Pools.DEFAULT,
-                setSize / Pools.DEFAULT_CONCURRENCY,
+                SET_SIZE / Pools.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT_CONCURRENCY,
                 config,
-                AllocationTracker.EMPTY,
-                NullLog.getInstance());
+                AllocationTracker.EMPTY);
     }
 }

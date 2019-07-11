@@ -132,21 +132,6 @@ public enum UnionFindAlgorithmType {
         }
     };
 
-    public DisjointSetStruct run(
-            Graph graph,
-            ExecutorService executor,
-            int minBatchSize,
-            int concurrency,
-            final UnionFindAlgorithm.Config config,
-            AllocationTracker tracker,
-            Log log) {
-
-        UnionFindAlgorithm<?> algo = create(graph, executor, minBatchSize, concurrency, config, tracker, log);
-        DisjointSetStruct communities = algo.compute();
-        algo.release();
-        return communities;
-    }
-
     public abstract UnionFindAlgorithm<?> create(
             Graph graph,
             ExecutorService executor,
