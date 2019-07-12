@@ -30,8 +30,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.neo4j.graphalgo.core.utils.paged.dss.UnionStrategy;
-import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -44,6 +42,8 @@ import java.util.Collection;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.neo4j.graphalgo.ThrowableRootCauseMatcher.rootCause;
+import static org.neo4j.graphalgo.ThrowableRootCauseMatcher.rootCauseMessage;
 
 @RunWith(Parameterized.class)
 public class UnionFindProcTest {
@@ -190,11 +190,8 @@ public class UnionFindProcTest {
         String query = "CALL algo.unionFind('', '', { graph: '%s', seedProperty: 'seedId', unionStrategy: 'foobar' }) " +
                        "YIELD setCount, communityCount";
 
-        expectedEx.expect(QueryExecutionException.class);
-        expectedEx.expectMessage("Unsupported");
-        expectedEx.expectMessage("'foobar'");
-        expectedEx.expectMessage(UnionStrategy.ByMin.NAME);
-        expectedEx.expectMessage(UnionStrategy.ByRank.NAME);
+        expectedEx.expect(rootCause(IllegalArgumentException.class));
+        expectedEx.expect(rootCauseMessage("Unsupported unionStrategy 'foobar'. Supported values are: 'rank', 'min'"));
 
         db.execute(String.format(query, graphImpl));
     }
