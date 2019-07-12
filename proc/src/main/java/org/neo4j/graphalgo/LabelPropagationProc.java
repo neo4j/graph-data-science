@@ -120,7 +120,7 @@ public final class LabelPropagationProc {
         AllocationTracker tracker = AllocationTracker.create();
         Graph graph = load(graphLoader.withAllocationTracker(tracker), configuration, stats);
 
-        if(graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.of(LabelPropagationStats.EMPTY);
         }
@@ -166,7 +166,7 @@ public final class LabelPropagationProc {
         AllocationTracker tracker = AllocationTracker.create();
         Graph graph = load(graphLoader.withAllocationTracker(tracker), configuration, stats);
 
-        if(graph.nodeCount() == 0L) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }

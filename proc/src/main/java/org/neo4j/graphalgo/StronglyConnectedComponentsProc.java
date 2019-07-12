@@ -117,7 +117,7 @@ public class StronglyConnectedComponentsProc {
                 .load(configuration.getGraphImpl());
         loadTimer.stop();
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             return Stream.of(SCCResult.EMPTY);
         }
 
@@ -175,7 +175,7 @@ public class StronglyConnectedComponentsProc {
                 .load(configuration.getGraphImpl());
         loadTimer.stop();
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             return Stream.of(SCCResult.EMPTY);
         }
 
@@ -224,7 +224,7 @@ public class StronglyConnectedComponentsProc {
                 .withDirection(Direction.OUTGOING)
                 .load(configuration.getGraphImpl());
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             return Stream.empty();
         }
 
@@ -256,7 +256,7 @@ public class StronglyConnectedComponentsProc {
                 .load(configuration.getGraphImpl());
         loadTimer.stop();
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             return Stream.of(SCCResult.EMPTY);
         }
 
@@ -307,7 +307,7 @@ public class StronglyConnectedComponentsProc {
                 .withDirection(Direction.OUTGOING)
                 .load(configuration.getGraphImpl());
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }
@@ -346,7 +346,7 @@ public class StronglyConnectedComponentsProc {
                 .load(configuration.getGraphImpl());
         loadTimer.stop();
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.of(SCCResult.EMPTY);
         }
@@ -400,7 +400,7 @@ public class StronglyConnectedComponentsProc {
                 .init(log, label, relationship, configuration)
                 .withoutRelationshipWeights()
                 .load(configuration.getGraphImpl());
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }
@@ -429,7 +429,7 @@ public class StronglyConnectedComponentsProc {
                 .init(log, label, relationship, configuration)
                 .withoutRelationshipWeights()
                 .load(configuration.getGraphImpl());
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }

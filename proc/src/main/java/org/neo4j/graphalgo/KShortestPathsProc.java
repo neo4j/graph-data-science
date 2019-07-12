@@ -100,7 +100,7 @@ public class KShortestPathsProc {
             graph = graphLoader.load(configuration.getGraphImpl());
         }
 
-        if (graph.nodeCount() == 0 || startNode == null || endNode == null) {
+        if (graph.isEmpty() || startNode == null || endNode == null) {
             graph.release();
             return Stream.of(builder.build());
         }
@@ -166,7 +166,7 @@ public class KShortestPathsProc {
             graph = graphLoader.load(configuration.getGraphImpl());
         }
 
-        if (graph.nodeCount() == 0 || startNode == null || endNode == null) {
+        if (graph.isEmpty() || startNode == null || endNode == null) {
             graph.release();
             return Stream.empty();
         }

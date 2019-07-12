@@ -103,7 +103,7 @@ public class ShortestPathProc {
 
         final Graph graph = graphLoader.load(configuration.getGraphImpl());
 
-        if (graph.nodeCount() == 0 || startNode == null || endNode == null) {
+        if (graph.isEmpty() || startNode == null || endNode == null) {
             graph.release();
             return Stream.empty();
         }
@@ -153,7 +153,7 @@ public class ShortestPathProc {
             graph = graphLoader.load(configuration.getGraphImpl());
         }
 
-        if (graph.nodeCount() == 0 || startNode == null || endNode == null) {
+        if (graph.isEmpty() || startNode == null || endNode == null) {
             graph.release();
             return Stream.of(builder.build());
         }
@@ -217,7 +217,7 @@ public class ShortestPathProc {
 
         final Graph graph = graphLoader.load(configuration.getGraphImpl());
 
-            if (graph.nodeCount() == 0 || startNode == null || endNode == null) {
+            if (graph.isEmpty() || startNode == null || endNode == null) {
                 graph.release();
                 return Stream.empty();
             }

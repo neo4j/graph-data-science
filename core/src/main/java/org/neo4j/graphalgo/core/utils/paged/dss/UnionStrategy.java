@@ -31,6 +31,8 @@ public interface UnionStrategy {
      */
     final class ByMin implements UnionStrategy {
 
+        public static final String NAME = "min";
+
         @Override
         public void union(final long p, final long q, final DisjointSetStruct dss) {
             long pRoot = dss.find(p);
@@ -51,6 +53,8 @@ public interface UnionStrategy {
      * Uses <a href="https://en.wikipedia.org/wiki/Disjoint-set_data_structure#by_rank%22&gt;Rank&lt;/a&gt;">rank based tree balancing.</a>
      */
     final class ByRank implements UnionStrategy {
+
+        public static final String NAME = "rank";
 
         private final HugeLongArray depth;
 

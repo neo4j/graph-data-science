@@ -77,7 +77,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
         ProcedureConfiguration configuration = newConfig(label, relationship, config);
         final Graph graph = this.loadGraph(configuration, tracker, builder);
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.of(LouvainResult.EMPTY);
         }
@@ -128,7 +128,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
         ProcedureConfiguration configuration = newConfig(label, relationship, config);
         final Graph graph = this.loadGraph(configuration, tracker, builder);
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }

@@ -99,7 +99,7 @@ public class ShortestPathDeltaSteppingProc {
 
         final Graph graph = graphLoader.load(configuration.getGraphImpl());
 
-        if (graph.nodeCount() == 0 || startNode == null) {
+        if (graph.isEmpty() || startNode == null) {
             graph.release();
             return Stream.empty();
         }
@@ -149,7 +149,7 @@ public class ShortestPathDeltaSteppingProc {
                     .load(configuration.getGraphImpl());
         }
 
-        if (graph.nodeCount() == 0 || startNode == null) {
+        if (graph.isEmpty() || startNode == null) {
             graph.release();
             return Stream.empty();
         }

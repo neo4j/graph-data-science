@@ -87,7 +87,7 @@ public class AllShortestPathsProc {
 
         Graph graph = graphLoader.load(configuration.getGraphImpl());
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }

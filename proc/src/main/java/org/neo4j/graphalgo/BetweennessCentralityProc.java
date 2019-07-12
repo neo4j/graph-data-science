@@ -81,7 +81,7 @@ public class BetweennessCentralityProc {
                 .withDirection(configuration.getDirection(Direction.OUTGOING))
                 .load(configuration.getGraphImpl());
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }
@@ -119,7 +119,7 @@ public class BetweennessCentralityProc {
                 .withDirection(configuration.getDirection(DEFAULT_DIRECTION))
                 .load(configuration.getGraphImpl());
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }
@@ -247,7 +247,7 @@ public class BetweennessCentralityProc {
 
         builder.withNodeCount(graph.nodeCount());
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.of(builder.build());
         }
@@ -307,7 +307,7 @@ public class BetweennessCentralityProc {
 
         builder.withNodeCount(graph.nodeCount());
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.of(builder.build());
         }

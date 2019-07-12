@@ -78,7 +78,7 @@ public class ShortestPathsProc {
                 .withDirection(Direction.OUTGOING)
                 .load(configuration.getGraphImpl());
 
-        if (graph.nodeCount() == 0 || startNode == null) {
+        if (graph.isEmpty() || startNode == null) {
             graph.release();
             return Stream.empty();
         }
@@ -115,7 +115,7 @@ public class ShortestPathsProc {
                 .load(configuration.getGraphImpl());
         load.stop();
 
-        if (graph.nodeCount() == 0 || startNode == null) {
+        if (graph.isEmpty() || startNode == null) {
             graph.release();
             return Stream.of(builder.build());
         }

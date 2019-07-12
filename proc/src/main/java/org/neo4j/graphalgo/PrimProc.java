@@ -135,7 +135,7 @@ public class PrimProc {
                     .load(configuration.getGraphImpl(Graph.TYPE));
         }
 
-        if(graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.of(builder.build());
         }

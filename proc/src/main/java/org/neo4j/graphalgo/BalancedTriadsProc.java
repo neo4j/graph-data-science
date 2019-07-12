@@ -79,7 +79,7 @@ public class BalancedTriadsProc {
                 .load(configuration.getGraphImpl(HugeGraph.TYPE, HugeGraph.TYPE));
 
         // omit empty graphs
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }

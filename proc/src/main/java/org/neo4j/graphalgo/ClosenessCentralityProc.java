@@ -79,7 +79,7 @@ public class ClosenessCentralityProc {
                 .withAllocationTracker(tracker)
                 .load(configuration.getGraphImpl());
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }
@@ -125,7 +125,7 @@ public class ClosenessCentralityProc {
 
         builder.withNodeCount(graph.nodeCount());
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.of(builder.build());
         }

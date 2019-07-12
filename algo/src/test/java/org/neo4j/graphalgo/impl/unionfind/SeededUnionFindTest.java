@@ -125,7 +125,8 @@ public class SeededUnionFindTest {
 
         config = new UnionFind.Config(
                 graph.nodeProperties(COMMUNITY_PROPERTY),
-                Double.NaN
+                Double.NaN,
+                false
         );
     }
 

@@ -79,7 +79,7 @@ public class HarmonicCentralityProc {
                 .withAllocationTracker(tracker)
                 .load(configuration.getGraphImpl());
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }
@@ -127,7 +127,7 @@ public class HarmonicCentralityProc {
 
         builder.withNodeCount(graph.nodeCount());
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.of(builder.build());
         }

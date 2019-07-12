@@ -90,7 +90,7 @@ public final class ArticleRankProc {
                 statsBuilder,
                 configuration);
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.of(statsBuilder.build());
         }
@@ -134,7 +134,7 @@ public final class ArticleRankProc {
                 statsBuilder,
                 configuration);
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }

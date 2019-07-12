@@ -45,9 +45,13 @@ public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> 
     }
 
     DisjointSetStruct initDisjointSetStruct(long nodeCount, AllocationTracker tracker, Log log) {
+        UnionStrategy unionStrategy = algoConfig.isUnionByRank ?
+                new UnionStrategy.ByRank(nodeCount, tracker) :
+                new UnionStrategy.ByMin();
+
         return algoConfig.communityMap == null ?
-                new RankedDisjointSetStruct(nodeCount, new UnionStrategy.ByRank(nodeCount, tracker), tracker, log) :
-                new IncrementalDisjointSetStruct(nodeCount, algoConfig.communityMap, new UnionStrategy.ByMin(), tracker, log);
+                new RankedDisjointSetStruct(nodeCount, unionStrategy, tracker, log) :
+                new IncrementalDisjointSetStruct(nodeCount, algoConfig.communityMap, unionStrategy, tracker, log);
     }
 
     /**
@@ -87,7 +91,7 @@ public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> 
 
         public final HugeWeightMapping communityMap;
         public final double threshold;
-        public final boolean unionByRank;
+        public final boolean isUnionByRank;
 
         public Config(final HugeWeightMapping communityMap, final double threshold) {
             this(communityMap, threshold, true);
@@ -96,10 +100,10 @@ public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> 
         public Config(
                 final HugeWeightMapping communityMap,
                 final double threshold,
-                final boolean unionByRank) {
+                final boolean isUnionByRank) {
             this.communityMap = communityMap;
             this.threshold = threshold;
-            this.unionByRank = unionByRank;
+            this.isUnionByRank = isUnionByRank;
         }
     }
 }

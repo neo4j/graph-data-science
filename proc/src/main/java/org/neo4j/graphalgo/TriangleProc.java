@@ -93,7 +93,7 @@ public class TriangleProc {
                 .withDirection(TriangleCountBase.D)
                 .load(configuration.getGraphImpl());
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }
@@ -128,7 +128,7 @@ public class TriangleProc {
                 .withDirection(TriangleCountBase.D)
                 .load(configuration.getGraphImpl());
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }

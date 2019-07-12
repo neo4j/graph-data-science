@@ -112,7 +112,7 @@ public class KSpanningTreeProc {
                     .load(configuration.getGraphImpl());
         }
 
-        if(graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.of(builder.withEffectiveNodeCount(0).build());
         }

@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.dss.UnionStrategy;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
@@ -43,6 +44,7 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -166,117 +168,6 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
         return stream(label, relationship, config, UnionFindType.FORK_JOIN);
     }
 
-    public Stream<DisjointSetStruct.Result> stream(
-            String label,
-            String relationship,
-            Map<String, Object> config,
-            UnionFindType algoImpl) {
-
-        final Builder builder = new Builder();
-
-        config.put(CONFIG_PARALLEL_ALGO, algoImpl.name());
-
-        AllocationTracker tracker = AllocationTracker.create();
-        ProcedureConfiguration configuration = newConfig(label, relationship, config);
-        Graph graph = this.loadGraph(configuration, tracker, builder);
-        if (graph.nodeCount() == 0) {
-            graph.release();
-            return Stream.empty();
-        }
-
-        DisjointSetStruct communities = compute(builder, tracker, configuration, graph);
-        graph.release();
-        return communities.resultStream(graph);
-    }
-
-    private Stream<UnionFindResult> run(
-            String label,
-            String relationship,
-            Map<String, Object> config,
-            UnionFindType algoImpl) {
-
-        final Builder builder = new Builder();
-
-        config.put(CONFIG_PARALLEL_ALGO, algoImpl.name());
-
-        ProcedureConfiguration configuration = newConfig(label, relationship, config);
-
-        AllocationTracker tracker = AllocationTracker.create();
-        Graph graph = this.loadGraph(configuration, tracker, builder);
-        if (graph.nodeCount() == 0) {
-            graph.release();
-            return Stream.of(UnionFindResult.EMPTY);
-        }
-
-        DisjointSetStruct communities = compute(builder, tracker, configuration, graph);
-
-        if (configuration.isWriteFlag()) {
-            String writeProperty = configuration.get(
-                    CONFIG_CLUSTER_PROPERTY,
-                    CONFIG_OLD_CLUSTER_PROPERTY,
-                    DEFAULT_CLUSTER_PROPERTY);
-            builder.withWrite(true);
-            builder.withPartitionProperty(writeProperty).withWriteProperty(writeProperty);
-
-            write(builder::timeWrite, graph, communities, configuration, writeProperty);
-        }
-
-        return Stream.of(builder.build(tracker, graph.nodeCount(), communities::setIdOf));
-    }
-
-    private PropertyMapping[] createPropertyMappings(String communityProperty) {
-        return new PropertyMapping[]{
-                PropertyMapping.of(SEED_TYPE, communityProperty, -1),
-        };
-    }
-
-    private void write(
-            Supplier<ProgressTimer> timer,
-            Graph graph,
-            DisjointSetStruct struct,
-            ProcedureConfiguration configuration, String writeProperty) {
-        try (ProgressTimer ignored = timer.get()) {
-            write(graph, struct, configuration, writeProperty);
-        }
-    }
-
-    private void write(
-            Graph graph,
-            DisjointSetStruct struct,
-            ProcedureConfiguration configuration, String writeProperty) {
-        log.debug("Writing results");
-        Exporter exporter = Exporter.of(api, graph)
-                .withLog(log)
-                .parallel(
-                        Pools.DEFAULT,
-                        configuration.getWriteConcurrency(),
-                        TerminationFlag.wrap(transaction))
-                .build();
-        exporter.write(
-                writeProperty,
-                struct,
-                DisjointSetStruct.Translator.INSTANCE);
-    }
-
-    private DisjointSetStruct compute(
-            final Builder builder,
-            final AllocationTracker tracker,
-            final ProcedureConfiguration configuration,
-            final Graph graph) {
-
-        T algo = newAlgorithm(graph, configuration, tracker);
-        final DisjointSetStruct algoResult = runWithExceptionLogging(
-                "UnionFind failed",
-                () -> builder.timeEval((Supplier<DisjointSetStruct>) algo::compute));
-
-        log.info("UnionFind: overall memory usage: %s", tracker.getUsageString());
-
-        algo.release();
-        graph.release();
-
-        return algoResult;
-    }
-
     @Override
     GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
 
@@ -318,6 +209,147 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
             }
         }
         return new UnionFindFactory<>(algorithmType, incremental);
+    }
+
+    private Stream<DisjointSetStruct.Result> stream(
+            String label,
+            String relationship,
+            Map<String, Object> config,
+            UnionFindType algoImpl) {
+
+        ProcedureSetup setup = setup(label, relationship, config, algoImpl);
+
+        if (setup.graph.isEmpty()) {
+            setup.graph.release();
+            return Stream.empty();
+        }
+
+        DisjointSetStruct communities = compute(setup);
+
+        setup.graph.release();
+        return communities.resultStream(setup.graph);
+    }
+
+    private Stream<UnionFindResult> run(
+            String label,
+            String relationship,
+            Map<String, Object> config,
+            UnionFindType algoImpl) {
+
+        ProcedureSetup setup = setup(label, relationship, config, algoImpl);
+
+        if (setup.graph.isEmpty()) {
+            setup.graph.release();
+            return Stream.of(UnionFindResult.EMPTY);
+        }
+
+        DisjointSetStruct communities = compute(setup);
+
+        if (setup.procedureConfig.isWriteFlag()) {
+            String writeProperty = setup.procedureConfig.get(
+                    CONFIG_CLUSTER_PROPERTY,
+                    CONFIG_OLD_CLUSTER_PROPERTY,
+                    DEFAULT_CLUSTER_PROPERTY);
+            setup.builder.withWrite(true);
+            setup.builder.withPartitionProperty(writeProperty).withWriteProperty(writeProperty);
+
+            write(setup.builder::timeWrite, setup.graph, communities, setup.procedureConfig, writeProperty);
+        }
+
+        return Stream.of(setup.builder.build(setup.tracker, setup.graph.nodeCount(), communities::setIdOf));
+    }
+
+    private ProcedureSetup setup(String label, String relationship, Map<String, Object> config, UnionFindType algoImpl) {
+        final Builder builder = new Builder();
+        config.put(CONFIG_PARALLEL_ALGO, algoImpl.name());
+
+        ProcedureConfiguration configuration = newConfig(label, relationship, config);
+        checkUnionStrategy(configuration);
+
+        AllocationTracker tracker = AllocationTracker.create();
+        Graph graph = loadGraph(configuration, tracker, builder);
+        return new ProcedureSetup(builder, graph, tracker, configuration);
+    }
+
+    private PropertyMapping[] createPropertyMappings(String communityProperty) {
+        return new PropertyMapping[]{
+                PropertyMapping.of(SEED_TYPE, communityProperty, -1),
+        };
+    }
+
+    private void checkUnionStrategy(ProcedureConfiguration config) {
+        Optional<String> maybeValue = config.getString(UnionFindFactory.CONFIG_UNION_STRATEGY);
+        if (maybeValue.isPresent()) {
+            String unionStrategy = maybeValue.get();
+            if (!(unionStrategy.equalsIgnoreCase(UnionStrategy.ByRank.NAME) ||
+                  unionStrategy.equalsIgnoreCase(UnionStrategy.ByMin.NAME))) {
+                throw new IllegalArgumentException(String.format("Unsupported unionStrategy '%s'. " +
+                                                                 "Supported values are: " +
+                                                                 "'%s', '%s'",
+                        unionStrategy, UnionStrategy.ByRank.NAME, UnionStrategy.ByMin.NAME));
+            }
+        }
+    }
+
+    private void write(
+            Supplier<ProgressTimer> timer,
+            Graph graph,
+            DisjointSetStruct struct,
+            ProcedureConfiguration configuration, String writeProperty) {
+        try (ProgressTimer ignored = timer.get()) {
+            write(graph, struct, configuration, writeProperty);
+        }
+    }
+
+    private void write(
+            Graph graph,
+            DisjointSetStruct struct,
+            ProcedureConfiguration configuration, String writeProperty) {
+        log.debug("Writing results");
+        Exporter exporter = Exporter.of(api, graph)
+                .withLog(log)
+                .parallel(
+                        Pools.DEFAULT,
+                        configuration.getWriteConcurrency(),
+                        TerminationFlag.wrap(transaction))
+                .build();
+        exporter.write(
+                writeProperty,
+                struct,
+                DisjointSetStruct.Translator.INSTANCE);
+    }
+
+    private DisjointSetStruct compute(final ProcedureSetup init) {
+
+        T algo = newAlgorithm(init.graph, init.procedureConfig, init.tracker);
+        final DisjointSetStruct algoResult = runWithExceptionLogging(
+                "UnionFind failed",
+                () -> init.builder.timeEval((Supplier<DisjointSetStruct>) algo::compute));
+
+        log.info("UnionFind: overall memory usage: %s", init.tracker.getUsageString());
+
+        algo.release();
+        init.graph.release();
+
+        return algoResult;
+    }
+
+    public static class ProcedureSetup {
+        final Builder builder;
+        final Graph graph;
+        final AllocationTracker tracker;
+        final ProcedureConfiguration procedureConfig;
+
+        ProcedureSetup(
+                final Builder builder,
+                final Graph graph,
+                final AllocationTracker tracker,
+                final ProcedureConfiguration procedureConfig) {
+            this.builder = builder;
+            this.graph = graph;
+            this.tracker = tracker;
+            this.procedureConfig = procedureConfig;
+        }
     }
 
     public static class UnionFindResult {

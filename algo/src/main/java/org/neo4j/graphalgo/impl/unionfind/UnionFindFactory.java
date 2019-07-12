@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.dss.UnionStrategy;
 import org.neo4j.logging.Log;
 
 public class UnionFindFactory<A extends UnionFind<A>> extends AlgorithmFactory<A> {
@@ -32,6 +33,7 @@ public class UnionFindFactory<A extends UnionFind<A>> extends AlgorithmFactory<A
     public static final String CONFIG_PARALLEL_ALGO = "parallel_algo";
     public static final String CONFIG_THRESHOLD = "threshold";
     public static final String CONFIG_SEED_PROPERTY = "seedProperty";
+    public static final String CONFIG_UNION_STRATEGY = "unionStrategy";
 
     public static final String SEED_TYPE = "seed";
 
@@ -56,7 +58,10 @@ public class UnionFindFactory<A extends UnionFind<A>> extends AlgorithmFactory<A
 
         UnionFind.Config algoConfig = new UnionFind.Config(
                 graph.nodeProperties(SEED_TYPE),
-                configuration.get(CONFIG_THRESHOLD, Double.NaN)
+                configuration.get(CONFIG_THRESHOLD, Double.NaN),
+                configuration
+                        .get(CONFIG_UNION_STRATEGY, UnionStrategy.ByRank.NAME)
+                        .equalsIgnoreCase(UnionStrategy.ByRank.NAME)
         );
 
         final UnionFind<?> algo = algorithmType.create(

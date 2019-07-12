@@ -85,7 +85,7 @@ public final class DegreeCentralityProc {
                 weightPropertyKey,
                 direction);
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.of(statsBuilder.build());
         }
@@ -147,7 +147,7 @@ public final class DegreeCentralityProc {
                 weightPropertyKey,
                 direction);
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }
