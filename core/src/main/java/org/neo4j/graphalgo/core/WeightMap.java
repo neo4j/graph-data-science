@@ -78,6 +78,11 @@ public final class WeightMap implements WeightMapping {
         return MEMORY_ESTIMATION;
     }
 
+    @Override
+    public long size() {
+        return weights.size();
+    }
+
     /**
      * return the weight for id or defaultValue if unknown
      */
@@ -111,10 +116,6 @@ public final class WeightMap implements WeightMapping {
 
     public int propertyId() {
         return propertyId;
-    }
-
-    public int size() {
-        return weights.size();
     }
 
     public double defaultValue() {

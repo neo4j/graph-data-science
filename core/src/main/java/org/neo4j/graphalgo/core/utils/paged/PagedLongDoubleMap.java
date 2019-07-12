@@ -69,6 +69,10 @@ public final class PagedLongDoubleMap {
         this.tracker = tracker;
     }
 
+    public long size() {
+        return Arrays.stream(pages).mapToLong(TrackingIntDoubleHashMap::size).sum();
+    }
+
     public double getOrDefault(long index, double defaultValue) {
         int pageIndex = pageIndex(index);
         if (pageIndex < pages.length) {

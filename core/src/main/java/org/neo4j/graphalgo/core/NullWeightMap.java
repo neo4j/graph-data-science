@@ -40,6 +40,11 @@ public class NullWeightMap implements WeightMapping {
     }
 
     @Override
+    public long size() {
+        return 0;
+    }
+
+    @Override
     public double get(long id) {
         return defaultValue;
     }

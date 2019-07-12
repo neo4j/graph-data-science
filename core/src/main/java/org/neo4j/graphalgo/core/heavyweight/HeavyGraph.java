@@ -143,6 +143,11 @@ public class HeavyGraph implements Graph {
         return new HugeWeightMapping() {
 
             @Override
+            public long size() {
+                return weightMapping.size();
+            }
+
+            @Override
             public double weight(long source, long target) {
                 checkSize(source, target);
                 return weightMapping.get((int) source, (int) target);

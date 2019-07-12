@@ -40,6 +40,11 @@ public class HugeNullWeightMap implements HugeWeightMapping {
     }
 
     @Override
+    public long size() {
+        return 0;
+    }
+
+    @Override
     public double weight(final long source, final long target) {
         return defaultValue;
     }

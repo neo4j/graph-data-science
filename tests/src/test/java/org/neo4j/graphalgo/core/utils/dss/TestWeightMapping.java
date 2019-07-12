@@ -65,7 +65,8 @@ public final class TestWeightMapping implements HugeWeightMapping {
         return 0;
     }
 
-    public int size() {
+    @Override
+    public long size() {
         return weights.size();
     }
 }

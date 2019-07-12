@@ -27,6 +27,11 @@ import org.neo4j.graphalgo.core.utils.RawValues;
 public interface WeightMapping {
 
     /**
+     * Returns the number of keys stores in that mapping.
+     */
+    long size();
+
+    /**
      * returns the weight for ID if set or the load-time specified default weight otherwise
      */
     double get(long id);

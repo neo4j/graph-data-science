@@ -105,6 +105,7 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
 
         log.debug("[%s] Capacity: %d", getClass().getSimpleName(), capacity);
         log.debug("[%s] Max community id (before init): %d", getClass().getSimpleName(), maxCommunity);
+        log.debug("[%s] Community Mapping size: %d", getClass().getSimpleName(), communityMapping.size());
 
         final LongLongMap internalMapping = new LongLongHashMap();
         this.internalToProvidedIds.clear();
