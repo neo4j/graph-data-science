@@ -25,9 +25,13 @@ import com.carrotsearch.hppc.cursors.IntIntCursor;
 import org.junit.AfterClass;
 import org.junit.Assume;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.neo4j.graphalgo.core.utils.paged.dss.UnionStrategy;
+import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -43,6 +47,9 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
 public class UnionFindProcTest {
+
+    @Rule
+    public ExpectedException expectedEx = ExpectedException.none();
 
     private static GraphDatabaseAPI db;
 
@@ -124,6 +131,72 @@ public class UnionFindProcTest {
                     assertEquals(1L, row.getNumber("setCount"));
                     return true;
                 });
+    }
+
+    @Test
+    public void testUnionFindWithMinStrategy() throws Exception {
+        String query = "CALL algo.unionFind('', '', { graph: '%s', unionStrategy: 'min' }) " +
+                       "YIELD setCount, communityCount";
+
+        db.execute(String.format(query, graphImpl)).accept(
+                (Result.ResultVisitor<Exception>) row -> {
+                    assertEquals(3L, row.getNumber("communityCount"));
+                    assertEquals(3L, row.getNumber("setCount"));
+                    return true;
+                });
+    }
+
+    @Test
+    public void testUnionFindWithRankStrategy() throws Exception {
+        String query = "CALL algo.unionFind('', '', { graph: '%s', unionStrategy: 'rank' }) " +
+                       "YIELD setCount, communityCount";
+
+        db.execute(String.format(query, graphImpl)).accept(
+                (Result.ResultVisitor<Exception>) row -> {
+                    assertEquals(3L, row.getNumber("communityCount"));
+                    assertEquals(3L, row.getNumber("setCount"));
+                    return true;
+                });
+    }
+
+    @Test
+    public void testUnionFindWithSeedAndMinStrategy() throws Exception {
+        String query = "CALL algo.unionFind('', '', { graph: '%s', seedProperty: 'seedId', unionStrategy: 'min' }) " +
+                       "YIELD setCount, communityCount";
+
+        db.execute(String.format(query, graphImpl)).accept(
+                (Result.ResultVisitor<Exception>) row -> {
+                    assertEquals(3L, row.getNumber("communityCount"));
+                    assertEquals(3L, row.getNumber("setCount"));
+                    return true;
+                });
+    }
+
+    @Test
+    public void testUnionFindWithSeedAndRankStrategy() throws Exception {
+        String query = "CALL algo.unionFind('', '', { graph: '%s', seedProperty: 'seedId', unionStrategy: 'rank' }) " +
+                       "YIELD setCount, communityCount";
+
+        db.execute(String.format(query, graphImpl)).accept(
+                (Result.ResultVisitor<Exception>) row -> {
+                    assertEquals(3L, row.getNumber("communityCount"));
+                    assertEquals(3L, row.getNumber("setCount"));
+                    return true;
+                });
+    }
+
+    @Test
+    public void testUnionFindWithUnsupportedUnionStrategy() {
+        String query = "CALL algo.unionFind('', '', { graph: '%s', seedProperty: 'seedId', unionStrategy: 'foobar' }) " +
+                       "YIELD setCount, communityCount";
+
+        expectedEx.expect(QueryExecutionException.class);
+        expectedEx.expectMessage("Unsupported");
+        expectedEx.expectMessage("'foobar'");
+        expectedEx.expectMessage(UnionStrategy.ByMin.NAME);
+        expectedEx.expectMessage(UnionStrategy.ByRank.NAME);
+
+        db.execute(String.format(query, graphImpl));
     }
 
     @Test
