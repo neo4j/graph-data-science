@@ -116,6 +116,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
     private final ImportProgress progress;
     private final HugeLongArrayBuilder idMapBuilder;
     private final IntObjectMap<HugeNodePropertiesBuilder> nodePropertyBuilders;
+    private long nodePropertiesRead = 0L;
 
     private volatile long relationshipsImported;
 
@@ -161,6 +162,10 @@ final class NodesScanner extends StatementAction implements RecordScanner {
             }
             relationshipsImported = allImported;
         }
+    }
+
+    public long propertiesImported() {
+        return nodePropertiesRead;
     }
 
     @Override
@@ -216,7 +221,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
             long nodeReference,
             long propertiesReference,
             IntObjectMap<HugeNodePropertiesBuilder> nodeProperties,
-            long localIndex,
+            long internalId,
             CursorFactory cursors,
             Read read) {
         try (PropertyCursor pc = cursors.allocatePropertyCursor()) {
@@ -227,9 +232,8 @@ final class NodesScanner extends StatementAction implements RecordScanner {
                     Value value = pc.propertyValue();
                     double defaultValue = props.defaultValue();
                     double weight = ReadHelper.extractValue(value, defaultValue);
-                    if (weight != defaultValue) {
-                        props.set(localIndex, weight);
-                    }
+                    props.set(internalId, weight);
+                    nodePropertiesRead++;
                 }
             }
         }

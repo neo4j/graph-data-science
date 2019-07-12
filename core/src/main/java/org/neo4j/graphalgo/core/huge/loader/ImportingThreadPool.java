@@ -58,26 +58,35 @@ final class ImportingThreadPool {
         ParallelUtil.run(tasks, pool);
         ParallelUtil.run(createScanner.flushTasks(), pool);
         long took = System.nanoTime() - scannerStart;
-        long imported = 0L;
+        long importedRecords = 0L;
+        long importedProperties = 0L;
         for (RecordScanner task : tasks) {
-            imported += task.recordsImported();
+            importedRecords += task.recordsImported();
+            importedProperties += task.propertiesImported();
         }
 
-        return new ImportResult(took, imported);
+        return new ImportResult(took, importedRecords, importedProperties);
     }
 
     static final class ImportResult {
         final long tookNanos;
         final long recordsImported;
+        final long propertiesImported;
 
-        ImportResult(long tookNanos, long recordsImported) {
+        ImportResult(long tookNanos, long recordsImported, long propertiesImported) {
             this.tookNanos = tookNanos;
             this.recordsImported = recordsImported;
+            this.propertiesImported = propertiesImported;
         }
     }
 
     private static final class NoRecordsScanner implements RecordScanner, ImportingThreadPool.CreateScanner {
         private static final NoRecordsScanner INSTANCE = new NoRecordsScanner();
+
+        @Override
+        public long propertiesImported() {
+            return 0;
+        }
 
         @Override
         public long recordsImported() {

@@ -171,10 +171,10 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
     @Override
     GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
 
-        final String communityProperty = config.getString(CONFIG_SEED_PROPERTY, null);
+        final String seedProperty = config.getString(CONFIG_SEED_PROPERTY, null);
 
-        if (communityProperty != null) {
-            loader.withOptionalNodeProperties(createPropertyMappings(communityProperty));
+        if (seedProperty != null) {
+            loader.withOptionalNodeProperties(createPropertyMappings(seedProperty));
         }
 
         return loader
@@ -271,9 +271,9 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
         return new ProcedureSetup(builder, graph, tracker, configuration);
     }
 
-    private PropertyMapping[] createPropertyMappings(String communityProperty) {
+    private PropertyMapping[] createPropertyMappings(String seedProperty) {
         return new PropertyMapping[]{
-                PropertyMapping.of(SEED_TYPE, communityProperty, -1),
+                PropertyMapping.of(SEED_TYPE, seedProperty, -1),
         };
     }
 
