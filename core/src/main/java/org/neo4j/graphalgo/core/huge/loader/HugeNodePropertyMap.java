@@ -66,10 +66,6 @@ final class HugeNodePropertyMap implements HugeWeightMapping {
         return defaultValue;
     }
 
-    public void put(long nodeId, double value) {
-        properties.put(nodeId, value);
-    }
-
     @Override
     public long release() {
         if (properties != null) {
