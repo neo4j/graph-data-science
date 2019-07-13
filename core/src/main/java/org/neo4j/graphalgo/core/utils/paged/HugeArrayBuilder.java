@@ -88,6 +88,7 @@ abstract class HugeArrayBuilder<Array, Huge extends HugeArray<Array, ?, Huge>> {
             if (!cursor.next()) {
                 return false;
             }
+            start += length;
             buffer = cursor.array;
             offset = cursor.offset;
             length = cursor.limit - cursor.offset;
