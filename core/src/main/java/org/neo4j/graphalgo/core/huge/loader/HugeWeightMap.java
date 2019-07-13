@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
@@ -83,7 +84,11 @@ abstract class HugeWeightMap {
 
         @Override
         public long size() {
-            return Arrays.stream(data).mapToLong(TrackingLongDoubleHashMap::size).sum();
+            return Arrays
+                    .stream(data)
+                    .filter(Objects::nonNull)
+                    .mapToLong(TrackingLongDoubleHashMap::size)
+                    .sum();
         }
 
         @Override
@@ -163,7 +168,11 @@ abstract class HugeWeightMap {
 
         @Override
         public long size() {
-            return Arrays.stream(pages).mapToLong(Page::size).sum();
+            return Arrays
+                    .stream(pages)
+                    .filter(Objects::nonNull)
+                    .mapToLong(Page::size)
+                    .sum();
         }
 
         @Override

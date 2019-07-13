@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
@@ -70,7 +71,11 @@ public final class PagedLongDoubleMap {
     }
 
     public long size() {
-        return Arrays.stream(pages).mapToLong(TrackingIntDoubleHashMap::size).sum();
+        return Arrays
+                .stream(pages)
+                .filter(Objects::nonNull)
+                .mapToLong(TrackingIntDoubleHashMap::size)
+                .sum();
     }
 
     public double getOrDefault(long index, double defaultValue) {
