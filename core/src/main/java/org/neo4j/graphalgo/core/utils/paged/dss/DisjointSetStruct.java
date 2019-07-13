@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
-import org.neo4j.logging.Log;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -40,11 +39,9 @@ import java.util.stream.Stream;
 public abstract class DisjointSetStruct {
 
     private final UnionStrategy unionStrategy;
-    protected final Log log;
 
-    public DisjointSetStruct(UnionStrategy unionStrategy, Log log) {
+    public DisjointSetStruct(UnionStrategy unionStrategy) {
         this.unionStrategy = unionStrategy;
-        this.log = log;
     }
 
     /**

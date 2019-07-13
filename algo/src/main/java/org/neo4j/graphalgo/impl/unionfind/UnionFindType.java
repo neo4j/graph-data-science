@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.impl.unionfind;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.logging.Log;
 
 import java.util.concurrent.ExecutorService;
 
@@ -36,17 +35,14 @@ public enum UnionFindType {
                 final int minBatchSize,
                 final int concurrency,
                 final UnionFind.Config config,
-                final AllocationTracker tracker,
-                final Log log) {
-
+                final AllocationTracker tracker) {
             return new UnionFindQueue(
                     graph,
                     executor,
                     minBatchSize,
                     concurrency,
                     config,
-                    tracker,
-                    log);
+                    tracker);
         }
 
         @Override
@@ -62,17 +58,13 @@ public enum UnionFindType {
                 final int minBatchSize,
                 final int concurrency,
                 final UnionFind.Config config,
-                final AllocationTracker tracker,
-                final Log log) {
-
+                final AllocationTracker tracker) {
             return new UnionFindForkJoin(
                     graph,
                     minBatchSize,
                     concurrency,
                     config,
-                    tracker,
-                    log
-            );
+                    tracker);
         }
 
         @Override
@@ -88,17 +80,14 @@ public enum UnionFindType {
                 final int minBatchSize,
                 final int concurrency,
                 final UnionFind.Config config,
-                final AllocationTracker tracker,
-                final Log log) {
-
+                final AllocationTracker tracker) {
             return new UnionFindFJMerge(
                     graph,
                     executor,
                     minBatchSize,
                     concurrency,
                     config,
-                    tracker,
-                    log);
+                    tracker);
         }
 
         @Override
@@ -114,14 +103,11 @@ public enum UnionFindType {
                 final int minBatchSize,
                 final int concurrency,
                 final UnionFind.Config config,
-                final AllocationTracker tracker,
-                final Log log) {
-
+                final AllocationTracker tracker) {
             return new UnionFindSeq(
                     graph,
                     config,
-                    AllocationTracker.EMPTY,
-                    log
+                    tracker
             );
         }
 
@@ -137,8 +123,7 @@ public enum UnionFindType {
             int minBatchSize,
             int concurrency,
             final UnionFind.Config config,
-            AllocationTracker tracker,
-            final Log log);
+            AllocationTracker tracker);
 
     MemoryEstimation memoryEstimation() {
         return memoryEstimation(false);

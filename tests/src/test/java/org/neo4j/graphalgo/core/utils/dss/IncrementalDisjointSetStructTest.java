@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.IncrementalDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.UnionStrategy;
-import org.neo4j.logging.NullLog;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -44,8 +43,7 @@ public class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
                 capacity,
                 weightMapping,
                 new UnionStrategy.ByMin(),
-                AllocationTracker.EMPTY,
-                NullLog.getInstance());
+                AllocationTracker.EMPTY);
     }
 
     @Test

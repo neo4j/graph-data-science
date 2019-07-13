@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.IncrementalDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.RankedDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.UnionStrategy;
-import org.neo4j.logging.Log;
 
 public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> {
 
@@ -44,14 +43,14 @@ public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> 
         return algoConfig.threshold;
     }
 
-    DisjointSetStruct initDisjointSetStruct(long nodeCount, AllocationTracker tracker, Log log) {
+    DisjointSetStruct initDisjointSetStruct(long nodeCount, AllocationTracker tracker) {
         UnionStrategy unionStrategy = algoConfig.isUnionByRank ?
                 new UnionStrategy.ByRank(nodeCount, tracker) :
                 new UnionStrategy.ByMin();
 
         return algoConfig.communityMap == null ?
-                new RankedDisjointSetStruct(nodeCount, unionStrategy, tracker, log) :
-                new IncrementalDisjointSetStruct(nodeCount, algoConfig.communityMap, unionStrategy, tracker, log);
+                new RankedDisjointSetStruct(nodeCount, unionStrategy, tracker) :
+                new IncrementalDisjointSetStruct(nodeCount, algoConfig.communityMap, unionStrategy, tracker);
     }
 
     /**

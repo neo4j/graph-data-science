@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.impl.unionfind.UnionFindSeq;
 import org.neo4j.graphalgo.impl.unionfind.UnionFind;
 import org.neo4j.graphalgo.impl.unionfind.UnionFindType;
-import org.neo4j.logging.NullLog;
 
 public enum UFBenchmarkCombination {
 
@@ -60,8 +59,8 @@ public enum UFBenchmarkCombination {
                 (int) (graph.nodeCount() / Pools.DEFAULT_CONCURRENCY),
                 Pools.DEFAULT_CONCURRENCY,
                 algoConfig,
-                AllocationTracker.EMPTY,
-                NullLog.getInstance());
+                AllocationTracker.EMPTY
+        );
         DisjointSetStruct communities = unionFindAlgo.compute();
         unionFindAlgo.release();
         return communities;

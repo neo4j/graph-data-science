@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.RankedDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.UnionStrategy;
-import org.neo4j.logging.NullLog;
 
 import static org.junit.Assert.assertEquals;
 
@@ -38,8 +37,7 @@ public class RankedDisjointSetStructTest extends DisjointSetStructTest {
         return new RankedDisjointSetStruct(
                 capacity,
                 new UnionStrategy.ByRank(capacity, tracker),
-                tracker,
-                NullLog.getInstance());
+                tracker);
     }
 
     @Test

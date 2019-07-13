@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.logging.Log;
 
 import java.util.stream.LongStream;
 
@@ -79,9 +78,8 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
             long capacity,
             HugeWeightMapping communityMapping,
             UnionStrategy unionStrategy,
-            AllocationTracker tracker,
-            Log log) {
-        super(unionStrategy, log);
+            AllocationTracker tracker) {
+        super(unionStrategy);
         this.parent = HugeLongArray.newArray(capacity, tracker);
         this.internalToProvidedIds = new LongLongHashMap();
         this.communityMapping = communityMapping;
@@ -102,10 +100,6 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
                 .range(0, capacity)
                 .map(id -> (long) communityMapping.nodeWeight(id, -1))
                 .max().orElse(0);
-
-        log.debug("[%s] Capacity: %d", getClass().getSimpleName(), capacity);
-        log.debug("[%s] Max community id (before init): %d", getClass().getSimpleName(), maxCommunity);
-        log.debug("[%s] Community Mapping size: %d", getClass().getSimpleName(), communityMapping.size());
 
         final LongLongMap internalMapping = new LongLongHashMap();
         this.internalToProvidedIds.clear();
@@ -129,10 +123,6 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
             }
             return parentValue;
         });
-
-        log.debug("[%s] Internal mapping size: %d", getClass().getSimpleName(), internalMapping.size());
-        log.debug("[%s] Internal to provided ids size (after init): %d", getClass().getSimpleName(), internalToProvidedIds.size());
-        log.debug("[%s] Max community id (after init): %d", getClass().getSimpleName(), maxCommunity);
     }
 
     /**

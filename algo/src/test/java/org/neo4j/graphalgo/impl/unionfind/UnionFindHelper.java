@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.impl.unionfind;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.logging.NullLog;
 
 import java.util.concurrent.ExecutorService;
 
@@ -38,7 +37,7 @@ public final class UnionFindHelper {
             AllocationTracker tracker) {
 
         UnionFind<?> algo = algorithmType
-                .create(graph, executor, minBatchSize, concurrency, config, tracker, NullLog.getInstance());
+                .create(graph, executor, minBatchSize, concurrency, config, tracker);
         DisjointSetStruct communities = algo.compute();
         algo.release();
         return communities;

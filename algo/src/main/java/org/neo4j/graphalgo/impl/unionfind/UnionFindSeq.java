@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.IncrementalDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.RankedDisjointSetStruct;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.logging.Log;
 
 /**
  * Sequential UnionFind:
@@ -65,12 +64,11 @@ public class UnionFindSeq extends UnionFind<UnionFindSeq> {
     public UnionFindSeq(
             Graph graph,
             UnionFind.Config algoConfig,
-            AllocationTracker tracker,
-            Log log) {
+            AllocationTracker tracker) {
         super(graph, algoConfig);
 
         this.nodeCount = graph.nodeCount();
-        this.dss = initDisjointSetStruct(nodeCount, tracker, log);
+        this.dss = initDisjointSetStruct(nodeCount, tracker);
 
         this.unrestricted = (source, target) -> {
             dss.union(source, target);

@@ -70,8 +70,7 @@ public class UnionFindFactory<A extends UnionFind<A>> extends AlgorithmFactory<A
                 minBatchSize,
                 concurrency,
                 algoConfig,
-                tracker,
-                log);
+                tracker);
         return (A) algo;
     }
 

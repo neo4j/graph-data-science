@@ -29,9 +29,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.IncrementalDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.RankedDisjointSetStruct;
-import org.neo4j.graphalgo.core.utils.paged.dss.UnionStrategy;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.logging.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,7 +59,6 @@ public class UnionFindFJMerge extends UnionFind<UnionFindFJMerge> {
     private final long nodeCount;
     private final long batchSize;
     private DisjointSetStruct dss;
-    private final Log log;
 
     public static MemoryEstimation memoryEstimation(final boolean incremental) {
         return MemoryEstimations.builder(UnionFindFJMerge.class)
@@ -91,16 +88,14 @@ public class UnionFindFJMerge extends UnionFind<UnionFindFJMerge> {
             ExecutorService executor,
             int minBatchSize,
             int concurrency,
-            Config algoConfig,
-            AllocationTracker tracker,
-            Log log) {
+            UnionFind.Config algoConfig,
+            AllocationTracker tracker) {
         super(graph, algoConfig);
 
         this.nodeCount = graph.nodeCount();
         this.executor = executor;
         this.tracker = tracker;
-        this.log = log;
-        this.dss = initDisjointSetStruct(nodeCount, tracker, log);
+        this.dss = initDisjointSetStruct(nodeCount, tracker);
         this.batchSize = ParallelUtil.adjustBatchSize(
                 nodeCount,
                 concurrency,
@@ -164,7 +159,7 @@ public class UnionFindFJMerge extends UnionFind<UnionFindFJMerge> {
         UFProcess(long offset, long length) {
             this.offset = offset;
             this.end = offset + length;
-            struct = initDisjointSetStruct(nodeCount, tracker, log);
+            struct = initDisjointSetStruct(nodeCount, tracker);
             rels = graph.concurrentCopy();
         }
 
@@ -207,7 +202,7 @@ public class UnionFindFJMerge extends UnionFind<UnionFindFJMerge> {
             this.offset = offset;
             this.end = offset + length;
             this.threshold = threshold;
-            struct = initDisjointSetStruct(nodeCount, tracker, log);
+            struct = initDisjointSetStruct(nodeCount, tracker);
             rels = graph.concurrentCopy();
         }
 
