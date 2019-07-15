@@ -20,19 +20,14 @@
 package org.neo4j.graphalgo.core.utils.paged.dss;
 
 
-import com.carrotsearch.hppc.OpenHashContainers;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 
 import java.util.stream.LongStream;
-
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
 /**
  * Implements {@link DisjointSetStruct} with support for incremental computation based on a previously computed mapping
@@ -45,17 +40,7 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
     public static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations.builder(
             IncrementalDisjointSetStruct.class)
             .perNode("parent", HugeLongArray::memoryEstimation)
-            .rangePerNode("internalToProvidedIds", nodeCount -> {
-                int minBufferSize = OpenHashContainers.emptyBufferSize();
-                int maxBufferSize = OpenHashContainers.expectedBufferSize((int) nodeCount);
-                if (maxBufferSize < minBufferSize) {
-                    minBufferSize = maxBufferSize;
-                    maxBufferSize = OpenHashContainers.emptyBufferSize();
-                }
-                long min = sizeOfLongArray(minBufferSize) + sizeOfDoubleArray(minBufferSize);
-                long max = sizeOfLongArray(maxBufferSize) + sizeOfDoubleArray(maxBufferSize);
-                return MemoryRange.of(min, max);
-            })
+            .add("internalToProvidedIds", HugeLongLongMap.memoryEstimation())
             .build();
 
     private final HugeLongArray parent;

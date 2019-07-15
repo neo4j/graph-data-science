@@ -22,6 +22,8 @@ package org.neo4j.graphalgo.core.utils.paged;
 import com.carrotsearch.hppc.BitMixer;
 import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.neo4j.graphalgo.core.utils.BitUtil;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -31,6 +33,14 @@ import java.util.NoSuchElementException;
  * store more than 2B values
  */
 public final class HugeLongLongMap implements Iterable<LongLongCursor> {
+
+    private static final MemoryEstimation MEMORY_REQUIREMENTS = MemoryEstimations
+            .builder(HugeLongLongMap.class)
+            .field("keysCursor", HugeCursor.class)
+            .field("entries", EntryIterator.class)
+            .perNode("keys", HugeLongArray::memoryEstimation)
+            .perNode("values", HugeLongArray::memoryEstimation)
+            .build();
 
     private final AllocationTracker tracker;
 
@@ -45,6 +55,10 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
 
     private static final long DEFAULT_EXPECTED_ELEMENTS = 4L;
     private static final double LOAD_FACTOR = 0.75;
+
+    public static MemoryEstimation memoryEstimation() {
+        return MEMORY_REQUIREMENTS;
+    }
 
     /**
      * New instance with sane defaults.
