@@ -72,7 +72,7 @@ public final class LoadGraphProc extends BaseProc {
         try (ProgressTimer timer = ProgressTimer.start()) {
             Class<? extends GraphFactory> graphImpl = configuration.getGraphImpl();
             GraphLoader loader = newLoader(configuration, AllocationTracker.EMPTY);
-            Graph graph = loader.load(graphImpl);
+            Graph graph = runWithExceptionLogging("Graph loading failed", () -> loader.load(graphImpl));
 
             stats.nodes = graph.nodeCount();
             stats.relationships = graph.relationshipCount();
