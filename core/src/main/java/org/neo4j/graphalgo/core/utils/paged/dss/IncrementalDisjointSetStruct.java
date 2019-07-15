@@ -20,8 +20,6 @@
 package org.neo4j.graphalgo.core.utils.paged.dss;
 
 
-import com.carrotsearch.hppc.LongLongHashMap;
-import com.carrotsearch.hppc.LongLongMap;
 import com.carrotsearch.hppc.OpenHashContainers;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -29,6 +27,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 
 import java.util.stream.LongStream;
 
@@ -60,7 +59,7 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
             .build();
 
     private final HugeLongArray parent;
-    private final LongLongHashMap internalToProvidedIds;
+    private final HugeLongLongMap internalToProvidedIds;
     private final HugeWeightMapping communityMapping;
     private final long capacity;
     private long maxCommunity;
@@ -81,10 +80,10 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
             AllocationTracker tracker) {
         super(unionStrategy);
         this.parent = HugeLongArray.newArray(capacity, tracker);
-        this.internalToProvidedIds = new LongLongHashMap();
+        this.internalToProvidedIds = new HugeLongLongMap(capacity, tracker);
         this.communityMapping = communityMapping;
         this.capacity = capacity;
-        init();
+        init(tracker);
     }
 
     @Override
@@ -95,14 +94,13 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
     /**
      * reset the container
      */
-    private void init() {
+    private void init(AllocationTracker tracker) {
         this.maxCommunity = LongStream
                 .range(0, capacity)
                 .map(id -> (long) communityMapping.nodeWeight(id, -1))
                 .max().orElse(0);
 
-        final LongLongMap internalMapping = new LongLongHashMap();
-        this.internalToProvidedIds.clear();
+        final HugeLongLongMap internalMapping = new HugeLongLongMap(capacity, tracker);
 
         this.parent.setAll(nodeId -> {
             long parentValue = -1;
@@ -111,15 +109,15 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
             if (!Double.isNaN(communityIdValue)) {
                 long communityId = (long) communityIdValue;
 
-                int idIndex = internalMapping.indexOf(communityId);
-                if (internalMapping.indexExists(idIndex)) {
-                    parentValue = internalMapping.indexGet(idIndex);
+                long internalCommunityId = internalMapping.getOrDefault(communityId, -1);
+                if (internalCommunityId != -1) {
+                    parentValue = internalCommunityId;
                 } else {
-                    internalToProvidedIds.put(nodeId, communityId);
-                    internalMapping.indexInsert(idIndex, communityId, nodeId);
+                    internalToProvidedIds.addTo(nodeId, communityId);
+                    internalMapping.addTo(communityId, nodeId);
                 }
             } else {
-                internalToProvidedIds.put(nodeId, ++maxCommunity);
+                internalToProvidedIds.addTo(nodeId, ++maxCommunity);
             }
             return parentValue;
         });
@@ -170,6 +168,8 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
 
     @Override
     long setIdOfRoot(final long rootId) {
-        return internalToProvidedIds.get(rootId);
+        long setId = internalToProvidedIds.getOrDefault(rootId, -1);
+        assert(setId != -1);
+        return setId;
     }
 }
