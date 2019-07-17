@@ -1,0 +1,20 @@
+[[experimental-algorithms]]
+= Experimental algorithms
+
+[abstract]
+--
+La di da.
+--
+
+include::experimental-algorithms-centrality.adoc[leveloffset=+1]
+
+include::experimental-algorithms-community.adoc[leveloffset=+1]
+
+include::experimental-algorithms-path-finding.adoc[leveloffset=+1]
+
+include::experimental-algorithms-similarity.adoc[leveloffset=+1]
+
+include::experimental-algorithms-link-prediction.adoc[leveloffset=+1]
+
+include::experimental-algorithms-preprocessing.adoc[leveloffset=+1]
+

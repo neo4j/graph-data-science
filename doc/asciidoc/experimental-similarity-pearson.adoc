@@ -55,7 +55,7 @@ For example, to get movie recommendations based on the preferences of users who 
 
 The Pearson Similarity function computes the similarity of two lists of numbers.
 
-include::similarity.adoc[tag=weighted-function-note]
+include::experimental-similarity.adoc[tag=weighted-function-note]
 
 We can use it to compute the similarity of two hardcoded lists.
 
@@ -126,8 +126,8 @@ include::scripts/similarity-pearson.cypher[tag=function-cypher-all]
 [[algorithms-similarity-pearson-procedure-sample]]
 == Pearson Similarity algorithm procedures sample
 
-include::similarity.adoc[tag=computation]
-include::similarity.adoc[tag=weighted-note]
+include::experimental-similarity.adoc[tag=computation]
+include::experimental-similarity.adoc[tag=weighted-note]
 
 
 .The following will create a sample graph:
@@ -271,7 +271,7 @@ include::scripts/similarity-pearson.cypher[tag=query]
 [[algorithms-similarity-pearson-source-target-ids]]
 == Specifying source and target ids
 
-include::similarity.adoc[tag=source-target-ids]
+include::experimental-similarity.adoc[tag=source-target-ids]
 
 We could use this technique to compute the similarity of a subset of items to all other items.
 

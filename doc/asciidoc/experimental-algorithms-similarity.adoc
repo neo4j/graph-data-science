@@ -20,8 +20,12 @@ These algorithms help calculate the similarity of nodes:
 * <<algorithms-similarity-overlap, Overlap Similarity>> (`algo.similarity.overlap`)
 // end::summary[]
 
-include::similarity-jaccard.adoc[leveloffset=2]
-include::similarity-cosine.adoc[leveloffset=2]
-include::similarity-pearson.adoc[leveloffset=2]
-include::similarity-euclidean.adoc[leveloffset=2]
-include::similarity-overlap.adoc[leveloffset=2]
+include::experimental-similarity-jaccard.adoc[leveloffset=+1]
+
+include::experimental-similarity-cosine.adoc[leveloffset=+1]
+
+include::experimental-similarity-pearson.adoc[leveloffset=+1]
+
+include::experimental-similarity-euclidean.adoc[leveloffset=+1]
+
+include::experimental-similarity-overlap.adoc[leveloffset=+1]

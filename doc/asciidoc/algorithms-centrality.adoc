@@ -1,40 +1,12 @@
 [[algorithms-centrality]]
-// tag::header[]
 = Centrality algorithms
-// end::header[]
 
-ifdef::env-docs[]
-[abstract]
---
-This chapter provides explanations and examples for each of the centrality algorithms in the Neo4j Graph Algorithms library.
---
-endif::env-docs[]
-
-// todo introduction to graph algorithms, also say something about pregel & parallelization
-// todo sensible ordering
-
-// tag::summary[]
 The following centrality algorithms determine the importance of distinct nodes in a network:
 
 * <<algorithms-pagerank, PageRank>> (`algo.pageRank`)
-* <<algorithms-articlerank, ArticleRank>> (`algo.articleRank`)
-* <<algorithms-betweenness-centrality, Betweenness Centrality>> (`algo.betweenness`)
-* <<algorithms-closeness-centrality, Closeness Centrality>> (`algo.closeness`)
-* <<algorithms-harmonic-centrality, Harmonic Centrality>> (`algo.closeness.harmonic`)
-* <<algorithms-eigenvector, Eigenvector Centrality>> (`algo.eigenvector`)
 * <<algorithms-degree-centrality, Degree Centrality>> (`algo.degree`)
-// end::summary[]
 
-include::pagerank.adoc[leveloffset=2]
+include::pagerank.adoc[leveloffset=+1]
 
-include::articlerank.adoc[leveloffset=2]
+include::degree-centrality.adoc[leveloffset=+1]
 
-include::betweenness-centrality.adoc[leveloffset=2]
-
-include::closeness-centrality.adoc[leveloffset=2]
-
-include::harmonic-centrality.adoc[leveloffset=2]
-
-include::eigenvector-centrality.adoc[leveloffset=2]
-
-include::degree-centrality.adoc[leveloffset=2]

@@ -18,4 +18,4 @@ The following feature and procedure can be used as part of the data preparation 
 * <<algorithms-one-hot-encoding, One Hot Encoding>> (`algo.ml.oneHotEncoding`)
 // end::summary[]
 
-include::one-hot-encoding.adoc[leveloffset=2]
+include::experimental-one-hot-encoding.adoc[leveloffset=+1]

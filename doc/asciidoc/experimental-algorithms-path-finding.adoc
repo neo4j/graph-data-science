@@ -34,16 +34,16 @@ If you are running these algorithms on a graph where the direction is important,
 For example, `direction:"INCOMING"` or `direction:"OUTGOING"`.
 ====
 
-include::minimum-weight-spanning-tree.adoc[leveloffset=2]
+include::experimental-minimum-weight-spanning-tree.adoc[leveloffset=+1]
 
-include::shortest-path.adoc[leveloffset=2]
+include::experimental-shortest-path.adoc[leveloffset=+1]
 
-include::single-shortest-path.adoc[leveloffset=2]
+include::experimental-single-shortest-path.adoc[leveloffset=+1]
 
-include::all-pairs-shortest-path.adoc[leveloffset=2]
+include::experimental-all-pairs-shortest-path.adoc[leveloffset=+1]
 
-include::astar.adoc[leveloffset=2]
+include::experimental-astar.adoc[leveloffset=+1]
 
-include::yens-k-shortest-paths.adoc[leveloffset=2]
+include::experimental-yens-k-shortest-paths.adoc[leveloffset=+1]
 
-include::random-walk.adoc[leveloffset=2]
+include::experimental-random-walk.adoc[leveloffset=+1]

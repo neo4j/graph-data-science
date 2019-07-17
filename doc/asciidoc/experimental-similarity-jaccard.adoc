@@ -132,7 +132,7 @@ include::scripts/similarity-jaccard.cypher[tag=function-cypher-all]
 == Jaccard Similarity algorithm procedures sample
 
 :procedure-name: Jaccard Similarity
-include::similarity.adoc[tag=computation]
+include::experimental-similarity.adoc[tag=computation]
 
 .The following will create a sample graph:
 [source, cypher]
@@ -252,7 +252,7 @@ include::scripts/similarity-jaccard.cypher[tag=query]
 [[algorithms-similarity-jaccard-source-target-ids]]
 == Specifying source and target ids
 
-include::similarity.adoc[tag=source-target-ids]
+include::experimental-similarity.adoc[tag=source-target-ids]
 
 We might want to use this technique when comparing nodes with different labels that intersect on a common label.
 In our sample dataset, recipes and people both have relationships to cuisines, which means we have a way of computing similarities between recipes and people.

@@ -191,7 +191,7 @@ include::scripts/similarity-overlap.cypher[tag=query]
 [[algorithms-similarity-overlap-source-target-ids]]
 == Specifying source and target ids
 
-include::similarity.adoc[tag=source-target-ids]
+include::experimental-similarity.adoc[tag=source-target-ids]
 
 We could use this technique to compute the similarity of a subset of items to all other items.
 

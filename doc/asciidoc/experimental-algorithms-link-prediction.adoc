@@ -24,9 +24,14 @@ We would then use the computed scores as part of a link prediction solution:
 // end::summary[]
 
 
-include::linkprediction-adamic-adar.adoc[leveloffset=2]
-include::linkprediction-common-neighbors.adoc[leveloffset=2]
-include::linkprediction-preferential-attachment.adoc[leveloffset=2]
-include::linkprediction-resource-allocation.adoc[leveloffset=2]
-include::linkprediction-same-community.adoc[leveloffset=2]
-include::linkprediction-total-neighbors.adoc[leveloffset=2]
+include::experimental-linkprediction-adamic-adar.adoc[leveloffset=+1]
+
+include::experimental-linkprediction-common-neighbors.adoc[leveloffset=+1]
+
+include::experimental-linkprediction-preferential-attachment.adoc[leveloffset=+1]
+
+include::experimental-linkprediction-resource-allocation.adoc[leveloffset=+1]
+
+include::experimental-linkprediction-same-community.adoc[leveloffset=+1]
+
+include::experimental-linkprediction-total-neighbors.adoc[leveloffset=+1]

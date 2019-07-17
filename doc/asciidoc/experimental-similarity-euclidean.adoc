@@ -1,39 +1,41 @@
-:procedure-name: Cosine Similarity
-[[algorithms-similarity-cosine]]
-= The Cosine Similarity algorithm
+:procedure-name: Euclidean Distance
+
+[[algorithms-similarity-euclidean]]
+= The Euclidean Distance algorithm
 
 [abstract]
 --
-This section describes the Cosine Similarity algorithm in the Neo4j Graph Algorithms library.
+This section describes the Euclidean Distance algorithm in the Neo4j Graph Algorithms library.
 --
 
 // tag::introduction[]
-link:http://en.wikipedia.org/wiki/Cosine_similarity[Cosine similarity] is the cosine of the angle between two _n_-dimensional vectors in an _n_-dimensional space.
-It is the dot product of the two vectors divided by the product of the two vectors' lengths (or magnitudes).
+Euclidean distance measures the straight line distance between two points in n-dimensional space.
 // end::introduction[]
 
 This section includes:
 
-* <<algorithms-similarity-cosine-context, History and explanation>>
-* <<algorithms-similarity-cosine-usecase, Use-cases - when to use the Cosine Similarity algorithm>>
-* <<algorithms-similarity-cosine-function-sample, Cosine Similarity function algorithm sample>>
-* <<algorithms-similarity-cosine-procedure-sample, Cosine Similarity procedures algorithm sample>>
-* <<algorithms-similarity-cosine-source-target-ids, Specifying source and target ids>>
-* <<algorithms-similarity-cosine-skipping-values, Skipping values>>
-* <<algorithms-similarity-cosine-cypher-projection, Cypher projection>>
-* <<algorithms-similarity-cosine-syntax, Syntax>>
+* <<algorithms-similarity-euclidean-context, History and explanation>>
+* <<algorithms-similarity-euclidean-usecase, Use-cases - when to use the Euclidean Distance algorithm>>
+* <<algorithms-similarity-euclidean-function-sample, Euclidean Distance algorithm function sample>>
+* <<algorithms-similarity-euclidean-procedure-sample, Euclidean Distance algorithm procedures sample>>
+* <<algorithms-similarity-euclidean-source-target-ids, Specifying source and target ids>>
+* <<algorithms-similarity-euclidean-skipping-values, Skipping values>>
+* <<algorithms-similarity-euclidean-cypher-projection, Cypher projection>>
+* <<algorithms-similarity-euclidean-syntax, Syntax>>
 
 
-[[algorithms-similarity-cosine-context]]
+[[algorithms-similarity-euclidean-context]]
 == History and explanation
 
 // tag::explanation[]
 
-Cosine similarity is computed using the following formula:
+Euclidean distance is computed using the following formula:
 
-image::cosine-similarity.png[role="middle"]
+image::euclidean.png[role="middle"]
 
-Values range between -1 and 1, where -1 is perfectly dissimilar and 1 is perfectly similar.
+// This is the raw information for this image:
+// [subs = none]
+// \( similarity(p_1, p_2) = \sqrt{\sum_{i~\in~\textrm{item}} (s_{p_1} - s_{p_2})^2} \)
 
 The library contains both procedures and functions to calculate similarity between sets of data.
 The function is best used when calculating the similarity between small numbers of sets.
@@ -41,29 +43,30 @@ The procedures parallelize the computation and are therefore more appropriate fo
 
 // end::explanation[]
 
-[[algorithms-similarity-cosine-usecase]]
-== Use-cases - when to use the Cosine Similarity algorithm
+
+[[algorithms-similarity-euclidean-usecase]]
+== Use-cases - when to use the Euclidean Distance algorithm
 
 // tag::use-case[]
-We can use the Cosine Similarity algorithm to work out the similarity between two things.
+We can use the Euclidean Distance algorithm to work out the similarity between two things.
 We might then use the computed similarity as part of a recommendation query.
-For example, to get movie recommendations based on the preferences of users who have given similar ratings to other movies that you've seen.
+For example, to get movie recommendations based on the preferences of users who have given similar ratings to other movies that you’ve seen.
 // end::use-case[]
 
 
-[[algorithms-similarity-cosine-function-sample]]
-== Cosine Similarity algorithm function sample
+[[algorithms-similarity-euclidean-function-sample]]
+== Euclidean Distance algorithm function sample
 
-The Cosine Similarity function computes the similarity of two lists of numbers.
+The Euclidean Distance function computes the similarity of two lists of numbers.
 
-include::similarity.adoc[tag=weighted-function-note]
+include::experimental-similarity.adoc[tag=weighted-function-note]
 
 We can use it to compute the similarity of two hardcoded lists.
 
-.The following will return the cosine similarity of two lists of numbers:
+.The following will return the euclidean similarity of two lists of numbers:
 [source, cypher]
 ----
-include::scripts/similarity-cosine.cypher[tag=function]
+include::scripts/similarity-euclidean.cypher[tag=function]
 ----
 
 // tag::function[]
@@ -71,19 +74,12 @@ include::scripts/similarity-cosine.cypher[tag=function]
 [opts="header",cols="1"]
 |===
 | `similarity`
-| 0.8638935626791596
+| 8.426149773176359
 |===
 // end::function[]
 
 // tag::function-explanation[]
-These two lists of numbers have a Cosine similarity of 0.863.
-We can see how this result is derived by breaking down the formula:
-
-image::cosine-similarity2.png[role="middle"]
-
-// This is the raw information for this image:
-// [subs = none]
-// \( similarity(A, B) = \frac{3 \cdot 10 + 8 \cdot 8 + 7 \cdot 6 + 5 \cdot 6 + 2 \cdot 4 + 9 \cdot 5}{\sqrt{3^2 + 8^2 + 7^2 + 5^2 + 2^2 + 9^2} \times \sqrt{10^2 + 8^2 + 6^2 + 6^2 + 4^2 + 5^2}} = \frac{219}{15.2315 \times 16.6433} = 0.8639 \)
+These two lists of numbers have a euclidean distance of 8.42.
 
 // end::function-explanation[]
 
@@ -92,13 +88,13 @@ We can also use it to compute the similarity of nodes based on lists computed by
 .The following will create a sample graph:
 [source, cypher]
 ----
-include::scripts/similarity-cosine.cypher[tag=create-sample-graph]
+include::scripts/similarity-euclidean.cypher[tag=create-sample-graph]
 ----
 
-.The following will return the Cosine similarity of Michael and Arya:
+.The following will return the Euclidean distance of Zhen and Praveena:
 [source, cypher]
 ----
-include::scripts/similarity-cosine.cypher[tag=function-cypher]
+include::scripts/similarity-euclidean.cypher[tag=function-cypher]
 ----
 
 // tag::function-cypher[]
@@ -106,15 +102,15 @@ include::scripts/similarity-cosine.cypher[tag=function-cypher]
 [opts="header"]
 |===
 | `from`       | `to`         | `similarity`
-| "Michael" | "Arya" | 0.9788908326303921
+| "Zhen" | "Praveena" | 6.708203932499369
 
 |===
 // end::function-cypher[]
 
-.The following will return the Cosine similarity of Michael and the other people that have a cuisine in common:
+.The following will return the Euclidean distance  of Zhen and the other people that have a cuisine in common:
 [source, cypher]
 ----
-include::scripts/similarity-cosine.cypher[tag=function-cypher-all]
+include::scripts/similarity-euclidean.cypher[tag=function-cypher-all]
 ----
 
 // tag::function-cypher--all[]
@@ -122,129 +118,122 @@ include::scripts/similarity-cosine.cypher[tag=function-cypher-all]
 [opts="header"]
 |===
 | `from`       | `to`         | `similarity`
-| "Michael" | "Arya"     | 0.9788908326303921
-| "Michael" | "Zhen"     | 0.9542262139256075
-| "Michael" | "Praveena" | 0.9429903335828894
-| "Michael" | "Karin"    | 0.8498063272285821
+| "Zhen" | "Praveena" | 6.708203932499369
+| "Zhen" | "Michael"  | 3.605551275463989
 
 |===
 // end::function-cypher-all[]
 
+[[algorithms-similarity-euclidean-procedure-sample]]
+== Euclidean Distance algorithm procedures sample
 
-[[algorithms-similarity-cosine-procedure-sample]]
-== Cosine Similarity algorithm procedures sample
-
-
-include::similarity.adoc[tag=computation]
-include::similarity.adoc[tag=weighted-note]
+include::experimental-similarity.adoc[tag=computation]
+include::experimental-similarity.adoc[tag=weighted-note]
 
 .The following will create a sample graph:
 [source, cypher]
 ----
-include::scripts/similarity-cosine.cypher[tag=create-sample-graph]
+include::scripts/similarity-euclidean.cypher[tag=create-sample-graph]
 ----
 
-
-.The following will return a stream of node pairs along with their Cosine similarities:
+.The following will return a stream of node pairs, along with their intersection and euclidean similarities:
 [source, cypher]
 ----
-include::scripts/similarity-cosine.cypher[tag=stream]
+include::scripts/similarity-euclidean.cypher[tag=stream]
 ----
 
 // tag::stream[]
 .Results
 [opts="header"]
 |===
-| `from`       | `to`         | `similarity`
-| "Praveena" | "Karin"    | 1.0
-| "Michael"  | "Arya"     | 0.9788908326303921
-| "Arya"     | "Karin"    | 0.9610904115204073
-| "Zhen"     | "Michael"  | 0.9542262139256075
-| "Praveena" | "Michael"  | 0.9429903335828895
-| "Zhen"     | "Praveena" | 0.9191450300180579
-| "Michael"  | "Karin"    | 0.8498063272285821
-| "Praveena" | "Arya"     | 0.7194014606174091
+| `from`     | `to`       | `similarity`
 | "Zhen"     | "Arya"     | 0.0
 | "Zhen"     | "Karin"    | 0.0
+| "Praveena" | "Karin"    | 3.0
+| "Zhen"     | "Michael"  | 3.605551275463989
+| "Praveena" | "Michael"  | 4.0
+| "Arya"     | "Karin"    | 4.358898943540674
+| "Michael"  | "Arya"     | 5.0
+| "Zhen"     | "Praveena" | 6.708203932499369
+| "Michael"  | "Karin"    | 7.0
+| "Praveena" | "Arya"     | 8.0
 
 |===
 // end::stream[]
 
-Praveena and Karin have the most similar food tastes, with a score of 1.0, and there are also several other pairs of users with similar tastes.
-The scores here are unusually high because our users haven't liked many of the same cuisines.
-We also have 2 pairs of users who are not similar at all.
-We'd probably want to filter those out, which we can do by passing in the `similarityCutoff` parameter.
+Zhen and Arya, and Zhen and Karin have the most similar food preferences, with a euclidean distance of 0.0.
+Lower scores are better here; a score of 0 would indicate that users have exactly the same preferences.
 
-.The following will return a stream of node pairs that have a similarity of at least 0.1, along with their cosine similarities:
+We might decide that we don't want to see users with a similarity above 5 returned in our results.
+If so, we can filter those out by passing in the `similarityCutoff` parameter.
+
+.The following will return a stream of node pairs that have a similarity of at most 17, along with their euclidean distance:
 [source, cypher]
 ----
-include::scripts/similarity-cosine.cypher[tag=stream-similarity-cutoff]
+include::scripts/similarity-euclidean.cypher[tag=stream-similarity-cutoff]
 ----
 
 // tag::stream-similarity-cutoff[]
 .Results
 [opts="header"]
 |===
-| `from`       | `to`         | `similarity`
-| "Praveena" | "Karin"    | 1.0
-| "Michael"  | "Arya"     | 0.9788908326303921
-| "Arya"     | "Karin"    | 0.9610904115204073
-| "Zhen"     | "Michael"  | 0.9542262139256075
-| "Praveena" | "Michael"  | 0.9429903335828895
-| "Zhen"     | "Praveena" | 0.9191450300180579
-| "Michael"  | "Karin"    | 0.8498063272285821
-| "Praveena" | "Arya"     | 0.7194014606174091
+| `from`     | `to`       | `similarity`
+| "Zhen"     | "Arya"    | 0.0
+| "Zhen"     | "Karin"   | 0.0
+| "Praveena" | "Karin"   | 3.0
+| "Zhen"     | "Michael" | 3.605551275463989
+| "Praveena" | "Michael" | 4.0
 |===
 // end::stream-similarity-cutoff[]
 
-We can see that those users with no similarity have been filtered out.
+We can see that those users with a high score have been filtered out.
 If we're implementing a k-Nearest Neighbors type query we might instead want to find the most similar `k` users for a given user.
 We can do that by passing in the `topK` parameter.
 
 .The following will return a stream of users along with the most similar user to them (i.e. `k=1`):
 [source, cypher]
 ----
-include::scripts/similarity-cosine.cypher[tag=stream-topk]
+include::scripts/similarity-euclidean.cypher[tag=stream-topk]
 ----
 
 // tag::stream-topk[]
 .Results
 [opts="header",cols="1,1,1"]
 |===
-| `from`     | `to`       | `similarity`
-| "Arya"     | "Michael"  | 0.9788908326303921
-| "Karin"    | "Praveena" | 1.0
-| "Michael"  | "Arya"     | 0.9788908326303921
-| "Praveena" | "Karin"    | 1.0
-| "Zhen"     | "Michael"  | 0.9542262139256075
+| `from`       | `to`         | `similarity`
+| "Arya"     | "Zhen"  | 0.0
+| "Karin"    | "Zhen"  | 0.0
+| "Michael"  | "Zhen"  | 3.605551275463989
+| "Praveena" | "Karin" | 3.0
+| "Zhen"     | "Arya"  | 0.0
 
 |===
 // end::stream-topk[]
 
 These results will not be symmetrical.
-For example, the person most similar to Zhen is Michael, but the person most similar to Michael is Arya.
+For example, the person most similar to Michael is Zhen, but the person most similar to Zhen is Arya.
 
 .The following will find the most similar user for each user, and store a relationship between those users:
 [source, cypher]
 ----
-include::scripts/similarity-cosine.cypher[tag=write-back]
+include::scripts/similarity-euclidean.cypher[tag=write-back]
 ----
 
 // tag::write-back[]
 .Results
-[opts="header",cols="1,1,1,1,1,1,1,1,1"]
+[opts="header"]
 |===
 | `nodes` | `similarityPairs` | `write` | `writeRelationshipType` | `writeProperty` | `min`  | `max`  | `mean` | `p95`
-| 5     | 5               | TRUE  | "SIMILAR"             | "score"       | 0.9542236328125 | 1.0000038146972656 | 0.9824020385742187 | 1.0000038146972656
+| 5     | 5               | TRUE  | "SIMILAR"             | "score"       | 0.0 | 3.6055450439453125 | 1.3211090087890625 | 3.6055450439453125
 |===
 // end::write-back[]
 
 We then could write a query to find out what types of cuisine that other people similar to us might like.
 
-.The following will find the most similar user to Praveena, and return their favourite cuisines that Praveena doesn't (yet!) like:
+.The following will find the most similar user to Praveena, and return their favorite cuisines that Praveena doesn't (yet!) like:
 [source, cypher]
 ----
-include::scripts/similarity-cosine.cypher[tag=query]
+include::scripts/similarity-euclidean.cypher[tag=query]
 ----
 
 // tag::query[]
@@ -257,31 +246,32 @@ include::scripts/similarity-cosine.cypher[tag=query]
 |===
 // end::query[]
 
-
-[[algorithms-similarity-cosine-source-target-ids]]
+[[algorithms-similarity-euclidean-source-target-ids]]
 == Specifying source and target ids
 
-include::similarity.adoc[tag=source-target-ids]
+include::experimental-similarity.adoc[tag=source-target-ids]
 
 We could use this technique to compute the similarity of a subset of items to all other items.
+
 
 .The following will find the most similar person (i.e. `k=1`) to Arya and Praveena:
 [source, cypher]
 ----
-include::scripts/similarity-cosine.cypher[tag=source-target-ids]
+include::scripts/similarity-euclidean.cypher[tag=source-target-ids]
 ----
 
 // tag::source-target-ids[]
 .Results
 [opts="header",cols="1,1,1"]
 |===
-| `from`   | `to`     | `similarity`
-| Praveena | Karin   | 1.0                
-| Arya     | Michael | 0.9788908326303921 
+| `from`   | `to`     | `similarity`\
+| Praveena | Karin | 3.0       
+| Arya     | Zhen  | 0.0       
 |===
 // end::source-target-ids[]
 
-[[algorithms-similarity-cosine-skipping-values]]
+
+[[algorithms-similarity-euclidean-skipping-values]]
 == Skipping values
 
 By default the `skipValue` parameter is `algo.Nan()`.
@@ -291,16 +281,16 @@ For cases where no values should be skipped, skipping can be disabled by setting
 .The following will create a sample graph:
 [source, cypher]
 ----
-include::scripts/similarity-cosine.cypher[tag=create-sample-embedding-graph]
+include::scripts/similarity-euclidean.cypher[tag=create-sample-embedding-graph]
 ----
 
 .The following will find the similarity between cuisines based on the `embedding` property:
 [source, cypher]
 ----
-include::scripts/similarity-cosine.cypher[tag=embedding-graph-stream]
+include::scripts/similarity-euclidean.cypher[tag=embedding-graph-stream]
 ----
 
-[[algorithms-similarity-cosine-cypher-projection]]
+[[algorithms-similarity-euclidean-cypher-projection]]
 == Cypher projection
 
 include::projected-graph-model/cypher-projection.adoc[tag=similarity-explanation]
@@ -309,21 +299,22 @@ include::projected-graph-model/cypher-projection.adoc[tag=similarity-explanation
 
 [source,cypher]
 ----
-include::scripts/similarity-cosine.cypher[tag=cypher-projection]
+include::scripts/similarity-euclidean.cypher[tag=cypher-projection]
 ----
 
-[[algorithms-similarity-cosine-syntax]]
+
+
+[[algorithms-similarity-euclidean-syntax]]
 == Syntax
 
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL algo.similarity.cosine(userData:List<Map> or String, {
-    topK: 1, similarityCutoff: 0.1, write:true, writeProperty: "cosineSimilarity"
+CALL algo.similarity.euclidean(userData:List<Map>> or String, {
+    topK: 1, similarityCutoff: 17.0, write:true, writeProperty: "euclideanSimilarity"
 })
 YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
 ----
-
 
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
@@ -332,7 +323,7 @@ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, 
 | `data`                   | list or string    | null           | no       | A list of maps of the following structure: `{item: nodeId, categories: [nodeId, nodeId, nodeId]}` or a Cypher query.
 | `top`                    | int     | 0              | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
 | `topK`                   | int     | 0              | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
-| `similarityCutoff`       | int     | -1             | yes      | The threshold for similarity. Values below this will not be returned.
+| `similarityCutoff`       | int     | -1             | yes      | The threshold for Euclidean distance. Values above this will not be returned.
 | `degreeCutoff`           | int     | 0              | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
 | `skipValue`              | double  | algo.NaN()     | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
 | `concurrency`            | int     | available CPUs | yes      | The number of concurrent threads.
@@ -368,15 +359,6 @@ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, 
 | `p100`                  | double  | The 100 percentile of similarities scores computed.
 |===
 
-.The following will run the algorithm and stream results:
-[source,cypher]
-----
-CALL algo.similarity.cosine.stream(userData:List<Map> or String, {
-    degreeCutoff: 10, similarityCutoff: 0.1, concurrency:4
-})
-YIELD item1, item2, count1, count2, intersection, similarity
-
-----
 
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
@@ -385,9 +367,9 @@ YIELD item1, item2, count1, count2, intersection, similarity
 | `data`                   | list or string    | null           | no       | A list of maps of the following structure: `{item: nodeId, categories: [nodeId, nodeId, nodeId]}` or a Cypher query.
 | `top`              | int    | 0              | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
 | `topK`             | int    | 0              | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
-| `similarityCutoff` | int    | -1             | yes      | The threshold for similarity. Values below this will not be returned.
+| `similarityCutoff` | int    | -1             | yes      | The threshold for euclidean distance. Values above this will not be returned.
 | `degreeCutoff`     | int    | 0              | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
-| `skipValue`              | double  | null           | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
+| `skipValue`              | double  | algo.NaN()     | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
 | `concurrency`      | int    | available CPUs | yes      | The number of concurrent threads.
 | `graph`                  | string  | dense          | yes      | The graph name ('dense' or 'cypher').
 | `sourceIds`          | long[] | null | yes | The ids of items from which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
@@ -403,5 +385,5 @@ YIELD item1, item2, count1, count2, intersection, similarity
 | `count1`       | int  | The size of the `targets` list of one node.
 | `count2`       | int  | The size of the `targets` list of other node.
 | `intersection` | int  | The number of intersecting values in the two nodes `targets` lists.
-| `similarity`   | int  | The cosine similarity of the two nodes.
+| `similarity`   | int  | The euclidean distance between the two nodes.
 |===

@@ -3,7 +3,7 @@
 :experimental:
 :sectid:
 :sectlinks:
-:toclevels: 2
+:toclevels: 3
 :env-docs: true
 
 ifdef::backend-html5[(C) {copyright}]
@@ -55,34 +55,34 @@ This chapter provides an introduction to the available graph algorithms, and ins
 
 include::../../contrib/readme.adoc[tags=algorithms-intro,leveloffset=1]
 
-include::algorithms-centrality.adoc[tags=header,leveloffset=3]
-
-include::algorithms-centrality.adoc[tags=summary,leveloffset=3]
-
-include::algorithms-community.adoc[tags=header,leveloffset=3]
-
-include::algorithms-community.adoc[tags=summary,leveloffset=3]
-
-include::algorithms-path-finding.adoc[tags=header,leveloffset=3]
-
-include::algorithms-path-finding.adoc[tags=summary,leveloffset=3]
-
-include::algorithms-similarity.adoc[tags=header,leveloffset=3]
-
-include::algorithms-similarity.adoc[tags=summary,leveloffset=3]
-
-include::algorithms-link-prediction.adoc[tags=header,leveloffset=3]
-
-include::algorithms-link-prediction.adoc[tags=summary,leveloffset=3]
-
-include::algorithms-preprocessing.adoc[tags=header,leveloffset=3]
-
-include::algorithms-preprocessing.adoc[tags=summary,leveloffset=3]
-
-include::../../contrib/readme.adoc[tags=installation,leveloffset=1]
-
-include::../../contrib/readme.adoc[tags=usage,leveloffset=1]
-
+// include::algorithms-centrality.adoc[tags=header,leveloffset=3]
+// 
+// include::algorithms-centrality.adoc[tags=summary,leveloffset=3]
+// 
+// include::algorithms-community.adoc[tags=header,leveloffset=3]
+// 
+// include::algorithms-community.adoc[tags=summary,leveloffset=3]
+// 
+// include::algorithms-path-finding.adoc[tags=header,leveloffset=3]
+// 
+// include::algorithms-path-finding.adoc[tags=summary,leveloffset=3]
+// 
+// include::algorithms-similarity.adoc[tags=header,leveloffset=3]
+// 
+// include::algorithms-similarity.adoc[tags=summary,leveloffset=3]
+// 
+// include::algorithms-link-prediction.adoc[tags=header,leveloffset=3]
+// 
+// include::algorithms-link-prediction.adoc[tags=summary,leveloffset=3]
+// 
+// include::algorithms-preprocessing.adoc[tags=header,leveloffset=3]
+// 
+// include::algorithms-preprocessing.adoc[tags=summary,leveloffset=3]
+// 
+// include::../../contrib/readme.adoc[tags=installation,leveloffset=1]
+// 
+// include::../../contrib/readme.adoc[tags=usage,leveloffset=1]
+// 
 include::system-requirements.adoc[leveloffset=2]
 
 include::projected-graph-model.adoc[leveloffset=1]
@@ -114,111 +114,104 @@ This chapter contains a reference of all the procedures in the Neo4j Graph Algor
 include::csv/procedures.csv[]
 |===
 
-include::algorithms-centrality.adoc[leveloffset=1]
 
-include::algorithms-community.adoc[leveloffset=1]
+include::algorithms.adoc[leveloffset=1]
 
-include::algorithms-path-finding.adoc[leveloffset=1]
-
-include::algorithms-similarity.adoc[leveloffset=1]
-
-include::algorithms-link-prediction.adoc[leveloffset=1]
-
-include::algorithms-preprocessing.adoc[leveloffset=1]
+include::experimental-index.adoc[leveloffset=1]
 
 
-ifndef::env-docs[]
-== Implementers section
-
-include::algo-procedures-api.adoc[leveloffset=2]
-
-// include::developer-api.adoc[leveloffset=2]
-
-include::implementers.adoc[leveloffset=2]
-
-:implementation:
-
-
-=== PageRank
-
-include::pagerank.adoc[leveloffset=2,tags=implementation]
-
-
-=== Betweenness Centrality
-
-include::betweenness-centrality.adoc[leveloffset=2,tags=implementation]
-
-
-=== Closeness Centrality
-
-include::closeness-centrality.adoc[leveloffset=2,tags=implementation]
-
-
-=== Harmonic Centrality
-
-include::harmonic-centrality.adoc[leveloffset=2,tags=implementation]
-
-
-=== Minimum Weight Spanning Tree
-
-include::minimum-weight-spanning-tree.adoc[leveloffset=2,tags=implementation]
-
-
-=== Single Shortest Path
-
-include::single-shortest-path.adoc[leveloffset=2,tags=implementation]
-
-
-=== A*
-
-include::astar.adoc[leveloffset=2,tags=implementation]
-
-
-=== Yen's K-Shortest Paths algorithm
-
-include::yens-k-shortest-paths.adoc[leveloffset=2,tags=implementation]
-
-
-=== All Pairs Shortest Path
-
-include::all-pairs-shortest-path.adoc[leveloffset=2,tags=implementation]
-
-
-=== Triangle Count
-
-include::triangleCount.adoc[leveloffset=2,tags=implementation]
-
-
-=== Label Propagation
-
-include::label-propagation.adoc[leveloffset=2,tags=implementation]
-
-
-=== Louvain
-
-include::louvain.adoc[leveloffset=2,tags=implementation]
-
-
-=== Weakly Connected Components
-
-include::connected-components.adoc[leveloffset=2,tags=implementation]
-
-
-=== Strongly Connected Components
-
-include::strongly-connected-components.adoc[leveloffset=2,tags=implementation]
-
-endif::env-docs[]
-
-ifdef::backend-html5[]
-++++
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.13/css/jquery.dataTables.min.css">
-<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-<script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
-<script>
-$(document).ready(function() {
-    $('#table-all').DataTable();
-} );
-</script>
-++++
-endif::[]
+// ifndef::env-docs[]
+// == Implementers section
+// 
+// include::algo-procedures-api.adoc[leveloffset=2]
+// 
+// // include::developer-api.adoc[leveloffset=2]
+// 
+// include::implementers.adoc[leveloffset=2]
+// 
+// :implementation:
+// 
+// 
+// === PageRank
+// 
+// include::pagerank.adoc[leveloffset=2,tags=implementation]
+// 
+// 
+// === Betweenness Centrality
+// 
+// include::betweenness-centrality.adoc[leveloffset=2,tags=implementation]
+// 
+// 
+// === Closeness Centrality
+// 
+// include::closeness-centrality.adoc[leveloffset=2,tags=implementation]
+// 
+// 
+// === Harmonic Centrality
+// 
+// include::harmonic-centrality.adoc[leveloffset=2,tags=implementation]
+// 
+// 
+// === Minimum Weight Spanning Tree
+// 
+// include::minimum-weight-spanning-tree.adoc[leveloffset=2,tags=implementation]
+// 
+// 
+// === Single Shortest Path
+// 
+// include::single-shortest-path.adoc[leveloffset=2,tags=implementation]
+// 
+// 
+// === A*
+// 
+// include::astar.adoc[leveloffset=2,tags=implementation]
+// 
+// 
+// === Yen's K-Shortest Paths algorithm
+// 
+// include::yens-k-shortest-paths.adoc[leveloffset=2,tags=implementation]
+// 
+// 
+// === All Pairs Shortest Path
+// 
+// include::all-pairs-shortest-path.adoc[leveloffset=2,tags=implementation]
+// 
+// 
+// === Triangle Count
+// 
+// include::triangleCount.adoc[leveloffset=2,tags=implementation]
+// 
+// 
+// === Label Propagation
+// 
+// include::label-propagation.adoc[leveloffset=2,tags=implementation]
+// 
+// 
+// === Louvain
+// 
+// include::louvain.adoc[leveloffset=2,tags=implementation]
+// 
+// 
+// === Weakly Connected Components
+// 
+// include::connected-components.adoc[leveloffset=2,tags=implementation]
+// 
+// 
+// === Strongly Connected Components
+// 
+// include::strongly-connected-components.adoc[leveloffset=2,tags=implementation]
+// 
+// endif::env-docs[]
+// 
+// ifdef::backend-html5[]
+// ++++
+// <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.13/css/jquery.dataTables.min.css">
+// <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+// <script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
+// <script>
+// $(document).ready(function() {
+//     $('#table-all').DataTable();
+// } );
+// </script>
+// ++++
+// endif::[]
