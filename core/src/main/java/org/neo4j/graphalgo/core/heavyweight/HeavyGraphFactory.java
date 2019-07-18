@@ -61,7 +61,7 @@ public class HeavyGraphFactory extends GraphFactory {
         return getMemoryEstimation(setup, dimensions);
     }
 
-    static MemoryEstimation getMemoryEstimation(final GraphSetup setup, final GraphDimensions dimensions) {
+    public static MemoryEstimation getMemoryEstimation(final GraphSetup setup, final GraphDimensions dimensions) {
         MemoryEstimations.Builder builder = MemoryEstimations
                 .builder(HeavyGraph.class)
                 .add("nodeIdMap", IntIdMap.memoryEstimation())

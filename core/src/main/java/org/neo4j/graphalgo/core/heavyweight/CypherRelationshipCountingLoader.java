@@ -34,7 +34,7 @@ public class CypherRelationshipCountingLoader {
     private final GraphDatabaseAPI api;
     private final GraphSetup setup;
 
-    public CypherRelationshipCountingLoader(final GraphDatabaseAPI api, final GraphSetup setup) {
+    CypherRelationshipCountingLoader(final GraphDatabaseAPI api, final GraphSetup setup) {
         this.api = api;
         this.setup = setup;
     }

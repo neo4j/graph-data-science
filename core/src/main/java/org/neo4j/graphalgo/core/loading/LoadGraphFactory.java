@@ -22,6 +22,8 @@ package org.neo4j.graphalgo.core.loading;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,6 +46,14 @@ public final class LoadGraphFactory extends GraphFactory {
     @Override
     public Graph build() {
         return importGraph();
+    }
+    
+    public final MemoryEstimation memoryEstimation() {
+        Graph graph = get(setup.name);
+        dimensions.nodeCount(graph.nodeCount());
+        dimensions.maxRelCount(graph.relationshipCount());
+
+        return HeavyGraphFactory.getMemoryEstimation(setup, dimensions);
     }
 
     public static void set(String name, Graph graph) {
