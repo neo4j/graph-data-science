@@ -19,6 +19,7 @@ The following community detection algorithms evaluate how a group is clustered o
 * <<algorithms-strongly-connected-components, Strongly Connected Components>> (`algo.scc`)
 * <<algorithms-triangle-count-clustering-coefficient, Triangle Counting / Clustering Coefficient>> (`algo.triangleCount`)
 * <<algorithms-balanced-triads, Balanced Triads>> (`algo.balancedTriads`)
+* <<experimental-algorithms-connected-components, Connected Components>> (`algo.unionFind.*`)
 // end::summary[]
 
 include::experimental-strongly-connected-components.adoc[leveloffset=+1]
