@@ -1,4 +1,4 @@
-[[algorithms-harmonic-centrality]]
+[[experimental-algorithms-harmonic-centrality]]
 = The Harmonic Centrality algorithm
 
 [abstract]

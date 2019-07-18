@@ -1,4 +1,4 @@
-[[algorithms-linkprediction-common-neighbors]]
+[[experimental-algorithms-linkprediction-common-neighbors]]
 = The Common Neighbors algorithm
 
 [abstract]

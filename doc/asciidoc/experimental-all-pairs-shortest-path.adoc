@@ -1,4 +1,4 @@
-[[algorithm-all-pairs-shortest-path]]
+[[experimental-algorithm-all-pairs-shortest-path]]
 = The All Pairs Shortest Path algorithm
 
 [abstract]

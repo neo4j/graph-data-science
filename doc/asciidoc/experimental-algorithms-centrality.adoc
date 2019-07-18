@@ -16,9 +16,9 @@ endif::env-docs[]
 // tag::summary[]
 The following centrality algorithms determine the importance of distinct nodes in a network:
 
-* <<algorithms-articlerank, ArticleRank>> (`algo.articleRank`)
-* <<algorithms-harmonic-centrality, Harmonic Centrality>> (`algo.closeness.harmonic`)
-* <<algorithms-eigenvector, Eigenvector Centrality>> (`algo.eigenvector`)
+* <<experimental-algorithms-articlerank, ArticleRank>> (`algo.articleRank`)
+* <<experimental-algorithms-harmonic-centrality, Harmonic Centrality>> (`algo.closeness.harmonic`)
+* <<experimental-algorithms-eigenvector, Eigenvector Centrality>> (`algo.eigenvector`)
 // end::summary[]
 
 include::experimental-articlerank.adoc[leveloffset=+1]

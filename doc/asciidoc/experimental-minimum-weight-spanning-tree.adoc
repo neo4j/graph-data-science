@@ -1,4 +1,4 @@
-[[algorithms-minimum-weight-spanning-tree]]
+[[experimental-algorithms-minimum-weight-spanning-tree]]
 = The Minimum Weight Spanning Tree algorithm
 
 [abstract]

@@ -1,4 +1,4 @@
-[[algorithms-linkprediction-same-community]]
+[[experimental-algorithms-linkprediction-same-community]]
 = The Same Community algorithm
 
 [abstract]

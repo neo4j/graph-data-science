@@ -1,4 +1,4 @@
-[[algorithms-yens-k-shortest-path]]
+[[experimental-algorithms-yens-k-shortest-path]]
 = The Yen's K-shortest paths algorithm
 
 [abstract]

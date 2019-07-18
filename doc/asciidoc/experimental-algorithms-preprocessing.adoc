@@ -1,4 +1,4 @@
-[[algorithms-preprocessing]]
+[[experimental-algorithms-preprocessing]]
 // tag::header[]
 = Preprocessing functions and procedures
 // end::header[]
@@ -15,7 +15,7 @@ endif::env-docs[]
 // tag::summary[]
 The following feature and procedure can be used as part of the data preparation process:
 
-* <<algorithms-one-hot-encoding, One Hot Encoding>> (`algo.ml.oneHotEncoding`)
+* <<experimental-algorithms-one-hot-encoding, One Hot Encoding>> (`algo.ml.oneHotEncoding`)
 // end::summary[]
 
 include::experimental-one-hot-encoding.adoc[leveloffset=+1]

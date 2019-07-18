@@ -1,4 +1,4 @@
-[[algorithms-linkprediction]]
+[[experimental-algorithms-linkprediction]]
 // tag::header[]
 = Link Prediction algorithms
 // end::header[]
@@ -15,12 +15,12 @@ endif::env-docs[]
 These algorithms help determine the closeness of a pair of nodes.
 We would then use the computed scores as part of a link prediction solution:
 
-* <<algorithms-linkprediction-adamic-adar, Adamic Adar>> (`algo.linkprediction.adamicAdar`)
-* <<algorithms-linkprediction-common-neighbors, Common Neighbors>> (`algo.linkprediction.commonNeighbors`)
-* <<algorithms-linkprediction-preferential-attachment, Preferential Attachment>> (`algo.linkprediction.preferentialAttachment`)
-* <<algorithms-linkprediction-resource-allocation, Resource Allocation>> (`algo.linkprediction.resourceAllocation`)
-* <<algorithms-linkprediction-same-community, Same Community>> (`algo.linkprediction.sameCommunity`)
-* <<algorithms-linkprediction-total-neighbors, Total Neighbors>> (`algo.linkprediction.totalNeighbors`)
+* <<experimental-algorithms-linkprediction-adamic-adar, Adamic Adar>> (`algo.linkprediction.adamicAdar`)
+* <<experimental-algorithms-linkprediction-common-neighbors, Common Neighbors>> (`algo.linkprediction.commonNeighbors`)
+* <<experimental-algorithms-linkprediction-preferential-attachment, Preferential Attachment>> (`algo.linkprediction.preferentialAttachment`)
+* <<experimental-algorithms-linkprediction-resource-allocation, Resource Allocation>> (`algo.linkprediction.resourceAllocation`)
+* <<experimental-algorithms-linkprediction-same-community, Same Community>> (`algo.linkprediction.sameCommunity`)
+* <<experimental-algorithms-linkprediction-total-neighbors, Total Neighbors>> (`algo.linkprediction.totalNeighbors`)
 // end::summary[]
 
 

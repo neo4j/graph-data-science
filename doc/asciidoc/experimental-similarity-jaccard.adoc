@@ -1,4 +1,4 @@
-[[algorithms-similarity-jaccard]]
+[[experimental-algorithms-similarity-jaccard]]
 = The Jaccard Similarity algorithm
 
 [abstract]

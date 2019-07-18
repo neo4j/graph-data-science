@@ -1,4 +1,4 @@
-[[algorithms-similarity-overlap]]
+[[experimental-algorithms-similarity-overlap]]
 = The Overlap Similarity algorithm
 
 [abstract]

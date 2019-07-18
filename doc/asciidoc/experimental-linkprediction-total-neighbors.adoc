@@ -1,4 +1,4 @@
-[[algorithms-linkprediction-total-neighbors]]
+[[experimental-algorithms-linkprediction-total-neighbors]]
 = The Total Neighbors algorithm
 
 [abstract]

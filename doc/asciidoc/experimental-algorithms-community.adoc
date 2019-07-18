@@ -17,9 +17,9 @@ endif::env-docs[]
 The following community detection algorithms evaluate how a group is clustered or partitioned, as well as its tendency to strengthen or break apart:
 
 * <<experimental-algorithms-connected-components, Connected Components>> (`algo.unionFind.*`)
-* <<algorithms-strongly-connected-components, Strongly Connected Components>> (`algo.scc`)
-* <<algorithms-triangle-count-clustering-coefficient, Triangle Counting / Clustering Coefficient>> (`algo.triangleCount`)
-* <<algorithms-balanced-triads, Balanced Triads>> (`algo.balancedTriads`)
+* <<experimental-algorithms-strongly-connected-components, Strongly Connected Components>> (`algo.scc`)
+* <<experimental-algorithms-triangle-count-clustering-coefficient, Triangle Counting / Clustering Coefficient>> (`algo.triangleCount`)
+* <<experimental-algorithms-balanced-triads, Balanced Triads>> (`algo.balancedTriads`)
 // end::summary[]
 
 include::experimental-connected-components.adoc[leveloffset=+1]

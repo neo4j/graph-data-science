@@ -1,6 +1,6 @@
 :procedure-name: Euclidean Distance
 
-[[algorithms-similarity-euclidean]]
+[[experimental-algorithms-similarity-euclidean]]
 = The Euclidean Distance algorithm
 
 [abstract]

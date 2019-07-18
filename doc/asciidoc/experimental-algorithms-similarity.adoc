@@ -1,4 +1,4 @@
-[[algorithms-similarity]]
+[[experimental-algorithms-similarity]]
 // tag::header[]
 = Similarity algorithms
 // end::header[]
@@ -13,11 +13,11 @@ endif::env-docs[]
 // tag::summary[]
 These algorithms help calculate the similarity of nodes:
 
-* <<algorithms-similarity-jaccard, Jaccard Similarity>> (`algo.similarity.jaccard`)
-* <<algorithms-similarity-cosine, Cosine Similarity>> (`algo.similarity.cosine`)
-* <<algorithms-similarity-pearson, Pearson Similarity>> (`algo.similarity.pearson`)
-* <<algorithms-similarity-euclidean, Euclidean Distance>> (`algo.similarity.euclidean`)
-* <<algorithms-similarity-overlap, Overlap Similarity>> (`algo.similarity.overlap`)
+* <<experimental-algorithms-similarity-jaccard, Jaccard Similarity>> (`algo.similarity.jaccard`)
+* <<experimental-algorithms-similarity-cosine, Cosine Similarity>> (`algo.similarity.cosine`)
+* <<experimental-algorithms-similarity-pearson, Pearson Similarity>> (`algo.similarity.pearson`)
+* <<experimental-algorithms-similarity-euclidean, Euclidean Distance>> (`algo.similarity.euclidean`)
+* <<experimental-algorithms-similarity-overlap, Overlap Similarity>> (`algo.similarity.overlap`)
 // end::summary[]
 
 include::experimental-similarity-jaccard.adoc[leveloffset=+1]

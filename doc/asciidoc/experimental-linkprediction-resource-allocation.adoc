@@ -1,4 +1,4 @@
-[[algorithms-linkprediction-resource-allocation]]
+[[experimental-algorithms-linkprediction-resource-allocation]]
 = The Resource Allocation algorithm
 
 [abstract]

@@ -1,4 +1,4 @@
-[[algorithms-eigenvector]]
+[[experimental-algorithms-eigenvector]]
 = The Eigenvector Centrality algorithm
 
 [abstract]

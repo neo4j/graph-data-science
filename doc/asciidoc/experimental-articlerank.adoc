@@ -1,4 +1,4 @@
-[[algorithms-articlerank]]
+[[experimental-algorithms-articlerank]]
 = The ArticleRank algorithm
 
 [abstract]

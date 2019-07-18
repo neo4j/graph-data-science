@@ -1,5 +1,5 @@
 :procedure-name: Pearson Similarity
-[[algorithms-similarity-pearson]]
+[[experimental-algorithms-similarity-pearson]]
 = The Pearson Similarity algorithm
 
 [abstract]

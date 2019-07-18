@@ -1,4 +1,4 @@
-[[algorithms-single-source-shortest-path]]
+[[experimental-algorithms-single-source-shortest-path]]
 = The Single Source Shortest Path algorithm
 
 [abstract]

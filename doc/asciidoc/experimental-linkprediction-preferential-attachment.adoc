@@ -1,4 +1,4 @@
-[[algorithms-linkprediction-preferential-attachment]]
+[[experimental-algorithms-linkprediction-preferential-attachment]]
 = The Preferential Attachment algorithm
 
 [abstract]

@@ -1,4 +1,4 @@
-[[algorithms-path-finding]]
+[[experimental-algorithms-path-finding]]
 // tag::header[]
 = Path finding algorithms
 // end::header[]
@@ -16,13 +16,13 @@ endif::env-docs[]
 // tag::summary[]
 The following path finding algorithms help find the shortest path or evaluate the availability and quality of routes:
 
-* <<algorithms-minimum-weight-spanning-tree, Minimum Weight Spanning Tree>> (`algo.mst`)
-* <<algorithms-shortest-path, Shortest Path>> (`algo.shortestPath`)
-* <<algorithms-single-source-shortest-path, Single Source Shortest Path>> (`algo.shortestPath`)
-* <<algorithm-all-pairs-shortest-path, All Pairs Shortest Path>> (`algo.allShortestPaths`)
-* <<algorithms-a_star, A*>> (`algo.shortestPath.astar`)
-* <<algorithms-yens-k-shortest-path, Yen’s K-shortest paths>> (`algo.kShortestPaths`)
-* <<algorithms-random-walk, Random Walk>> (`algo.randomWalk`)
+* <<experimental-algorithms-minimum-weight-spanning-tree, Minimum Weight Spanning Tree>> (`algo.mst`)
+* <<experimental-algorithms-shortest-path, Shortest Path>> (`algo.shortestPath`)
+* <<experimental-algorithms-single-source-shortest-path, Single Source Shortest Path>> (`algo.shortestPath`)
+* <<experimental-algorithm-all-pairs-shortest-path, All Pairs Shortest Path>> (`algo.allShortestPaths`)
+* <<experimental-algorithms-a_star, A*>> (`algo.shortestPath.astar`)
+* <<experimental-algorithms-yens-k-shortest-path, Yen’s K-shortest paths>> (`algo.kShortestPaths`)
+* <<experimental-algorithms-random-walk, Random Walk>> (`algo.randomWalk`)
 // end::summary[]
 
 [WARNING]

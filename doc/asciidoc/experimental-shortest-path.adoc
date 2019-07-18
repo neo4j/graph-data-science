@@ -1,4 +1,4 @@
-[[algorithms-shortest-path]]
+[[experimental-algorithms-shortest-path]]
 = The Shortest Path algorithm
 
 [abstract]

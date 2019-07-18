@@ -1,4 +1,4 @@
-[[algorithms-one-hot-encoding]]
+[[experimental-algorithms-one-hot-encoding]]
 = One Hot Encoding
 
 [abstract]

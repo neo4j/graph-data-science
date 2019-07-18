@@ -1,4 +1,4 @@
-[[algorithms-strongly-connected-components]]
+[[experimental-algorithms-strongly-connected-components]]
 = The Strongly Connected Components algorithm
 
 [abstract]

@@ -1,4 +1,4 @@
-[[algorithms-random-walk]]
+[[experimental-algorithms-random-walk]]
 = The Random Walk algorithm
 
 [abstract]

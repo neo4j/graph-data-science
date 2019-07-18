@@ -1,4 +1,4 @@
-[[algorithms-linkprediction-adamic-adar]]
+[[experimental-algorithms-linkprediction-adamic-adar]]
 = The Adamic Adar algorithm
 
 [abstract]

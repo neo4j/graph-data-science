@@ -1,4 +1,4 @@
-[[algorithms-a_star]]
+[[experimental-algorithms-a_star]]
 = The A* algorithm
 
 [abstract]

@@ -1,5 +1,5 @@
 :procedure-name: Cosine Similarity
-[[algorithms-similarity-cosine]]
+[[experimental-algorithms-similarity-cosine]]
 = The Cosine Similarity algorithm
 
 [abstract]
