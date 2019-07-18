@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
 import org.neo4j.graphalgo.impl.results.LabelPropagationStats;
@@ -62,11 +63,9 @@ public final class LabelPropagationProc {
     @Context
     public GraphDatabaseAPI dbAPI;
 
-    @SuppressWarnings("WeakerAccess")
     @Context
     public Log log;
 
-    @SuppressWarnings("WeakerAccess")
     @Context
     public KernelTransaction transaction;
 
@@ -79,7 +78,7 @@ public final class LabelPropagationProc {
     public Stream<LabelPropagationStats> labelPropagation(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationshipType,
-            @Name(value = "config", defaultValue="null") Object directionOrConfig,
+            @Name(value = "config", defaultValue = "null") Object directionOrConfig,
             @Name(value = "deprecatedConfig", defaultValue = "{}") Map<String, Object> config) {
         Map<String, Object> rawConfig = config;
         if (directionOrConfig == null) {
@@ -94,7 +93,7 @@ public final class LabelPropagationProc {
                 .setNodeLabelOrQuery(label)
                 .setRelationshipTypeOrQuery(relationshipType);
 
-        if(directionOrConfig instanceof String) {
+        if (directionOrConfig instanceof String) {
             configuration.setDirection((String) directionOrConfig);
         }
 
@@ -114,7 +113,10 @@ public final class LabelPropagationProc {
                 .writeProperty(writeProperty)
                 .weightProperty(weightProperty);
 
-        GraphLoader graphLoader = graphLoader(configuration, weightProperty, createPropertyMappings(seedProperty, weightProperty));
+        GraphLoader graphLoader = graphLoader(
+                configuration,
+                weightProperty,
+                createPropertyMappings(seedProperty, weightProperty));
         Direction direction = configuration.getDirection(Direction.OUTGOING);
         if (direction == Direction.BOTH) {
             graphLoader.asUndirected(true);
@@ -126,18 +128,25 @@ public final class LabelPropagationProc {
         AllocationTracker tracker = AllocationTracker.create();
         Graph graph = load(graphLoader.withAllocationTracker(tracker), configuration, stats);
 
-        if(graph.nodeCount() == 0) {
+        if (graph.nodeCount() == 0) {
             graph.release();
             return Stream.of(LabelPropagationStats.EMPTY);
         }
 
-        final LabelPropagation.Labels labels = compute(configuration, direction, iterations, batchSize, configuration.getConcurrency(), graph, tracker, stats);
+        final HugeLongArray labels = compute(
+                direction,
+                iterations,
+                batchSize,
+                configuration.getConcurrency(),
+                graph,
+                tracker,
+                stats);
         if (configuration.isWriteFlag(DEFAULT_WRITE)) {
             stats.withWrite(true);
             write(configuration.getWriteConcurrency(), writeProperty, graph, labels, stats);
         }
 
-        return Stream.of(stats.build(tracker, graph.nodeCount(), labels::labelFor));
+        return Stream.of(stats.build(tracker, graph.nodeCount(), labels::get));
     }
 
     @Procedure(value = "algo.labelPropagation.stream")
@@ -172,15 +181,22 @@ public final class LabelPropagationProc {
         AllocationTracker tracker = AllocationTracker.create();
         Graph graph = load(graphLoader.withAllocationTracker(tracker), configuration, stats);
 
-        if(graph.nodeCount() == 0L) {
+        if (graph.nodeCount() == 0L) {
             graph.release();
             return Stream.empty();
         }
 
-        LabelPropagation.Labels result = compute(configuration, direction, iterations, batchSize, configuration.getConcurrency(), graph, tracker, stats);
+        HugeLongArray result = compute(
+                direction,
+                iterations,
+                batchSize,
+                configuration.getConcurrency(),
+                graph,
+                tracker,
+                stats);
 
         return LongStream.range(0L, result.size())
-                .mapToObj(i -> new StreamResult(graph.toOriginalNodeId(i), result.labelFor(i)));
+                .mapToObj(i -> new StreamResult(graph.toOriginalNodeId(i), result.get(i)));
 
     }
 
@@ -202,15 +218,17 @@ public final class LabelPropagationProc {
         }
     }
 
-    private GraphLoader graphLoader(ProcedureConfiguration config, String weightKey, PropertyMapping... propertyMappings) {
+    private GraphLoader graphLoader(
+            ProcedureConfiguration config,
+            String weightKey,
+            PropertyMapping... propertyMappings) {
         return new GraphLoader(dbAPI, Pools.DEFAULT)
                 .init(log, config.getNodeLabelOrQuery(), config.getRelationshipOrQuery(), config)
                 .withOptionalRelationshipWeightsFromProperty(weightKey, 1.0d)
                 .withOptionalNodeProperties(propertyMappings);
     }
 
-    private LabelPropagation.Labels compute(
-            ProcedureConfiguration configuration,
+    private HugeLongArray compute(
             Direction direction,
             int iterations,
             int batchSize,
@@ -219,38 +237,26 @@ public final class LabelPropagationProc {
             AllocationTracker tracker,
             LabelPropagationStats.Builder stats) {
         try {
-            return compute(direction, iterations, batchSize, concurrency, graph, tracker, stats);
+            ExecutorService pool = batchSize > 0 ? Pools.DEFAULT : null;
+            batchSize = Math.max(1, batchSize);
+            LabelPropagation labelPropagation = new LabelPropagation(graph, batchSize, concurrency, pool, tracker);
+            try (ProgressTimer ignored = stats.timeEval()) {
+                labelPropagation
+                        .withProgressLogger(ProgressLogger.wrap(log, "LabelPropagation"))
+                        .withTerminationFlag(TerminationFlag.wrap(transaction))
+                        .compute(direction, iterations);
+
+                final HugeLongArray result = labelPropagation.labels();
+
+                stats.iterations(labelPropagation.ranIterations());
+                stats.didConverge(labelPropagation.didConverge());
+
+                labelPropagation.release();
+                graph.release();
+                return result;
+            }
         } finally {
             graph.release();
-        }
-    }
-
-    private LabelPropagation.Labels compute(
-            Direction direction,
-            int iterations,
-            int batchSize,
-            int concurrency,
-            Graph graph,
-            AllocationTracker tracker,
-            LabelPropagationStats.Builder stats) {
-
-        ExecutorService pool = batchSize > 0 ? Pools.DEFAULT : null;
-        batchSize = Math.max(1, batchSize);
-        LabelPropagation labelPropagation = new LabelPropagation(graph, batchSize, concurrency, pool, tracker);
-        try (ProgressTimer ignored = stats.timeEval()) {
-            labelPropagation
-                    .withProgressLogger(ProgressLogger.wrap(log, "LabelPropagation"))
-                    .withTerminationFlag(TerminationFlag.wrap(transaction))
-                    .compute(direction, iterations);
-
-            final LabelPropagation.Labels result = labelPropagation.labels();
-
-            stats.iterations(labelPropagation.ranIterations());
-            stats.didConverge(labelPropagation.didConverge());
-
-            labelPropagation.release();
-            graph.release();
-            return result;
         }
     }
 
@@ -258,7 +264,7 @@ public final class LabelPropagationProc {
             int concurrency,
             String labelKey,
             Graph graph,
-            LabelPropagation.Labels labels,
+            HugeLongArray labels,
             LabelPropagationStats.Builder stats) {
         try (ProgressTimer ignored = stats.timeWrite()) {
             Exporter.of(dbAPI, graph)
@@ -268,7 +274,7 @@ public final class LabelPropagationProc {
                     .write(
                             labelKey,
                             labels,
-                            LabelPropagation.LABEL_TRANSLATOR
+                            HugeLongArray.Translator.INSTANCE
                     );
         }
     }

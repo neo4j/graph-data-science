@@ -35,7 +35,6 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
@@ -52,8 +51,6 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
     public static final String SEED_TYPE = "seed";
     public static final String WEIGHT_TYPE = "weight";
 
-    public static final PropertyTranslator.OfLong<Labels> LABEL_TRANSLATOR = Labels::labelFor;
-
     private final long nodeCount;
     private final AllocationTracker tracker;
     private final HugeWeightMapping nodeProperties;
@@ -63,7 +60,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
     private final ExecutorService executor;
 
     private Graph graph;
-    private Labels labels;
+    private HugeLongArray labels;
     private final long maxLabelId;
     private long ranIterations;
     private boolean didConverge;
@@ -114,7 +111,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         return didConverge;
     }
 
-    public Labels labels() {
+    public HugeLongArray labels() {
         return labels;
     }
 
@@ -124,7 +121,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         }
 
         if (labels == null || labels.size() != nodeCount) {
-            labels = initialLabels(nodeCount, tracker);
+            labels = HugeLongArray.newArray(nodeCount, tracker);
         }
 
         ranIterations = 0L;
@@ -158,10 +155,6 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         return me();
     }
 
-    private Labels initialLabels(final long nodeCount, final AllocationTracker tracker) {
-        return new Labels(HugeLongArray.newArray(nodeCount, tracker));
-    }
-
     private List<StepRunner> stepRunners(Direction direction) {
         long nodeCount = graph.nodeCount();
         long batchSize = ParallelUtil.adjustBatchSize(nodeCount, (long) this.batchSize);
@@ -191,37 +184,6 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         return tasks;
     }
 
-    // Labels
-
-    public static final class Labels {
-        final HugeLongArray labels;
-
-        Labels(final HugeLongArray labels) {
-            this.labels = labels;
-        }
-
-        public long labelFor(final long nodeId) {
-            return labels.get(nodeId);
-        }
-
-        public void setLabelFor(final long nodeId, final long label) {
-            labels.set(nodeId, label);
-        }
-
-        public long size() {
-            return labels.size();
-        }
-
-        @Override
-        public String toString() {
-            return "Labels{" +
-                   "labels=" + labels +
-                   '}';
-        }
-    }
-
-    // Steps
-
     interface Step extends Runnable {
         @Override
         void run();
@@ -248,7 +210,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
     private static final class InitStep implements Step {
 
         private final HugeWeightMapping nodeProperties;
-        private final Labels existingLabels;
+        private final HugeLongArray existingLabels;
         private final PrimitiveLongIterable nodes;
         private final Graph graph;
         private final HugeWeightMapping nodeWeights;
@@ -261,7 +223,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
                 HugeWeightMapping nodeProperties,
                 HugeWeightMapping nodeWeights,
                 PrimitiveLongIterable nodes,
-                Labels existingLabels,
+                HugeLongArray existingLabels,
                 ProgressLogger progressLogger,
                 Direction direction,
                 long maxLabelId) {
@@ -284,7 +246,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
                 long existingLabel = Double.isNaN(existingLabelValue)
                         ? maxLabelId + graph.toOriginalNodeId(nodeId) + 1L
                         : (long) existingLabelValue;
-                existingLabels.setLabelFor(nodeId, existingLabel);
+                existingLabels.set(nodeId, existingLabel);
             }
         }
 
@@ -306,7 +268,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         private final RelationshipIterator localRelationshipIterator;
         private final Direction direction;
         private final HugeWeightMapping nodeWeights;
-        private final Labels existingLabels;
+        private final HugeLongArray existingLabels;
         private final LongDoubleScatterMap votes;
         private final PrimitiveLongIterable nodes;
         private final ProgressLogger progressLogger;
@@ -317,7 +279,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
                 HugeWeightMapping nodeWeights,
                 ProgressLogger progressLogger,
                 Direction direction,
-                Labels existingLabels,
+                HugeLongArray existingLabels,
                 PrimitiveLongIterable nodes) {
             this.existingLabels = existingLabels;
             this.progressLogger = progressLogger;
@@ -379,13 +341,13 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
 
         final void castVote(long candidate, double weight) {
             weight = weightOf(candidate, weight);
-            long label = existingLabels.labelFor(candidate);
+            long label = existingLabels.get(candidate);
             votes.addTo(label, weight);
         }
 
         final boolean compute(long nodeId, boolean didChange) {
             votes.clear();
-            long label = existingLabels.labelFor(nodeId);
+            long label = existingLabels.get(nodeId);
             long previous = label;
             forEach(nodeId);
             double weight = Double.NEGATIVE_INFINITY;
@@ -400,7 +362,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
                 }
             }
             if (label != previous) {
-                existingLabels.setLabelFor(nodeId, label);
+                existingLabels.set(nodeId, label);
                 return true;
             }
             return didChange;

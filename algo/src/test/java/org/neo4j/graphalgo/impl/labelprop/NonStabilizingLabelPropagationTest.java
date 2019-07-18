@@ -121,7 +121,7 @@ public class NonStabilizingLabelPropagationTest {
     public void testLabelPropagationDoesStabilize() {
         LabelPropagation labelPropagation = new LabelPropagation(graph, ParallelUtil.DEFAULT_BATCH_SIZE, Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT, AllocationTracker.EMPTY);
         LabelPropagation compute = labelPropagation.compute(Direction.OUTGOING, 10);
-        LabelPropagation.Labels result = compute.labels();
+        compute.labels();
         assertTrue("Should converge", compute.didConverge());
     }
 

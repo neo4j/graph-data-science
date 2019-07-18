@@ -38,6 +38,7 @@ import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
@@ -158,8 +159,8 @@ public final class LabelPropagationTest {
                 AllocationTracker.EMPTY
         );
         lp.compute(Direction.OUTGOING, 1L);
-        LabelPropagation.Labels labels = lp.labels();
-        assertArrayEquals("Incorrect result assuming initial labels are neo4j id", new long[]{1, 1, 1, maxId + seededLabel + 1}, labels.labels.toArray());
+        HugeLongArray labels = lp.labels();
+        assertArrayEquals("Incorrect result assuming initial labels are neo4j id", new long[]{1, 1, 1, maxId + seededLabel + 1}, labels.toArray());
     }
 
     @Test
@@ -172,8 +173,8 @@ public final class LabelPropagationTest {
                 AllocationTracker.EMPTY
         );
         lp.compute(Direction.OUTGOING, 1L);
-        LabelPropagation.Labels labels = lp.labels();
-        assertArrayEquals("Incorrect result assuming initial labels are neo4j id", new long[]{1, 1, 3, 4, 4, 1}, labels.labels.toArray());
+        HugeLongArray labels = lp.labels();
+        assertArrayEquals("Incorrect result assuming initial labels are neo4j id", new long[]{1, 1, 3, 4, 4, 1}, labels.toArray());
     }
 
     @Test
@@ -212,7 +213,7 @@ public final class LabelPropagationTest {
                 AllocationTracker.EMPTY
         );
         lp.compute(Direction.OUTGOING, 10L);
-        LabelPropagation.Labels labels = lp.labels();
+        HugeLongArray labels = lp.labels();
         assertNotNull(labels);
         IntObjectMap<IntArrayList> cluster = groupByPartitionInt(labels);
         assertNotNull(cluster);
@@ -231,13 +232,13 @@ public final class LabelPropagationTest {
         }
     }
 
-    private static IntObjectMap<IntArrayList> groupByPartitionInt(LabelPropagation.Labels labels) {
+    private static IntObjectMap<IntArrayList> groupByPartitionInt(HugeLongArray labels) {
         if (labels == null) {
             return null;
         }
         IntObjectMap<IntArrayList> cluster = new IntObjectHashMap<>();
         for (int node = 0, l = Math.toIntExact(labels.size()); node < l; node++) {
-            int key = Math.toIntExact(labels.labelFor(node));
+            int key = Math.toIntExact(labels.get(node));
             IntArrayList ids = cluster.get(key);
             if (ids == null) {
                 ids = new IntArrayList();
