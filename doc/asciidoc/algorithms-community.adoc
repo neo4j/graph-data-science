@@ -12,9 +12,9 @@ The following community detection algorithms evaluate how a group is clustered o
 * <<algorithms-label-propagation, Label Propagation>> (`algo.labelPropagation`)
 * <<algorithms-connected-components, Connected Components>> (`algo.unionFind`)
 
-include::experimental-louvain.adoc[leveloffset=+1]
+include::louvain.adoc[leveloffset=+1]
 
-include::experimental-label-propagation.adoc[leveloffset=+1]
+include::label-propagation.adoc[leveloffset=+1]
 
 include::connected_components.adoc[leveloffset=+1]
 

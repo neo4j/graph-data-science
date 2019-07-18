@@ -60,7 +60,7 @@ The others don’t have any influence, because all the shortest paths between pa
 
 
 [[algorithms-betweenness-centrality-syntax]]
-= Syntax
+== Syntax
 
 .The following will run the Brandes algorithm and write back results:
 [source,cypher]
