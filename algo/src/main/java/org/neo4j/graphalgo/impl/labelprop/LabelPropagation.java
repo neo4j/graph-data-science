@@ -44,7 +44,6 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class LabelPropagation extends Algorithm<LabelPropagation> {
 
@@ -188,7 +187,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
             StepRunner task = new StepRunner(initStep);
             tasks.add(task);
         }
-        ParallelUtil.runWithConcurrency(concurrency, tasks, 1, MILLISECONDS, terminationFlag, executor);
+        ParallelUtil.runWithConcurrency(concurrency, tasks, 1, MICROSECONDS, terminationFlag, executor);
         return tasks;
     }
 
