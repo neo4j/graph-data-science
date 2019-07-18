@@ -243,6 +243,16 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
             while (iterator.hasNext()) {
                 long nodeId = iterator.next();
                 double existingLabelValue = nodeProperties.nodeWeight(nodeId, Double.NaN);
+                // if there is no provided value for this node, we could start adding
+                // to the max provided id and continue from there, but that might
+                // clash with node IDs. If we have loaded a graph with a greater node ID
+                // than what was provided to us, we would inadvertently put two nodes into
+                // the same cluster, that probably have nothing to do with each other.
+                // To work around that, we're also adding the node ID to the maxLabelId,
+                // basically shifting the node IDs by maxLabelId. We're using the original
+                // node ID to maintain determinism since our internal node IDs are not
+                // guaranteed to always map in the same fashion to the original IDs and those
+                // one are as stable as we need them to be for getting deterministic results.
                 long existingLabel = Double.isNaN(existingLabelValue)
                         ? maxLabelId + graph.toOriginalNodeId(nodeId) + 1L
                         : (long) existingLabelValue;
