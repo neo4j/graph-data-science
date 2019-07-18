@@ -49,7 +49,7 @@ final class ComputeStepConsumer implements WeightedRelationshipConsumer {
                 weight = vote.value;
                 label = vote.key;
             } else if (weight == vote.value) {
-                if (label > vote.key) {
+                if (vote.key < label) {
                     label = vote.key;
                 }
             }
