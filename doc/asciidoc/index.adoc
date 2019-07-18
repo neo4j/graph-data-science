@@ -3,7 +3,7 @@
 :experimental:
 :sectid:
 :sectlinks:
-:toclevels: 3
+:toclevels: 2
 :env-docs: true
 
 ifdef::backend-html5[(C) {copyright}]
@@ -108,7 +108,7 @@ This chapter contains a reference of all the procedures in the Neo4j Graph Algor
 --
 
 
-[[table-all]]
+[[table-proc]]
 [separator=¦,opts=header,cols="1m,5m,1m"]
 |===
 include::csv/procedures.csv[]
@@ -116,6 +116,19 @@ include::csv/procedures.csv[]
 
 
 include::algorithms.adoc[leveloffset=1]
+
+[[experimental-procedures]]
+== Experimental Procedures
+
+[abstract]
+--
+This chapter contains a reference of all the experimental procedures in the Neo4j Graph Algorithms library.
+--
+[[table-experimental]]
+[separator=¦,opts=header,cols="1m,5m,1m"]
+|===
+include::csv/experimental-procedures.csv[]
+|===
 
 include::experimental-index.adoc[leveloffset=1]
 
