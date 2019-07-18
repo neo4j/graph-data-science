@@ -107,7 +107,7 @@ public class ParallelLocalQueueBFS implements BFS {
         }
         RelationshipIterator localRelationshipIterator = graph.concurrentCopy();
         final LongPriorityQueue queue = LongPriorityQueue.max();
-        queue.add(startNodeId, 0d);
+        queue.add(startNodeId, 0D);
         while (!queue.isEmpty()) {
             final long node = queue.pop();
 

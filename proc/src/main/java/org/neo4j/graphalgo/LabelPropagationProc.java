@@ -203,10 +203,10 @@ public final class LabelPropagationProc {
     private PropertyMapping[] createPropertyMappings(String seedProperty, String weightProperty) {
         ArrayList<PropertyMapping> propertyMappings = new ArrayList<>();
         if (seedProperty != null) {
-            propertyMappings.add(PropertyMapping.of(LabelPropagation.SEED_TYPE, seedProperty, 0d));
+            propertyMappings.add(PropertyMapping.of(LabelPropagation.SEED_TYPE, seedProperty, 0D));
         }
         if (weightProperty != null) {
-            propertyMappings.add(PropertyMapping.of(LabelPropagation.WEIGHT_TYPE, weightProperty, 1d));
+            propertyMappings.add(PropertyMapping.of(LabelPropagation.WEIGHT_TYPE, weightProperty, 1D));
         }
         return propertyMappings.toArray(new PropertyMapping[0]);
     }
@@ -224,7 +224,7 @@ public final class LabelPropagationProc {
             PropertyMapping... propertyMappings) {
         return new GraphLoader(dbAPI, Pools.DEFAULT)
                 .init(log, config.getNodeLabelOrQuery(), config.getRelationshipOrQuery(), config)
-                .withOptionalRelationshipWeightsFromProperty(weightKey, 1.0d)
+                .withOptionalRelationshipWeightsFromProperty(weightKey, 1.0D)
                 .withOptionalNodeProperties(propertyMappings);
     }
 

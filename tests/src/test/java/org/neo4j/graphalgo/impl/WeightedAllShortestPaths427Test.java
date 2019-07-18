@@ -534,7 +534,7 @@ public class WeightedAllShortestPaths427Test {
             super(
                     0.0D,
                     startNode,
-                    withWeights ? WEIGHT : (relationship, direction) -> 1.0d,
+                    withWeights ? WEIGHT : (relationship, direction) -> 1.0D,
                     new DoubleAdder(),
                     Comparator.comparingDouble(Double::doubleValue),
                     Direction.OUTGOING,

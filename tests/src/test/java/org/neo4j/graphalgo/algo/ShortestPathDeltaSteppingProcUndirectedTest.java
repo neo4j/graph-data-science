@@ -135,7 +135,7 @@ public final class ShortestPathDeltaSteppingProcUndirectedTest {
         });
 
         verify(consumer, times(11)).accept(anyDouble());
-        verify(consumer, times(10)).accept(eq(Double.POSITIVE_INFINITY, 0.1d));
+        verify(consumer, times(10)).accept(eq(Double.POSITIVE_INFINITY, 0.1D));
     }
 
     @Test
@@ -158,6 +158,6 @@ public final class ShortestPathDeltaSteppingProcUndirectedTest {
         });
 
         verify(consumer, times(11)).accept(anyDouble());
-        verify(consumer, times(1)).accept(eq(8, 0.1d));
+        verify(consumer, times(1)).accept(eq(8, 0.1D));
     }
 }

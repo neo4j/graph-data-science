@@ -75,7 +75,7 @@ public class WeightedComputeStep extends BaseComputeStep implements Relationship
         if (weight > 0) {
             double proportion = weight / sumOfWeights;
             float srcRankDelta = (float) (delta * proportion);
-            if (srcRankDelta != 0f) {
+            if (srcRankDelta != 0F) {
                 int idx = binaryLookup(targetNodeId, starts);
                 nextScores[idx][(int) (targetNodeId - starts[idx])] += srcRankDelta;
             }

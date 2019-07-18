@@ -40,7 +40,7 @@ public class AdjacencyMatrixSortingTest {
     @Test
     public void sortOutgoing() {
         RelationshipConsumer consumer = mock(RelationshipConsumer.class);
-        AdjacencyMatrix matrix = new AdjacencyMatrix(3, false, 0d, false, AllocationTracker.EMPTY);
+        AdjacencyMatrix matrix = new AdjacencyMatrix(3, false, 0D, false, AllocationTracker.EMPTY);
         matrix.addOutgoing(0, 2);
         matrix.addOutgoing(0, 1);
 
@@ -58,7 +58,7 @@ public class AdjacencyMatrixSortingTest {
     public void sortOutgoingWithWeights() {
         WeightedRelationshipConsumer consumer = mock(WeightedRelationshipConsumer.class);
 
-        AdjacencyMatrix matrix = new AdjacencyMatrix(3, true, 0d, false, AllocationTracker.EMPTY);
+        AdjacencyMatrix matrix = new AdjacencyMatrix(3, true, 0D, false, AllocationTracker.EMPTY);
         matrix.addOutgoingWithWeight(0, 2, 2.0);
         matrix.addOutgoingWithWeight(0, 1, 1.0);
 
@@ -75,7 +75,7 @@ public class AdjacencyMatrixSortingTest {
     @Test
     public void sortIncoming() {
         RelationshipConsumer consumer = mock(RelationshipConsumer.class);
-        AdjacencyMatrix matrix = new AdjacencyMatrix(3, false, 0d, false, AllocationTracker.EMPTY);
+        AdjacencyMatrix matrix = new AdjacencyMatrix(3, false, 0D, false, AllocationTracker.EMPTY);
         matrix.addIncoming(2, 0);
         matrix.addIncoming(1, 0);
 
@@ -92,7 +92,7 @@ public class AdjacencyMatrixSortingTest {
     @Test
     public void sortIncomingWithWeights() {
         WeightedRelationshipConsumer consumer = mock(WeightedRelationshipConsumer.class);
-        AdjacencyMatrix matrix = new AdjacencyMatrix(3, true, 0d, false, AllocationTracker.EMPTY);
+        AdjacencyMatrix matrix = new AdjacencyMatrix(3, true, 0D, false, AllocationTracker.EMPTY);
         matrix.addIncomingWithWeight(2, 0, 2.0);
         matrix.addIncomingWithWeight(1, 0, 1.0);
 

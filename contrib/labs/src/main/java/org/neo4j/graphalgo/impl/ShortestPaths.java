@@ -69,8 +69,8 @@ public class ShortestPaths extends Algorithm<ShortestPaths> {
             return true;
         }));
         final int nodeId = Math.toIntExact(graph.toMappedNodeId(startNode));
-        costs.put(nodeId, 0d);
-        queue.add(nodeId, 0d);
+        costs.put(nodeId, 0D);
+        queue.add(nodeId, 0D);
         run();
         return this;
     }

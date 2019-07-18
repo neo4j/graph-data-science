@@ -89,7 +89,7 @@ public class HeavyCypherGraphSequentialFactoryTest {
         final Graph graph = new GraphLoader((GraphDatabaseAPI) db)
                 .withBatchSize(1000)
                 .withDuplicateRelationshipsStrategy(accumulateWeights ? DuplicateRelationshipsStrategy.SUM : DuplicateRelationshipsStrategy.SKIP)
-                .withRelationshipWeightsFromProperty("prop",0d)
+                .withRelationshipWeightsFromProperty("prop",0D)
                 .withLabel(nodeStatement)
                 .withRelationshipType(relStatement)
                 .load(HeavyCypherGraphFactory.class);

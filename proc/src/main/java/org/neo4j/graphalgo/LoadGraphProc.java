@@ -112,11 +112,11 @@ public final class LoadGraphProc extends BaseProc {
                 .withOptionalRelationshipWeightsFromProperty(
                         config.getWeightProperty(),
                         config.getWeightPropertyDefaultValue(1.0))
-                .withOptionalNodeProperty(nodeProperty, 0.0d)
-                .withOptionalNodeWeightsFromProperty(nodeWeight, 1.0d)
+                .withOptionalNodeProperty(nodeProperty, 0.0D)
+                .withOptionalNodeWeightsFromProperty(nodeWeight, 1.0D)
                 .withOptionalNodeProperties(
-                        PropertyMapping.of(LabelPropagation.SEED_TYPE, nodeProperty, 0.0d),
-                        PropertyMapping.of(LabelPropagation.WEIGHT_TYPE, nodeWeight, 1.0d)
+                        PropertyMapping.of(LabelPropagation.SEED_TYPE, nodeProperty, 0.0D),
+                        PropertyMapping.of(LabelPropagation.WEIGHT_TYPE, nodeWeight, 1.0D)
                 )
                 .withDirection(direction)
                 .withSort(sorted)
@@ -140,7 +140,7 @@ public final class LoadGraphProc extends BaseProc {
             loadRelationships = configuration.getRelationshipOrQuery();
             direction = configuration.getDirection(Direction.OUTGOING).name();
             nodeWeight = configuration.getString(ProcedureConstants.NODE_WEIGHT, null);
-            nodeProperty = configuration.getString(ProcedureConstants.NODE_PROPERTY, null);;
+            nodeProperty = configuration.getString(ProcedureConstants.NODE_PROPERTY, null);
             relationshipWeight = configuration.getString(ProcedureConstants.RELATIONSHIP_WEIGHT, null);;
         }
     }

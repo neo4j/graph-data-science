@@ -121,7 +121,7 @@ public class CosineProc extends SimilarityProc {
     private double similarityCutoff(ProcedureConfiguration configuration) {
         double similarityCutoff = getSimilarityCutoff(configuration);
         // as we don't compute the sqrt until the end
-        if (similarityCutoff > 0d) similarityCutoff *= similarityCutoff;
+        if (similarityCutoff > 0D) similarityCutoff *= similarityCutoff;
         return similarityCutoff;
     }
 

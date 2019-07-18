@@ -44,7 +44,7 @@ public class CategoricalInput implements  Comparable<CategoricalInput>, Similari
 
     public SimilarityResult jaccard(double similarityCutoff, CategoricalInput e2, boolean bidirectional) {
         long intersection = Intersections.intersection3(targets, e2.targets);
-        if (similarityCutoff >= 0d && intersection == 0) return null;
+        if (similarityCutoff >= 0D && intersection == 0) return null;
         int count1 = targets.length;
         int count2 = e2.targets.length;
         long denominator = count1 + count2 - intersection;
@@ -59,7 +59,7 @@ public class CategoricalInput implements  Comparable<CategoricalInput>, Similari
 
     public SimilarityResult overlap(double similarityCutoff, CategoricalInput e2, boolean inferReverse) {
         long intersection = Intersections.intersection3(targets, e2.targets);
-        if (similarityCutoff >= 0d && intersection == 0) return null;
+        if (similarityCutoff >= 0D && intersection == 0) return null;
         int count1 = targets.length;
         int count2 = e2.targets.length;
         long denominator = Math.min(count1, count2);

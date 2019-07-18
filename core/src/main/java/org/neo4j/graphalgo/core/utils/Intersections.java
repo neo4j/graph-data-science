@@ -161,9 +161,9 @@ public class Intersections {
     }
 
     public static double cosineSquare(double[] vector1, double[] vector2, int len) {
-        double dotProduct = 0d;
-        double xLength = 0d;
-        double yLength = 0d;
+        double dotProduct = 0D;
+        double xLength = 0D;
+        double yLength = 0D;
         for (int i = 0; i < len; i++) {
             double weight1 = vector1[i];
             double weight2 = vector2[i];
@@ -171,16 +171,16 @@ public class Intersections {
             xLength += weight1 * weight1;
             yLength += weight2 * weight2;
         }
-        if (xLength == 0d || yLength == 0d) return 0d;
+        if (xLength == 0D || yLength == 0D) return 0D;
         return dotProduct * dotProduct / xLength / yLength;
     }
 
     public static double cosineSquareSkip(double[] vector1, double[] vector2, int len, double skipValue) {
         boolean skipNan = Double.isNaN(skipValue);
 
-        double dotProduct = 0d;
-        double xLength = 0d;
-        double yLength = 0d;
+        double dotProduct = 0D;
+        double xLength = 0D;
+        double yLength = 0D;
         for (int i = 0; i < len; i++) {
             double weight1 = vector1[i];
             if (shouldSkip(weight1, skipValue, skipNan)) continue;
@@ -192,7 +192,7 @@ public class Intersections {
             yLength += weight2 * weight2;
         }
 
-        if (xLength == 0d || yLength == 0d) return 0d;
+        if (xLength == 0D || yLength == 0D) return 0D;
         return dotProduct * dotProduct / xLength / yLength;
     }
 
@@ -207,9 +207,9 @@ public class Intersections {
         double vector1Mean = vector1Sum / len;
         double vector2Mean = vector2Sum / len;
 
-        double dotProductMinusMean = 0d;
-        double xLength = 0d;
-        double yLength = 0d;
+        double dotProductMinusMean = 0D;
+        double xLength = 0D;
+        double yLength = 0D;
         for (int i = 0; i < len; i++) {
             double vector1Delta = vector1[i] - vector1Mean;
             double vector2Delta = vector2[i] - vector2Mean;
@@ -248,9 +248,9 @@ public class Intersections {
         double vector1Mean = vector1Sum / vector1Count;
         double vector2Mean = vector2Sum / vector2Count;
 
-        double dotProductMinusMean = 0d;
-        double xLength = 0d;
-        double yLength = 0d;
+        double dotProductMinusMean = 0D;
+        double xLength = 0D;
+        double yLength = 0D;
         for (int i = 0; i < len; i++) {
             double weight1 = vector1[i];
             if (shouldSkip(weight1, skipValue, skipNan)) continue;
@@ -275,9 +275,9 @@ public class Intersections {
     }
 
     public static double cosine(double[] vector1, double[] vector2, int len) {
-        double dotProduct = 0d;
-        double xLength = 0d;
-        double yLength = 0d;
+        double dotProduct = 0D;
+        double xLength = 0D;
+        double yLength = 0D;
         for (int i = 0; i < len; i++) {
             double weight1 = vector1[i];
             // if (weight1 == 0d) continue;
@@ -296,7 +296,7 @@ public class Intersections {
     public static double[] cosines(double[] vector1, double[][] vector2, int len) {
         int vectors = vector2.length;
         double[] dotProduct = new double[vectors];
-        double xLength = 0d;
+        double xLength = 0D;
         double[] yLength = new double[vectors];
         for (int i = 0; i < len; i++) {
             double weight1 = vector1[i];

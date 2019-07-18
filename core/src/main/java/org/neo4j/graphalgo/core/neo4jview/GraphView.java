@@ -266,7 +266,7 @@ public class GraphView implements Graph {
 
     @Override
     public HugeWeightMapping nodeProperties(String type) {
-        return new HugeNullWeightMap(1d);
+        return new HugeNullWeightMap(1D);
     }
 
     @Override

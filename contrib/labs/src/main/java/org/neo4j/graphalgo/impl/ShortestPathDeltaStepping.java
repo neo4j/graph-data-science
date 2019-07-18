@@ -72,7 +72,7 @@ public class ShortestPathDeltaStepping extends Algorithm<ShortestPathDeltaSteppi
     private ExecutorService executorService;
 
     // multiplier used to scale an double to int
-    private double multiplier = 100_000d; // double type is intended
+    private double multiplier = 100_000D; // double type is intended
     private Direction direction;
 
     public ShortestPathDeltaStepping(Graph graph, double delta, Direction direction) {
