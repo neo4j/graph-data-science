@@ -102,7 +102,7 @@ public class LabelPropagationProcLoadPredefinedLabelsTest {
 
     @Test
     public void shouldUseDefaultValues() {
-        String query = "CALL algo.labelPropagation.stream(null, null, {batchSize:$batchSize,concurrency:$concurrency,graph:$graph,seedProperty:'community'}) " +
+        String query = "CALL algo.labelPropagation.stream(null, null, {batchSize: $batchSize, concurrency: $concurrency, graph: $graph, seedProperty: 'community'}) " +
                 "YIELD nodeId, community " +
                 "RETURN algo.asNode(nodeId) AS id, community " +
                 "ORDER BY id";

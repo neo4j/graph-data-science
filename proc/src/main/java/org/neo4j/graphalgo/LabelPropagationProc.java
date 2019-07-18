@@ -105,7 +105,7 @@ public final class LabelPropagationProc {
         final String weightProperty = configuration.getString(CONFIG_WEIGHT_KEY, null);
 
         if (configuration.isWriteFlag(DEFAULT_WRITE) && writeProperty == null) {
-            throw new IllegalArgumentException("Write property not specified");
+            throw new IllegalArgumentException(String.format("Write property '%s' not specified", CONFIG_WRITE_KEY));
         }
 
         LabelPropagationStats.Builder stats = new LabelPropagationStats.Builder()
@@ -154,8 +154,8 @@ public final class LabelPropagationProc {
 
         final int iterations = configuration.getIterations(DEFAULT_ITERATIONS);
         final int batchSize = configuration.getBatchSize();
-        final String seedProperty = configuration.getString(CONFIG_SEED_KEY, null);
-        final String weightProperty = configuration.getString(CONFIG_WEIGHT_KEY, null);
+        final String seedProperty = configuration.getString(CONFIG_SEED_KEY, null, CONFIG_OLD_SEED_KEY);
+        final String weightProperty = configuration.getString(CONFIG_WEIGHT_KEY, null, CONFIG_OLD_SEED_KEY);
 
         PropertyMapping[] propertyMappings = createPropertyMappings(seedProperty, weightProperty);
 

@@ -112,7 +112,7 @@ Only Charles doesn't strongly fit into either side, but ends up with Doug and Ma
 [[algorithms-label-propagation-sample-seed_label]]
 === Using seed labels
 
-At the beginning of the algorithm, every node is initialized with unique label and the labels propagate through the network.
+At the beginning of the algorithm, every node is initialized with a unique label and the labels propagate through the network.
 
 It is possible to define preliminary labels of nodes using the `seedProperty` parameter.
 We need to save a preliminary set of labels that we would like to run the Label Propagation algorithm with as node properties.
@@ -120,8 +120,8 @@ This property needs to be a number.
 In our example graph we saved them as the property `seed_label`.
 
 The algorithm first checks if there is a seed label assigned to the node, and loads it if there is one.
-If there isn't one, it assigns the node a new unique label.
-Using this preliminary set of labels, it then sequentially updates each node's label to a new one, which is the most frequent label among its neighbors at every label propagation iteration.
+If there isn't one, it assigns a new unique label to the node.
+Using this preliminary set of labels, it then sequentially updates each node's label to a new one, which is the most frequent label among its neighbors at every iteration of label propagation.
 
 .The following will run the algorithm with pre-defined labels:
 [source, cypher]

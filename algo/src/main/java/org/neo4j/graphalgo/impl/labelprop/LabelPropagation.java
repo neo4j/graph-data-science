@@ -182,7 +182,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         Collection<PrimitiveLongIterable> nodeBatches = LazyBatchCollection.of(
                 nodeCount,
                 batchSize,
-                (start, length) -> () -> PrimitiveLongCollections.range(start, start + length -1L));
+                (start, length) -> () -> PrimitiveLongCollections.range(start, start + length - 1L));
 
         int threads = nodeBatches.size();
         List<BaseStep> tasks = new ArrayList<>(threads);
@@ -290,7 +290,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
 
         @Override
         public final void run() {
-            final PrimitiveLongIterator iterator = nodes.iterator();
+            PrimitiveLongIterator iterator = nodes.iterator();
             while (iterator.hasNext()) {
                 long nodeId = iterator.next();
                 double existingLabelValue = nodeProperties.nodeWeight(nodeId, Double.NaN);
