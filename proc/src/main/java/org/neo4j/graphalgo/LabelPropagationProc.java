@@ -99,8 +99,8 @@ public final class LabelPropagationProc {
 
         final int iterations = configuration.getIterations(DEFAULT_ITERATIONS);
         final int batchSize = configuration.getBatchSize();
-        final String seedProperty = configuration.getString(CONFIG_SEED_KEY, null, CONFIG_OLD_SEED_KEY);
-        final String writeProperty = configuration.getString(CONFIG_WRITE_KEY, null, CONFIG_OLD_SEED_KEY);
+        final String seedProperty = configuration.getString(CONFIG_SEED_KEY, CONFIG_OLD_SEED_KEY, null);
+        final String writeProperty = configuration.getString(CONFIG_WRITE_KEY, CONFIG_OLD_SEED_KEY, null);
         final String weightProperty = configuration.getString(CONFIG_WEIGHT_KEY, null);
 
         if (configuration.isWriteFlag(DEFAULT_WRITE) && writeProperty == null) {
@@ -163,8 +163,8 @@ public final class LabelPropagationProc {
 
         final int iterations = configuration.getIterations(DEFAULT_ITERATIONS);
         final int batchSize = configuration.getBatchSize();
-        final String seedProperty = configuration.getString(CONFIG_SEED_KEY, null, CONFIG_OLD_SEED_KEY);
-        final String weightProperty = configuration.getString(CONFIG_WEIGHT_KEY, null, CONFIG_OLD_SEED_KEY);
+        final String seedProperty = configuration.getString(CONFIG_SEED_KEY, CONFIG_OLD_SEED_KEY, null);
+        final String weightProperty = configuration.getString(CONFIG_WEIGHT_KEY, CONFIG_OLD_SEED_KEY, null);
 
         PropertyMapping[] propertyMappings = createPropertyMappings(seedProperty, weightProperty);
 

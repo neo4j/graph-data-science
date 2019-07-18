@@ -49,7 +49,7 @@ public class ProcedureConfigurationTest {
     public void newKeyIfPresent() {
         Map<String, Object> map = MapUtil.map("partitionProperty", "old", "writeProperty", "new");
         ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
-        String value = procedureConfiguration.get("writeProperty", "defaultValue", "partitionProperty");
+        String value = procedureConfiguration.get("writeProperty", "partitionProperty", "defaultValue");
         assertEquals("new", value);
     }
 
@@ -57,7 +57,7 @@ public class ProcedureConfigurationTest {
     public void oldKeyIfNewKeyNotPresent() {
         Map<String, Object> map = MapUtil.map("partitionProperty", "old");
         ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
-        String value = procedureConfiguration.get("writeProperty", "defaultValue", "partitionProperty");
+        String value = procedureConfiguration.get("writeProperty", "partitionProperty", "defaultValue");
         assertEquals("old", value);
     }
 
@@ -65,7 +65,7 @@ public class ProcedureConfigurationTest {
     public void defaultIfNoKeysPresent() {
         Map<String, Object> map = Collections.emptyMap();
         ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
-        String value = procedureConfiguration.get("writeProperty", "defaultValue", "partitionProperty");
+        String value = procedureConfiguration.get("writeProperty", "partitionProperty", "defaultValue");
         assertEquals("defaultValue", value);
     }
 

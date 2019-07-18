@@ -131,7 +131,9 @@ public class StronglyConnectedComponentsProc {
         final int[] connectedComponents = tarjan.getConnectedComponents();
         if (configuration.isWriteFlag()) {
             builder.withWrite(true);
-            String partitionProperty = configuration.get(CONFIG_WRITE_PROPERTY, CONFIG_CLUSTER, CONFIG_OLD_WRITE_PROPERTY);
+            String partitionProperty = configuration.get(CONFIG_WRITE_PROPERTY,
+                    CONFIG_OLD_WRITE_PROPERTY,
+                    CONFIG_CLUSTER);
             builder.withPartitionProperty(partitionProperty);
 
             builder.timeWrite(() -> {
@@ -188,7 +190,9 @@ public class StronglyConnectedComponentsProc {
 
         if (configuration.isWriteFlag()) {
             builder.withWrite(true);
-            String partitionProperty = configuration.get(CONFIG_WRITE_PROPERTY, CONFIG_CLUSTER, CONFIG_OLD_WRITE_PROPERTY);
+            String partitionProperty = configuration.get(CONFIG_WRITE_PROPERTY,
+                    CONFIG_OLD_WRITE_PROPERTY,
+                    CONFIG_CLUSTER);
             builder.withPartitionProperty(partitionProperty);
 
             builder.timeWrite(() -> Exporter
@@ -270,7 +274,9 @@ public class StronglyConnectedComponentsProc {
 
         if (configuration.isWriteFlag()) {
             builder.withWrite(true);
-            String partitionProperty = configuration.get(CONFIG_WRITE_PROPERTY, CONFIG_CLUSTER, CONFIG_OLD_WRITE_PROPERTY);
+            String partitionProperty = configuration.get(CONFIG_WRITE_PROPERTY,
+                    CONFIG_OLD_WRITE_PROPERTY,
+                    CONFIG_CLUSTER);
             builder.withPartitionProperty(partitionProperty).withWriteProperty(partitionProperty);
 
             builder.timeWrite(() -> Exporter.of(api, graph)
@@ -367,7 +373,9 @@ public class StronglyConnectedComponentsProc {
             multistep.release();
             builder.timeWrite(() -> {
                 builder.withWrite(true);
-                String partitionProperty = configuration.get(CONFIG_WRITE_PROPERTY, CONFIG_CLUSTER, CONFIG_OLD_WRITE_PROPERTY);
+                String partitionProperty = configuration.get(CONFIG_WRITE_PROPERTY,
+                        CONFIG_OLD_WRITE_PROPERTY,
+                        CONFIG_CLUSTER);
                 builder.withPartitionProperty(partitionProperty);
 
                 Exporter

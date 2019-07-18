@@ -384,8 +384,8 @@ public class ProcedureConfiguration {
         return (null == value || "".equals(value)) ? defaultValue : value;
     }
 
-    public String getString(String key, String defaultValue, String... oldKeys) {
-        return getChecked(key, defaultValue, String.class, oldKeys);
+    public String getString(String key, String oldKey, String defaultValue) {
+        return getChecked(key, oldKey, defaultValue, String.class);
     }
 
     public Optional<String> getString(String key) {
@@ -408,7 +408,7 @@ public class ProcedureConfiguration {
     }
 
     public Number getNumber(String key, String oldKey, Number defaultValue) {
-        Object value = get(key, (Object) defaultValue, oldKey);
+        Object value = get(key, oldKey, (Object) defaultValue);
         if (null == value) {
             return defaultValue;
         }
@@ -447,22 +447,17 @@ public class ProcedureConfiguration {
         return checkValue(key, defaultValue, expectedType, value);
     }
 
-    public <V> V get(String newKey, V defaultValue, String... oldKeys) {
+    @SuppressWarnings("unchecked")
+    public <V> V get(String newKey, String oldKey, V defaultValue) {
         Object value = config.get(newKey);
         if (null == value) {
-            for (String oldKey : oldKeys) {
-                value = config.get(oldKey);
-                if (null != value) {
-                    return (V) value;
-                }
-            }
-            return defaultValue;
+            value = config.get(oldKey);
         }
-        return (V) value;
+        return null == value ? defaultValue : (V) value;
     }
 
-    public <V> V getChecked(String key, V defaultValue, Class<V> expectedType, String... oldKeys) {
-        Object value = get(key, null, oldKeys);
+    public <V> V getChecked(String key, String oldKey, V defaultValue, Class<V> expectedType) {
+        Object value = get(key, oldKey, null);
         return checkValue(key, defaultValue, expectedType, value);
     }
 
