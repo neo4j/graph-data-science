@@ -29,9 +29,9 @@ import static org.neo4j.internal.kernel.api.Read.ANY_LABEL;
 
 public final class GraphDimensions {
 
-    private final long nodeCount;
+    private long nodeCount;
     private final long highestNeoId;
-    private final long maxRelCount;
+    private long maxRelCount;
     private final int labelId;
     private final int[] relationId;
     private final int relWeightId;
@@ -63,6 +63,10 @@ public final class GraphDimensions {
         return nodeCount;
     }
 
+    public void nodeCount(long nodeCount) {
+        this.nodeCount = nodeCount;
+    }
+
     public long highestNeoId() {
         return highestNeoId;
     }
@@ -73,6 +77,10 @@ public final class GraphDimensions {
 
     public long maxRelCount() {
         return maxRelCount;
+    }
+
+    public void maxRelCount(long maxRelCount) {
+        this.maxRelCount = maxRelCount;
     }
 
     public int labelId() {
