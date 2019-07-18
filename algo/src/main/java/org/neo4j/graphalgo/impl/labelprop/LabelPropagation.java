@@ -131,18 +131,18 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         ranIterations = 0L;
         didConverge = false;
 
-        List<BaseStep> baseSteps = baseSteps(direction);
+        List<StepRunner> stepRunners = stepRunners(direction);
 
         long currentIteration = 0L;
         while (running() && currentIteration < maxIterations) {
-            ParallelUtil.runWithConcurrency(concurrency, baseSteps, 1L, MICROSECONDS, terminationFlag, executor);
+            ParallelUtil.runWithConcurrency(concurrency, stepRunners, 1L, MICROSECONDS, terminationFlag, executor);
             ++currentIteration;
         }
 
         long maxIteration = 0L;
         boolean converged = true;
-        for (BaseStep baseStep : baseSteps) {
-            Step current = baseStep.current;
+        for (StepRunner stepRunner : stepRunners) {
+            Step current = stepRunner.current;
             if (current instanceof ComputeStep) {
                 ComputeStep step = (ComputeStep) current;
                 if (step.iteration > maxIteration) {
@@ -163,7 +163,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         return new Labels(HugeLongArray.newArray(nodeCount, tracker));
     }
 
-    private List<BaseStep> baseSteps(Direction direction) {
+    private List<StepRunner> stepRunners(Direction direction) {
         long nodeCount = graph.nodeCount();
         long batchSize = ParallelUtil.adjustBatchSize(nodeCount, (long) this.batchSize);
 
@@ -173,7 +173,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
                 (start, length) -> () -> PrimitiveLongCollections.range(start, start + length - 1L));
 
         int threads = nodeBatches.size();
-        List<BaseStep> tasks = new ArrayList<>(threads);
+        List<StepRunner> tasks = new ArrayList<>(threads);
         for (PrimitiveLongIterable iter : nodeBatches) {
             InitStep initStep = new InitStep(
                     graph,
@@ -185,7 +185,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
                     direction,
                     maxLabelId
             );
-            BaseStep task = new BaseStep(initStep);
+            StepRunner task = new StepRunner(initStep);
             tasks.add(task);
         }
         ParallelUtil.runWithConcurrency(concurrency, tasks, 1, MILLISECONDS, terminationFlag, executor);
@@ -231,11 +231,11 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
 
     }
 
-    static final class BaseStep implements Runnable {
+    static final class StepRunner implements Runnable {
 
         private Step current;
 
-        BaseStep(final Step current) {
+        StepRunner(final Step current) {
             this.current = current;
         }
 
