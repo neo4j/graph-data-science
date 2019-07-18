@@ -133,7 +133,7 @@ public final class LabelPropagationTest {
         long maxId = (Long) DB.execute(query, Collections.singletonMap("seed", seededLabel)).next().get("maxId");
 
         GraphLoader graphLoader = new GraphLoader(DB, Pools.DEFAULT)
-                .withOptionalNodeProperties(new PropertyMapping(LabelPropagation.LABEL_TYPE, "seed", 0.0))
+                .withOptionalNodeProperties(new PropertyMapping(LabelPropagation.SEED_TYPE, "seed", 0.0))
                 .withDirection(Direction.OUTGOING)
                 .withConcurrency(Pools.DEFAULT_CONCURRENCY);
 

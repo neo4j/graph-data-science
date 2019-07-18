@@ -187,7 +187,7 @@ public final class LabelPropagationProc {
     private PropertyMapping[] createPropertyMappings(String seedProperty, String weightProperty) {
         ArrayList<PropertyMapping> propertyMappings = new ArrayList<>();
         if (seedProperty != null) {
-            propertyMappings.add(PropertyMapping.of(LabelPropagation.LABEL_TYPE, seedProperty, 0d));
+            propertyMappings.add(PropertyMapping.of(LabelPropagation.SEED_TYPE, seedProperty, 0d));
         }
         if (weightProperty != null) {
             propertyMappings.add(PropertyMapping.of(LabelPropagation.WEIGHT_TYPE, weightProperty, 1d));

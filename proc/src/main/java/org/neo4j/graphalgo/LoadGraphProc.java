@@ -115,7 +115,7 @@ public final class LoadGraphProc extends BaseProc {
                 .withOptionalNodeProperty(nodeProperty, 0.0d)
                 .withOptionalNodeWeightsFromProperty(nodeWeight, 1.0d)
                 .withOptionalNodeProperties(
-                        PropertyMapping.of(LabelPropagation.LABEL_TYPE, nodeProperty, 0.0d),
+                        PropertyMapping.of(LabelPropagation.SEED_TYPE, nodeProperty, 0.0d),
                         PropertyMapping.of(LabelPropagation.WEIGHT_TYPE, nodeWeight, 1.0d)
                 )
                 .withDirection(direction)

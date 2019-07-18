@@ -46,7 +46,7 @@ import org.openjdk.jmh.annotations.Warmup;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import static org.neo4j.graphalgo.impl.labelprop.LabelPropagation.LABEL_TYPE;
+import static org.neo4j.graphalgo.impl.labelprop.LabelPropagation.SEED_TYPE;
 import static org.neo4j.graphalgo.impl.labelprop.LabelPropagation.WEIGHT_TYPE;
 
 /**
@@ -76,7 +76,7 @@ public class LabelPropagationBenchmarkLdbc {
                 .withRelationshipWeightsFromProperty("weight", 1.0d)
                 .withOptionalNodeProperties(
                         PropertyMapping.of(WEIGHT_TYPE, WEIGHT_TYPE, 1.0),
-                        PropertyMapping.of(LABEL_TYPE, LABEL_TYPE, 0.0)
+                        PropertyMapping.of(SEED_TYPE, SEED_TYPE, 0.0)
                 )
                 .withExecutorService(Pools.DEFAULT)
                 .load(HeavyGraphFactory.class);

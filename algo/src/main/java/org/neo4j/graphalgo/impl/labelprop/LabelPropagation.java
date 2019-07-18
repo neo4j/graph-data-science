@@ -51,7 +51,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
 
     private static final long[] EMPTY_LONGS = new long[0];
 
-    public static final String LABEL_TYPE = "property";
+    public static final String SEED_TYPE = "seed";
     public static final String WEIGHT_TYPE = "weight";
 
     public static final PropertyTranslator.OfLong<Labels> LABEL_TRANSLATOR = Labels::labelFor;
@@ -83,7 +83,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         this.executor = executor;
         this.tracker = tracker;
 
-        HugeWeightMapping seedProperty = graph.nodeProperties(LABEL_TYPE);
+        HugeWeightMapping seedProperty = graph.nodeProperties(SEED_TYPE);
         if (seedProperty == null) {
             seedProperty = new HugeNullWeightMap(0.0);
         }
