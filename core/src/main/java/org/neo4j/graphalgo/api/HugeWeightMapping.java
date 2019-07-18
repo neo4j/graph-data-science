@@ -59,7 +59,6 @@ public interface HugeWeightMapping extends WeightMapping, HugeNodeWeights {
      */
     long release();
 
-    // WeightMapping
     /**
      * @deprecated Use {@link #weight(long, long)}
      * @param id
@@ -71,7 +70,6 @@ public interface HugeWeightMapping extends WeightMapping, HugeNodeWeights {
         return weight((long) getHead(id), (long) getTail(id));
     }
 
-    // WeightMapping
     /**
      * @deprecated Use {@link #weight(long, long, double)}
      * @param id
@@ -84,7 +82,6 @@ public interface HugeWeightMapping extends WeightMapping, HugeNodeWeights {
         return weight((long) getHead(id), (long) getTail(id), defaultValue);
     }
 
-    // WeightMapping
     /**
      * @deprecated Use {@link #weight(long, long)}
      * @param source
@@ -97,7 +94,6 @@ public interface HugeWeightMapping extends WeightMapping, HugeNodeWeights {
         return weight((long) source, (long) target);
     }
 
-    // WeightMapping
     /**
      * @deprecated Use {@link #nodeWeight(long)}
      * @param id
@@ -109,7 +105,6 @@ public interface HugeWeightMapping extends WeightMapping, HugeNodeWeights {
         return nodeWeight((long) id);
     }
 
-    // WeightMapping
     /**
      * @deprecated Use {@link #nodeWeight(long, double)}
      * @param id
