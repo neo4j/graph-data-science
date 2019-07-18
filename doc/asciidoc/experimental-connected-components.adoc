@@ -7,10 +7,6 @@ This section describes the experimental variation of the Connected Components al
 --
 
 For more informations about `algo.union-find` look at <<algorithms-connected-components, Connected Components>> (`algo.unionFind`)
-This section includes:
-
-* <<experimental-algorithms-connected-components-imp, Implementations>>
-
 
 
 [[experimental-algorithms-connected-components-imp]]
