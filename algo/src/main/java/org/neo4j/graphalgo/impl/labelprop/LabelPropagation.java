@@ -62,7 +62,8 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
             int batchSize,
             int concurrency,
             ExecutorService executor,
-            AllocationTracker tracker) {
+            AllocationTracker tracker
+    ) {
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
         this.batchSize = batchSize;
