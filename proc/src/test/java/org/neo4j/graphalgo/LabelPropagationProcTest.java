@@ -26,9 +26,11 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.neo4j.graphdb.Result;
+import org.neo4j.helpers.collection.Iterators;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
 import java.util.Arrays;
@@ -37,6 +39,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -211,6 +214,46 @@ public class LabelPropagationProcTest {
         runQuery(query, parParams(), row -> {
             assertEquals(row.getNumber("seedProperty").intValue(), row.getNumber("community").intValue());
         });
+    }
+
+    @Test
+    public void testGeneratedAndProvidedLabelsDontConflict() throws KernelException {
+        GraphDatabaseAPI db = TestDatabaseCreator.createTestDatabase();
+        db.getDependencyResolver()
+                .resolveDependency(Procedures.class)
+                .registerProcedure(LabelPropagationProc.class);
+
+        int seededLabel = 1;
+        // When
+        String query = "CREATE " +
+                       " (a:Pet {id: 0,type: 'cat',   seedId: $seed}) " +
+                       ",(b:Pet {id: 1,type: 'okapi', seedId: $seed}) " +
+                       ",(c:Pet {id: 2,type: 'koala'}) " +
+                       ",(d:Pet {id: 3,type: 'python'}) " +
+                       ",(a)<-[:REL]-(c) " +
+                       ",(b)<-[:REL]-(c) " +
+                       "RETURN id(d) AS maxId";
+
+        // (c) will get seed 1
+        // (d) will get seed id(d) + 1
+        Result initResult = db.execute(query, Collections.singletonMap("seed", seededLabel));
+        long maxId = Iterators.single(initResult.<Number>columnAs("maxId")).longValue();
+
+        String lpa = "CALL algo.labelPropagation.stream('Pet', 'REL', {seedProperty: 'seedId'}) " +
+                     "YIELD nodeId, community " +
+                     "MATCH (pet:Pet) WHERE id(pet) = nodeId " +
+                     "RETURN pet.id as nodeId, community";
+
+        long[] sets = new long[4];
+        db.execute(lpa).accept(row -> {
+            int nodeId = row.getNumber("nodeId").intValue();
+            long setId = row.getNumber("community").longValue();
+            sets[nodeId] = setId;
+            return true;
+        });
+
+        long newLabel = maxId + seededLabel + 1;
+        assertArrayEquals("Incorrect result assuming initial labels are neo4j id", new long[]{1, 1, 1, newLabel}, sets);
     }
 
     private void runQuery(String query, Map<String,  Object> params) {

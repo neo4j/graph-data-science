@@ -117,53 +117,6 @@ public final class LabelPropagationTest {
     }
 
     @Test
-    public void testGeneratedAndProvidedLabelsDontConflict() {
-        int seededLabel = 1;
-        // When
-        String query = "CREATE " +
-                       " (a:Pet {type: 'cat',   seedId: $seed}) " +
-                       ",(b:Pet {type: 'okapi', seedId: $seed}) " +
-                       ",(c:Pet {type: 'koala'}) " +
-                       ",(d:Pet {type: 'python'}) " +
-                       ",(a)<-[:REL]-(c) " +
-                       ",(b)<-[:REL]-(c) " +
-                       "RETURN id(d) AS maxId";
-
-        // (c) will get seed 1
-        // (d) will get seed id(d) + 1
-        long maxId = (Long) DB.execute(query, Collections.singletonMap("seed", seededLabel)).next().get("maxId");
-
-        GraphLoader graphLoader = new GraphLoader(DB, Pools.DEFAULT)
-                .withOptionalNodeProperties(new PropertyMapping(LabelPropagation.SEED_TYPE, "seedId", 0.0))
-                .withDirection(Direction.OUTGOING)
-                .withConcurrency(Pools.DEFAULT_CONCURRENCY);
-
-        if (graphImpl == HeavyCypherGraphFactory.class) {
-            graphLoader
-                    .withLabel("MATCH (u:Pet) RETURN id(u) AS id, u.seedId AS seedId")
-                    .withRelationshipType("MATCH (u1:Pet)-[rel:REL]->(u2:Pet) " +
-                                          "RETURN id(u1) AS source, id(u2) AS target")
-                    .withName("cypher");
-        } else {
-            graphLoader
-                    .withLabel("Pet")
-                    .withRelationshipType("REL")
-                    .withName(graphImpl.getSimpleName());
-        }
-        graph = graphLoader.load(graphImpl);
-        LabelPropagation lp = new LabelPropagation(
-                graph,
-                10000,
-                Pools.DEFAULT_CONCURRENCY,
-                Pools.DEFAULT,
-                AllocationTracker.EMPTY
-        );
-        lp.compute(Direction.OUTGOING, 1L);
-        HugeLongArray labels = lp.labels();
-        assertArrayEquals("Incorrect result assuming initial labels are neo4j id", new long[]{1, 1, 1, maxId + seededLabel + 1}, labels.toArray());
-    }
-
-    @Test
     public void testUsesNeo4jNodeIdWhenSeedPropertyIsMissing() {
         LabelPropagation lp = new LabelPropagation(
                 graph,
