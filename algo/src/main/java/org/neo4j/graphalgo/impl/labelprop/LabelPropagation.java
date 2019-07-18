@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
-import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -164,20 +163,9 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         return new Labels(HugeLongArray.newArray(nodeCount, tracker));
     }
 
-    private long adjustBatchSize(long nodeCount, long batchSize) {
-        if (batchSize <= 0L) {
-            batchSize = 1L;
-        }
-        batchSize = BitUtil.nextHighestPowerOfTwo(batchSize);
-        while (((nodeCount + batchSize + 1L) / batchSize) > (long) Integer.MAX_VALUE) {
-            batchSize = batchSize << 1;
-        }
-        return batchSize;
-    }
-
     private List<BaseStep> baseSteps(Direction direction) {
         long nodeCount = graph.nodeCount();
-        long batchSize = adjustBatchSize(nodeCount, (long) this.batchSize);
+        long batchSize = ParallelUtil.adjustBatchSize(nodeCount, (long) this.batchSize);
 
         Collection<PrimitiveLongIterable> nodeBatches = LazyBatchCollection.of(
                 nodeCount,
