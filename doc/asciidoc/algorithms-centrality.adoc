@@ -3,16 +3,16 @@
 
 The following centrality algorithms determine the importance of distinct nodes in a network:
 
+* <<algorithms-pagerank, PageRank>> (`algo.pageRank`)
 * <<algorithms-betweenness-centrality, Betweenness Centrality>> (`algo.betweenness`)
 * <<algorithms-closeness-centrality, Closeness Centrality>> (`algo.closeness`)
-* <<algorithms-pagerank, PageRank>> (`algo.pageRank`)
 * <<algorithms-degree-centrality, Degree Centrality>> (`algo.degree`)
+
+include::pagerank.adoc[leveloffset=+1]
 
 include::betweenness-centrality.adoc[leveloffset=+1]
 
 include::closeness-centrality.adoc[leveloffset=+1]
-
-include::pagerank.adoc[leveloffset=+1]
 
 include::degree-centrality.adoc[leveloffset=+1]
 

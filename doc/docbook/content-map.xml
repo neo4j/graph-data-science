@@ -18,23 +18,17 @@
     <d:tocentry linkend="procedures"><?dbhtml filename="procedures/index.html"?>
     </d:tocentry>
 
+  <d:tocentry linkend="algorithms"><?dbhtml filename="algorithms/index.html"?>
     <d:tocentry linkend="algorithms-centrality"><?dbhtml filename="algorithms/centrality/index.html"?>
       <d:tocentry linkend="algorithms-pagerank"><?dbhtml filename="algorithms/page-rank/index.html"?>
-      </d:tocentry>
-      <d:tocentry linkend="algorithms-articlerank"><?dbhtml filename="algorithms/article-rank/index.html"?>
       </d:tocentry>
       <d:tocentry linkend="algorithms-betweenness-centrality"><?dbhtml filename="algorithms/betweenness-centrality/index.html"?>
       </d:tocentry>
       <d:tocentry linkend="algorithms-closeness-centrality"><?dbhtml filename="algorithms/closeness-centrality/index.html"?>
       </d:tocentry>
-      <d:tocentry linkend="algorithms-harmonic-centrality"><?dbhtml filename="algorithms/harmonic-centrality/index.html"?>
-      </d:tocentry>
-      <d:tocentry linkend="algorithms-eigenvector"><?dbhtml filename="algorithms/eigenvector-centrality/index.html"?>
-      </d:tocentry>
       <d:tocentry linkend="algorithms-degree-centrality"><?dbhtml filename="algorithms/degree-centrality/index.html"?>
       </d:tocentry>
     </d:tocentry>
-
     <d:tocentry linkend="algorithms-community"><?dbhtml filename="algorithms/community/index.html"?>
       <d:tocentry linkend="algorithms-louvain"><?dbhtml filename="algorithms/louvain/index.html"?>
       </d:tocentry>
@@ -42,64 +36,92 @@
       </d:tocentry>
       <d:tocentry linkend="algorithms-connected-components"><?dbhtml filename="algorithms/connected-components/index.html"?>
       </d:tocentry>
-      <d:tocentry linkend="algorithms-strongly-connected-components"><?dbhtml filename="algorithms/strongly-connected-components/index.html"?>
+    </d:tocentry>
+  </d:tocentry>
+
+  <d:tocentry linkend="experimental-procedures"><?dbhtml filename="experimental-procedures/index.html"?>
+  </d:tocentry>
+
+  <d:tocentry linkend="experimental-algorithms"><?dbhtml filename="experimental-algorithms/index.html"?>
+    <d:tocentry linkend="experimental-algorithms-centrality"><?dbhtml filename="experimental-algorithms/centrality/index.html"?>>
+      <d:tocentry linkend="experimental-algorithms-articlerank"><?dbhtml filename="experimental-algorithms/article-rank/index.html"?>
       </d:tocentry>
-      <d:tocentry linkend="algorithms-triangle-count-clustering-coefficient"><?dbhtml filename="algorithms/triangle-counting-clustering-coefficient/index.html"?>
+      <d:tocentry linkend="experimental-algorithms-harmonic-centrality"><?dbhtml filename="experimental-algorithms/harmonic-centrality/index.html"?>
       </d:tocentry>
-      <d:tocentry linkend="algorithms-balanced-triads"><?dbhtml filename="algorithms/balanced-triads/index.html"?>
+      <d:tocentry linkend="experimental-algorithms-eigenvector"><?dbhtml filename="experimental-algorithms/eigenvector-centrality/index.html"?>
+      </d:tocentry>
+    </d:tocentry>
+    <d:tocentry linkend="experimental-algorithms-community"><?dbhtml filename="experimental-algorithms/community/index.html"?>
+      <d:tocentry linkend="experimental-algorithms-connected-components"><?dbhtml filename="experimental-algorithms/connected-components/index.html"?>
+      </d:tocentry>
+      <d:tocentry linkend="experimental-algorithms-strongly-connected-components"><?dbhtml filename="experimental-algorithms/strongly-connected-components/index.html"?>
+      </d:tocentry>
+      <d:tocentry linkend="experimental-algorithms-triangle-count-clustering-coefficient"><?dbhtml filename="experimental-algorithms/triangle-counting-clustering-coefficient/index.html"?>
+      </d:tocentry>
+      <d:tocentry linkend="experimental-algorithms-balanced-triads"><?dbhtml filename="experimental-algorithms/balanced-triads/index.html"?>
+      </d:tocentry>
+    </d:tocentry>
+    <d:tocentry linkend="experimental-algorithms-community"><?dbhtml filename="experimental-algorithms/community/index.html"?>
+      <d:tocentry linkend="experimental-algorithms-connected-components"><?dbhtml filename="experimental-algorithms/connected-components/index.html"?>
+      </d:tocentry>
+      <d:tocentry linkend="experimental-algorithms-strongly-connected-components"><?dbhtml filename="experimental-algorithms/strongly-connected-components/index.html"?>
+      </d:tocentry>
+      <d:tocentry linkend="experimental-algorithms-triangle-count-clustering-coefficient"><?dbhtml filename="experimental-algorithms/triangle-counting-clustering-coefficient/index.html"?>
+      </d:tocentry>
+      <d:tocentry linkend="algorithms-balanced-triads"><?dbhtml filename="experimental-algorithms/balanced-triads/index.html"?>
       </d:tocentry>
     </d:tocentry>
 
-    <d:tocentry linkend="algorithms-path-finding"><?dbhtml filename="algorithms/pathfinding/index.html"?>
-      <d:tocentry linkend="algorithms-minimum-weight-spanning-tree"><?dbhtml filename="algorithms/minimum-weight-spanning-tree/index.html"?>
+    <d:tocentry linkend="experimental-algorithms-path-finding"><?dbhtml filename="experimental-algorithms/pathfinding/index.html"?>
+      <d:tocentry linkend="experimental-algorithms-minimum-weight-spanning-tree"><?dbhtml filename="experimental-algorithms/minimum-weight-spanning-tree/index.html"?>
       </d:tocentry>
-      <d:tocentry linkend="algorithms-shortest-path"><?dbhtml filename="algorithms/shortest-path/index.html"?>
+      <d:tocentry linkend="experimental-algorithms-shortest-path"><?dbhtml filename="experimental-algorithms/shortest-path/index.html"?>
       </d:tocentry>
-      <d:tocentry linkend="algorithms-single-source-shortest-path"><?dbhtml filename="algorithms/single-source-shortest-path/index.html"?>
+      <d:tocentry linkend="experimental-algorithms-single-source-shortest-path"><?dbhtml filename="experimental-algorithms/single-source-shortest-path/index.html"?>
       </d:tocentry>
-      <d:tocentry linkend="algorithm-all-pairs-shortest-path"><?dbhtml filename="algorithms/all-pairs-shortest-path/index.html"?>
+      <d:tocentry linkend="algorithm-all-pairs-shortest-path"><?dbhtml filename="experimental-algorithms/all-pairs-shortest-path/index.html"?>
       </d:tocentry>
-      <d:tocentry linkend="algorithms-a_star"><?dbhtml filename="algorithms/a_star/index.html"?>
+      <d:tocentry linkend="experimental-algorithms-a_star"><?dbhtml filename="experimental-algorithms/a_star/index.html"?>
       </d:tocentry>
-      <d:tocentry linkend="algorithms-yens-k-shortest-path"><?dbhtml filename="algorithms/yen-s-k-shortest-path/index.html"?>
+      <d:tocentry linkend="experimental-algorithms-yens-k-shortest-path"><?dbhtml filename="experimental-algorithms/yen-s-k-shortest-path/index.html"?>
       </d:tocentry>
-      <d:tocentry linkend="algorithms-random-walk"><?dbhtml filename="algorithms/random-walk/index.html"?>
-      </d:tocentry>
-    </d:tocentry>
-
-    <d:tocentry linkend="algorithms-similarity"><?dbhtml filename="algorithms/similarity/index.html"?>
-      <d:tocentry linkend="algorithms-similarity-jaccard"><?dbhtml filename="algorithms/similarity-jaccard/index.html"?>
-      </d:tocentry>
-      <d:tocentry linkend="algorithms-similarity-cosine"><?dbhtml filename="algorithms/similarity-cosine/index.html"?>
-      </d:tocentry>
-      <d:tocentry linkend="algorithms-similarity-pearson"><?dbhtml filename="algorithms/similarity-pearson/index.html"?>
-      </d:tocentry>
-      <d:tocentry linkend="algorithms-similarity-euclidean"><?dbhtml filename="algorithms/similarity-euclidean/index.html"?>
-      </d:tocentry>
-      <d:tocentry linkend="algorithms-similarity-overlap"><?dbhtml filename="algorithms/similarity-overlap/index.html"?>
+      <d:tocentry linkend="experimental-algorithms-random-walk"><?dbhtml filename="experimental-algorithms/random-walk/index.html"?>
       </d:tocentry>
     </d:tocentry>
 
-    <d:tocentry linkend="algorithms-linkprediction"><?dbhtml filename="algorithms/linkprediction/index.html"?>
-      <d:tocentry linkend="algorithms-linkprediction-adamic-adar"><?dbhtml filename="algorithms/linkprediction-adamic-adar/index.html"?>
+    <d:tocentry linkend="experimental-algorithms-similarity"><?dbhtml filename="experimental-algorithms/similarity/index.html"?>
+      <d:tocentry linkend="experimental-algorithms-similarity-jaccard"><?dbhtml filename="experimental-algorithms/similarity-jaccard/index.html"?>
       </d:tocentry>
-      <d:tocentry linkend="algorithms-linkprediction-common-neighbors"><?dbhtml filename="algorithms/linkprediction-common-neighbors/index.html"?>
+      <d:tocentry linkend="experimental-algorithms-similarity-cosine"><?dbhtml filename="experimental-algorithms/similarity-cosine/index.html"?>
       </d:tocentry>
-      <d:tocentry linkend="algorithms-linkprediction-preferential-attachment"><?dbhtml filename="algorithms/linkprediction-preferential-attachment/index.html"?>
+      <d:tocentry linkend="experimental-algorithms-similarity-pearson"><?dbhtml filename="experimental-algorithms/similarity-pearson/index.html"?>
       </d:tocentry>
-      <d:tocentry linkend="algorithms-linkprediction-resource-allocation"><?dbhtml filename="algorithms/linkprediction-resource-allocation/index.html"?>
+      <d:tocentry linkend="experimental-algorithms-similarity-euclidean"><?dbhtml filename="experimental-algorithms/similarity-euclidean/index.html"?>
       </d:tocentry>
-      <d:tocentry linkend="algorithms-linkprediction-same-community"><?dbhtml filename="algorithms/linkprediction-same-community/index.html"?>
-      </d:tocentry>
-      <d:tocentry linkend="algorithms-linkprediction-total-neighbors"><?dbhtml filename="algorithms/linkprediction-total-neighbors/index.html"?>
+      <d:tocentry linkend="experimental-algorithms-similarity-overlap"><?dbhtml filename="experimental-algorithms/similarity-overlap/index.html"?>
       </d:tocentry>
     </d:tocentry>
 
-    <d:tocentry linkend="algorithms-preprocessing"><?dbhtml filename="algorithms/preprocessing/index.html"?>
-      <d:tocentry linkend="algorithms-one-hot-encoding"><?dbhtml filename="algorithms/one-hot-encoding/index.html"?>
+    <d:tocentry linkend="experimental-algorithms-linkprediction"><?dbhtml filename="experimental-algorithms/linkprediction/index.html"?>
+      <d:tocentry linkend="experimental-algorithms-linkprediction-adamic-adar"><?dbhtml filename="experimental-algorithms/linkprediction-adamic-adar/index.html"?>
+      </d:tocentry>
+      <d:tocentry linkend="experimental-algorithms-linkprediction-common-neighbors"><?dbhtml filename="experimental-algorithms/linkprediction-common-neighbors/index.html"?>
+      </d:tocentry>
+      <d:tocentry linkend="experimental-algorithms-linkprediction-preferential-attachment"><?dbhtml filename="experimental-algorithms/linkprediction-preferential-attachment/index.html"?>
+      </d:tocentry>
+      <d:tocentry linkend="experimental-algorithms-linkprediction-resource-allocation"><?dbhtml filename="experimental-algorithms/linkprediction-resource-allocation/index.html"?>
+      </d:tocentry>
+      <d:tocentry linkend="experimental-algorithms-linkprediction-same-community"><?dbhtml filename="experimental-algorithms/linkprediction-same-community/index.html"?>
+      </d:tocentry>
+      <d:tocentry linkend="experimental-algorithms-linkprediction-total-neighbors"><?dbhtml filename="experimental-algorithms/linkprediction-total-neighbors/index.html"?>
       </d:tocentry>
     </d:tocentry>
 
+    <d:tocentry linkend="experimental-algorithms-preprocessing"><?dbhtml filename="experimental-algorithms/preprocessing/index.html"?>
+      <d:tocentry linkend="experimental-algorithms-one-hot-encoding"><?dbhtml filename="experimental-algorithms/one-hot-encoding/index.html"?>
+      </d:tocentry>
+    </d:tocentry>
+  </d:tocentry>
   </d:tocentry>
 </d:toc>
 <!-- vim: set ts=2 sw=2: -->

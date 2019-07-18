@@ -3,7 +3,7 @@
 
 [abstract]
 --
-La di da.
+This chapter provides explanations and examples for each of the experimental algorithms in the Neo4j Graph Algorithms library.
 --
 
 include::experimental-algorithms-centrality.adoc[leveloffset=+1]
