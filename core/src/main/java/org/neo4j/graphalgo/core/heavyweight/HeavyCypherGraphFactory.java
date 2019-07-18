@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.WeightMapping;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.graphalgo.core.NullWeightMap;
 import org.neo4j.graphalgo.core.WeightMap;
@@ -70,27 +71,7 @@ public class HeavyCypherGraphFactory extends GraphFactory {
         CypherRelationshipCountingLoader.RelationshipCount relCount = relationshipCountingLoader.load();
         dimensions.maxRelCount(relCount.rows());
 
-        MemoryEstimations.Builder builder = MemoryEstimations
-                .builder(HeavyGraph.class)
-                .add("nodeIdMap", IntIdMap.memoryEstimation())
-                .add("container", AdjacencyMatrix.memoryEstimation(
-                        setup.loadIncoming,
-                        setup.loadOutgoing,
-                        setup.loadAsUndirected,
-                        dimensions.relWeightId() != StatementConstants.NO_SUCH_PROPERTY_KEY
-                ))
-                .startField("nodePropertiesMapping", Map.class);
-
-        for (PropertyMapping propertyMapping : setup.nodePropertyMappings) {
-            int propertyId = dimensions.nodePropertyKeyId(propertyMapping.propertyName, setup);
-            if (propertyId == StatementConstants.NO_SUCH_PROPERTY_KEY) {
-                builder.add(NullWeightMap.MEMORY_USAGE);
-            } else {
-                builder.add(WeightMap.memoryEstimation());
-            }
-        }
-
-        return builder.endField().build();
+        return HeavyGraphFactory.getMemoryEstimation(setup, dimensions);
     }
 
 
