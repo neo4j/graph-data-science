@@ -81,7 +81,6 @@ public class ParallelTraverseTest {
             graph = new GraphLoader(db)
                     .withLabel(LABEL)
                     .withRelationshipType(RELATIONSHIP)
-                    .withOptionalRelationshipWeightsFromProperty(null, 1.0)
                     .load(HeavyGraphFactory.class);
 
             nodeCount = (int) graph.nodeCount();
