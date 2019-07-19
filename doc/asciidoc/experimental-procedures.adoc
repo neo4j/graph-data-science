@@ -1,0 +1,13 @@
+[[experimental-procedures]]
+= Experimental procedures
+
+[abstract]
+--
+This chapter contains a reference of all the experimental procedures in the Neo4j Graph Algorithms library.
+--
+[[table-experimental]]
+[separator=¦,opts=header,cols="1m,5m,1m"]
+|===
+include::csv/experimental-procedures.csv[]
+|===
+

@@ -55,8 +55,10 @@ include::procedures.adoc[leveloffset=+1]
 
 include::algorithms.adoc[leveloffset=+1]
 
-[[experimental-procedures]]
-== Experimental Procedures
+include::experimental-procedures.adoc[leveloffset=+1]
+
+include::experimental-algorithms.adoc[leveloffset=+1]
+
 
 [abstract]
 --
