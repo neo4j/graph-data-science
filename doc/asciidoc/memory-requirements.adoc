@@ -188,6 +188,50 @@ RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
 | 400 | 550 | 563 KiB  | 577112    | 577112
 |===
 
+=== Cypher graph projection
+
+This graph projection supports graphs up to 2 billion nodes and 2 billion relationships, specfied by Cypher queries that return node ids.
+
+.The following computes the amount of memory required by the in memory graph for all nodes and relationships:
+[source,cypher]
+----
+CALL algo.memrec(
+  "MATCH (n) RETURN id(n) AS id",
+  "MATCH (a)-->(b) RETURN id(a) AS source, id(b) as target",
+  "graph.load",
+  {graph: "cypher"}
+)
+YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax
+RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
+| 400 | 3551 | 40 KiB  | 41456    | 41456
+|===
+
+.The following computes the amount of memory required by the heavy in memory graph for node label `Character` and relationship type `INTERACTS_SEASON1`:
+[source,cypher]
+----
+CALL algo.memrec(
+  "MATCH (n:Character) RETURN id(n) AS id",
+  "MATCH (a:Character)-[:INTERACTS_SEASON1]->(b) RETURN id(a) AS source, id(b) as target",
+  "graph.load",
+  {graph: "cypher"}
+)
+YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax
+RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
+| 400 | 550 | 27 KiB  | 28656    | 28656
+|===
+
 [[memory-requirements-sample-graphs]]
 == Memory Requirements on Sample Graphs
 
