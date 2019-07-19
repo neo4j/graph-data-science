@@ -19,12 +19,18 @@
  */
 package org.neo4j.graphalgo.api;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 /**
  * Getter for weight property values at relationships
  *
  * @author mknblch
  */
 public interface RelationshipWeights {
+
+    default void setWeight(long source, long target, double value) {
+        throw new NotImplementedException();
+    }
 
     /**
      * get weight between source and target node id

@@ -51,6 +51,12 @@ final class NodePropertyMap implements WeightMapping {
     }
 
     @Override
+    public void put(final long source, final long target, final double value) {
+        assert target == -1L;
+        properties.put(source, value);
+    }
+
+    @Override
     public double weight(final long source, final long target) {
         assert target == -1L;
         return properties.getOrDefault(source, defaultValue);
