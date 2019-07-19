@@ -47,7 +47,7 @@ Download it for free at https://neo4j.com/graph-algorithms-book/[neo4j.com/graph
 
 include::introduction.adoc[leveloffset=+1]
 
-include::projected-graph-model.adoc[leveloffset=1]
+include::projected-graph-model.adoc[leveloffset=+1]
 
 include::yelp-example.adoc[leveloffset=+1]
 
