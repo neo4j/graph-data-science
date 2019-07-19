@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 
 /**
  * Implements Betweenness Centrality for unweighted graphs
- * as specified in <a href="http://www.algo.uni-konstanz.de/publications/b-fabc-01.pdf">this paper</a>
+ * as specified in <a href="https://kops.uni-konstanz.de/handle/123456789/5739">this paper</a>
  *
  * the algo additionally uses node partitioning to run multiple tasks concurrently. each
  * task takes a node from a shared counter and calculates its bc value. The counter increments
