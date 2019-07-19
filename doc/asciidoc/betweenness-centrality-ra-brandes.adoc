@@ -1,4 +1,4 @@
-[[experimental-algorithms-betweenness-centrality-approx]]
+[[algorithms-betweenness-centrality-approx]]
 = Approximation of Betweenness Centrality
 
 // tag::introduction[]
