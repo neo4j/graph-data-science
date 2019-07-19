@@ -51,42 +51,9 @@ include::projected-graph-model.adoc[leveloffset=+1]
 
 include::yelp-example.adoc[leveloffset=+1]
 
-[[procedures]]
-== Procedures
+include::procedures.adoc[leveloffset=+1]
 
-[abstract]
---
-This chapter contains a reference of all the procedures in the Neo4j Graph Algorithms library.
---
-
-
-[[table-proc]]
-[opts=header,cols="1m,5a"]
-|===
-| Name                                                                		| Description
-| <<algorithms-betweenness-centrality-syntax, algo.betweenness>>                | Betweenness centrality algorithm writing results back to the graph.
-| <<algorithms-betweenness-centrality-syntax, algo.betweenness.stream>>         | Betweenness centrality algorithm streaming results back to the user.
-| <<algorithms-betweenness-centrality-syntax, <algo.betweenness.sampled>>       | Approximate betweenness centrality algorithm writing results back to the graph.
-| <<algorithms-betweenness-centrality-syntax, algo.betweenness.sampled.stream>> | Approximate betweenness centrality algorithm streaming results to the user.
-| <<algorithms-closeness-centrality-syntax, algo.closeness>>                    | Closeness centrality algorithm writing results back to the graph.
-| <<algorithms-closeness-centrality-syntax, algo.closeness.stream>>             | Closeness centrality algorithm streaming results back to the user.
-| <<algorithms-degree-syntax, algo.degree>>                                     | Degree centrality algorithm writing results back to the graph.
-| <<algorithms-degree-syntax, algo.degree.stream>>                              | Degree centrality algorithm streaming results back to the user.
-| <<named-graph, algo.graph.load>>                                              | Procedure for pre-loading a graph and giving it a name.
-| <<named-graph, algo.graph.remove>>                                            | Procedure for unloading a pre-loaded graph.
-| <<named-graph, algo.graph.info>>                                              | Procedure to compute statistics about a pre-loaded graph.
-| <<algorithms-label-propagation-syntax, algo.labelPropagation>>                | Label propagation algorithm writing results back to the graph.
-| <<algorithms-label-propagation-syntax, algo.labelPropagation.stream>>         | Label propagation algorithm streaming results back to the user.
-| <<algorithms-louvain-syntax, algo.louvain>>                                   | Louvain algorithm writing results back to the graph.
-| <<algorithms-louvain-syntax, algo.louvain.stream>>                            | Louvain algorithm streaming results back to the user.
-| <<algorithms-pagerank-syntax, algo.pageRank>>                                 | Page rank algorithm writing results back to the graph.
-| <<algorithms-pagerank-syntax, algo.pageRank.stream>>                          | Page rank algorithm streaming results back to the user.
-| <<algorithms-connected-components-syntax, algo.unionfind>>                    | Union find algorithm writing results back to the graph.
-| <<algorithms-connected-components-syntax, algo.unionfind.stream>>             | Union find algorithm streaming results back to the user.
-|===
-
-
-include::algorithms.adoc[leveloffset=1]
+include::algorithms.adoc[leveloffset=+1]
 
 [[experimental-procedures]]
 == Experimental Procedures
