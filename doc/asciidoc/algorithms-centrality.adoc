@@ -1,6 +1,11 @@
 [[algorithms-centrality]]
 = Centrality algorithms
 
+[abstract]
+--
+This chapter provides explanations and examples for each of the centrality algorithms in the Neo4j Graph Algorithms library.
+--
+
 The following centrality algorithms determine the importance of distinct nodes in a network:
 
 * <<algorithms-pagerank, PageRank>> (`algo.pageRank`)
