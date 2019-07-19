@@ -1,3 +1,11 @@
+[[yelp-example]]
+= The Yelp example
+
+[abstract]
+--
+This chapter introduces the Yelp Open Dataset that is used throughout to exemplify how the Neo4j Graph Algorithms work.
+--
+
 == The Yelp Open Dataset
 
 // tag::intro[]
