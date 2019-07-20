@@ -107,14 +107,14 @@ public class PRTest {
         HugeWeightMapping nodeProperties = graph.nodeProperties(RANK_PROPERTY);
 
         int batchSize = 10;
-        int maxIterations = 50;
-        float jumpProbablity = 0.15f;
+        int maxIterations = 20;
+        float jumpProbability = 0.15f;
         float dampingFactor = 0.85f;
 
         Pregel pregelJob = new Pregel(
                 graph,
                 nodeProperties,
-                new PRComputation(graph.nodeCount(), jumpProbablity, dampingFactor),
+                new PRComputation(graph.nodeCount(), jumpProbability, dampingFactor),
                 batchSize,
                 Pools.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT,

@@ -95,7 +95,7 @@ public class SCCTest {
     }
 
     @Test
-    public void runScc() {
+    public void runSCC() {
         HugeWeightMapping nodeProperties = graph.nodeProperties(COMPONENT_PROPERTY);
 
         int batchSize = 10;

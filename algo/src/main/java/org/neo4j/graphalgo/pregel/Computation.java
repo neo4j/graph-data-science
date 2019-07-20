@@ -35,11 +35,11 @@ public abstract class Computation {
     }
 
     protected double[] receiveMessages(final long nodeId) {
-        return computeStep.getMessages(nodeId);
+        return computeStep.receiveMessages(nodeId);
     }
 
     protected void sendMessages(final long nodeId , final double message) {
-        computeStep.receiveMessages(nodeId, message);
+        computeStep.sendMessages(nodeId, message);
     }
 
     protected double getValue(final long nodeId) {

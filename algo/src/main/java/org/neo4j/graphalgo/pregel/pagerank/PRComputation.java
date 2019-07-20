@@ -27,7 +27,10 @@ public class PRComputation extends Computation {
     private final float jumpProbability;
     private final float dampingFactor;
 
-    public PRComputation(final long nodeCount, final float jumpProbability, final float dampingFactor) {
+    public PRComputation(
+            final long nodeCount,
+            final float jumpProbability,
+            final float dampingFactor) {
         this.nodeCount = nodeCount;
         this.jumpProbability = jumpProbability;
         this.dampingFactor = dampingFactor;
@@ -35,9 +38,11 @@ public class PRComputation extends Computation {
 
     @Override
     protected void compute(final long nodeId) {
+        double newRank = getValue(nodeId);
+
         // init
         if (getSuperstep() == 0) {
-            setValue(nodeId, 1.0 / nodeCount);
+            newRank = 1.0 / nodeCount;
         }
 
         // compute new rank based on neighbor ranks
@@ -46,11 +51,11 @@ public class PRComputation extends Computation {
             for (double message : receiveMessages(nodeId)) {
                 sum += message;
             }
-            setValue(nodeId, (jumpProbability / nodeCount) + dampingFactor * sum);
+            newRank = (jumpProbability / nodeCount) + dampingFactor * sum;
         }
 
         // send new rank to neighbors
-        sendMessages(nodeId, getValue(nodeId) / getDegree(nodeId));
-
+        setValue(nodeId, newRank);
+        sendMessages(nodeId, newRank / getDegree(nodeId));
     }
 }

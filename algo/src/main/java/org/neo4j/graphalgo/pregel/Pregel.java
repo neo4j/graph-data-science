@@ -74,22 +74,17 @@ public class Pregel {
 
     public int run(final int maxIterations) {
         int currentIteration = 0;
-        BitSet hasMessage = new BitSet(graph.nodeCount());
+        BitSet messages = new BitSet(graph.nodeCount());
 
         boolean canHalt = false;
         while (currentIteration < maxIterations && !canHalt) {
-            final List<ComputeStep> computeSteps = runSuperstep(currentIteration++, hasMessage);
-
-            if (computeSteps.parallelStream().map(ComputeStep::canHalt).reduce(true, (l, r) -> l && r)) {
-                canHalt = true;
-            } else {
-                hasMessage.clear();
-            }
+            final List<ComputeStep> computeSteps = runSuperstep(currentIteration++, messages);
+            canHalt = (computeSteps.parallelStream().map(ComputeStep::canHalt).reduce(true, (l, r) -> l && r));
         }
         return currentIteration;
     }
 
-    private List<ComputeStep> runSuperstep(final int iteration, final BitSet hasMessage) {
+    private List<ComputeStep> runSuperstep(final int iteration, final BitSet messages) {
         Collection<PrimitiveLongIterable> iterators = graph.batchIterables(batchSize);
 
         int threads = iterators.size();
@@ -101,14 +96,13 @@ public class Pregel {
                 nodeIterator -> {
                     ComputeStep task = new ComputeStep(
                             computation,
-                            hasMessage,
+                            messages,
                             iteration,
                             nodeIterator,
                             graph,
                             nodeProperties,
                             relationshipWeights,
-                            graph,
-                            progressLogger);
+                            graph);
                     tasks.add(task);
                     return task;
                 });
@@ -121,33 +115,30 @@ public class Pregel {
 
         private final int iteration;
         private final Computation computation;
-        private final BitSet hasMessage;
+        private final BitSet messages;
         private final PrimitiveLongIterable nodes;
         private final Degrees degrees;
         private final HugeWeightMapping nodeProperties;
         private final RelationshipWeights relationshipWeights;
         private final RelationshipIterator relationshipIterator;
-        private final ProgressLogger progressLogger;
 
         private ComputeStep(
                 final Computation computation,
-                final BitSet hasMessage,
+                final BitSet messages,
                 final int iteration,
                 final PrimitiveLongIterable nodes,
                 final Degrees degrees,
                 final HugeWeightMapping nodeProperties,
                 final RelationshipWeights relationshipWeights,
-                final RelationshipIterator relationshipIterator,
-                final ProgressLogger progressLogger) {
+                final RelationshipIterator relationshipIterator) {
             this.iteration = iteration;
             this.computation = computation;
-            this.hasMessage = hasMessage;
+            this.messages = messages;
             this.nodes = nodes;
             this.degrees = degrees;
             this.nodeProperties = nodeProperties;
             this.relationshipWeights = relationshipWeights;
             this.relationshipIterator = relationshipIterator.concurrentCopy();
-            this.progressLogger = progressLogger;
 
             computation.setComputeStep(this);
         }
@@ -180,12 +171,13 @@ public class Pregel {
         private static final ArraySizingStrategy ARRAY_SIZING_STRATEGY =
                 (currentBufferLength, elementsCount, expectedAdditions) -> expectedAdditions + elementsCount;
 
-        static double[] NO_MESSAGE = new double[0];
+        private static final double[] NO_MESSAGES = new double[0];
 
-        double[] getMessages(final long nodeId) {
-            if (!hasMessage.get(nodeId)) {
-                return NO_MESSAGE;
+        double[] receiveMessages(final long nodeId) {
+            if (!messages.get(nodeId)) {
+                return NO_MESSAGES;
             }
+            messages.flip(nodeId);
             final int degree = degrees.degree(nodeId, Direction.INCOMING);
             final DoubleArrayList doubleCursors = new DoubleArrayList(degree, ARRAY_SIZING_STRATEGY);
 
@@ -203,10 +195,10 @@ public class Pregel {
             return doubleCursors.buffer;
         }
 
-        void receiveMessages(final long nodeId, final double message) {
+        void sendMessages(final long nodeId, final double message) {
             relationshipIterator.forEachRelationship(nodeId, Direction.OUTGOING, (sourceNodeId, targetNodeId) -> {
                 relationshipWeights.setWeight(sourceNodeId, targetNodeId, message);
-                hasMessage.set(targetNodeId);
+                messages.set(targetNodeId);
                 return true;
             });
         }
@@ -215,7 +207,7 @@ public class Pregel {
             boolean canHalt = true;
             final PrimitiveLongIterator nodes = this.nodes.iterator();
             while (nodes.hasNext()) {
-                if (hasMessage.get(nodes.next())) {
+                if (messages.get(nodes.next())) {
                     canHalt = false;
                     break;
                 }
