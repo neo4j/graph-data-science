@@ -11,7 +11,7 @@ public abstract class Computation {
 
     protected abstract void compute(final long nodeId);
 
-    protected int getSuperStep() {
+    protected int getSuperstep() {
         return computeStep.getIteration();
     }
 
@@ -20,7 +20,7 @@ public abstract class Computation {
     }
 
     protected void sendMessages(final long nodeId , final double message) {
-        computeStep.sendToNeighbors(nodeId, message);
+        computeStep.receiveMessages(nodeId, message);
     }
 
     protected double getValue(final long nodeId) {
@@ -29,5 +29,9 @@ public abstract class Computation {
 
     protected void setValue(final long nodeId, final double value) {
         computeStep.setNodeValue(nodeId, value);
+    }
+
+    protected int getDegree(final long nodeId) {
+        return computeStep.getDegree(nodeId);
     }
 }

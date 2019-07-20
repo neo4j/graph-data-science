@@ -22,29 +22,29 @@ public class SCCTest {
     private static final String MESSAGE_PROPERTY = "message";
 
     private static final String TEST_GRAPH =
-            "CREATE (nA { component: -1 })\n" +
-            "CREATE (nB { component: -1 })\n" +
-            "CREATE (nC { component: -1 })\n" +
-            "CREATE (nD { component: -1 })\n" +
-            "CREATE (nE { component: -1 })\n" +
-            "CREATE (nF { component: -1 })\n" +
-            "CREATE (nG { component: -1 })\n" +
-            "CREATE (nH { component: -1 })\n" +
-            "CREATE (nI { component: -1 })\n" +
-            "CREATE (nJ { component: -1 })\n" + // {J}
+            "CREATE (nA { component: 1 })\n" +
+            "CREATE (nB { component: 1 })\n" +
+            "CREATE (nC { component: 1 })\n" +
+            "CREATE (nD { component: 1 })\n" +
+            "CREATE (nE { component: 1 })\n" +
+            "CREATE (nF { component: 1 })\n" +
+            "CREATE (nG { component: 1 })\n" +
+            "CREATE (nH { component: 1 })\n" +
+            "CREATE (nI { component: 1 })\n" +
+            "CREATE (nJ { component: 1 })\n" + // {J}
             "CREATE\n" +
             // {A, B, C, D}
-            "  (nA)-[:TYPE { message: -2 }]->(nB),\n" +
-            "  (nB)-[:TYPE { message: -2 }]->(nC),\n" +
-            "  (nC)-[:TYPE { message: -2 }]->(nD),\n" +
-            "  (nD)-[:TYPE { message: -2 }]->(nA),\n" +
+            "  (nA)-[:TYPE { message: 1 }]->(nB),\n" +
+            "  (nB)-[:TYPE { message: 1 }]->(nC),\n" +
+            "  (nC)-[:TYPE { message: 1 }]->(nD),\n" +
+            "  (nD)-[:TYPE { message: 1 }]->(nA),\n" +
             // {E, F, G}
-            "  (nE)-[:TYPE { message: -2 }]->(nF),\n" +
-            "  (nF)-[:TYPE { message: -2 }]->(nG),\n" +
-            "  (nG)-[:TYPE { message: -2 }]->(nE),\n" +
+            "  (nE)-[:TYPE { message: 1 }]->(nF),\n" +
+            "  (nF)-[:TYPE { message: 1 }]->(nG),\n" +
+            "  (nG)-[:TYPE { message: 1 }]->(nE),\n" +
             // {H, I}
-            "  (nI)-[:TYPE { message: -2 }]->(nH),\n" +
-            "  (nH)-[:TYPE { message: -2 }]->(nI)";
+            "  (nI)-[:TYPE { message: 1 }]->(nH),\n" +
+            "  (nH)-[:TYPE { message: 1 }]->(nI)";
 
     @ClassRule
     public static final ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
@@ -63,7 +63,7 @@ public class SCCTest {
 
     public SCCTest() {
 
-        PropertyMapping propertyMapping = new PropertyMapping(COMPONENT_PROPERTY, COMPONENT_PROPERTY, -1);
+        PropertyMapping propertyMapping = new PropertyMapping(COMPONENT_PROPERTY, COMPONENT_PROPERTY, 1);
 
         graph = new GraphLoader(DB)
                 .withAnyRelationshipType()
@@ -71,7 +71,7 @@ public class SCCTest {
                 // The following options need to be default for Pregel
                 .withDirection(Direction.BOTH)
                 .withOptionalNodeProperties(propertyMapping)
-                .withOptionalRelationshipWeightsFromProperty(MESSAGE_PROPERTY, -2)
+                .withOptionalRelationshipWeightsFromProperty(MESSAGE_PROPERTY, 1)
                 .load(HugeGraphFactory.class);
     }
 
@@ -80,6 +80,7 @@ public class SCCTest {
         HugeWeightMapping nodeProperties = graph.nodeProperties(COMPONENT_PROPERTY);
 
         int batchSize = 10;
+        int maxIterations = 10;
 
         Pregel pregelJob = new Pregel(graph,
                 nodeProperties,
@@ -90,7 +91,7 @@ public class SCCTest {
                 AllocationTracker.EMPTY,
                 ProgressLogger.NULL_LOGGER);
 
-        int ranIterations = pregelJob.run(10);
+        int ranIterations = pregelJob.run(maxIterations);
 
         System.out.printf("Ran %d iterations.%n", ranIterations);
 

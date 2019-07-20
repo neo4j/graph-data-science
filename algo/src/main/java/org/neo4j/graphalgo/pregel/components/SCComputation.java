@@ -6,7 +6,7 @@ public class SCComputation extends Computation {
 
     @Override
     protected void compute(final long nodeId) {
-        if (getSuperStep() == 0) {
+        if (getSuperstep() == 0) {
             setValue(nodeId, nodeId);
             sendMessages(nodeId, nodeId);
         } else {

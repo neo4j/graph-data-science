@@ -146,6 +146,10 @@ public class Pregel {
             return iteration;
         }
 
+        int getDegree(final long nodeId) {
+            return degrees.degree(nodeId, Direction.OUTGOING);
+        }
+
         double getNodeValue(final long nodeId) {
             return nodeProperties.nodeWeight(nodeId);
         }
@@ -157,7 +161,12 @@ public class Pregel {
         private static final ArraySizingStrategy ARRAY_SIZING_STRATEGY =
                 (currentBufferLength, elementsCount, expectedAdditions) -> expectedAdditions + elementsCount;
 
+        static double[] NO_MESSAGE = new double[0];
+
         double[] getMessages(final long nodeId) {
+            if (!hasMessage.get(nodeId)) {
+                return NO_MESSAGE;
+            }
             final int degree = degrees.degree(nodeId, Direction.INCOMING);
             final DoubleArrayList doubleCursors = new DoubleArrayList(degree, ARRAY_SIZING_STRATEGY);
 
@@ -175,7 +184,7 @@ public class Pregel {
             return doubleCursors.buffer;
         }
 
-        void sendToNeighbors(final long nodeId, final double message) {
+        void receiveMessages(final long nodeId, final double message) {
             relationshipIterator.forEachRelationship(nodeId, Direction.OUTGOING, (sourceNodeId, targetNodeId) -> {
                 relationshipWeights.setWeight(sourceNodeId, targetNodeId, message);
                 hasMessage.set(targetNodeId);
