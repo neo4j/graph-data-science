@@ -15,11 +15,11 @@ public abstract class Computation {
         return computeStep.getIteration();
     }
 
-    protected double[] getMessages(final long nodeId) {
+    protected double[] receiveMessages(final long nodeId) {
         return computeStep.getMessages(nodeId);
     }
 
-    protected void sendToNeighbors(final long nodeId , final double message) {
+    protected void sendMessages(final long nodeId , final double message) {
         computeStep.sendToNeighbors(nodeId, message);
     }
 

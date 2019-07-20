@@ -27,7 +27,6 @@ public class Pregel {
     private final HugeWeightMapping nodeProperties;
     private final RelationshipWeights relationshipWeights;
     private final Computation computation;
-    private final BitSet votes;
     private final int batchSize;
     private final int concurrency;
     private final ExecutorService executor;
@@ -47,7 +46,6 @@ public class Pregel {
         this.nodeProperties = nodeProperties;
         this.relationshipWeights = graph;
         this.computation = computation;
-        this.votes = new BitSet(graph.nodeCount());
         this.tracker = tracker;
         this.batchSize = batchSize;
         this.concurrency = concurrency;
@@ -57,21 +55,22 @@ public class Pregel {
 
     public int run(final int maxIterations) {
         int currentIteration = 0;
+        BitSet hasMessage = new BitSet(graph.nodeCount());
 
-        while (currentIteration < maxIterations) {
-            final List<ComputeStep> computeSteps = runSuperstep(currentIteration);
-            currentIteration++;
+        boolean canHalt = false;
+        while (currentIteration < maxIterations && !canHalt) {
+            final List<ComputeStep> computeSteps = runSuperstep(currentIteration++, hasMessage);
+
             if (computeSteps.parallelStream().map(ComputeStep::canHalt).reduce(true, (l, r) -> l && r)) {
-                break;
+                canHalt = true;
             } else {
-                votes.clear();
+                hasMessage.clear();
             }
         }
-
         return currentIteration;
     }
 
-    private List<ComputeStep> runSuperstep(final int iteration) {
+    private List<ComputeStep> runSuperstep(final int iteration, final BitSet hasMessage) {
         Collection<PrimitiveLongIterable> iterators = graph.batchIterables(batchSize);
 
         int threads = iterators.size();
@@ -83,7 +82,7 @@ public class Pregel {
                 nodeIterator -> {
                     ComputeStep task = new ComputeStep(
                             computation,
-                            votes,
+                            hasMessage,
                             iteration,
                             nodeIterator,
                             graph,
@@ -99,11 +98,11 @@ public class Pregel {
         return tasks;
     }
 
-    public static class ComputeStep implements Runnable {
+    public static final class ComputeStep implements Runnable {
 
         private final int iteration;
         private final Computation computation;
-        private final BitSet votes;
+        private final BitSet hasMessage;
         private final PrimitiveLongIterable nodes;
         private final Degrees degrees;
         private final HugeWeightMapping nodeProperties;
@@ -113,7 +112,7 @@ public class Pregel {
 
         private ComputeStep(
                 final Computation computation,
-                final BitSet votes,
+                final BitSet hasMessage,
                 final int iteration,
                 final PrimitiveLongIterable nodes,
                 final Degrees degrees,
@@ -123,7 +122,7 @@ public class Pregel {
                 final ProgressLogger progressLogger) {
             this.iteration = iteration;
             this.computation = computation;
-            this.votes = votes;
+            this.hasMessage = hasMessage;
             this.nodes = nodes;
             this.degrees = degrees;
             this.nodeProperties = nodeProperties;
@@ -136,8 +135,6 @@ public class Pregel {
 
         @Override
         public void run() {
-//            System.out.println("Running iteration: " + iteration);
-
             final PrimitiveLongIterator nodesIterator = nodes.iterator();
 
             while (nodesIterator.hasNext()) {
@@ -161,14 +158,16 @@ public class Pregel {
                 (currentBufferLength, elementsCount, expectedAdditions) -> expectedAdditions + elementsCount;
 
         double[] getMessages(final long nodeId) {
-            final int degree = degrees.degree(nodeId, Direction.BOTH);
+            final int degree = degrees.degree(nodeId, Direction.INCOMING);
             final DoubleArrayList doubleCursors = new DoubleArrayList(degree, ARRAY_SIZING_STRATEGY);
 
-            relationshipIterator.forEachRelationship(nodeId, Direction.BOTH, (sourceNodeId, targetNodeId, weight) -> {
-//                System.out.println(String.format("[%d (%d)] Weight: (%d)-[%.1f]->(%d)", nodeId, degree, sourceNodeId, weight, targetNodeId));
-                doubleCursors.add(weight);
-                return true;
-            });
+            relationshipIterator.forEachRelationship(
+                    nodeId,
+                    Direction.INCOMING,
+                    (sourceNodeId, targetNodeId, weight) -> {
+                        doubleCursors.add(weight);
+                        return true;
+                    });
 
             assert (doubleCursors.buffer.length == degree);
             assert (doubleCursors.elementsCount == degree);
@@ -178,16 +177,8 @@ public class Pregel {
 
         void sendToNeighbors(final long nodeId, final double message) {
             relationshipIterator.forEachRelationship(nodeId, Direction.OUTGOING, (sourceNodeId, targetNodeId) -> {
-//                System.out.println(String.format("[%d] Message: (%d)-[%.1f]->(%d)", nodeId, sourceNodeId, message, targetNodeId));
                 relationshipWeights.setWeight(sourceNodeId, targetNodeId, message);
-                votes.set(targetNodeId);
-                return true;
-            });
-
-            relationshipIterator.forEachRelationship(nodeId, Direction.INCOMING, (sourceNodeId, targetNodeId) -> {
-//                System.out.println(String.format("[%d] Message: (%d)<-[%.1f]-(%d)", nodeId, sourceNodeId, message, targetNodeId));
-                relationshipWeights.setWeight(targetNodeId, sourceNodeId, message);
-                votes.set(sourceNodeId);
+                hasMessage.set(targetNodeId);
                 return true;
             });
         }
@@ -196,7 +187,7 @@ public class Pregel {
             boolean canHalt = true;
             final PrimitiveLongIterator nodes = this.nodes.iterator();
             while (nodes.hasNext()) {
-                if (!votes.get(nodes.next())) {
+                if (hasMessage.get(nodes.next())) {
                     canHalt = false;
                     break;
                 }

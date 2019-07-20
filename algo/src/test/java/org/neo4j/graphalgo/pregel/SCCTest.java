@@ -12,11 +12,11 @@ import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.pregel.components.WCComputation;
+import org.neo4j.graphalgo.pregel.components.SCComputation;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
-public class WCCTest {
+public class SCCTest {
 
     private static final String COMPONENT_PROPERTY = "component";
     private static final String MESSAGE_PROPERTY = "message";
@@ -37,10 +37,13 @@ public class WCCTest {
             "  (nA)-[:TYPE { message: -2 }]->(nB),\n" +
             "  (nB)-[:TYPE { message: -2 }]->(nC),\n" +
             "  (nC)-[:TYPE { message: -2 }]->(nD),\n" +
+            "  (nD)-[:TYPE { message: -2 }]->(nA),\n" +
             // {E, F, G}
             "  (nE)-[:TYPE { message: -2 }]->(nF),\n" +
             "  (nF)-[:TYPE { message: -2 }]->(nG),\n" +
+            "  (nG)-[:TYPE { message: -2 }]->(nE),\n" +
             // {H, I}
+            "  (nI)-[:TYPE { message: -2 }]->(nH),\n" +
             "  (nH)-[:TYPE { message: -2 }]->(nI)";
 
     @ClassRule
@@ -58,7 +61,7 @@ public class WCCTest {
 
     private Graph graph;
 
-    public WCCTest() {
+    public SCCTest() {
 
         PropertyMapping propertyMapping = new PropertyMapping(COMPONENT_PROPERTY, COMPONENT_PROPERTY, -1);
 
@@ -80,14 +83,16 @@ public class WCCTest {
 
         Pregel pregelJob = new Pregel(graph,
                 nodeProperties,
-                new WCComputation(),
+                new SCComputation(),
                 batchSize,
                 Pools.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT,
                 AllocationTracker.EMPTY,
                 ProgressLogger.NULL_LOGGER);
 
-        pregelJob.run(10);
+        int ranIterations = pregelJob.run(10);
+
+        System.out.printf("Ran %d iterations.%n", ranIterations);
 
         for (int i = 0; i < graph.nodeCount(); i++) {
             System.out.println(String.format("nodeId: %d, componentId: %d", i, (long) nodeProperties.get(i)));
