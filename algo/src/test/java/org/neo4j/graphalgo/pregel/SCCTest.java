@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.pregel;
 
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -33,24 +34,33 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.pregel.components.SCComputation;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.Label;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class SCCTest {
 
+    private static final String ID_PROPERTY = "id";
     private static final String COMPONENT_PROPERTY = "component";
     private static final String MESSAGE_PROPERTY = "message";
 
+    private static final Label NODE_LABEL = Label.label("Node");
+
     private static final String TEST_GRAPH =
-            "CREATE (nA { component: 1 })\n" +
-            "CREATE (nB { component: 1 })\n" +
-            "CREATE (nC { component: 1 })\n" +
-            "CREATE (nD { component: 1 })\n" +
-            "CREATE (nE { component: 1 })\n" +
-            "CREATE (nF { component: 1 })\n" +
-            "CREATE (nG { component: 1 })\n" +
-            "CREATE (nH { component: 1 })\n" +
-            "CREATE (nI { component: 1 })\n" +
-            "CREATE (nJ { component: 1 })\n" + // {J}
+            "CREATE (nA:Node { id: 0, component: 1 })\n" +
+            "CREATE (nB:Node { id: 1, component: 1 })\n" +
+            "CREATE (nC:Node { id: 2, component: 1 })\n" +
+            "CREATE (nD:Node { id: 3, component: 1 })\n" +
+            "CREATE (nE:Node { id: 4, component: 1 })\n" +
+            "CREATE (nF:Node { id: 5, component: 1 })\n" +
+            "CREATE (nG:Node { id: 6, component: 1 })\n" +
+            "CREATE (nH:Node { id: 7, component: 1 })\n" +
+            "CREATE (nI:Node { id: 8, component: 1 })\n" +
+            // {J}
+            "CREATE (nJ:Node { id: 9, component: 1 })\n" +
             "CREATE\n" +
             // {A, B, C, D}
             "  (nA)-[:TYPE { message: 1 }]->(nB),\n" +
@@ -78,18 +88,15 @@ public class SCCTest {
         DB.shutdown();
     }
 
-    private Graph graph;
+    private final Graph graph;
 
     public SCCTest() {
-
-        PropertyMapping propertyMapping = new PropertyMapping(COMPONENT_PROPERTY, COMPONENT_PROPERTY, 1);
-
         graph = new GraphLoader(DB)
                 .withAnyRelationshipType()
                 .withAnyLabel()
                 // The following options need to be default for Pregel
                 .withDirection(Direction.BOTH)
-                .withOptionalNodeProperties(propertyMapping)
+                .withOptionalNodeProperties(new PropertyMapping(COMPONENT_PROPERTY, COMPONENT_PROPERTY, 1))
                 .withOptionalRelationshipWeightsFromProperty(MESSAGE_PROPERTY, 1)
                 .load(HugeGraphFactory.class);
     }
@@ -101,7 +108,8 @@ public class SCCTest {
         int batchSize = 10;
         int maxIterations = 10;
 
-        Pregel pregelJob = new Pregel(graph,
+        Pregel pregelJob = new Pregel(
+                graph,
                 nodeProperties,
                 new SCComputation(),
                 batchSize,
@@ -110,12 +118,27 @@ public class SCCTest {
                 AllocationTracker.EMPTY,
                 ProgressLogger.NULL_LOGGER);
 
-        int ranIterations = pregelJob.run(maxIterations);
+        pregelJob.run(maxIterations);
 
-        System.out.printf("Ran %d iterations.%n", ranIterations);
+        assertValues(graph, 0, 0, 1, 0, 2, 0, 3, 0, 4, 4, 5, 4, 6, 4, 7, 7, 8, 7, 9, 9);
+    }
 
-        for (int i = 0; i < graph.nodeCount(); i++) {
-            System.out.println(String.format("nodeId: %d, componentId: %d", i, (long) nodeProperties.get(i)));
+    private void assertValues(final Graph graph, final long... values) {
+        Map<Long, Long> expectedValues = new HashMap<>();
+        try (Transaction tx = DB.beginTx()) {
+            for (int i = 0; i < values.length; i+=2) {
+                expectedValues.put(DB.findNode(NODE_LABEL, ID_PROPERTY, values[i]).getId(), values[i + 1]);
+            }
+            tx.success();
         }
+        final HugeWeightMapping actualValues = graph.nodeProperties(COMPONENT_PROPERTY);
+        expectedValues.forEach((idProp, expectedValue) -> {
+            long neoId = graph.toOriginalNodeId(idProp);
+            long actualValue = (long) actualValues.nodeWeight(neoId);
+            Assert.assertEquals(
+                    String.format("Node.id = %d should have component %d", idProp, expectedValue),
+                    (long) expectedValue,
+                    actualValue);
+        });
     }
 }
