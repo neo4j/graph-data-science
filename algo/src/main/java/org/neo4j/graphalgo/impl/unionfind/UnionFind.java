@@ -53,9 +53,6 @@ public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> 
                 new IncrementalDisjointSetStruct(nodeCount, algoConfig.communityMap, unionStrategy, tracker);
     }
 
-    /**
-     * compute connected components
-     */
     public DisjointSetStruct compute() {
         return Double.isFinite(threshold()) ? compute(threshold()) : computeUnrestricted();
     }
