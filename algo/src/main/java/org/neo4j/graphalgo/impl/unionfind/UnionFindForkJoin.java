@@ -52,7 +52,7 @@ public class UnionFindForkJoin extends UnionFind<UnionFindForkJoin> {
     private final long batchSize;
 
     public static MemoryEstimation memoryEstimation(final boolean incremental) {
-        return UnionFind.memoryEstimation(incremental, UnionFindForkJoin.class, ThresholdUFTask.class);
+        return UnionFind.memoryEstimation(incremental, UnionFindForkJoin.class, ThresholdUnionFindTask.class);
     }
 
     /**
@@ -79,7 +79,7 @@ public class UnionFindForkJoin extends UnionFind<UnionFindForkJoin> {
 
     @Override
     public DisjointSetStruct compute(final double threshold) {
-        return ForkJoinPool.commonPool().invoke(new ThresholdUFTask(0, threshold));
+        return ForkJoinPool.commonPool().invoke(new ThresholdUnionFindTask(0, threshold));
     }
 
     @Override
@@ -110,30 +110,30 @@ public class UnionFindForkJoin extends UnionFind<UnionFindForkJoin> {
         }
 
         protected DisjointSetStruct run() {
-            final DisjointSetStruct struct = initDisjointSetStruct(nodeCount, tracker);
+            final DisjointSetStruct communityContainer = initDisjointSetStruct(nodeCount, tracker);
             for (long node = offset; node < end && running(); node++) {
                 rels.forEachRelationship(
                         node,
                         Direction.OUTGOING,
                         (sourceNodeId, targetNodeId) -> {
-                            struct.union(sourceNodeId, targetNodeId);
+                            communityContainer.union(sourceNodeId, targetNodeId);
                             return true;
                         });
             }
             getProgressLogger().logProgress(end - 1, nodeCount - 1);
 
-            return struct;
+            return communityContainer;
         }
     }
 
-    private class ThresholdUFTask extends RecursiveTask<DisjointSetStruct> {
+    private class ThresholdUnionFindTask extends RecursiveTask<DisjointSetStruct> {
 
         private final long offset;
         private final long end;
         private final RelationshipIterator rels;
         private final double threshold;
 
-        ThresholdUFTask(long offset, double threshold) {
+        ThresholdUnionFindTask(long offset, double threshold) {
             this.offset = offset;
             this.end = Math.min(offset + batchSize, nodeCount);
             this.rels = graph.concurrentCopy();
@@ -143,7 +143,7 @@ public class UnionFindForkJoin extends UnionFind<UnionFindForkJoin> {
         @Override
         protected DisjointSetStruct compute() {
             if (nodeCount - end >= batchSize && running()) {
-                final ThresholdUFTask process = new ThresholdUFTask(
+                final ThresholdUnionFindTask process = new ThresholdUnionFindTask(
                         offset,
                         end);
                 process.fork();

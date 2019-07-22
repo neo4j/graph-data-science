@@ -58,7 +58,7 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
     private DisjointSetStruct dss;
 
     public static MemoryEstimation memoryEstimation(final boolean incremental) {
-        return UnionFind.memoryEstimation(incremental, UnionFindForkJoinMerge.class, TUFProcess.class);
+        return UnionFind.memoryEstimation(incremental, UnionFindForkJoinMerge.class, ThresholdUnionFindProcess.class);
     }
 
     /**
@@ -88,9 +88,9 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
 
     @Override
     public DisjointSetStruct compute(double threshold) {
-        final ArrayList<TUFProcess> ufProcesses = new ArrayList<>();
+        final ArrayList<ThresholdUnionFindProcess> ufProcesses = new ArrayList<>();
         for (long i = 0L; i < nodeCount; i += batchSize) {
-            ufProcesses.add(new TUFProcess(i, batchSize, threshold));
+            ufProcesses.add(new ThresholdUnionFindProcess(i, batchSize, threshold));
         }
         merge(ufProcesses);
         return dss;
@@ -98,21 +98,21 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
 
     @Override
     public DisjointSetStruct computeUnrestricted() {
-        final ArrayList<UFProcess> ufProcesses = new ArrayList<>();
+        final ArrayList<UnionFindProcess> ufProcesses = new ArrayList<>();
         for (long i = 0L; i < nodeCount; i += batchSize) {
-            ufProcesses.add(new UFProcess(i, batchSize));
+            ufProcesses.add(new UnionFindProcess(i, batchSize));
         }
         merge(ufProcesses);
         return dss;
     }
 
-    private void merge(Collection<? extends UFTask> ufProcesses) {
+    private void merge(Collection<? extends AbstractUnionFindTask> ufProcesses) {
         ParallelUtil.run(ufProcesses, executor);
         if (!running()) {
             return;
         }
         final Stack<DisjointSetStruct> temp = new Stack<>();
-        ufProcesses.forEach(uf -> temp.add(uf.struct()));
+        ufProcesses.forEach(uf -> temp.add(uf.getDisjointSetStruct()));
         dss = ForkJoinPool.commonPool().invoke(new Merge(temp));
     }
 
@@ -122,21 +122,21 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
         return super.release();
     }
 
-    private abstract class UFTask implements Runnable {
-        abstract DisjointSetStruct struct();
+    private abstract class AbstractUnionFindTask implements Runnable {
+        abstract DisjointSetStruct getDisjointSetStruct();
     }
 
     /**
      * Process for finding unions of weakly connected components
      */
-    private class UFProcess extends UFTask {
+    private class UnionFindProcess extends AbstractUnionFindTask {
 
         private final long offset;
         private final long end;
         private final DisjointSetStruct struct;
         private final RelationshipIterator rels;
 
-        UFProcess(long offset, long length) {
+        UnionFindProcess(long offset, long length) {
             this.offset = offset;
             this.end = offset + length;
             struct = initDisjointSetStruct(nodeCount, tracker);
@@ -162,7 +162,7 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
         }
 
         @Override
-        DisjointSetStruct struct() {
+        DisjointSetStruct getDisjointSetStruct() {
             return struct;
         }
     }
@@ -170,7 +170,7 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
     /**
      * Process to calc a DSS using a threshold
      */
-    private class TUFProcess extends UFTask {
+    private class ThresholdUnionFindProcess extends AbstractUnionFindTask {
 
         private final long offset;
         private final long end;
@@ -178,7 +178,7 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
         private final RelationshipIterator rels;
         private final double threshold;
 
-        TUFProcess(long offset, long length, double threshold) {
+        ThresholdUnionFindProcess(long offset, long length, double threshold) {
             this.offset = offset;
             this.end = offset + length;
             this.threshold = threshold;
@@ -205,35 +205,35 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
         }
 
         @Override
-        DisjointSetStruct struct() {
+        DisjointSetStruct getDisjointSetStruct() {
             return struct;
         }
     }
 
     private class Merge extends RecursiveTask<DisjointSetStruct> {
 
-        private final Stack<DisjointSetStruct> structs;
+        private final Stack<DisjointSetStruct> communityContainers;
 
         private Merge(Stack<DisjointSetStruct> structs) {
-            this.structs = structs;
+            this.communityContainers = structs;
         }
 
         @Override
         protected DisjointSetStruct compute() {
-            final int size = structs.size();
+            final int size = communityContainers.size();
             if (size == 1) {
-                return structs.pop();
+                return communityContainers.pop();
             }
             if (!running()) {
-                return structs.pop();
+                return communityContainers.pop();
             }
             if (size == 2) {
-                return structs.pop().merge(structs.pop());
+                return communityContainers.pop().merge(communityContainers.pop());
             }
             final Stack<DisjointSetStruct> list = new Stack<>();
-            list.push(structs.pop());
-            list.push(structs.pop());
-            final Merge mergeA = new Merge(structs);
+            list.push(communityContainers.pop());
+            list.push(communityContainers.pop());
+            final Merge mergeA = new Merge(communityContainers);
             final Merge mergeB = new Merge(list);
             mergeA.fork();
             final DisjointSetStruct computed = mergeB.compute();

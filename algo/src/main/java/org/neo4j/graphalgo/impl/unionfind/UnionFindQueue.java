@@ -63,9 +63,6 @@ public class UnionFindQueue extends UnionFind<UnionFindQueue> {
         return UnionFind.memoryEstimation(incremental, UnionFindQueue.class, HugeUnionFindTask.class);
     }
 
-    /**
-     * Initialize parallel UF.
-     */
     public UnionFindQueue(
             Graph graph,
             ExecutorService executor,
@@ -109,21 +106,21 @@ public class UnionFindQueue extends UnionFind<UnionFindQueue> {
     @Override
     public DisjointSetStruct computeUnrestricted() {
         final List<Future<?>> futures = new ArrayList<>(2 * stepSize);
-        final BlockingQueue<DisjointSetStruct> communities = new ArrayBlockingQueue<>(stepSize);
+        final BlockingQueue<DisjointSetStruct> communityContainers = new ArrayBlockingQueue<>(stepSize);
         AtomicInteger expectedCommunityCount = new AtomicInteger();
 
         for (long i = 0L; i < nodeCount; i += batchSize) {
-            futures.add(executor.submit(new HugeUnionFindTask(communities, i, expectedCommunityCount)));
+            futures.add(executor.submit(new HugeUnionFindTask(communityContainers, i, expectedCommunityCount)));
         }
         int steps = futures.size();
 
         for (int i = 1; i < steps; ++i) {
-            futures.add(executor.submit(() -> mergeTask(communities, expectedCommunityCount, DisjointSetStruct::merge)));
+            futures.add(executor.submit(() -> mergeTask(communityContainers, expectedCommunityCount, DisjointSetStruct::merge)));
         }
 
         awaitTermination(futures);
 
-        DisjointSetStruct mergedCommunities = communities.poll();
+        DisjointSetStruct mergedCommunities = communityContainers.poll();
         if (mergedCommunities == null) {
             mergedCommunities = initDisjointSetStruct(nodeCount, tracker);
         }
