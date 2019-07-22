@@ -33,7 +33,7 @@ import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
 import static org.junit.Assert.assertEquals;
 
-public final class LoaderLargerGraphTest {
+public final class HugeGraphLoadingTest {
 
     @Rule
     public ImpermanentDatabaseRule db = new ImpermanentDatabaseRule();
