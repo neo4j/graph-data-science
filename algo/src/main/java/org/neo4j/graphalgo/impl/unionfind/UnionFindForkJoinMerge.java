@@ -52,7 +52,7 @@ import java.util.concurrent.RecursiveTask;
  *
  * @author mknblch
  */
-public class UnionFindFJMerge extends UnionFind<UnionFindFJMerge> {
+public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
 
     private final ExecutorService executor;
     private final AllocationTracker tracker;
@@ -61,7 +61,7 @@ public class UnionFindFJMerge extends UnionFind<UnionFindFJMerge> {
     private DisjointSetStruct dss;
 
     public static MemoryEstimation memoryEstimation(final boolean incremental) {
-        return MemoryEstimations.builder(UnionFindFJMerge.class)
+        return MemoryEstimations.builder(UnionFindForkJoinMerge.class)
                 .startField("computeStep", TUFProcess.class)
                 .add(MemoryEstimations.of("DisjointSetStruct", (dimensions, concurrency) -> {
                             MemoryEstimation dssEstimation = (incremental) ?
@@ -83,7 +83,7 @@ public class UnionFindFJMerge extends UnionFind<UnionFindFJMerge> {
      * @param graph
      * @param executor
      */
-    public UnionFindFJMerge(
+    public UnionFindForkJoinMerge(
             Graph graph,
             ExecutorService executor,
             int minBatchSize,
@@ -137,7 +137,7 @@ public class UnionFindFJMerge extends UnionFind<UnionFindFJMerge> {
     }
 
     @Override
-    public UnionFindFJMerge release() {
+    public UnionFindForkJoinMerge release() {
         dss = null;
         return super.release();
     }

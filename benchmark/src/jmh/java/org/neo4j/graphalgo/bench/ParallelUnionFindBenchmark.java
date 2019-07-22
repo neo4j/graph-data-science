@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.MSColoring;
 import org.neo4j.graphalgo.impl.unionfind.UnionFindSeq;
 import org.neo4j.graphalgo.impl.unionfind.UnionFind;
-import org.neo4j.graphalgo.impl.unionfind.UnionFindFJMerge;
+import org.neo4j.graphalgo.impl.unionfind.UnionFindForkJoinMerge;
 import org.neo4j.graphalgo.impl.unionfind.UnionFindForkJoin;
 import org.neo4j.graphalgo.impl.unionfind.UnionFindQueue;
 import org.neo4j.graphdb.Direction;
@@ -201,13 +201,13 @@ public class ParallelUnionFindBenchmark {
 
     @Benchmark
     public Object parallelUnionFindForkJoinMerge_400000() {
-        return new UnionFindFJMerge(graph, Pools.DEFAULT, 400_000, 8, algoConfig, AllocationTracker.EMPTY)
+        return new UnionFindForkJoinMerge(graph, Pools.DEFAULT, 400_000, 8, algoConfig, AllocationTracker.EMPTY)
                 .compute();
     }
 
     @Benchmark
     public Object parallelUnionFindForkJoinMerge_800000() {
-        return new UnionFindFJMerge(graph, Pools.DEFAULT, 800_000, 8, algoConfig, AllocationTracker.EMPTY)
+        return new UnionFindForkJoinMerge(graph, Pools.DEFAULT, 800_000, 8, algoConfig, AllocationTracker.EMPTY)
                 .compute();
     }
 

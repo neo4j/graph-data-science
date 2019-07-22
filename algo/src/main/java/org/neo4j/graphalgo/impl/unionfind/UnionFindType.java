@@ -81,7 +81,7 @@ public enum UnionFindType {
                 final int concurrency,
                 final UnionFind.Config config,
                 final AllocationTracker tracker) {
-            return new UnionFindFJMerge(
+            return new UnionFindForkJoinMerge(
                     graph,
                     executor,
                     minBatchSize,
@@ -92,7 +92,7 @@ public enum UnionFindType {
 
         @Override
         public MemoryEstimation memoryEstimation(boolean incremental) {
-            return UnionFindFJMerge.memoryEstimation(incremental);
+            return UnionFindForkJoinMerge.memoryEstimation(incremental);
         }
     },
     SEQ {
