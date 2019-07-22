@@ -110,19 +110,19 @@ public class UnionFindForkJoin extends UnionFind<UnionFindForkJoin> {
         }
 
         protected DisjointSetStruct run() {
-            final DisjointSetStruct communityContainer = initDisjointSetStruct(nodeCount, tracker);
+            final DisjointSetStruct disjointSetStruct = initDisjointSetStruct(nodeCount, tracker);
             for (long node = offset; node < end && running(); node++) {
                 rels.forEachRelationship(
                         node,
                         Direction.OUTGOING,
                         (sourceNodeId, targetNodeId) -> {
-                            communityContainer.union(sourceNodeId, targetNodeId);
+                            disjointSetStruct.union(sourceNodeId, targetNodeId);
                             return true;
                         });
             }
             getProgressLogger().logProgress(end - 1, nodeCount - 1);
 
-            return communityContainer;
+            return disjointSetStruct;
         }
     }
 
@@ -153,22 +153,22 @@ public class UnionFindForkJoin extends UnionFind<UnionFindForkJoin> {
         }
 
         protected DisjointSetStruct run() {
-            final DisjointSetStruct struct = initDisjointSetStruct(nodeCount, tracker);
+            final DisjointSetStruct disjointSetStruct = initDisjointSetStruct(nodeCount, tracker);
             for (long node = offset; node < end && running(); node++) {
                 rels.forEachRelationship(
                         node,
                         Direction.OUTGOING,
                         (source, target) -> {
                             double weight = graph.weightOf(source, target);
-                            if (weight >= threshold && !struct.connected(
+                            if (weight >= threshold && !disjointSetStruct.connected(
                                     source,
                                     target)) {
-                                struct.union(source, target);
+                                disjointSetStruct.union(source, target);
                             }
                             return true;
                         });
             }
-            return struct;
+            return disjointSetStruct;
         }
     }
 }

@@ -36,8 +36,13 @@ public final class UnionFindHelper {
             final UnionFind.Config config,
             AllocationTracker tracker) {
 
-        UnionFind<?> algo = algorithmType
-                .create(graph, executor, minBatchSize, concurrency, config, tracker);
+        UnionFind<? extends UnionFind> algo = algorithmType.create(
+                graph,
+                executor,
+                minBatchSize,
+                concurrency,
+                config,
+                tracker);
         DisjointSetStruct communities = algo.compute();
         algo.release();
         return communities;

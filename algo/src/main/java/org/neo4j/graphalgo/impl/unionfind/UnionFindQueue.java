@@ -106,21 +106,21 @@ public class UnionFindQueue extends UnionFind<UnionFindQueue> {
     @Override
     public DisjointSetStruct computeUnrestricted() {
         final List<Future<?>> futures = new ArrayList<>(2 * stepSize);
-        final BlockingQueue<DisjointSetStruct> communityContainers = new ArrayBlockingQueue<>(stepSize);
+        final BlockingQueue<DisjointSetStruct> disjointSetStructs = new ArrayBlockingQueue<>(stepSize);
         AtomicInteger expectedCommunityCount = new AtomicInteger();
 
         for (long i = 0L; i < nodeCount; i += batchSize) {
-            futures.add(executor.submit(new HugeUnionFindTask(communityContainers, i, expectedCommunityCount)));
+            futures.add(executor.submit(new HugeUnionFindTask(disjointSetStructs, i, expectedCommunityCount)));
         }
         int steps = futures.size();
 
         for (int i = 1; i < steps; ++i) {
-            futures.add(executor.submit(() -> mergeTask(communityContainers, expectedCommunityCount, DisjointSetStruct::merge)));
+            futures.add(executor.submit(() -> mergeTask(disjointSetStructs, expectedCommunityCount, DisjointSetStruct::merge)));
         }
 
         awaitTermination(futures);
 
-        return communityContainers.poll();
+        return disjointSetStructs.poll();
     }
 
     public static <T> void mergeTask(
@@ -160,21 +160,21 @@ public class UnionFindQueue extends UnionFind<UnionFindQueue> {
     private class HugeUnionFindTask implements Runnable {
 
         private final RelationshipIterator rels;
-        private final BlockingQueue<DisjointSetStruct> queue;
-        private final AtomicInteger expectedStructs;
+        private final BlockingQueue<DisjointSetStruct> disjointSetStructs;
+        private final AtomicInteger expectedCount;
         private final long offset;
         private final long end;
 
         HugeUnionFindTask(
-                BlockingQueue<DisjointSetStruct> queue,
+                BlockingQueue<DisjointSetStruct> disjointSetStructs,
                 long offset,
-                AtomicInteger expectedStructs) {
+                AtomicInteger expectedCount) {
             this.rels = graph.concurrentCopy();
-            this.queue = queue;
-            this.expectedStructs = expectedStructs;
+            this.disjointSetStructs = disjointSetStructs;
+            this.expectedCount = expectedCount;
             this.offset = offset;
             this.end = Math.min(offset + batchSize, nodeCount);
-            expectedStructs.incrementAndGet();
+            expectedCount.incrementAndGet();
         }
 
         @Override
@@ -193,7 +193,7 @@ public class UnionFindQueue extends UnionFind<UnionFindQueue> {
                 }
                 getProgressLogger().logProgress((end - 1.0) / (nodeCount - 1.0));
                 try {
-                    queue.put(struct);
+                    disjointSetStructs.put(struct);
                     pushed = true;
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
@@ -201,7 +201,7 @@ public class UnionFindQueue extends UnionFind<UnionFindQueue> {
                 }
             } finally {
                 if (!pushed) {
-                    expectedStructs.decrementAndGet();
+                    expectedCount.decrementAndGet();
                 }
             }
         }

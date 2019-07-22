@@ -47,7 +47,7 @@ import org.neo4j.graphdb.Direction;
  */
 public class UnionFindSeq extends UnionFind<UnionFindSeq> {
 
-    private DisjointSetStruct dss;
+    private DisjointSetStruct disjointSetStruct;
     private final long nodeCount;
     private RelationshipConsumer unrestricted;
 
@@ -66,10 +66,10 @@ public class UnionFindSeq extends UnionFind<UnionFindSeq> {
         super(graph, algoConfig);
 
         this.nodeCount = graph.nodeCount();
-        this.dss = initDisjointSetStruct(nodeCount, tracker);
+        this.disjointSetStruct = initDisjointSetStruct(nodeCount, tracker);
 
         this.unrestricted = (source, target) -> {
-            dss.union(source, target);
+            disjointSetStruct.union(source, target);
             return true;
         };
     }
@@ -97,7 +97,7 @@ public class UnionFindSeq extends UnionFind<UnionFindSeq> {
 
     @Override
     public UnionFindSeq release() {
-        dss = null;
+        disjointSetStruct = null;
         unrestricted = null;
         return super.release();
     }
@@ -112,7 +112,7 @@ public class UnionFindSeq extends UnionFind<UnionFindSeq> {
             progressLogger.logProgress((double) node / (nodeCount - 1));
             return true;
         });
-        return dss;
+        return disjointSetStruct;
     }
 
     private final class WithThreshold implements RelationshipConsumer {
@@ -128,7 +128,7 @@ public class UnionFindSeq extends UnionFind<UnionFindSeq> {
                 final long target) {
             double weight = graph.weightOf(source, target);
             if (weight >= threshold) {
-                dss.union(source, target);
+                disjointSetStruct.union(source, target);
             }
             return true;
         }

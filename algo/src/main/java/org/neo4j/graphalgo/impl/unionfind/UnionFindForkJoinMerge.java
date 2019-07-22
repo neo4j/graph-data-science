@@ -55,7 +55,7 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
     private final AllocationTracker tracker;
     private final long nodeCount;
     private final long batchSize;
-    private DisjointSetStruct dss;
+    private DisjointSetStruct disjointSetStruct;
 
     public static MemoryEstimation memoryEstimation(final boolean incremental) {
         return UnionFind.memoryEstimation(incremental, UnionFindForkJoinMerge.class, ThresholdUnionFindProcess.class);
@@ -79,7 +79,7 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
         this.nodeCount = graph.nodeCount();
         this.executor = executor;
         this.tracker = tracker;
-        this.dss = initDisjointSetStruct(nodeCount, tracker);
+        this.disjointSetStruct = initDisjointSetStruct(nodeCount, tracker);
         this.batchSize = ParallelUtil.adjustBatchSize(
                 nodeCount,
                 concurrency,
@@ -93,7 +93,7 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
             ufProcesses.add(new ThresholdUnionFindProcess(i, batchSize, threshold));
         }
         merge(ufProcesses);
-        return dss;
+        return disjointSetStruct;
     }
 
     @Override
@@ -103,7 +103,7 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
             ufProcesses.add(new UnionFindProcess(i, batchSize));
         }
         merge(ufProcesses);
-        return dss;
+        return disjointSetStruct;
     }
 
     private void merge(Collection<? extends AbstractUnionFindTask> ufProcesses) {
@@ -111,14 +111,14 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
         if (!running()) {
             return;
         }
-        final Stack<DisjointSetStruct> temp = new Stack<>();
-        ufProcesses.forEach(uf -> temp.add(uf.getDisjointSetStruct()));
-        dss = ForkJoinPool.commonPool().invoke(new Merge(temp));
+        final Stack<DisjointSetStruct> disjointSetStructs = new Stack<>();
+        ufProcesses.forEach(uf -> disjointSetStructs.add(uf.getDisjointSetStruct()));
+        disjointSetStruct = ForkJoinPool.commonPool().invoke(new Merge(disjointSetStructs));
     }
 
     @Override
     public UnionFindForkJoinMerge release() {
-        dss = null;
+        disjointSetStruct = null;
         return super.release();
     }
 
@@ -168,7 +168,7 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
     }
 
     /**
-     * Process to calc a DSS using a threshold
+     * Process to calc a DisjointSetStruct using a threshold
      */
     private class ThresholdUnionFindProcess extends AbstractUnionFindTask {
 
