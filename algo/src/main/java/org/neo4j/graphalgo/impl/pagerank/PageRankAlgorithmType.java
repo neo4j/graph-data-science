@@ -28,7 +28,7 @@ public enum PageRankAlgorithmType implements PageRankAlgorithm {
         }
 
         @Override
-        public Class<?> computeStepClass() {
+        public Class<EigenvectorCentralityComputeStep> computeStepClass() {
             return EigenvectorCentralityComputeStep.class;
         }
     },
@@ -40,7 +40,7 @@ public enum PageRankAlgorithmType implements PageRankAlgorithm {
         }
 
         @Override
-        public Class<?> computeStepClass() {
+        public Class<WeightedComputeStep> computeStepClass() {
             return WeightedComputeStep.class;
         }
     },
@@ -52,7 +52,7 @@ public enum PageRankAlgorithmType implements PageRankAlgorithm {
         }
 
         @Override
-        public Class<?> computeStepClass() {
+        public Class<ArticleRankComputeStep> computeStepClass() {
             return ArticleRankComputeStep.class;
         }
     },
@@ -64,7 +64,7 @@ public enum PageRankAlgorithmType implements PageRankAlgorithm {
         }
 
         @Override
-        public Class<?> computeStepClass() {
+        public Class<NonWeightedComputeStep> computeStepClass() {
             return NonWeightedComputeStep.class;
         }
     }
