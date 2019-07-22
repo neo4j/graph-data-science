@@ -23,7 +23,11 @@ import com.carrotsearch.hppc.LongLongMap;
 import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.junit.Before;
 import org.junit.Test;
+import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.dss.IncrementalDisjointSetStruct;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -130,6 +134,19 @@ public abstract class DisjointSetStructTest {
 
     public static int[] set(int... elements) {
         return elements;
+    }
+
+    void assertMemoryEstimation(MemoryEstimation memoryEstimation, long nodeCount, MemoryRange memoryRange) {
+        assertMemoryEstimation(memoryEstimation, nodeCount, 1, memoryRange);
+    }
+
+    void assertMemoryEstimation(
+            final MemoryEstimation memoryEstimation,
+            long nodeCount,
+            int concurrency,
+            MemoryRange memoryRange) {
+        GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(nodeCount).build();
+        assertEquals(memoryRange, memoryEstimation.estimate(dimensions, concurrency).memoryUsage());
     }
 
     private DisjointSetStruct create(int size, int[]... sets) {

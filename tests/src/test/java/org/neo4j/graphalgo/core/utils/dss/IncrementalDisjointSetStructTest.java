@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.utils.dss;
 
 import org.junit.Test;
-import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
@@ -29,6 +28,7 @@ import org.neo4j.graphalgo.core.utils.paged.dss.UnionStrategy;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.neo4j.graphalgo.core.utils.paged.dss.IncrementalDisjointSetStruct.memoryEstimation;
 
 public class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
 
@@ -87,18 +87,8 @@ public class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
 
     @Test
     public void shouldComputeMemoryEstimation() {
-        GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
-        assertEquals(
-                MemoryRange.of(304),
-                IncrementalDisjointSetStruct.memoryEstimation().estimate(dimensions0, 1).memoryUsage());
-
-        GraphDimensions dimensions100 = new GraphDimensions.Builder().setNodeCount(100).build();
-        assertEquals(
-                MemoryRange.of(2704),
-                IncrementalDisjointSetStruct.memoryEstimation().estimate(dimensions100, 1).memoryUsage());
-
-        GraphDimensions dimensions100B = new GraphDimensions.Builder().setNodeCount(100_000_000_000L).build();
-        assertEquals(MemoryRange.of(2400366211288L), IncrementalDisjointSetStruct
-                .memoryEstimation().estimate(dimensions100B, 1).memoryUsage());
+        assertMemoryEstimation(memoryEstimation(), 0, MemoryRange.of(304));
+        assertMemoryEstimation(memoryEstimation(), 100, MemoryRange.of(2704));
+        assertMemoryEstimation(memoryEstimation(), 100_000_000_000L, MemoryRange.of(2400366211288L));
     }
 }
