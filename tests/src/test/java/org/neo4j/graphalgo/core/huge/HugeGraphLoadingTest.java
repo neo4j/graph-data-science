@@ -86,16 +86,15 @@ public final class HugeGraphLoadingTest {
         HugeWeightMapping nodeProperties = graph.nodeProperties("bar");
         long propertyCountDiff = nodeCount - nodeProperties.size();
         String errorMessage = String.format(
-                "lost %d properties during import",
-                propertyCountDiff
+                "Expected %d properties to be imported. Actually imported %d properties (missing %d properties).",
+                nodeCount, nodeProperties.size(), propertyCountDiff
         );
         assertEquals(errorMessage, 0, propertyCountDiff);
 
-        for (int i = 0; i < nodeCount; i++) {
-            double weight = nodeProperties.nodeWeight(i);
-            long expected = graph.toOriginalNodeId(i);
-            String message = String.format("Property for node %d (neo = %d) was overwritten.", i, expected);
-            assertEquals(message, expected, (long) weight);
+        for (int nodeId = 0; nodeId < nodeCount; nodeId++) {
+            double weight = nodeProperties.nodeWeight(nodeId);
+            long neoId = graph.toOriginalNodeId(nodeId);
+            assertEquals(String.format("Property for node %d (neo = %d) was overwritten.", nodeId, neoId), neoId, (long) weight);
         }
     }
 }
