@@ -190,7 +190,7 @@ public class LoadGraphProcIntegrationTest {
                 : String.format(queryTemplate, "null", "null");
         db.execute(loadQuery, singletonMap("graph", graph)).close();
 
-        String algoQuery = "CALL algo.labelPropagation(null,null,null,{graph:$name,write:false})";
+        String algoQuery = "CALL algo.labelPropagation(null,null,{graph:$name,write:false})";
         try {
             runQuery(algoQuery, singletonMap("name", "foo"), row -> {
                 assertEquals(12, row.getNumber("nodes").intValue());
