@@ -19,20 +19,15 @@
  */
 package org.neo4j.graphalgo.impl.unionfind;
 
-import com.carrotsearch.hppc.IntLongHashMap;
-import com.carrotsearch.hppc.IntLongMap;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.neo4j.graphalgo.HeavyHugeTester;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
@@ -41,66 +36,55 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
-import java.util.Arrays;
-import java.util.Collection;
-
 import static org.junit.Assert.assertEquals;
 
-@RunWith(Parameterized.class)
-public class SeededUnionFindTest {
+public class SeededUnionFindTest extends HeavyHugeTester {
 
     private static final RelationshipType RELATIONSHIP_TYPE = RelationshipType.withName("TYPE");
-    private static final String COMMUNITY_PROPERTY = "community";
+    private static final String SEED_PROPERTY = "community";
 
-    private static final int SETS_COUNT = 16;
-    private static final int SET_SIZE = 10;
-
-    @Parameterized.Parameters(name = "{1}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(
-                new Object[]{HeavyGraphFactory.class, "Heavy"},
-                new Object[]{HugeGraphFactory.class, "Huge"}
-                // TODO GraphView graph does not support node properties
-                // new Object[]{GraphViewFactory.class, "Kernel"}
-        );
-    }
+    private static final int COMMUNITY_COUNT = 16;
+    private static final int COMMUNITY_SIZE = 10;
 
     @ClassRule
     public static final ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
 
+    /**
+     * Create multiple communities and connect them pairwise.
+     */
     @BeforeClass
     public static void setupGraph() {
-        int[] setSizes = new int[SETS_COUNT];
-        Arrays.fill(setSizes, SET_SIZE);
-        createTestGraph(setSizes);
-    }
-
-    private static void createTestGraph(int... setSizes) {
         DB.executeAndCommit(db -> {
-            for (int i = 0; i < setSizes.length; i = i + 2) {
-                long sourceId = createLine(db, setSizes[i]);
-                long targetId = createLine(db, setSizes[i + 1]);
-
-                createConnection(db, sourceId, targetId);
+            for (int i = 0; i < COMMUNITY_COUNT; i = i + 2) {
+                long community1 = createLineGraph(db);
+                long community2 = createLineGraph(db);
+                createConnection(db, community1, community2);
             }
         });
     }
 
-    private static Long createLine(GraphDatabaseService db, int setSize) {
+     /**
+     * Creates a line graph of the given length (i.e. numer of relationships).
+     *
+     * @param db database
+     * @return the last node id inserted into the graph
+     */
+    private static long createLineGraph(GraphDatabaseService db) {
         Node temp = db.createNode();
-        for (int i = 1; i < setSize; i++) {
-            Node t = db.createNode();
+        long communityId = getCommunityId(temp.getId(), COMMUNITY_SIZE);
 
-            int communityId = (int) t.getId() / setSize * 2 + 1;
-            temp.setProperty(COMMUNITY_PROPERTY, communityId);
-
-            temp.createRelationshipTo(t, RELATIONSHIP_TYPE);
-            temp = t;
+        for (int i = 1; i < COMMUNITY_SIZE; i++) {
+            temp.setProperty(SEED_PROPERTY, communityId);
+            Node target = db.createNode();
+            temp.createRelationshipTo(target, RELATIONSHIP_TYPE);
+            temp = target;
         }
-
-        int communityId = (int) temp.getId() / setSize * 2 + 1;
-        temp.setProperty(COMMUNITY_PROPERTY, communityId);
+        temp.setProperty(SEED_PROPERTY, communityId);
         return temp.getId();
+    }
+
+    private static long getCommunityId(long nodeId, int communitySize) {
+        return nodeId / communitySize;
     }
 
     private static void createConnection(GraphDatabaseService db, long sourceId, long targetId) {
@@ -114,17 +98,18 @@ public class SeededUnionFindTest {
     private final UnionFind.Config config;
 
     public SeededUnionFindTest(Class<? extends GraphFactory> graphImpl, String name) {
+        super(graphImpl);
         graph = new GraphLoader(DB)
                 .withExecutorService(Pools.DEFAULT)
                 .withAnyLabel()
                 .withOptionalNodeProperties(
-                        PropertyMapping.of(COMMUNITY_PROPERTY, COMMUNITY_PROPERTY, -1L)
+                        PropertyMapping.of(SEED_PROPERTY, SEED_PROPERTY, -1L)
                 )
                 .withRelationshipType(RELATIONSHIP_TYPE)
                 .load(graphImpl);
 
         config = new UnionFind.Config(
-                graph.nodeProperties(COMMUNITY_PROPERTY),
+                graph.nodeProperties(SEED_PROPERTY),
                 Double.NaN,
                 false
         );
@@ -151,29 +136,20 @@ public class SeededUnionFindTest {
     }
 
     private void test(UnionFindType uf) {
+        // We expect that UF connects pairs of communites
         DisjointSetStruct result = run(uf);
-
-        Assert.assertEquals(SETS_COUNT / 2, result.getSetCount());
-        IntLongMap setRegions = new IntLongHashMap();
+        Assert.assertEquals(COMMUNITY_COUNT / 2, result.getSetCount());
 
         graph.forEachNode((nodeId) -> {
-            int expectedSetRegion = ((int) nodeId / (2 * SET_SIZE) * 2) * 2 + 1;
-            final long setId = result.setIdOf(nodeId);
-            int setRegion = (int) setId;
+            // Since the community size has doubled, the community id first needs to be computed with twice the
+            // community size. To account for the gaps in the community ids when communities have merged,
+            // we need to multiply the resulting id by two.
+            long expectedCommunityId = getCommunityId(nodeId, 2 * COMMUNITY_SIZE) * 2;
+            long actualCommunityId = result.setIdOf(nodeId);
             assertEquals(
-                    "Node " + nodeId + " in unexpected set: " + setId,
-                    expectedSetRegion,
-                    setRegion);
-
-            long regionSetId = setRegions.getOrDefault(setRegion, -1);
-            if (regionSetId == -1) {
-                setRegions.put(setRegion, setId);
-            } else {
-                assertEquals(
-                        "Inconsistent set for node " + nodeId + ", is " + setId + " but should be " + regionSetId,
-                        regionSetId,
-                        setId);
-            }
+                    "Node " + nodeId + " in unexpected set: " + actualCommunityId,
+                    expectedCommunityId,
+                    actualCommunityId);
             return true;
         });
     }
@@ -183,7 +159,7 @@ public class SeededUnionFindTest {
                 uf,
                 graph,
                 Pools.DEFAULT,
-                SET_SIZE / Pools.DEFAULT_CONCURRENCY,
+                COMMUNITY_SIZE / Pools.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT_CONCURRENCY,
                 config,
                 AllocationTracker.EMPTY);
