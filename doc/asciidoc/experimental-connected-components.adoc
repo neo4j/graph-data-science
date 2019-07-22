@@ -3,14 +3,16 @@
 
 [abstract]
 --
-This section describes the experimental variation of the Connected Components algorithm in the Neo4j Graph Algorithms library.
+This section describes the experimental variations of the Connected Components algorithm in the Neo4j Graph Algorithms library.
 --
 
-For more informations about `algo.union-find` look at <<algorithms-connected-components, Connected Components>> (`algo.unionFind`)
+For general information about the union find algorithm see <<algorithms-connected-components, Connected Components>> (`algo.unionFind`).
 
 
 [[experimental-algorithms-connected-components-imp]]
-== Additional Implementations
+== Additional implementations
+
+The experimental implementations vary from the default in the following ways:
 
 `algo.unionFind`
 
