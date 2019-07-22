@@ -109,28 +109,25 @@ public class UnionFindQueue extends UnionFind<UnionFindQueue> {
     @Override
     public DisjointSetStruct computeUnrestricted() {
         final List<Future<?>> futures = new ArrayList<>(2 * stepSize);
-        final BlockingQueue<DisjointSetStruct> queue = new ArrayBlockingQueue<>(stepSize);
-        AtomicInteger expectedStructs = new AtomicInteger();
+        final BlockingQueue<DisjointSetStruct> communities = new ArrayBlockingQueue<>(stepSize);
+        AtomicInteger expectedCommunityCount = new AtomicInteger();
 
         for (long i = 0L; i < nodeCount; i += batchSize) {
-            futures.add(executor.submit(new HugeUnionFindTask(queue, i, expectedStructs)));
+            futures.add(executor.submit(new HugeUnionFindTask(communities, i, expectedCommunityCount)));
         }
         int steps = futures.size();
 
         for (int i = 1; i < steps; ++i) {
-            futures.add(executor.submit(() -> mergeTask(queue, expectedStructs, DisjointSetStruct::merge)));
+            futures.add(executor.submit(() -> mergeTask(communities, expectedCommunityCount, DisjointSetStruct::merge)));
         }
 
         awaitTermination(futures);
-        return getStruct(queue);
-    }
 
-    private DisjointSetStruct getStruct(final BlockingQueue<DisjointSetStruct> queue) {
-        DisjointSetStruct set = queue.poll();
-        if (set == null) {
-            set = initDisjointSetStruct(nodeCount, tracker);
+        DisjointSetStruct mergedCommunities = communities.poll();
+        if (mergedCommunities == null) {
+            mergedCommunities = initDisjointSetStruct(nodeCount, tracker);
         }
-        return set;
+        return mergedCommunities;
     }
 
     public static <T> void mergeTask(
