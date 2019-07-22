@@ -84,22 +84,12 @@ public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> 
 
     public abstract DisjointSetStruct computeUnrestricted();
 
-    /**
-     * method reference for self
-     *
-     * @return
-     */
     @Override
     public ME me() {
         //noinspection unchecked
         return (ME) this;
     }
 
-    /**
-     * release internal datastructures
-     *
-     * @return
-     */
     @Override
     public ME release() {
         graph = null;
