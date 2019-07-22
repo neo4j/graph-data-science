@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.utils.RawValues;
 public interface WeightMapping {
 
     /**
-     * Returns the number of keys stores in that mapping.
+     * Returns the number of keys stored in that mapping.
      */
     long size();
 

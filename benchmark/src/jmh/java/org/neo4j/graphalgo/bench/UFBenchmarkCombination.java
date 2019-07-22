@@ -48,7 +48,7 @@ public enum UFBenchmarkCombination {
     }
 
     public Object run(Graph graph) {
-        UnionFindSeq.Config algoConfig = new UnionFind.Config(
+        UnionFind.Config algoConfig = new UnionFind.Config(
                 new HugeNullWeightMap(-1L),
                 Double.NaN
         );

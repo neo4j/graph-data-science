@@ -87,7 +87,7 @@ public class ParallelUnionFindBenchmark {
 
     private static File storeDir = new File(GRAPH_DIRECTORY);
 
-    private final UnionFindSeq.Config algoConfig = new UnionFind.Config(
+    private final UnionFind.Config algoConfig = new UnionFind.Config(
             new HugeNullWeightMap(-1L),
             Double.NaN
     );

@@ -57,7 +57,7 @@ public class UnionFindFactory<A extends UnionFind<A>> extends AlgorithmFactory<A
         int minBatchSize = configuration.getBatchSize();
 
         UnionFind.Config algoConfig = new UnionFind.Config(
-                graph.nodeProperties(SEED_TYPE),
+                graph.availableNodeProperties().contains(SEED_TYPE) ? graph.nodeProperties(SEED_TYPE) : null,
                 configuration.get(CONFIG_THRESHOLD, Double.NaN),
                 configuration
                         .get(CONFIG_UNION_STRATEGY, UnionStrategy.ByRank.NAME)

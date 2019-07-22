@@ -59,7 +59,7 @@ public final class UnionFindSafetyTest {
     @Parameterized.Parameter
     public UnionFindType unionFindType;
 
-    UnionFindSeq.Config algoConfig = new UnionFind.Config(
+    UnionFind.Config algoConfig = new UnionFind.Config(
             new HugeNullWeightMap(-1),
             Double.NaN
     );
