@@ -61,7 +61,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
 
     @Procedure(value = "algo.unionFind", mode = Mode.WRITE)
     @Description("CALL algo.unionFind(label:String, relationship:String, " +
-                 "{weightProperty: 'weight', threshold: 0.42, defaultValue: 1.0, write: true, writeProperty: 'community', seedProperty: 'oldCommunity', unionStrategy: 'rank|min'}) " +
+                 "{weightProperty: 'weight', threshold: 0.42, defaultValue: 1.0, write: true, writeProperty: 'community', seedProperty: 'seedCommunity', unionStrategy: 'rank|min'}) " +
                  "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
     public Stream<UnionFindResult> unionFind(
             @Name(value = "label", defaultValue = "") String label,
@@ -73,7 +73,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
 
     @Procedure(value = "algo.unionFind.stream")
     @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
-                 "{weightProperty: 'propertyName', threshold: 0.42, defaultValue: 1.0, seedProperty: 'oldCommunity', unionStrategy: 'rank|min'}} " +
+                 "{weightProperty: 'propertyName', threshold: 0.42, defaultValue: 1.0, seedProperty: 'seedCommunity', unionStrategy: 'rank|min'}} " +
                  "YIELD nodeId, setId - yields a setId to each node id")
     public Stream<DisjointSetStruct.Result> unionFindStream(
             @Name(value = "label", defaultValue = "") String label,
@@ -98,7 +98,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
 
     @Procedure(value = "algo.unionFind.queue", mode = Mode.WRITE)
     @Description("CALL algo.unionFind(label:String, relationship:String, " +
-                 "{property: 'weight', threshold: 0.42, defaultValue: 1.0, write: true, writeProperty: 'community', seedProperty: 'oldCommunity', unionStrategy: 'rank|min', concurrency: 4}) " +
+                 "{property: 'weight', threshold: 0.42, defaultValue: 1.0, write: true, writeProperty: 'community', seedProperty: 'seedCommunity', unionStrategy: 'rank|min', concurrency: 4}) " +
                  "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
     public Stream<UnionFindResult> unionFindQueue(
             @Name(value = "label", defaultValue = "") String label,
@@ -110,7 +110,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
 
     @Procedure(value = "algo.unionFind.queue.stream")
     @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
-                 "{property: 'propertyName', threshold: 0.42, defaultValue: 1.0, seedProperty: 'oldCommunity', unionStrategy: 'rank|min', concurrency: 4}) " +
+                 "{property: 'propertyName', threshold: 0.42, defaultValue: 1.0, seedProperty: 'seedCommunity', unionStrategy: 'rank|min', concurrency: 4}) " +
                  "YIELD nodeId, setId - yields a setId to each node id")
     public Stream<DisjointSetStruct.Result> unionFindQueueStream(
             @Name(value = "label", defaultValue = "") String label,
@@ -122,7 +122,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
 
     @Procedure(value = "algo.unionFind.forkJoinMerge", mode = Mode.WRITE)
     @Description("CALL algo.unionFind(label:String, relationship:String, " +
-                 "{property: 'weight', threshold: 0.42, defaultValue: 1.0, write: true, writeProperty: 'community', seedProperty: 'oldCommunity', unionStrategy: 'rank|min', concurrency: 4}) " +
+                 "{property: 'weight', threshold: 0.42, defaultValue: 1.0, write: true, writeProperty: 'community', seedProperty: 'seedCommunity', unionStrategy: 'rank|min', concurrency: 4}) " +
                  "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
     public Stream<UnionFindResult> unionFindForkJoinMerge(
             @Name(value = "label", defaultValue = "") String label,
@@ -134,7 +134,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
 
     @Procedure(value = "algo.unionFind.forkJoinMerge.stream")
     @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
-                 "{property: 'propertyName', threshold: 0.42, defaultValue: 1.0, seedProperty: 'oldCommunity', unionStrategy: 'rank|min', concurrency: 4}) " +
+                 "{property: 'propertyName', threshold: 0.42, defaultValue: 1.0, seedProperty: 'seedCommunity', unionStrategy: 'rank|min', concurrency: 4}) " +
                  "YIELD nodeId, setId - yields a setId to each node id")
     public Stream<DisjointSetStruct.Result> unionFindForkJoinMergeStream(
             @Name(value = "label", defaultValue = "") String label,
@@ -146,7 +146,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
 
     @Procedure(value = "algo.unionFind.forkJoin", mode = Mode.WRITE)
     @Description("CALL algo.unionFind(label:String, relationship:String, " +
-                 "{property: 'weight', threshold: 0.42, defaultValue: 1.0, write: true, writeProperty: 'community', seedProperty: 'oldCommunity', unionStrategy: 'rank|min', concurrency: 4}) " +
+                 "{property: 'weight', threshold: 0.42, defaultValue: 1.0, write: true, writeProperty: 'community', seedProperty: 'seedCommunity', unionStrategy: 'rank|min', concurrency: 4}) " +
                  "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
     public Stream<UnionFindResult> unionFindForkJoin(
             @Name(value = "label", defaultValue = "") String label,
@@ -158,7 +158,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
 
     @Procedure(value = "algo.unionFind.forkJoin.stream")
     @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
-                 "{property: 'propertyName', threshold: 0.42, defaultValue: 1.0, seedProperty: 'oldCommunity', unionStrategy: 'rank|min', concurrency: 4}) " +
+                 "{property: 'propertyName', threshold: 0.42, defaultValue: 1.0, seedProperty: 'seedCommunity', unionStrategy: 'rank|min', concurrency: 4}) " +
                  "YIELD nodeId, setId - yields a setId to each node id")
     public Stream<DisjointSetStruct.Result> unionFindForJoinStream(
             @Name(value = "label", defaultValue = "") String label,
