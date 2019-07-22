@@ -160,7 +160,6 @@ YIELD nodes, iterations, didConverge, loadMillis, computeMillis, writeMillis, wr
 | Name              | Type    | Default        | Optional | Description
 | node label        | string  | null           | yes      | The label to load from the graph. If null, load all nodes
 | relationship type | string  | null           | yes      | The relationship-type to load from the graph. If null, load all relationships
-| direction         | string  | 'OUTGOING'     | yes      | The relationship-direction to use in the algorithm
 | config            | map     | n/a            | yes      | Additional configurations
 |===
 
@@ -168,6 +167,7 @@ YIELD nodes, iterations, didConverge, loadMillis, computeMillis, writeMillis, wr
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name              | Type    | Default        | Optional | Description
+| direction         | string  | 'OUTGOING'     | yes      | The relationship-direction to use in the algorithm
 | concurrency       | int     | available CPUs | yes      | The number of concurrent threads
 | iterations        | int     | 1              | yes      | The maximum number of iterations to run
 | weightProperty    | string  | 'weight'       | yes      | The property name of node and/or relationship that contain weight. Must be numeric.
@@ -223,7 +223,6 @@ YIELD nodeId, label
 | Name              | Type    | Default        | Optional | Description
 | node label        | string  | null           | yes      | The label to load from the graph. If null, load all nodes
 | relationship type | string  | null           | yes      | The relationship-type to load from the graph. If null, load all relationships
-| direction         | string  | 'OUTGOING'     | yes      | The relationship-direction to use in the algorithm
 | config            | map     | n/a            | yes      | Additional configurations
 |===
 
@@ -231,6 +230,7 @@ YIELD nodeId, label
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name              | Type    | Default        | Optional | Description
+| direction         | string  | 'OUTGOING'     | yes      | The relationship-direction to use in the algorithm
 | concurrency       | int     | available CPUs | yes      | The number of concurrent threads
 | iterations        | int     | 1              | yes      | The maximum number of iterations to run
 | weightProperty    | string  | 'weight'       | yes      | The property name of node and/or relationship that contain weight. Must be numeric.
