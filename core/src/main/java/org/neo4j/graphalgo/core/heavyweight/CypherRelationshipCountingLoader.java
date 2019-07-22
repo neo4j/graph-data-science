@@ -24,7 +24,6 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
@@ -76,7 +75,7 @@ public class CypherRelationshipCountingLoader {
     }
 
     private RelationshipCount loadRelationships(long offset, int batchSize) {
-        RelationshipRowCountingVisitor visitor = new RelationshipRowCountingVisitor();
+        ResultCountingVisitor visitor = new ResultCountingVisitor();
         api.execute(setup.relationshipType, CypherLoadingUtils.params(setup.params, offset, batchSize)).accept(visitor);
         return new RelationshipCount(visitor.rows(), offset);
     }

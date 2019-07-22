@@ -24,13 +24,8 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.WeightMapping;
-import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.IntIdMap;
-import org.neo4j.graphalgo.core.NullWeightMap;
 import org.neo4j.graphalgo.core.WeightMap;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.kernel.api.StatementConstants;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashMap;
@@ -57,7 +52,7 @@ public class HeavyCypherGraphFactory extends GraphFactory {
         super(api, setup);
         this.nodeLoader = new CypherNodeLoader(api, setup, dimensions);
         this.relationshipLoader = new CypherRelationshipLoader(api, setup);
-        this.nodeCountingLoader = new CypherNodeCountingLoader(api, setup, dimensions);
+        this.nodeCountingLoader = new CypherNodeCountingLoader(api, setup);
         this.relationshipCountingLoader = new CypherRelationshipCountingLoader(api, setup);
     }
 

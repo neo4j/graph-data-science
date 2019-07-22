@@ -19,13 +19,9 @@
  */
 package org.neo4j.graphalgo.core.heavyweight;
 
-import org.neo4j.graphalgo.core.DuplicateRelationshipsStrategy;
-import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.graphdb.Result;
 
-import java.util.concurrent.atomic.LongAdder;
-
-class RelationshipRowCountingVisitor implements Result.ResultVisitor<RuntimeException> {
+class ResultCountingVisitor implements Result.ResultVisitor<RuntimeException> {
     private long rows = 0;
 
 

@@ -35,12 +35,10 @@ import static org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory.NO_BA
 class CypherNodeCountingLoader {
     private final GraphDatabaseAPI api;
     private final GraphSetup setup;
-    private final GraphDimensions dimensions;
 
-    public CypherNodeCountingLoader(GraphDatabaseAPI api, GraphSetup setup, GraphDimensions dimensions) {
+    public CypherNodeCountingLoader(GraphDatabaseAPI api, GraphSetup setup) {
         this.api = api;
         this.setup = setup;
-        this.dimensions = dimensions;
     }
 
     public NodeCount load() {
@@ -77,13 +75,9 @@ class CypherNodeCountingLoader {
         return new NodeCount(total, 0);
     }
 
-    private NodeCount loadNodes(long offset, int batchSize) {
-        int capacity = batchSize == NO_BATCH ? INITIAL_NODE_COUNT : batchSize;
-        final IntIdMap idMap = new IntIdMap(capacity);
-
-        NodeRowCountingVisitor visitor = new NodeRowCountingVisitor();
+    private NodeCount loadNodes(final long offset, final int batchSize) {
+        ResultCountingVisitor visitor = new ResultCountingVisitor();
         api.execute(setup.startLabel, CypherLoadingUtils.params(setup.params,offset, batchSize)).accept(visitor);
-        idMap.buildMappedIds(setup.tracker);
         return new NodeCount(visitor.rows(), offset);
     }
 
