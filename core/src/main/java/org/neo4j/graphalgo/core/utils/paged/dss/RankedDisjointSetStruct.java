@@ -66,7 +66,7 @@ public final class RankedDisjointSetStruct extends DisjointSetStruct {
 
     @Override
     public long find(long p) {
-        return findPC(p);
+        return findWithPathCompression(p);
     }
 
     @Override

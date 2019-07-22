@@ -78,6 +78,8 @@ public abstract class DisjointSetStruct {
     /**
      * Find set Id of element p.
      *
+     * Note that implementations of this method might apply path optimizations while looking for the set id.
+     *
      * @param p the set element
      * @return returns the representative member of the set to which p belongs
      */
@@ -147,13 +149,13 @@ public abstract class DisjointSetStruct {
      * @param p the set element
      * @return returns the representative member of the set to which p belongs
      */
-    final long findPC(long p) {
+    final long findWithPathCompression(long p) {
         long pv = parent().get(p);
         if (pv == -1L) {
             return p;
         }
         // path compression optimization
-        long value = findPC(pv);
+        long value = findWithPathCompression(pv);
         parent().set(p, value);
         return value;
     }

@@ -126,7 +126,7 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
      */
     @Override
     public long find(long p) {
-        return findPC(p);
+        return findWithPathCompression(p);
     }
 
     /**
