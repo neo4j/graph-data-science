@@ -68,5 +68,13 @@ task versionsJson {
     }
 }
 
-ci.finalizedBy shadowCopy, versionsJson
-cipr.finalizedBy shadowCopy, versionsJson
+task distZip(type: Zip) {
+    description 'Create a ZIP archive of the main distribution JAR.'
+    baseName = shadowJar.baseName
+    classifier = shadowJar.classifier
+    from shadowJar
+    destinationDir file(distributionDir)
+}
+
+ci.finalizedBy shadowCopy, versionsJson, distZip
+cipr.finalizedBy shadowCopy, versionsJson, distZip
