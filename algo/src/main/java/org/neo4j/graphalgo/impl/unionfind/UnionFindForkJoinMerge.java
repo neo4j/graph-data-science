@@ -93,7 +93,7 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
             ufProcesses.add(new TUFProcess(i, batchSize, threshold));
         }
         merge(ufProcesses);
-        return getDss();
+        return dss;
     }
 
     @Override
@@ -103,7 +103,7 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
             ufProcesses.add(new UFProcess(i, batchSize));
         }
         merge(ufProcesses);
-        return getDss();
+        return dss;
     }
 
     private void merge(Collection<? extends UFTask> ufProcesses) {
@@ -114,10 +114,6 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
         final Stack<DisjointSetStruct> temp = new Stack<>();
         ufProcesses.forEach(uf -> temp.add(uf.struct()));
         dss = ForkJoinPool.commonPool().invoke(new Merge(temp));
-    }
-
-    public DisjointSetStruct getDss() {
-        return dss;
     }
 
     @Override
