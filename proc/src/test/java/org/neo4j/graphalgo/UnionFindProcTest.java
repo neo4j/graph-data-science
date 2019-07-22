@@ -32,6 +32,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -109,10 +110,10 @@ public class UnionFindProcTest {
 
     @Test
     public void testUnionFind() throws Exception {
-        String query = "CALL algo.unionFind('', '', { graph: '%s' }) " +
+        String query = "CALL algo.unionFind('', '', { graph: $graph }) " +
                        "YIELD setCount, communityCount";
 
-        db.execute(String.format(query, graphImpl)).accept(
+        db.execute(query, MapUtil.map("graph", graphImpl)).accept(
                 (Result.ResultVisitor<Exception>) row -> {
                     assertEquals(3L, row.getNumber("communityCount"));
                     assertEquals(3L, row.getNumber("setCount"));
@@ -122,10 +123,10 @@ public class UnionFindProcTest {
 
     @Test
     public void testUnionFindWithLabel() throws Exception {
-        String query = "CALL algo.unionFind('Label', '', { graph: '%s' }) " +
+        String query = "CALL algo.unionFind('Label', '', { graph: $graph }) " +
                        "YIELD setCount, communityCount";
 
-        db.execute(String.format(query, graphImpl)).accept(
+        db.execute(query, MapUtil.map("graph", graphImpl)).accept(
                 (Result.ResultVisitor<Exception>) row -> {
                     assertEquals(1L, row.getNumber("communityCount"));
                     assertEquals(1L, row.getNumber("setCount"));
@@ -135,10 +136,10 @@ public class UnionFindProcTest {
 
     @Test
     public void testUnionFindWithMinStrategy() throws Exception {
-        String query = "CALL algo.unionFind('', '', { graph: '%s', unionStrategy: 'min' }) " +
+        String query = "CALL algo.unionFind('', '', { graph: $graph, unionStrategy: 'min' }) " +
                        "YIELD setCount, communityCount";
 
-        db.execute(String.format(query, graphImpl)).accept(
+        db.execute(query, MapUtil.map("graph", graphImpl)).accept(
                 (Result.ResultVisitor<Exception>) row -> {
                     assertEquals(3L, row.getNumber("communityCount"));
                     assertEquals(3L, row.getNumber("setCount"));
@@ -148,10 +149,10 @@ public class UnionFindProcTest {
 
     @Test
     public void testUnionFindWithRankStrategy() throws Exception {
-        String query = "CALL algo.unionFind('', '', { graph: '%s', unionStrategy: 'rank' }) " +
+        String query = "CALL algo.unionFind('', '', { graph: $graph, unionStrategy: 'rank' }) " +
                        "YIELD setCount, communityCount";
 
-        db.execute(String.format(query, graphImpl)).accept(
+        db.execute(query, MapUtil.map("graph", graphImpl)).accept(
                 (Result.ResultVisitor<Exception>) row -> {
                     assertEquals(3L, row.getNumber("communityCount"));
                     assertEquals(3L, row.getNumber("setCount"));
@@ -161,10 +162,10 @@ public class UnionFindProcTest {
 
     @Test
     public void testUnionFindWithSeedAndMinStrategy() throws Exception {
-        String query = "CALL algo.unionFind('', '', { graph: '%s', seedProperty: 'seedId', unionStrategy: 'min' }) " +
+        String query = "CALL algo.unionFind('', '', { graph: $graph, seedProperty: 'seedId', unionStrategy: 'min' }) " +
                        "YIELD setCount, communityCount";
 
-        db.execute(String.format(query, graphImpl)).accept(
+        db.execute(query, MapUtil.map("graph", graphImpl)).accept(
                 (Result.ResultVisitor<Exception>) row -> {
                     assertEquals(3L, row.getNumber("communityCount"));
                     assertEquals(3L, row.getNumber("setCount"));
@@ -174,10 +175,10 @@ public class UnionFindProcTest {
 
     @Test
     public void testUnionFindWithSeedAndRankStrategy() throws Exception {
-        String query = "CALL algo.unionFind('', '', { graph: '%s', seedProperty: 'seedId', unionStrategy: 'rank' }) " +
+        String query = "CALL algo.unionFind('', '', { graph: $graph, seedProperty: 'seedId', unionStrategy: 'rank' }) " +
                        "YIELD setCount, communityCount";
 
-        db.execute(String.format(query, graphImpl)).accept(
+        db.execute(query, MapUtil.map("graph", graphImpl)).accept(
                 (Result.ResultVisitor<Exception>) row -> {
                     assertEquals(3L, row.getNumber("communityCount"));
                     assertEquals(3L, row.getNumber("setCount"));
@@ -187,23 +188,23 @@ public class UnionFindProcTest {
 
     @Test
     public void testUnionFindWithUnsupportedUnionStrategy() {
-        String query = "CALL algo.unionFind('', '', { graph: '%s', seedProperty: 'seedId', unionStrategy: 'foobar' }) " +
+        String query = "CALL algo.unionFind('', '', { graph: $graph, seedProperty: 'seedId', unionStrategy: 'foobar' }) " +
                        "YIELD setCount, communityCount";
 
         expectedEx.expect(rootCause(IllegalArgumentException.class));
         expectedEx.expect(rootCauseMessage("Unsupported unionStrategy 'foobar'. Supported values are: 'rank', 'min'"));
 
-        db.execute(String.format(query, graphImpl));
+        db.execute(query, MapUtil.map("graph", graphImpl));
     }
 
     @Test
     public void testUnionFindWithSeed() throws Exception {
         Assume.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
 
-        String query = "CALL algo.unionFind('', '', { graph: '%s', seedProperty: 'seedId' }) " +
+        String query = "CALL algo.unionFind('', '', { graph: $graph, seedProperty: 'seedId' }) " +
                        "YIELD setCount, communityCount";
 
-        db.execute(String.format(query, graphImpl)).accept(
+        db.execute(query, MapUtil.map("graph", graphImpl)).accept(
                 (Result.ResultVisitor<Exception>) row -> {
                     assertEquals(3L, row.getNumber("communityCount"));
                     assertEquals(3L, row.getNumber("setCount"));
@@ -233,10 +234,10 @@ public class UnionFindProcTest {
 
     @Test
     public void testUnionFindWriteBack() throws Exception {
-        String query = "CALL algo.unionFind('', 'TYPE', { write: true, graph: '%s' }) " +
+        String query = "CALL algo.unionFind('', 'TYPE', { write: true, graph: $graph }) " +
                        "YIELD setCount, communityCount, writeMillis, nodes, partitionProperty, writeProperty";
 
-        db.execute(String.format(query, graphImpl)).accept(
+        db.execute(query, MapUtil.map("graph", graphImpl)).accept(
                 (Result.ResultVisitor<Exception>) row -> {
                     assertNotEquals(-1L, row.getNumber("writeMillis"));
                     assertNotEquals(-1L, row.getNumber("nodes"));
@@ -250,10 +251,10 @@ public class UnionFindProcTest {
 
     @Test
     public void testUnionFindWriteBackExplicitWriteProperty() throws Exception {
-        String query = "CALL algo.unionFind('', 'TYPE', { write:true, graph:'%s', writeProperty:'unionFind' }) " +
+        String query = "CALL algo.unionFind('', 'TYPE', { write: true, graph: $graph, writeProperty: 'unionFind' }) " +
                        "YIELD setCount, communityCount, writeMillis, nodes, partitionProperty, writeProperty";
 
-        db.execute(String.format(query, graphImpl)).accept(
+        db.execute(query, MapUtil.map("graph", graphImpl)).accept(
                 (Result.ResultVisitor<Exception>) row -> {
                     assertNotEquals(-1L, row.getNumber("writeMillis"));
                     assertNotEquals(-1L, row.getNumber("nodes"));
@@ -268,10 +269,10 @@ public class UnionFindProcTest {
 
     @Test
     public void testUnionFindStream() throws Exception {
-        String query = "CALL algo.unionFind.stream('', 'TYPE', {graph:'%s'}) YIELD setId";
+        String query = "CALL algo.unionFind.stream('', 'TYPE', {graph: $graph}) YIELD setId";
 
         IntIntScatterMap map = new IntIntScatterMap(11);
-        db.execute(String.format(query, graphImpl)).accept(
+        db.execute(query, MapUtil.map("graph", graphImpl)).accept(
                 (Result.ResultVisitor<Exception>) row -> {
                     map.addTo(row.getNumber("setId").intValue(), 1);
                     return true;
@@ -282,11 +283,11 @@ public class UnionFindProcTest {
     @Test
     public void testThresholdUnionFindStream() throws Exception {
         String query = "CALL algo.unionFind.stream('', 'TYPE', " +
-                       "{ weightProperty:'cost', defaultValue:10.0, threshold:5.0, concurrency:1, graph:'%s' }) " +
+                       "{ weightProperty: 'cost', defaultValue: 10.0, threshold: 5.0, concurrency: 1, graph: $graph }) " +
                        "YIELD setId";
 
         IntIntScatterMap map = new IntIntScatterMap(11);
-        db.execute(String.format(query, graphImpl)).accept(
+        db.execute(query, MapUtil.map("graph", graphImpl)).accept(
                 (Result.ResultVisitor<Exception>) row -> {
                     map.addTo(row.getNumber("setId").intValue(), 1);
                     return true;
@@ -297,10 +298,10 @@ public class UnionFindProcTest {
     @Test
     public void testThresholdUnionFindLowThreshold() throws Exception {
         String query = "CALL algo.unionFind.stream('', 'TYPE', " +
-                       "{ weightProperty:'cost', defaultValue:10.0, concurrency:1, threshold:3.14, graph:'%s' }) " +
+                       "{ weightProperty: 'cost', defaultValue: 10.0, concurrency: 1, threshold: 3.14, graph: $graph }) " +
                        "YIELD setId";
         final IntIntScatterMap map = new IntIntScatterMap(11);
-        db.execute(String.format(query, graphImpl)).accept(
+        db.execute(query, MapUtil.map("graph", graphImpl)).accept(
                 (Result.ResultVisitor<Exception>) row -> {
                     map.addTo(row.getNumber("setId").intValue(), 1);
                     return true;
