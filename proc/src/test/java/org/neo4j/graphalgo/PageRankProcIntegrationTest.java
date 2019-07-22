@@ -65,28 +65,28 @@ public class PageRankProcIntegrationTest {
             "CREATE (s:Label2 {name:\"s\"})\n" +
             "CREATE (t:Label2 {name:\"t\"})\n" +
             "CREATE\n" +
-            "  (b)-[:TYPE1{foo:1.0}]->(c),\n" +
+            "  (b)-[:TYPE1{foo:1.0, equalWeight: 1.0}]->(c),\n" +
 
-            "  (c)-[:TYPE1{foo:1.2}]->(b),\n" +
+            "  (c)-[:TYPE1{foo:1.2, equalWeight: 1.0}]->(b),\n" +
 
-            "  (d)-[:TYPE1{foo:1.3}]->(a),\n" +
-            "  (d)-[:TYPE1{foo:1.7}]->(b),\n" +
+            "  (d)-[:TYPE1{foo:1.3, equalWeight: 1.0}]->(a),\n" +
+            "  (d)-[:TYPE1{foo:1.7, equalWeight: 1.0}]->(b),\n" +
 
-            "  (e)-[:TYPE1{foo:6.1}]->(b),\n" +
-            "  (e)-[:TYPE1{foo:2.2}]->(d),\n" +
-            "  (e)-[:TYPE1{foo:1.5}]->(f),\n" +
+            "  (e)-[:TYPE1{foo:6.1, equalWeight: 1.0}]->(b),\n" +
+            "  (e)-[:TYPE1{foo:2.2, equalWeight: 1.0}]->(d),\n" +
+            "  (e)-[:TYPE1{foo:1.5, equalWeight: 1.0}]->(f),\n" +
 
-            "  (f)-[:TYPE1{foo:10.5}]->(b),\n" +
-            "  (f)-[:TYPE1{foo:2.9}]->(e),\n" +
+            "  (f)-[:TYPE1{foo:10.5, equalWeight: 1.0}]->(b),\n" +
+            "  (f)-[:TYPE1{foo:2.9, equalWeight: 1.0}]->(e),\n" +
 
-            "  (g)-[:TYPE2{foo:3.2}]->(b),\n" +
-            "  (g)-[:TYPE2{foo:5.3}]->(e),\n" +
-            "  (h)-[:TYPE2{foo:9.5}]->(b),\n" +
-            "  (h)-[:TYPE2{foo:0.3}]->(e),\n" +
-            "  (i)-[:TYPE2{foo:5.4}]->(b),\n" +
-            "  (i)-[:TYPE2{foo:3.2}]->(e),\n" +
-            "  (j)-[:TYPE2{foo:9.5}]->(e),\n" +
-            "  (k)-[:TYPE2{foo:4.2}]->(e)\n";
+            "  (g)-[:TYPE2{foo:3.2, equalWeight: 1.0}]->(b),\n" +
+            "  (g)-[:TYPE2{foo:5.3, equalWeight: 1.0}]->(e),\n" +
+            "  (h)-[:TYPE2{foo:9.5, equalWeight: 1.0}]->(b),\n" +
+            "  (h)-[:TYPE2{foo:0.3, equalWeight: 1.0}]->(e),\n" +
+            "  (i)-[:TYPE2{foo:5.4, equalWeight: 1.0}]->(b),\n" +
+            "  (i)-[:TYPE2{foo:3.2, equalWeight: 1.0}]->(e),\n" +
+            "  (j)-[:TYPE2{foo:9.5, equalWeight: 1.0}]->(e),\n" +
+            "  (k)-[:TYPE2{foo:4.2, equalWeight: 1.0}]->(e)\n";
 
     @AfterClass
     public static void tearDown() throws Exception {
@@ -186,7 +186,7 @@ public class PageRankProcIntegrationTest {
     public void testWeightedPageRankWithAllRelationshipsEqualStream() throws Exception {
         final Map<Long, Double> actual = new HashMap<>();
         runQuery(
-                "CALL algo.pageRank.stream('Label1', 'TYPE1', {graph:'"+graphImpl+"', weightProperty: 'madeUp', defaultValue: 1.0}) YIELD nodeId, score",
+                "CALL algo.pageRank.stream('Label1', 'TYPE1', {graph:'"+graphImpl+"', weightProperty: 'equalWeight'}) YIELD nodeId, score",
                 row -> actual.put(
                         (Long)row.get("nodeId"),
                         (Double) row.get("score")));

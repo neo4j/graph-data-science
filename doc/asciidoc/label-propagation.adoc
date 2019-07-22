@@ -18,7 +18,6 @@ This section includes:
 
 * <<algorithms-label-propagation-context, History and explanation>>
 * <<algorithms-label-propagation-usecase, Use-cases - when to use the Label Propagation algorithm>>
-* <<algorithms-label-propagation-limitations, Constraints - when not to use the Label Propagation algorithm>>
 * <<algorithms-label-propagation-sample, Label Propagation algorithm sample>>
 ** <<algorithms-label-propagation-sample-seed_label, Using seed labels>>
 * <<algorithms-label-propagation-cp, Cypher projection>>
@@ -40,7 +39,7 @@ Labels will get trapped inside a densely connected group of nodes, and those nod
 // tag::formula[]
 The algorithm works as follows:
 
-* Every node is initialized with a unique label (an identifier).
+* Every node is initialized with a unique community label (an identifier).
 * These labels propagate through the network.
 * At every iteration of propagation, each node updates its label to the one that the maximum numbers of its neighbours belongs to.
   Ties are broken uniformly and randomly.
@@ -48,7 +47,7 @@ The algorithm works as follows:
 
 As labels propagate, densely connected groups of nodes quickly reach a consensus on a unique label.
 At the end of the propagation only a few labels will remain - most will have disappeared.
-Nodes that have the same label at convergence are said to belong to the same community.
+Nodes that have the same community label at convergence are said to belong to the same community.
 // end::formula[]
 
 
@@ -63,16 +62,6 @@ Nodes that have the same label at convergence are said to belong to the same com
 * Label propagation has been used to infer features of utterances in a dialogue, for a machine learning model to track user intention with the help of Wikidata knowledge graph of concepts and their relations.
   For more information, see  https://www.uni-ulm.de/fileadmin/website_uni_ulm/iui.iwsds2017/papers/IWSDS2017_paper_12.pdf["Feature Inference Based on Label Propagation on Wikidata Graph for DST"]
 // end::use-case[]
-
-
-[[algorithms-label-propagation-limitations]]
-== Constraints - when not to use the Label Propagation algorithm
-
-// tag::constraint[]
-In contrast with other algorithms, label propagation can result in different community structures when run multiple times on the same graph.
-The range of solutions can be narrowed if some nodes are given preliminary labels, while others are unlabelled.
-Unlabelled nodes will be more likely to adapt the preliminary labels.
-// end::constraint[]
 
 
 [[algorithms-label-propagation-sample]]
@@ -102,7 +91,7 @@ include::scripts/label-propagation.cypher[tag=write-sample-graph]
 .Results
 [opts="header",cols="1,1"]
 |===
-| Name    | Partition
+| Name    | Community
 | Alice   | 5
 | Charles | 4
 | Bridget | 5
@@ -123,15 +112,16 @@ Only Charles doesn't strongly fit into either side, but ends up with Doug and Ma
 [[algorithms-label-propagation-sample-seed_label]]
 === Using seed labels
 
-At the beginning of the algorithm, every node is initialized with unique label (called as identifier) and the labels propagate through the network.
+At the beginning of the algorithm, every node is initialized with a unique label and the labels propagate through the network.
 
-It is possible to define preliminary labels (identifiers) of nodes using the `partitionProperty` parameter.
-We need to save a preliminary set of labels that we would like to run the Label Propagation algorithm with as a property of nodes (must be a number).
+It is possible to define preliminary labels of nodes using the `seedProperty` parameter.
+We need to store a preliminary set of labels that we would like to run the Label Propagation algorithm with as node properties.
+That property needs to be a number.
 In our example graph we saved them as the property `seed_label`.
 
 The algorithm first checks if there is a seed label assigned to the node, and loads it if there is one.
-If there isn't one, it assigns the node new unique label (node ID is used).
-Using this preliminary set of labels (identifiers), it then sequentially updates each node's label to a new one, which is the most frequent label among its neighbors at every label propagation step (iteration).
+If there isn't one, it assigns a new unique label to the node.
+Using this preliminary set of labels, it then sequentially updates each node's label to a new one, which is the most frequent label among its neighbors at every iteration of label propagation.
 
 .The following will run the algorithm with pre-defined labels:
 [source, cypher]
@@ -160,7 +150,7 @@ include::scripts/label-propagation.cypher[tag=cypher-loading]
 [source, cypher]
 ----
 CALL algo.labelPropagation(label:String, relationship:String, {iterations:1,
-    weightProperty:'weight', writeProperty:'partition', write:true, concurrency:4})
+    weightProperty:'weight', writeProperty:'community', write:true, concurrency:4})
 YIELD nodes, iterations, didConverge, loadMillis, computeMillis, writeMillis, write, weightProperty, writeProperty
 ----
 
@@ -168,14 +158,22 @@ YIELD nodes, iterations, didConverge, loadMillis, computeMillis, writeMillis, wr
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name              | Type    | Default        | Optional | Description
-| label             | string  | null           | yes      | The label to load from the graph. If null, load all nodes
-| relationship      | string  | null           | yes      | The relationship-type to load from the graph. If null, load all relationships
+| node label        | string  | null           | yes      | The label to load from the graph. If null, load all nodes
+| relationship type | string  | null           | yes      | The relationship-type to load from the graph. If null, load all relationships
 | direction         | string  | 'OUTGOING'     | yes      | The relationship-direction to use in the algorithm
+| config            | map     | n/a            | yes      | Additional configurations
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type    | Default        | Optional | Description
 | concurrency       | int     | available CPUs | yes      | The number of concurrent threads
 | iterations        | int     | 1              | yes      | The maximum number of iterations to run
 | weightProperty    | string  | 'weight'       | yes      | The property name of node and/or relationship that contain weight. Must be numeric.
-| partitionProperty | string  | 'partition'    | yes      | Used to define initial set of labels (must be a number)
-| writeProperty | string  | 'partition'    | yes      | The property name written back to the partition of the graph in which the node resides.
+| seedProperty      | string  | n/a            | yes      | Used to define initial set of labels (must be a number)
+| partitionProperty | string  | n/a            | yes      | Deprecated. Replaced by `seedProperty`.
+| writeProperty     | string  | n/a            | yes      | The property name written back to the partition of the graph in which the node resides.
 | write             | boolean | true           | yes      | Specifies if the result should be written back as a node property
 | graph             | string  | 'heavy'        | yes      | Use 'heavy' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
 |===
@@ -222,16 +220,23 @@ YIELD nodeId, label
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name              | Type   | Default        | Optional | Description
-| label             | string | null           | yes      | The label to load from the graph. If null, load all nodes
-| relationship      | string | null           | yes      | The relationship-type to load from the graph. If null, load all relationships
-| direction         | string | 'OUTGOING'     | yes      | The relationship-direction to use in the algorithm
-| concurrency       | int    | available CPUs | yes      | The number of concurrent threads
-| iterations        | int    | 1              | yes      | The maximum number of iterations to run
-| weightProperty    | string | 'weight'       | yes      | The property name of node and/or relationship that contain weight. Must be numeric.
-| partitionProperty | string  | 'partition'    | yes      | Used to define initial set of labels (must be a number)
-| writeProperty | string  | 'partition'    | yes      | The property name written back to the partition of the graph in which the node resides.
-| graph             | string | 'heavy'        | yes      | Use 'heavy' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
+| Name              | Type    | Default        | Optional | Description
+| node label        | string  | null           | yes      | The label to load from the graph. If null, load all nodes
+| relationship type | string  | null           | yes      | The relationship-type to load from the graph. If null, load all relationships
+| direction         | string  | 'OUTGOING'     | yes      | The relationship-direction to use in the algorithm
+| config            | map     | n/a            | yes      | Additional configurations
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type    | Default        | Optional | Description
+| concurrency       | int     | available CPUs | yes      | The number of concurrent threads
+| iterations        | int     | 1              | yes      | The maximum number of iterations to run
+| weightProperty    | string  | 'weight'       | yes      | The property name of node and/or relationship that contain weight. Must be numeric.
+| seedProperty      | string  | n/a            | yes      | Used to define initial set of labels (must be a number)
+| partitionProperty | string  | n/a            | yes      | Deprecated. Replaced by `seedProperty`.
+| graph             | string  | 'heavy'        | yes      | Use 'heavy' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
 |===
 
 .Results

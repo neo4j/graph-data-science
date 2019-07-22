@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.TokenRead;
+import org.neo4j.kernel.api.StatementConstants;
 
 import static org.neo4j.internal.kernel.api.Read.ANY_LABEL;
 
@@ -127,14 +128,39 @@ public final class GraphDimensions {
         return 0.0;
     }
 
-    public boolean isValidNodePredicate(GraphSetup setup) {
-        return (setup.startLabel == null || setup.startLabel.isEmpty()) || labelId() != ANY_LABEL;
+    public void checkValidNodePredicate(GraphSetup setup) {
+        if (!(setup.startLabel == null || setup.startLabel.isEmpty()) && labelId() == ANY_LABEL) {
+            throw new IllegalArgumentException(String.format("Node label not found: '%s'", setup.startLabel));
+        }
     }
 
-    public boolean isValidRelationshipTypePredicate(GraphSetup setup) {
-        return (setup.relationshipType == null || setup.relationshipType.isEmpty()) || singleRelationshipTypeId() != ANY_LABEL;
+    public void checkValidRelationshipTypePredicate(GraphSetup setup) {
+        if (!(setup.relationshipType == null || setup.relationshipType.isEmpty()) && singleRelationshipTypeId() == ANY_LABEL) {
+            throw new IllegalArgumentException(String.format(
+                    "Relationship type not found: '%s'",
+                    setup.relationshipType));
+        }
     }
 
+    public void checkValidNodeProperty(GraphSetup setup) {
+        for (int i = 0; i < nodePropIds.length; i++) {
+            int id = nodePropIds[i];
+            if (!(setup.nodePropertyMappings[i].propertyKey == null || setup.nodePropertyMappings[i].propertyKey.isEmpty())
+                && id == StatementConstants.NO_SUCH_PROPERTY_KEY) {
+                throw new IllegalArgumentException(String.format(
+                        "Node property not found: '%s'",
+                        setup.nodePropertyMappings[i].propertyKey));
+            }
+        }
+    }
+
+    public void checkValidRelationshipProperty(GraphSetup setup) {
+        if (!(setup.relationWeightPropertyName == null || setup.relationWeightPropertyName.isEmpty()) && relWeightId == StatementConstants.NO_SUCH_PROPERTY_KEY) {
+            throw new IllegalArgumentException(String.format(
+                    "Relationship property not found: '%s'",
+                    setup.relationWeightPropertyName));
+        }
+    }
 
     public static class Builder {
         private long nodeCount;

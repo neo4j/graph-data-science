@@ -104,6 +104,10 @@ public final class ParallelUtil {
         return (long) Math.ceil(elementCount / (double) batchSize);
     }
 
+    /**
+     * @return a batch size, so that {@code nodeCount} is equally divided by {@code concurrency}
+     *         but no smaller than {@code minBatchSize}.
+     */
     public static int adjustBatchSize(
             int nodeCount,
             int concurrency,
@@ -115,13 +119,22 @@ public final class ParallelUtil {
         return Math.max(minBatchSize, targetBatchSize);
     }
 
+    /**
+     * @see #adjustBatchSize(int, int, int)
+     * @return a batch size, so that {@code nodeCount} is equally divided by {@code concurrency}
+     *         but no smaller than {@link #DEFAULT_BATCH_SIZE}.
+     */
     public static int adjustBatchSize(
             int nodeCount,
             int concurrency) {
         return adjustBatchSize(nodeCount, concurrency, DEFAULT_BATCH_SIZE);
     }
 
-
+    /**
+     * @see #adjustBatchSize(int, int, int)
+     * @return a batch size, so that {@code nodeCount} is equally divided by {@code concurrency}
+     *         but no smaller than {@link #DEFAULT_BATCH_SIZE}.
+     */
     public static long adjustBatchSize(
             long nodeCount,
             int concurrency,
@@ -133,12 +146,34 @@ public final class ParallelUtil {
         return Math.max(minBatchSize, targetBatchSize);
     }
 
+    /**
+     * @see #adjustBatchSize(long, int, long)
+     * @return a batch size, so that {@code nodeCount} is equally divided by {@code concurrency}
+     *         but no smaller than {@link #DEFAULT_BATCH_SIZE} and no larger than {@code maxBatchSize}.
+     */
     public static long adjustBatchSize(
             long nodeCount,
             int concurrency,
             long minBatchSize,
             long maxBatchSize) {
         return Math.min(maxBatchSize, adjustBatchSize(nodeCount, concurrency, minBatchSize));
+    }
+
+    /**
+     * @return a batch size, that is
+     *         1) at least {@code batchSize}
+     *         2) a power of two
+     *         3) divides {@code nodeCount} into int-sized chunks.
+     */
+    public static long adjustBatchSize(long nodeCount, long batchSize) {
+        if (batchSize <= 0L) {
+            batchSize = 1L;
+        }
+        batchSize = BitUtil.nextHighestPowerOfTwo(batchSize);
+        while (((nodeCount + batchSize + 1L) / batchSize) > (long) Integer.MAX_VALUE) {
+            batchSize = batchSize << 1;
+        }
+        return batchSize;
     }
 
     public static boolean canRunInParallel(ExecutorService executor) {

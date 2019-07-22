@@ -59,31 +59,59 @@ public interface HugeWeightMapping extends WeightMapping, HugeNodeWeights {
      */
     long release();
 
-    // WeightMapping
+    /**
+     * @deprecated Use {@link #weight(long, long)}
+     * @param id
+     * @return
+     */
+    @Deprecated
     @Override
     default double get(long id) {
         return weight((long) getHead(id), (long) getTail(id));
     }
 
-    // WeightMapping
+    /**
+     * @deprecated Use {@link #weight(long, long, double)}
+     * @param id
+     * @param defaultValue
+     * @return
+     */
+    @Deprecated
     @Override
     default double get(final long id, final double defaultValue) {
         return weight((long) getHead(id), (long) getTail(id), defaultValue);
     }
 
-    // WeightMapping
+    /**
+     * @deprecated Use {@link #weight(long, long)}
+     * @param source
+     * @param target
+     * @return
+     */
+    @Deprecated
     @Override
     default double get(int source, int target) {
         return weight((long) source, (long) target);
     }
 
-    // WeightMapping
+    /**
+     * @deprecated Use {@link #nodeWeight(long)}
+     * @param id
+     * @return
+     */
+    @Deprecated
     @Override
     default double get(int id) {
         return nodeWeight((long) id);
     }
 
-    // WeightMapping
+    /**
+     * @deprecated Use {@link #nodeWeight(long, double)}
+     * @param id
+     * @param defaultValue
+     * @return
+     */
+    @Deprecated
     @Override
     default double get(int id, double defaultValue) {
         return nodeWeight((long) id, defaultValue);

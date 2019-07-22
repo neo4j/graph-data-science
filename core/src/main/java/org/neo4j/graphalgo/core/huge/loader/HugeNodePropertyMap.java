@@ -66,6 +66,11 @@ final class HugeNodePropertyMap implements HugeWeightMapping {
     }
 
     @Override
+    public long getMaxValue() {
+        return properties.getMaxValue();
+    }
+
+    @Override
     public long release() {
         if (properties != null) {
             long freed = properties.release();

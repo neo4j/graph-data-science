@@ -27,6 +27,9 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 
+import java.util.stream.DoubleStream;
+import java.util.stream.StreamSupport;
+
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
@@ -119,5 +122,16 @@ public final class WeightMap implements WeightMapping {
 
     public double defaultValue() {
         return defaultValue;
+    }
+
+    @Override
+    public long getMaxValue() {
+        return (long) getValuesAsStream().max().orElse(0d);
+    }
+
+    public DoubleStream getValuesAsStream() {
+        return StreamSupport
+                .stream(weights().spliterator(), false)
+                .mapToDouble(c -> c.value);
     }
 }

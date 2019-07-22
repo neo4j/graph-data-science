@@ -79,7 +79,7 @@ public class ShortestPathProc {
     public Stream<ShortestPathDijkstra.Result> dijkstraStream(
             @Name("startNode") Node startNode,
             @Name("endNode") Node endNode,
-            @Name(value = "propertyName", defaultValue = "null") String propertyName,
+            @Name(value = "propertyName", defaultValue = "") String propertyName,
             @Name(value = "config", defaultValue = "{}")
                     Map<String, Object> config) {
 
@@ -122,7 +122,7 @@ public class ShortestPathProc {
     public Stream<DijkstraResult> dijkstra(
             @Name("startNode") Node startNode,
             @Name("endNode") Node endNode,
-            @Name(value = "propertyName", defaultValue="null") String propertyName,
+            @Name(value = "propertyName", defaultValue = "") String propertyName,
             @Name(value = "config", defaultValue = "{}")
                     Map<String, Object> config) {
 

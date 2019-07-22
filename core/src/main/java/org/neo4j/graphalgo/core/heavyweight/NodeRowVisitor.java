@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.heavyweight;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.graphalgo.core.WeightMap;
+import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphdb.Result;
 
 import java.util.Map;
@@ -40,12 +41,17 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
     public boolean visit(Result.ResultRow row) throws RuntimeException {
         rows++;
         long id = row.getNumber("id").longValue();
-        idMap.add(id);
+        int graphId = idMap.add(id);
 
         for (Map.Entry<PropertyMapping, WeightMap> entry : nodeProperties.entrySet()) {
             Object value = CypherLoadingUtils.getProperty(row, entry.getKey().propertyKey);
             if (value instanceof Number) {
-                entry.getValue().put(id, ((Number) value).doubleValue());
+                // we need to store the weights as (source | target) encoding in our
+                // non-huge relationship weights. Since we're storing properties for
+                // nodes and not relationship, we only have the source available
+                // and have to use -1 as the target id to signal that to the map
+                // so that calls to nodeWeight(int) will be able to find this value again.
+                entry.getValue().put(RawValues.combineIntInt(graphId, -1), ((Number) value).doubleValue());
             }
         }
 

@@ -130,7 +130,7 @@ public class LoadGraphProcIntegrationTest {
         runQuery(
                 query,
                 singletonMap("graph", graph),
-                row -> assertEquals(MemoryUsage.humanReadable(1040), row.getString("requiredMemory")));
+                row -> assertEquals(MemoryUsage.humanReadable(992), row.getString("requiredMemory")));
     }
 
     @Test
@@ -144,8 +144,8 @@ public class LoadGraphProcIntegrationTest {
                 query,
                 singletonMap("graph", graph),
                 row -> {
-                    assertEquals(303576, row.getNumber("bytesMin").longValue());
-                    assertEquals(303576, row.getNumber("bytesMax").longValue());
+                    assertEquals(303528, row.getNumber("bytesMin").longValue());
+                    assertEquals(303528, row.getNumber("bytesMax").longValue());
                 });
     }
 
@@ -196,6 +196,7 @@ public class LoadGraphProcIntegrationTest {
                 assertEquals(12, row.getNumber("nodes").intValue());
             });
         } catch (QueryExecutionException qee) {
+            qee.printStackTrace();
             fail("Error using wrong graph type:" + qee.getMessage());
         }
     }
