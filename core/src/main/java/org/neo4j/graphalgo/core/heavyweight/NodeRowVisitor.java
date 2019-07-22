@@ -46,7 +46,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
         for (Map.Entry<PropertyMapping, WeightMap> entry : nodeProperties.entrySet()) {
             Object value = CypherLoadingUtils.getProperty(row, entry.getKey().propertyKey);
             if (value instanceof Number) {
-                // we need to store the weights as (source | target) encoding in out
+                // we need to store the weights as (source | target) encoding in our
                 // non-huge relationship weights. Since we're storing properties for
                 // nodes and not relationship, we only have the source available
                 // and have to use -1 as the target id to signal that to the map

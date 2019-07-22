@@ -106,7 +106,7 @@ public final class ParallelUtil {
 
     /**
      * @return a batch size, so that {@code nodeCount} is equally divided by {@code concurrency}
-     *         but no smaller that {@code minBatchSize}.
+     *         but no smaller than {@code minBatchSize}.
      */
     public static int adjustBatchSize(
             int nodeCount,
@@ -122,7 +122,7 @@ public final class ParallelUtil {
     /**
      * @see #adjustBatchSize(int, int, int)
      * @return a batch size, so that {@code nodeCount} is equally divided by {@code concurrency}
-     *         but no smaller that {@link #DEFAULT_BATCH_SIZE}.
+     *         but no smaller than {@link #DEFAULT_BATCH_SIZE}.
      */
     public static int adjustBatchSize(
             int nodeCount,
@@ -133,7 +133,7 @@ public final class ParallelUtil {
     /**
      * @see #adjustBatchSize(int, int, int)
      * @return a batch size, so that {@code nodeCount} is equally divided by {@code concurrency}
-     *         but no smaller that {@link #DEFAULT_BATCH_SIZE}.
+     *         but no smaller than {@link #DEFAULT_BATCH_SIZE}.
      */
     public static long adjustBatchSize(
             long nodeCount,
@@ -149,7 +149,7 @@ public final class ParallelUtil {
     /**
      * @see #adjustBatchSize(long, int, long)
      * @return a batch size, so that {@code nodeCount} is equally divided by {@code concurrency}
-     *         but no smaller that {@link #DEFAULT_BATCH_SIZE} and no larger than {@code maxBatchSize}.
+     *         but no smaller than {@link #DEFAULT_BATCH_SIZE} and no larger than {@code maxBatchSize}.
      */
     public static long adjustBatchSize(
             long nodeCount,
