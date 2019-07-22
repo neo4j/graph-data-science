@@ -53,11 +53,9 @@ public class UnionFindSeq extends UnionFind<UnionFindSeq> {
 
     public static MemoryEstimation memoryEstimation(final boolean incremental) {
         return MemoryEstimations.builder(UnionFindSeq.class)
-                .add(
-                        "DisjointSetStruct",
-                        (incremental) ?
-                                IncrementalDisjointSetStruct.MEMORY_ESTIMATION :
-                                RankedDisjointSetStruct.MEMORY_ESTIMATION)
+                .add("DisjointSetStruct", (incremental) ?
+                        IncrementalDisjointSetStruct.MEMORY_ESTIMATION :
+                        RankedDisjointSetStruct.MEMORY_ESTIMATION)
                 .build();
     }
 

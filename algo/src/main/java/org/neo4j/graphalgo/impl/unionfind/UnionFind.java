@@ -22,17 +22,40 @@ package org.neo4j.graphalgo.impl.unionfind;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.IncrementalDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.RankedDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.UnionStrategy;
 
+import java.util.concurrent.ForkJoinTask;
+
 public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> {
 
     protected Graph graph;
 
     protected final UnionFind.Config algoConfig;
+
+    static MemoryEstimation memoryEstimation(
+            final boolean incremental,
+            Class<? extends UnionFind> unionFindClass,
+            Class<?> taskClass) {
+        return MemoryEstimations.builder(unionFindClass)
+                .startField("computeStep", taskClass)
+                .add(MemoryEstimations.of("DisjointSetStruct", (dimensions, concurrency) -> {
+                    MemoryEstimation dssEstimation = (incremental) ?
+                            IncrementalDisjointSetStruct.memoryEstimation() :
+                            RankedDisjointSetStruct.memoryEstimation();
+                    return dssEstimation
+                            .estimate(dimensions, concurrency)
+                            .memoryUsage()
+                            .times(concurrency);
+                }))
+                .endField()
+                .build();
+    }
 
     protected UnionFind(final Graph graph, final UnionFind.Config algoConfig) {
         this.graph = graph;

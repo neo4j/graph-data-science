@@ -24,11 +24,8 @@ import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.graphalgo.core.utils.paged.dss.IncrementalDisjointSetStruct;
-import org.neo4j.graphalgo.core.utils.paged.dss.RankedDisjointSetStruct;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
@@ -61,20 +58,7 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
     private DisjointSetStruct dss;
 
     public static MemoryEstimation memoryEstimation(final boolean incremental) {
-        return MemoryEstimations.builder(UnionFindForkJoinMerge.class)
-                .startField("computeStep", TUFProcess.class)
-                .add(MemoryEstimations.of("DisjointSetStruct", (dimensions, concurrency) -> {
-                            MemoryEstimation dssEstimation = (incremental) ?
-                                    IncrementalDisjointSetStruct.memoryEstimation() :
-                                    RankedDisjointSetStruct.memoryEstimation();
-                            return dssEstimation
-                                    .estimate(dimensions, concurrency)
-                                    .memoryUsage()
-                                    .times(concurrency);
-                        }
-                ))
-                .endField()
-                .build();
+        return UnionFind.memoryEstimation(incremental, UnionFindForkJoinMerge.class, TUFProcess.class);
     }
 
     /**
