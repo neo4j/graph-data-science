@@ -164,6 +164,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
         }
     }
 
+    @Override
     public long propertiesImported() {
         return nodePropertiesRead;
     }
