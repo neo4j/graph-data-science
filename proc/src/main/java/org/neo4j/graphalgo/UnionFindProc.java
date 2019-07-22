@@ -319,17 +319,17 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
                 DisjointSetStruct.Translator.INSTANCE);
     }
 
-    private DisjointSetStruct compute(final ProcedureSetup init) {
+    private DisjointSetStruct compute(final ProcedureSetup procedureSetup) {
 
-        T algo = newAlgorithm(init.graph, init.procedureConfig, init.tracker);
-        final DisjointSetStruct algoResult = runWithExceptionLogging(
+        T algo = newAlgorithm(procedureSetup.graph, procedureSetup.procedureConfig, procedureSetup.tracker);
+        DisjointSetStruct algoResult = runWithExceptionLogging(
                 "UnionFind failed",
-                () -> init.builder.timeEval((Supplier<DisjointSetStruct>) algo::compute));
+                () -> procedureSetup.builder.timeEval((Supplier<DisjointSetStruct>) algo::compute));
 
-        log.info("UnionFind: overall memory usage: %s", init.tracker.getUsageString());
+        log.info("UnionFind: overall memory usage: %s", procedureSetup.tracker.getUsageString());
 
         algo.release();
-        init.graph.release();
+        procedureSetup.graph.release();
 
         return algoResult;
     }
