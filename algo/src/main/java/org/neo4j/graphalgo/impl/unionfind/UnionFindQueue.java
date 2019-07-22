@@ -120,11 +120,7 @@ public class UnionFindQueue extends UnionFind<UnionFindQueue> {
 
         awaitTermination(futures);
 
-        DisjointSetStruct mergedCommunities = communityContainers.poll();
-        if (mergedCommunities == null) {
-            mergedCommunities = initDisjointSetStruct(nodeCount, tracker);
-        }
-        return mergedCommunities;
+        return communityContainers.poll();
     }
 
     public static <T> void mergeTask(
