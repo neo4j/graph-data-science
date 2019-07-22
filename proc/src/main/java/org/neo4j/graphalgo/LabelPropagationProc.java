@@ -82,8 +82,8 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
         AllocationTracker tracker = AllocationTracker.create();
         ProcedureConfiguration configuration = newConfig(label, relationshipType, config);
 
-        final String writeProperty = configuration.getString(CONFIG_WRITE_KEY, null, CONFIG_OLD_SEED_KEY);
-        final String seedProperty = configuration.getString(CONFIG_SEED_KEY, null, CONFIG_OLD_SEED_KEY);
+        final String writeProperty = configuration.getString(CONFIG_WRITE_KEY, CONFIG_OLD_SEED_KEY, null);
+        final String seedProperty = configuration.getString(CONFIG_SEED_KEY, CONFIG_OLD_SEED_KEY, null);
         final String weightProperty = configuration.getString(CONFIG_WEIGHT_KEY, null);
 
         stats
@@ -101,7 +101,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
             return Stream.of(LabelPropagationStats.EMPTY);
         }
 
-        final LabelPropagation.Labels labels = compute(stats, tracker, configuration, graph);
+        final HugeLongArray labels = compute(stats, tracker, configuration, graph);
         if (configuration.isWriteFlag()) {
             stats.withWrite(true);
             write(configuration.getWriteConcurrency(), writeProperty, graph, labels, stats);
@@ -129,9 +129,9 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
             return Stream.empty();
         }
 
-        final LabelPropagation.Labels labels = compute(stats, tracker, configuration, graph);
+        final HugeLongArray labels = compute(stats, tracker, configuration, graph);
         return LongStream.range(0L, labels.size())
-                .mapToObj(i -> new StreamResult(graph.toOriginalNodeId(i), labels.labelFor(i)));
+                .mapToObj(i -> new StreamResult(graph.toOriginalNodeId(i), labels.get(i)));
     }
 
     private PropertyMapping[] createPropertyMappings(String seedProperty, String weightProperty) {
@@ -152,7 +152,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
 
     @Override
     GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
-        final String seedProperty = config.getString(CONFIG_SEED_KEY, null, CONFIG_OLD_SEED_KEY);
+        final String seedProperty = config.getString(CONFIG_SEED_KEY, CONFIG_OLD_SEED_KEY, null);
         final String weightProperty = config.getString(CONFIG_WEIGHT_KEY, null);
 
         Direction direction = config.getDirection(Direction.OUTGOING);
@@ -167,7 +167,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
                 .withOptionalNodeProperties(createPropertyMappings(seedProperty, weightProperty));
     }
 
-    private LabelPropagation.Labels compute(
+    private HugeLongArray compute(
             final LabelPropagationStats.Builder stats,
             final AllocationTracker tracker,
             final ProcedureConfiguration configuration,
@@ -175,7 +175,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
 
         LabelPropagation algo = newAlgorithm(graph, configuration, tracker);
 
-        final LabelPropagation.Labels algoResult = runWithExceptionLogging(
+        final HugeLongArray algoResult = runWithExceptionLogging(
                 "LabelPropagation failed",
                 () -> stats.timeEval(() -> algo.compute(configuration.getDirection(Direction.OUTGOING), configuration.getIterations(1)))).labels();
 
@@ -193,7 +193,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
             int concurrency,
             String labelKey,
             Graph graph,
-            LabelPropagation.Labels labels,
+            HugeLongArray labels,
             LabelPropagationStats.Builder stats) {
         try (ProgressTimer ignored = stats.timeWrite()) {
             Exporter.of(dbAPI, graph)
@@ -203,7 +203,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
                     .write(
                             labelKey,
                             labels,
-                            LabelPropagation.LABEL_TRANSLATOR
+                            HugeLongArray.Translator.INSTANCE
                     );
         }
     }
