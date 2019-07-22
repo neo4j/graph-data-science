@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.write.Exporter;
@@ -32,6 +33,7 @@ import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
 import org.neo4j.graphalgo.impl.labelprop.LabelPropagationFactory;
 import org.neo4j.graphalgo.impl.results.LabelPropagationStats;
 import org.neo4j.graphalgo.impl.results.LabelPropagationStats.StreamResult;
+import org.neo4j.graphalgo.impl.results.MemRecResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -132,6 +134,18 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
         final HugeLongArray labels = compute(stats, tracker, configuration, graph);
         return LongStream.range(0L, labels.size())
                 .mapToObj(i -> new StreamResult(graph.toOriginalNodeId(i), labels.get(i)));
+    }
+
+    @Procedure(value = "algo.labelPropagation.memRec")
+    @Description("CALL algo.labelPropagation.memRec(label:String, relationship:String, config:Map<String, Object>) YIELD " +
+                 "nodeId, label")
+    public Stream<MemRecResult> labelPropagationMemrec(
+            @Name(value = "label", defaultValue = "") String label,
+            @Name(value = "relationship", defaultValue = "") String relationshipType,
+            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+        ProcedureConfiguration configuration = newConfig(label, relationshipType, config);
+        MemoryTreeWithDimensions memoryEstimation = this.memoryEstimation(configuration);
+        return Stream.of(new MemRecResult(memoryEstimation));
     }
 
     private PropertyMapping[] createPropertyMappings(String seedProperty, String weightProperty) {
