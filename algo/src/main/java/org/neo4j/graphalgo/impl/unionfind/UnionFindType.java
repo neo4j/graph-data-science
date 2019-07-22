@@ -29,7 +29,7 @@ public enum UnionFindType {
 
     QUEUE {
         @Override
-        public UnionFind<?> create(
+        public UnionFind<UnionFindQueue> create(
                 final Graph graph,
                 final ExecutorService executor,
                 final int minBatchSize,
@@ -52,7 +52,7 @@ public enum UnionFindType {
     },
     FORK_JOIN {
         @Override
-        public UnionFind<?> create(
+        public UnionFind<UnionFindForkJoin> create(
                 final Graph graph,
                 final ExecutorService executor,
                 final int minBatchSize,
@@ -74,7 +74,7 @@ public enum UnionFindType {
     },
     FJ_MERGE {
         @Override
-        public UnionFind<?> create(
+        public UnionFind<UnionFindForkJoinMerge> create(
                 final Graph graph,
                 final ExecutorService executor,
                 final int minBatchSize,
@@ -97,7 +97,7 @@ public enum UnionFindType {
     },
     SEQ {
         @Override
-        public UnionFind<?> create(
+        public UnionFind<UnionFindSeq> create(
                 final Graph graph,
                 final ExecutorService executor,
                 final int minBatchSize,
@@ -117,7 +117,7 @@ public enum UnionFindType {
         }
     };
 
-    public abstract UnionFind<?> create(
+    public abstract UnionFind<? extends UnionFind> create(
             Graph graph,
             ExecutorService executor,
             int minBatchSize,
