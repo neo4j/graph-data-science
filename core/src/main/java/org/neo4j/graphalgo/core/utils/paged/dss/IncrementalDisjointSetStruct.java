@@ -37,7 +37,7 @@ import java.util.stream.LongStream;
  */
 public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
 
-    public static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations.builder(
+    private static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations.builder(
             IncrementalDisjointSetStruct.class)
             .perNode("parent", HugeLongArray::memoryEstimation)
             .add("internalToProvidedIds", HugeLongLongMap.memoryEstimation())
