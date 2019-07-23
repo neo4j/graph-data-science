@@ -192,6 +192,12 @@ RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
 
 This graph projection supports graphs up to 2 billion nodes and 2 billion relationships, specfied by Cypher queries that return node ids.
 
+[NOTE]
+====
+`algo.memrec` executes the provided Cypher queries to compute the number of nodes and relationships in the projected graph.
+The results from running the procedure for Cypher graph projections will therefore not be immediate, as they will be with other graph projections.
+====
+
 .The following computes the amount of memory required by the in memory graph for all nodes and relationships:
 [source,cypher]
 ----
