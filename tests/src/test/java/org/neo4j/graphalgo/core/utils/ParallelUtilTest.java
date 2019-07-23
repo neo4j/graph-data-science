@@ -28,7 +28,6 @@ import org.neo4j.function.ThrowingConsumer;
 import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.helpers.Exceptions;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -38,8 +37,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
+import static java.util.Arrays.asList;
+import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
@@ -52,6 +54,13 @@ import static org.mockito.Mockito.when;
 @ThreadLeakScope(ThreadLeakScope.Scope.NONE)
 public final class ParallelUtilTest extends RandomizedTest {
 
+//    @Test
+//    public void shouldRetryByDefault() throws Exception {
+//        ParallelUtil.runWithConcurrency(5, asList(() -> {
+//
+//        }));
+//    }
+//
     @Test
     public void threadSizeShouldDivideByBatchsize() throws Exception {
         int batchSize = between(10, 10_000);
@@ -112,7 +121,7 @@ public final class ParallelUtilTest extends RandomizedTest {
     public void shouldRunBatchesSequentialIfNoExecutorIsGiven() {
         PrimitiveIntIterable[] ints = {ints(0, 10), ints(10, 14)};
         IntIdMap batches = mock(IntIdMap.class);
-        when(batches.batchIterables(anyInt())).thenReturn(Arrays.asList(ints));
+        when(batches.batchIterables(anyInt())).thenReturn(asList(ints));
         Runnable task = () -> {
         };
         ParallelGraphImporter importer = mock(ParallelGraphImporter.class);
@@ -177,7 +186,7 @@ public final class ParallelUtilTest extends RandomizedTest {
         withPool(4, pool -> {
             ExecutorService deadPool = Executors.newFixedThreadPool(4);
             deadPool.shutdown();
-            List<Consumer<Tasks>> runs = Arrays.asList(
+            List<Consumer<Tasks>> runs = asList(
                     // null pool
                     t -> ParallelUtil.runWithConcurrency(8, t, null),
                     // terminated pool
@@ -212,11 +221,15 @@ public final class ParallelUtilTest extends RandomizedTest {
     }
 
     @Test
-    public void shouldBailOnFullThreadpool() throws Exception {
+    public void shouldBailOnFullThreadpoolAfterTrying() {
         ThreadPoolExecutor pool = mock(ThreadPoolExecutor.class);
         when(pool.getActiveCount()).thenReturn(Integer.MAX_VALUE);
         Tasks tasks = new Tasks(5, 10);
-        tasks.run(t -> ParallelUtil.runWithConcurrency(4, t, pool));
+        try {
+            tasks.run(t -> ParallelUtil.runWithConcurrency(4, t, 100, pool));
+        } catch (Exception e) {
+            assertThat(e.getMessage(), containsString("Attempted to submit tasks"));
+        }
         assertEquals(0, tasks.started());
         assertEquals(0, tasks.maxRunning());
         assertEquals(1, tasks.requested());
@@ -265,17 +278,21 @@ public final class ParallelUtilTest extends RandomizedTest {
     }
 
     @Test
-    public void shouldWaitOnFullThreadpool() throws Exception {
+    public void shouldWaitThenThrowOnFullThreadpool() throws Exception {
         ThreadPoolExecutor pool = mock(ThreadPoolExecutor.class);
         when(pool.getActiveCount()).thenReturn(Integer.MAX_VALUE);
         Tasks tasks = new Tasks(5, 10);
-        tasks.run(t -> ParallelUtil.runWithConcurrency(
-                4,
-                t,
-                10,
-                5,
-                TimeUnit.MILLISECONDS,
-                pool));
+        try {
+            tasks.run(t -> ParallelUtil.runWithConcurrency(
+                    4,
+                    t,
+                    10,
+                    5,
+                    TimeUnit.MILLISECONDS,
+                    pool));
+        } catch (IllegalThreadStateException e) {
+            assertThat(e.getMessage(), containsString("Attempted to submit tasks"));
+        }
         assertEquals(0, tasks.started());
         assertEquals(0, tasks.maxRunning());
         assertEquals(1, tasks.requested());
