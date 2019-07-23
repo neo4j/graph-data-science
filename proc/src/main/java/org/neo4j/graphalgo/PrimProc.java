@@ -130,7 +130,7 @@ public class PrimProc {
                     .withOptionalRelationshipType(relationship)
                     .withRelationshipWeightsFromProperty(weightProperty, configuration.getWeightPropertyDefaultValue(Double.MAX_VALUE))
                     .withoutNodeWeights()
-                    .asUndirected(true)
+                    .loadAsUndirected(true)
                     .withLog(log)
                     .load(configuration.getGraphImpl(Graph.TYPE));
         }

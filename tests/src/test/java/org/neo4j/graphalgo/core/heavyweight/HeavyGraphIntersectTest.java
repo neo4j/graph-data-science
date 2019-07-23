@@ -63,7 +63,7 @@ public class HeavyGraphIntersectTest {
 
     private List<Long> assertTriangles() {
         HeavyGraph graph = (HeavyGraph)new GraphLoader(gdb)
-                .asUndirected(true)
+                .loadAsUndirected(true)
                 .withSort(true)
                 .load(HeavyGraphFactory.class);
 

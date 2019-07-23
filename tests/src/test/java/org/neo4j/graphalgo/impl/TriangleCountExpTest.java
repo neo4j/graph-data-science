@@ -108,7 +108,7 @@ public class TriangleCountExpTest {
                     .withoutNodeWeights()
                     .withDirection(Direction.BOTH)
                     .withSort(true)
-                    .asUndirected(true)
+                    .loadAsUndirected(true)
                     .load(graphImpl);
         }
     }

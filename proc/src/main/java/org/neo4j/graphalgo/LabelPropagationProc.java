@@ -119,7 +119,7 @@ public final class LabelPropagationProc {
                 createPropertyMappings(seedProperty, weightProperty));
         Direction direction = configuration.getDirection(Direction.OUTGOING);
         if (direction == Direction.BOTH) {
-            graphLoader.asUndirected(true);
+            graphLoader.loadAsUndirected(true);
             direction = Direction.OUTGOING;
         } else {
             graphLoader.withDirection(direction);
@@ -171,7 +171,7 @@ public final class LabelPropagationProc {
         GraphLoader graphLoader = graphLoader(configuration, weightProperty, propertyMappings);
         Direction direction = configuration.getDirection(Direction.OUTGOING);
         if (direction == Direction.BOTH) {
-            graphLoader.asUndirected(true);
+            graphLoader.loadAsUndirected(true);
             direction = Direction.OUTGOING;
         } else {
             graphLoader.withDirection(direction);

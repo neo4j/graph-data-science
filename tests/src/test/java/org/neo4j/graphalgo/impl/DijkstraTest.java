@@ -88,7 +88,7 @@ public class DijkstraTest {
                 .withAnyLabel()
                 .withoutNodeProperties()
                 .withRelationshipWeightsFromProperty("cost", Double.MAX_VALUE)
-                .asUndirected(true)
+                .loadAsUndirected(true)
                 .load(HeavyGraphFactory.class);
 
         edgeBlackList = new LongArrayList();

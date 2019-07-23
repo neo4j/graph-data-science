@@ -78,7 +78,8 @@ public class GraphLoaderTest {
         GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT);
         Graph graph = graphLoader.withAnyLabel()
                 .withAnyRelationshipType()
-                .direction(Direction.BOTH)
+                .withDirection(Direction.BOTH)
+                .loadAsUndirected(true)
                 .load(graphImpl);
 
         assertEquals(4L, graph.nodeCount());
@@ -101,7 +102,7 @@ public class GraphLoaderTest {
         GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT);
         Graph graph = graphLoader.withAnyLabel()
                 .withAnyRelationshipType()
-                .direction(Direction.OUTGOING)
+                .withDirection(Direction.OUTGOING)
                 .load(graphImpl);
 
         assertEquals(4L, graph.nodeCount());
@@ -124,7 +125,7 @@ public class GraphLoaderTest {
         GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT);
         Graph graph = graphLoader.withAnyLabel()
                 .withAnyRelationshipType()
-                .direction(Direction.INCOMING)
+                .withDirection(Direction.INCOMING)
                 .load(graphImpl);
 
         assertEquals(4L, graph.nodeCount());
@@ -169,7 +170,7 @@ public class GraphLoaderTest {
         final Graph graph = new GraphLoader(db)
                 .withAnyLabel()
                 .withAnyRelationshipType()
-                .asUndirected(true)
+                .loadAsUndirected(true)
                 .load(graphImpl);
 
         assertEquals(2L, graph.nodeCount());
@@ -208,7 +209,7 @@ public class GraphLoaderTest {
         final Graph graph = new GraphLoader(db)
                 .withAnyLabel()
                 .withAnyRelationshipType()
-                .asUndirected(true)
+                .loadAsUndirected(true)
                 .load(graphImpl);
 
         assertEquals(4L, graph.nodeCount());

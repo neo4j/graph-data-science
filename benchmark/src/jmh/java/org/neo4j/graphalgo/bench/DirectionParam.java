@@ -64,7 +64,7 @@ public enum DirectionParam implements Function<GraphLoader, GraphLoader> {
     UNDIRECTED {
         @Override
         public GraphLoader apply(final GraphLoader graphLoader) {
-            return graphLoader.asUndirected(true).withDirection(Direction.BOTH).withSort(true);
+            return graphLoader.loadAsUndirected(true).withDirection(Direction.BOTH).withSort(true);
         }
     },
     NONE {

@@ -434,7 +434,7 @@ public final class DegreeCentralityTest {
                     .withLabel(label)
                     .withRelationshipType("TYPE1")
                     .withDirection(Direction.OUTGOING)
-                    .asUndirected(true)
+                    .loadAsUndirected(true)
                     .load(graphImpl);
         }
 

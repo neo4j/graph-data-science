@@ -88,7 +88,7 @@ public class TriangleProc {
                 .withoutRelationshipWeights()
                 .withoutNodeWeights()
                 .withSort(true)
-                .asUndirected(true)
+                .loadAsUndirected(true)
                 .init(log, label, relationship, configuration)
                 .withDirection(TriangleCountBase.D)
                 .load(configuration.getGraphImpl());
@@ -123,7 +123,7 @@ public class TriangleProc {
                 .withoutRelationshipWeights()
                 .withoutNodeWeights()
                 .withSort(true)
-                .asUndirected(true)
+                .loadAsUndirected(true)
                 .init(log, label, relationship, configuration)
                 .withDirection(TriangleCountBase.D)
                 .load(configuration.getGraphImpl());
@@ -163,7 +163,7 @@ public class TriangleProc {
                 .withoutRelationshipWeights()
                 .withoutNodeWeights()
                 .withSort(true)
-                .asUndirected(true)
+                .loadAsUndirected(true)
                 .init(log, label, relationship, configuration)
                 .withDirection(TriangleCountBase.D)
                 .load(configuration.getGraphImpl());
@@ -203,7 +203,7 @@ public class TriangleProc {
                     .withoutRelationshipWeights()
                     .withoutNodeWeights()
                     .withSort(true)
-                    .asUndirected(true)
+                    .loadAsUndirected(true)
                     .init(log, label, relationship, configuration)
                     .withDirection(TriangleCountBase.D)
                     .load(configuration.getGraphImpl());
@@ -323,7 +323,7 @@ public class TriangleProc {
                     .withoutRelationshipWeights()
                     .withoutNodeWeights()
                     .withSort(true)
-                    .asUndirected(true)
+                    .loadAsUndirected(true)
                     .init(log, label, relationship, configuration)
                     .withDirection(TriangleCountBase.D)
                     .load(configuration.getGraphImpl());

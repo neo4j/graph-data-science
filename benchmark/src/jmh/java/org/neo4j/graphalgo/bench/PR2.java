@@ -66,7 +66,7 @@ public final class PR2 extends BaseMain {
                 .withAllocationTracker(trackerHuge)
                 .withDirection(Direction.OUTGOING)
                 .withSort(true)
-                .asUndirected(true)
+                .loadAsUndirected(true)
                 .withoutRelationshipWeights();
 //                .withOptionalRelationshipWeightsFromProperty(
 //                        "creationDate", 1.0

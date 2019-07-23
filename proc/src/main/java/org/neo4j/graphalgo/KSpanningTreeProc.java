@@ -107,7 +107,7 @@ public class KSpanningTreeProc {
                     .withOptionalRelationshipType(relationship)
                     .withRelationshipWeightsFromProperty(weightProperty, configuration.getWeightPropertyDefaultValue(1.0))
                     .withoutNodeWeights()
-                    .asUndirected(true)
+                    .loadAsUndirected(true)
                     .withLog(log)
                     .load(configuration.getGraphImpl());
         }

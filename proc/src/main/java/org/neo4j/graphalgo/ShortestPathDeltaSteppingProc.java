@@ -92,7 +92,7 @@ public class ShortestPathDeltaSteppingProc {
 
         if(direction == Direction.BOTH) {
             direction = Direction.OUTGOING;
-            graphLoader.asUndirected(true).withDirection(direction);
+            graphLoader.loadAsUndirected(true).withDirection(direction);
         } else {
             graphLoader.withDirection(direction);
         }
@@ -140,7 +140,7 @@ public class ShortestPathDeltaSteppingProc {
 
             if(direction == Direction.BOTH) {
                 direction = Direction.OUTGOING;
-                graphLoader.asUndirected(true).withDirection(direction);
+                graphLoader.loadAsUndirected(true).withDirection(direction);
             } else {
                 graphLoader.withDirection(direction);
             }

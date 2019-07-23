@@ -96,7 +96,7 @@ public class KSpanningTreeTest {
                 .withRelationshipWeightsFromProperty("w", 1.0)
                 .withAnyRelationshipType()
                 .withAnyLabel()
-                .asUndirected(true)
+                .loadAsUndirected(true)
                 .load(graphImpl);
 
         try (Transaction tx = DB.beginTx()) {

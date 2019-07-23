@@ -104,7 +104,7 @@ public class ClusteringCoefficientTest {
                 .withLabel(LABEL)
                 .withoutRelationshipWeights()
                 .withoutNodeWeights()
-                .asUndirected(true)
+                .loadAsUndirected(true)
                 .load(HeavyGraphFactory.class);
     }
 

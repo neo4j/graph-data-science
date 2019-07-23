@@ -99,7 +99,7 @@ public final class LabelPropagationTest {
         DB.execute(GRAPH).close();
         GraphLoader graphLoader = new GraphLoader(DB, Pools.DEFAULT)
                 .withDirection(Direction.OUTGOING)
-                .withConcurrency(Pools.DEFAULT_CONCURRENCY);
+                .withDefaultConcurrency();
 
         if (graphImpl == HeavyCypherGraphFactory.class) {
             graphLoader

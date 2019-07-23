@@ -77,12 +77,12 @@ public class LouvainBenchmarkLdbc {
     public void setup() throws IOException {
         gdb = LdbcDownloader.openDb(db);
         g = new GraphLoader(gdb)
-                .withConcurrency(Pools.DEFAULT_CONCURRENCY)
+                .withDefaultConcurrency()
                 .withExecutorService(Pools.DEFAULT)
                 .withAnyLabel()
                 .withAnyRelationshipType()
                 .withOptionalRelationshipWeightsFromProperty(null, 1.0)
-                .asUndirected(true)
+                .loadAsUndirected(true)
                 .load(graph.impl);
     }
 

@@ -111,7 +111,7 @@ public class DegreesTest {
                 .withAnyLabel()
                 .withoutNodeProperties()
                 .withDirection(direction == null ? Direction.BOTH : direction)
-                .asUndirected(direction == null)
+                .loadAsUndirected(direction == null)
                 .load(graphImpl);
     }
 

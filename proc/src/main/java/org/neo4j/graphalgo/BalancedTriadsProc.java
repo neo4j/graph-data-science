@@ -75,7 +75,7 @@ public class BalancedTriadsProc {
                 .withoutNodeWeights()
                 .withSort(true)
                 .withLog(log)
-                .asUndirected(true)
+                .loadAsUndirected(true)
                 .load(configuration.getGraphImpl(HugeGraph.TYPE, HugeGraph.TYPE));
 
         // omit empty graphs
@@ -120,7 +120,7 @@ public class BalancedTriadsProc {
                     .withoutNodeWeights()
                     .withSort(true)
                     .withLog(log)
-                    .asUndirected(true)
+                    .loadAsUndirected(true)
                     .load(configuration.getGraphImpl(HugeGraph.TYPE, HugeGraph.TYPE));
         }
 

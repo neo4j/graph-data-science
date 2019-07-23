@@ -86,7 +86,7 @@ public class BalancedTriadsTest {
                 .withRelationshipStatement("TYPE")
                 .withRelationshipWeightsFromProperty("w", 0.0)
                 .withSort(true)
-                .asUndirected(true)
+                .loadAsUndirected(true)
                 .load(HugeGraphFactory.class);
     }
 

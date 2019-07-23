@@ -86,7 +86,7 @@ public class BFSBenchmark {
                 .withoutRelationshipWeights()
                 .withoutNodeWeights()
                 .withSort(true)
-                .asUndirected(true)
+                .loadAsUndirected(true)
                 .load(graph.impl);
     }
 

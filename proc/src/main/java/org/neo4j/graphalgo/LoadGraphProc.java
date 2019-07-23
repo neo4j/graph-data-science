@@ -120,7 +120,7 @@ public final class LoadGraphProc extends BaseProc {
                 )
                 .withDirection(direction)
                 .withSort(sorted)
-                .asUndirected(undirected);
+                .loadAsUndirected(undirected);
     }
 
     public static class LoadGraphStats {

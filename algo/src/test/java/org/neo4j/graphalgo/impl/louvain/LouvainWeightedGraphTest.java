@@ -106,7 +106,7 @@ public class LouvainWeightedGraphTest extends HeavyHugeTester {
                 .withAnyLabel()
                 .withoutNodeProperties()
                 .withOptionalRelationshipWeightsFromProperty("w", 1.0)
-                .asUndirected(true)
+                .loadAsUndirected(true)
                 .load(graphImpl);
 
         try (Transaction transaction = DB.beginTx()) {

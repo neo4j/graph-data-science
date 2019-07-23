@@ -100,7 +100,7 @@ public class YensTest {
                 .withAnyLabel()
                 .withoutNodeProperties()
                 .withRelationshipWeightsFromProperty("cost", Double.MAX_VALUE)
-                .asUndirected(true)
+                .loadAsUndirected(true)
                 .load(HugeGraphFactory.class);
     }
 

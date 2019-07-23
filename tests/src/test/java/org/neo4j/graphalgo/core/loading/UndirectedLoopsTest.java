@@ -67,7 +67,7 @@ public final class UndirectedLoopsTest {
                 .withRelationshipType("")
                 .withRelationshipWeightsFromProperty("cost", Double.MAX_VALUE)
                 .withDirection(Direction.OUTGOING)
-                .asUndirected(true)
+                .loadAsUndirected(true)
                 .load(HeavyGraphFactory.class);
 
         LongArrayList nodes = new LongArrayList();

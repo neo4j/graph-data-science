@@ -98,7 +98,7 @@ public class ClusteringBenchmark {
                 .withoutRelationshipWeights()
                 .withoutNodeWeights()
                 .withSort(true)
-                .asUndirected(true)
+                .loadAsUndirected(true)
                 .load(HugeGraphFactory.class);
 
         final PageRank.Config algoConfig = new PageRank.Config(10, 1.0 - InfoMap.TAU);
