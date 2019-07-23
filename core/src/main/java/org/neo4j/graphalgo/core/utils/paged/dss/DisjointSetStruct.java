@@ -76,22 +76,31 @@ public abstract class DisjointSetStruct {
     abstract long size();
 
     /**
-     * Find set Id of element p.
-     *
-     * Note that implementations of this method might apply path optimizations while looking for the set id.
-     *
-     * @param p the set element
-     * @return returns the representative member of the set to which p belongs
-     */
-    abstract long find(long p);
-
-    /**
-     * Find set Id of element p without balancing optimization.
+     * Find set id of element p without balancing tree structure.
      *
      * @param nodeId the element in the set we are looking for
      * @return an id of the set it belongs to
      */
-    abstract long findNoOpt(long nodeId);
+    abstract long find(long nodeId);
+
+    /**
+     * Find set id of element p and balances the tree structure while searching.
+     * <p>
+     * This default implementation uses recursive path compression logic.
+     *
+     * @param p the set element
+     * @return returns the representative member of the set to which p belongs
+     */
+    final long findAndBalance(long p) {
+        long pv = parent().get(p);
+        if (pv == -1L) {
+            return p;
+        }
+        // path compression optimization
+        long value = findAndBalance(pv);
+        parent().set(p, value);
+        return value;
+    }
 
     /**
      * Merges the given DisjointSetStruct into this one.
@@ -120,7 +129,7 @@ public abstract class DisjointSetStruct {
             while (offset < limit) {
                 // Skip root nodes
                 if (parentPage[offset] != -1L) {
-                    union(nodeId, other.find(nodeId));
+                    union(nodeId, other.findAndBalance(nodeId));
                 }
                 ++offset;
                 ++nodeId;
@@ -138,27 +147,10 @@ public abstract class DisjointSetStruct {
      * @return true if both items belong to the same set, false otherwise
      */
     public final boolean connected(long p, long q) {
-        return find(p) == find(q);
+        return findAndBalance(p) == findAndBalance(q);
     }
 
-    /**
-     * Find set Id of element p.
-     * <p>
-     * This method uses recursive path compression logic.
-     *
-     * @param p the set element
-     * @return returns the representative member of the set to which p belongs
-     */
-    final long findWithPathCompression(long p) {
-        long pv = parent().get(p);
-        if (pv == -1L) {
-            return p;
-        }
-        // path compression optimization
-        long value = findWithPathCompression(pv);
-        parent().set(p, value);
-        return value;
-    }
+
 
     /**
      * Compute number of sets present.
@@ -169,7 +161,7 @@ public abstract class DisjointSetStruct {
         long capacity = size();
         BitSet sets = new BitSet(capacity);
         for (long i = 0L; i < capacity; i++) {
-            long setId = find(i);
+            long setId = findAndBalance(i);
             sets.set(setId);
         }
         return sets.cardinality();
@@ -190,7 +182,7 @@ public abstract class DisjointSetStruct {
 
     /**
      * Computes the result stream based on a given ID mapping by using
-     * {@link #find(long)} to look up the set representative for each node id.
+     * {@link #findAndBalance(long)} to look up the set representative for each node id.
      *
      * @param idMapping mapping between internal ids and Neo4j ids
      * @return tuples of Neo4j ids and their set ids

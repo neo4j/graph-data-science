@@ -65,12 +65,7 @@ public final class RankedDisjointSetStruct extends DisjointSetStruct {
     }
 
     @Override
-    public long find(long p) {
-        return findWithPathCompression(p);
-    }
-
-    @Override
-    long findNoOpt(final long nodeId) {
+    long find(final long nodeId) {
         long p = nodeId;
         long np;
         while ((np = parent.get(p)) != -1L) {
@@ -81,7 +76,7 @@ public final class RankedDisjointSetStruct extends DisjointSetStruct {
 
     @Override
     public long setIdOf(final long nodeId) {
-        return findNoOpt(nodeId);
+        return find(nodeId);
     }
 
     @Override

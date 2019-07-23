@@ -119,24 +119,13 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
     }
 
     /**
-     * find setId of element p.
-     *
-     * @param p the element in the set we are looking for
-     * @return an id of the set it belongs to
-     */
-    @Override
-    public long find(long p) {
-        return findWithPathCompression(p);
-    }
-
-    /**
      * find setId of element p without balancing optimization.
      *
      * @param nodeId the element in the set we are looking for
      * @return an id of the set it belongs to
      */
     @Override
-    long findNoOpt(final long nodeId) {
+    long find(final long nodeId) {
         long p = nodeId;
         long np;
         while ((np = parent.get(p)) != -1L) {
@@ -147,7 +136,7 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
 
     @Override
     public long setIdOf(final long nodeId) {
-        long setId = findNoOpt(nodeId);
+        long setId = find(nodeId);
         return setIdOfRoot(setId);
     }
 

@@ -35,8 +35,8 @@ public interface UnionStrategy {
 
         @Override
         public void union(final long p, final long q, final DisjointSetStruct dss) {
-            long pRoot = dss.find(p);
-            long qRoot = dss.find(q);
+            long pRoot = dss.findAndBalance(p);
+            long qRoot = dss.findAndBalance(q);
 
             long pSet = dss.setIdOfRoot(pRoot);
             long qSet = dss.setIdOfRoot(qRoot);
@@ -64,8 +64,8 @@ public interface UnionStrategy {
 
         @Override
         public void union(final long p, final long q, final DisjointSetStruct dss) {
-            final long pSet = dss.find(p);
-            final long qSet = dss.find(q);
+            final long pSet = dss.findAndBalance(p);
+            final long qSet = dss.findAndBalance(q);
             if (pSet == qSet) {
                 return;
             }
