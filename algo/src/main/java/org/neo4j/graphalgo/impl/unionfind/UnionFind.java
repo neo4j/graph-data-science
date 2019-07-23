@@ -102,7 +102,7 @@ public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> 
         public final boolean isUnionByRank;
 
         public Config(final HugeWeightMapping communityMap, final double threshold) {
-            this(communityMap, threshold, true);
+            this(communityMap, threshold, false);
         }
 
         public Config(

@@ -60,7 +60,7 @@ public class UnionFindFactory<A extends UnionFind<A>> extends AlgorithmFactory<A
                 graph.availableNodeProperties().contains(SEED_TYPE) ? graph.nodeProperties(SEED_TYPE) : null,
                 configuration.get(CONFIG_THRESHOLD, Double.NaN),
                 configuration
-                        .get(CONFIG_UNION_STRATEGY, UnionStrategy.ByRank.NAME)
+                        .get(CONFIG_UNION_STRATEGY, UnionStrategy.ByMin.NAME)
                         .equalsIgnoreCase(UnionStrategy.ByRank.NAME)
         );
 
