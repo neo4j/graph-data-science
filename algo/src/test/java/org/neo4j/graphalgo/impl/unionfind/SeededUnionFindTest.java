@@ -38,6 +38,7 @@ import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
 import static org.junit.Assert.assertEquals;
+import static org.neo4j.graphalgo.impl.unionfind.UnionFindTest.getSetCount;
 
 public class SeededUnionFindTest extends HeavyHugeTester {
 
@@ -164,18 +165,5 @@ public class SeededUnionFindTest extends HeavyHugeTester {
                 Pools.DEFAULT_CONCURRENCY,
                 config,
                 AllocationTracker.EMPTY);
-    }
-
-    /**
-     * Compute number of sets present.
-     */
-    private long getSetCount(DisjointSetStruct struct) {
-        long capacity = struct.size();
-        BitSet sets = new BitSet(capacity);
-        for (long i = 0L; i < capacity; i++) {
-            long setId = struct.findAndBalance(i);
-            sets.set(setId);
-        }
-        return sets.cardinality();
     }
 }

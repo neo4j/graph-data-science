@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.unionfind;
 
+import com.carrotsearch.hppc.BitSet;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -259,7 +260,7 @@ public class UnionFindTest {
     private void test(UnionFindType uf) {
         DisjointSetStruct result = run(uf);
 
-        Assert.assertEquals(SETS_COUNT, result.getSetCount());
+        Assert.assertEquals(SETS_COUNT, getSetCount(result));
         long[] setRegions = new long[SETS_COUNT];
         Arrays.fill(setRegions, -1);
 
@@ -294,5 +295,18 @@ public class UnionFindTest {
                 Pools.DEFAULT_CONCURRENCY,
                 config,
                 AllocationTracker.EMPTY);
+    }
+
+    /**
+     * Compute number of sets present.
+     */
+    static long getSetCount(DisjointSetStruct struct) {
+        long capacity = struct.size();
+        BitSet sets = new BitSet(capacity);
+        for (long i = 0L; i < capacity; i++) {
+            long setId = struct.findAndBalance(i);
+            sets.set(setId);
+        }
+        return sets.cardinality();
     }
 }
