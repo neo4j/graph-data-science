@@ -111,13 +111,16 @@ public abstract class DisjointSetStruct {
     public DisjointSetStruct merge(DisjointSetStruct other) {
         if (!getClass().equals(other.getClass())) {
             throw new IllegalArgumentException(String.format(
-                    "Expected: %s Actual: %s",
+                    "Cannot merge DisjointSetStructs of different types: %s and %s.",
                     getClass().getSimpleName(),
                     other.getClass().getSimpleName()));
         }
 
         if (other.size() != this.size()) {
-            throw new IllegalArgumentException("Different Capacity");
+            throw new IllegalArgumentException(String.format(
+                    "Cannot merge DisjointSetStructs with different sizes: %d and %d.",
+                    other.size(),
+                    this.size()));
         }
 
         final HugeCursor<long[]> others = other.parent().initCursor(other.parent().newCursor());
@@ -149,7 +152,6 @@ public abstract class DisjointSetStruct {
     public final boolean connected(long p, long q) {
         return findAndBalance(p) == findAndBalance(q);
     }
-
 
 
     /**
