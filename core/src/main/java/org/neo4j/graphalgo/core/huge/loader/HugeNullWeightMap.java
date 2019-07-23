@@ -65,27 +65,27 @@ public class HugeNullWeightMap implements HugeWeightMapping {
     }
 
     @Override
-    public double get(final long id) {
+    public double weight(final long id) {
         return defaultValue;
     }
 
     @Override
-    public double get(final long id, final double defaultValue) {
+    public double weight(final long id, final double defaultValue) {
         return defaultValue;
     }
 
     @Override
-    public double get(final int source, final int target) {
+    public double weight(final int source, final int target) {
         return defaultValue;
     }
 
     @Override
-    public double get(final int id) {
+    public double nodeWeight(final int id) {
         return defaultValue;
     }
 
     @Override
-    public double get(final int id, final double defaultValue) {
+    public double nodeWeight(final int id, final double defaultValue) {
         return defaultValue;
     }
 

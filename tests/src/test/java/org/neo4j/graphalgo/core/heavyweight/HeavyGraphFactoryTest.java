@@ -37,7 +37,6 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -181,8 +180,8 @@ public class HeavyGraphFactoryTest {
                 )
                 .load(HeavyGraphFactory.class);
 
-        assertEquals(1.0, graph.nodeProperties("prop1").get((int) graph.toMappedNodeId(0L)), 0.01);
-        assertEquals(2.0, graph.nodeProperties("prop2").get((int) graph.toMappedNodeId(1L)), 0.01);
-        assertEquals(3.0, graph.nodeProperties("prop3").get((int) graph.toMappedNodeId(2L)), 0.01);
+        assertEquals(1.0, graph.nodeProperties("prop1").nodeWeight((int) graph.toMappedNodeId(0L)), 0.01);
+        assertEquals(2.0, graph.nodeProperties("prop2").nodeWeight((int) graph.toMappedNodeId(1L)), 0.01);
+        assertEquals(3.0, graph.nodeProperties("prop3").nodeWeight((int) graph.toMappedNodeId(2L)), 0.01);
     }
 }

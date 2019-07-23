@@ -32,25 +32,25 @@ public interface WeightMapping {
     long size();
 
     /**
-     * returns the weight for ID if set or the load-time specified default weight otherwise
+     * Returns the weight for ID if set or the load-time specified default weight otherwise.
      */
-    double get(long id);
+    double weight(long id);
 
     /**
-     * returns the weight for ID if set or the given default weight otherwise
+     * Returns the weight for ID if set or the given default weight otherwise.
      */
-    double get(long id, double defaultValue);
+    double weight(long id, double defaultValue);
 
-    default double get(int source, int target) {
-        return get(RawValues.combineIntInt(source, target));
+    default double weight(int source, int target) {
+        return weight(RawValues.combineIntInt(source, target));
     }
 
-    default double get(int id) {
-        return get(RawValues.combineIntInt(id, -1));
+    default double nodeWeight(int id) {
+        return weight(id, -1);
     }
 
-    default double get(int id, double defaultValue) {
-        return get(RawValues.combineIntInt(id, -1), defaultValue);
+    default double nodeWeight(int id, double defaultValue) {
+        return weight(RawValues.combineIntInt(id, -1), defaultValue);
     }
 
     default long getMaxValue() {
