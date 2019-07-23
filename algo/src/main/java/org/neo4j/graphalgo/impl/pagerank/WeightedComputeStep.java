@@ -24,12 +24,13 @@ import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.binaryLookup;
 
 public class WeightedComputeStep extends BaseComputeStep implements RelationshipConsumer {
     private final RelationshipWeights relationshipWeights;
-    private final double[] aggregatedDegrees;
+    private final HugeDoubleArray aggregatedDegrees;
     private double sumOfWeights;
     private double delta;
 
@@ -61,7 +62,7 @@ public class WeightedComputeStep extends BaseComputeStep implements Relationship
             if (delta > 0.0) {
                 int degree = degrees.degree(nodeId, direction);
                 if (degree > 0) {
-                    sumOfWeights = aggregatedDegrees[(int) nodeId];
+                    sumOfWeights = aggregatedDegrees.get(nodeId);
                     rels.forEachRelationship(nodeId, direction, this);
                 }
             }

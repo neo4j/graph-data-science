@@ -31,8 +31,9 @@ import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
-import org.neo4j.graphalgo.impl.results.DoubleArrayResult;
+import org.neo4j.graphalgo.impl.results.HugeDoubleArrayResult;
 import org.neo4j.graphalgo.impl.results.PartitionedDoubleArrayResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
@@ -500,7 +501,7 @@ public class PageRank extends Algorithm<PageRank> {
                 }
                 return new PartitionedDoubleArrayResult(results, firstStep.starts());
             } else {
-                return new DoubleArrayResult(firstStep.pageRank());
+                return new HugeDoubleArrayResult(HugeDoubleArray.of(firstStep.pageRank()));
             }
         }
 

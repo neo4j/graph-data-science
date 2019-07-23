@@ -19,16 +19,16 @@
  */
 package org.neo4j.graphalgo.impl.results;
 
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.write.Exporter;
-import org.neo4j.graphalgo.core.write.Translators;
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
-import java.util.Arrays;
-import java.util.function.Function;
+import java.util.function.DoubleUnaryOperator;
 
-public final class DoubleArrayResult implements CentralityResult {
-    private final double[] result;
+public final class HugeDoubleArrayResult implements CentralityResult {
+    private final HugeDoubleArray result;
 
-    public DoubleArrayResult(double[] result) {
+    public HugeDoubleArrayResult(HugeDoubleArray result) {
         this.result = result;
     }
 
@@ -38,39 +38,53 @@ public final class DoubleArrayResult implements CentralityResult {
         exporter.write(
                 propertyName,
                 result,
-                Translators.DOUBLE_ARRAY_TRANSLATOR);
+                HugeDoubleArray.Translator.INSTANCE);
     }
 
     @Override
-    public void export(String propertyName, Exporter exporter, Function<Double, Double> normalizationFunction) {
+    public void export(String propertyName, Exporter exporter, DoubleUnaryOperator normalizationFunction) {
         exporter.write(
                 propertyName,
-                Arrays.stream(result).map(normalizationFunction::apply).toArray(),
-                Translators.DOUBLE_ARRAY_TRANSLATOR);
+                result,
+                new MapTranslator(normalizationFunction));
+    }
+
+    public static class MapTranslator implements PropertyTranslator.OfDouble<HugeDoubleArray> {
+
+        private DoubleUnaryOperator fn;
+
+        public MapTranslator(DoubleUnaryOperator fn) {
+            this.fn = fn;
+        }
+
+        @Override
+        public double toDouble(final HugeDoubleArray data, final long nodeId) {
+            return fn.applyAsDouble(data.get(nodeId));
+        }
     }
 
     @Override
     public double computeMax() {
-        return NormalizationComputations.max(result, 1.0);
+        return HugeNormalizationComputations.max(result, 1.0);
     }
 
     @Override
     public double computeL2Norm() {
-        return Math.sqrt(NormalizationComputations.squaredSum(result));
+        return Math.sqrt(HugeNormalizationComputations.squaredSum(result));
     }
 
     @Override
     public double computeL1Norm() {
-        return NormalizationComputations.l1Norm(result);
+        return HugeNormalizationComputations.l1Norm(result);
     }
 
     @Override
     public final double score(final long nodeId) {
-        return result[(int) nodeId];
+        return result.get(nodeId);
     }
 
     @Override
     public double score(final int nodeId) {
-        return result[nodeId];
+        return result.get(nodeId);
     }
 }

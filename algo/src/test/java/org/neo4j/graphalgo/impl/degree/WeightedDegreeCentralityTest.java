@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
@@ -184,7 +185,7 @@ public final class WeightedDegreeCentralityTest {
                     .load(graphImpl);
         }
 
-        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph, Pools.DEFAULT, 1);
+        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY);
         degreeCentrality.compute(true);
 
         IntStream.range(0, expected.size()).forEach(i -> {
@@ -192,8 +193,8 @@ public final class WeightedDegreeCentralityTest {
             assertArrayEquals(
                     "Node#" + nodeId,
                     expected.get(nodeId),
-                    degreeCentrality.weights()[i],
-                    0.01
+                    degreeCentrality.weights().get(i).toArray(),
+                    0.01D
 
             );
         });

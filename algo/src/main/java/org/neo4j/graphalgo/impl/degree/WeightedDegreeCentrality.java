@@ -23,31 +23,37 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
-import org.neo4j.graphalgo.impl.results.DoubleArrayResult;
+import org.neo4j.graphalgo.impl.results.HugeDoubleArrayResult;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality> implements DegreeCentralityAlgorithm {
-    private final int nodeCount;
+    private final long nodeCount;
     private Graph graph;
     private final ExecutorService executor;
     private final int concurrency;
     private volatile AtomicInteger nodeQueue = new AtomicInteger();
 
-    private double[] degrees;
-    private double[][] weights;
+    private HugeDoubleArray degrees;
+    private HugeObjectArray<HugeDoubleArray> weights;
+    private AllocationTracker tracker;
 
     public WeightedDegreeCentrality(
             Graph graph,
             ExecutorService executor,
-            int concurrency
+            int concurrency,
+            AllocationTracker tracker
     ) {
+        this.tracker = tracker;
         if (concurrency <= 0) {
             concurrency = Pools.DEFAULT_CONCURRENCY;
         }
@@ -55,17 +61,22 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
         this.graph = graph;
         this.executor = executor;
         this.concurrency = concurrency;
-        nodeCount = Math.toIntExact(graph.nodeCount());
-        degrees = new double[nodeCount];
-        weights = new double[nodeCount][];
+        nodeCount = graph.nodeCount();
+        degrees = HugeDoubleArray.newArray(nodeCount, tracker);
+        weights = HugeObjectArray.newArray(HugeDoubleArray.class, nodeCount, tracker);
     }
 
     public WeightedDegreeCentrality compute(boolean cacheWeights) {
         nodeQueue.set(0);
 
-        int batchSize = ParallelUtil.adjustBatchSize(nodeCount, concurrency);
-        int taskCount = ParallelUtil.threadSize(batchSize, nodeCount);
-        final ArrayList<Runnable> tasks = new ArrayList<>(taskCount);
+        long batchSize = ParallelUtil.adjustBatchSize(nodeCount, concurrency);
+        long taskCount = ParallelUtil.threadSize(batchSize, nodeCount);
+        if (taskCount > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException(String.format(
+                    "A concurrency of %d is too small to devide graph into at most Integer.MAX_VALUE tasks",
+                    concurrency));
+        }
+        final ArrayList<Runnable> tasks = new ArrayList<>((int) taskCount);
 
         for (int i = 0; i < taskCount; i++) {
             if(cacheWeights) {
@@ -92,7 +103,7 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
 
     @Override
     public CentralityResult result() {
-        return new DoubleArrayResult(degrees);
+        return new HugeDoubleArrayResult(degrees);
     }
 
     @Override
@@ -124,7 +135,7 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
                     return true;
                 });
 
-                degrees[nodeId] = weightedDegree[0];
+                degrees.set(nodeId, weightedDegree[0]);
 
             }
         }
@@ -134,43 +145,45 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
         @Override
         public void run() {
             Direction loadDirection = graph.getLoadDirection();
+            double[] weightedDegree = new double[1];
             for (; ; ) {
                 final int nodeId = nodeQueue.getAndIncrement();
                 if (nodeId >= nodeCount || !running()) {
                     return;
                 }
 
-                weights[nodeId] = new double[graph.degree(nodeId, loadDirection)];
+                final HugeDoubleArray nodeWeights = HugeDoubleArray.newArray(graph.degree(nodeId, loadDirection), tracker);
+                weights.set(nodeId, nodeWeights);
 
                 int[] index = {0};
-                double[] weightedDegree = new double[1];
+                weightedDegree[0] = 0D;
                 graph.forEachRelationship(nodeId, loadDirection, (sourceNodeId, targetNodeId, weight) -> {
                     if(weight > 0) {
                         weightedDegree[0] += weight;
                     }
 
-                    weights[nodeId][index[0]] = weight;
+                    nodeWeights.set(index[0], weight);
                     index[0]++;
                     return true;
                 });
 
-                degrees[nodeId] = weightedDegree[0];
+                degrees.set(nodeId, weightedDegree[0]);
 
             }
         }
     }
 
-    public double[] degrees() {
+    public HugeDoubleArray degrees() {
         return degrees;
     }
-    public double[][] weights() {
+    public HugeObjectArray<HugeDoubleArray> weights() {
         return weights;
     }
 
     public Stream<DegreeCentrality.Result> resultStream() {
-        return IntStream.range(0, nodeCount)
+        return LongStream.range(0, nodeCount)
                 .mapToObj(nodeId ->
-                        new DegreeCentrality.Result(graph.toOriginalNodeId(nodeId), degrees[nodeId]));
+                        new DegreeCentrality.Result(graph.toOriginalNodeId(nodeId), degrees.get(nodeId)));
     }
 
 }

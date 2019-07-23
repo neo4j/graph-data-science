@@ -22,18 +22,21 @@ package org.neo4j.graphalgo.impl.results;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.neo4j.graphalgo.Normalization;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.write.Exporter;
-import org.neo4j.graphalgo.core.write.Translators;
 
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class CentralityResultTest {
     @Test
     public void doubleArrayResult() {
-        DoubleArrayResult result = new DoubleArrayResult(new double[] {1,2,3,4});
+        HugeDoubleArrayResult result = new HugeDoubleArrayResult(HugeDoubleArray.of(1,2,3,4));
 
         assertEquals(4.0, result.computeMax(), 0.01);
         assertEquals(10.0, result.computeL1Norm(), 0.01);
@@ -44,12 +47,12 @@ public class CentralityResultTest {
     @Test
     public void doubleArrayResultExport() {
         String property = "eigenvector";
-        DoubleArrayResult result = new DoubleArrayResult(new double[] {1,2,3,4});
+        HugeDoubleArrayResult result = new HugeDoubleArrayResult(HugeDoubleArray.of(1,2,3,4));
 
         Exporter exporter = mock(Exporter.class);
         Normalization.MAX.apply(result).export(property, exporter);
 
-        verify(exporter).write(property, new double[] {0.25,0.5,0.75,1.0}, Translators.DOUBLE_ARRAY_TRANSLATOR);
+        verify(exporter).write(property, HugeDoubleArray.of(0.25,0.5,0.75,1.0), HugeDoubleArray.Translator.INSTANCE);
     }
 
     @Test
