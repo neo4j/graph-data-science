@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 /**
- * Implementation of {@link DisjointSetStruct} uses Union by Rank and Path compression.
+ * Implementation of {@link DisjointSetStruct} using Union by Rank and Path compression.
  */
 public final class RankedDisjointSetStruct extends DisjointSetStruct {
 
