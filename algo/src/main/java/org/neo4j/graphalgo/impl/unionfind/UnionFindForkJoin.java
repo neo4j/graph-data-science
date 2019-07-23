@@ -160,9 +160,7 @@ public class UnionFindForkJoin extends UnionFind<UnionFindForkJoin> {
                         Direction.OUTGOING,
                         (source, target) -> {
                             double weight = graph.weightOf(source, target);
-                            if (weight >= threshold && !disjointSetStruct.connected(
-                                    source,
-                                    target)) {
+                            if (weight >= threshold) {
                                 disjointSetStruct.union(source, target);
                             }
                             return true;

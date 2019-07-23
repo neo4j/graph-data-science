@@ -125,7 +125,7 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
      * @return an id of the set it belongs to
      */
     @Override
-    long find(final long nodeId) {
+    public long find(final long nodeId) {
         long p = nodeId;
         long np;
         while ((np = parent.get(p)) != -1L) {

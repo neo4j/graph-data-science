@@ -45,9 +45,7 @@ public abstract class DisjointSetStruct {
     }
 
     /**
-     * Joins the set of p (Sp) with set of q (Sq) such that
-     * {@link DisjointSetStruct#connected(long, long)}
-     * for any pair of (Spi, Sqj) evaluates to true.
+     * Joins the set of p (Sp) with set of q (Sq).
      *
      * @param p an item of Sp
      * @param q an item of Sq
@@ -81,7 +79,7 @@ public abstract class DisjointSetStruct {
      * @param nodeId the element in the set we are looking for
      * @return an id of the set it belongs to
      */
-    abstract long find(long nodeId);
+    public abstract long find(long nodeId);
 
     /**
      * Find set id of element p and balances the tree structure while searching.
@@ -91,7 +89,7 @@ public abstract class DisjointSetStruct {
      * @param p the set element
      * @return returns the representative member of the set to which p belongs
      */
-    final long findAndBalance(long p) {
+    public final long findAndBalance(long p) {
         long pv = parent().get(p);
         if (pv == -1L) {
             return p;
@@ -140,17 +138,6 @@ public abstract class DisjointSetStruct {
         }
 
         return this;
-    }
-
-    /**
-     * Check if p and q belong to the same set.
-     *
-     * @param p a set item
-     * @param q a set item
-     * @return true if both items belong to the same set, false otherwise
-     */
-    public final boolean connected(long p, long q) {
-        return findAndBalance(p) == findAndBalance(q);
     }
 
 

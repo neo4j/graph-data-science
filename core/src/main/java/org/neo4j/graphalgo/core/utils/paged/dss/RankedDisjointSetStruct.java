@@ -65,7 +65,7 @@ public final class RankedDisjointSetStruct extends DisjointSetStruct {
     }
 
     @Override
-    long find(final long nodeId) {
+    public long find(final long nodeId) {
         long p = nodeId;
         long np;
         while ((np = parent.get(p)) != -1L) {

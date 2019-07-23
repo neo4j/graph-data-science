@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.graphalgo.core.utils.paged.dss.IncrementalDisjointSetStruct;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -50,7 +49,7 @@ public abstract class DisjointSetStructTest {
     @Test
     public final void testSetUnion() {
         // {0}{1}{2}{3}{4}{5}{6}
-        assertFalse(struct.connected(0, 1));
+        assertFalse(connected(struct,0, 1));
         assertEquals(7, struct.getSetSize().size());
         assertEquals(0, struct.setIdOf(0));
         assertEquals(1, struct.setIdOf(1));
@@ -62,51 +61,51 @@ public abstract class DisjointSetStructTest {
 
         struct.union(0, 1);
         // {0,1}{2}{3}{4}{5}{6}
-        assertTrue(struct.connected(0, 1));
-        assertFalse(struct.connected(2, 3));
+        assertTrue(connected(struct,0, 1));
+        assertFalse(connected(struct,2, 3));
         assertEquals(6, struct.getSetSize().size());
 
         struct.union(2, 3);
         // {0,1}{2,3}{4}{5}{6}
-        assertTrue(struct.connected(2, 3));
-        assertFalse(struct.connected(0, 2));
-        assertFalse(struct.connected(0, 3));
-        assertFalse(struct.connected(1, 2));
-        assertFalse(struct.connected(1, 3));
+        assertTrue(connected(struct, 2, 3));
+        assertFalse(connected(struct, 0, 2));
+        assertFalse(connected(struct, 0, 3));
+        assertFalse(connected(struct, 1, 2));
+        assertFalse(connected(struct, 1, 3));
         assertEquals(5, struct.getSetSize().size());
 
         struct.union(3, 0);
         // {0,1,2,3}{4}{5}{6}
-        assertTrue(struct.connected(0, 2));
-        assertTrue(struct.connected(0, 3));
-        assertTrue(struct.connected(1, 2));
-        assertTrue(struct.connected(1, 3));
-        assertFalse(struct.connected(4, 5));
+        assertTrue(connected(struct, 0, 2));
+        assertTrue(connected(struct, 0, 3));
+        assertTrue(connected(struct, 1, 2));
+        assertTrue(connected(struct, 1, 3));
+        assertFalse(connected(struct, 4, 5));
         assertEquals(4, struct.getSetSize().size());
 
         struct.union(4, 5);
         // {0,1,2,3}{4,5}{6}
-        assertTrue(struct.connected(4, 5));
-        assertFalse(struct.connected(0, 4));
+        assertTrue(connected(struct, 4, 5));
+        assertFalse(connected(struct, 0, 4));
         assertEquals(3, struct.getSetSize().size());
 
         struct.union(0, 4);
         // {0,1,2,3,4,5}{6}
-        assertTrue(struct.connected(0, 4));
-        assertTrue(struct.connected(0, 5));
-        assertTrue(struct.connected(1, 4));
-        assertTrue(struct.connected(1, 5));
-        assertTrue(struct.connected(2, 4));
-        assertTrue(struct.connected(2, 5));
-        assertTrue(struct.connected(3, 4));
-        assertTrue(struct.connected(3, 5));
-        assertTrue(struct.connected(4, 5));
-        assertFalse(struct.connected(0, 6));
-        assertFalse(struct.connected(1, 6));
-        assertFalse(struct.connected(2, 6));
-        assertFalse(struct.connected(3, 6));
-        assertFalse(struct.connected(4, 6));
-        assertFalse(struct.connected(5, 6));
+        assertTrue(connected(struct, 0, 4));
+        assertTrue(connected(struct, 0, 5));
+        assertTrue(connected(struct, 1, 4));
+        assertTrue(connected(struct, 1, 5));
+        assertTrue(connected(struct, 2, 4));
+        assertTrue(connected(struct, 2, 5));
+        assertTrue(connected(struct, 3, 4));
+        assertTrue(connected(struct, 3, 5));
+        assertTrue(connected(struct, 4, 5));
+        assertFalse(connected(struct, 0, 6));
+        assertFalse(connected(struct, 1, 6));
+        assertFalse(connected(struct, 2, 6));
+        assertFalse(connected(struct, 3, 6));
+        assertFalse(connected(struct, 4, 6));
+        assertFalse(connected(struct, 5, 6));
 
         assertEquals(struct.setIdOf(0), struct.setIdOf(1));
         assertEquals(struct.setIdOf(0), struct.setIdOf(2));
@@ -147,6 +146,17 @@ public abstract class DisjointSetStructTest {
             MemoryRange memoryRange) {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(nodeCount).build();
         assertEquals(memoryRange, memoryEstimation.estimate(dimensions, concurrency).memoryUsage());
+    }
+
+    /**
+     * Check if p and q belong to the same set.
+     *
+     * @param p a set item
+     * @param q a set item
+     * @return true if both items belong to the same set, false otherwise
+     */
+    private final boolean connected(DisjointSetStruct struct, long p, long q) {
+        return struct.find(p) == struct.find(q);
     }
 
     private DisjointSetStruct create(int size, int[]... sets) {
