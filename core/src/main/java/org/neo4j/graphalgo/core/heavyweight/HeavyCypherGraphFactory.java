@@ -70,8 +70,6 @@ public class HeavyCypherGraphFactory extends GraphFactory {
     }
 
 
-    protected void checkLabelPredicates() { }
-
     @Override
     public Graph importGraph() {
         Nodes nodes = nodeLoader.load();
