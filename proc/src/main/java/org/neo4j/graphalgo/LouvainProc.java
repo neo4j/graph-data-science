@@ -87,7 +87,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
         if (configuration.isWriteFlag()) {
             builder.timeWrite(() -> {
                 String writeProperty = configuration.getWriteProperty("community");
-                boolean includeIntermediateCommunities = configuration.get(INCLUDE_INTERMEDIATE_COMMUNITIES, false);
+                Boolean includeIntermediateCommunities = configuration.getBool(INCLUDE_INTERMEDIATE_COMMUNITIES, false);
                 String intermediateCommunitiesWriteProperty = configuration.get(
                         INTERMEDIATE_COMMUNITIES_WRITE_PROPERTY,
                         "communities");

@@ -62,21 +62,21 @@ public class LouvainMultiLevelTest extends HeavyHugeTester {
                     "CREATE (i:Node {name:'i'})\n" +
                     "CREATE" +
 
-                    " (a)-[:TYPE]->(b),\n" +
-                    " (a)-[:TYPE]->(c),\n" +
-                    " (b)-[:TYPE]->(c),\n" +
+                    " (a)-[:TYPE {weight: 1.0}]->(b),\n" +
+                    " (a)-[:TYPE {weight: 1.0}]->(c),\n" +
+                    " (b)-[:TYPE {weight: 1.0}]->(c),\n" +
 
-                    " (g)-[:TYPE]->(h),\n" +
-                    " (g)-[:TYPE]->(i),\n" +
-                    " (h)-[:TYPE]->(i),\n" +
+                    " (g)-[:TYPE {weight: 1.0}]->(h),\n" +
+                    " (g)-[:TYPE {weight: 1.0}]->(i),\n" +
+                    " (h)-[:TYPE {weight: 1.0}]->(i),\n" +
 
-                    " (e)-[:TYPE]->(d),\n" +
-                    " (e)-[:TYPE]->(f),\n" +
-                    " (d)-[:TYPE]->(f),\n" +
+                    " (e)-[:TYPE {weight: 1.0}]->(d),\n" +
+                    " (e)-[:TYPE {weight: 1.0}]->(f),\n" +
+                    " (d)-[:TYPE {weight: 1.0}]->(f),\n" +
 
-                    " (a)-[:TYPE]->(g),\n" +
-                    " (c)-[:TYPE]->(e),\n" +
-                    " (f)-[:TYPE]->(i)";
+                    " (a)-[:TYPE {weight: 1.0}]->(g),\n" +
+                    " (c)-[:TYPE {weight: 1.0}]->(e),\n" +
+                    " (f)-[:TYPE {weight: 1.0}]->(i)";
 
     @Rule
     public ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
@@ -98,7 +98,7 @@ public class LouvainMultiLevelTest extends HeavyHugeTester {
                 .withAnyRelationshipType()
                 .withAnyLabel()
                 .withoutNodeProperties()
-                .withOptionalRelationshipWeightsFromProperty("w", 1.0)
+                .withOptionalRelationshipWeightsFromProperty("weight", 1.0)
                 .asUndirected(true)
                 .load(graphImpl);
     }

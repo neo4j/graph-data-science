@@ -52,7 +52,7 @@ public class HeavyCypherGraphFactory extends GraphFactory {
     }
 
     @Override
-    protected void checkLabelPredicates() { }
+    protected void validateTokens() { }
 
     @Override
     public Graph importGraph() {

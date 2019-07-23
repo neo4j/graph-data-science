@@ -63,23 +63,23 @@ public class LouvainClusteringIntegrationTest {
 
         final String cypher =
                 "CREATE (a:Node {name:'a', c:1})\n" +
-                        "CREATE (c:Node {name:'c', c:1})\n" + // shuffled
-                        "CREATE (b:Node {name:'b', c:1})\n" +
-                        "CREATE (d:Node {name:'d', c:1})\n" +
-                        "CREATE (e:Node {name:'e', c:1})\n" +
-                        "CREATE (g:Node {name:'g', c:1})\n" +
-                        "CREATE (f:Node {name:'f', c:1})\n" +
-                        "CREATE (h:Node {name:'h', c:1})\n" +
-                        "CREATE (z:Node {name:'z', c:1})\n" + // assign impossible community to outstanding node
+                        "CREATE (c:Node {name: 'c', c: 1})\n" + // shuffled
+                        "CREATE (b:Node {name: 'b', c: 1})\n" +
+                        "CREATE (d:Node {name: 'd', c: 1})\n" +
+                        "CREATE (e:Node {name: 'e', c: 1})\n" +
+                        "CREATE (g:Node {name: 'g', c: 1})\n" +
+                        "CREATE (f:Node {name: 'f', c: 1})\n" +
+                        "CREATE (h:Node {name: 'h', c: 1})\n" +
+                        "CREATE (z:Node {name: 'z', c: 1})\n" + // assign impossible community to outstanding node
 
                         "CREATE" +
 
-                        " (a)-[:TYPE]->(b),\n" +
-                        " (a)-[:TYPE]->(c),\n" +
-                        " (a)-[:TYPE]->(d),\n" +
-                        " (c)-[:TYPE]->(d),\n" +
-                        " (b)-[:TYPE]->(c),\n" +
-                        " (b)-[:TYPE]->(d),\n" +
+                        " (a)-[:TYPE {weight: 0.5}]->(b),\n" +
+                        " (a)-[:TYPE {weight: 1.5}]->(c),\n" +
+                        " (a)-[:TYPE {weight: 0.5}]->(d),\n" +
+                        " (c)-[:TYPE {weight: 1.5}]->(d),\n" +
+                        " (b)-[:TYPE {weight: 0.5}]->(c),\n" +
+                        " (b)-[:TYPE {weight: 1.5}]->(d),\n" +
 
                         " (f)-[:TYPE]->(e),\n" +
                         " (e)-[:TYPE]->(g),\n" +
@@ -302,7 +302,7 @@ public class LouvainClusteringIntegrationTest {
 
     @Test
     public void testWithWeight() {
-        final String cypher = "CALL algo.louvain('Node', 'TYPE', {weightProperty:'w', defaultValue:1.0, concurrency:1, graph:$graph}) " +
+        final String cypher = "CALL algo.louvain('Node', 'TYPE', {weightProperty: 'weight', defaultValue: 1.0, concurrency: 1, graph: $graph}) " +
                 "YIELD nodes, communityCount, iterations, loadMillis, computeMillis, writeMillis";
 
         run(cypher).accept(row -> {

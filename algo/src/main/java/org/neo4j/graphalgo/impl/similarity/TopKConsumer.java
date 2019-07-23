@@ -33,6 +33,7 @@ public class TopKConsumer<T> implements Consumer<T> {
     private Comparator<T> comparator;
     private int count;
     private T minValue;
+    private T maxValue;
 
     public TopKConsumer(int topK, Comparator<T> comparator) {
         this.topK = topK;
@@ -40,6 +41,7 @@ public class TopKConsumer<T> implements Consumer<T> {
         this.comparator = comparator;
         count = 0;
         minValue = null;
+        maxValue = null;
     }
 
     public static <T> List<T> topK(List<T> items, int topK, Comparator<T> comparator) {
@@ -86,6 +88,7 @@ public class TopKConsumer<T> implements Consumer<T> {
             heap[idx-1]=item;
             if (count< topK) count++;
             minValue = heap[count-1];
+            maxValue = heap[0];
         }
     }
 
@@ -99,7 +102,7 @@ public class TopKConsumer<T> implements Consumer<T> {
     }
 
     public void accept(TopKConsumer<T> other) {
-        if (minValue == null || count < topK || other.minValue != null && comparator.compare(other.minValue,minValue) < 0) {
+        if (minValue == null || count < topK || other.maxValue != null && comparator.compare(other.maxValue,minValue) < 0) {
             for (int i=0;i<other.count;i++) {
                 accept(other.heap[i]);
             }

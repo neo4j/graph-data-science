@@ -19,14 +19,19 @@
  */
 package org.neo4j.graphalgo.impl.similarity;
 
+import org.hamcrest.Matchers;
 import org.junit.Assume;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.*;
 
 public class TopKConsumerTest {
@@ -35,6 +40,9 @@ public class TopKConsumerTest {
     private static final Item ITEM3 = new Item(null, 3);
     private static final Item ITEM2 = new Item(null, 2);
     private static final Item ITEM4 = new Item(null, 4);
+    private static final Item ITEM5 = new Item(null, 5);
+    private static final Item ITEM6 = new Item(null, 6);
+    private static final Item ITEM7 = new Item(null, 7);
 
     static class Item implements Comparable<Item> {
         String name;
@@ -141,6 +149,51 @@ public class TopKConsumerTest {
         for (Item topItem : topItems) {
             System.out.println(topItem);
         }
+    }
+
+    @Test
+    public void mergeNoOverlapConsumers() {
+        TopKConsumer<Item> rootConsumer = new TopKConsumer<>(3, Item::compareTo);
+        TopKConsumer<Item> comparator1 = new TopKConsumer<>(3, Item::compareTo);
+        TopKConsumer<Item> comparator2 = new TopKConsumer<>(3, Item::compareTo);
+
+        asList(ITEM4, ITEM5, ITEM7).forEach(comparator1);
+        asList(ITEM1, ITEM2, ITEM3).forEach(comparator2);
+
+        rootConsumer.accept(comparator1);
+        rootConsumer.accept(comparator2);
+
+        assertThat(rootConsumer.list(), contains(ITEM7, ITEM5, ITEM4));
+    }
+
+    @Test
+    public void mergeOverlappingConsumers() {
+        TopKConsumer<Item> rootConsumer = new TopKConsumer<>(3, Item::compareTo);
+        TopKConsumer<Item> comparator1 = new TopKConsumer<>(3, Item::compareTo);
+        TopKConsumer<Item> comparator2 = new TopKConsumer<>(3, Item::compareTo);
+
+        asList(ITEM3, ITEM4, ITEM5).forEach(comparator1);
+        asList(ITEM1, ITEM6, ITEM7).forEach(comparator2);
+
+        rootConsumer.accept(comparator1);
+        rootConsumer.accept(comparator2);
+
+        assertThat(rootConsumer.list(), contains(ITEM7, ITEM6, ITEM5));
+    }
+
+    @Test
+    public void mergeNotFullConsumer() {
+        TopKConsumer<Item> rootConsumer = new TopKConsumer<>(3, Item::compareTo);
+        TopKConsumer<Item> comparator1 = new TopKConsumer<>(3, Item::compareTo);
+        TopKConsumer<Item> comparator2 = new TopKConsumer<>(3, Item::compareTo);
+
+        asList(ITEM6).forEach(comparator1);
+        asList(ITEM3, ITEM4, ITEM5).forEach(comparator2);
+
+        rootConsumer.accept(comparator1);
+        rootConsumer.accept(comparator2);
+
+        assertThat(rootConsumer.list(), contains(ITEM6, ITEM5, ITEM4));
     }
 
     private List<Item> createItems(int count) {

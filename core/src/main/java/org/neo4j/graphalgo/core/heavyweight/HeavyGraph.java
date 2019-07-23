@@ -156,6 +156,11 @@ public class HeavyGraph implements Graph {
             }
 
             @Override
+            public long getMaxValue() {
+                return weightMapping.getMaxValue();
+            }
+
+            @Override
             public long release() {
                 return 0;
             }

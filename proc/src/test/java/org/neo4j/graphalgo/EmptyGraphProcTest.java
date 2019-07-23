@@ -279,7 +279,7 @@ public class EmptyGraphProcTest {
 
     @Test
     public void testLabelPropagationCentrality() throws Exception {
-        db.execute("CALL algo.labelPropagation('', '', '', {graph:'" + graphImpl + "'})")
+        db.execute("CALL algo.labelPropagation('', '', '', {graph: '" + graphImpl + "', writeProperty: 'community'})")
                 .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(0L, row.getNumber("nodes"));
                     return true;

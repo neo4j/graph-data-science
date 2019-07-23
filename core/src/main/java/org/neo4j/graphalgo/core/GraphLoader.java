@@ -39,6 +39,7 @@ import org.neo4j.logging.NullLog;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -598,7 +599,9 @@ public class GraphLoader {
     }
 
     public GraphLoader withOptionalNodeProperties(PropertyMapping... nodePropertyMappings) {
-        this.nodePropertyMappings = nodePropertyMappings;
+        this.nodePropertyMappings = Arrays.stream(nodePropertyMappings)
+                .filter(propMapping -> !(propMapping.propertyKey == null || propMapping.propertyKey.isEmpty()))
+                .toArray(PropertyMapping[]::new);
         return this;
     }
 

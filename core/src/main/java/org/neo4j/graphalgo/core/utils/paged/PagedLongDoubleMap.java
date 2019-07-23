@@ -126,6 +126,15 @@ public final class PagedLongDoubleMap {
         return subMap;
     }
 
+    public long getMaxValue() {
+        return (long) Arrays
+                .stream(pages)
+                .parallel()
+                .flatMapToDouble(TrackingIntDoubleHashMap::getValuesAsStream)
+                .max()
+                .orElse(0d);
+    }
+
     public long release() {
         if (pages != null) {
             TrackingIntDoubleHashMap[] pages = this.pages;

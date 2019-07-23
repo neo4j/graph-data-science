@@ -72,7 +72,7 @@ public final class LoadGraphProc extends BaseProc {
         try (ProgressTimer timer = ProgressTimer.start()) {
             Class<? extends GraphFactory> graphImpl = configuration.getGraphImpl();
             GraphLoader loader = newLoader(configuration, AllocationTracker.EMPTY);
-            Graph graph = loader.load(graphImpl);
+            Graph graph = runWithExceptionLogging("Graph loading failed", () -> loader.load(graphImpl));
 
             stats.nodes = graph.nodeCount();
             stats.relationships = graph.relationshipCount();
@@ -115,7 +115,7 @@ public final class LoadGraphProc extends BaseProc {
                 .withOptionalNodeProperty(nodeProperty, 0.0d)
                 .withOptionalNodeWeightsFromProperty(nodeWeight, 1.0d)
                 .withOptionalNodeProperties(
-                        PropertyMapping.of(LabelPropagation.PARTITION_TYPE, nodeProperty, 0.0d),
+                        PropertyMapping.of(LabelPropagation.SEED_TYPE, nodeProperty, 0.0d),
                         PropertyMapping.of(LabelPropagation.WEIGHT_TYPE, nodeWeight, 1.0d)
                 )
                 .withDirection(direction)
