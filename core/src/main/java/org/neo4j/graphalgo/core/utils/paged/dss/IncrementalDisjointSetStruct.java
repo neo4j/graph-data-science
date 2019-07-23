@@ -78,7 +78,7 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
      * reset the container
      */
     private void init(AllocationTracker tracker) {
-        this.maxCommunity = communityMapping.getMaxValue();
+        this.maxCommunity = communityMapping.getMaxValue(-1);
 
         final HugeLongLongMap internalMapping = new HugeLongLongMap(size, tracker);
 

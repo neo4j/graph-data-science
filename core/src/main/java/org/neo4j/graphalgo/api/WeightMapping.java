@@ -53,6 +53,20 @@ public interface WeightMapping {
         return weight(RawValues.combineIntInt(id, -1), defaultValue);
     }
 
+    /**
+     * Returns the maximum value contained in the mapping or {@code defaultValue} if the mapping is empty.
+     *
+     * @param defaultValue value being returned if the mapping is empty
+     * @return maximum value or given default value if mapping is empty
+     */
+    default long getMaxValue(long defaultValue) {
+        return size() == 0 ? defaultValue : getMaxValue();
+    }
+
+    /**
+     * Returns the maximum value contained in the mapping.
+     * @return
+     */
     default long getMaxValue() {
         return -1L;
     }
