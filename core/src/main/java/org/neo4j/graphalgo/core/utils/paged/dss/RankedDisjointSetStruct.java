@@ -36,21 +36,21 @@ public final class RankedDisjointSetStruct extends DisjointSetStruct {
             .build();
 
     private final HugeLongArray parent;
-    private final long capacity;
+    private final long size;
 
     public static MemoryEstimation memoryEstimation() {
         return RankedDisjointSetStruct.MEMORY_ESTIMATION;
     }
 
     /**
-     * Initialize the struct with the given capacity.
+     * Initialize the struct with the given size.
      *
-     * @param capacity the capacity (maximum node id)
+     * @param size number of elements (maximum node id)
      */
-    public RankedDisjointSetStruct(long capacity, UnionStrategy unionStrategy, AllocationTracker tracker) {
+    public RankedDisjointSetStruct(long size, UnionStrategy unionStrategy, AllocationTracker tracker) {
         super(unionStrategy);
-        parent = HugeLongArray.newArray(capacity, tracker);
-        this.capacity = capacity;
+        parent = HugeLongArray.newArray(size, tracker);
+        this.size = size;
         parent.fill(-1L);
     }
 
@@ -60,8 +60,8 @@ public final class RankedDisjointSetStruct extends DisjointSetStruct {
     }
 
     @Override
-    public long capacity() {
-        return capacity;
+    public long size() {
+        return size;
     }
 
     @Override

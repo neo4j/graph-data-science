@@ -73,7 +73,7 @@ public abstract class DisjointSetStruct {
      *
      * @return element count
      */
-    abstract long capacity();
+    abstract long size();
 
     /**
      * Find set Id of element p.
@@ -107,7 +107,7 @@ public abstract class DisjointSetStruct {
                     other.getClass().getSimpleName()));
         }
 
-        if (other.capacity() != this.capacity()) {
+        if (other.size() != this.size()) {
             throw new IllegalArgumentException("Different Capacity");
         }
 
@@ -166,7 +166,7 @@ public abstract class DisjointSetStruct {
      * @note This is very expensive.
      */
     public final long getSetCount() {
-        long capacity = capacity();
+        long capacity = size();
         BitSet sets = new BitSet(capacity);
         for (long i = 0L; i < capacity; i++) {
             long setId = find(i);

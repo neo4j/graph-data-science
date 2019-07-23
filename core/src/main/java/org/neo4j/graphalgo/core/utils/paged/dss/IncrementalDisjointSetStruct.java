@@ -46,7 +46,7 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
     private final HugeLongArray parent;
     private final HugeLongLongMap internalToProvidedIds;
     private final HugeWeightMapping communityMapping;
-    private final long capacity;
+    private final long size;
     private long maxCommunity;
 
     public static MemoryEstimation memoryEstimation() {
@@ -54,20 +54,20 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
     }
 
     /**
-     * Initialize the struct with the given capacity.
+     * Initialize the struct with the given size.
      *
-     * @param capacity the capacity (maximum node id)
+     * @param size number of elements (maximum node id)
      */
     public IncrementalDisjointSetStruct(
-            long capacity,
+            long size,
             HugeWeightMapping communityMapping,
             UnionStrategy unionStrategy,
             AllocationTracker tracker) {
         super(unionStrategy);
-        this.parent = HugeLongArray.newArray(capacity, tracker);
-        this.internalToProvidedIds = new HugeLongLongMap(capacity, tracker);
+        this.parent = HugeLongArray.newArray(size, tracker);
+        this.internalToProvidedIds = new HugeLongLongMap(size, tracker);
         this.communityMapping = communityMapping;
-        this.capacity = capacity;
+        this.size = size;
         init(tracker);
     }
 
@@ -81,11 +81,11 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
      */
     private void init(AllocationTracker tracker) {
         this.maxCommunity = LongStream
-                .range(0, capacity)
+                .range(0, size)
                 .map(id -> (long) communityMapping.nodeWeight(id, -1))
                 .max().orElse(0);
 
-        final HugeLongLongMap internalMapping = new HugeLongLongMap(capacity, tracker);
+        final HugeLongLongMap internalMapping = new HugeLongLongMap(size, tracker);
 
         this.parent.setAll(nodeId -> {
             long parentValue = -1;
@@ -114,8 +114,8 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
      * @return the element count
      */
     @Override
-    public long capacity() {
-        return capacity;
+    public long size() {
+        return size;
     }
 
     /**
