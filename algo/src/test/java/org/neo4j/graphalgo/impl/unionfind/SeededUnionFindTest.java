@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.impl.unionfind;
 
-import com.carrotsearch.hppc.BitSet;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
