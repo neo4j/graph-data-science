@@ -376,8 +376,8 @@ public final class ParallelUtil {
         awaitTermination(futures);
     }
 
-    private static final int DEFAULT_WAIT_TIME_NANOS = 1000;
-    private static final int DEFAULT_MAX_NUMBER_OF_RETRIES = (int) 2.5e11; // about 3 days in micros
+    private static final long DEFAULT_WAIT_TIME_NANOS = 1000;
+    private static final long DEFAULT_MAX_NUMBER_OF_RETRIES = (long) 2.5e11; // about 3 days in micros
 
     /**
      * Try to run all tasks for their side-effects using at most
@@ -467,7 +467,7 @@ public final class ParallelUtil {
     public static void runWithConcurrency(
             final int concurrency,
             final Collection<? extends Runnable> tasks,
-            final int maxRetries,
+            final long maxRetries,
             final ExecutorService executor) {
         runWithConcurrency(
                 concurrency,
@@ -696,7 +696,7 @@ public final class ParallelUtil {
     public static void runWithConcurrency(
             final int concurrency,
             final Collection<? extends Runnable> tasks,
-            final int maxRetries,
+            final long maxRetries,
             final long waitTime,
             final TimeUnit timeUnit,
             final ExecutorService executor) {
@@ -759,7 +759,7 @@ public final class ParallelUtil {
     public static void runWithConcurrency(
             final int concurrency,
             final Collection<? extends Runnable> tasks,
-            final int maxRetries,
+            final long maxRetries,
             final long waitTime,
             final TimeUnit timeUnit,
             final TerminationFlag terminationFlag,
@@ -777,7 +777,7 @@ public final class ParallelUtil {
             final int concurrency,
             final Collection<? extends Runnable> tasks,
             final long waitNanos,
-            final int maxWaitRetries,
+            final long maxWaitRetries,
             final TerminationFlag terminationFlag,
             final ExecutorService executor) {
         if (!canRunInParallel(executor)
