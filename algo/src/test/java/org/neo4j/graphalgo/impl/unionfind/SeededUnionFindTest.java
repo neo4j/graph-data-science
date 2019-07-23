@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.unionfind;
 
+import com.carrotsearch.hppc.BitSet;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -138,7 +139,7 @@ public class SeededUnionFindTest extends HeavyHugeTester {
     private void test(UnionFindType uf) {
         // We expect that UF connects pairs of communites
         DisjointSetStruct result = run(uf);
-        Assert.assertEquals(COMMUNITY_COUNT / 2, result.getSetCount());
+        Assert.assertEquals(COMMUNITY_COUNT / 2, getSetCount(result));
 
         graph.forEachNode((nodeId) -> {
             // Since the community size has doubled, the community id first needs to be computed with twice the
@@ -163,5 +164,18 @@ public class SeededUnionFindTest extends HeavyHugeTester {
                 Pools.DEFAULT_CONCURRENCY,
                 config,
                 AllocationTracker.EMPTY);
+    }
+
+    /**
+     * Compute number of sets present.
+     */
+    private long getSetCount(DisjointSetStruct struct) {
+        long capacity = struct.size();
+        BitSet sets = new BitSet(capacity);
+        for (long i = 0L; i < capacity; i++) {
+            long setId = struct.findAndBalance(i);
+            sets.set(setId);
+        }
+        return sets.cardinality();
     }
 }

@@ -19,9 +19,6 @@
  */
 package org.neo4j.graphalgo.core.utils.paged.dss;
 
-import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.LongLongMap;
-import com.carrotsearch.hppc.LongLongScatterMap;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -71,7 +68,7 @@ public abstract class DisjointSetStruct {
      *
      * @return element count
      */
-    abstract long size();
+    public abstract long size();
 
     /**
      * Find set id of element p without balancing tree structure.
@@ -138,35 +135,6 @@ public abstract class DisjointSetStruct {
         }
 
         return this;
-    }
-
-
-    /**
-     * Compute number of sets present.
-     *
-     * @note This is very expensive.
-     */
-    public final long getSetCount() {
-        long capacity = size();
-        BitSet sets = new BitSet(capacity);
-        for (long i = 0L; i < capacity; i++) {
-            long setId = findAndBalance(i);
-            sets.set(setId);
-        }
-        return sets.cardinality();
-    }
-
-    /**
-     * Compute the size of each set.
-     *
-     * @return a map which maps setId to setSize
-     */
-    public final LongLongMap getSetSize() {
-        final LongLongMap map = new LongLongScatterMap();
-        for (long i = parent().size() - 1; i >= 0; i--) {
-            map.addTo(setIdOf(i), 1);
-        }
-        return map;
     }
 
     /**
