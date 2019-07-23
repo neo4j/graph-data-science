@@ -118,11 +118,10 @@ public class ShortestPaths extends Algorithm<ShortestPaths> {
     }
 
     @Override
-    public ShortestPaths release() {
+    public void release() {
         graph = null;
         costs = null;
         queue = null;
-        return this;
     }
 
     /**

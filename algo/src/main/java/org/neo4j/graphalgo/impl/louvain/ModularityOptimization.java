@@ -279,17 +279,15 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     /**
      * release structures
      *
-     * @return this
      */
     @Override
-    public ModularityOptimization release() {
+    public void release() {
         tracker.remove(ki.release());
         this.ki = null;
         tracker.remove(communities.release());
         this.communities = null;
         this.graph = null;
         this.pool = null;
-        return this;
     }
 
     /**

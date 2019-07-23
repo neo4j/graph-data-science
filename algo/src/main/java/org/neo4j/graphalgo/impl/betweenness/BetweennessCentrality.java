@@ -214,10 +214,9 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality> {
 
     /**
      * release internal structures
-     * @return
      */
     @Override
-    public BetweennessCentrality release() {
+    public void release() {
         graph = null;
         centrality = null;
         delta = null;
@@ -226,7 +225,6 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality> {
         stack = null;
         queue = null;
         paths = null;
-        return this;
     }
 
     /**

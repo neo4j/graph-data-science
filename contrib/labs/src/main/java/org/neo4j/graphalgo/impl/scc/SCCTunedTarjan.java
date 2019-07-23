@@ -23,7 +23,6 @@ import com.carrotsearch.hppc.IntStack;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.Algorithm;
-import org.neo4j.graphalgo.results.SCCStreamResult;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Arrays;
@@ -163,14 +162,12 @@ public class SCCTunedTarjan extends Algorithm<SCCTunedTarjan> implements SCCAlgo
 
     /**
      * release inner data structures
-     * @return
      */
     @Override
-    public SCCTunedTarjan release() {
+    public void release() {
         graph = null;
         edgeStack = null;
         open = null;
         connectedComponents = null;
-        return this;
     }
 }

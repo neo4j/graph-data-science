@@ -97,12 +97,11 @@ public class HarmonicCentrality extends Algorithm<HarmonicCentrality> {
     }
 
     @Override
-    public HarmonicCentrality release() {
+    public void release() {
         graph = null;
         executorService = null;
         inverseFarness.release();
         inverseFarness = null;
-        return this;
     }
 
     public final double[] exportToArray() {

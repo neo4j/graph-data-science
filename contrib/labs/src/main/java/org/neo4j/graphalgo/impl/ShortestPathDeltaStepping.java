@@ -240,14 +240,13 @@ public class ShortestPathDeltaStepping extends Algorithm<ShortestPathDeltaSteppi
     }
 
     @Override
-    public ShortestPathDeltaStepping release() {
+    public void release() {
         distance = null;
         buckets = null;
         graph = null;
         light = null;
         heavy = null;
         futures = null;
-        return null;
     }
 
     /**

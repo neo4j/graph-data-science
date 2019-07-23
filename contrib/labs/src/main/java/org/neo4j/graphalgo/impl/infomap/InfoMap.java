@@ -310,15 +310,13 @@ public class InfoMap extends Algorithm<InfoMap> {
     /**
      * release data
      *
-     * @return
      */
     @Override
-    public InfoMap release() {
+    public void release() {
         modules.forEach(Module::release);
         modules.release();
         modules = null;
         communities = null;
-        return this;
     }
 
     /**

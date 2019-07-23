@@ -96,17 +96,15 @@ public class BalancedTriads extends Algorithm<BalancedTriads> {
 
     /**
      * release inner data structs
-     * @return
      */
     @Override
-    public BalancedTriads release() {
+    public void release() {
         executorService = null;
         graph = null;
         unbalancedTriangles.release();
         balancedTriangles.release();
         balancedTriangleCount.reset();
         unbalancedTriangleCount.reset();
-        return this;
     }
 
     /**

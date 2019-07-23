@@ -117,9 +117,8 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
     }
 
     @Override
-    public UnionFindForkJoinMerge release() {
+    public void release() {
         disjointSetStruct = null;
-        return super.release();
     }
 
     private abstract class AbstractUnionFindTask implements Runnable {

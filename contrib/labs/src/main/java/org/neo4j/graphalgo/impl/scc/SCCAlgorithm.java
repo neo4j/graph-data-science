@@ -72,7 +72,7 @@ public interface SCCAlgorithm {
      * release inner data structures
      * @return
      */
-    SCCAlgorithm release();
+    void release();
 
     /**
      * get nodeId to component id mapping

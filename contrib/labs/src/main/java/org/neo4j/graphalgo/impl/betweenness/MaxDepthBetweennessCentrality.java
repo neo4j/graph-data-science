@@ -220,7 +220,7 @@ public class MaxDepthBetweennessCentrality extends Algorithm<MaxDepthBetweenness
     }
 
     @Override
-    public MaxDepthBetweennessCentrality release() {
+    public void release() {
         graph = null;
         centrality = null;
         delta = null;
@@ -229,7 +229,6 @@ public class MaxDepthBetweennessCentrality extends Algorithm<MaxDepthBetweenness
         stack = null;
         queue = null;
         paths = null;
-        return this;
     }
 
     /**

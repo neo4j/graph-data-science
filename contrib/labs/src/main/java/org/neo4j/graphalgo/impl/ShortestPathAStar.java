@@ -200,7 +200,7 @@ public class ShortestPathAStar extends Algorithm<ShortestPathAStar> {
     }
 
     @Override
-    public ShortestPathAStar release() {
+    public void release() {
         graph = null;
         gCosts = null;
         fCosts = null;
@@ -208,7 +208,6 @@ public class ShortestPathAStar extends Algorithm<ShortestPathAStar> {
         path = null;
         shortestPath = null;
         closedNodes = null;
-        return this;
     }
 
     public static class Result {

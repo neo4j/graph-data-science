@@ -96,10 +96,9 @@ public class UnionFindSeq extends UnionFind<UnionFindSeq> {
     }
 
     @Override
-    public UnionFindSeq release() {
+    public void release() {
         disjointSetStruct = null;
         unrestricted = null;
-        return super.release();
     }
 
     private DisjointSetStruct compute(RelationshipConsumer consumer) {
