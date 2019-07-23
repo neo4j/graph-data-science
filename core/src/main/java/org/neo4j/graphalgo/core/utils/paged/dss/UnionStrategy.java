@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 public interface UnionStrategy {
 
-    void union(long p, long q, DisjointSetStruct dss);
+    void union(long p, long q, SequentialDisjointSetStruct dss);
 
     /**
      * Picks the minimum set id as representative when merging two sets.
@@ -34,7 +34,7 @@ public interface UnionStrategy {
         public static final String NAME = "min";
 
         @Override
-        public void union(final long p, final long q, final DisjointSetStruct dss) {
+        public void union(final long p, final long q, final SequentialDisjointSetStruct dss) {
             long pRoot = dss.findAndBalance(p);
             long qRoot = dss.findAndBalance(q);
 
@@ -63,7 +63,7 @@ public interface UnionStrategy {
         }
 
         @Override
-        public void union(final long p, final long q, final DisjointSetStruct dss) {
+        public void union(final long p, final long q, final SequentialDisjointSetStruct dss) {
             final long pSet = dss.findAndBalance(p);
             final long qSet = dss.findAndBalance(q);
             if (pSet == qSet) {

@@ -30,12 +30,12 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import java.util.stream.LongStream;
 
 /**
- * Implements {@link DisjointSetStruct} with support for incremental computation based on a previously computed mapping
+ * Implements {@link SequentialDisjointSetStruct} with support for incremental computation based on a previously computed mapping
  * between node ids and set ids.
  * Note that this does not use <a href="https://en.wikipedia.org/wiki/Disjoint-set_data_structure#by_rank">Union by Rank</a>
  * but prefers the minimum set id instead when merging two sets.
  */
-public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
+public final class IncrementalDisjointSetStruct extends SequentialDisjointSetStruct {
 
     private static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations.builder(
             IncrementalDisjointSetStruct.class)

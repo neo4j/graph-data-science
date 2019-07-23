@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.dss.SequentialDisjointSetStruct;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
@@ -51,7 +52,7 @@ import static org.neo4j.graphalgo.core.utils.ParallelUtil.awaitTermination;
  *
  * @author mknblch
  */
-public class UnionFindQueue extends UnionFind<UnionFindQueue> {
+public class ParallelUnionFind extends UnionFind<ParallelUnionFind> {
 
     private final ExecutorService executor;
     private final AllocationTracker tracker;
@@ -60,10 +61,10 @@ public class UnionFindQueue extends UnionFind<UnionFindQueue> {
     private final int stepSize;
 
     public static MemoryEstimation memoryEstimation(final boolean incremental) {
-        return UnionFind.memoryEstimation(incremental, UnionFindQueue.class, HugeUnionFindTask.class);
+        return UnionFind.memoryEstimation(incremental, ParallelUnionFind.class, HugeUnionFindTask.class);
     }
 
-    public UnionFindQueue(
+    public ParallelUnionFind(
             Graph graph,
             ExecutorService executor,
             int minBatchSize,
@@ -106,7 +107,7 @@ public class UnionFindQueue extends UnionFind<UnionFindQueue> {
     @Override
     public DisjointSetStruct computeUnrestricted() {
         final List<Future<?>> futures = new ArrayList<>(2 * stepSize);
-        final BlockingQueue<DisjointSetStruct> disjointSetStructs = new ArrayBlockingQueue<>(stepSize);
+        final BlockingQueue<SequentialDisjointSetStruct> disjointSetStructs = new ArrayBlockingQueue<>(stepSize);
         AtomicInteger expectedCommunityCount = new AtomicInteger();
 
         for (long i = 0L; i < nodeCount; i += batchSize) {
@@ -115,7 +116,7 @@ public class UnionFindQueue extends UnionFind<UnionFindQueue> {
         int steps = futures.size();
 
         for (int i = 1; i < steps; ++i) {
-            futures.add(executor.submit(() -> mergeTask(disjointSetStructs, expectedCommunityCount, DisjointSetStruct::merge)));
+            futures.add(executor.submit(() -> mergeTask(disjointSetStructs, expectedCommunityCount, SequentialDisjointSetStruct::merge)));
         }
 
         awaitTermination(futures);
@@ -160,13 +161,13 @@ public class UnionFindQueue extends UnionFind<UnionFindQueue> {
     private class HugeUnionFindTask implements Runnable {
 
         private final RelationshipIterator rels;
-        private final BlockingQueue<DisjointSetStruct> disjointSetStructs;
+        private final BlockingQueue<SequentialDisjointSetStruct> disjointSetStructs;
         private final AtomicInteger expectedCount;
         private final long offset;
         private final long end;
 
         HugeUnionFindTask(
-                BlockingQueue<DisjointSetStruct> disjointSetStructs,
+                BlockingQueue<SequentialDisjointSetStruct> disjointSetStructs,
                 long offset,
                 AtomicInteger expectedCount) {
             this.rels = graph.concurrentCopy();
@@ -181,7 +182,7 @@ public class UnionFindQueue extends UnionFind<UnionFindQueue> {
         public void run() {
             boolean pushed = false;
             try {
-                final DisjointSetStruct struct = initDisjointSetStruct(nodeCount, tracker);
+                final SequentialDisjointSetStruct struct = initDisjointSetStruct(nodeCount, tracker);
                 for (long node = offset; node < end; node++) {
                     rels.forEachRelationship(
                             node,

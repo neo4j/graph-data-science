@@ -27,16 +27,16 @@ import java.util.concurrent.ExecutorService;
 
 public enum UnionFindType {
 
-    QUEUE {
+    PARALLEL {
         @Override
-        public UnionFind<UnionFindQueue> create(
+        public UnionFind<ParallelUnionFind> create(
                 final Graph graph,
                 final ExecutorService executor,
                 final int minBatchSize,
                 final int concurrency,
                 final UnionFind.Config config,
                 final AllocationTracker tracker) {
-            return new UnionFindQueue(
+            return new ParallelUnionFind(
                     graph,
                     executor,
                     minBatchSize,
@@ -47,7 +47,7 @@ public enum UnionFindType {
 
         @Override
         public MemoryEstimation memoryEstimation(final boolean incremental) {
-            return UnionFindQueue.memoryEstimation(incremental);
+            return ParallelUnionFind.memoryEstimation(incremental);
         }
     },
     FORK_JOIN {
@@ -95,16 +95,16 @@ public enum UnionFindType {
             return UnionFindForkJoinMerge.memoryEstimation(incremental);
         }
     },
-    SEQ {
+    SEQUENTIAL {
         @Override
-        public UnionFind<UnionFindSeq> create(
+        public UnionFind<SequentialUnionFind> create(
                 final Graph graph,
                 final ExecutorService executor,
                 final int minBatchSize,
                 final int concurrency,
                 final UnionFind.Config config,
                 final AllocationTracker tracker) {
-            return new UnionFindSeq(
+            return new SequentialUnionFind(
                     graph,
                     config,
                     tracker
@@ -113,7 +113,7 @@ public enum UnionFindType {
 
         @Override
         public MemoryEstimation memoryEstimation(final boolean incremental) {
-            return UnionFindSeq.memoryEstimation(incremental);
+            return SequentialUnionFind.memoryEstimation(incremental);
         }
     };
 

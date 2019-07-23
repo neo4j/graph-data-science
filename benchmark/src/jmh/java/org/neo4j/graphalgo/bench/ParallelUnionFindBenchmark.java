@@ -26,12 +26,11 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.MSColoring;
-import org.neo4j.graphalgo.impl.unionfind.UnionFindSeq;
 import org.neo4j.graphalgo.impl.unionfind.UnionFind;
-import org.neo4j.graphalgo.impl.unionfind.UnionFindForkJoinMerge;
+import org.neo4j.graphalgo.impl.unionfind.ParallelUnionFind;
+import org.neo4j.graphalgo.impl.unionfind.SequentialUnionFind;
 import org.neo4j.graphalgo.impl.unionfind.UnionFindForkJoin;
-import org.neo4j.graphalgo.impl.unionfind.UnionFindQueue;
+import org.neo4j.graphalgo.impl.unionfind.UnionFindForkJoinMerge;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
@@ -183,19 +182,19 @@ public class ParallelUnionFindBenchmark {
 
     @Benchmark
     public Object parallelUnionFindQueue_200000() {
-        return new UnionFindQueue(graph, Pools.DEFAULT, 200_000, 8, algoConfig, AllocationTracker.EMPTY)
+        return new ParallelUnionFind(graph, Pools.DEFAULT, 200_000, 8, algoConfig, AllocationTracker.EMPTY)
                 .compute();
     }
 
     @Benchmark
-    public Object parallelUnionFindQueue_400000() {
-        return new UnionFindQueue(graph, Pools.DEFAULT, 400_000, 8, algoConfig, AllocationTracker.EMPTY)
+    public Object parallelParallelUnionFind_400000() {
+        return new ParallelUnionFind(graph, Pools.DEFAULT, 400_000, 8, algoConfig, AllocationTracker.EMPTY)
                 .compute();
     }
 
     @Benchmark
-    public Object parallelUnionFindQueue_800000() {
-        return new UnionFindQueue(graph, Pools.DEFAULT, 800_000, 8, algoConfig, AllocationTracker.EMPTY)
+    public Object parallelParallelUnionFind_800000() {
+        return new ParallelUnionFind(graph, Pools.DEFAULT, 800_000, 8, algoConfig, AllocationTracker.EMPTY)
                 .compute();
     }
 
@@ -223,16 +222,9 @@ public class ParallelUnionFindBenchmark {
                 .compute();
     }
 
-    // TODO: not a benchmark, it's eirther extremely slow or does not terminate rn
-    public Object multiSourceColoring() {
-        return new MSColoring(graph, Pools.DEFAULT, 8)
-                .compute()
-                .getColors();
-    }
-
     @Benchmark
     public Object sequentialUnionFind() {
-        return new UnionFindSeq(graph, algoConfig, AllocationTracker.EMPTY)
+        return new SequentialUnionFind(graph, algoConfig, AllocationTracker.EMPTY)
                 .compute();
 
     }

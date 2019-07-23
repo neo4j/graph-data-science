@@ -26,13 +26,12 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 /**
- * Implementation of {@link DisjointSetStruct} using Union by Rank and Path compression.
+ * Implementation of {@link SequentialDisjointSetStruct} using Union by Rank and Path compression.
  */
-public final class RankedDisjointSetStruct extends DisjointSetStruct {
+public final class RankedDisjointSetStruct extends SequentialDisjointSetStruct {
 
     public static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations.builder(RankedDisjointSetStruct.class)
             .perNode("parent", HugeLongArray::memoryEstimation)
-            .perNode("depth", HugeLongArray::memoryEstimation)
             .build();
 
     private final HugeLongArray parent;

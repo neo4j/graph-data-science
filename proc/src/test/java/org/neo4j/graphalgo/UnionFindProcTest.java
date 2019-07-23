@@ -149,7 +149,7 @@ public class UnionFindProcTest {
 
     @Test
     public void testUnionFindWithRankStrategy() throws Exception {
-        String query = "CALL algo.unionFind('', '', { graph: $graph, unionStrategy: 'rank' }) " +
+        String query = "CALL algo.unionFind('', '', { graph: $graph, unionStrategy: 'rank', concurrency: 1 }) " +
                        "YIELD setCount, communityCount";
 
         db.execute(query, MapUtil.map("graph", graphImpl)).accept(
@@ -175,7 +175,7 @@ public class UnionFindProcTest {
 
     @Test
     public void testUnionFindWithSeedAndRankStrategy() throws Exception {
-        String query = "CALL algo.unionFind('', '', { graph: $graph, seedProperty: 'seedId', unionStrategy: 'rank' }) " +
+        String query = "CALL algo.unionFind('', '', { graph: $graph, seedProperty: 'seedId', unionStrategy: 'rank', concurrency: 1 }) " +
                        "YIELD setCount, communityCount";
 
         db.execute(query, MapUtil.map("graph", graphImpl)).accept(

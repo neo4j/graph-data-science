@@ -50,7 +50,7 @@ public final class UnionFindSafetyTest {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(
-                new Object[]{UnionFindType.QUEUE},
+                new Object[]{UnionFindType.PARALLEL},
                 new Object[]{UnionFindType.FORK_JOIN},
                 new Object[]{UnionFindType.FJ_MERGE}
         );

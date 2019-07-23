@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.dss.SequentialDisjointSetStruct;
 import org.neo4j.graphdb.Direction;
 
 import java.util.concurrent.ForkJoinPool;
@@ -87,7 +88,7 @@ public class UnionFindForkJoin extends UnionFind<UnionFindForkJoin> {
         return ForkJoinPool.commonPool().invoke(new UnionFindTask(0));
     }
 
-    private class UnionFindTask extends RecursiveTask<DisjointSetStruct> {
+    private class UnionFindTask extends RecursiveTask<SequentialDisjointSetStruct> {
 
         private final long offset;
         private final long end;
@@ -100,7 +101,7 @@ public class UnionFindForkJoin extends UnionFind<UnionFindForkJoin> {
         }
 
         @Override
-        protected DisjointSetStruct compute() {
+        protected SequentialDisjointSetStruct compute() {
             if (nodeCount - end >= batchSize && running()) {
                 final UnionFindTask process = new UnionFindTask(end);
                 process.fork();
@@ -109,8 +110,8 @@ public class UnionFindForkJoin extends UnionFind<UnionFindForkJoin> {
             return run();
         }
 
-        protected DisjointSetStruct run() {
-            final DisjointSetStruct disjointSetStruct = initDisjointSetStruct(nodeCount, tracker);
+        protected SequentialDisjointSetStruct run() {
+            final SequentialDisjointSetStruct disjointSetStruct = initDisjointSetStruct(nodeCount, tracker);
             for (long node = offset; node < end && running(); node++) {
                 rels.forEachRelationship(
                         node,
@@ -126,7 +127,7 @@ public class UnionFindForkJoin extends UnionFind<UnionFindForkJoin> {
         }
     }
 
-    private class ThresholdUnionFindTask extends RecursiveTask<DisjointSetStruct> {
+    private class ThresholdUnionFindTask extends RecursiveTask<SequentialDisjointSetStruct> {
 
         private final long offset;
         private final long end;
@@ -141,7 +142,7 @@ public class UnionFindForkJoin extends UnionFind<UnionFindForkJoin> {
         }
 
         @Override
-        protected DisjointSetStruct compute() {
+        protected SequentialDisjointSetStruct compute() {
             if (nodeCount - end >= batchSize && running()) {
                 final ThresholdUnionFindTask process = new ThresholdUnionFindTask(
                         offset,
@@ -152,8 +153,8 @@ public class UnionFindForkJoin extends UnionFind<UnionFindForkJoin> {
             return run();
         }
 
-        protected DisjointSetStruct run() {
-            final DisjointSetStruct disjointSetStruct = initDisjointSetStruct(nodeCount, tracker);
+        protected SequentialDisjointSetStruct run() {
+            final SequentialDisjointSetStruct disjointSetStruct = initDisjointSetStruct(nodeCount, tracker);
             for (long node = offset; node < end && running(); node++) {
                 rels.forEachRelationship(
                         node,

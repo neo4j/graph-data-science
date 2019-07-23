@@ -23,21 +23,20 @@ import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.graphalgo.impl.unionfind.UnionFindSeq;
 import org.neo4j.graphalgo.impl.unionfind.UnionFind;
 import org.neo4j.graphalgo.impl.unionfind.UnionFindType;
 
 public enum UFBenchmarkCombination {
 
-    HEAVY_QUEUE(GraphImpl.HEAVY, UnionFindType.QUEUE),
+    HEAVY_QUEUE(GraphImpl.HEAVY, UnionFindType.PARALLEL),
     HEAVY_FORK_JOIN(GraphImpl.HEAVY, UnionFindType.FORK_JOIN),
     HEAVY_FJ_MERGE(GraphImpl.HEAVY, UnionFindType.FJ_MERGE),
-    HEAVY_SEQ(GraphImpl.HEAVY, UnionFindType.SEQ),
+    HEAVY_SEQ(GraphImpl.HEAVY, UnionFindType.SEQUENTIAL),
 
-    HUGE_QUEUE(GraphImpl.HUGE, UnionFindType.QUEUE),
+    HUGE_QUEUE(GraphImpl.HUGE, UnionFindType.PARALLEL),
     HUGE_FORK_JOIN(GraphImpl.HUGE, UnionFindType.FORK_JOIN),
     HUGE_FJ_MERGE(GraphImpl.HUGE, UnionFindType.FJ_MERGE),
-    HUGE_SEQ(GraphImpl.HUGE, UnionFindType.SEQ);
+    HUGE_SEQ(GraphImpl.HUGE, UnionFindType.SEQUENTIAL);
 
     final GraphImpl graph;
     final UnionFindType algo;

@@ -126,11 +126,17 @@ public abstract class DisjointSetStructTest {
     public final void testMergeDSS() {
         final DisjointSetStruct a = create(10, set(0, 1, 2, 3), set(4, 5, 6), set(7, 8), set(9));
         final DisjointSetStruct b = create(10, set(0, 5), set(7, 9));
-        assertEquals(4, getSetCount(a));
-        a.merge(b);
-        assertEquals(2, getSetCount(a));
-    }
+        if (a instanceof SequentialDisjointSetStruct) {
+            SequentialDisjointSetStruct dssa = (SequentialDisjointSetStruct) a;
+            if (b instanceof SequentialDisjointSetStruct) {
+                SequentialDisjointSetStruct dssb = (SequentialDisjointSetStruct) b;
+                assertEquals(4, getSetCount(dssa));
+                dssa.merge(dssb);
+                assertEquals(2, getSetCount(dssa));
 
+            }
+        }
+    }
 
     public static int[] set(int... elements) {
         return elements;
@@ -157,7 +163,7 @@ public abstract class DisjointSetStructTest {
      * @return true if both items belong to the same set, false otherwise
      */
     private boolean connected(DisjointSetStruct struct, long p, long q) {
-        return struct.find(p) == struct.find(q);
+        return struct.connected(p, q);
     }
 
     /**
@@ -167,7 +173,7 @@ public abstract class DisjointSetStructTest {
         long capacity = struct.size();
         BitSet sets = new BitSet(capacity);
         for (long i = 0L; i < capacity; i++) {
-            long setId = struct.findAndBalance(i);
+            long setId = struct.setIdOf(i);
             sets.set(setId);
         }
         return sets.cardinality();
@@ -180,7 +186,7 @@ public abstract class DisjointSetStructTest {
      */
     private LongLongMap getSetSize(DisjointSetStruct struct) {
         final LongLongMap map = new LongLongScatterMap();
-        for (long i = struct.parent().size() - 1; i >= 0; i--) {
+        for (long i = struct.size() - 1; i >= 0; i--) {
             map.addTo(struct.setIdOf(i), 1);
         }
         return map;

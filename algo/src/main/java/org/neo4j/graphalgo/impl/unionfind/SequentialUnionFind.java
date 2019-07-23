@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.dss.SequentialDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.IncrementalDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.RankedDisjointSetStruct;
 import org.neo4j.graphdb.Direction;
@@ -35,7 +35,7 @@ import org.neo4j.graphdb.Direction;
  * <p>
  * The algorithm computes sets of weakly connected components.
  * <p>
- * The impl. is based on a {@link DisjointSetStruct}. It iterates over all relationships once
+ * The impl. is based on a {@link SequentialDisjointSetStruct}. It iterates over all relationships once
  * within a single forEach loop and adds each source-target pair to the struct. Therefore buffering
  * would introduce an overhead (a SingleRun-RelationshipIterable might be used here).
  * <p>
@@ -45,21 +45,21 @@ import org.neo4j.graphdb.Direction;
  *
  * @author mknblch
  */
-public class UnionFindSeq extends UnionFind<UnionFindSeq> {
+public class SequentialUnionFind extends UnionFind<SequentialUnionFind> {
 
-    private DisjointSetStruct disjointSetStruct;
+    private SequentialDisjointSetStruct disjointSetStruct;
     private final long nodeCount;
     private RelationshipConsumer unrestricted;
 
     public static MemoryEstimation memoryEstimation(final boolean incremental) {
-        return MemoryEstimations.builder(UnionFindSeq.class)
+        return MemoryEstimations.builder(SequentialUnionFind.class)
                 .add("DisjointSetStruct", (incremental) ?
                         IncrementalDisjointSetStruct.memoryEstimation() :
                         RankedDisjointSetStruct.memoryEstimation())
                 .build();
     }
 
-    public UnionFindSeq(
+    public SequentialUnionFind(
             Graph graph,
             UnionFind.Config algoConfig,
             AllocationTracker tracker) {
@@ -81,7 +81,7 @@ public class UnionFindSeq extends UnionFind<UnionFindSeq> {
      * @return a DSS
      */
     @Override
-    public DisjointSetStruct compute(final double threshold) {
+    public SequentialDisjointSetStruct compute(final double threshold) {
         return compute(new WithThreshold(threshold));
     }
 
@@ -91,18 +91,18 @@ public class UnionFindSeq extends UnionFind<UnionFindSeq> {
      * @return a DSS
      */
     @Override
-    public DisjointSetStruct computeUnrestricted() {
+    public SequentialDisjointSetStruct computeUnrestricted() {
         return compute(unrestricted);
     }
 
     @Override
-    public UnionFindSeq release() {
+    public SequentialUnionFind release() {
         disjointSetStruct = null;
         unrestricted = null;
         return super.release();
     }
 
-    private DisjointSetStruct compute(RelationshipConsumer consumer) {
+    private SequentialDisjointSetStruct compute(RelationshipConsumer consumer) {
         final ProgressLogger progressLogger = getProgressLogger();
         graph.forEachNode((long node) -> {
             if (!running()) {

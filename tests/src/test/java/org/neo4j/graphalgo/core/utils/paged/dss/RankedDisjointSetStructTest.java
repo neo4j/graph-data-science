@@ -28,7 +28,7 @@ import static org.neo4j.graphalgo.core.utils.paged.dss.RankedDisjointSetStruct.m
 public class RankedDisjointSetStructTest extends DisjointSetStructTest {
 
     @Override
-    DisjointSetStruct newSet(final int capacity) {
+    SequentialDisjointSetStruct newSet(final int capacity) {
         AllocationTracker tracker = AllocationTracker.EMPTY;
         return new RankedDisjointSetStruct(
                 capacity,
@@ -38,8 +38,8 @@ public class RankedDisjointSetStructTest extends DisjointSetStructTest {
 
     @Test
     public void shouldComputeMemoryEstimation() {
-        assertMemoryEstimation(memoryEstimation(), 0, MemoryRange.of(112));
-        assertMemoryEstimation(memoryEstimation(), 100, MemoryRange.of(1712));
-        assertMemoryEstimation(memoryEstimation(), 100_000_000_000L, MemoryRange.of(1600244140768L));
+        assertMemoryEstimation(memoryEstimation(), 0, MemoryRange.of(72));
+        assertMemoryEstimation(memoryEstimation(), 100, MemoryRange.of(872));
+        assertMemoryEstimation(memoryEstimation(), 100_000_000_000L, MemoryRange.of(800_122_070_400L));
     }
 }

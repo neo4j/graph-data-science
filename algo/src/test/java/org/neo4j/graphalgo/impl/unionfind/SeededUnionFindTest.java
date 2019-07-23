@@ -119,12 +119,12 @@ public class SeededUnionFindTest extends HeavyHugeTester {
 
     @Test
     public void testSeq() {
-        test(UnionFindType.SEQ);
+        test(UnionFindType.SEQUENTIAL);
     }
 
     @Test
-    public void testQueue() {
-        test(UnionFindType.QUEUE);
+    public void testPar() {
+        test(UnionFindType.PARALLEL);
     }
 
     @Test

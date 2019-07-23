@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.dss.SequentialDisjointSetStruct;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
@@ -55,7 +56,7 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
     private final AllocationTracker tracker;
     private final long nodeCount;
     private final long batchSize;
-    private DisjointSetStruct disjointSetStruct;
+    private SequentialDisjointSetStruct disjointSetStruct;
 
     public static MemoryEstimation memoryEstimation(final boolean incremental) {
         return UnionFind.memoryEstimation(incremental, UnionFindForkJoinMerge.class, ThresholdUnionFindProcess.class);
@@ -111,7 +112,7 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
         if (!running()) {
             return;
         }
-        final Stack<DisjointSetStruct> disjointSetStructs = new Stack<>();
+        final Stack<SequentialDisjointSetStruct> disjointSetStructs = new Stack<>();
         ufProcesses.forEach(uf -> disjointSetStructs.add(uf.getDisjointSetStruct()));
         disjointSetStruct = ForkJoinPool.commonPool().invoke(new Merge(disjointSetStructs));
     }
@@ -123,7 +124,7 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
     }
 
     private abstract class AbstractUnionFindTask implements Runnable {
-        abstract DisjointSetStruct getDisjointSetStruct();
+        abstract SequentialDisjointSetStruct getDisjointSetStruct();
     }
 
     /**
@@ -133,7 +134,7 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
 
         private final long offset;
         private final long end;
-        private final DisjointSetStruct struct;
+        private final SequentialDisjointSetStruct struct;
         private final RelationshipIterator rels;
 
         UnionFindProcess(long offset, long length) {
@@ -162,7 +163,7 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
         }
 
         @Override
-        DisjointSetStruct getDisjointSetStruct() {
+        SequentialDisjointSetStruct getDisjointSetStruct() {
             return struct;
         }
     }
@@ -174,7 +175,7 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
 
         private final long offset;
         private final long end;
-        private final DisjointSetStruct struct;
+        private final SequentialDisjointSetStruct struct;
         private final RelationshipIterator rels;
         private final double threshold;
 
@@ -205,21 +206,21 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
         }
 
         @Override
-        DisjointSetStruct getDisjointSetStruct() {
+        SequentialDisjointSetStruct getDisjointSetStruct() {
             return struct;
         }
     }
 
-    private class Merge extends RecursiveTask<DisjointSetStruct> {
+    private class Merge extends RecursiveTask<SequentialDisjointSetStruct> {
 
-        private final Stack<DisjointSetStruct> communityContainers;
+        private final Stack<SequentialDisjointSetStruct> communityContainers;
 
-        private Merge(Stack<DisjointSetStruct> structs) {
+        private Merge(Stack<SequentialDisjointSetStruct> structs) {
             this.communityContainers = structs;
         }
 
         @Override
-        protected DisjointSetStruct compute() {
+        protected SequentialDisjointSetStruct compute() {
             final int size = communityContainers.size();
             if (size == 1) {
                 return communityContainers.pop();
@@ -230,13 +231,13 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
             if (size == 2) {
                 return communityContainers.pop().merge(communityContainers.pop());
             }
-            final Stack<DisjointSetStruct> list = new Stack<>();
+            final Stack<SequentialDisjointSetStruct> list = new Stack<>();
             list.push(communityContainers.pop());
             list.push(communityContainers.pop());
             final Merge mergeA = new Merge(communityContainers);
             final Merge mergeB = new Merge(list);
             mergeA.fork();
-            final DisjointSetStruct computed = mergeB.compute();
+            final SequentialDisjointSetStruct computed = mergeB.compute();
             return mergeA.join().merge(computed);
         }
     }

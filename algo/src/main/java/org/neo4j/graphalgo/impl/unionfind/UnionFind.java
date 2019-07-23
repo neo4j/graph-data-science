@@ -25,12 +25,11 @@ import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.dss.SequentialDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.IncrementalDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.RankedDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.UnionStrategy;
-
-import java.util.concurrent.ForkJoinTask;
 
 public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> {
 
@@ -66,7 +65,7 @@ public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> 
         return algoConfig.threshold;
     }
 
-    DisjointSetStruct initDisjointSetStruct(long nodeCount, AllocationTracker tracker) {
+    SequentialDisjointSetStruct initDisjointSetStruct(long nodeCount, AllocationTracker tracker) {
         UnionStrategy unionStrategy = algoConfig.isUnionByRank ?
                 new UnionStrategy.ByRank(nodeCount, tracker) :
                 new UnionStrategy.ByMin();

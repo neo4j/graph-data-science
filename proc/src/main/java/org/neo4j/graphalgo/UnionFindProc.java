@@ -68,7 +68,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        return run(label, relationship, config, UnionFindType.QUEUE);
+        return run(label, relationship, config, UnionFindType.PARALLEL);
     }
 
     @Procedure(value = "algo.unionFind.stream")
@@ -80,7 +80,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        return stream(label, relationship, config, UnionFindType.QUEUE);
+        return stream(label, relationship, config, UnionFindType.PARALLEL);
     }
 
     @Procedure(value = "algo.unionFind.memrec", mode = Mode.READ)
@@ -105,7 +105,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        return run(label, relationship, config, UnionFindType.QUEUE);
+        return run(label, relationship, config, UnionFindType.PARALLEL);
     }
 
     @Procedure(value = "algo.unionFind.queue.stream")
@@ -117,7 +117,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        return stream(label, relationship, config, UnionFindType.QUEUE);
+        return stream(label, relationship, config, UnionFindType.PARALLEL);
     }
 
     @Procedure(value = "algo.unionFind.forkJoinMerge", mode = Mode.WRITE)
@@ -187,12 +187,12 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
     @Override
     UnionFindFactory<T> algorithmFactory(final ProcedureConfiguration config) {
         boolean incremental = config.getString(CONFIG_SEED_PROPERTY).isPresent();
-        String algoName = config.getString(CONFIG_PARALLEL_ALGO, UnionFindType.QUEUE.name());
+        String algoName = config.getString(CONFIG_PARALLEL_ALGO, UnionFindType.PARALLEL.name());
 
         UnionFindType algorithmType = null;
 
         if (config.isSingleThreaded()) {
-            algorithmType = UnionFindType.SEQ;
+            algorithmType = UnionFindType.SEQUENTIAL;
         } else {
             for (final UnionFindType algoType : UnionFindType.values()) {
                 if (algoType.name().equalsIgnoreCase(algoName)) {
@@ -202,7 +202,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
             if (algorithmType == null) {
                 String errorMsg = String.format("Parallel configuration %s is invalid. Valid names are %s", algoName,
                         Arrays.stream(UnionFindType.values())
-                                .filter(ufa -> ufa != UnionFindType.SEQ)
+                                .filter(ufa -> ufa != UnionFindType.SEQUENTIAL)
                                 .map(UnionFindType::name)
                                 .collect(Collectors.joining(", ")));
                 throw new IllegalArgumentException(errorMsg);

@@ -30,12 +30,12 @@ import static org.neo4j.graphalgo.core.utils.paged.dss.IncrementalDisjointSetStr
 public class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
 
     @Override
-    DisjointSetStruct newSet(final int capacity) {
+    SequentialDisjointSetStruct newSet(final int capacity) {
         TestWeightMapping communities = new TestWeightMapping();
         return newSet(capacity, communities);
     }
 
-    DisjointSetStruct newSet(final int capacity, final TestWeightMapping weightMapping) {
+    SequentialDisjointSetStruct newSet(final int capacity, final TestWeightMapping weightMapping) {
         return new IncrementalDisjointSetStruct(
                 capacity,
                 weightMapping,
@@ -46,7 +46,7 @@ public class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
     @Test
     public void shouldRunWithLessInitialCommunities() {
         TestWeightMapping communities = new TestWeightMapping(0, 0, 1, 0);
-        DisjointSetStruct dss = newSet(4, communities);
+        SequentialDisjointSetStruct dss = newSet(4, communities);
 
         assertEquals(3, getSetCount(dss));
         assertEquals(dss.setIdOf(0), dss.setIdOf(1));
@@ -59,7 +59,7 @@ public class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
     @Test
     public void shouldRunWithLessInitialCommunitiesAndLargerIdSpace() {
         TestWeightMapping communities = new TestWeightMapping(0, 10, 1, 10);
-        DisjointSetStruct dss = newSet(4, communities);
+        SequentialDisjointSetStruct dss = newSet(4, communities);
 
         assertEquals(3, getSetCount(dss));
         assertEquals(dss.setIdOf(0), dss.setIdOf(1));
@@ -72,7 +72,7 @@ public class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
     @Test
     public void shouldRunWithLessInitialCommunitiesAndOverlappingIdSpace() {
         TestWeightMapping communities = new TestWeightMapping(0, 3, 1, 3);
-        DisjointSetStruct dss = newSet(4, communities);
+        SequentialDisjointSetStruct dss = newSet(4, communities);
 
         assertEquals(3, getSetCount(dss));
         assertEquals(dss.setIdOf(0), dss.setIdOf(1));
