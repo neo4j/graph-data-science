@@ -20,11 +20,11 @@
 package org.neo4j.graphalgo.impl.results;
 
 import org.junit.Test;
-import org.neo4j.graphalgo.Normalization;
-import org.neo4j.graphalgo.core.write.Exporter;
+import org.neo4j.graphalgo.impl.utils.Normalization;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class NormalizedCentralityResultTest {
     @Test

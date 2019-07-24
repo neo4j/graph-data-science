@@ -219,8 +219,6 @@ public class PageRank extends Algorithm<PageRank> {
                 idMapping.nodeCount(),
                 dampingFactor,
                 sourceNodeIds.map(graph::toMappedNodeId).filter(mappedId -> mappedId != -1L).toArray(),
-                relationshipIterator,
-                degrees,
                 partitions,
                 executor);
     }
@@ -259,8 +257,6 @@ public class PageRank extends Algorithm<PageRank> {
             long nodeCount,
             double dampingFactor,
             long[] sourceNodeIds,
-            RelationshipIterator relationshipIterator,
-            Degrees degrees,
             List<Partition> partitions,
             ExecutorService pool) {
         concurrency = findIdealConcurrency(nodeCount, partitions, concurrency, log);

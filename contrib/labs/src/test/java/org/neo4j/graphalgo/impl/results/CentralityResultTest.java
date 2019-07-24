@@ -20,10 +20,11 @@
 package org.neo4j.graphalgo.impl.results;
 
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
-import org.neo4j.graphalgo.Normalization;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.write.Exporter;
+import org.neo4j.graphalgo.impl.utils.Normalization;
 
 import java.util.Arrays;
 
@@ -36,30 +37,39 @@ import static org.mockito.Mockito.verify;
 public class CentralityResultTest {
     @Test
     public void doubleArrayResult() {
-        HugeDoubleArrayResult result = new HugeDoubleArrayResult(HugeDoubleArray.of(1,2,3,4));
+        HugeDoubleArrayResult result = new HugeDoubleArrayResult(HugeDoubleArray.of(1, 2, 3, 4));
 
         assertEquals(4.0, result.computeMax(), 0.01);
         assertEquals(10.0, result.computeL1Norm(), 0.01);
         assertEquals(5.477225575051661, result.computeL2Norm(), 0.01);
     }
 
-
     @Test
     public void doubleArrayResultExport() {
         String property = "eigenvector";
-        HugeDoubleArrayResult result = new HugeDoubleArrayResult(HugeDoubleArray.of(1,2,3,4));
+        final HugeDoubleArray given = HugeDoubleArray.of(1, 2, 3, 4);
+        HugeDoubleArrayResult result = new HugeDoubleArrayResult(given);
 
         Exporter exporter = mock(Exporter.class);
+        ArgumentCaptor<HugeDoubleArrayResult.MapTranslator> arg = ArgumentCaptor
+                .forClass(HugeDoubleArrayResult.MapTranslator.class);
+
         Normalization.MAX.apply(result).export(property, exporter);
 
-        verify(exporter).write(property, HugeDoubleArray.of(0.25,0.5,0.75,1.0), HugeDoubleArray.Translator.INSTANCE);
+        verify(exporter).write(eq(property), eq(given), arg.capture());
+        HugeDoubleArrayResult.MapTranslator provided = arg.getValue();
+
+        assertEquals(0.25D, provided.toDouble(given, 0), 1e-4);
+        assertEquals(0.5D, provided.toDouble(given, 1), 1e-4);
+        assertEquals(0.75D, provided.toDouble(given, 2), 1e-4);
+        assertEquals(1.0D, provided.toDouble(given, 3), 1e-4);
     }
 
     @Test
     public void partitionedPrimitiveDoubleArrayResult() {
-        double[][] partitions = new double[][] { {1.0,2.0}, {3.0,4.0} };
-        int[] starts = new int[] { 0, 2};
-        PartitionedPrimitiveDoubleArrayResult result = new PartitionedPrimitiveDoubleArrayResult(partitions, starts);
+        double[][] partitions = new double[][]{{1.0, 2.0}, {3.0, 4.0}};
+        long[] starts = new long[]{0, 2};
+        PartitionedDoubleArrayResult result = new PartitionedDoubleArrayResult(partitions, starts);
 
         assertEquals(4.0, result.computeMax(), 0.01);
         assertEquals(10.0, result.computeL1Norm(), 0.01);
@@ -69,21 +79,20 @@ public class CentralityResultTest {
     @Test
     public void partitionedPrimitiveDoubleArrayResultExport() {
         String property = "eigenvector";
-        double[][] partitions = new double[][] { {1.0,2.0}, {3.0,4.0} };
-        int[] starts = new int[] { 0, 2};
-        PartitionedPrimitiveDoubleArrayResult result = new PartitionedPrimitiveDoubleArrayResult(partitions, starts);
+        double[][] partitions = new double[][]{{1.0, 2.0}, {3.0, 4.0}};
+        long[] starts = new long[]{0, 2};
+        PartitionedDoubleArrayResult result = new PartitionedDoubleArrayResult(partitions, starts);
 
         Exporter exporter = mock(Exporter.class);
         Normalization.MAX.apply(result).export(property, exporter);
 
-        verify(exporter).write(eq(property), argThat(arrayEq(new double[][] { {0.25, 0.5}, {0.75, 1.0} })), eq(result));
+        verify(exporter).write(eq(property), argThat(arrayEq(new double[][]{{0.25, 0.5}, {0.75, 1.0}})), eq(result));
     }
-
 
     @Test
     public void partitionedDoubleArrayResult() {
-        double[][] partitions = new double[][] { {1.0,2.0}, {3.0,4.0} };
-        long[] starts = new long[] { 0, 2};
+        double[][] partitions = new double[][]{{1.0, 2.0}, {3.0, 4.0}};
+        long[] starts = new long[]{0, 2};
         PartitionedDoubleArrayResult result = new PartitionedDoubleArrayResult(partitions, starts);
 
         assertEquals(4.0, result.computeMax(), 0.01);
@@ -94,21 +103,19 @@ public class CentralityResultTest {
     @Test
     public void partitionedDoubleArrayResultExport() {
         String property = "eigenvector";
-        double[][] partitions = new double[][] { {1.0,2.0}, {3.0,4.0} };
-        long[] starts = new long[] { 0, 2};
+        double[][] partitions = new double[][]{{1.0, 2.0}, {3.0, 4.0}};
+        long[] starts = new long[]{0, 2};
         PartitionedDoubleArrayResult result = new PartitionedDoubleArrayResult(partitions, starts);
 
         Exporter exporter = mock(Exporter.class);
         Normalization.MAX.apply(result).export(property, exporter);
 
-        verify(exporter).write(eq(property), argThat(arrayEq(new double[][] { {0.25, 0.5}, {0.75, 1.0} })), eq(result));
+        verify(exporter).write(eq(property), argThat(arrayEq(new double[][]{{0.25, 0.5}, {0.75, 1.0}})), eq(result));
     }
-
 
     private ArrayMatcher arrayEq(double[][] expected) {
         return new ArrayMatcher(expected);
     }
-
 
     class ArrayMatcher implements ArgumentMatcher<double[][]> {
         private double[][] expected;
