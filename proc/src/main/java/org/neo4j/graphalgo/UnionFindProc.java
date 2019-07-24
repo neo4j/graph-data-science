@@ -92,7 +92,8 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
         return Stream.of(new MemRecResult(memoryEstimation));
     }
 
-    @Procedure(value = "algo.unionFind.queue", mode = Mode.WRITE)
+    @Deprecated
+    @Procedure(value = "algo.unionFind.queue", mode = Mode.WRITE, deprecatedBy = "algo.unionFind")
     @Description("CALL algo.unionFind(label:String, relationship:String, " +
                  "{property: 'weight', threshold: 0.42, defaultValue: 1.0, write: true, writeProperty: 'community', seedProperty: 'seedCommunity', concurrency: 4}) " +
                  "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
@@ -104,7 +105,8 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
         return run(label, relationship, config, UnionFindType.PARALLEL);
     }
 
-    @Procedure(value = "algo.unionFind.queue.stream")
+    @Deprecated
+    @Procedure(value = "algo.unionFind.queue.stream", deprecatedBy = "algo.unionFind.stream")
     @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
                  "{property: 'propertyName', threshold: 0.42, defaultValue: 1.0, seedProperty: 'seedCommunity', concurrency: 4}) " +
                  "YIELD nodeId, setId - yields a setId to each node id")
@@ -116,7 +118,8 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
         return stream(label, relationship, config, UnionFindType.PARALLEL);
     }
 
-    @Procedure(value = "algo.unionFind.forkJoinMerge", mode = Mode.WRITE)
+    @Deprecated
+    @Procedure(value = "algo.unionFind.forkJoinMerge", mode = Mode.WRITE, deprecatedBy = "algo.unionFind")
     @Description("CALL algo.unionFind(label:String, relationship:String, " +
                  "{property: 'weight', threshold: 0.42, defaultValue: 1.0, write: true, writeProperty: 'community', seedProperty: 'seedCommunity', concurrency: 4}) " +
                  "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
@@ -128,7 +131,8 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
         return run(label, relationship, config, UnionFindType.FJ_MERGE);
     }
 
-    @Procedure(value = "algo.unionFind.forkJoinMerge.stream")
+    @Deprecated
+    @Procedure(value = "algo.unionFind.forkJoinMerge.stream", deprecatedBy = "algo.unionFind.stream")
     @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
                  "{property: 'propertyName', threshold: 0.42, defaultValue: 1.0, seedProperty: 'seedCommunity', concurrency: 4}) " +
                  "YIELD nodeId, setId - yields a setId to each node id")
@@ -140,7 +144,8 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
         return stream(label, relationship, config, UnionFindType.FJ_MERGE);
     }
 
-    @Procedure(value = "algo.unionFind.forkJoin", mode = Mode.WRITE)
+    @Deprecated
+    @Procedure(value = "algo.unionFind.forkJoin", mode = Mode.WRITE, deprecatedBy = "algo.unionFind")
     @Description("CALL algo.unionFind(label:String, relationship:String, " +
                  "{property: 'weight', threshold: 0.42, defaultValue: 1.0, write: true, writeProperty: 'community', seedProperty: 'seedCommunity', concurrency: 4}) " +
                  "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
@@ -152,7 +157,8 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
         return run(label, relationship, config, UnionFindType.FORK_JOIN);
     }
 
-    @Procedure(value = "algo.unionFind.forkJoin.stream")
+    @Deprecated
+    @Procedure(value = "algo.unionFind.forkJoin.stream", deprecatedBy = "algo.unionFind.stream")
     @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
                  "{property: 'propertyName', threshold: 0.42, defaultValue: 1.0, seedProperty: 'seedCommunity', concurrency: 4}) " +
                  "YIELD nodeId, setId - yields a setId to each node id")
