@@ -57,9 +57,6 @@ public class UnionFindBenchmark {
     @Param({"HEAVY", "HUGE"})
     GraphImpl graph;
 
-    @Param({"SEQUENTIAL", "PARALLEL"})
-    UnionFindType ufType;
-
     private Graph theGraph;
 
     @Setup
@@ -81,7 +78,7 @@ public class UnionFindBenchmark {
                 Double.NaN
         );
 
-        UnionFind<?> unionFindAlgo = ufType.create(
+        UnionFind<?> unionFindAlgo = UnionFindType.PARALLEL.create(
                 theGraph,
                 Pools.DEFAULT,
                 (int) (theGraph.nodeCount() / Pools.DEFAULT_CONCURRENCY),
