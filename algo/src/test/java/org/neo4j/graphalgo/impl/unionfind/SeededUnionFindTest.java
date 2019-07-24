@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.impl.unionfind;
 
-import com.carrotsearch.hppc.BitSet;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -111,11 +110,6 @@ public class SeededUnionFindTest extends HeavyHugeTester {
                 .load(graphImpl);
 
         config = new UnionFind.Config(graph.nodeProperties(SEED_PROPERTY), Double.NaN);
-    }
-
-    @Test
-    public void testSeq() {
-        test(UnionFindType.SEQUENTIAL);
     }
 
     @Test

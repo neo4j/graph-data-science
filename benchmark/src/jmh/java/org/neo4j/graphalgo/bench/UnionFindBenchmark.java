@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.impl.unionfind.UnionFind;
-import org.neo4j.graphalgo.impl.unionfind.SequentialUnionFind;
 import org.neo4j.graphalgo.impl.unionfind.UnionFindType;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -77,7 +76,7 @@ public class UnionFindBenchmark {
 
     @Benchmark
     public Object unionFind() {
-        SequentialUnionFind.Config algoConfig = new UnionFind.Config(
+        UnionFind.Config algoConfig = new UnionFind.Config(
                 new HugeNullWeightMap(-1L),
                 Double.NaN
         );

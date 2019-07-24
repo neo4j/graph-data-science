@@ -109,11 +109,6 @@ public class UnionFindTest {
     }
 
     @Test
-    public void testSeq() {
-        test(UnionFindType.SEQUENTIAL);
-    }
-
-    @Test
     public void testPar() {
         test(UnionFindType.PARALLEL);
     }
@@ -126,24 +121,6 @@ public class UnionFindTest {
     @Test
     public void testFJMerge() {
         test(UnionFindType.FJ_MERGE);
-    }
-
-    @Test
-    public void memRecSeq() {
-        GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
-        assertEquals(
-                MemoryRange.of(112),
-                UnionFindType.SEQUENTIAL.memoryEstimation().estimate(dimensions0, 1).memoryUsage());
-
-        GraphDimensions dimensions100 = new GraphDimensions.Builder().setNodeCount(100).build();
-        assertEquals(
-                MemoryRange.of(912),
-                UnionFindType.SEQUENTIAL.memoryEstimation().estimate(dimensions100, 1).memoryUsage());
-
-        GraphDimensions dimensions100B = new GraphDimensions.Builder().setNodeCount(100_000_000_000L).build();
-        assertEquals(
-                MemoryRange.of(800_122_070_440L),
-                UnionFindType.SEQUENTIAL.memoryEstimation().estimate(dimensions100B, 1).memoryUsage());
     }
 
     @Test

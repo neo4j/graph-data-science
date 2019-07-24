@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.unionfind.UnionFind;
 import org.neo4j.graphalgo.impl.unionfind.ParallelUnionFind;
-import org.neo4j.graphalgo.impl.unionfind.SequentialUnionFind;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
@@ -194,12 +193,6 @@ public class ParallelUnionFindBenchmark {
     public Object parallelParallelUnionFind_800000() {
         return new ParallelUnionFind(graph, Pools.DEFAULT, 800_000, 8, algoConfig, AllocationTracker.EMPTY)
                 .compute();
-    }
-
-    public Object sequentialUnionFind() {
-        return new SequentialUnionFind(graph, algoConfig, AllocationTracker.EMPTY)
-                .compute();
-
     }
 
 }

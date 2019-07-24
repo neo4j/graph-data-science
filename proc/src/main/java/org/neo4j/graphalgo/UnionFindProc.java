@@ -41,11 +41,8 @@ import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Arrays;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.impl.unionfind.UnionFindFactory.CONFIG_ALGO_TYPE;
@@ -186,15 +183,8 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
     @Override
     UnionFindFactory<T> algorithmFactory(final ProcedureConfiguration config) {
         boolean incremental = config.getString(CONFIG_SEED_PROPERTY).isPresent();
-        UnionFindType defaultAlgoType = config.isSingleThreaded()
-                ? UnionFindType.SEQUENTIAL
-                : UnionFindType.PARALLEL;
-
+        UnionFindType defaultAlgoType = UnionFindType.PARALLEL;
         UnionFindType algoType = config.getChecked(CONFIG_ALGO_TYPE, defaultAlgoType, UnionFindType.class);
-        if (algoType == UnionFindType.SEQUENTIAL && !config.isSingleThreaded()) {
-            throw new IllegalArgumentException("The sequential union find can only be used with 'concurrency: 1'");
-        }
-
         return new UnionFindFactory<>(algoType, incremental);
     }
 
@@ -454,7 +444,6 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
             this.partitionProperty = partitionProperty;
             return this;
         }
-
 
         public Builder withWriteProperty(String writeProperty) {
             this.writeProperty = writeProperty;

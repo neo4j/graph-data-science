@@ -94,27 +94,6 @@ public enum UnionFindType {
         public MemoryEstimation memoryEstimation(boolean incremental) {
             return UnionFindForkJoinMerge.memoryEstimation(incremental);
         }
-    },
-    SEQUENTIAL {
-        @Override
-        public UnionFind<SequentialUnionFind> create(
-                final Graph graph,
-                final ExecutorService executor,
-                final int minBatchSize,
-                final int concurrency,
-                final UnionFind.Config config,
-                final AllocationTracker tracker) {
-            return new SequentialUnionFind(
-                    graph,
-                    config,
-                    tracker
-            );
-        }
-
-        @Override
-        public MemoryEstimation memoryEstimation(final boolean incremental) {
-            return SequentialUnionFind.memoryEstimation(incremental);
-        }
     };
 
     public abstract UnionFind<? extends UnionFind> create(
