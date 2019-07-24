@@ -133,21 +133,9 @@ public class GraphLoader {
      * Log progress every {@code interval} time units.
      * At most 1 message will be logged within this interval, but it is not
      * guaranteed that a message will be logged at all.
-     *
-     * @see #withDefaultLogInterval()
      */
     public GraphLoader withLogInterval(long value, TimeUnit unit) {
         this.logMillis = unit.toMillis(value);
-        return this;
-    }
-
-    /**
-     * Log progress in the default interval specified by {@link ProgressLoggerAdapter}.
-     *
-     * @see #withLogInterval(long, TimeUnit)
-     */
-    public GraphLoader withDefaultLogInterval() {
-        this.logMillis = -1;
         return this;
     }
 
@@ -156,25 +144,23 @@ public class GraphLoader {
         return this;
     }
 
-    public GraphLoader loadAsUndirected(boolean asUndirected) {
-        this.loadAsUndirected = asUndirected;
+    public GraphLoader loadAsUndirected(boolean loadAsUndirected) {
+        this.loadAsUndirected = loadAsUndirected;
         return this;
     }
 
     /**
      * Use the given {@link AllocationTracker} to track memory allocations during loading.
-     * Can be null, in which case no tracking happens. The same effect can be
-     * achieved by using {@link AllocationTracker#EMPTY}.
+     *
+     * If the tracker is {@code null}, we use {@link AllocationTracker#EMPTY}.
      */
     public GraphLoader withAllocationTracker(AllocationTracker tracker) {
-        this.tracker = tracker;
+        this.tracker = (tracker == null) ? AllocationTracker.EMPTY : tracker;
         return this;
     }
 
     /**
-     * set an executor service
-     *
-     * @param executorService the executor service
+     * Sets an executor service.
      */
     public GraphLoader withExecutorService(ExecutorService executorService) {
         this.executorService = Objects.requireNonNull(executorService);
@@ -286,10 +272,40 @@ public class GraphLoader {
      * Instructs the loader to load only relationships of the given direction.
      */
     public GraphLoader withDirection(Direction direction) {
-//        if (direction == Direction.BOTH) {
-//            this.asUndirected(true);
-//        }
         this.direction = direction;
+        return this;
+    }
+
+    /**
+     * Instructs the loader to load node weights by reading the given property.
+     * If the property is not set at the relationship, the given default value is used.
+     *
+     * @param property             May be null
+     * @param propertyDefaultValue default value to use if the property is not set
+     */
+    public GraphLoader withOptionalNodeWeightsFromProperty(String property, double propertyDefaultValue) {
+        this.nodeWeightProp = property;
+        this.nodeWeightDefault = propertyDefaultValue;
+        return this;
+    }
+
+    /**
+     * Instructs the loader to load node values by reading the given property.
+     * If the property is not set at the node, the given default value is used.
+     *
+     * @param property             May be null
+     * @param propertyDefaultValue default value to use if the property is not set
+     */
+    public GraphLoader withOptionalNodeProperty(String property, double propertyDefaultValue) {
+        this.nodeProp = property;
+        this.nodePropDefault = propertyDefaultValue;
+        return this;
+    }
+
+    public GraphLoader withOptionalNodeProperties(PropertyMapping... nodePropertyMappings) {
+        this.nodePropertyMappings = Arrays.stream(nodePropertyMappings)
+                .filter(propMapping -> !(propMapping.propertyKey == null || propMapping.propertyKey.isEmpty()))
+                .toArray(PropertyMapping[]::new);
         return this;
     }
 
@@ -316,94 +332,6 @@ public class GraphLoader {
     public GraphLoader withOptionalRelationshipWeightsFromProperty(String property, double propertyDefaultValue) {
         this.relWeightProp = property;
         this.relWeightDefault = propertyDefaultValue;
-        return this;
-    }
-
-    /**
-     * Instructs the loader to load node weights by reading the given property.
-     * If the property is not set, the given default value is used.
-     *
-     * @param property             Must not be null; to remove a weight property, use {@link #withoutNodeWeights()} instead.
-     * @param propertyDefaultValue default value to use if the property is not set
-     */
-    public GraphLoader withNodeWeightsFromProperty(String property, double propertyDefaultValue) {
-        this.nodeWeightProp = Objects.requireNonNull(property);
-        this.nodeWeightDefault = propertyDefaultValue;
-        return this;
-    }
-
-    /**
-     * Instructs the loader to load node weights by reading the given property.
-     * If the property is not set at the relationship, the given default value is used.
-     *
-     * @param property             May be null
-     * @param propertyDefaultValue default value to use if the property is not set
-     */
-    public GraphLoader withOptionalNodeWeightsFromProperty(String property, double propertyDefaultValue) {
-        this.nodeWeightProp = property;
-        this.nodeWeightDefault = propertyDefaultValue;
-        return this;
-    }
-
-    /**
-     * Instructs the loader to load node values by reading the given property.
-     * If the property is not set, the given default value is used.
-     *
-     * @param property             Must not be null; to remove a node property, use {@link #withoutNodeProperties()} instead.
-     * @param propertyDefaultValue default value to use if the property is not set
-     */
-    public GraphLoader withNodeProperty(String property, double propertyDefaultValue) {
-        this.nodeProp = Objects.requireNonNull(property);
-        this.nodePropDefault = propertyDefaultValue;
-        return this;
-    }
-
-    /**
-     * Instructs the loader to load node values by reading the given property.
-     * If the property is not set at the node, the given default value is used.
-     *
-     * @param property             May be null
-     * @param propertyDefaultValue default value to use if the property is not set
-     */
-    public GraphLoader withOptionalNodeProperty(String property, double propertyDefaultValue) {
-        this.nodeProp = property;
-        this.nodePropDefault = propertyDefaultValue;
-        return this;
-    }
-
-    /**
-     * Instructs the loader to not load any relationship weights. Instead each weight is set
-     * to propertyDefaultValue.
-     *
-     * @param propertyDefaultValue the default value.
-     */
-    public GraphLoader withDefaultRelationshipWeight(double propertyDefaultValue) {
-        this.relWeightProp = null;
-        this.relWeightDefault = propertyDefaultValue;
-        return this;
-    }
-
-    /**
-     * Instructs the loader to not load any node weights. Instead each weight is set
-     * to propertyDefaultValue.
-     *
-     * @param propertyDefaultValue the default value.
-     */
-    public GraphLoader withDefaultNodeWeight(double propertyDefaultValue) {
-        this.nodeWeightProp = null;
-        this.nodeWeightDefault = propertyDefaultValue;
-        return this;
-    }
-
-    /**
-     * Instructs the loader to not load any node properties. Instead each weight is set
-     * to propertyDefaultValue.
-     *
-     * @param propertyDefaultValue the default value.
-     */
-    public GraphLoader withDefaultNodeProperties(double propertyDefaultValue) {
-        this.nodeProp = null;
-        this.nodePropDefault = propertyDefaultValue;
         return this;
     }
 
@@ -478,13 +406,6 @@ public class GraphLoader {
      */
     public GraphLoader withDuplicateRelationshipsStrategy(DuplicateRelationshipsStrategy duplicateRelationshipsStrategy) {
         this.duplicateRelationshipsStrategy = duplicateRelationshipsStrategy;
-        return this;
-    }
-
-    public GraphLoader withOptionalNodeProperties(PropertyMapping... nodePropertyMappings) {
-        this.nodePropertyMappings = Arrays.stream(nodePropertyMappings)
-                .filter(propMapping -> !(propMapping.propertyKey == null || propMapping.propertyKey.isEmpty()))
-                .toArray(PropertyMapping[]::new);
         return this;
     }
 
