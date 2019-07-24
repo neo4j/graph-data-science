@@ -91,8 +91,8 @@ public final class LargerTriangleCountTest {
                 .withRelationshipType(RELATIONSHIP)
                 .withoutRelationshipWeights()
                 .withoutNodeWeights()
-                .withSort(true)
-                .loadAsUndirected(true)
+                .sorted()
+                .undirected()
                 .withConcurrency(1)
                 .load(graphImpl);
     }

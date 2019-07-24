@@ -186,7 +186,9 @@ public final class DegreeCentralityProc {
                         configuration.getWeightPropertyDefaultValue(0.0))
                 .withDirection(direction);
 
-        graphLoader = (direction == Direction.BOTH) ? graphLoader.loadAsUndirected(true) : graphLoader;
+        if (direction == Direction.BOTH) {
+            graphLoader.undirected();
+        }
 
         try (ProgressTimer timer = statsBuilder.timeLoad()) {
             Graph graph = graphLoader.load(graphFactory);

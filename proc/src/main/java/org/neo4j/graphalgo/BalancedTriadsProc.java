@@ -73,9 +73,9 @@ public class BalancedTriadsProc {
                 .withOptionalRelationshipType(configuration.getRelationshipOrQuery())
                 .withOptionalRelationshipWeightsFromProperty(configuration.getWeightProperty(), 0.0)
                 .withoutNodeWeights()
-                .withSort(true)
                 .withLog(log)
-                .loadAsUndirected(true)
+                .sorted()
+                .undirected()
                 .load(configuration.getGraphImpl(HugeGraph.TYPE, HugeGraph.TYPE));
 
         // omit empty graphs
@@ -118,9 +118,9 @@ public class BalancedTriadsProc {
                     .withOptionalRelationshipType(configuration.getRelationshipOrQuery())
                     .withOptionalRelationshipWeightsFromProperty(configuration.getWeightProperty(), 0.0)
                     .withoutNodeWeights()
-                    .withSort(true)
                     .withLog(log)
-                    .loadAsUndirected(true)
+                    .sorted()
+                    .undirected()
                     .load(configuration.getGraphImpl(HugeGraph.TYPE, HugeGraph.TYPE));
         }
 

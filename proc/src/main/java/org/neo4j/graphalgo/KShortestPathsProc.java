@@ -93,7 +93,7 @@ public class KShortestPathsProc {
             // use undirected traversal if direction is BOTH
             if (direction == Direction.BOTH) {
                 direction = Direction.OUTGOING; // rewrite
-                graphLoader.loadAsUndirected(true);
+                graphLoader.undirected();
             } else {
                 graphLoader.withDirection(direction);
             }
@@ -159,7 +159,7 @@ public class KShortestPathsProc {
             // use undirected traversal if direction is BOTH
             if (direction == Direction.BOTH) {
                 direction = Direction.OUTGOING; // rewrite
-                graphLoader.loadAsUndirected(true);
+                graphLoader.undirected();
             } else {
                 graphLoader.withDirection(direction);
             }

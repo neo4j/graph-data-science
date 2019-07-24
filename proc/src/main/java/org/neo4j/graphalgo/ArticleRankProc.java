@@ -161,7 +161,7 @@ public final class ArticleRankProc {
 
         Direction direction = configuration.getDirection(Direction.OUTGOING);
         if (direction == Direction.BOTH) {
-            graphLoader.loadAsUndirected(true);
+            graphLoader.undirected();
         } else {
             graphLoader.withDirection(direction);
         }

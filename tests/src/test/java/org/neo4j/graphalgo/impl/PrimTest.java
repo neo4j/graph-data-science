@@ -113,7 +113,7 @@ public class PrimTest {
                 .withRelationshipType("TYPE")
                 .withRelationshipWeightsFromProperty("cost", Double.MAX_VALUE)
                 .withoutNodeWeights()
-                .loadAsUndirected(true)
+                .undirected()
                 .load(graphImpl);
 
         try (Transaction transaction = DB.beginTx()) {

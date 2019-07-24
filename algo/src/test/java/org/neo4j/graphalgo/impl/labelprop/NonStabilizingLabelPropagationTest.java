@@ -96,7 +96,7 @@ public class NonStabilizingLabelPropagationTest {
     @Before
     public void setup() {
         GraphLoader graphLoader = new GraphLoader(DB, Pools.DEFAULT)
-                .loadAsUndirected(true)
+                .undirected()
                 .withDefaultConcurrency();
 
         if (graphImpl == HeavyCypherGraphFactory.class) {

@@ -69,9 +69,9 @@ public class InfoMapGraph {
                 .withAllocationTracker(tracker)
                 .withLog(log)
                 .withLogInterval(1L, TimeUnit.SECONDS)
-                .loadAsUndirected(true)
                 .withAnyLabel()
                 .withAnyRelationshipType()
+                .undirected()
                 .load(HeavyGraphFactory.class);
 
 

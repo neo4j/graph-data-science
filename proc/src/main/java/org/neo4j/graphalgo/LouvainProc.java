@@ -162,7 +162,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
             loader.withOptionalNodeProperties(PropertyMapping.of(CLUSTERING_IDENTIFIER, propertyIdentifier, -1));
         });
 
-        return loader.loadAsUndirected(true);
+        return loader.undirected();
     }
 
     @Override

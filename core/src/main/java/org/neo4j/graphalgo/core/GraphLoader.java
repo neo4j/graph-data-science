@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressLoggerAdapter;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
@@ -86,8 +85,8 @@ public class GraphLoader {
     private Log log = NullLog.getInstance();
     private long logMillis = -1;
     private AllocationTracker tracker = AllocationTracker.EMPTY;
-    private boolean sort = false;
-    private boolean loadAsUndirected = false;
+    private boolean sorted = false;
+    private boolean undirected = false;
     private PropertyMapping[] nodePropertyMappings = new PropertyMapping[0];
 
     /**
@@ -139,13 +138,13 @@ public class GraphLoader {
         return this;
     }
 
-    public GraphLoader withSort(boolean sort) {
-        this.sort = sort;
+    public GraphLoader sorted() {
+        this.sorted = true;
         return this;
     }
 
-    public GraphLoader loadAsUndirected(boolean loadAsUndirected) {
-        this.loadAsUndirected = loadAsUndirected;
+    public GraphLoader undirected() {
+        this.undirected = true;
         return this;
     }
 
@@ -461,27 +460,27 @@ public class GraphLoader {
 
     public GraphSetup toSetup() {
         return new GraphSetup(
-                    label,
-                    null,
-                    relation,
-                    direction,
-                    relWeightProp,
-                    relWeightDefault,
-                    nodeWeightProp,
-                    nodeWeightDefault,
-                    nodeProp,
-                    nodePropDefault,
-                    params,
-                    executorService,
-                    concurrency,
-                    batchSize,
-                    duplicateRelationshipsStrategy,
-                    log,
-                    logMillis,
-                    sort,
-                    loadAsUndirected,
-                    tracker,
-                    name,
-                    nodePropertyMappings);
+                label,
+                null,
+                relation,
+                direction,
+                relWeightProp,
+                relWeightDefault,
+                nodeWeightProp,
+                nodeWeightDefault,
+                nodeProp,
+                nodePropDefault,
+                params,
+                executorService,
+                concurrency,
+                batchSize,
+                duplicateRelationshipsStrategy,
+                log,
+                logMillis,
+                sorted,
+                undirected,
+                tracker,
+                name,
+                nodePropertyMappings);
     }
 }

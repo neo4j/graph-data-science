@@ -93,8 +93,7 @@ public class LouvainTest extends HeavyHugeTester {
                 .withAnyLabel()
                 .withoutNodeProperties()
                 .withOptionalRelationshipWeightsFromProperty("weight", 1.0)
-                //.withDirection(Direction.BOTH)
-                .loadAsUndirected(true)
+                .undirected()
                 .load(graphImpl);
 
         try (Transaction transaction = DB.beginTx()) {
@@ -151,8 +150,8 @@ public class LouvainTest extends HeavyHugeTester {
                 .withRelationshipType("REL")
                 .withOptionalRelationshipWeightsFromProperty(null, 1.0)
                 .withoutNodeWeights()
-                .withSort(true)
-                .loadAsUndirected(true)
+                .sorted()
+                .undirected()
                 .load(graphImpl);
 
         Louvain.Config config = new Louvain.Config(99, 99999);

@@ -82,7 +82,7 @@ public class LouvainBenchmarkLdbc {
                 .withAnyLabel()
                 .withAnyRelationshipType()
                 .withOptionalRelationshipWeightsFromProperty(null, 1.0)
-                .loadAsUndirected(true)
+                .undirected()
                 .load(graph.impl);
     }
 

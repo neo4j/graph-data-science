@@ -101,7 +101,7 @@ public class InfoMapProc {
                 graph = new GraphLoader(db, Pools.DEFAULT)
                         .init(log, config.getNodeLabelOrQuery(), config.getRelationshipOrQuery(), config)
                         .withRelationshipWeightsFromProperty(config.getWeightProperty(), 1.0)
-                        .loadAsUndirected(true)
+                        .undirected()
                         .load(config.getGraphImpl());
                 infoMap = InfoMap.weighted(
                         graph,
@@ -123,7 +123,7 @@ public class InfoMapProc {
                         .init(log, config.getNodeLabelOrQuery(), config.getRelationshipOrQuery(), config)
                         .withRelationshipWeightsFromProperty(config.getWeightProperty(), 1.0)
                         .withOptionalNodeProperties(PropertyMapping.of("_pr", pageRankPropertyName, 0.))
-                        .loadAsUndirected(true)
+                        .undirected()
                         .load(config.getGraphImpl());
                 infoMap = InfoMap.weighted(
                         graph,
@@ -143,7 +143,7 @@ public class InfoMapProc {
                 log.info("initializing unweighted InfoMap with internal PageRank computation");
                 graph = new GraphLoader(db, Pools.DEFAULT)
                         .init(log, config.getNodeLabelOrQuery(), config.getRelationshipOrQuery(), config)
-                        .loadAsUndirected(true)
+                        .undirected()
                         .load(config.getGraphImpl());
                 infoMap = InfoMap.unweighted(
                         graph,
@@ -163,7 +163,7 @@ public class InfoMapProc {
                 graph = new GraphLoader(db, Pools.DEFAULT)
                         .init(log, config.getNodeLabelOrQuery(), config.getRelationshipOrQuery(), config)
                         .withOptionalNodeProperties(PropertyMapping.of("_pr", pageRankPropertyName, 0.))
-                        .loadAsUndirected(true)
+                        .undirected()
                         .load(config.getGraphImpl());
                 infoMap = InfoMap.unweighted(
                         graph,
@@ -232,7 +232,7 @@ public class InfoMapProc {
                     graph = new GraphLoader(db, Pools.DEFAULT)
                             .init(log, config.getNodeLabelOrQuery(), config.getRelationshipOrQuery(), config)
                             .withRelationshipWeightsFromProperty(config.getWeightProperty(), 1.0)
-                            .loadAsUndirected(true)
+                            .undirected()
                             .load(config.getGraphImpl());
 
                     infoMap = InfoMap.weighted(
@@ -257,7 +257,7 @@ public class InfoMapProc {
                             .init(log, config.getNodeLabelOrQuery(), config.getRelationshipOrQuery(), config)
                             .withRelationshipWeightsFromProperty(config.getWeightProperty(), 1.0)
                             .withOptionalNodeProperties(PropertyMapping.of("_pr", pageRankPropertyName, 0.))
-                            .loadAsUndirected(true)
+                            .undirected()
                             .load(config.getGraphImpl());
                     infoMap = InfoMap.weighted(
                             graph,
@@ -279,7 +279,7 @@ public class InfoMapProc {
                 try (ProgressTimer timer = builder.timeLoad()) {
                     graph = new GraphLoader(db, Pools.DEFAULT)
                             .init(log, config.getNodeLabelOrQuery(), config.getRelationshipOrQuery(), config)
-                            .loadAsUndirected(true)
+                            .undirected()
                             .load(config.getGraphImpl());
                     infoMap = InfoMap.unweighted(
                             graph,
@@ -301,7 +301,7 @@ public class InfoMapProc {
                     graph = new GraphLoader(db, Pools.DEFAULT)
                             .init(log, config.getNodeLabelOrQuery(), config.getRelationshipOrQuery(), config)
                             .withOptionalNodeProperties(PropertyMapping.of("_pr", pageRankPropertyName, 0.))
-                            .loadAsUndirected(true)
+                            .undirected()
                             .load(config.getGraphImpl());
                     infoMap = InfoMap.unweighted(
                             graph,

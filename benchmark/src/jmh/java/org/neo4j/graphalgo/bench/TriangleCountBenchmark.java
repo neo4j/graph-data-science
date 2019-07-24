@@ -96,8 +96,8 @@ public class TriangleCountBenchmark {
                     .withRelationshipType(RELATIONSHIP)
                     .withoutRelationshipWeights()
                     .withoutNodeWeights()
-                    .withSort(true)
-                    .loadAsUndirected(true)
+                    .sorted()
+                    .undirected()
                     .load(graph.impl);
         }
 

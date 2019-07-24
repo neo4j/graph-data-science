@@ -65,7 +65,7 @@ public class GraphLoaderCypherTest {
         Graph graph = graphLoader.withLabel("MATCH (n) RETURN id(n) AS id")
                 .withRelationshipType("MATCH (a)--(b) RETURN id(a) AS source, id(b) AS target")
                 .withDirection(Direction.BOTH)
-                .loadAsUndirected(true)
+                .undirected()
                 .load(graphImpl);
 
         assertEquals(4L, graph.nodeCount());

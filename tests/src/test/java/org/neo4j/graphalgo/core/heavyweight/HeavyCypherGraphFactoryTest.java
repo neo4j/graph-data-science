@@ -79,7 +79,7 @@ public class HeavyCypherGraphFactoryTest {
                         PropertyMapping.of("partition", "partition", 0.0),
                         PropertyMapping.of("foo", "foo", 5.0)
                 )
-                .withSort(true)
+                .sorted()
                 .load(HeavyCypherGraphFactory.class);
 
         long node1 = graph.toMappedNodeId(id1);

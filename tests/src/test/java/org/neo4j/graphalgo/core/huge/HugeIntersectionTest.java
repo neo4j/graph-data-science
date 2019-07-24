@@ -82,7 +82,7 @@ public final class HugeIntersectionTest {
             }
         });
 
-        final Graph graph = new GraphLoader(DB).loadAsUndirected(true).load(HugeGraphFactory.class);
+        final Graph graph = new GraphLoader(DB).undirected().load(HugeGraphFactory.class);
         INTERSECT = graph.intersection();
         START1 = graph.toMappedNodeId(neoStarts[0]);
         START2 = graph.toMappedNodeId(neoStarts[1]);

@@ -101,7 +101,7 @@ public class RelationshipPredicateTest {
 
         final Graph graph = loader()
                 .withDirection(Direction.OUTGOING)
-                .withSort(true)
+                .sorted()
                 .load(HeavyGraphFactory.class);
 
         // A -> B
@@ -149,7 +149,7 @@ public class RelationshipPredicateTest {
 
         final Graph graph = loader()
                 .withDirection(Direction.INCOMING)
-                .withSort(true)
+                .sorted()
                 .load(HeavyGraphFactory.class);
 
         // B <- A
@@ -204,7 +204,7 @@ public class RelationshipPredicateTest {
 
         final Graph graph = loader()
                 .withDirection(Direction.BOTH)
-                .withSort(true)
+                .sorted()
                 .load(HeavyGraphFactory.class);
 
         // A -> B

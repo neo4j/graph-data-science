@@ -83,7 +83,7 @@ public class ClusteringCoefficientWikiTest {
                 .withAnyRelationshipType()
                 .withoutRelationshipWeights()
                 .withoutNodeWeights()
-                .loadAsUndirected(true)
+                .undirected()
                 .load(HeavyGraphFactory.class);
     }
 

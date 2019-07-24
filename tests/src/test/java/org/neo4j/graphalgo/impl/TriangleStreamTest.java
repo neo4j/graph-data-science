@@ -99,7 +99,7 @@ public class TriangleStreamTest {
                     .withRelationshipType(RELATIONSHIP)
                     .withoutRelationshipWeights()
                     .withoutNodeWeights()
-                    .loadAsUndirected(true)
+                    .undirected()
                     .load(graphImpl);
         }
     }

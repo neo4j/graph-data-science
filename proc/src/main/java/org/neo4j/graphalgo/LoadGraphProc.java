@@ -104,9 +104,7 @@ public final class LoadGraphProc extends BaseProc {
         final Direction direction = config.getDirection(Direction.OUTGOING);
         final String nodeWeight = config.getString("nodeWeight", null);
         final String nodeProperty = config.getString("nodeProperty", null);
-        final Boolean sorted = config.get("sorted", false);
-        final Boolean undirected = config.get("undirected", false);
-        return loader
+        loader
                 .withNodeStatement(config.getNodeLabelOrQuery())
                 .withRelationshipStatement(config.getRelationshipOrQuery())
                 .withOptionalRelationshipWeightsFromProperty(
@@ -118,9 +116,15 @@ public final class LoadGraphProc extends BaseProc {
                         PropertyMapping.of(LabelPropagation.SEED_TYPE, nodeProperty, 0.0d),
                         PropertyMapping.of(LabelPropagation.WEIGHT_TYPE, nodeWeight, 1.0d)
                 )
-                .withDirection(direction)
-                .withSort(sorted)
-                .loadAsUndirected(undirected);
+                .withDirection(direction);
+
+        if (config.get("sorted", false)) {
+            loader.sorted();
+        }
+        if (config.get("undirected", false)) {
+            loader.undirected();
+        }
+        return loader;
     }
 
     public static class LoadGraphStats {
