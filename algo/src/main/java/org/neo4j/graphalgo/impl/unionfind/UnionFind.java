@@ -25,11 +25,10 @@ import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.dss.SequentialDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.IncrementalDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.RankedDisjointSetStruct;
-import org.neo4j.graphalgo.core.utils.paged.dss.UnionStrategy;
+import org.neo4j.graphalgo.core.utils.paged.dss.SequentialDisjointSetStruct;
 
 public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> {
 
@@ -66,13 +65,9 @@ public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> 
     }
 
     SequentialDisjointSetStruct initDisjointSetStruct(long nodeCount, AllocationTracker tracker) {
-        UnionStrategy unionStrategy = algoConfig.isUnionByRank ?
-                new UnionStrategy.ByRank(nodeCount, tracker) :
-                new UnionStrategy.ByMin();
-
         return algoConfig.communityMap == null ?
-                new RankedDisjointSetStruct(nodeCount, unionStrategy, tracker) :
-                new IncrementalDisjointSetStruct(nodeCount, algoConfig.communityMap, unionStrategy, tracker);
+                new RankedDisjointSetStruct(nodeCount, tracker) :
+                new IncrementalDisjointSetStruct(nodeCount, algoConfig.communityMap, tracker);
     }
 
     public DisjointSetStruct compute() {
@@ -99,19 +94,10 @@ public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> 
 
         public final HugeWeightMapping communityMap;
         public final double threshold;
-        public final boolean isUnionByRank;
 
         public Config(final HugeWeightMapping communityMap, final double threshold) {
-            this(communityMap, threshold, false);
-        }
-
-        public Config(
-                final HugeWeightMapping communityMap,
-                final double threshold,
-                final boolean isUnionByRank) {
             this.communityMap = communityMap;
             this.threshold = threshold;
-            this.isUnionByRank = isUnionByRank;
         }
     }
 }

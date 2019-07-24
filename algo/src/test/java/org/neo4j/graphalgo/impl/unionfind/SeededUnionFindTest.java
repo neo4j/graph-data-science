@@ -110,11 +110,7 @@ public class SeededUnionFindTest extends HeavyHugeTester {
                 .withRelationshipType(RELATIONSHIP_TYPE)
                 .load(graphImpl);
 
-        config = new UnionFind.Config(
-                graph.nodeProperties(SEED_PROPERTY),
-                Double.NaN,
-                false
-        );
+        config = new UnionFind.Config(graph.nodeProperties(SEED_PROPERTY), Double.NaN);
     }
 
     @Test

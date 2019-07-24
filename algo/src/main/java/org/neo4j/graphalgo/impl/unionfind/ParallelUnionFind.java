@@ -19,38 +19,30 @@
  */
 package org.neo4j.graphalgo.impl.unionfind;
 
+import org.eclipse.collections.api.block.function.primitive.ObjectLongToObjectFunction;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.graphalgo.core.utils.paged.dss.SequentialDisjointSetStruct;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
+import java.util.Collection;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BinaryOperator;
-
-import static org.neo4j.graphalgo.core.utils.ParallelUtil.awaitTermination;
 
 /**
  * parallel UnionFind using ExecutorService only.
  * <p>
- * Algorithm based on the idea that DisjointSetStruct can be built using
- * just a partition of the nodes which then can be merged pairwise.
- * <p>
- * The implementation is based on a queue which acts as a buffer
- * for each computed DSS. As long as there are more elements on
- * the queue the algorithm takes two, merges them and adds its
- * result to the queue until only 1 element remains.
- *
- * @author mknblch
+ * Algorithm based on the {@link HugeAtomicDisjointSetStruct}, following the
+ * "Wait-free Parallel Algorithms for the Union􏰁-Find Problem"
+ * paper.
  */
 public class ParallelUnionFind extends UnionFind<ParallelUnionFind> {
 
@@ -60,8 +52,11 @@ public class ParallelUnionFind extends UnionFind<ParallelUnionFind> {
     private final long batchSize;
     private final int stepSize;
 
-    public static MemoryEstimation memoryEstimation(final boolean incremental) {
-        return UnionFind.memoryEstimation(incremental, ParallelUnionFind.class, HugeUnionFindTask.class);
+    public static MemoryEstimation memoryEstimation(boolean incremental) {
+        return MemoryEstimations
+            .builder(ParallelUnionFind.class)
+            .add("dss", HugeAtomicDisjointSetStruct.memoryEstimation(incremental))
+            .build();
     }
 
     public ParallelUnionFind(
@@ -94,117 +89,92 @@ public class ParallelUnionFind extends UnionFind<ParallelUnionFind> {
     }
 
     @Override
-    public DisjointSetStruct compute() {
-        return computeUnrestricted();
+    public DisjointSetStruct computeUnrestricted() {
+        return compute(Double.NaN);
     }
 
     @Override
     public DisjointSetStruct compute(double threshold) {
-        throw new IllegalArgumentException(
-                "Parallel UnionFind with threshold not implemented, please use either `concurrency:1` or one of the exp* variants of UnionFind");
+        ObjectLongToObjectFunction<DisjointSetStruct, UnionFindTask> newTask =
+                Double.isNaN(threshold)
+                        ? UnionFindTask::new
+                        : (dss, offset) -> new ThresholdTask(threshold, dss, offset);
+        return compute(newTask);
     }
 
-    @Override
-    public DisjointSetStruct computeUnrestricted() {
-        final List<Future<?>> futures = new ArrayList<>(2 * stepSize);
-        final BlockingQueue<SequentialDisjointSetStruct> disjointSetStructs = new ArrayBlockingQueue<>(stepSize);
-        AtomicInteger expectedCommunityCount = new AtomicInteger();
+    private DisjointSetStruct compute(ObjectLongToObjectFunction<DisjointSetStruct, UnionFindTask> newTask) {
+        long nodeCount = graph.nodeCount();
+        HugeWeightMapping communityMap = algoConfig.communityMap;
+        DisjointSetStruct dss = communityMap == null
+                ? new HugeAtomicDisjointSetStruct(nodeCount, tracker)
+                : new HugeAtomicDisjointSetStruct(nodeCount, communityMap, tracker);
 
-        for (long i = 0L; i < nodeCount; i += batchSize) {
-            futures.add(executor.submit(new HugeUnionFindTask(disjointSetStructs, i, expectedCommunityCount)));
+        final Collection<Runnable> tasks = new ArrayList<>(stepSize);
+        for (long i = 0L; i < this.nodeCount; i += batchSize) {
+            tasks.add(newTask.valueOf(dss, i));
         }
-        int steps = futures.size();
-
-        for (int i = 1; i < steps; ++i) {
-            futures.add(executor.submit(() -> mergeTask(disjointSetStructs, expectedCommunityCount, SequentialDisjointSetStruct::merge)));
-        }
-
-        awaitTermination(futures);
-
-        return disjointSetStructs.poll();
+        ParallelUtil.run(tasks, executor);
+        return dss;
     }
 
-    public static <T> void mergeTask(
-            final BlockingQueue<T> queue,
-            final AtomicInteger expected,
-            BinaryOperator<T> merge) {
-        // basically a decrement operation, but we don't decrement in case there's not
-        // enough sets for us to operate on
-        int available, afterMerge;
-        do {
-            available = expected.get();
-            // see if there are at least two sets to take, so we don't wait for a set that will never come
-            if (available < 2) {
-                return;
-            }
-            // decrease by one, as we're pushing a new set onto the queue
-            afterMerge = available - 1;
-        } while (!expected.compareAndSet(available, afterMerge));
+    private class UnionFindTask implements Runnable, RelationshipConsumer {
 
-        boolean pushed = false;
-        try {
-            final T a = queue.take();
-            final T b = queue.take();
-            final T next = merge.apply(a, b);
-            queue.add(next);
-            pushed = true;
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException(e);
-        } finally {
-            if (!pushed) {
-                expected.decrementAndGet();
-            }
-        }
-    }
-
-    private class HugeUnionFindTask implements Runnable {
-
-        private final RelationshipIterator rels;
-        private final BlockingQueue<SequentialDisjointSetStruct> disjointSetStructs;
-        private final AtomicInteger expectedCount;
+        final DisjointSetStruct struct;
+        final RelationshipIterator rels;
         private final long offset;
         private final long end;
 
-        HugeUnionFindTask(
-                BlockingQueue<SequentialDisjointSetStruct> disjointSetStructs,
-                long offset,
-                AtomicInteger expectedCount) {
+        UnionFindTask(
+                DisjointSetStruct struct,
+                long offset) {
+            this.struct = struct;
             this.rels = graph.concurrentCopy();
-            this.disjointSetStructs = disjointSetStructs;
-            this.expectedCount = expectedCount;
             this.offset = offset;
             this.end = Math.min(offset + batchSize, nodeCount);
-            expectedCount.incrementAndGet();
         }
 
         @Override
         public void run() {
-            boolean pushed = false;
-            try {
-                final SequentialDisjointSetStruct struct = initDisjointSetStruct(nodeCount, tracker);
-                for (long node = offset; node < end; node++) {
-                    rels.forEachRelationship(
-                            node,
-                            Direction.OUTGOING,
-                            (sourceNodeId, targetNodeId) -> {
-                                struct.union(sourceNodeId, targetNodeId);
-                                return true;
-                            });
-                }
-                getProgressLogger().logProgress((end - 1.0) / (nodeCount - 1.0));
-                try {
-                    disjointSetStructs.put(struct);
-                    pushed = true;
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw new RuntimeException(e);
-                }
-            } finally {
-                if (!pushed) {
-                    expectedCount.decrementAndGet();
-                }
+            for (long node = offset; node < end; node++) {
+                compute(node);
             }
+            getProgressLogger().logProgress((end - 1.0) / (nodeCount - 1.0));
+        }
+
+        void compute(final long node) {
+            rels.forEachRelationship(node, Direction.OUTGOING, this);
+        }
+
+        @Override
+        public boolean accept(final long sourceNodeId, final long targetNodeId) {
+            struct.union(sourceNodeId, targetNodeId);
+            return true;
+        }
+    }
+
+    private class ThresholdTask extends UnionFindTask implements WeightedRelationshipConsumer {
+
+        private final double threshold;
+
+        ThresholdTask(
+                double threshold,
+                DisjointSetStruct struct,
+                long offset) {
+            super(struct, offset);
+            this.threshold = threshold;
+        }
+
+        @Override
+        void compute(final long node) {
+            rels.forEachRelationship(node, Direction.OUTGOING, (WeightedRelationshipConsumer) this);
+        }
+
+        @Override
+        public boolean accept(final long sourceNodeId, final long targetNodeId, final double weight) {
+            if (weight > threshold) {
+                struct.union(sourceNodeId, targetNodeId);
+            }
+            return true;
         }
     }
 }

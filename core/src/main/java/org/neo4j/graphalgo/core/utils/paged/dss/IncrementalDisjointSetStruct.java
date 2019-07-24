@@ -35,6 +35,7 @@ import java.util.stream.LongStream;
  * Note that this does not use <a href="https://en.wikipedia.org/wiki/Disjoint-set_data_structure#by_rank">Union by Rank</a>
  * but prefers the minimum set id instead when merging two sets.
  */
+@Deprecated
 public final class IncrementalDisjointSetStruct extends SequentialDisjointSetStruct {
 
     private static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations.builder(
@@ -61,9 +62,7 @@ public final class IncrementalDisjointSetStruct extends SequentialDisjointSetStr
     public IncrementalDisjointSetStruct(
             long size,
             HugeWeightMapping communityMapping,
-            UnionStrategy unionStrategy,
             AllocationTracker tracker) {
-        super(unionStrategy);
         this.parent = HugeLongArray.newArray(size, tracker);
         this.internalToProvidedIds = new HugeLongLongMap(size, tracker);
         this.communityMapping = communityMapping;

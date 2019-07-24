@@ -28,17 +28,22 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
  *
  * @see <a href="https://en.wikipedia.org/wiki/Disjoint-set_data_structure">Wiki</a>
  */
+@Deprecated
 public abstract class SequentialDisjointSetStruct implements DisjointSetStruct {
 
-    private final UnionStrategy unionStrategy;
-
-    public SequentialDisjointSetStruct(UnionStrategy unionStrategy) {
-        this.unionStrategy = unionStrategy;
-    }
-
     @Override
-    public final void union(long p, long q) {
-        unionStrategy.union(p, q, this);
+    public void union(final long p, final long q) {
+        long pRoot = findAndBalance(p);
+        long qRoot = findAndBalance(q);
+
+        long pSet = setIdOfRoot(pRoot);
+        long qSet = setIdOfRoot(qRoot);
+
+        if (pSet < qSet) {
+            parent().set(qRoot, pRoot);
+        } else if (qSet < pSet) {
+            parent().set(pRoot, qRoot);
+        }
     }
 
     /**

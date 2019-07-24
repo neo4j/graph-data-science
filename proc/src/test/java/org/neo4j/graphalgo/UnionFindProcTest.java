@@ -136,20 +136,7 @@ public class UnionFindProcTest {
 
     @Test
     public void testUnionFindWithMinStrategy() throws Exception {
-        String query = "CALL algo.unionFind('', '', { graph: $graph, unionStrategy: 'min' }) " +
-                       "YIELD setCount, communityCount";
-
-        db.execute(query, MapUtil.map("graph", graphImpl)).accept(
-                (Result.ResultVisitor<Exception>) row -> {
-                    assertEquals(3L, row.getNumber("communityCount"));
-                    assertEquals(3L, row.getNumber("setCount"));
-                    return true;
-                });
-    }
-
-    @Test
-    public void testUnionFindWithRankStrategy() throws Exception {
-        String query = "CALL algo.unionFind('', '', { graph: $graph, unionStrategy: 'rank', concurrency: 1 }) " +
+        String query = "CALL algo.unionFind('', '', { graph: $graph }) " +
                        "YIELD setCount, communityCount";
 
         db.execute(query, MapUtil.map("graph", graphImpl)).accept(
@@ -162,7 +149,7 @@ public class UnionFindProcTest {
 
     @Test
     public void testUnionFindWithSeedAndMinStrategy() throws Exception {
-        String query = "CALL algo.unionFind('', '', { graph: $graph, seedProperty: 'seedId', unionStrategy: 'min' }) " +
+        String query = "CALL algo.unionFind('', '', { graph: $graph, seedProperty: 'seedId' }) " +
                        "YIELD setCount, communityCount";
 
         db.execute(query, MapUtil.map("graph", graphImpl)).accept(
@@ -171,30 +158,6 @@ public class UnionFindProcTest {
                     assertEquals(3L, row.getNumber("setCount"));
                     return true;
                 });
-    }
-
-    @Test
-    public void testUnionFindWithSeedAndRankStrategy() throws Exception {
-        String query = "CALL algo.unionFind('', '', { graph: $graph, seedProperty: 'seedId', unionStrategy: 'rank', concurrency: 1 }) " +
-                       "YIELD setCount, communityCount";
-
-        db.execute(query, MapUtil.map("graph", graphImpl)).accept(
-                (Result.ResultVisitor<Exception>) row -> {
-                    assertEquals(3L, row.getNumber("communityCount"));
-                    assertEquals(3L, row.getNumber("setCount"));
-                    return true;
-                });
-    }
-
-    @Test
-    public void testUnionFindWithUnsupportedUnionStrategy() {
-        String query = "CALL algo.unionFind('', '', { graph: $graph, seedProperty: 'seedId', unionStrategy: 'foobar' }) " +
-                       "YIELD setCount, communityCount";
-
-        expectedEx.expect(rootCause(IllegalArgumentException.class));
-        expectedEx.expect(rootCauseMessage("Unsupported unionStrategy 'foobar'. Supported values are: 'rank', 'min'"));
-
-        db.execute(query, MapUtil.map("graph", graphImpl));
     }
 
     @Test
@@ -265,7 +228,6 @@ public class UnionFindProcTest {
                     return false;
                 });
     }
-
 
     @Test
     public void testUnionFindStream() throws Exception {

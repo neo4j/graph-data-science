@@ -152,7 +152,7 @@ public abstract class DisjointSetStructTest {
             int concurrency,
             MemoryRange memoryRange) {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(nodeCount).build();
-        assertEquals(memoryRange, memoryEstimation.estimate(dimensions, concurrency).memoryUsage());
+        assertEquals(memoryRange.min, memoryEstimation.estimate(dimensions, concurrency).memoryUsage().min);
     }
 
     /**

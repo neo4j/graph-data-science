@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 /**
  * Implementation of {@link SequentialDisjointSetStruct} using Union by Rank and Path compression.
  */
+@Deprecated
 public final class RankedDisjointSetStruct extends SequentialDisjointSetStruct {
 
     public static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations.builder(RankedDisjointSetStruct.class)
@@ -46,8 +47,7 @@ public final class RankedDisjointSetStruct extends SequentialDisjointSetStruct {
      *
      * @param size number of elements (maximum node id)
      */
-    public RankedDisjointSetStruct(long size, UnionStrategy unionStrategy, AllocationTracker tracker) {
-        super(unionStrategy);
+    public RankedDisjointSetStruct(long size, AllocationTracker tracker) {
         parent = HugeLongArray.newArray(size, tracker);
         this.size = size;
         parent.fill(-1L);

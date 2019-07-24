@@ -39,7 +39,6 @@ public class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
         return new IncrementalDisjointSetStruct(
                 capacity,
                 weightMapping,
-                new UnionStrategy.ByMin(),
                 AllocationTracker.EMPTY);
     }
 
@@ -84,8 +83,8 @@ public class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
 
     @Test
     public void shouldComputeMemoryEstimation() {
-        assertMemoryEstimation(memoryEstimation(), 0, MemoryRange.of(304));
-        assertMemoryEstimation(memoryEstimation(), 100, MemoryRange.of(2704));
-        assertMemoryEstimation(memoryEstimation(), 100_000_000_000L, MemoryRange.of(2400366211288L));
+        assertMemoryEstimation(memoryEstimation(), 0, MemoryRange.of(296));
+        assertMemoryEstimation(memoryEstimation(), 100, MemoryRange.of(2696));
+        assertMemoryEstimation(memoryEstimation(), 100_000_000_000L, MemoryRange.of(2_400_366_211_280L));
     }
 }

@@ -20,7 +20,13 @@ package org.neo4j.graphalgo.bench;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.graphalgo.impl.unionfind.UnionFind;
+import org.neo4j.graphalgo.impl.unionfind.SequentialUnionFind;
+import org.neo4j.graphalgo.impl.unionfind.UnionFindType;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -49,14 +55,17 @@ import java.util.concurrent.TimeUnit;
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
 public class UnionFindBenchmark {
 
-    @Param({"HEAVY_QUEUE", "HEAVY_FORK_JOIN", "HEAVY_FJ_MERGE", "HEAVY_SEQ", "HUGE_QUEUE", "HUGE_FORK_JOIN", "HUGE_FJ_MERGE", "HUGE_SEQ"})
-    UFBenchmarkCombination uf;
+    @Param({"HEAVY", "HUGE"})
+    GraphImpl graph;
+
+    @Param({"SEQUENTIAL", "PARALLEL"})
+    UnionFindType ufType;
 
     private Graph theGraph;
 
     @Setup
     public void setup(HeroGraph heroGraph) {
-        theGraph = new GraphLoader(heroGraph.db).load(uf.graph.impl);
+        theGraph = new GraphLoader(heroGraph.db).load(graph.impl);
         heroGraph.db.shutdown();
     }
 
@@ -66,9 +75,23 @@ public class UnionFindBenchmark {
         Pools.DEFAULT.shutdownNow();
     }
 
-
     @Benchmark
     public Object unionFind() {
-        return uf.run(theGraph);
+        SequentialUnionFind.Config algoConfig = new UnionFind.Config(
+                new HugeNullWeightMap(-1L),
+                Double.NaN
+        );
+
+        UnionFind<?> unionFindAlgo = ufType.create(
+                theGraph,
+                Pools.DEFAULT,
+                (int) (theGraph.nodeCount() / Pools.DEFAULT_CONCURRENCY),
+                Pools.DEFAULT_CONCURRENCY,
+                algoConfig,
+                AllocationTracker.EMPTY
+        );
+        DisjointSetStruct communities = unionFindAlgo.compute();
+        unionFindAlgo.release();
+        return communities;
     }
 }

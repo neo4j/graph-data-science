@@ -19,26 +19,12 @@
  */
 package org.neo4j.graphalgo.core.utils.paged.dss;
 
-import org.junit.Test;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
-import static org.neo4j.graphalgo.core.utils.paged.dss.RankedDisjointSetStruct.memoryEstimation;
-
-public class RankedDisjointSetStructTest extends DisjointSetStructTest {
+public class HugeAtomicDisjointSetStructTest extends DisjointSetStructTest {
 
     @Override
-    SequentialDisjointSetStruct newSet(final int capacity) {
-        AllocationTracker tracker = AllocationTracker.EMPTY;
-        return new RankedDisjointSetStruct(
-                capacity,
-                tracker);
-    }
-
-    @Test
-    public void shouldComputeMemoryEstimation() {
-        assertMemoryEstimation(memoryEstimation(), 0, MemoryRange.of(64));
-        assertMemoryEstimation(memoryEstimation(), 100, MemoryRange.of(864));
-        assertMemoryEstimation(memoryEstimation(), 100_000_000_000L, MemoryRange.of(800_122_070_392L));
+    DisjointSetStruct newSet(int capacity) {
+        return new HugeAtomicDisjointSetStruct(capacity, AllocationTracker.EMPTY);
     }
 }
