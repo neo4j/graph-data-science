@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.huge.loader;
 
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.huge.loader.ImportingThreadPool.ImportResult;
+import org.neo4j.graphalgo.core.huge.loader.InternalImporter.ImportResult;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
@@ -67,9 +67,9 @@ abstract class ScanningRecordsImporter<Record extends AbstractBaseRecord, T> {
         AbstractStorePageCacheScanner<Record> scanner =
                 new AbstractStorePageCacheScanner<>(DEFAULT_PREFETCH_SIZE, api, access);
 
-        ImportingThreadPool.CreateScanner creator = creator(nodeCount, sizing, scanner);
-        ImportingThreadPool pool = new ImportingThreadPool(numberOfThreads, creator);
-        ImportResult importResult = pool.run(threadPool);
+        InternalImporter.CreateScanner creator = creator(nodeCount, sizing, scanner);
+        InternalImporter importer = new InternalImporter(numberOfThreads, creator);
+        ImportResult importResult = importer.runImport(threadPool);
 
         long requiredBytes = scanner.storeSize();
         long recordsImported = importResult.recordsImported;
@@ -99,7 +99,7 @@ abstract class ScanningRecordsImporter<Record extends AbstractBaseRecord, T> {
         return build();
     }
 
-    abstract ImportingThreadPool.CreateScanner creator(
+    abstract InternalImporter.CreateScanner creator(
             long nodeCount,
             ImportSizing sizing,
             AbstractStorePageCacheScanner<Record> scanner);

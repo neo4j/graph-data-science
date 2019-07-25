@@ -56,7 +56,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     }
 
     @Override
-    ImportingThreadPool.CreateScanner creator(
+    InternalImporter.CreateScanner creator(
             long nodeCount,
             ImportSizing sizing,
             AbstractStorePageCacheScanner<NodeRecord> scanner) {

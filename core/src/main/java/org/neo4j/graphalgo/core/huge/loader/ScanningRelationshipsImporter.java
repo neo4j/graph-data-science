@@ -75,7 +75,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
     }
 
     @Override
-    ImportingThreadPool.CreateScanner creator(
+    InternalImporter.CreateScanner creator(
             final long nodeCount,
             final ImportSizing sizing,
             final AbstractStorePageCacheScanner<RelationshipRecord> scanner) {

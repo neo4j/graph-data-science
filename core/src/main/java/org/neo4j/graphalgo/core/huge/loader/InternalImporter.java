@@ -26,7 +26,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 
-final class ImportingThreadPool {
+final class InternalImporter {
 
     interface CreateScanner {
         RecordScanner create(int index);
@@ -41,14 +41,14 @@ final class ImportingThreadPool {
     private final int numberOfThreads;
     private final CreateScanner createScanner;
 
-    ImportingThreadPool(
+    InternalImporter(
             final int numberOfThreads,
             final CreateScanner createScanner) {
         this.numberOfThreads = numberOfThreads;
         this.createScanner = createScanner;
     }
 
-    ImportResult run(ExecutorService pool) {
+    ImportResult runImport(ExecutorService pool) {
         Collection<RecordScanner> tasks = new ArrayList<>(numberOfThreads);
         for (int i = 0; i < numberOfThreads; i++) {
             tasks.add(createScanner.create(i));
@@ -80,7 +80,7 @@ final class ImportingThreadPool {
         }
     }
 
-    private static final class NoRecordsScanner implements RecordScanner, ImportingThreadPool.CreateScanner {
+    private static final class NoRecordsScanner implements RecordScanner, InternalImporter.CreateScanner {
         private static final NoRecordsScanner INSTANCE = new NoRecordsScanner();
 
         @Override

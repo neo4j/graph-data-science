@@ -37,7 +37,7 @@ import java.util.Collections;
 
 final class RelationshipsScanner extends StatementAction implements RecordScanner {
 
-    static ImportingThreadPool.CreateScanner of(
+    static InternalImporter.CreateScanner of(
             GraphDatabaseAPI api,
             GraphSetup setup,
             ImportProgress progress,
@@ -50,7 +50,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
             AdjacencyBuilder inAdjacency) {
         final Imports imports = imports(setup, weights.loadsWeights());
         if (imports == null) {
-            return ImportingThreadPool.createEmptyScanner();
+            return InternalImporter.createEmptyScanner();
         }
         final AdjacencyBuilder actualInAdjacency = setup.loadAsUndirected ? outAdjacency : inAdjacency;
         return new RelationshipsScanner.Creator(
@@ -58,7 +58,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
                 weights, outAdjacency, actualInAdjacency, imports);
     }
 
-    static final class Creator implements ImportingThreadPool.CreateScanner {
+    static final class Creator implements InternalImporter.CreateScanner {
         private final GraphDatabaseAPI api;
         private final ImportProgress progress;
         private final IdMapping idMap;

@@ -39,7 +39,7 @@ import java.util.Collections;
 
 final class NodesScanner extends StatementAction implements RecordScanner {
 
-    static ImportingThreadPool.CreateScanner of(
+    static InternalImporter.CreateScanner of(
             GraphDatabaseAPI api,
             AbstractStorePageCacheScanner<NodeRecord> scanner,
             int label,
@@ -56,7 +56,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
         );
     }
 
-    static final class Creator implements ImportingThreadPool.CreateScanner {
+    static final class Creator implements InternalImporter.CreateScanner {
         private final GraphDatabaseAPI api;
         private final AbstractStorePageCacheScanner<NodeRecord> scanner;
         private final int label;
