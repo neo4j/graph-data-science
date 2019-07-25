@@ -44,8 +44,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+@Deprecated
 @RunWith(Parameterized.class)
-public class LabelPropagationProcTest {
+public class LabelPropagationDeprecatedProcTest {
 
     private static final String DB_CYPHER = "" +
             "CREATE (a:A {id: 0, community: 42}) " +
@@ -82,7 +83,7 @@ public class LabelPropagationProcTest {
     private final boolean parallel;
     private final String graphImpl;
 
-    public LabelPropagationProcTest(boolean parallel, String graphImpl) {
+    public LabelPropagationDeprecatedProcTest(boolean parallel, String graphImpl) {
         this.parallel = parallel;
         this.graphImpl = graphImpl;
     }
@@ -95,7 +96,7 @@ public class LabelPropagationProcTest {
 
     @Test
     public void shouldTakeDifferentSeedProperties() {
-        String query = "CALL algo.labelPropagation(null, null, {direction: 'OUTGOING', seedProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: 'lpa'})";
+        String query = "CALL algo.labelPropagation(null, null, null, {seedProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: 'lpa'})";
 
         runQuery(query, parParams(), row -> {
             assertEquals(1, row.getNumber("iterations").intValue());
@@ -105,7 +106,7 @@ public class LabelPropagationProcTest {
             assertTrue(row.getBoolean("write"));
         });
 
-        query = "CALL algo.labelPropagation(null, null, {direction: 'OUTGOING', partitionProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: 'lpa'})";
+        query = "CALL algo.labelPropagation(null, null, null, {partitionProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: 'lpa'})";
 
         runQuery(query, parParams(), row -> {
             assertEquals(1, row.getNumber("iterations").intValue());
@@ -118,7 +119,7 @@ public class LabelPropagationProcTest {
 
     @Test
     public void explicitWriteProperty() {
-        String query = "CALL algo.labelPropagation(null, null, {direction: 'OUTGOING', seedProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: 'lpa'})";
+        String query = "CALL algo.labelPropagation(null, null, null, {seedProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: 'lpa'})";
 
         runQuery(query, parParams(), row -> {
             assertEquals(1, row.getNumber("iterations").intValue());
@@ -131,7 +132,7 @@ public class LabelPropagationProcTest {
 
     @Test
     public void shouldTakeParametersFromConfig() {
-        String query = "CALL algo.labelPropagation(null, null, {iterations: 5, write: false, weightProperty: 'score', seedProperty: $seedProperty})";
+        String query = "CALL algo.labelPropagation(null, null, null, {iterations: 5, write: false, weightProperty: 'score', seedProperty: $seedProperty})";
 
         runQuery(query, parParams(), row -> {
             assertTrue(5 >= row.getNumber("iterations").intValue());
@@ -144,7 +145,7 @@ public class LabelPropagationProcTest {
 
     @Test
     public void shouldRunLabelPropagation() {
-        String query = "CALL algo.labelPropagation(null, 'X', {batchSize: $batchSize, direction: 'OUTGOING', concurrency: $concurrency, graph: $graph, seedProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: $writeProperty})";
+        String query = "CALL algo.labelPropagation(null, 'X', 'OUTOING', {batchSize: $batchSize, concurrency: $concurrency, graph: $graph, seedProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: $writeProperty})";
         String check = "MATCH (n) WHERE n.id IN [0,1] RETURN n.community AS community";
 
         runQuery(query, parParams(), row -> {
@@ -167,7 +168,7 @@ public class LabelPropagationProcTest {
 
     @Test
     public void shouldFilterByLabel() {
-        String query = "CALL algo.labelPropagation('A', 'X', {batchSize: $batchSize, direction: 'OUTGOING', concurrency: $concurrency, graph: $graph, writeProperty: $writeProperty})";
+        String query = "CALL algo.labelPropagation('A', 'X', 'OUTGOING', {batchSize: $batchSize, concurrency: $concurrency, graph: $graph, writeProperty: $writeProperty})";
         String checkA = "MATCH (n) WHERE n.id = 0 RETURN n.community AS community";
         String checkB = "MATCH (n) WHERE n.id = 1 RETURN n.community AS community";
 
@@ -180,7 +181,7 @@ public class LabelPropagationProcTest {
 
     @Test
     public void shouldPropagateIncoming() {
-        String query = "CALL algo.labelPropagation('A', 'X', {batchSize: $batchSize, direction: 'INCOMING', concurrency: $concurrency, graph: $graph, seedProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: $writeProperty})";
+        String query = "CALL algo.labelPropagation('A', 'X', 'INCOMING', {batchSize: $batchSize, concurrency: $concurrency, graph: $graph, seedProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: $writeProperty})";
         String check = "MATCH (n:A) WHERE n.id <> 0 RETURN n.community AS community";
 
         runQuery(query, parParams());

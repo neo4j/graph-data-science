@@ -68,8 +68,8 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
     @Context
     public KernelTransaction transaction;
 
-    @Procedure(name = "algo.labelPropagation", mode = Mode.WRITE)
-    @Description("CALL algo.labelPropagation(" +
+    @Procedure(name = "algo.beta.labelPropagation", mode = Mode.WRITE)
+    @Description("CALL algo.beta.labelPropagation(" +
                  "label:String, relationship:String, " +
                  "{iterations: 1, direction: 'OUTGOING', weightProperty: 'weight', seedProperty: 'seed', write: true, concurrency: 4}) " +
                  "YIELD nodes, iterations, didConverge, loadMillis, computeMillis, writeMillis, write, weightProperty, seedProperty - " +
@@ -111,6 +111,30 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
 
         return Stream.of(stats.build(tracker, graph.nodeCount(), labels::get));
     }
+
+    @Procedure(deprecatedBy = "algo.beta.labelPropagation", name = "algo.labelPropagation", mode = Mode.WRITE)
+    @Description("CALL algo.labelPropagation(" +
+                 "label:String, relationship:String, direction:String, " +
+                 "{iterations: 1, weightProperty: 'weight', seedProperty: 'seed', write: true, concurrency: 4}) " +
+                 "YIELD nodes, iterations, didConverge, loadMillis, computeMillis, writeMillis, write, weightProperty, seedProperty - " +
+                 "simple label propagation kernel")
+    public Stream<LabelPropagationStats> labelPropagation(
+            @Name(value = "label", defaultValue = "") String label,
+            @Name(value = "relationship", defaultValue = "") String relationshipType,
+            @Name(value = "config", defaultValue = "null") Object directionOrConfig,
+            @Name(value = "deprecatedConfig", defaultValue = "{}") Map<String, Object> config) {
+            Map<String, Object> rawConfig = config;
+            if (directionOrConfig == null) {
+                if (!config.isEmpty()) {
+                    rawConfig.put("direction", "OUTGOING");
+                }
+            } else if (directionOrConfig instanceof Map) {
+                rawConfig = (Map<String, Object>) directionOrConfig;
+            } else if (directionOrConfig instanceof String) {
+                rawConfig.put("direction", directionOrConfig);
+            }
+            return labelPropagation(label, relationshipType, rawConfig);
+        }
 
     @Procedure(value = "algo.labelPropagation.stream")
     @Description("CALL algo.labelPropagation.stream(label:String, relationship:String, config:Map<String, Object>) YIELD " +
@@ -177,7 +201,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
         }
 
         return loader
-                .withOptionalRelationshipWeightsFromProperty(weightProperty, 1.0d)
+                .withOptionalRelationshipWeightsFromProperty(weightProperty, 1.0D)
                 .withOptionalNodeProperties(createPropertyMappings(seedProperty, weightProperty));
     }
 
