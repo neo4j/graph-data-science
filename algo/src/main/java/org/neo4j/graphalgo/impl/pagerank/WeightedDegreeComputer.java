@@ -27,20 +27,20 @@ import java.util.concurrent.ExecutorService;
 
 public class WeightedDegreeComputer implements DegreeComputer {
 
-    private Graph graph;
-    private boolean cacheWeights;
+    private final Graph graph;
+    private final boolean cacheWeights;
 
-    public WeightedDegreeComputer(Graph graph, boolean cacheWeights) {
+    WeightedDegreeComputer(Graph graph, boolean cacheWeights) {
         this.graph = graph;
         this.cacheWeights = cacheWeights;
     }
 
     @Override
-    // TODO: This does not work for huge graphs with more than Int.MAX_VALUE nodes
-    // https://trello.com/c/aALx63XZ/137-weighted-pagerank-does-not-work-for-hugegraph-with-more-than-integermaxvalue-nodes
-    public DegreeCache degree(ExecutorService executor, int concurrency) {
-        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph,
-                executor, concurrency, AllocationTracker.EMPTY);
+    public DegreeCache degree(
+            ExecutorService executor,
+            int concurrency,
+            AllocationTracker tracker) {
+        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph, executor, concurrency, tracker);
         degreeCentrality.compute(cacheWeights);
         return new DegreeCache(degreeCentrality.degrees(), degreeCentrality.weights(), -1D);
     }

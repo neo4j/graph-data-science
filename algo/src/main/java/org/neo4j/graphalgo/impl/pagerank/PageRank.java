@@ -273,7 +273,7 @@ public class PageRank extends Algorithm<PageRank> {
         Iterator<Partition> parts = partitions.iterator();
 
         DegreeComputer degreeComputer = pageRankVariant.degreeComputer(graph);
-        DegreeCache degreeCache = degreeComputer.degree(pool, concurrency);
+        DegreeCache degreeCache = degreeComputer.degree(pool, concurrency, tracker);
 
         while (parts.hasNext()) {
             Partition partition = parts.next();

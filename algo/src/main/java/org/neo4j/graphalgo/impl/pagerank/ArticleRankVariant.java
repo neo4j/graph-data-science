@@ -49,6 +49,6 @@ public class ArticleRankVariant implements PageRankVariant {
 
     @Override
     public DegreeComputer degreeComputer(Graph graph) {
-            return new BasicDegreeComputer(graph);
+        return new BasicDegreeComputer(graph);
     }
 }

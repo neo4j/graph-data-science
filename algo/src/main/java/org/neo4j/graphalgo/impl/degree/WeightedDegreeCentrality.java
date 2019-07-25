@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.impl.results.HugeDoubleArrayResult;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.LongStream;
@@ -70,15 +71,15 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
         nodeQueue.set(0);
 
         long batchSize = ParallelUtil.adjustBatchSize(nodeCount, concurrency);
-        long taskCount = ParallelUtil.threadSize(batchSize, nodeCount);
-        if (taskCount > Integer.MAX_VALUE) {
+        long threadSize = ParallelUtil.threadSize(batchSize, nodeCount);
+        if (threadSize > Integer.MAX_VALUE) {
             throw new IllegalArgumentException(String.format(
                     "A concurrency of %d is too small to divide graph into at most Integer.MAX_VALUE tasks",
                     concurrency));
         }
-        final ArrayList<Runnable> tasks = new ArrayList<>((int) taskCount);
+        final List<Runnable> tasks = new ArrayList<>((int) threadSize);
 
-        for (int i = 0; i < taskCount; i++) {
+        for (int i = 0; i < threadSize; i++) {
             if(cacheWeights) {
                 tasks.add(new CacheDegreeTask());
             } else {
@@ -120,7 +121,7 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
         @Override
         public void run() {
             Direction loadDirection = graph.getLoadDirection();
-            for (; ; ) {
+            while (true) {
                 final int nodeId = nodeQueue.getAndIncrement();
                 if (nodeId >= nodeCount || !running()) {
                     return;

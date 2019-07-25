@@ -25,13 +25,14 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 public class DegreeCache {
 
-    public final static DegreeCache EMPTY = new DegreeCache(
+    public static final DegreeCache EMPTY = new DegreeCache(
             HugeDoubleArray.newArray(0, AllocationTracker.EMPTY),
-            HugeObjectArray.newArray(HugeDoubleArray.class, 0, AllocationTracker.EMPTY), 0.0);
+            HugeObjectArray.newArray(HugeDoubleArray.class, 0, AllocationTracker.EMPTY),
+            0.0);
 
-    private HugeDoubleArray aggregatedDegrees;
-    private HugeObjectArray<HugeDoubleArray> weights;
-    private double averageDegree;
+    private final HugeDoubleArray aggregatedDegrees;
+    private final HugeObjectArray<HugeDoubleArray> weights;
+    private final double averageDegree;
 
     public DegreeCache(HugeDoubleArray aggregatedDegrees, HugeObjectArray<HugeDoubleArray> weights, double averageDegree) {
         this.aggregatedDegrees = aggregatedDegrees;
@@ -49,5 +50,9 @@ public class DegreeCache {
 
     double average() {
         return averageDegree;
+    }
+
+    public DegreeCache withAverave(double newAverage) {
+        return new DegreeCache(aggregatedDegrees, weights, newAverage);
     }
 }
