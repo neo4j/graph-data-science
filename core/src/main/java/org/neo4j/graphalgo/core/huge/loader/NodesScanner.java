@@ -118,7 +118,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
     private final IntObjectMap<HugeNodePropertiesBuilder> nodePropertyBuilders;
     private long nodePropertiesRead = 0L;
 
-    private volatile long relationshipsImported;
+    private volatile long nodesImported;
 
     private NodesScanner(
             GraphDatabaseAPI api,
@@ -160,7 +160,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
                 progress.relationshipsImported(imported);
                 allImported += imported;
             }
-            relationshipsImported = allImported;
+            nodesImported = allImported;
         }
     }
 
@@ -171,7 +171,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
 
     @Override
     public long recordsImported() {
-        return relationshipsImported;
+        return nodesImported;
     }
 
     private int importNodes(

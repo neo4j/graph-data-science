@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
+import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.paged.PaddedAtomicLong;
 import org.neo4j.graphdb.DependencyResolver;
 import org.neo4j.graphdb.DependencyResolver.SelectionStrategy;
@@ -101,8 +102,8 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
         private int endOffset;
 
         Cursor(PageCursor pageCursor, Record record) {
-            this.lastPage = Math.max((((maxId - 1L) + ((long) recordsPerPage - 1L)) / (long) recordsPerPage) - 1L, 0L);
             this.lastOffset = offsetForId(maxId, pageSize, recordSize);
+            this.lastPage = calculateLastPageId(maxId, recordsPerPage, lastOffset);
             this.pageCursor = pageCursor;
             this.record = record;
             this.offset = pageSize; // trigger page load as first action
@@ -111,6 +112,15 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
 
         int bulkSize() {
             return prefetchSize * recordsPerPage;
+        }
+
+        long calculateLastPageId(long maxId, long recordsPerPage, int lastPageOffset) {
+            long maxPage = BitUtil.ceilDiv(maxId, recordsPerPage) - 1L;
+            maxPage = Math.max(maxPage, 0L);
+            if (lastPageOffset == 0) {
+                maxPage += 1;
+            }
+            return maxPage;
         }
 
         public boolean next(Predicate<Record> filter) {
@@ -181,7 +191,7 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
                 offset = 0;
 
                 while (offset < endOffset) {
-                    record.setId(recordId++);
+                    record.setId(recordId++); // do we need this setId command here?
                     loadAtOffset(offset);
                     offset += recordSize;
                     if (record.inUse()) {
