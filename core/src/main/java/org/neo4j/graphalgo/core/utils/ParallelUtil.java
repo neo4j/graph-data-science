@@ -230,7 +230,7 @@ public final class ParallelUtil {
      * Executes read operations in parallel, based on the given batch size
      * and executor.
      */
-    public static <T extends Runnable> List<T> readParallel(
+    public static <T extends Runnable> void readParallel(
             final int concurrency,
             final int batchSize,
             final BatchNodeIterable idMapping,
@@ -242,12 +242,10 @@ public final class ParallelUtil {
 
         int threads = iterators.size();
 
-        final List<T> tasks = new ArrayList<>(threads);
         if (!canRunInParallel(executor) || threads == 1) {
             long nodeOffset = 0L;
             for (PrimitiveLongIterable iterator : iterators) {
                 final T task = importer.newImporter(nodeOffset, iterator);
-                tasks.add(task);
                 task.run();
                 nodeOffset += batchSize;
             }
@@ -255,14 +253,9 @@ public final class ParallelUtil {
             AtomicLong nodeOffset = new AtomicLong();
             Collection<T> importers = LazyMappingCollection.of(
                     iterators,
-                    it -> {
-                        T task = importer.newImporter(nodeOffset.getAndAdd(batchSize), it);
-                        tasks.add(task);
-                        return task;
-                    });
+                    it -> importer.newImporter(nodeOffset.getAndAdd(batchSize), it));
             runWithConcurrency(concurrency, importers, executor);
         }
-        return tasks;
     }
 
     public static void readParallel(
@@ -354,7 +347,7 @@ public final class ParallelUtil {
             final ExecutorService executor,
             Collection<Future<?>> futures) {
 
-        if (tasks.size() == 0) {
+        if (tasks.isEmpty()) {
             selfTask.run();
             return;
         }
