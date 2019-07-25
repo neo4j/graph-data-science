@@ -106,7 +106,6 @@ public class HugeGraph implements Graph {
     public HugeGraph(
             final AllocationTracker tracker,
             final IdMap idMapping,
-            final HugeWeightMapping weights,
             final Map<String, HugeWeightMapping> nodeProperties,
             final long relationshipCount,
             final HugeAdjacencyList inAdjacency,
@@ -312,7 +311,6 @@ public class HugeGraph implements Graph {
         return new HugeGraph(
                 tracker,
                 idMapping,
-                null,
                 nodeProperties,
                 relationshipCount,
                 inAdjacency,
