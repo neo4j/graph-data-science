@@ -39,9 +39,10 @@ public class SimilarityExporter extends StatementApi {
     private final int propertyId;
     private final int relationshipTypeId;
 
-    public SimilarityExporter(GraphDatabaseAPI api,
-                              String relationshipType,
-                              String propertyName) {
+    public SimilarityExporter(
+            GraphDatabaseAPI api,
+            String relationshipType,
+            String propertyName) {
         super(api);
         propertyId = getOrCreatePropertyId(propertyName);
         relationshipTypeId = getOrCreateRelationshipId(relationshipType);
@@ -77,7 +78,10 @@ public class SimilarityExporter extends StatementApi {
 
     }
 
-    private void createRelationship(SimilarityResult similarityResult, KernelTransaction statement) throws EntityNotFoundException, InvalidTransactionTypeKernelException, AutoIndexingKernelException {
+    private void createRelationship(SimilarityResult similarityResult, KernelTransaction statement) throws
+            EntityNotFoundException,
+            InvalidTransactionTypeKernelException,
+            AutoIndexingKernelException {
         long node1 = similarityResult.item1;
         long node2 = similarityResult.item2;
         long relationshipId = statement.dataWrite().relationshipCreate(node1, relationshipTypeId, node2);

@@ -36,7 +36,15 @@ public class SimilarityResult implements Comparable<SimilarityResult> {
 
     public static SimilarityResult TOMB = new SimilarityResult(-1, -1, -1, -1, -1, -1);
 
-    public SimilarityResult(long item1, long item2, long count1, long count2, long intersection, double similarity, boolean bidirectional, boolean reversed) {
+    public SimilarityResult(
+            long item1,
+            long item2,
+            long count1,
+            long count2,
+            long intersection,
+            double similarity,
+            boolean bidirectional,
+            boolean reversed) {
         this.item1 = item1;
         this.item2 = item2;
         this.count1 = count1;
@@ -46,8 +54,9 @@ public class SimilarityResult implements Comparable<SimilarityResult> {
         this.bidirectional = bidirectional;
         this.reversed = reversed;
     }
+
     public SimilarityResult(long item1, long item2, long count1, long count2, long intersection, double similarity) {
-        this(item1,item2, count1,count2,intersection,similarity, true, false);
+        this(item1, item2, count1, count2, intersection, similarity, true, false);
     }
 
     @Override
@@ -56,13 +65,13 @@ public class SimilarityResult implements Comparable<SimilarityResult> {
         if (o == null || getClass() != o.getClass()) return false;
         SimilarityResult that = (SimilarityResult) o;
         return item1 == that.item1 &&
-                item2 == that.item2 &&
-                count1 == that.count1 &&
-                count2 == that.count2 &&
-                intersection == that.intersection &&
-                Double.compare(that.similarity, similarity) == 0 &&
-                bidirectional == that.bidirectional &&
-                reversed == that.reversed;
+               item2 == that.item2 &&
+               count1 == that.count1 &&
+               count2 == that.count2 &&
+               intersection == that.intersection &&
+               Double.compare(that.similarity, similarity) == 0 &&
+               bidirectional == that.bidirectional &&
+               reversed == that.reversed;
     }
 
     @Override
@@ -75,16 +84,16 @@ public class SimilarityResult implements Comparable<SimilarityResult> {
      */
     @Override
     public int compareTo(SimilarityResult o) {
-        return Double.compare(o.similarity,this.similarity);
+        return Double.compare(o.similarity, this.similarity);
     }
 
     public SimilarityResult reverse() {
-        return new SimilarityResult(item2, item1,count2,count1,intersection,similarity,bidirectional,!reversed);
+        return new SimilarityResult(item2, item1, count2, count1, intersection, similarity, bidirectional, !reversed);
     }
 
     public SimilarityResult squareRooted() {
         this.similarity = Math.sqrt(this.similarity);
-        return  this;
+        return this;
     }
 
     public void record(DoubleHistogram histogram) {
@@ -93,20 +102,21 @@ public class SimilarityResult implements Comparable<SimilarityResult> {
         } catch (ArrayIndexOutOfBoundsException ignored) {
         }
     }
+
     public static Comparator<SimilarityResult> ASCENDING = (o1, o2) -> -o1.compareTo(o2);
     public static Comparator<SimilarityResult> DESCENDING = SimilarityResult::compareTo;
 
     @Override
     public String toString() {
         return "SimilarityResult{" +
-                "item1=" + item1 +
-                ", item2=" + item2 +
-                ", count1=" + count1 +
-                ", count2=" + count2 +
-                ", intersection=" + intersection +
-                ", similarity=" + similarity +
-                ", bidirectional=" + bidirectional +
-                ", reversed=" + reversed +
-                '}';
+               "item1=" + item1 +
+               ", item2=" + item2 +
+               ", count1=" + count1 +
+               ", count2=" + count2 +
+               ", intersection=" + intersection +
+               ", similarity=" + similarity +
+               ", bidirectional=" + bidirectional +
+               ", reversed=" + reversed +
+               '}';
     }
 }

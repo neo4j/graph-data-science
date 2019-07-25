@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.core.write.Exporter;
 
 import java.util.function.DoubleUnaryOperator;
 
-public  class NormalizedCentralityResult implements CentralityResult {
+public class NormalizedCentralityResult implements CentralityResult {
     private CentralityResult result;
     private DoubleUnaryOperator normalizationFunction;
 

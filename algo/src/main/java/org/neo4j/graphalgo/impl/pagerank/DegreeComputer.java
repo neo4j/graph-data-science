@@ -27,5 +27,5 @@ public interface DegreeComputer {
     DegreeCache degree(
             ExecutorService executor,
             int concurrency,
-            final AllocationTracker tracker);
+            AllocationTracker tracker);
 }
