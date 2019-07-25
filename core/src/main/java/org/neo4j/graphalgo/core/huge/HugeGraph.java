@@ -81,16 +81,23 @@ import java.util.function.LongPredicate;
  */
 public class HugeGraph implements Graph {
 
+    public static final double NO_WEIGHT = Double.NaN;
+
     private final IdMap idMapping;
     private final AllocationTracker tracker;
 
-    private HugeWeightMapping weights;
     private Map<String, HugeWeightMapping> nodeProperties;
     private final long relationshipCount;
     private HugeAdjacencyList inAdjacency;
     private HugeAdjacencyList outAdjacency;
     private HugeAdjacencyOffsets inOffsets;
     private HugeAdjacencyOffsets outOffsets;
+
+    private final HugeAdjacencyList inWeights;
+    private final HugeAdjacencyList outWeights;
+    private final HugeAdjacencyOffsets inWeightOffsets;
+    private final HugeAdjacencyOffsets outWeightOffsets;
+
     private HugeAdjacencyList.Cursor empty;
     private HugeAdjacencyList.Cursor inCache;
     private HugeAdjacencyList.Cursor outCache;
@@ -108,7 +115,6 @@ public class HugeGraph implements Graph {
             final HugeAdjacencyOffsets outOffsets) {
         this.idMapping = idMapping;
         this.tracker = tracker;
-        this.weights = weights;
         this.nodeProperties = nodeProperties;
         this.relationshipCount = relationshipCount;
         this.inAdjacency = inAdjacency;
@@ -118,6 +124,11 @@ public class HugeGraph implements Graph {
         inCache = newCursor(this.inAdjacency);
         outCache = newCursor(this.outAdjacency);
         empty = inCache == null ? newCursor(this.outAdjacency) : newCursor(this.inAdjacency);
+
+        inWeights = null;
+        outWeights = null;
+        inWeightOffsets = null;
+        outWeightOffsets = null;
     }
 
     @Override
@@ -147,7 +158,37 @@ public class HugeGraph implements Graph {
 
     @Override
     public double weightOf(final long sourceNodeId, final long targetNodeId) {
-        return weights.weight(sourceNodeId, targetNodeId);
+        if (outWeights != null) {
+            return findWeight(sourceNodeId, targetNodeId, outWeights, outWeightOffsets, outAdjacency, outOffsets);
+        } else if (inWeights != null) {
+            return findWeight(targetNodeId, sourceNodeId, inWeights, inWeightOffsets, inAdjacency, inOffsets);
+        }
+        return NO_WEIGHT;
+    }
+
+    private double findWeight(
+            final long fromId,
+            final long toId,
+            final HugeAdjacencyList weights,
+            final HugeAdjacencyOffsets weightOffsets,
+            final HugeAdjacencyList adjacencies,
+            final HugeAdjacencyOffsets adjacencyOffsets
+    ) {
+        long relOffset = adjacencyOffsets.get(fromId);
+        long weightOffset = weightOffsets.get(fromId);
+
+        HugeAdjacencyList.Cursor relCursor = adjacencies.deltaCursor(relOffset);
+        HugeAdjacencyList.Cursor weightCursor = weights.deltaCursor(weightOffset);
+
+        while (relCursor.hasNextVLong() &&
+               weightCursor.hasNextVLong() &&
+               relCursor.nextVLong() != toId
+        ) {
+            weightCursor.nextVLong();
+        }
+
+        long doubleBits = weightCursor.nextVLong();
+        return Double.longBitsToDouble(doubleBits);
     }
 
     @Override
@@ -271,7 +312,7 @@ public class HugeGraph implements Graph {
         return new HugeGraph(
                 tracker,
                 idMapping,
-                weights,
+                null,
                 nodeProperties,
                 relationshipCount,
                 inAdjacency,
@@ -407,16 +448,12 @@ public class HugeGraph implements Graph {
             outAdjacency = null;
             outOffsets = null;
         }
-        if (weights != null) {
-            tracker.remove(weights.release());
-        }
         for (final HugeWeightMapping nodeMapping : nodeProperties.values()) {
             tracker.remove(nodeMapping.release());
         }
         empty = null;
         inCache = null;
         outCache = null;
-        weights = null;
     }
 
     @Override

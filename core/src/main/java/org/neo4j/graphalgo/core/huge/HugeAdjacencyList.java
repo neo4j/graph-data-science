@@ -115,8 +115,18 @@ public final class HugeAdjacencyList {
         return allocatedMemory;
     }
 
+    /**
+     * Initialise the given cursor with the given offset
+     */
     Cursor deltaCursor(Cursor reuse, long offset) {
         return reuse.init(offset);
+    }
+
+    /**
+     * Get a new cursor initialised on the given offset
+     */
+    Cursor deltaCursor(long offset) {
+        return newCursor().init(offset);
     }
 
     public static final class Cursor extends MutableIntValue {

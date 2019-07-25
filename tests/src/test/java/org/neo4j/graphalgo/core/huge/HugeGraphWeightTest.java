@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.TokenWrite;
 import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -50,7 +50,8 @@ public final class HugeGraphWeightTest {
 
     @Test
     public void shouldLoadCorrectWeights() throws Exception {
-        mkDb(WEIGHT_BATCH_SIZE << 1, 2);
+        mkDb(WEIGHT_BATCH_SIZE * 2, 2);
+
         Graph graph = loadGraph(db);
 
         graph.forEachNode((long node) -> {
@@ -73,38 +74,39 @@ public final class HugeGraphWeightTest {
     }
 
     private void mkDb(final int nodes, final int relsPerNode) {
-        db.executeAndCommit((GraphDatabaseService __) -> {
-            try (KernelTransaction st = db.transaction()) {
-                TokenWrite token = st.tokenWrite();
-                int type = token.relationshipTypeGetOrCreateForName("TYPE");
-                int key = token.propertyKeyGetOrCreateForName("weight");
-                Write write = st.dataWrite();
-                NewRel newRel = newRel(write, type, key);
+        try (Transaction __ = db.beginTx()) {
+            KernelTransaction tx = db.transaction();
+            TokenWrite token = tx.tokenWrite();
+            int type = token.relationshipTypeGetOrCreateForName("TYPE");
+            int key = token.propertyKeyGetOrCreateForName("weight");
+            Write write = tx.dataWrite();
+            NewRel newRel = newRel(write, type, key);
 
-                long[] nodeIds = new long[nodes];
-                for (int i = 0; i < nodes; i++) {
-                    nodeIds[i] = write.nodeCreate();
-                }
+            long[] nodeIds = new long[nodes];
+            for (int i = 0; i < nodes; i++) {
+                nodeIds[i] = write.nodeCreate();
+            }
 
-                int pageSize = PageUtil.pageSizeFor(MemoryUsage.BYTES_OBJECT_REF);
-                for (int i = 0; i < nodes; i += pageSize) {
-                    int max = Math.min(pageSize, nodes - i);
-                    for (int j = 0; j < max; j++) {
-                        long sourceId = nodeIds[i + j];
-                        for (int k = 1; k <= relsPerNode; k++) {
-                            int targetIndex = j + k;
-                            if (targetIndex >= pageSize) {
-                                targetIndex = j - k;
-                            }
-                            long targetId = nodeIds[i + targetIndex];
-                            newRel.mk(sourceId, targetId);
+            int pageSize = PageUtil.pageSizeFor(MemoryUsage.BYTES_OBJECT_REF);
+            for (int i = 0; i < nodes; i += pageSize) {
+                int max = Math.min(pageSize, nodes - i);
+                for (int j = 0; j < max; j++) {
+                    long sourceId = nodeIds[i + j];
+                    for (int k = 1; k <= relsPerNode; k++) {
+                        int targetIndex = j + k;
+                        if (targetIndex >= pageSize) {
+                            targetIndex = j - k;
                         }
+                        long targetId = nodeIds[i + targetIndex];
+                        newRel.mk(sourceId, targetId);
                     }
                 }
-            } catch (KernelException e) {
-                throw new RuntimeException(e);
             }
-        });
+            tx.success();
+            __.success();
+        } catch (KernelException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private Graph loadGraph(final GraphDatabaseAPI db) {
