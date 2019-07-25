@@ -11,7 +11,7 @@ The experimental algorithms are accessed by via Cypher by calling procedures, ju
 
 [WARNING]
 --
-The experimental procedures are not officially supported.
+The experimental algorithms are not officially supported.
 --
 
 The documentation for the experimental algorithms is divided into the following sections:

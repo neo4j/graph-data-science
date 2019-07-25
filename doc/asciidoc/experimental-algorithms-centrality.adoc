@@ -1,6 +1,6 @@
 [[experimental-algorithms-centrality]]
 // tag::header[]
-= Centrality algorithms
+= Experimental centrality algorithms
 // end::header[]
 
 ifdef::env-docs[]
