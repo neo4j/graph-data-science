@@ -1,12 +1,12 @@
 [[experimental-procedures]]
-= Experimental procedures
+= Procedures
 
 [abstract]
 --
-This chapter contains a reference of all the experimental procedures in the Neo4j Graph Algorithms library.
+This chapter contains a reference of procedures for using the experimental algorithms in the Neo4j Graph Algorithms library.
 --
 
-// include::csv/experimental-procedures.csv[]
+The following is a procedure reference for calling the experimental algorithms in the Neo4j Graph Algorithms library.
 
 [[table-experimental]]
 [opts=header,cols="1m,5m"]

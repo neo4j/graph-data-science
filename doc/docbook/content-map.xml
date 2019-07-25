@@ -18,31 +18,28 @@
         <d:tocentry linkend="procedures"><?dbhtml filename="procedures/index.html"?>
         </d:tocentry>
 
-        <d:tocentry linkend="algorithms"><?dbhtml filename="algorithms/index.html"?>
-            <d:tocentry linkend="algorithms-centrality"><?dbhtml filename="algorithms/centrality/index.html"?>
-                <d:tocentry linkend="algorithms-pagerank"><?dbhtml filename="algorithms/page-rank/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-betweenness-centrality"><?dbhtml filename="algorithms/betweenness-centrality/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-closeness-centrality"><?dbhtml filename="algorithms/closeness-centrality/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-degree-centrality"><?dbhtml filename="algorithms/degree-centrality/index.html"?>
-                </d:tocentry>
+        <d:tocentry linkend="algorithms-centrality"><?dbhtml filename="algorithms/centrality/index.html"?>
+            <d:tocentry linkend="algorithms-pagerank"><?dbhtml filename="algorithms/page-rank/index.html"?>
             </d:tocentry>
-            <d:tocentry linkend="algorithms-community"><?dbhtml filename="algorithms/community/index.html"?>
-                <d:tocentry linkend="algorithms-louvain"><?dbhtml filename="algorithms/louvain/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-label-propagation"><?dbhtml filename="algorithms/label-propagation/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-connected-components"><?dbhtml filename="algorithms/connected-components/index.html"?>
-                </d:tocentry>
+            <d:tocentry linkend="algorithms-betweenness-centrality"><?dbhtml filename="algorithms/betweenness-centrality/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-closeness-centrality"><?dbhtml filename="algorithms/closeness-centrality/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-degree-centrality"><?dbhtml filename="algorithms/degree-centrality/index.html"?>
             </d:tocentry>
         </d:tocentry>
-
-        <d:tocentry linkend="experimental-procedures"><?dbhtml filename="experimental-procedures/index.html"?>
+        <d:tocentry linkend="algorithms-community"><?dbhtml filename="algorithms/community/index.html"?>
+            <d:tocentry linkend="algorithms-louvain"><?dbhtml filename="algorithms/louvain/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-label-propagation"><?dbhtml filename="algorithms/label-propagation/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-connected-components"><?dbhtml filename="algorithms/connected-components/index.html"?>
+            </d:tocentry>
         </d:tocentry>
 
         <d:tocentry linkend="experimental-algorithms"><?dbhtml filename="experimental-algorithms/index.html"?>
+            <d:tocentry linkend="experimental-procedures"><?dbhtml filename="experimental-procedures/index.html"?>
+            </d:tocentry>
             <d:tocentry linkend="experimental-algorithms-centrality"><?dbhtml filename="experimental-algorithms/centrality/index.html"?>>
                 <d:tocentry linkend="experimental-algorithms-articlerank"><?dbhtml filename="experimental-algorithms/article-rank/index.html"?>
                 </d:tocentry>
