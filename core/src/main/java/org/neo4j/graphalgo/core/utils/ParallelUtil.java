@@ -61,6 +61,9 @@ public final class ParallelUtil {
     private static final long DEFAULT_WAIT_TIME_NANOS = 1000;
     private static final long DEFAULT_MAX_NUMBER_OF_RETRIES = (long) 2.5e11; // about 3 days in micros
 
+    // prevent instantiation of factory
+    private ParallelUtil() {}
+
     public static Collection<PrimitiveLongIterable> batchIterables(final int concurrency, final int nodeCount) {
         if (concurrency <= 0) {
             throw new IllegalArgumentException("concurrency must be > 0");
