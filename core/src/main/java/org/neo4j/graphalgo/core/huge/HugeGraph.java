@@ -287,16 +287,6 @@ public class HugeGraph implements Graph {
         runForEach(node, Direction.OUTGOING, consumer, /* reuseCursor */ true);
     }
 
-//    @Override
-//    public void forEachOutgoing(int nodeId, RelationshipConsumer consumer) {
-//        runForEach(
-//                Integer.toUnsignedLong(nodeId),
-//                Direction.OUTGOING,
-//                toHugeOutConsumer(consumer),
-//                /* reuseCursor */ false
-//        );
-//    }
-
     public void forEachOutgoing(long nodeId, WeightedRelationshipConsumer consumer) {
         runForEach(
                 nodeId,
@@ -325,20 +315,6 @@ public class HugeGraph implements Graph {
         return new HugeGraphIntersectImpl(outAdjacency, outOffsets);
     }
 
-//    /**
-//     * O(n) !
-//     */
-//    @Override
-//    public boolean exists(int sourceNodeId, int targetNodeId, Direction direction) {
-//        return exists(
-//                Integer.toUnsignedLong(sourceNodeId),
-//                Integer.toUnsignedLong(targetNodeId),
-//                direction,
-//                // Graph interface should be thread-safe
-//                false
-//        );
-//    }
-
     /**
      * O(n) !
      */
@@ -358,20 +334,6 @@ public class HugeGraph implements Graph {
         runForEach(sourceNodeId, direction, consumer, reuseCursor);
         return consumer.found;
     }
-
-//    /**
-//     * O(n) !
-//     */
-//    @Override
-//    public int getTarget(int nodeId, int index, Direction direction) {
-//        return Math.toIntExact(getTarget(
-//                Integer.toUnsignedLong(nodeId),
-//                Integer.toUnsignedLong(index),
-//                direction,
-//                // Graph interface should be thread-safe
-//                false
-//        ));
-//    }
 
     /*
      * O(n) !
