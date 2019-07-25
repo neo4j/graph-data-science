@@ -425,9 +425,8 @@ public class PageRank extends Algorithm<PageRank> {
     }
 
     @Override
-    public PageRank release() {
+    public void release() {
         computeSteps.release();
-        return this;
     }
 
     static final class Partition {

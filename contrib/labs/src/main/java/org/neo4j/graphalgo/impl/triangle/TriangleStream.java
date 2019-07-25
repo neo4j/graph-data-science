@@ -77,16 +77,14 @@ public class TriangleStream extends Algorithm<TriangleStream> {
 
     /**
      * release inner data structures
-     * @return
      */
     @Override
-    public TriangleStream release() {
+    public void release() {
         visitedNodes = null;
         runningThreads = null;
         resultQueue = null;
         graph = null;
         executorService = null;
-        return this;
     }
 
     /**

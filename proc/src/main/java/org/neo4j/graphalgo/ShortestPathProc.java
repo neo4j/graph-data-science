@@ -95,7 +95,7 @@ public class ShortestPathProc {
 
         if(direction == Direction.BOTH) {
             direction = Direction.OUTGOING;
-            graphLoader.asUndirected(true).withDirection(direction);
+            graphLoader.undirected().withDirection(direction);
         } else {
             graphLoader.withDirection(direction);
         }
@@ -144,7 +144,7 @@ public class ShortestPathProc {
 
             if(direction == Direction.BOTH) {
                 direction = Direction.OUTGOING;
-                graphLoader.asUndirected(true).withDirection(direction);
+                graphLoader.undirected().withDirection(direction);
             } else {
                 graphLoader.withDirection(direction);
             }
@@ -210,7 +210,7 @@ public class ShortestPathProc {
 
         if(direction == Direction.BOTH) {
             direction = Direction.OUTGOING;
-            graphLoader.asUndirected(true).withDirection(direction);
+            graphLoader.undirected().withDirection(direction);
         } else {
             graphLoader.withDirection(direction);
         }

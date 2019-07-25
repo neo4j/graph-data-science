@@ -422,7 +422,7 @@ public class WeightedAllShortestPaths427Test {
                 .withRelationshipType("LINK")
                 .withRelationshipWeightsFromProperty("weight", 1.0)
                 .withDirection(Direction.OUTGOING)
-                .withConcurrency(Pools.DEFAULT_CONCURRENCY)
+                .withDefaultConcurrency()
                 .load(graphImpl);
         expected = calculateExpected(true);
         expectedNonWeighted = calculateExpected(false);

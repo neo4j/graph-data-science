@@ -57,20 +57,14 @@ public final class PR2 extends BaseMain {
         AllocationTracker trackerHeavy = AllocationTracker.create();
 
         GraphLoader graphLoader = new GraphLoader(db)
-//                .withoutExecutorService()
                 .withExecutorService(Pools.DEFAULT)
-//                .withConcurrency(1)
                 .withLog(log)
                 .withLogInterval(500, TimeUnit.MILLISECONDS)
-//                    .withLabel("Person")
                 .withAllocationTracker(trackerHuge)
                 .withDirection(Direction.OUTGOING)
-                .withSort(true)
-                .asUndirected(true)
+                .sorted()
+                .undirected()
                 .withoutRelationshipWeights();
-//                .withOptionalRelationshipWeightsFromProperty(
-//                        "creationDate", 1.0
-//                );
 
 
         System.gc();

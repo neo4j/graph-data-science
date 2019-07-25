@@ -130,7 +130,7 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
 
         Direction direction = config.getDirection(Direction.OUTGOING);
         if (direction == Direction.BOTH) {
-            loader.asUndirected(true);
+            loader.undirected();
         } else {
             loader.withDirection(direction);
         }

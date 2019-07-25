@@ -174,7 +174,7 @@ public final class WeightedDegreeCentralityTest {
                     .withRelationshipType("TYPE1")
                     .withDirection(Direction.OUTGOING)
                     .withOptionalRelationshipWeightsFromProperty("weight", 1.0)
-                    .withSort(true)
+                    .sorted()
                     .load(graphImpl);
         }
 

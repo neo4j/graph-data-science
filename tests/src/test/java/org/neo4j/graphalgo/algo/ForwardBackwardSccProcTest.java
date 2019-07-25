@@ -79,7 +79,6 @@ public class ForwardBackwardSccProcTest {
             tx.success();
         }
 
-
         api.getDependencyResolver()
                 .resolveDependency(Procedures.class)
                 .registerProcedure(StronglyConnectedComponentsProc.class);

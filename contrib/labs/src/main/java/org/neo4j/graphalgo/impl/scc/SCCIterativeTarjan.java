@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.core.utils.paged.PagedSimpleBitSet;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphdb.Direction;
 
-import java.util.function.LongPredicate;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -100,10 +99,9 @@ public class SCCIterativeTarjan extends Algorithm<SCCIterativeTarjan> implements
 
     /**
      * release inner data structures
-     * @return
      */
     @Override
-    public SCCIterativeTarjan release() {
+    public void release() {
         graph = null;
         index = null;
         visited = null;
@@ -111,7 +109,6 @@ public class SCCIterativeTarjan extends Algorithm<SCCIterativeTarjan> implements
         stack = null;
         boundaries = null;
         todo = null;
-        return this;
     }
 
     /**

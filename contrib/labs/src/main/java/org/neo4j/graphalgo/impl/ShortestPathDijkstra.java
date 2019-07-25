@@ -187,14 +187,13 @@ public class ShortestPathDijkstra extends Algorithm<ShortestPathDijkstra> {
     }
 
     @Override
-    public ShortestPathDijkstra release() {
+    public void release() {
         graph = null;
         costs = null;
         queue = null;
         path = null;
         finalPath = null;
         visited = null;
-        return this;
     }
 
     private void reset() {

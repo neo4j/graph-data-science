@@ -417,10 +417,9 @@ public final class Louvain extends Algorithm<Louvain> {
     }
 
     @Override
-    public Louvain release() {
+    public void release() {
         tracker.remove(communities.release());
         communities = null;
-        return this;
     }
 
     @Override

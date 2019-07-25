@@ -91,9 +91,8 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> implements Deg
     }
 
     @Override
-    public DegreeCentrality release() {
+    public void release() {
         graph = null;
-        return null;
     }
 
     @Override

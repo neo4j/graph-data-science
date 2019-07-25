@@ -34,7 +34,7 @@ public enum DirectionParam implements Function<GraphLoader, GraphLoader> {
     IN_SORT {
         @Override
         public GraphLoader apply(final GraphLoader graphLoader) {
-            return graphLoader.withDirection(Direction.INCOMING).withSort(true);
+            return graphLoader.withDirection(Direction.INCOMING).sorted();
         }
     },
     OUT {
@@ -46,7 +46,7 @@ public enum DirectionParam implements Function<GraphLoader, GraphLoader> {
     OUT_SORT {
         @Override
         public GraphLoader apply(final GraphLoader graphLoader) {
-            return graphLoader.withDirection(Direction.OUTGOING).withSort(true);
+            return graphLoader.withDirection(Direction.OUTGOING).sorted();
         }
     },
     BOTH {
@@ -58,13 +58,13 @@ public enum DirectionParam implements Function<GraphLoader, GraphLoader> {
     BOTH_SORT {
         @Override
         public GraphLoader apply(final GraphLoader graphLoader) {
-            return graphLoader.withDirection(Direction.BOTH).withSort(true);
+            return graphLoader.withDirection(Direction.BOTH).sorted();
         }
     },
     UNDIRECTED {
         @Override
         public GraphLoader apply(final GraphLoader graphLoader) {
-            return graphLoader.asUndirected(true).withDirection(Direction.BOTH).withSort(true);
+            return graphLoader.undirected().withDirection(Direction.BOTH).sorted();
         }
     },
     NONE {

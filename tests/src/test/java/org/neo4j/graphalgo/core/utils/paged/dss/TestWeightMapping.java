@@ -22,6 +22,8 @@ package org.neo4j.graphalgo.core.utils.paged.dss;
 import com.carrotsearch.hppc.IntIntHashMap;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 
+import java.util.Arrays;
+
 public final class TestWeightMapping implements HugeWeightMapping {
     private final IntIntHashMap weights;
 
@@ -63,6 +65,11 @@ public final class TestWeightMapping implements HugeWeightMapping {
     @Override
     public long release() {
         return 0;
+    }
+
+    @Override
+    public long getMaxValue() {
+        return Arrays.stream(weights.values).max().orElse(-1);
     }
 
     @Override

@@ -88,7 +88,7 @@ public class ClosenessCentralityDiscoTest {
         return new GraphLoader(DB, Pools.DEFAULT)
                 .withLabel("Node")
                 .withRelationshipType("TYPE")
-                .asUndirected(true)
+                .undirected()
                 .load(factory);
     }
 

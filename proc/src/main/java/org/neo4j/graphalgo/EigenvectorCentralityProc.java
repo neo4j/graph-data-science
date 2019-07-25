@@ -162,7 +162,7 @@ public final class EigenvectorCentralityProc {
 
         Direction direction = configuration.getDirection(Direction.OUTGOING);
         if (direction == Direction.BOTH) {
-            graphLoader.asUndirected(true);
+            graphLoader.undirected();
         } else {
             graphLoader.withDirection(direction);
         }

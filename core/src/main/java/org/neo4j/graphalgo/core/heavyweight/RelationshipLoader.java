@@ -71,7 +71,7 @@ abstract class RelationshipLoader {
      * Since we don't support multiple relationships to the same target node, might drop
      * such duplicated relationships, e.g. if we're loading with the requirement that
      * the final adjacency list will be sorted –
-     * ({@link org.neo4j.graphalgo.core.GraphLoader#withSort(boolean)} is called with {@code true} as its argument.
+     * ({@link org.neo4j.graphalgo.core.GraphLoader#sorted()} is called with {@code true} as its argument.
      * In those cases, the algo degree can be less than the Neo4j degree.
      *
      * We eventually require both values, the first for progress logging (how many relationships were processed),

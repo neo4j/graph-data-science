@@ -85,13 +85,12 @@ public class SCCTarjan extends Algorithm<SCCTarjan> {
     }
 
     @Override
-    public SCCTarjan release() {
+    public void release() {
         stack.clear();
         communities = null;
         indices = null;
         lowLink = null;
         graph = null;
-        return this;
     }
 
     /**

@@ -90,9 +90,8 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
     }
 
     @Override
-    public LabelPropagation release() {
+    public void release() {
         graph = null;
-        return me();
     }
 
     public long ranIterations() {

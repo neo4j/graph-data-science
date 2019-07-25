@@ -80,7 +80,7 @@ public class AllShortestPathsProc {
 
         if(direction == Direction.BOTH) {
             direction = Direction.OUTGOING;
-            graphLoader.asUndirected(true).withDirection(direction);
+            graphLoader.undirected().withDirection(direction);
         } else {
             graphLoader.withDirection(direction);
         }

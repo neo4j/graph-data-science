@@ -74,9 +74,8 @@ public class AverageDegreeCentrality extends Algorithm<AverageDegreeCentrality> 
     }
 
     @Override
-    public AverageDegreeCentrality release() {
+    public void release() {
         graph = null;
-        return null;
     }
 
     private class DegreeTask implements Runnable {

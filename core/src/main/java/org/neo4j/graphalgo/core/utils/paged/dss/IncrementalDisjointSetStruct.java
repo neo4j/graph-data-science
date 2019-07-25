@@ -27,8 +27,6 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 
-import java.util.stream.LongStream;
-
 /**
  * Implements {@link DisjointSetStruct} with support for incremental computation based on a previously computed mapping
  * between node ids and set ids.
@@ -80,10 +78,7 @@ public final class IncrementalDisjointSetStruct extends DisjointSetStruct {
      * reset the container
      */
     private void init(AllocationTracker tracker) {
-        this.maxCommunity = LongStream
-                .range(0, size)
-                .map(id -> (long) communityMapping.nodeWeight(id, -1))
-                .max().orElse(0);
+        this.maxCommunity = communityMapping.getMaxValue(-1);
 
         final HugeLongLongMap internalMapping = new HugeLongLongMap(size, tracker);
 

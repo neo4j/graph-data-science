@@ -159,11 +159,10 @@ public class Traverse extends Algorithm<Traverse> {
     }
 
     @Override
-    public Traverse release() {
+    public void release() {
         nodes = null;
         weights = null;
         visited = null;
-        return this;
     }
 
     public interface ExitPredicate {

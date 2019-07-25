@@ -212,8 +212,7 @@ public class MultistepSCC extends Algorithm<MultistepSCC> {
     }
 
     @Override
-    public MultistepSCC release() {
+    public void release() {
         graph = null;
-        return this;
     }
 }

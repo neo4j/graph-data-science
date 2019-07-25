@@ -97,9 +97,8 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
     }
 
     @Override
-    public WeightedDegreeCentrality release() {
+    public void release() {
         graph = null;
-        return null;
     }
 
     @Override

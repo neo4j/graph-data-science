@@ -83,14 +83,14 @@ public class TriangleProc {
                 .setRelationshipTypeOrQuery(relationship);
 
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
+                .init(log, label, relationship, configuration)
                 .withOptionalLabel(configuration.getNodeLabelOrQuery())
                 .withOptionalRelationshipType(configuration.getRelationshipOrQuery())
                 .withoutRelationshipWeights()
                 .withoutNodeWeights()
-                .withSort(true)
-                .asUndirected(true)
-                .init(log, label, relationship, configuration)
                 .withDirection(TriangleCountBase.D)
+                .sorted()
+                .undirected()
                 .load(configuration.getGraphImpl());
 
         if (graph.isEmpty()) {
@@ -118,14 +118,14 @@ public class TriangleProc {
                 .setRelationshipTypeOrQuery(relationship);
 
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
+                .init(log, label, relationship, configuration)
                 .withOptionalLabel(configuration.getNodeLabelOrQuery())
                 .withOptionalRelationshipType(configuration.getRelationshipOrQuery())
                 .withoutRelationshipWeights()
                 .withoutNodeWeights()
-                .withSort(true)
-                .asUndirected(true)
-                .init(log, label, relationship, configuration)
                 .withDirection(TriangleCountBase.D)
+                .sorted()
+                .undirected()
                 .load(configuration.getGraphImpl());
 
         if (graph.isEmpty()) {
@@ -158,14 +158,14 @@ public class TriangleProc {
                 .setRelationshipTypeOrQuery(relationship);
 
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
+                .init(log, label, relationship, configuration)
                 .withOptionalLabel(configuration.getNodeLabelOrQuery())
                 .withOptionalRelationshipType(configuration.getRelationshipOrQuery())
                 .withoutRelationshipWeights()
                 .withoutNodeWeights()
-                .withSort(true)
-                .asUndirected(true)
-                .init(log, label, relationship, configuration)
                 .withDirection(TriangleCountBase.D)
+                .sorted()
+                .undirected()
                 .load(configuration.getGraphImpl());
 
         return new TriangleCountForkJoin(
@@ -198,14 +198,14 @@ public class TriangleProc {
 
         try (ProgressTimer timer = builder.timeLoad()) {
             graph = new GraphLoader(api, Pools.DEFAULT)
+                    .init(log, label, relationship, configuration)
                     .withOptionalLabel(configuration.getNodeLabelOrQuery())
                     .withOptionalRelationshipType(configuration.getRelationshipOrQuery())
                     .withoutRelationshipWeights()
                     .withoutNodeWeights()
-                    .withSort(true)
-                    .asUndirected(true)
-                    .init(log, label, relationship, configuration)
                     .withDirection(TriangleCountBase.D)
+                    .sorted()
+                    .undirected()
                     .load(configuration.getGraphImpl());
         }
 
@@ -318,14 +318,14 @@ public class TriangleProc {
 
         try (ProgressTimer timer = builder.timeLoad()) {
             graph = new GraphLoader(api, Pools.DEFAULT)
+                    .init(log, label, relationship, configuration)
                     .withOptionalLabel(configuration.getNodeLabelOrQuery())
                     .withOptionalRelationshipType(configuration.getRelationshipOrQuery())
                     .withoutRelationshipWeights()
                     .withoutNodeWeights()
-                    .withSort(true)
-                    .asUndirected(true)
-                    .init(log, label, relationship, configuration)
                     .withDirection(TriangleCountBase.D)
+                    .sorted()
+                    .undirected()
                     .load(configuration.getGraphImpl());
         }
 

@@ -106,10 +106,9 @@ public abstract class TriangleCountBase<Coeff, Self extends TriangleCountBase<Co
     }
 
     @Override
-    public Self release() {
+    public void release() {
         graph = null;
         triangles = null;
-        return me();
     }
 
     /**

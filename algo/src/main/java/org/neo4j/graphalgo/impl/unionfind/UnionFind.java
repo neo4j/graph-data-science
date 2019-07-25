@@ -30,8 +30,6 @@ import org.neo4j.graphalgo.core.utils.paged.dss.IncrementalDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.RankedDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.UnionStrategy;
 
-import java.util.concurrent.ForkJoinTask;
-
 public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> {
 
     protected Graph graph;
@@ -91,9 +89,8 @@ public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> 
     }
 
     @Override
-    public ME release() {
+    public void release() {
         graph = null;
-        return me();
     }
 
     public static class Config {

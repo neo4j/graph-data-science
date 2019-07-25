@@ -174,13 +174,11 @@ public class RABrandesBetweennessCentrality extends Algorithm<RABrandesBetweenne
 
     /**
      * release inner data structures
-     * @return
      */
     @Override
-    public RABrandesBetweennessCentrality release() {
+    public void release() {
         graph = null;
         selectionStrategy = null;
-        return this;
     }
 
     /**
