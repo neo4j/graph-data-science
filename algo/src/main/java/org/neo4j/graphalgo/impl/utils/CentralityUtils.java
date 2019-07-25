@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.impl.results.CentralityScore;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 
-import java.util.function.Function;
+import java.util.function.DoubleUnaryOperator;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -68,10 +68,10 @@ public class CentralityUtils {
                     });
     }
 
-    public static void normalizeArray(double[][] partitions, Function<Double, Double> normalizationFunction) {
+    public static void normalizeArray(double[][] partitions, DoubleUnaryOperator normalizationFunction) {
         for (double[] partition : partitions) {
             for (int j = 0; j < partition.length; j++) {
-                partition[j] = normalizationFunction.apply(partition[j]);
+                partition[j] = normalizationFunction.applyAsDouble(partition[j]);
             }
         }
     }

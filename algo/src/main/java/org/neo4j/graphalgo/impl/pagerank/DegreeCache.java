@@ -19,29 +19,40 @@
  */
 package org.neo4j.graphalgo.impl.pagerank;
 
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+
 public class DegreeCache {
 
-    public final static DegreeCache EMPTY = new DegreeCache(new double[0], new double[0][0], 0.0);
+    public static final DegreeCache EMPTY = new DegreeCache(
+            HugeDoubleArray.newArray(0, AllocationTracker.EMPTY),
+            HugeObjectArray.newArray(HugeDoubleArray.class, 0, AllocationTracker.EMPTY),
+            0.0);
 
-    private double[] aggregatedDegrees;
-    private double[][] weights;
-    private double averageDegree;
+    private final HugeDoubleArray aggregatedDegrees;
+    private final HugeObjectArray<HugeDoubleArray> weights;
+    private final double averageDegree;
 
-    public DegreeCache(double[] aggregatedDegrees, double[][] weights, double averageDegree) {
+    public DegreeCache(HugeDoubleArray aggregatedDegrees, HugeObjectArray<HugeDoubleArray> weights, double averageDegree) {
         this.aggregatedDegrees = aggregatedDegrees;
         this.weights = weights;
         this.averageDegree = averageDegree;
     }
 
-    double[] aggregatedDegrees() {
+    HugeDoubleArray aggregatedDegrees() {
         return aggregatedDegrees;
     }
 
-    double[][] weights() {
+    HugeObjectArray<HugeDoubleArray> weights() {
         return weights;
     }
 
     double average() {
         return averageDegree;
+    }
+
+    public DegreeCache withAverave(double newAverage) {
+        return new DegreeCache(aggregatedDegrees, weights, newAverage);
     }
 }

@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
@@ -52,13 +53,6 @@ public final class WeightedDegreeCentralityTest {
 
     @Parameterized.Parameters(name = "{1}")
     public static Collection<Object[]> data() {
-//        return Arrays.asList(
-//                new Object[]{HeavyGraphFactory.class, "HeavyGraphFactory"},
-//                new Object[]{HeavyCypherGraphFactory.class, "HeavyCypherGraphFactory"},
-//                new Object[]{HugeGraphFactory.class, "HugeGraphFactory"},
-//                new Object[]{GraphViewFactory.class, "GraphViewFactory"}
-//        );
-
         return Arrays.asList(
                 new Object[]{HeavyGraphFactory.class, "HeavyGraphFactory"},
                 new Object[]{HugeGraphFactory.class, "HugeGraphFactory"}
@@ -184,7 +178,7 @@ public final class WeightedDegreeCentralityTest {
                     .load(graphImpl);
         }
 
-        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph, Pools.DEFAULT, 1);
+        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY);
         degreeCentrality.compute(true);
 
         IntStream.range(0, expected.size()).forEach(i -> {
@@ -192,8 +186,8 @@ public final class WeightedDegreeCentralityTest {
             assertArrayEquals(
                     "Node#" + nodeId,
                     expected.get(nodeId),
-                    degreeCentrality.weights()[i],
-                    0.01
+                    degreeCentrality.weights().get(i).toArray(),
+                    0.01D
 
             );
         });

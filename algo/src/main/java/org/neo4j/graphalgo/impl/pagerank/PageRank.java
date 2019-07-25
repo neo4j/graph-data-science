@@ -27,12 +27,12 @@ import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeIterator;
-import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
-import org.neo4j.graphalgo.impl.results.DoubleArrayResult;
+import org.neo4j.graphalgo.impl.results.HugeDoubleArrayResult;
 import org.neo4j.graphalgo.impl.results.PartitionedDoubleArrayResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
@@ -111,14 +111,13 @@ public class PageRank extends Algorithm<PageRank> {
     private final AllocationTracker tracker;
     private final IdMapping idMapping;
     private final NodeIterator nodeIterator;
-    private final RelationshipIterator relationshipIterator;
     private final Degrees degrees;
     private final double dampingFactor;
     private final int iterations;
     private final Graph graph;
     private final RelationshipWeights relationshipWeights;
-    private LongStream sourceNodeIds;
-    private PageRankVariant pageRankVariant;
+    private final LongStream sourceNodeIds;
+    private final PageRankVariant pageRankVariant;
 
     private Log log;
     private ComputeSteps computeSteps;
@@ -153,18 +152,17 @@ public class PageRank extends Algorithm<PageRank> {
             PageRank.Config algoConfig,
             LongStream sourceNodeIds,
             PageRankVariant pageRankVariant) {
+        assert algoConfig.iterations >= 1;
         this.executor = executor;
         this.concurrency = concurrency;
         this.batchSize = batchSize;
         this.tracker = tracker;
         this.idMapping = graph;
         this.nodeIterator = graph;
-        this.relationshipIterator = graph;
         this.degrees = graph;
         this.graph = graph;
         this.relationshipWeights = graph;
         this.dampingFactor = algoConfig.dampingFactor;
-        assert algoConfig.iterations >= 1;
         this.iterations = algoConfig.iterations;
         this.sourceNodeIds = sourceNodeIds;
         this.pageRankVariant = pageRankVariant;
@@ -218,8 +216,6 @@ public class PageRank extends Algorithm<PageRank> {
                 idMapping.nodeCount(),
                 dampingFactor,
                 sourceNodeIds.map(graph::toMappedNodeId).filter(mappedId -> mappedId != -1L).toArray(),
-                relationshipIterator,
-                degrees,
                 partitions,
                 executor);
     }
@@ -246,9 +242,9 @@ public class PageRank extends Algorithm<PageRank> {
                     degrees,
                     direction,
                     start,
-                    (long) batchSize);
+                    batchSize);
             partitions.add(partition);
-            start += ((long) partition.nodeCount);
+            start += partition.nodeCount;
         }
         return partitions;
     }
@@ -258,8 +254,6 @@ public class PageRank extends Algorithm<PageRank> {
             long nodeCount,
             double dampingFactor,
             long[] sourceNodeIds,
-            RelationshipIterator relationshipIterator,
-            Degrees degrees,
             List<Partition> partitions,
             ExecutorService pool) {
         concurrency = findIdealConcurrency(nodeCount, partitions, concurrency, log);
@@ -276,7 +270,7 @@ public class PageRank extends Algorithm<PageRank> {
         Iterator<Partition> parts = partitions.iterator();
 
         DegreeComputer degreeComputer = pageRankVariant.degreeComputer(graph);
-        DegreeCache degreeCache = degreeComputer.degree(pool, concurrency);
+        DegreeCache degreeCache = degreeComputer.degree(pool, concurrency, tracker);
 
         while (parts.hasNext()) {
             Partition partition = parts.next();
@@ -457,7 +451,7 @@ public class PageRank extends Algorithm<PageRank> {
             while (nodes.hasNext() && partitionSize < batchSize && nodeCount < MAX_NODE_COUNT) {
                 long nodeId = nodes.next();
                 ++nodeCount;
-                partitionSize += ((long) degrees.degree(nodeId, direction));
+                partitionSize += degrees.degree(nodeId, direction);
             }
             this.startNode = startNode;
             this.nodeCount = nodeCount;
@@ -500,7 +494,7 @@ public class PageRank extends Algorithm<PageRank> {
                 }
                 return new PartitionedDoubleArrayResult(results, firstStep.starts());
             } else {
-                return new DoubleArrayResult(firstStep.pageRank());
+                return new HugeDoubleArrayResult(HugeDoubleArray.of(firstStep.pageRank()));
             }
         }
 

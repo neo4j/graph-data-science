@@ -19,23 +19,19 @@
  */
 package org.neo4j.graphalgo.impl.results;
 
-import org.neo4j.graphalgo.core.write.Exporter;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
-import java.util.function.Function;
+public class HugeNormalizationComputations {
 
-public interface CentralityResult {
+    static double squaredSum(HugeDoubleArray partition) {
+        return partition.stream().parallel().map(value -> value * value).sum();
+    }
 
-    double score(int nodeId);
+    static double l1Norm(HugeDoubleArray partition) {
+        return partition.stream().parallel().sum();
+    }
 
-    double score(long nodeId);
-
-    void export(String propertyName, Exporter exporter);
-
-    void export(String propertyName, Exporter exporter, Function<Double, Double> normalizationFunction);
-
-    double computeMax();
-
-    double computeL2Norm();
-
-    double computeL1Norm();
+    public static double max(HugeDoubleArray result, double defaultMax) {
+        return result.stream().parallel().max().orElse(defaultMax);
+    }
 }

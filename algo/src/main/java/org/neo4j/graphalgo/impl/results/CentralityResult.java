@@ -21,18 +21,17 @@ package org.neo4j.graphalgo.impl.results;
 
 import org.neo4j.graphalgo.core.write.Exporter;
 
-import java.util.function.Function;
+import java.util.function.DoubleUnaryOperator;
 
-public interface CentralityResult
-{
+public interface CentralityResult {
 
-    double score( int nodeId );
+    double score(int nodeId);
 
-    double score( long nodeId );
+    double score(long nodeId);
 
-    void export( String propertyName, Exporter exporter );
+    void export(String propertyName, Exporter exporter);
 
-    void export( String propertyName, Exporter exporter, Function<Double,Double> normalizationFunction );
+    void export(String propertyName, Exporter exporter, DoubleUnaryOperator normalizationFunction);
 
     double computeMax();
 
