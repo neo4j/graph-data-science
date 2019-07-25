@@ -54,13 +54,6 @@ import static org.mockito.Mockito.when;
 @ThreadLeakScope(ThreadLeakScope.Scope.NONE)
 public final class ParallelUtilTest extends RandomizedTest {
 
-//    @Test
-//    public void shouldRetryByDefault() throws Exception {
-//        ParallelUtil.runWithConcurrency(5, asList(() -> {
-//
-//        }));
-//    }
-//
     @Test
     public void threadSizeShouldDivideByBatchsize() throws Exception {
         int batchSize = between(10, 10_000);

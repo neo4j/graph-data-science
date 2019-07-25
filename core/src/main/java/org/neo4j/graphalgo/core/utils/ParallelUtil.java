@@ -58,6 +58,9 @@ public final class ParallelUtil {
 
     public static final int DEFAULT_BATCH_SIZE = 10_000;
 
+    private static final long DEFAULT_WAIT_TIME_NANOS = 1000;
+    private static final long DEFAULT_MAX_NUMBER_OF_RETRIES = (long) 2.5e11; // about 3 days in micros
+
     public static Collection<PrimitiveLongIterable> batchIterables(final int concurrency, final int nodeCount) {
         if (concurrency <= 0) {
             throw new IllegalArgumentException("concurrency must be > 0");
@@ -375,9 +378,6 @@ public final class ParallelUtil {
 
         awaitTermination(futures);
     }
-
-    private static final long DEFAULT_WAIT_TIME_NANOS = 1000;
-    private static final long DEFAULT_MAX_NUMBER_OF_RETRIES = (long) 2.5e11; // about 3 days in micros
 
     /**
      * Try to run all tasks for their side-effects using at most
