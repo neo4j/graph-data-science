@@ -6,13 +6,15 @@
 This section describes the Eigenvector Centrality algorithm in the Neo4j Graph Algorithms library.
 --
 
-// tag::introduction[]
 Eigenvector Centrality is an algorithm that measures the *transitive* influence or connectivity of nodes.
 
 Relationships to high-scoring nodes contribute more to the score of a node than connections to low-scoring nodes.
 A high score means that a node is connected to other nodes that have high scores.
 
-// end::introduction[]
+[WARNING]
+--
+The Eigenvector Centrality algorithm is experimental and not officially supported.
+--
 
 This section includes:
 

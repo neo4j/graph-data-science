@@ -6,11 +6,14 @@
 This section describes the Minimum Weight Spanning Tree algorithm in the Neo4j Graph Algorithms library.
 --
 
-// tag::introduction[]
 The Minimum Weight Spanning Tree (MST) starts from a given node, and finds all its reachable nodes and the set of relationships that connect the nodes together with the minimum possible weight.
 Prim's algorithm is one of the simplest and best-known minimum spanning tree algorithms.
 The K-Means variant of this algorithm can be used to detect clusters in the graph.
-// end::introduction[]
+
+[WARNING]
+--
+The Minimum Weight Spanning Tree algorithm is experimental and not officially supported.
+--
 
 This section includes:
 

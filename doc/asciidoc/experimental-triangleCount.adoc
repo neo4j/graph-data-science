@@ -6,10 +6,13 @@
 This section describes the Triangle Count or Clustering Coefficient algorithm in the Neo4j Graph Algorithms library.
 --
 
-// tag::introduction[]
 Triangle counting is a community detection graph algorithm that is used to determine the number of triangles passing through each node in the graph.
 A triangle is a set of three nodes, where each node has a relationship to all other nodes.
-// end::introduction[]
+
+[WARNING]
+--
+The Triangle Counting / Cluster Coefficient algorithm is experimental and not officially supported.
+--
 
 This section includes:
 

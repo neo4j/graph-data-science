@@ -6,14 +6,17 @@
 This section describes the Balanced Triads algorithm in the Neo4j Graph Algorithms library.
 --
 
-// tag::introduction[]
 Balanced Triads algorithm is used to evaluate structural balance of the graph.
 
 It is based on the https://en.wikipedia.org/wiki/Balance_theory[Balance Theory] proposed by Fritz Heider in 1958.
 Unlike other algorithms where there are only positive relationships available, balance theory differentiates between positive and negative relationships.
 Certain structures between individuals and objects are perceived as balanced whereas others are not.
 In general balanced structures are preferred over imbalanced ones.
-// end::introduction[]
+
+[WARNING]
+--
+The ArticleRank algorithm is experimental and not officially supported.
+--
 
 This section includes:
 

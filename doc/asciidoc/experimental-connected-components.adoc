@@ -8,6 +8,10 @@ This section describes the experimental variations of the Connected Components a
 
 For general information about the union find algorithm see <<algorithms-connected-components, Connected Components>> (`algo.unionFind`).
 
+[WARNING]
+--
+The variants of the UnionFind algorithm is experimental and not officially supported.
+--
 
 [[experimental-algorithms-connected-components-imp]]
 == Additional implementations

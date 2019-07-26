@@ -6,9 +6,12 @@
 This section describes the Common Neighbors algorithm in the Neo4j Graph Algorithms library.
 --
 
-// tag::introduction[]
 Common neighbors captures the idea that two strangers who have a friend in common are more likely to be introduced than those who don't have any friends in common.
-// end::introduction[]
+
+[WARNING]
+--
+The Common Neighbors algorithm is experimental and not officially supported.
+--
 
 This section includes:
 

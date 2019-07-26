@@ -6,10 +6,13 @@
 This section describes the Same Community algorithm in the Neo4j Graph Algorithms library.
 --
 
-// tag::introduction[]
 Same Community is a way of determining whether two nodes belong to the same community.
 These communities could be computed by using one of the <<algorithms-community>>.
-// end::introduction[]
+
+[WARNING]
+--
+The Same Community algorithm is experimental and not officially supported.
+--
 
 This section includes:
 

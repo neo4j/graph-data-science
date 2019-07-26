@@ -6,9 +6,12 @@
 This section describes the Yen's K-shortest paths algorithm in the Neo4j Graph Algorithms library.
 --
 
-// tag::introduction[]
 Yen's K-shortest paths algorithm computes single-source K-shortest loopless paths for a graph with non-negative relationship weights.
-// end::introduction[]
+
+[WARNING]
+--
+The Yen's K-shortest paths algorithm is experimental and not officially supported.
+--
 
 This section includes:
 

@@ -6,10 +6,13 @@
 This section describes the Harmonic Centrality algorithm in the Neo4j Graph Algorithms library.
 --
 
-// tag::introduction[]
 Harmonic centrality (also known as valued centrality) is a variant of closeness centrality, that was invented to solve the problem the original formula had when dealing with unconnected graphs.
 As with many of the centrality algorithms, it originates from the field of social network analysis.
-// end::introduction[]
+
+[WARNING]
+--
+The Harmonic Centrality algorithm is experimental and not officially supported.
+--
 
 This section includes:
 

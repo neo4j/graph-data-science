@@ -6,10 +6,13 @@
 This section describes the Overlap Similarity algorithm in the Neo4j Graph Algorithms library.
 --
 
-// tag::introduction[]
 link:https://en.wikipedia.org/wiki/Overlap_coefficient[Overlap similarity] measures overlap between two sets.
 It is defined as the size of the intersection of two sets, divided by the size of the smaller of the two sets.
-// end::introduction[]
+
+[WARNING]
+--
+The Overlap Similarity algorithm is experimental and not officially supported.
+--
 
 This section includes:
 

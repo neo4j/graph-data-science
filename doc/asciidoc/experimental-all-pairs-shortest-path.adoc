@@ -6,10 +6,13 @@
 This section describes the All Pairs Shortest Path algorithm in the Neo4j Graph Algorithms library.
 --
 
-// tag::introduction[]
 The All Pairs Shortest Path (APSP) calculates the shortest (weighted) path between all pairs of nodes.
 This algorithm has optimisations that make it quicker than calling the Single Source Shortest Path algorithm for every pair of nodes in the graph.
-// end::introduction[]
+
+[WARNING]
+--
+The All Pairs Shortest Path algorithm is experimental and not officially supported.
+--
 
 This section includes:
 

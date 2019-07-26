@@ -1,7 +1,5 @@
 [[experimental-algorithms-centrality]]
-// tag::header[]
-= Experimental centrality algorithms
-// end::header[]
+= Centrality algorithms
 
 ifdef::env-docs[]
 [abstract]
@@ -10,16 +8,11 @@ This chapter provides explanations and examples for each of the centrality algor
 --
 endif::env-docs[]
 
-// todo introduction to graph algorithms, also say something about pregel & parallelization
-// todo sensible ordering
-
-// tag::summary[]
 The following centrality algorithms determine the importance of distinct nodes in a network:
 
 * <<experimental-algorithms-articlerank, ArticleRank>> (`algo.articleRank`)
 * <<experimental-algorithms-harmonic-centrality, Harmonic Centrality>> (`algo.closeness.harmonic`)
 * <<experimental-algorithms-eigenvector, Eigenvector Centrality>> (`algo.eigenvector`)
-// end::summary[]
 
 include::experimental-articlerank.adoc[leveloffset=+1]
 

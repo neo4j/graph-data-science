@@ -1,16 +1,10 @@
 [[experimental-algorithms-linkprediction]]
-// tag::header[]
 = Link Prediction algorithms
-// end::header[]
 
-ifdef::env-docs[]
 [abstract]
 --
 This chapter provides explanations and examples for each of the link prediction algorithms in the Neo4j Graph Algorithms library.
 --
-endif::env-docs[]
-
-// tag::summary[]
 
 These algorithms help determine the closeness of a pair of nodes.
 We would then use the computed scores as part of a link prediction solution:
@@ -21,7 +15,6 @@ We would then use the computed scores as part of a link prediction solution:
 * <<experimental-algorithms-linkprediction-resource-allocation, Resource Allocation>> (`algo.linkprediction.resourceAllocation`)
 * <<experimental-algorithms-linkprediction-same-community, Same Community>> (`algo.linkprediction.sameCommunity`)
 * <<experimental-algorithms-linkprediction-total-neighbors, Total Neighbors>> (`algo.linkprediction.totalNeighbors`)
-// end::summary[]
 
 
 include::experimental-linkprediction-adamic-adar.adoc[leveloffset=+1]

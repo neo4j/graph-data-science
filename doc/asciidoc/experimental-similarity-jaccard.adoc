@@ -6,10 +6,13 @@
 This section describes the Jaccard Similarity algorithm in the Neo4j Graph Algorithms library.
 --
 
-// tag::introduction[]
 Jaccard Similarity (coefficient), a term coined by https://en.wikipedia.org/wiki/Paul_Jaccard[Paul Jaccard^], measures similarities between sets.
 It is defined as the size of the intersection divided by the size of the union of two sets.
-// end::introduction[]
+
+[WARNING]
+--
+The Jaccard Similarity algorithm is experimental and not officially supported.
+--
 
 This section includes:
 

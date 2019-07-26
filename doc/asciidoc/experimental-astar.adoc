@@ -6,10 +6,13 @@
 This section describes the A* algorithm in the Neo4j Graph Algorithms library.
 --
 
-// tag::introduction[]
 The A* (pronounced “A-star”) algorithm improves on the classic Dijkstra algorithm.
 It is based upon the observation that some searches are informed, and that by being informed we can make better choices over which paths to take through the graph.
-// end::introduction[]
+
+[WARNING]
+--
+The A* algorithm is experimental and not officially supported.
+--
 
 This section includes:
 

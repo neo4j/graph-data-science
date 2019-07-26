@@ -6,11 +6,14 @@
 This section describes the Shortest Path algorithm in the Neo4j Graph Algorithms library.
 --
 
-// tag::introduction[]
 The Shortest Path algorithm calculates the shortest (weighted) path between a pair of nodes.
 In this category, Dijkstra's algorithm is the most well known.
 It is a real time graph algorithm, and can be used as part of the normal user flow in a web or mobile application.
-// end::introduction[]
+
+[WARNING]
+--
+The Shortest Path algorithm is experimental and not officially supported.
+--
 
 This section includes:
 
