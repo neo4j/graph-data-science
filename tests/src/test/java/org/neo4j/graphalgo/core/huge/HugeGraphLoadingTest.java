@@ -46,6 +46,8 @@ public final class HugeGraphLoadingTest {
         // results in pages of 16384 elements, so we would have to write in multiple
         // pages for a single batch
         testPropertyLoading(14);
+        // drop DB inb between tests
+        db.shutdown();
         // default value
         testPropertyLoading(28);
     }
