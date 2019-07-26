@@ -10,10 +10,10 @@ This chapter contains a reference of all the procedures in the Neo4j Graph Algor
 [[table-proc]]
 [opts=header,cols="1m,5a"]
 |===
-| Name                                                                		| Description
+| Name                                                                          | Description
 | <<algorithms-betweenness-centrality-syntax, algo.betweenness>>                | Betweenness centrality algorithm writing results back to the graph.
 | <<algorithms-betweenness-centrality-syntax, algo.betweenness.stream>>         | Betweenness centrality algorithm streaming results back to the user.
-| <<algorithms-betweenness-centrality-syntax, <algo.betweenness.sampled>>       | Approximate betweenness centrality algorithm writing results back to the graph.
+| <<algorithms-betweenness-centrality-syntax, algo.betweenness.sampled>>        | Approximate betweenness centrality algorithm writing results back to the graph.
 | <<algorithms-betweenness-centrality-syntax, algo.betweenness.sampled.stream>> | Approximate betweenness centrality algorithm streaming results to the user.
 | <<algorithms-closeness-centrality-syntax, algo.closeness>>                    | Closeness centrality algorithm writing results back to the graph.
 | <<algorithms-closeness-centrality-syntax, algo.closeness.stream>>             | Closeness centrality algorithm streaming results back to the user.

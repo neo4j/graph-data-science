@@ -35,6 +35,7 @@ The guide covers the following areas:
 
 
 In addition to the above algorithms, there are a large number of experimental algorithm implementations developed as part of Neo4j Labs.
+These include experimental centrality and community algorithms, as well as experimental algorithms for link prediction, path finding and similarity.
 The Neo4j Labs algorithms are documented in <<experimental-algorithms>>.
 
 ====

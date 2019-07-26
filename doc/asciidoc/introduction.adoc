@@ -79,8 +79,8 @@ dbms.security.procedures.unrestricted=algo.*
 
 If we are using a standalone Neo4j Server, the library will need to be installed and configured manually.
 
-. Download `graph-algorithms-algo-[version].jar` from https://github.com/neo4j-contrib/neo4j-graph-algorithms/releases[the matching release] and copy it into the `$NEO4J_HOME/plugins` directory.
-We can work out which release to download by referring to the https://github.com/neo4j-contrib/neo4j-graph-algorithms/blob/master/versions.json[versions file^].
+. Download `neo4j-graph-algorithms-[version]-standalone.jar` from the https://neo4j.com/download-center/[Neo4j Download Center] and copy it into the `$NEO4J_HOME/plugins` directory.
+  We can work out which release to download by referring to the https://github.com/neo4j-contrib/neo4j-graph-algorithms/blob/master/versions.json[versions file^].
 
 
 . Add the following to your `$NEO4J_HOME/conf/neo4j.conf` file:
