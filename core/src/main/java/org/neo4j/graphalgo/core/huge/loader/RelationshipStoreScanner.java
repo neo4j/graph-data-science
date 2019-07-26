@@ -54,14 +54,6 @@ public final class RelationshipStoreScanner extends AbstractStorePageCacheScanne
         }
     };
 
-    public static RelationshipStoreScanner of(GraphDatabaseAPI api) {
-        return of(api, AbstractStorePageCacheScanner.DEFAULT_PREFETCH_SIZE);
-    }
-
-    public static RelationshipStoreScanner of(GraphDatabaseAPI api, int prefetchSize) {
-        return new RelationshipStoreScanner(prefetchSize, api);
-    }
-
     private RelationshipStoreScanner(final int prefetchSize, final GraphDatabaseAPI api) {
         super(prefetchSize, api, RELATIONSHIP_ACCESS);
     }
