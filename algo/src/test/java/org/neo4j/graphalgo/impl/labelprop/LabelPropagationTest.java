@@ -29,14 +29,16 @@ import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
+import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Direction;
@@ -44,7 +46,6 @@ import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -99,7 +100,7 @@ public final class LabelPropagationTest {
         DB.execute(GRAPH).close();
         GraphLoader graphLoader = new GraphLoader(DB, Pools.DEFAULT)
                 .withDirection(Direction.OUTGOING)
-                .withConcurrency(Pools.DEFAULT_CONCURRENCY);
+                .withDefaultConcurrency();
 
         if (graphImpl == HeavyCypherGraphFactory.class) {
             graphLoader
@@ -200,5 +201,57 @@ public final class LabelPropagationTest {
         }
 
         return cluster;
+    }
+
+    @Test
+    public void shouldComputeMemoryEstimation1Thread() {
+        long nodeCount = 100_000L;
+        int concurrency = 1;
+        assertMemoryEstimation(nodeCount, concurrency);
+    }
+
+    @Test
+    public void shouldComputeMemoryEstimation4Threads() {
+        long nodeCount = 100_000L;
+        int concurrency = 4;
+        assertMemoryEstimation(nodeCount, concurrency);
+    }
+
+    @Test
+    public void shouldComputeMemoryEstimation42Threads() {
+        long nodeCount = 100_000L;
+        int concurrency = 42;
+        assertMemoryEstimation(nodeCount, concurrency);
+    }
+
+    private void assertMemoryEstimation(final long nodeCount, final int concurrency) {
+        GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(nodeCount).build();
+
+        final LabelPropagationFactory labelPropagation = new LabelPropagationFactory();
+
+        final MemoryRange actual = labelPropagation.memoryEstimation().estimate(dimensions, concurrency).memoryUsage();
+        final long min = 80L /* LabelPropagation.class */ +
+                         16L * concurrency /* StepRunner.class */ +
+                         48L * concurrency /* InitStep.class */ +
+                         56L * concurrency /* ComputeStep.class */ +
+                         24L * concurrency /* ComputeStepConsumer.class */ +
+                         HugeLongArray.memoryEstimation(nodeCount) /* labels HugeLongArray wrapper */ +
+                /* LongDoubleScatterMap votes */
+                         56L * concurrency /* LongDoubleScatterMap.class */ +
+                         (9 * 8 + 16) * concurrency /* long[] keys */ +
+                         (9 * 8 + 16) * concurrency; /* double[] values */
+        final long max = 80L /* LabelPropagation.class */ +
+                         16L * concurrency /* StepRunner.class */ +
+                         48L * concurrency /* InitStep.class */ +
+                         56L * concurrency /* ComputeStep.class */ +
+                         24L * concurrency /* ComputeStepConsumer.class */ +
+                         HugeLongArray.memoryEstimation(nodeCount) /* labels HugeLongArray wrapper */ +
+                /* LongDoubleScattermap votes */
+                         56L * concurrency /* LongDoubleScatterMap.class */ +
+                         ((BitUtil.nextHighestPowerOfTwo((long) (nodeCount / 0.75)) + 1) * 8 + 16) * concurrency /* long[] keys */ +
+                         ((BitUtil.nextHighestPowerOfTwo((long) (nodeCount / 0.75)) + 1) * 8 + 16) * concurrency; /* double[] values */
+
+        assertEquals("min", min, actual.min);
+        assertEquals("max", max, actual.max);
     }
 }

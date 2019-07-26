@@ -93,10 +93,9 @@ public class DangalchevClosenessCentrality extends Algorithm<DangalchevCloseness
     }
 
     @Override
-    public DangalchevClosenessCentrality release() {
+    public void release() {
         graph = null;
         farness = null;
-        return this;
     }
 
 

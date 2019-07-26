@@ -17,25 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.results;
+package org.neo4j.graphalgo.core.heavyweight;
 
-import org.neo4j.graphalgo.core.write.Exporter;
+import org.neo4j.graphdb.Result;
 
-import java.util.function.Function;
+class ResultCountingVisitor implements Result.ResultVisitor<RuntimeException> {
+    private long rows = 0;
 
-public interface CentralityResult {
 
-    double score(int nodeId);
+    @Override
+    public boolean visit(Result.ResultRow row) throws RuntimeException {
+        rows++;
+        return true;
+    }
 
-    double score(long nodeId);
+    public long rows() {
+        return rows;
+    }
 
-    void export(String propertyName, Exporter exporter);
 
-    void export(String propertyName, Exporter exporter, Function<Double, Double> normalizationFunction);
-
-    double computeMax();
-
-    double computeL2Norm();
-
-    double computeL1Norm();
 }

@@ -119,11 +119,10 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm<WeightedAllShort
     }
 
     @Override
-    public WeightedAllShortestPaths release() {
+    public void release() {
         graph = null;
         counter = null;
         resultQueue = null;
-        return this;
     }
 
     /**
@@ -165,8 +164,8 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm<WeightedAllShort
 
         public void compute(int startNode) {
             Arrays.fill(distance, Double.POSITIVE_INFINITY);
-            distance[startNode] = 0d;
-            queue.add(startNode, 0d);
+            distance[startNode] = 0D;
+            queue.add(startNode, 0D);
             while (outputStreamOpen && !queue.isEmpty()) {
                 final int node = queue.pop();
                 final double sourceDistance = distance[node];

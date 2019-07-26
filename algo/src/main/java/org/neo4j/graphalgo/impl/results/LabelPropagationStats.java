@@ -82,9 +82,29 @@ public class LabelPropagationStats {
     public final String seedProperty;
     public final String writeProperty;
 
-    public LabelPropagationStats(long loadMillis, long computeMillis, long postProcessingMillis, long writeMillis, long nodes,
-                                 long communityCount, long p100, long p99, long p95, long p90, long p75, long p50, long p25, long p10, long p5, long p1, long iterations, boolean write, boolean didConverge,
-                                 String weightProperty, String seedProperty, String writeProperty) {
+    public LabelPropagationStats(
+            long loadMillis,
+            long computeMillis,
+            long postProcessingMillis,
+            long writeMillis,
+            long nodes,
+            long communityCount,
+            long p100,
+            long p99,
+            long p95,
+            long p90,
+            long p75,
+            long p50,
+            long p25,
+            long p10,
+            long p5,
+            long p1,
+            long iterations,
+            boolean write,
+            boolean didConverge,
+            String weightProperty,
+            String seedProperty,
+            String writeProperty) {
         this.loadMillis = loadMillis;
         this.computeMillis = computeMillis;
         this.postProcessingMillis = postProcessingMillis;
@@ -137,6 +157,7 @@ public class LabelPropagationStats {
             this.seedProperty = seedProperty;
             return this;
         }
+
         public Builder writeProperty(final String writeProperty) {
             this.writeProperty = writeProperty;
             return this;

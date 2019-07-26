@@ -66,6 +66,10 @@ public final class SparseNodeMapping {
         return MemoryRange.of(classSize + pagesSize).add(MemoryRange.of(minRequirements, maxRequirements));
     }
 
+    public long getCapacity() {
+        return capacity;
+    }
+
     public long get(long index) {
         assert index < capacity;
         final int pageIndex = pageIndex(index);

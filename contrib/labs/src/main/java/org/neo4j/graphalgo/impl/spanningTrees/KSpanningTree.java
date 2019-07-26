@@ -106,12 +106,11 @@ public class KSpanningTree extends Algorithm<KSpanningTree> {
     }
 
     @Override
-    public KSpanningTree release() {
+    public void release() {
         idMapping = null;
         relationshipIterator = null;
         weights = null;
         kSpanningTree = null;
-        return this;
     }
 
     public static class Result {

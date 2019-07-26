@@ -21,8 +21,6 @@ package org.neo4j.graphalgo.core.huge;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
@@ -33,40 +31,33 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
-import java.util.Arrays;
-import java.util.Collection;
-
 import static org.junit.Assert.assertEquals;
 
-@RunWith(Parameterized.class)
 public final class HugeGraphLoadingTest {
 
     @Rule
     public ImpermanentDatabaseRule db = new ImpermanentDatabaseRule();
 
-    @Parameterized.Parameters(name = "singlePageShift = {0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(
-                // set low page shift so that 100k nodes will trigger the usage of the paged
-                // huge array, which will trigger multi page code paths.
-                // we import nodes in batches of 54600 nodes, using a page shift of 14
-                // results in pages of 16384 elements, so we would have to write in multiple
-                // pages for a single batch
-                new Object[]{"14"},
-                // default value
-                new Object[]{"28"}
-        );
-    }
-
-    private final String singlePageShift;
-
-    public HugeGraphLoadingTest(String singlePageShift) {
-        this.singlePageShift = singlePageShift;
+    @Test
+    public void testDefaultPropertyLoading() {
+        // default value
+        testPropertyLoading(28);
     }
 
     @Test
-    public void testLoading() {
-        System.setProperty("org.neo4j.graphalgo.core.utils.paged.HugeArrays.singlePageShift", singlePageShift);
+    public void testPagedPropertyLoading() {
+        // set low page shift so that 100k nodes will trigger the usage of the paged
+        // huge array, which will trigger multi page code paths.
+        // we import nodes in batches of 54600 nodes, using a page shift of 14
+        // results in pages of 16384 elements, so we would have to write in multiple
+        // pages for a single batch
+        testPropertyLoading(14);
+    }
+
+    private void testPropertyLoading(int singlePageShift) {
+        System.setProperty(
+                "org.neo4j.graphalgo.core.utils.paged.HugeArrays.singlePageShift",
+                String.valueOf(singlePageShift));
         // something larger than one batch
         int nodeCount = 60_000;
         Label label = Label.label("Foo");
@@ -96,5 +87,26 @@ public final class HugeGraphLoadingTest {
             long neoId = graph.toOriginalNodeId(nodeId);
             assertEquals(String.format("Property for node %d (neo = %d) was overwritten.", nodeId, neoId), neoId, (long) weight);
         }
+    }
+
+    @Test
+    public void testFullPageLoading() {
+        final int recordsPerPage = 546;
+
+        // IdGeneration in Neo4j happens in chunks of 20. In order to get completely occupied pages
+        // with 546 records each, we need to meet a point where we have a generated id chunk as well as a full page.
+        // So we need a node count of 546 * 10 -> 5460 % 20 == 0
+        final int pages = 10;
+        int nodeCount = recordsPerPage * pages;
+
+        db.executeAndCommit(gdb -> {
+            for (int i = 0; i < nodeCount; i++) {
+                gdb.createNode();
+            }
+        });
+
+        final Graph graph = new GraphLoader(db).load(HugeGraphFactory.class);
+
+        assertEquals(nodeCount, graph.nodeCount());
     }
 }

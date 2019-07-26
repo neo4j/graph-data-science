@@ -99,7 +99,7 @@ public class LouvainMultiLevelTest extends HeavyHugeTester {
                 .withAnyLabel()
                 .withoutNodeProperties()
                 .withOptionalRelationshipWeightsFromProperty("weight", 1.0)
-                .asUndirected(true)
+                .undirected()
                 .load(graphImpl);
     }
 

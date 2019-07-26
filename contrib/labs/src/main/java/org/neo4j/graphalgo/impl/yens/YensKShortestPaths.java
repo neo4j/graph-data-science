@@ -174,11 +174,10 @@ public class YensKShortestPaths extends Algorithm<YensKShortestPaths> {
     }
 
     @Override
-    public YensKShortestPaths release() {
+    public void release() {
         graph = null;
         dijkstra = null;
         shortestPaths = null;
         candidates = null;
-        return this;
     }
 }

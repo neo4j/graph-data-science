@@ -151,13 +151,13 @@ public class HeavyGraph implements Graph {
             @Override
             public double weight(long source, long target) {
                 checkSize(source, target);
-                return weightMapping.get((int) source, (int) target);
+                return weightMapping.weight((int) source, (int) target);
             }
 
             @Override
             public double weight(long source, long target, double defaultValue) {
                 checkSize(source, target);
-                return weightMapping.get(RawValues.combineIntInt((int) source, (int) target), defaultValue);
+                return weightMapping.weight(RawValues.combineIntInt((int) source, (int) target), defaultValue);
             }
 
             @Override

@@ -129,9 +129,8 @@ public class Prim extends Algorithm<Prim> {
     }
 
     @Override
-    public Prim release() {
+    public void release() {
         spanningTree = null;
-        return this;
     }
 
     public static class Result {

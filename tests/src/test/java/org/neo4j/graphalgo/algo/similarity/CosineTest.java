@@ -436,7 +436,7 @@ public class CosineTest {
         assertEquals(3L, row.get("count1"));
         assertEquals(3L, row.get("count2"));
         assertEquals(0L, row.get("intersection"));
-        assertEquals(0d, row.get("similarity"));
+        assertEquals(0D, row.get("similarity"));
     }
 
     private void assert23Skip(Map<String, Object> row) {
@@ -445,7 +445,7 @@ public class CosineTest {
         assertEquals(1L, row.get("count1"));
         assertEquals(0L, row.get("count2"));
         assertEquals(0L, row.get("intersection"));
-        assertEquals(0d, row.get("similarity"));
+        assertEquals(0D, row.get("similarity"));
     }
 
     private void assert13(Map<String, Object> row) {
@@ -454,7 +454,7 @@ public class CosineTest {
         assertEquals(3L, row.get("count1"));
         assertEquals(3L, row.get("count2"));
         assertEquals(0L, row.get("intersection"));
-        assertEquals(0d, row.get("similarity"));
+        assertEquals(0D, row.get("similarity"));
     }
 
     private void assert13Skip(Map<String, Object> row) {
@@ -463,7 +463,7 @@ public class CosineTest {
         assertEquals(2L, row.get("count1"));
         assertEquals(0L, row.get("count2"));
         assertEquals(0L, row.get("intersection"));
-        assertEquals(0d, row.get("similarity"));
+        assertEquals(0D, row.get("similarity"));
     }
 
     private void assert12(Map<String, Object> row) {
@@ -490,7 +490,7 @@ public class CosineTest {
         assertEquals(3L, row.get("count1"));
         assertEquals(3L, row.get("count2"));
         assertEquals(0L, row.get("intersection"));
-        assertEquals(0d, row.get("similarity"));
+        assertEquals(0D, row.get("similarity"));
     }
 
     private void assert03Skip(Map<String, Object> row) {
@@ -499,7 +499,7 @@ public class CosineTest {
         assertEquals(3L, row.get("count1"));
         assertEquals(0L, row.get("count2"));
         assertEquals(0L, row.get("intersection"));
-        assertEquals(0d, row.get("similarity"));
+        assertEquals(0D, row.get("similarity"));
     }
 
     private void assert02(Map<String, Object> row) {

@@ -47,7 +47,7 @@ public class TriangleCountForkJoin extends TriangleCountBase<AtomicDoubleArray, 
     private final int sequentialThreshold;
     private final AtomicDoubleArray coefficients;
     private long triangleCount = -1;
-    private double averageClusteringCoefficient = 0.0d;
+    private double averageClusteringCoefficient = 0.0D;
 
     public TriangleCountForkJoin(Graph graph, ForkJoinPool pool, int sequentialThreshold) {
         super(graph);

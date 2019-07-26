@@ -44,12 +44,12 @@ import java.util.stream.Stream;
 
 public final class PageRankProc extends BaseAlgoProc<PageRank> {
 
-    public static final String CONFIG_DAMPING = "dampingFactor";
-    public static final String CONFIG_WEIGHT_PROPERTY = "weightProperty";
-    public static final String CONFIG_CACHE_WEIGHTS = "cacheWeights";
-    public static final Double DEFAULT_DAMPING = 0.85;
-    public static final Integer DEFAULT_ITERATIONS = 20;
-    public static final String DEFAULT_SCORE_PROPERTY = "pagerank";
+    private static final String CONFIG_DAMPING = "dampingFactor";
+    private static final String CONFIG_WEIGHT_PROPERTY = "weightProperty";
+    private static final String CONFIG_CACHE_WEIGHTS = "cacheWeights";
+    private static final Double DEFAULT_DAMPING = 0.85;
+    private static final Integer DEFAULT_ITERATIONS = 20;
+    private static final String DEFAULT_SCORE_PROPERTY = "pagerank";
 
 
     @Procedure(value = "algo.pageRank", mode = Mode.WRITE)
@@ -130,7 +130,7 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
 
         Direction direction = config.getDirection(Direction.OUTGOING);
         if (direction == Direction.BOTH) {
-            loader.asUndirected(true);
+            loader.undirected();
         } else {
             loader.withDirection(direction);
         }

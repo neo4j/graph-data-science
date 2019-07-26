@@ -17,26 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.pagerank;
+package org.neo4j.graphalgo.impl.results;
 
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipWeights;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
-public interface PageRankVariant {
+public class HugeNormalizationComputations {
 
-    ComputeStep createComputeStep(
-            double dampingFactor,
-            long[] sourceNodeIds,
-            Graph graph,
-            RelationshipWeights relationshipWeights,
-            AllocationTracker tracker,
-            int partitionCount,
-            long start,
-            DegreeCache aggregatedDegrees,
-            long nodeCount);
+    static double squaredSum(HugeDoubleArray partition) {
+        return partition.stream().parallel().map(value -> value * value).sum();
+    }
 
-    DegreeComputer degreeComputer(Graph graph);
+    static double l1Norm(HugeDoubleArray partition) {
+        return partition.stream().parallel().sum();
+    }
+
+    public static double max(HugeDoubleArray result, double defaultMax) {
+        return result.stream().parallel().max().orElse(defaultMax);
+    }
 }
-
-

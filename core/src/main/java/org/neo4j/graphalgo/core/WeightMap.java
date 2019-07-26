@@ -90,12 +90,12 @@ public final class WeightMap implements WeightMapping {
      * return the weight for id or defaultValue if unknown
      */
     @Override
-    public double get(long id) {
+    public double weight(long id) {
         return weights.getOrDefault(id, defaultValue);
     }
 
     @Override
-    public double get(final long id, final double defaultValue) {
+    public double weight(final long id, final double defaultValue) {
         return weights.getOrDefault(id, defaultValue);
     }
 

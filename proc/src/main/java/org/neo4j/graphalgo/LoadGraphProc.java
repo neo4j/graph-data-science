@@ -104,23 +104,27 @@ public final class LoadGraphProc extends BaseProc {
         final Direction direction = config.getDirection(Direction.OUTGOING);
         final String nodeWeight = config.getString("nodeWeight", null);
         final String nodeProperty = config.getString("nodeProperty", null);
-        final Boolean sorted = config.get("sorted", false);
-        final Boolean undirected = config.get("undirected", false);
-        return loader
+        loader
                 .withNodeStatement(config.getNodeLabelOrQuery())
                 .withRelationshipStatement(config.getRelationshipOrQuery())
                 .withOptionalRelationshipWeightsFromProperty(
                         config.getWeightProperty(),
                         config.getWeightPropertyDefaultValue(1.0))
-                .withOptionalNodeProperty(nodeProperty, 0.0d)
-                .withOptionalNodeWeightsFromProperty(nodeWeight, 1.0d)
+                .withOptionalNodeProperty(nodeProperty, 0.0D)
+                .withOptionalNodeWeightsFromProperty(nodeWeight, 1.0D)
                 .withOptionalNodeProperties(
-                        PropertyMapping.of(LabelPropagation.SEED_TYPE, nodeProperty, 0.0d),
-                        PropertyMapping.of(LabelPropagation.WEIGHT_TYPE, nodeWeight, 1.0d)
+                        PropertyMapping.of(LabelPropagation.SEED_TYPE, nodeProperty, 0.0D),
+                        PropertyMapping.of(LabelPropagation.WEIGHT_TYPE, nodeWeight, 1.0D)
                 )
-                .withDirection(direction)
-                .withSort(sorted)
-                .asUndirected(undirected);
+                .withDirection(direction);
+
+        if (config.get("sorted", false)) {
+            loader.sorted();
+        }
+        if (config.get("undirected", false)) {
+            loader.undirected();
+        }
+        return loader;
     }
 
     public static class LoadGraphStats {
@@ -140,7 +144,7 @@ public final class LoadGraphProc extends BaseProc {
             loadRelationships = configuration.getRelationshipOrQuery();
             direction = configuration.getDirection(Direction.OUTGOING).name();
             nodeWeight = configuration.getString(ProcedureConstants.NODE_WEIGHT, null);
-            nodeProperty = configuration.getString(ProcedureConstants.NODE_PROPERTY, null);;
+            nodeProperty = configuration.getString(ProcedureConstants.NODE_PROPERTY, null);
             relationshipWeight = configuration.getString(ProcedureConstants.RELATIONSHIP_WEIGHT, null);;
         }
     }

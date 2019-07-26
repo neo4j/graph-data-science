@@ -54,14 +54,6 @@ public final class NodeStoreScanner extends AbstractStorePageCacheScanner<NodeRe
         }
     };
 
-    public static NodeStoreScanner of(GraphDatabaseAPI api) {
-        return of(api, AbstractStorePageCacheScanner.DEFAULT_PREFETCH_SIZE);
-    }
-
-    public static NodeStoreScanner of(GraphDatabaseAPI api, int prefetchSize) {
-        return new NodeStoreScanner(prefetchSize, api);
-    }
-
     private NodeStoreScanner(final int prefetchSize, final GraphDatabaseAPI api) {
         super(prefetchSize, api, NODE_ACCESS);
     }

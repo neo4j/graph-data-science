@@ -113,11 +113,10 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
     }
 
     @Override
-    public IntersectingTriangleCount release() {
+    public void release() {
         executorService = null;
         graph = null;
         triangles = null;
-        return this;
     }
 
     public IntersectingTriangleCount compute() {

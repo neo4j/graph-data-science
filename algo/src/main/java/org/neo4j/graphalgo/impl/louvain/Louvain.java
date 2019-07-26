@@ -209,7 +209,7 @@ public final class Louvain extends Algorithm<Louvain> {
         return this;
     }
 
-    private static final int MAX_MAP_ENTRIES = (int) ((Integer.MAX_VALUE - 2) * 0.75f);
+    private static final int MAX_MAP_ENTRIES = (int) ((Integer.MAX_VALUE - 2) * 0.75F);
 
     /**
      * create a virtual graph based on the community structure of the
@@ -417,10 +417,9 @@ public final class Louvain extends Algorithm<Louvain> {
     }
 
     @Override
-    public Louvain release() {
+    public void release() {
         tracker.remove(communities.release());
         communities = null;
-        return this;
     }
 
     @Override
@@ -437,7 +436,7 @@ public final class Louvain extends Algorithm<Louvain> {
 
     public double getFinalModularity() {
         double[] modularities = getModularities();
-        return modularities.length > 0 ? modularities[modularities.length - 1] : 0.0d;
+        return modularities.length > 0 ? modularities[modularities.length - 1] : 0.0D;
     }
 
     @Override

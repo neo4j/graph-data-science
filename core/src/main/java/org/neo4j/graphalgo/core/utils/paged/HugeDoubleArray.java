@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.function.IntToDoubleFunction;
 import java.util.function.LongFunction;
 import java.util.function.LongToDoubleFunction;
+import java.util.stream.DoubleStream;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
@@ -123,6 +124,8 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
      */
     @Override
     abstract public HugeCursor<double[]> newCursor();
+
+    abstract public DoubleStream stream();
 
     /**
      * {@inheritDoc}
@@ -340,6 +343,11 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
         }
 
         @Override
+        public DoubleStream stream() {
+            return Arrays.stream(page);
+        }
+
+        @Override
         public double[] toArray() {
             return page;
         }
@@ -484,6 +492,11 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
         @Override
         public HugeCursor<double[]> newCursor() {
             return new HugeCursor.PagedCursor<>(size, pages);
+        }
+
+        @Override
+        public DoubleStream stream() {
+            return Arrays.stream(pages).flatMapToDouble(Arrays::stream);
         }
     }
 }

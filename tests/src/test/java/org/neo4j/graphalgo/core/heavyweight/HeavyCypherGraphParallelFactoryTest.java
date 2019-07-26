@@ -105,7 +105,7 @@ public class HeavyCypherGraphParallelFactoryTest {
                 .withExecutorService(Pools.DEFAULT)
                 .withBatchSize(1000)
                 .withDuplicateRelationshipsStrategy(accumulateWeights ? DuplicateRelationshipsStrategy.SUM : DuplicateRelationshipsStrategy.NONE)
-                .withRelationshipWeightsFromProperty("prop",0d)
+                .withRelationshipWeightsFromProperty("prop",0D)
                 .withLabel(nodeStatement)
                 .withRelationshipType(relStatement)
                 .load(HeavyCypherGraphFactory.class);

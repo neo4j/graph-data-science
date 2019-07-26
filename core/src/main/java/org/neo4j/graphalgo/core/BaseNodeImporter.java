@@ -43,7 +43,7 @@ public abstract class BaseNodeImporter<T> extends StatementFunction<T> {
         final T mapping = newNodeMap(nodeCount);
         ReadHelper.readNodes(transaction.cursors(), transaction.dataRead(), labelId, (nodeId) -> {
             addNodeId(mapping, nodeId);
-            progress.nodeImported();
+            progress.singleNodeImported();
         });
         finish(mapping);
         return mapping;

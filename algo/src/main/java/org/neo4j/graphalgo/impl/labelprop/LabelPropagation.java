@@ -62,7 +62,8 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
             int batchSize,
             int concurrency,
             ExecutorService executor,
-            AllocationTracker tracker) {
+            AllocationTracker tracker
+    ) {
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
         this.batchSize = batchSize;
@@ -90,9 +91,8 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
     }
 
     @Override
-    public LabelPropagation release() {
+    public void release() {
         graph = null;
-        return me();
     }
 
     public long ranIterations() {

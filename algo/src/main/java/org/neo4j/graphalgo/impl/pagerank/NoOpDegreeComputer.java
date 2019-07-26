@@ -19,12 +19,17 @@
  */
 package org.neo4j.graphalgo.impl.pagerank;
 
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+
 import java.util.concurrent.ExecutorService;
 
 public class NoOpDegreeComputer implements DegreeComputer {
 
     @Override
-    public DegreeCache degree(ExecutorService executor, int concurrency) {
+    public DegreeCache degree(
+            ExecutorService executor,
+            int concurrency,
+            AllocationTracker tracker) {
         return DegreeCache.EMPTY;
     }
 }

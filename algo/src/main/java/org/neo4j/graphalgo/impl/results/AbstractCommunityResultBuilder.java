@@ -140,7 +140,8 @@ public abstract class AbstractCommunityResultBuilder<T> {
 
         timer.stop();
 
-        return build(loadDuration,
+        return build(
+                loadDuration,
                 evalDuration,
                 writeDuration,
                 timer.getDuration(),
@@ -161,7 +162,8 @@ public abstract class AbstractCommunityResultBuilder<T> {
 
         timer.stop();
 
-        return build(loadDuration,
+        return build(
+                loadDuration,
                 evalDuration,
                 writeDuration,
                 timer.getDuration(),
@@ -206,7 +208,8 @@ public abstract class AbstractCommunityResultBuilder<T> {
         long communityCount = communitySizeMap.size();
         communitySizeMap.release();
 
-        return build(loadDuration,
+        return build(
+                loadDuration,
                 evalDuration,
                 writeDuration,
                 timer.getDuration(),

@@ -305,7 +305,7 @@ public abstract class IntPriorityQueue implements PrimitiveIntIterable {
 
         @Override
         protected boolean addCost(int element, double cost) {
-            return costs.put(element, cost) != 0d;
+            return costs.put(element, cost) != 0D;
         }
 
         @Override

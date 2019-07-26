@@ -92,8 +92,8 @@ public class NodeWalkerProc  {
         }
 
 
-        Number returnParam = configuration.get("return", 1d);
-        Number inOut = configuration.get("inOut", 1d);
+        Number returnParam = configuration.get("return", 1D);
+        Number inOut = configuration.get("inOut", 1D);
         NodeWalker.NextNodeStrategy strategy = configuration.get("mode","random").equalsIgnoreCase("random") ?
                 new NodeWalker.RandomNextNodeStrategy(graph, graph) :
                 new NodeWalker.Node2VecStrategy(graph,graph, returnParam.doubleValue(), inOut.doubleValue());

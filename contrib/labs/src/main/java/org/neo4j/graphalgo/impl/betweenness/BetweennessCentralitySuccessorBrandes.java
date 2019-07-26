@@ -159,7 +159,7 @@ public class BetweennessCentralitySuccessorBrandes extends Algorithm<Betweenness
         }
 
         // back propagation + dependency accumulation
-        Arrays.fill(delta, 0d);
+        Arrays.fill(delta, 0D);
         while (--phase > 0 && running()) {
             futures.clear();
             phaseQueue.forEach(futures, phase, w -> {
@@ -222,7 +222,7 @@ public class BetweennessCentralitySuccessorBrandes extends Algorithm<Betweenness
     }
 
     @Override
-    public BetweennessCentralitySuccessorBrandes release() {
+    public void release() {
         graph = null;
         centrality = null;
         executorService = null;
@@ -233,6 +233,5 @@ public class BetweennessCentralitySuccessorBrandes extends Algorithm<Betweenness
         successors = null;
         phaseQueue = null;
         futures = null;
-        return this;
     }
 }

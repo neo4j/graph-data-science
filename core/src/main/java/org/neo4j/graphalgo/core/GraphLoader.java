@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressLoggerAdapter;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
@@ -86,8 +85,8 @@ public class GraphLoader {
     private Log log = NullLog.getInstance();
     private long logMillis = -1;
     private AllocationTracker tracker = AllocationTracker.EMPTY;
-    private boolean sort = false;
-    private boolean loadAsUndirected = false;
+    private boolean sorted = false;
+    private boolean undirected = false;
     private PropertyMapping[] nodePropertyMappings = new PropertyMapping[0];
 
     /**
@@ -110,6 +109,17 @@ public class GraphLoader {
         this.concurrency = Pools.DEFAULT_CONCURRENCY;
     }
 
+    public GraphLoader init(Log log, String label, String relationship, ProcedureConfiguration config) {
+        return withLog(log)
+                .withName(config.getGraphName(null))
+                .withOptionalLabel(label)
+                .withOptionalRelationshipType(relationship)
+                .withConcurrency(config.getReadConcurrency())
+                .withBatchSize(config.getBatchSize())
+                .withDuplicateRelationshipsStrategy(config.getDuplicateRelationshipsStrategy())
+                .withParams(config.getParams());
+    }
+
     /**
      * Use the given {@link Log}instance to log the progress during loading.
      */
@@ -122,49 +132,34 @@ public class GraphLoader {
      * Log progress every {@code interval} time units.
      * At most 1 message will be logged within this interval, but it is not
      * guaranteed that a message will be logged at all.
-     *
-     * @see #withDefaultLogInterval()
      */
     public GraphLoader withLogInterval(long value, TimeUnit unit) {
         this.logMillis = unit.toMillis(value);
         return this;
     }
 
-    /**
-     * Log progress in the default interval specified by {@link ProgressLoggerAdapter}.
-     *
-     * @see #withLogInterval(long, TimeUnit)
-     */
-    public GraphLoader withDefaultLogInterval() {
-        this.logMillis = -1;
+    public GraphLoader sorted() {
+        this.sorted = true;
         return this;
     }
 
-    public GraphLoader withSort(boolean sort) {
-        this.sort = sort;
-        return this;
-    }
-
-    public GraphLoader asUndirected(boolean loadAsUndirected) {
-        this.loadAsUndirected = loadAsUndirected;
+    public GraphLoader undirected() {
+        this.undirected = true;
         return this;
     }
 
     /**
      * Use the given {@link AllocationTracker} to track memory allocations during loading.
-     * Can be null, in which case no tracking happens. The same effect can be
-     * achieved by using {@link AllocationTracker#EMPTY}.
+     *
+     * If the tracker is {@code null}, we use {@link AllocationTracker#EMPTY}.
      */
     public GraphLoader withAllocationTracker(AllocationTracker tracker) {
-        this.tracker = tracker;
+        this.tracker = (tracker == null) ? AllocationTracker.EMPTY : tracker;
         return this;
     }
 
     /**
-     * set an executor service
-     *
-     * @param executorService the executor service
-     * @return itself to enable fluent interface
+     * Sets an executor service.
      */
     public GraphLoader withExecutorService(ExecutorService executorService) {
         this.executorService = Objects.requireNonNull(executorService);
@@ -172,37 +167,22 @@ public class GraphLoader {
     }
 
     /**
-     * disable use of executor service
-     *
-     * @return itself to enable fluent interface
-     */
-    public GraphLoader withoutExecutorService() {
-        this.executorService = null;
-        return this;
-    }
-
-    /**
-     * change the concurrency level. Negative and zero values are not supported.
-     *
-     * @return itself to enable fluent interface
+     * Change the concurrency level. Negative and zero values are not supported.
      */
     public GraphLoader withConcurrency(int newConcurrency) {
         if (newConcurrency <= 0) {
-            throw new IllegalArgumentException("concurrency: " + newConcurrency);
+            throw new IllegalArgumentException(String.format("Concurrency less than one is invalid: %d", newConcurrency));
         }
         this.concurrency = Pools.allowedConcurrency(newConcurrency);
         return this;
     }
 
     /**
-     * change the concurrency level to the default concurrency, which is based
+     * Change the concurrency level to the default concurrency, which is based
      * on the numbers of detected processors.
-     *
-     * @return itself to enable fluent interface
      */
     public GraphLoader withDefaultConcurrency() {
-        this.concurrency = Pools.DEFAULT_CONCURRENCY;
-        return this;
+        return withConcurrency(Pools.DEFAULT_CONCURRENCY);
     }
 
     public GraphLoader withName(String name) {
@@ -211,10 +191,9 @@ public class GraphLoader {
     }
 
     /**
-     * Instructs the loader to load only nodes with the given label name.
+     * Instructs the loader to load only nodes with the given label.
      *
-     * @param label May not be null; to remove a label filter, use {@link #withAnyLabel()} instead.
-     * @return itself to enable fluent interface
+     * @param label Must not be null; to remove a label filter, use {@link #withAnyLabel()} instead.
      */
     public GraphLoader withLabel(String label) {
         this.label = Objects.requireNonNull(label);
@@ -222,10 +201,9 @@ public class GraphLoader {
     }
 
     /**
-     * Instructs the loader to load only nodes with the given label name.
+     * Instructs the loader to load only nodes with the given label.
      *
      * @param label May be null
-     * @return itself to enable fluent interface
      */
     public GraphLoader withOptionalLabel(String label) {
         this.label = label;
@@ -235,8 +213,7 @@ public class GraphLoader {
     /**
      * Instructs the loader to load only nodes with the given {@link Label}.
      *
-     * @param label May not be null; to remove a label filter, use {@link #withAnyLabel()} instead.
-     * @return itself to enable fluent interface
+     * @param label Must not be null; to remove a label filter, use {@link #withAnyLabel()} instead.
      */
     public GraphLoader withLabel(Label label) {
         this.label = Objects.requireNonNull(label).name();
@@ -245,8 +222,6 @@ public class GraphLoader {
 
     /**
      * Instructs the loader to load any node with no restriction to any label.
-     *
-     * @return itself to enable fluent interface
      */
     public GraphLoader withAnyLabel() {
         this.label = null;
@@ -254,43 +229,38 @@ public class GraphLoader {
     }
 
     /**
-     * Instructs the loader to load only relationships with the given type name.
+     * Instructs the loader to load only relationships with the given relationship type.
      *
-     * @param relation May not be null; to remove a type filter, use {@link #withAnyRelationshipType()} instead.
-     * @return itself to enable fluent interface
+     * @param relationshipType Must not be null; to remove a type filter, use {@link #withAnyRelationshipType()} instead.
      */
-    public GraphLoader withRelationshipType(String relation) {
-        this.relation = Objects.requireNonNull(relation);
+    public GraphLoader withRelationshipType(String relationshipType) {
+        this.relation = Objects.requireNonNull(relationshipType);
         return this;
     }
 
     /**
-     * Instructs the loader to load only relationships with the given type name.
-     * If the argument is null, every relationship will be considered.
+     * Instructs the loader to load only relationships with the given relationship type.
+     * If the argument is null, all relationship types will be considered.
      *
-     * @param relation May be null
-     * @return itself to enable fluent interface
+     * @param relationshipType May be null
      */
-    public GraphLoader withOptionalRelationshipType(String relation) {
-        this.relation = relation;
+    public GraphLoader withOptionalRelationshipType(String relationshipType) {
+        this.relation = relationshipType;
         return this;
     }
 
     /**
      * Instructs the loader to load only relationships with the given {@link RelationshipType}.
      *
-     * @param relation May not be null; to remove a type filter, use {@link #withAnyRelationshipType()} instead.
-     * @return itself to enable fluent interface
+     * @param relationshipType Must not be null; to remove a type filter, use {@link #withAnyRelationshipType()} instead.
      */
-    public GraphLoader withRelationshipType(RelationshipType relation) {
-        this.relation = Objects.requireNonNull(relation).name();
+    public GraphLoader withRelationshipType(RelationshipType relationshipType) {
+        this.relation = Objects.requireNonNull(relationshipType).name();
         return this;
     }
 
     /**
-     * Instructs the loader to load any relationship with no restriction to any type.
-     *
-     * @return itself to enable fluent interface
+     * Instructs the loader to load all relationships.
      */
     public GraphLoader withAnyRelationshipType() {
         this.relation = null;
@@ -298,9 +268,7 @@ public class GraphLoader {
     }
 
     /**
-     * Instructs the loader to load only relationship of the given direction.
-     *
-     * @return itself to enable fluent interface
+     * Instructs the loader to load only relationships of the given direction.
      */
     public GraphLoader withDirection(Direction direction) {
         this.direction = direction;
@@ -308,54 +276,11 @@ public class GraphLoader {
     }
 
     /**
-     * Instructs the loader to load relationship weights by reading the given property.
-     * If the property is not set, the propertyDefaultValue is used instead.
-     *
-     * @param property             May not be null; to remove a weight property, use {@link #withoutRelationshipWeights()} instead.
-     * @param propertyDefaultValue the default value to use if property is not set
-     * @return itself to enable fluent interface
-     */
-    public GraphLoader withRelationshipWeightsFromProperty(String property, double propertyDefaultValue) {
-        this.relWeightProp = Objects.requireNonNull(property);
-        this.relWeightDefault = propertyDefaultValue;
-        return this;
-    }
-
-    /**
-     * Instructs the loader to load relationship weights by reading the given property.
-     * If the property is not set at the relationship, the propertyDefaultValue is used instead.
+     * Instructs the loader to load node weights by reading the given property.
+     * If the property is not set at the relationship, the given default value is used.
      *
      * @param property             May be null
-     * @param propertyDefaultValue the default value to use if property is not set
-     * @return itself to enable fluent interface
-     */
-    public GraphLoader withOptionalRelationshipWeightsFromProperty(String property, double propertyDefaultValue) {
-        this.relWeightProp = property;
-        this.relWeightDefault = propertyDefaultValue;
-        return this;
-    }
-
-    /**
-     * Instructs the loader to load node weights by reading the given property.
-     * If the property is not set, the propertyDefaultValue is used instead.
-     *
-     * @param property             May not be null; to remove a weight property, use {@link #withoutNodeWeights()} instead.
-     * @param propertyDefaultValue the default value to use if property is not set
-     * @return itself to enable fluent interface
-     */
-    public GraphLoader withNodeWeightsFromProperty(String property, double propertyDefaultValue) {
-        this.nodeWeightProp = Objects.requireNonNull(property);
-        this.nodeWeightDefault = propertyDefaultValue;
-        return this;
-    }
-
-    /**
-     * Instructs the loader to load node weights by reading the given property.
-     * If the property is not set at the relationship, the propertyDefaultValue is used instead.
-     *
-     * @param property             May be null
-     * @param propertyDefaultValue the default value to use if property is not set
-     * @return itself to enable fluent interface
+     * @param propertyDefaultValue default value to use if the property is not set
      */
     public GraphLoader withOptionalNodeWeightsFromProperty(String property, double propertyDefaultValue) {
         this.nodeWeightProp = property;
@@ -365,25 +290,10 @@ public class GraphLoader {
 
     /**
      * Instructs the loader to load node values by reading the given property.
-     * If the property is not set, the propertyDefaultValue is used instead.
-     *
-     * @param property             May not be null; to remove a node property, use {@link #withoutNodeProperties()} instead.
-     * @param propertyDefaultValue the default value to use if property is not set
-     * @return itself to enable fluent interface
-     */
-    public GraphLoader withNodeProperty(String property, double propertyDefaultValue) {
-        this.nodeProp = Objects.requireNonNull(property);
-        this.nodePropDefault = propertyDefaultValue;
-        return this;
-    }
-
-    /**
-     * Instructs the loader to load node values by reading the given property.
-     * If the property is not set at the node, the propertyDefaultValue is used instead.
+     * If the property is not set at the node, the given default value is used.
      *
      * @param property             May be null
-     * @param propertyDefaultValue the default value to use if property is not set
-     * @return itself to enable fluent interface
+     * @param propertyDefaultValue default value to use if the property is not set
      */
     public GraphLoader withOptionalNodeProperty(String property, double propertyDefaultValue) {
         this.nodeProp = property;
@@ -391,42 +301,36 @@ public class GraphLoader {
         return this;
     }
 
+    public GraphLoader withOptionalNodeProperties(PropertyMapping... nodePropertyMappings) {
+        this.nodePropertyMappings = Arrays.stream(nodePropertyMappings)
+                .filter(propMapping -> !(propMapping.propertyKey == null || propMapping.propertyKey.isEmpty()))
+                .toArray(PropertyMapping[]::new);
+        return this;
+    }
+
     /**
-     * Instructs the loader to not load any relationship weights. Instead each weight is set
-     * to propertyDefaultValue.
+     * Instructs the loader to load relationship weights by reading the given property.
+     * If the property is not set, the given default value is used.
      *
-     * @param propertyDefaultValue the default value.
-     * @return itself to enable fluent interface
+     * @param property             Must not be null; to remove a weight property, use {@link #withoutRelationshipWeights()} instead.
+     * @param propertyDefaultValue default value to use if the property is not set
      */
-    public GraphLoader withDefaultRelationshipWeight(double propertyDefaultValue) {
-        this.relWeightProp = null;
+    public GraphLoader withRelationshipWeightsFromProperty(String property, double propertyDefaultValue) {
+        this.relWeightProp = Objects.requireNonNull(property);
         this.relWeightDefault = propertyDefaultValue;
         return this;
     }
 
     /**
-     * Instructs the loader to not load any node weights. Instead each weight is set
-     * to propertyDefaultValue.
+     * Instructs the loader to load relationship weights by reading the given property.
+     * If the property is not set at the relationship, the given default value is used.
      *
-     * @param propertyDefaultValue the default value.
-     * @return itself to enable fluent interface
+     * @param property             May be null
+     * @param propertyDefaultValue default value to use if the property is not set
      */
-    public GraphLoader withDefaultNodeWeight(double propertyDefaultValue) {
-        this.nodeWeightProp = null;
-        this.nodeWeightDefault = propertyDefaultValue;
-        return this;
-    }
-
-    /**
-     * Instructs the loader to not load any node properties. Instead each weight is set
-     * to propertyDefaultValue.
-     *
-     * @param propertyDefaultValue the default value.
-     * @return itself to enable fluent interface
-     */
-    public GraphLoader withDefaultNodeProperties(double propertyDefaultValue) {
-        this.nodeProp = null;
-        this.nodePropDefault = propertyDefaultValue;
+    public GraphLoader withOptionalRelationshipWeightsFromProperty(String property, double propertyDefaultValue) {
+        this.relWeightProp = property;
+        this.relWeightDefault = propertyDefaultValue;
         return this;
     }
 
@@ -434,7 +338,6 @@ public class GraphLoader {
      * Instructs the loader to not load any weights. The behavior of using weighted graph-functions
      * on a graph without weights is not specified.
      *
-     * @return itself to enable fluent interface
      */
     public GraphLoader withoutRelationshipWeights() {
         this.relWeightProp = null;
@@ -445,7 +348,6 @@ public class GraphLoader {
     /**
      * Instructs the loader to not load any node weights.
      *
-     * @return itself to enable fluent interface
      */
     public GraphLoader withoutNodeWeights() {
         this.nodeWeightProp = null;
@@ -456,7 +358,6 @@ public class GraphLoader {
     /**
      * Instructs the loader to not load any node properties.
      *
-     * @return itself to enable fluent interface
      */
     public GraphLoader withoutNodeProperties() {
         this.nodeProp = null;
@@ -466,6 +367,44 @@ public class GraphLoader {
 
     public GraphLoader withParams(Map<String, Object> params) {
         this.params.putAll(params);
+        return this;
+    }
+
+    /**
+     * provide statement to load nodes, has to return "id" and optionally "weight" or "value"
+     *
+     * @param nodeStatement
+     */
+    public GraphLoader withNodeStatement(String nodeStatement) {
+        this.label = nodeStatement;
+        return this;
+    }
+
+    /**
+     * provide statement to load unique relationships, has to return ids of start "source" and end-node "target" and optionally "weight"
+     *
+     * @param relationshipStatement
+     */
+    public GraphLoader withRelationshipStatement(String relationshipStatement) {
+        this.relation = relationshipStatement;
+        return this;
+    }
+
+    /**
+     * provide batch size for parallel loading
+     *
+     * @param batchSize
+     */
+    public GraphLoader withBatchSize(int batchSize) {
+        this.batchSize = batchSize;
+        return this;
+    }
+
+    /**
+     * @param duplicateRelationshipsStrategy strategy for handling duplicate relationships
+     */
+    public GraphLoader withDuplicateRelationshipsStrategy(DuplicateRelationshipsStrategy duplicateRelationshipsStrategy) {
+        this.duplicateRelationshipsStrategy = duplicateRelationshipsStrategy;
         return this;
     }
 
@@ -521,91 +460,27 @@ public class GraphLoader {
 
     public GraphSetup toSetup() {
         return new GraphSetup(
-                    label,
-                    null,
-                    relation,
-                    direction,
-                    relWeightProp,
-                    relWeightDefault,
-                    nodeWeightProp,
-                    nodeWeightDefault,
-                    nodeProp,
-                    nodePropDefault,
-                    params,
-                    executorService,
-                    concurrency,
-                    batchSize,
-                    duplicateRelationshipsStrategy,
-                    log,
-                    logMillis,
-                    sort,
-                    loadAsUndirected,
-                    tracker,
-                    name,
-                    nodePropertyMappings);
-    }
-
-    /**
-     * provide statement to load nodes, has to return "id" and optionally "weight" or "value"
-     *
-     * @param nodeStatement
-     * @return itself to enable fluent interface
-     */
-    public GraphLoader withNodeStatement(String nodeStatement) {
-        this.label = nodeStatement;
-        return this;
-    }
-
-    /**
-     * provide statement to load unique relationships, has to return ids of start "source" and end-node "target" and optionally "weight"
-     *
-     * @param relationshipStatement
-     * @return itself to enable fluent interface
-     */
-    public GraphLoader withRelationshipStatement(String relationshipStatement) {
-        this.relation = relationshipStatement;
-        return this;
-    }
-
-    /**
-     * provide batch size for parallel loading
-     *
-     * @param batchSize
-     * @return itself to enable fluent interface
-     */
-    public GraphLoader withBatchSize(int batchSize) {
-        this.batchSize = batchSize;
-        return this;
-    }
-
-    public GraphLoader init(Log log, String label, String relationship, ProcedureConfiguration config) {
-        return withLog(log)
-                .withName(config.getGraphName(null))
-                .withOptionalLabel(label)
-                .withOptionalRelationshipType(relationship)
-                .withConcurrency(config.getReadConcurrency())
-                .withBatchSize(config.getBatchSize())
-                .withDuplicateRelationshipsStrategy(config.getDuplicateRelationshipsStrategy())
-                .withParams(config.getParams());
-    }
-
-    /**
-     * @param duplicateRelationshipsStrategy strategy for handling duplicate relationships
-     * @return itself to enable fluent interface
-     */
-    public GraphLoader withDuplicateRelationshipsStrategy(DuplicateRelationshipsStrategy duplicateRelationshipsStrategy) {
-        this.duplicateRelationshipsStrategy = duplicateRelationshipsStrategy;
-        return this;
-    }
-
-    public GraphLoader withOptionalNodeProperties(PropertyMapping... nodePropertyMappings) {
-        this.nodePropertyMappings = Arrays.stream(nodePropertyMappings)
-                .filter(propMapping -> !(propMapping.propertyKey == null || propMapping.propertyKey.isEmpty()))
-                .toArray(PropertyMapping[]::new);
-        return this;
-    }
-
-    public GraphLoader direction(Direction direction) {
-        return direction == Direction.BOTH ? asUndirected(true).withDirection(direction) : withDirection(direction);
+                label,
+                null,
+                relation,
+                direction,
+                relWeightProp,
+                relWeightDefault,
+                nodeWeightProp,
+                nodeWeightDefault,
+                nodeProp,
+                nodePropDefault,
+                params,
+                executorService,
+                concurrency,
+                batchSize,
+                duplicateRelationshipsStrategy,
+                log,
+                logMillis,
+                sorted,
+                undirected,
+                tracker,
+                name,
+                nodePropertyMappings);
     }
 }

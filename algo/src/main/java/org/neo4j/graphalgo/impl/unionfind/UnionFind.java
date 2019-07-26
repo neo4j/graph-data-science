@@ -85,9 +85,8 @@ public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> 
     }
 
     @Override
-    public ME release() {
+    public void release() {
         graph = null;
-        return me();
     }
 
     public static class Config {

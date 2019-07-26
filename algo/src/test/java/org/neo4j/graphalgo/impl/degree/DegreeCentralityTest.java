@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
@@ -227,7 +228,7 @@ public final class DegreeCentralityTest {
                     .load(graphImpl);
         }
 
-        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph, Pools.DEFAULT, 1);
+        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY);
         degreeCentrality.compute(false);
 
         IntStream.range(0, expected.size()).forEach(i -> {
@@ -235,7 +236,7 @@ public final class DegreeCentralityTest {
             assertEquals(
                     "Node#" + nodeId,
                     expected.get(nodeId),
-                    degreeCentrality.degrees()[i],
+                    degreeCentrality.degrees().get(i),
                     1e-2
             );
         });
@@ -276,7 +277,7 @@ public final class DegreeCentralityTest {
                     .load(graphImpl);
         }
 
-        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph, Pools.DEFAULT, 1);
+        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph, Pools.DEFAULT, 1,AllocationTracker.EMPTY);
         degreeCentrality.compute(false);
 
         IntStream.range(0, expected.size()).forEach(i -> {
@@ -284,7 +285,7 @@ public final class DegreeCentralityTest {
             assertEquals(
                     "Node#" + nodeId,
                     expected.get(nodeId),
-                    degreeCentrality.degrees()[i],
+                    degreeCentrality.degrees().get(i),
                     1e-2
             );
         });
@@ -387,7 +388,7 @@ public final class DegreeCentralityTest {
                     .load(graphImpl);
         }
 
-        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph, Pools.DEFAULT, 4);
+        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph, Pools.DEFAULT, 4, AllocationTracker.EMPTY);
         degreeCentrality.compute(false);
 
         IntStream.range(0, expected.size()).forEach(i -> {
@@ -395,7 +396,7 @@ public final class DegreeCentralityTest {
             assertEquals(
                     "Node#" + nodeId,
                     expected.get(nodeId),
-                    degreeCentrality.degrees()[i],
+                    degreeCentrality.degrees().get(i),
                     1e-2
             );
         });
@@ -434,7 +435,7 @@ public final class DegreeCentralityTest {
                     .withLabel(label)
                     .withRelationshipType("TYPE1")
                     .withDirection(Direction.OUTGOING)
-                    .asUndirected(true)
+                    .undirected()
                     .load(graphImpl);
         }
 

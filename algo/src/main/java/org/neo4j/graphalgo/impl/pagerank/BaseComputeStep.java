@@ -177,7 +177,7 @@ public abstract class BaseComputeStep implements ComputeStep {
             for (int j = 0; j < scoreDim; j++) {
                 float[] scores = prevScores[j];
                 sum += (double) scores[i];
-                scores[i] = 0f;
+                scores[i] = 0F;
             }
             double delta = dampingFactor * sum;
             pageRank[i] += delta;

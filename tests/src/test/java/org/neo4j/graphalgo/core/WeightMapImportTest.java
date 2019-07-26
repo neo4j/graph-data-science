@@ -151,9 +151,9 @@ public class WeightMapImportTest {
                 .withAnyRelationshipType()
                 .withAnyLabel()
                 .withoutNodeProperties()
-                .withSort(true)
                 .withDirection(direction)
                 .withRelationshipWeightsFromProperty("w", 0.0)
+                .sorted()
                 .load(graphImpl);
     }
 

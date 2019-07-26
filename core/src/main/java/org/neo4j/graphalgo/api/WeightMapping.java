@@ -32,27 +32,41 @@ public interface WeightMapping {
     long size();
 
     /**
-     * returns the weight for ID if set or the load-time specified default weight otherwise
+     * Returns the weight for ID if set or the load-time specified default weight otherwise.
      */
-    double get(long id);
+    double weight(long id);
 
     /**
-     * returns the weight for ID if set or the given default weight otherwise
+     * Returns the weight for ID if set or the given default weight otherwise.
      */
-    double get(long id, double defaultValue);
+    double weight(long id, double defaultValue);
 
-    default double get(int source, int target) {
-        return get(RawValues.combineIntInt(source, target));
+    default double weight(int source, int target) {
+        return weight(RawValues.combineIntInt(source, target));
     }
 
-    default double get(int id) {
-        return get(RawValues.combineIntInt(id, -1));
+    default double nodeWeight(int id) {
+        return weight(id, -1);
     }
 
-    default double get(int id, double defaultValue) {
-        return get(RawValues.combineIntInt(id, -1), defaultValue);
+    default double nodeWeight(int id, double defaultValue) {
+        return weight(RawValues.combineIntInt(id, -1), defaultValue);
     }
 
+    /**
+     * Returns the maximum value contained in the mapping or {@code defaultValue} if the mapping is empty.
+     *
+     * @param defaultValue value being returned if the mapping is empty
+     * @return maximum value or given default value if mapping is empty
+     */
+    default long getMaxValue(long defaultValue) {
+        return size() == 0 ? defaultValue : getMaxValue();
+    }
+
+    /**
+     * Returns the maximum value contained in the mapping.
+     * @return
+     */
     default long getMaxValue() {
         return -1L;
     }

@@ -422,7 +422,7 @@ public class WeightedAllShortestPaths427Test {
                 .withRelationshipType("LINK")
                 .withRelationshipWeightsFromProperty("weight", 1.0)
                 .withDirection(Direction.OUTGOING)
-                .withConcurrency(Pools.DEFAULT_CONCURRENCY)
+                .withDefaultConcurrency()
                 .load(graphImpl);
         expected = calculateExpected(true);
         expectedNonWeighted = calculateExpected(false);
@@ -534,7 +534,7 @@ public class WeightedAllShortestPaths427Test {
             super(
                     0.0D,
                     startNode,
-                    withWeights ? WEIGHT : (relationship, direction) -> 1.0d,
+                    withWeights ? WEIGHT : (relationship, direction) -> 1.0D,
                     new DoubleAdder(),
                     Comparator.comparingDouble(Double::doubleValue),
                     Direction.OUTGOING,

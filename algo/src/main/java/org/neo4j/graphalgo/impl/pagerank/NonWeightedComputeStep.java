@@ -63,7 +63,7 @@ public class NonWeightedComputeStep extends BaseComputeStep implements Relations
 
     @Override
     public boolean accept(long sourceNodeId, long targetNodeId) {
-        if (srcRankDelta != 0f) {
+        if (srcRankDelta != 0F) {
             int idx = binaryLookup(targetNodeId, starts);
             nextScores[idx][(int) (targetNodeId - starts[idx])] += srcRankDelta;
         }
