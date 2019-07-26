@@ -114,13 +114,13 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
             return prefetchSize * recordsPerPage;
         }
 
-        long calculateLastPageId(long maxId, long recordsPerPage, int lastPageOffset) {
-            long maxPage = BitUtil.ceilDiv(maxId, recordsPerPage) - 1L;
-            maxPage = Math.max(maxPage, 0L);
+        private long calculateLastPageId(long maxId, long recordsPerPage, int lastPageOffset) {
+            long lastPageId = BitUtil.ceilDiv(maxId, recordsPerPage) - 1L;
+            lastPageId = Math.max(lastPageId, 0L);
             if (lastPageOffset == 0) {
-                maxPage += 1;
+                lastPageId += 1;
             }
-            return maxPage;
+            return lastPageId;
         }
 
         public boolean next(Predicate<Record> filter) {

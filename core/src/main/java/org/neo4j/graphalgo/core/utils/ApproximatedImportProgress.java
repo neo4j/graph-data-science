@@ -44,7 +44,7 @@ public final class ApproximatedImportProgress implements ImportProgress {
     }
 
     @Override
-    public void nodeImported() {
+    public void singleNodeImported() {
         long ops = progress.incrementAndGet();
         if ((ops & mask) == 0L) {
             progressLogger.logProgress(ops, operations, tracker);
@@ -52,7 +52,16 @@ public final class ApproximatedImportProgress implements ImportProgress {
     }
 
     @Override
+    public void nodesImported(final int numImported) {
+        trackProgress(numImported);
+    }
+
+    @Override
     public void relationshipsImported(int numImported) {
+        trackProgress(numImported);
+    }
+
+    private void trackProgress(final int numImported) {
         long opsBefore = progress.getAndAdd(numImported);
         long opsAfter = opsBefore + numImported;
         if ((opsAfter & mask) < (opsBefore & mask)) {

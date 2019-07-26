@@ -157,7 +157,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
             long allImported = 0L;
             while (batches.scan(cursor)) {
                 int imported = importNodes(batches, read, cursors);
-                progress.relationshipsImported(imported);
+                progress.nodesImported(imported);
                 allImported += imported;
             }
             nodesImported = allImported;

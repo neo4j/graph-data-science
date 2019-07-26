@@ -39,21 +39,24 @@ public final class HugeGraphLoadingTest {
     public ImpermanentDatabaseRule db = new ImpermanentDatabaseRule();
 
     @Test
-    public void testPropertyLoading() {
+    public void testDefaultPropertyLoading() {
+        // default value
+        testPropertyLoading(28);
+    }
+
+    @Test
+    public void testPagedPropertyLoading() {
         // set low page shift so that 100k nodes will trigger the usage of the paged
         // huge array, which will trigger multi page code paths.
         // we import nodes in batches of 54600 nodes, using a page shift of 14
         // results in pages of 16384 elements, so we would have to write in multiple
         // pages for a single batch
         testPropertyLoading(14);
-        // drop DB inb between tests
-        db.shutdown();
-        // default value
-        testPropertyLoading(28);
     }
 
     private void testPropertyLoading(int singlePageShift) {
-        System.setProperty("org.neo4j.graphalgo.core.utils.paged.HugeArrays.singlePageShift",
+        System.setProperty(
+                "org.neo4j.graphalgo.core.utils.paged.HugeArrays.singlePageShift",
                 String.valueOf(singlePageShift));
         // something larger than one batch
         int nodeCount = 60_000;
@@ -91,8 +94,8 @@ public final class HugeGraphLoadingTest {
         final int recordsPerPage = 546;
 
         // IdGeneration in Neo4j happens in chunks of 20. In order to get completely occupied pages
-        // with 546 records each. To meet a point where we have a generated id chunk as well as a full page we need
-        // a node count of 546 * 10 -> 5460 % 20 == 0
+        // with 546 records each, we need to meet a point where we have a generated id chunk as well as a full page.
+        // So we need a node count of 546 * 10 -> 5460 % 20 == 0
         final int pages = 10;
         int nodeCount = recordsPerPage * pages;
 
