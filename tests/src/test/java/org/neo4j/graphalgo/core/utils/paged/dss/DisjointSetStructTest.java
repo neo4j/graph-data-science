@@ -163,7 +163,7 @@ public abstract class DisjointSetStructTest {
      * @return true if both items belong to the same set, false otherwise
      */
     private boolean connected(DisjointSetStruct struct, long p, long q) {
-        return struct.connected(p, q);
+        return struct.sameSet(p, q);
     }
 
     /**

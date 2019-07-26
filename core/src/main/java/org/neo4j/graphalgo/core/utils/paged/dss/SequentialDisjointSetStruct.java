@@ -76,7 +76,7 @@ public abstract class SequentialDisjointSetStruct implements DisjointSetStruct {
     }
 
     @Override
-    public final boolean connected(long p, long q) {
+    public final boolean sameSet(long p, long q) {
         return find(p) == find(q);
     }
 

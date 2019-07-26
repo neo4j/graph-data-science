@@ -28,6 +28,40 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * Add adaption of the C++ implementation [1] for the
+ * "Wait-free Parallel Algorithms for the Union􏰁-Find Problem" [2]
+ * with some input from an atomic DSS implementation in Rust [3].
+ *
+ * The major difference for our DSS is, that we don't supported the
+ * Union-by-Rank strategy [3], for techincal and performance reasons.
+ *
+ * The reference implementation in C++ uses 32bit unsigned integers for
+ * both the id values and the rank values. Those two values have to be
+ * updated atomically, which [1] does by merging them into a single
+ * 64bit unsigned integer and doing atomic/cas operations on that value.
+ *
+ * We need 64bits for the id value alone and since there is no u128 data type
+ * in Java, the only way to update those values would be to use a class for
+ * the combination of id+rank and updated the references to that atomically.
+ * This is the approach that the Rust implementation is doing, except that
+ * Rust allows the struct values to be allocated on the stack and has no GC
+ * overhead, where that would not be true for Java (in the near future).
+ *
+ * We drop the by-Rank functionality and just support Union-by-Min for this DSS.
+ *
+ * The main difference in implementation comared to the regular DSS is that we
+ * use CAS operations to atomically set a set id for some value.
+ * We will retry union operations until a thread succeeds in changing the set id
+ * for a node. Other threads that might have wanted to write a different value
+ * will fail and the CAS operation and redo their union step. This allows for concurrent
+ * writes into a single DSS and does not longer necessitate an additional merge step.
+ *
+ * [1]: https://github.com/wjakob/dset/blob/7967ef0e6041cd9d73b9c7f614ab8ae92e9e587a/dset.h
+ * [2]: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.56.8354&rep=rep1&type=pdf
+ * [3]: https://github.com/tov/disjoint-sets-rs/blob/88ab08df21f04fcf7c157b6e042efd561ee873ba/src/concurrent.rs
+ * [4]: https://en.wikipedia.org/wiki/Disjoint-set_data_structure#by_rank
+ */
 public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
 
     public static MemoryEstimation memoryEstimation(boolean incremental) {
@@ -40,14 +74,9 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
         return builder.build();
     }
 
-    // mutable std::vector<std::atomic<uint64_t>> mData;
     private final HugeAtomicLongArray data;
     private final HugeLongLongMap internalToProvidedIds;
 
-    // DisjointSets(uint32_t size) : mData(size) {
-    //    for (uint32_t i=0; i<size; ++i)
-    //        mData[i] = (uint32_t) i;
-    //}
     public HugeAtomicDisjointSetStruct(long capacity, AllocationTracker tracker) {
         this.data = HugeAtomicLongArray.newArray(capacity, i -> i, tracker);
         this.internalToProvidedIds = null;
@@ -79,37 +108,25 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
         }, tracker);
     }
 
-    // uint32_t parent(uint32_t id) const {
-    //        return (uint32_t) mData[id];
-    //    }
-
     private long parent(long id) {
         return data.get(id);
     }
 
-    // uint32_t find(uint32_t id) const {
-    //    while (id != parent(id)) {
-    //        uint64_t value = mData[id];
-    //        uint32_t new_parent = parent((uint32_t) value);
-    //        uint64_t new_value =
-    //            (value & 0xFFFFFFFF00000000ULL) | new_parent;
-    //        /* Try to update parent (may fail, that's ok) */
-    //        if (value != new_value)
-    //            mData[id].compare_exchange_weak(value, new_value);
-    //        id = new_parent;
-    //    }
-    //    return id;
-    //}
-
     private long find(long id) {
-        while (id != parent(id)) {
-            long value = data.get(id);
-            long newParent = parent(value);
-            if (value != newParent) {
-                /* Try to update parent (may fail, that's ok) */
-                data.compareAndSet(id, value, newParent);
+        long parent;
+        while (id != (parent = parent(id))) {
+            long grandParent = parent(parent);
+            if (parent != grandParent) {
+                // Try to apply path-halfing by setting the value
+                // for some id to its grand parent. This might fail
+                // if another thread is also changing the same value
+                // but that's ok. The CAS operations guarantees
+                // that at least one of the contenting threads will
+                // succeed. That's enough for the path halfing to work
+                // and there is no need to retry in case of a CAS failure.
+                data.compareAndSet(id, parent, grandParent);
             }
-            id = newParent;
+            id = grandParent;
         }
         return id;
     }
@@ -124,19 +141,8 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
         return setId;
     }
 
-    // bool same(uint32_t id1, uint32_t id2) const {
-    //    for (;;) {
-    //        id1 = find(id1);
-    //        id2 = find(id2);
-    //        if (id1 == id2)
-    //            return true;
-    //        if (parent(id1) == id1)
-    //            return false;
-    //    }
-    //}
-
     @Override
-    public boolean connected(long id1, long id2) {
+    public boolean sameSet(long id1, long id2) {
         while (true) {
             id1 = find(id1);
             id2 = find(id2);
@@ -149,39 +155,6 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
         }
     }
 
-    // uint32_t unite(uint32_t id1, uint32_t id2) {
-    //    for (;;) {
-    //        id1 = find(id1);
-    //        id2 = find(id2);
-    //
-    //        if (id1 == id2)
-    //            return id1;
-    //
-    //        uint32_t r1 = rank(id1), r2 = rank(id2);
-    //
-    //        if (r1 > r2 || (r1 == r2 && id1 < id2)) {
-    //            std::swap(r1, r2);
-    //            std::swap(id1, id2);
-    //        }
-    //
-    //        uint64_t oldEntry = ((uint64_t) r1 << 32) | id1;
-    //        uint64_t newEntry = ((uint64_t) r1 << 32) | id2;
-    //
-    //        if (!mData[id1].compare_exchange_strong(oldEntry, newEntry))
-    //            continue;
-    //
-    //        if (r1 == r2) {
-    //            oldEntry = ((uint64_t) r2 << 32) | id2;
-    //            newEntry = ((uint64_t) (r2+1) << 32) | id2;
-    //            /* Try to update the rank (may fail, that's ok) */
-    //            mData[id2].compare_exchange_weak(oldEntry, newEntry);
-    //        }
-    //
-    //        break;
-    //    }
-    //    return id2;
-    //}
-
     @Override
     public void union(long id1, long id2) {
         while (true) {
@@ -192,6 +165,10 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
                 return;
             }
 
+            // We need to do Union-by-Min, so the smalled ID wins.
+            // We also only update the entry for id1 and if that
+            // is the smaller value, we need to swap ids so we update
+            // only the value for id2, not id1.
             if (id1 < id2) {
                 long tmp = id2;
                 id2 = id1;
@@ -208,8 +185,6 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
             break;
         }
     }
-
-    // uint32_t size() const { return (uint32_t) mData.size(); }
 
     @Override
     public long size() {
