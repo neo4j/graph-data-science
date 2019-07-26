@@ -14,23 +14,13 @@ For general information about the union find algorithm see <<algorithms-connecte
 
 The experimental implementations vary from the default in the following ways:
 
-`algo.unionFind`
-
-* If a threshold configuration parameter is supplied, only relationships with a property value higher than the threshold are merged.
-+
-`algo.unionFind.queue`
-
 `algo.unionFind.forkJoinMerge`
 
-* Like in `algo.unionFind.queue`, the resulting `DisjointSetStruct` of each node-partition is merged by the `ForkJoin` pool, while the calculation of the `DisjointSetStruct` is done by the `ExecutorService`.
+* The resulting `DisjointSetStruct` of each node-partition is merged by the `ForkJoin` pool, while the calculation of the `DisjointSetStruct` is done by the `ExecutorService`.
 
 `algo.unionFind.forkJoin`
 
 * Calculation and merge using `forkJoinPool`
-
-`algo.unionFind.mscoloring`
-
-* Coloring based parallel algorithm
 
 
 ifndef::env-docs[]
