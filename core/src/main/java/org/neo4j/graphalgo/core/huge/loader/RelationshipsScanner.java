@@ -367,6 +367,8 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
         for (int i = 0; i < batchLength; i += 4) {
             source = batch[i];
             target = batch[1 + i];
+            // If rels come in chunks for same source node
+            // then we can skip adding an extra offset
             if (source > prevSource) {
                 offsets[nodesLength++] = offset;
                 prevSource = source;

@@ -120,6 +120,7 @@ class HugeAdjacencyBuilder {
     static Graph apply(
             final AllocationTracker tracker,
             final IdMap idMapping,
+            final HugeWeightMapping weights,
             final Map<String, HugeWeightMapping> nodeProperties,
             final HugeAdjacencyBuilder inAdjacency,
             final HugeAdjacencyBuilder outAdjacency,
@@ -137,6 +138,9 @@ class HugeAdjacencyBuilder {
             inAdjacencyList = inAdjacency.adjacency.build();
             inOffsets = inAdjacency.globalOffsets;
         }
+
+        HugeAdjacencyList outWeights = null;
+        HugeAdjacencyOffsets outWeightOffsets = null;
 
         return new HugeGraph(
                 tracker, idMapping, nodeProperties, relationshipCount,

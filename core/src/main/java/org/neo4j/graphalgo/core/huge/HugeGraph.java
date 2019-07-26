@@ -186,6 +186,10 @@ public class HugeGraph implements Graph {
             weightCursor.nextVLong();
         }
 
+        if (!weightCursor.hasNextVLong()) {
+            return NO_WEIGHT;
+        }
+
         long doubleBits = weightCursor.nextVLong();
         return Double.longBitsToDouble(doubleBits);
     }

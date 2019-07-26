@@ -173,6 +173,7 @@ public final class HugeGraphFactory extends GraphFactory {
         return HugeAdjacencyBuilder.apply(
                 tracker,
                 idsAndProperties.hugeIdMap,
+                weights,
                 idsAndProperties.properties,
                 inAdjacency,
                 outAdjacency,

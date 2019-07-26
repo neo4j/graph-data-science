@@ -135,6 +135,7 @@ abstract class AdjacencyBuilder {
                 for (int i = 0; i < length; ++i) {
                     endOffset = offsets[i];
 
+                    // if there are no rels for this node, just go to next
                     if (endOffset <= startOffset) {
                         continue;
                     }
@@ -143,6 +144,7 @@ abstract class AdjacencyBuilder {
                     int pageIndex = (int) (source >>> pageShift);
 
                     if (pageIndex > lastPageIndex) {
+                        // switch to the builder for this page
                         if (builder != null) {
                             builder.unlock();
                         }
@@ -153,6 +155,7 @@ abstract class AdjacencyBuilder {
 
                     int localId = (int) (source & pageMask);
 
+                    // pre-fetching degree helps us size the array without needing to grow it
                     int degree = builder.degree(localId);
                     CompressedLongArray compressedTargets = this.targets[pageIndex][localId];
 
