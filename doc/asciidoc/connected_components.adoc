@@ -6,11 +6,9 @@
 This section describes the Connected Components algorithm in the Neo4j Graph Algorithms library.
 --
 
-// tag::introduction[]
 The Connected Components, or `Union Find`, algorithm finds sets of connected nodes in an undirected graph where each node is reachable from any other node in the same set.
 It differs from the Strongly Connected Components algorithm (SCC) because it only needs a path to exist between pairs of nodes in one direction, whereas SCC needs a path to exist in both directions.
 As with SCC, `UnionFind` is often used early in an analysis to understand a graph's structure.
-// end::introduction[]
 
 This section includes:
 
@@ -288,14 +286,16 @@ YIELD nodeId, setId - yields a setId to each node id
 
 
 [[algorithms-connected-components-imp]]
-== Implementations
+== Implementation
 
 `algo.unionFind`
 
+* If a threshold configuration parameter is supplied, only relationships with a property value higher than the threshold are merged.
 * Parallel `Union Find`, using `ExecutorService` only.
 * Algorithm based on the idea that `DisjointSetStruct` can be built using just a partition of the nodes, which are then merged pairwise.
 * The implementation is based on a queue which acts as a buffer for each computed `DisjointSetStruct`.
   As long as there are more elements on the queue, the algorithm takes two, merges them, and adds its result to the queue until only 1 element remains.
+
 
 [[algorithms-unionfind-memory-requirements]]
 == Memory Requirements for the Union Find algorithm
@@ -352,6 +352,7 @@ include::memrec.adoc[tags=component]
 |===
 
 Below are the memory requirements for various sample datasets.
+
 
 === Pokec
 
