@@ -126,7 +126,7 @@ public class PRTest {
         System.out.printf("Ran %d iterations.%n", ranIterations);
 
         for (int i = 0; i < graph.nodeCount(); i++) {
-            System.out.println(String.format("nodeId: %d, rank: %.4f", i, nodeProperties.get(i)));
+            System.out.println(String.format("nodeId: %d, rank: %.4f", i, nodeProperties.nodeWeight(i)));
         }
     }
 }
