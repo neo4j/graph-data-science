@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWeights;
+import org.neo4j.graphalgo.core.huge.loader.HugeNodePropertiesBuilder;
 import org.neo4j.graphalgo.core.utils.LazyMappingCollection;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -43,7 +44,7 @@ import java.util.concurrent.ExecutorService;
 public class Pregel {
 
     private final Graph graph;
-    private final HugeWeightMapping nodeProperties;
+    private final HugeWeightMapping nodeValues;
     private final RelationshipWeights relationshipWeights;
     private final Computation computation;
     private final int batchSize;
@@ -52,9 +53,10 @@ public class Pregel {
     private final AllocationTracker tracker;
     private final ProgressLogger progressLogger;
 
+    private int iterations;
+
     public Pregel(
             final Graph graph,
-            final HugeWeightMapping nodeProperties,
             final Computation computation,
             final int batchSize,
             final int concurrency,
@@ -62,7 +64,6 @@ public class Pregel {
             final AllocationTracker tracker,
             final ProgressLogger progressLogger) {
         this.graph = graph;
-        this.nodeProperties = nodeProperties;
         this.relationshipWeights = graph;
         this.computation = computation;
         this.tracker = tracker;
@@ -70,18 +71,26 @@ public class Pregel {
         this.concurrency = concurrency;
         this.executor = executor;
         this.progressLogger = progressLogger;
+
+        this.nodeValues = HugeNodePropertiesBuilder
+                .of(graph.nodeCount(), tracker, 1.0, 0)
+                .build();
     }
 
-    public int run(final int maxIterations) {
-        int currentIteration = 0;
+    public HugeWeightMapping run(final int maxIterations) {
+        iterations = 0;
         BitSet messages = new BitSet(graph.nodeCount());
 
         boolean canHalt = false;
-        while (currentIteration < maxIterations && !canHalt) {
-            final List<ComputeStep> computeSteps = runSuperstep(currentIteration++, messages);
+        while (iterations < maxIterations && !canHalt) {
+            final List<ComputeStep> computeSteps = runSuperstep(iterations++, messages);
             canHalt = (computeSteps.parallelStream().map(ComputeStep::canHalt).reduce(true, (l, r) -> l && r));
         }
-        return currentIteration;
+        return nodeValues;
+    }
+
+    public int getIterations() {
+        return iterations;
     }
 
     private List<ComputeStep> runSuperstep(final int iteration, final BitSet messages) {
@@ -100,7 +109,7 @@ public class Pregel {
                             iteration,
                             nodeIterator,
                             graph,
-                            nodeProperties,
+                            nodeValues,
                             relationshipWeights,
                             graph);
                     tasks.add(task);

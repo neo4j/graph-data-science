@@ -44,23 +44,22 @@ import java.util.Map;
 public class SCCTest {
 
     private static final String ID_PROPERTY = "id";
-    private static final String COMPONENT_PROPERTY = "component";
     private static final String MESSAGE_PROPERTY = "message";
 
     private static final Label NODE_LABEL = Label.label("Node");
 
     private static final String TEST_GRAPH =
-            "CREATE (nA:Node { id: 0, component: 1 })\n" +
-            "CREATE (nB:Node { id: 1, component: 1 })\n" +
-            "CREATE (nC:Node { id: 2, component: 1 })\n" +
-            "CREATE (nD:Node { id: 3, component: 1 })\n" +
-            "CREATE (nE:Node { id: 4, component: 1 })\n" +
-            "CREATE (nF:Node { id: 5, component: 1 })\n" +
-            "CREATE (nG:Node { id: 6, component: 1 })\n" +
-            "CREATE (nH:Node { id: 7, component: 1 })\n" +
-            "CREATE (nI:Node { id: 8, component: 1 })\n" +
+            "CREATE (nA:Node { id: 0 })\n" +
+            "CREATE (nB:Node { id: 1 })\n" +
+            "CREATE (nC:Node { id: 2 })\n" +
+            "CREATE (nD:Node { id: 3 })\n" +
+            "CREATE (nE:Node { id: 4 })\n" +
+            "CREATE (nF:Node { id: 5 })\n" +
+            "CREATE (nG:Node { id: 6 })\n" +
+            "CREATE (nH:Node { id: 7 })\n" +
+            "CREATE (nI:Node { id: 8 })\n" +
             // {J}
-            "CREATE (nJ:Node { id: 9, component: 1 })\n" +
+            "CREATE (nJ:Node { id: 9 })\n" +
             "CREATE\n" +
             // {A, B, C, D}
             "  (nA)-[:TYPE { message: 1 }]->(nB),\n" +
@@ -96,21 +95,17 @@ public class SCCTest {
                 .withAnyLabel()
                 // The following options need to be default for Pregel
                 .withDirection(Direction.BOTH)
-                .withOptionalNodeProperties(new PropertyMapping(COMPONENT_PROPERTY, COMPONENT_PROPERTY, 1))
                 .withOptionalRelationshipWeightsFromProperty(MESSAGE_PROPERTY, 1)
                 .load(HugeGraphFactory.class);
     }
 
     @Test
     public void runSCC() {
-        HugeWeightMapping nodeProperties = graph.nodeProperties(COMPONENT_PROPERTY);
-
         int batchSize = 10;
         int maxIterations = 10;
 
         Pregel pregelJob = new Pregel(
                 graph,
-                nodeProperties,
                 new SCComputation(),
                 batchSize,
                 Pools.DEFAULT_CONCURRENCY,
@@ -118,12 +113,12 @@ public class SCCTest {
                 AllocationTracker.EMPTY,
                 ProgressLogger.NULL_LOGGER);
 
-        pregelJob.run(maxIterations);
+        HugeWeightMapping nodeValues = pregelJob.run(maxIterations);
 
-        assertValues(graph, 0, 0, 1, 0, 2, 0, 3, 0, 4, 4, 5, 4, 6, 4, 7, 7, 8, 7, 9, 9);
+        assertValues(graph, nodeValues,0, 0, 1, 0, 2, 0, 3, 0, 4, 4, 5, 4, 6, 4, 7, 7, 8, 7, 9, 9);
     }
 
-    private void assertValues(final Graph graph, final long... values) {
+    private void assertValues(final Graph graph, HugeWeightMapping nodeValues, final long... values) {
         Map<Long, Long> expectedValues = new HashMap<>();
         try (Transaction tx = DB.beginTx()) {
             for (int i = 0; i < values.length; i+=2) {
@@ -131,7 +126,7 @@ public class SCCTest {
             }
             tx.success();
         }
-        final HugeWeightMapping actualValues = graph.nodeProperties(COMPONENT_PROPERTY);
+        final HugeWeightMapping actualValues = nodeValues;
         expectedValues.forEach((idProp, expectedValue) -> {
             long neoId = graph.toOriginalNodeId(idProp);
             long actualValue = (long) actualValues.nodeWeight(neoId);
