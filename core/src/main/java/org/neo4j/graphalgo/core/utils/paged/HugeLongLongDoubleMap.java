@@ -61,12 +61,39 @@ public final class HugeLongLongDoubleMap {
         initialBuffers(expectedElements);
     }
 
+    public void set(long key1, long key2, double value) {
+        set0(1L + key1, 1L + key2, value);
+    }
+
     public void addTo(long key1, long key2, double value) {
         addTo0(1L + key1, 1L + key2, value);
     }
 
     public double getOrDefault(long key1, long key2, double defaultValue) {
         return getOrDefault0(1L + key1, 1L + key2, defaultValue);
+    }
+
+    private void set0(long key1, long key2, double value) {
+        assert assigned < mask + 1L;
+        final long key = hashKey(key1, key2);
+
+        long slot = findSlot(key1, key2, key & mask);
+        assert slot != -1L;
+        if (slot >= 0L) {
+            values.set(slot, value);
+            return;
+        }
+
+        slot = ~(1L + slot);
+        if (assigned == resizeAt) {
+            allocateThenInsertThenRehash(slot, key1, key2, value);
+        } else {
+            keys1.set(slot, key1);
+            keys2.set(slot, key2);
+            values.set(slot, value);
+        }
+
+        assigned++;
     }
 
     private void addTo0(long key1, long key2, double value) {
