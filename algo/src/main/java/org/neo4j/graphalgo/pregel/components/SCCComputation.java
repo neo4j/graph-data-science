@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.pregel.components;
 
 import org.neo4j.graphalgo.pregel.Computation;
 
-public class SCComputation extends Computation {
+public class SCCComputation extends Computation {
 
     @Override
     protected void compute(final long nodeId) {

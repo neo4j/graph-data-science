@@ -46,6 +46,7 @@ public class Pregel {
     private final Graph graph;
     private final HugeWeightMapping nodeValues;
     private final HugeLongLongDoubleMap outgoingMessages;
+    private final HugeLongLongDoubleMap incomingMessages;
     private final Computation computation;
     private final int batchSize;
     private final int concurrency;
@@ -75,7 +76,16 @@ public class Pregel {
                 .of(graph.nodeCount(), tracker, 1.0, 0)
                 .build();
 
-        outgoingMessages = new HugeLongLongDoubleMap(graph.relationshipCount(), tracker);
+        if (computation.getMessageDirection() == Direction.BOTH) {
+            outgoingMessages = new HugeLongLongDoubleMap(graph.relationshipCount(), tracker);
+            incomingMessages = new HugeLongLongDoubleMap(graph.relationshipCount(), tracker);
+        } else if (computation.getMessageDirection() == Direction.OUTGOING) {
+            outgoingMessages = new HugeLongLongDoubleMap(graph.relationshipCount(), tracker);
+            incomingMessages = null;
+        } else {
+            outgoingMessages = null;
+            incomingMessages = new HugeLongLongDoubleMap(graph.relationshipCount(), tracker);
+        }
     }
 
     public HugeWeightMapping run(final int maxIterations) {
@@ -112,6 +122,7 @@ public class Pregel {
                             graph,
                             nodeValues,
                             outgoingMessages,
+                            incomingMessages,
                             graph);
                     tasks.add(task);
                     return task;
@@ -130,6 +141,7 @@ public class Pregel {
         private final Degrees degrees;
         private final HugeWeightMapping nodeProperties;
         private final HugeLongLongDoubleMap outgoingMessages;
+        private final HugeLongLongDoubleMap incomingMessages;
         private final RelationshipIterator relationshipIterator;
 
         private ComputeStep(
@@ -140,6 +152,7 @@ public class Pregel {
                 final Degrees degrees,
                 final HugeWeightMapping nodeProperties,
                 final HugeLongLongDoubleMap outgoingMessages,
+                final HugeLongLongDoubleMap incomingMessages,
                 final RelationshipIterator relationshipIterator) {
             this.iteration = iteration;
             this.computation = computation;
@@ -148,6 +161,7 @@ public class Pregel {
             this.degrees = degrees;
             this.nodeProperties = nodeProperties;
             this.outgoingMessages = outgoingMessages;
+            this.incomingMessages = incomingMessages;
             this.relationshipIterator = relationshipIterator.concurrentCopy();
 
             computation.setComputeStep(this);
@@ -166,8 +180,8 @@ public class Pregel {
             return iteration;
         }
 
-        int getDegree(final long nodeId) {
-            return degrees.degree(nodeId, Direction.OUTGOING);
+        int getDegree(final long nodeId, Direction direction) {
+            return degrees.degree(nodeId, direction);
         }
 
         double getNodeValue(final long nodeId) {
@@ -183,21 +197,33 @@ public class Pregel {
 
         private static final double[] NO_MESSAGES = new double[0];
 
-        double[] receiveMessages(final long nodeId) {
+        double[] receiveMessages(final long nodeId, Direction direction) {
             if (!messages.get(nodeId)) {
                 return NO_MESSAGES;
             }
             messages.flip(nodeId);
-            final int degree = degrees.degree(nodeId, Direction.INCOMING);
+            final int degree = degrees.degree(nodeId, direction);
             final DoubleArrayList doubleCursors = new DoubleArrayList(degree, ARRAY_SIZING_STRATEGY);
 
-            relationshipIterator.forEachRelationship(
-                    nodeId,
-                    Direction.INCOMING,
-                    (sourceNodeId, targetNodeId) -> {
-                        doubleCursors.add(outgoingMessages.getOrDefault(targetNodeId, sourceNodeId, 1.0));
-                        return true;
-                    });
+            if (direction == Direction.INCOMING || direction == Direction.BOTH) {
+                relationshipIterator.forEachRelationship(
+                        nodeId,
+                        Direction.INCOMING,
+                        (sourceNodeId, targetNodeId) -> {
+                            doubleCursors.add(outgoingMessages.getOrDefault(targetNodeId, sourceNodeId, 1.0));
+                            return true;
+                        });
+            }
+
+            if (direction == Direction.OUTGOING || direction == Direction.BOTH) {
+                relationshipIterator.forEachRelationship(
+                        nodeId,
+                        Direction.OUTGOING,
+                        (sourceNodeId, targetNodeId) -> {
+                            doubleCursors.add(incomingMessages.getOrDefault(sourceNodeId, targetNodeId, 1.0));
+                            return true;
+                        });
+            }
 
             assert (doubleCursors.buffer.length == degree);
             assert (doubleCursors.elementsCount == degree);
@@ -205,12 +231,22 @@ public class Pregel {
             return doubleCursors.buffer;
         }
 
-        void sendMessages(final long nodeId, final double message) {
-            relationshipIterator.forEachRelationship(nodeId, Direction.OUTGOING, (sourceNodeId, targetNodeId) -> {
-                outgoingMessages.set(sourceNodeId, targetNodeId, message);
-                messages.set(targetNodeId);
-                return true;
-            });
+        void sendMessages(final long nodeId, final double message, Direction direction) {
+            if (direction == Direction.OUTGOING || direction == Direction.BOTH) {
+                relationshipIterator.forEachRelationship(nodeId, Direction.OUTGOING, (sourceNodeId, targetNodeId) -> {
+                    outgoingMessages.set(sourceNodeId, targetNodeId, message);
+                    messages.set(targetNodeId);
+                    return true;
+                });
+            }
+
+            if (direction == Direction.INCOMING || direction == Direction.BOTH) {
+                relationshipIterator.forEachRelationship(nodeId, Direction.INCOMING, (targetNodeId, sourceNodeId) -> {
+                    incomingMessages.set(sourceNodeId, targetNodeId, message);
+                    messages.set(sourceNodeId);
+                    return true;
+                });
+            }
         }
 
         boolean canHalt() {

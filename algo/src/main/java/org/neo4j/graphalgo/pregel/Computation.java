@@ -20,9 +20,15 @@
 package org.neo4j.graphalgo.pregel;
 
 
+import org.neo4j.graphdb.Direction;
+
 public abstract class Computation {
 
     private Pregel.ComputeStep computeStep;
+
+    protected Direction getMessageDirection() {
+        return Direction.OUTGOING;
+    }
 
     void setComputeStep(final Pregel.ComputeStep computeStep) {
         this.computeStep = computeStep;
@@ -35,11 +41,19 @@ public abstract class Computation {
     }
 
     protected double[] receiveMessages(final long nodeId) {
-        return computeStep.receiveMessages(nodeId);
+        return receiveMessages(nodeId, Direction.INCOMING);
+    }
+
+    protected double[] receiveMessages(final long nodeId, Direction direction) {
+        return computeStep.receiveMessages(nodeId, direction);
     }
 
     protected void sendMessages(final long nodeId , final double message) {
-        computeStep.sendMessages(nodeId, message);
+        sendMessages(nodeId, message, Direction.OUTGOING);
+    }
+
+    protected void sendMessages(final long nodeId , final double message, Direction direction) {
+        computeStep.sendMessages(nodeId, message, direction);
     }
 
     protected double getValue(final long nodeId) {
@@ -51,6 +65,10 @@ public abstract class Computation {
     }
 
     protected int getDegree(final long nodeId) {
-        return computeStep.getDegree(nodeId);
+        return getDegree(nodeId, Direction.OUTGOING);
+    }
+
+    protected int getDegree(final long nodeId, Direction direction) {
+        return computeStep.getDegree(nodeId, direction);
     }
 }

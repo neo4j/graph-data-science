@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.pregel.components.SCCComputation;
+import org.neo4j.graphalgo.pregel.components.WCCComputation;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
@@ -40,7 +41,7 @@ import org.neo4j.test.rule.ImpermanentDatabaseRule;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SCCTest {
+public class WCCTest {
 
     private static final String ID_PROPERTY = "id";
 
@@ -63,14 +64,11 @@ public class SCCTest {
             "  (nA)-[:TYPE]->(nB),\n" +
             "  (nB)-[:TYPE]->(nC),\n" +
             "  (nC)-[:TYPE]->(nD),\n" +
-            "  (nD)-[:TYPE]->(nA),\n" +
             // {E, F, G}
             "  (nE)-[:TYPE]->(nF),\n" +
             "  (nF)-[:TYPE]->(nG),\n" +
-            "  (nG)-[:TYPE]->(nE),\n" +
             // {H, I}
-            "  (nI)-[:TYPE]->(nH),\n" +
-            "  (nH)-[:TYPE]->(nI)";
+            "  (nI)-[:TYPE]->(nH)";
 
     @ClassRule
     public static final ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
@@ -87,7 +85,7 @@ public class SCCTest {
 
     private final Graph graph;
 
-    public SCCTest() {
+    public WCCTest() {
         graph = new GraphLoader(DB)
                 .withAnyRelationshipType()
                 .withAnyLabel()
@@ -97,13 +95,13 @@ public class SCCTest {
     }
 
     @Test
-    public void runSCC() {
+    public void runWCC() {
         int batchSize = 10;
         int maxIterations = 10;
 
         Pregel pregelJob = new Pregel(
                 graph,
-                new SCCComputation(),
+                new WCCComputation(),
                 batchSize,
                 Pools.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT,
