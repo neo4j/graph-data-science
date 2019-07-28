@@ -28,12 +28,12 @@ import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.huge.loader.HugeNodePropertiesBuilder;
 import org.neo4j.graphalgo.core.utils.LazyMappingCollection;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongLongDoubleMap;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
@@ -45,7 +45,7 @@ public class Pregel {
 
     private final Graph graph;
     private final HugeWeightMapping nodeValues;
-    private final RelationshipWeights relationshipWeights;
+    private final HugeLongLongDoubleMap outgoingMessages;
     private final Computation computation;
     private final int batchSize;
     private final int concurrency;
@@ -64,7 +64,6 @@ public class Pregel {
             final AllocationTracker tracker,
             final ProgressLogger progressLogger) {
         this.graph = graph;
-        this.relationshipWeights = graph;
         this.computation = computation;
         this.tracker = tracker;
         this.batchSize = batchSize;
@@ -75,6 +74,8 @@ public class Pregel {
         this.nodeValues = HugeNodePropertiesBuilder
                 .of(graph.nodeCount(), tracker, 1.0, 0)
                 .build();
+
+        outgoingMessages = new HugeLongLongDoubleMap(graph.relationshipCount(), tracker);
     }
 
     public HugeWeightMapping run(final int maxIterations) {
@@ -110,7 +111,7 @@ public class Pregel {
                             nodeIterator,
                             graph,
                             nodeValues,
-                            relationshipWeights,
+                            outgoingMessages,
                             graph);
                     tasks.add(task);
                     return task;
@@ -128,7 +129,7 @@ public class Pregel {
         private final PrimitiveLongIterable nodes;
         private final Degrees degrees;
         private final HugeWeightMapping nodeProperties;
-        private final RelationshipWeights relationshipWeights;
+        private final HugeLongLongDoubleMap outgoingMessages;
         private final RelationshipIterator relationshipIterator;
 
         private ComputeStep(
@@ -138,7 +139,7 @@ public class Pregel {
                 final PrimitiveLongIterable nodes,
                 final Degrees degrees,
                 final HugeWeightMapping nodeProperties,
-                final RelationshipWeights relationshipWeights,
+                final HugeLongLongDoubleMap outgoingMessages,
                 final RelationshipIterator relationshipIterator) {
             this.iteration = iteration;
             this.computation = computation;
@@ -146,7 +147,7 @@ public class Pregel {
             this.nodes = nodes;
             this.degrees = degrees;
             this.nodeProperties = nodeProperties;
-            this.relationshipWeights = relationshipWeights;
+            this.outgoingMessages = outgoingMessages;
             this.relationshipIterator = relationshipIterator.concurrentCopy();
 
             computation.setComputeStep(this);
@@ -193,8 +194,8 @@ public class Pregel {
             relationshipIterator.forEachRelationship(
                     nodeId,
                     Direction.INCOMING,
-                    (sourceNodeId, targetNodeId, weight) -> {
-                        doubleCursors.add(weight);
+                    (sourceNodeId, targetNodeId) -> {
+                        doubleCursors.add(outgoingMessages.getOrDefault(targetNodeId, sourceNodeId, 1.0));
                         return true;
                     });
 
@@ -206,7 +207,7 @@ public class Pregel {
 
         void sendMessages(final long nodeId, final double message) {
             relationshipIterator.forEachRelationship(nodeId, Direction.OUTGOING, (sourceNodeId, targetNodeId) -> {
-                relationshipWeights.setWeight(sourceNodeId, targetNodeId, message);
+                outgoingMessages.set(sourceNodeId, targetNodeId, message);
                 messages.set(targetNodeId);
                 return true;
             });

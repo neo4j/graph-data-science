@@ -43,7 +43,6 @@ import java.util.Map;
 public class PRTest {
 
     private static final String ID_PROPERTY = "id";
-    private static final String MESSAGE_PROPERTY = "message";
 
     private static final Label NODE_LABEL = Label.label("Node");
 
@@ -61,23 +60,23 @@ public class PRTest {
                                              "CREATE (j:Node { id: 9, name: 'j' })\n" +
                                              "CREATE (k:Node { id: 10, name: 'k' })\n" +
                                              "CREATE\n" +
-                                             "  (b)-[:REL { message: 1.0 }]->(c),\n" +
-                                             "  (c)-[:REL { message: 1.0 }]->(b),\n" +
-                                             "  (d)-[:REL { message: 1.0 }]->(a),\n" +
-                                             "  (d)-[:REL { message: 1.0 }]->(b),\n" +
-                                             "  (e)-[:REL { message: 1.0 }]->(b),\n" +
-                                             "  (e)-[:REL { message: 1.0 }]->(d),\n" +
-                                             "  (e)-[:REL { message: 1.0 }]->(f),\n" +
-                                             "  (f)-[:REL { message: 1.0 }]->(b),\n" +
-                                             "  (f)-[:REL { message: 1.0 }]->(e),\n" +
-                                             "  (g)-[:REL { message: 1.0 }]->(b),\n" +
-                                             "  (g)-[:REL { message: 1.0 }]->(e),\n" +
-                                             "  (h)-[:REL { message: 1.0 }]->(b),\n" +
-                                             "  (h)-[:REL { message: 1.0 }]->(e),\n" +
-                                             "  (i)-[:REL { message: 1.0 }]->(b),\n" +
-                                             "  (i)-[:REL { message: 1.0 }]->(e),\n" +
-                                             "  (j)-[:REL { message: 1.0 }]->(e),\n" +
-                                             "  (k)-[:REL { message: 1.0 }]->(e)\n";
+                                             "  (b)-[:REL]->(c),\n" +
+                                             "  (c)-[:REL]->(b),\n" +
+                                             "  (d)-[:REL]->(a),\n" +
+                                             "  (d)-[:REL]->(b),\n" +
+                                             "  (e)-[:REL]->(b),\n" +
+                                             "  (e)-[:REL]->(d),\n" +
+                                             "  (e)-[:REL]->(f),\n" +
+                                             "  (f)-[:REL]->(b),\n" +
+                                             "  (f)-[:REL]->(e),\n" +
+                                             "  (g)-[:REL]->(b),\n" +
+                                             "  (g)-[:REL]->(e),\n" +
+                                             "  (h)-[:REL]->(b),\n" +
+                                             "  (h)-[:REL]->(e),\n" +
+                                             "  (i)-[:REL]->(b),\n" +
+                                             "  (i)-[:REL]->(e),\n" +
+                                             "  (j)-[:REL]->(e),\n" +
+                                             "  (k)-[:REL]->(e)\n";
 
 
     @ClassRule
@@ -101,7 +100,6 @@ public class PRTest {
                 .withAnyLabel()
                 // The following options need to be default for Pregel
                 .withDirection(Direction.BOTH)
-                .withOptionalRelationshipWeightsFromProperty(MESSAGE_PROPERTY, 1.0)
                 .load(HugeGraphFactory.class);
     }
 

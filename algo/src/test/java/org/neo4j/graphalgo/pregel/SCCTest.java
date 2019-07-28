@@ -44,7 +44,6 @@ import java.util.Map;
 public class SCCTest {
 
     private static final String ID_PROPERTY = "id";
-    private static final String MESSAGE_PROPERTY = "message";
 
     private static final Label NODE_LABEL = Label.label("Node");
 
@@ -62,17 +61,17 @@ public class SCCTest {
             "CREATE (nJ:Node { id: 9 })\n" +
             "CREATE\n" +
             // {A, B, C, D}
-            "  (nA)-[:TYPE { message: 1 }]->(nB),\n" +
-            "  (nB)-[:TYPE { message: 1 }]->(nC),\n" +
-            "  (nC)-[:TYPE { message: 1 }]->(nD),\n" +
-            "  (nD)-[:TYPE { message: 1 }]->(nA),\n" +
+            "  (nA)-[:TYPE]->(nB),\n" +
+            "  (nB)-[:TYPE]->(nC),\n" +
+            "  (nC)-[:TYPE]->(nD),\n" +
+            "  (nD)-[:TYPE]->(nA),\n" +
             // {E, F, G}
-            "  (nE)-[:TYPE { message: 1 }]->(nF),\n" +
-            "  (nF)-[:TYPE { message: 1 }]->(nG),\n" +
-            "  (nG)-[:TYPE { message: 1 }]->(nE),\n" +
+            "  (nE)-[:TYPE]->(nF),\n" +
+            "  (nF)-[:TYPE]->(nG),\n" +
+            "  (nG)-[:TYPE]->(nE),\n" +
             // {H, I}
-            "  (nI)-[:TYPE { message: 1 }]->(nH),\n" +
-            "  (nH)-[:TYPE { message: 1 }]->(nI)";
+            "  (nI)-[:TYPE]->(nH),\n" +
+            "  (nH)-[:TYPE]->(nI)";
 
     @ClassRule
     public static final ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
@@ -95,7 +94,6 @@ public class SCCTest {
                 .withAnyLabel()
                 // The following options need to be default for Pregel
                 .withDirection(Direction.BOTH)
-                .withOptionalRelationshipWeightsFromProperty(MESSAGE_PROPERTY, 1)
                 .load(HugeGraphFactory.class);
     }
 
