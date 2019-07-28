@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.pregel;
 
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -32,25 +33,33 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.pregel.pagerank.PRComputation;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.Label;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class PRTest {
 
+    private static final String ID_PROPERTY = "id";
     private static final String MESSAGE_PROPERTY = "message";
+
+    private static final Label NODE_LABEL = Label.label("Node");
 
     // https://en.wikipedia.org/wiki/PageRank#/media/File:PageRanks-Example.jpg
     private static final String TEST_GRAPH = "" +
-                                             "CREATE (a:Node { name: 'a' })\n" +
-                                             "CREATE (b:Node { name: 'b' })\n" +
-                                             "CREATE (c:Node { name: 'c' })\n" +
-                                             "CREATE (d:Node { name: 'd' })\n" +
-                                             "CREATE (e:Node { name: 'e' })\n" +
-                                             "CREATE (f:Node { name: 'f' })\n" +
-                                             "CREATE (g:Node { name: 'g' })\n" +
-                                             "CREATE (h:Node { name: 'h' })\n" +
-                                             "CREATE (i:Node { name: 'i' })\n" +
-                                             "CREATE (j:Node { name: 'j' })\n" +
-                                             "CREATE (k:Node { name: 'k' })\n" +
+                                             "CREATE (a:Node { id: 0, name: 'a' })\n" +
+                                             "CREATE (b:Node { id: 1, name: 'b' })\n" +
+                                             "CREATE (c:Node { id: 2, name: 'c' })\n" +
+                                             "CREATE (d:Node { id: 3, name: 'd' })\n" +
+                                             "CREATE (e:Node { id: 4, name: 'e' })\n" +
+                                             "CREATE (f:Node { id: 5, name: 'f' })\n" +
+                                             "CREATE (g:Node { id: 6, name: 'g' })\n" +
+                                             "CREATE (h:Node { id: 7, name: 'h' })\n" +
+                                             "CREATE (i:Node { id: 8, name: 'i' })\n" +
+                                             "CREATE (j:Node { id: 9, name: 'j' })\n" +
+                                             "CREATE (k:Node { id: 10, name: 'k' })\n" +
                                              "CREATE\n" +
                                              "  (b)-[:REL { message: 1.0 }]->(c),\n" +
                                              "  (c)-[:REL { message: 1.0 }]->(b),\n" +
@@ -100,7 +109,7 @@ public class PRTest {
     public void runPR() {
 
         int batchSize = 10;
-        int maxIterations = 20;
+        int maxIterations = 40;
         float jumpProbability = 0.15f;
         float dampingFactor = 0.85f;
 
@@ -115,10 +124,37 @@ public class PRTest {
 
         final HugeWeightMapping nodeValues = pregelJob.run(maxIterations);
 
-        System.out.printf("Ran %d iterations.%n", pregelJob.getIterations());
+        assertValues(graph, nodeValues,
+                0, 0.0276,
+                1, 0.3242,
+                2, 0.2889,
+                3, 0.0330,
+                4, 0.0682,
+                5, 0.0330,
+                6, 0.0136,
+                7, 0.0136,
+                8, 0.0136,
+                9, 0.0136,
+                10, 0.0136);
+    }
 
-        for (int i = 0; i < graph.nodeCount(); i++) {
-            System.out.println(String.format("nodeId: %d, rank: %.4f", i, nodeValues.nodeWeight(i)));
+    private void assertValues(final Graph graph, HugeWeightMapping computedValues, final double... values) {
+        Map<Long, Double> expectedValues = new HashMap<>();
+        try (Transaction tx = DB.beginTx()) {
+            for (int i = 0; i < values.length; i += 2) {
+                expectedValues.put(DB.findNode(NODE_LABEL, ID_PROPERTY, (long) values[i]).getId(), values[i + 1]);
+            }
+            tx.success();
         }
+
+        expectedValues.forEach((idProp, expectedValue) -> {
+            long neoId = graph.toOriginalNodeId(idProp);
+            double computedValue = computedValues.nodeWeight(neoId);
+            Assert.assertEquals(
+                    String.format("Node.id = %d should have page rank %f", idProp, expectedValue),
+                    expectedValue,
+                    computedValue,
+                    1e-3);
+        });
     }
 }

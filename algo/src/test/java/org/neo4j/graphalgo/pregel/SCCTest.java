@@ -118,7 +118,7 @@ public class SCCTest {
         assertValues(graph, nodeValues,0, 0, 1, 0, 2, 0, 3, 0, 4, 4, 5, 4, 6, 4, 7, 7, 8, 7, 9, 9);
     }
 
-    private void assertValues(final Graph graph, HugeWeightMapping nodeValues, final long... values) {
+    private void assertValues(final Graph graph, HugeWeightMapping computedValues, final long... values) {
         Map<Long, Long> expectedValues = new HashMap<>();
         try (Transaction tx = DB.beginTx()) {
             for (int i = 0; i < values.length; i+=2) {
@@ -126,14 +126,13 @@ public class SCCTest {
             }
             tx.success();
         }
-        final HugeWeightMapping actualValues = nodeValues;
         expectedValues.forEach((idProp, expectedValue) -> {
             long neoId = graph.toOriginalNodeId(idProp);
-            long actualValue = (long) actualValues.nodeWeight(neoId);
+            long computedValue = (long) computedValues.nodeWeight(neoId);
             Assert.assertEquals(
                     String.format("Node.id = %d should have component %d", idProp, expectedValue),
                     (long) expectedValue,
-                    actualValue);
+                    computedValue);
         });
     }
 }
