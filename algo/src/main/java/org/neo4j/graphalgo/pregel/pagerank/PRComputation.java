@@ -40,11 +40,6 @@ public class PRComputation extends Computation {
     protected void compute(final long nodeId) {
         double newRank = getValue(nodeId);
 
-        // init
-        if (getSuperstep() == 0) {
-            newRank = 1.0 / nodeCount;
-        }
-
         // compute new rank based on neighbor ranks
         if (getSuperstep() > 0) {
             double sum = 0;
