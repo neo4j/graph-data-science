@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 
 /**
- * Implements {@link SequentialDisjointSetStruct} with support for incremental computation based on a previously computed mapping
+ * Extends {@link SequentialDisjointSetStruct} with support for incremental computation based on a previously computed mapping
  * between node ids and set ids.
  * Note that this does not use <a href="https://en.wikipedia.org/wiki/Disjoint-set_data_structure#by_rank">Union by Rank</a>
  * but prefers the minimum set id instead when merging two sets.

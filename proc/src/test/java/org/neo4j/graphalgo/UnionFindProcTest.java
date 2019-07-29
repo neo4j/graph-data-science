@@ -135,7 +135,7 @@ public class UnionFindProcTest {
     }
 
     @Test
-    public void testUnionFindWithMinStrategy() throws Exception {
+    public void testUnionFind() throws Exception {
         String query = "CALL algo.unionFind('', '', { graph: $graph }) " +
                        "YIELD setCount, communityCount";
 
@@ -148,7 +148,7 @@ public class UnionFindProcTest {
     }
 
     @Test
-    public void testUnionFindWithSeedAndMinStrategy() throws Exception {
+    public void testUnionFindWithSeed() throws Exception {
         String query = "CALL algo.unionFind('', '', { graph: $graph, seedProperty: 'seedId' }) " +
                        "YIELD setCount, communityCount";
 

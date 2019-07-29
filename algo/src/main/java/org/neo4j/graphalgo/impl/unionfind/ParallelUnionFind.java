@@ -80,7 +80,7 @@ public class ParallelUnionFind extends UnionFind<ParallelUnionFind> {
         long targetSteps = ParallelUtil.threadSize(batchSize, nodeCount);
         if (targetSteps > Integer.MAX_VALUE) {
             throw new IllegalArgumentException(String.format(
-                    "too many nodes (%d) to run union find with the given concurrency (%d) and batchSize (%d)",
+                    "Too many nodes (%d) to run union find with the given concurrency (%d) and batchSize (%d)",
                     nodeCount,
                     concurrency,
                     batchSize));

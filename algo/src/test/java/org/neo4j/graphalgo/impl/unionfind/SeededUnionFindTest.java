@@ -113,7 +113,7 @@ public class SeededUnionFindTest extends HeavyHugeTester {
     }
 
     @Test
-    public void testPar() {
+    public void testParallel() {
         test(UnionFindType.PARALLEL);
     }
 

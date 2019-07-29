@@ -117,12 +117,12 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
         while (id != (parent = parent(id))) {
             long grandParent = parent(parent);
             if (parent != grandParent) {
-                // Try to apply path-halfing by setting the value
+                // Try to apply path-halving by setting the value
                 // for some id to its grand parent. This might fail
                 // if another thread is also changing the same value
                 // but that's ok. The CAS operations guarantees
                 // that at least one of the contenting threads will
-                // succeed. That's enough for the path halfing to work
+                // succeed. That's enough for the path-halving to work
                 // and there is no need to retry in case of a CAS failure.
                 data.compareAndSet(id, parent, grandParent);
             }
