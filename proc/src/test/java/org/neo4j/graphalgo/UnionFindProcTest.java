@@ -135,32 +135,6 @@ public class UnionFindProcTest {
     }
 
     @Test
-    public void testUnionFind() throws Exception {
-        String query = "CALL algo.unionFind('', '', { graph: $graph }) " +
-                       "YIELD setCount, communityCount";
-
-        db.execute(query, MapUtil.map("graph", graphImpl)).accept(
-                (Result.ResultVisitor<Exception>) row -> {
-                    assertEquals(3L, row.getNumber("communityCount"));
-                    assertEquals(3L, row.getNumber("setCount"));
-                    return true;
-                });
-    }
-
-    @Test
-    public void testUnionFindWithSeed() throws Exception {
-        String query = "CALL algo.unionFind('', '', { graph: $graph, seedProperty: 'seedId' }) " +
-                       "YIELD setCount, communityCount";
-
-        db.execute(query, MapUtil.map("graph", graphImpl)).accept(
-                (Result.ResultVisitor<Exception>) row -> {
-                    assertEquals(3L, row.getNumber("communityCount"));
-                    assertEquals(3L, row.getNumber("setCount"));
-                    return true;
-                });
-    }
-
-    @Test
     public void testUnionFindWithSeed() throws Exception {
         Assume.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
 
