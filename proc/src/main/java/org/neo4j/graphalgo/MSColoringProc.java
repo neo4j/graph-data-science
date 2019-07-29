@@ -55,7 +55,7 @@ public class MSColoringProc {
     @Description("CALL algo.unionFind.mscoloring(label:String, relationship:String, " +
             "{property:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition', concurrency:4}) " +
             "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
-    public Stream<UnionFindProc.UnionFindResult> unionFind(
+    public Stream<UnionFindProc.WriteResult> unionFind(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
@@ -75,7 +75,7 @@ public class MSColoringProc {
 
         if (graph.isEmpty()) {
             graph.release();
-            return Stream.of(UnionFindProc.UnionFindResult.EMPTY);
+            return Stream.of(UnionFindProc.WriteResult.EMPTY);
         }
 
         // evaluation

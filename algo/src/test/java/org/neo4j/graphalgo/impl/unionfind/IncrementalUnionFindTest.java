@@ -39,7 +39,7 @@ import org.neo4j.test.rule.ImpermanentDatabaseRule;
 import static org.junit.Assert.assertEquals;
 import static org.neo4j.graphalgo.impl.unionfind.UnionFindTest.getSetCount;
 
-public class SeededUnionFindTest extends HeavyHugeTester {
+public class IncrementalUnionFindTest extends HeavyHugeTester {
 
     private static final RelationshipType RELATIONSHIP_TYPE = RelationshipType.withName("TYPE");
     private static final String SEED_PROPERTY = "community";
@@ -98,7 +98,7 @@ public class SeededUnionFindTest extends HeavyHugeTester {
     private final Graph graph;
     private final UnionFind.Config config;
 
-    public SeededUnionFindTest(Class<? extends GraphFactory> graphImpl, String name) {
+    public IncrementalUnionFindTest(Class<? extends GraphFactory> graphImpl, String name) {
         super(graphImpl);
         graph = new GraphLoader(DB)
                 .withExecutorService(Pools.DEFAULT)

@@ -39,12 +39,14 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.neo4j.graphalgo.ThrowableRootCauseMatcher.rootCause;
-import static org.neo4j.graphalgo.ThrowableRootCauseMatcher.rootCauseMessage;
 
 @RunWith(Parameterized.class)
 public class UnionFindProcTest {
@@ -162,8 +164,63 @@ public class UnionFindProcTest {
                     if (nodeId >= 0 && nodeId <= 6) {
                         assertEquals(42, partitionId);
                     } else {
+                        assertTrue(partitionId > 42);
+                    }
+                    return true;
+                }
+        );
+    }
+
+    @Test
+    public void testUnionFindWithSeedAndConsecutive() throws Exception {
+        Assume.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
+
+        String query = "CALL algo.unionFind('', '', { graph: $graph, seedProperty: 'seedId', consecutiveIds: true }) " +
+                       "YIELD setCount, communityCount";
+
+        db.execute(query, MapUtil.map("graph", graphImpl)).accept(
+                (Result.ResultVisitor<Exception>) row -> {
+                    assertEquals(3L, row.getNumber("communityCount"));
+                    assertEquals(3L, row.getNumber("setCount"));
+                    return true;
+                });
+
+        db.execute("MATCH (n) RETURN n.partition AS partition").accept(
+                row -> {
+                    assertThat(row.getNumber("partition").longValue(), greaterThanOrEqualTo(42L));
+                    return true;
+                }
+        );
+
+        db.execute("MATCH (n) RETURN n.nodeId AS nodeId, n.partition AS partition").accept(
+                row -> {
+                    final long nodeId = row.getNumber("nodeId").longValue();
+                    final long partitionId = row.getNumber("partition").longValue();
+                    if (nodeId >= 0 && nodeId <= 6) {
+                        assertEquals(42, partitionId);
+                    } else {
                         assertTrue(partitionId != 42);
                     }
+                    return true;
+                }
+        );
+    }
+
+    @Test
+    public void testUnionFindWithConsecutiveIds() throws Exception {
+        String query = "CALL algo.unionFind('', '', { graph: $graph, consecutiveIds: true })";
+
+        db.execute(query, MapUtil.map("graph", graphImpl)).accept(
+                (Result.ResultVisitor<Exception>) row -> {
+                    assertEquals(3L, row.getNumber("communityCount"));
+                    assertEquals(3L, row.getNumber("setCount"));
+                    return true;
+                });
+
+        db.execute("MATCH (n) RETURN collect(distinct n.partition) AS partitions ").accept(
+                row -> {
+
+                    assertThat((List<Long>) row.get("partitions"), containsInAnyOrder(0L, 1L, 2L));
                     return true;
                 }
         );
