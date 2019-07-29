@@ -54,7 +54,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(Parameterized.class)
 public final class PageRankTest {
 
-    static PageRank.Config DEFAULT_CONFIG = new PageRank.Config(40, 0.85);
+    static PageRank.Config DEFAULT_CONFIG = new PageRank.Config(40, 0.85, PageRank.DEFAULT_TOLERANCE);
 
     private Class<? extends GraphFactory> graphImpl;
 

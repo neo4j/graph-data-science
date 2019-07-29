@@ -75,7 +75,7 @@ public class InfoMapGraph {
                 .load(HeavyGraphFactory.class);
 
 
-        final PageRank.Config algoConfig = new PageRank.Config(iterations, 1.0 - tau);
+        final PageRank.Config algoConfig = new PageRank.Config(iterations, 1.0 - tau, PageRank.DEFAULT_TOLERANCE);
         CentralityResult pr = PageRankAlgorithmType.NON_WEIGHTED
                 .create(
                         graph,

@@ -183,7 +183,8 @@ public final class ArticleRankProc {
 
         PageRank.Config algoConfig = new PageRank.Config(
                 configuration.getIterations(DEFAULT_ITERATIONS),
-                configuration.get(CONFIG_DAMPING, DEFAULT_DAMPING)
+                configuration.get(CONFIG_DAMPING, DEFAULT_DAMPING),
+                configuration.getTolerance(PageRank.DEFAULT_TOLERANCE)
         );
 
         final int batchSize = configuration.getBatchSize();

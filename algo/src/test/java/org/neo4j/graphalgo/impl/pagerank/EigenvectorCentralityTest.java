@@ -46,12 +46,11 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.junit.Assert.assertEquals;
-import static org.neo4j.graphalgo.impl.pagerank.PageRankTest.DEFAULT_CONFIG;
 
 @RunWith(Parameterized.class)
 public final class EigenvectorCentralityTest {
 
-    static PageRank.Config DEFAULT_EIGENVECTOR_CONFIG = new PageRank.Config(40, 1);
+    static PageRank.Config DEFAULT_EIGENVECTOR_CONFIG = new PageRank.Config(40, 1, PageRank.DEFAULT_TOLERANCE);
 
     private Class<? extends GraphFactory> graphImpl;
 

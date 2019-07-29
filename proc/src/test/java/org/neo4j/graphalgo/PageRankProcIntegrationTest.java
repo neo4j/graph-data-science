@@ -31,10 +31,16 @@ import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.function.Consumer;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @RunWith(Parameterized.class)
 public class PageRankProcIntegrationTest {
@@ -263,6 +269,12 @@ public class PageRankProcIntegrationTest {
         assertMapEquals(expected, actual);
     }
 
+    @Test
+    public void testPageRankWithToleranceParam() throws Exception {
+        runQuery("CALL algo.pageRank('Label1', 'TYPE1', {tolerance: 0.0001, batchSize:3, graph:'"+graphImpl+"'}) YIELD nodes, iterations",
+                row -> {});
+    }
+
     private static void runQuery(
             String query,
             Consumer<Result.ResultRow> check) {
@@ -274,6 +286,7 @@ public class PageRankProcIntegrationTest {
             Map<String, Object> params,
             Consumer<Result.ResultRow> check) {
         try (Result result = db.execute(query, params)) {
+            System.out.println(result.resultAsString());
             result.accept(row -> {
                 check.accept(row);
                 return true;

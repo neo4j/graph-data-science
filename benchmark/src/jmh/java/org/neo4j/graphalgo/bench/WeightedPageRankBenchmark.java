@@ -117,7 +117,7 @@ public class WeightedPageRankBenchmark {
                 .withRelationshipWeightsFromProperty("weight", 0.0)
                 .load(impl.impl);
         try {
-            final PageRank.Config algoConfig = new PageRank.Config(iterations, 0.85);
+            final PageRank.Config algoConfig = new PageRank.Config(iterations, 0.85, PageRank.DEFAULT_TOLERANCE);
             return PageRankAlgorithmType.WEIGHTED
                     .create(graph, algoConfig, LongStream.empty())
                     .compute()

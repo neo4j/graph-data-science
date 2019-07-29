@@ -120,7 +120,7 @@ public class WeightedPageRankBenchmarkLdbc {
                         Pools.DEFAULT,
                         Pools.DEFAULT_CONCURRENCY,
                         batchSize,
-                        new PageRank.Config(iterations, 0.85, cacheWeights),
+                        new PageRank.Config(iterations, 0.85, PageRank.DEFAULT_TOLERANCE, cacheWeights),
                         LongStream.empty(),
                         AllocationTracker.EMPTY
                 )

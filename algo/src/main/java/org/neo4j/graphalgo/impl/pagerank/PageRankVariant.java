@@ -27,6 +27,7 @@ public interface PageRankVariant {
 
     ComputeStep createComputeStep(
             double dampingFactor,
+            double toleranceValue,
             long[] sourceNodeIds,
             Graph graph,
             RelationshipWeights relationshipWeights,

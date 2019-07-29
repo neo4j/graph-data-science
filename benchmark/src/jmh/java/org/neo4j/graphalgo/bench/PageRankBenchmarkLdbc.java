@@ -96,7 +96,7 @@ public class PageRankBenchmarkLdbc {
                         Pools.DEFAULT,
                         Pools.DEFAULT_CONCURRENCY,
                         batchSize,
-                        new PageRank.Config(iterations, 0.85),
+                        new PageRank.Config(iterations, 0.85, PageRank.DEFAULT_TOLERANCE),
                         LongStream.empty(),
                         AllocationTracker.EMPTY
                 )

@@ -105,6 +105,8 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
  */
 public class PageRank extends Algorithm<PageRank> {
 
+    public static final Double DEFAULT_TOLERANCE = 0.0000001D;
+
     private final ExecutorService executor;
     private final int concurrency;
     private final int batchSize;
@@ -113,7 +115,9 @@ public class PageRank extends Algorithm<PageRank> {
     private final NodeIterator nodeIterator;
     private final Degrees degrees;
     private final double dampingFactor;
-    private final int iterations;
+    private final int maxIterations;
+    private int ranIterations;
+    private final double toleranceValue;
     private final Graph graph;
     private final RelationshipWeights relationshipWeights;
     private final LongStream sourceNodeIds;
@@ -125,15 +129,17 @@ public class PageRank extends Algorithm<PageRank> {
     public static final class Config {
         public final int iterations;
         public final double dampingFactor;
+        public final double toleranceValue;
         public final boolean cacheWeights;
 
-        public Config(final int iterations, final double dampingFactor) {
-            this(iterations, dampingFactor, false);
+        public Config(final int iterations, final double dampingFactor, final double toleranceValue) {
+            this(iterations, dampingFactor, toleranceValue, false);
         }
 
-        public Config(final int iterations, final double dampingFactor, boolean cacheWeights) {
+        public Config(final int iterations, final double dampingFactor, final double toleranceValue, boolean cacheWeights) {
             this.iterations = iterations;
             this.dampingFactor = dampingFactor;
+            this.toleranceValue = toleranceValue;
             this.cacheWeights = cacheWeights;
         }
     }
@@ -163,27 +169,31 @@ public class PageRank extends Algorithm<PageRank> {
         this.graph = graph;
         this.relationshipWeights = graph;
         this.dampingFactor = algoConfig.dampingFactor;
-        this.iterations = algoConfig.iterations;
+        this.maxIterations = algoConfig.iterations;
+        this.ranIterations = 0;
+        this.toleranceValue = algoConfig.toleranceValue;
         this.sourceNodeIds = sourceNodeIds;
         this.pageRankVariant = pageRankVariant;
     }
 
     public int iterations() {
-        return iterations;
+        return ranIterations;
+    }
+
+    public int getMaxIterations() {
+        return this.maxIterations;
     }
 
     public double dampingFactor() {
         return dampingFactor;
     }
 
-
-
     /**
      * compute pageRank for n iterations
      */
     public PageRank compute() {
         initializeSteps();
-        computeSteps.run(iterations);
+        computeSteps.run(maxIterations);
         return this;
     }
 
@@ -288,7 +298,9 @@ public class PageRank extends Algorithm<PageRank> {
             starts.add(start);
             lengths.add(partitionSize);
 
-            computeSteps.add(pageRankVariant.createComputeStep(dampingFactor,
+            computeSteps.add(pageRankVariant.createComputeStep(
+                    dampingFactor,
+                    toleranceValue,
                     sourceNodeIds,
                     graph,
                     relationshipWeights,
@@ -500,9 +512,10 @@ public class PageRank extends Algorithm<PageRank> {
         private void run(int iterations) {
             final int operations = (iterations << 1) + 1;
             int op = 0;
+            boolean algorithmHasStabilized = false;
             ParallelUtil.runWithConcurrency(concurrency, steps, pool);
             getProgressLogger().logProgress(++op, operations, tracker);
-            for (int i = 0; i < iterations && running(); i++) {
+            for (int i = 0; i < iterations && running() && !algorithmHasStabilized; i++) {
                 // calculate scores
                 ParallelUtil.runWithConcurrency(concurrency, steps, pool);
                 getProgressLogger().logProgress(++op, operations, tracker);
@@ -510,13 +523,20 @@ public class PageRank extends Algorithm<PageRank> {
                 // sync scores
                 synchronizeScores();
                 ParallelUtil.runWithConcurrency(concurrency, steps, pool);
+                algorithmHasStabilized = checkTolerance();
                 getProgressLogger().logProgress(++op, operations, tracker);
 
                 // normalize deltas
                 normalizeDeltas();
                 ParallelUtil.runWithConcurrency(concurrency, steps, pool);
                 getProgressLogger().logProgress(++op, operations, tracker);
+
+                ranIterations++;
             }
+        }
+
+        private boolean checkTolerance() {
+            return steps.stream().allMatch(ComputeStep::partitionIsStabilized);
         }
 
         private void normalizeDeltas() {

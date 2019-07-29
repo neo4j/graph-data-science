@@ -28,6 +28,7 @@ public class ArticleRankVariant implements PageRankVariant {
     @Override
     public ComputeStep createComputeStep(
             double dampingFactor,
+            double toleranceValue,
             long[] sourceNodeIds,
             Graph graph,
             RelationshipWeights relationshipWeights,

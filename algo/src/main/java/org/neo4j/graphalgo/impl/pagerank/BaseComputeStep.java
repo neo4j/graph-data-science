@@ -44,6 +44,7 @@ public abstract class BaseComputeStep implements ComputeStep {
 
     long[] starts;
     private int[] lengths;
+    protected double tolerance;
     private long[] sourceNodeIds;
     final RelationshipIterator relationshipIterator;
     final Degrees degrees;
@@ -64,6 +65,8 @@ public abstract class BaseComputeStep implements ComputeStep {
     private final int partitionSize;
     double l2Norm;
 
+    private boolean shouldBreak;
+
     BaseComputeStep(
             double dampingFactor,
             long[] sourceNodeIds,
@@ -71,8 +74,28 @@ public abstract class BaseComputeStep implements ComputeStep {
             AllocationTracker tracker,
             int partitionSize,
             long startNode) {
+        this(
+                dampingFactor,
+                PageRank.DEFAULT_TOLERANCE,
+                sourceNodeIds,
+                graph,
+                tracker,
+                partitionSize,
+                startNode
+        );
+    }
+
+    BaseComputeStep(
+            double dampingFactor,
+            double tolerance,
+            long[] sourceNodeIds,
+            Graph graph,
+            AllocationTracker tracker,
+            int partitionSize,
+            long startNode) {
         this.dampingFactor = dampingFactor;
         this.alpha = 1.0 - dampingFactor;
+        this.tolerance = tolerance;
         this.sourceNodeIds = sourceNodeIds;
         this.relationshipIterator = graph.concurrentCopy();
         this.degrees = graph;
@@ -106,7 +129,7 @@ public abstract class BaseComputeStep implements ComputeStep {
             singleIteration();
             state = S_SYNC;
         } else if (state == S_SYNC) {
-            combineScores();
+            this.shouldBreak = combineScores();
             state = S_NORM;
         } else if (state == S_NORM) {
             normalizeDeltas();
@@ -164,12 +187,14 @@ public abstract class BaseComputeStep implements ComputeStep {
         this.prevScores = prevScores;
     }
 
-    void combineScores() {
+    boolean combineScores() {
         assert prevScores != null;
         assert prevScores.length >= 1;
 
         int scoreDim = prevScores.length;
         float[][] prevScores = this.prevScores;
+
+        boolean shouldBreak = true;
 
         int length = prevScores[0].length;
         for (int i = 0; i < length; i++) {
@@ -180,9 +205,14 @@ public abstract class BaseComputeStep implements ComputeStep {
                 scores[i] = 0F;
             }
             double delta = dampingFactor * sum;
+            if (delta > tolerance) {
+                shouldBreak = false;
+            }
             pageRank[i] += delta;
             deltas[i] = delta;
         }
+
+        return shouldBreak;
     }
 
     public float[][] nextScores() {
@@ -198,4 +228,9 @@ public abstract class BaseComputeStep implements ComputeStep {
     }
 
     public double[] deltas() { return deltas;}
+
+    @Override
+    public boolean partitionIsStabilized() {
+        return shouldBreak;
+    }
 }

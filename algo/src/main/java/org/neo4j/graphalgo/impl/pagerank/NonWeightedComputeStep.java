@@ -32,12 +32,14 @@ public class NonWeightedComputeStep extends BaseComputeStep implements Relations
 
     NonWeightedComputeStep(
             double dampingFactor,
+            double toleranceValue,
             long[] sourceNodeIds,
             Graph graph,
             AllocationTracker tracker,
             int partitionSize,
             long startNode) {
         super(dampingFactor,
+                toleranceValue,
                 sourceNodeIds,
                 graph,
                 tracker,

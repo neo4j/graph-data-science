@@ -182,7 +182,7 @@ public final class EigenvectorCentralityProc {
             ProcedureConfiguration configuration,
             PageRankScore.Stats.Builder statsBuilder) {
 
-        PageRank.Config algoConfig = new PageRank.Config(configuration.getIterations(DEFAULT_ITERATIONS), 1.0);
+        PageRank.Config algoConfig = new PageRank.Config(configuration.getIterations(DEFAULT_ITERATIONS), 1.0, PageRank.DEFAULT_TOLERANCE);
         final int batchSize = configuration.getBatchSize();
         final int concurrency = configuration.getConcurrency();
 

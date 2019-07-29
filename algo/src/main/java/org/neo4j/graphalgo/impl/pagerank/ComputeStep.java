@@ -33,4 +33,6 @@ public interface ComputeStep extends Runnable {
     double[] deltas();
 
     void prepareNormalizeDeltas(double l2Norm);
+
+    boolean partitionIsStabilized();
 }

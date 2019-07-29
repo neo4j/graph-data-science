@@ -28,6 +28,7 @@ public class NonWeightedPageRankVariant implements PageRankVariant {
     @Override
     public NonWeightedComputeStep createComputeStep(
             double dampingFactor,
+            double toleranceValue,
             long[] sourceNodeIds,
             Graph graph,
             RelationshipWeights relationshipWeights,
@@ -38,6 +39,7 @@ public class NonWeightedPageRankVariant implements PageRankVariant {
             long nodeCount) {
         return new NonWeightedComputeStep(
                 dampingFactor,
+                toleranceValue,
                 sourceNodeIds,
                 graph,
                 tracker,

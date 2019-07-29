@@ -47,7 +47,7 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
     private static final String CONFIG_DAMPING = "dampingFactor";
     private static final String CONFIG_WEIGHT_PROPERTY = "weightProperty";
     private static final String CONFIG_CACHE_WEIGHTS = "cacheWeights";
-    private static final Double DEFAULT_DAMPING = 0.85;
+    private static final Double DEFAULT_DAMPING = 0.85D;
     private static final Integer DEFAULT_ITERATIONS = 20;
     private static final String DEFAULT_SCORE_PROPERTY = "pagerank";
 
@@ -142,8 +142,9 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
     protected PageRankFactory algorithmFactory(final ProcedureConfiguration config) {
         double dampingFactor = config.get(CONFIG_DAMPING, DEFAULT_DAMPING);
         int iterations = config.getIterations(DEFAULT_ITERATIONS);
+        double tolerance = config.getTolerance(PageRank.DEFAULT_TOLERANCE);
         boolean cacheWeights = config.get(CONFIG_CACHE_WEIGHTS, false);
-        PageRank.Config algoConfig = new PageRank.Config(iterations, dampingFactor, cacheWeights);
+        PageRank.Config algoConfig = new PageRank.Config(iterations, dampingFactor, tolerance, cacheWeights);
 
         boolean weighted = config.getString(CONFIG_WEIGHT_PROPERTY, null) != null;
 
