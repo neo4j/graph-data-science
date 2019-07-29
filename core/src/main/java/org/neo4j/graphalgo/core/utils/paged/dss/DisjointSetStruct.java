@@ -34,9 +34,7 @@ import java.util.stream.Stream;
 public interface DisjointSetStruct {
 
     /**
-     * Joins the set of p (Sp) with set of q (Sq) such that
-     * {@link DisjointSetStruct#sameSet(long, long)}
-     * for any pair of (Spi, Sqj) evaluates to true.
+     * Joins the set of p (Sp) with set of q (Sq).
      *
      * @param p an item of Sp
      * @param q an item of Sq

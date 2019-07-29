@@ -39,6 +39,6 @@ public class BasicDegreeComputer implements DegreeComputer {
             AllocationTracker tracker) {
         AverageDegreeCentrality degreeCentrality = new AverageDegreeCentrality(graph, executor, concurrency);
         degreeCentrality.compute();
-        return DegreeCache.EMPTY.withAverave(degreeCentrality.average());
+        return DegreeCache.EMPTY.withAverage(degreeCentrality.average());
     }
 }

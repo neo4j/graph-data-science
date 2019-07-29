@@ -23,14 +23,14 @@ import org.junit.Test;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
-import static org.neo4j.graphalgo.core.utils.paged.dss.RankedDisjointSetStruct.memoryEstimation;
+import static org.neo4j.graphalgo.core.utils.paged.dss.NonInrementalDisjointSetStruct.memoryEstimation;
 
-public class RankedDisjointSetStructTest extends DisjointSetStructTest {
+public class NonInrementalDisjointSetStructTest extends DisjointSetStructTest {
 
     @Override
     SequentialDisjointSetStruct newSet(final int capacity) {
         AllocationTracker tracker = AllocationTracker.EMPTY;
-        return new RankedDisjointSetStruct(
+        return new NonInrementalDisjointSetStruct(
                 capacity,
                 tracker);
     }

@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.impl.unionfind;
 
-import org.eclipse.collections.api.block.function.primitive.ObjectLongToObjectFunction;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
@@ -38,11 +37,10 @@ import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
 /**
- * parallel UnionFind using ExecutorService only.
- * <p>
- * Algorithm based on the {@link HugeAtomicDisjointSetStruct}, following the
- * "Wait-free Parallel Algorithms for the Union􏰁-Find Problem"
- * paper.
+ * Parallel Union-Find Algorithm based on the
+ * "Wait-free Parallel Algorithms for the Union-Find Problem" paper.
+ * @see HugeAtomicDisjointSetStruct
+ * @see <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.56.8354&rep=rep1&type=pdf">the paper</a>
  */
 public class ParallelUnionFind extends UnionFind<ParallelUnionFind> {
 
@@ -50,7 +48,7 @@ public class ParallelUnionFind extends UnionFind<ParallelUnionFind> {
     private final AllocationTracker tracker;
     private final long nodeCount;
     private final long batchSize;
-    private final int stepSize;
+    private final int threadSize;
 
     public static MemoryEstimation memoryEstimation(boolean incremental) {
         return MemoryEstimations
@@ -69,23 +67,21 @@ public class ParallelUnionFind extends UnionFind<ParallelUnionFind> {
         super(graph, algoConfig);
         this.executor = executor;
         this.tracker = tracker;
-
         this.nodeCount = graph.nodeCount();
-
         this.batchSize = ParallelUtil.adjustBatchSize(
                 nodeCount,
                 concurrency,
                 minBatchSize,
                 Integer.MAX_VALUE);
-        long targetSteps = ParallelUtil.threadSize(batchSize, nodeCount);
-        if (targetSteps > Integer.MAX_VALUE) {
+        long threadSize = ParallelUtil.threadSize(batchSize, nodeCount);
+        if (threadSize > Integer.MAX_VALUE) {
             throw new IllegalArgumentException(String.format(
                     "Too many nodes (%d) to run union find with the given concurrency (%d) and batchSize (%d)",
                     nodeCount,
                     concurrency,
                     batchSize));
         }
-        this.stepSize = (int) targetSteps;
+        this.threadSize = (int) threadSize;
     }
 
     @Override
@@ -95,23 +91,18 @@ public class ParallelUnionFind extends UnionFind<ParallelUnionFind> {
 
     @Override
     public DisjointSetStruct compute(double threshold) {
-        ObjectLongToObjectFunction<DisjointSetStruct, UnionFindTask> newTask =
-                Double.isNaN(threshold)
-                        ? UnionFindTask::new
-                        : (dss, offset) -> new ThresholdTask(threshold, dss, offset);
-        return compute(newTask);
-    }
-
-    private DisjointSetStruct compute(ObjectLongToObjectFunction<DisjointSetStruct, UnionFindTask> newTask) {
         long nodeCount = graph.nodeCount();
         HugeWeightMapping communityMap = algoConfig.communityMap;
         DisjointSetStruct dss = communityMap == null
                 ? new HugeAtomicDisjointSetStruct(nodeCount, tracker)
                 : new HugeAtomicDisjointSetStruct(nodeCount, communityMap, tracker);
 
-        final Collection<Runnable> tasks = new ArrayList<>(stepSize);
+        final Collection<Runnable> tasks = new ArrayList<>(threadSize);
         for (long i = 0L; i < this.nodeCount; i += batchSize) {
-            tasks.add(newTask.valueOf(dss, i));
+            UnionFindTask unionFindTask = Double.isNaN(threshold)
+                    ? new UnionFindTask(dss, i)
+                    : new UnionFindWithThresholdTask(threshold, dss, i);
+            tasks.add(unionFindTask);
         }
         ParallelUtil.run(tasks, executor);
         return dss;
@@ -152,11 +143,11 @@ public class ParallelUnionFind extends UnionFind<ParallelUnionFind> {
         }
     }
 
-    private class ThresholdTask extends UnionFindTask implements WeightedRelationshipConsumer {
+    private class UnionFindWithThresholdTask extends UnionFindTask implements WeightedRelationshipConsumer {
 
         private final double threshold;
 
-        ThresholdTask(
+        UnionFindWithThresholdTask(
                 double threshold,
                 DisjointSetStruct struct,
                 long offset) {

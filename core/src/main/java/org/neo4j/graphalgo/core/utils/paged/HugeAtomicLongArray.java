@@ -39,15 +39,16 @@ import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.numberOfPages;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.pageIndex;
 
 /**
- * A long-indexable version of a primitive long array ({@code long[]}) that can contain more than 2 bn. elements.
+ * A long-indexable version of a {@link java.util.concurrent.atomic.AtomicLongArray} that can contain more than 2 bn. elements.
  * <p>
  * It is implemented by paging of smaller long-arrays ({@code long[][]}) to support approx. 32k bn. elements.
  * If the the provided size is small enough, an optimized view of a single {@code long[]} might be used.
  * <p>
  * <ul>
  * <li>The array is of a fixed size and cannot grow or shrink dynamically.</li>
- * <li>The array is not optimized for sparseness and has a large memory overhead if the values written to it are very sparse (see {@link org.neo4j.graphalgo.core.huge.loader.SparseNodeMapping} for a different implementation that can profit from sparse data).</li>
+ * <li>The array is not optimized for sparseness and has a large memory overhead if the values written to it are very sparse.</li>
  * <li>The array does not support default values and returns the same default for unset values that a regular {@code long[]} does ({@code 0}).</li>
+ * <li>It only supports a minimal subset of the atomic operations that {@link java.util.concurrent.atomic.AtomicLongArray} provides.</li>
  * </ul>
  * <p>
  * <h3>Basic Usage</h3>
@@ -55,14 +56,12 @@ import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.pageIndex;
  * {@code}
  * AllocationTracker tracker = ...;
  * long arraySize = 42L;
- * HugeLongArray array = HugeLongArray.newArray(arraySize, tracker);
+ * HugeAtomicLongArray array = HugeAtomicLongArray.newArray(arraySize, tracker);
  * array.set(13L, 37L);
  * long value = array.get(13L);
  * // value = 37L
  * {@code}
  * </pre>
- *
- * @author phorn@avantgarde-labs.de
  */
 public abstract class HugeAtomicLongArray {
 
@@ -187,6 +186,13 @@ public abstract class HugeAtomicLongArray {
         }
     }
 
+    // implementation is similar to the AtomicLongArray, based on sun.misc.Unsafe
+    // https://hg.openjdk.java.net/jdk/jdk/file/a1ee9743f4ee/jdk/src/share/classes/java/util/concurrent/atomic/AtomicLongArray.java
+    // TODO: Replace usage of Unsafe with VarHandles once we can move to jdk9+
+    // https://hg.openjdk.java.net/jdk/jdk13/file/9e0c80381e32/jdk/src/java.base/share/classes/java/util/concurrent/atomic/AtomicLongArray.java
+
+    // array-internal values to access the raw memory locations of certain elements
+    // see #memoryOffset
     private static final int base;
     private static final int shift;
 
@@ -200,7 +206,7 @@ public abstract class HugeAtomicLongArray {
         shift = 31 - Integer.numberOfLeadingZeros(scale);
     }
 
-    private static long byteOffset(int i) {
+    private static long memoryOffset(int i) {
         return ((long) i << shift) + base;
     }
 
@@ -228,25 +234,25 @@ public abstract class HugeAtomicLongArray {
         @Override
         public long get(long index) {
             assert index < size;
-            return getRaw(byteOffset((int) index));
+            return getRaw(memoryOffset((int) index));
         }
 
         @Override
         public void set(long index, long value) {
             assert index < size;
-            UnsafeUtil.putLongVolatile(page, byteOffset((int) index), value);
+            UnsafeUtil.putLongVolatile(page, memoryOffset((int) index), value);
         }
 
         @Override
         public boolean compareAndSet(long index, long expect, long update) {
             assert index < size;
-            return compareAndSetRaw(byteOffset((int) index), expect, update);
+            return compareAndSetRaw(memoryOffset((int) index), expect, update);
         }
 
         @Override
         public void update(long index, LongUnaryOperator updateFunction) {
             assert index < size;
-            long offset = byteOffset((int) index);
+            long offset = memoryOffset((int) index);
             long prev, next;
             do {
                 prev = getRaw(offset);
@@ -335,7 +341,7 @@ public abstract class HugeAtomicLongArray {
             assert index < size && index >= 0;
             int pageIndex = pageIndex(index);
             int indexInPage = indexInPage(index);
-            return getRaw(pages[pageIndex], byteOffset(indexInPage));
+            return getRaw(pages[pageIndex], memoryOffset(indexInPage));
         }
 
         @Override
@@ -343,7 +349,7 @@ public abstract class HugeAtomicLongArray {
             assert index < size && index >= 0;
             int pageIndex = pageIndex(index);
             int indexInPage = indexInPage(index);
-            UnsafeUtil.putLongVolatile(pages[pageIndex], byteOffset(indexInPage), value);
+            UnsafeUtil.putLongVolatile(pages[pageIndex], memoryOffset(indexInPage), value);
         }
 
         @Override
@@ -351,7 +357,7 @@ public abstract class HugeAtomicLongArray {
             assert index < size && index >= 0;
             int pageIndex = pageIndex(index);
             int indexInPage = indexInPage(index);
-            return compareAndSetRaw(pages[pageIndex], byteOffset(indexInPage), expect, update);
+            return compareAndSetRaw(pages[pageIndex], memoryOffset(indexInPage), expect, update);
         }
 
         @Override
@@ -360,7 +366,7 @@ public abstract class HugeAtomicLongArray {
             int pageIndex = pageIndex(index);
             int indexInPage = indexInPage(index);
             long[] page = pages[pageIndex];
-            long offset = byteOffset(indexInPage);
+            long offset = memoryOffset(indexInPage);
             long prev, next;
             do {
                 prev = getRaw(page, offset);

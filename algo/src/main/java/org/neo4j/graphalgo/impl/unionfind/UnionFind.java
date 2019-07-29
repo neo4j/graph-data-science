@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.IncrementalDisjointSetStruct;
-import org.neo4j.graphalgo.core.utils.paged.dss.RankedDisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.dss.NonInrementalDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.SequentialDisjointSetStruct;
 
 public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> {
@@ -45,7 +45,7 @@ public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> 
                 .add(MemoryEstimations.of("DisjointSetStruct", (dimensions, concurrency) -> {
                     MemoryEstimation dssEstimation = (incremental) ?
                             IncrementalDisjointSetStruct.memoryEstimation() :
-                            RankedDisjointSetStruct.memoryEstimation();
+                            NonInrementalDisjointSetStruct.memoryEstimation();
                     return dssEstimation
                             .estimate(dimensions, concurrency)
                             .memoryUsage()
@@ -66,7 +66,7 @@ public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> 
 
     SequentialDisjointSetStruct initDisjointSetStruct(long nodeCount, AllocationTracker tracker) {
         return algoConfig.communityMap == null ?
-                new RankedDisjointSetStruct(nodeCount, tracker) :
+                new NonInrementalDisjointSetStruct(nodeCount, tracker) :
                 new IncrementalDisjointSetStruct(nodeCount, algoConfig.communityMap, tracker);
     }
 

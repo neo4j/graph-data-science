@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Add adaption of the C++ implementation [1] for the
- * "Wait-free Parallel Algorithms for the Union􏰁-Find Problem" [2]
+ * "Wait-free Parallel Algorithms for the Union-Find Problem" [2]
  * with some input from an atomic DSS implementation in Rust [3].
  *
  * The major difference for our DSS is, that we don't supported the
@@ -74,11 +74,11 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
         return builder.build();
     }
 
-    private final HugeAtomicLongArray data;
+    private final HugeAtomicLongArray parent;
     private final HugeLongLongMap internalToProvidedIds;
 
     public HugeAtomicDisjointSetStruct(long capacity, AllocationTracker tracker) {
-        this.data = HugeAtomicLongArray.newArray(capacity, i -> i, tracker);
+        this.parent = HugeAtomicLongArray.newArray(capacity, i -> i, tracker);
         this.internalToProvidedIds = null;
     }
 
@@ -87,7 +87,7 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
         AtomicLong maxCommunityId = new AtomicLong(maxCommunity);
         final HugeLongLongMap internalMapping = new HugeLongLongMap(capacity, tracker);
         this.internalToProvidedIds = new HugeLongLongMap(capacity, tracker);
-        this.data = HugeAtomicLongArray.newArray(capacity, nodeId -> {
+        this.parent = HugeAtomicLongArray.newArray(capacity, nodeId -> {
             long parentValue = nodeId;
             double communityIdValue = communityMapping.nodeWeight(nodeId, Double.NaN);
 
@@ -109,7 +109,7 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
     }
 
     private long parent(long id) {
-        return data.get(id);
+        return parent.get(id);
     }
 
     private long find(long id) {
@@ -124,7 +124,7 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
                 // that at least one of the contenting threads will
                 // succeed. That's enough for the path-halving to work
                 // and there is no need to retry in case of a CAS failure.
-                data.compareAndSet(id, parent, grandParent);
+                this.parent.compareAndSet(id, parent, grandParent);
             }
             id = grandParent;
         }
@@ -178,7 +178,7 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
             long oldEntry = id1;
             long newEntry = id2;
 
-            if (!data.compareAndSet(id1, oldEntry, newEntry)) {
+            if (!parent.compareAndSet(id1, oldEntry, newEntry)) {
                 continue;
             }
 
@@ -188,6 +188,6 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
 
     @Override
     public long size() {
-        return data.size();
+        return parent.size();
     }
 }

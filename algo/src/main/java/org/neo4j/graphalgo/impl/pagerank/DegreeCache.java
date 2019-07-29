@@ -52,7 +52,7 @@ public class DegreeCache {
         return averageDegree;
     }
 
-    public DegreeCache withAverave(double newAverage) {
+    public DegreeCache withAverage(double newAverage) {
         return new DegreeCache(aggregatedDegrees, weights, newAverage);
     }
 }
