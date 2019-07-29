@@ -83,18 +83,17 @@ final class HugeAdjacencyListBuilder {
     private long allocatePage(byte[] page, Allocator into) {
         long intoIndex = allocIdx.getAndAdd(PAGE_SIZE);
         int pageIndex = PageUtil.pageIndex(intoIndex, PAGE_SHIFT);
-        grow(intoIndex + PAGE_SIZE, pageIndex);
+        grow(intoIndex + PAGE_SIZE, pageIndex, page);
         tracker.add(sizeOfByteArray(page.length));
-        pages[pageIndex] = page;
         into.insertPage(page);
         return intoIndex;
     }
 
     private void grow(final long newSize) {
-        grow(newSize, -1);
+        grow(newSize, -1, null);
     }
 
-    private void grow(final long newSize, final int skipPage) {
+    private void grow(final long newSize, final int skipPage, byte[] page) {
         assert newSize <= MAX_SIZE;
         boolean didSetSize = tryGrowSize(newSize);
         if (didSetSize) {
@@ -108,7 +107,7 @@ final class HugeAdjacencyListBuilder {
             }
             int newNumPages = PageUtil.numPagesFor(newSize, PAGE_SHIFT, PAGE_MASK);
             long newCap = PageUtil.capacityFor(newNumPages, PAGE_SHIFT);
-            setPages(newNumPages, this.pages.length, skipPage);
+            setPages(newNumPages, this.pages.length, skipPage, page);
             capacity.set(newCap);
             size.set(newSize);
         } finally {
@@ -132,7 +131,9 @@ final class HugeAdjacencyListBuilder {
         } while (size < newSize && !this.size.compareAndSet(size, newSize));
     }
 
-    private void setPages(int newNumPages, int currentNumPages, int skipPage) {
+    private void setPages(int newNumPages, int currentNumPages, int skipPage, byte[] page) {
+        assert skipPage == -1L || page != null : "Trying to insert null page at skipPage index (" + skipPage +")";
+
         int newPages = newNumPages - currentNumPages;
         if (newPages > 0) {
             AllocationTracker tracker = this.tracker;
@@ -142,6 +143,8 @@ final class HugeAdjacencyListBuilder {
                 if (i != skipPage) {
                     tracker.add(PAGE_SIZE_IN_BYTES);
                     pages[i] = new byte[PAGE_SIZE];
+                } else {
+                    pages[i] = page;
                 }
             }
             this.pages = pages;
