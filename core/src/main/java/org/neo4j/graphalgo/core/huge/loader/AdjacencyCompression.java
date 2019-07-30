@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
+import com.carrotsearch.hppc.sorting.IndirectComparator;
+import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.apache.lucene.util.LongsRef;
 
 import java.util.Arrays;
@@ -48,6 +50,20 @@ final class AdjacencyCompression {
     static int applyDeltaEncoding(LongsRef data) {
         Arrays.sort(data.longs, 0, data.length);
         return data.length = applyDelta(data.longs, data.length);
+    }
+
+    // TODO: requires lots of additional memory ... inline indirect sort to make reuse of - to be created - buffers
+    static int applyDeltaEncoding(LongsRef data, double[] weights) {
+        int[] order = IndirectSort.mergesort(0, data.length, new AscendingLongComparator(data.longs));
+
+        long[] sortedValues = new long[data.length];
+        double[] sortedWeights = new double[data.length];
+        int degree = applyDelta(order, data.longs, sortedValues, weights, sortedWeights, data.length);
+
+        System.arraycopy(sortedValues, 0, data.longs, 0, degree);
+        System.arraycopy(sortedWeights, 0, weights, 0, degree);
+
+        return degree;
     }
 
     static int compress(LongsRef data, byte[] out) {
@@ -80,6 +96,50 @@ final class AdjacencyCompression {
         return out;
     }
 
+    private static int applyDelta(
+            int[] order,
+            long[] values,
+            long[] outValues,
+            double[] weights,
+            double[] outWeights,
+            int length) {
+        int firstSortIdx = order[0];
+        long value = values[firstSortIdx];
+        long delta;
+        outValues[0] = values[firstSortIdx];
+        outWeights[0] = weights[firstSortIdx];
+
+        int in = 1, out = 1;
+        for (; in < length; ++in) {
+            final int sortIdx = order[in];
+            delta = values[sortIdx] - value;
+            value = values[sortIdx];
+            if (delta > 0L) {
+                outWeights[out] = weights[sortIdx];
+                outValues[out++] = delta;
+            }
+        }
+        return out;
+    }
+
     private AdjacencyCompression() {
+    }
+
+    private static class AscendingLongComparator implements IndirectComparator {
+        private final long[] array;
+
+        AscendingLongComparator(long[] array) {
+            this.array = array;
+        }
+
+        public int compare(int indexA, int indexB) {
+            long a = this.array[indexA];
+            long b = this.array[indexB];
+            if (a < b) {
+                return -1;
+            } else {
+                return a > b ? 1 : 0;
+            }
+        }
     }
 }

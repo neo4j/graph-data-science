@@ -164,7 +164,7 @@ abstract class AdjacencyBuilder {
                         this.targets[pageIndex][localId] = compressedTargets;
                     }
 
-                    compressedTargets.addDeltas(targets, startOffset, endOffset);
+                    compressedTargets.add(targets, startOffset, endOffset);
                     int currentDegree = compressedTargets.length();
                     if (currentDegree >= degree) {
                         int importedRelationships = builder.applyVariableDeltaEncoding(

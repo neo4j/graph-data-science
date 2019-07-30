@@ -29,13 +29,16 @@ import static org.neo4j.graphalgo.core.huge.loader.VarLongEncoding.encodeVLongs;
 import static org.neo4j.graphalgo.core.huge.loader.VarLongEncoding.encodedVLongSize;
 import static org.neo4j.graphalgo.core.huge.loader.VarLongEncoding.zigZag;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfByteArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 
 final class CompressedLongArray {
 
     private static final byte[] EMPTY_BYTES = new byte[0];
+    private static final double[] EMPTY_DOUBLES = new double[0];
 
     private final AllocationTracker tracker;
     private byte[] storage;
+    private double[] weights;
     private int pos;
     private long lastValue;
     private int length;
@@ -51,21 +54,52 @@ final class CompressedLongArray {
         } else {
             storage = EMPTY_BYTES;
         }
+        weights = EMPTY_DOUBLES;
     }
 
-    void addDeltas(long[] deltas, int start, int end) {
-        long last = lastValue, val;
-        int required = 0;
+    /**
+     * @implNote For memory efficiency, we reuse the {@code values}. They cannot be reused after calling this method.
+     *
+     * @param values values to write
+     * @param start start index in values
+     * @param end end index in values
+     */
+    void add(long[] values, int start, int end) {
+        // not inlined to avoid field access
+        long currentLastValue = this.lastValue;
+        long delta;
+        long compressedValue;
+        int requiredBytes = 0;
         for (int i = start; i < end; i++) {
-            val = zigZag(deltas[i] - last);
-            last = deltas[i];
-            deltas[i] = val;
-            required += encodedVLongSize(val);
+            delta = values[i] - currentLastValue;
+            compressedValue = zigZag(delta);
+            currentLastValue = values[i];
+            values[i] = compressedValue;
+            requiredBytes += encodedVLongSize(compressedValue);
         }
-        ensureCapacity(pos, required, storage);
-        pos = encodeVLongs(deltas, start, end, storage, pos);
-        lastValue = last;
-        length += (end - start);
+        ensureCapacity(this.pos, requiredBytes, this.storage);
+        this.pos = encodeVLongs(values, start, end, this.storage, this.pos);
+
+        this.lastValue = currentLastValue;
+        this.length += (end - start);
+    }
+
+    /**
+     * @implNote For memory efficiency, we reuse the {@code values}. They cannot be reused after calling this method.
+     *
+     * @param values values to write
+     * @param weights weights to write
+     * @param start start index in values and weights
+     * @param end end index in values and weights
+     */
+    void add(long[] values, double[] weights, int start, int end) {
+        // write weights
+        int targetCount = end - start;
+        ensureCapacity(length, targetCount, this.weights);
+        System.arraycopy(weights, start, this.weights, this.length, targetCount);
+
+        // write values
+        add(values, start, end);
     }
 
     private void ensureCapacity(int pos, int required, byte[] storage) {
@@ -74,6 +108,15 @@ final class CompressedLongArray {
             tracker.remove(sizeOfByteArray(storage.length));
             tracker.add(sizeOfByteArray(newLength));
             this.storage = Arrays.copyOf(storage, newLength);
+        }
+    }
+
+    private void ensureCapacity(int pos, int required, double[] weights) {
+        if (weights.length <= pos + required) {
+            int newLength = ArrayUtil.oversize(pos + required, Double.BYTES);
+            tracker.remove(sizeOfDoubleArray(weights.length));
+            tracker.add(sizeOfDoubleArray(newLength));
+            this.weights = Arrays.copyOf(weights, newLength);
         }
     }
 
@@ -86,15 +129,21 @@ final class CompressedLongArray {
         return zigZagUncompress(storage, pos, into);
     }
 
-    byte[] internalStorage() {
+    byte[] storage() {
         return storage;
+    }
+
+    double[] weights() {
+        return weights;
     }
 
     void release() {
         if (storage.length > 0) {
             tracker.remove(sizeOfByteArray(storage.length));
+            tracker.remove(sizeOfDoubleArray(weights.length));
         }
         storage = null;
+        weights = null;
         pos = 0;
         length = 0;
     }

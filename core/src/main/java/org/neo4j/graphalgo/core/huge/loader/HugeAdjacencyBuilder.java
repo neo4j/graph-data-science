@@ -29,6 +29,8 @@ import org.neo4j.graphalgo.core.huge.HugeAdjacencyOffsets;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -40,8 +42,10 @@ class HugeAdjacencyBuilder {
 
     private ReentrantLock lock;
     private HugeAdjacencyListBuilder.Allocator allocator;
+    private HugeAdjacencyListBuilder.Allocator weightAllocator;
     private HugeAdjacencyOffsets globalOffsets;
     private long[] offsets;
+    private long[] weightOffsets;
 
     private final AllocationTracker tracker;
 
@@ -93,12 +97,29 @@ class HugeAdjacencyBuilder {
             CompressedLongArray array,
             LongsRef buffer,
             int localId) {
-        byte[] storage = array.internalStorage();
+        byte[] storage = array.storage();
         AdjacencyCompression.copyFrom(buffer, array);
         int degree = AdjacencyCompression.applyDeltaEncoding(buffer);
         int requiredBytes = AdjacencyCompression.compress(buffer, storage);
         long address = copyIds(storage, requiredBytes, degree);
         offsets[localId] = address;
+        array.release();
+        return degree;
+    }
+
+    final int applyVariableDeltaEncodingWithWeights(
+            CompressedLongArray array,
+            LongsRef buffer,
+            int localId) {
+        byte[] storage = array.storage();
+        double[] weights = array.weights();
+        AdjacencyCompression.copyFrom(buffer, array);
+        int degree = AdjacencyCompression.applyDeltaEncoding(buffer, weights);
+        int requiredBytes = AdjacencyCompression.compress(buffer, storage);
+        int weightsRequiredBytes = degree * Double.BYTES;
+
+        offsets[localId] = copyIds(storage, requiredBytes, degree);
+        weightOffsets[localId] = copyWeights(weights, weightsRequiredBytes, degree);
         array.release();
         return degree;
     }
@@ -110,6 +131,18 @@ class HugeAdjacencyBuilder {
         offset = writeDegree(allocator.page, offset, degree);
         System.arraycopy(targets, 0, allocator.page, offset, requiredBytes);
         allocator.offset = (offset + requiredBytes);
+        return address;
+    }
+
+    private synchronized long copyWeights(double[] weights, int requiredBytes, int degree) {
+        long address = weightAllocator.allocate(requiredBytes);
+        int offset = weightAllocator.offset;
+        ByteBuffer
+                .wrap(weightAllocator.page, offset, requiredBytes)
+                .order(ByteOrder.BIG_ENDIAN)
+                .asDoubleBuffer()
+                .put(weights, 0, degree);
+        weightAllocator.offset = (offset + requiredBytes);
         return address;
     }
 
