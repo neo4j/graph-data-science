@@ -77,7 +77,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
     @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
                  "{weightProperty: 'propertyName', threshold: 0.42, defaultValue: 1.0, seedProperty: 'seedCommunity', consecutiveId: false}}} " +
                  "YIELD nodeId, setId - yields a setId to each node id")
-    public Stream<UnionFindProc.StreamResult> unionFindStream(
+    public Stream<StreamResult> unionFindStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
@@ -100,7 +100,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
 
     @Deprecated
     @Procedure(value = "algo.unionFind.queue", mode = Mode.WRITE, deprecatedBy = "algo.unionFind")
-    @Description("CALL algo.unionFind(label:String, relationship:String, " +
+    @Description("CALL algo.unionFind.queue(label:String, relationship:String, " +
                  "{property: 'weight', threshold: 0.42, defaultValue: 1.0, write: true, writeProperty: 'community', seedProperty: 'seedCommunity', concurrency: 4}) " +
                  "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
     public Stream<WriteResult> unionFindQueue(
@@ -113,10 +113,10 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
 
     @Deprecated
     @Procedure(value = "algo.unionFind.queue.stream", deprecatedBy = "algo.unionFind.stream")
-    @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
+    @Description("CALL algo.unionFind.queue.stream(label:String, relationship:String, " +
                  "{property: 'propertyName', threshold: 0.42, defaultValue: 1.0, seedProperty: 'seedCommunity', concurrency: 4}) " +
                  "YIELD nodeId, setId - yields a setId to each node id")
-    public Stream<UnionFindProc.StreamResult> unionFindQueueStream(
+    public Stream<StreamResult> unionFindQueueStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
@@ -126,7 +126,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
 
     @Deprecated
     @Procedure(value = "algo.unionFind.forkJoinMerge", mode = Mode.WRITE, deprecatedBy = "algo.unionFind")
-    @Description("CALL algo.unionFind(label:String, relationship:String, " +
+    @Description("CALL algo.unionFind.forkJoinMerge(label:String, relationship:String, " +
                  "{property: 'weight', threshold: 0.42, defaultValue: 1.0, write: true, writeProperty: 'community', seedProperty: 'seedCommunity', concurrency: 4}) " +
                  "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
     public Stream<WriteResult> unionFindForkJoinMerge(
@@ -139,10 +139,10 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
 
     @Deprecated
     @Procedure(value = "algo.unionFind.forkJoinMerge.stream", deprecatedBy = "algo.unionFind.stream")
-    @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
+    @Description("CALL algo.unionFind.forkJoinMerge.stream(label:String, relationship:String, " +
                  "{property: 'propertyName', threshold: 0.42, defaultValue: 1.0, seedProperty: 'seedCommunity', concurrency: 4}) " +
                  "YIELD nodeId, setId - yields a setId to each node id")
-    public Stream<UnionFindProc.StreamResult> unionFindForkJoinMergeStream(
+    public Stream<StreamResult> unionFindForkJoinMergeStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
@@ -152,7 +152,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
 
     @Deprecated
     @Procedure(value = "algo.unionFind.forkJoin", mode = Mode.WRITE, deprecatedBy = "algo.unionFind")
-    @Description("CALL algo.unionFind(label:String, relationship:String, " +
+    @Description("CALL algo.unionFind.forkJoin(label:String, relationship:String, " +
                  "{property: 'weight', threshold: 0.42, defaultValue: 1.0, write: true, writeProperty: 'community', seedProperty: 'seedCommunity', concurrency: 4}) " +
                  "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
     public Stream<WriteResult> unionFindForkJoin(
@@ -165,10 +165,10 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
 
     @Deprecated
     @Procedure(value = "algo.unionFind.forkJoin.stream", deprecatedBy = "algo.unionFind.stream")
-    @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
+    @Description("CALL algo.unionFind.forkJoin.stream(label:String, relationship:String, " +
                  "{property: 'propertyName', threshold: 0.42, defaultValue: 1.0, seedProperty: 'seedCommunity', concurrency: 4}) " +
                  "YIELD nodeId, setId - yields a setId to each node id")
-    public Stream<UnionFindProc.StreamResult> unionFindForJoinStream(
+    public Stream<StreamResult> unionFindForJoinStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
@@ -219,7 +219,6 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
 
         return producer.resultStream(setup.graph);
     }
-
 
     private Stream<WriteResult> run(
             String label,
