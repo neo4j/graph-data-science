@@ -152,7 +152,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
     }
 
     @Override
-    GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
+    protected GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
         loader.withOptionalRelationshipWeightsFromProperty(
                 config.getWeightProperty(),
                 config.getWeightPropertyDefaultValue(1.0));
@@ -166,7 +166,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
     }
 
     @Override
-    LouvainFactory algorithmFactory(final ProcedureConfiguration procedureConfig) {
+    protected LouvainFactory algorithmFactory(final ProcedureConfiguration procedureConfig) {
         int maxLevel = procedureConfig.getIterations(DEFAULT_MAX_LEVEL);
         int maxIterations = procedureConfig.getNumber(INNER_ITERATIONS, DEFAULT_MAX_ITERATIONS).intValue();
         boolean randomNeighbor = procedureConfig.get(COMMUNITY_SELECTION, "classic").equalsIgnoreCase("random");

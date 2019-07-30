@@ -17,11 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.unionfind;
 
 import org.HdrHistogram.Histogram;
+import org.neo4j.graphalgo.BaseAlgoProc;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -29,11 +30,8 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.write.Exporter;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
 import org.neo4j.graphalgo.impl.unionfind.UnionFind;
@@ -47,7 +45,6 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.function.Supplier;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.impl.unionfind.UnionFindFactory.CONFIG_ALGO_TYPE;
@@ -177,7 +174,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
     }
 
     @Override
-    GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
+    protected GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
 
         final String seedProperty = config.getString(CONFIG_SEED_PROPERTY, null);
 
@@ -193,14 +190,14 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
     }
 
     @Override
-    UnionFindFactory<T> algorithmFactory(final ProcedureConfiguration config) {
+    protected UnionFindFactory<T> algorithmFactory(final ProcedureConfiguration config) {
         boolean incremental = config.getString(CONFIG_SEED_PROPERTY).isPresent();
         UnionFindType defaultAlgoType = UnionFindType.PARALLEL;
         UnionFindType algoType = config.getChecked(CONFIG_ALGO_TYPE, defaultAlgoType, UnionFindType.class);
         return new UnionFindFactory<>(algoType, incremental);
     }
 
-    private Stream<UnionFindProc.StreamResult> stream(
+    private Stream<StreamResult> stream(
             String label,
             String relationship,
             Map<String, Object> config,
@@ -260,7 +257,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
             String relationship,
             Map<String, Object> config,
             UnionFindType algoType) {
-        final Builder builder = new Builder();
+        final WriteResultBuilder builder = new WriteResultBuilder();
 
         config.put(CONFIG_ALGO_TYPE, algoType);
         ProcedureConfiguration configuration = newConfig(label, relationship, config);
@@ -335,17 +332,17 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
 
         return withConsecutiveIds && !withSeeding ?
                 new UnionFindResultProducer.Consecutive(dss, tracker) :
-                new UnionFindResultProducer.Default(dss);
+                new UnionFindResultProducer.NonConsecutive(dss);
     }
 
     public static class ProcedureSetup {
-        final Builder builder;
+        final WriteResultBuilder builder;
         final Graph graph;
         final AllocationTracker tracker;
         final ProcedureConfiguration procedureConfig;
 
         ProcedureSetup(
-                final Builder builder,
+                final WriteResultBuilder builder,
                 final Graph graph,
                 final AllocationTracker tracker,
                 final ProcedureConfiguration procedureConfig) {
@@ -353,6 +350,18 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
             this.graph = graph;
             this.tracker = tracker;
             this.procedureConfig = procedureConfig;
+        }
+    }
+
+    public static class StreamResult {
+
+        public final long nodeId;
+
+        public final long setId;
+
+        public StreamResult(long nodeId, long setId) {
+            this.nodeId = nodeId;
+            this.setId = setId;
         }
     }
 
@@ -398,7 +407,6 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
         public final String partitionProperty;
         public final String writeProperty;
 
-
         WriteResult(
                 long loadMillis,
                 long computeMillis,
@@ -441,30 +449,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
         }
     }
 
-    public static class StreamResult {
-
-        /**
-         * the mapped node id
-         */
-        public final long nodeId;
-
-        /**
-         * set id
-         */
-        public final long setId;
-
-        public StreamResult(long nodeId, int setId) {
-            this.nodeId = nodeId;
-            this.setId = (long) setId;
-        }
-
-        public StreamResult(long nodeId, long setId) {
-            this.nodeId = nodeId;
-            this.setId = setId;
-        }
-    }
-
-    public static class Builder extends AbstractCommunityResultBuilder<WriteResult> {
+    static class WriteResultBuilder extends AbstractCommunityResultBuilder<WriteResult> {
         private String partitionProperty;
         private String writeProperty;
 
@@ -501,94 +486,15 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
             );
         }
 
-        public Builder withPartitionProperty(String partitionProperty) {
+        WriteResultBuilder withPartitionProperty(String partitionProperty) {
             this.partitionProperty = partitionProperty;
             return this;
         }
 
-        public Builder withWriteProperty(String writeProperty) {
+        WriteResultBuilder withWriteProperty(String writeProperty) {
             this.writeProperty = writeProperty;
             return this;
         }
     }
 
-    public interface UnionFindResultProducer {
-
-        /**
-         * Computes the set id of a given ID.
-         *
-         * @param p an id
-         * @return corresponding set id
-         */
-        long setIdOf(long p);
-
-        /**
-         * Computes the result stream based on a given ID mapping by using
-         * {@link #setIdOf(long)} to look up the set representative for each node id.
-         *
-         * @param idMapping mapping between internal ids and Neo4j ids
-         * @return tuples of Neo4j ids and their set ids
-         */
-        default Stream<StreamResult> resultStream(IdMapping idMapping) {
-            return LongStream.range(IdMapping.START_NODE_ID, idMapping.nodeCount())
-                    .mapToObj(mappedId -> new StreamResult(
-                            idMapping.toOriginalNodeId(mappedId),
-                            setIdOf(mappedId)));
-        }
-
-        class Default implements UnionFindResultProducer {
-
-            private final DisjointSetStruct dss;
-
-            Default(final DisjointSetStruct dss) {
-                this.dss = dss;
-            }
-
-            @Override
-            public long setIdOf(final long p) {
-                return dss.setIdOf(p);
-            }
-
-        }
-
-        class Consecutive implements UnionFindResultProducer {
-
-            private final HugeLongArray communities;
-
-            Consecutive(DisjointSetStruct dss, AllocationTracker tracker) {
-                long nextConsecutiveId = -1L;
-
-                // TODO is there a better way to set the initial size, e.g. dss.setCount
-                HugeLongLongMap setIdToConsecutiveId = new HugeLongLongMap(dss.size() / 10, tracker);
-                this.communities = HugeLongArray.newArray(dss.size(), tracker);
-
-                for (int nodeId = 0; nodeId < dss.size(); nodeId++) {
-                    long setId = dss.setIdOf(nodeId);
-                    final long successiveId = setIdToConsecutiveId.getOrDefault(setId, -1);
-                    if (successiveId == -1) {
-                        setIdToConsecutiveId.addTo(setId, ++nextConsecutiveId);
-                    }
-                    communities.set(nodeId, nextConsecutiveId);
-                }
-            }
-
-            @Override
-            public long setIdOf(final long p) {
-                return communities.get(p);
-            }
-        }
-
-        /**
-         * Responsible for writing back the set ids to Neo4j.
-         */
-        final class Translator implements PropertyTranslator.OfLong<UnionFindResultProducer> {
-
-            public static final PropertyTranslator<UnionFindResultProducer> INSTANCE = new Translator();
-
-            @Override
-            public long toLong(final UnionFindResultProducer data, final long nodeId) {
-                return data.setIdOf(nodeId);
-            }
-        }
-    }
 }

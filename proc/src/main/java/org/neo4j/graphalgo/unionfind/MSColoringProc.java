@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.unionfind;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -64,7 +64,7 @@ public class MSColoringProc {
                 .setNodeLabelOrQuery(label)
                 .setRelationshipTypeOrQuery(relationship);
 
-        final UnionFindProc.Builder builder = new UnionFindProc.Builder();
+        final UnionFindProc.WriteResultBuilder builder = new UnionFindProc.WriteResultBuilder();
 
         // loading
         AllocationTracker tracker = AllocationTracker.create();

@@ -22,6 +22,8 @@ package org.neo4j.graphalgo;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.neo4j.graphalgo.unionfind.MSColoringProc;
+import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;

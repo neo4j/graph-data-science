@@ -46,11 +46,11 @@ public abstract class BaseProc {
     @Context
     public KernelTransaction transaction;
 
-    abstract GraphLoader configureLoader(
+    protected abstract GraphLoader configureLoader(
             GraphLoader loader,
             ProcedureConfiguration config);
 
-    final ProcedureConfiguration newConfig(
+    protected final ProcedureConfiguration newConfig(
             final String label,
             final String relationship,
             final Map<String, Object> config) {
@@ -93,7 +93,7 @@ public abstract class BaseProc {
         }
     }
 
-    <R> R runWithExceptionLogging(String message, Supplier<R> supplier) {
+    protected <R> R runWithExceptionLogging(String message, Supplier<R> supplier) {
         try {
             return supplier.get();
         } catch (Exception e) {
@@ -110,7 +110,7 @@ public abstract class BaseProc {
                 () -> newLoader(config, tracker).load(config.getGraphImpl()));
     }
 
-    final <R> Graph loadGraph(
+    protected final <R> Graph loadGraph(
             final ProcedureConfiguration config,
             final AllocationTracker tracker,
             final AbstractResultBuilder<R> result) {
@@ -119,7 +119,7 @@ public abstract class BaseProc {
         }
     }
 
-    final <R> Graph loadGraph(
+    protected final <R> Graph loadGraph(
             final ProcedureConfiguration config,
             final AllocationTracker tracker,
             final AbstractCommunityResultBuilder<R> result) {

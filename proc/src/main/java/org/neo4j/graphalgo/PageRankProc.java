@@ -123,7 +123,7 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
     }
 
     @Override
-    GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
+    protected GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
         loader.withOptionalRelationshipWeightsFromProperty(
                 config.getString(CONFIG_WEIGHT_PROPERTY, null),
                 config.getWeightPropertyDefaultValue(0.0));
@@ -139,7 +139,7 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
     }
 
     @Override
-    PageRankFactory algorithmFactory(final ProcedureConfiguration config) {
+    protected PageRankFactory algorithmFactory(final ProcedureConfiguration config) {
         double dampingFactor = config.get(CONFIG_DAMPING, DEFAULT_DAMPING);
         int iterations = config.getIterations(DEFAULT_ITERATIONS);
         boolean cacheWeights = config.get(CONFIG_CACHE_WEIGHTS, false);

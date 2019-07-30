@@ -154,12 +154,12 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
     }
 
     @Override
-    AlgorithmFactory<LabelPropagation> algorithmFactory(final ProcedureConfiguration config) {
+    protected AlgorithmFactory<LabelPropagation> algorithmFactory(final ProcedureConfiguration config) {
         return new LabelPropagationFactory();
     }
 
     @Override
-    GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
+    protected GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
         final String seedProperty = config.getString(CONFIG_SEED_KEY, CONFIG_OLD_SEED_KEY, null);
         final String weightProperty = config.getString(CONFIG_WEIGHT_KEY, null);
 

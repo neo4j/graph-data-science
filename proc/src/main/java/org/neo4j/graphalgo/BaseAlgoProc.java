@@ -32,7 +32,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 public abstract class BaseAlgoProc<A extends Algorithm<A>> extends BaseProc {
 
-    final A newAlgorithm(
+    protected final A newAlgorithm(
             final Graph graph,
             final ProcedureConfiguration config,
             final AllocationTracker tracker) {
@@ -43,9 +43,9 @@ public abstract class BaseAlgoProc<A extends Algorithm<A>> extends BaseProc {
                 .withTerminationFlag(terminationFlag);
     }
 
-    abstract AlgorithmFactory<A> algorithmFactory(ProcedureConfiguration config);
+    protected abstract AlgorithmFactory<A> algorithmFactory(ProcedureConfiguration config);
 
-    MemoryTreeWithDimensions memoryEstimation(final ProcedureConfiguration config) {
+    protected MemoryTreeWithDimensions memoryEstimation(final ProcedureConfiguration config) {
         GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
         GraphFactory graphFactory = loader.build(config.getGraphImpl());
         AlgorithmFactory<A> algorithmFactory = algorithmFactory(config);

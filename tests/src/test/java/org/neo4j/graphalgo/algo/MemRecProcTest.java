@@ -25,7 +25,7 @@ import org.junit.Test;
 import org.neo4j.graphalgo.LoadGraphProc;
 import org.neo4j.graphalgo.MemRecProc;
 import org.neo4j.graphalgo.PageRankProc;
-import org.neo4j.graphalgo.UnionFindProc;
+import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
 import org.neo4j.graphdb.DependencyResolver;

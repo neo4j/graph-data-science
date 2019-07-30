@@ -100,7 +100,7 @@ public final class LoadGraphProc extends BaseProc {
     }
 
     @Override
-    GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
+    protected GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
         final Direction direction = config.getDirection(Direction.OUTGOING);
         final String nodeWeight = config.getString("nodeWeight", null);
         final String nodeProperty = config.getString("nodeProperty", null);
