@@ -199,7 +199,8 @@ final class HugeAdjacencyListBuilder {
                 top += size;
                 return address;
             }
-            address = top += (long) (PAGE_SIZE - offset);
+            int waste = PAGE_SIZE - offset;
+            address = top += waste;
             if (next()) {
                 // TODO: store and reuse fragments
                 // branch: huge-alloc-fragmentation-recycle

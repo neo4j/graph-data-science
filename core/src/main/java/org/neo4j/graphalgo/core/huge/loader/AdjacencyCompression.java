@@ -70,6 +70,9 @@ final class AdjacencyCompression {
         for (; in < length; ++in) {
             delta = values[in] - value;
             value = values[in];
+            // only keep the relationship if we don't already have
+            // one that points to the same target node
+            // no support for #parallel-edges
             if (delta > 0L) {
                 values[out++] = delta;
             }
