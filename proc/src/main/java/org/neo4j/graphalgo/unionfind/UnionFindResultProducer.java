@@ -85,11 +85,12 @@ abstract class UnionFindResultProducer {
 
             for (int nodeId = 0; nodeId < dss.size(); nodeId++) {
                 long setId = dss.setIdOf(nodeId);
-                final long successiveId = setIdToConsecutiveId.getOrDefault(setId, -1);
-                if (successiveId == -1) {
+                long communityId = setIdToConsecutiveId.getOrDefault(setId, -1);
+                if (communityId == -1) {
                     setIdToConsecutiveId.addTo(setId, ++nextConsecutiveId);
+                    communityId = nextConsecutiveId;
                 }
-                communities.set(nodeId, nextConsecutiveId);
+                communities.set(nodeId, communityId);
             }
         }
 
