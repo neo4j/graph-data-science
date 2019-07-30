@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.unionfind;
 
 import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
@@ -70,13 +71,16 @@ abstract class UnionFindResultProducer {
 
     static final class Consecutive extends UnionFindResultProducer {
 
+        // Magic number to estimate the number of communities that need to be mapped into consecutive space
+        private static final long MAPPING_SIZE_QUOTIENT = 10L;
+
         private final HugeLongArray communities;
 
         Consecutive(DisjointSetStruct dss, AllocationTracker tracker) {
             long nextConsecutiveId = -1L;
 
             // TODO is there a better way to set the initial size, e.g. dss.setCount
-            HugeLongLongMap setIdToConsecutiveId = new HugeLongLongMap(dss.size() / 10, tracker);
+            HugeLongLongMap setIdToConsecutiveId = new HugeLongLongMap(BitUtil.ceilDiv(dss.size(), MAPPING_SIZE_QUOTIENT), tracker);
             this.communities = HugeLongArray.newArray(dss.size(), tracker);
 
             for (int nodeId = 0; nodeId < dss.size(); nodeId++) {
