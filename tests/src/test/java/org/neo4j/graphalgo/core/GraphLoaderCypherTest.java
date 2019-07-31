@@ -64,7 +64,8 @@ public class GraphLoaderCypherTest {
         GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT);
         Graph graph = graphLoader.withLabel("MATCH (n) RETURN id(n) AS id")
                 .withRelationshipType("MATCH (a)--(b) RETURN id(a) AS source, id(b) AS target")
-                .direction(Direction.BOTH)
+                .withDirection(Direction.BOTH)
+                .undirected()
                 .load(graphImpl);
 
         assertEquals(4L, graph.nodeCount());
@@ -87,7 +88,7 @@ public class GraphLoaderCypherTest {
         GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT);
         Graph graph = graphLoader.withLabel("MATCH (n) RETURN id(n) AS id")
                 .withRelationshipType("MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target")
-                .direction(Direction.OUTGOING)
+                .withDirection(Direction.OUTGOING)
                 .load(graphImpl);
 
         assertEquals(4L, graph.nodeCount());
@@ -110,7 +111,7 @@ public class GraphLoaderCypherTest {
         GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT);
         Graph graph = graphLoader.withLabel("MATCH (n) RETURN id(n) AS id")
                 .withRelationshipType("MATCH (a)<--(b) RETURN id(a) AS source, id(b) AS target")
-                .direction(Direction.INCOMING)
+                .withDirection(Direction.INCOMING)
                 .load(graphImpl);
 
         assertEquals(4L, graph.nodeCount());

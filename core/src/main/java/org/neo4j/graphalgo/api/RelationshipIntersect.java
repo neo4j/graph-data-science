@@ -27,7 +27,7 @@ import org.neo4j.graphdb.Direction;
  * Intersect adjacency lists of two nodes.
  * Only {@link org.neo4j.graphdb.Direction#OUTGOING} is used for intersection.
  * If you want to intersect on {@link org.neo4j.graphdb.Direction#BOTH}, you have to
- * load the graph with {@link org.neo4j.graphalgo.core.GraphLoader#asUndirected(boolean)}
+ * load the graph with {@link org.neo4j.graphalgo.core.GraphLoader#loadAsUndirected(boolean)}
  * set to {@code true}.
  */
 public interface RelationshipIntersect {

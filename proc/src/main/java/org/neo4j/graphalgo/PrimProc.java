@@ -130,12 +130,12 @@ public class PrimProc {
                     .withOptionalRelationshipType(relationship)
                     .withRelationshipWeightsFromProperty(weightProperty, configuration.getWeightPropertyDefaultValue(Double.MAX_VALUE))
                     .withoutNodeWeights()
-                    .asUndirected(true)
+                    .undirected()
                     .withLog(log)
                     .load(configuration.getGraphImpl(Graph.TYPE));
         }
 
-        if(graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.of(builder.build());
         }

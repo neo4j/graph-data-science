@@ -203,13 +203,13 @@ public class NodeWalker {
 
                 if (neighbourId == previousNodeId) {
                     // node is previous node
-                    probability = 1d / returnParam;
+                    probability = 1D / returnParam;
                 } else if (graph.exists(previousNodeId, neighbourId, Direction.BOTH)) {
                     // node is also adjacent to previous node --> distance to previous node is 1
-                    probability = 1d;
+                    probability = 1D;
                 } else {
                     // node is not adjacent to previous node --> distance to previous node is 2
-                    probability = 1d / inOutParam;
+                    probability = 1D / inOutParam;
                 }
                 probabilities[index] = probability;
                 probSum += probability;

@@ -75,7 +75,7 @@ public final class IntMinPriorityQueueTest extends RandomizedTest {
         int min = -1;
         double minWeight = Double.POSITIVE_INFINITY;
         for (int i = 0; i < iterations; i++) {
-            final double weight = exclusiveDouble(0d, 100d);
+            final double weight = exclusiveDouble(0D, 100D);
             if (weight < minWeight) {
                 minWeight = weight;
                 min = i;
@@ -94,7 +94,7 @@ public final class IntMinPriorityQueueTest extends RandomizedTest {
         int min = -1;
         double minWeight = Double.POSITIVE_INFINITY;
         for (int i = 1; i <= iterations; i++) {
-            final double weight = exclusiveDouble(0d, 100d);
+            final double weight = exclusiveDouble(0D, 100D);
             if (weight < minWeight) {
                 minWeight = weight;
                 min = i;
@@ -136,7 +136,7 @@ public final class IntMinPriorityQueueTest extends RandomizedTest {
         final int iterations = RandomizedTest.between(5, 50);
         double minWeight = Double.POSITIVE_INFINITY;
         for (int i = 1; i <= iterations; i++) {
-            final double weight = exclusiveDouble(50d, 100d);
+            final double weight = exclusiveDouble(50D, 100D);
             if (weight < minWeight) {
                 minWeight = weight;
             }
@@ -156,12 +156,12 @@ public final class IntMinPriorityQueueTest extends RandomizedTest {
         final IntPriorityQueue queue = IntPriorityQueue.min();
         final int iterations = RandomizedTest.between(5, 50);
         for (int i = 1; i <= iterations; i++) {
-            queue.add(i, exclusiveDouble(50d, 100d));
+            queue.add(i, exclusiveDouble(50D, 100D));
         }
 
         final int top = queue.top();
         for (int i = iterations + 1; i < iterations + 10; i++) {
-            queue.addCost(i, 1d);
+            queue.addCost(i, 1D);
             queue.update(i);
             assertEquals(top, queue.top());
         }
@@ -174,7 +174,7 @@ public final class IntMinPriorityQueueTest extends RandomizedTest {
         final int iterations = RandomizedTest.between(5, 50);
         double maxWeight = Double.NEGATIVE_INFINITY;
         for (int i = 1; i <= iterations; i++) {
-            final double weight = exclusiveDouble(50d, 100d);
+            final double weight = exclusiveDouble(50D, 100D);
             if (weight > maxWeight) {
                 maxWeight = weight;
             }

@@ -93,14 +93,14 @@ public class KShortestPathsProc {
             // use undirected traversal if direction is BOTH
             if (direction == Direction.BOTH) {
                 direction = Direction.OUTGOING; // rewrite
-                graphLoader.asUndirected(true);
+                graphLoader.undirected();
             } else {
                 graphLoader.withDirection(direction);
             }
             graph = graphLoader.load(configuration.getGraphImpl());
         }
 
-        if (graph.nodeCount() == 0 || startNode == null || endNode == null) {
+        if (graph.isEmpty() || startNode == null || endNode == null) {
             graph.release();
             return Stream.of(builder.build());
         }
@@ -159,14 +159,14 @@ public class KShortestPathsProc {
             // use undirected traversal if direction is BOTH
             if (direction == Direction.BOTH) {
                 direction = Direction.OUTGOING; // rewrite
-                graphLoader.asUndirected(true);
+                graphLoader.undirected();
             } else {
                 graphLoader.withDirection(direction);
             }
             graph = graphLoader.load(configuration.getGraphImpl());
         }
 
-        if (graph.nodeCount() == 0 || startNode == null || endNode == null) {
+        if (graph.isEmpty() || startNode == null || endNode == null) {
             graph.release();
             return Stream.empty();
         }

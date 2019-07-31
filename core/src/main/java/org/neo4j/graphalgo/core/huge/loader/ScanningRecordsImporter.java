@@ -33,7 +33,6 @@ import java.util.concurrent.ExecutorService;
 import static org.neo4j.graphalgo.core.huge.loader.AbstractStorePageCacheScanner.DEFAULT_PREFETCH_SIZE;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
 
-
 abstract class ScanningRecordsImporter<Record extends AbstractBaseRecord, T> {
 
     private static final BigInteger A_BILLION = BigInteger.valueOf(1_000_000_000L);
@@ -73,7 +72,8 @@ abstract class ScanningRecordsImporter<Record extends AbstractBaseRecord, T> {
         ImportResult importResult = pool.run(threadPool);
 
         long requiredBytes = scanner.storeSize();
-        long nodesImported = importResult.recordsImported;
+        long recordsImported = importResult.recordsImported;
+        long propertiesImported = importResult.propertiesImported;
         BigInteger bigNanos = BigInteger.valueOf(importResult.tookNanos);
         double tookInSeconds = new BigDecimal(bigNanos)
                 .divide(new BigDecimal(A_BILLION), 9, RoundingMode.CEILING)
@@ -81,16 +81,17 @@ abstract class ScanningRecordsImporter<Record extends AbstractBaseRecord, T> {
         long bytesPerSecond = A_BILLION.multiply(BigInteger.valueOf(requiredBytes)).divide(bigNanos).longValueExact();
 
         log.info(
-                "%s Store Scan: Imported %,d records from %s (%,d bytes); took %.3f s, %,.2f %1$ss/s, %s/s (%,d bytes/s) (per thread: %,.2f %1$ss/s, %s/s (%,d bytes/s))",
+                "%s Store Scan: Imported %,d records and %,d properties from %s (%,d bytes); took %.3f s, %,.2f %1$ss/s, %s/s (%,d bytes/s) (per thread: %,.2f %1$ss/s, %s/s (%,d bytes/s))",
                 label,
-                nodesImported,
+                recordsImported,
+                propertiesImported,
                 humanReadable(requiredBytes),
                 requiredBytes,
                 tookInSeconds,
-                (double) nodesImported / tookInSeconds,
+                (double) recordsImported / tookInSeconds,
                 humanReadable(bytesPerSecond),
                 bytesPerSecond,
-                (double) nodesImported / tookInSeconds / numberOfThreads,
+                (double) recordsImported / tookInSeconds / numberOfThreads,
                 humanReadable(bytesPerSecond / numberOfThreads),
                 bytesPerSecond / numberOfThreads
         );

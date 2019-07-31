@@ -76,7 +76,7 @@ public class ClosenessCentralityIntegrationTest_546 {
         final Graph graph = new GraphLoader(db, Pools.DEFAULT)
                 .withLabel("Person")
                 .withRelationshipType("KNOWS")
-                .asUndirected(true)
+                .undirected()
                 .load(HugeGraphFactory.class);
 
         System.out.println("547:");
@@ -111,7 +111,7 @@ public class ClosenessCentralityIntegrationTest_546 {
         final Graph graph = new GraphLoader(db, Pools.DEFAULT)
                 .withLabel("Person")
                 .withRelationshipType("KNOWS")
-                .asUndirected(true)
+                .undirected()
                 .load(HugeGraphFactory.class);
 
         System.out.println("547 Dangalchev:");
@@ -143,7 +143,7 @@ public class ClosenessCentralityIntegrationTest_546 {
         final Graph graph = new GraphLoader(db, Pools.DEFAULT)
                 .withLabel("User")
                 .withRelationshipType("FRIEND")
-                .asUndirected(true)
+                .undirected()
                 .load(HugeGraphFactory.class);
 
         System.out.println("546:");
@@ -175,7 +175,7 @@ public class ClosenessCentralityIntegrationTest_546 {
         final Graph graph = new GraphLoader(db, Pools.DEFAULT)
                 .withLabel("User")
                 .withRelationshipType("FRIEND")
-                .asUndirected(true)
+                .undirected()
                 .load(HugeGraphFactory.class);
 
         System.out.println("546 Dangalchev:");

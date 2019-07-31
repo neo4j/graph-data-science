@@ -36,7 +36,7 @@ public class MergedRelationshipsTest {
 
     @Test
     public void byDefaultDontRemoveDuplicates() {
-        AdjacencyMatrix matrix = new AdjacencyMatrix(2, false, 0d, false, AllocationTracker.EMPTY);
+        AdjacencyMatrix matrix = new AdjacencyMatrix(2, false, 0D, false, AllocationTracker.EMPTY);
         matrix.addOutgoing(0, 1);
 
         Relationships relationships = new Relationships(0, 5, matrix);
@@ -57,7 +57,7 @@ public class MergedRelationshipsTest {
 
     @Test
     public void skipRemovesDuplicates() {
-        AdjacencyMatrix matrix = new AdjacencyMatrix(2, false, 0d, false, AllocationTracker.EMPTY);
+        AdjacencyMatrix matrix = new AdjacencyMatrix(2, false, 0D, false, AllocationTracker.EMPTY);
         matrix.addOutgoing(0, 1);
 
         Relationships relationships = new Relationships(0, 5, matrix);
@@ -87,11 +87,11 @@ public class MergedRelationshipsTest {
                 DuplicateRelationshipsStrategy.SUM,
                 relationshipCount);
 
-        AdjacencyMatrix matrix1 = new AdjacencyMatrix(1, true, 0d, false, AllocationTracker.EMPTY);
+        AdjacencyMatrix matrix1 = new AdjacencyMatrix(1, true, 0D, false, AllocationTracker.EMPTY);
         matrix1.addOutgoingWithWeight(0, 1, 3.0);
         Relationships relationships1 = new Relationships(0, 5, matrix1);
 
-        AdjacencyMatrix matrix2 = new AdjacencyMatrix(1, true, 0d, false, AllocationTracker.EMPTY);
+        AdjacencyMatrix matrix2 = new AdjacencyMatrix(1, true, 0D, false, AllocationTracker.EMPTY);
         matrix1.addOutgoingWithWeight(0, 1, 7.0);
         Relationships relationships2 = new Relationships(0, 5, matrix2);
 
@@ -113,11 +113,11 @@ public class MergedRelationshipsTest {
                 DuplicateRelationshipsStrategy.MIN,
                 relationshipCount);
 
-        AdjacencyMatrix matrix1 = new AdjacencyMatrix(1, true, 0d, false, AllocationTracker.EMPTY);
+        AdjacencyMatrix matrix1 = new AdjacencyMatrix(1, true, 0D, false, AllocationTracker.EMPTY);
         matrix1.addOutgoingWithWeight(0, 1, 3.0);
         Relationships relationships1 = new Relationships(0, 5, matrix1);
 
-        AdjacencyMatrix matrix2 = new AdjacencyMatrix(1, true, 0d, false, AllocationTracker.EMPTY);
+        AdjacencyMatrix matrix2 = new AdjacencyMatrix(1, true, 0D, false, AllocationTracker.EMPTY);
         matrix1.addOutgoingWithWeight(0, 1, 7.0);
         Relationships relationships2 = new Relationships(0, 5, matrix2);
 
@@ -139,11 +139,11 @@ public class MergedRelationshipsTest {
                 DuplicateRelationshipsStrategy.MAX,
                 relationshipCount);
 
-        AdjacencyMatrix matrix1 = new AdjacencyMatrix(1, true, 0d, false, AllocationTracker.EMPTY);
+        AdjacencyMatrix matrix1 = new AdjacencyMatrix(1, true, 0D, false, AllocationTracker.EMPTY);
         matrix1.addOutgoingWithWeight(0, 1, 3.0);
         Relationships relationships1 = new Relationships(0, 5, matrix1);
 
-        AdjacencyMatrix matrix2 = new AdjacencyMatrix(1, true, 0d, false, AllocationTracker.EMPTY);
+        AdjacencyMatrix matrix2 = new AdjacencyMatrix(1, true, 0D, false, AllocationTracker.EMPTY);
         matrix1.addOutgoingWithWeight(0, 1, 7.0);
         Relationships relationships2 = new Relationships(0, 5, matrix2);
 

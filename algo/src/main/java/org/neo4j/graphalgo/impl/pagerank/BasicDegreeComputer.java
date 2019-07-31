@@ -20,21 +20,25 @@
 package org.neo4j.graphalgo.impl.pagerank;
 
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.degree.AverageDegreeCentrality;
 
 import java.util.concurrent.ExecutorService;
 
 public class BasicDegreeComputer implements DegreeComputer {
-    private Graph graph;
+    private final Graph graph;
 
-    public BasicDegreeComputer(Graph graph) {
+    BasicDegreeComputer(Graph graph) {
         this.graph = graph;
     }
 
     @Override
-    public DegreeCache degree(ExecutorService executor, int concurrency) {
+    public DegreeCache degree(
+            ExecutorService executor,
+            int concurrency,
+            AllocationTracker tracker) {
         AverageDegreeCentrality degreeCentrality = new AverageDegreeCentrality(graph, executor, concurrency);
         degreeCentrality.compute();
-        return new DegreeCache(new double[0], new double[0][], degreeCentrality.average());
+        return DegreeCache.EMPTY.withAverage(degreeCentrality.average());
     }
 }

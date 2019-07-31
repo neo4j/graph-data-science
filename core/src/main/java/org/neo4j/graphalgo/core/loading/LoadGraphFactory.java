@@ -22,13 +22,17 @@ package org.neo4j.graphalgo.core.loading;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class LoadGraphFactory extends GraphFactory {
 
-    private final static ConcurrentHashMap<String, Graph> graphs = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, Graph> graphs = new ConcurrentHashMap<>();
 
     public LoadGraphFactory(
             final GraphDatabaseAPI api,
@@ -37,8 +41,25 @@ public final class LoadGraphFactory extends GraphFactory {
     }
 
     @Override
-    public Graph importGraph() {
+    protected Graph importGraph() {
         return get(setup.name);
+    }
+
+    @Override
+    public Graph build() {
+        return importGraph();
+    }
+    
+    public final MemoryEstimation memoryEstimation() {
+        Graph graph = get(setup.name);
+        dimensions.nodeCount(graph.nodeCount());
+        dimensions.maxRelCount(graph.relationshipCount());
+
+        if (HugeGraph.TYPE.equals(graph.getType())) {
+            return HugeGraphFactory.getMemoryEstimation(setup, dimensions);
+        } else {
+            return HeavyGraphFactory.getMemoryEstimation(setup, dimensions);
+        }
     }
 
     public static void set(String name, Graph graph) {

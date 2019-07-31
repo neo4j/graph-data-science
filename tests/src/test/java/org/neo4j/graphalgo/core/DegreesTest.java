@@ -106,13 +106,15 @@ public class DegreesTest {
 
     private void setup(String cypher, Direction direction) {
         DB.execute(cypher);
-        graph = new GraphLoader(DB)
+        GraphLoader graphLoader = new GraphLoader(DB)
                 .withAnyRelationshipType()
                 .withAnyLabel()
                 .withoutNodeProperties()
-                .withDirection(direction == null ? Direction.BOTH : direction)
-                .asUndirected(direction == null)
-                .withRelationshipWeightsFromProperty("w", 0.0)
+                .withDirection(direction == null ? Direction.BOTH : direction);
+        if (direction == null) {
+            graphLoader.undirected();
+        }
+        graph = graphLoader
                 .load(graphImpl);
     }
 

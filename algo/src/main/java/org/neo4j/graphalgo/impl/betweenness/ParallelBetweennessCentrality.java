@@ -146,13 +146,11 @@ public class ParallelBetweennessCentrality extends Algorithm<ParallelBetweenness
 
     /**
      * release internal data structures
-     * @return
      */
     @Override
-    public ParallelBetweennessCentrality release() {
+    public void release() {
         graph = null;
         centrality = null;
-        return null;
     }
 
     /**

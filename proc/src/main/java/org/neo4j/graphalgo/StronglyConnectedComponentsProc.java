@@ -117,7 +117,7 @@ public class StronglyConnectedComponentsProc {
                 .load(configuration.getGraphImpl());
         loadTimer.stop();
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             return Stream.of(SCCResult.EMPTY);
         }
 
@@ -131,7 +131,9 @@ public class StronglyConnectedComponentsProc {
         final int[] connectedComponents = tarjan.getConnectedComponents();
         if (configuration.isWriteFlag()) {
             builder.withWrite(true);
-            String partitionProperty = configuration.get(CONFIG_WRITE_PROPERTY, CONFIG_OLD_WRITE_PROPERTY, CONFIG_CLUSTER);
+            String partitionProperty = configuration.get(CONFIG_WRITE_PROPERTY,
+                    CONFIG_OLD_WRITE_PROPERTY,
+                    CONFIG_CLUSTER);
             builder.withPartitionProperty(partitionProperty);
 
             builder.timeWrite(() -> {
@@ -175,7 +177,7 @@ public class StronglyConnectedComponentsProc {
                 .load(configuration.getGraphImpl());
         loadTimer.stop();
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             return Stream.of(SCCResult.EMPTY);
         }
 
@@ -188,7 +190,9 @@ public class StronglyConnectedComponentsProc {
 
         if (configuration.isWriteFlag()) {
             builder.withWrite(true);
-            String partitionProperty = configuration.get(CONFIG_WRITE_PROPERTY, CONFIG_OLD_WRITE_PROPERTY, CONFIG_CLUSTER);
+            String partitionProperty = configuration.get(CONFIG_WRITE_PROPERTY,
+                    CONFIG_OLD_WRITE_PROPERTY,
+                    CONFIG_CLUSTER);
             builder.withPartitionProperty(partitionProperty);
 
             builder.timeWrite(() -> Exporter
@@ -224,7 +228,7 @@ public class StronglyConnectedComponentsProc {
                 .withDirection(Direction.OUTGOING)
                 .load(configuration.getGraphImpl());
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             return Stream.empty();
         }
 
@@ -256,7 +260,7 @@ public class StronglyConnectedComponentsProc {
                 .load(configuration.getGraphImpl());
         loadTimer.stop();
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             return Stream.of(SCCResult.EMPTY);
         }
 
@@ -270,7 +274,9 @@ public class StronglyConnectedComponentsProc {
 
         if (configuration.isWriteFlag()) {
             builder.withWrite(true);
-            String partitionProperty = configuration.get(CONFIG_WRITE_PROPERTY, CONFIG_OLD_WRITE_PROPERTY, CONFIG_CLUSTER);
+            String partitionProperty = configuration.get(CONFIG_WRITE_PROPERTY,
+                    CONFIG_OLD_WRITE_PROPERTY,
+                    CONFIG_CLUSTER);
             builder.withPartitionProperty(partitionProperty).withWriteProperty(partitionProperty);
 
             builder.timeWrite(() -> Exporter.of(api, graph)
@@ -307,7 +313,7 @@ public class StronglyConnectedComponentsProc {
                 .withDirection(Direction.OUTGOING)
                 .load(configuration.getGraphImpl());
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }
@@ -346,7 +352,7 @@ public class StronglyConnectedComponentsProc {
                 .load(configuration.getGraphImpl());
         loadTimer.stop();
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.of(SCCResult.EMPTY);
         }
@@ -367,7 +373,9 @@ public class StronglyConnectedComponentsProc {
             multistep.release();
             builder.timeWrite(() -> {
                 builder.withWrite(true);
-                String partitionProperty = configuration.get(CONFIG_WRITE_PROPERTY, CONFIG_OLD_WRITE_PROPERTY, CONFIG_CLUSTER);
+                String partitionProperty = configuration.get(CONFIG_WRITE_PROPERTY,
+                        CONFIG_OLD_WRITE_PROPERTY,
+                        CONFIG_CLUSTER);
                 builder.withPartitionProperty(partitionProperty);
 
                 Exporter
@@ -400,7 +408,7 @@ public class StronglyConnectedComponentsProc {
                 .init(log, label, relationship, configuration)
                 .withoutRelationshipWeights()
                 .load(configuration.getGraphImpl());
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }
@@ -429,7 +437,7 @@ public class StronglyConnectedComponentsProc {
                 .init(log, label, relationship, configuration)
                 .withoutRelationshipWeights()
                 .load(configuration.getGraphImpl());
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }

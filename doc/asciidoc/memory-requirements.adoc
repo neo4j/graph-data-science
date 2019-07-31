@@ -188,6 +188,89 @@ RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
 | 400 | 550 | 563 KiB  | 577112    | 577112
 |===
 
+=== Cypher graph projection
+
+This graph projection supports graphs up to 2 billion nodes and 2 billion relationships, specfied by Cypher queries that return node ids.
+
+[NOTE]
+====
+`algo.memrec` executes the provided Cypher queries to compute the number of nodes and relationships in the projected graph.
+The results from running the procedure for Cypher graph projections will therefore not be immediate, as they will be with other graph projections.
+====
+
+.The following computes the amount of memory required by the in memory graph for all nodes and relationships:
+[source,cypher]
+----
+CALL algo.memrec(
+  "MATCH (n) RETURN id(n) AS id",
+  "MATCH (a)-->(b) RETURN id(a) AS source, id(b) as target",
+  "graph.load",
+  {graph: "cypher"}
+)
+YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax
+RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
+| 400 | 3551 | 40 KiB  | 41456    | 41456
+|===
+
+.The following computes the amount of memory required by the heavy in memory graph for node label `Character` and relationship type `INTERACTS_SEASON1`:
+[source,cypher]
+----
+CALL algo.memrec(
+  "MATCH (n:Character) RETURN id(n) AS id",
+  "MATCH (a:Character)-[:INTERACTS_SEASON1]->(b) RETURN id(a) AS source, id(b) as target",
+  "graph.load",
+  {graph: "cypher"}
+)
+YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax
+RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
+| 400 | 3551 | 40 KiB  | 41456    | 41456
+|===
+
+=== Named Graph
+
+
+.The following creates a heavy in memory graph named `my-graph` for the node label `Character` and relationship type `INTERACTS_SEASON3`:
+[source,cypher]
+----
+CALL algo.graph.load("my-graph6", "Character", "INTERACTS_SEASON3")
+YIELD name, graph, direction, nodes, relationships
+RETURN name, graph, direction, nodes, relationships
+----
+
+.Results
+[opts="header"]
+|===
+| Name | Graph | Direction | Nodes | Relationships
+| my-graph | heavy | OUTGOING | 400 | 504
+|===
+
+.The following computes the amount of memory being used by the graph named `my-graph`:
+[source,cypher]
+----
+CALL algo.memrec(null, null, "graph.load", {graph: "my-graph"})
+YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax
+RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
+| 400 |	504 |	27 KiB |	28656 |	28656
+|===
+
 [[memory-requirements-sample-graphs]]
 == Memory Requirements on Sample Graphs
 

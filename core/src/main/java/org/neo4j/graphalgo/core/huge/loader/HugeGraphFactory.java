@@ -48,6 +48,12 @@ public final class HugeGraphFactory extends GraphFactory {
 
     @Override
     public MemoryEstimation memoryEstimation() {
+        return getMemoryEstimation(setup, dimensions);
+    }
+
+    public static MemoryEstimation getMemoryEstimation(
+            final GraphSetup setup,
+            final GraphDimensions dimensions) {
         MemoryEstimations.Builder builder = MemoryEstimations
                 .builder(HugeGraph.class)
                 .add("nodeIdMap", IdMap.memoryEstimation());
@@ -75,12 +81,12 @@ public final class HugeGraphFactory extends GraphFactory {
         // Adjacency lists and Adjacency offsets
         MemoryEstimation adjacencyListSize = HugeAdjacencyList.memoryEstimation(setup.loadAsUndirected);
         MemoryEstimation adjacencyOffsetsSetup = HugeAdjacencyOffsets.memoryEstimation();
-        if (this.setup.loadOutgoing || this.setup.loadAsUndirected) {
+        if (setup.loadOutgoing || setup.loadAsUndirected) {
             builder.add("outgoing", adjacencyListSize);
             builder.add("outgoing offsets", adjacencyOffsetsSetup);
 
         }
-        if (this.setup.loadIncoming && !this.setup.loadAsUndirected) {
+        if (setup.loadIncoming && !setup.loadAsUndirected) {
             builder.add("incoming", adjacencyListSize);
             builder.add("incoming offsets", adjacencyOffsetsSetup);
         }

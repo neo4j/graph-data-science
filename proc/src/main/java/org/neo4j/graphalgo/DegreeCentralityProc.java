@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo;
 
-import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -85,7 +84,7 @@ public final class DegreeCentralityProc {
                 weightPropertyKey,
                 direction);
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.of(statsBuilder.build());
         }
@@ -147,7 +146,7 @@ public final class DegreeCentralityProc {
                 weightPropertyKey,
                 direction);
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }
@@ -184,9 +183,12 @@ public final class DegreeCentralityProc {
                 .withAllocationTracker(tracker)
                 .withOptionalRelationshipWeightsFromProperty(
                         weightPropertyKey,
-                        configuration.getWeightPropertyDefaultValue(0.0));
+                        configuration.getWeightPropertyDefaultValue(0.0))
+                .withDirection(direction);
 
-        graphLoader.direction(direction);
+        if (direction == Direction.BOTH) {
+            graphLoader.undirected();
+        }
 
         try (ProgressTimer timer = statsBuilder.timeLoad()) {
             Graph graph = graphLoader.load(graphFactory);

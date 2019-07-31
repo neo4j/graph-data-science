@@ -70,7 +70,7 @@ final class EigenvectorCentralityComputeStep extends BaseComputeStep implements 
 
     @Override
     public boolean accept(long sourceNodeId, long targetNodeId) {
-        if (srcRankDelta != 0f) {
+        if (srcRankDelta != 0F) {
             int idx = binaryLookup(targetNodeId, starts);
             nextScores[idx][(int) (targetNodeId - starts[idx])] += srcRankDelta;
         }
@@ -91,7 +91,7 @@ final class EigenvectorCentralityComputeStep extends BaseComputeStep implements 
             double delta = 0.0;
             for (float[] scores : prevScores) {
                 delta += (double) scores[i];
-                scores[i] = 0f;
+                scores[i] = 0F;
             }
             pageRank[i] += delta;
             deltas[i] = delta;

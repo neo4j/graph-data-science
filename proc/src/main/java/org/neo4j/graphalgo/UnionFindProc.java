@@ -28,33 +28,28 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.PagedDisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
-import org.neo4j.graphalgo.impl.unionfind.GraphUnionFindAlgo;
-import org.neo4j.graphalgo.impl.unionfind.UnionFindAlgorithmType;
+import org.neo4j.graphalgo.impl.unionfind.UnionFind;
 import org.neo4j.graphalgo.impl.unionfind.UnionFindFactory;
+import org.neo4j.graphalgo.impl.unionfind.UnionFindType;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.impl.unionfind.UnionFindFactory.CONFIG_PARALLEL_ALGO;
+import static org.neo4j.graphalgo.impl.unionfind.UnionFindFactory.CONFIG_ALGO_TYPE;
+import static org.neo4j.graphalgo.impl.unionfind.UnionFindFactory.CONFIG_SEED_PROPERTY;
+import static org.neo4j.graphalgo.impl.unionfind.UnionFindFactory.SEED_TYPE;
 
-/**
- * @author mknblch
- */
-public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc<T> {
-
-    private static final String CONFIG_THRESHOLD = "threshold";
+public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
 
     private static final String CONFIG_CLUSTER_PROPERTY = "writeProperty";
     private static final String CONFIG_OLD_CLUSTER_PROPERTY = "partitionProperty";
@@ -62,31 +57,31 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
 
     @Procedure(value = "algo.unionFind", mode = Mode.WRITE)
     @Description("CALL algo.unionFind(label:String, relationship:String, " +
-            "{weightProperty:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition'}) " +
-            "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
+                 "{weightProperty: 'weight', threshold: 0.42, defaultValue: 1.0, write: true, writeProperty: 'community', seedProperty: 'seedCommunity'}) " +
+                 "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
     public Stream<UnionFindResult> unionFind(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        return run(label, relationship, config, UnionFindAlgorithmType.QUEUE);
+        return run(label, relationship, config, UnionFindType.PARALLEL);
     }
 
     @Procedure(value = "algo.unionFind.stream")
     @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
-            "{weightProperty:'propertyName', threshold:0.42, defaultValue:1.0) " +
-            "YIELD nodeId, setId - yields a setId to each node id")
-    public Stream<PagedDisjointSetStruct.Result> unionFindStream(
+                 "{weightProperty: 'propertyName', threshold: 0.42, defaultValue: 1.0, seedProperty: 'seedCommunity'}} " +
+                 "YIELD nodeId, setId - yields a setId to each node id")
+    public Stream<DisjointSetStruct.Result> unionFindStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        return stream(label, relationship, config, UnionFindAlgorithmType.QUEUE);
+        return stream(label, relationship, config, UnionFindType.PARALLEL);
     }
 
     @Procedure(value = "algo.unionFind.memrec", mode = Mode.READ)
     @Description("CALL algo.unionFind.memrec(label:String, relationship:String, {...properties}) " +
-            "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for UnionFind")
+                 "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for UnionFind")
     public Stream<MemRecResult> unionFindMemRec(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
@@ -97,139 +92,181 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
         return Stream.of(new MemRecResult(memoryEstimation));
     }
 
-    @Procedure(value = "algo.unionFind.queue", mode = Mode.WRITE)
+    @Deprecated
+    @Procedure(value = "algo.unionFind.queue", mode = Mode.WRITE, deprecatedBy = "algo.unionFind")
     @Description("CALL algo.unionFind(label:String, relationship:String, " +
-            "{property:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition',concurrency:4}) " +
-            "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
+                 "{property: 'weight', threshold: 0.42, defaultValue: 1.0, write: true, writeProperty: 'community', seedProperty: 'seedCommunity', concurrency: 4}) " +
+                 "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
     public Stream<UnionFindResult> unionFindQueue(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        return run(label, relationship, config, UnionFindAlgorithmType.QUEUE);
+        return run(label, relationship, config, UnionFindType.PARALLEL);
     }
 
-    @Procedure(value = "algo.unionFind.queue.stream")
+    @Deprecated
+    @Procedure(value = "algo.unionFind.queue.stream", deprecatedBy = "algo.unionFind.stream")
     @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
-            "{property:'propertyName', threshold:0.42, defaultValue:1.0, concurrency:4}) " +
-            "YIELD nodeId, setId - yields a setId to each node id")
-    public Stream<PagedDisjointSetStruct.Result> unionFindQueueStream(
+                 "{property: 'propertyName', threshold: 0.42, defaultValue: 1.0, seedProperty: 'seedCommunity', concurrency: 4}) " +
+                 "YIELD nodeId, setId - yields a setId to each node id")
+    public Stream<DisjointSetStruct.Result> unionFindQueueStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        return stream(label, relationship, config, UnionFindAlgorithmType.QUEUE);
+        return stream(label, relationship, config, UnionFindType.PARALLEL);
     }
 
-    @Procedure(value = "algo.unionFind.forkJoinMerge", mode = Mode.WRITE)
+    @Deprecated
+    @Procedure(value = "algo.unionFind.forkJoinMerge", mode = Mode.WRITE, deprecatedBy = "algo.unionFind")
     @Description("CALL algo.unionFind(label:String, relationship:String, " +
-            "{property:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition', concurrency:4}) " +
-            "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
+                 "{property: 'weight', threshold: 0.42, defaultValue: 1.0, write: true, writeProperty: 'community', seedProperty: 'seedCommunity', concurrency: 4}) " +
+                 "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
     public Stream<UnionFindResult> unionFindForkJoinMerge(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        return run(label, relationship, config, UnionFindAlgorithmType.FJ_MERGE);
+        return run(label, relationship, config, UnionFindType.FJ_MERGE);
     }
 
-    @Procedure(value = "algo.unionFind.forkJoinMerge.stream")
+    @Deprecated
+    @Procedure(value = "algo.unionFind.forkJoinMerge.stream", deprecatedBy = "algo.unionFind.stream")
     @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
-            "{property:'propertyName', threshold:0.42, defaultValue:1.0, concurrency:4}) " +
-            "YIELD nodeId, setId - yields a setId to each node id")
-    public Stream<PagedDisjointSetStruct.Result> unionFindForkJoinMergeStream(
+                 "{property: 'propertyName', threshold: 0.42, defaultValue: 1.0, seedProperty: 'seedCommunity', concurrency: 4}) " +
+                 "YIELD nodeId, setId - yields a setId to each node id")
+    public Stream<DisjointSetStruct.Result> unionFindForkJoinMergeStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        return stream(label, relationship, config, UnionFindAlgorithmType.FJ_MERGE);
+        return stream(label, relationship, config, UnionFindType.FJ_MERGE);
     }
 
-    @Procedure(value = "algo.unionFind.forkJoin", mode = Mode.WRITE)
+    @Deprecated
+    @Procedure(value = "algo.unionFind.forkJoin", mode = Mode.WRITE, deprecatedBy = "algo.unionFind")
     @Description("CALL algo.unionFind(label:String, relationship:String, " +
-            "{property:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition',concurrency:4}) " +
-            "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
+                 "{property: 'weight', threshold: 0.42, defaultValue: 1.0, write: true, writeProperty: 'community', seedProperty: 'seedCommunity', concurrency: 4}) " +
+                 "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
     public Stream<UnionFindResult> unionFindForkJoin(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        return run(label, relationship, config, UnionFindAlgorithmType.FORK_JOIN);
+        return run(label, relationship, config, UnionFindType.FORK_JOIN);
     }
 
-    @Procedure(value = "algo.unionFind.forkJoin.stream")
+    @Deprecated
+    @Procedure(value = "algo.unionFind.forkJoin.stream", deprecatedBy = "algo.unionFind.stream")
     @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
-            "{property:'propertyName', threshold:0.42, defaultValue:1.0,concurrency:4}) " +
-            "YIELD nodeId, setId - yields a setId to each node id")
-    public Stream<PagedDisjointSetStruct.Result> unionFindForJoinStream(
+                 "{property: 'propertyName', threshold: 0.42, defaultValue: 1.0, seedProperty: 'seedCommunity', concurrency: 4}) " +
+                 "YIELD nodeId, setId - yields a setId to each node id")
+    public Stream<DisjointSetStruct.Result> unionFindForJoinStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        return stream(label, relationship, config, UnionFindAlgorithmType.FORK_JOIN);
+        return stream(label, relationship, config, UnionFindType.FORK_JOIN);
     }
 
-    public Stream<PagedDisjointSetStruct.Result> stream(
+    @Override
+    GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
+
+        final String seedProperty = config.getString(CONFIG_SEED_PROPERTY, null);
+
+        if (seedProperty != null) {
+            loader.withOptionalNodeProperties(createPropertyMappings(seedProperty));
+        }
+
+        return loader
+                .withOptionalRelationshipWeightsFromProperty(
+                        config.getWeightProperty(),
+                        config.getWeightPropertyDefaultValue(1.0))
+                .withDirection(Direction.OUTGOING);
+    }
+
+    @Override
+    UnionFindFactory<T> algorithmFactory(final ProcedureConfiguration config) {
+        boolean incremental = config.getString(CONFIG_SEED_PROPERTY).isPresent();
+        UnionFindType defaultAlgoType = UnionFindType.PARALLEL;
+        UnionFindType algoType = config.getChecked(CONFIG_ALGO_TYPE, defaultAlgoType, UnionFindType.class);
+        return new UnionFindFactory<>(algoType, incremental);
+    }
+
+    private Stream<DisjointSetStruct.Result> stream(
             String label,
             String relationship,
             Map<String, Object> config,
-            UnionFindAlgorithmType algoImpl) {
+            UnionFindType algoType) {
 
-        final Builder builder = new Builder();
+        ProcedureSetup setup = setup(label, relationship, config, algoType);
 
-        config.put(CONFIG_PARALLEL_ALGO, algoImpl.name());
-
-        AllocationTracker tracker = AllocationTracker.create();
-        ProcedureConfiguration configuration = newConfig(label, relationship, config);
-        Graph graph = this.loadGraph(configuration, tracker, builder);
-        if (graph.nodeCount() == 0) {
-            graph.release();
+        if (setup.graph.isEmpty()) {
+            setup.graph.release();
             return Stream.empty();
         }
 
-        PagedDisjointSetStruct communities = compute(builder, tracker, configuration, graph);
-        graph.release();
-        return communities.resultStream(graph);
+        DisjointSetStruct communities = compute(setup);
+
+        setup.graph.release();
+        return communities.resultStream(setup.graph);
     }
 
     private Stream<UnionFindResult> run(
             String label,
             String relationship,
             Map<String, Object> config,
-            UnionFindAlgorithmType algoImpl) {
+            UnionFindType algoType) {
 
-        final Builder builder = new Builder();
+        ProcedureSetup setup = setup(label, relationship, config, algoType);
 
-        config.put(CONFIG_PARALLEL_ALGO, algoImpl.name());
-
-        AllocationTracker tracker = AllocationTracker.create();
-        ProcedureConfiguration configuration = newConfig(label, relationship, config);
-        Graph graph = this.loadGraph(configuration, tracker, builder);
-        if (graph.nodeCount() == 0) {
-            graph.release();
+        if (setup.graph.isEmpty()) {
+            setup.graph.release();
             return Stream.of(UnionFindResult.EMPTY);
         }
 
-        PagedDisjointSetStruct communities = compute(builder, tracker, configuration, graph);
+        DisjointSetStruct communities = compute(setup);
 
-        if (configuration.isWriteFlag()) {
-            String writeProperty = configuration.get(
+        if (setup.procedureConfig.isWriteFlag()) {
+            String writeProperty = setup.procedureConfig.get(
                     CONFIG_CLUSTER_PROPERTY,
                     CONFIG_OLD_CLUSTER_PROPERTY,
                     DEFAULT_CLUSTER_PROPERTY);
-            builder.withWrite(true);
-            builder.withPartitionProperty(writeProperty).withWriteProperty(writeProperty);
+            setup.builder.withWrite(true);
+            setup.builder.withPartitionProperty(writeProperty).withWriteProperty(writeProperty);
 
-            write(builder::timeWrite, graph, communities, configuration, writeProperty);
+            write(setup.builder::timeWrite, setup.graph, communities, setup.procedureConfig, writeProperty);
         }
 
-        return Stream.of(builder.build(tracker, graph.nodeCount(), communities::find));
+        return Stream.of(setup.builder.build(setup.tracker, setup.graph.nodeCount(), communities::setIdOf));
+    }
+
+    private ProcedureSetup setup(
+            String label,
+            String relationship,
+            Map<String, Object> config,
+            UnionFindType algoType) {
+        final Builder builder = new Builder();
+
+        config.put(CONFIG_ALGO_TYPE, algoType);
+        ProcedureConfiguration configuration = newConfig(label, relationship, config);
+
+        AllocationTracker tracker = AllocationTracker.create();
+        Graph graph = loadGraph(configuration, tracker, builder);
+        return new ProcedureSetup(builder, graph, tracker, configuration);
+    }
+
+    private PropertyMapping[] createPropertyMappings(String seedProperty) {
+        return new PropertyMapping[]{
+                PropertyMapping.of(SEED_TYPE, seedProperty, -1),
+        };
     }
 
     private void write(
             Supplier<ProgressTimer> timer,
             Graph graph,
-            PagedDisjointSetStruct struct,
+            DisjointSetStruct struct,
             ProcedureConfiguration configuration, String writeProperty) {
         try (ProgressTimer ignored = timer.get()) {
             write(graph, struct, configuration, writeProperty);
@@ -238,7 +275,7 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
 
     private void write(
             Graph graph,
-            PagedDisjointSetStruct struct,
+            DisjointSetStruct struct,
             ProcedureConfiguration configuration, String writeProperty) {
         log.debug("Writing results");
         Exporter exporter = Exporter.of(api, graph)
@@ -251,62 +288,40 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
         exporter.write(
                 writeProperty,
                 struct,
-                PagedDisjointSetStruct.Translator.INSTANCE);
+                DisjointSetStruct.Translator.INSTANCE);
     }
 
-    private PagedDisjointSetStruct compute(
-            final Builder builder,
-            final AllocationTracker tracker,
-            final ProcedureConfiguration configuration, final Graph graph) {
-        T algo = newAlgorithm(graph, configuration, tracker);
-        final PagedDisjointSetStruct algoResult = runWithExceptionLogging(
-                "Union failed",
-                () -> builder.timeEval(() -> Double.isFinite(algo.threshold())
-                        ? algo.compute(algo.threshold())
-                        : algo.compute()));
+    private DisjointSetStruct compute(final ProcedureSetup procedureSetup) {
 
-        log.info("UnionFind: overall memory usage: %s", tracker.getUsageString());
+        T algo = newAlgorithm(procedureSetup.graph, procedureSetup.procedureConfig, procedureSetup.tracker);
+        DisjointSetStruct algoResult = runWithExceptionLogging(
+                "UnionFind failed",
+                () -> procedureSetup.builder.timeEval((Supplier<DisjointSetStruct>) algo::compute));
+
+        log.info("UnionFind: overall memory usage: %s", procedureSetup.tracker.getUsageString());
 
         algo.release();
-        graph.release();
+        procedureSetup.graph.release();
 
         return algoResult;
     }
 
-    @Override
-    GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
-        return loader
-                .withOptionalRelationshipWeightsFromProperty(
-                        config.getWeightProperty(),
-                        config.getWeightPropertyDefaultValue(1.0))
-                .withDirection(Direction.OUTGOING);
-    }
+    public static class ProcedureSetup {
+        final Builder builder;
+        final Graph graph;
+        final AllocationTracker tracker;
+        final ProcedureConfiguration procedureConfig;
 
-    @Override
-    UnionFindFactory<T> algorithmFactory(final ProcedureConfiguration config) {
-        double threshold = config.get(CONFIG_THRESHOLD, Double.NaN);
-        String algoName = config.getString(CONFIG_PARALLEL_ALGO, UnionFindAlgorithmType.QUEUE.name());
-
-        UnionFindAlgorithmType algorithmType = null;
-
-        if (config.isSingleThreaded()) {
-            algorithmType = UnionFindAlgorithmType.SEQ;
-        } else {
-            for (final UnionFindAlgorithmType algoType : UnionFindAlgorithmType.values()) {
-                if (algoType.name().equalsIgnoreCase(algoName)) {
-                    algorithmType = algoType;
-                }
-            }
-            if (algorithmType == null) {
-                String errorMsg = String.format("Parallel configuration %s is invalid. Valid names are %s", algoName,
-                        Arrays.stream(UnionFindAlgorithmType.values())
-                                .filter(ufa -> ufa != UnionFindAlgorithmType.SEQ)
-                                .map(UnionFindAlgorithmType::name)
-                                .collect(Collectors.joining(", ")));
-                throw new IllegalArgumentException(errorMsg);
-            }
+        ProcedureSetup(
+                final Builder builder,
+                final Graph graph,
+                final AllocationTracker tracker,
+                final ProcedureConfiguration procedureConfig) {
+            this.builder = builder;
+            this.graph = graph;
+            this.tracker = tracker;
+            this.procedureConfig = procedureConfig;
         }
-        return new UnionFindFactory<>(algorithmType, threshold);
     }
 
     public static class UnionFindResult {
@@ -435,7 +450,6 @@ public class UnionFindProc<T extends GraphUnionFindAlgo<T>> extends BaseAlgoProc
             this.partitionProperty = partitionProperty;
             return this;
         }
-
 
         public Builder withWriteProperty(String writeProperty) {
             this.writeProperty = writeProperty;

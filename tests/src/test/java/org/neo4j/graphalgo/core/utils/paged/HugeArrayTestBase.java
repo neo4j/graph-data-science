@@ -185,7 +185,7 @@ public abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array
         int size = between(100, 200);
         Huge array = singleArray(size);
         array.boxedFill(box(42));
-        HugeCursor<Array> cursor = array.cursor(array.newCursor());
+        HugeCursor<Array> cursor = array.initCursor(array.newCursor());
 
         assertTrue(cursor.next());
         assertEquals(0, cursor.offset);
@@ -202,7 +202,7 @@ public abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array
         int size = between(100, 200);
         Huge array = pagedArray(size);
         array.boxedFill(box(42));
-        HugeCursor<Array> cursor = array.cursor(array.newCursor());
+        HugeCursor<Array> cursor = array.initCursor(array.newCursor());
 
         assertTrue(cursor.next());
         assertEquals(0, cursor.offset);
@@ -225,7 +225,7 @@ public abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array
         int size = between(100_000, 200_000);
         Huge array = pagedArray(size);
         array.boxedFill(box(42));
-        HugeCursor<Array> cursor = array.cursor(array.newCursor());
+        HugeCursor<Array> cursor = array.initCursor(array.newCursor());
 
         // first page
         assertTrue(cursor.next());
@@ -290,7 +290,7 @@ public abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array
         Huge array = pagedArray(size);
         array.boxedSetAll(i1 -> box(42 + (int) i1));
         HugeCursor<Array> cursor = array.newCursor();
-        array.cursor(cursor, start, end);
+        array.initCursor(cursor, start, end);
 
         long expected = start + 42L;
         while (cursor.next()) {
@@ -310,7 +310,7 @@ public abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array
             array.boxedSetAll(i1 -> box((int) i1 + 1));
 
             long actual = 0L;
-            HugeCursor<Array> cursor = array.cursor(array.newCursor());
+            HugeCursor<Array> cursor = array.initCursor(array.newCursor());
             while (cursor.next()) {
                 int offset = cursor.offset;
                 int limit = cursor.limit;

@@ -86,11 +86,10 @@ public class ForwardBackwardScc extends Algorithm<ForwardBackwardScc> {
     }
 
     @Override
-    public ForwardBackwardScc release() {
+    public void release() {
         graph = null;
         traverse = null;
         scc = null;
-        return this;
     }
 
     public class Result {

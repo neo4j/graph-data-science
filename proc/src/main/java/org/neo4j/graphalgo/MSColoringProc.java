@@ -73,7 +73,7 @@ public class MSColoringProc {
             graph = load(configuration, tracker);
         }
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.of(UnionFindProc.UnionFindResult.EMPTY);
         }
@@ -110,7 +110,7 @@ public class MSColoringProc {
         AllocationTracker tracker = AllocationTracker.create();
         final Graph graph = load(configuration, tracker);
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }

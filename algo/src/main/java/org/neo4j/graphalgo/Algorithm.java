@@ -34,7 +34,11 @@ public abstract class Algorithm<ME extends Algorithm<ME>> implements Termination
 
     public abstract ME me();
 
-    public abstract ME release();
+    /**
+     * Release internal data structures used by the algorithm.
+     *
+     */
+    public abstract void release();
 
     public ME withProgressLogger(Log log) {
         return withProgressLogger(ProgressLogger.wrap(log, getClass().getSimpleName()));

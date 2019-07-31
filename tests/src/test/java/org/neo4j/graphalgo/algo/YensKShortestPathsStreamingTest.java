@@ -93,9 +93,9 @@ public class YensKShortestPathsStreamingTest {
         expectedNodes.put(2L, getNodeIds("a", "e", "f", "d"));
 
         Map<Long, List<Double>> expectedCosts = new HashMap<>();
-        expectedCosts.put(0L, Arrays.asList(1.0d, 2.0d));
-        expectedCosts.put(1L, Arrays.asList(5.0d));
-        expectedCosts.put(2L, Arrays.asList(7.0d, 3.0, 4.0));
+        expectedCosts.put(0L, Arrays.asList(1.0D, 2.0D));
+        expectedCosts.put(1L, Arrays.asList(5.0D));
+        expectedCosts.put(2L, Arrays.asList(7.0D, 3.0, 4.0));
 
         // 9 possible paths without loop
         DB.execute(cypher).accept(row -> {
@@ -121,9 +121,9 @@ public class YensKShortestPathsStreamingTest {
         expectedNodes.put(2L, getNodes("a", "e", "f", "d"));
 
         Map<Long, List<Double>> expectedCosts = new HashMap<>();
-        expectedCosts.put(0L, Arrays.asList(1.0d, 2.0d));
-        expectedCosts.put(1L, Arrays.asList(5.0d));
-        expectedCosts.put(2L, Arrays.asList(7.0d, 3.0, 4.0));
+        expectedCosts.put(0L, Arrays.asList(1.0D, 2.0D));
+        expectedCosts.put(1L, Arrays.asList(5.0D));
+        expectedCosts.put(2L, Arrays.asList(7.0D, 3.0, 4.0));
 
         DB.execute(cypher).accept(row -> {
             Path path = (Path) row.get("path");
@@ -154,9 +154,9 @@ public class YensKShortestPathsStreamingTest {
         expectedNodes.put(2L, getNodes("a", "e", "f", "d"));
 
         Map<Long, List<Double>> expectedCosts = new HashMap<>();
-        expectedCosts.put(0L, Arrays.asList(1.0d, 2.0d));
-        expectedCosts.put(1L, Arrays.asList(5.0d));
-        expectedCosts.put(2L, Arrays.asList(7.0d, 3.0, 4.0));
+        expectedCosts.put(0L, Arrays.asList(1.0D, 2.0D));
+        expectedCosts.put(1L, Arrays.asList(5.0D));
+        expectedCosts.put(2L, Arrays.asList(7.0D, 3.0, 4.0));
 
         DB.execute(cypher).accept(row -> {
             Path path = (Path) row.get("path");

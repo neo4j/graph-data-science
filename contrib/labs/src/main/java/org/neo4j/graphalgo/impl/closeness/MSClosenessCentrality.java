@@ -130,10 +130,9 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality> {
     }
 
     @Override
-    public MSClosenessCentrality release() {
+    public void release() {
         graph = null;
         farness = null;
-        return this;
     }
 
     public MSClosenessCentrality compute() {

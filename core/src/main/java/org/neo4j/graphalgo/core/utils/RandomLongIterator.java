@@ -45,13 +45,6 @@ public final class RandomLongIterator implements PrimitiveLongIterator {
     private long next;
 
     /**
-     * @param end iteration end, exclusive
-     */
-    public RandomLongIterator(long end) {
-        this(0L, end, ThreadLocalRandom.current());
-    }
-
-    /**
      * @param start iteration start, inclusive
      * @param end   iteration end, exclusive
      */
@@ -107,10 +100,6 @@ public final class RandomLongIterator implements PrimitiveLongIterator {
     public void reset() {
         next = seed;
         hasNext = true;
-    }
-
-    long maxValue() {
-        return base + range;
     }
 
     private long internalNext(long next, final long mask, final long range) {

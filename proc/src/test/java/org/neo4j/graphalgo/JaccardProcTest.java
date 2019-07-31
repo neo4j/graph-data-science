@@ -358,7 +358,7 @@ public class JaccardProcTest {
         assertEquals(2L, row.get("count1"));
         assertEquals(1L, row.get("count2"));
         // assertEquals(0L, row.get("intersection"));
-        assertEquals(0d, row.get("similarity"));
+        assertEquals(0D, row.get("similarity"));
     }
 
     // a / b = 2 : 2/3
@@ -371,7 +371,7 @@ public class JaccardProcTest {
         assertEquals(3L, row.get("count1"));
         assertEquals(1L, row.get("count2"));
         // assertEquals(1L, row.get("intersection"));
-        assertEquals(1d/3d, row.get("similarity"));
+        assertEquals(1D/3D, row.get("similarity"));
     }
 
     private void assert01(Map<String, Object> row) {
@@ -380,6 +380,6 @@ public class JaccardProcTest {
         assertEquals(3L, row.get("count1"));
         assertEquals(2L, row.get("count2"));
         // assertEquals(2L, row.get("intersection"));
-        assertEquals(2d/3d, row.get("similarity"));
+        assertEquals(2D/3D, row.get("similarity"));
     }
 }

@@ -134,7 +134,7 @@ public class InfoMapTest {
                 .withAnyRelationshipType()
                 .withAnyLabel()
                 .withoutNodeProperties()
-                .asUndirected(true)
+                .undirected()
                 .load(HeavyGraphFactory.class);
 
     }

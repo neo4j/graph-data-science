@@ -77,7 +77,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
         ProcedureConfiguration configuration = newConfig(label, relationship, config);
         final Graph graph = this.loadGraph(configuration, tracker, builder);
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.of(LouvainResult.EMPTY);
         }
@@ -87,7 +87,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
         if (configuration.isWriteFlag()) {
             builder.timeWrite(() -> {
                 String writeProperty = configuration.getWriteProperty("community");
-                boolean includeIntermediateCommunities = configuration.get(INCLUDE_INTERMEDIATE_COMMUNITIES, false);
+                Boolean includeIntermediateCommunities = configuration.getBool(INCLUDE_INTERMEDIATE_COMMUNITIES, false);
                 String intermediateCommunitiesWriteProperty = configuration.get(
                         INTERMEDIATE_COMMUNITIES_WRITE_PROPERTY,
                         "communities");
@@ -128,7 +128,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
         ProcedureConfiguration configuration = newConfig(label, relationship, config);
         final Graph graph = this.loadGraph(configuration, tracker, builder);
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }
@@ -162,7 +162,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
             loader.withOptionalNodeProperties(PropertyMapping.of(CLUSTERING_IDENTIFIER, propertyIdentifier, -1));
         });
 
-        return loader.asUndirected(true);
+        return loader.undirected();
     }
 
     @Override

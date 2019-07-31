@@ -32,6 +32,10 @@ public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterab
 
     long RELATIONSHIP_COUNT_NOT_SUPPORTED = -1L;
 
+    default boolean isEmpty() {
+        return nodeCount() == 0;
+    }
+
     /**
      * @return if supported, returns the total number of relationships in the graph, otherwise {@link Graph#RELATIONSHIP_COUNT_NOT_SUPPORTED}.
      */

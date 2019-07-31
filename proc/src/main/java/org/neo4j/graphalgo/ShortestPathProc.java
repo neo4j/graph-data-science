@@ -79,7 +79,7 @@ public class ShortestPathProc {
     public Stream<ShortestPathDijkstra.Result> dijkstraStream(
             @Name("startNode") Node startNode,
             @Name("endNode") Node endNode,
-            @Name(value = "propertyName", defaultValue = "null") String propertyName,
+            @Name(value = "propertyName", defaultValue = "") String propertyName,
             @Name(value = "config", defaultValue = "{}")
                     Map<String, Object> config) {
 
@@ -95,7 +95,7 @@ public class ShortestPathProc {
 
         if(direction == Direction.BOTH) {
             direction = Direction.OUTGOING;
-            graphLoader.asUndirected(true).withDirection(direction);
+            graphLoader.undirected().withDirection(direction);
         } else {
             graphLoader.withDirection(direction);
         }
@@ -103,7 +103,7 @@ public class ShortestPathProc {
 
         final Graph graph = graphLoader.load(configuration.getGraphImpl());
 
-        if (graph.nodeCount() == 0 || startNode == null || endNode == null) {
+        if (graph.isEmpty() || startNode == null || endNode == null) {
             graph.release();
             return Stream.empty();
         }
@@ -122,7 +122,7 @@ public class ShortestPathProc {
     public Stream<DijkstraResult> dijkstra(
             @Name("startNode") Node startNode,
             @Name("endNode") Node endNode,
-            @Name(value = "propertyName", defaultValue="null") String propertyName,
+            @Name(value = "propertyName", defaultValue = "") String propertyName,
             @Name(value = "config", defaultValue = "{}")
                     Map<String, Object> config) {
 
@@ -144,7 +144,7 @@ public class ShortestPathProc {
 
             if(direction == Direction.BOTH) {
                 direction = Direction.OUTGOING;
-                graphLoader.asUndirected(true).withDirection(direction);
+                graphLoader.undirected().withDirection(direction);
             } else {
                 graphLoader.withDirection(direction);
             }
@@ -153,7 +153,7 @@ public class ShortestPathProc {
             graph = graphLoader.load(configuration.getGraphImpl());
         }
 
-        if (graph.nodeCount() == 0 || startNode == null || endNode == null) {
+        if (graph.isEmpty() || startNode == null || endNode == null) {
             graph.release();
             return Stream.of(builder.build());
         }
@@ -210,14 +210,14 @@ public class ShortestPathProc {
 
         if(direction == Direction.BOTH) {
             direction = Direction.OUTGOING;
-            graphLoader.asUndirected(true).withDirection(direction);
+            graphLoader.undirected().withDirection(direction);
         } else {
             graphLoader.withDirection(direction);
         }
 
         final Graph graph = graphLoader.load(configuration.getGraphImpl());
 
-            if (graph.nodeCount() == 0 || startNode == null || endNode == null) {
+            if (graph.isEmpty() || startNode == null || endNode == null) {
                 graph.release();
                 return Stream.empty();
             }

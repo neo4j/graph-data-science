@@ -36,7 +36,7 @@ import static org.mockito.Mockito.when;
 public class RelationshipRowVisitorTest {
     @Test
     public void byDefaultDontRemoveDuplicates() {
-        AdjacencyMatrix matrix = new AdjacencyMatrix(2, false, 0d, false, AllocationTracker.EMPTY);
+        AdjacencyMatrix matrix = new AdjacencyMatrix(2, false, 0D, false, AllocationTracker.EMPTY);
         IntIdMap idMap = idMap();
 
         Result.ResultRow row1 = mock(Result.ResultRow.class);
@@ -47,7 +47,7 @@ public class RelationshipRowVisitorTest {
         RelationshipRowVisitor visitor = new RelationshipRowVisitor(
                 idMap,
                 false,
-                0d,
+                0D,
                 matrix,
                 DuplicateRelationshipsStrategy.NONE,
                 relationshipCount);
@@ -60,7 +60,7 @@ public class RelationshipRowVisitorTest {
 
     @Test
     public void skipRemovesDuplicates() {
-        AdjacencyMatrix matrix = new AdjacencyMatrix(2, false, 0d, false, AllocationTracker.EMPTY);
+        AdjacencyMatrix matrix = new AdjacencyMatrix(2, false, 0D, false, AllocationTracker.EMPTY);
 
         Result.ResultRow row = mock(Result.ResultRow.class);
         when(row.getNumber("source")).thenReturn(0L);
@@ -70,7 +70,7 @@ public class RelationshipRowVisitorTest {
         RelationshipRowVisitor visitor = new RelationshipRowVisitor(
                 idMap(),
                 false,
-                0d,
+                0D,
                 matrix,
                 DuplicateRelationshipsStrategy.SKIP,
                 relationshipCount);
@@ -83,7 +83,7 @@ public class RelationshipRowVisitorTest {
 
     @Test
     public void sumRemovesDuplicates() {
-        AdjacencyMatrix matrix = new AdjacencyMatrix(2, true, 0d, false, AllocationTracker.EMPTY);
+        AdjacencyMatrix matrix = new AdjacencyMatrix(2, true, 0D, false, AllocationTracker.EMPTY);
 
         Result.ResultRow row = mock(Result.ResultRow.class);
         when(row.getNumber("source")).thenReturn(0L);
@@ -94,7 +94,7 @@ public class RelationshipRowVisitorTest {
         RelationshipRowVisitor visitor = new RelationshipRowVisitor(
                 idMap(),
                 true,
-                0d,
+                0D,
                 matrix,
                 DuplicateRelationshipsStrategy.SUM,
                 relationshipCount);
@@ -108,7 +108,7 @@ public class RelationshipRowVisitorTest {
 
     @Test
     public void minRemovesDuplicates() {
-        AdjacencyMatrix matrix = new AdjacencyMatrix(2, true, 0d, false, AllocationTracker.EMPTY);
+        AdjacencyMatrix matrix = new AdjacencyMatrix(2, true, 0D, false, AllocationTracker.EMPTY);
 
         Result.ResultRow row = mock(Result.ResultRow.class);
         when(row.getNumber("source")).thenReturn(0L);
@@ -119,7 +119,7 @@ public class RelationshipRowVisitorTest {
         RelationshipRowVisitor visitor = new RelationshipRowVisitor(
                 idMap(),
                 true,
-                0d,
+                0D,
                 matrix,
                 DuplicateRelationshipsStrategy.MIN,
                 relationshipCount);
@@ -133,7 +133,7 @@ public class RelationshipRowVisitorTest {
 
     @Test
     public void maxRemovesDuplicates() {
-        AdjacencyMatrix matrix = new AdjacencyMatrix(2, true, 0d, false, AllocationTracker.EMPTY);
+        AdjacencyMatrix matrix = new AdjacencyMatrix(2, true, 0D, false, AllocationTracker.EMPTY);
 
         Result.ResultRow row = mock(Result.ResultRow.class);
         when(row.getNumber("source")).thenReturn(0L);
@@ -144,7 +144,7 @@ public class RelationshipRowVisitorTest {
         RelationshipRowVisitor visitor = new RelationshipRowVisitor(
                 idMap(),
                 true,
-                0d,
+                0D,
                 matrix,
                 DuplicateRelationshipsStrategy.MAX,
                 relationshipCount);

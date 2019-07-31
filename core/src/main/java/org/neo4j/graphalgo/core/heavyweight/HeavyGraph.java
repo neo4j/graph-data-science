@@ -21,14 +21,14 @@ package org.neo4j.graphalgo.core.heavyweight;
 
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.graphalgo.api.*;
-import org.neo4j.graphalgo.core.IntIdMap;
-import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
+import org.neo4j.graphalgo.core.IntIdMap;
+import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Collection;
@@ -135,18 +135,34 @@ public class HeavyGraph implements Graph {
     @Override
     public HugeWeightMapping nodeProperties(String type) {
         WeightMapping weightMapping = nodePropertiesMapping.get(type);
+
+        // TODO: get rid of that check
+        if (weightMapping == null) {
+            return null;
+        }
+
         return new HugeWeightMapping() {
+
+            @Override
+            public long size() {
+                return weightMapping.size();
+            }
 
             @Override
             public double weight(long source, long target) {
                 checkSize(source, target);
-                return weightMapping.get((int) source, (int) target);
+                return weightMapping.weight((int) source, (int) target);
             }
 
             @Override
             public double weight(long source, long target, double defaultValue) {
                 checkSize(source, target);
-                return weightMapping.get(RawValues.combineIntInt((int) source, (int) target), defaultValue);
+                return weightMapping.weight(RawValues.combineIntInt((int) source, (int) target), defaultValue);
+            }
+
+            @Override
+            public long getMaxValue() {
+                return weightMapping.getMaxValue();
             }
 
             @Override

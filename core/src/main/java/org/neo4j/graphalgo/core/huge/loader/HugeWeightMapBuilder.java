@@ -83,7 +83,7 @@ class HugeWeightMapBuilder {
         return HugeWeightMap.of(pages, pageSize, defaultWeight, tracker);
     }
 
-    void load(
+    int load(
             long relationshipReference,
             long propertiesReference,
             long target,
@@ -95,7 +95,9 @@ class HugeWeightMapBuilder {
             double weight = ReadHelper.readProperty(pc, weightProperty, defaultWeight);
             if (weight != defaultWeight) {
                 addWeight(localSource, target, weight);
+                return 1;
             }
+            return 0;
         }
     }
 
@@ -136,13 +138,14 @@ class HugeWeightMapBuilder {
         }
 
         @Override
-        void load(
+        int load(
                 long relationshipReference,
                 long propertiesReference,
                 long target,
                 int localSource,
                 CursorFactory cursors,
                 Read read) {
+            return 0;
         }
     }
 }

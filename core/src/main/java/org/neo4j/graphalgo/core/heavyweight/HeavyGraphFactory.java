@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.WeightMapping;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.graphalgo.core.NullWeightMap;
 import org.neo4j.graphalgo.core.WeightMap;
@@ -57,6 +58,10 @@ public class HeavyGraphFactory extends GraphFactory {
 
     @Override
     public final MemoryEstimation memoryEstimation() {
+        return getMemoryEstimation(setup, dimensions);
+    }
+
+    public static MemoryEstimation getMemoryEstimation(final GraphSetup setup, final GraphDimensions dimensions) {
         MemoryEstimations.Builder builder = MemoryEstimations
                 .builder(HeavyGraph.class)
                 .add("nodeIdMap", IntIdMap.memoryEstimation())

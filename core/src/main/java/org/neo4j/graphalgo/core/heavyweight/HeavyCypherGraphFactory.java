@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.core.WeightMap;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashMap;
@@ -40,6 +41,8 @@ public class HeavyCypherGraphFactory extends GraphFactory {
     static final String LIMIT = "limit";
     static final String SKIP = "skip";
     public static final String TYPE = "cypher";
+    private final CypherNodeCountingLoader nodeCountingLoader;
+    private final CypherRelationshipCountingLoader relationshipCountingLoader;
     private CypherNodeLoader nodeLoader;
     private CypherRelationshipLoader relationshipLoader;
 
@@ -49,10 +52,23 @@ public class HeavyCypherGraphFactory extends GraphFactory {
         super(api, setup);
         this.nodeLoader = new CypherNodeLoader(api, setup, dimensions);
         this.relationshipLoader = new CypherRelationshipLoader(api, setup);
+        this.nodeCountingLoader = new CypherNodeCountingLoader(api, setup);
+        this.relationshipCountingLoader = new CypherRelationshipCountingLoader(api, setup);
     }
 
     @Override
-    protected void checkLabelPredicates() { }
+    protected void validateTokens() { }
+
+    public final MemoryEstimation memoryEstimation() {
+        CypherNodeCountingLoader.NodeCount nodeCount = nodeCountingLoader.load();
+        dimensions.nodeCount(nodeCount.rows());
+
+        CypherRelationshipCountingLoader.RelationshipCount relCount = relationshipCountingLoader.load();
+        dimensions.maxRelCount(relCount.rows());
+
+        return HeavyGraphFactory.getMemoryEstimation(setup, dimensions);
+    }
+
 
     @Override
     public Graph importGraph() {

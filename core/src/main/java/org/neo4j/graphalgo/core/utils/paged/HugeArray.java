@@ -66,7 +66,9 @@ abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, Self>> {
 
     /**
      * Returns a new {@link HugeCursor} for this array. The cursor is not positioned and in an invalid state.
-     * You must call {@link HugeCursor#next()} first to position the cursor to a valid state.
+     *
+     * To position the cursor you must call {@link #initCursor(HugeCursor)} or {@link #initCursor(HugeCursor, long, long)}.
+     * Then the cursor needs to be put in a valid state by calling {@link HugeCursor#next()}.
      *
      * Obtaining a {@link HugeCursor} for an empty array (where {@link #size()} returns {@code 0}) is undefined and
      * might result in a {@link NullPointerException} or another {@link RuntimeException}.
@@ -84,7 +86,7 @@ abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, Self>> {
      * Resetting the {@link HugeCursor} of an empty array (where {@link #size()} returns {@code 0}) is undefined and
      * might result in a {@link NullPointerException} or another {@link RuntimeException}.
      */
-    final public HugeCursor<Array> cursor(HugeCursor<Array> cursor) {
+    final public HugeCursor<Array> initCursor(HugeCursor<Array> cursor) {
         cursor.setRange();
         return cursor;
     }
@@ -101,9 +103,9 @@ abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, Self>> {
      * Resetting the {@link HugeCursor} of an empty array (where {@link #size()} returns {@code 0}) is undefined and
      * might result in a {@link NullPointerException} or another {@link RuntimeException}.
      *
-     * @see HugeIntArray#cursor(HugeCursor)
+     * @see HugeIntArray#initCursor(HugeCursor)
      */
-    final public HugeCursor<Array> cursor(HugeCursor<Array> cursor, long start, long end) {
+    final public HugeCursor<Array> initCursor(HugeCursor<Array> cursor, long start, long end) {
         assert start >= 0L && start <= size() : "start expected to be in [0 : " + size() + "] but got " + start;
         assert end >= start && end <= size() : "end expected to be in [" + start + " : " + size() + "] but got " + end;
         cursor.setRange(start, end);
@@ -152,7 +154,7 @@ abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, Self>> {
         }
         StringBuilder sb = new StringBuilder();
         sb.append('[');
-        try (HugeCursor<Array> cursor = cursor(newCursor())) {
+        try (HugeCursor<Array> cursor = initCursor(newCursor())) {
             while (cursor.next()) {
                 Array array = cursor.array;
                 for (int i = cursor.offset; i < cursor.limit; ++i) {
@@ -174,7 +176,7 @@ abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, Self>> {
         int size = (int) fullSize;
         Object result = java.lang.reflect.Array.newInstance(componentClass.getComponentType(), size);
         int pos = 0;
-        try (HugeCursor<Array> cursor = cursor(newCursor())) {
+        try (HugeCursor<Array> cursor = initCursor(newCursor())) {
             while (cursor.next()) {
                 Array array = cursor.array;
                 int length = cursor.limit - cursor.offset;

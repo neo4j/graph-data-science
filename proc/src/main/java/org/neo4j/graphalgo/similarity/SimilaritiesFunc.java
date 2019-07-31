@@ -163,7 +163,7 @@ public class SimilaritiesFunc {
     @Description("algo.similarity.euclidean([vector1], [vector2]) " +
             "given two collection vectors, calculate similarity based on euclidean distance")
     public double euclideanSimilarity(@Name("vector1") List<Number> vector1, @Name("vector2") List<Number> vector2) {
-        return 1.0d / (1 + euclideanDistance(vector1, vector2));
+        return 1.0D / (1 + euclideanDistance(vector1, vector2));
     }
 
     @UserFunction("algo.similarity.overlap")

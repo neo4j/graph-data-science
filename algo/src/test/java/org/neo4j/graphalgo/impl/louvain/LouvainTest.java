@@ -64,10 +64,10 @@ public class LouvainTest extends HeavyHugeTester {
                     "CREATE (c:Node {name:'c'})\n" +
                     "CREATE (d:Node {name:'d'})\n" +
                     "CREATE" +
-                    " (a)-[:TYPE]->(b),\n" +
-                    " (b)-[:TYPE]->(c),\n" +
-                    " (c)-[:TYPE]->(a),\n" +
-                    " (a)-[:TYPE]->(c)";
+                    " (a)-[:TYPE {weight: 1.0}]->(b),\n" +
+                    " (b)-[:TYPE {weight: 1.0}]->(c),\n" +
+                    " (c)-[:TYPE {weight: 1.0}]->(a),\n" +
+                    " (a)-[:TYPE {weight: 1.0}]->(c)";
 
     public static final Label LABEL = Label.label("Node");
     public static final String ABCD = "abcd";
@@ -92,9 +92,8 @@ public class LouvainTest extends HeavyHugeTester {
                 .withAnyRelationshipType()
                 .withAnyLabel()
                 .withoutNodeProperties()
-                .withOptionalRelationshipWeightsFromProperty("w", 1.0)
-                //.withDirection(Direction.BOTH)
-                .asUndirected(true)
+                .withOptionalRelationshipWeightsFromProperty("weight", 1.0)
+                .undirected()
                 .load(graphImpl);
 
         try (Transaction transaction = DB.beginTx()) {
@@ -149,10 +148,10 @@ public class LouvainTest extends HeavyHugeTester {
         graph = new GraphLoader(DB)
                 .withLabel("Node")
                 .withRelationshipType("REL")
-                .withOptionalRelationshipWeightsFromProperty("w", 1.0)
+                .withOptionalRelationshipWeightsFromProperty(null, 1.0)
                 .withoutNodeWeights()
-                .withSort(true)
-                .asUndirected(true)
+                .sorted()
+                .undirected()
                 .load(graphImpl);
 
         Louvain.Config config = new Louvain.Config(99, 99999);

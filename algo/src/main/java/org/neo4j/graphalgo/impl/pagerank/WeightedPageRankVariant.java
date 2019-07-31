@@ -24,9 +24,9 @@ import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 public class WeightedPageRankVariant implements PageRankVariant {
-    private boolean cacheWeights;
+    private final boolean cacheWeights;
 
-    public WeightedPageRankVariant(boolean cacheWeights) {
+    WeightedPageRankVariant(boolean cacheWeights) {
         this.cacheWeights = cacheWeights;
     }
 
@@ -55,6 +55,6 @@ public class WeightedPageRankVariant implements PageRankVariant {
 
     @Override
     public DegreeComputer degreeComputer(Graph graph) {
-            return new WeightedDegreeComputer(graph, cacheWeights);
+        return new WeightedDegreeComputer(graph, cacheWeights);
     }
 }

@@ -90,7 +90,7 @@ public final class ArticleRankProc {
                 statsBuilder,
                 configuration);
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.of(statsBuilder.build());
         }
@@ -134,7 +134,7 @@ public final class ArticleRankProc {
                 statsBuilder,
                 configuration);
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }
@@ -161,7 +161,7 @@ public final class ArticleRankProc {
 
         Direction direction = configuration.getDirection(Direction.OUTGOING);
         if (direction == Direction.BOTH) {
-            graphLoader.asUndirected(true);
+            graphLoader.undirected();
         } else {
             graphLoader.withDirection(direction);
         }

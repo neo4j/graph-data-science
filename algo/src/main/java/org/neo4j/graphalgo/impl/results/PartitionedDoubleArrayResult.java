@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.utils.CentralityUtils;
 
-import java.util.function.Function;
+import java.util.function.DoubleUnaryOperator;
 
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.binaryLookup;
 
@@ -43,9 +43,8 @@ public final class PartitionedDoubleArrayResult implements CentralityResult, Pro
         exporter.write(propertyName, partitions, this);
     }
 
-
     @Override
-    public void export(String propertyName, Exporter exporter, Function<Double, Double> normalizationFunction) {
+    public void export(String propertyName, Exporter exporter, DoubleUnaryOperator normalizationFunction) {
         CentralityUtils.normalizeArray(partitions, normalizationFunction);
         export(propertyName, exporter);
     }

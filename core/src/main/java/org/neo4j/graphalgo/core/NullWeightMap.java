@@ -40,27 +40,32 @@ public class NullWeightMap implements WeightMapping {
     }
 
     @Override
-    public double get(long id) {
+    public long size() {
+        return 0;
+    }
+
+    @Override
+    public double weight(long id) {
         return defaultValue;
     }
 
     @Override
-    public double get(final long id, final double defaultValue) {
+    public double weight(final long id, final double defaultValue) {
         return defaultValue;
     }
 
     @Override
-    public double get(final int source, final int target) {
+    public double weight(final int source, final int target) {
         return defaultValue;
     }
 
     @Override
-    public double get(final int id) {
+    public double nodeWeight(final int id) {
         return defaultValue;
     }
 
     @Override
-    public double get(final int id, final double defaultValue) {
+    public double nodeWeight(final int id, final double defaultValue) {
         return defaultValue;
     }
 }

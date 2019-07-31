@@ -116,8 +116,9 @@ final class NodesScanner extends StatementAction implements RecordScanner {
     private final ImportProgress progress;
     private final HugeLongArrayBuilder idMapBuilder;
     private final IntObjectMap<HugeNodePropertiesBuilder> nodePropertyBuilders;
+    private long nodePropertiesRead = 0L;
 
-    private volatile long relationshipsImported;
+    private volatile long nodesImported;
 
     private NodesScanner(
             GraphDatabaseAPI api,
@@ -156,16 +157,21 @@ final class NodesScanner extends StatementAction implements RecordScanner {
             long allImported = 0L;
             while (batches.scan(cursor)) {
                 int imported = importNodes(batches, read, cursors);
-                progress.relationshipsImported(imported);
+                progress.nodesImported(imported);
                 allImported += imported;
             }
-            relationshipsImported = allImported;
+            nodesImported = allImported;
         }
     }
 
     @Override
+    public long propertiesImported() {
+        return nodePropertiesRead;
+    }
+
+    @Override
     public long recordsImported() {
-        return relationshipsImported;
+        return nodesImported;
     }
 
     private int importNodes(
@@ -216,7 +222,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
             long nodeReference,
             long propertiesReference,
             IntObjectMap<HugeNodePropertiesBuilder> nodeProperties,
-            long localIndex,
+            long internalId,
             CursorFactory cursors,
             Read read) {
         try (PropertyCursor pc = cursors.allocatePropertyCursor()) {
@@ -227,9 +233,8 @@ final class NodesScanner extends StatementAction implements RecordScanner {
                     Value value = pc.propertyValue();
                     double defaultValue = props.defaultValue();
                     double weight = ReadHelper.extractValue(value, defaultValue);
-                    if (weight != defaultValue) {
-                        props.set(localIndex, weight);
-                    }
+                    props.set(internalId, weight);
+                    nodePropertiesRead++;
                 }
             }
         }

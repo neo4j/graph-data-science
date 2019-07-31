@@ -46,6 +46,11 @@ final class HugeNodePropertyMap implements HugeWeightMapping {
     }
 
     @Override
+    public long size() {
+        return properties.size();
+    }
+
+    @Override
     public double weight(final long source, final long target) {
         assert target == -1L;
         return properties.getOrDefault(source, defaultValue);
@@ -61,8 +66,9 @@ final class HugeNodePropertyMap implements HugeWeightMapping {
         return defaultValue;
     }
 
-    public void put(long nodeId, double value) {
-        properties.put(nodeId, value);
+    @Override
+    public long getMaxValue() {
+        return properties.getMaxValue();
     }
 
     @Override

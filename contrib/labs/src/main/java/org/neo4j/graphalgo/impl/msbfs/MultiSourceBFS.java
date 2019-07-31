@@ -246,7 +246,7 @@ public final class MultiSourceBFS implements Runnable {
         int depth = 0;
 
         while (true) {
-            visitSet.cursor(visitCursor);
+            visitSet.initCursor(visitCursor);
             while (visitCursor.next()) {
                 long[] array = visitCursor.array;
                 int offset = visitCursor.offset;
@@ -265,7 +265,7 @@ public final class MultiSourceBFS implements Runnable {
             boolean hasNext = false;
             long next;
 
-            nextSet.cursor(nextCursor);
+            nextSet.initCursor(nextCursor);
             while (nextCursor.next()) {
                 long[] array = nextCursor.array;
                 int offset = nextCursor.offset;

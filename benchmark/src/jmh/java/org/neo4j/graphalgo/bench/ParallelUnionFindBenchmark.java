@@ -21,15 +21,13 @@ package org.neo4j.graphalgo.bench;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
+import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.MSColoring;
-import org.neo4j.graphalgo.impl.unionfind.GraphUnionFind;
-import org.neo4j.graphalgo.impl.unionfind.ParallelUnionFindFJMerge;
-import org.neo4j.graphalgo.impl.unionfind.ParallelUnionFindForkJoin;
-import org.neo4j.graphalgo.impl.unionfind.ParallelUnionFindQueue;
+import org.neo4j.graphalgo.impl.unionfind.UnionFind;
+import org.neo4j.graphalgo.impl.unionfind.ParallelUnionFind;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
@@ -59,7 +57,6 @@ import org.openjdk.jmh.annotations.Warmup;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -86,10 +83,13 @@ public class ParallelUnionFindBenchmark {
 
     private static File storeDir = new File(GRAPH_DIRECTORY);
 
-//    @Param({"5", "10", "20", "50"})
-    public static int numSets = 20;
+    private final UnionFind.Config algoConfig = new UnionFind.Config(
+            new HugeNullWeightMap(-1L),
+            Double.NaN
+    );
 
-    private static final double threshold = Double.NaN;
+    //    @Param({"5", "10", "20", "50"})
+    public static int numSets = 20;
 
     @Setup
     public static void setup() throws Exception {
@@ -179,58 +179,20 @@ public class ParallelUnionFindBenchmark {
 
     @Benchmark
     public Object parallelUnionFindQueue_200000() {
-        return new ParallelUnionFindQueue(graph, Pools.DEFAULT, 200_000, 8, threshold, AllocationTracker.EMPTY)
+        return new ParallelUnionFind(graph, Pools.DEFAULT, 200_000, 8, algoConfig, AllocationTracker.EMPTY)
                 .compute();
     }
 
     @Benchmark
-    public Object parallelUnionFindQueue_400000() {
-        return new ParallelUnionFindQueue(graph, Pools.DEFAULT, 400_000, 8, threshold, AllocationTracker.EMPTY)
+    public Object parallelParallelUnionFind_400000() {
+        return new ParallelUnionFind(graph, Pools.DEFAULT, 400_000, 8, algoConfig, AllocationTracker.EMPTY)
                 .compute();
     }
 
     @Benchmark
-    public Object parallelUnionFindQueue_800000() {
-        return new ParallelUnionFindQueue(graph, Pools.DEFAULT, 800_000, 8, threshold, AllocationTracker.EMPTY)
+    public Object parallelParallelUnionFind_800000() {
+        return new ParallelUnionFind(graph, Pools.DEFAULT, 800_000, 8, algoConfig, AllocationTracker.EMPTY)
                 .compute();
-    }
-
-    @Benchmark
-    public Object parallelUnionFindForkJoinMerge_400000() {
-        return new ParallelUnionFindFJMerge(graph, Pools.DEFAULT, AllocationTracker.EMPTY, 400_000, 8, threshold)
-                .compute();
-    }
-
-    @Benchmark
-    public Object parallelUnionFindForkJoinMerge_800000() {
-        return new ParallelUnionFindFJMerge(graph, Pools.DEFAULT, AllocationTracker.EMPTY, 800_000, 8, threshold)
-                .compute();
-    }
-
-    @Benchmark
-    public Object parallelUnionFindForkJoin_400000() {
-        return new ParallelUnionFindForkJoin(graph, AllocationTracker.EMPTY,400_000, 8, threshold)
-                .compute();
-    }
-
-    @Benchmark
-    public Object parallelUnionFindForkJoin_800000() {
-        return new ParallelUnionFindForkJoin(graph, AllocationTracker.EMPTY, 800_000, 8, threshold)
-                .compute();
-    }
-
-    // TODO: not a benchmark, it's eirther extremely slow or does not terminate rn
-    public Object multiSourceColoring() {
-        return new MSColoring(graph, Pools.DEFAULT, 8)
-                .compute()
-                .getColors();
-    }
-
-    @Benchmark
-    public Object sequentialUnionFind() {
-        return new GraphUnionFind(graph, AllocationTracker.EMPTY, threshold)
-                .compute();
-
     }
 
 }

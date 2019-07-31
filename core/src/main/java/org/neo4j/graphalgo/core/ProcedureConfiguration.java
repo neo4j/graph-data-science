@@ -384,6 +384,10 @@ public class ProcedureConfiguration {
         return (null == value || "".equals(value)) ? defaultValue : value;
     }
 
+    public String getString(String key, String oldKey, String defaultValue) {
+        return getChecked(key, oldKey, defaultValue, String.class);
+    }
+
     public Optional<String> getString(String key) {
         if (config.containsKey(key)) {
             return Optional.of((String) get(key));
@@ -440,6 +444,24 @@ public class ProcedureConfiguration {
      */
     public <V> V getChecked(String key, V defaultValue, Class<V> expectedType) {
         Object value = config.get(key);
+        return checkValue(key, defaultValue, expectedType, value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <V> V get(String newKey, String oldKey, V defaultValue) {
+        Object value = config.get(newKey);
+        if (null == value) {
+            value = config.get(oldKey);
+        }
+        return null == value ? defaultValue : (V) value;
+    }
+
+    public <V> V getChecked(String key, String oldKey, V defaultValue, Class<V> expectedType) {
+        Object value = get(key, oldKey, null);
+        return checkValue(key, defaultValue, expectedType, value);
+    }
+
+    private <V> V checkValue(final String key, final V defaultValue, final Class<V> expectedType, final Object value) {
         if (null == value) {
             return defaultValue;
         }
@@ -449,17 +471,6 @@ public class ProcedureConfiguration {
             throw new IllegalArgumentException(message);
         }
         return expectedType.cast(value);
-    }
-
-    public <V> V get(String newKey, String oldKey, V defaultValue) {
-        Object value = config.get(newKey);
-        if (null == value) {
-            value = config.get(oldKey);
-            if (null == value) {
-                return defaultValue;
-            }
-        }
-        return (V) value;
     }
 
     public static ProcedureConfiguration create(Map<String, Object> config) {

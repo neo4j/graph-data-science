@@ -33,8 +33,7 @@ abstract class WeightBuilder {
 
     abstract void finish();
 
-    // TODO: check thread safety
-    abstract void addWeight(
+    abstract int addWeight(
             CursorFactory cursors,
             Read read,
             long relationshipReference,
@@ -109,7 +108,7 @@ abstract class WeightBuilder {
         }
 
         @Override
-        void addWeight(
+        int addWeight(
                 final CursorFactory cursors,
                 final Read read,
                 final long relationshipReference,
@@ -118,7 +117,7 @@ abstract class WeightBuilder {
                 final long targetNodeId) {
             int pageIdx = (int) (sourceNodeId >>> pageShift);
             int localId = (int) (sourceNodeId & pageMask);
-            builders[pageIdx].load(
+            return builders[pageIdx].load(
                     relationshipReference,
                     propertiesReference,
                     targetNodeId,
@@ -147,13 +146,14 @@ abstract class WeightBuilder {
         }
 
         @Override
-        void addWeight(
+        int addWeight(
                 final CursorFactory cursors,
                 final Read read,
                 final long relationshipReference,
                 final long propertiesReference,
                 final long sourceNodeId,
                 final long targetNodeId) {
+            return 0;
         }
     }
 }

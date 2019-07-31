@@ -141,7 +141,7 @@ public final class PersonalizedPageRankTest {
             graph = new GraphLoader(db)
                     .withDirection(Direction.BOTH)
                     .withRelationshipType("PURCHASED")
-                    .asUndirected(true)
+                    .undirected()
                     .load(graphImpl);
         }
 

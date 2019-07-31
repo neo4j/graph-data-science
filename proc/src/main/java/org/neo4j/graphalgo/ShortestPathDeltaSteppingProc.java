@@ -92,14 +92,14 @@ public class ShortestPathDeltaSteppingProc {
 
         if(direction == Direction.BOTH) {
             direction = Direction.OUTGOING;
-            graphLoader.asUndirected(true).withDirection(direction);
+            graphLoader.undirected().withDirection(direction);
         } else {
             graphLoader.withDirection(direction);
         }
 
         final Graph graph = graphLoader.load(configuration.getGraphImpl());
 
-        if (graph.nodeCount() == 0 || startNode == null) {
+        if (graph.isEmpty() || startNode == null) {
             graph.release();
             return Stream.empty();
         }
@@ -140,7 +140,7 @@ public class ShortestPathDeltaSteppingProc {
 
             if(direction == Direction.BOTH) {
                 direction = Direction.OUTGOING;
-                graphLoader.asUndirected(true).withDirection(direction);
+                graphLoader.undirected().withDirection(direction);
             } else {
                 graphLoader.withDirection(direction);
             }
@@ -149,7 +149,7 @@ public class ShortestPathDeltaSteppingProc {
                     .load(configuration.getGraphImpl());
         }
 
-        if (graph.nodeCount() == 0 || startNode == null) {
+        if (graph.isEmpty() || startNode == null) {
             graph.release();
             return Stream.empty();
         }

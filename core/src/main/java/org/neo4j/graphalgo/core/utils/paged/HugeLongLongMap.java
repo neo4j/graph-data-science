@@ -22,6 +22,8 @@ package org.neo4j.graphalgo.core.utils.paged;
 import com.carrotsearch.hppc.BitMixer;
 import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.neo4j.graphalgo.core.utils.BitUtil;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -31,6 +33,14 @@ import java.util.NoSuchElementException;
  * store more than 2B values
  */
 public final class HugeLongLongMap implements Iterable<LongLongCursor> {
+
+    private static final MemoryEstimation MEMORY_REQUIREMENTS = MemoryEstimations
+            .builder(HugeLongLongMap.class)
+            .field("keysCursor", HugeCursor.class)
+            .field("entries", EntryIterator.class)
+            .perNode("keys", HugeLongArray::memoryEstimation)
+            .perNode("values", HugeLongArray::memoryEstimation)
+            .build();
 
     private final AllocationTracker tracker;
 
@@ -45,6 +55,10 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
 
     private static final long DEFAULT_EXPECTED_ELEMENTS = 4L;
     private static final double LOAD_FACTOR = 0.75;
+
+    public static MemoryEstimation memoryEstimation() {
+        return MEMORY_REQUIREMENTS;
+    }
 
     /**
      * New instance with sane defaults.
@@ -127,7 +141,7 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
         int blockPos, blockEnd;
         long[] keysBlock;
         long existing;
-        keys.cursor(cursor, start, end);
+        keys.initCursor(cursor, start, end);
         while (cursor.next()) {
             keysBlock = cursor.array;
             blockPos = cursor.offset;
@@ -326,8 +340,8 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
         }
 
         EntryIterator(HugeLongArray keys, HugeLongArray values) {
-            keyCursor = keys.cursor(keys.newCursor());
-            valueCursor = values.cursor(values.newCursor());
+            keyCursor = keys.initCursor(keys.newCursor());
+            valueCursor = values.initCursor(values.newCursor());
             cursor = new LongLongCursor();
         }
 
@@ -336,8 +350,8 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
         }
 
         EntryIterator reset(HugeLongArray keys, HugeLongArray values) {
-            keyCursor = keys.cursor(keyCursor);
-            valueCursor = values.cursor(valueCursor);
+            keyCursor = keys.initCursor(keyCursor);
+            valueCursor = values.initCursor(valueCursor);
             pos = 0;
             end = 0;
             hasNext = false;

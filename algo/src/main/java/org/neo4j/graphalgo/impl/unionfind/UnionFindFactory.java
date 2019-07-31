@@ -27,16 +27,21 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.logging.Log;
 
-public class UnionFindFactory<A extends GraphUnionFindAlgo<A>> extends AlgorithmFactory<A> {
+public class UnionFindFactory<A extends UnionFind<A>> extends AlgorithmFactory<A> {
 
-    public static final String CONFIG_PARALLEL_ALGO = "parallel_algo";
+    public static final String CONFIG_ALGO_TYPE = "algoType";
+    public static final String CONFIG_THRESHOLD = "threshold";
+    public static final String CONFIG_SEED_PROPERTY = "seedProperty";
 
-    private final UnionFindAlgorithmType algorithmType;
-    private final double threshold;
+    public static final String SEED_TYPE = "seed";
 
-    public UnionFindFactory(UnionFindAlgorithmType algorithmType, double threshold) {
+    private final UnionFindType algorithmType;
+
+    private final boolean incremental;
+
+    public UnionFindFactory(final UnionFindType algorithmType, final boolean incremental) {
         this.algorithmType = algorithmType;
-        this.threshold = threshold;
+        this.incremental = incremental;
     }
 
     @SuppressWarnings("unchecked")
@@ -48,18 +53,24 @@ public class UnionFindFactory<A extends GraphUnionFindAlgo<A>> extends Algorithm
             final Log log) {
         int concurrency = configuration.getConcurrency();
         int minBatchSize = configuration.getBatchSize();
-        final GraphUnionFindAlgo<?> algo = algorithmType.create(
+
+        UnionFind.Config algoConfig = new UnionFind.Config(
+                graph.availableNodeProperties().contains(SEED_TYPE) ? graph.nodeProperties(SEED_TYPE) : null,
+                configuration.get(CONFIG_THRESHOLD, Double.NaN)
+        );
+
+        final UnionFind<?> algo = algorithmType.create(
                 graph,
                 Pools.DEFAULT,
                 minBatchSize,
                 concurrency,
-                threshold,
+                algoConfig,
                 tracker);
         return (A) algo;
     }
 
     @Override
     public MemoryEstimation memoryEstimation() {
-        return algorithmType.memoryEstimation();
+        return algorithmType.memoryEstimation(incremental);
     }
 }

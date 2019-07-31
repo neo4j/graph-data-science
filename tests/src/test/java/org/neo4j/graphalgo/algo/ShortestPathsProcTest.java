@@ -144,7 +144,7 @@ public final class ShortestPathsProcTest {
         System.out.println();
 
         verify(consumer, times(11)).accept(anyDouble());
-        verify(consumer, times(1)).accept(eq(8d));
+        verify(consumer, times(1)).accept(eq(8D));
     }
 
     @Test
@@ -174,7 +174,7 @@ public final class ShortestPathsProcTest {
         });
 
         verify(consumer, times(11)).accept(anyDouble());
-        verify(consumer, times(1)).accept(eq(8d));
+        verify(consumer, times(1)).accept(eq(8D));
     }
 
 

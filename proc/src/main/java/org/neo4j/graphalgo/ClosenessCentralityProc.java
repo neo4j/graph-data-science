@@ -74,12 +74,12 @@ public class ClosenessCentralityProc {
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, configuration)
                 .withoutNodeProperties()
-                .asUndirected(true)
                 .withDirection(Direction.OUTGOING)
                 .withAllocationTracker(tracker)
+                .undirected()
                 .load(configuration.getGraphImpl());
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }
@@ -119,13 +119,13 @@ public class ClosenessCentralityProc {
                     .withoutNodeProperties()
                     .withDirection(Direction.OUTGOING)
                     .withAllocationTracker(tracker)
-                    .asUndirected(true)
+                    .undirected()
                     .load(configuration.getGraphImpl());
         }
 
         builder.withNodeCount(graph.nodeCount());
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.of(builder.build());
         }

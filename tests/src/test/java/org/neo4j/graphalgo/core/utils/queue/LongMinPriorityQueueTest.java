@@ -74,7 +74,7 @@ public final class LongMinPriorityQueueTest extends RandomizedTest {
         int min = -1;
         double minWeight = Double.POSITIVE_INFINITY;
         for (int i = 0; i < iterations; i++) {
-            final double weight = exclusiveDouble(0d, 100d);
+            final double weight = exclusiveDouble(0D, 100D);
             if (weight < minWeight) {
                 minWeight = weight;
                 min = i;
@@ -92,7 +92,7 @@ public final class LongMinPriorityQueueTest extends RandomizedTest {
         long min = -1;
         double minWeight = Double.POSITIVE_INFINITY;
         for (long i = 1; i <= iterations; i++) {
-            final double weight = exclusiveDouble(0d, 100d);
+            final double weight = exclusiveDouble(0D, 100D);
             if (weight < minWeight) {
                 minWeight = weight;
                 min = i;

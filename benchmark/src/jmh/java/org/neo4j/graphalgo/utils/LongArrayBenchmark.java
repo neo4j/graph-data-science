@@ -83,7 +83,7 @@ public class LongArrayBenchmark {
     @Benchmark
     public long huge_paged_get_cursor(LongArrays arrays) {
         final HugeLongArray array = arrays.paged;
-        HugeCursor<long[]> cursor = array.cursor(array.newCursor());
+        HugeCursor<long[]> cursor = array.initCursor(array.newCursor());
         long res = 0;
         long[] block;
         int limit;
@@ -114,7 +114,7 @@ public class LongArrayBenchmark {
     public HugeLongArray huge_paged_set_cursor(LongArrays arrays) {
         long[] values = arrays.primitive;
         final HugeLongArray array = NewHugeArrays.newPagedArray(values.length, AllocationTracker.EMPTY);
-        HugeCursor<long[]> cursor = array.cursor(array.newCursor());
+        HugeCursor<long[]> cursor = array.initCursor(array.newCursor());
         long[] block;
         int limit, offset, idx;
         while (cursor.next()) {
@@ -147,7 +147,7 @@ public class LongArrayBenchmark {
     @Benchmark
     public long huge_single_get_cursor(LongArrays arrays) {
         final HugeLongArray array = arrays.single;
-        HugeCursor<long[]> cursor = array.cursor(array.newCursor());
+        HugeCursor<long[]> cursor = array.initCursor(array.newCursor());
         long res = 0;
         long[] block;
         int limit;
@@ -178,7 +178,7 @@ public class LongArrayBenchmark {
     public HugeLongArray huge_single_set_cursor(LongArrays arrays) {
         long[] values = arrays.primitive;
         final HugeLongArray array = HugeLongArray.newArray(values.length, AllocationTracker.EMPTY);
-        HugeCursor<long[]> cursor = array.cursor(array.newCursor());
+        HugeCursor<long[]> cursor = array.initCursor(array.newCursor());
         long[] block;
         int limit, offset, idx;
         while (cursor.next()) {

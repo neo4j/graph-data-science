@@ -104,6 +104,7 @@ public class TriangleProcTest {
                 final String name = (String) api.getNodeById(i).getProperty("name");
                 idToName[i] = name;
             }
+            tx.success();
         }
     }
 

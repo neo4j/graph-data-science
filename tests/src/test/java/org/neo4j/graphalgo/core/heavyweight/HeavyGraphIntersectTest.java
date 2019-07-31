@@ -63,8 +63,8 @@ public class HeavyGraphIntersectTest {
 
     private List<Long> assertTriangles() {
         HeavyGraph graph = (HeavyGraph)new GraphLoader(gdb)
-                .asUndirected(true)
-                .withSort(true)
+                .undirected()
+                .sorted()
                 .load(HeavyGraphFactory.class);
 
         String triangleQuery = "MATCH (a)--(b)--(c)--(a) where a <> b and b <> c and c <> a " +

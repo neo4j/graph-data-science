@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
+import org.neo4j.graphalgo.impl.utils.CommunityUtils;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.values.storable.Values;
 
@@ -148,7 +149,7 @@ public final class Louvain extends Algorithm<Louvain> {
         });
         // temporary graph
         long nodeCount = comCount.cardinality();
-        LouvainUtils.normalize(communities);
+        CommunityUtils.normalize(communities);
         Graph graph = rebuildGraph(this.root, communities, nodeCount);
 
         return computeOf(graph, nodeCount, maxLevel, maxIterations, randomNeighborSelection);
@@ -184,7 +185,7 @@ public final class Louvain extends Algorithm<Louvain> {
                             .compute(maxIterations);
             // rebuild graph based on the community structure
             final HugeLongArray communityIds = modularityOptimization.getCommunityIds();
-            communityCount = LouvainUtils.normalize(communityIds);
+            communityCount = CommunityUtils.normalize(communityIds);
             progressLogger.log(
                     "level: " + (level + 1) +
                             " communities: " + communityCount +
@@ -208,7 +209,7 @@ public final class Louvain extends Algorithm<Louvain> {
         return this;
     }
 
-    private static final int MAX_MAP_ENTRIES = (int) ((Integer.MAX_VALUE - 2) * 0.75f);
+    private static final int MAX_MAP_ENTRIES = (int) ((Integer.MAX_VALUE - 2) * 0.75F);
 
     /**
      * create a virtual graph based on the community structure of the
@@ -229,7 +230,7 @@ public final class Louvain extends Algorithm<Louvain> {
         LongLongSubGraph subGraph = new LongLongSubGraph(communityCount, tracker);
 
         // for each node in the current graph
-        HugeCursor<long[]> cursor = communityIds.cursor(communityIds.newCursor());
+        HugeCursor<long[]> cursor = communityIds.initCursor(communityIds.newCursor());
         while (cursor.next()) {
             long[] communities = cursor.array;
             int start = cursor.offset;
@@ -276,7 +277,7 @@ public final class Louvain extends Algorithm<Louvain> {
         final IntIntSubGraph subGraph = new IntIntSubGraph(communityCount);
 
         // for each node in the current graph
-        HugeCursor<long[]> cursor = communityIds.cursor(communityIds.newCursor());
+        HugeCursor<long[]> cursor = communityIds.initCursor(communityIds.newCursor());
         while (cursor.next()) {
             long[] communities = cursor.array;
             int start = cursor.offset;
@@ -314,7 +315,7 @@ public final class Louvain extends Algorithm<Louvain> {
 
     private HugeLongArray rebuildCommunityStructure(final HugeLongArray communityIds) {
         // rebuild community array
-        try (HugeCursor<long[]> cursor = communities.cursor(communities.newCursor())) {
+        try (HugeCursor<long[]> cursor = communities.initCursor(communities.newCursor())) {
             while (cursor.next()) {
                 long[] array = cursor.array;
                 int limit = Math.min(cursor.limit, array.length);
@@ -416,10 +417,9 @@ public final class Louvain extends Algorithm<Louvain> {
     }
 
     @Override
-    public Louvain release() {
+    public void release() {
         tracker.remove(communities.release());
         communities = null;
-        return this;
     }
 
     @Override
@@ -436,7 +436,7 @@ public final class Louvain extends Algorithm<Louvain> {
 
     public double getFinalModularity() {
         double[] modularities = getModularities();
-        return modularities.length > 0 ? modularities[modularities.length - 1] : 0.0d;
+        return modularities.length > 0 ? modularities[modularities.length - 1] : 0.0D;
     }
 
     @Override

@@ -71,10 +71,10 @@ public class DangalchevCentralityProc {
                 .init(log, configuration.getNodeLabelOrQuery(), configuration.getRelationshipOrQuery(), configuration)
                 .withoutNodeProperties()
                 .withAllocationTracker(tracker)
-                .asUndirected(true)
+                .undirected()
                 .load(configuration.getGraphImpl("huge"));
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }
@@ -112,13 +112,13 @@ public class DangalchevCentralityProc {
                     .init(log, configuration.getNodeLabelOrQuery(), configuration.getRelationshipOrQuery(), configuration)
                     .withoutNodeProperties()
                     .withAllocationTracker(tracker)
-                    .asUndirected(true)
+                    .undirected()
                     .load(configuration.getGraphImpl("huge"));
         }
 
         builder.withNodeCount(graph.nodeCount());
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.of(builder.build());
         }

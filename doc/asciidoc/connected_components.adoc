@@ -18,6 +18,7 @@ This section includes:
 ** <<algorithms-connected-components-sample-unweighted, Unweighted version>>
 ** <<algorithms-connected-components-sample-weighted, Weighted version>>
 * <<algorithms-connected-components-example, Example usage>>
+** <<algorithms-connected-components-example-seeding, Using seed communities>>
 * <<algorithms-connected-components-hgp, Huge graph projection>>
 * <<algorithms-connected-components-cp, Cypher projection>>
 * <<algorithms-connected-components-syntax, Syntax>>
@@ -172,7 +173,23 @@ The biggest component has 8938630 out of total 8981389 (99,5%).
 It is quite high, but not shocking, as we have a friendship social network where we can expect small world effect and 6 degree of separation rule, where you can get to any person in a social network, just depends how long is the path.
 
 We can now move on to next step of analysis and run centralities on only the biggest components, so that our results will be more accurate.
-We will write back the results to the node, and use centralities with Cypher loading, or set a new label for the biggest component.
+We will write back the results to the node, and use centralities with Cypher loading, or set a new community identifier for the biggest component.
+
+
+[[algorithms-connected-components-example-seeding]]
+=== Using seed communities
+
+It is possible to define preliminary communities of nodes using the `seedProperty` parameter.
+This is helpful if we want to retain communities from a previous run.
+It can also potentially speed up the computation.
+The property value needs to be a number.
+
+The algorithm first checks if there is a seed community assigned to the node.
+If there is one, that community is used.
+Otherwise, a new unique community is assigned to the node.
+
+Once every node has a community, the algorithm runs and merges communities of nodes that are connected.
+When merging communities, the resulting community is always the one with the lower community id.
 
 
 [[algorithms-connected-components-hgp]]
@@ -216,15 +233,25 @@ YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name              | Type    | Default        | Optional | Description
-| label             | string  | null           | yes      | The label to load from the graph. If null, load all nodes
-| relationship      | string  | null           | yes      | The relationship-type to load from the graph. If null, load all relationships
-| weightProperty    | string  | null           | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| write             | boolean | true           | yes      | Specifies if the result should be written back as a node property
-| writeProperty | string  | 'partition'    | yes      | The property name written back the ID of the partition particular node belongs to
-| threshold         | float   | null           | yes      | The value of the weight above which the relationship is not thrown away
-| defaultValue      | float   | null           | yes      | The default value of the weight in case it is missing or invalid
-| concurrency       | int     | available CPUs | yes      | The number of concurrent threads
-| graph             | string  | 'heavy'        | yes      | Use 'heavy' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
+| node label        | string  | null           | yes      | The label to load from the graph. If null, load all nodes
+| relationship type | string  | null           | yes      | The relationship-type to load from the graph. If null, load all relationships
+| config            | map     | n/a            | yes      | Additional configurations
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type    | Default                   | Optional | Description
+| concurrency       | int     | available CPUs            | yes      | The number of concurrent threads
+| readConcurrency   | int     | value of `concurrency`    | yes      | The number of concurrent threads used for reading the graph
+| writeConcurrency  | int     | value of `concurrency`    | yes      | The number of concurrent threads used for writing the result
+| weightProperty    | string  | null                      | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
+| seedProperty      | string  | n/a                       | yes      | Used to set the initial community for a node. The property value needs to be a number.
+| write             | boolean | true                      | yes      | Specifies if the result should be written back as a node property
+| writeProperty     | string  | 'partition'               | yes      | The property name written back the ID of the partition particular node belongs to
+| threshold         | float   | null                      | yes      | The value of the weight above which the relationship is not thrown away
+| defaultValue      | float   | null                      | yes      | The default value of the weight in case it is missing or invalid
+| graph             | string  | 'heavy'                   | yes      | Use 'heavy' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
 |===
 
 .Results

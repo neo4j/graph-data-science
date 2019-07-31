@@ -77,7 +77,7 @@ abstract class HugeArrayBuilder<Array, Huge extends HugeArray<Array, ?, Huge>> {
         }
 
         private void reset(long start, long end) {
-            array.cursor(this.cursor, start, end);
+            array.initCursor(this.cursor, start, end);
             this.start = start;
             buffer = null;
             offset = 0;
@@ -88,6 +88,7 @@ abstract class HugeArrayBuilder<Array, Huge extends HugeArray<Array, ?, Huge>> {
             if (!cursor.next()) {
                 return false;
             }
+            start += length;
             buffer = cursor.array;
             offset = cursor.offset;
             length = cursor.limit - cursor.offset;

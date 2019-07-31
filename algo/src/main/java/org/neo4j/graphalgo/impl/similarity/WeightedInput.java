@@ -111,7 +111,7 @@ public class WeightedInput implements Comparable<WeightedInput>, SimilarityInput
         double sumSquareDelta = Intersections.sumSquareDeltaSkip(thisWeights, otherWeights, len, skipValue);
         long intersection = 0;
 
-        if (similarityCutoff >= 0d && sumSquareDelta > similarityCutoff) return null;
+        if (similarityCutoff >= 0D && sumSquareDelta > similarityCutoff) return null;
         return new SimilarityResult(id, other.id, itemCount, other.itemCount, intersection, sumSquareDelta,bidirectional, false);
     }
 
@@ -128,7 +128,7 @@ public class WeightedInput implements Comparable<WeightedInput>, SimilarityInput
         double sumSquareDelta = Intersections.sumSquareDelta(thisWeights, otherWeights, len);
         long intersection = 0;
 
-        if (similarityCutoff >= 0d && sumSquareDelta > similarityCutoff) return null;
+        if (similarityCutoff >= 0D && sumSquareDelta > similarityCutoff) return null;
         return new SimilarityResult(id, other.id, itemCount, other.itemCount, intersection, sumSquareDelta, bidirectional, false);
     }
 
@@ -145,7 +145,7 @@ public class WeightedInput implements Comparable<WeightedInput>, SimilarityInput
         double cosineSquares = Intersections.cosineSquareSkip(thisWeights, otherWeights, len, skipValue);
         long intersection = 0;
 
-        if (similarityCutoff >= 0d && (cosineSquares == 0 || cosineSquares < similarityCutoff)) return null;
+        if (similarityCutoff >= 0D && (cosineSquares == 0 || cosineSquares < similarityCutoff)) return null;
         return new SimilarityResult(id, other.id, itemCount, other.itemCount, intersection, cosineSquares, bidirectional, false);
     }
 
@@ -162,7 +162,7 @@ public class WeightedInput implements Comparable<WeightedInput>, SimilarityInput
         double cosineSquares = Intersections.cosineSquare(thisWeights, otherWeights, len);
         long intersection = 0;
 
-        if (similarityCutoff >= 0d && (cosineSquares == 0 || cosineSquares < similarityCutoff)) return null;
+        if (similarityCutoff >= 0D && (cosineSquares == 0 || cosineSquares < similarityCutoff)) return null;
         return new SimilarityResult(id, other.id, itemCount, other.itemCount, intersection, cosineSquares, bidirectional, false);
     }
 
@@ -178,7 +178,7 @@ public class WeightedInput implements Comparable<WeightedInput>, SimilarityInput
         int len = Math.min(thisWeights.length, otherWeights.length);
         double pearson = Intersections.pearson(thisWeights, otherWeights, len);
 
-        if (similarityCutoff >= 0d && (pearson == 0 || pearson < similarityCutoff)) return null;
+        if (similarityCutoff >= 0D && (pearson == 0 || pearson < similarityCutoff)) return null;
 
         return new SimilarityResult(id, other.id, itemCount, other.itemCount, 0, pearson, bidirectional, false);
     }
@@ -195,7 +195,7 @@ public class WeightedInput implements Comparable<WeightedInput>, SimilarityInput
         int len = Math.min(thisWeights.length, otherWeights.length);
         double pearson = Intersections.pearsonSkip(thisWeights, otherWeights, len, skipValue);
 
-        if (similarityCutoff >= 0d && (pearson == 0 || pearson < similarityCutoff)) return null;
+        if (similarityCutoff >= 0D && (pearson == 0 || pearson < similarityCutoff)) return null;
 
         return new SimilarityResult(id, other.id, itemCount, other.itemCount, 0, pearson, bidirectional, false);
     }

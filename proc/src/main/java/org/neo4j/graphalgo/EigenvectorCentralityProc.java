@@ -86,7 +86,7 @@ public final class EigenvectorCentralityProc {
                 statsBuilder,
                 configuration);
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.of(statsBuilder.build());
         }
@@ -130,7 +130,7 @@ public final class EigenvectorCentralityProc {
                 statsBuilder,
                 configuration);
 
-        if (graph.nodeCount() == 0) {
+        if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();
         }
@@ -162,7 +162,7 @@ public final class EigenvectorCentralityProc {
 
         Direction direction = configuration.getDirection(Direction.OUTGOING);
         if (direction == Direction.BOTH) {
-            graphLoader.asUndirected(true);
+            graphLoader.undirected();
         } else {
             graphLoader.withDirection(direction);
         }
