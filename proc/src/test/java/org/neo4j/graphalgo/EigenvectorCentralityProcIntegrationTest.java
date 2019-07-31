@@ -45,7 +45,6 @@ public class EigenvectorCentralityProcIntegrationTest {
 
     private static GraphDatabaseAPI db;
     private static Map<Long, Double> expected = new HashMap<>();
-    private static Map<Long, Double> weightedExpected = new HashMap<>();
 
     @BeforeClass
     public static void setup() throws KernelException {
