@@ -54,7 +54,7 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
 
     @Procedure(value = "algo.pageRank", mode = Mode.WRITE)
     @Description("CALL algo.pageRank(label:String, relationship:String, " +
-                 "{iterations:5, dampingFactor:0.85, weightProperty: null, write: true, writeProperty:'pagerank', concurrency:4}) " +
+                 "{iterations: 5, tolerance: 0.0000001, dampingFactor: 0.85, weightProperty: null, write: true, writeProperty: 'pagerank', concurrency: 4}) " +
                  "YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, dampingFactor, write, writeProperty" +
                  " - calculates page rank and potentially writes back")
     public Stream<PageRankScore.Stats> pageRank(
@@ -88,7 +88,7 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
 
     @Procedure(value = "algo.pageRank.stream", mode = Mode.READ)
     @Description("CALL algo.pageRank.stream(label:String, relationship:String, " +
-                 "{iterations:20, dampingFactor:0.85, weightProperty: null, concurrency:4}) " +
+                 "{iterations: 20, tolerance: 0.0000001, dampingFactor: 0.85, weightProperty: null, concurrency: 4}) " +
                  "YIELD node, score - calculates page rank and streams results")
     public Stream<CentralityScore> pageRankStream(
             @Name(value = "label", defaultValue = "") String label,
