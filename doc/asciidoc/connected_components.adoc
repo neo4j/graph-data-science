@@ -232,10 +232,10 @@ YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name              | Type    | Default        | Optional | Description.
+| Name              | Type    | Default        | Optional | Description
 | node label        | string  | null           | yes      | The label to load from the graph. If null, load all nodes.
 | relationship type | string  | null           | yes      | The relationship-type to load from the graph. If null, load all relationships.
-| config            | map     | n/a            | yes      | Additional configurations.
+| config            | map     | n/a            | yes      | Additional configurations
 |===
 
 .Configuration
@@ -252,7 +252,7 @@ YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
 | threshold         | float   | null                      | yes      | The value of the weight above which the relationship is not thrown away.
 | defaultValue      | float   | null                      | yes      | The default value of the weight in case it is missing or invalid.
 | consecutiveIds    | boolean | false                     | yes      | Community identifiers are mapped into a consecutive id space (requires additional memory).
-| graph             | string  | 'heavy'                   | yes      | Use 'heavy' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement.
+| graph             | string  | 'heavy'                   | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement.
 |===
 
 .Results
@@ -294,10 +294,10 @@ YIELD nodeId, setId - yields a setId to each node id
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name              | Type    | Default        | Optional | Description.
+| Name              | Type    | Default        | Optional | Description
 | node label        | string  | null           | yes      | The label to load from the graph. If null, load all nodes.
 | relationship type | string  | null           | yes      | The relationship-type to load from the graph. If null, load all relationships.
-| config            | map     | n/a            | yes      | Additional configurations.
+| config            | map     | n/a            | yes      | Additional configurations
 |===
 
 .Configuration
@@ -312,7 +312,7 @@ YIELD nodeId, setId - yields a setId to each node id
 | threshold         | float   | null                      | yes      | The value of the weight above which the relationship is not thrown away.
 | defaultValue      | float   | null                      | yes      | The default value of the weight in case it is missing or invalid.
 | consecutiveIds    | boolean | false                     | yes      | Community identifiers are mapped into a consecutive id space (requires additional memory).
-| graph             | string  | 'heavy'                   | yes      | Use 'heavy' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement.
+| graph             | string  | 'heavy'                   | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement.
 |===
 
 .Results
