@@ -536,7 +536,7 @@ public class PageRank extends Algorithm<PageRank> {
         }
 
         private boolean checkTolerance() {
-            return steps.stream().allMatch(ComputeStep::partitionIsStabilized);
+            return steps.stream().allMatch(ComputeStep::partitionIsStable);
         }
 
         private void normalizeDeltas() {

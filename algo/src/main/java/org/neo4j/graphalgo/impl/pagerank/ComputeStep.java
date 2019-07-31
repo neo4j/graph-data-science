@@ -34,5 +34,5 @@ public interface ComputeStep extends Runnable {
 
     void prepareNormalizeDeltas(double l2Norm);
 
-    boolean partitionIsStabilized();
+    boolean partitionIsStable();
 }

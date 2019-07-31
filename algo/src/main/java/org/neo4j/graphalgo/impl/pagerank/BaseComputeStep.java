@@ -230,7 +230,7 @@ public abstract class BaseComputeStep implements ComputeStep {
     public double[] deltas() { return deltas;}
 
     @Override
-    public boolean partitionIsStabilized() {
+    public boolean partitionIsStable() {
         return shouldBreak;
     }
 }

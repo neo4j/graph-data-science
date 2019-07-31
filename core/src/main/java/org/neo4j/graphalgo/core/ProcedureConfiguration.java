@@ -253,17 +253,6 @@ public class ProcedureConfiguration {
     }
 
     /**
-     * return the tolerance value which determines an termination threshold of an algorithm when successive
-     * results do not exceed this value
-     *
-     * @param defaultValue a default value
-     * @return
-     */
-    public double getTolerance(double defaultValue) {
-        return getNumber(ProcedureConstants.TOLERANCE_PARAM, defaultValue).doubleValue();
-    }
-
-    /**
      * get the batchSize for parallel evaluation
      *
      * @return batch size

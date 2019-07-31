@@ -54,7 +54,7 @@ import java.util.stream.Stream;
 public final class ArticleRankProc {
 
     public static final String CONFIG_DAMPING = "dampingFactor";
-
+    private static final String CONFIG_TOLERANCE = "tolerance";
     public static final Double DEFAULT_DAMPING = 0.85;
     public static final Integer DEFAULT_ITERATIONS = 20;
     public static final String DEFAULT_SCORE_PROPERTY = "articlerank";
@@ -184,7 +184,7 @@ public final class ArticleRankProc {
         PageRank.Config algoConfig = new PageRank.Config(
                 configuration.getIterations(DEFAULT_ITERATIONS),
                 configuration.get(CONFIG_DAMPING, DEFAULT_DAMPING),
-                configuration.getTolerance(PageRank.DEFAULT_TOLERANCE)
+                configuration.get(CONFIG_TOLERANCE, PageRank.DEFAULT_TOLERANCE)
         );
 
         final int batchSize = configuration.getBatchSize();
