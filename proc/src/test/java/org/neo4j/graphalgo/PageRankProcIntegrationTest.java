@@ -272,7 +272,7 @@ public class PageRankProcIntegrationTest {
     @Test
     public void testPageRankWithToleranceParam() throws Exception {
         runQuery("CALL algo.pageRank('Label1', 'TYPE1', {tolerance: 0.0001, batchSize:3, graph:'"+graphImpl+"'}) YIELD nodes, iterations",
-                row -> assertEquals((long)PageRankProc.DEFAULT_ITERATIONS, (long)row.getNumber("iterations")));
+                row -> assertEquals(20L, (long)row.getNumber("iterations")));
 
         runQuery("CALL algo.pageRank('Label1', 'TYPE1', {tolerance: 100.0, batchSize:3, graph:'"+graphImpl+"'}) YIELD nodes, iterations",
                 row -> assertEquals(1L, (long)row.getNumber("iterations")));
