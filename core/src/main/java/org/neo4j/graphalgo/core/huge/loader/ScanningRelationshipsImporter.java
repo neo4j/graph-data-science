@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.ImportProgress;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.kernel.api.StatementConstants;
 import org.neo4j.kernel.impl.store.record.RelationshipRecord;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -37,10 +38,8 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
     private final ImportProgress progress;
     private final AllocationTracker tracker;
     private final IdMapping idMap;
-    private final HugeWeightMapBuilder weights;
-    private final boolean loadDegrees;
-    private final HugeAdjacencyBuilder outAdjacency;
-    private final HugeAdjacencyBuilder inAdjacency;
+    private final RelationshipsBuilder outRelationshipsBuilder;
+    private final RelationshipsBuilder inRelationshipsBuilder;
     private final AtomicLong relationshipCounter;
 
     ScanningRelationshipsImporter(
@@ -50,10 +49,8 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
             ImportProgress progress,
             AllocationTracker tracker,
             IdMapping idMap,
-            HugeWeightMapBuilder weights,
-            boolean loadDegrees,
-            HugeAdjacencyBuilder outAdjacency,
-            HugeAdjacencyBuilder inAdjacency,
+            RelationshipsBuilder outRelationshipsBuilder,
+            RelationshipsBuilder inRelationshipsBuilder,
             ExecutorService threadPool,
             int concurrency) {
         super(
@@ -67,10 +64,8 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         this.progress = progress;
         this.tracker = tracker;
         this.idMap = idMap;
-        this.weights = weights;
-        this.loadDegrees = loadDegrees;
-        this.outAdjacency = outAdjacency;
-        this.inAdjacency = inAdjacency;
+        this.outRelationshipsBuilder = outRelationshipsBuilder;
+        this.inRelationshipsBuilder = inRelationshipsBuilder;
         this.relationshipCounter = new AtomicLong();
     }
 
@@ -83,23 +78,26 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         int pageSize = sizing.pageSize();
         int numberOfPages = sizing.numberOfPages();
 
-        WeightBuilder weightBuilder = WeightBuilder.of(weights, numberOfPages, pageSize, nodeCount, tracker);
-        AdjacencyBuilder outBuilder = AdjacencyBuilder.compressing(outAdjacency, numberOfPages, pageSize, tracker, relationshipCounter);
-        AdjacencyBuilder inBuilder = AdjacencyBuilder.compressing(inAdjacency, numberOfPages, pageSize, tracker, relationshipCounter);
+        AdjacencyBuilder outBuilder = AdjacencyBuilder.compressing(
+                outRelationshipsBuilder,
+                numberOfPages, pageSize, tracker, relationshipCounter, dimensions.relWeightId(), setup.relationDefaultWeight);
+        AdjacencyBuilder inBuilder = AdjacencyBuilder.compressing(
+                inRelationshipsBuilder,
+                numberOfPages, pageSize, tracker, relationshipCounter, dimensions.relWeightId(), setup.relationDefaultWeight);
 
         for (int idx = 0; idx < numberOfPages; idx++) {
-            weightBuilder.addWeightImporter(idx);
-            outBuilder.addAdjacencyImporter(tracker, loadDegrees, idx);
-            inBuilder.addAdjacencyImporter(tracker, loadDegrees, idx);
+            outBuilder.addAdjacencyImporter(tracker, idx);
+            inBuilder.addAdjacencyImporter(tracker, idx);
         }
 
-        weightBuilder.finish();
         outBuilder.finishPreparation();
         inBuilder.finishPreparation();
 
+        boolean importWeights = dimensions.relWeightId() != StatementConstants.NO_SUCH_PROPERTY_KEY;
+
         return RelationshipsScanner.of(
                 api, setup, progress, idMap, scanner, dimensions.singleRelationshipTypeId(),
-                tracker, weightBuilder, outBuilder, inBuilder);
+                tracker, importWeights, outBuilder, inBuilder);
     }
 
     @Override

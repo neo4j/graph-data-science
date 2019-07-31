@@ -119,7 +119,7 @@ public class HugeGraphFactoryTest {
         final Graph graph = new GraphLoader(DB)
                 .withAnyLabel()
                 .withAnyRelationshipType()
-                .withRelationshipWeightsFromProperty("prop1", 0.0)
+                .withRelationshipWeightsFromProperty("prop1", 1337.42)
                 .load(HugeGraphFactory.class);
 
         double[] out1 = collectTargetWeights(graph, id1);

@@ -34,11 +34,11 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 final class CompressedLongArray {
 
     private static final byte[] EMPTY_BYTES = new byte[0];
-    private static final double[] EMPTY_DOUBLES = new double[0];
+    private static final long[] EMPTY_LONGS = new long[0];
 
     private final AllocationTracker tracker;
     private byte[] storage;
-    private double[] weights;
+    private long[] weights;
     private int pos;
     private long lastValue;
     private int length;
@@ -54,7 +54,7 @@ final class CompressedLongArray {
         } else {
             storage = EMPTY_BYTES;
         }
-        weights = EMPTY_DOUBLES;
+        weights = EMPTY_LONGS;
     }
 
     /**
@@ -92,7 +92,7 @@ final class CompressedLongArray {
      * @param start start index in values and weights
      * @param end end index in values and weights
      */
-    void add(long[] values, double[] weights, int start, int end) {
+    void add(long[] values, long[] weights, int start, int end) {
         // write weights
         int targetCount = end - start;
         ensureCapacity(length, targetCount, this.weights);
@@ -111,9 +111,9 @@ final class CompressedLongArray {
         }
     }
 
-    private void ensureCapacity(int pos, int required, double[] weights) {
+    private void ensureCapacity(int pos, int required, long[] weights) {
         if (weights.length <= pos + required) {
-            int newLength = ArrayUtil.oversize(pos + required, Double.BYTES);
+            int newLength = ArrayUtil.oversize(pos + required, Long.BYTES);
             tracker.remove(sizeOfDoubleArray(weights.length));
             tracker.add(sizeOfDoubleArray(newLength));
             this.weights = Arrays.copyOf(weights, newLength);
@@ -133,8 +133,12 @@ final class CompressedLongArray {
         return storage;
     }
 
-    double[] weights() {
+    long[] weights() {
         return weights;
+    }
+
+    boolean hasWeights() {
+        return weights != null && !(weights.length == 0);
     }
 
     void release() {

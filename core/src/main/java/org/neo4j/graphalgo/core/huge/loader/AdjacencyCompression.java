@@ -53,11 +53,11 @@ final class AdjacencyCompression {
     }
 
     // TODO: requires lots of additional memory ... inline indirect sort to make reuse of - to be created - buffers
-    static int applyDeltaEncoding(LongsRef data, double[] weights) {
+    static int applyDeltaEncoding(LongsRef data, long[] weights) {
         int[] order = IndirectSort.mergesort(0, data.length, new AscendingLongComparator(data.longs));
 
         long[] sortedValues = new long[data.length];
-        double[] sortedWeights = new double[data.length];
+        long[] sortedWeights = new long[data.length];
         int degree = applyDelta(order, data.longs, sortedValues, weights, sortedWeights, data.length);
 
         System.arraycopy(sortedValues, 0, data.longs, 0, degree);
@@ -67,7 +67,11 @@ final class AdjacencyCompression {
     }
 
     static int compress(LongsRef data, byte[] out) {
-        return encodeVLongs(data.longs, data.length, out, 0);
+        return compress(data.longs, out, data.length);
+    }
+
+    static int compress(long[] data, byte[] out, int length) {
+        return encodeVLongs(data, length, out, 0);
     }
 
     //@formatter:off
@@ -100,12 +104,16 @@ final class AdjacencyCompression {
             int[] order,
             long[] values,
             long[] outValues,
-            double[] weights,
-            double[] outWeights,
+            long[] weights,
+            long[] outWeights,
             int length) {
         int firstSortIdx = order[0];
         long value = values[firstSortIdx];
         long delta;
+
+        long weightValue = weights[firstSortIdx];
+        long weightDelta;
+
         outValues[0] = values[firstSortIdx];
         outWeights[0] = weights[firstSortIdx];
 
@@ -114,8 +122,15 @@ final class AdjacencyCompression {
             final int sortIdx = order[in];
             delta = values[sortIdx] - value;
             value = values[sortIdx];
+
+            weightDelta = weights[sortIdx] - weightValue;
+            weightValue = weights[sortIdx];
+
+            // only keep the relationship if we don't already have
+            // one that points to the same target node
+            // no support for #parallel-edges
             if (delta > 0L) {
-                outWeights[out] = weights[sortIdx];
+                outWeights[out] = weightDelta;
                 outValues[out++] = delta;
             }
         }

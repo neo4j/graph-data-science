@@ -21,11 +21,13 @@ package org.neo4j.graphalgo.core.huge.loader;
 
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.core.loading.ReadHelper;
 import org.neo4j.graphalgo.core.utils.ImportProgress;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.StatementAction;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.internal.kernel.api.CursorFactory;
+import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.store.record.RelationshipRecord;
@@ -37,6 +39,8 @@ import java.util.Collections;
 
 final class RelationshipsScanner extends StatementAction implements RecordScanner {
 
+    public static final int BATCH_ENTRY_SIZE = 4;
+
     static InternalImporter.CreateScanner of(
             GraphDatabaseAPI api,
             GraphSetup setup,
@@ -45,17 +49,17 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
             AbstractStorePageCacheScanner<RelationshipRecord> scanner,
             int relType,
             AllocationTracker tracker,
-            WeightBuilder weights,
+            boolean loadWeights,
             AdjacencyBuilder outAdjacency,
             AdjacencyBuilder inAdjacency) {
-        final Imports imports = imports(setup, weights.loadsWeights());
+        final Imports imports = imports(setup, loadWeights);
         if (imports == null) {
             return InternalImporter.createEmptyScanner();
         }
         final AdjacencyBuilder actualInAdjacency = setup.loadAsUndirected ? outAdjacency : inAdjacency;
         return new RelationshipsScanner.Creator(
                 api, progress, idMap, scanner, relType, tracker,
-                weights, outAdjacency, actualInAdjacency, imports);
+                outAdjacency, actualInAdjacency, imports);
     }
 
     static final class Creator implements InternalImporter.CreateScanner {
@@ -65,7 +69,6 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
         private final AbstractStorePageCacheScanner<RelationshipRecord> scanner;
         private final int relType;
         private final AllocationTracker tracker;
-        private final WeightBuilder weights;
         private final AdjacencyBuilder outAdjacency;
         private final AdjacencyBuilder inAdjacency;
         private final Imports imports;
@@ -77,7 +80,6 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
                 AbstractStorePageCacheScanner<RelationshipRecord> scanner,
                 int relType,
                 AllocationTracker tracker,
-                WeightBuilder weights,
                 AdjacencyBuilder outAdjacency,
                 AdjacencyBuilder inAdjacency,
                 Imports imports) {
@@ -87,7 +89,6 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
             this.scanner = scanner;
             this.relType = relType;
             this.tracker = tracker;
-            this.weights = weights;
             this.outAdjacency = outAdjacency;
             this.inAdjacency = inAdjacency;
             this.imports = imports;
@@ -97,7 +98,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
         public RecordScanner create(final int index) {
             return new RelationshipsScanner(
                     api, progress, idMap, scanner, relType, index,
-                    tracker, weights, outAdjacency, inAdjacency, imports);
+                    tracker, outAdjacency, inAdjacency, imports);
         }
 
         @Override
@@ -124,7 +125,6 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
     private final int scannerIndex;
 
     private final AllocationTracker tracker;
-    private final WeightBuilder weights;
     private final AdjacencyBuilder outAdjacency;
     private final AdjacencyBuilder inAdjacency;
     private final Imports imports;
@@ -140,7 +140,6 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
             int relType,
             int threadIndex,
             AllocationTracker tracker,
-            WeightBuilder weights,
             AdjacencyBuilder outAdjacency,
             AdjacencyBuilder inAdjacency,
             Imports imports) {
@@ -151,7 +150,6 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
         this.relType = relType;
         this.scannerIndex = threadIndex;
         this.tracker = tracker;
-        this.weights = weights;
         this.outAdjacency = outAdjacency;
         this.inAdjacency = inAdjacency;
         this.imports = imports;
@@ -171,7 +169,6 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
         try (AbstractStorePageCacheScanner<RelationshipRecord>.Cursor cursor = scanner.getCursor()) {
             RelationshipsBatchBuffer batches = new RelationshipsBatchBuffer(idMap, relType, cursor.bulkSize());
 
-            final WeightBuilder weights = this.weights;
             final ImportProgress progress = this.progress;
             final AdjacencyBuilder outAdjacency = this.outAdjacency;
             final AdjacencyBuilder inAdjacency = this.inAdjacency;
@@ -183,7 +180,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
             while (batches.scan(cursor)) {
                 int batchLength = batches.length();
                 long imported = imports.importRels(
-                        batches, batchLength, weights, cursors, read, tracker, outAdjacency, inAdjacency
+                        batches, batchLength, cursors, read, tracker, outAdjacency, inAdjacency
                 );
                 int importedRels = RawValues.getHead(imported);
                 int importedWeights = RawValues.getTail(imported);
@@ -210,7 +207,6 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
         long importRels(
                 RelationshipsBatchBuffer batches,
                 int batchLength,
-                WeightBuilder weights,
                 CursorFactory cursors,
                 Read read,
                 AllocationTracker tracker,
@@ -246,115 +242,114 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
     private static long importBothOrUndirected(
             RelationshipsBatchBuffer buffer,
             int batchLength,
-            WeightBuilder weights,
             CursorFactory cursors,
             Read read,
             AllocationTracker tracker,
             AdjacencyBuilder outAdjacency,
             AdjacencyBuilder inAdjacency) {
         long[] batch = buffer.sortBySource();
-        int importedOut = importRelationships(buffer, batch, batchLength, outAdjacency, tracker);
+        int importedOut = importRelationships(buffer, batch, batchLength, null, outAdjacency, tracker);
         batch = buffer.sortByTarget();
-        int importedIn = importRelationships(buffer, batch, batchLength, inAdjacency, tracker);
+        int importedIn = importRelationships(buffer, batch, batchLength, null, inAdjacency, tracker);
         return RawValues.combineIntInt(importedOut + importedIn, 0);
     }
 
     private static long importUndirectedWithWeight(
             RelationshipsBatchBuffer buffer,
             int batchLength,
-            WeightBuilder weights,
             CursorFactory cursors,
             Read read,
             AllocationTracker tracker,
             AdjacencyBuilder outAdjacency,
             AdjacencyBuilder inAdjacency) {
         long[] batch = buffer.sortBySource();
-        int importedOut = importRelationships(buffer, batch, batchLength, outAdjacency, tracker);
-        int importedOutWeights = importWeights(batch, batchLength, weights, cursors, read);
+        long[] weightsOut = loadWeights(batch, batchLength, cursors, outAdjacency.getWeightProperty(), outAdjacency.getWeightProperty(), read);
+        int importedOut = importRelationships(buffer, batch, batchLength, weightsOut, outAdjacency, tracker);
         batch = buffer.sortByTarget();
-        int importedIn = importRelationships(buffer, batch, batchLength, inAdjacency, tracker);
-        int importedInWeights = importWeights(batch, batchLength, weights, cursors, read);
-        return RawValues.combineIntInt(importedOut + importedIn, importedOutWeights + importedInWeights);
+
+        long[] weightsIn = loadWeights(batch, batchLength, cursors, outAdjacency.getWeightProperty(), outAdjacency.getWeightProperty(), read);
+        int importedIn = importRelationships(buffer, batch, batchLength, weightsIn, inAdjacency, tracker);
+        return RawValues.combineIntInt(importedOut + importedIn, importedOut + importedIn);
     }
 
     private static long importBothWithWeight(
             RelationshipsBatchBuffer buffer,
             int batchLength,
-            WeightBuilder weights,
             CursorFactory cursors,
             Read read,
             AllocationTracker tracker,
             AdjacencyBuilder outAdjacency,
             AdjacencyBuilder inAdjacency) {
+
         long[] batch = buffer.sortBySource();
-        int importedOut = importRelationships(buffer, batch, batchLength, outAdjacency, tracker);
-        int importedOutWeights = importWeights(batch, batchLength, weights, cursors, read);
+        long[] weightsOut = loadWeights(batch, batchLength, cursors, outAdjacency.getWeightProperty(), outAdjacency.getWeightProperty(), read);
+        int importedOut = importRelationships(buffer, batch, batchLength, weightsOut, outAdjacency, tracker);
+
         batch = buffer.sortByTarget();
-        int importedIn = importRelationships(buffer, batch, batchLength, inAdjacency, tracker);
-        return RawValues.combineIntInt(importedOut + importedIn, importedOutWeights);
+        long[] weightsIn = loadWeights(batch, batchLength, cursors, outAdjacency.getWeightProperty(), outAdjacency.getWeightProperty(), read);
+        int importedIn = importRelationships(buffer, batch, batchLength, weightsIn, inAdjacency, tracker);
+
+        return RawValues.combineIntInt(importedOut + importedIn, importedOut + importedIn);
     }
 
     private static long importOutgoing(
             RelationshipsBatchBuffer buffer,
             int batchLength,
-            WeightBuilder weights,
             CursorFactory cursors,
             Read read,
             AllocationTracker tracker,
             AdjacencyBuilder outAdjacency,
             AdjacencyBuilder inAdjacency) {
         long[] batch = buffer.sortBySource();
-        return RawValues.combineIntInt(importRelationships(buffer, batch, batchLength, outAdjacency, tracker), 0);
+        return RawValues.combineIntInt(importRelationships(buffer, batch, batchLength, null, outAdjacency, tracker), 0);
     }
 
     private static long importOutgoingWithWeight(
             RelationshipsBatchBuffer buffer,
             int batchLength,
-            WeightBuilder weights,
             CursorFactory cursors,
             Read read,
             AllocationTracker tracker,
             AdjacencyBuilder outAdjacency,
             AdjacencyBuilder inAdjacency) {
+
         long[] batch = buffer.sortBySource();
-        int importedOut = importRelationships(buffer, batch, batchLength, outAdjacency, tracker);
-        int importedOutWeights = importWeights(batch, batchLength, weights, cursors, read);
-        return RawValues.combineIntInt(importedOut, importedOutWeights);
+        long[] weightsOut = loadWeights(batch, batchLength, cursors, outAdjacency.getWeightProperty(), outAdjacency.getWeightProperty(), read);
+        int importedOut = importRelationships(buffer, batch, batchLength, weightsOut, outAdjacency, tracker);
+        return RawValues.combineIntInt(importedOut, importedOut);
     }
 
     private static long importIncoming(
             RelationshipsBatchBuffer buffer,
             int batchLength,
-            WeightBuilder weights,
             CursorFactory cursors,
             Read read,
             AllocationTracker tracker,
             AdjacencyBuilder outAdjacency,
             AdjacencyBuilder inAdjacency) {
         long[] batch = buffer.sortByTarget();
-        return RawValues.combineIntInt(importRelationships(buffer, batch, batchLength, inAdjacency, tracker), 0);
+        return RawValues.combineIntInt(importRelationships(buffer, batch, batchLength, null, inAdjacency, tracker), 0);
     }
 
     private static long importIncomingWithWeight(
             RelationshipsBatchBuffer buffer,
             int batchLength,
-            WeightBuilder weights,
             CursorFactory cursors,
             Read read,
             AllocationTracker tracker,
             AdjacencyBuilder outAdjacency,
             AdjacencyBuilder inAdjacency) {
-        long[] batch = buffer.sortBySource();
-        int importedInWeights = importWeights(batch, batchLength, weights, cursors, read);
-        batch = buffer.sortByTarget();
-        int importedIn = importRelationships(buffer, batch, batchLength, inAdjacency, tracker);
-        return RawValues.combineIntInt(importedIn, importedInWeights);
+        long[] batch = buffer.sortByTarget();
+        long[] weightsIn = loadWeights(batch, batchLength, cursors, outAdjacency.getWeightProperty(), outAdjacency.getWeightProperty(), read);
+        int importedIn = importRelationships(buffer, batch, batchLength, weightsIn, inAdjacency, tracker);
+        return RawValues.combineIntInt(importedIn, importedIn);
     }
 
     private static int importRelationships(
             RelationshipsBatchBuffer buffer,
             long[] batch,
             int batchLength,
+            long[] weights,
             AdjacencyBuilder adjacency,
             AllocationTracker tracker) {
 
@@ -380,6 +375,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
         adjacency.addAll(
                 batch,
                 targets,
+                weights,
                 offsets,
                 nodesLength,
                 tracker
@@ -388,23 +384,27 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
         return batchLength >> 2;
     }
 
-    private static int importWeights(
+    private static long[] loadWeights(
             long[] batch,
             int batchLength,
-            WeightBuilder weights,
             CursorFactory cursors,
+            int weightProperty,
+            double defaultWeight,
             Read read) {
-        int importedWeights = 0;
 
-        for (int i = 0; i < batchLength; i += 4) {
-            importedWeights += weights.addWeight(
-                    cursors,
-                    read,
-                    /* rel ref */ batch[2 + i],
-                    /* prop ref */ batch[3 + i],
-                    /* source */ batch[i],
-                    /* target */ batch[1 + i]);
+        long[] weights = new long[batchLength / BATCH_ENTRY_SIZE];
+
+        try (PropertyCursor pc = cursors.allocatePropertyCursor()) {
+            for (int i = 0; i < batchLength; i += BATCH_ENTRY_SIZE) {
+                long relationshipReference = batch[2 + i];
+                long propertiesReference = batch[3 + i];
+
+                read.relationshipProperties(relationshipReference, propertiesReference, pc);
+                double weight = ReadHelper.readProperty(pc, weightProperty, defaultWeight);
+                weights[i / BATCH_ENTRY_SIZE] = Double.doubleToLongBits(weight);
+            }
         }
-        return importedWeights;
+
+        return weights;
     }
 }

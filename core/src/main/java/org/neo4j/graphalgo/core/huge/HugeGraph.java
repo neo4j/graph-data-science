@@ -111,7 +111,11 @@ public class HugeGraph implements Graph {
             final HugeAdjacencyList inAdjacency,
             final HugeAdjacencyList outAdjacency,
             final HugeAdjacencyOffsets inOffsets,
-            final HugeAdjacencyOffsets outOffsets) {
+            final HugeAdjacencyOffsets outOffsets,
+            final HugeAdjacencyList inWeights,
+            final HugeAdjacencyList outWeights,
+            final HugeAdjacencyOffsets inWeightOffsets,
+            final HugeAdjacencyOffsets outWeightOffsets) {
         this.idMapping = idMapping;
         this.tracker = tracker;
         this.nodeProperties = nodeProperties;
@@ -120,14 +124,13 @@ public class HugeGraph implements Graph {
         this.outAdjacency = outAdjacency;
         this.inOffsets = inOffsets;
         this.outOffsets = outOffsets;
+        this.inWeights = inWeights;
+        this.outWeights = outWeights;
+        this.inWeightOffsets = inWeightOffsets;
+        this.outWeightOffsets = outWeightOffsets;
         inCache = newCursor(this.inAdjacency);
         outCache = newCursor(this.outAdjacency);
         empty = inCache == null ? newCursor(this.outAdjacency) : newCursor(this.inAdjacency);
-
-        inWeights = null;
-        outWeights = null;
-        inWeightOffsets = null;
-        outWeightOffsets = null;
     }
 
     @Override
@@ -310,8 +313,8 @@ public class HugeGraph implements Graph {
                 inAdjacency,
                 outAdjacency,
                 inOffsets,
-                outOffsets
-        );
+                outOffsets,
+                inWeights, outWeights, inWeightOffsets, outWeightOffsets);
     }
 
     @Override
