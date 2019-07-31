@@ -28,6 +28,7 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
+import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -83,16 +84,16 @@ public class EigenvectorCentralityProcIntegrationTest {
 
         try (Transaction tx = db.beginTx()) {
             final Label label = Label.label("Character");
-            expected.put(db.findNode(label, "name", "Ned").getId(), 111.68570401574802);
-            expected.put(db.findNode(label, "name", "Robert").getId(), 88.09448401574804);
-            expected.put(db.findNode(label, "name", "Cersei").getId(), 		84.59226401574804);
-            expected.put(db.findNode(label, "name", "Catelyn").getId(), 	84.51566401574803);
-            expected.put(db.findNode(label, "name", "Tyrion").getId(), 82.00291401574802);
+            expected.put(db.findNode(label, "name", "Ned").getId(),     111.68570401574802);
+            expected.put(db.findNode(label, "name", "Robert").getId() , 88.09448401574804);
+            expected.put(db.findNode(label, "name", "Cersei").getId() , 84.59226401574804);
+            expected.put(db.findNode(label, "name", "Catelyn").getId(), 84.51566401574803);
+            expected.put(db.findNode(label, "name", "Tyrion").getId(),  82.00291401574802);
             expected.put(db.findNode(label, "name", "Joffrey").getId(), 77.67397401574803);
-            expected.put(db.findNode(label, "name", "Robb").getId(), 73.56551401574802);
-            expected.put(db.findNode(label, "name", "Arya").getId(), 73.32532401574804	);
-            expected.put(db.findNode(label, "name", "Petyr").getId(), 72.26733401574802);
-            expected.put(db.findNode(label, "name", "Sansa").getId(), 71.56470401574803);
+            expected.put(db.findNode(label, "name", "Robb").getId(),    73.56551401574802);
+            expected.put(db.findNode(label, "name", "Arya").getId(),    73.32532401574804);
+            expected.put(db.findNode(label, "name", "Petyr").getId()  , 72.26733401574802);
+            expected.put(db.findNode(label, "name", "Sansa").getId()  , 71.56470401574803);
             tx.success();
         }
     }
@@ -106,8 +107,7 @@ public class EigenvectorCentralityProcIntegrationTest {
     public static Collection<Object[]> data() {
         return Arrays.asList(
                 new Object[]{"Heavy"},
-                new Object[]{"Light"},
-//                new Object[]{"Kernel"},
+                new Object[]{"Kernel"},
                 new Object[]{"Huge"}
         );
     }
@@ -119,59 +119,25 @@ public class EigenvectorCentralityProcIntegrationTest {
     public void testStream() throws Exception {
         final Map<Long, Double> actual = new HashMap<>();
         runQuery(
-                "CALL algo.eigenvector.stream('Character', 'INTERACTS_SEASON1', {graph:'"+graphImpl+"', direction: 'BOTH'}) " +
+                "CALL algo.eigenvector.stream('Character', 'INTERACTS_SEASON1', {graph: $graph, direction: 'BOTH'}) " +
                         "YIELD nodeId, score " +
                         "RETURN nodeId, score " +
                         "ORDER BY score DESC " +
                         "LIMIT 10",
+                MapUtil.map("graph", graphImpl),
                 row -> actual.put(
-                        (Long)row.get("nodeId"),
+                        (Long) row.get("nodeId"),
                         (Double) row.get("score")));
 
         assertMapEquals(expected, actual);
     }
 
-//    @Test
-//    public void testWeightedPageRankStream() throws Exception {
-//        final Map<Long, Double> actual = new HashMap<>();
-//        runQuery(
-//                "CALL algo.pageRank.stream('Label1', 'TYPE1', {graph:'"+graphImpl+"', weightProperty: 'foo'}) YIELD nodeId, score",
-//                row -> actual.put(
-//                        (Long)row.get("nodeId"),
-//                        (Double) row.get("score")));
-//
-//        assertMapEquals(weightedExpected, actual);
-//    }
-
-//    @Test
-//    public void testWeightedPageRankWithCachedWeightsStream() throws Exception {
-//        final Map<Long, Double> actual = new HashMap<>();
-//        runQuery(
-//                "CALL algo.pageRank.stream('Label1', 'TYPE1', {graph:'"+graphImpl+"', weightProperty: 'foo', cacheWeights: true}) YIELD nodeId, score",
-//                row -> actual.put(
-//                        (Long)row.get("nodeId"),
-//                        (Double) row.get("score")));
-//
-//        assertMapEquals(weightedExpected, actual);
-//    }
-
-//    @Test
-//    public void testWeightedPageRankWithAllRelationshipsEqualStream() throws Exception {
-//        final Map<Long, Double> actual = new HashMap<>();
-//        runQuery(
-//                "CALL algo.pageRank.stream('Label1', 'TYPE1', {graph:'"+graphImpl+"', weightProperty: 'madeUp', defaultValue: 1.0}) YIELD nodeId, score",
-//                row -> actual.put(
-//                        (Long)row.get("nodeId"),
-//                        (Double) row.get("score")));
-//
-//        assertMapEquals(expected, actual);
-//    }
-
     @Test
     public void testWriteBack() throws Exception {
         runQuery(
-                "CALL algo.eigenvector('Character', 'INTERACTS_SEASON1', {graph:'"+graphImpl+"', direction: 'BOTH'}) " +
+                "CALL algo.eigenvector('Character', 'INTERACTS_SEASON1', {graph: $graph, direction: 'BOTH'}) " +
                         "YIELD writeMillis, write, writeProperty ",
+                MapUtil.map("graph", graphImpl),
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("eigenvector", row.getString("writeProperty"));
@@ -183,25 +149,11 @@ public class EigenvectorCentralityProcIntegrationTest {
         assertResult("eigenvector", expected);
     }
 
-//    @Test
-//    public void testWeightedPageRankWriteBack() throws Exception {
-//        runQuery(
-//                "CALL algo.pageRank('Label1', 'TYPE1', {graph:'"+graphImpl+"', weightProperty: 'foo'}) YIELD writeMillis, write, writeProperty",
-//                row -> {
-//                    assertTrue(row.getBoolean("write"));
-//                    assertEquals("pagerank", row.getString("writeProperty"));
-//                    assertTrue(
-//                            "write time not set",
-//                            row.getNumber("writeMillis").intValue() >= 0);
-//                });
-//
-//        assertResult("pagerank", weightedExpected);
-//    }
-
     @Test
     public void testWriteBackUnderDifferentProperty() throws Exception {
         runQuery(
-                "CALL algo.eigenvector('Character', 'INTERACTS_SEASON1', {writeProperty:'foobar', graph:'"+graphImpl+"', direction: 'BOTH'}) YIELD writeMillis, write, writeProperty",
+                "CALL algo.eigenvector('Character', 'INTERACTS_SEASON1', {writeProperty:'foobar', graph: $graph, direction: 'BOTH'}) YIELD writeMillis, write, writeProperty",
+                MapUtil.map("graph", graphImpl),
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("foobar", row.getString("writeProperty"));
@@ -216,7 +168,8 @@ public class EigenvectorCentralityProcIntegrationTest {
     @Test
     public void testParallelWriteBack() throws Exception {
         runQuery(
-                "CALL algo.eigenvector('Character', 'INTERACTS_SEASON1', {batchSize:3, concurrency:2, write:true, graph:'"+graphImpl+"', direction: 'BOTH'}) YIELD writeMillis, write, writeProperty, iterations",
+                "CALL algo.eigenvector('Character', 'INTERACTS_SEASON1', {batchSize:3, concurrency:2, write:true, graph: $graph, direction: 'BOTH'}) YIELD writeMillis, write, writeProperty, iterations",
+                MapUtil.map("graph", graphImpl),
                 row -> {
                     assertTrue(
                             "write time not set",
@@ -230,11 +183,12 @@ public class EigenvectorCentralityProcIntegrationTest {
     public void testParallelExecution() throws Exception {
         final Map<Long, Double> actual = new HashMap<>();
         runQuery(
-                "CALL algo.eigenvector.stream('Character', 'INTERACTS_SEASON1', {batchSize:2, graph:'"+graphImpl+"', direction: 'BOTH'}) " +
+                "CALL algo.eigenvector.stream('Character', 'INTERACTS_SEASON1', {batchSize:2, graph: $graph, direction: 'BOTH'}) " +
                         "YIELD nodeId, score " +
                         "RETURN nodeId, score " +
                         "ORDER BY score DESC " +
                         "LIMIT 10",
+                MapUtil.map("graph", graphImpl),
                 row -> {
                     final long nodeId = row.getNumber("nodeId").longValue();
                     actual.put(nodeId, (Double) row.get("score"));

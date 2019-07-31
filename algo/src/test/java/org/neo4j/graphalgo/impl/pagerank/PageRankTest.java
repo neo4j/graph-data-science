@@ -236,7 +236,6 @@ public final class PageRankTest {
         });
     }
 
-
     @Test
     public void correctPartitionBoundariesForAllNodes() {
         final Label label = Label.label("Label1");
@@ -298,7 +297,7 @@ public final class PageRankTest {
         long partitionSize = BitUtil.ceilDiv(nodeCount, concurrency);
         final MemoryRange actual = pageRank.memoryEstimation().estimate(dimensions, concurrency).memoryUsage();
         final MemoryRange expected = MemoryRange.of(
-                88L /* PageRank.class */ +
+                96L /* PageRank.class */ +
                 32L /* ComputeSteps.class */ +
                 BitUtil.align(16 + concurrency * 4, 8) /* scores[] wrapper */ +
                 BitUtil.align(16 + concurrency * 8, 8) /* starts[] */ +
@@ -306,7 +305,7 @@ public final class PageRankTest {
                 BitUtil.align(16 + concurrency * 4, 8) /* list of computeSteps */ +
                         /* ComputeStep */
                 concurrency * (
-                        112L /* NonWeightedComputeStep.class */ +
+                        120L /* NonWeightedComputeStep.class */ +
                         BitUtil.align(16 + concurrency * 4, 8) /* nextScores[] wrapper */ +
                         concurrency * BitUtil.align(16 + partitionSize * 4, 8) /* inner nextScores[][] */ +
                         BitUtil.align(16 + partitionSize * 8, 8) /* pageRank[] */ +

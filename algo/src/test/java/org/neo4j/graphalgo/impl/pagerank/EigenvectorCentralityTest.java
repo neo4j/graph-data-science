@@ -122,7 +122,7 @@ public final class EigenvectorCentralityTest {
     }
 
     @AfterClass
-    public static void shutdownGraph() throws Exception {
+    public static void shutdownGraph() {
         if (db!=null) db.shutdown();
     }
 
@@ -133,7 +133,7 @@ public final class EigenvectorCentralityTest {
     }
 
     @Test
-    public void test() throws Exception {
+    public void test() {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 

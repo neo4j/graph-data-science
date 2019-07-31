@@ -87,7 +87,7 @@ final class EigenvectorCentralityComputeStep extends BaseComputeStep implements 
         float[][] prevScores = this.prevScores;
         int length = prevScores[0].length;
 
-        boolean shouldBreak = false;
+        boolean shouldBreak = true;
 
         for (int i = 0; i < length; i++) {
             double delta = 0.0;
@@ -95,8 +95,8 @@ final class EigenvectorCentralityComputeStep extends BaseComputeStep implements 
                 delta += (double) scores[i];
                 scores[i] = 0F;
             }
-            if (delta < tolerance) {
-                shouldBreak = true;
+            if (delta > tolerance) {
+                shouldBreak = false;
             }
             pageRank[i] += delta;
             deltas[i] = delta;
