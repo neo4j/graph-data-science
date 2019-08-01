@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.huge.loader;
 
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.huge.loader.AbstractStorePageCacheScanner.RecordConsumer;
+import org.neo4j.kernel.api.StatementConstants;
 import org.neo4j.kernel.impl.store.record.RelationshipRecord;
 
 
@@ -54,7 +55,7 @@ final class RelationshipsBatchBuffer implements RecordConsumer<RelationshipRecor
 
     @Override
     public void add(final RelationshipRecord record) {
-        if ((type & record.getType()) == record.getType()) {
+        if (type == StatementConstants.ANY_RELATIONSHIP_TYPE || type == record.getType()) {
             long source = idMap.toMappedNodeId(record.getFirstNode());
             if (source != -1L) {
                 long target = idMap.toMappedNodeId(record.getSecondNode());

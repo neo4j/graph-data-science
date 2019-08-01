@@ -54,7 +54,8 @@ public class HugeGraphFactoryTest {
                 "CREATE " +
                 "(n1)-[:REL1 {prop1: 1}]->(n2)," +
                 "(n1)-[:REL2 {prop2: 2}]->(n3)," +
-                "(n2)-[:REL3 {prop3: 3}]->(n3);");
+                "(n2)-[:REL1 {prop3: 3, weight: 42}]->(n3)," +
+                "(n2)-[:REL3 {prop4: 4, weight: 1337}]->(n3);");
         id1 = DB.execute("MATCH (n:Node1) RETURN id(n) AS id").<Long>columnAs("id").next();
         id2 = DB.execute("MATCH (n:Node2) RETURN id(n) AS id").<Long>columnAs("id").next();
         id3 = DB.execute("MATCH (n:Node3) RETURN id(n) AS id").<Long>columnAs("id").next();
@@ -99,18 +100,36 @@ public class HugeGraphFactoryTest {
     }
 
     @Test
-    public void testWithRelation() {
+    public void testWithBothWeightedRelationship() {
         final Graph graph = new GraphLoader(DB)
                 .withAnyLabel()
                 .withoutRelationshipWeights()
-                .withRelationshipType("REL1")
+                .withRelationshipType("REL3")
+                .withRelationshipWeightsFromProperty("weight", 1.0)
+                .withDirection(Direction.BOTH)
                 .load(HugeGraphFactory.class);
 
-        long[] out1 = collectTargetIds(graph, id1);
-        assertArrayEquals(expectedIds(graph, id2), out1);
+        assertEquals(2, graph.relationshipCount());
 
-        long[] out2 = collectTargetIds(graph, id2);
-        assertArrayEquals(expectedIds(graph), out2);
+        long[] targets = collectTargetIds(graph, id2);
+        assertArrayEquals(expectedIds(graph, id3), targets);
+        double[] weights = collectTargetWeights(graph, id2);
+        assertArrayEquals(expectedWeights(1337), weights, 1e-4);
+    }
+
+    @Test
+    public void testWithOutgoingRelationship() {
+        final Graph graph = new GraphLoader(DB)
+                .withAnyLabel()
+                .withoutRelationshipWeights()
+                .withRelationshipType("REL3")
+                .withDirection(Direction.OUTGOING)
+                .load(HugeGraphFactory.class);
+
+        assertEquals(1, graph.relationshipCount());
+
+        long[] out1 = collectTargetIds(graph, id2);
+        assertArrayEquals(expectedIds(graph, id3), out1);
     }
 
     @Test
@@ -123,7 +142,7 @@ public class HugeGraphFactoryTest {
                 .load(HugeGraphFactory.class);
 
         double[] out1 = collectTargetWeights(graph, id1);
-        assertArrayEquals(expectedWeights(1.0, 0.0), out1, 1e-4);
+        assertArrayEquals(expectedWeights(1.0, 1337.42), out1, 1e-4);
     }
 
     @Test
