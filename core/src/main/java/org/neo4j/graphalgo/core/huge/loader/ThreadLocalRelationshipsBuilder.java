@@ -61,7 +61,7 @@ class ThreadLocalRelationshipsBuilder {
         AdjacencyCompression.copyFrom(buffer, array);
         int degree = AdjacencyCompression.applyDeltaEncoding(buffer);
         int requiredBytes = AdjacencyCompression.compress(buffer, storage);
-        long address = copyValues(storage, requiredBytes, degree, adjacencyAllocator);
+        long address = copyIds(storage, requiredBytes, degree);
         adjacencyOffsets[localId] = address;
         array.release();
         return degree;
@@ -77,27 +77,33 @@ class ThreadLocalRelationshipsBuilder {
         int degree = AdjacencyCompression.applyDeltaEncoding(buffer, weights);
         int requiredBytes = AdjacencyCompression.compress(buffer, storage);
 
-        byte[] compressedWeights = new byte[degree * 10];
-        int weightsRequiredBytes = AdjacencyCompression.compress(weights, compressedWeights, degree);
-
-        adjacencyOffsets[localId] = copyValues(storage, requiredBytes, degree, adjacencyAllocator);
-        weightOffsets[localId] = copyValues(compressedWeights, weightsRequiredBytes, degree, weightsAllocator);
+        adjacencyOffsets[localId] = copyIds(storage, requiredBytes, degree);
+        weightOffsets[localId] = copyWeights(weights, degree);
 
         array.release();
         return degree;
     }
 
-    private synchronized long copyValues(
-            byte[] targets,
-            int requiredBytes,
-            int degree,
-            HugeAdjacencyListBuilder.Allocator allocator) {
+    private long copyIds(byte[] targets, int requiredBytes, int degree) {
         // sizeOf(degree) + compression bytes
-        long address = allocator.allocate(4 + requiredBytes);
-        int offset = allocator.offset;
-        offset = writeDegree(allocator.page, offset, degree);
-        System.arraycopy(targets, 0, allocator.page, offset, requiredBytes);
-        allocator.offset = (offset + requiredBytes);
+        long address = adjacencyAllocator.allocate(Integer.BYTES + requiredBytes);
+        int offset = adjacencyAllocator.offset;
+        offset = writeDegree(adjacencyAllocator.page, offset, degree);
+        System.arraycopy(targets, 0, adjacencyAllocator.page, offset, requiredBytes);
+        adjacencyAllocator.offset = (offset + requiredBytes);
+        return address;
+    }
+
+    private long copyWeights(long[] weights, int degree) {
+        int requiredBytes = degree * Long.BYTES;
+        long address = weightsAllocator.allocate(Integer.BYTES /* degree */ + requiredBytes);
+        int offset = weightsAllocator.offset;
+        offset = writeDegree(weightsAllocator.page, offset, degree);
+        ByteBuffer
+                .wrap(weightsAllocator.page, offset, requiredBytes)
+                .asLongBuffer()
+                .put(weights, 0, degree);
+        weightsAllocator.offset = (offset + requiredBytes);
         return address;
     }
 

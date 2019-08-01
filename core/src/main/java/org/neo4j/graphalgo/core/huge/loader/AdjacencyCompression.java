@@ -100,6 +100,10 @@ final class AdjacencyCompression {
         return out;
     }
 
+    /**
+     * Applies delta encoding to the given {@code values}.
+     * Weights are not encoded, {@code outWeights} contains weights according to {@code order}.
+     */
     private static int applyDelta(
             int[] order,
             long[] values,
@@ -111,9 +115,6 @@ final class AdjacencyCompression {
         long value = values[firstSortIdx];
         long delta;
 
-        long weightValue = weights[firstSortIdx];
-        long weightDelta;
-
         outValues[0] = values[firstSortIdx];
         outWeights[0] = weights[firstSortIdx];
 
@@ -123,14 +124,11 @@ final class AdjacencyCompression {
             delta = values[sortIdx] - value;
             value = values[sortIdx];
 
-            weightDelta = weights[sortIdx] - weightValue;
-            weightValue = weights[sortIdx];
-
             // only keep the relationship if we don't already have
             // one that points to the same target node
             // no support for #parallel-edges
             if (delta > 0L) {
-                outWeights[out] = weightDelta;
+                outWeights[out] = weights[sortIdx];
                 outValues[out++] = delta;
             }
         }

@@ -26,6 +26,8 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
+import java.nio.ByteBuffer;
+
 import static org.neo4j.graphalgo.core.huge.loader.VarLongEncoding.encodedVLongSize;
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 import static org.neo4j.graphalgo.core.utils.paged.PageUtil.indexInPage;
@@ -74,7 +76,8 @@ public final class HugeAdjacencyList {
                 .build();
     }
 
-    /* test private */ static long computeAdjacencyByteSize(long avgDegree, long nodeCount, long delta) {
+    /* test private */
+    static long computeAdjacencyByteSize(long avgDegree, long nodeCount, long delta) {
         long firstAdjacencyIdAvgByteSize = (avgDegree > 0) ? ceilDiv(encodedVLongSize(nodeCount), 2) : 0L;
         int relationshipByteSize = encodedVLongSize(delta);
         int degreeByteSize = Integer.BYTES;
@@ -98,13 +101,9 @@ public final class HugeAdjacencyList {
     }
 
     int getDegree(long index) {
-        return AdjacencyDecompression.readInt(
+        return AdjacencyReader.readInt(
                 pages[pageIndex(index, PAGE_SHIFT)],
                 indexInPage(index, PAGE_MASK));
-    }
-
-    Cursor newCursor() {
-        return new Cursor(pages);
     }
 
     public final long release() {
@@ -115,38 +114,95 @@ public final class HugeAdjacencyList {
         return allocatedMemory;
     }
 
+    // Cursors
+
+    Cursor cursor(long offset) {
+        return new Cursor(pages).init(offset);
+    }
+
     /**
-     * Initialise the given cursor with the given offset
+     * Returns a new, uninitialized delta cursor. Call {@link DecompressingCursor#init(long)}.
      */
-    Cursor deltaCursor(Cursor reuse, long offset) {
-        return reuse.init(offset);
+    DecompressingCursor rawDecompressingCursor() {
+        return new DecompressingCursor(pages);
     }
 
     /**
      * Get a new cursor initialised on the given offset
      */
-    Cursor deltaCursor(long offset) {
-        return newCursor().init(offset);
+    DecompressingCursor decompressingCursor(long offset) {
+        return rawDecompressingCursor().init(offset);
+    }
+
+    /**
+     * Initialise the given cursor with the given offset
+     */
+    DecompressingCursor decompressingCursor(DecompressingCursor reuse, long offset) {
+        return reuse.init(offset);
     }
 
     public static final class Cursor extends MutableIntValue {
+        // TODO: free
+        private final byte[][] pages;
+        private final ByteBuffer byteBuffer;
+
+        private int length;
+        private int pos;
+
+        private Cursor(byte[][] pages) {
+            this.pages = pages;
+            this.byteBuffer = ByteBuffer.allocate(PAGE_SIZE);
+        }
+
+        public int length() {
+            return length;
+        }
+
+        /**
+         * Return true iff there is at least one more target to decode.
+         */
+        boolean hasNextLong() {
+            return pos < length;
+        }
+
+        /**
+         * Read the next target id.
+         * It is undefined behavior if this is called after {@link #hasNextLong()} returns {@code false}.
+         */
+        long nextLong() {
+            pos++;
+            return byteBuffer.getLong();
+        }
+
+        Cursor init(long fromIndex) {
+            byte[] page = pages[pageIndex(fromIndex, PAGE_SHIFT)];
+            int offsetInPage = indexInPage(fromIndex, PAGE_MASK);
+            byteBuffer.put(page, offsetInPage, page.length - offsetInPage);
+            byteBuffer.position(0);
+            length = byteBuffer.getInt();
+            pos = 0;
+            return this;
+        }
+    }
+
+    public static final class DecompressingCursor extends MutableIntValue {
 
         // TODO: free
         private byte[][] pages;
-        private final AdjacencyDecompression decompress;
+        private final AdjacencyDecompressingReader decompress;
 
         private int maxTargets;
         private int currentTarget;
 
-        private Cursor(byte[][] pages) {
+        private DecompressingCursor(byte[][] pages) {
             this.pages = pages;
-            this.decompress = new AdjacencyDecompression();
+            this.decompress = new AdjacencyDecompressingReader();
         }
 
         /**
          * Copy iteration state from another cursor without changing {@code other}.
          */
-        void copyFrom(Cursor other) {
+        void copyFrom(DecompressingCursor other) {
             decompress.copyFrom(other.decompress);
             currentTarget = other.currentTarget;
             maxTargets = other.maxTargets;
@@ -209,7 +265,7 @@ public final class HugeAdjacencyList {
             return value;
         }
 
-        Cursor init(long fromIndex) {
+        DecompressingCursor init(long fromIndex) {
             maxTargets = decompress.reset(
                     pages[pageIndex(fromIndex, PAGE_SHIFT)],
                     indexInPage(fromIndex, PAGE_MASK));

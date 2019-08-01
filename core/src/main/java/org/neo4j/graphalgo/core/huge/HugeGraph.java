@@ -98,9 +98,9 @@ public class HugeGraph implements Graph {
     private final HugeAdjacencyOffsets inWeightOffsets;
     private final HugeAdjacencyOffsets outWeightOffsets;
 
-    private HugeAdjacencyList.Cursor empty;
-    private HugeAdjacencyList.Cursor inCache;
-    private HugeAdjacencyList.Cursor outCache;
+    private HugeAdjacencyList.DecompressingCursor empty;
+    private HugeAdjacencyList.DecompressingCursor inCache;
+    private HugeAdjacencyList.DecompressingCursor outCache;
     private boolean canRelease = true;
 
     public HugeGraph(
@@ -174,26 +174,22 @@ public class HugeGraph implements Graph {
             final HugeAdjacencyList weights,
             final HugeAdjacencyOffsets weightOffsets,
             final HugeAdjacencyList adjacencies,
-            final HugeAdjacencyOffsets adjacencyOffsets
-    ) {
+            final HugeAdjacencyOffsets adjacencyOffsets) {
         long relOffset = adjacencyOffsets.get(fromId);
         long weightOffset = weightOffsets.get(fromId);
 
-        HugeAdjacencyList.Cursor relCursor = adjacencies.deltaCursor(relOffset);
-        HugeAdjacencyList.Cursor weightCursor = weights.deltaCursor(weightOffset);
+        HugeAdjacencyList.DecompressingCursor relDecompressingCursor = adjacencies.decompressingCursor(relOffset);
+        HugeAdjacencyList.Cursor weightCursor = weights.cursor(weightOffset);
 
-        while (relCursor.hasNextVLong() &&
-               weightCursor.hasNextVLong() &&
-               relCursor.nextVLong() != toId
-        ) {
-            weightCursor.nextVLong();
+        while (relDecompressingCursor.hasNextVLong() && weightCursor.hasNextLong() && relDecompressingCursor.nextVLong() != toId) {
+            weightCursor.nextLong();
         }
 
-        if (!weightCursor.hasNextVLong()) {
+        if (!weightCursor.hasNextLong()) {
             return NO_WEIGHT;
         }
 
-        long doubleBits = weightCursor.nextVLong();
+        long doubleBits = weightCursor.nextLong();
         return Double.longBitsToDouble(doubleBits);
     }
 
@@ -372,24 +368,24 @@ public class HugeGraph implements Graph {
             runForEach(sourceNodeId, Direction.INCOMING, consumer, reuseCursor);
             return;
         }
-        HugeAdjacencyList.Cursor cursor = forEachCursor(sourceNodeId, direction, reuseCursor);
-        consumeNodes(sourceNodeId, cursor, consumer);
+        HugeAdjacencyList.DecompressingCursor decompressingCursor = forEachCursor(sourceNodeId, direction, reuseCursor);
+        consumeNodes(sourceNodeId, decompressingCursor, consumer);
     }
 
-    private HugeAdjacencyList.Cursor forEachCursor(
+    private HugeAdjacencyList.DecompressingCursor forEachCursor(
             long sourceNodeId,
             Direction direction,
             boolean reuseCursor) {
         if (direction == Direction.OUTGOING) {
             return cursor(
                     sourceNodeId,
-                    reuseCursor ? outCache : outAdjacency.newCursor(),
+                    reuseCursor ? outCache : outAdjacency.rawDecompressingCursor(),
                     outOffsets,
                     outAdjacency);
         } else {
             return cursor(
                     sourceNodeId,
-                    reuseCursor ? inCache : inAdjacency.newCursor(),
+                    reuseCursor ? inCache : inAdjacency.rawDecompressingCursor(),
                     inOffsets,
                     inAdjacency);
         }
@@ -430,13 +426,13 @@ public class HugeGraph implements Graph {
         } else if (inOffsets != null) {
             return Direction.INCOMING;
         } else {
-            assert(outOffsets != null);
+            assert (outOffsets != null);
             return Direction.OUTGOING;
         }
     }
 
-    private HugeAdjacencyList.Cursor newCursor(final HugeAdjacencyList adjacency) {
-        return adjacency != null ? adjacency.newCursor() : null;
+    private HugeAdjacencyList.DecompressingCursor newCursor(final HugeAdjacencyList adjacency) {
+        return adjacency != null ? adjacency.rawDecompressingCursor() : null;
     }
 
     private int degree(long node, HugeAdjacencyOffsets offsets, HugeAdjacencyList array) {
@@ -447,24 +443,24 @@ public class HugeGraph implements Graph {
         return array.getDegree(offset);
     }
 
-    private HugeAdjacencyList.Cursor cursor(
+    private HugeAdjacencyList.DecompressingCursor cursor(
             long node,
-            HugeAdjacencyList.Cursor reuse,
+            HugeAdjacencyList.DecompressingCursor reuse,
             HugeAdjacencyOffsets offsets,
             HugeAdjacencyList array) {
         final long offset = offsets.get(node);
         if (offset == 0L) {
             return empty;
         }
-        return array.deltaCursor(reuse, offset);
+        return array.decompressingCursor(reuse, offset);
     }
 
     private void consumeNodes(
             long startNode,
-            HugeAdjacencyList.Cursor cursor,
+            HugeAdjacencyList.DecompressingCursor decompressingCursor,
             RelationshipConsumer consumer) {
         //noinspection StatementWithEmptyBody
-        while (cursor.hasNextVLong() && consumer.accept(startNode, cursor.nextVLong())) ;
+        while (decompressingCursor.hasNextVLong() && consumer.accept(startNode, decompressingCursor.nextVLong())) ;
     }
 
     private RelationshipConsumer toHugeOutConsumer(RelationshipConsumer consumer) {

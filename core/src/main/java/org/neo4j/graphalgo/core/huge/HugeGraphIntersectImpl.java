@@ -33,20 +33,20 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
 
     private HugeAdjacencyList adjacency;
     private HugeAdjacencyOffsets offsets;
-    private HugeAdjacencyList.Cursor empty;
-    private HugeAdjacencyList.Cursor cache;
-    private HugeAdjacencyList.Cursor cacheA;
-    private HugeAdjacencyList.Cursor cacheB;
+    private HugeAdjacencyList.DecompressingCursor empty;
+    private HugeAdjacencyList.DecompressingCursor cache;
+    private HugeAdjacencyList.DecompressingCursor cacheA;
+    private HugeAdjacencyList.DecompressingCursor cacheB;
 
     HugeGraphIntersectImpl(final HugeAdjacencyList adjacency, final HugeAdjacencyOffsets offsets) {
         assert adjacency != null;
         assert offsets != null;
         this.adjacency = adjacency;
         this.offsets = offsets;
-        cache = adjacency.newCursor();
-        cacheA = adjacency.newCursor();
-        cacheB = adjacency.newCursor();
-        empty = adjacency.newCursor();
+        cache = adjacency.rawDecompressingCursor();
+        cacheA = adjacency.rawDecompressingCursor();
+        cacheB = adjacency.rawDecompressingCursor();
+        empty = adjacency.rawDecompressingCursor();
     }
 
     @Override
@@ -54,33 +54,33 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
         HugeAdjacencyOffsets offsets = this.offsets;
         HugeAdjacencyList adjacency = this.adjacency;
 
-        HugeAdjacencyList.Cursor mainCursor = cursor(nodeIdA, cache, offsets, adjacency);
-        long nodeIdB = mainCursor.skipUntil(nodeIdA);
+        HugeAdjacencyList.DecompressingCursor mainDecompressingCursor = cursor(nodeIdA, cache, offsets, adjacency);
+        long nodeIdB = mainDecompressingCursor.skipUntil(nodeIdA);
         if (nodeIdB <= nodeIdA) {
             return;
         }
 
-        HugeAdjacencyList.Cursor lead, follow, cursorA = cacheA, cursorB = cacheB;
+        HugeAdjacencyList.DecompressingCursor lead, follow, decompressingCursorA = cacheA, decompressingCursorB = cacheB;
         long nodeIdC, currentA, s, t;
         boolean hasNext = true;
 
         while (hasNext) {
-            cursorB = cursor(nodeIdB, cursorB, offsets, adjacency);
-            nodeIdC = cursorB.skipUntil(nodeIdB);
+            decompressingCursorB = cursor(nodeIdB, decompressingCursorB, offsets, adjacency);
+            nodeIdC = decompressingCursorB.skipUntil(nodeIdB);
             if (nodeIdC > nodeIdB) {
-                cursorA.copyFrom(mainCursor);
-                currentA = cursorA.advance(nodeIdC);
+                decompressingCursorA.copyFrom(mainDecompressingCursor);
+                currentA = decompressingCursorA.advance(nodeIdC);
 
                 if (currentA == nodeIdC) {
                     consumer.accept(nodeIdA, nodeIdB, nodeIdC);
                 }
 
-                if (cursorA.remaining() <= cursorB.remaining()) {
-                    lead = cursorA;
-                    follow = cursorB;
+                if (decompressingCursorA.remaining() <= decompressingCursorB.remaining()) {
+                    lead = decompressingCursorA;
+                    follow = decompressingCursorB;
                 } else {
-                    lead = cursorB;
-                    follow = cursorA;
+                    lead = decompressingCursorB;
+                    follow = decompressingCursorA;
                 }
 
                 while (lead.hasNextVLong() && follow.hasNextVLong()) {
@@ -92,8 +92,8 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
                 }
             }
 
-            if (hasNext = mainCursor.hasNextVLong()) {
-                nodeIdB = mainCursor.nextVLong();
+            if (hasNext = mainDecompressingCursor.hasNextVLong()) {
+                nodeIdB = mainDecompressingCursor.nextVLong();
             }
         }
     }
@@ -106,23 +106,23 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
         return array.getDegree(offset);
     }
 
-    private HugeAdjacencyList.Cursor cursor(
+    private HugeAdjacencyList.DecompressingCursor cursor(
             long node,
-            HugeAdjacencyList.Cursor reuse,
+            HugeAdjacencyList.DecompressingCursor reuse,
             HugeAdjacencyOffsets offsets,
             HugeAdjacencyList array) {
         final long offset = offsets.get(node);
         if (offset == 0L) {
             return empty;
         }
-        return array.deltaCursor(reuse, offset);
+        return array.decompressingCursor(reuse, offset);
     }
 
     private void consumeNodes(
             long startNode,
-            HugeAdjacencyList.Cursor cursor,
+            HugeAdjacencyList.DecompressingCursor decompressingCursor,
             RelationshipConsumer consumer) {
         //noinspection StatementWithEmptyBody
-        while (cursor.hasNextVLong() && consumer.accept(startNode, cursor.nextVLong())) ;
+        while (decompressingCursor.hasNextVLong() && consumer.accept(startNode, decompressingCursor.nextVLong())) ;
     }
 }
