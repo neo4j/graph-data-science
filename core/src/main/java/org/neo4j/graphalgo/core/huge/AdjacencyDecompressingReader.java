@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.core.huge.loader.MutableIntValue;
 
 import java.util.Arrays;
 
-import static org.neo4j.graphalgo.core.huge.AdjacencyReader.readInt;
 import static org.neo4j.graphalgo.core.huge.VarLongDecoding.decodeDeltaVLongs;
 
 final class AdjacencyDecompressingReader {
@@ -38,6 +37,15 @@ final class AdjacencyDecompressingReader {
     AdjacencyDecompressingReader() {
         this.block = new long[CHUNK_SIZE];
     }
+
+    //@formatter:off
+    static int readInt(byte[] array, int offset) {
+        return   array[    offset] & 255        |
+                (array[1 + offset] & 255) <<  8 |
+                (array[2 + offset] & 255) << 16 |
+                (array[3 + offset] & 255) << 24;
+    }
+    //@formatter:on
 
     void copyFrom(AdjacencyDecompressingReader other) {
         System.arraycopy(other.block, 0, block, 0, CHUNK_SIZE);

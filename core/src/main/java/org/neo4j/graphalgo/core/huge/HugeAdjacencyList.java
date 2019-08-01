@@ -102,7 +102,7 @@ public final class HugeAdjacencyList {
     }
 
     int getDegree(long index) {
-        return AdjacencyReader.readInt(
+        return AdjacencyDecompressingReader.readInt(
                 pages[pageIndex(index, PAGE_SHIFT)],
                 indexInPage(index, PAGE_MASK));
     }
@@ -143,6 +143,9 @@ public final class HugeAdjacencyList {
     }
 
     public static final class Cursor extends MutableIntValue {
+        public static final Cursor EMPTY = new Cursor();
+
+        private final int length;
         private final ByteBuffer byteBuffer;
 
         private Cursor(byte[][] pages, long fromIndex) {
@@ -150,13 +153,19 @@ public final class HugeAdjacencyList {
             int offsetInPage = indexInPage(fromIndex, PAGE_MASK);
             // TODO: use same endianess for degree and weights
             ByteBuffer byteBuffer = ByteBuffer.wrap(page, offsetInPage, page.length - offsetInPage).order(ByteOrder.LITTLE_ENDIAN);
-            int length = byteBuffer.getInt();
+            length = byteBuffer.getInt();
             byteBuffer.limit(Long.BYTES * length + byteBuffer.position());
             this.byteBuffer = byteBuffer.order(ByteOrder.BIG_ENDIAN);
         }
 
+        // empty Cursor
+        private Cursor() {
+            length = 0;
+            byteBuffer = ByteBuffer.allocate(0);
+        }
+
         public int length() {
-            return (byteBuffer.capacity() - Integer.BYTES) / Long.BYTES;
+            return length;
         }
 
         /**
