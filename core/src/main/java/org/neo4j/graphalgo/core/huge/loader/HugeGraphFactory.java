@@ -183,6 +183,7 @@ public final class HugeGraphFactory extends GraphFactory {
                 idsAndProperties.properties,
                 incomingRelationshipsBuilder,
                 outgoingRelationshipsBuilder,
+                setup.relationDefaultWeight,
                 relationshipCount);
     }
 
@@ -192,6 +193,7 @@ public final class HugeGraphFactory extends GraphFactory {
             final Map<String, HugeWeightMapping> nodeProperties,
             final RelationshipsBuilder inRelationshipsBuilder,
             final RelationshipsBuilder outRelationshipsBuilder,
+            final double defaultWeight,
             final long relationshipCount) {
 
         HugeAdjacencyList outAdjacencyList = null;
@@ -221,6 +223,7 @@ public final class HugeGraphFactory extends GraphFactory {
         return new HugeGraph(
                 tracker, idMapping, nodeProperties, relationshipCount,
                 inAdjacencyList, outAdjacencyList, inAdjacencyOffsets, outAdjacencyOffsets,
+                defaultWeight,
                 inWeightList, outWeightList, inWeightOffsets, outWeightOffsets);
     }
 
