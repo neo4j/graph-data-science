@@ -263,11 +263,11 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
             AdjacencyBuilder outAdjacency,
             AdjacencyBuilder inAdjacency) {
         long[] batch = buffer.sortBySource();
-        long[] weightsOut = loadWeights(batch, batchLength, cursors, outAdjacency.getWeightProperty(), outAdjacency.getWeightProperty(), read);
+        long[] weightsOut = loadWeights(batch, batchLength, cursors, outAdjacency.getWeightProperty(), outAdjacency.getDefaultWeight(), read);
         int importedOut = importRelationships(buffer, batch, batchLength, weightsOut, outAdjacency, tracker);
         batch = buffer.sortByTarget();
 
-        long[] weightsIn = loadWeights(batch, batchLength, cursors, outAdjacency.getWeightProperty(), outAdjacency.getWeightProperty(), read);
+        long[] weightsIn = loadWeights(batch, batchLength, cursors, outAdjacency.getWeightProperty(), outAdjacency.getDefaultWeight(), read);
         int importedIn = importRelationships(buffer, batch, batchLength, weightsIn, inAdjacency, tracker);
         return RawValues.combineIntInt(importedOut + importedIn, importedOut + importedIn);
     }
@@ -282,11 +282,11 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
             AdjacencyBuilder inAdjacency) {
 
         long[] batch = buffer.sortBySource();
-        long[] weightsOut = loadWeights(batch, batchLength, cursors, outAdjacency.getWeightProperty(), outAdjacency.getWeightProperty(), read);
+        long[] weightsOut = loadWeights(batch, batchLength, cursors, outAdjacency.getWeightProperty(), outAdjacency.getDefaultWeight(), read);
         int importedOut = importRelationships(buffer, batch, batchLength, weightsOut, outAdjacency, tracker);
 
         batch = buffer.sortByTarget();
-        long[] weightsIn = loadWeights(batch, batchLength, cursors, outAdjacency.getWeightProperty(), outAdjacency.getWeightProperty(), read);
+        long[] weightsIn = loadWeights(batch, batchLength, cursors, outAdjacency.getWeightProperty(), outAdjacency.getDefaultWeight(), read);
         int importedIn = importRelationships(buffer, batch, batchLength, weightsIn, inAdjacency, tracker);
 
         return RawValues.combineIntInt(importedOut + importedIn, importedOut + importedIn);
@@ -314,7 +314,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
             AdjacencyBuilder inAdjacency) {
 
         long[] batch = buffer.sortBySource();
-        long[] weightsOut = loadWeights(batch, batchLength, cursors, outAdjacency.getWeightProperty(), outAdjacency.getWeightProperty(), read);
+        long[] weightsOut = loadWeights(batch, batchLength, cursors, outAdjacency.getWeightProperty(), outAdjacency.getDefaultWeight(), read);
         int importedOut = importRelationships(buffer, batch, batchLength, weightsOut, outAdjacency, tracker);
         return RawValues.combineIntInt(importedOut, importedOut);
     }
@@ -340,7 +340,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
             AdjacencyBuilder outAdjacency,
             AdjacencyBuilder inAdjacency) {
         long[] batch = buffer.sortByTarget();
-        long[] weightsIn = loadWeights(batch, batchLength, cursors, outAdjacency.getWeightProperty(), outAdjacency.getWeightProperty(), read);
+        long[] weightsIn = loadWeights(batch, batchLength, cursors, outAdjacency.getWeightProperty(), outAdjacency.getDefaultWeight(), read);
         int importedIn = importRelationships(buffer, batch, batchLength, weightsIn, inAdjacency, tracker);
         return RawValues.combineIntInt(importedIn, importedIn);
     }
