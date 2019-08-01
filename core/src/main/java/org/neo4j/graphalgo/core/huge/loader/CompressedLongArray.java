@@ -43,17 +43,9 @@ final class CompressedLongArray {
     private long lastValue;
     private int length;
 
-    CompressedLongArray(AllocationTracker tracker, int length) {
+    CompressedLongArray(AllocationTracker tracker) {
         this.tracker = tracker;
-        if (length == Integer.MAX_VALUE) {
-            length = 0;
-        }
-        if (length > 0) {
-            tracker.add(sizeOfByteArray(length));
-            storage = new byte[length];
-        } else {
-            storage = EMPTY_BYTES;
-        }
+        storage = EMPTY_BYTES;
         weights = EMPTY_LONGS;
     }
 

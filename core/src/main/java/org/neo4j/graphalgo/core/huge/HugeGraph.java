@@ -240,10 +240,8 @@ public class HugeGraph implements Graph {
                 return degree(node, outOffsets, outAdjacency);
 
             case BOTH:
-                return degree(node, inOffsets, inAdjacency) + degree(
-                        node,
-                        outOffsets,
-                        outAdjacency);
+                return degree(node, inOffsets, inAdjacency) +
+                       degree(node, outOffsets, outAdjacency);
 
             default:
                 throw new IllegalArgumentException(direction + "");

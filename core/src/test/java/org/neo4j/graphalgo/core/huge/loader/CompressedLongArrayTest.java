@@ -32,14 +32,12 @@ public class CompressedLongArrayTest {
 
     @Test
     public void add() {
-        final int length = 10;
-        CompressedLongArray compressedLongArray = new CompressedLongArray(AllocationTracker.EMPTY, length);
+        CompressedLongArray compressedLongArray = new CompressedLongArray(AllocationTracker.EMPTY);
 
         final long[] inValues = {1, 2, 3, 4};
         compressedLongArray.add(inValues.clone(), 0, inValues.length);
 
-        // 10 bytes are enough to store the input values (1 byte each)
-        Assert.assertEquals(length, compressedLongArray.storage().length);
+        Assert.assertTrue(compressedLongArray.storage().length >= inValues.length);
 
         long[] outValues = new long[4];
         int uncompressedValueCount = compressedLongArray.uncompress(outValues);
@@ -50,8 +48,7 @@ public class CompressedLongArrayTest {
 
     @Test
     public void addGrowing() {
-        final int length = 0;
-        CompressedLongArray compressedLongArray = new CompressedLongArray(AllocationTracker.EMPTY, length);
+        CompressedLongArray compressedLongArray = new CompressedLongArray(AllocationTracker.EMPTY);
 
         int count = 10;
         long[] inValues = LongStream.range(0, count).toArray();
@@ -68,9 +65,8 @@ public class CompressedLongArrayTest {
 
     @Test
     public void addSameValues() {
-        final int length = 0;
-        CompressedLongArray compressedLongArray1 = new CompressedLongArray(AllocationTracker.EMPTY, length);
-        CompressedLongArray compressedLongArray2 = new CompressedLongArray(AllocationTracker.EMPTY, length);
+        CompressedLongArray compressedLongArray1 = new CompressedLongArray(AllocationTracker.EMPTY);
+        CompressedLongArray compressedLongArray2 = new CompressedLongArray(AllocationTracker.EMPTY);
 
         int count = 10;
 
@@ -93,8 +89,7 @@ public class CompressedLongArrayTest {
 
     @Test
     public void addReverseOrder() {
-        final int length = 0;
-        CompressedLongArray compressedLongArray = new CompressedLongArray(AllocationTracker.EMPTY, length);
+        CompressedLongArray compressedLongArray = new CompressedLongArray(AllocationTracker.EMPTY);
 
         int count = 10;
 
@@ -112,15 +107,14 @@ public class CompressedLongArrayTest {
 
     @Test
     public void addWithWeights() {
-        final int length = 10;
-        CompressedLongArray compressedLongArray = new CompressedLongArray(AllocationTracker.EMPTY, length);
+        CompressedLongArray compressedLongArray = new CompressedLongArray(AllocationTracker.EMPTY);
 
         final long[] inValues = {1, 2, 3, 4};
         final long[] inWeights = DoubleStream.of(1.0, 2.0, 3.0, 4.0).mapToLong(Double::doubleToLongBits).toArray();
         compressedLongArray.add(inValues.clone(), inWeights.clone(), 0, inValues.length);
 
         // 10 bytes are enough to store the input values (1 byte each)
-        Assert.assertEquals(length, compressedLongArray.storage().length);
+        Assert.assertTrue(compressedLongArray.storage().length >= inValues.length);
 
         long[] outValues = new long[4];
         int uncompressedValueCount = compressedLongArray.uncompress(outValues);

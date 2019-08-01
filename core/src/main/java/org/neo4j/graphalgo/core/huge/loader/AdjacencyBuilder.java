@@ -183,12 +183,9 @@ abstract class AdjacencyBuilder {
 
                     int localId = (int) (source & pageMask);
 
-                    // pre-fetching degree helps us size the array without needing to grow it
-                    int degree = builder.degree(localId);
                     CompressedLongArray compressedTargets = this.compressedAdjacencyLists[pageIndex][localId];
-
                     if (compressedTargets == null) {
-                        compressedTargets = new CompressedLongArray(tracker, degree);
+                        compressedTargets = new CompressedLongArray(tracker);
                         this.compressedAdjacencyLists[pageIndex][localId] = compressedTargets;
                     }
 
@@ -196,16 +193,6 @@ abstract class AdjacencyBuilder {
                         compressedTargets.add(targets, startOffset, endOffset);
                     } else {
                         compressedTargets.add(targets, weights, startOffset, endOffset);
-                    }
-
-                    int currentDegree = compressedTargets.length();
-                    if (currentDegree >= degree) {
-                        int importedRelationships = builder.applyVariableDeltaEncoding(
-                                compressedTargets,
-                                this.buffers[pageIndex],
-                                localId);
-                        relationshipCounter.addAndGet(importedRelationships);
-                        this.compressedAdjacencyLists[pageIndex][localId] = null;
                     }
 
                     startOffset = endOffset;
