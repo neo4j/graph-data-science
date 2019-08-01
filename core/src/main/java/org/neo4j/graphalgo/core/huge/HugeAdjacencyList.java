@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 import static org.neo4j.graphalgo.core.huge.loader.VarLongEncoding.encodedVLongSize;
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
@@ -117,7 +118,7 @@ public final class HugeAdjacencyList {
     // Cursors
 
     Cursor cursor(long offset) {
-        return new Cursor(pages).init(offset);
+        return new Cursor(pages, offset);
     }
 
     /**
@@ -142,27 +143,27 @@ public final class HugeAdjacencyList {
     }
 
     public static final class Cursor extends MutableIntValue {
-        // TODO: free
-        private final byte[][] pages;
         private final ByteBuffer byteBuffer;
 
-        private int length;
-        private int pos;
-
-        private Cursor(byte[][] pages) {
-            this.pages = pages;
-            this.byteBuffer = ByteBuffer.allocate(PAGE_SIZE);
+        private Cursor(byte[][] pages, long fromIndex) {
+            byte[] page = pages[pageIndex(fromIndex, PAGE_SHIFT)];
+            int offsetInPage = indexInPage(fromIndex, PAGE_MASK);
+            // TODO: use same endianess for degree and weights
+            ByteBuffer byteBuffer = ByteBuffer.wrap(page, offsetInPage, page.length - offsetInPage).order(ByteOrder.LITTLE_ENDIAN);
+            int length = byteBuffer.getInt();
+            byteBuffer.limit(Long.BYTES * length + byteBuffer.position());
+            this.byteBuffer = byteBuffer.order(ByteOrder.BIG_ENDIAN);
         }
 
         public int length() {
-            return length;
+            return (byteBuffer.capacity() - Integer.BYTES) / Long.BYTES;
         }
 
         /**
          * Return true iff there is at least one more target to decode.
          */
         boolean hasNextLong() {
-            return pos < length;
+            return byteBuffer.hasRemaining();
         }
 
         /**
@@ -170,18 +171,7 @@ public final class HugeAdjacencyList {
          * It is undefined behavior if this is called after {@link #hasNextLong()} returns {@code false}.
          */
         long nextLong() {
-            pos++;
             return byteBuffer.getLong();
-        }
-
-        Cursor init(long fromIndex) {
-            byte[] page = pages[pageIndex(fromIndex, PAGE_SHIFT)];
-            int offsetInPage = indexInPage(fromIndex, PAGE_MASK);
-            byteBuffer.put(page, offsetInPage, page.length - offsetInPage);
-            byteBuffer.position(0);
-            length = byteBuffer.getInt();
-            pos = 0;
-            return this;
         }
     }
 
