@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.util.Arrays;
+import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
 
 public class CompressedLongArrayTest {
@@ -115,7 +116,7 @@ public class CompressedLongArrayTest {
         CompressedLongArray compressedLongArray = new CompressedLongArray(AllocationTracker.EMPTY, length);
 
         final long[] inValues = {1, 2, 3, 4};
-        final double[] inWeights = {1.0, 2.0, 3.0, 4.0};
+        final long[] inWeights = DoubleStream.of(1.0, 2.0, 3.0, 4.0).mapToLong(Double::doubleToLongBits).toArray();
         compressedLongArray.add(inValues.clone(), inWeights.clone(), 0, inValues.length);
 
         // 10 bytes are enough to store the input values (1 byte each)
@@ -126,6 +127,6 @@ public class CompressedLongArrayTest {
         Assert.assertEquals(4, uncompressedValueCount);
         Assert.assertArrayEquals(inValues, outValues);
 
-        Assert.assertArrayEquals(inWeights, Arrays.copyOf(compressedLongArray.weights(), inWeights.length), 0D);
+        Assert.assertArrayEquals(inWeights, Arrays.copyOf(compressedLongArray.weights(), inWeights.length));
     }
 }
