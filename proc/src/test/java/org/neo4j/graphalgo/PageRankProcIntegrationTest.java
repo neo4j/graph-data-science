@@ -19,87 +19,79 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-@RunWith(Parameterized.class)
 public class PageRankProcIntegrationTest {
 
     private static GraphDatabaseAPI db;
     private static Map<Long, Double> expected = new HashMap<>();
     private static Map<Long, Double> weightedExpected = new HashMap<>();
 
-    private static final String DB_CYPHER = "" +
-            "CREATE (a:Label1 {name:\"a\"})\n" +
-            "CREATE (b:Label1 {name:\"b\"})\n" +
-            "CREATE (c:Label1 {name:\"c\"})\n" +
-            "CREATE (d:Label1 {name:\"d\"})\n" +
-            "CREATE (e:Label1 {name:\"e\"})\n" +
-            "CREATE (f:Label1 {name:\"f\"})\n" +
-            "CREATE (g:Label1 {name:\"g\"})\n" +
-            "CREATE (h:Label1 {name:\"h\"})\n" +
-            "CREATE (i:Label1 {name:\"i\"})\n" +
-            "CREATE (j:Label1 {name:\"j\"})\n" +
-            "CREATE (k:Label2 {name:\"k\"})\n" +
-            "CREATE (l:Label2 {name:\"l\"})\n" +
-            "CREATE (m:Label2 {name:\"m\"})\n" +
-            "CREATE (n:Label2 {name:\"n\"})\n" +
-            "CREATE (o:Label2 {name:\"o\"})\n" +
-            "CREATE (p:Label2 {name:\"p\"})\n" +
-            "CREATE (q:Label2 {name:\"q\"})\n" +
-            "CREATE (r:Label2 {name:\"r\"})\n" +
-            "CREATE (s:Label2 {name:\"s\"})\n" +
-            "CREATE (t:Label2 {name:\"t\"})\n" +
-            "CREATE\n" +
-            "  (b)-[:TYPE1{foo:1.0, equalWeight: 1.0}]->(c),\n" +
+    private static final String DB_CYPHER = "CREATE " +
+            " (a:Label1 {name: 'a'})" +
+            ",(b:Label1 {name: 'b'})" +
+            ",(c:Label1 {name: 'c'})" +
+            ",(d:Label1 {name: 'd'})" +
+            ",(e:Label1 {name: 'e'})" +
+            ",(f:Label1 {name: 'f'})" +
+            ",(g:Label1 {name: 'g'})" +
+            ",(h:Label1 {name: 'h'})" +
+            ",(i:Label1 {name: 'i'})" +
+            ",(j:Label1 {name: 'j'})" +
+            ",(k:Label2 {name: 'k'})" +
+            ",(l:Label2 {name: 'l'})" +
+            ",(m:Label2 {name: 'm'})" +
+            ",(n:Label2 {name: 'n'})" +
+            ",(o:Label2 {name: 'o'})" +
+            ",(p:Label2 {name: 'p'})" +
+            ",(q:Label2 {name: 'q'})" +
+            ",(r:Label2 {name: 'r'})" +
+            ",(s:Label2 {name: 's'})" +
+            ",(t:Label2 {name: 't'})" +
+            ",(b)-[:TYPE1 {foo: 1.0,  equalWeight: 1.0}]->(c)" +
+            ",(c)-[:TYPE1 {foo: 1.2,  equalWeight: 1.0}]->(b)" +
+            ",(d)-[:TYPE1 {foo: 1.3,  equalWeight: 1.0}]->(a)" +
+            ",(d)-[:TYPE1 {foo: 1.7,  equalWeight: 1.0}]->(b)" +
+            ",(e)-[:TYPE1 {foo: 6.1,  equalWeight: 1.0}]->(b)" +
+            ",(e)-[:TYPE1 {foo: 2.2,  equalWeight: 1.0}]->(d)" +
+            ",(e)-[:TYPE1 {foo: 1.5,  equalWeight: 1.0}]->(f)" +
+            ",(f)-[:TYPE1 {foo: 10.5, equalWeight: 1.0}]->(b)" +
+            ",(f)-[:TYPE1 {foo: 2.9,  equalWeight: 1.0}]->(e)" +
+            ",(g)-[:TYPE2 {foo: 3.2,  equalWeight: 1.0}]->(b)" +
+            ",(g)-[:TYPE2 {foo: 5.3,  equalWeight: 1.0}]->(e)" +
+            ",(h)-[:TYPE2 {foo: 9.5,  equalWeight: 1.0}]->(b)" +
+            ",(h)-[:TYPE2 {foo: 0.3,  equalWeight: 1.0}]->(e)" +
+            ",(i)-[:TYPE2 {foo: 5.4,  equalWeight: 1.0}]->(b)" +
+            ",(i)-[:TYPE2 {foo: 3.2,  equalWeight: 1.0}]->(e)" +
+            ",(j)-[:TYPE2 {foo: 9.5,  equalWeight: 1.0}]->(e)" +
+            ",(k)-[:TYPE2 {foo: 4.2,  equalWeight: 1.0}]->(e)";
 
-            "  (c)-[:TYPE1{foo:1.2, equalWeight: 1.0}]->(b),\n" +
-
-            "  (d)-[:TYPE1{foo:1.3, equalWeight: 1.0}]->(a),\n" +
-            "  (d)-[:TYPE1{foo:1.7, equalWeight: 1.0}]->(b),\n" +
-
-            "  (e)-[:TYPE1{foo:6.1, equalWeight: 1.0}]->(b),\n" +
-            "  (e)-[:TYPE1{foo:2.2, equalWeight: 1.0}]->(d),\n" +
-            "  (e)-[:TYPE1{foo:1.5, equalWeight: 1.0}]->(f),\n" +
-
-            "  (f)-[:TYPE1{foo:10.5, equalWeight: 1.0}]->(b),\n" +
-            "  (f)-[:TYPE1{foo:2.9, equalWeight: 1.0}]->(e),\n" +
-
-            "  (g)-[:TYPE2{foo:3.2, equalWeight: 1.0}]->(b),\n" +
-            "  (g)-[:TYPE2{foo:5.3, equalWeight: 1.0}]->(e),\n" +
-            "  (h)-[:TYPE2{foo:9.5, equalWeight: 1.0}]->(b),\n" +
-            "  (h)-[:TYPE2{foo:0.3, equalWeight: 1.0}]->(e),\n" +
-            "  (i)-[:TYPE2{foo:5.4, equalWeight: 1.0}]->(b),\n" +
-            "  (i)-[:TYPE2{foo:3.2, equalWeight: 1.0}]->(e),\n" +
-            "  (j)-[:TYPE2{foo:9.5, equalWeight: 1.0}]->(e),\n" +
-            "  (k)-[:TYPE2{foo:4.2, equalWeight: 1.0}]->(e)\n";
-
-    @AfterClass
-    public static void tearDown() throws Exception {
+    @AfterAll
+    public static void tearDown() {
         if (db != null) db.shutdown();
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void setup() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase();
         try (Transaction tx = db.beginTx()) {
@@ -110,7 +102,6 @@ public class PageRankProcIntegrationTest {
         db.getDependencyResolver()
                 .resolveDependency(Procedures.class)
                 .registerProcedure(PageRankProc.class);
-
 
         try (Transaction tx = db.beginTx()) {
             final Label label = Label.label("Label1");
@@ -139,158 +130,189 @@ public class PageRankProcIntegrationTest {
         }
     }
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(
-                new Object[]{"Heavy"},
-                new Object[]{"Light"},
-                new Object[]{"Kernel"},
-                new Object[]{"Huge"}
+    static Stream<String> testArguments() {
+        return Stream.of("Heavy", "Huge", "Kernel");
+    }
+
+    @ParameterizedTest
+    @MethodSource("testArguments")
+    public void testPageRankStream(String graphImpl) {
+        final Map<Long, Double> actual = new HashMap<>();
+        String query = "CALL algo.pageRank.stream(" +
+                       "    'Label1', 'TYPE1', {" +
+                       "         graph: $graph" +
+                       "    }" +
+                       ") YIELD nodeId, score";
+        runQuery(query, MapUtil.map("graph", graphImpl),
+                row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
-    }
-
-    @Parameterized.Parameter
-    public String graphImpl;
-
-    @Test
-    public void testPageRankStream() throws Exception {
-        final Map<Long, Double> actual = new HashMap<>();
-        runQuery(
-                "CALL algo.pageRank.stream('Label1', 'TYPE1', {graph:'" + graphImpl + "'}) YIELD nodeId, score",
-                row -> actual.put(
-                        (Long) row.get("nodeId"),
-                        (Double) row.get("score")));
-
         assertMapEquals(expected, actual);
     }
 
-    @Test
-    public void testWeightedPageRankStream() throws Exception {
+    @ParameterizedTest
+    @MethodSource("testArguments")
+    public void testWeightedPageRankStream(String graphImpl) {
         final Map<Long, Double> actual = new HashMap<>();
-        runQuery(
-                "CALL algo.pageRank.stream('Label1', 'TYPE1', {graph:'" + graphImpl + "', weightProperty: 'foo'}) YIELD nodeId, score",
-                row -> actual.put(
-                        (Long) row.get("nodeId"),
-                        (Double) row.get("score")));
-
+        String query = "CALL algo.pageRank.stream(" +
+                       "    'Label1', 'TYPE1', {" +
+                       "        graph: $graph, weightProperty: 'foo'" +
+                       "    }" +
+                       ") YIELD nodeId, score";
+        runQuery(query, MapUtil.map("graph", graphImpl),
+                row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
+        );
         assertMapEquals(weightedExpected, actual);
     }
 
-    @Test
-    public void testWeightedPageRankWithCachedWeightsStream() throws Exception {
+    @ParameterizedTest
+    @MethodSource("testArguments")
+    public void testWeightedPageRankWithCachedWeightsStream(String graphImpl) throws Exception {
         final Map<Long, Double> actual = new HashMap<>();
-        runQuery(
-                "CALL algo.pageRank.stream('Label1', 'TYPE1', {graph:'" + graphImpl + "', weightProperty: 'foo', cacheWeights: true}) YIELD nodeId, score",
-                row -> actual.put(
-                        (Long) row.get("nodeId"),
-                        (Double) row.get("score")));
-
+        String query = "CALL algo.pageRank.stream(" +
+                       "    'Label1', 'TYPE1', {" +
+                       "        graph: $graph, weightProperty: 'foo', cacheWeights: true" +
+                       "    }" +
+                       ") YIELD nodeId, score";
+        runQuery(query, MapUtil.map("graph", graphImpl),
+                row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
+        );
         assertMapEquals(weightedExpected, actual);
     }
 
-    @Test
-    public void testWeightedPageRankWithAllRelationshipsEqualStream() throws Exception {
+    @ParameterizedTest
+    @MethodSource("testArguments")
+    public void testWeightedPageRankWithAllRelationshipsEqualStream(String graphImpl) {
         final Map<Long, Double> actual = new HashMap<>();
-        runQuery(
-                "CALL algo.pageRank.stream('Label1', 'TYPE1', {graph:'" + graphImpl + "', weightProperty: 'equalWeight'}) YIELD nodeId, score",
-                row -> actual.put(
-                        (Long) row.get("nodeId"),
-                        (Double) row.get("score")));
-
+        String query = "CALL algo.pageRank.stream(" +
+                       "    'Label1', 'TYPE1', {" +
+                       "        graph: $graph, weightProperty: 'equalWeight'" +
+                       "    }" +
+                       ") YIELD nodeId, score";
+        runQuery(query, MapUtil.map("graph", graphImpl),
+                row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
+        );
         assertMapEquals(expected, actual);
     }
 
 
-    @Test
-    public void testPageRankWriteBack() throws Exception {
-        runQuery(
-                "CALL algo.pageRank('Label1', 'TYPE1', {graph:'" + graphImpl + "'}) YIELD writeMillis, write, writeProperty",
+    @ParameterizedTest
+    @MethodSource("testArguments")
+    public void testPageRankWriteBack(String graphImpl) {
+        String query = "CALL algo.pageRank(" +
+                       "    'Label1', 'TYPE1', {" +
+                       "        graph: $graph" +
+                       "    }" +
+                       ") YIELD writeMillis, write, writeProperty";
+        runQuery(query, MapUtil.map("graph", graphImpl),
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("pagerank", row.getString("writeProperty"));
-                    assertTrue(
-                            "write time not set",
-                            row.getNumber("writeMillis").intValue() >= 0);
-                });
-
+                    assertTrue("write time not set", row.getNumber("writeMillis").intValue() >= 0);
+                }
+        );
         assertResult("pagerank", expected);
     }
 
-    @Test
-    public void testWeightedPageRankWriteBack() throws Exception {
-        runQuery(
-                "CALL algo.pageRank('Label1', 'TYPE1', {graph:'" + graphImpl + "', weightProperty: 'foo'}) YIELD writeMillis, write, writeProperty",
+    @ParameterizedTest
+    @MethodSource("testArguments")
+    public void testWeightedPageRankWriteBack(String graphImpl) {
+        String query = "CALL algo.pageRank(" +
+                       "    'Label1', 'TYPE1', {" +
+                       "        graph: $graph, weightProperty: 'foo'" +
+                       "    }" +
+                       ") YIELD writeMillis, write, writeProperty";
+        runQuery(query, MapUtil.map("graph", graphImpl),
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("pagerank", row.getString("writeProperty"));
-                    assertTrue(
-                            "write time not set",
-                            row.getNumber("writeMillis").intValue() >= 0);
-                });
-
+                    assertTrue("write time not set", row.getNumber("writeMillis").intValue() >= 0);
+                }
+        );
         assertResult("pagerank", weightedExpected);
     }
 
-    @Test
-    public void testPageRankWriteBackUnderDifferentProperty() throws Exception {
-        runQuery(
-                "CALL algo.pageRank('Label1', 'TYPE1', {writeProperty:'foobar', graph:'" + graphImpl + "'}) YIELD writeMillis, write, writeProperty",
+    @ParameterizedTest
+    @MethodSource("testArguments")
+    public void testPageRankWriteBackUnderDifferentProperty(String graphImpl) throws Exception {
+        String query = "CALL algo.pageRank(" +
+                       "    'Label1', 'TYPE1', {" +
+                       "        writeProperty: 'foobar', graph: $graph" +
+                       "    }" +
+                       ") YIELD writeMillis, write, writeProperty";
+        runQuery(query, MapUtil.map("graph", graphImpl),
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("foobar", row.getString("writeProperty"));
-                    assertTrue(
-                            "write time not set",
-                            row.getNumber("writeMillis").intValue() >= 0);
-                });
-
+                    assertTrue("write time not set", row.getNumber("writeMillis").intValue() >= 0);
+                }
+        );
         assertResult("foobar", expected);
     }
 
-    @Test
-    public void testPageRankParallelWriteBack() throws Exception {
-        runQuery(
-                "CALL algo.pageRank('Label1', 'TYPE1', {batchSize:3, write:true, graph:'" + graphImpl + "'}) YIELD writeMillis, write, writeProperty",
-                row -> assertTrue(
-                        "write time not set",
-                        row.getNumber("writeMillis").intValue() >= 0));
-
+    @ParameterizedTest
+    @MethodSource("testArguments")
+    public void testPageRankParallelWriteBack(String graphImpl) throws Exception {
+        String query = "CALL algo.pageRank(" +
+                       "    'Label1', 'TYPE1', {" +
+                       "        batchSize: 3, write: true, graph: $graph" +
+                       "    }" +
+                       ") YIELD writeMillis, write, writeProperty";
+        runQuery(query, MapUtil.map("graph", graphImpl),
+                row -> assertTrue("write time not set", row.getNumber("writeMillis").intValue() >= 0)
+        );
         assertResult("pagerank", expected);
     }
 
-    @Test
-    public void testPageRankParallelExecution() throws Exception {
+    @ParameterizedTest
+    @MethodSource("testArguments")
+    public void testPageRankParallelExecution(String graphImpl) throws Exception {
         final Map<Long, Double> actual = new HashMap<>();
-        runQuery(
-                "CALL algo.pageRank.stream('Label1', 'TYPE1', {batchSize:2, graph:'" + graphImpl + "'}) YIELD nodeId, score",
+        String query = "CALL algo.pageRank.stream(" +
+                       "    'Label1', 'TYPE1', {" +
+                       "        batchSize: 2, graph: $graph" +
+                       "    }" +
+                       ") YIELD nodeId, score";
+        runQuery(query, MapUtil.map("graph", graphImpl),
                 row -> {
                     final long nodeId = row.getNumber("nodeId").longValue();
                     actual.put(nodeId, (Double) row.get("score"));
-                });
+                }
+        );
         assertMapEquals(expected, actual);
     }
 
-    @Test
-    public void testPageRankWithToleranceParam() throws Exception {
-        runQuery("CALL algo.pageRank('Label1', 'TYPE1', {tolerance: 0.0001, batchSize:3, graph:'"+graphImpl+"'}) YIELD nodes, iterations",
-                row -> assertEquals(20L, (long)row.getNumber("iterations")));
-
-        runQuery("CALL algo.pageRank('Label1', 'TYPE1', {tolerance: 100.0, batchSize:3, graph:'"+graphImpl+"'}) YIELD nodes, iterations",
+    @ParameterizedTest
+    @MethodSource("testArguments")
+    public void testPageRankWithToleranceParam(String graphImpl) throws Exception {
+        String query;
+        query = "CALL algo.pageRank(" +
+                "    'Label1', 'TYPE1', {" +
+                "        tolerance: 0.0001, batchSize: 3, graph: $graph" +
+                "     }" +
+                ") YIELD nodes, iterations";
+        runQuery(query, MapUtil.map("graph", graphImpl),
+                row -> assertEquals(20L, (long) row.getNumber("iterations")));
+        query = "CALL algo.pageRank(" +
+                "    'Label1', 'TYPE1', {" +
+                "        tolerance: 100.0, batchSize: 3, graph: $graph" +
+                "    }" +
+                ") YIELD nodes, iterations";
+        runQuery(query, MapUtil.map("graph", graphImpl),
                 row -> assertEquals(1L, (long)row.getNumber("iterations")));
-
-        runQuery(
-                "CALL algo.pageRank('Label1', 'TYPE1', {tolerance: 0.20010237991809848, batchSize:3, graph:'" + graphImpl + "'}) YIELD nodes, iterations",
+        query = "CALL algo.pageRank(" +
+                "    'Label1', 'TYPE1', {" +
+                "        tolerance: 0.20010237991809848, batchSize: 3, graph: $graph" +
+                "    }" +
+                ") YIELD nodes, iterations";
+        runQuery(query, MapUtil.map("graph", graphImpl),
                 row -> assertEquals(4L, (long) row.getNumber("iterations")));
-
-        runQuery(
-                "CALL algo.pageRank('Label1', 'TYPE1', {tolerance: 0.20010237991809843, batchSize:3, graph:'" + graphImpl + "'}) YIELD nodes, iterations",
+        query = "CALL algo.pageRank(" +
+                "    'Label1', 'TYPE1', {" +
+                "        tolerance: 0.20010237991809843, batchSize: 3, graph: $graph" +
+                "    }" +
+                ") YIELD nodes, iterations";
+        runQuery(query, MapUtil.map("graph", graphImpl),
                 row -> assertEquals(5L, (long) row.getNumber("iterations")));
-
-    }
-
-    private static void runQuery(
-            String query,
-            Consumer<Result.ResultRow> check) {
-        runQuery(query, new HashMap<>(), check);
     }
 
     private static void runQuery(
