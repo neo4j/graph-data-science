@@ -1,9 +1,12 @@
 package org.neo4j.graphalgo;
 
+import com.carrotsearch.hppc.IntIntMap;
+import com.carrotsearch.hppc.cursors.IntIntCursor;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -18,6 +21,12 @@ public class ProcTestBase {
 
     static Stream<String> graphImplementations() {
         return Stream.of("Heavy", "Huge", "Kernel");
+    }
+
+    protected void runQuery(
+            String query,
+            Consumer<Result.ResultRow> check) {
+        runQuery(query, Collections.emptyMap(), check);
     }
 
     protected static void runQuery(
@@ -52,6 +61,21 @@ public class ProcTestBase {
         }
     }
 
+    protected static void assertMapContains(IntIntMap map, int... values) {
+        assertEquals("set count does not match", values.length, map.size());
+        for (int count : values) {
+            assertTrue("set size " + count + " does not match", mapContainsValue(map, count));
+        }
+    }
+
+    private static boolean mapContainsValue(IntIntMap map, int value) {
+        for (IntIntCursor cursor : map) {
+            if (cursor.value == value) {
+                return true;
+            }
+        }
+        return false;
+    }
     protected void assertResult(final String scoreProperty, Map<Long, Double> expected) {
         try (Transaction tx = db.beginTx()) {
             for (Map.Entry<Long, Double> entry : expected.entrySet()) {
