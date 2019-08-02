@@ -67,8 +67,8 @@ task versionsJson {
         def indexedVersionsJson = versionsJson.collectEntries {
             [(it.neo4j): it]
         }
-        indexedVersionsJson[versions.neo4j] = [
-                'neo4j': versions.neo4j,
+        indexedVersionsJson[ver.neo4j] = [
+                'neo4j': ver.neo4j,
                 'version': project.version,
                 'url': "",
                 'jar': "$bucketUrl/${shadowJar.archiveName}",
