@@ -43,7 +43,7 @@ public final class HugeAdjacencyList {
     private final long allocatedMemory;
     private byte[][] pages;
 
-    public static MemoryEstimation memoryEstimation(boolean undirected) {
+    public static MemoryEstimation compressedMemoryEstimation(boolean undirected) {
 
         return MemoryEstimations
                 .builder(HugeAdjacencyList.class)
@@ -73,6 +73,26 @@ public final class HugeAdjacencyList {
                     long maxMemoryReqs = maxPages * bytesPerPage + MemoryUsage.sizeOfObjectArray(maxPages);
 
                     return MemoryRange.of(minMemoryReqs, maxMemoryReqs);
+                })
+                .build();
+    }
+
+    public static MemoryEstimation uncompressedMemoryEstimation(boolean undirected) {
+
+        return MemoryEstimations
+                .builder(HugeAdjacencyList.class)
+                .rangePerGraphDimension("pages", dim -> {
+                    long nodeCount = dim.nodeCount();
+                    long relCount = undirected ? dim.maxRelCount() * 2 : dim.maxRelCount();
+
+                    long uncompressedAdjacencySize = relCount * Long.BYTES + nodeCount * Integer.BYTES;
+
+                    int pages = PageUtil.numPagesFor(uncompressedAdjacencySize, PAGE_SHIFT, PAGE_MASK);
+
+                    long bytesPerPage = MemoryUsage.sizeOfByteArray(PAGE_SIZE);
+                    long memoryReqs = pages * bytesPerPage + MemoryUsage.sizeOfObjectArray(pages);
+
+                    return MemoryRange.of(memoryReqs);
                 })
                 .build();
     }

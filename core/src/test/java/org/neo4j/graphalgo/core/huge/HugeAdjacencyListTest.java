@@ -36,13 +36,13 @@ import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 public class HugeAdjacencyListTest {
 
     @Test
-    public void shouldComputeMemoryEstimationForSinglePage() {
+    public void shouldComputeCompressedMemoryEstimationForSinglePage() {
         GraphDimensions dimensions = new GraphDimensions.Builder()
                 .setNodeCount(100)
                 .setMaxRelCount(100)
                 .build();
 
-        MemoryTree memRec = HugeAdjacencyList.memoryEstimation(false).estimate(dimensions, 1);
+        MemoryTree memRec = HugeAdjacencyList.compressedMemoryEstimation(false).estimate(dimensions, 1);
 
         long classSize = 24;
         long bestCaseAdjacencySize = 500;
@@ -60,13 +60,34 @@ public class HugeAdjacencyListTest {
     }
 
     @Test
-    public void shouldComputeMemoryEstimationForMultiplePage() {
+    public void shouldComputeUncompressedMemoryEstimationForSinglePage() {
+        GraphDimensions dimensions = new GraphDimensions.Builder()
+                .setNodeCount(100)
+                .setMaxRelCount(100)
+                .build();
+
+        MemoryTree memRec = HugeAdjacencyList.compressedMemoryEstimation(false).estimate(dimensions, 1);
+
+        long classSize = 24;
+        long uncompressedAdjacencySize = 1200;
+
+        int pages = PageUtil.numPagesFor(uncompressedAdjacencySize, PAGE_SHIFT, PAGE_MASK);
+        long bytesPerPage = BitUtil.align(16 + 262144L, 8);
+        long memoryReqs = pages * bytesPerPage + BitUtil.align(16 + pages * 4, 8);
+
+        MemoryRange expected = MemoryRange.of(memoryReqs + classSize);
+
+        assertEquals(expected, memRec.memoryUsage());
+    }
+
+    @Test
+    public void shouldComputeCompressedMemoryEstimationForMultiplePage() {
         GraphDimensions dimensions = new GraphDimensions.Builder()
                 .setNodeCount(100_000_000L)
                 .setMaxRelCount(100_000_000_000L)
                 .build();
 
-        MemoryTree memRec = HugeAdjacencyList.memoryEstimation(false).estimate(dimensions, 1);
+        MemoryTree memRec = HugeAdjacencyList.compressedMemoryEstimation(false).estimate(dimensions, 1);
 
         long classSize = 24;
         long bestCaseAdjacencySize = 100_500_000_000L;
@@ -79,6 +100,28 @@ public class HugeAdjacencyListTest {
         long maxMemoryReqs = maxPages * bytesPerPage + BitUtil.align(16 + maxPages * 4, 8);
 
         MemoryRange expected = MemoryRange.of(minMemoryReqs + classSize, maxMemoryReqs + classSize);
+
+        assertEquals(expected, memRec.memoryUsage());
+    }
+
+    @Test
+    public void shouldComputeUncompressedMemoryEstimationForMultiplePage() {
+        GraphDimensions dimensions = new GraphDimensions.Builder()
+                .setNodeCount(100_000_000L)
+                .setMaxRelCount(100_000_000_000L)
+                .build();
+
+        MemoryTree memRec = HugeAdjacencyList.uncompressedMemoryEstimation(false).estimate(dimensions, 1);
+
+        long classSize = 24;
+
+        long uncompessedAdjacencySize = 800_400_000_000L;
+
+        int pages = PageUtil.numPagesFor(uncompessedAdjacencySize, PAGE_SHIFT, PAGE_MASK);
+        long bytesPerPage = BitUtil.align(16 + 262144L, 8);
+        long memoryReqs = pages * bytesPerPage + BitUtil.align(16 + pages * 4, 8);
+
+        MemoryRange expected = MemoryRange.of(memoryReqs + classSize);
 
         assertEquals(expected, memRec.memoryUsage());
     }

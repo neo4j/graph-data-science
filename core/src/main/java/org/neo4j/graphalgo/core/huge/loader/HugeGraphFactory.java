@@ -71,16 +71,23 @@ public final class HugeGraphFactory extends GraphFactory {
         }
 
         // Relationship weight properties
-        if (dimensions.relWeightId() == StatementConstants.NO_SUCH_PROPERTY_KEY) {
-            builder.add(setup.relationWeightPropertyName, HugeNullWeightMap.MEMORY_USAGE);
-        } else {
-            builder.add(
-                    setup.relationWeightPropertyName,
-                    HugeWeightMap.memoryEstimation(setup.relationWeightPropertyName));
+        if (dimensions.relWeightId() != StatementConstants.NO_SUCH_PROPERTY_KEY) {
+            // Adjacency lists and Adjacency offsets
+            MemoryEstimation adjacencyListSize = HugeAdjacencyList.uncompressedMemoryEstimation(setup.loadAsUndirected);
+            MemoryEstimation adjacencyOffsetsSetup = HugeAdjacencyOffsets.memoryEstimation();
+            if (setup.loadOutgoing || setup.loadAsUndirected) {
+                builder.add("outgoing weights", adjacencyListSize);
+                builder.add("outgoing weight offsets", adjacencyOffsetsSetup);
+
+            }
+            if (setup.loadIncoming && !setup.loadAsUndirected) {
+                builder.add("incoming weights", adjacencyListSize);
+                builder.add("incoming weight offsets", adjacencyOffsetsSetup);
+            }
         }
 
         // Adjacency lists and Adjacency offsets
-        MemoryEstimation adjacencyListSize = HugeAdjacencyList.memoryEstimation(setup.loadAsUndirected);
+        MemoryEstimation adjacencyListSize = HugeAdjacencyList.compressedMemoryEstimation(setup.loadAsUndirected);
         MemoryEstimation adjacencyOffsetsSetup = HugeAdjacencyOffsets.memoryEstimation();
         if (setup.loadOutgoing || setup.loadAsUndirected) {
             builder.add("outgoing", adjacencyListSize);
