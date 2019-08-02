@@ -163,12 +163,24 @@ public class HugeGraph implements Graph {
 
     @Override
     public double weightOf(final long sourceNodeId, final long targetNodeId) {
+        double maybeWeight;
+
         if (outWeights != null) {
-            return findWeight(sourceNodeId, targetNodeId, outWeights, outWeightOffsets, outAdjacency, outOffsets);
-        } else if (inWeights != null) {
-            return findWeight(targetNodeId, sourceNodeId, inWeights, inWeightOffsets, inAdjacency, inOffsets);
+            maybeWeight = findWeight(sourceNodeId, targetNodeId, outWeights, outWeightOffsets, outAdjacency, outOffsets);
+            if (!Double.isNaN(maybeWeight)) {
+                return maybeWeight;
+            }
         }
-        return NO_WEIGHT;
+
+        if (inWeights != null) {
+            maybeWeight = findWeight(targetNodeId, sourceNodeId, inWeights, inWeightOffsets, inAdjacency, inOffsets);
+
+            if (!Double.isNaN(maybeWeight)) {
+                return maybeWeight;
+            }
+        }
+
+        return defaultWeight;
     }
 
     private double findWeight(
