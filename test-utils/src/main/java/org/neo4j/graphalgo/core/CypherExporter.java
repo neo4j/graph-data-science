@@ -36,12 +36,26 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+/**
+ * Exports a graph as Cypher statements, so that you could inspect it during tests or similar.
+ * Absolutely NOT intented for any kind of larger graph (say, > 100 nodes).
+ *
+ * The Cypher statement should be valid, but might not reproduce the input graph 100%.
+ */
 public final class CypherExporter {
 
+    /**
+     * Writes a Cypher statement describing the graph to the given writer.
+     */
     public static void export(PrintWriter out, GraphDatabaseService db) {
         export(out, db, NeoData.INSTANCE);
     }
 
+    /**
+     * Writes a Cypher statement describing the graph to the given writer.
+     * Information about labels and relationship types is lost and won't be reproduced.
+     * Property names and ids will reflect internal names/values and not the actual ids/values.
+     */
     public static void export(PrintWriter out, Graph graph) {
         export(out, graph, GraphData.INSTANCE);
     }
