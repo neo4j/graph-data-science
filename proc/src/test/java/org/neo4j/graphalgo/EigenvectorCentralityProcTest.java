@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.helpers.collection.MapUtil;
@@ -35,24 +34,19 @@ import org.neo4j.test.TestGraphDatabaseFactory;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
-public class EigenvectorCentralityProcIntegrationTest {
+public class EigenvectorCentralityProcTest extends ProcTestBase {
 
-    private static GraphDatabaseAPI db;
     private static Map<Long, Double> expected = new HashMap<>();
 
     @BeforeAll
     public static void setup() throws KernelException {
-        ClassLoader classLoader = EigenvectorCentralityProcIntegrationTest.class.getClassLoader();
+        ClassLoader classLoader = EigenvectorCentralityProcTest.class.getClassLoader();
         File file = new File(classLoader.getResource("got/got-s1-nodes.csv").getFile());
 
         db = (GraphDatabaseAPI)new TestGraphDatabaseFactory()
@@ -106,12 +100,8 @@ public class EigenvectorCentralityProcIntegrationTest {
         if (db != null) db.shutdown();
     }
 
-    static Stream<String> testArguments() {
-        return Stream.of("Heavy", "Huge", "Kernel");
-    }
-
     @ParameterizedTest
-    @MethodSource("testArguments")
+    @MethodSource("graphImplementations")
     public void testStream(String graphImpl) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.eigenvector.stream(" +
@@ -131,7 +121,7 @@ public class EigenvectorCentralityProcIntegrationTest {
     }
 
     @ParameterizedTest
-    @MethodSource("testArguments")
+    @MethodSource("graphImplementations")
     public void testWriteBack(String graphImpl) {
         String query = "CALL algo.eigenvector(" +
                        "    'Character', 'INTERACTS_SEASON1', {" +
@@ -148,7 +138,7 @@ public class EigenvectorCentralityProcIntegrationTest {
     }
 
     @ParameterizedTest
-    @MethodSource("testArguments")
+    @MethodSource("graphImplementations")
     public void testWriteBackUnderDifferentProperty(String graphImpl) {
         String query = "CALL algo.eigenvector(" +
                        "    'Character', 'INTERACTS_SEASON1', {" +
@@ -165,7 +155,7 @@ public class EigenvectorCentralityProcIntegrationTest {
     }
 
     @ParameterizedTest
-    @MethodSource("testArguments")
+    @MethodSource("graphImplementations")
     public void testParallelWriteBack(String graphImpl) {
         String query = "CALL algo.eigenvector(" +
                        "    'Character', 'INTERACTS_SEASON1', {" +
@@ -179,7 +169,7 @@ public class EigenvectorCentralityProcIntegrationTest {
     }
 
     @ParameterizedTest
-    @MethodSource("testArguments")
+    @MethodSource("graphImplementations")
     public void testParallelExecution(String graphImpl) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.eigenvector.stream(" +
@@ -196,53 +186,5 @@ public class EigenvectorCentralityProcIntegrationTest {
                     actual.put(nodeId, (Double) row.get("score"));
         });
         assertMapEquals(expected, actual);
-    }
-
-    private static void runQuery(
-            String query,
-            Map<String, Object> params,
-            Consumer<Result.ResultRow> check) {
-        try (Result result = db.execute(query, params)) {
-            result.accept(row -> {
-                check.accept(row);
-                return true;
-            });
-        }
-    }
-
-    private void assertResult(final String scoreProperty, Map<Long, Double> expected) {
-        try (Transaction tx = db.beginTx()) {
-            for (Map.Entry<Long, Double> entry : expected.entrySet()) {
-                double score = ((Number) db
-                        .getNodeById(entry.getKey())
-                        .getProperty(scoreProperty)).doubleValue();
-                assertEquals(
-                        "score for " + entry.getKey(),
-                        entry.getValue(),
-                        score,
-                        0.1);
-            }
-            tx.success();
-        }
-    }
-
-    private static void assertMapEquals(
-            Map<Long, Double> expected,
-            Map<Long, Double> actual) {
-        assertEquals("number of elements", expected.size(), actual.size());
-        HashSet<Long> expectedKeys = new HashSet<>(expected.keySet());
-        for (Map.Entry<Long, Double> entry : actual.entrySet()) {
-            assertTrue(
-                    "unknown key " + entry.getKey(),
-                    expectedKeys.remove(entry.getKey()));
-            assertEquals(
-                    "value for " + entry.getKey(),
-                    expected.get(entry.getKey()),
-                    entry.getValue(),
-                    0.1);
-        }
-        for (Long expectedKey : expectedKeys) {
-            fail("missing key " + expectedKey);
-        }
     }
 }
