@@ -46,7 +46,7 @@ import static org.junit.Assume.assumeFalse;
  * @author mknblch
  */
 @RunWith(Parameterized.class)
-public class WeightMapImportTest {
+public class RelationshipWeightImportTest {
 
     @Parameterized.Parameters(name = "{1}")
     public static Collection<Object[]> data() {
@@ -66,7 +66,7 @@ public class WeightMapImportTest {
     private Class<? extends GraphFactory> graphImpl;
     private Graph graph;
 
-    public WeightMapImportTest(
+    public RelationshipWeightImportTest(
             Class<? extends GraphFactory> graphImpl,
             String name) {
         this.graphImpl = graphImpl;

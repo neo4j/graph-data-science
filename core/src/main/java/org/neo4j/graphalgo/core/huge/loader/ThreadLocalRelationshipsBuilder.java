@@ -30,7 +30,10 @@ class ThreadLocalRelationshipsBuilder {
 
     final void prepare() {
         adjacencyAllocator.prepare();
-        weightsAllocator.prepare();
+
+        if (weightsAllocator != null) {
+            weightsAllocator.prepare();
+        }
     }
 
     final void lock() {

@@ -64,7 +64,9 @@ abstract class AdjacencyBuilder {
         final CompressedLongArray[][] compressedAdjacencyLists = new CompressedLongArray[numPages][];
         LongsRef[] buffers = new LongsRef[numPages];
         long[][] globalAdjacencyOffsets = new long[numPages][];
-        long[][] globalWeightOffsets = new long[numPages][];
+
+        long[][] globalWeightOffsets = weightProperty != StatementConstants.NO_SUCH_PROPERTY_KEY ? new long[numPages][] : null;
+
         return new CompressingPagedAdjacency(
                 globalBuilder,
                 localBuilders,
@@ -134,15 +136,24 @@ abstract class AdjacencyBuilder {
             compressedAdjacencyLists[pageIndex] = new CompressedLongArray[pageSize];
             buffers[pageIndex] = new LongsRef();
             long[] localAdjacencyOffsets = globalAdjacencyOffsets[pageIndex] = new long[pageSize];
-            long[] localWeightOffsets = globalWeightOffsets[pageIndex] = new long[pageSize];
-            localBuilders[pageIndex] = globalBuilder.threadLocalRelationshipsBuilder(localAdjacencyOffsets, localWeightOffsets);
+
+            long[] localWeightOffsets = null;
+            if (weightProperty != StatementConstants.NO_SUCH_PROPERTY_KEY) {
+                localWeightOffsets = globalWeightOffsets[pageIndex] = new long[pageSize];
+            }
+
+            localBuilders[pageIndex] = globalBuilder.threadLocalRelationshipsBuilder(
+                    localAdjacencyOffsets,
+                    localWeightOffsets);
             localBuilders[pageIndex].prepare();
         }
 
         @Override
         void finishPreparation() {
             globalBuilder.setGlobalAdjacencyOffsets(HugeAdjacencyOffsets.of(globalAdjacencyOffsets, pageSize));
-            globalBuilder.setGlobalWeightOffsets(HugeAdjacencyOffsets.of(globalWeightOffsets, pageSize));
+            if (globalWeightOffsets != null) {
+                globalBuilder.setGlobalWeightOffsets(HugeAdjacencyOffsets.of(globalWeightOffsets, pageSize));
+            }
         }
 
         @Override

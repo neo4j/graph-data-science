@@ -152,14 +152,13 @@ public final class HugeGraphFactory extends GraphFactory {
         RelationshipsBuilder incomingRelationshipsBuilder = null;
 
         if (setup.loadAsUndirected) {
-            outgoingRelationshipsBuilder = new RelationshipsBuilder(tracker);
-
+            outgoingRelationshipsBuilder = new RelationshipsBuilder(tracker, setup.shouldLoadRelationshipWeight());
         } else {
             if (setup.loadOutgoing) {
-                outgoingRelationshipsBuilder = new RelationshipsBuilder(tracker);
+                outgoingRelationshipsBuilder = new RelationshipsBuilder(tracker, setup.shouldLoadRelationshipWeight());
             }
             if (setup.loadIncoming) {
-                incomingRelationshipsBuilder = new RelationshipsBuilder(tracker);
+                incomingRelationshipsBuilder = new RelationshipsBuilder(tracker, setup.shouldLoadRelationshipWeight());
             }
         }
 
@@ -204,8 +203,10 @@ public final class HugeGraphFactory extends GraphFactory {
             outAdjacencyList = outRelationshipsBuilder.adjacency.build();
             outAdjacencyOffsets = outRelationshipsBuilder.globalAdjacencyOffsets;
 
-            outWeightList = outRelationshipsBuilder.weights.build();
-            outWeightOffsets = outRelationshipsBuilder.globalWeightOffsets;
+            if (setup.shouldLoadRelationshipWeight()) {
+                outWeightList = outRelationshipsBuilder.weights.build();
+                outWeightOffsets = outRelationshipsBuilder.globalWeightOffsets;
+            }
         }
 
         HugeAdjacencyList inAdjacencyList = null;
@@ -216,8 +217,10 @@ public final class HugeGraphFactory extends GraphFactory {
             inAdjacencyList = inRelationshipsBuilder.adjacency.build();
             inAdjacencyOffsets = inRelationshipsBuilder.globalAdjacencyOffsets;
 
-            inWeightList = inRelationshipsBuilder.weights.build();
-            inWeightOffsets = inRelationshipsBuilder.globalWeightOffsets;
+            if (setup.shouldLoadRelationshipWeight()) {
+                inWeightList = inRelationshipsBuilder.weights.build();
+                inWeightOffsets = inRelationshipsBuilder.globalWeightOffsets;
+            }
         }
 
         return new HugeGraph(

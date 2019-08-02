@@ -27,18 +27,23 @@ class RelationshipsBuilder {
     final HugeAdjacencyListBuilder adjacency;
     final HugeAdjacencyListBuilder weights;
 
+    private final boolean weighted;
+
     HugeAdjacencyOffsets globalAdjacencyOffsets;
     HugeAdjacencyOffsets globalWeightOffsets;
 
-    RelationshipsBuilder(AllocationTracker tracker) {
+    RelationshipsBuilder(AllocationTracker tracker, final boolean weighted) {
+        this.weighted = weighted;
         adjacency = HugeAdjacencyListBuilder.newBuilder(tracker);
-        weights = HugeAdjacencyListBuilder.newBuilder(tracker);
+        weights = weighted ? HugeAdjacencyListBuilder.newBuilder(tracker) : null;
     }
 
-    final ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder(long[] adjacencyOffsets, long[] weightOffsets) {
+    final ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder(
+            long[] adjacencyOffsets,
+            long[] weightOffsets) {
         return new ThreadLocalRelationshipsBuilder(
                 adjacency.newAllocator(),
-                weights.newAllocator(),
+                weighted ? weights.newAllocator() : null,
                 adjacencyOffsets,
                 weightOffsets);
     }
