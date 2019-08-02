@@ -59,7 +59,7 @@ public class DegreeProcIssue848Test extends ProcTestBase {
     @MethodSource("graphImplementations")
     public void multipleBatches(String graphImpl) {
         final Map<Long, Double> actual = new HashMap<>();
-        String query = "CALL algo.degree.stream('Node', '', {graph, $graph, direction: 'incoming'}) " +
+        String query = "CALL algo.degree.stream('Node', '', {graph: $graph, direction: 'incoming'}) " +
                        "YIELD nodeId, score";
         runQuery(query, MapUtil.map("graph", graphImpl),
                 row -> actual.put(
