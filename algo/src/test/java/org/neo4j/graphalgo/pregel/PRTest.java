@@ -124,8 +124,8 @@ public class PRTest {
 
         assertValues(graph, nodeValues,
                 0, 0.0276,
-                1, 0.3242,
-                2, 0.2889,
+                1, 0.3138,
+                2, 0.2832,
                 3, 0.0330,
                 4, 0.0682,
                 5, 0.0330,
