@@ -38,26 +38,14 @@ public abstract class Computation {
         this.computeStep = computeStep;
     }
 
-    protected abstract void compute(final long nodeId);
+    protected abstract void compute(final long nodeId, double[] messages);
 
     protected int getSuperstep() {
         return computeStep.getIteration();
     }
 
-    protected double[] receiveMessages(final long nodeId) {
-        return receiveMessages(nodeId, Direction.INCOMING);
-    }
-
-    protected double[] receiveMessages(final long nodeId, Direction direction) {
-        return computeStep.receiveMessages(nodeId, direction);
-    }
-
     protected void sendMessages(final long nodeId , final double message) {
-        sendMessages(nodeId, message, Direction.OUTGOING);
-    }
-
-    protected void sendMessages(final long nodeId , final double message, Direction direction) {
-        computeStep.sendMessages(nodeId, message, direction);
+        computeStep.sendMessages(nodeId, message, getMessageDirection());
     }
 
     protected double getValue(final long nodeId) {
@@ -69,10 +57,6 @@ public abstract class Computation {
     }
 
     protected int getDegree(final long nodeId) {
-        return getDegree(nodeId, Direction.OUTGOING);
-    }
-
-    protected int getDegree(final long nodeId, Direction direction) {
-        return computeStep.getDegree(nodeId, direction);
+        return computeStep.getDegree(nodeId, getMessageDirection());
     }
 }

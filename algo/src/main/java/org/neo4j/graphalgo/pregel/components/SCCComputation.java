@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.pregel.Computation;
 public class SCCComputation extends Computation {
 
     @Override
-    protected void compute(final long nodeId) {
+    protected void compute(final long nodeId, double[] messages) {
         if (getSuperstep() == 0) {
             setValue(nodeId, nodeId);
             sendMessages(nodeId, nodeId);
@@ -32,7 +32,7 @@ public class SCCComputation extends Computation {
             long oldComponentId = (long) getValue(nodeId);
             long newComponentId = oldComponentId;
 
-            for (double message : receiveMessages(nodeId)) {
+            for (double message : messages) {
                 if (message < newComponentId) {
                     newComponentId = (long) message;
                 }

@@ -37,13 +37,13 @@ public class PRComputation extends Computation {
     }
 
     @Override
-    protected void compute(final long nodeId) {
+    protected void compute(final long nodeId, double[] messages) {
         double newRank = getValue(nodeId);
 
         // compute new rank based on neighbor ranks
         if (getSuperstep() > 0) {
             double sum = 0;
-            for (double message : receiveMessages(nodeId)) {
+            for (double message : messages) {
                 sum += message;
             }
             newRank = (jumpProbability / nodeCount) + dampingFactor * sum;

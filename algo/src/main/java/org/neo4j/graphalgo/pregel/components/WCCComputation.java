@@ -30,20 +30,20 @@ public class WCCComputation extends Computation {
     }
 
     @Override
-    protected void compute(final long nodeId) {
+    protected void compute(final long nodeId, double[] messages) {
         if (getSuperstep() == 0) {
             double currentValue = getValue(nodeId);
             if (currentValue == getDefaultNodeValue()) {
-                sendMessages(nodeId, nodeId, Direction.BOTH);
+                sendMessages(nodeId, nodeId);
                 setValue(nodeId, nodeId);
             } else {
-                sendMessages(nodeId, currentValue, Direction.BOTH);
+                sendMessages(nodeId, currentValue);
             }
         } else {
             long oldComponentId = (long) getValue(nodeId);
             long newComponentId = oldComponentId;
 
-            for (double message : receiveMessages(nodeId, Direction.BOTH)) {
+            for (double message : messages) {
                 if (message < newComponentId) {
                     newComponentId = (long) message;
                 }
@@ -51,7 +51,7 @@ public class WCCComputation extends Computation {
 
             if (newComponentId != oldComponentId) {
                 setValue(nodeId, newComponentId);
-                sendMessages(nodeId, newComponentId, Direction.BOTH);
+                sendMessages(nodeId, newComponentId);
             }
         }
     }

@@ -41,7 +41,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
-public class Pregel {
+public final class Pregel {
 
     private final Graph graph;
     private final HugeWeightMapping nodeValues;
@@ -200,7 +200,8 @@ public class Pregel {
             final PrimitiveLongIterator nodesIterator = nodes.iterator();
 
             while (nodesIterator.hasNext()) {
-                computation.compute(nodesIterator.next());
+                final long nodeId = nodesIterator.next();
+                computation.compute(nodeId, receiveMessages(nodeId, computation.getMessageDirection()));
             }
         }
 
