@@ -33,20 +33,23 @@ import org.neo4j.graphalgo.core.utils.LazyMappingCollection;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongLongDoubleMap;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 
 public final class Pregel {
 
     private final Graph graph;
     private final HugeWeightMapping nodeValues;
-    private final HugeLongLongDoubleMap outgoingMessages;
-    private final HugeLongLongDoubleMap incomingMessages;
+    private final ConcurrentMap<Long, Map<Long, Double>> outgoingMessages;
+    private final ConcurrentMap<Long, Map<Long, Double>> incomingMessages;
     private final double[][] messages;
     private final Computation computation;
     private final int batchSize;
@@ -108,14 +111,14 @@ public final class Pregel {
         this.messages = new double[(int) graph.nodeCount()][];
 
         if (computation.getMessageDirection() == Direction.BOTH) {
-            outgoingMessages = new HugeLongLongDoubleMap(graph.relationshipCount(), tracker);
-            incomingMessages = new HugeLongLongDoubleMap(graph.relationshipCount(), tracker);
+            outgoingMessages = new ConcurrentHashMap<>((int) graph.relationshipCount());
+            incomingMessages = new ConcurrentHashMap<>((int) graph.relationshipCount());
         } else if (computation.getMessageDirection() == Direction.OUTGOING) {
-            outgoingMessages = new HugeLongLongDoubleMap(graph.relationshipCount(), tracker);
+            outgoingMessages = new ConcurrentHashMap<>((int) graph.relationshipCount());
             incomingMessages = null;
         } else {
             outgoingMessages = null;
-            incomingMessages = new HugeLongLongDoubleMap(graph.relationshipCount(), tracker);
+            incomingMessages = new ConcurrentHashMap<>((int) graph.relationshipCount());
         }
     }
 
@@ -211,8 +214,8 @@ public final class Pregel {
         private final PrimitiveLongIterable nodes;
         private final Degrees degrees;
         private final HugeWeightMapping nodeProperties;
-        private final HugeLongLongDoubleMap outgoingMessages;
-        private final HugeLongLongDoubleMap incomingMessages;
+        private final ConcurrentMap<Long, Map<Long, Double>> outgoingMessages;
+        private final ConcurrentMap<Long, Map<Long, Double>> incomingMessages;
         private final RelationshipIterator relationshipIterator;
 
         private ComputeStep(
@@ -223,8 +226,8 @@ public final class Pregel {
                 final PrimitiveLongIterable nodes,
                 final Degrees degrees,
                 final HugeWeightMapping nodeProperties,
-                final HugeLongLongDoubleMap outgoingMessages,
-                final HugeLongLongDoubleMap incomingMessages,
+                final ConcurrentMap<Long, Map<Long, Double>> outgoingMessages,
+                final ConcurrentMap<Long, Map<Long, Double>> incomingMessages,
                 final RelationshipIterator relationshipIterator) {
             this.iteration = iteration;
             this.computation = computation;
@@ -273,7 +276,7 @@ public final class Pregel {
         synchronized void sendMessages(final long nodeId, final double message, Direction direction) {
             if (direction == Direction.OUTGOING || direction == Direction.BOTH) {
                 relationshipIterator.forEachRelationship(nodeId, Direction.OUTGOING, (sourceNodeId, targetNodeId) -> {
-                    outgoingMessages.set(sourceNodeId, targetNodeId, message);
+                    outgoingMessages.computeIfAbsent(sourceNodeId, k -> new ConcurrentHashMap<>()).put(targetNodeId, message);
                     messageBits.set(targetNodeId);
                     return true;
                 });
@@ -281,7 +284,7 @@ public final class Pregel {
 
             if (direction == Direction.INCOMING || direction == Direction.BOTH) {
                 relationshipIterator.forEachRelationship(nodeId, Direction.INCOMING, (targetNodeId, sourceNodeId) -> {
-                    incomingMessages.set(sourceNodeId, targetNodeId, message);
+                    incomingMessages.computeIfAbsent(sourceNodeId, k -> new ConcurrentHashMap<>()).put(targetNodeId, message);
                     messageBits.set(sourceNodeId);
                     return true;
                 });
@@ -295,8 +298,8 @@ public final class Pregel {
         private final Direction messageDirection;
         private final PrimitiveLongIterable nodes;
         private final Degrees degrees;
-        private final HugeLongLongDoubleMap outgoingMessages;
-        private final HugeLongLongDoubleMap incomingMessages;
+        private final ConcurrentMap<Long, Map<Long, Double>> outgoingMessages;
+        private final ConcurrentMap<Long, Map<Long, Double>> incomingMessages;
         private final RelationshipIterator relationshipIterator;
 
         private static final double[] NO_MESSAGES = new double[0];
@@ -310,8 +313,8 @@ public final class Pregel {
                 final Direction messageDirection,
                 final PrimitiveLongIterable nodes,
                 final Degrees degrees,
-                final HugeLongLongDoubleMap outgoingMessages,
-                final HugeLongLongDoubleMap incomingMessages,
+                final ConcurrentMap<Long, Map<Long, Double>> outgoingMessages,
+                final ConcurrentMap<Long, Map<Long, Double>> incomingMessages,
                 final RelationshipIterator relationshipIterator) {
             this.messageBits = messageBits;
             this.messages = messages;
@@ -333,6 +336,8 @@ public final class Pregel {
             }
         }
 
+        static Map<Long, Double> EMPTY_MAP = new HashMap<>(0);
+
         private synchronized double[] receiveMessages(final long nodeId, Direction direction) {
             if (!messageBits.get(nodeId)) {
                 return NO_MESSAGES;
@@ -345,7 +350,7 @@ public final class Pregel {
                         nodeId,
                         Direction.INCOMING,
                         (sourceNodeId, targetNodeId) -> {
-                            doubleCursors.add(outgoingMessages.getOrDefault(targetNodeId, sourceNodeId, 1.0));
+                            doubleCursors.add(outgoingMessages.getOrDefault(targetNodeId, EMPTY_MAP).getOrDefault(sourceNodeId, 1.0));
                             return true;
                         });
             }
@@ -355,7 +360,7 @@ public final class Pregel {
                         nodeId,
                         Direction.OUTGOING,
                         (sourceNodeId, targetNodeId) -> {
-                            doubleCursors.add(incomingMessages.getOrDefault(sourceNodeId, targetNodeId, 1.0));
+                            doubleCursors.add(incomingMessages.getOrDefault(sourceNodeId, EMPTY_MAP).getOrDefault(targetNodeId, 1.0));
                             return true;
                         });
             }
