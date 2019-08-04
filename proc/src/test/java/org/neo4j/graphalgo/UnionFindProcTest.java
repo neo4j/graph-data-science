@@ -266,6 +266,21 @@ public class UnionFindProcTest extends ProcTestBase {
     }
 
     @AllGraphNamesTest
+    void testUnionFindPregel(String graphImpl) throws Exception {
+        String query = "CALL algo.beta.unionFind.pregel(" +
+                       "    '', '', {" +
+                       "        graph: $graph" +
+                       "    }" +
+                       ")";
+
+        runQuery(query, MapUtil.map("graph", graphImpl),
+                row -> {
+                    assertEquals(3L, row.getNumber("communityCount"));
+                    assertEquals(3L, row.getNumber("setCount"));
+                });
+    }
+
+    @AllGraphNamesTest
     void testUnionFindWithConsecutiveIds(String graphImpl) {
         String query = "CALL algo.unionFind(" +
                        "    '', 'TYPE', {" +
