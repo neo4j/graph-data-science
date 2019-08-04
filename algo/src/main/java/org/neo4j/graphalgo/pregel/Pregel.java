@@ -40,7 +40,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicReferenceArray;
 
 public final class Pregel {
 
@@ -48,7 +47,7 @@ public final class Pregel {
     private final HugeWeightMapping nodeValues;
     private final HugeLongLongDoubleMap outgoingMessages;
     private final HugeLongLongDoubleMap incomingMessages;
-    private final AtomicReferenceArray<double[]> messages;
+    private final double[][] messages;
     private final Computation computation;
     private final int batchSize;
     private final int concurrency;
@@ -106,7 +105,7 @@ public final class Pregel {
 
         this.nodeValues = nodeValues;
 
-        this.messages = new AtomicReferenceArray<>((int) graph.nodeCount());
+        this.messages = new double[(int) graph.nodeCount()][];
 
         if (computation.getMessageDirection() == Direction.BOTH) {
             outgoingMessages = new HugeLongLongDoubleMap(graph.relationshipCount(), tracker);
@@ -128,6 +127,7 @@ public final class Pregel {
             int iteration = iterations++;
             final List<ComputeStep> computeSteps = runComputeSteps(iteration);
 
+            // maybe use AtomicBitSet for memory efficiency?
             final BitSet messageBits = computeSteps.get(0).getMessageBits();
             for (int i = 1; i < computeSteps.size(); i++) {
                 messageBits.union(computeSteps.get(i).getMessageBits());
@@ -207,7 +207,7 @@ public final class Pregel {
         private final int iteration;
         private final Computation computation;
         private final BitSet messageBits;
-        private final AtomicReferenceArray<double[]> messages;
+        private final double[][] messages;
         private final PrimitiveLongIterable nodes;
         private final Degrees degrees;
         private final HugeWeightMapping nodeProperties;
@@ -219,7 +219,7 @@ public final class Pregel {
                 final Computation computation,
                 final long totalNodeCount,
                 final int iteration,
-                final AtomicReferenceArray<double[]> messages,
+                final double[][] messages,
                 final PrimitiveLongIterable nodes,
                 final Degrees degrees,
                 final HugeWeightMapping nodeProperties,
@@ -246,11 +246,11 @@ public final class Pregel {
 
             while (nodesIterator.hasNext()) {
                 final long nodeId = nodesIterator.next();
-                computation.compute(nodeId, messages.get((int) nodeId));
+                computation.compute(nodeId, messages[(int) nodeId]);
             }
         }
 
-        public BitSet getMessageBits() {
+        BitSet getMessageBits() {
             return messageBits;
         }
 
@@ -291,7 +291,7 @@ public final class Pregel {
 
     public static final class MessageStep implements Runnable {
         private final BitSet messageBits;
-        private final AtomicReferenceArray<double[]> messages;
+        private final double[][] messages;
         private final Direction messageDirection;
         private final PrimitiveLongIterable nodes;
         private final Degrees degrees;
@@ -306,7 +306,7 @@ public final class Pregel {
 
         MessageStep(
                 final BitSet messageBits,
-                final AtomicReferenceArray<double[]> messages,
+                final double[][] messages,
                 final Direction messageDirection,
                 final PrimitiveLongIterable nodes,
                 final Degrees degrees,
@@ -329,7 +329,7 @@ public final class Pregel {
 
             while (nodesIterator.hasNext()) {
                 final long nodeId = nodesIterator.next();
-                messages.set((int) nodeId, receiveMessages(nodeId, messageDirection));
+                messages[(int) nodeId] = receiveMessages(nodeId, messageDirection);
             }
         }
 
