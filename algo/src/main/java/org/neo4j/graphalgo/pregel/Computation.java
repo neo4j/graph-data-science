@@ -30,6 +30,10 @@ public abstract class Computation {
         return Direction.OUTGOING;
     }
 
+    protected double getDefaultNodeValue() {
+        return -1.0;
+    }
+
     void setComputeStep(final Pregel.ComputeStep computeStep) {
         this.computeStep = computeStep;
     }

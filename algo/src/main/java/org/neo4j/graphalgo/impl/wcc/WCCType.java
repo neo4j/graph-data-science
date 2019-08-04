@@ -94,6 +94,23 @@ public enum WCCType {
         public MemoryEstimation memoryEstimation(boolean incremental) {
             return WCCForkJoinMerge.memoryEstimation(incremental);
         }
+    },
+    PREGEL {
+        @Override
+        public UnionFind<? extends UnionFind> create(
+                final Graph graph,
+                final ExecutorService executor,
+                final int minBatchSize,
+                final int concurrency,
+                final UnionFind.Config config,
+                final AllocationTracker tracker) {
+            return new UnionFindPregel(graph, executor, minBatchSize, concurrency, config, tracker);
+        }
+
+        @Override
+        MemoryEstimation memoryEstimation(final boolean incremental) {
+            return UnionFindPregel.memoryEstimation(incremental);
+        }
     };
 
     public abstract WCC<? extends WCC<?>> create(

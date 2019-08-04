@@ -32,8 +32,13 @@ public class WCCComputation extends Computation {
     @Override
     protected void compute(final long nodeId) {
         if (getSuperstep() == 0) {
-            setValue(nodeId, nodeId);
-            sendMessages(nodeId, nodeId, Direction.BOTH);
+            double currentValue = getValue(nodeId);
+            if (currentValue == getDefaultNodeValue()) {
+                sendMessages(nodeId, nodeId, Direction.BOTH);
+                setValue(nodeId, nodeId);
+            } else {
+                sendMessages(nodeId, currentValue, Direction.BOTH);
+            }
         } else {
             long oldComponentId = (long) getValue(nodeId);
             long newComponentId = oldComponentId;

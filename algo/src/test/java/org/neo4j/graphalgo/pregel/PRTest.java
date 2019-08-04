@@ -111,7 +111,7 @@ public class PRTest {
         float jumpProbability = 0.15f;
         float dampingFactor = 0.85f;
 
-        Pregel pregelJob = new Pregel(
+        Pregel pregelJob = Pregel.withDefaultNodeValues(
                 graph,
                 new PRComputation(graph.nodeCount(), jumpProbability, dampingFactor),
                 batchSize,

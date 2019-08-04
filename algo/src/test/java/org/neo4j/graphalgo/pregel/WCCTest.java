@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.pregel.components.SCCComputation;
 import org.neo4j.graphalgo.pregel.components.WCCComputation;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
@@ -99,7 +98,7 @@ public class WCCTest {
         int batchSize = 10;
         int maxIterations = 10;
 
-        Pregel pregelJob = new Pregel(
+        Pregel pregelJob = Pregel.withDefaultNodeValues(
                 graph,
                 new WCCComputation(),
                 batchSize,

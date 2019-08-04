@@ -56,9 +56,39 @@ public class Pregel {
 
     private int iterations;
 
-    public Pregel(
+    public static Pregel withDefaultNodeValues(
             final Graph graph,
             final Computation computation,
+            final int batchSize,
+            final int concurrency,
+            final ExecutorService executor,
+            final AllocationTracker tracker,
+            final ProgressLogger progressLogger) {
+
+        final HugeWeightMapping nodeValues = HugeNodePropertiesBuilder
+                .of(graph.nodeCount(), tracker, computation.getDefaultNodeValue(), 0)
+                .build();
+
+       return new Pregel(graph, computation, nodeValues, batchSize, concurrency, executor, tracker, progressLogger);
+    }
+
+    public static Pregel withInitialNodeValues(
+            final Graph graph,
+            final Computation computation,
+            final HugeWeightMapping nodeValues,
+            final int batchSize,
+            final int concurrency,
+            final ExecutorService executor,
+            final AllocationTracker tracker,
+            final ProgressLogger progressLogger) {
+
+        return new Pregel(graph, computation, nodeValues, batchSize, concurrency, executor, tracker, progressLogger);
+    }
+
+    private Pregel(
+            final Graph graph,
+            final Computation computation,
+            final HugeWeightMapping nodeValues,
             final int batchSize,
             final int concurrency,
             final ExecutorService executor,
@@ -72,9 +102,7 @@ public class Pregel {
         this.executor = executor;
         this.progressLogger = progressLogger;
 
-        this.nodeValues = HugeNodePropertiesBuilder
-                .of(graph.nodeCount(), tracker, 1.0, 0)
-                .build();
+        this.nodeValues = nodeValues;
 
         if (computation.getMessageDirection() == Direction.BOTH) {
             outgoingMessages = new HugeLongLongDoubleMap(graph.relationshipCount(), tracker);

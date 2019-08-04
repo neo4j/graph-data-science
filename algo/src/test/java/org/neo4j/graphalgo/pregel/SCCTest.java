@@ -101,7 +101,7 @@ public class SCCTest {
         int batchSize = 10;
         int maxIterations = 10;
 
-        Pregel pregelJob = new Pregel(
+        Pregel pregelJob = Pregel.withDefaultNodeValues(
                 graph,
                 new SCCComputation(),
                 batchSize,
