@@ -31,6 +31,8 @@ import org.neo4j.graphalgo.LabelPropagationProc;
 import org.neo4j.graphalgo.LoadGraphProc;
 import org.neo4j.graphalgo.PageRankProc;
 import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
+import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.graphdb.Result;
@@ -38,9 +40,14 @@ import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
+import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
 
 import static java.util.Collections.singletonMap;
@@ -118,6 +125,35 @@ public class LoadGraphProcIntegrationTest {
             assertEquals(graph, row.getString("graph"));
             assertFalse(row.getBoolean("alreadyLoaded"));
         });
+    }
+
+    @Test
+    public void shouldLoadGraphWithSaturatedThreadPool() {
+        // ensure that we don't drop task that can't be scheduled while importing a graph.
+
+        String queryTemplate = "CALL algo.graph.load('foo', %s, %s, {graph: $graph, batchSize: 2})";
+        String query = graph.equals("cypher")
+                ? String.format(queryTemplate, "'MATCH (n) RETURN id(n) AS id'", "'MATCH (s)-->(t) RETURN id(s) AS source, id(t) AS target'")
+                : String.format(queryTemplate, "null", "null");
+
+        List<Future<?>> futures = new ArrayList<>();
+        // block all available threads
+        for (int i = 0; i < Pools.DEFAULT_CONCURRENCY; i++) {
+            futures.add(
+                    Pools.DEFAULT.submit(() -> LockSupport.parkNanos(Duration.ofSeconds(1).toNanos()))
+            );
+        }
+
+        try {
+            runQuery(query, singletonMap("graph", graph), row -> {
+                assertEquals(12, row.getNumber("nodes").intValue());
+                assertEquals(10, row.getNumber("relationships").intValue());
+                assertEquals(graph, row.getString("graph"));
+                assertFalse(row.getBoolean("alreadyLoaded"));
+            });
+        } finally {
+            ParallelUtil.awaitTermination(futures);
+        }
     }
 
     @Test
