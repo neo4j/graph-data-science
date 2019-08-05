@@ -69,7 +69,8 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
                 .builder(HugeAtomicDisjointSetStruct.class)
                 .perNode("data", HugeAtomicLongArray::memoryEstimation);
         if (incremental) {
-            builder.add("internalToProvidedIds", HugeLongLongMap.memoryEstimation());
+            builder.add("forward community mapping (max size)", HugeLongLongMap.memoryEstimation());
+            builder.add("reverse community mapping (max size)", HugeLongLongMap.memoryEstimation());
         }
         return builder.build();
     }
@@ -85,8 +86,8 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
     public HugeAtomicDisjointSetStruct(long capacity, HugeWeightMapping communityMapping, AllocationTracker tracker) {
         long maxCommunity = communityMapping.getMaxValue();
         AtomicLong maxCommunityId = new AtomicLong(maxCommunity);
-        final HugeLongLongMap internalMapping = new HugeLongLongMap(capacity, tracker);
-        this.internalToProvidedIds = new HugeLongLongMap(capacity, tracker);
+        final HugeLongLongMap internalMapping = new HugeLongLongMap(communityMapping.size(), tracker);
+        this.internalToProvidedIds = new HugeLongLongMap(communityMapping.size(), tracker);
         this.parent = HugeAtomicLongArray.newArray(capacity, nodeId -> {
             long parentValue = nodeId;
             double communityIdValue = communityMapping.nodeWeight(nodeId, Double.NaN);
