@@ -29,8 +29,8 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * (a)-(b)--(g)-(h)
@@ -40,8 +40,6 @@ import static org.junit.Assert.assertEquals;
  * (d)-(e)                (DEF)
  * \  /
  * (f)
- *
- * @author mknblch
  */
 public class LouvainMultiLevelTest extends LouvainTestBase {
 

@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.impl.unionfind;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -35,7 +34,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class IncrementalUnionFindTest extends UnionFindTestBase {
 
@@ -92,7 +91,7 @@ public class IncrementalUnionFindTest extends UnionFindTestBase {
 
         // We expect that UF connects pairs of communites
         DisjointSetStruct result = run(uf, graph, config);
-        Assert.assertEquals(COMMUNITY_COUNT / 2, getSetCount(result));
+        assertEquals(COMMUNITY_COUNT / 2, getSetCount(result));
 
         graph.forEachNode((nodeId) -> {
             // Since the community size has doubled, the community id first needs to be computed with twice the
@@ -101,9 +100,10 @@ public class IncrementalUnionFindTest extends UnionFindTestBase {
             long expectedCommunityId = getCommunityId(nodeId, 2 * COMMUNITY_SIZE) * 2;
             long actualCommunityId = result.setIdOf(nodeId);
             assertEquals(
-                    "Node " + nodeId + " in unexpected set: " + actualCommunityId,
                     expectedCommunityId,
-                    actualCommunityId);
+                    actualCommunityId,
+                    "Node " + nodeId + " in unexpected set: " + actualCommunityId
+            );
             return true;
         });
     }

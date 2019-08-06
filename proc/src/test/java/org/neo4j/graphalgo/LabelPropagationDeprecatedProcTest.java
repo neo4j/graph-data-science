@@ -34,10 +34,10 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 @Deprecated
@@ -171,14 +171,14 @@ public class LabelPropagationDeprecatedProcTest extends ProcTestBase {
                     assertTrue(row.getBoolean("write"));
 
                     assertTrue(
-                            "load time not set",
-                            row.getNumber("loadMillis").intValue() >= 0);
+                            row.getNumber("loadMillis").intValue() >= 0,
+                            "load time not set");
                     assertTrue(
-                            "compute time not set",
-                            row.getNumber("computeMillis").intValue() >= 0);
+                            row.getNumber("computeMillis").intValue() >= 0,
+                            "compute time not set");
                     assertTrue(
-                            "write time not set",
-                            row.getNumber("writeMillis").intValue() >= 0);
+                            row.getNumber("writeMillis").intValue() >= 0,
+                            "write time not set");
                 }
         );
         runQuery(check, row -> assertEquals(2, row.getNumber("community").intValue()));
@@ -294,7 +294,7 @@ public class LabelPropagationDeprecatedProcTest extends ProcTestBase {
         });
 
         long newLabel = maxId + seededLabel + 1;
-        assertArrayEquals("Incorrect result assuming initial labels are neo4j id", new long[]{1, 1, 1, newLabel}, sets);
+        assertArrayEquals(new long[]{1, 1, 1, newLabel}, sets, "Incorrect result assuming initial labels are neo4j id");
     }
 
     private Map<String, Object> parParams(boolean parallel, String graphImpl) {

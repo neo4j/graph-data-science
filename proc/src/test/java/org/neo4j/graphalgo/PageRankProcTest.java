@@ -32,8 +32,8 @@ import org.neo4j.kernel.impl.proc.Procedures;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PageRankProcTest extends ProcTestBase {
 
@@ -196,7 +196,7 @@ public class PageRankProcTest extends ProcTestBase {
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("pagerank", row.getString("writeProperty"));
-                    assertTrue("write time not set", row.getNumber("writeMillis").intValue() >= 0);
+                    assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
                 }
         );
         assertResult("pagerank", expected);
@@ -214,7 +214,7 @@ public class PageRankProcTest extends ProcTestBase {
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("pagerank", row.getString("writeProperty"));
-                    assertTrue("write time not set", row.getNumber("writeMillis").intValue() >= 0);
+                    assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
                 }
         );
         assertResult("pagerank", weightedExpected);
@@ -232,7 +232,7 @@ public class PageRankProcTest extends ProcTestBase {
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("foobar", row.getString("writeProperty"));
-                    assertTrue("write time not set", row.getNumber("writeMillis").intValue() >= 0);
+                    assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
                 }
         );
         assertResult("foobar", expected);
@@ -247,7 +247,7 @@ public class PageRankProcTest extends ProcTestBase {
                        "    }" +
                        ") YIELD writeMillis, write, writeProperty";
         runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> assertTrue("write time not set", row.getNumber("writeMillis").intValue() >= 0)
+                row -> assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set")
         );
         assertResult("pagerank", expected);
     }

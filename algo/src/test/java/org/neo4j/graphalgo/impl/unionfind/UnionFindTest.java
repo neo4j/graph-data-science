@@ -39,7 +39,7 @@ import org.neo4j.graphdb.Transaction;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class UnionFindTest extends UnionFindTestBase {
 
@@ -214,18 +214,18 @@ public class UnionFindTest extends UnionFindTestBase {
             final long setId = result.setIdOf(nodeId);
             int setRegion = (int) (setId / SET_SIZE);
             assertEquals(
-                    "Node " + nodeId + " in unexpected set: " + setId,
                     expectedSetRegion,
-                    setRegion);
+                    setRegion,
+                    "Node " + nodeId + " in unexpected set: " + setId);
 
             long regionSetId = setRegions[setRegion];
             if (regionSetId == -1) {
                 setRegions[setRegion] = setId;
             } else {
                 assertEquals(
-                        "Inconsistent set for node " + nodeId + ", is " + setId + " but should be " + regionSetId,
                         regionSetId,
-                        setId);
+                        setId,
+                        "Inconsistent set for node " + nodeId + ", is " + setId + " but should be " + regionSetId);
             }
             return true;
         });

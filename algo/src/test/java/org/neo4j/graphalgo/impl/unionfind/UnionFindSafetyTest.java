@@ -42,7 +42,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.LongPredicate;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 public final class UnionFindSafetyTest {
 

@@ -20,13 +20,11 @@
 package org.neo4j.graphalgo;
 
 import com.carrotsearch.hppc.IntIntScatterMap;
-import org.junit.Rule;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.rules.ExpectedException;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.helpers.collection.MapUtil;
@@ -40,9 +38,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
 
-import static junit.framework.TestCase.assertNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Graph:
@@ -50,8 +48,6 @@ import static org.junit.Assert.assertTrue;
  * (a)-(b)---(e)-(f)
  *  | X |     | X |   (z)
  * (c)-(d)   (g)-(h)
- *
- * @author mknblch
  */
 public class LouvainClusteringProcTest extends ProcTestBase {
 
@@ -101,9 +97,6 @@ public class LouvainClusteringProcTest extends ProcTestBase {
         db.execute(cypher);
     }
 
-    @Rule
-    public ExpectedException exceptions = ExpectedException.none();
-
     @ParameterizedTest
     @MethodSource("graphImplementations")
     public void test(String graphImpl) {
@@ -121,11 +114,11 @@ public class LouvainClusteringProcTest extends ProcTestBase {
                     long computeMillis = row.getNumber("computeMillis").longValue();
                     long writeMillis = row.getNumber("writeMillis").longValue();
 
-                    assertEquals("invalid node count",9, nodes);
-                    assertEquals("wrong community count", 3, communityCount);
-                    assertTrue("invalid loadTime", loadMillis >= 0);
-                    assertTrue("invalid writeTime", writeMillis >= 0);
-                    assertTrue("invalid computeTime", computeMillis >= 0);
+                    assertEquals(9, nodes, "invalid node count");
+                    assertEquals(3, communityCount, "wrong community count");
+                    assertTrue(loadMillis >= 0, "invalid loadTime");
+                    assertTrue(writeMillis >= 0, "invalid writeTime");
+                    assertTrue(computeMillis >= 0, "invalid computeTime");
                 }
         );
     }
@@ -147,11 +140,11 @@ public class LouvainClusteringProcTest extends ProcTestBase {
                     long computeMillis = row.getNumber("computeMillis").longValue();
                     long writeMillis = row.getNumber("writeMillis").longValue();
 
-                    assertEquals("invalid node count",9, nodes);
-                    assertEquals("wrong community count", 3, communityCount);
-                    assertTrue("invalid loadTime", loadMillis >= 0);
-                    assertTrue("invalid writeTime", writeMillis >= 0);
-                    assertTrue("invalid computeTime", computeMillis >= 0);
+                    assertEquals(9, nodes, "invalid node count");
+                    assertEquals(3, communityCount, "wrong community count");
+                    assertTrue(loadMillis >= 0, "invalid loadTime");
+                    assertTrue(writeMillis >= 0, "invalid writeTime");
+                    assertTrue(computeMillis >= 0, "invalid computeTime");
                 }
         );
     }
@@ -173,11 +166,11 @@ public class LouvainClusteringProcTest extends ProcTestBase {
                     long computeMillis = row.getNumber("computeMillis").longValue();
                     long writeMillis = row.getNumber("writeMillis").longValue();
 
-                    assertEquals("invalid node count",9, nodes);
-                    assertEquals("wrong community count", 3, communityCount);
-                    assertTrue("invalid loadTime", loadMillis >= 0);
-                    assertTrue("invalid writeTime", writeMillis >= 0);
-                    assertTrue("invalid computeTime", computeMillis >= 0);
+                    assertEquals(9, nodes, "invalid node count");
+                    assertEquals(3, communityCount, "wrong community count");
+                    assertTrue(loadMillis >= 0, "invalid loadTime");
+                    assertTrue(writeMillis >= 0, "invalid writeTime");
+                    assertTrue(computeMillis >= 0, "invalid computeTime");
                 }
         );
     }
@@ -336,11 +329,11 @@ public class LouvainClusteringProcTest extends ProcTestBase {
                     long computeMillis = row.getNumber("computeMillis").longValue();
                     long writeMillis = row.getNumber("writeMillis").longValue();
 
-                    assertEquals("invalid node count",9, nodes);
-                    assertEquals("wrong community count", 3, communityCount);
-                    assertTrue("invalid loadTime", loadMillis >= 0);
-                    assertTrue("invalid writeTime", writeMillis >= 0);
-                    assertTrue("invalid computeTime", computeMillis >= 0);
+                    assertEquals(9, nodes, "invalid node count");
+                    assertEquals(3, communityCount, "wrong community count");
+                    assertTrue(loadMillis >= 0, "invalid loadTime");
+                    assertTrue(writeMillis >= 0, "invalid writeTime");
+                    assertTrue(computeMillis >= 0, "invalid computeTime");
                 }
         );
 
@@ -365,10 +358,10 @@ public class LouvainClusteringProcTest extends ProcTestBase {
                     long writeMillis = row.getNumber("writeMillis").longValue();
 
                     assertEquals(3, communityCount);
-                    assertEquals("invalid node count", 9, nodes);
-                    assertTrue("invalid loadTime", loadMillis >= 0);
-                    assertTrue("invalid writeTime", writeMillis >= 0);
-                    assertTrue("invalid computeTime", computeMillis >= 0);
+                    assertEquals(9, nodes, "invalid node count");
+                    assertTrue(loadMillis >= 0, "invalid loadTime");
+                    assertTrue(writeMillis >= 0, "invalid writeTime");
+                    assertTrue(computeMillis >= 0, "invalid computeTime");
                 }
         );
 
@@ -385,8 +378,8 @@ public class LouvainClusteringProcTest extends ProcTestBase {
                        ") YIELD nodes, communityCount";
 
         runQuery(query, row -> {
-            assertEquals("invalid node count",9, row.getNumber("nodes").longValue());
-            assertEquals("wrong community count", 3, row.getNumber("communityCount").longValue());
+            assertEquals(9, row.getNumber("nodes").longValue(), "invalid node count");
+            assertEquals(3, row.getNumber("communityCount").longValue(), "wrong community count");
         });
     }
 
@@ -400,8 +393,8 @@ public class LouvainClusteringProcTest extends ProcTestBase {
                        ") YIELD nodes, communityCount";
 
         runQuery(query, row -> {
-            assertEquals("invalid node count",9, row.getNumber("nodes").longValue());
-            assertEquals("wrong community count", 3, row.getNumber("communityCount").longValue());
+            assertEquals(9, row.getNumber("nodes").longValue(), "invalid node count");
+            assertEquals(3, row.getNumber("communityCount").longValue(), "wrong community count");
         });
     }
 
@@ -433,8 +426,8 @@ public class LouvainClusteringProcTest extends ProcTestBase {
                        ") YIELD nodes, communityCount";
         try {
             runQuery(query, row -> {
-                assertEquals("invalid node count",9, row.getNumber("nodes").longValue());
-                assertEquals("wrong community count", 3, row.getNumber("communityCount").longValue());
+                assertEquals(9, row.getNumber("nodes").longValue(), "invalid node count");
+                assertEquals(3, row.getNumber("communityCount").longValue(), "wrong community count");
             });
         } finally {
             ParallelUtil.awaitTermination(futures);
@@ -451,8 +444,8 @@ public class LouvainClusteringProcTest extends ProcTestBase {
                        ") YIELD nodes, communityCount";
 
         runQuery(query, row -> {
-            assertEquals("invalid node count",9, row.getNumber("nodes").longValue());
-            assertEquals("wrong community count", 3, row.getNumber("communityCount").longValue());
+            assertEquals(9, row.getNumber("nodes").longValue(), "invalid node count");
+            assertEquals(3, row.getNumber("communityCount").longValue(), "wrong community count");
         });
     }
 

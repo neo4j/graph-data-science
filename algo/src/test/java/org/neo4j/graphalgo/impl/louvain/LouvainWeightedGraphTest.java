@@ -31,14 +31,12 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * (a)-(b)---(e)-(f)
  * | X |     | X |   (z)
  * (c)-(d)   (g)-(h)
- *
- * @author mknblch
  */
 public class LouvainWeightedGraphTest extends LouvainTestBase {
 
@@ -112,7 +110,7 @@ public class LouvainWeightedGraphTest extends LouvainTestBase {
         System.out.println("louvain.getRuns() = " + louvain.getLevel());
         System.out.println("louvain.communityCount() = " + louvain.communityCount());
         assertCommunities(louvain);
-        assertTrue("Maximum iterations > " + MAX_ITERATIONS, louvain.getLevel() < MAX_ITERATIONS);
+        assertTrue(louvain.getLevel() < MAX_ITERATIONS, "Maximum iterations > " + MAX_ITERATIONS);
     }
 
     @ParameterizedTest

@@ -32,8 +32,8 @@ import org.neo4j.kernel.impl.proc.Procedures;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DegreeProcTest extends ProcTestBase {
 
@@ -54,7 +54,7 @@ public class DegreeProcTest extends ProcTestBase {
             ",(a)-[:TYPE2 {foo: 7.1}]->(c)";
 
     @AfterAll
-    public static void tearDown() throws Exception {
+    public static void tearDown() {
         if (db != null) db.shutdown();
     }
 
@@ -144,8 +144,8 @@ public class DegreeProcTest extends ProcTestBase {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("degree", row.getString("writeProperty"));
                     assertTrue(
-                            "write time not set",
-                            row.getNumber("writeMillis").intValue() >= 0);
+                            row.getNumber("writeMillis").intValue() >= 0,
+                            "write time not set");
                 }
         );
         assertResult("degree", incomingExpected);
@@ -164,8 +164,8 @@ public class DegreeProcTest extends ProcTestBase {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("degree", row.getString("writeProperty"));
                     assertTrue(
-                            "write time not set",
-                            row.getNumber("writeMillis").intValue() >= 0);
+                            row.getNumber("writeMillis").intValue() >= 0,
+                            "write time not set");
                 }
         );
         assertResult("degree", incomingWeightedExpected);
@@ -213,7 +213,7 @@ public class DegreeProcTest extends ProcTestBase {
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("degree", row.getString("writeProperty"));
-                    assertTrue("write time not set", row.getNumber("writeMillis").intValue() >= 0);
+                    assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
                 }
         );
         assertResult("degree", bothExpected);
@@ -231,7 +231,7 @@ public class DegreeProcTest extends ProcTestBase {
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("degree", row.getString("writeProperty"));
-                    assertTrue("write time not set", row.getNumber("writeMillis").intValue() >= 0);
+                    assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
                 }
         );
         assertResult("degree", bothWeightedExpected);
@@ -279,7 +279,7 @@ public class DegreeProcTest extends ProcTestBase {
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("degree", row.getString("writeProperty"));
-                    assertTrue("write time not set", row.getNumber("writeMillis").intValue() >= 0);
+                    assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
                 }
         );
         assertResult("degree", outgoingExpected);
@@ -297,7 +297,7 @@ public class DegreeProcTest extends ProcTestBase {
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("degree", row.getString("writeProperty"));
-                    assertTrue("write time not set", row.getNumber("writeMillis").intValue() >= 0);
+                    assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
                 }
         );
         assertResult("degree", outgoingWeightedExpected);

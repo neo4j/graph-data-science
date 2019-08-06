@@ -20,14 +20,11 @@
 package org.neo4j.graphalgo;
 
 import com.carrotsearch.hppc.IntIntScatterMap;
-import org.junit.Rule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.rules.ExpectedException;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.MapUtil;
@@ -36,20 +33,14 @@ import org.neo4j.kernel.impl.proc.Procedures;
 
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.neo4j.graphalgo.ThrowableRootCauseMatcher.rootCause;
-import static org.neo4j.graphalgo.ThrowableRootCauseMatcher.rootCauseMessage;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@EnableRuleMigrationSupport
 public class UnionFindProcTest extends ProcTestBase {
-
-    @Rule
-    public ExpectedException expectedEx = ExpectedException.none();
 
     @BeforeAll
     public static void setup() throws KernelException {

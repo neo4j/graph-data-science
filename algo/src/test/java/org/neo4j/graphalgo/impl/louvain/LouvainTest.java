@@ -36,15 +36,13 @@ import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * (a)-(b)-(d)
  * | /            -> (abc)-(d)
  * (c)
- *
- * @author mknblch
  */
 public class LouvainTest extends LouvainTestBase {
 

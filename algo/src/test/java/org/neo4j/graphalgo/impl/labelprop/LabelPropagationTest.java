@@ -47,10 +47,10 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public final class LabelPropagationTest {
 
@@ -129,7 +129,7 @@ public final class LabelPropagationTest {
         );
         lp.compute(Direction.OUTGOING, 1L);
         HugeLongArray labels = lp.labels();
-        assertArrayEquals("Incorrect result assuming initial labels are neo4j id", new long[]{1, 1, 3, 4, 4, 1}, labels.toArray());
+        assertArrayEquals(new long[]{1, 1, 3, 4, 4, 1}, labels.toArray(), "Incorrect result assuming initial labels are neo4j id");
     }
 
     @ParameterizedTest
@@ -181,7 +181,7 @@ public final class LabelPropagationTest {
         assertNotNull(cluster);
 
         assertTrue(lp.didConverge());
-        assertTrue("expected at least 2 iterations, got " + lp.ranIterations(), 2L <= lp.ranIterations());
+        assertTrue(2L <= lp.ranIterations(), "expected at least 2 iterations, got " + lp.ranIterations());
         assertEquals(2L, (long) cluster.size());
         for (IntObjectCursor<IntArrayList> cursor : cluster) {
             int[] ids = cursor.value.toArray();
@@ -260,7 +260,7 @@ public final class LabelPropagationTest {
                          ((BitUtil.nextHighestPowerOfTwo((long) (nodeCount / 0.75)) + 1) * 8 + 16) * concurrency /* long[] keys */ +
                          ((BitUtil.nextHighestPowerOfTwo((long) (nodeCount / 0.75)) + 1) * 8 + 16) * concurrency; /* double[] values */
 
-        assertEquals("min", min, actual.min);
-        assertEquals("max", max, actual.max);
+        assertEquals(min, actual.min, "min");
+        assertEquals(max, actual.max, "max");
     }
 }
