@@ -16,6 +16,7 @@ dependencies {
 
     testCompile     platform(dep.junit5bom)
     testCompile     dep.junit5jupiter
+    testCompile     dep.junit5migration
     testRuntimeOnly dep.junit5vintage
     testRuntimeOnly dep.junit5platform
 }

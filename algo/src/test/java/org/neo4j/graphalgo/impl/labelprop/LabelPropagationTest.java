@@ -23,12 +23,12 @@ import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.cursors.IntObjectCursor;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ErrorCollector;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
@@ -42,61 +42,60 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-@RunWith(Parameterized.class)
 public final class LabelPropagationTest {
 
-    private static final String GRAPH =
-            "CREATE (nAlice:User {id:'Alice',seedId:2})\n" +
-            ",(nBridget:User {id:'Bridget',seedId:3})\n" +
-            ",(nCharles:User {id:'Charles',seedId:4})\n" +
-            ",(nDoug:User {id:'Doug',seedId:3})\n" +
-            ",(nMark:User {id:'Mark',seedId: 4})\n" +
-            ",(nMichael:User {id:'Michael',seedId:2})\n" +
-            "CREATE (nAlice)-[:FOLLOW]->(nBridget)\n" +
-            ",(nAlice)-[:FOLLOW]->(nCharles)\n" +
-            ",(nMark)-[:FOLLOW]->(nDoug)\n" +
-            ",(nBridget)-[:FOLLOW]->(nMichael)\n" +
-            ",(nDoug)-[:FOLLOW]->(nMark)\n" +
-            ",(nMichael)-[:FOLLOW]->(nAlice)\n" +
-            ",(nAlice)-[:FOLLOW]->(nMichael)\n" +
-            ",(nBridget)-[:FOLLOW]->(nAlice)\n" +
-            ",(nMichael)-[:FOLLOW]->(nBridget)\n" +
-            ",(nCharles)-[:FOLLOW]->(nDoug)";
+    private static final String GRAPH = "CREATE" +
+            "  (nAlice:User   {id: 'Alice',   seedId: 2})" +
+            ", (nBridget:User {id: 'Bridget', seedId: 3})" +
+            ", (nCharles:User {id: 'Charles', seedId: 4})" +
+            ", (nDoug:User    {id: 'Doug',    seedId: 3})" +
+            ", (nMark:User    {id: 'Mark',    seedId: 4})" +
+            ", (nMichael:User {id:'Michael',  seedId: 2})" +
+            ", (nAlice)-[:FOLLOW]->(nBridget)" +
+            ", (nAlice)-[:FOLLOW]->(nCharles)" +
+            ", (nMark)-[:FOLLOW]->(nDoug)" +
+            ", (nBridget)-[:FOLLOW]->(nMichael)" +
+            ", (nDoug)-[:FOLLOW]->(nMark)" +
+            ", (nMichael)-[:FOLLOW]->(nAlice)" +
+            ", (nAlice)-[:FOLLOW]->(nMichael)" +
+            ", (nBridget)-[:FOLLOW]->(nAlice)" +
+            ", (nMichael)-[:FOLLOW]->(nBridget)" +
+            ", (nCharles)-[:FOLLOW]->(nDoug)";
 
-    @Parameterized.Parameters(name = "graph={0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(
-                new Object[]{HeavyGraphFactory.class},
-                new Object[]{HeavyCypherGraphFactory.class},
-                new Object[]{HugeGraphFactory.class}
+    private static GraphDatabaseAPI DB;
+
+    public static Stream<Class<? extends GraphFactory>> parameters() {
+        return Stream.of(
+                HeavyGraphFactory.class,
+                HeavyCypherGraphFactory.class,
+                HugeGraphFactory.class
         );
     }
 
-    @Rule
-    public final ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
-
-    @Rule
-    public ErrorCollector collector = new ErrorCollector();
-
-    private final Class<? extends GraphFactory> graphImpl;
-    private Graph graph;
-
-    public LabelPropagationTest(Class<? extends GraphFactory> graphImpl) {
-        this.graphImpl = graphImpl;
+    @BeforeEach
+    void setup() {
+        DB = TestDatabaseCreator.createTestDatabase();
     }
 
-    @Before
-    public void setup() {
+    @AfterEach
+    void teardown() {
+        if (null != DB) {
+            DB.shutdown();
+            DB = null;
+        }
+    }
+
+    public Graph setup(Class<? extends GraphFactory> graphImpl) {
         DB.execute(GRAPH).close();
         GraphLoader graphLoader = new GraphLoader(DB, Pools.DEFAULT)
                 .withDirection(Direction.OUTGOING)
@@ -114,11 +113,13 @@ public final class LabelPropagationTest {
                     .withRelationshipType("FOLLOW")
                     .withName(graphImpl.getSimpleName());
         }
-        graph = graphLoader.load(graphImpl);
+        return graphLoader.load(graphImpl);
     }
 
-    @Test
-    public void testUsesNeo4jNodeIdWhenSeedPropertyIsMissing() {
+    @ParameterizedTest
+    @MethodSource("parameters")
+    public void testUsesNeo4jNodeIdWhenSeedPropertyIsMissing(Class<? extends GraphFactory> graphImpl) {
+        Graph graph = setup(graphImpl);
         LabelPropagation lp = new LabelPropagation(
                 graph,
                 10000,
@@ -131,33 +132,41 @@ public final class LabelPropagationTest {
         assertArrayEquals("Incorrect result assuming initial labels are neo4j id", new long[]{1, 1, 3, 4, 4, 1}, labels.toArray());
     }
 
-    @Test
-    public void testSingleThreadClustering() {
-        testClustering(100);
+    @ParameterizedTest
+    @MethodSource("parameters")
+    public void testSingleThreadClustering(Class<? extends GraphFactory> graphImpl) {
+        Graph graph = setup(graphImpl);
+        testClustering(graph, 100);
     }
 
-    @Test
-    public void testMultiThreadClustering() {
-        testClustering(2);
+    @ParameterizedTest
+    @MethodSource("parameters")
+    public void testMultiThreadClustering(Class<? extends GraphFactory> graphImpl) {
+        Graph graph = setup(graphImpl);
+        testClustering(graph, 2);
     }
 
-    @Test
-    public void testHugeSingleThreadClustering() {
-        testClustering(100);
+    @ParameterizedTest
+    @MethodSource("parameters")
+    public void testHugeSingleThreadClustering(Class<? extends GraphFactory> graphImpl) {
+        Graph graph = setup(graphImpl);
+        testClustering(graph, 100);
     }
 
-    @Test
-    public void testHugeMultiThreadClustering() {
-        testClustering(2);
+    @ParameterizedTest
+    @MethodSource("parameters")
+    public void testHugeMultiThreadClustering(Class<? extends GraphFactory> graphImpl) {
+        Graph graph = setup(graphImpl);
+        testClustering(graph, 2);
     }
 
-    private void testClustering(int batchSize) {
+    private void testClustering(Graph graph, int batchSize) {
         for (int i = 0; i < 20; i++) {
-            testLPClustering(batchSize);
+            testLPClustering(graph, batchSize);
         }
     }
 
-    private void testLPClustering(int batchSize) {
+    private void testLPClustering(Graph graph, int batchSize) {
         LabelPropagation lp = new LabelPropagation(
                 graph,
                 batchSize,
