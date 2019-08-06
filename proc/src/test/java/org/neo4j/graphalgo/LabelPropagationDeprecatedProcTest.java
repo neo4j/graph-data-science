@@ -70,13 +70,13 @@ public class LabelPropagationDeprecatedProcTest extends ProcTestBase {
 
     @BeforeEach
     public void setup() throws KernelException {
-        db = TestDatabaseCreator.createTestDatabase();
+        DB = TestDatabaseCreator.createTestDatabase();
 
-        db.getDependencyResolver()
+        DB.getDependencyResolver()
                 .resolveDependency(Procedures.class)
                 .registerProcedure(LabelPropagationProc.class);
 
-        db.execute(DB_CYPHER);
+        DB.execute(DB_CYPHER);
     }
 
     @ParameterizedTest

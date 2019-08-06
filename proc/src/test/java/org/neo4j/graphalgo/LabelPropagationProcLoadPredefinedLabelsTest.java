@@ -63,16 +63,14 @@ public class LabelPropagationProcLoadPredefinedLabelsTest extends ProcTestBase {
         );
     }
 
-    public static GraphDatabaseService DB;
-
     @BeforeEach
     public void setup() throws KernelException {
-        DB = new TestGraphDatabaseFactory()
+        DB = (GraphDatabaseAPI) new TestGraphDatabaseFactory()
                 .newImpermanentDatabaseBuilder()
                 .setConfig(GraphDatabaseSettings.procedure_unrestricted,"algo.*")
                 .newGraphDatabase();
 
-        Procedures proceduresService = ((GraphDatabaseAPI) DB).getDependencyResolver().resolveDependency(Procedures.class);
+        Procedures proceduresService = DB.getDependencyResolver().resolveDependency(Procedures.class);
 
         proceduresService.registerProcedure(Procedures.class, true);
         proceduresService.registerProcedure(LabelPropagationProc.class, true);

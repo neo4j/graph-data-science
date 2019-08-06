@@ -65,12 +65,12 @@ public class LoadGraphProcTest extends ProcTestBase {
 
     @BeforeEach
     public void setup() throws KernelException {
-        db = TestDatabaseCreator.createTestDatabase();
-        Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class);
+        DB = TestDatabaseCreator.createTestDatabase();
+        Procedures procedures = DB.getDependencyResolver().resolveDependency(Procedures.class);
         procedures.registerProcedure(LoadGraphProc.class);
         procedures.registerProcedure(PageRankProc.class);
         procedures.registerProcedure(LabelPropagationProc.class);
-        db.execute(DB_CYPHER);
+        DB.execute(DB_CYPHER);
     }
 
     @AfterEach
@@ -182,7 +182,7 @@ public class LoadGraphProcTest extends ProcTestBase {
                     "'MATCH (s)-->(t) RETURN id(s) AS source, id(t) AS target'")
                 : String.format(queryTemplate, "null", "null");
 
-        db.execute(loadQuery, singletonMap("graph", graph)).close();
+        runQuery(loadQuery, singletonMap("graph", graph), row -> {});
 
         String algoQuery = "CALL algo.pageRank(" +
                            "    null, null, {" +
@@ -264,8 +264,8 @@ public class LoadGraphProcTest extends ProcTestBase {
                 : String.format(queryTemplate, "null", "null");
 
         Map<String, Object> params = singletonMap("graph", graph);
-        assertFalse(db.execute(query, params).<Boolean>columnAs("loaded").next());
-        assertTrue(db.execute(query, params).<Boolean>columnAs("loaded").next());
+        assertFalse(DB.execute(query, params).<Boolean>columnAs("loaded").next());
+        assertTrue(DB.execute(query, params).<Boolean>columnAs("loaded").next());
     }
 
     @ParameterizedTest
@@ -281,7 +281,7 @@ public class LoadGraphProcTest extends ProcTestBase {
                     "'MATCH (n) RETURN id(n) AS id'",
                     "'MATCH (s)-->(t) RETURN id(s) AS source, id(t) AS target'")
                 : String.format(queryTemplate, "null", "null");
-        db.execute(query, singletonMap("graph", graph)).close();
+        runQuery(query, singletonMap("graph", graph), row -> {});
 
         runQuery("CALL algo.graph.info($name, true)", singletonMap("name", "foo"), row -> {
             assertEquals(12, row.getNumber("nodes").intValue());
@@ -316,7 +316,7 @@ public class LoadGraphProcTest extends ProcTestBase {
                     "'MATCH (n) RETURN id(n) AS id'",
                     "'MATCH (s)-->(t) RETURN id(s) AS source, id(t) AS target'")
                 : String.format(queryTemplate, "null", "null");
-        db.execute(query, singletonMap("graph", graph)).close();
+        runQuery(query, singletonMap("graph", graph), row -> {});
 
         runQuery("CALL algo.graph.info($name, true)", singletonMap("name", "foo"), row -> {
             assertEquals(5, row.getNumber("max").intValue());
@@ -380,7 +380,7 @@ public class LoadGraphProcTest extends ProcTestBase {
                     "'MATCH (n) RETURN id(n) AS id'",
                     "'MATCH (s)<--(t) RETURN id(s) AS source, id(t) AS target'")
                 : String.format(queryTemplate, "null", "null");
-        db.execute(loadQuery, singletonMap("graph", graph)).close();
+        runQuery(loadQuery, singletonMap("graph", graph), row -> {});
 
         String infoQuery = graph.equals("cypher")
                 ? "CALL algo.graph.info($name, {direction:'OUT'})"

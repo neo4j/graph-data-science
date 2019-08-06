@@ -36,7 +36,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class ProcTestBase {
-    static GraphDatabaseAPI db;
+
+    static GraphDatabaseAPI DB;
 
     static Stream<String> graphImplementations() {
         return Stream.of("Heavy", "Huge", "Kernel");
@@ -52,7 +53,7 @@ public class ProcTestBase {
             String query,
             Map<String, Object> params,
             Consumer<Result.ResultRow> check) {
-        try (Result result = db.execute(query, params)) {
+        try (Result result = DB.execute(query, params)) {
             result.accept(row -> {
                 check.accept(row);
                 return true;
@@ -97,9 +98,9 @@ public class ProcTestBase {
     }
 
     protected void assertResult(final String scoreProperty, Map<Long, Double> expected) {
-        try (Transaction tx = db.beginTx()) {
+        try (Transaction tx = DB.beginTx()) {
             for (Map.Entry<Long, Double> entry : expected.entrySet()) {
-                double score = ((Number) db
+                double score = ((Number) DB
                         .getNodeById(entry.getKey())
                         .getProperty(scoreProperty)).doubleValue();
                 assertEquals(

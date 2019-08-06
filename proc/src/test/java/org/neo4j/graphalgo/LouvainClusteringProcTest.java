@@ -57,7 +57,7 @@ public class LouvainClusteringProcTest extends ProcTestBase {
     @BeforeAll
     public static void setupGraph() throws KernelException {
 
-        db = TestDatabaseCreator.createTestDatabase();
+        DB = TestDatabaseCreator.createTestDatabase();
 
         final String cypher = "CREATE " +
                 "  (a:Node {name: 'a', c: 1})" +
@@ -85,16 +85,16 @@ public class LouvainClusteringProcTest extends ProcTestBase {
                 ", (g)-[:TYPE]->(h)" +
                 ", (b)-[:TYPE]->(e)";
 
-        Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class);
+        Procedures procedures = DB.getDependencyResolver().resolveDependency(Procedures.class);
         procedures.registerProcedure(LouvainProc.class);
         procedures.registerProcedure(LoadGraphProc.class);
-        db.execute(cypher);
+        DB.execute(cypher);
     }
 
     @BeforeEach
     public void clearCommunities() {
         String cypher  ="MATCH (n) REMOVE n.communities REMOVE n.community";
-        db.execute(cypher);
+        DB.execute(cypher);
     }
 
     @ParameterizedTest

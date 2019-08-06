@@ -81,44 +81,44 @@ public class PageRankProcTest extends ProcTestBase {
 
     @AfterAll
     public static void tearDown() {
-        if (db != null) db.shutdown();
+        if (DB != null) DB.shutdown();
     }
 
     @BeforeAll
     public static void setup() throws KernelException {
-        db = TestDatabaseCreator.createTestDatabase();
-        try (Transaction tx = db.beginTx()) {
-            db.execute(DB_CYPHER).close();
+        DB = TestDatabaseCreator.createTestDatabase();
+        try (Transaction tx = DB.beginTx()) {
+            DB.execute(DB_CYPHER).close();
             tx.success();
         }
 
-        db.getDependencyResolver()
+        DB.getDependencyResolver()
                 .resolveDependency(Procedures.class)
                 .registerProcedure(PageRankProc.class);
 
-        try (Transaction tx = db.beginTx()) {
+        try (Transaction tx = DB.beginTx()) {
             final Label label = Label.label("Label1");
-            expected.put(db.findNode(label, "name", "a").getId(), 0.243);
-            expected.put(db.findNode(label, "name", "b").getId(), 1.844);
-            expected.put(db.findNode(label, "name", "c").getId(), 1.777);
-            expected.put(db.findNode(label, "name", "d").getId(), 0.218);
-            expected.put(db.findNode(label, "name", "e").getId(), 0.243);
-            expected.put(db.findNode(label, "name", "f").getId(), 0.218);
-            expected.put(db.findNode(label, "name", "g").getId(), 0.150);
-            expected.put(db.findNode(label, "name", "h").getId(), 0.150);
-            expected.put(db.findNode(label, "name", "i").getId(), 0.150);
-            expected.put(db.findNode(label, "name", "j").getId(), 0.150);
+            expected.put(DB.findNode(label, "name", "a").getId(), 0.243);
+            expected.put(DB.findNode(label, "name", "b").getId(), 1.844);
+            expected.put(DB.findNode(label, "name", "c").getId(), 1.777);
+            expected.put(DB.findNode(label, "name", "d").getId(), 0.218);
+            expected.put(DB.findNode(label, "name", "e").getId(), 0.243);
+            expected.put(DB.findNode(label, "name", "f").getId(), 0.218);
+            expected.put(DB.findNode(label, "name", "g").getId(), 0.150);
+            expected.put(DB.findNode(label, "name", "h").getId(), 0.150);
+            expected.put(DB.findNode(label, "name", "i").getId(), 0.150);
+            expected.put(DB.findNode(label, "name", "j").getId(), 0.150);
 
-            weightedExpected.put(db.findNode(label, "name", "a").getId(), 0.218);
-            weightedExpected.put(db.findNode(label, "name", "b").getId(), 2.008);
-            weightedExpected.put(db.findNode(label, "name", "c").getId(), 1.850);
-            weightedExpected.put(db.findNode(label, "name", "d").getId(), 0.185);
-            weightedExpected.put(db.findNode(label, "name", "e").getId(), 0.182);
-            weightedExpected.put(db.findNode(label, "name", "f").getId(), 0.174);
-            weightedExpected.put(db.findNode(label, "name", "g").getId(), 0.150);
-            weightedExpected.put(db.findNode(label, "name", "h").getId(), 0.150);
-            weightedExpected.put(db.findNode(label, "name", "i").getId(), 0.150);
-            weightedExpected.put(db.findNode(label, "name", "j").getId(), 0.150);
+            weightedExpected.put(DB.findNode(label, "name", "a").getId(), 0.218);
+            weightedExpected.put(DB.findNode(label, "name", "b").getId(), 2.008);
+            weightedExpected.put(DB.findNode(label, "name", "c").getId(), 1.850);
+            weightedExpected.put(DB.findNode(label, "name", "d").getId(), 0.185);
+            weightedExpected.put(DB.findNode(label, "name", "e").getId(), 0.182);
+            weightedExpected.put(DB.findNode(label, "name", "f").getId(), 0.174);
+            weightedExpected.put(DB.findNode(label, "name", "g").getId(), 0.150);
+            weightedExpected.put(DB.findNode(label, "name", "h").getId(), 0.150);
+            weightedExpected.put(DB.findNode(label, "name", "i").getId(), 0.150);
+            weightedExpected.put(DB.findNode(label, "name", "j").getId(), 0.150);
             tx.success();
         }
     }

@@ -33,7 +33,7 @@ public class LouvainClusteringPreDefinedCommunitiesProcTest extends ProcTestBase
 
     @BeforeAll
     public static void setupGraph() throws KernelException {
-        db = TestDatabaseCreator.createTestDatabase();
+        DB = TestDatabaseCreator.createTestDatabase();
 
         final String cypher =
                 "  MERGE (nRyan:User {id: 'Ryan'})" +
@@ -46,10 +46,10 @@ public class LouvainClusteringPreDefinedCommunitiesProcTest extends ProcTestBase
                 "    SET  nMark.community = 10" +
                 "  MERGE (nAlice)-[:FRIEND]->(nBridget)";
 
-        db.getDependencyResolver()
+        DB.getDependencyResolver()
                 .resolveDependency(Procedures.class)
                 .registerProcedure(LouvainProc.class);
-        db.execute(cypher);
+        DB.execute(cypher);
     }
 
     @ParameterizedTest

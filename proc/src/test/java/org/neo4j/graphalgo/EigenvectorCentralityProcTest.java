@@ -49,55 +49,55 @@ public class EigenvectorCentralityProcTest extends ProcTestBase {
         ClassLoader classLoader = EigenvectorCentralityProcTest.class.getClassLoader();
         File file = new File(classLoader.getResource("got/got-s1-nodes.csv").getFile());
 
-        db = (GraphDatabaseAPI)new TestGraphDatabaseFactory()
+        DB = (GraphDatabaseAPI)new TestGraphDatabaseFactory()
                 .newImpermanentDatabaseBuilder(new File(UUID.randomUUID().toString()))
                 .setConfig(GraphDatabaseSettings.load_csv_file_url_root,file.getParent())
                 .newGraphDatabase();
 
-        try (Transaction tx = db.beginTx()) {
-            db.execute("CREATE CONSTRAINT ON (c:Character) " +
-                    "ASSERT c.id IS UNIQUE;").close();
+        try (Transaction tx = DB.beginTx()) {
+            DB.execute("CREATE CONSTRAINT ON (c:Character) " +
+                       "ASSERT c.id IS UNIQUE;").close();
             tx.success();
         }
 
-        try (Transaction tx = db.beginTx()) {
-            db.execute("LOAD CSV WITH HEADERS FROM 'file:///got-s1-nodes.csv' AS row " +
-                    "MERGE (c:Character {id: row.Id}) " +
-                    "SET c.name = row.Label;").close();
+        try (Transaction tx = DB.beginTx()) {
+            DB.execute("LOAD CSV WITH HEADERS FROM 'file:///got-s1-nodes.csv' AS row " +
+                       "MERGE (c:Character {id: row.Id}) " +
+                       "SET c.name = row.Label;").close();
 
-            db.execute("LOAD CSV WITH HEADERS FROM 'file:///got-s1-edges.csv' AS row " +
-                    "MATCH (source:Character {id: row.Source}) " +
-                    "MATCH (target:Character {id: row.Target}) " +
-                    "MERGE (source)-[rel:INTERACTS_SEASON1]->(target) " +
-                    "SET rel.weight = toInteger(row.Weight);").close();
+            DB.execute("LOAD CSV WITH HEADERS FROM 'file:///got-s1-edges.csv' AS row " +
+                       "MATCH (source:Character {id: row.Source}) " +
+                       "MATCH (target:Character {id: row.Target}) " +
+                       "MERGE (source)-[rel:INTERACTS_SEASON1]->(target) " +
+                       "SET rel.weight = toInteger(row.Weight);").close();
 
             tx.success();
         }
 
-        Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class);
+        Procedures procedures = DB.getDependencyResolver().resolveDependency(Procedures.class);
         procedures.registerProcedure(EigenvectorCentralityProc.class);
         procedures.registerProcedure(PageRankProc.class);
 
 
-        try (Transaction tx = db.beginTx()) {
+        try (Transaction tx = DB.beginTx()) {
             final Label label = Label.label("Character");
-            expected.put(db.findNode(label, "name", "Ned").getId(),     111.68570401574802);
-            expected.put(db.findNode(label, "name", "Robert").getId(),  88.09448401574804);
-            expected.put(db.findNode(label, "name", "Cersei").getId() , 84.59226401574804);
-            expected.put(db.findNode(label, "name", "Catelyn").getId(), 84.51566401574803);
-            expected.put(db.findNode(label, "name", "Tyrion").getId(),  82.00291401574802);
-            expected.put(db.findNode(label, "name", "Joffrey").getId(), 77.67397401574803);
-            expected.put(db.findNode(label, "name", "Robb").getId(),    73.56551401574802);
-            expected.put(db.findNode(label, "name", "Arya").getId(),    73.32532401574804);
-            expected.put(db.findNode(label, "name", "Petyr").getId(),   72.26733401574802);
-            expected.put(db.findNode(label, "name", "Sansa").getId(),   71.56470401574803);
+            expected.put(DB.findNode(label, "name", "Ned").getId(),     111.68570401574802);
+            expected.put(DB.findNode(label, "name", "Robert").getId(),  88.09448401574804);
+            expected.put(DB.findNode(label, "name", "Cersei").getId() , 84.59226401574804);
+            expected.put(DB.findNode(label, "name", "Catelyn").getId(), 84.51566401574803);
+            expected.put(DB.findNode(label, "name", "Tyrion").getId(),  82.00291401574802);
+            expected.put(DB.findNode(label, "name", "Joffrey").getId(), 77.67397401574803);
+            expected.put(DB.findNode(label, "name", "Robb").getId(),    73.56551401574802);
+            expected.put(DB.findNode(label, "name", "Arya").getId(),    73.32532401574804);
+            expected.put(DB.findNode(label, "name", "Petyr").getId(),   72.26733401574802);
+            expected.put(DB.findNode(label, "name", "Sansa").getId(),   71.56470401574803);
             tx.success();
         }
     }
 
     @AfterAll
     public static void tearDown() {
-        if (db != null) db.shutdown();
+        if (DB != null) DB.shutdown();
     }
 
     @ParameterizedTest

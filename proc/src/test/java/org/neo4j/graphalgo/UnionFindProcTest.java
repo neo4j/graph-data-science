@@ -66,21 +66,21 @@ public class UnionFindProcTest extends ProcTestBase {
                 // {H, I}
                 ",(nH)-[:TYPE]->(nI)";
 
-        db = TestDatabaseCreator.createTestDatabase();
+        DB = TestDatabaseCreator.createTestDatabase();
 
-        try (Transaction tx = db.beginTx()) {
-            db.execute(createGraph).close();
+        try (Transaction tx = DB.beginTx()) {
+            DB.execute(createGraph).close();
             tx.success();
         }
 
-        db.getDependencyResolver()
+        DB.getDependencyResolver()
                 .resolveDependency(Procedures.class)
                 .registerProcedure(UnionFindProc.class);
     }
 
     @AfterAll
     public static void tearDown() {
-        if (db != null) db.shutdown();
+        if (DB != null) DB.shutdown();
     }
 
     @ParameterizedTest

@@ -39,18 +39,18 @@ public class DegreeProcIssue848Test extends ProcTestBase {
 
     @AfterAll
     public static void tearDown() {
-        if (db != null) db.shutdown();
+        if (DB != null) DB.shutdown();
     }
 
     @BeforeAll
     public static void setup() throws KernelException {
-        db = TestDatabaseCreator.createTestDatabase();
-        try (Transaction tx = db.beginTx()) {
-            db.execute(DB_CYPHER).close();
+        DB = TestDatabaseCreator.createTestDatabase();
+        try (Transaction tx = DB.beginTx()) {
+            DB.execute(DB_CYPHER).close();
             tx.success();
         }
 
-        db.getDependencyResolver()
+        DB.getDependencyResolver()
                 .resolveDependency(Procedures.class)
                 .registerProcedure(DegreeCentralityProc.class);
     }
