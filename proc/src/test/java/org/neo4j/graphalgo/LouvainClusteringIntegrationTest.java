@@ -24,17 +24,22 @@ import org.junit.*;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.neo4j.graphalgo.LouvainProc;
+import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Result;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.LockSupport;
 
 import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertEquals;
@@ -89,15 +94,17 @@ public class LouvainClusteringIntegrationTest {
                         " (g)-[:TYPE]->(h),\n" +
                         " (b)-[:TYPE]->(e)";
 
-        DB.resolveDependency(Procedures.class).registerProcedure(LouvainProc.class);
+        Procedures procedures = DB.resolveDependency(Procedures.class);
+        procedures.registerProcedure(LouvainProc.class);
+        procedures.registerProcedure(LoadGraphProc.class);
         DB.execute(cypher);
     }
 
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(
-                new Object[]{"heavy"},
-                new Object[]{"huge"}
+                new Object[]{"huge"},
+                new Object[]{"heavy"}
         );
     }
 
@@ -343,6 +350,33 @@ public class LouvainClusteringIntegrationTest {
             assertEquals("wrong community count", 3, row.getNumber("communityCount").longValue());
             return true;
         });
+    }
+
+    @Test
+    public void shouldRunWithSaturatedThreadPool() {
+        // ensure that we don't drop task that can't be scheduled while executing the algorithm.
+
+        // load graph first to isolate failing behavior to the actual algorithm execution.
+        DB.execute("CALL algo.graph.load('louvainGraph', '', '', {graph: '" + graphImpl + "'})").close();
+
+        List<Future<?>> futures = new ArrayList<>();
+        // block all available threads
+        for (int i = 0; i < Pools.DEFAULT_CONCURRENCY; i++) {
+            futures.add(
+                    Pools.DEFAULT.submit(() -> LockSupport.parkNanos(Duration.ofSeconds(1).toNanos()))
+            );
+        }
+
+        final String cypher = "CALL algo.louvain('', '', {graph: 'louvainGraph'}) YIELD nodes, communityCount";
+        try {
+            DB.execute(cypher).accept(row -> {
+                assertEquals("invalid node count",9, row.getNumber("nodes").longValue());
+                assertEquals("wrong community count", 3, row.getNumber("communityCount").longValue());
+                return true;
+            });
+        } finally {
+            ParallelUtil.awaitTermination(futures);
+        }
     }
 
     @Test
