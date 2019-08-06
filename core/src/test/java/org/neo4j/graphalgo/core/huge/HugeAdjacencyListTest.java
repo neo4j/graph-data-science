@@ -66,7 +66,7 @@ public class HugeAdjacencyListTest {
                 .setMaxRelCount(100)
                 .build();
 
-        MemoryTree memRec = HugeAdjacencyList.compressedMemoryEstimation(false).estimate(dimensions, 1);
+        MemoryTree memRec = HugeAdjacencyList.uncompressedMemoryEstimation(false).estimate(dimensions, 1);
 
         long classSize = 24;
         long uncompressedAdjacencySize = 1200;

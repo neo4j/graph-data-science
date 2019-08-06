@@ -172,7 +172,7 @@ public final class HugeAdjacencyList {
             byte[] page = pages[pageIndex(fromIndex, PAGE_SHIFT)];
             int offsetInPage = indexInPage(fromIndex, PAGE_MASK);
             // TODO: use same endianess for degree and weights
-            ByteBuffer byteBuffer = ByteBuffer.wrap(page, offsetInPage, page.length - offsetInPage).order(ByteOrder.LITTLE_ENDIAN);
+            ByteBuffer byteBuffer = ByteBuffer.wrap(page, offsetInPage, page.length - offsetInPage);
             length = byteBuffer.getInt();
             byteBuffer.limit(Long.BYTES * length + byteBuffer.position());
             this.byteBuffer = byteBuffer.order(ByteOrder.BIG_ENDIAN);
