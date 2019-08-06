@@ -22,27 +22,33 @@ package org.neo4j.graphalgo.impl.louvain;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.rules.ErrorCollector;
-import org.neo4j.graphalgo.HeavyHugeTester;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
+import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
+import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.neo4j.graphalgo.impl.louvain.LouvainTest.DEFAULT_CONFIG;
 
 /**
  * (a)-(b)---(e)-(f)
@@ -51,57 +57,71 @@ import static org.neo4j.graphalgo.impl.louvain.LouvainTest.DEFAULT_CONFIG;
  *
  * @author mknblch
  */
-public class LouvainWeightedGraphTest extends HeavyHugeTester {
+public class LouvainWeightedGraphTest {
 
-    private static final String unidirectional =
-            "CREATE (a:Node {name:'a'})\n" +
-            "CREATE (b:Node {name:'b'})\n" +
-            "CREATE (c:Node {name:'c'})\n" +
-            "CREATE (d:Node {name:'d'})\n" +
-            "CREATE (e:Node {name:'e'})\n" +
-            "CREATE (f:Node {name:'f'})\n" +
-            "CREATE (g:Node {name:'g'})\n" +
-            "CREATE (h:Node {name:'h'})\n" +
-            "CREATE (z:Node {name:'z'})\n" +
-            "CREATE" +
-            " (a)-[:TYPE]->(b),\n" +
-            " (a)-[:TYPE]->(c),\n" +
-            " (a)-[:TYPE]->(d),\n" +
-            " (c)-[:TYPE]->(d),\n" +
-            " (c)-[:TYPE]->(b),\n" +
-            " (b)-[:TYPE]->(d),\n" +
+    private static final String unidirectional = "CREATE " +
+            "  (a:Node {name: 'a'})" +
+            ", (b:Node {name: 'b'})" +
+            ", (c:Node {name: 'c'})" +
+            ", (d:Node {name: 'd'})" +
+            ", (e:Node {name: 'e'})" +
+            ", (f:Node {name: 'f'})" +
+            ", (g:Node {name: 'g'})" +
+            ", (h:Node {name: 'h'})" +
+            ", (z:Node {name: 'z'})" +
 
-            " (e)-[:TYPE]->(f),\n" +
-            " (e)-[:TYPE]->(g),\n" +
-            " (e)-[:TYPE]->(h),\n" +
-            " (f)-[:TYPE]->(h),\n" +
-            " (f)-[:TYPE]->(g),\n" +
-            " (g)-[:TYPE]->(h),\n" +
+            ", (a)-[:TYPE]->(b)" +
+            ", (a)-[:TYPE]->(c)" +
+            ", (a)-[:TYPE]->(d)" +
+            ", (c)-[:TYPE]->(d)" +
+            ", (c)-[:TYPE]->(b)" +
+            ", (b)-[:TYPE]->(d)" +
 
-            " (e)-[:TYPE {w:4}]->(b)";
+            ", (e)-[:TYPE]->(f)" +
+            ", (e)-[:TYPE]->(g)" +
+            ", (e)-[:TYPE]->(h)" +
+            ", (f)-[:TYPE]->(h)" +
+            ", (f)-[:TYPE]->(g)" +
+            ", (g)-[:TYPE]->(h)" +
 
+            ", (e)-[:TYPE {w: 4}]->(b)";
 
     private static final int MAX_ITERATIONS = 10;
     public static final Label LABEL = Label.label("Node");
     public static final String ABCDEFGHZ = "abcdefghz";
 
-    @Rule
-    public ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
+    private static final Louvain.Config DEFAULT_CONFIG = new Louvain.Config(10, 10, false);
+    private static GraphDatabaseAPI DB;
+
+    static Stream<Class<? extends GraphFactory>> parameters() {
+        return Stream.of(
+                HeavyGraphFactory.class,
+                HugeGraphFactory.class,
+                GraphViewFactory.class
+        );
+    }
+
+    private final Map<String, Integer> nameMap = new HashMap<>();
 
     @Rule
     public ErrorCollector collector = new ErrorCollector();
 
-    private Graph graph;
-    private final Map<String, Integer> nameMap;
-
-    public LouvainWeightedGraphTest(Class<? extends GraphFactory> graphImpl, String name) {
-        super(graphImpl);
-        nameMap = new HashMap<>();
+    @BeforeEach
+    void setup() {
+        DB = TestDatabaseCreator.createTestDatabase();
     }
 
-    private void setup(String cypher) {
+    @AfterEach
+    void teardown() {
+        if (null != DB) {
+            DB.shutdown();
+            DB = null;
+        }
+    }
+
+    private Graph setup(Class<? extends GraphFactory> graphImpl, String cypher) {
         DB.execute(cypher);
-        graph = new GraphLoader(DB)
+        Graph graph = new GraphLoader(DB)
                 .withAnyRelationshipType()
                 .withAnyLabel()
                 .withoutNodeProperties()
@@ -117,19 +137,20 @@ public class LouvainWeightedGraphTest extends HeavyHugeTester {
             }
             transaction.success();
         }
+
+        return graph;
     }
 
     public void printCommunities(Louvain louvain) {
-        DB.executeAndCommit(db -> {
-            louvain.resultStream().forEach(r -> {
-                System.out.println(db.getNodeById(r.nodeId).getProperty("name") + ":" + r.community);
-            });
-        });
+        try (Transaction ignored = DB.beginTx()) {
+            louvain.resultStream().forEach(r -> System.out.println(DB.getNodeById(r.nodeId).getProperty("name") + ":" + r.community));
+        }
     }
 
-    @Test
-    public void testWeightedLouvain() throws Exception {
-        setup(unidirectional);
+    @ParameterizedTest
+    @MethodSource("parameters")
+    public void testWeightedLouvain(Class<? extends GraphFactory> graphImpl) {
+        Graph graph = setup(graphImpl, unidirectional);
         final Louvain louvain =
                 new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                         .withProgressLogger(TestProgressLogger.INSTANCE)
@@ -150,9 +171,10 @@ public class LouvainWeightedGraphTest extends HeavyHugeTester {
         assertTrue("Maximum iterations > " + MAX_ITERATIONS, louvain.getLevel() < MAX_ITERATIONS);
     }
 
-    @Test
-    public void testWeightedRandomNeighborLouvain() throws Exception {
-        setup(unidirectional);
+    @ParameterizedTest
+    @MethodSource("parameters")
+    public void testWeightedRandomNeighborLouvain(Class<? extends GraphFactory> graphImpl) {
+        Graph graph = setup(graphImpl, unidirectional);
         final Louvain louvain =
                 new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                         .withProgressLogger(TestProgressLogger.INSTANCE)

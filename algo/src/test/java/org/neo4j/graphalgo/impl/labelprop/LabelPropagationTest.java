@@ -74,7 +74,7 @@ public final class LabelPropagationTest {
 
     private static GraphDatabaseAPI DB;
 
-    public static Stream<Class<? extends GraphFactory>> parameters() {
+    static Stream<Class<? extends GraphFactory>> parameters() {
         return Stream.of(
                 HeavyGraphFactory.class,
                 HeavyCypherGraphFactory.class,

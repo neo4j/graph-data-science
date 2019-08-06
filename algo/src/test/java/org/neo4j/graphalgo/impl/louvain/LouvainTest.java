@@ -22,14 +22,22 @@ package org.neo4j.graphalgo.impl.louvain;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.rules.ErrorCollector;
-import org.neo4j.graphalgo.HeavyHugeTester;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
+import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
+import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -38,10 +46,11 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -54,41 +63,54 @@ import static org.junit.Assert.assertTrue;
  *
  * @author mknblch
  */
-public class LouvainTest extends HeavyHugeTester {
+@EnableRuleMigrationSupport
+public class LouvainTest {
 
-    static Louvain.Config DEFAULT_CONFIG = new Louvain.Config(10, 10, false);
-
-    private static final String unidirectional =
-            "CREATE (a:Node {name:'a'})\n" +
-                    "CREATE (b:Node {name:'b'})\n" +
-                    "CREATE (c:Node {name:'c'})\n" +
-                    "CREATE (d:Node {name:'d'})\n" +
-                    "CREATE" +
-                    " (a)-[:TYPE {weight: 1.0}]->(b),\n" +
-                    " (b)-[:TYPE {weight: 1.0}]->(c),\n" +
-                    " (c)-[:TYPE {weight: 1.0}]->(a),\n" +
-                    " (a)-[:TYPE {weight: 1.0}]->(c)";
+    private static final String unidirectional = "CREATE" +
+            "  (a:Node {name:'a'})" +
+            ", (b:Node {name:'b'})" +
+            ", (c:Node {name:'c'})" +
+            ", (d:Node {name:'d'})" +
+            ", (a)-[:TYPE {weight: 1.0}]->(b)" +
+            ", (b)-[:TYPE {weight: 1.0}]->(c)" +
+            ", (c)-[:TYPE {weight: 1.0}]->(a)" +
+            ", (a)-[:TYPE {weight: 1.0}]->(c)";
 
     public static final Label LABEL = Label.label("Node");
     public static final String ABCD = "abcd";
 
-    @Rule
-    public ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
+    private static final Louvain.Config DEFAULT_CONFIG = new Louvain.Config(10, 10, false);
+    private static GraphDatabaseAPI DB;
+    private final Map<String, Integer> nameMap = new HashMap<>();
 
     @Rule
     public ErrorCollector collector = new ErrorCollector();
 
-    private Graph graph;
-    private final Map<String, Integer> nameMap;
-
-    public LouvainTest(Class<? extends GraphFactory> graphImpl, String name) {
-        super(graphImpl);
-        nameMap = new HashMap<>();
+    static Stream<Class<? extends GraphFactory>> parameters() {
+        return Stream.of(
+                HeavyGraphFactory.class,
+                HugeGraphFactory.class,
+                GraphViewFactory.class
+        );
     }
 
-    private void setup(String cypher) {
+    @BeforeEach
+    void setup() {
+        DB = TestDatabaseCreator.createTestDatabase();
+    }
+
+    @AfterEach
+    void teardown() {
+        if (null != DB) {
+            DB.shutdown();
+            DB = null;
+        }
+    }
+
+    private Graph setup(Class<? extends GraphFactory> graphImpl, String cypher) {
         DB.execute(cypher);
-        graph = new GraphLoader(DB)
+
+        Graph graph = new GraphLoader(DB)
                 .withAnyRelationshipType()
                 .withAnyLabel()
                 .withoutNodeProperties()
@@ -104,11 +126,14 @@ public class LouvainTest extends HeavyHugeTester {
             }
             transaction.success();
         }
+
+        return graph;
     }
 
-    @Test
-    public void testRunner() throws Exception {
-        setup(unidirectional);
+    @ParameterizedTest
+    @MethodSource("parameters")
+    public void testRunner(Class<? extends GraphFactory> graphImpl) {
+        Graph graph = setup(graphImpl, unidirectional);
         final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
@@ -122,9 +147,10 @@ public class LouvainTest extends HeavyHugeTester {
         assertCommunities(algorithm);
     }
 
-    @Test
-    public void testRandomNeighborLouvain() throws Exception {
-        setup(unidirectional);
+    @ParameterizedTest
+    @MethodSource("parameters")
+    public void testRandomNeighborLouvain(Class<? extends GraphFactory> graphImpl) {
+        Graph graph = setup(graphImpl, unidirectional);
         final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
@@ -138,14 +164,15 @@ public class LouvainTest extends HeavyHugeTester {
         assertCommunities(algorithm);
     }
 
-    @Test
-    public void testMultithreadedLouvain() {
+    @ParameterizedTest
+    @MethodSource("parameters")
+    public void testMultithreadedLouvain(Class<? extends GraphFactory> graphImpl) {
         GraphBuilder.create(DB)
                 .setLabel("Node")
                 .setRelationship("REL")
                 .newCompleteGraphBuilder()
                 .createCompleteGraph(200, 1.0);
-        graph = new GraphLoader(DB)
+        Graph graph = new GraphLoader(DB)
                 .withLabel("Node")
                 .withRelationshipType("REL")
                 .withOptionalRelationshipWeightsFromProperty(null, 1.0)
