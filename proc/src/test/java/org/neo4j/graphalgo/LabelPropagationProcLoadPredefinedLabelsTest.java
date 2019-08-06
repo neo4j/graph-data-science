@@ -20,13 +20,11 @@
 package org.neo4j.graphalgo;
 
 import org.hamcrest.Matchers;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
@@ -37,49 +35,37 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-@RunWith(Parameterized.class)
-public class LabelPropagationProcLoadPredefinedLabelsTest {
+public class LabelPropagationProcLoadPredefinedLabelsTest extends ProcTestBase {
 
-    private static final String DB_CYPHER = "" +
-            "CREATE (a:A {id: 0, community: 42})\n" +
-            "CREATE (b:B {id: 1, community: 42})\n" +
-            "CREATE (c:C {id: 2, community: 42})\n" +
-            "CREATE (d:D {id: 3, community: 29})\n" +
-            "CREATE (e:E {id: 4, community: 29})\n" +
-            "CREATE (f:F {id: 5, community: 29})\n" +
-            "CREATE (g:G {id: 6, community: 29}) ";
+    private static final String DB_CYPHER = "CREATE " +
+            "  (a:A {id: 0, community: 42})" +
+            ", (b:B {id: 1, community: 42})" +
+            ", (c:C {id: 2, community: 42})" +
+            ", (d:D {id: 3, community: 29})" +
+            ", (e:E {id: 4, community: 29})" +
+            ", (f:F {id: 5, community: 29})" +
+            ", (g:G {id: 6, community: 29})";
 
-    @Parameterized.Parameters(name = "parallel={0}, graph={1}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(
-                new Object[]{false, "heavy"},
-                new Object[]{true, "heavy"},
-                new Object[]{false, "huge"},
-                new Object[]{true, "huge"}
+    static Stream<Arguments> parameters() {
+        return Stream.of(
+                arguments(false, "heavy"),
+                arguments(true,  "heavy"),
+                arguments(false, "huge"),
+                arguments(true,  "huge")
         );
     }
 
     public static GraphDatabaseService DB;
 
-    @Rule
-    public ExpectedException exceptions = ExpectedException.none();
-
-    private final boolean parallel;
-    private final String graphImpl;
-
-    public LabelPropagationProcLoadPredefinedLabelsTest(boolean parallel, String graphImpl) {
-        this.parallel = parallel;
-        this.graphImpl = graphImpl;
-    }
-
-    @Before
+    @BeforeEach
     public void setup() throws KernelException {
         DB = new TestGraphDatabaseFactory()
                 .newImpermanentDatabaseBuilder()
@@ -95,26 +81,30 @@ public class LabelPropagationProcLoadPredefinedLabelsTest {
         DB.execute(DB_CYPHER);
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() {
         DB.shutdown();
     }
 
-    @Test
-    public void shouldUseDefaultValues() {
-        String query = "CALL algo.labelPropagation.stream(null, null, {batchSize: $batchSize, concurrency: $concurrency, graph: $graph, seedProperty: 'community'}) " +
-                "YIELD nodeId, community " +
-                "RETURN algo.asNode(nodeId) AS id, community " +
-                "ORDER BY id";
+    @ParameterizedTest
+    @MethodSource("parameters")
+    public void shouldUseDefaultValues(boolean parallel, String graphImpl) {
+        String query = "CALL algo.labelPropagation.stream(" +
+                       "    null, null, {" +
+                       "        batchSize: $batchSize, concurrency: $concurrency, graph: $graph, seedProperty: 'community'" +
+                       "    }" +
+                       ") YIELD nodeId, community " +
+                       "RETURN algo.asNode(nodeId) AS id, community " +
+                       "ORDER BY id";
 
-        Result result = DB.execute(query, parParams());
+        Result result = DB.execute(query, parParams(parallel, graphImpl));
 
         List<Integer> labels = result.columnAs("community").stream()
                 .mapToInt(value -> ((Long)value).intValue()).boxed().collect(Collectors.toList());
         assertThat(labels, Matchers.is(Arrays.asList(42, 42, 42, 29, 29, 29,29)));
     }
 
-    private Map<String, Object> parParams() {
+    private Map<String, Object> parParams(boolean parallel, String graphImpl) {
         return MapUtil.map("batchSize", parallel ? 5 : 1, "concurrency", parallel ? 8 : 1, "graph", graphImpl);
     }
 }
