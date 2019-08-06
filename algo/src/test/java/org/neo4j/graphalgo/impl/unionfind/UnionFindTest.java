@@ -19,60 +19,32 @@
  */
 package org.neo4j.graphalgo.impl.unionfind;
 
-import com.carrotsearch.hppc.BitSet;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraph;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
-import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
-import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-public class UnionFindTest {
+public class UnionFindTest extends UnionFindTestBase {
 
-    private static GraphDatabaseAPI DB;
-    private static final RelationshipType RELATIONSHIP_TYPE = RelationshipType.withName("TYPE");
     private static final int SETS_COUNT = 16;
     private static final int SET_SIZE = 10;
-
-    static Stream<Arguments> parameters() {
-        return Stream.of(
-                arguments("Heavy", HeavyGraphFactory.class, UnionFindType.PARALLEL),
-                arguments("Heavy", HeavyGraphFactory.class, UnionFindType.FJ_MERGE),
-                arguments("Heavy", HeavyGraphFactory.class, UnionFindType.FORK_JOIN),
-                arguments("Huge", HugeGraphFactory.class, UnionFindType.PARALLEL),
-                arguments("Huge", HugeGraphFactory.class, UnionFindType.FJ_MERGE),
-                arguments("Huge", HugeGraphFactory.class, UnionFindType.FORK_JOIN),
-                arguments("Kernel", GraphViewFactory.class, UnionFindType.PARALLEL),
-                arguments("Kernel", GraphViewFactory.class, UnionFindType.FJ_MERGE),
-                arguments("Kernel", GraphViewFactory.class, UnionFindType.FORK_JOIN)
-        );
-    }
 
     @BeforeAll
     static void setupGraph() {
@@ -80,24 +52,6 @@ public class UnionFindTest {
         int[] setSizes = new int[SETS_COUNT];
         Arrays.fill(setSizes, SET_SIZE);
         createTestGraph(setSizes);
-    }
-
-    private static void createTestGraph(int... setSizes) {
-        try (Transaction tx = DB.beginTx()) {
-            for (int setSize : setSizes) {
-                createLine(DB, setSize);
-            }
-            tx.success();
-        }
-    }
-
-    private static void createLine(GraphDatabaseService db, int setSize) {
-        Node temp = db.createNode();
-        for (int i = 1; i < setSize; i++) {
-            Node t = db.createNode();
-            temp.createRelationshipTo(t, RELATIONSHIP_TYPE);
-            temp = t;
-        }
     }
 
     @Test
@@ -249,7 +203,7 @@ public class UnionFindTest {
 
         UnionFind.Config config = new UnionFind.Config(null, Double.NaN);
 
-        DisjointSetStruct result = run(uf, config, graph);
+        DisjointSetStruct result = run(uf, graph, config);
 
         Assert.assertEquals(SETS_COUNT, getSetCount(result));
         long[] setRegions = new long[SETS_COUNT];
@@ -277,27 +231,27 @@ public class UnionFindTest {
         });
     }
 
-    private DisjointSetStruct run(final UnionFindType uf, UnionFind.Config config, Graph graph) {
-        return UnionFindHelper.run(
-                uf,
-                graph,
-                Pools.DEFAULT,
-                SET_SIZE / Pools.DEFAULT_CONCURRENCY,
-                Pools.DEFAULT_CONCURRENCY,
-                config,
-                AllocationTracker.EMPTY);
+    @Override
+    int communitySize() {
+        return SET_SIZE;
     }
 
-    /**
-     * Compute number of sets present.
-     */
-    static long getSetCount(DisjointSetStruct struct) {
-        long capacity = struct.size();
-        BitSet sets = new BitSet(capacity);
-        for (long i = 0L; i < capacity; i++) {
-            long setId = struct.setIdOf(i);
-            sets.set(setId);
+    private static void createTestGraph(int... setSizes) {
+        try (Transaction tx = DB.beginTx()) {
+            for (int setSize : setSizes) {
+                createLine(DB, setSize);
+            }
+            tx.success();
         }
-        return sets.cardinality();
     }
+
+    private static void createLine(GraphDatabaseService db, int setSize) {
+        Node temp = db.createNode();
+        for (int i = 1; i < setSize; i++) {
+            Node t = db.createNode();
+            temp.createRelationshipTo(t, RELATIONSHIP_TYPE);
+            temp = t;
+        }
+    }
+
 }

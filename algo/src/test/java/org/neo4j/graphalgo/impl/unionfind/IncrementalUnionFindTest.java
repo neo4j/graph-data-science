@@ -20,68 +20,44 @@
 package org.neo4j.graphalgo.impl.unionfind;
 
 import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.neo4j.graphalgo.HeavyHugeTester;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.graphdb.Transaction;
 
 import static org.junit.Assert.assertEquals;
-import static org.neo4j.graphalgo.impl.unionfind.UnionFindTest.getSetCount;
 
-public class IncrementalUnionFindTest extends HeavyHugeTester {
+public class IncrementalUnionFindTest extends UnionFindTestBase {
 
-    private static final RelationshipType RELATIONSHIP_TYPE = RelationshipType.withName("TYPE");
     private static final String SEED_PROPERTY = "community";
 
     private static final int COMMUNITY_COUNT = 16;
     private static final int COMMUNITY_SIZE = 10;
 
-    @ClassRule
-    public static final ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
-
     /**
      * Create multiple communities and connect them pairwise.
      */
-    @BeforeClass
+    @BeforeAll
     public static void setupGraph() {
-        DB.executeAndCommit(db -> {
+        DB = TestDatabaseCreator.createTestDatabase();
+        try (Transaction tx = DB.beginTx()) {
             for (int i = 0; i < COMMUNITY_COUNT; i = i + 2) {
-                long community1 = createLineGraph(db);
-                long community2 = createLineGraph(db);
-                createConnection(db, community1, community2);
+                long community1 = createLineGraph(DB);
+                long community2 = createLineGraph(DB);
+                createConnection(DB, community1, community2);
             }
-        });
-    }
-
-     /**
-     * Creates a line graph of the given length (i.e. numer of relationships).
-     *
-     * @param db database
-     * @return the last node id inserted into the graph
-     */
-    private static long createLineGraph(GraphDatabaseService db) {
-        Node temp = db.createNode();
-        long communityId = getCommunityId(temp.getId(), COMMUNITY_SIZE);
-
-        for (int i = 1; i < COMMUNITY_SIZE; i++) {
-            temp.setProperty(SEED_PROPERTY, communityId);
-            Node target = db.createNode();
-            temp.createRelationshipTo(target, RELATIONSHIP_TYPE);
-            temp = target;
+            tx.success();
         }
-        temp.setProperty(SEED_PROPERTY, communityId);
-        return temp.getId();
     }
 
     private static long getCommunityId(long nodeId, int communitySize) {
@@ -95,12 +71,12 @@ public class IncrementalUnionFindTest extends HeavyHugeTester {
         source.createRelationshipTo(target, RELATIONSHIP_TYPE);
     }
 
-    private final Graph graph;
-    private final UnionFind.Config config;
-
-    public IncrementalUnionFindTest(Class<? extends GraphFactory> graphImpl, String name) {
-        super(graphImpl);
-        graph = new GraphLoader(DB)
+    @ParameterizedTest(name = "{0} -- {2}")
+    @MethodSource("parameters")
+    void test(String graphName, Class<? extends GraphFactory> graphImpl, UnionFindType uf) {
+        // TODO: Why can't we run this test for kernel graph / graph view?
+        Assumptions.assumeFalse(graphName.equalsIgnoreCase("kernel"));
+        Graph graph = new GraphLoader(DB)
                 .withExecutorService(Pools.DEFAULT)
                 .withAnyLabel()
                 .withOptionalNodeProperties(
@@ -109,27 +85,13 @@ public class IncrementalUnionFindTest extends HeavyHugeTester {
                 .withRelationshipType(RELATIONSHIP_TYPE)
                 .load(graphImpl);
 
-        config = new UnionFind.Config(graph.nodeProperties(SEED_PROPERTY), Double.NaN);
-    }
+        UnionFind.Config config = new UnionFind.Config(
+                graph.nodeProperties(SEED_PROPERTY),
+                Double.NaN
+        );
 
-    @Test
-    public void testParallel() {
-        test(UnionFindType.PARALLEL);
-    }
-
-    @Test
-    public void testForkJoin() {
-        test(UnionFindType.FORK_JOIN);
-    }
-
-    @Test
-    public void testFJMerge() {
-        test(UnionFindType.FJ_MERGE);
-    }
-
-    private void test(UnionFindType uf) {
         // We expect that UF connects pairs of communites
-        DisjointSetStruct result = run(uf);
+        DisjointSetStruct result = run(uf, graph, config);
         Assert.assertEquals(COMMUNITY_COUNT / 2, getSetCount(result));
 
         graph.forEachNode((nodeId) -> {
@@ -146,14 +108,29 @@ public class IncrementalUnionFindTest extends HeavyHugeTester {
         });
     }
 
-    private DisjointSetStruct run(final UnionFindType uf) {
-        return UnionFindHelper.run(
-                uf,
-                graph,
-                Pools.DEFAULT,
-                COMMUNITY_SIZE / Pools.DEFAULT_CONCURRENCY,
-                Pools.DEFAULT_CONCURRENCY,
-                config,
-                AllocationTracker.EMPTY);
+    @Override
+    int communitySize() {
+        return COMMUNITY_SIZE;
     }
+
+    /**
+     * Creates a line graph of the given length (i.e. numer of relationships).
+     *
+     * @param db database
+     * @return the last node id inserted into the graph
+     */
+    protected static long createLineGraph(GraphDatabaseService db) {
+        Node temp = db.createNode();
+        long communityId = getCommunityId(temp.getId(), COMMUNITY_SIZE);
+
+        for (int i = 1; i < COMMUNITY_SIZE; i++) {
+            temp.setProperty(SEED_PROPERTY, communityId);
+            Node target = db.createNode();
+            temp.createRelationshipTo(target, RELATIONSHIP_TYPE);
+            temp = target;
+        }
+        temp.setProperty(SEED_PROPERTY, communityId);
+        return temp.getId();
+    }
+
 }
