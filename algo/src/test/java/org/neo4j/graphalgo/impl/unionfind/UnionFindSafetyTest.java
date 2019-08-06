@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.impl.unionfind;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
@@ -35,37 +35,26 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.Exceptions;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.function.LongPredicate;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertSame;
 
-@RunWith(Parameterized.class)
 public final class UnionFindSafetyTest {
-
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(
-                new Object[]{UnionFindType.PARALLEL},
-                new Object[]{UnionFindType.FORK_JOIN},
-                new Object[]{UnionFindType.FJ_MERGE}
-        );
-    }
-
-    @Parameterized.Parameter
-    public UnionFindType unionFindType;
 
     UnionFind.Config algoConfig = new UnionFind.Config(
             new HugeNullWeightMap(-1),
             Double.NaN
     );
 
-    @Test(timeout = 10_000L)
-    public void testUnionFindSafetyUnderFailure() {
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
+    @ParameterizedTest
+    @EnumSource(UnionFindType.class)
+    public void testUnionFindSafetyUnderFailure(UnionFindType unionFindType) {
         IllegalStateException error = new IllegalStateException("some error");
         Graph graph = new FlakyGraph(100, 10, new Random(42L), error);
         try {
@@ -82,8 +71,10 @@ public final class UnionFindSafetyTest {
         }
     }
 
-    @Test(timeout = 10_000L)
-    public void testHugeUnionFindSafetyUnderFailure() {
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
+    @ParameterizedTest
+    @EnumSource(UnionFindType.class)
+    public void testHugeUnionFindSafetyUnderFailure(UnionFindType unionFindType) {
         IllegalStateException error = new IllegalStateException("some error");
         Graph graph = new FlakyGraph(100, 10, new Random(42L), error);
         try {
