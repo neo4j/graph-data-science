@@ -58,12 +58,13 @@ final class AdjacencyCompression {
 
         long[] sortedValues = new long[data.length];
         long[] sortedWeights = new long[data.length];
-        int degree = applyDelta(order, data.longs, sortedValues, weights, sortedWeights, data.length);
 
-        System.arraycopy(sortedValues, 0, data.longs, 0, degree);
-        System.arraycopy(sortedWeights, 0, weights, 0, degree);
+        data.length = applyDelta(order, data.longs, sortedValues, weights, sortedWeights, data.length);
 
-        return degree;
+        System.arraycopy(sortedValues, 0, data.longs, 0, data.length);
+        System.arraycopy(sortedWeights, 0, weights, 0, data.length);
+
+        return data.length;
     }
 
     static int compress(LongsRef data, byte[] out) {

@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.neo4j.graphalgo.PropertyMapping;
@@ -29,6 +30,9 @@ import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
 import static org.junit.Assert.assertEquals;
@@ -108,5 +112,35 @@ public final class HugeGraphLoadingTest {
         final Graph graph = new GraphLoader(db).load(HugeGraphFactory.class);
 
         assertEquals(nodeCount, graph.nodeCount());
+    }
+
+    @Test
+    public void testParallelEdgeWithHugeOffsetLoading() {
+        RelationshipType fooRelType = RelationshipType.withName("FOO");
+        int nodeCount = 1_000;
+        int parallelEdgeCount = 10;
+
+        try (Transaction tx = db.beginTx()) {
+            Node n0 = db.createNode();
+            Node n1 = db.createNode();
+            Node last = null;
+
+            for (int i = 0; i < nodeCount; i++) {
+                last = db.createNode();
+            }
+
+            n0.createRelationshipTo(n1, fooRelType).setProperty("weight", 1.0);
+            for (int i = 0; i < parallelEdgeCount; i++) {
+                n0.createRelationshipTo(last, fooRelType);
+            }
+            tx.success();
+        }
+
+        final Graph graph = new GraphLoader(db)
+                .withDirection(Direction.OUTGOING)
+                .withOptionalRelationshipWeightsFromProperty("weight", 1.0)
+                .load(HugeGraphFactory.class);
+
+        Assert.assertEquals(2, graph.relationshipCount());
     }
 }
