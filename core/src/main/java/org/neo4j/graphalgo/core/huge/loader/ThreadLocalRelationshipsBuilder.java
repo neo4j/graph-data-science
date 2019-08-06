@@ -123,6 +123,7 @@ class ThreadLocalRelationshipsBuilder {
         offset = writeDegree(weightsAllocator.page, offset, degree);
         ByteBuffer
                 .wrap(weightsAllocator.page, offset, requiredBytes)
+                .order(ByteOrder.LITTLE_ENDIAN)
                 .asLongBuffer()
                 .put(weights, 0, degree);
         weightsAllocator.offset = (offset + requiredBytes);

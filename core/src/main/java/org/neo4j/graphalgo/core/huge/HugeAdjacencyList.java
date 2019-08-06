@@ -81,18 +81,15 @@ public final class HugeAdjacencyList {
 
         return MemoryEstimations
                 .builder(HugeAdjacencyList.class)
-                .rangePerGraphDimension("pages", dim -> {
+                .perGraphDimension("pages", dim -> {
                     long nodeCount = dim.nodeCount();
                     long relCount = undirected ? dim.maxRelCount() * 2 : dim.maxRelCount();
 
                     long uncompressedAdjacencySize = relCount * Long.BYTES + nodeCount * Integer.BYTES;
-
                     int pages = PageUtil.numPagesFor(uncompressedAdjacencySize, PAGE_SHIFT, PAGE_MASK);
-
                     long bytesPerPage = MemoryUsage.sizeOfByteArray(PAGE_SIZE);
-                    long memoryReqs = pages * bytesPerPage + MemoryUsage.sizeOfObjectArray(pages);
 
-                    return MemoryRange.of(memoryReqs);
+                    return pages * bytesPerPage + MemoryUsage.sizeOfObjectArray(pages);
                 })
                 .build();
     }
@@ -162,7 +159,7 @@ public final class HugeAdjacencyList {
         return reuse.init(offset);
     }
 
-    public static final class Cursor extends MutableIntValue {
+    public static final class Cursor {
         public static final Cursor EMPTY = new Cursor();
 
         private final int length;
@@ -171,11 +168,12 @@ public final class HugeAdjacencyList {
         private Cursor(byte[][] pages, long fromIndex) {
             byte[] page = pages[pageIndex(fromIndex, PAGE_SHIFT)];
             int offsetInPage = indexInPage(fromIndex, PAGE_MASK);
-            // TODO: use same endianess for degree and weights
-            ByteBuffer byteBuffer = ByteBuffer.wrap(page, offsetInPage, page.length - offsetInPage);
+            ByteBuffer byteBuffer = ByteBuffer
+                    .wrap(page, offsetInPage, page.length - offsetInPage)
+                    .order(ByteOrder.LITTLE_ENDIAN);
             length = byteBuffer.getInt();
             byteBuffer.limit(Long.BYTES * length + byteBuffer.position());
-            this.byteBuffer = byteBuffer.order(ByteOrder.BIG_ENDIAN);
+            this.byteBuffer = byteBuffer;
         }
 
         // empty Cursor

@@ -39,8 +39,6 @@ import java.util.Collections;
 
 final class RelationshipsScanner extends StatementAction implements RecordScanner {
 
-    public static final int BATCH_ENTRY_SIZE = 4;
-
     static InternalImporter.CreateScanner of(
             GraphDatabaseAPI api,
             GraphSetup setup,
@@ -217,13 +215,13 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
     private static Imports imports(GraphSetup setup, boolean loadWeights) {
         if (setup.loadAsUndirected) {
             return loadWeights
-                    ? RelationshipsScanner::importUndirectedWithWeight
+                    ? RelationshipsScanner::importBothOrUndirectedWithWeight
                     : RelationshipsScanner::importBothOrUndirected;
         }
         if (setup.loadOutgoing) {
             if (setup.loadIncoming) {
                 return loadWeights
-                        ? RelationshipsScanner::importBothWithWeight
+                        ? RelationshipsScanner::importBothOrUndirectedWithWeight
                         : RelationshipsScanner::importBothOrUndirected;
             }
             return loadWeights
@@ -254,7 +252,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
         return RawValues.combineIntInt(importedOut + importedIn, 0);
     }
 
-    private static long importUndirectedWithWeight(
+    private static long importBothOrUndirectedWithWeight(
             RelationshipsBatchBuffer buffer,
             int batchLength,
             CursorFactory cursors,
@@ -267,28 +265,8 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
         int importedOut = importRelationships(buffer, batch, batchLength, weightsOut, outAdjacency, tracker);
         batch = buffer.sortByTarget();
 
-        long[] weightsIn = loadWeights(batch, batchLength, cursors, outAdjacency.getWeightProperty(), outAdjacency.getDefaultWeight(), read);
-        int importedIn = importRelationships(buffer, batch, batchLength, weightsIn, inAdjacency, tracker);
-        return RawValues.combineIntInt(importedOut + importedIn, importedOut + importedIn);
-    }
-
-    private static long importBothWithWeight(
-            RelationshipsBatchBuffer buffer,
-            int batchLength,
-            CursorFactory cursors,
-            Read read,
-            AllocationTracker tracker,
-            AdjacencyBuilder outAdjacency,
-            AdjacencyBuilder inAdjacency) {
-
-        long[] batch = buffer.sortBySource();
-        long[] weightsOut = loadWeights(batch, batchLength, cursors, outAdjacency.getWeightProperty(), outAdjacency.getDefaultWeight(), read);
-        int importedOut = importRelationships(buffer, batch, batchLength, weightsOut, outAdjacency, tracker);
-
-        batch = buffer.sortByTarget();
         long[] weightsIn = loadWeights(batch, batchLength, cursors, inAdjacency.getWeightProperty(), inAdjacency.getDefaultWeight(), read);
         int importedIn = importRelationships(buffer, batch, batchLength, weightsIn, inAdjacency, tracker);
-
         return RawValues.combineIntInt(importedOut + importedIn, importedOut + importedIn);
     }
 
@@ -384,6 +362,10 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
         return batchLength >> 2;
     }
 
+    private static final int BATCH_ENTRY_SIZE = 4;
+    private static final int RELATIONSHIP_REFERENCE_OFFSET = 2;
+    private static final int PROPERTIES_REFERENCE_OFFSET = 3;
+
     private static long[] loadWeights(
             long[] batch,
             int batchLength,
@@ -396,8 +378,8 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
 
         try (PropertyCursor pc = cursors.allocatePropertyCursor()) {
             for (int i = 0; i < batchLength; i += BATCH_ENTRY_SIZE) {
-                long relationshipReference = batch[2 + i];
-                long propertiesReference = batch[3 + i];
+                long relationshipReference = batch[RELATIONSHIP_REFERENCE_OFFSET + i];
+                long propertiesReference = batch[PROPERTIES_REFERENCE_OFFSET + i];
 
                 read.relationshipProperties(relationshipReference, propertiesReference, pc);
                 double weight = ReadHelper.readProperty(pc, weightProperty, defaultWeight);

@@ -47,23 +47,6 @@ public class CompressedLongArrayTest {
     }
 
     @Test
-    public void addGrowing() {
-        CompressedLongArray compressedLongArray = new CompressedLongArray(AllocationTracker.EMPTY);
-
-        int count = 10;
-        long[] inValues = LongStream.range(0, count).toArray();
-        compressedLongArray.add(inValues.clone(), 0, inValues.length);
-
-        Assert.assertTrue(compressedLongArray.storage().length >= 10);
-
-        long[] outValues = new long[count];
-        int uncompressedValueCount = compressedLongArray.uncompress(outValues);
-
-        Assert.assertEquals(count, uncompressedValueCount);
-        Assert.assertArrayEquals(inValues, outValues);
-    }
-
-    @Test
     public void addSameValues() {
         CompressedLongArray compressedLongArray1 = new CompressedLongArray(AllocationTracker.EMPTY);
         CompressedLongArray compressedLongArray2 = new CompressedLongArray(AllocationTracker.EMPTY);
