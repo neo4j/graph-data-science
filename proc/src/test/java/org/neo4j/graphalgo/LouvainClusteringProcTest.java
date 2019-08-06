@@ -89,9 +89,9 @@ public class LouvainClusteringProcTest extends ProcTestBase {
                 ", (g)-[:TYPE]->(h)" +
                 ", (b)-[:TYPE]->(e)";
 
-        db.getDependencyResolver()
-                .resolveDependency(Procedures.class)
-                .registerProcedure(LouvainProc.class);
+        Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class);
+        procedures.registerProcedure(LouvainProc.class);
+        procedures.registerProcedure(LoadGraphProc.class);
         db.execute(cypher);
     }
 
@@ -115,11 +115,11 @@ public class LouvainClusteringProcTest extends ProcTestBase {
 
         runQuery(query, MapUtil.map("graph", graphImpl),
                 row -> {
-                    final long nodes = row.getNumber("nodes").longValue();
-                    final long communityCount = row.getNumber("communityCount").longValue();
-                    final long loadMillis = row.getNumber("loadMillis").longValue();
-                    final long computeMillis = row.getNumber("computeMillis").longValue();
-                    final long writeMillis = row.getNumber("writeMillis").longValue();
+                    long nodes = row.getNumber("nodes").longValue();
+                    long communityCount = row.getNumber("communityCount").longValue();
+                    long loadMillis = row.getNumber("loadMillis").longValue();
+                    long computeMillis = row.getNumber("computeMillis").longValue();
+                    long writeMillis = row.getNumber("writeMillis").longValue();
 
                     assertEquals("invalid node count",9, nodes);
                     assertEquals("wrong community count", 3, communityCount);
@@ -141,11 +141,11 @@ public class LouvainClusteringProcTest extends ProcTestBase {
 
         runQuery(query, MapUtil.map("graph", graphImpl),
                 row -> {
-                    final long nodes = row.getNumber("nodes").longValue();
-                    final long communityCount = row.getNumber("communityCount").longValue();
-                    final long loadMillis = row.getNumber("loadMillis").longValue();
-                    final long computeMillis = row.getNumber("computeMillis").longValue();
-                    final long writeMillis = row.getNumber("writeMillis").longValue();
+                    long nodes = row.getNumber("nodes").longValue();
+                    long communityCount = row.getNumber("communityCount").longValue();
+                    long loadMillis = row.getNumber("loadMillis").longValue();
+                    long computeMillis = row.getNumber("computeMillis").longValue();
+                    long writeMillis = row.getNumber("writeMillis").longValue();
 
                     assertEquals("invalid node count",9, nodes);
                     assertEquals("wrong community count", 3, communityCount);
@@ -167,13 +167,14 @@ public class LouvainClusteringProcTest extends ProcTestBase {
 
         runQuery(query, MapUtil.map("graph", graphImpl),
                 row -> {
-                    final long nodes = row.getNumber("nodes").longValue();
-                    final long communityCount = row.getNumber("communityCount").longValue();
-                    final long loadMillis = row.getNumber("loadMillis").longValue();
-                    final long computeMillis = row.getNumber("computeMillis").longValue();
-                    final long writeMillis = row.getNumber("writeMillis").longValue();
+                    long nodes = row.getNumber("nodes").longValue();
+                    long communityCount = row.getNumber("communityCount").longValue();
+                    long loadMillis = row.getNumber("loadMillis").longValue();
+                    long computeMillis = row.getNumber("computeMillis").longValue();
+                    long writeMillis = row.getNumber("writeMillis").longValue();
 
                     assertEquals("invalid node count",9, nodes);
+                    assertEquals("wrong community count", 3, communityCount);
                     assertTrue("invalid loadTime", loadMillis >= 0);
                     assertTrue("invalid writeTime", writeMillis >= 0);
                     assertTrue("invalid computeTime", computeMillis >= 0);
@@ -211,7 +212,7 @@ public class LouvainClusteringProcTest extends ProcTestBase {
         IntIntScatterMap testMap = new IntIntScatterMap();
         runQuery(query, MapUtil.map("graph", graphImpl),
                 row -> {
-                    final long community = (long) row.get("community");
+                    long community = (long) row.get("community");
                     testMap.addTo((int) community, 1);
                 }
         );
@@ -260,11 +261,11 @@ public class LouvainClusteringProcTest extends ProcTestBase {
                        "        concurrency: 1, graph: $graph" +
                        "    }" +
                        ")";
-        IntIntScatterMap testMap = new IntIntScatterMap();
         runQuery(query, MapUtil.map("graph", graphImpl), (row) -> {});
 
         String readQuery = "MATCH (n) RETURN n.community AS community";
 
+        IntIntScatterMap testMap = new IntIntScatterMap();
         runQuery(readQuery, row -> {
             int community = ((Number) row.get("community")).intValue();
             testMap.addTo(community, 1);
@@ -281,14 +282,14 @@ public class LouvainClusteringProcTest extends ProcTestBase {
                        "        concurrency: 1, includeIntermediateCommunities: true, graph: $graph" +
                        "    }" +
                        ")";
-        IntIntScatterMap testMap = new IntIntScatterMap();
         runQuery(query, MapUtil.map("graph", graphImpl), (row) -> {});
 
         String readQuery = "MATCH (n) RETURN n.communities AS communities";
 
+        IntIntScatterMap testMap = new IntIntScatterMap();
         runQuery(readQuery, row -> {
             Object communities = row.get("communities");
-            final int community = Math.toIntExact(((long[]) communities)[0]);
+            int community = Math.toIntExact(((long[]) communities)[0]);
             testMap.addTo(community, 1);
         });
 
@@ -305,10 +306,11 @@ public class LouvainClusteringProcTest extends ProcTestBase {
                        ")";
         runQuery(query, MapUtil.map("graph", graphImpl), (row) -> {});
 
-        AtomicLong testInteger = new AtomicLong(0);
         String readQuery = "MATCH (n) " +
                            "WHERE not(exists(n.communities)) " +
                            "RETURN count(*) AS count";
+
+        AtomicLong testInteger = new AtomicLong(0);
         runQuery(readQuery, row -> {
             long count = (long) row.get("count");
             testInteger.set(count);
@@ -328,11 +330,12 @@ public class LouvainClusteringProcTest extends ProcTestBase {
 
         runQuery(query, MapUtil.map("graph", graphImpl),
                 row -> {
-                    final long nodes = row.getNumber("nodes").longValue();
-                    final long communityCount = row.getNumber("communityCount").longValue();
-                    final long loadMillis = row.getNumber("loadMillis").longValue();
-                    final long computeMillis = row.getNumber("computeMillis").longValue();
-                    final long writeMillis = row.getNumber("writeMillis").longValue();
+                    long nodes = row.getNumber("nodes").longValue();
+                    long communityCount = row.getNumber("communityCount").longValue();
+                    long loadMillis = row.getNumber("loadMillis").longValue();
+                    long computeMillis = row.getNumber("computeMillis").longValue();
+                    long writeMillis = row.getNumber("writeMillis").longValue();
+
                     assertEquals("invalid node count",9, nodes);
                     assertEquals("wrong community count", 3, communityCount);
                     assertTrue("invalid loadTime", loadMillis >= 0);
@@ -355,11 +358,12 @@ public class LouvainClusteringProcTest extends ProcTestBase {
 
         runQuery(query, MapUtil.map("graph", graphImpl),
                 row -> {
-                    final long nodes = row.getNumber("nodes").longValue();
-                    final long communityCount = row.getNumber("communityCount").longValue();
-                    final long loadMillis = row.getNumber("loadMillis").longValue();
-                    final long computeMillis = row.getNumber("computeMillis").longValue();
-                    final long writeMillis = row.getNumber("writeMillis").longValue();
+                    long nodes = row.getNumber("nodes").longValue();
+                    long communityCount = row.getNumber("communityCount").longValue();
+                    long loadMillis = row.getNumber("loadMillis").longValue();
+                    long computeMillis = row.getNumber("computeMillis").longValue();
+                    long writeMillis = row.getNumber("writeMillis").longValue();
+
                     assertEquals(3, communityCount);
                     assertEquals("invalid node count", 9, nodes);
                     assertTrue("invalid loadTime", loadMillis >= 0);

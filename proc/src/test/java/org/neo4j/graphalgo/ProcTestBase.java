@@ -95,6 +95,7 @@ public class ProcTestBase {
         }
         return false;
     }
+
     protected void assertResult(final String scoreProperty, Map<Long, Double> expected) {
         try (Transaction tx = db.beginTx()) {
             for (Map.Entry<Long, Double> entry : expected.entrySet()) {

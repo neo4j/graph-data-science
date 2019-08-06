@@ -19,27 +19,15 @@
  */
 package org.neo4j.graphalgo.impl.louvain;
 
-import org.junit.Rule;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.rules.ErrorCollector;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
-import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-
-import java.util.stream.Stream;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -55,9 +43,9 @@ import static org.junit.Assert.assertEquals;
  *
  * @author mknblch
  */
-public class LouvainMultiLevelTest {
+public class LouvainMultiLevelTest extends LouvainTestBase {
 
-    private static final String COMPLEX_CYPHER = "CREATE " +
+    private static final String SETUP_QUERY = "CREATE " +
                     "  (a:Node {name: 'a'})" +
                     ", (b:Node {name: 'b'})" +
                     ", (c:Node {name: 'c'})" +
@@ -84,49 +72,14 @@ public class LouvainMultiLevelTest {
                     ", (c)-[:TYPE {weight: 1.0}]->(e)" +
                     ", (f)-[:TYPE {weight: 1.0}]->(i)";
 
-    private static final Louvain.Config DEFAULT_CONFIG = new Louvain.Config(10, 10, false);
-
-    static Stream<Class<? extends GraphFactory>> parameters() {
-        return Stream.of(
-                HeavyGraphFactory.class,
-                HugeGraphFactory.class,
-                GraphViewFactory.class
-        );
-    }
-
-    private GraphDatabaseAPI DB;
-
-    @BeforeEach
-    void setup() {
-        DB = TestDatabaseCreator.createTestDatabase();
-    }
-
-    @AfterEach
-    void teardown() {
-        if (null != DB) {
-            DB.shutdown();
-            DB = null;
-        }
-    }
-
-    @Rule
-    public ErrorCollector collector = new ErrorCollector();
-
-    private Graph setup(Class<? extends GraphFactory> graphImpl, String cypher) {
-        DB.execute(cypher);
-        return new GraphLoader(DB)
-                .withAnyRelationshipType()
-                .withAnyLabel()
-                .withoutNodeProperties()
-                .withOptionalRelationshipWeightsFromProperty("weight", 1.0)
-                .undirected()
-                .load(graphImpl);
+    @Override
+    void setup(Graph graph) {
     }
 
     @ParameterizedTest
     @MethodSource("parameters")
     public void testComplex(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = setup(graphImpl, COMPLEX_CYPHER);
+        Graph graph = setup(graphImpl, SETUP_QUERY);
         final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
@@ -148,7 +101,7 @@ public class LouvainMultiLevelTest {
     @ParameterizedTest
     @MethodSource("parameters")
     public void testComplexRNL(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = setup(graphImpl, COMPLEX_CYPHER);
+        Graph graph = setup(graphImpl, SETUP_QUERY);
         final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)

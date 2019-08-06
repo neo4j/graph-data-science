@@ -19,25 +19,14 @@
  */
 package org.neo4j.graphalgo.impl.louvain;
 
-import com.carrotsearch.hppc.LongHashSet;
-import com.carrotsearch.hppc.LongSet;
-import org.junit.Rule;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.rules.ErrorCollector;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
-import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -46,15 +35,9 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Stream;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * (a)-(b)-(d)
@@ -63,10 +46,9 @@ import static org.junit.Assert.assertTrue;
  *
  * @author mknblch
  */
-@EnableRuleMigrationSupport
-public class LouvainTest {
+public class LouvainTest extends LouvainTestBase {
 
-    private static final String unidirectional = "CREATE" +
+    private static final String SETUP_QUERY = "CREATE" +
             "  (a:Node {name:'a'})" +
             ", (b:Node {name:'b'})" +
             ", (c:Node {name:'c'})" +
@@ -79,45 +61,8 @@ public class LouvainTest {
     public static final Label LABEL = Label.label("Node");
     public static final String ABCD = "abcd";
 
-    private static final Louvain.Config DEFAULT_CONFIG = new Louvain.Config(10, 10, false);
-    private static GraphDatabaseAPI DB;
-    private final Map<String, Integer> nameMap = new HashMap<>();
-
-    @Rule
-    public ErrorCollector collector = new ErrorCollector();
-
-    static Stream<Class<? extends GraphFactory>> parameters() {
-        return Stream.of(
-                HeavyGraphFactory.class,
-                HugeGraphFactory.class,
-                GraphViewFactory.class
-        );
-    }
-
-    @BeforeEach
-    void setup() {
-        DB = TestDatabaseCreator.createTestDatabase();
-    }
-
-    @AfterEach
-    void teardown() {
-        if (null != DB) {
-            DB.shutdown();
-            DB = null;
-        }
-    }
-
-    private Graph setup(Class<? extends GraphFactory> graphImpl, String cypher) {
-        DB.execute(cypher);
-
-        Graph graph = new GraphLoader(DB)
-                .withAnyRelationshipType()
-                .withAnyLabel()
-                .withoutNodeProperties()
-                .withOptionalRelationshipWeightsFromProperty("weight", 1.0)
-                .undirected()
-                .load(graphImpl);
-
+    @Override
+    void setup(Graph graph) {
         try (Transaction transaction = DB.beginTx()) {
             for (int i = 0; i < ABCD.length(); i++) {
                 final String value = String.valueOf(ABCD.charAt(i));
@@ -126,14 +71,12 @@ public class LouvainTest {
             }
             transaction.success();
         }
-
-        return graph;
     }
 
     @ParameterizedTest
     @MethodSource("parameters")
     public void testRunner(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = setup(graphImpl, unidirectional);
+        Graph graph = setup(graphImpl, SETUP_QUERY);
         final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
@@ -150,7 +93,7 @@ public class LouvainTest {
     @ParameterizedTest
     @MethodSource("parameters")
     public void testRandomNeighborLouvain(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = setup(graphImpl, unidirectional);
+        Graph graph = setup(graphImpl, SETUP_QUERY);
         final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
@@ -218,31 +161,4 @@ public class LouvainTest {
         assertDisjoint(new String[]{"a", "d"}, louvain.getCommunityIds());
     }
 
-    private void assertUnion(String[] nodeNames, HugeLongArray values) {
-        final long[] communityIds = values.toArray();
-        long current = -1L;
-        for (String name : nodeNames) {
-            if (!nameMap.containsKey(name)) {
-                throw new IllegalArgumentException("unknown node name: " + name);
-            }
-            final int id = nameMap.get(name);
-            if (current == -1L) {
-                current = communityIds[id];
-            } else {
-                assertEquals(
-                        "Node " + name + " belongs to wrong community " + communityIds[id],
-                        current,
-                        communityIds[id]);
-            }
-        }
-    }
-
-    private void assertDisjoint(String[] nodeNames, HugeLongArray values) {
-        final long[] communityIds = values.toArray();
-        final LongSet set = new LongHashSet();
-        for (String name : nodeNames) {
-            final long communityId = communityIds[nameMap.get(name)];
-            assertTrue("Node " + name + " belongs to wrong community " + communityId, set.add(communityId));
-        }
-    }
 }

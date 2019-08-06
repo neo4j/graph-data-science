@@ -20,20 +20,15 @@
 package org.neo4j.graphalgo;
 
 import com.carrotsearch.hppc.IntIntScatterMap;
-import org.junit.Rule;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.rules.ExpectedException;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 
 import static org.junit.Assert.assertEquals;
 
-/**
- *
- */
 public class LouvainClusteringPreDefinedCommunitiesProcTest extends ProcTestBase {
 
     @BeforeAll
@@ -56,9 +51,6 @@ public class LouvainClusteringPreDefinedCommunitiesProcTest extends ProcTestBase
                 .registerProcedure(LouvainProc.class);
         db.execute(cypher);
     }
-
-    @Rule
-    public ExpectedException exceptions = ExpectedException.none();
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
