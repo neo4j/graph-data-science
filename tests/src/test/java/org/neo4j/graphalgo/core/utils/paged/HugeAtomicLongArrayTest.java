@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.utils.paged;
 
 import com.carrotsearch.randomizedtesting.RandomizedTest;
+import com.carrotsearch.randomizedtesting.annotations.ThreadLeakScope;
 import junit.framework.AssertionFailedError;
 import org.junit.Assert;
 import org.junit.Test;
@@ -53,6 +54,7 @@ import static org.junit.Assert.fail;
  * @see <a href="https://hg.openjdk.java.net/jdk/jdk13/file/9e0c80381e32/jdk/test/java/util/concurrent/tck/JSR166TestCase.java">OpenJDK sources for JSR166TestCase.java</a>
  * @see <a href="https://hg.openjdk.java.net/jdk/jdk13/file/9e0c80381e32/jdk/test/java/util/concurrent/atomic/LongAdderDemo.java">OpenJDK sources for LongAdderDemo.java</a>
  */
+@ThreadLeakScope(ThreadLeakScope.Scope.NONE)
 public final class HugeAtomicLongArrayTest extends RandomizedTest {
 
     private static final int SIZE = 20;

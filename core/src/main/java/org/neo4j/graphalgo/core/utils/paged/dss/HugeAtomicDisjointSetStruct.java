@@ -69,7 +69,7 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
                 .builder(HugeAtomicDisjointSetStruct.class)
                 .perNode("data", HugeAtomicLongArray::memoryEstimation);
         if (incremental) {
-            builder.add("internalToProvidedIds", HugeLongLongMap.memoryEstimation());
+            builder.perNode("seeding information", HugeAtomicLongArray::memoryEstimation);
         }
         return builder.build();
     }
