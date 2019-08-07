@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -69,44 +70,28 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
                 .builder(HugeAtomicDisjointSetStruct.class)
                 .perNode("data", HugeAtomicLongArray::memoryEstimation);
         if (incremental) {
-            builder.add("forward community mapping (max size)", HugeLongLongMap.memoryEstimation());
-            builder.add("reverse community mapping (max size)", HugeLongLongMap.memoryEstimation());
+            builder.add("internalToProvidedIds", HugeLongLongMap.memoryEstimation());
         }
         return builder.build();
     }
 
     private final HugeAtomicLongArray parent;
-    private final HugeLongLongMap internalToProvidedIds;
+    private final HugeLongArray communities;
 
     public HugeAtomicDisjointSetStruct(long capacity, AllocationTracker tracker) {
         this.parent = HugeAtomicLongArray.newArray(capacity, i -> i, tracker);
-        this.internalToProvidedIds = null;
+        this.communities = null;
     }
 
     public HugeAtomicDisjointSetStruct(long capacity, HugeWeightMapping communityMapping, AllocationTracker tracker) {
         long maxCommunity = communityMapping.getMaxValue();
         AtomicLong maxCommunityId = new AtomicLong(maxCommunity);
-        final HugeLongLongMap internalMapping = new HugeLongLongMap(communityMapping.size(), tracker);
-        this.internalToProvidedIds = new HugeLongLongMap(communityMapping.size(), tracker);
-        this.parent = HugeAtomicLongArray.newArray(capacity, nodeId -> {
-            long parentValue = nodeId;
+        this.parent = HugeAtomicLongArray.newArray(capacity, i -> i, tracker);
+        this.communities = HugeLongArray.newArray(capacity, tracker);
+        communities.setAll(nodeId -> {
             double communityIdValue = communityMapping.nodeWeight(nodeId, Double.NaN);
-
-            if (!Double.isNaN(communityIdValue)) {
-                long communityId = (long) communityIdValue;
-
-                long internalCommunityId = internalMapping.getOrDefault(communityId, -1);
-                if (internalCommunityId != -1) {
-                    parentValue = internalCommunityId;
-                } else {
-                    internalToProvidedIds.addTo(nodeId, communityId);
-                    internalMapping.addTo(communityId, nodeId);
-                }
-            } else {
-                internalToProvidedIds.addTo(nodeId, maxCommunityId.incrementAndGet());
-            }
-            return parentValue;
-        }, tracker);
+            return Double.isNaN(communityIdValue) ? maxCommunityId.incrementAndGet() : (long) communityIdValue;
+        });
     }
 
     private long parent(long id) {
@@ -135,11 +120,7 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
     @Override
     public long setIdOf(final long nodeId) {
         long setId = find(nodeId);
-        if (internalToProvidedIds != null) {
-            setId = internalToProvidedIds.getOrDefault(setId, -1L);
-            assert setId != -1L;
-        }
-        return setId;
+        return this.communities.get(setId);
     }
 
     @Override
