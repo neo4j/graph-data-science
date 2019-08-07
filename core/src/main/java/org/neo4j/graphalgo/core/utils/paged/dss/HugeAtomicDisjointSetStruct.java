@@ -24,7 +24,6 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -76,22 +75,22 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
     }
 
     private final HugeAtomicLongArray parent;
-    private final HugeLongArray communities;
+    private final HugeAtomicLongArray communities;
+    private final AtomicLong maxCommunityId;
 
     public HugeAtomicDisjointSetStruct(long capacity, AllocationTracker tracker) {
         this.parent = HugeAtomicLongArray.newArray(capacity, i -> i, tracker);
         this.communities = null;
+        this.maxCommunityId = null;
     }
 
     public HugeAtomicDisjointSetStruct(long capacity, HugeWeightMapping communityMapping, AllocationTracker tracker) {
-        long maxCommunity = communityMapping.getMaxValue();
-        AtomicLong maxCommunityId = new AtomicLong(maxCommunity);
         this.parent = HugeAtomicLongArray.newArray(capacity, i -> i, tracker);
-        this.communities = HugeLongArray.newArray(capacity, tracker);
-        communities.setAll(nodeId -> {
+        this.communities = HugeAtomicLongArray.newArray(capacity, nodeId -> {
             double communityIdValue = communityMapping.nodeWeight(nodeId, Double.NaN);
-            return Double.isNaN(communityIdValue) ? maxCommunityId.incrementAndGet() : (long) communityIdValue;
-        });
+            return Double.isNaN(communityIdValue) ? -1L : (long) communityIdValue;
+        }, tracker);
+        maxCommunityId = new AtomicLong(communityMapping.getMaxValue());
     }
 
     private long parent(long id) {
@@ -120,7 +119,20 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
     @Override
     public long setIdOf(final long nodeId) {
         long setId = find(nodeId);
-        return communities == null ? setId : communities.get(setId);
+        if (communities == null) {
+            return setId;
+        }
+
+        do {
+            long providedSetId = communities.get(setId);
+            if (providedSetId >= 0L) {
+                return providedSetId;
+            }
+            long newSetId = maxCommunityId.incrementAndGet();
+            if (communities.compareAndSet(setId, providedSetId, newSetId)) {
+                return newSetId;
+            }
+        } while (true);
     }
 
     @Override

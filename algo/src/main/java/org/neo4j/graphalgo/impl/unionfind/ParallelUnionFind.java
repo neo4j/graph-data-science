@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
+import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -93,7 +94,7 @@ public class ParallelUnionFind extends UnionFind<ParallelUnionFind> {
     public DisjointSetStruct compute(double threshold) {
         long nodeCount = graph.nodeCount();
         HugeWeightMapping communityMap = algoConfig.communityMap;
-        DisjointSetStruct dss = communityMap == null
+        DisjointSetStruct dss = communityMap == null || (communityMap instanceof HugeNullWeightMap)
                 ? new HugeAtomicDisjointSetStruct(nodeCount, tracker)
                 : new HugeAtomicDisjointSetStruct(nodeCount, communityMap, tracker);
 
