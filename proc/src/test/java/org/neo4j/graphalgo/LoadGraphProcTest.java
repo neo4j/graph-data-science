@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -135,33 +134,25 @@ public class LoadGraphProcTest extends ProcTestBase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"heavy", "huge", "kernel", "cypher"})
+    @ValueSource(strings = {"heavy"})
     public void shouldComputeMemoryEstimationForHeavy(String graph) {
-        Assumptions.assumeTrue(graph.equals("heavy"));
-
-        String queryTemplate = "CALL algo.graph.load.memrec(" +
-                               "    %s, %s, {" +
-                               "        graph: $graph" +
-                               "    }" +
-                               ") YIELD requiredMemory";
-        String query = String.format(queryTemplate, "null", "null");
-
+        String query = "CALL algo.graph.load.memrec(" +
+                       "    null, null, {" +
+                       "        graph: $graph" +
+                       "    }" +
+                       ") YIELD requiredMemory";
         runQuery(query, singletonMap("graph", graph),
                 row -> assertEquals(MemoryUsage.humanReadable(992), row.getString("requiredMemory")));
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"heavy", "huge", "kernel", "cypher"})
+    @ValueSource(strings = {"huge"})
     public void shouldComputeMemoryEstimationForHuge(String graph) {
-        Assumptions.assumeTrue(graph.equals("huge"));
-
-        String queryTemplate = "CALL algo.graph.load.memrec(" +
-                               "    %s, %s, {" +
-                               "        graph: $graph" +
-                               "    }" +
-                               ") YIELD bytesMin, bytesMax";
-        String query = String.format(queryTemplate, "null", "null");
-
+        String query = "CALL algo.graph.load.memrec(" +
+                       "    null, null, {" +
+                       "        graph: $graph" +
+                       "    }" +
+                       ") YIELD bytesMin, bytesMax";
         runQuery(query, singletonMap("graph", graph),
                 row -> {
                     assertEquals(303528, row.getNumber("bytesMin").longValue());

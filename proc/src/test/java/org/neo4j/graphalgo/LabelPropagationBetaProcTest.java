@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -248,9 +249,8 @@ public class LabelPropagationBetaProcTest extends ProcTestBase {
                 row -> assertEquals(row.getNumber("seedProperty").intValue(), row.getNumber("community").intValue()));
     }
 
-    @ParameterizedTest
-    @MethodSource("parameters")
-    public void testGeneratedAndProvidedLabelsDontConflict(boolean parallel, String graphImpl) throws KernelException {
+    @Test
+    public void testGeneratedAndProvidedLabelsDontConflict() throws KernelException {
         GraphDatabaseAPI db = TestDatabaseCreator.createTestDatabase();
         db.getDependencyResolver()
                 .resolveDependency(Procedures.class)
