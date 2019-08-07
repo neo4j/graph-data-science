@@ -120,7 +120,7 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
     @Override
     public long setIdOf(final long nodeId) {
         long setId = find(nodeId);
-        return this.communities.get(setId);
+        return communities == null ? setId : communities.get(setId);
     }
 
     @Override
