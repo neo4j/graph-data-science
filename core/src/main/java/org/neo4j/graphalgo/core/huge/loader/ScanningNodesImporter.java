@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
-import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.KernelPropertyMapping;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.ImportProgress;
@@ -39,7 +39,6 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
 
     private final ImportProgress progress;
     private final AllocationTracker tracker;
-    private final PropertyMapping[] propertyMappings;
 
     private Map<String, HugeNodePropertiesBuilder> builders;
     private HugeLongArrayBuilder idMapBuilder;
@@ -50,12 +49,10 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
             ImportProgress progress,
             AllocationTracker tracker,
             ExecutorService threadPool,
-            int concurrency,
-            PropertyMapping[] propertyMappings) {
+            int concurrency) {
         super(NodeStoreScanner.NODE_ACCESS, "Node", api, dimensions, threadPool, concurrency);
         this.progress = progress;
         this.tracker = tracker;
-        this.propertyMappings = propertyMappings;
     }
 
     @Override
@@ -82,7 +79,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
                 concurrency,
                 tracker);
         Map<String, HugeWeightMapping> nodeProperties = new HashMap<>();
-        for (PropertyMapping propertyMapping : propertyMappings) {
+        for (KernelPropertyMapping propertyMapping : dimensions.nodeProperties()) {
             HugeNodePropertiesBuilder builder = builders.get(propertyMapping.propertyName);
             HugeWeightMapping props = builder != null ? builder.build() : new HugeNullWeightMap(propertyMapping.defaultValue);
             nodeProperties.put(propertyMapping.propertyName, props);
@@ -91,13 +88,9 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     }
 
     private Map<String, HugeNodePropertiesBuilder> propertyBuilders(long nodeCount) {
-        if (propertyMappings == null || propertyMappings.length == 0) {
-            return Collections.emptyMap();
-        }
         Map<String, HugeNodePropertiesBuilder> builders = new HashMap<>();
-        for (int i = 0; i < propertyMappings.length; i++) {
-            PropertyMapping propertyMapping = propertyMappings[i];
-            int propertyId = dimensions.nodePropertyKeyId(i);
+        for (KernelPropertyMapping propertyMapping : dimensions.nodeProperties()) {
+            int propertyId = propertyMapping.propertyKeyId;
             if (propertyId != StatementConstants.NO_SUCH_PROPERTY_KEY) {
                 HugeNodePropertiesBuilder builder = HugeNodePropertiesBuilder.of(
                         nodeCount,

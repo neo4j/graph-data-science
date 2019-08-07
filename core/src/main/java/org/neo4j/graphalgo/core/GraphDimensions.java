@@ -19,11 +19,12 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.KernelPropertyMapping;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.internal.kernel.api.Read;
-import org.neo4j.internal.kernel.api.TokenRead;
 import org.neo4j.kernel.api.StatementConstants;
+
+import java.util.Arrays;
 
 import static org.neo4j.internal.kernel.api.Read.ANY_LABEL;
 
@@ -35,10 +36,7 @@ public final class GraphDimensions {
     private final int labelId;
     private final int[] relationId;
     private final int relWeightId;
-
-    private final int nodeWeightId;
-    private final int nodePropId;
-    private final int[] nodePropIds;
+    private final KernelPropertyMapping[] nodeProperties;
 
     public GraphDimensions(
             final long nodeCount,
@@ -47,16 +45,14 @@ public final class GraphDimensions {
             final int labelId,
             final int[] relationId,
             final int relWeightId,
-            final int nodeWeightId, final int nodePropId, final int[] nodePropIds) {
+            final KernelPropertyMapping[] nodeProperties) {
         this.nodeCount = nodeCount;
         this.highestNeoId = highestNeoId;
         this.maxRelCount = maxRelCount;
         this.labelId = labelId;
         this.relationId = relationId;
         this.relWeightId = relWeightId;
-        this.nodeWeightId = nodeWeightId;
-        this.nodePropId = nodePropId;
-        this.nodePropIds = nodePropIds;
+        this.nodeProperties = nodeProperties;
     }
 
     public long nodeCount() {
@@ -99,38 +95,30 @@ public final class GraphDimensions {
         return relWeightId;
     }
 
-    public int nodeWeightId() {
-        return nodeWeightId;
+    public Iterable<KernelPropertyMapping> nodeProperties() {
+        return Arrays.asList(nodeProperties);
     }
 
-    public int nodePropId() {
-        return nodePropId;
-    }
-
-    public int nodePropertyKeyId(String type, GraphSetup setup) {
-        PropertyMapping[] mappings = setup.nodePropertyMappings;
-
-        for (int i = 0; i < mappings.length; i++) {
-            if (mappings[i].propertyName.equals(type)) {
-                return nodePropIds[i];
+    public int nodePropertyKeyId(String type) {
+        for (KernelPropertyMapping nodeProperty : nodeProperties) {
+            if (nodeProperty.propertyName.equals(type)) {
+                return nodeProperty.propertyKeyId;
             }
         }
-        return -1;
+        return StatementConstants.NO_SUCH_PROPERTY_KEY;
     }
 
     public int nodePropertyKeyId(int mappingIndex) {
-        if (mappingIndex < 0 || mappingIndex >= nodePropIds.length) {
-            return TokenRead.NO_TOKEN;
+        if (mappingIndex < 0 || mappingIndex >= nodeProperties.length) {
+            return StatementConstants.NO_SUCH_PROPERTY_KEY;
         }
-        return nodePropIds[mappingIndex];
+        return nodeProperties[mappingIndex].propertyKeyId;
     }
 
-    public double nodePropertyDefaultValue(String type, GraphSetup setup) {
-        PropertyMapping[] mappings = setup.nodePropertyMappings;
-
-        for (PropertyMapping mapping : mappings) {
-            if (mapping.propertyName.equals(type)) {
-                return mapping.defaultValue;
+    public double nodePropertyDefaultValue(String type) {
+        for (KernelPropertyMapping nodeProperty : nodeProperties) {
+            if (nodeProperty.propertyName.equals(type)) {
+                return nodeProperty.defaultValue;
             }
         }
         return 0.0;
@@ -150,14 +138,14 @@ public final class GraphDimensions {
         }
     }
 
-    public void checkValidNodeProperty(GraphSetup setup) {
-        for (int i = 0; i < nodePropIds.length; i++) {
-            int id = nodePropIds[i];
-            if (!(setup.nodePropertyMappings[i].propertyKey == null || setup.nodePropertyMappings[i].propertyKey.isEmpty())
-                && id == StatementConstants.NO_SUCH_PROPERTY_KEY) {
+    public void checkValidNodeProperty() {
+        for (KernelPropertyMapping nodeProperty : nodeProperties) {
+            int id = nodeProperty.propertyKeyId;
+            String propertyKey = nodeProperty.propertyKeyNameInGraph;
+            if (!(propertyKey == null || propertyKey.isEmpty()) && id == StatementConstants.NO_SUCH_PROPERTY_KEY) {
                 throw new IllegalArgumentException(String.format(
                         "Node property not found: '%s'",
-                        setup.nodePropertyMappings[i].propertyKey));
+                        propertyKey));
             }
         }
     }
@@ -177,9 +165,7 @@ public final class GraphDimensions {
         private int labelId;
         private int[] relationId;
         private int relWeightId;
-        private int nodeWeightId;
-        private int nodePropId;
-        private int[] nodePropIds;
+        private KernelPropertyMapping[] nodeProperties;
 
         public Builder setNodeCount(final long nodeCount) {
             this.nodeCount = nodeCount;
@@ -211,18 +197,8 @@ public final class GraphDimensions {
             return this;
         }
 
-        public Builder setNodeWeightId(final int nodeWeightId) {
-            this.nodeWeightId = nodeWeightId;
-            return this;
-        }
-
-        public Builder setNodePropId(final int nodePropId) {
-            this.nodePropId = nodePropId;
-            return this;
-        }
-
-        public Builder setNodePropIds(final int[] nodePropIds) {
-            this.nodePropIds = nodePropIds;
+        public Builder setNodeProperties(final KernelPropertyMapping[] nodeProperties) {
+            this.nodeProperties = nodeProperties;
             return this;
         }
 
@@ -234,9 +210,7 @@ public final class GraphDimensions {
                     labelId,
                     relationId,
                     relWeightId,
-                    nodeWeightId,
-                    nodePropId,
-                    nodePropIds);
+                    nodeProperties);
         }
     }
 }

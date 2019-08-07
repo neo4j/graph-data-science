@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core;
 
+import org.neo4j.graphalgo.KernelPropertyMapping;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.utils.StatementFunction;
 import org.neo4j.internal.kernel.api.Read;
@@ -56,19 +58,14 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
                 setup.shouldLoadRelationshipWeight(),
                 setup.relationWeightPropertyName);
 
-        int[] nodePropIds;
-        if (setup.nodePropertyMappings.length > 0) {
-            nodePropIds = new int[setup.nodePropertyMappings.length];
-            for (int i = 0; i < setup.nodePropertyMappings.length; i++) {
-                String propertyKey = setup.nodePropertyMappings[i].propertyKey;
-                nodePropIds[i] = propertyKey(tokenRead, propertyKey != null, propertyKey);
-            }
-        } else {
-            nodePropIds = new int[0];
+        PropertyMapping[] nodePropertyMappings = setup.nodePropertyMappings;
+        KernelPropertyMapping[] nodeProperties = new KernelPropertyMapping[nodePropertyMappings.length];
+        for (int i = 0; i < nodePropertyMappings.length; i++) {
+            PropertyMapping propertyMapping = nodePropertyMappings[i];
+            String propertyKey = nodePropertyMappings[i].propertyKey;
+            int key = propertyKey(tokenRead, propertyKey != null, propertyKey);
+            nodeProperties[i] = propertyMapping.toKernelMapping(key);
         }
-
-        final int nodeWeightId = propertyKey(tokenRead, setup.shouldLoadNodeWeight(), setup.nodeWeightPropertyName);
-        final int nodePropId = propertyKey(tokenRead, setup.shouldLoadNodeProperty(), setup.nodePropertyName);
 
         final long nodeCount = dataRead.countsForNode(labelId);
         final long allNodesCount = InternalReadOps.getHighestPossibleNodeCount(dataRead, api);
@@ -91,9 +88,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
                 .setLabelId(labelId)
                 .setRelationId(relationId)
                 .setRelWeightId(relWeightId)
-                .setNodeWeightId(nodeWeightId)
-                .setNodePropId(nodePropId)
-                .setNodePropIds(nodePropIds)
+                .setNodeProperties(nodeProperties)
                 .build();
     }
 

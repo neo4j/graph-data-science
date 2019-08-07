@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
-import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.KernelPropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
@@ -59,13 +59,12 @@ public final class HugeGraphFactory extends GraphFactory {
                 .add("nodeIdMap", IdMap.memoryEstimation());
 
         // Node properties
-        for (PropertyMapping propertyMapping : setup.nodePropertyMappings) {
-            String propertyKey = propertyMapping.propertyName;
-            int propertyId = dimensions.nodePropertyKeyId(propertyKey, setup);
+        for (KernelPropertyMapping propertyMapping : dimensions.nodeProperties()) {
+            int propertyId = propertyMapping.propertyKeyId;
             if (propertyId == StatementConstants.NO_SUCH_PROPERTY_KEY) {
-                builder.add(propertyKey, HugeNullWeightMap.MEMORY_USAGE);
+                builder.add(propertyMapping.propertyName, HugeNullWeightMap.MEMORY_USAGE);
             } else {
-                builder.add(propertyKey, HugeNodePropertyMap.memoryEstimation());
+                builder.add(propertyMapping.propertyName, HugeNodePropertyMap.memoryEstimation());
             }
         }
 
@@ -137,8 +136,8 @@ public final class HugeGraphFactory extends GraphFactory {
                 progress,
                 tracker,
                 threadPool,
-                concurrency,
-                setup.nodePropertyMappings)
+                concurrency
+        )
                 .call(setup.log);
     }
 

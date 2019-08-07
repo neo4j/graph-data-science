@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.heavyweight;
 
-import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.KernelPropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
@@ -73,9 +73,8 @@ public class HeavyGraphFactory extends GraphFactory {
                 ))
                 .startField("nodePropertiesMapping", Map.class);
 
-        for (PropertyMapping propertyMapping : setup.nodePropertyMappings) {
-            int propertyId = dimensions.nodePropertyKeyId(propertyMapping.propertyName, setup);
-            if (propertyId == StatementConstants.NO_SUCH_PROPERTY_KEY) {
+        for (KernelPropertyMapping nodeProperty : dimensions.nodeProperties()) {
+            if (nodeProperty.propertyKeyId == StatementConstants.NO_SUCH_PROPERTY_KEY) {
                 builder.add(NullWeightMap.MEMORY_USAGE);
             } else {
                 builder.add(WeightMap.memoryEstimation());
@@ -89,10 +88,14 @@ public class HeavyGraphFactory extends GraphFactory {
         final IntIdMap idMap = loadIdMap();
 
         Map<String, Supplier<WeightMapping>> nodePropertySuppliers = new HashMap<>();
-        for (PropertyMapping propertyMapping : setup.nodePropertyMappings) {
-            nodePropertySuppliers.put(propertyMapping.propertyName, () -> newWeightMap(
-                    dimensions.nodePropertyKeyId(propertyMapping.propertyName, setup),
-                    dimensions.nodePropertyDefaultValue(propertyMapping.propertyName, setup)));
+        for (KernelPropertyMapping propertyMapping : dimensions.nodeProperties()) {
+            nodePropertySuppliers.put(
+                    propertyMapping.propertyName,
+                    () -> newWeightMap(
+                            propertyMapping.propertyKeyId,
+                            propertyMapping.defaultValue
+                    )
+            );
         }
 
         int concurrency = setup.concurrency();
