@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.unionfind;
 
+import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -26,11 +27,19 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
+import org.neo4j.values.storable.Value;
+import org.neo4j.values.storable.Values;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 abstract class UnionFindResultProducer {
+
+    private final PropertyTranslator<UnionFindResultProducer> propertyTranslator;
+
+    UnionFindResultProducer(final PropertyTranslator<UnionFindResultProducer> propertyTranslator) {
+        this.propertyTranslator = propertyTranslator;
+    }
 
     /**
      * Computes the set id of a given ID.
@@ -39,6 +48,10 @@ abstract class UnionFindResultProducer {
      * @return corresponding set id
      */
     abstract long setIdOf(long p);
+
+    PropertyTranslator<UnionFindResultProducer> getPropertyTranslator() {
+        return propertyTranslator;
+    }
 
     /**
      * Computes the result stream based on a given ID mapping by using
@@ -58,7 +71,8 @@ abstract class UnionFindResultProducer {
 
         private final DisjointSetStruct dss;
 
-        NonConsecutive(final DisjointSetStruct dss) {
+        NonConsecutive(final PropertyTranslator<UnionFindResultProducer> translator, final DisjointSetStruct dss) {
+            super(translator);
             this.dss = dss;
         }
 
@@ -76,11 +90,18 @@ abstract class UnionFindResultProducer {
 
         private final HugeLongArray communities;
 
-        Consecutive(DisjointSetStruct dss, AllocationTracker tracker) {
+        Consecutive(
+                PropertyTranslator<UnionFindResultProducer> propertyTranslator,
+                DisjointSetStruct dss,
+                AllocationTracker tracker) {
+            super(propertyTranslator);
+
             long nextConsecutiveId = -1L;
 
             // TODO is there a better way to set the initial size, e.g. dss.setCount
-            HugeLongLongMap setIdToConsecutiveId = new HugeLongLongMap(BitUtil.ceilDiv(dss.size(), MAPPING_SIZE_QUOTIENT), tracker);
+            HugeLongLongMap setIdToConsecutiveId = new HugeLongLongMap(BitUtil.ceilDiv(
+                    dss.size(),
+                    MAPPING_SIZE_QUOTIENT), tracker);
             this.communities = HugeLongArray.newArray(dss.size(), tracker);
 
             for (int nodeId = 0; nodeId < dss.size(); nodeId++) {
@@ -103,13 +124,31 @@ abstract class UnionFindResultProducer {
     /**
      * Responsible for writing back the set ids to Neo4j.
      */
-    static final class Translator implements PropertyTranslator.OfLong<UnionFindResultProducer> {
+    static final class NonSeedingTranslator implements PropertyTranslator.OfLong<UnionFindResultProducer> {
 
-        public static final PropertyTranslator<UnionFindResultProducer> INSTANCE = new Translator();
+        public static final PropertyTranslator<UnionFindResultProducer> INSTANCE = new NonSeedingTranslator();
+
+        private NonSeedingTranslator() {}
 
         @Override
         public long toLong(final UnionFindResultProducer data, final long nodeId) {
             return data.setIdOf(nodeId);
+        }
+    }
+
+    static final class SeedingTranslator implements PropertyTranslator<UnionFindResultProducer> {
+
+        private final HugeWeightMapping seedProperties;
+
+        SeedingTranslator(HugeWeightMapping seedProperties) {
+            this.seedProperties = seedProperties;
+        }
+
+        @Override
+        public Value toProperty(final int propertyId, final UnionFindResultProducer data, final long nodeId) {
+            double seedValue = seedProperties.nodeWeight(nodeId, Double.NaN);
+            long setId = data.setIdOf(nodeId);
+            return Double.isNaN(seedValue) || ((long) seedValue != setId) ? Values.longValue(setId) : null;
         }
     }
 }

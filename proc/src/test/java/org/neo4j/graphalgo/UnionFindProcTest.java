@@ -167,7 +167,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testUnionFindWithSeedAndRankStrategy(String graphImpl) {
+    public void testUnionFindWithSeed(String graphImpl) {
         String query = "CALL algo.unionFind(" +
                        "    '', '', {" +
                        "        graph: $graph, seedProperty: 'seedId', unionStrategy: 'rank'" +

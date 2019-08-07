@@ -404,12 +404,16 @@ public class HugeGraph implements Graph {
             outOffsets = null;
             outWeightOffsets = null;
         }
-        for (final HugeWeightMapping nodeMapping : nodeProperties.values()) {
-            tracker.remove(nodeMapping.release());
-        }
         emptyAdjacencyCursor = null;
         inCache = null;
         outCache = null;
+    }
+
+    @Override
+    public void releaseProperties() {
+        for (final HugeWeightMapping nodeMapping : nodeProperties.values()) {
+            tracker.remove(nodeMapping.release());
+        }
     }
 
     @Override

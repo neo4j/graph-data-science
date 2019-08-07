@@ -23,8 +23,10 @@ import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.BaseAlgoProc;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
+import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -212,7 +214,10 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
 
         DisjointSetStruct dss = compute(setup);
 
-        UnionFindResultProducer producer = getResultProducer(dss, setup.procedureConfig, setup.tracker);
+        UnionFindResultProducer producer = getResultProducer(
+                dss,
+                setup.graph.nodeProperties(SEED_TYPE),
+                setup.procedureConfig, setup.tracker);
 
         return producer.resultStream(setup.graph);
     }
@@ -247,6 +252,8 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
                     setup.procedureConfig,
                     writeProperty,
                     setup.tracker);
+
+            setup.graph.releaseProperties();
         }
 
         return Stream.of(setup.builder.build(setup.tracker, setup.graph.nodeCount(), communities::setIdOf));
@@ -293,7 +300,10 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
             AllocationTracker tracker) {
         log.debug("Writing results");
 
-        UnionFindResultProducer producer = getResultProducer(dss, procedureConfiguration, tracker);
+        UnionFindResultProducer producer = getResultProducer(
+                dss,
+                graph.nodeProperties(SEED_TYPE),
+                procedureConfiguration, tracker);
 
         Exporter exporter = Exporter.of(api, graph)
                 .withLog(log)
@@ -305,34 +315,39 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
         exporter.write(
                 writeProperty,
                 producer,
-                UnionFindResultProducer.Translator.INSTANCE);
+                producer.getPropertyTranslator());
     }
 
-    private DisjointSetStruct compute(final ProcedureSetup procedureSetup) {
+    private DisjointSetStruct compute(final ProcedureSetup setup) {
 
-        T algo = newAlgorithm(procedureSetup.graph, procedureSetup.procedureConfig, procedureSetup.tracker);
+        T algo = newAlgorithm(setup.graph, setup.procedureConfig, setup.tracker);
         DisjointSetStruct algoResult = runWithExceptionLogging(
                 "UnionFind failed",
-                () -> procedureSetup.builder.timeEval((Supplier<DisjointSetStruct>) algo::compute));
+                () -> setup.builder.timeEval((Supplier<DisjointSetStruct>) algo::compute));
 
-        log.info("UnionFind: overall memory usage: %s", procedureSetup.tracker.getUsageString());
+        log.info("UnionFind: overall memory usage: %s", setup.tracker.getUsageString());
 
         algo.release();
-        procedureSetup.graph.release();
+        setup.graph.release();
 
         return algoResult;
     }
 
     private UnionFindResultProducer getResultProducer(
             final DisjointSetStruct dss,
+            final HugeWeightMapping seedingProperties,
             final ProcedureConfiguration procedureConfiguration,
             final AllocationTracker tracker) {
         boolean withConsecutiveIds = procedureConfiguration.get(CONFIG_CONSECUTIVE_IDS_PROPERTY, false);
         boolean withSeeding = procedureConfiguration.get(CONFIG_SEED_PROPERTY, null) != null;
 
-        return withConsecutiveIds && !withSeeding ?
-                new UnionFindResultProducer.Consecutive(dss, tracker) :
-                new UnionFindResultProducer.NonConsecutive(dss);
+        if (withConsecutiveIds && !withSeeding) {
+            return new UnionFindResultProducer.Consecutive(UnionFindResultProducer.NonSeedingTranslator.INSTANCE, dss, tracker);
+        } else if (withSeeding && seedingProperties != null && !(seedingProperties instanceof HugeNullWeightMap)) {
+            return new UnionFindResultProducer.NonConsecutive(new UnionFindResultProducer.SeedingTranslator(seedingProperties), dss);
+        } else {
+            return new UnionFindResultProducer.NonConsecutive(UnionFindResultProducer.NonSeedingTranslator.INSTANCE, dss);
+        }
     }
 
     public static class ProcedureSetup {
