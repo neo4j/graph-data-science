@@ -195,7 +195,7 @@ public class LabelPropagationDeprecatedProcTest extends ProcTestBase {
         String checkA = "MATCH (n) WHERE n.id = 0 RETURN n.community AS community";
         String checkB = "MATCH (n) WHERE n.id = 1 RETURN n.community AS community";
 
-        runQuery(query, parParams(parallel, graphImpl), row -> {});
+        runQuery(query, parParams(parallel, graphImpl));
         runQuery(checkA, row -> assertEquals(2, row.getNumber("community").intValue()));
         runQuery(checkB, row -> assertEquals(42, row.getNumber("community").intValue()));
     }
@@ -210,7 +210,7 @@ public class LabelPropagationDeprecatedProcTest extends ProcTestBase {
                        ")";
         String check = "MATCH (n:A) WHERE n.id <> 0 RETURN n.community AS community";
 
-        runQuery(query, parParams(parallel, graphImpl), row -> {});
+        runQuery(query, parParams(parallel, graphImpl));
         runQuery(check, row -> assertEquals(42, row.getNumber("community").intValue()));
     }
 
@@ -238,7 +238,7 @@ public class LabelPropagationDeprecatedProcTest extends ProcTestBase {
                               "      iterations: 20, writeProperty: 'lpa', weightProperty: $weightProperty" +
                               "  }" +
                               ")";
-        runQuery(writingQuery, parParams(parallel, graphImpl), row -> {});
+        runQuery(writingQuery, parParams(parallel, graphImpl));
 
         String streamingQuery = "CALL algo.labelPropagation.stream(" +
                                 "   null, null, {" +

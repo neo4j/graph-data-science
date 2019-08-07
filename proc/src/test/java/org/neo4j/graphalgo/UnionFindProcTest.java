@@ -85,7 +85,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testUnionFind(String graphImpl) throws Exception {
+    public void testUnionFind(String graphImpl) {
         String query = "CALL algo.unionFind(" +
                        "    '', '', {" +
                        "        graph: $graph" +
@@ -101,7 +101,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testUnionFindWithLabel(String graphImpl) throws Exception {
+    public void testUnionFindWithLabel(String graphImpl) {
         String query = "CALL algo.unionFind(" +
                        "    'Label', '', {" +
                        "        graph: $graph" +
@@ -117,7 +117,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testUnionFindWithMinStrategy(String graphImpl) throws Exception {
+    public void testUnionFindWithMinStrategy(String graphImpl) {
         String query = "CALL algo.unionFind(" +
                        "    '', '', {" +
                        "        graph: $graph, unionStrategy: 'min'" +
@@ -134,7 +134,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testUnionFindWithRankStrategy(String graphImpl) throws Exception {
+    public void testUnionFindWithRankStrategy(String graphImpl) {
         String query = "CALL algo.unionFind(" +
                        "    '', '', {" +
                        "        graph: $graph, unionStrategy: 'rank'" +
@@ -151,7 +151,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testUnionFindWithSeedAndMinStrategy(String graphImpl) throws Exception {
+    public void testUnionFindWithSeedAndMinStrategy(String graphImpl) {
         String query = "CALL algo.unionFind(" +
                        "    '', '', {" +
                        "        graph: $graph, seedProperty: 'seedId', unionStrategy: 'min'" +
@@ -167,7 +167,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testUnionFindWithSeedAndRankStrategy(String graphImpl) throws Exception {
+    public void testUnionFindWithSeedAndRankStrategy(String graphImpl) {
         String query = "CALL algo.unionFind(" +
                        "    '', '', {" +
                        "        graph: $graph, seedProperty: 'seedId', unionStrategy: 'rank'" +
@@ -183,7 +183,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testUnionFindWithSeed(String graphImpl) throws Exception {
+    public void testUnionFindWithSeed(String graphImpl) {
         Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
 
         String query = "CALL algo.unionFind(" +
@@ -217,7 +217,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testUnionFindWithSeedAndConsecutive(String graphImpl) throws Exception {
+    public void testUnionFindWithSeedAndConsecutive(String graphImpl) {
         Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
 
         String query = "CALL algo.unionFind(" +
@@ -252,7 +252,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testUnionFindWithConsecutiveIds(String graphImpl) throws Exception {
+    public void testUnionFindWithConsecutiveIds(String graphImpl) {
         String query = "CALL algo.unionFind(" +
                        "    '', '', {" +
                        "        graph: $graph, consecutiveIds: true" +
@@ -273,7 +273,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testUnionFindWriteBack(String graphImpl) throws Exception {
+    public void testUnionFindWriteBack(String graphImpl) {
         String query = "CALL algo.unionFind(" +
                        "    '', 'TYPE', {" +
                        "        write: true, graph: $graph" +
@@ -294,7 +294,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testUnionFindWriteBackExplicitWriteProperty(String graphImpl) throws Exception {
+    public void testUnionFindWriteBackExplicitWriteProperty(String graphImpl) {
         String query = "CALL algo.unionFind(" +
                        "    '', 'TYPE', {" +
                        "        write: true, graph: $graph, writeProperty: 'unionFind'" +
@@ -315,7 +315,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testUnionFindStream(String graphImpl) throws Exception {
+    public void testUnionFindStream(String graphImpl) {
         String query = "CALL algo.unionFind.stream(" +
                        "    '', 'TYPE', {" +
                        "        graph: $graph" +
@@ -330,7 +330,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testThresholdUnionFindStream(String graphImpl) throws Exception {
+    public void testThresholdUnionFindStream(String graphImpl) {
         String query = "CALL algo.unionFind.stream(" +
                        "    '', 'TYPE', {" +
                        "        weightProperty: 'cost', defaultValue: 10.0, threshold: 5.0, concurrency: 1, graph: $graph" +
@@ -346,7 +346,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testThresholdUnionFindLowThreshold(String graphImpl) throws Exception {
+    public void testThresholdUnionFindLowThreshold(String graphImpl) {
         String query = "CALL algo.unionFind.stream(" +
                        "    '', 'TYPE', {" +
                        "        weightProperty: 'cost', defaultValue: 10.0, concurrency: 1, threshold: 3.14, graph: $graph" +

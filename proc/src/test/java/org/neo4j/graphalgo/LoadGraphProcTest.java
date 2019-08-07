@@ -47,6 +47,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class LoadGraphProcTest extends ProcTestBase {
 
+    private static final String ALL_NODES_QUERY = "'MATCH (n) RETURN id(n) AS id'";
+    private static final String ALL_RELATIONSIHPS_QUERY = "'MATCH (s)-->(t) RETURN id(s) AS source, id(t) AS target'";
     private static final String DB_CYPHER = "CREATE " +
             "  (a:A {id: 0, partition: 42})" +
             ", (b:B {id: 1, partition: 42})" +
@@ -87,7 +89,7 @@ public class LoadGraphProcTest extends ProcTestBase {
                                "    }" +
                                ")";
         String query = graphImpl.equals("cypher")
-                ? String.format(queryTemplate, "'MATCH (n) RETURN id(n) AS id'", "'MATCH (s)-->(t) RETURN id(s) AS source, id(t) AS target'")
+                ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSIHPS_QUERY)
                 : String.format(queryTemplate, "null", "null");
 
         runQuery(query, singletonMap("graph", graphImpl),
@@ -107,7 +109,7 @@ public class LoadGraphProcTest extends ProcTestBase {
 
         String queryTemplate = "CALL algo.graph.load('foo', %s, %s, {graph: $graph, batchSize: 2})";
         String query = graphImpl.equals("cypher")
-                ? String.format(queryTemplate, "'MATCH (n) RETURN id(n) AS id'", "'MATCH (s)-->(t) RETURN id(s) AS source, id(t) AS target'")
+                ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSIHPS_QUERY)
                 : String.format(queryTemplate, "null", "null");
 
         List<Future<?>> futures = new ArrayList<>();
@@ -176,13 +178,12 @@ public class LoadGraphProcTest extends ProcTestBase {
                                "        graph: $graph" +
                                "    }" +
                                ")";
+        System.out.println(String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSIHPS_QUERY));
         String loadQuery = graph.equals("cypher")
-                ? String.format(queryTemplate,
-                    "'MATCH (n) RETURN id(n) AS id'",
-                    "'MATCH (s)-->(t) RETURN id(s) AS source, id(t) AS target'")
+                ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSIHPS_QUERY)
                 : String.format(queryTemplate, "null", "null");
 
-        runQuery(loadQuery, singletonMap("graph", graph), row -> {});
+        runQuery(loadQuery, singletonMap("graph", graph));
 
         String algoQuery = "CALL algo.pageRank(" +
                            "    null, null, {" +
@@ -202,12 +203,10 @@ public class LoadGraphProcTest extends ProcTestBase {
                                "    }" +
                                ")";
         String loadQuery = graph.equals("cypher")
-                ? String.format(queryTemplate,
-                    "'MATCH (n) RETURN id(n) AS id'",
-                    "'MATCH (s)-->(t) RETURN id(s) AS source, id(t) AS target'")
+                ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSIHPS_QUERY)
                 : String.format(queryTemplate, "null", "null");
 
-        runQuery(loadQuery, singletonMap("graph", graph), row -> {});
+        runQuery(loadQuery, singletonMap("graph", graph));
 
         String algoQuery = "CALL algo.pageRank(" +
                            "    null, null, {" +
@@ -229,11 +228,9 @@ public class LoadGraphProcTest extends ProcTestBase {
                                "    }" +
                                ")";
         String loadQuery = graph.equals("cypher")
-                ? String.format(queryTemplate,
-                    "'MATCH (n) RETURN id(n) AS id'",
-                    "'MATCH (s)-->(t) RETURN id(s) AS source, id(t) AS target'")
+                ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSIHPS_QUERY)
                 : String.format(queryTemplate, "null", "null");
-        runQuery(loadQuery, singletonMap("graph", graph), row -> {});
+        runQuery(loadQuery, singletonMap("graph", graph));
 
         String algoQuery = "CALL algo.labelPropagation(" +
                            "    null, null,{" +
@@ -258,9 +255,7 @@ public class LoadGraphProcTest extends ProcTestBase {
                                ") YIELD alreadyLoaded AS loaded " +
                                "RETURN loaded";
         String query = graph.equals("cypher")
-                ? String.format(queryTemplate,
-                    "'MATCH (n) RETURN id(n) AS id'",
-                    "'MATCH (s)-->(t) RETURN id(s) AS source, id(t) AS target'")
+                ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSIHPS_QUERY)
                 : String.format(queryTemplate, "null", "null");
 
         Map<String, Object> params = singletonMap("graph", graph);
@@ -277,11 +272,9 @@ public class LoadGraphProcTest extends ProcTestBase {
                                "    }" +
                                ")";
         String query = graph.equals("cypher")
-                ? String.format(queryTemplate,
-                    "'MATCH (n) RETURN id(n) AS id'",
-                    "'MATCH (s)-->(t) RETURN id(s) AS source, id(t) AS target'")
+                ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSIHPS_QUERY)
                 : String.format(queryTemplate, "null", "null");
-        runQuery(query, singletonMap("graph", graph), row -> {});
+        runQuery(query, singletonMap("graph", graph));
 
         runQuery("CALL algo.graph.info($name, true)", singletonMap("name", "foo"), row -> {
             assertEquals(12, row.getNumber("nodes").intValue());
@@ -312,11 +305,9 @@ public class LoadGraphProcTest extends ProcTestBase {
                                "    }" +
                                ")";
         String query = graph.equals("cypher")
-                ? String.format(queryTemplate,
-                    "'MATCH (n) RETURN id(n) AS id'",
-                    "'MATCH (s)-->(t) RETURN id(s) AS source, id(t) AS target'")
+                ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSIHPS_QUERY)
                 : String.format(queryTemplate, "null", "null");
-        runQuery(query, singletonMap("graph", graph), row -> {});
+        runQuery(query, singletonMap("graph", graph));
 
         runQuery("CALL algo.graph.info($name, true)", singletonMap("name", "foo"), row -> {
             assertEquals(5, row.getNumber("max").intValue());
@@ -377,10 +368,10 @@ public class LoadGraphProcTest extends ProcTestBase {
                                ")";
         String loadQuery = graph.equals("cypher")
                 ? String.format(queryTemplate,
-                    "'MATCH (n) RETURN id(n) AS id'",
+                    ALL_NODES_QUERY,
                     "'MATCH (s)<--(t) RETURN id(s) AS source, id(t) AS target'")
                 : String.format(queryTemplate, "null", "null");
-        runQuery(loadQuery, singletonMap("graph", graph), row -> {});
+        runQuery(loadQuery, singletonMap("graph", graph));
 
         String infoQuery = graph.equals("cypher")
                 ? "CALL algo.graph.info($name, {direction:'OUT'})"

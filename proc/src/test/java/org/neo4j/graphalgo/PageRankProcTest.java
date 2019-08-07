@@ -155,7 +155,7 @@ public class PageRankProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testWeightedPageRankWithCachedWeightsStream(String graphImpl) throws Exception {
+    public void testWeightedPageRankWithCachedWeightsStream(String graphImpl) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.pageRank.stream(" +
                        "    'Label1', 'TYPE1', {" +
@@ -222,7 +222,7 @@ public class PageRankProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testPageRankWriteBackUnderDifferentProperty(String graphImpl) throws Exception {
+    public void testPageRankWriteBackUnderDifferentProperty(String graphImpl) {
         String query = "CALL algo.pageRank(" +
                        "    'Label1', 'TYPE1', {" +
                        "        writeProperty: 'foobar', graph: $graph" +
@@ -240,7 +240,7 @@ public class PageRankProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testPageRankParallelWriteBack(String graphImpl) throws Exception {
+    public void testPageRankParallelWriteBack(String graphImpl) {
         String query = "CALL algo.pageRank(" +
                        "    'Label1', 'TYPE1', {" +
                        "        batchSize: 3, write: true, graph: $graph" +
@@ -254,7 +254,7 @@ public class PageRankProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testPageRankParallelExecution(String graphImpl) throws Exception {
+    public void testPageRankParallelExecution(String graphImpl) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.pageRank.stream(" +
                        "    'Label1', 'TYPE1', {" +
@@ -272,7 +272,7 @@ public class PageRankProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testPageRankWithToleranceParam(String graphImpl) throws Exception {
+    public void testPageRankWithToleranceParam(String graphImpl) {
         String query;
         query = "CALL algo.pageRank(" +
                 "    'Label1', 'TYPE1', {" +

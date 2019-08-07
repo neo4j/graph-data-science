@@ -254,7 +254,7 @@ public class LouvainClusteringProcTest extends ProcTestBase {
                        "        concurrency: 1, graph: $graph" +
                        "    }" +
                        ")";
-        runQuery(query, MapUtil.map("graph", graphImpl), (row) -> {});
+        runQuery(query, MapUtil.map("graph", graphImpl));
 
         String readQuery = "MATCH (n) RETURN n.community AS community";
 
@@ -275,7 +275,7 @@ public class LouvainClusteringProcTest extends ProcTestBase {
                        "        concurrency: 1, includeIntermediateCommunities: true, graph: $graph" +
                        "    }" +
                        ")";
-        runQuery(query, MapUtil.map("graph", graphImpl), (row) -> {});
+        runQuery(query, MapUtil.map("graph", graphImpl));
 
         String readQuery = "MATCH (n) RETURN n.communities AS communities";
 
@@ -297,7 +297,7 @@ public class LouvainClusteringProcTest extends ProcTestBase {
                        "        concurrency: 1, graph: $graph" +
                        "    }" +
                        ")";
-        runQuery(query, MapUtil.map("graph", graphImpl), (row) -> {});
+        runQuery(query, MapUtil.map("graph", graphImpl));
 
         String readQuery = "MATCH (n) " +
                            "WHERE not(exists(n.communities)) " +
@@ -409,7 +409,7 @@ public class LouvainClusteringProcTest extends ProcTestBase {
                            "        graph: $graph" +
                            "    }" +
                            ")";
-        runQuery(loadQuery, MapUtil.map("graph", graphImpl), row -> {});
+        runQuery(loadQuery, MapUtil.map("graph", graphImpl));
 
         List<Future<?>> futures = new ArrayList<>();
         // block all available threads

@@ -43,9 +43,15 @@ public class ProcTestBase {
         return Stream.of("Heavy", "Huge", "Kernel");
     }
 
-    protected void runQuery(
-            String query,
-            Consumer<Result.ResultRow> check) {
+    protected void runQuery(String query) {
+        runQuery(query, row -> {});
+    }
+
+    protected void runQuery(String query, Map<String, Object> params) {
+        runQuery(query, params, row -> {});
+    }
+
+    protected void runQuery(String query, Consumer<Result.ResultRow> check) {
         runQuery(query, Collections.emptyMap(), check);
     }
 
