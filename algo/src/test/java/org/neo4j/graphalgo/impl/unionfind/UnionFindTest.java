@@ -102,10 +102,7 @@ public class UnionFindTest {
                 .withRelationshipType(RELATIONSHIP_TYPE)
                 .load(graphImpl);
 
-        config = new UnionFind.Config(
-                new HugeNullWeightMap(-1),
-                Double.NaN
-        );
+        config = new UnionFind.Config(null, Double.NaN);
     }
 
     @Test

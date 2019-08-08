@@ -94,7 +94,7 @@ public class ParallelUnionFind extends UnionFind<ParallelUnionFind> {
     public DisjointSetStruct compute(double threshold) {
         long nodeCount = graph.nodeCount();
         HugeWeightMapping communityMap = algoConfig.communityMap;
-        DisjointSetStruct dss = communityMap == null || (communityMap instanceof HugeNullWeightMap)
+        DisjointSetStruct dss = communityMap == null
                 ? new HugeAtomicDisjointSetStruct(nodeCount, tracker)
                 : new HugeAtomicDisjointSetStruct(nodeCount, communityMap, tracker);
 
