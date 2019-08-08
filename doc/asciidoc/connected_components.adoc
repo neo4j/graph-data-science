@@ -181,7 +181,6 @@ We will write back the results to the node, and use centralities with Cypher loa
 
 It is possible to define preliminary communities of nodes using the `seedProperty` parameter.
 This is helpful if we want to retain communities from a previous run.
-It can also potentially speed up the computation.
 The property value needs to be a number.
 
 The algorithm first checks if there is a seed community assigned to the node.
@@ -190,6 +189,11 @@ Otherwise, a new unique community is assigned to the node.
 
 Once every node has a community, the algorithm runs and merges communities of nodes that are connected.
 When merging communities, the resulting community is always the one with the lower community id.
+
+[NOTE]
+If the `seedProperty` option is the same as the `writeProperty` option,
+the algorithm only writes properties for nodes where the community has changed.
+If they differ, the algorithm writes properties for all nodes.
 
 
 [[algorithms-connected-components-hgp]]
