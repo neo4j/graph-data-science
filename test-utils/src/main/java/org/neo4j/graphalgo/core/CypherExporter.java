@@ -33,6 +33,7 @@ import org.neo4j.helpers.collection.Pair;
 import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -76,13 +77,17 @@ public final class CypherExporter {
                     node(n, graph, nodeLike, nodePropsLike, sb)
                             .append(System.lineSeparator());
                 });
-                sb.append("CREATE").append(System.lineSeparator());
+                StringJoiner relStatements = new StringJoiner("," + System.lineSeparator(), "CREATE" + System.lineSeparator(), "");
+                relStatements.setEmptyValue("");
+                StringBuilder relBuilder = new StringBuilder();
                 graphLike.forEachNode(graph, n -> {
                     graphLike.forEachOutgoing(graph, n, r -> {
-                        rel(r, graph, relLike, relPropsLike, sb)
-                                .append(',').append(System.lineSeparator());
+                        relBuilder.setLength(0);
+                        rel(r, graph, relLike, relPropsLike, relBuilder);
+                        relStatements.add(relBuilder);
                     });
                 });
+                sb.append(relStatements.toString()).append(";");
             });
 
             sb.append(System.lineSeparator());
@@ -106,7 +111,7 @@ public final class CypherExporter {
         return s.append(props(item, context, props, s)).append(')');
     }
 
-    private static <T, C> StringBuilder rel(
+    private static <T, C> void rel(
             T item,
             C context,
             RelationshipLike<? super T> rel,
@@ -114,7 +119,7 @@ public final class CypherExporter {
             StringBuilder s) {
         s.append("  (n").append(rel.startId(item)).append(")-[");
         rel.type(item).ifPresent(type -> s.append(":").append(type));
-        return s.append(props(item, context, props, s))
+        s.append(props(item, context, props, s))
                 .append("]->")
                 .append("(n")
                 .append(rel.endId(item))
