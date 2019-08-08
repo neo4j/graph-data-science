@@ -71,7 +71,7 @@ public class BetweennessCentralityTest2 extends HeavyHugeTester {
     private TestConsumer testConsumer;
 
     @BeforeClass
-    public static void setupGraph() {
+    public static void setupGraphDb() {
 
         final String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
@@ -101,7 +101,7 @@ public class BetweennessCentralityTest2 extends HeavyHugeTester {
     }
 
     @AfterClass
-    public static void tearDown() {
+    public static void shutdownGraphDb() {
         if (db != null) db.shutdown();
         graph = null;
     }

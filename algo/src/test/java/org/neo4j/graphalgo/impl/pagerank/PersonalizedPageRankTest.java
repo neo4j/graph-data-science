@@ -90,7 +90,7 @@ public final class PersonalizedPageRankTest {
     private static GraphDatabaseAPI db;
 
     @BeforeClass
-    public static void setupGraph() {
+    public static void setupGraphDb() {
         db = TestDatabaseCreator.createTestDatabase();
         try (Transaction tx = db.beginTx()) {
             db.execute(DB_CYPHER).close();
@@ -99,7 +99,7 @@ public final class PersonalizedPageRankTest {
     }
 
     @AfterClass
-    public static void shutdownGraph() throws Exception {
+    public static void shutdownGraphDb() throws Exception {
         if (db!=null) db.shutdown();
     }
 

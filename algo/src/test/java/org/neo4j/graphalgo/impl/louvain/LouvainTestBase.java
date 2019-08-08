@@ -57,21 +57,21 @@ public abstract class LouvainTestBase {
     protected Map<String, Integer> nameMap = new HashMap<>();
 
     @BeforeEach
-    void setup() {
+    void setupGraphDb() {
         DB = TestDatabaseCreator.createTestDatabase();
     }
 
     @AfterEach
-    void teardown() {
+    void shutdownGraphDb() {
         if (null != DB) {
             DB.shutdown();
             DB = null;
         }
     }
 
-    abstract void setup(Graph graph);
+    abstract void setupGraphDb(Graph graph);
 
-    Graph setup(Class<? extends GraphFactory> graphImpl, String cypher) {
+    Graph loadGraph(Class<? extends GraphFactory> graphImpl, String cypher) {
         DB.execute(cypher);
         Graph graph = new GraphLoader(DB)
                 .withAnyRelationshipType()
@@ -80,7 +80,7 @@ public abstract class LouvainTestBase {
                 .withOptionalRelationshipWeightsFromProperty("weight", 1.0)
                 .undirected()
                 .load(graphImpl);
-        setup(graph);
+        setupGraphDb(graph);
         return graph;
     }
 

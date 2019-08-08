@@ -62,12 +62,12 @@ public class NonStabilizingLabelPropagationTest {
     static GraphDatabaseAPI DB;
 
     @BeforeAll
-    public static void setupGraph() {
+    public static void setupGraphDB() {
         DB = TestDatabaseCreator.createTestDatabase();
         DB.execute(GRAPH).close();
     }
 
-    public Graph setup(Class<? extends GraphFactory> graphImpl) {
+    public Graph loadGraph(Class<? extends GraphFactory> graphImpl) {
         GraphLoader graphLoader = new GraphLoader(DB, Pools.DEFAULT)
                 .undirected()
                 .withDefaultConcurrency();
@@ -93,7 +93,7 @@ public class NonStabilizingLabelPropagationTest {
     @ParameterizedTest
     @ValueSource(classes = {HeavyCypherGraphFactory.class, GraphViewFactory.class, HeavyGraphFactory.class, HugeGraphFactory.class})
     public void testLabelPropagationDoesStabilize(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = setup(graphImpl);
+        Graph graph = loadGraph(graphImpl);
         LabelPropagation labelPropagation = new LabelPropagation(graph, ParallelUtil.DEFAULT_BATCH_SIZE, Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT, AllocationTracker.EMPTY);
         LabelPropagation compute = labelPropagation.compute(Direction.OUTGOING, 10);
         compute.labels();

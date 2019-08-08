@@ -71,13 +71,13 @@ public class LouvainMultiLevelTest extends LouvainTestBase {
                     ", (f)-[:TYPE {weight: 1.0}]->(i)";
 
     @Override
-    void setup(Graph graph) {
+    void setupGraphDb(Graph graph) {
     }
 
     @ParameterizedTest
     @MethodSource("parameters")
     public void testComplex(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = setup(graphImpl, SETUP_QUERY);
+        Graph graph = loadGraph(graphImpl, SETUP_QUERY);
         final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
@@ -99,7 +99,7 @@ public class LouvainMultiLevelTest extends LouvainTestBase {
     @ParameterizedTest
     @MethodSource("parameters")
     public void testComplexRNL(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = setup(graphImpl, SETUP_QUERY);
+        Graph graph = loadGraph(graphImpl, SETUP_QUERY);
         final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)

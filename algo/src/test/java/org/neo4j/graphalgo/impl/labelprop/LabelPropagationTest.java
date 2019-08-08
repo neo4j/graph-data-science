@@ -83,19 +83,19 @@ public final class LabelPropagationTest {
     }
 
     @BeforeEach
-    void setup() {
+    void setupGraphDb() {
         DB = TestDatabaseCreator.createTestDatabase();
     }
 
     @AfterEach
-    void teardown() {
+    void shutdownGraphDb() {
         if (null != DB) {
             DB.shutdown();
             DB = null;
         }
     }
 
-    public Graph setup(Class<? extends GraphFactory> graphImpl) {
+    public Graph loadGraph(Class<? extends GraphFactory> graphImpl) {
         DB.execute(GRAPH).close();
         GraphLoader graphLoader = new GraphLoader(DB, Pools.DEFAULT)
                 .withDirection(Direction.OUTGOING)
@@ -119,7 +119,7 @@ public final class LabelPropagationTest {
     @ParameterizedTest
     @MethodSource("parameters")
     public void testUsesNeo4jNodeIdWhenSeedPropertyIsMissing(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = setup(graphImpl);
+        Graph graph = loadGraph(graphImpl);
         LabelPropagation lp = new LabelPropagation(
                 graph,
                 10000,
@@ -135,28 +135,28 @@ public final class LabelPropagationTest {
     @ParameterizedTest
     @MethodSource("parameters")
     public void testSingleThreadClustering(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = setup(graphImpl);
+        Graph graph = loadGraph(graphImpl);
         testClustering(graph, 100);
     }
 
     @ParameterizedTest
     @MethodSource("parameters")
     public void testMultiThreadClustering(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = setup(graphImpl);
+        Graph graph = loadGraph(graphImpl);
         testClustering(graph, 2);
     }
 
     @ParameterizedTest
     @MethodSource("parameters")
     public void testHugeSingleThreadClustering(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = setup(graphImpl);
+        Graph graph = loadGraph(graphImpl);
         testClustering(graph, 100);
     }
 
     @ParameterizedTest
     @MethodSource("parameters")
     public void testHugeMultiThreadClustering(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = setup(graphImpl);
+        Graph graph = loadGraph(graphImpl);
         testClustering(graph, 2);
     }
 

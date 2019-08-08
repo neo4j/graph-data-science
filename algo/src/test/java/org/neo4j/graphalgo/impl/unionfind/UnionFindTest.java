@@ -46,7 +46,7 @@ public class UnionFindTest extends UnionFindTestBase {
     private static final int SET_SIZE = 10;
 
     @BeforeAll
-    static void setupGraph() {
+    static void setupGraphDb() {
         DB = TestDatabaseCreator.createTestDatabase();
         int[] setSizes = new int[SETS_COUNT];
         Arrays.fill(setSizes, SET_SIZE);

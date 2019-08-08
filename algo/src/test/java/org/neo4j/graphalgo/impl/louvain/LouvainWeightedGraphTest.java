@@ -72,7 +72,7 @@ public class LouvainWeightedGraphTest extends LouvainTestBase {
     public static final String ABCDEFGHZ = "abcdefghz";
 
     @Override
-    void setup(Graph graph) {
+    void setupGraphDb(Graph graph) {
         try (Transaction transaction = DB.beginTx()) {
             for (int i = 0; i < ABCDEFGHZ.length(); i++) {
                 final String value = String.valueOf(ABCDEFGHZ.charAt(i));
@@ -92,7 +92,7 @@ public class LouvainWeightedGraphTest extends LouvainTestBase {
     @ParameterizedTest
     @MethodSource("parameters")
     public void testWeightedLouvain(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = setup(graphImpl, SETUP_QUERY);
+        Graph graph = loadGraph(graphImpl, SETUP_QUERY);
         final Louvain louvain =
                 new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                         .withProgressLogger(TestProgressLogger.INSTANCE)
@@ -116,7 +116,7 @@ public class LouvainWeightedGraphTest extends LouvainTestBase {
     @ParameterizedTest
     @MethodSource("parameters")
     public void testWeightedRandomNeighborLouvain(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = setup(graphImpl, SETUP_QUERY);
+        Graph graph = loadGraph(graphImpl, SETUP_QUERY);
         final Louvain louvain =
                 new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                         .withProgressLogger(TestProgressLogger.INSTANCE)

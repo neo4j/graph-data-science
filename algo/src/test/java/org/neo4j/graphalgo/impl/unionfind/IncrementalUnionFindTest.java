@@ -47,7 +47,7 @@ public class IncrementalUnionFindTest extends UnionFindTestBase {
      * Create multiple communities and connect them pairwise.
      */
     @BeforeAll
-    static void setupGraph() {
+    static void setupGraphDb() {
         DB = TestDatabaseCreator.createTestDatabase();
         try (Transaction tx = DB.beginTx()) {
             for (int i = 0; i < COMMUNITY_COUNT; i = i + 2) {
