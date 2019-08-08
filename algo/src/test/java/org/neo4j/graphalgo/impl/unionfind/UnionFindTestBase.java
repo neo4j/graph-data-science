@@ -56,7 +56,7 @@ public abstract class UnionFindTestBase {
 
     abstract int communitySize();
 
-    protected DisjointSetStruct run(UnionFindType uf, Graph graph, UnionFind.Config config) {
+    DisjointSetStruct run(UnionFindType uf, Graph graph, UnionFind.Config config) {
         return UnionFindHelper.run(
                 uf,
                 graph,
@@ -70,7 +70,7 @@ public abstract class UnionFindTestBase {
     /**
      * Compute number of sets present.
      */
-    protected static long getSetCount(DisjointSetStruct struct) {
+    static long getSetCount(DisjointSetStruct struct) {
         long capacity = struct.size();
         BitSet sets = new BitSet(capacity);
         for (long i = 0L; i < capacity; i++) {

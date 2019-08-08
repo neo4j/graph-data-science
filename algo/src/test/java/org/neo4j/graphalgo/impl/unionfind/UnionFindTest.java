@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
@@ -54,8 +53,52 @@ public class UnionFindTest extends UnionFindTestBase {
         createTestGraph(setSizes);
     }
 
+    @Override
+    int communitySize() {
+        return SET_SIZE;
+    }
+
+    @ParameterizedTest(name = "{0} -- {2}")
+    @MethodSource("parameters")
+    void test(String graphName, Class<? extends GraphFactory> graphImpl, UnionFindType uf) {
+        Graph graph = new GraphLoader(DB)
+                .withExecutorService(Pools.DEFAULT)
+                .withAnyLabel()
+                .withRelationshipType(RELATIONSHIP_TYPE)
+                .load(graphImpl);
+
+        UnionFind.Config config = new UnionFind.Config(null, Double.NaN);
+
+        DisjointSetStruct result = run(uf, graph, config);
+
+        Assert.assertEquals(SETS_COUNT, getSetCount(result));
+        long[] setRegions = new long[SETS_COUNT];
+        Arrays.fill(setRegions, -1);
+
+        graph.forEachNode((nodeId) -> {
+            long expectedSetRegion = nodeId / SET_SIZE;
+            final long setId = result.setIdOf(nodeId);
+            int setRegion = (int) (setId / SET_SIZE);
+            assertEquals(
+                    expectedSetRegion,
+                    setRegion,
+                    "Node " + nodeId + " in unexpected set: " + setId);
+
+            long regionSetId = setRegions[setRegion];
+            if (regionSetId == -1) {
+                setRegions[setRegion] = setId;
+            } else {
+                assertEquals(
+                        regionSetId,
+                        setId,
+                        "Inconsistent set for node " + nodeId + ", is " + setId + " but should be " + regionSetId);
+            }
+            return true;
+        });
+    }
+
     @Test
-    public void memRecParallel() {
+    void memRecParallel() {
         GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
 
         assertEquals(
@@ -119,7 +162,7 @@ public class UnionFindTest extends UnionFindTestBase {
     }
 
     @Test
-    public void memRecForkJoin() {
+    void memRecForkJoin() {
         GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
 
         assertEquals(
@@ -156,7 +199,7 @@ public class UnionFindTest extends UnionFindTestBase {
     }
 
     @Test
-    public void memRecFJMerge() {
+    void memRecFJMerge() {
         GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
 
         assertEquals(
@@ -192,50 +235,6 @@ public class UnionFindTest extends UnionFindTestBase {
                 UnionFindType.FJ_MERGE.memoryEstimation().estimate(dimensions100B, 64).memoryUsage().min);
     }
 
-    @ParameterizedTest(name = "{0} -- {2}")
-    @MethodSource("parameters")
-    void test(String graphName, Class<? extends GraphFactory> graphImpl, UnionFindType uf) {
-        Graph graph = new GraphLoader(DB)
-                .withExecutorService(Pools.DEFAULT)
-                .withAnyLabel()
-                .withRelationshipType(RELATIONSHIP_TYPE)
-                .load(graphImpl);
-
-        UnionFind.Config config = new UnionFind.Config(null, Double.NaN);
-
-        DisjointSetStruct result = run(uf, graph, config);
-
-        Assert.assertEquals(SETS_COUNT, getSetCount(result));
-        long[] setRegions = new long[SETS_COUNT];
-        Arrays.fill(setRegions, -1);
-
-        graph.forEachNode((nodeId) -> {
-            long expectedSetRegion = nodeId / SET_SIZE;
-            final long setId = result.setIdOf(nodeId);
-            int setRegion = (int) (setId / SET_SIZE);
-            assertEquals(
-                    expectedSetRegion,
-                    setRegion,
-                    "Node " + nodeId + " in unexpected set: " + setId);
-
-            long regionSetId = setRegions[setRegion];
-            if (regionSetId == -1) {
-                setRegions[setRegion] = setId;
-            } else {
-                assertEquals(
-                        regionSetId,
-                        setId,
-                        "Inconsistent set for node " + nodeId + ", is " + setId + " but should be " + regionSetId);
-            }
-            return true;
-        });
-    }
-
-    @Override
-    int communitySize() {
-        return SET_SIZE;
-    }
-
     private static void createTestGraph(int... setSizes) {
         try (Transaction tx = DB.beginTx()) {
             for (int setSize : setSizes) {
@@ -253,5 +252,4 @@ public class UnionFindTest extends UnionFindTestBase {
             temp = t;
         }
     }
-
 }
