@@ -185,7 +185,9 @@ public class HeavyGraph implements Graph {
 
     @Override
     public void releaseProperties() {
-        nodePropertiesMapping.clear();
+        if (canRelease) {
+            nodePropertiesMapping.clear();
+        }
     }
 
     @Override

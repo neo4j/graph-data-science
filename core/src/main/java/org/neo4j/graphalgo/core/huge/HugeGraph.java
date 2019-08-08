@@ -411,8 +411,10 @@ public class HugeGraph implements Graph {
 
     @Override
     public void releaseProperties() {
-        for (final HugeWeightMapping nodeMapping : nodeProperties.values()) {
-            tracker.remove(nodeMapping.release());
+        if (canRelease) {
+            for (final HugeWeightMapping nodeMapping : nodeProperties.values()) {
+                tracker.remove(nodeMapping.release());
+            }
         }
     }
 

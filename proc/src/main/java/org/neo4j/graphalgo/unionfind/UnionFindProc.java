@@ -46,6 +46,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -55,8 +56,8 @@ import static org.neo4j.graphalgo.impl.unionfind.UnionFindFactory.SEED_TYPE;
 
 public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
 
-    private static final String CONFIG_CLUSTER_PROPERTY = "writeProperty";
-    private static final String CONFIG_OLD_CLUSTER_PROPERTY = "partitionProperty";
+    private static final String CONFIG_WRITE_PROPERTY = "writeProperty";
+    private static final String CONFIG_OLD_WRITE_PROPERTY = "partitionProperty";
     private static final String DEFAULT_CLUSTER_PROPERTY = "partition";
     private static final String CONFIG_CONSECUTIVE_IDS_PROPERTY = "consecutiveIds";
 
@@ -239,8 +240,8 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
 
         if (setup.procedureConfig.isWriteFlag()) {
             String writeProperty = setup.procedureConfig.get(
-                    CONFIG_CLUSTER_PROPERTY,
-                    CONFIG_OLD_CLUSTER_PROPERTY,
+                    CONFIG_WRITE_PROPERTY,
+                    CONFIG_OLD_WRITE_PROPERTY,
                     DEFAULT_CLUSTER_PROPERTY);
             setup.builder.withWrite(true);
             setup.builder.withPartitionProperty(writeProperty).withWriteProperty(writeProperty);
@@ -335,19 +336,36 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
 
     private UnionFindResultProducer getResultProducer(
             final DisjointSetStruct dss,
-            final HugeWeightMapping seedingProperties,
+            final HugeWeightMapping nodeProperties,
             final ProcedureConfiguration procedureConfiguration,
             final AllocationTracker tracker) {
+        String writeProperty = procedureConfiguration.get(
+                CONFIG_WRITE_PROPERTY,
+                CONFIG_OLD_WRITE_PROPERTY,
+                DEFAULT_CLUSTER_PROPERTY);
+        String seedProperty = procedureConfiguration.getString(CONFIG_SEED_PROPERTY, null);
+
         boolean withConsecutiveIds = procedureConfiguration.get(CONFIG_CONSECUTIVE_IDS_PROPERTY, false);
-        boolean withSeeding = procedureConfiguration.get(CONFIG_SEED_PROPERTY, null) != null;
+        boolean withSeeding = seedProperty != null;
+        boolean writePropertyEqualsSeedProperty = Objects.equals(seedProperty, writeProperty);
+        boolean hasNodeProperties = nodeProperties != null && !(nodeProperties instanceof HugeNullWeightMap);
+
+        UnionFindResultProducer resultProducer = new UnionFindResultProducer.NonConsecutive(
+                UnionFindResultProducer.NonSeedingTranslator.INSTANCE,
+                dss);
 
         if (withConsecutiveIds && !withSeeding) {
-            return new UnionFindResultProducer.Consecutive(UnionFindResultProducer.NonSeedingTranslator.INSTANCE, dss, tracker);
-        } else if (withSeeding && seedingProperties != null && !(seedingProperties instanceof HugeNullWeightMap)) {
-            return new UnionFindResultProducer.NonConsecutive(new UnionFindResultProducer.SeedingTranslator(seedingProperties), dss);
-        } else {
-            return new UnionFindResultProducer.NonConsecutive(UnionFindResultProducer.NonSeedingTranslator.INSTANCE, dss);
+            resultProducer = new UnionFindResultProducer.Consecutive(
+                    UnionFindResultProducer.NonSeedingTranslator.INSTANCE,
+                    dss,
+                    tracker);
+        } else if (writePropertyEqualsSeedProperty && hasNodeProperties) {
+            resultProducer = new UnionFindResultProducer.NonConsecutive(
+                    new UnionFindResultProducer.SeedingTranslator(nodeProperties),
+                    dss);
         }
+
+        return resultProducer;
     }
 
     public static class ProcedureSetup {
