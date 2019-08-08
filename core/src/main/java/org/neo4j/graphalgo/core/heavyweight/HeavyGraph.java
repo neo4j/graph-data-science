@@ -178,7 +178,7 @@ public class HeavyGraph implements Graph {
     }
 
     @Override
-    public void release() {
+    public void releaseTopology() {
         if (!canRelease) return;
         container = null;
     }

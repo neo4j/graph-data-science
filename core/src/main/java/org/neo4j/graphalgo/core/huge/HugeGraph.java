@@ -386,7 +386,7 @@ public class HugeGraph implements Graph {
     }
 
     @Override
-    public void release() {
+    public void releaseTopology() {
         if (!canRelease) return;
         if (inAdjacency != null) {
             tracker.remove(inAdjacency.release());

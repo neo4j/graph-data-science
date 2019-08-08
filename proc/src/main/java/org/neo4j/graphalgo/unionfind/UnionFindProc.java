@@ -329,7 +329,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
         log.info("UnionFind: overall memory usage: %s", setup.tracker.getUsageString());
 
         algo.release();
-        setup.graph.release();
+        setup.graph.releaseTopology();
 
         return algoResult;
     }

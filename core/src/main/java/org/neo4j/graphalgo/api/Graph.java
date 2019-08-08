@@ -42,10 +42,21 @@ public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterab
     long relationshipCount();
 
     /**
-     * release resources which are not part of the result or IdMapping
+     * Release all resources which are not part of the result or IdMapping
      */
-    default void release() { }
+    default void release() {
+        releaseTopology();
+        releaseProperties();
+    }
 
+    /**
+     * Release only the topological data associated with that graph.
+     */
+    default void releaseTopology() { }
+
+    /**
+     * Release only the properties associated with that graph.
+     */
     default void releaseProperties() { }
 
     default String getType() {
