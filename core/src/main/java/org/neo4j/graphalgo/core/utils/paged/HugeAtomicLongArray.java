@@ -218,7 +218,7 @@ public abstract class HugeAtomicLongArray {
             tracker.add(sizeOfLongArray(intSize));
             long[] page = new long[intSize];
             if (gen != null) {
-                Arrays.setAll(page, gen::applyAsLong);
+                Arrays.parallelSetAll(page, gen::applyAsLong);
             }
             return new SingleHugeAtomicLongArray(intSize, page);
         }
@@ -300,13 +300,13 @@ public abstract class HugeAtomicLongArray {
                 pages[i] = new long[PAGE_SIZE];
                 if (gen != null) {
                     long base = ((long) i) << PAGE_SHIFT;
-                    Arrays.setAll(pages[i], j -> gen.applyAsLong(base + j));
+                    Arrays.parallelSetAll(pages[i], j -> gen.applyAsLong(base + j));
                 }
             }
             pages[lastPage] = new long[lastPageSize];
             if (gen != null) {
                 long base = ((long) lastPage) << PAGE_SHIFT;
-                Arrays.setAll(pages[lastPage], j -> gen.applyAsLong(base + j));
+                Arrays.parallelSetAll(pages[lastPage], j -> gen.applyAsLong(base + j));
             }
 
             long memoryUsed = memoryUsageOfData(size);

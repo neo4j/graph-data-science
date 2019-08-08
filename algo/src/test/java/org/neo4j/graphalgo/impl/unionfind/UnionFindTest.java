@@ -102,14 +102,11 @@ public class UnionFindTest {
                 .withRelationshipType(RELATIONSHIP_TYPE)
                 .load(graphImpl);
 
-        config = new UnionFind.Config(
-                new HugeNullWeightMap(-1),
-                Double.NaN
-        );
+        config = new UnionFind.Config(null, Double.NaN);
     }
 
     @Test
-    public void testPar() {
+    public void testParallel() {
         test(UnionFindType.PARALLEL);
     }
 
@@ -131,19 +128,19 @@ public class UnionFindTest {
                 MemoryRange.of(120),
                 UnionFindType.PARALLEL.memoryEstimation().estimate(dimensions0, 1).memoryUsage());
         assertEquals(
-                MemoryRange.of(552),
+                MemoryRange.of(160),
                 UnionFindType.PARALLEL.memoryEstimation(true).estimate(dimensions0, 1).memoryUsage());
         assertEquals(
                 MemoryRange.of(120),
                 UnionFindType.PARALLEL.memoryEstimation().estimate(dimensions0, 8).memoryUsage());
         assertEquals(
-                MemoryRange.of(552),
+                MemoryRange.of(160),
                 UnionFindType.PARALLEL.memoryEstimation(true).estimate(dimensions0, 8).memoryUsage());
         assertEquals(
                 MemoryRange.of(120),
                 UnionFindType.PARALLEL.memoryEstimation().estimate(dimensions0, 64).memoryUsage());
         assertEquals(
-                MemoryRange.of(552),
+                MemoryRange.of(160),
                 UnionFindType.PARALLEL.memoryEstimation(true).estimate(dimensions0, 64).memoryUsage());
 
         GraphDimensions dimensions100 = new GraphDimensions.Builder().setNodeCount(100).build();
@@ -151,19 +148,19 @@ public class UnionFindTest {
                 MemoryRange.of(920),
                 UnionFindType.PARALLEL.memoryEstimation().estimate(dimensions100, 1).memoryUsage());
         assertEquals(
-                MemoryRange.of(4552),
+                MemoryRange.of(1760),
                 UnionFindType.PARALLEL.memoryEstimation(true).estimate(dimensions100, 1).memoryUsage());
         assertEquals(
                 MemoryRange.of(920),
                 UnionFindType.PARALLEL.memoryEstimation().estimate(dimensions100, 8).memoryUsage());
         assertEquals(
-                MemoryRange.of(4552),
+                MemoryRange.of(1760),
                 UnionFindType.PARALLEL.memoryEstimation(true).estimate(dimensions100, 8).memoryUsage());
         assertEquals(
                 MemoryRange.of(920),
                 UnionFindType.PARALLEL.memoryEstimation().estimate(dimensions100, 64).memoryUsage());
         assertEquals(
-                MemoryRange.of(4552),
+                MemoryRange.of(1760),
                 UnionFindType.PARALLEL.memoryEstimation(true).estimate(dimensions100, 64).memoryUsage());
 
         GraphDimensions dimensions100B = new GraphDimensions.Builder().setNodeCount(100_000_000_000L).build();
@@ -171,19 +168,19 @@ public class UnionFindTest {
                 MemoryRange.of(800_122_070_448L),
                 UnionFindType.PARALLEL.memoryEstimation().estimate(dimensions100B, 1).memoryUsage());
         assertEquals(
-                MemoryRange.of(4_000_610_352_192L),
+                MemoryRange.of(1_600_244_140_816L),
                 UnionFindType.PARALLEL.memoryEstimation(true).estimate(dimensions100B, 1).memoryUsage());
         assertEquals(
                 MemoryRange.of(800_122_070_448L),
                 UnionFindType.PARALLEL.memoryEstimation().estimate(dimensions100B, 8).memoryUsage());
         assertEquals(
-                MemoryRange.of(4_000_610_352_192L),
+                MemoryRange.of(1_600_244_140_816L),
                 UnionFindType.PARALLEL.memoryEstimation(true).estimate(dimensions100B, 8).memoryUsage());
         assertEquals(
                 MemoryRange.of(800_122_070_448L),
                 UnionFindType.PARALLEL.memoryEstimation().estimate(dimensions100B, 64).memoryUsage());
         assertEquals(
-                MemoryRange.of(4_000_610_352_192L),
+                MemoryRange.of(1_600_244_140_816L),
                 UnionFindType.PARALLEL.memoryEstimation(true).estimate(dimensions100B, 64).memoryUsage());
     }
 

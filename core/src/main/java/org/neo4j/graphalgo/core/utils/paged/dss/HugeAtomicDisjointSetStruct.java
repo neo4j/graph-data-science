@@ -69,44 +69,28 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
                 .builder(HugeAtomicDisjointSetStruct.class)
                 .perNode("data", HugeAtomicLongArray::memoryEstimation);
         if (incremental) {
-            builder.add("forward community mapping (max size)", HugeLongLongMap.memoryEstimation());
-            builder.add("reverse community mapping (max size)", HugeLongLongMap.memoryEstimation());
+            builder.perNode("seeding information", HugeAtomicLongArray::memoryEstimation);
         }
         return builder.build();
     }
 
     private final HugeAtomicLongArray parent;
-    private final HugeLongLongMap internalToProvidedIds;
+    private final HugeAtomicLongArray communities;
+    private final AtomicLong maxCommunityId;
 
     public HugeAtomicDisjointSetStruct(long capacity, AllocationTracker tracker) {
         this.parent = HugeAtomicLongArray.newArray(capacity, i -> i, tracker);
-        this.internalToProvidedIds = null;
+        this.communities = null;
+        this.maxCommunityId = null;
     }
 
     public HugeAtomicDisjointSetStruct(long capacity, HugeWeightMapping communityMapping, AllocationTracker tracker) {
-        long maxCommunity = communityMapping.getMaxValue();
-        AtomicLong maxCommunityId = new AtomicLong(maxCommunity);
-        final HugeLongLongMap internalMapping = new HugeLongLongMap(communityMapping.size(), tracker);
-        this.internalToProvidedIds = new HugeLongLongMap(communityMapping.size(), tracker);
-        this.parent = HugeAtomicLongArray.newArray(capacity, nodeId -> {
-            long parentValue = nodeId;
+        this.parent = HugeAtomicLongArray.newArray(capacity, i -> i, tracker);
+        this.communities = HugeAtomicLongArray.newArray(capacity, nodeId -> {
             double communityIdValue = communityMapping.nodeWeight(nodeId, Double.NaN);
-
-            if (!Double.isNaN(communityIdValue)) {
-                long communityId = (long) communityIdValue;
-
-                long internalCommunityId = internalMapping.getOrDefault(communityId, -1);
-                if (internalCommunityId != -1) {
-                    parentValue = internalCommunityId;
-                } else {
-                    internalToProvidedIds.addTo(nodeId, communityId);
-                    internalMapping.addTo(communityId, nodeId);
-                }
-            } else {
-                internalToProvidedIds.addTo(nodeId, maxCommunityId.incrementAndGet());
-            }
-            return parentValue;
+            return Double.isNaN(communityIdValue) ? -1L : (long) communityIdValue;
         }, tracker);
+        maxCommunityId = new AtomicLong(communityMapping.getMaxValue());
     }
 
     private long parent(long id) {
@@ -135,11 +119,20 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
     @Override
     public long setIdOf(final long nodeId) {
         long setId = find(nodeId);
-        if (internalToProvidedIds != null) {
-            setId = internalToProvidedIds.getOrDefault(setId, -1L);
-            assert setId != -1L;
+        if (communities == null) {
+            return setId;
         }
-        return setId;
+
+        do {
+            long providedSetId = communities.get(setId);
+            if (providedSetId >= 0L) {
+                return providedSetId;
+            }
+            long newSetId = maxCommunityId.incrementAndGet();
+            if (communities.compareAndSet(setId, providedSetId, newSetId)) {
+                return newSetId;
+            }
+        } while (true);
     }
 
     @Override
