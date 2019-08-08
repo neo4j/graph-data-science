@@ -138,7 +138,7 @@ public final class GraphDimensions {
         }
     }
 
-    public void checkValidNodeProperty() {
+    public void checkValidNodeProperties() {
         for (KernelPropertyMapping nodeProperty : nodeProperties) {
             int id = nodeProperty.propertyKeyId;
             String propertyKey = nodeProperty.propertyKeyNameInGraph;

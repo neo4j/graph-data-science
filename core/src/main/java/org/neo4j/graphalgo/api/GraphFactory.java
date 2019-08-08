@@ -70,7 +70,7 @@ public abstract class GraphFactory implements Assessable {
     protected void validateTokens() {
         dimensions.checkValidNodePredicate(setup);
         dimensions.checkValidRelationshipTypePredicate(setup);
-        dimensions.checkValidNodeProperty();
+        dimensions.checkValidNodeProperties();
         dimensions.checkValidRelationshipProperty(setup);
     }
 
