@@ -99,31 +99,6 @@ public final class GraphDimensions {
         return Arrays.asList(nodeProperties);
     }
 
-    public int nodePropertyKeyId(String type) {
-        for (KernelPropertyMapping nodeProperty : nodeProperties) {
-            if (nodeProperty.propertyName.equals(type)) {
-                return nodeProperty.propertyKeyId;
-            }
-        }
-        return StatementConstants.NO_SUCH_PROPERTY_KEY;
-    }
-
-    public int nodePropertyKeyId(int mappingIndex) {
-        if (mappingIndex < 0 || mappingIndex >= nodeProperties.length) {
-            return StatementConstants.NO_SUCH_PROPERTY_KEY;
-        }
-        return nodeProperties[mappingIndex].propertyKeyId;
-    }
-
-    public double nodePropertyDefaultValue(String type) {
-        for (KernelPropertyMapping nodeProperty : nodeProperties) {
-            if (nodeProperty.propertyName.equals(type)) {
-                return nodeProperty.defaultValue;
-            }
-        }
-        return 0.0;
-    }
-
     public void checkValidNodePredicate(GraphSetup setup) {
         if (!(setup.startLabel == null || setup.startLabel.isEmpty()) && labelId() == ANY_LABEL) {
             throw new IllegalArgumentException(String.format("Node label not found: '%s'", setup.startLabel));
