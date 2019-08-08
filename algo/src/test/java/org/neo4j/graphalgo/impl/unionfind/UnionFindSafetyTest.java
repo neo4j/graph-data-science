@@ -44,6 +44,7 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
 
+@Deprecated
 public final class UnionFindSafetyTest {
 
     UnionFind.Config algoConfig = new UnionFind.Config(
