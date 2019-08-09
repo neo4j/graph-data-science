@@ -24,7 +24,6 @@ import com.carrotsearch.hppc.cursors.LongIntCursor;
 import com.carrotsearch.hppc.procedures.LongIntProcedure;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.graphalgo.core.WeightMap;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -42,12 +41,10 @@ import static org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory.NO_BA
 class CypherNodeLoader {
     private final GraphDatabaseAPI api;
     private final GraphSetup setup;
-    private final GraphDimensions dimensions;
 
-    public CypherNodeLoader(GraphDatabaseAPI api, GraphSetup setup, GraphDimensions dimensions) {
+    public CypherNodeLoader(GraphDatabaseAPI api, GraphSetup setup) {
         this.api = api;
         this.setup = setup;
-        this.dimensions = dimensions;
     }
 
     public Nodes load() {
@@ -141,8 +138,9 @@ class CypherNodeLoader {
     private Map<PropertyMapping, WeightMap> nodeProperties(int capacity) {
         Map<PropertyMapping, WeightMap> nodeProperties = new HashMap<>();
         for (PropertyMapping propertyMapping : setup.nodePropertyMappings) {
-            nodeProperties.put(propertyMapping,
-                    CypherLoadingUtils.newWeightMapping(true, dimensions.nodePropertyDefaultValue(propertyMapping.propertyName, setup), capacity));
+            nodeProperties.put(
+                    propertyMapping,
+                    CypherLoadingUtils.newWeightMapping(true, propertyMapping.defaultValue, capacity));
         }
         return nodeProperties;
     }

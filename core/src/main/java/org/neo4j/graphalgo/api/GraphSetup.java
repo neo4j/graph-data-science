@@ -55,12 +55,8 @@ public class GraphSetup {
     public final String relationWeightPropertyName;
     // default property is used for weighted relationships if property is not set.
     public final double relationDefaultWeight;
-    // property of node weights. null means NO property (the default value will be used instead).
-    public final String nodeWeightPropertyName;
     // default property is used for weighted nodes if property is not set.
     public final double nodeDefaultWeight;
-    // additional node property. null means NO property (the default value will be used instead).
-    public final String nodePropertyName;
     // default property is used for node properties if property is not set.
     public final double nodeDefaultPropertyValue;
 
@@ -96,11 +92,7 @@ public class GraphSetup {
      * @param relationWeightPropertyName property name which holds the weights / costs of a relation.
      *                                   null means the default value is used for each weight.
      * @param relationDefaultWeight      the default relationship weight if property is not given.
-     * @param nodeWeightPropertyName     property name which holds the weights / costs of a node.
-     *                                   null means the default value is used for each weight.
      * @param nodeDefaultWeight          the default node weight if property is not given.
-     * @param nodePropertyName           property name which holds additional values of a node.
-     *                                   null means the default value is used for each value.
      * @param nodeDefaultPropertyValue   the default node value if property is not given.
      * @param executor                   the executor. null means single threaded evaluation
      * @param batchSize                  batch size for parallel loading
@@ -114,9 +106,7 @@ public class GraphSetup {
             Direction direction,
             String relationWeightPropertyName,
             double relationDefaultWeight,
-            String nodeWeightPropertyName,
             double nodeDefaultWeight,
-            String nodePropertyName,
             double nodeDefaultPropertyValue,
             Map<String, Object> params,
             ExecutorService executor,
@@ -138,9 +128,7 @@ public class GraphSetup {
         this.loadOutgoing = direction == Direction.OUTGOING || direction == Direction.BOTH;
         this.relationWeightPropertyName = relationWeightPropertyName;
         this.relationDefaultWeight = relationDefaultWeight;
-        this.nodeWeightPropertyName = nodeWeightPropertyName;
         this.nodeDefaultWeight = nodeDefaultWeight;
-        this.nodePropertyName = nodePropertyName;
         this.nodeDefaultPropertyValue = nodeDefaultPropertyValue;
         this.params = params == null ? Collections.emptyMap() : params;
         this.executor = executor;
@@ -176,9 +164,7 @@ public class GraphSetup {
                 Direction.BOTH,
                 weightProperty,
                 defaultWeight,
-                null,
                 1.0,
-                null,
                 1.0,
                 Collections.emptyMap(),
                 executor,
@@ -208,14 +194,6 @@ public class GraphSetup {
 
     public boolean shouldLoadRelationshipWeight() {
         return relationWeightPropertyName != null;
-    }
-
-    public boolean shouldLoadNodeWeight() {
-        return nodeWeightPropertyName != null;
-    }
-
-    public boolean shouldLoadNodeProperty() {
-        return nodePropertyName != null;
     }
 
     public boolean loadAnyLabel() {
