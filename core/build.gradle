@@ -12,9 +12,10 @@ dependencies {
     compileOnly         group: 'org.jetbrains',            name: 'annotations',        version: ver.'jetbrains-annotations'
     compileOnly         group: 'org.neo4j',                name: 'neo4j',              version: ver.'neo4j'
 
-    compile project(':neo4j-adapter')
-    compile project(':annotations')
+    compile project(":annotations")
     compile project(':cypher-printer')
+    compile project(':neo4j-adapter')
+    compile project(":neo4j-collections")
     compile group: 'com.carrotsearch',           name: 'hppc',               version: ver.'hppc'
 
     testCompile project(':test-utils')
