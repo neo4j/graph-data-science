@@ -117,72 +117,6 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testUnionFindWithMinStrategy(String graphImpl) {
-        String query = "CALL algo.unionFind(" +
-                       "    '', '', {" +
-                       "        graph: $graph, unionStrategy: 'min'" +
-                       "    }" +
-                       ") YIELD setCount, communityCount";
-
-        runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> {
-                    assertEquals(3L, row.getNumber("communityCount"));
-                    assertEquals(3L, row.getNumber("setCount"));
-                }
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void testUnionFindWithRankStrategy(String graphImpl) {
-        String query = "CALL algo.unionFind(" +
-                       "    '', '', {" +
-                       "        graph: $graph, unionStrategy: 'rank'" +
-                       "    }" +
-                       ") YIELD setCount, communityCount";
-
-        runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> {
-                    assertEquals(3L, row.getNumber("communityCount"));
-                    assertEquals(3L, row.getNumber("setCount"));
-                }
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void testUnionFindWithSeedAndMinStrategy(String graphImpl) {
-        String query = "CALL algo.unionFind(" +
-                       "    '', '', {" +
-                       "        graph: $graph, seedProperty: 'seedId', unionStrategy: 'min'" +
-                       "    }" +
-                       ") YIELD setCount, communityCount";
-        runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> {
-                    assertEquals(3L, row.getNumber("communityCount"));
-                    assertEquals(3L, row.getNumber("setCount"));
-                }
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void testUnionFindWithSeed(String graphImpl) {
-        String query = "CALL algo.unionFind(" +
-                       "    '', '', {" +
-                       "        graph: $graph, seedProperty: 'seedId', unionStrategy: 'rank'" +
-                       "    }" +
-                       ") YIELD setCount, communityCount";
-        runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> {
-                    assertEquals(3L, row.getNumber("communityCount"));
-                    assertEquals(3L, row.getNumber("setCount"));
-                }
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
     public void testUnionFindWithSeed(String graphImpl) {
         Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
 
@@ -203,6 +137,40 @@ public class UnionFindProcTest extends ProcTestBase {
         );
 
         runQuery("MATCH (n) RETURN n.nodeId AS nodeId, n.partition AS partition",
+                row -> {
+                    final long nodeId = row.getNumber("nodeId").longValue();
+                    final long partitionId = row.getNumber("partition").longValue();
+                    if (nodeId >= 0 && nodeId <= 6) {
+                        assertEquals(42, partitionId);
+                    } else {
+                        assertTrue(partitionId != 42);
+                    }
+                }
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("graphImplementations")
+    public void testUnionFindReadAndWriteSeed(String graphImpl) {
+        Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
+
+        String query = "CALL algo.unionFind(" +
+                       "    '', '', {" +
+                       "        graph: $graph, seedProperty: 'seedId', writeProperty: 'seedId'" +
+                       "    }" +
+                       ") YIELD setCount, communityCount";
+        runQuery(query, MapUtil.map("graph", graphImpl),
+                row -> {
+                    assertEquals(3L, row.getNumber("communityCount"));
+                    assertEquals(3L, row.getNumber("setCount"));
+                }
+        );
+
+        runQuery("MATCH (n) RETURN n.seedId AS partition",
+                row -> assertTrue(row.getNumber("partition").longValue() >= 42)
+        );
+
+        runQuery("MATCH (n) RETURN n.nodeId AS nodeId, n.seedId AS partition",
                 row -> {
                     final long nodeId = row.getNumber("nodeId").longValue();
                     final long partitionId = row.getNumber("partition").longValue();
