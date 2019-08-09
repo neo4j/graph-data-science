@@ -26,7 +26,6 @@ import org.neo4j.function.ThrowingConsumer;
 import org.neo4j.graphalgo.api.BatchNodeIterable;
 import org.neo4j.graphalgo.core.loading.HugeParallelGraphImporter;
 import org.neo4j.graphdb.TransactionTerminatedException;
-import org.neo4j.helpers.Exceptions;
 import org.neo4j.kernel.api.exceptions.Status;
 
 import java.util.AbstractCollection;
@@ -68,6 +67,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.neo4j.graphalgo.core.utils.ParallelUtil.parallelStream;
 import static org.neo4j.graphalgo.core.utils.ParallelUtil.parallelStreamConsume;
+import static org.neo4j.helpers.Exceptions.throwIfUnchecked;
 
 final class ParallelUtilTest {
 
@@ -324,7 +324,7 @@ final class ParallelUtilTest {
                     final Thread thread = new Thread(() -> tasks.run(t ->
                             ParallelUtil.runWithConcurrency(2, t, isRunning, pool)));
 
-                    thread.setUncaughtExceptionHandler((t, e) -> thrownException.set(Exceptions.launderedException(e)));
+                    thread.setUncaughtExceptionHandler((t, e) -> thrownException.set((RuntimeException) e));
                     thread.start();
                     running.set(false);
                     thread.join();
@@ -370,7 +370,8 @@ final class ParallelUtilTest {
         try {
             block.accept(pool);
         } catch (Throwable throwable) {
-            throw Exceptions.launderedException(throwable);
+            throwIfUnchecked(throwable);
+            throw new RuntimeException(throwable);
         } finally {
             List<Runnable> unscheduled = pool.shutdownNow();
             pool.shutdown();

@@ -30,8 +30,8 @@ import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.loading.NullPropertyMap;
+import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.helpers.Exceptions;
 
 import java.util.Collection;
 import java.util.Random;
@@ -65,7 +65,7 @@ final class WCCSafetyTest {
                     ALGO_CONFIG
             );
         } catch (Throwable e) {
-            assertSame(error, Exceptions.rootCause(e));
+            assertSame(error, ExceptionUtil.rootCause(e));
         }
     }
 

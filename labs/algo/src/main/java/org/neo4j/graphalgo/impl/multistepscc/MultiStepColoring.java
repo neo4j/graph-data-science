@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.core.utils.container.AtomicBitSet;
 import org.neo4j.graphalgo.core.utils.container.FlipStack;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.helpers.Exceptions;
 import org.neo4j.kernel.impl.util.collection.SimpleBitSet;
 
 import java.util.ArrayList;
@@ -44,6 +43,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.function.IntPredicate;
+
+import static org.neo4j.helpers.Exceptions.throwIfUnchecked;
 
 /**
  * Multistep SCC coloring algorithm.
@@ -322,7 +323,8 @@ public class MultiStepColoring {
             }
         }
         if (error != null) {
-            throw Exceptions.launderedException(error);
+            throwIfUnchecked(error);
+            throw new RuntimeException(error.getMessage(), error);
         }
     }
 
