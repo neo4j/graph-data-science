@@ -48,9 +48,14 @@ public final class Pregel {
 
     private final Graph graph;
     private final HugeWeightMapping nodeValues;
+
+    // 1 Use HugeAtomicLongArray
+    // * requires combine method
     private final ConcurrentMap<Long, Map<Long, Double>> outgoingMessages;
     private final ConcurrentMap<Long, Map<Long, Double>> incomingMessages;
     private final double[][] messages;
+
+
     private final Computation computation;
     private final int batchSize;
     private final int concurrency;
@@ -111,14 +116,14 @@ public final class Pregel {
         this.messages = new double[(int) graph.nodeCount()][];
 
         if (computation.getMessageDirection() == Direction.BOTH) {
-            outgoingMessages = new ConcurrentHashMap<>((int) graph.relationshipCount());
-            incomingMessages = new ConcurrentHashMap<>((int) graph.relationshipCount());
+            outgoingMessages = new ConcurrentHashMap<>((int) graph.nodeCount());
+            incomingMessages = new ConcurrentHashMap<>((int) graph.nodeCount());
         } else if (computation.getMessageDirection() == Direction.OUTGOING) {
-            outgoingMessages = new ConcurrentHashMap<>((int) graph.relationshipCount());
+            outgoingMessages = new ConcurrentHashMap<>((int) graph.nodeCount());
             incomingMessages = null;
         } else {
             outgoingMessages = null;
-            incomingMessages = new ConcurrentHashMap<>((int) graph.relationshipCount());
+            incomingMessages = new ConcurrentHashMap<>((int) graph.nodeCount());
         }
     }
 
@@ -276,7 +281,9 @@ public final class Pregel {
         synchronized void sendMessages(final long nodeId, final double message, Direction direction) {
             if (direction == Direction.OUTGOING || direction == Direction.BOTH) {
                 relationshipIterator.forEachRelationship(nodeId, Direction.OUTGOING, (sourceNodeId, targetNodeId) -> {
-                    outgoingMessages.computeIfAbsent(sourceNodeId, k -> new ConcurrentHashMap<>()).put(targetNodeId, message);
+                    outgoingMessages
+                            .computeIfAbsent(sourceNodeId, k -> new ConcurrentHashMap<>())
+                            .put(targetNodeId, message);
                     messageBits.set(targetNodeId);
                     return true;
                 });
@@ -284,7 +291,9 @@ public final class Pregel {
 
             if (direction == Direction.INCOMING || direction == Direction.BOTH) {
                 relationshipIterator.forEachRelationship(nodeId, Direction.INCOMING, (targetNodeId, sourceNodeId) -> {
-                    incomingMessages.computeIfAbsent(sourceNodeId, k -> new ConcurrentHashMap<>()).put(targetNodeId, message);
+                    incomingMessages
+                            .computeIfAbsent(sourceNodeId, k -> new ConcurrentHashMap<>())
+                            .put(targetNodeId, message);
                     messageBits.set(sourceNodeId);
                     return true;
                 });
@@ -332,25 +341,36 @@ public final class Pregel {
 
             while (nodesIterator.hasNext()) {
                 final long nodeId = nodesIterator.next();
-                messages[(int) nodeId] = receiveMessages(nodeId, messageDirection);
+                messages[(int) nodeId] = receiveMessages(nodeId, messageDirection, messages[(int) nodeId]);
             }
         }
 
-        static Map<Long, Double> EMPTY_MAP = new HashMap<>(0);
-
-        private synchronized double[] receiveMessages(final long nodeId, Direction direction) {
+        private double[] receiveMessages(final long nodeId, Direction direction, double[] messages) {
             if (!messageBits.get(nodeId)) {
                 return NO_MESSAGES;
             }
             final int degree = degrees.degree(nodeId, direction);
-            final DoubleArrayList doubleCursors = new DoubleArrayList(degree, ARRAY_SIZING_STRATEGY);
+            final DoubleArrayList doubleCursors;
+
+            if (messages != null) {
+                doubleCursors = new DoubleArrayList(0, ARRAY_SIZING_STRATEGY);
+                doubleCursors.buffer = messages;
+            } else {
+                doubleCursors = new DoubleArrayList(degree, ARRAY_SIZING_STRATEGY);
+            }
 
             if (direction == Direction.INCOMING || direction == Direction.BOTH) {
                 relationshipIterator.forEachRelationship(
                         nodeId,
                         Direction.INCOMING,
                         (sourceNodeId, targetNodeId) -> {
-                            doubleCursors.add(outgoingMessages.getOrDefault(targetNodeId, EMPTY_MAP).getOrDefault(sourceNodeId, 1.0));
+                            Map<Long, Double> localMessages = outgoingMessages.get(targetNodeId);
+                            if (localMessages != null) {
+                                Double message = localMessages.get(sourceNodeId);
+                                if (message != null) {
+                                    doubleCursors.add(message);
+                                }
+                            }
                             return true;
                         });
             }
@@ -360,12 +380,17 @@ public final class Pregel {
                         nodeId,
                         Direction.OUTGOING,
                         (sourceNodeId, targetNodeId) -> {
-                            doubleCursors.add(incomingMessages.getOrDefault(sourceNodeId, EMPTY_MAP).getOrDefault(targetNodeId, 1.0));
+                            Map<Long, Double> localMessages = incomingMessages.get(sourceNodeId);
+                            if (localMessages != null) {
+                                Double message = localMessages.get(targetNodeId);
+                                if (message != null) {
+                                    doubleCursors.add(message);
+                                }
+                            }
                             return true;
                         });
             }
 
-            assert (doubleCursors.buffer.length == degree);
             assert (doubleCursors.elementsCount == degree);
 
             return doubleCursors.buffer;
