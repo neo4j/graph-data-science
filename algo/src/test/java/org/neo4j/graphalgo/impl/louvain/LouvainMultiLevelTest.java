@@ -19,23 +19,18 @@
  */
 package org.neo4j.graphalgo.impl.louvain;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ErrorCollector;
-import org.neo4j.graphalgo.HeavyHugeTester;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.neo4j.graphalgo.impl.louvain.LouvainTest.DEFAULT_CONFIG;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * (a)-(b)--(g)-(h)
@@ -45,67 +40,44 @@ import static org.neo4j.graphalgo.impl.louvain.LouvainTest.DEFAULT_CONFIG;
  * (d)-(e)                (DEF)
  * \  /
  * (f)
- *
- * @author mknblch
  */
-public class LouvainMultiLevelTest extends HeavyHugeTester {
+public class LouvainMultiLevelTest extends LouvainTestBase {
 
-    private static final String COMPLEX_CYPHER =
-            "CREATE (a:Node {name:'a'})\n" +
-                    "CREATE (b:Node {name:'b'})\n" +
-                    "CREATE (c:Node {name:'c'})\n" +
-                    "CREATE (d:Node {name:'d'})\n" +
-                    "CREATE (e:Node {name:'e'})\n" +
-                    "CREATE (f:Node {name:'f'})\n" +
-                    "CREATE (g:Node {name:'g'})\n" +
-                    "CREATE (h:Node {name:'h'})\n" +
-                    "CREATE (i:Node {name:'i'})\n" +
-                    "CREATE" +
+    private static final String SETUP_QUERY = "CREATE " +
+                    "  (a:Node {name: 'a'})" +
+                    ", (b:Node {name: 'b'})" +
+                    ", (c:Node {name: 'c'})" +
+                    ", (d:Node {name: 'd'})" +
+                    ", (e:Node {name: 'e'})" +
+                    ", (f:Node {name: 'f'})" +
+                    ", (g:Node {name: 'g'})" +
+                    ", (h:Node {name: 'h'})" +
+                    ", (i:Node {name: 'i'})" +
 
-                    " (a)-[:TYPE {weight: 1.0}]->(b),\n" +
-                    " (a)-[:TYPE {weight: 1.0}]->(c),\n" +
-                    " (b)-[:TYPE {weight: 1.0}]->(c),\n" +
+                    ", (a)-[:TYPE {weight: 1.0}]->(b)" +
+                    ", (a)-[:TYPE {weight: 1.0}]->(c)" +
+                    ", (b)-[:TYPE {weight: 1.0}]->(c)" +
 
-                    " (g)-[:TYPE {weight: 1.0}]->(h),\n" +
-                    " (g)-[:TYPE {weight: 1.0}]->(i),\n" +
-                    " (h)-[:TYPE {weight: 1.0}]->(i),\n" +
+                    ", (g)-[:TYPE {weight: 1.0}]->(h)" +
+                    ", (g)-[:TYPE {weight: 1.0}]->(i)" +
+                    ", (h)-[:TYPE {weight: 1.0}]->(i)" +
 
-                    " (e)-[:TYPE {weight: 1.0}]->(d),\n" +
-                    " (e)-[:TYPE {weight: 1.0}]->(f),\n" +
-                    " (d)-[:TYPE {weight: 1.0}]->(f),\n" +
+                    ", (e)-[:TYPE {weight: 1.0}]->(d)" +
+                    ", (e)-[:TYPE {weight: 1.0}]->(f)" +
+                    ", (d)-[:TYPE {weight: 1.0}]->(f)" +
 
-                    " (a)-[:TYPE {weight: 1.0}]->(g),\n" +
-                    " (c)-[:TYPE {weight: 1.0}]->(e),\n" +
-                    " (f)-[:TYPE {weight: 1.0}]->(i)";
+                    ", (a)-[:TYPE {weight: 1.0}]->(g)" +
+                    ", (c)-[:TYPE {weight: 1.0}]->(e)" +
+                    ", (f)-[:TYPE {weight: 1.0}]->(i)";
 
-    @Rule
-    public ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
-
-    @Rule
-    public ErrorCollector collector = new ErrorCollector();
-
-    private Class<? extends GraphFactory> graphImpl;
-    private Graph graph;
-
-    public LouvainMultiLevelTest(Class<? extends GraphFactory> graphImpl, String name) {
-        super(graphImpl);
-        this.graphImpl = graphImpl;
+    @Override
+    void setupGraphDb(Graph graph) {
     }
 
-    private void setup(String cypher) {
-        DB.execute(cypher);
-        graph = new GraphLoader(DB)
-                .withAnyRelationshipType()
-                .withAnyLabel()
-                .withoutNodeProperties()
-                .withOptionalRelationshipWeightsFromProperty("weight", 1.0)
-                .undirected()
-                .load(graphImpl);
-    }
-
-    @Test
-    public void testComplex() {
-        setup(COMPLEX_CYPHER);
+    @ParameterizedTest
+    @MethodSource("parameters")
+    public void testComplex(Class<? extends GraphFactory> graphImpl) {
+        Graph graph = loadGraph(graphImpl, SETUP_QUERY);
         final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
@@ -124,9 +96,10 @@ public class LouvainMultiLevelTest extends HeavyHugeTester {
         assertArrayEquals(new double[]{0.53}, algorithm.getModularities(), 0.01);
     }
 
-    @Test
-    public void testComplexRNL() {
-        setup(COMPLEX_CYPHER);
+    @ParameterizedTest
+    @MethodSource("parameters")
+    public void testComplexRNL(Class<? extends GraphFactory> graphImpl) {
+        Graph graph = loadGraph(graphImpl, SETUP_QUERY);
         final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)

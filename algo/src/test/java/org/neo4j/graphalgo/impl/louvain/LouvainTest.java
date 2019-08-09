@@ -19,12 +19,9 @@
  */
 package org.neo4j.graphalgo.impl.louvain;
 
-import com.carrotsearch.hppc.LongHashSet;
-import com.carrotsearch.hppc.LongSet;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ErrorCollector;
-import org.neo4j.graphalgo.HeavyHugeTester;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
@@ -38,64 +35,32 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * (a)-(b)-(d)
  * | /            -> (abc)-(d)
  * (c)
- *
- * @author mknblch
  */
-public class LouvainTest extends HeavyHugeTester {
+public class LouvainTest extends LouvainTestBase {
 
-    static Louvain.Config DEFAULT_CONFIG = new Louvain.Config(10, 10, false);
-
-    private static final String unidirectional =
-            "CREATE (a:Node {name:'a'})\n" +
-                    "CREATE (b:Node {name:'b'})\n" +
-                    "CREATE (c:Node {name:'c'})\n" +
-                    "CREATE (d:Node {name:'d'})\n" +
-                    "CREATE" +
-                    " (a)-[:TYPE {weight: 1.0}]->(b),\n" +
-                    " (b)-[:TYPE {weight: 1.0}]->(c),\n" +
-                    " (c)-[:TYPE {weight: 1.0}]->(a),\n" +
-                    " (a)-[:TYPE {weight: 1.0}]->(c)";
+    private static final String SETUP_QUERY = "CREATE" +
+            "  (a:Node {name:'a'})" +
+            ", (b:Node {name:'b'})" +
+            ", (c:Node {name:'c'})" +
+            ", (d:Node {name:'d'})" +
+            ", (a)-[:TYPE {weight: 1.0}]->(b)" +
+            ", (b)-[:TYPE {weight: 1.0}]->(c)" +
+            ", (c)-[:TYPE {weight: 1.0}]->(a)" +
+            ", (a)-[:TYPE {weight: 1.0}]->(c)";
 
     public static final Label LABEL = Label.label("Node");
     public static final String ABCD = "abcd";
 
-    @Rule
-    public ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
-
-    @Rule
-    public ErrorCollector collector = new ErrorCollector();
-
-    private Graph graph;
-    private final Map<String, Integer> nameMap;
-
-    public LouvainTest(Class<? extends GraphFactory> graphImpl, String name) {
-        super(graphImpl);
-        nameMap = new HashMap<>();
-    }
-
-    private void setup(String cypher) {
-        DB.execute(cypher);
-        graph = new GraphLoader(DB)
-                .withAnyRelationshipType()
-                .withAnyLabel()
-                .withoutNodeProperties()
-                .withOptionalRelationshipWeightsFromProperty("weight", 1.0)
-                .undirected()
-                .load(graphImpl);
-
+    @Override
+    void setupGraphDb(Graph graph) {
         try (Transaction transaction = DB.beginTx()) {
             for (int i = 0; i < ABCD.length(); i++) {
                 final String value = String.valueOf(ABCD.charAt(i));
@@ -106,9 +71,10 @@ public class LouvainTest extends HeavyHugeTester {
         }
     }
 
-    @Test
-    public void testRunner() throws Exception {
-        setup(unidirectional);
+    @ParameterizedTest
+    @MethodSource("parameters")
+    public void testRunner(Class<? extends GraphFactory> graphImpl) {
+        Graph graph = loadGraph(graphImpl, SETUP_QUERY);
         final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
@@ -122,9 +88,10 @@ public class LouvainTest extends HeavyHugeTester {
         assertCommunities(algorithm);
     }
 
-    @Test
-    public void testRandomNeighborLouvain() throws Exception {
-        setup(unidirectional);
+    @ParameterizedTest
+    @MethodSource("parameters")
+    public void testRandomNeighborLouvain(Class<? extends GraphFactory> graphImpl) {
+        Graph graph = loadGraph(graphImpl, SETUP_QUERY);
         final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
@@ -138,14 +105,15 @@ public class LouvainTest extends HeavyHugeTester {
         assertCommunities(algorithm);
     }
 
-    @Test
-    public void testMultithreadedLouvain() {
+    @ParameterizedTest
+    @MethodSource("parameters")
+    public void testMultithreadedLouvain(Class<? extends GraphFactory> graphImpl) {
         GraphBuilder.create(DB)
                 .setLabel("Node")
                 .setRelationship("REL")
                 .newCompleteGraphBuilder()
                 .createCompleteGraph(200, 1.0);
-        graph = new GraphLoader(DB)
+        Graph graph = new GraphLoader(DB)
                 .withLabel("Node")
                 .withRelationshipType("REL")
                 .withOptionalRelationshipWeightsFromProperty(null, 1.0)
@@ -191,31 +159,4 @@ public class LouvainTest extends HeavyHugeTester {
         assertDisjoint(new String[]{"a", "d"}, louvain.getCommunityIds());
     }
 
-    private void assertUnion(String[] nodeNames, HugeLongArray values) {
-        final long[] communityIds = values.toArray();
-        long current = -1L;
-        for (String name : nodeNames) {
-            if (!nameMap.containsKey(name)) {
-                throw new IllegalArgumentException("unknown node name: " + name);
-            }
-            final int id = nameMap.get(name);
-            if (current == -1L) {
-                current = communityIds[id];
-            } else {
-                assertEquals(
-                        "Node " + name + " belongs to wrong community " + communityIds[id],
-                        current,
-                        communityIds[id]);
-            }
-        }
-    }
-
-    private void assertDisjoint(String[] nodeNames, HugeLongArray values) {
-        final long[] communityIds = values.toArray();
-        final LongSet set = new LongHashSet();
-        for (String name : nodeNames) {
-            final long communityId = communityIds[nameMap.get(name)];
-            assertTrue("Node " + name + " belongs to wrong community " + communityId, set.add(communityId));
-        }
-    }
 }

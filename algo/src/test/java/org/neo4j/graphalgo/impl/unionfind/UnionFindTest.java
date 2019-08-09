@@ -19,109 +19,86 @@
  */
 package org.neo4j.graphalgo.impl.unionfind;
 
-import com.carrotsearch.hppc.BitSet;
 import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
-import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
-import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.graphdb.Transaction;
 
 import java.util.Arrays;
-import java.util.Collection;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(Parameterized.class)
-public class UnionFindTest {
-
-    private static final RelationshipType RELATIONSHIP_TYPE = RelationshipType.withName("TYPE");
+public class UnionFindTest extends UnionFindTestBase {
 
     private static final int SETS_COUNT = 16;
     private static final int SET_SIZE = 10;
 
-    @Parameterized.Parameters(name = "{1}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(
-                new Object[]{HeavyGraphFactory.class, "Heavy"},
-                new Object[]{HugeGraphFactory.class, "Huge"},
-                new Object[]{GraphViewFactory.class, "Kernel"}
-        );
-    }
-
-    @ClassRule
-    public static final ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
-
-    @BeforeClass
-    public static void setupGraph() {
+    @BeforeAll
+    static void setupGraphDb() {
+        DB = TestDatabaseCreator.createTestDatabase();
         int[] setSizes = new int[SETS_COUNT];
         Arrays.fill(setSizes, SET_SIZE);
         createTestGraph(setSizes);
     }
 
-    private static void createTestGraph(int... setSizes) {
-        DB.executeAndCommit(db -> {
-            for (int setSize : setSizes) {
-                createLine(db, setSize);
-            }
-        });
+    @Override
+    int communitySize() {
+        return SET_SIZE;
     }
 
-    private static void createLine(GraphDatabaseService db, int setSize) {
-        Node temp = db.createNode();
-        for (int i = 1; i < setSize; i++) {
-            Node t = db.createNode();
-            temp.createRelationshipTo(t, RELATIONSHIP_TYPE);
-            temp = t;
-        }
-    }
-
-    private final Graph graph;
-    private final UnionFind.Config config;
-
-    public UnionFindTest(Class<? extends GraphFactory> graphImpl, String name) {
-        graph = new GraphLoader(DB)
+    @ParameterizedTest(name = "{0} -- {2}")
+    @MethodSource("parameters")
+    void test(String graphName, Class<? extends GraphFactory> graphImpl, UnionFindType uf) {
+        Graph graph = new GraphLoader(DB)
                 .withExecutorService(Pools.DEFAULT)
                 .withAnyLabel()
                 .withRelationshipType(RELATIONSHIP_TYPE)
                 .load(graphImpl);
 
-        config = new UnionFind.Config(null, Double.NaN);
+        UnionFind.Config config = new UnionFind.Config(null, Double.NaN);
+
+        DisjointSetStruct result = run(uf, graph, config);
+
+        Assert.assertEquals(SETS_COUNT, getSetCount(result));
+        long[] setRegions = new long[SETS_COUNT];
+        Arrays.fill(setRegions, -1);
+
+        graph.forEachNode((nodeId) -> {
+            long expectedSetRegion = nodeId / SET_SIZE;
+            final long setId = result.setIdOf(nodeId);
+            int setRegion = (int) (setId / SET_SIZE);
+            assertEquals(
+                    expectedSetRegion,
+                    setRegion,
+                    "Node " + nodeId + " in unexpected set: " + setId);
+
+            long regionSetId = setRegions[setRegion];
+            if (regionSetId == -1) {
+                setRegions[setRegion] = setId;
+            } else {
+                assertEquals(
+                        regionSetId,
+                        setId,
+                        "Inconsistent set for node " + nodeId + ", is " + setId + " but should be " + regionSetId);
+            }
+            return true;
+        });
     }
 
     @Test
-    public void testParallel() {
-        test(UnionFindType.PARALLEL);
-    }
-
-    @Test
-    public void testForkJoin() {
-        test(UnionFindType.FORK_JOIN);
-    }
-
-    @Test
-    public void testFJMerge() {
-        test(UnionFindType.FJ_MERGE);
-    }
-
-    @Test
-    public void memRecParallel() {
+    void memRecParallel() {
         GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
 
         assertEquals(
@@ -185,7 +162,7 @@ public class UnionFindTest {
     }
 
     @Test
-    public void memRecForkJoin() {
+    void memRecForkJoin() {
         GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
 
         assertEquals(
@@ -222,7 +199,7 @@ public class UnionFindTest {
     }
 
     @Test
-    public void memRecFJMerge() {
+    void memRecFJMerge() {
         GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
 
         assertEquals(
@@ -258,56 +235,21 @@ public class UnionFindTest {
                 UnionFindType.FJ_MERGE.memoryEstimation().estimate(dimensions100B, 64).memoryUsage().min);
     }
 
-    private void test(UnionFindType uf) {
-        DisjointSetStruct result = run(uf);
-
-        Assert.assertEquals(SETS_COUNT, getSetCount(result));
-        long[] setRegions = new long[SETS_COUNT];
-        Arrays.fill(setRegions, -1);
-
-        graph.forEachNode((nodeId) -> {
-            long expectedSetRegion = nodeId / SET_SIZE;
-            final long setId = result.setIdOf(nodeId);
-            int setRegion = (int) (setId / SET_SIZE);
-            assertEquals(
-                    "Node " + nodeId + " in unexpected set: " + setId,
-                    expectedSetRegion,
-                    setRegion);
-
-            long regionSetId = setRegions[setRegion];
-            if (regionSetId == -1) {
-                setRegions[setRegion] = setId;
-            } else {
-                assertEquals(
-                        "Inconsistent set for node " + nodeId + ", is " + setId + " but should be " + regionSetId,
-                        regionSetId,
-                        setId);
+    private static void createTestGraph(int... setSizes) {
+        try (Transaction tx = DB.beginTx()) {
+            for (int setSize : setSizes) {
+                createLine(DB, setSize);
             }
-            return true;
-        });
-    }
-
-    private DisjointSetStruct run(final UnionFindType uf) {
-        return UnionFindHelper.run(
-                uf,
-                graph,
-                Pools.DEFAULT,
-                SET_SIZE / Pools.DEFAULT_CONCURRENCY,
-                Pools.DEFAULT_CONCURRENCY,
-                config,
-                AllocationTracker.EMPTY);
-    }
-
-    /**
-     * Compute number of sets present.
-     */
-    static long getSetCount(DisjointSetStruct struct) {
-        long capacity = struct.size();
-        BitSet sets = new BitSet(capacity);
-        for (long i = 0L; i < capacity; i++) {
-            long setId = struct.setIdOf(i);
-            sets.set(setId);
+            tx.success();
         }
-        return sets.cardinality();
+    }
+
+    private static void createLine(GraphDatabaseService db, int setSize) {
+        Node temp = db.createNode();
+        for (int i = 1; i < setSize; i++) {
+            Node t = db.createNode();
+            temp.createRelationshipTo(t, RELATIONSHIP_TYPE);
+            temp = t;
+        }
     }
 }

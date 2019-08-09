@@ -13,6 +13,5 @@ task javadocJar(type: Jar) {
 
 // TODO: Make sure we ported all settings from the maven config
 test {
-    useJUnit()
     maxHeapSize = "1G"
 }

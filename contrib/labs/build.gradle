@@ -3,28 +3,28 @@ description = 'Neo4j Labs :: Graph Algorithms'
 dependencies {
     compile project(':algo')
 
-    compile group: 'com.carrotsearch',      name: 'hppc',           version: versions.'hppc'
-    compile group: 'io.dropwizard.metrics', name: 'metrics-core',   version: versions.'metrics-core'
-    compile group: 'org.hdrhistogram',      name: 'HdrHistogram',   version: versions.'HdrHistogram'
-    compile group: 'org.roaringbitmap',     name: 'RoaringBitmap',  version: versions.'RoaringBitmap'
+    compile group: 'com.carrotsearch',      name: 'hppc',           version: ver.'hppc'
+    compile group: 'io.dropwizard.metrics', name: 'metrics-core',   version: ver.'metrics-core'
+    compile group: 'org.hdrhistogram',      name: 'HdrHistogram',   version: ver.'HdrHistogram'
+    compile group: 'org.roaringbitmap',     name: 'RoaringBitmap',  version: ver.'RoaringBitmap'
 
-    compileOnly group: 'org.neo4j',             name: 'neo4j',                  version: versions.'neo4j'
-    compileOnly group: 'org.neo4j',             name: 'neo4j-slf4j',            version: versions.'neo4j'
+    compileOnly group: 'org.neo4j',             name: 'neo4j',                  version: ver.'neo4j'
+    compileOnly group: 'org.neo4j',             name: 'neo4j-slf4j',            version: ver.'neo4j'
     
     // TODO: enable and fix annotation processor
-//    annotationProcessor group: 'net.biville.florent',   name: 'neo4j-sproc-compiler',   version: versions.'neo4j-sproc-compiler'
+//    annotationProcessor group: 'net.biville.florent',   name: 'neo4j-sproc-compiler',   version: ver.'neo4j-sproc-compiler'
 
     testCompile project(':test-utils')
-    testCompile group: 'com.pholser',   name: 'junit-quickcheck-core',          version: versions.'junit-quickcheck-core'
-    testCompile group: 'com.pholser',   name: 'junit-quickcheck-generators',    version: versions.'junit-quickcheck-generators'
-    testCompile group: 'org.neo4j',     name: 'neo4j',                          version: versions.'neo4j'
-    testCompile group: 'org.neo4j',     name: 'neo4j-kernel',                   version: versions.'neo4j'
-    testCompile group: 'org.neo4j',     name: 'neo4j-kernel-api',               version: versions.'neo4j'
-    testCompile group: 'org.neo4j',     name: 'neo4j-io',                       version: versions.'neo4j'
-    testCompile group: 'junit',         name: 'junit',                          version: versions.'junit'
-    testCompile group: 'org.hamcrest',  name: 'hamcrest-library',               version: versions.'hamcrest'
-    testCompile group: 'org.mockito',   name: 'mockito-core',                   version: versions.'mockito'
-    testCompile group: 'org.mockito',   name: 'mockito-inline',                 version: versions.'mockito'
+    testCompile group: 'com.pholser',   name: 'junit-quickcheck-core',          version: ver.'junit-quickcheck-core'
+    testCompile group: 'com.pholser',   name: 'junit-quickcheck-generators',    version: ver.'junit-quickcheck-generators'
+    testCompile group: 'org.neo4j',     name: 'neo4j',                          version: ver.'neo4j'
+    testCompile group: 'org.neo4j',     name: 'neo4j-kernel',                   version: ver.'neo4j'
+    testCompile group: 'org.neo4j',     name: 'neo4j-kernel-api',               version: ver.'neo4j'
+    testCompile group: 'org.neo4j',     name: 'neo4j-io',                       version: ver.'neo4j'
+    testCompile dep.junit4
+    testCompile group: 'org.hamcrest',  name: 'hamcrest-library',               version: ver.'hamcrest'
+    testCompile group: 'org.mockito',   name: 'mockito-core',                   version: ver.'mockito'
+    testCompile group: 'org.mockito',   name: 'mockito-inline',                 version: ver.'mockito'
 }
 
 task javadocJar(type: Jar) {
