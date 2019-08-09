@@ -52,17 +52,17 @@ public class LoadGraphProcTest extends ProcTestBase {
             "  (a:A {id: 0, partition: 42})" +
             ", (b:B {id: 1, partition: 42})" +
 
-            ", (a)-[:X]->(:A {id: 2,  weight: 1.0, partition: 1})" +
-            ", (a)-[:X]->(:A {id: 3,  weight: 2.0, partition: 1})" +
-            ", (a)-[:X]->(:A {id: 4,  weight: 1.0, partition: 1})" +
-            ", (a)-[:X]->(:A {id: 5,  weight: 1.0, partition: 1})" +
-            ", (a)-[:X]->(:A {id: 6,  weight: 8.0, partition: 2})" +
+            ", (a)-[:X { weight: 1.0 }]->(:A {id: 2,  weight: 1.0, partition: 1})" +
+            ", (a)-[:X { weight: 1.0 }]->(:A {id: 3,  weight: 2.0, partition: 1})" +
+            ", (a)-[:X { weight: 1.0 }]->(:A {id: 4,  weight: 1.0, partition: 1})" +
+            ", (a)-[:X { weight: 1.0 }]->(:A {id: 5,  weight: 1.0, partition: 1})" +
+            ", (a)-[:X { weight: 1.0 }]->(:A {id: 6,  weight: 8.0, partition: 2})" +
 
-            ", (b)-[:X]->(:B {id: 7,  weight: 1.0, partition: 1})" +
-            ", (b)-[:X]->(:B {id: 8,  weight: 2.0, partition: 1})" +
-            ", (b)-[:X]->(:B {id: 9,  weight: 1.0, partition: 1})" +
-            ", (b)-[:X]->(:B {id: 10, weight: 1.0, partition: 1})" +
-            ", (b)-[:X]->(:B {id: 11, weight: 8.0, partition: 2})";
+            ", (b)-[:X { weight: 42.0 }]->(:B {id: 7,  weight: 1.0, partition: 1})" +
+            ", (b)-[:X { weight: 42.0 }]->(:B {id: 8,  weight: 2.0, partition: 1})" +
+            ", (b)-[:X { weight: 42.0 }]->(:B {id: 9,  weight: 1.0, partition: 1})" +
+            ", (b)-[:X { weight: 42.0 }]->(:B {id: 10, weight: 1.0, partition: 1})" +
+            ", (b)-[:X { weight: 42.0 }]->(:B {id: 11, weight: 8.0, partition: 2})";
 
     @BeforeEach
     public void setup() throws KernelException {
@@ -155,10 +155,26 @@ public class LoadGraphProcTest extends ProcTestBase {
                        ") YIELD bytesMin, bytesMax";
         runQuery(query, singletonMap("graph", graph),
                 row -> {
-                    assertEquals(303528, row.getNumber("bytesMin").longValue());
-                    assertEquals(303528, row.getNumber("bytesMax").longValue());
+                    assertEquals(303520, row.getNumber("bytesMin").longValue());
+                    assertEquals(303520, row.getNumber("bytesMax").longValue());
                 }
         );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"huge"})
+    public void shouldComputeMemoryEstimationForHugeWithProperties(String graph) {
+        String query = "CALL algo.graph.load.memrec(" +
+                               "    null, null, {" +
+                               "        graph: $graph, weightProperty: 'weight'" +
+                               "    }" +
+                               ") YIELD bytesMin, bytesMax";
+
+        runQuery(query, singletonMap("graph", graph),
+                row -> {
+                    assertEquals(573952, row.getNumber("bytesMin").longValue());
+                    assertEquals(573952, row.getNumber("bytesMax").longValue());
+                });
     }
 
     @ParameterizedTest
