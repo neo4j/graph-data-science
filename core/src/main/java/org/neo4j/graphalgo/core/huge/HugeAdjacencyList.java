@@ -26,9 +26,6 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-
 import static org.neo4j.graphalgo.core.huge.loader.VarLongEncoding.encodedVLongSize;
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 import static org.neo4j.graphalgo.core.utils.paged.PageUtil.indexInPage;
@@ -135,7 +132,7 @@ public final class HugeAdjacencyList {
     // Cursors
 
     Cursor cursor(long offset) {
-        return new Cursor(pages, offset);
+        return new Cursor(pages).init(offset);
     }
 
     /**
@@ -159,38 +156,31 @@ public final class HugeAdjacencyList {
         return reuse.init(offset);
     }
 
-    public static final class Cursor {
-        public static final Cursor EMPTY = new Cursor();
+    public static final class Cursor extends MutableIntValue {
 
-        private final int length;
-        private final ByteBuffer byteBuffer;
+        static final Cursor EMPTY = new Cursor(new byte[0][]);
 
-        private Cursor(byte[][] pages, long fromIndex) {
-            byte[] page = pages[pageIndex(fromIndex, PAGE_SHIFT)];
-            int offsetInPage = indexInPage(fromIndex, PAGE_MASK);
-            ByteBuffer byteBuffer = ByteBuffer
-                    .wrap(page, offsetInPage, page.length - offsetInPage)
-                    .order(ByteOrder.LITTLE_ENDIAN);
-            length = byteBuffer.getInt();
-            byteBuffer.limit(Long.BYTES * length + byteBuffer.position());
-            this.byteBuffer = byteBuffer;
-        }
+        // TODO: free
+        private final byte[][] pages;
 
-        // empty Cursor
-        private Cursor() {
-            length = 0;
-            byteBuffer = ByteBuffer.allocate(0);
+        private byte[] currentPage;
+        private int degree;
+        private int offset;
+        private int limit;
+
+        private Cursor(byte[][] pages) {
+            this.pages = pages;
         }
 
         public int length() {
-            return length;
+            return degree;
         }
 
         /**
          * Return true iff there is at least one more target to decode.
          */
         boolean hasNextLong() {
-            return byteBuffer.hasRemaining();
+            return offset < limit;
         }
 
         /**
@@ -198,7 +188,18 @@ public final class HugeAdjacencyList {
          * It is undefined behavior if this is called after {@link #hasNextLong()} returns {@code false}.
          */
         long nextLong() {
-            return byteBuffer.getLong();
+            long value = AdjacencyDecompressingReader.readLong(currentPage, offset);
+            offset += Long.BYTES;
+            return value;
+        }
+
+        Cursor init(long fromIndex) {
+            this.currentPage = pages[pageIndex(fromIndex, PAGE_SHIFT)];
+            this.offset = indexInPage(fromIndex, PAGE_MASK);
+            this.degree = AdjacencyDecompressingReader.readInt(currentPage, offset);
+            this.offset += Integer.BYTES;
+            this.limit = offset + degree * Long.BYTES;
+            return this;
         }
     }
 

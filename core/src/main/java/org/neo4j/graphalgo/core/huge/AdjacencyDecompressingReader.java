@@ -47,6 +47,19 @@ final class AdjacencyDecompressingReader {
     }
     //@formatter:on
 
+    //@formatter:off
+    static long readLong(byte[] array, int offset) {
+        return   array[    offset] & 255L        |
+                (array[1 + offset] & 255L) <<  8 |
+                (array[2 + offset] & 255L) << 16 |
+                (array[3 + offset] & 255L) << 24 |
+                (array[4 + offset] & 255L) << 32 |
+                (array[5 + offset] & 255L) << 40 |
+                (array[6 + offset] & 255L) << 48 |
+                (array[7 + offset] & 255L) << 56;
+    }
+    //@formatter:on
+
     void copyFrom(AdjacencyDecompressingReader other) {
         System.arraycopy(other.block, 0, block, 0, CHUNK_SIZE);
         pos = other.pos;
