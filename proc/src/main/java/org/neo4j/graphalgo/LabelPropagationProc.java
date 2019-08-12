@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
 import org.neo4j.graphalgo.impl.labelprop.LabelPropagationFactory;
 import org.neo4j.graphalgo.impl.results.LabelPropagationStats;
+import org.neo4j.graphalgo.impl.results.LabelPropagationStats.BetaStreamResult;
 import org.neo4j.graphalgo.impl.results.LabelPropagationStats.StreamResult;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
 import org.neo4j.graphdb.Direction;
@@ -84,8 +85,8 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
     @Procedure(value = "algo.beta.labelPropagation.stream")
     @Description("CALL algo.beta.labelPropagation.stream(label:String, relationship:String, " +
                  "{iterations: 1, direction: 'OUTGOING', weightProperty: 'weight', seedProperty: 'seed', concurrency: 4}) " +
-                 "YIELD nodeId, label")
-    public Stream<StreamResult> betaLabelPropagationStream(
+                 "YIELD nodeId, community")
+    public Stream<BetaStreamResult> betaLabelPropagationStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationshipType,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
@@ -126,13 +127,12 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationshipType,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
-
-        return betaLabelPropagationStream(label, relationshipType, config);
+        return betaLabelPropagationStream(label, relationshipType, config).map(StreamResult::new);
     }
 
     @Procedure(value = "algo.labelPropagation.memRec")
-    @Description("CALL algo.labelPropagation.memRec(label:String, relationship:String, config:Map<String, Object>) YIELD " +
-                 "nodeId, label")
+    @Description("CALL algo.labelPropagation.memRec(label:String, relationship:String, config:Map<String, Object>) " +
+                 "YIELD nodeId, label")
     public Stream<MemRecResult> labelPropagationMemrec(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationshipType,
@@ -205,7 +205,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
         return Stream.of(setup.statsBuilder.build(setup.tracker, setup.graph.nodeCount(), labels::get));
     }
 
-    private Stream<StreamResult> stream(
+    private Stream<BetaStreamResult> stream(
             final String label,
             final String relationshipType,
             final Map<String, Object> config) {
@@ -218,7 +218,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
 
         final HugeLongArray labels = compute(setup);
         return LongStream.range(0L, labels.size())
-                .mapToObj(i -> new StreamResult(setup.graph.toOriginalNodeId(i), labels.get(i)));
+                .mapToObj(i -> new BetaStreamResult(setup.graph.toOriginalNodeId(i), labels.get(i)));
     }
 
     private ProcedureSetup setup(
