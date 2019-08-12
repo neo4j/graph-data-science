@@ -115,7 +115,7 @@ public class Pointer {
         return new DoublePointer(v);
     }
 
-    public static <T> GenericPointer wrap(T v) {
+    public static <T> GenericPointer<T> wrap(T v) {
         return new GenericPointer<>(v);
     }
 }

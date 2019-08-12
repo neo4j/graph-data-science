@@ -65,14 +65,14 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
      * @return the value at the given index
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    abstract public T get(long index);
+    public abstract T get(long index);
 
     /**
      * Sets the value at the given index to the given value.
      *
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    abstract public void set(long index, T value);
+    public abstract void set(long index, T value);
 
     /**
      * If the value at the given index is {@code null}, attempts to compute its value using
@@ -83,57 +83,57 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
      *         the specified index, or null if the computed value is null
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    abstract public T putIfAbsent(long index, Supplier<T> supplier);
+    public abstract T putIfAbsent(long index, Supplier<T> supplier);
 
     /**
      * Set all elements using the provided generator function to compute each element.
      * <p>
      * The behavior is identical to {@link Arrays#setAll(Object[], IntFunction)}.
      */
-    abstract public void setAll(LongFunction<T> gen);
+    public abstract void setAll(LongFunction<T> gen);
 
     /**
      * Assigns the specified value to each element.
      * <p>
      * The behavior is identical to {@link Arrays#fill(Object[], Object)}.
      */
-    abstract public void fill(T value);
+    public abstract void fill(T value);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    abstract public long size();
+    public abstract long size();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    abstract public long sizeOf();
+    public abstract long sizeOf();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    abstract public long release();
+    public abstract long release();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    abstract public HugeCursor<T[]> newCursor();
+    public abstract HugeCursor<T[]> newCursor();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    abstract public void copyTo(final HugeObjectArray dest, final long length);
+    public abstract void copyTo(final HugeObjectArray<T> dest, final long length);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    abstract public HugeObjectArray<T> copyOf(final long newLength, final AllocationTracker tracker);
+    public abstract HugeObjectArray<T> copyOf(final long newLength, final AllocationTracker tracker);
 
     /**
      * {@inheritDoc}
@@ -171,7 +171,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
      * {@inheritDoc}
      */
     @Override
-    abstract public T[] toArray();
+    public abstract T[] toArray();
 
     /**
      * Creates a new array if the given size, tracking the memory requirements into the given {@link AllocationTracker}.
@@ -185,7 +185,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
     }
 
     @SafeVarargs
-    public static <T> HugeObjectArray of(final T... values) {
+    public static <T> HugeObjectArray<T> of(final T... values) {
         return new HugeObjectArray.SingleHugeObjectArray<>(values.length, values);
     }
 
@@ -254,7 +254,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
         }
 
         @Override
-        public void copyTo(HugeObjectArray dest, long length) {
+        public void copyTo(HugeObjectArray<T> dest, long length) {
             if (length > size) {
                 length = size;
             }
@@ -262,11 +262,11 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
                 length = dest.size();
             }
             if (dest instanceof SingleHugeObjectArray) {
-                SingleHugeObjectArray dst = (SingleHugeObjectArray) dest;
+                SingleHugeObjectArray<T> dst = (SingleHugeObjectArray<T>) dest;
                 System.arraycopy(page, 0, dst.page, 0, (int) length);
                 Arrays.fill(dst.page, (int) length, dst.size, null);
             } else if (dest instanceof PagedHugeObjectArray) {
-                PagedHugeObjectArray dst = (PagedHugeObjectArray) dest;
+                PagedHugeObjectArray<T> dst = (PagedHugeObjectArray<T>) dest;
                 int start = 0;
                 int remaining = (int) length;
                 for (Object[] dstPage : dst.pages) {
@@ -403,7 +403,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
         }
 
         @Override
-        public void copyTo(HugeObjectArray dest, long length) {
+        public void copyTo(HugeObjectArray<T> dest, long length) {
             if (length > size) {
                 length = size;
             }
@@ -411,7 +411,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
                 length = dest.size();
             }
             if (dest instanceof SingleHugeObjectArray) {
-                SingleHugeObjectArray dst = (SingleHugeObjectArray) dest;
+                SingleHugeObjectArray<T> dst = (SingleHugeObjectArray<T>) dest;
                 int start = 0;
                 int remaining = (int) length;
                 for (T[] page : pages) {
@@ -425,7 +425,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
                 }
                 Arrays.fill(dst.page, start, dst.size, null);
             } else if (dest instanceof PagedHugeObjectArray) {
-                PagedHugeObjectArray dst = (PagedHugeObjectArray) dest;
+                PagedHugeObjectArray<T> dst = (PagedHugeObjectArray<T>) dest;
                 int pageLen = Math.min(pages.length, dst.pages.length);
                 int lastPage = pageLen - 1;
                 long remaining = length;
