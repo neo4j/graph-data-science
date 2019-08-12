@@ -137,7 +137,7 @@ final class RelationshipImporter extends StatementAction {
                 .map(prop -> (WeightMap) prop)
                 .toArray(WeightMap[]::new);
 
-        return new ReadWithNodeProperties(loader, weightMaps);
+        return new RelationshipLoader.ReadWithNodeProperties(loader, weightMaps);
     }
 
     private RelationshipLoader prepareDirected(
@@ -153,7 +153,7 @@ final class RelationshipImporter extends StatementAction {
         if (loadOutgoing) {
             final VisitRelationship visitor;
             if (shouldLoadWeights) {
-                visitor = new VisitOutgoingWithWeight(
+                visitor = new VisitRelationship.VisitOutgoingWithWeight(
                         readOp,
                         cursors,
                         idMap,
@@ -161,14 +161,14 @@ final class RelationshipImporter extends StatementAction {
                         relWeightId,
                         setup.relationDefaultWeight);
             } else {
-                visitor = new VisitOutgoingNoWeight(idMap, sort);
+                visitor = new VisitRelationship.VisitOutgoingNoWeight(idMap, sort);
             }
-            loader = new ReadOutgoing(transaction, matrix, relationId, visitor);
+            loader = new RelationshipLoader.ReadOutgoing(transaction, matrix, relationId, visitor);
         }
         if (loadIncoming) {
             final VisitRelationship visitor;
             if (shouldLoadWeights) {
-                visitor = new VisitIncomingWithWeight(
+                visitor = new VisitRelationship.VisitIncomingWithWeight(
                         readOp,
                         cursors,
                         idMap,
@@ -176,20 +176,20 @@ final class RelationshipImporter extends StatementAction {
                         relWeightId,
                         setup.relationDefaultWeight);
             } else {
-                visitor = new VisitIncomingNoWeight(idMap, sort);
+                visitor = new VisitRelationship.VisitIncomingNoWeight(idMap, sort);
             }
             if (loader != null) {
-                ReadOutgoing readOutgoing = (ReadOutgoing) loader;
-                loader = new ReadBoth(readOutgoing, visitor);
+                loader = new RelationshipLoader.ReadBoth((RelationshipLoader.ReadOutgoing) loader, visitor);
             } else {
-                loader = new ReadIncoming(transaction, matrix, relationId, visitor);
+                loader = new RelationshipLoader.ReadIncoming(transaction, matrix, relationId, visitor);
             }
         }
         if (loader == null) {
-            loader = new ReadNothing(transaction, matrix, relationId);
+            loader = new RelationshipLoader.ReadNothing(transaction, matrix, relationId);
         }
         return loader;
     }
+
 
     private RelationshipLoader prepareUndirected(
             final KernelTransaction transaction,
@@ -198,14 +198,14 @@ final class RelationshipImporter extends StatementAction {
         final VisitRelationship visitorIn;
         final VisitRelationship visitorOut;
         if (relWeightId != NO_SUCH_PROPERTY_KEY) {
-            visitorIn = new VisitIncomingWithWeight(
+            visitorIn = new VisitRelationship.VisitIncomingWithWeight(
                     readOp,
                     cursors,
                     idMap,
                     true,
                     relWeightId,
                     setup.relationDefaultWeight);
-            visitorOut = new VisitOutgoingWithWeight(
+            visitorOut = new VisitRelationship.VisitOutgoingWithWeight(
                     readOp,
                     cursors,
                     idMap,
@@ -213,10 +213,11 @@ final class RelationshipImporter extends StatementAction {
                     relWeightId,
                     setup.relationDefaultWeight);
         } else {
-            visitorIn = new VisitIncomingNoWeight(idMap, true);
-            visitorOut = new VisitOutgoingNoWeight(idMap, true);
+            visitorIn = new VisitRelationship.VisitIncomingNoWeight(idMap, true);
+            visitorOut = new VisitRelationship.VisitOutgoingNoWeight(idMap, true);
         }
-        return new ReadUndirected(transaction, matrix, relationId, visitorOut, visitorIn);
+
+        return new RelationshipLoader.ReadUndirected(transaction, matrix, relationId, visitorOut, visitorIn);
     }
 
     Graph toGraph(final IntIdMap idMap, final AdjacencyMatrix matrix, final long relationshipCount) {

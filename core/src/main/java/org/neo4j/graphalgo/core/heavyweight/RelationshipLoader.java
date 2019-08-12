@@ -188,115 +188,115 @@ abstract class RelationshipLoader {
             }
         }
     }
-}
 
-final class ReadNothing extends RelationshipLoader {
-    ReadNothing(
-            final KernelTransaction transaction,
-            final AdjacencyMatrix matrix,
-            final int[] relationType) {
-        super(transaction, matrix, relationType);
-    }
-
-    @Override
-    long load(NodeCursor sourceNode, int localNodeId) {
-        return 0;
-    }
-}
-
-final class ReadOutgoing extends RelationshipLoader {
-    final VisitRelationship visitOutgoing;
-
-    ReadOutgoing(
-            final KernelTransaction transaction,
-            final AdjacencyMatrix matrix,
-            final int[] relationType,
-            final VisitRelationship visitOutgoing) {
-        super(transaction, matrix, relationType);
-        this.visitOutgoing = visitOutgoing;
-    }
-
-    @Override
-    long load(NodeCursor sourceNode, int localNodeId) {
-        return readOutgoing(visitOutgoing, sourceNode, localNodeId);
-    }
-}
-
-final class ReadIncoming extends RelationshipLoader {
-    private final VisitRelationship visitIncoming;
-
-    ReadIncoming(
-            final KernelTransaction transaction,
-            final AdjacencyMatrix matrix,
-            final int[] relationType,
-            final VisitRelationship visitIncoming) {
-        super(transaction, matrix, relationType);
-        this.visitIncoming = visitIncoming;
-    }
-
-    @Override
-    long load(NodeCursor sourceNode, int localNodeId) {
-        return readIncoming(visitIncoming, sourceNode, localNodeId);
-    }
-}
-
-final class ReadBoth extends RelationshipLoader {
-    private final VisitRelationship visitOutgoing;
-    private final VisitRelationship visitIncoming;
-
-    ReadBoth(final ReadOutgoing readOut, final VisitRelationship visitIncoming) {
-        super(readOut);
-        this.visitOutgoing = readOut.visitOutgoing;
-        this.visitIncoming = visitIncoming;
-    }
-
-    @Override
-    long load(NodeCursor sourceNode, int localNodeId) {
-        long out = readOutgoing(visitOutgoing, sourceNode, localNodeId);
-        long in = readIncoming(visitIncoming, sourceNode, localNodeId);
-        return addCombinedDegrees(out, in);
-    }
-}
-
-final class ReadUndirected extends RelationshipLoader {
-    private final VisitRelationship visitOutgoing;
-    private final VisitRelationship visitIncoming;
-
-    ReadUndirected(
-            final KernelTransaction transaction,
-            final AdjacencyMatrix matrix,
-            final int[] relationType,
-            final VisitRelationship visitOutgoing,
-            final VisitRelationship visitIncoming) {
-        super(transaction, matrix, relationType);
-        this.visitOutgoing = visitOutgoing;
-        this.visitIncoming = visitIncoming;
-    }
-
-    @Override
-    long load(NodeCursor sourceNode, int localNodeId) {
-        return readUndirected(visitOutgoing, visitIncoming, sourceNode, localNodeId);
-    }
-}
-
-final class ReadWithNodeProperties extends RelationshipLoader {
-    private final RelationshipLoader loader;
-    private final WeightMap[] nodeProperties;
-
-    ReadWithNodeProperties(
-            final RelationshipLoader loader,
-            final WeightMap...nodeProperties) {
-        super(loader);
-        this.loader = loader;
-        this.nodeProperties = nodeProperties;
-    }
-
-    @Override
-    long load(NodeCursor sourceNode, int localNodeId) {
-        long imported = loader.load(sourceNode, localNodeId);
-        for (WeightMap nodeProperty : nodeProperties) {
-            readNodeWeight(sourceNode, localNodeId, nodeProperty, nodeProperty.propertyId());
+    static final class ReadNothing extends RelationshipLoader {
+        ReadNothing(
+                final KernelTransaction transaction,
+                final AdjacencyMatrix matrix,
+                final int[] relationType) {
+            super(transaction, matrix, relationType);
         }
-        return imported;
+
+        @Override
+        long load(NodeCursor sourceNode, int localNodeId) {
+            return 0;
+        }
+    }
+
+    static final class ReadOutgoing extends RelationshipLoader {
+        final VisitRelationship visitOutgoing;
+
+        ReadOutgoing(
+                final KernelTransaction transaction,
+                final AdjacencyMatrix matrix,
+                final int[] relationType,
+                final VisitRelationship visitOutgoing) {
+            super(transaction, matrix, relationType);
+            this.visitOutgoing = visitOutgoing;
+        }
+
+        @Override
+        long load(NodeCursor sourceNode, int localNodeId) {
+            return readOutgoing(visitOutgoing, sourceNode, localNodeId);
+        }
+    }
+
+    static final class ReadIncoming extends RelationshipLoader {
+        private final VisitRelationship visitIncoming;
+
+        ReadIncoming(
+                final KernelTransaction transaction,
+                final AdjacencyMatrix matrix,
+                final int[] relationType,
+                final VisitRelationship visitIncoming) {
+            super(transaction, matrix, relationType);
+            this.visitIncoming = visitIncoming;
+        }
+
+        @Override
+        long load(NodeCursor sourceNode, int localNodeId) {
+            return readIncoming(visitIncoming, sourceNode, localNodeId);
+        }
+    }
+
+    static final class ReadBoth extends RelationshipLoader {
+        private final VisitRelationship visitOutgoing;
+        private final VisitRelationship visitIncoming;
+
+        ReadBoth(final ReadOutgoing readOut, final VisitRelationship visitIncoming) {
+            super(readOut);
+            this.visitOutgoing = readOut.visitOutgoing;
+            this.visitIncoming = visitIncoming;
+        }
+
+        @Override
+        long load(NodeCursor sourceNode, int localNodeId) {
+            long out = readOutgoing(visitOutgoing, sourceNode, localNodeId);
+            long in = readIncoming(visitIncoming, sourceNode, localNodeId);
+            return addCombinedDegrees(out, in);
+        }
+    }
+
+    static final class ReadUndirected extends RelationshipLoader {
+        private final VisitRelationship visitOutgoing;
+        private final VisitRelationship visitIncoming;
+
+        ReadUndirected(
+                final KernelTransaction transaction,
+                final AdjacencyMatrix matrix,
+                final int[] relationType,
+                final VisitRelationship visitOutgoing,
+                final VisitRelationship visitIncoming) {
+            super(transaction, matrix, relationType);
+            this.visitOutgoing = visitOutgoing;
+            this.visitIncoming = visitIncoming;
+        }
+
+        @Override
+        long load(NodeCursor sourceNode, int localNodeId) {
+            return readUndirected(visitOutgoing, visitIncoming, sourceNode, localNodeId);
+        }
+    }
+
+    static final class ReadWithNodeProperties extends RelationshipLoader {
+        private final RelationshipLoader loader;
+        private final WeightMap[] nodeProperties;
+
+        ReadWithNodeProperties(
+                final RelationshipLoader loader,
+                final WeightMap... nodeProperties) {
+            super(loader);
+            this.loader = loader;
+            this.nodeProperties = nodeProperties;
+        }
+
+        @Override
+        long load(NodeCursor sourceNode, int localNodeId) {
+            long imported = loader.load(sourceNode, localNodeId);
+            for (WeightMap nodeProperty : nodeProperties) {
+                readNodeWeight(sourceNode, localNodeId, nodeProperty, nodeProperty.propertyId());
+            }
+            return imported;
+        }
     }
 }

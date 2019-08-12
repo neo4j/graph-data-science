@@ -145,86 +145,99 @@ abstract class VisitRelationship {
         }
         return write;
     }
-}
 
-final class VisitOutgoingNoWeight extends VisitRelationship {
 
-    VisitOutgoingNoWeight(final IntIdMap idMap, final boolean shouldSort) {
-        super(idMap, shouldSort);
-    }
+    static final class VisitOutgoingNoWeight extends VisitRelationship {
 
-    @Override
-    void visit(final RelationshipSelectionCursor cursor) {
-        addNode(cursor.targetNodeReference());
-    }
-}
+        VisitOutgoingNoWeight(final IntIdMap idMap, final boolean shouldSort) {
+            super(idMap, shouldSort);
+        }
 
-final class VisitIncomingNoWeight extends VisitRelationship {
-
-    VisitIncomingNoWeight(final IntIdMap idMap, final boolean shouldSort) {
-        super(idMap, shouldSort);
-    }
-
-    @Override
-    void visit(final RelationshipSelectionCursor cursor) {
-        addNode(cursor.sourceNodeReference());
-    }
-}
-
-final class VisitOutgoingWithWeight extends VisitRelationship {
-
-    private final Read readOp;
-    private final CursorFactory cursors;
-    private final double defaultValue;
-    private final int propertyId;
-
-    VisitOutgoingWithWeight(
-            final Read readOp,
-            final CursorFactory cursors,
-            final IntIdMap idMap,
-            final boolean shouldSort,
-            final int propertyId,
-            final double defaultValue) {
-        super(idMap, shouldSort);
-        this.readOp = readOp;
-        this.cursors = cursors;
-        this.defaultValue = defaultValue;
-        this.propertyId = propertyId;
-    }
-
-    @Override
-    void visit(final RelationshipSelectionCursor cursor) {
-        if (addNode(cursor.targetNodeReference())) {
-            visitWeight(readOp, cursors, propertyId, defaultValue, cursor.relationshipReference(), cursor.propertiesReference());
+        @Override
+        void visit(final RelationshipSelectionCursor cursor) {
+            addNode(cursor.targetNodeReference());
         }
     }
-}
 
-final class VisitIncomingWithWeight extends VisitRelationship {
+    static final class VisitIncomingNoWeight extends VisitRelationship {
 
-    private final Read readOp;
-    private final CursorFactory cursors;
-    private final double defaultValue;
-    private final int propertyId;
+        VisitIncomingNoWeight(final IntIdMap idMap, final boolean shouldSort) {
+            super(idMap, shouldSort);
+        }
 
-    VisitIncomingWithWeight(
-            final Read readOp,
-            final CursorFactory cursors,
-            final IntIdMap idMap,
-            final boolean shouldSort,
-            final int propertyId,
-            final double defaultValue) {
-        super(idMap, shouldSort);
-        this.readOp = readOp;
-        this.cursors = cursors;
-        this.defaultValue = defaultValue;
-        this.propertyId = propertyId;
+        @Override
+        void visit(final RelationshipSelectionCursor cursor) {
+            addNode(cursor.sourceNodeReference());
+        }
     }
 
-    @Override
-    void visit(final RelationshipSelectionCursor cursor) {
-        if (addNode(cursor.sourceNodeReference())) {
-            visitWeight(readOp, cursors, propertyId, defaultValue, cursor.relationshipReference(), cursor.propertiesReference());
+    static final class VisitOutgoingWithWeight extends VisitRelationship {
+
+        private final Read readOp;
+        private final CursorFactory cursors;
+        private final double defaultValue;
+        private final int propertyId;
+
+        VisitOutgoingWithWeight(
+                final Read readOp,
+                final CursorFactory cursors,
+                final IntIdMap idMap,
+                final boolean shouldSort,
+                final int propertyId,
+                final double defaultValue) {
+            super(idMap, shouldSort);
+            this.readOp = readOp;
+            this.cursors = cursors;
+            this.defaultValue = defaultValue;
+            this.propertyId = propertyId;
+        }
+
+        @Override
+        void visit(final RelationshipSelectionCursor cursor) {
+            if (addNode(cursor.targetNodeReference())) {
+                visitWeight(
+                        readOp,
+                        cursors,
+                        propertyId,
+                        defaultValue,
+                        cursor.relationshipReference(),
+                        cursor.propertiesReference());
+            }
+        }
+    }
+
+    static final class VisitIncomingWithWeight extends VisitRelationship {
+
+        private final Read readOp;
+        private final CursorFactory cursors;
+        private final double defaultValue;
+        private final int propertyId;
+
+        VisitIncomingWithWeight(
+                final Read readOp,
+                final CursorFactory cursors,
+                final IntIdMap idMap,
+                final boolean shouldSort,
+                final int propertyId,
+                final double defaultValue) {
+            super(idMap, shouldSort);
+            this.readOp = readOp;
+            this.cursors = cursors;
+            this.defaultValue = defaultValue;
+            this.propertyId = propertyId;
+        }
+
+        @Override
+        void visit(final RelationshipSelectionCursor cursor) {
+            if (addNode(cursor.sourceNodeReference())) {
+                visitWeight(
+                        readOp,
+                        cursors,
+                        propertyId,
+                        defaultValue,
+                        cursor.relationshipReference(),
+                        cursor.propertiesReference());
+            }
         }
     }
 }
