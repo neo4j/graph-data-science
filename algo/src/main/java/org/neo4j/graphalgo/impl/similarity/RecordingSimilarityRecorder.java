@@ -28,7 +28,7 @@ public class RecordingSimilarityRecorder<T> implements SimilarityRecorder<T> {
     private final SimilarityComputer<T> computer;
     private final LongAdder computations = new LongAdder();
 
-    public RecordingSimilarityRecorder(SimilarityComputer computer) {
+    public RecordingSimilarityRecorder(SimilarityComputer<T> computer) {
         this.computer = computer;
     }
 

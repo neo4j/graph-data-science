@@ -147,7 +147,7 @@ public class SimilarityStreamGenerator<T> {
     private  Stream<SimilarityResult> similarityParallelStreamTopK(T[] inputs, int length, TerminationFlag terminationFlag, int concurrency, double cutoff, int topK, SimilarityComputer<T> computer, Supplier<RleDecoder> decoderFactory) {
         int batchSize = ParallelUtil.adjustBatchSize(length, concurrency, 1);
         int taskCount = (length / batchSize) + (length % batchSize > 0 ? 1 : 0);
-        Collection<TopKTask> tasks = new ArrayList<>(taskCount);
+        Collection<TopKTask<T>> tasks = new ArrayList<>(taskCount);
 
         int multiplier = batchSize < length ? batchSize : 1;
         for (int taskId = 0; taskId < taskCount; taskId++) {
@@ -271,7 +271,7 @@ public class SimilarityStreamGenerator<T> {
 
         int batchSize = ParallelUtil.adjustBatchSize(sourceIdsLength, concurrency, 1);
         int taskCount = (sourceIdsLength / batchSize) + (sourceIdsLength % batchSize > 0 ? 1 : 0);
-        Collection<SourceTargetTopKTask> tasks = new ArrayList<>(taskCount);
+        Collection<SourceTargetTopKTask<T>> tasks = new ArrayList<>(taskCount);
 
         int multiplier = batchSize < sourceIdsLength ? batchSize : 1;
         for (int taskId = 0; taskId < taskCount; taskId++) {

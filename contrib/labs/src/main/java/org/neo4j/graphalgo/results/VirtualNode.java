@@ -162,7 +162,7 @@ public class VirtualNode implements Node {
 
     @Override
     public int getDegree() {
-        return (int) rels.size();
+        return rels.size();
     }
 
     @Override

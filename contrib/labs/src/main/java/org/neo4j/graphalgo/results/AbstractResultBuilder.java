@@ -27,47 +27,44 @@ public abstract class AbstractResultBuilder<R> {
     protected long evalDuration = -1;
     protected long writeDuration = -1;
 
-    public AbstractResultBuilder withLoadDuration(long loadDuration) {
+    public void setLoadDuration(long loadDuration) {
         this.loadDuration = loadDuration;
-        return this;
     }
 
-    public AbstractResultBuilder withEvalDuration(long evalDuration) {
+    public void setEvalDuration(long evalDuration) {
         this.evalDuration = evalDuration;
-        return this;
     }
 
-    public AbstractResultBuilder withWriteDuration(long writeDuration) {
+    public void setWriteDuration(long writeDuration) {
         this.writeDuration = writeDuration;
-        return this;
     }
 
     public ProgressTimer timeLoad() {
-        return ProgressTimer.start(this::withLoadDuration);
+        return ProgressTimer.start(this::setLoadDuration);
     }
 
     public ProgressTimer timeEval() {
-        return ProgressTimer.start(this::withEvalDuration);
+        return ProgressTimer.start(this::setEvalDuration);
     }
 
     public ProgressTimer timeWrite() {
-        return ProgressTimer.start(this::withWriteDuration);
+        return ProgressTimer.start(this::setWriteDuration);
     }
 
     public void timeLoad(Runnable runnable) {
-        try (ProgressTimer timer = timeLoad()) {
+        try (ProgressTimer ignored = timeLoad()) {
             runnable.run();
         }
     }
 
     public void timeEval(Runnable runnable) {
-        try (ProgressTimer timer = timeEval()) {
+        try (ProgressTimer ignored = timeEval()) {
             runnable.run();
         }
     }
 
     public void timeWrite(Runnable runnable) {
-        try (ProgressTimer timer = timeWrite()) {
+        try (ProgressTimer ignored = timeWrite()) {
             runnable.run();
         }
     }

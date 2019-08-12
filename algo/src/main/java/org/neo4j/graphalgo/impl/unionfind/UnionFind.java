@@ -38,7 +38,7 @@ public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> 
 
     static MemoryEstimation memoryEstimation(
             final boolean incremental,
-            Class<? extends UnionFind> unionFindClass,
+            Class<? extends UnionFind<?>> unionFindClass,
             Class<?> taskClass) {
         return MemoryEstimations.builder(unionFindClass)
                 .startField("computeStep", taskClass)

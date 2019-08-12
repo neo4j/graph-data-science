@@ -246,7 +246,7 @@ public class TriangleProc {
         builder.withAverageClusteringCoefficient(triangleCount.getAverageCoefficient())
                 .withTriangleCount(triangleCount.getTriangleCount());
 
-        final PagedAtomicIntegerArray triangles = ((IntersectingTriangleCount) triangleCount).getTriangles();
+        final PagedAtomicIntegerArray triangles = triangleCount.getTriangles();
         return Stream.of(builder.buildfromKnownLongSizes(graph.nodeCount(), triangles::get));
     }
 
@@ -276,8 +276,8 @@ public class TriangleProc {
 
         if (coefficientProperty.isPresent()) {
             // huge with coefficients
-            final HugeDoubleArray coefficients = ((IntersectingTriangleCount) algorithm).getCoefficients();
-            final PagedAtomicIntegerArray triangles = ((IntersectingTriangleCount) algorithm).getTriangles();
+            final HugeDoubleArray coefficients = algorithm.getCoefficients();
+            final PagedAtomicIntegerArray triangles = algorithm.getTriangles();
             exporter.write(
                     writeProperty,
                     triangles,
@@ -288,7 +288,7 @@ public class TriangleProc {
             );
         } else {
             // huge without coefficients
-            final PagedAtomicIntegerArray triangles = ((IntersectingTriangleCount) algorithm).getTriangles();
+            final PagedAtomicIntegerArray triangles = algorithm.getTriangles();
             exporter.write(
                     writeProperty,
                     triangles,

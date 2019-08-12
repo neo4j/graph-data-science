@@ -39,21 +39,16 @@ public abstract class AbstractCommunityResultBuilder<T> {
     protected long writeDuration = -1;
     protected boolean write = false;
 
-    public AbstractCommunityResultBuilder<T> withLoadDuration(long loadDuration) {
+    public void setLoadDuration(long loadDuration) {
         this.loadDuration = loadDuration;
-        return this;
     }
 
-
-    public AbstractCommunityResultBuilder<T> withEvalDuration(long evalDuration) {
+    public void setEvalDuration(long evalDuration) {
         this.evalDuration = evalDuration;
-        return this;
     }
 
-
-    public AbstractCommunityResultBuilder<T> withWriteDuration(long writeDuration) {
+    public void setWriteDuration(long writeDuration) {
         this.writeDuration = writeDuration;
-        return this;
     }
 
     public AbstractCommunityResultBuilder<T> withWrite(boolean write) {
@@ -68,7 +63,7 @@ public abstract class AbstractCommunityResultBuilder<T> {
      * @return
      */
     public ProgressTimer timeLoad() {
-        return ProgressTimer.start(this::withLoadDuration);
+        return ProgressTimer.start(this::setLoadDuration);
     }
 
     /**
@@ -78,7 +73,7 @@ public abstract class AbstractCommunityResultBuilder<T> {
      * @return
      */
     public ProgressTimer timeEval() {
-        return ProgressTimer.start(this::withEvalDuration);
+        return ProgressTimer.start(this::setEvalDuration);
     }
 
     /**
@@ -88,7 +83,7 @@ public abstract class AbstractCommunityResultBuilder<T> {
      * @return
      */
     public ProgressTimer timeWrite() {
-        return ProgressTimer.start(this::withWriteDuration);
+        return ProgressTimer.start(this::setWriteDuration);
     }
 
     /**

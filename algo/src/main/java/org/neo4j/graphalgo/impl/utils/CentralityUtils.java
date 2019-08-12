@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.impl.utils;
 
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -35,15 +36,23 @@ import java.util.function.DoubleUnaryOperator;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public class CentralityUtils {
-    public static void write(GraphDatabaseAPI api, Log log, Graph graph, TerminationFlag terminationFlag,
-                             CentralityResult result, ProcedureConfiguration configuration,
-                             AbstractWriteBuilder statsBuilder,
-                             String defaultScoreProperty) {
+public final class CentralityUtils {
+
+    private CentralityUtils() {}
+
+    public static <R> void write(
+            GraphDatabaseAPI api,
+            Log log,
+            IdMapping graph,
+            TerminationFlag terminationFlag,
+            CentralityResult result,
+            ProcedureConfiguration configuration,
+            AbstractWriteBuilder<R> statsBuilder,
+            String defaultScoreProperty) {
         if (configuration.isWriteFlag(true)) {
             log.debug("Writing results");
             String propertyName = configuration.getWriteProperty(defaultScoreProperty);
-            try (ProgressTimer timer = statsBuilder.timeWrite()) {
+            try (ProgressTimer ignored = statsBuilder.timeWrite()) {
                 Exporter exporter = Exporter
                         .of(api, graph)
                         .withLog(log)

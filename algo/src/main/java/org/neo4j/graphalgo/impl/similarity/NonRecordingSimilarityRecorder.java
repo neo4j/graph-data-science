@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.impl.results.SimilarityResult;
 public class NonRecordingSimilarityRecorder<T> implements SimilarityRecorder<T> {
     private final SimilarityComputer<T> computer;
 
-    public NonRecordingSimilarityRecorder(SimilarityComputer computer) {
+    public NonRecordingSimilarityRecorder(SimilarityComputer<T> computer) {
         this.computer = computer;
     }
 

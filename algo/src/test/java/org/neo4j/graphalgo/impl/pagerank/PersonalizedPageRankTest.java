@@ -127,7 +127,8 @@ public final class PersonalizedPageRankTest {
             expected.put(db.findNode(productLabel, "name", "Fitbit Flex Wireless").getId(), 0.08085200000000001);
             expected.put(db.findNode(productLabel, "name", "Harry Potter").getId(), 0.01224);
             expected.put(db.findNode(productLabel, "name", "Hobbit").getId(), 0.01224);
-            tx.close();
+
+            tx.success();
         }
 
         final Graph graph;

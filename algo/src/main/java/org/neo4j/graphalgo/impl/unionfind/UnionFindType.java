@@ -96,7 +96,7 @@ public enum UnionFindType {
         }
     };
 
-    public abstract UnionFind<? extends UnionFind> create(
+    public abstract UnionFind<? extends UnionFind<?>> create(
             Graph graph,
             ExecutorService executor,
             int minBatchSize,

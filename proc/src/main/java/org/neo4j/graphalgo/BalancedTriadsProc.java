@@ -113,7 +113,7 @@ public class BalancedTriadsProc {
 
         // load
         try (ProgressTimer timer = builder.timeLoad()) {
-            graph = (Graph) new GraphLoader(api, Pools.DEFAULT)
+            graph = new GraphLoader(api, Pools.DEFAULT)
                     .withOptionalLabel(configuration.getNodeLabelOrQuery())
                     .withOptionalRelationshipType(configuration.getRelationshipOrQuery())
                     .withOptionalRelationshipWeightsFromProperty(configuration.getWeightProperty(), 0.0)
