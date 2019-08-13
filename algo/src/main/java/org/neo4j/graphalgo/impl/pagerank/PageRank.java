@@ -554,8 +554,7 @@ public class PageRank extends Algorithm<PageRank> {
                 double[] deltas = step.deltas();
                 l2Norm += ParallelUtil.parallelStream(
                         Arrays.stream(deltas),
-                        (stream) -> { return stream.map(score -> score * score).sum(); },
-                        Pools.FJ_POOL);
+                        (stream) -> stream.map(score -> score * score).sum());
             }
             l2Norm = Math.sqrt(l2Norm);
             l2Norm = l2Norm < 0 ? 1 : l2Norm;

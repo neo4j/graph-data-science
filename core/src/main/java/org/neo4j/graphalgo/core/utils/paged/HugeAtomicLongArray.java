@@ -318,7 +318,7 @@ public abstract class HugeAtomicLongArray {
         }
 
         private static void parallelSetAll(long[] array, IntToLongFunction generator) {
-            ParallelUtil.parallelStream(IntStream.range(0, array.length), intStream -> {
+            ParallelUtil.parallelStreamForeach(IntStream.range(0, array.length), intStream -> {
                 intStream.forEach(i -> array[i] = generator.applyAsLong(i));
             }, Pools.FJ_POOL);
         }

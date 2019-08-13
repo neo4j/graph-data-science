@@ -21,17 +21,23 @@ package org.neo4j.graphalgo.impl.results;
 
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
-public class HugeNormalizationComputations {
+import java.util.stream.DoubleStream;
+
+import static org.neo4j.graphalgo.core.utils.ParallelUtil.parallelStream;
+
+public final class HugeNormalizationComputations {
+
+    private HugeNormalizationComputations() {}
 
     static double squaredSum(HugeDoubleArray partition) {
-        return partition.stream().parallel().map(value -> value * value).sum();
+        return parallelStream(partition.stream(), stream -> stream.map(value -> value * value).sum());
     }
 
     static double l1Norm(HugeDoubleArray partition) {
-        return partition.stream().parallel().sum();
+        return parallelStream(partition.stream(), DoubleStream::sum);
     }
 
     public static double max(HugeDoubleArray result, double defaultMax) {
-        return result.stream().parallel().max().orElse(defaultMax);
+        return parallelStream(result.stream(), stream -> stream.max().orElse(defaultMax));
     }
 }
