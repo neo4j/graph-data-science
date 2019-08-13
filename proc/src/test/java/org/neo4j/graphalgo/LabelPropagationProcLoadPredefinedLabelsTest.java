@@ -90,8 +90,8 @@ public class LabelPropagationProcLoadPredefinedLabelsTest extends ProcTestBase {
                        "    null, null, {" +
                        "        batchSize: $batchSize, concurrency: $concurrency, graph: $graph, seedProperty: 'community'" +
                        "    }" +
-                       ") YIELD nodeId, community " +
-                       "RETURN algo.asNode(nodeId) AS id, community " +
+                       ") YIELD nodeId, label " +
+                       "RETURN algo.asNode(nodeId) AS id, label AS community " +
                        "ORDER BY id";
 
         Result result = DB.execute(query, parParams(parallel, graphImpl));

@@ -240,10 +240,10 @@ public class LabelPropagationBetaProcTest extends ProcTestBase {
                                 "    null, null, {" +
                                 "        iterations: 20, direction: 'OUTGOING', weightProperty: $weightProperty" +
                                 "    }" +
-                                ") YIELD nodeId, community " +
+                                ") YIELD nodeId, label " +
                                 "MATCH (node) " +
                                 "    WHERE id(node) = nodeId " +
-                                "RETURN node.id AS id, id(node) AS internalNodeId, node.lpa AS seedProperty, community";
+                                "RETURN node.id AS id, id(node) AS internalNodeId, node.lpa AS seedProperty, label AS community";
 
         runQuery(streamingQuery, parParams(parallel, graphImpl),
                 row -> assertEquals(row.getNumber("seedProperty").intValue(), row.getNumber("community").intValue()));
@@ -272,7 +272,7 @@ public class LabelPropagationBetaProcTest extends ProcTestBase {
         Result initResult = db.execute(query, Collections.singletonMap("seed", seededLabel));
         long maxId = Iterators.single(initResult.<Number>columnAs("maxId")).longValue();
 
-        String lpa = "CALL algo.labelPropagation.stream('Pet', 'REL', {seedProperty: 'seedId'}) " +
+        String lpa = "CALL algo.beta.labelPropagation.stream('Pet', 'REL', {seedProperty: 'seedId'}) " +
                      "YIELD nodeId, community " +
                      "MATCH (pet:Pet) WHERE id(pet) = nodeId " +
                      "RETURN pet.id as nodeId, community";

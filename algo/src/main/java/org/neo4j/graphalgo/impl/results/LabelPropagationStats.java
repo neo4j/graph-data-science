@@ -23,13 +23,24 @@ import org.HdrHistogram.Histogram;
 
 public class LabelPropagationStats {
 
-    public static class StreamResult {
+    public static class BetaStreamResult {
         public final long nodeId;
         public final long community;
 
-        public StreamResult(long nodeId, long community) {
+        public BetaStreamResult(long nodeId, long community) {
             this.nodeId = nodeId;
             this.community = community;
+        }
+    }
+
+    @Deprecated
+    public static class StreamResult {
+        public final long nodeId;
+        public final long label;
+
+        public StreamResult(BetaStreamResult betaStreamResult) {
+            this.nodeId = betaStreamResult.nodeId;
+            this.label = betaStreamResult.community;
         }
     }
 

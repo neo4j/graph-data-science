@@ -229,32 +229,6 @@ public class LabelPropagationDeprecatedProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("parameters")
-    public void shouldStreamResults(boolean parallel, String graphImpl) {
-        // this one deliberately tests the streaming and non streaming versions against each other to check we get the same results
-        // we intentionally start with no labels defined for any nodes (hence seedProperty = {lpa, lpa2})
-
-        String writingQuery = "CALL algo.labelPropagation(" +
-                              "  null, null, 'OUTGOING', {" +
-                              "      iterations: 20, writeProperty: 'lpa', weightProperty: $weightProperty" +
-                              "  }" +
-                              ")";
-        runQuery(writingQuery, parParams(parallel, graphImpl));
-
-        String streamingQuery = "CALL algo.labelPropagation.stream(" +
-                                "   null, null, {" +
-                                "       iterations: 20, direction: 'OUTGOING', weightProperty: $weightProperty" +
-                                "   }" +
-                                ") YIELD nodeId, community " +
-                                "MATCH (node) WHERE id(node) = nodeId " +
-                                "RETURN node.id AS id, id(node) AS internalNodeId, node.lpa AS seedProperty, community";
-
-        runQuery(streamingQuery, parParams(parallel, graphImpl),
-                row -> assertEquals(row.getNumber("seedProperty").intValue(), row.getNumber("community").intValue())
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("parameters")
     public void testGeneratedAndProvidedLabelsDontConflict(boolean parallel, String graphImpl) throws KernelException {
         GraphDatabaseAPI db = TestDatabaseCreator.createTestDatabase();
         db.getDependencyResolver()
@@ -281,9 +255,9 @@ public class LabelPropagationDeprecatedProcTest extends ProcTestBase {
                      "  'Pet', 'REL', {" +
                      "      seedProperty: 'seedId'" +
                      "  }" +
-                     ") YIELD nodeId, community " +
+                     ") YIELD nodeId, label " +
                      "MATCH (pet:Pet) WHERE id(pet) = nodeId " +
-                     "RETURN pet.id as nodeId, community";
+                     "RETURN pet.id as nodeId, label AS community";
 
         long[] sets = new long[4];
         db.execute(lpa).accept(row -> {
