@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.impl.similarity;
 
 import org.neo4j.graphalgo.impl.results.SimilarityResult;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
