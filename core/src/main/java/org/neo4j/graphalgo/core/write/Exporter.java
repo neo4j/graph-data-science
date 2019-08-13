@@ -262,8 +262,14 @@ public final class Exporter extends StatementApi {
             Write ops = stmt.dataWrite();
             for (long i = 0L; i < nodeCount; i++) {
                 writer.accept(ops, i);
-                progressLogger.logProgress(++progress, nodeCount);
+                ++progress;
+                if (progress % 10_000 == 0) {
+                    progressLogger.logProgress(progress, nodeCount);
+                }
             }
+            progressLogger.logProgress(
+                    nodeCount,
+                    nodeCount);
         });
     }
 
@@ -283,10 +289,21 @@ public final class Exporter extends StatementApi {
                         Write ops = stmt.dataWrite();
                         for (long j = start; j < end; j++) {
                             writer.accept(ops, j);
-                            progressLogger.logProgress(
-                                    progress.incrementAndGet(),
-                                    nodeCount);
+
+                            // Only log every 10_000 written nodes
+                            // add +1 to avoid logging on the first written node
+                            if ((j + 1) - start % 10_000 == 0) {
+                                long currentProgress = progress.addAndGet(10_000);
+                                progressLogger.logProgress(
+                                        currentProgress,
+                                        nodeCount);
+                            }
                         }
+
+                        // log progress for the last batch of written nodes
+                        progressLogger.logProgress(
+                                progress.addAndGet((start - end + 1) % 10_000),
+                                nodeCount);
                     });
                 });
         ParallelUtil.runWithConcurrency(
