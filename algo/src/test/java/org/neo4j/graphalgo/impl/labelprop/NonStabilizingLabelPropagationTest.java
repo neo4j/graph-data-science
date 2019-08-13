@@ -23,6 +23,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -90,8 +92,7 @@ public class NonStabilizingLabelPropagationTest {
     // According to "Near linear time algorithm to detect community structures in large-scale networks"[1], for a graph of this shape
     // LabelPropagation will not converge unless the iteration is random. However, we don't seem to be affected by this.
     // [1]: https://arxiv.org/pdf/0709.2938.pdf, page 5
-    @ParameterizedTest
-    @ValueSource(classes = {HeavyCypherGraphFactory.class, GraphViewFactory.class, HeavyGraphFactory.class, HugeGraphFactory.class})
+    @AllGraphTypesTest
     public void testLabelPropagationDoesStabilize(Class<? extends GraphFactory> graphImpl) {
         Graph graph = loadGraph(graphImpl);
         LabelPropagation labelPropagation = new LabelPropagation(graph, ParallelUtil.DEFAULT_BATCH_SIZE, Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT, AllocationTracker.EMPTY);

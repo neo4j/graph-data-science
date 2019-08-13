@@ -77,16 +77,16 @@ public class HarmonicCentralityIntegrationTest_477 {
     }
 
     @Test
-    public void testLoad() throws Exception {
-
-        String cypher = "CALL algo.closeness.harmonic.stream(\n" +
-                "'MATCH (u:Person) RETURN id(u) as id\n" +
-                "','\n" +
-                "MATCH (u1:Person)-[k:KNOWS]-(u2:Person) \n" +
-                "RETURN id(u1) as source,id(u2) as target\n" +
-                "',{graph:'cypher'}) YIELD nodeId,centrality";
-
+    public void testLoad() {
+        String cypher =
+                "CALL algo.closeness.harmonic.stream(" +
+                "    'MATCH (u:Person) RETURN id(u) as id'," +
+                "    'MATCH (u1:Person)-[k:KNOWS]-(u2:Person) RETURN id(u1) AS source, id(u2) AS target', {" +
+                "           graph: 'cypher'" +
+                "    }" +
+                ") YIELD nodeId, centrality   ";
 
         db.execute(cypher);
     }
+
 }
