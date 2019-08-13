@@ -53,7 +53,7 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.function.Function;
 import java.util.function.IntConsumer;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
+import java.util.stream.BaseStream;
 
 import static java.lang.String.format;
 
@@ -68,14 +68,14 @@ public final class ParallelUtil {
     private ParallelUtil() {}
 
     /**
-     * Executes the given function on a parallel stream of the given collection, using the provided thread pool.
+     * Executes the given function in parallel on the given {@link BaseStream}, using the provided thread pool.
      *
      * @note ForkJoinPool is required here to avoid .spliterator() calls
      *         on the stream to steal threads from the common pool.
      */
-    public static <T, R> R parallelStream(Collection<T> data, Function<Stream<T>, R> fn, ForkJoinPool pool) {
+    public static <T extends BaseStream<R, T>, R> R parallelStream(T data, Function<T, R> fn, ForkJoinPool pool) {
         try {
-            return pool.submit(() -> fn.apply(data.parallelStream())).get();
+            return pool.submit(() -> fn.apply(data.parallel())).get();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

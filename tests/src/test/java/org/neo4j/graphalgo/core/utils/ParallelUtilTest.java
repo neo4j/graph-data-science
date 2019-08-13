@@ -28,6 +28,7 @@ import org.neo4j.function.ThrowingConsumer;
 import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.helpers.Exceptions;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -38,8 +39,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -70,13 +71,23 @@ public final class ParallelUtilTest extends RandomizedTest {
 
         ForkJoinPool pool = Pools.FJ_POOL;
         ForkJoinPool commonPool = ForkJoinPool.commonPool();
-        long actualTotal = ParallelUtil.parallelStream(list, (s) -> {
+        Stream<Long> stream = list.stream();
+        long actualTotal = ParallelUtil.parallelStream(stream, (s) -> {
             assertThat(s.isParallel(), equalTo(true));
             return s.reduce(0L, Long::sum);
         }, pool);
 
         assertThat(commonPool.getStealCount(), equalTo(0L));
         assertEquals((lastNum + firstNum) * lastNum / 2, actualTotal);
+    }
+
+    @Test
+    public void shouldTakeBaseStreams() {
+        double[] data = {1.0, 2.5, 3.14};
+
+        double sum = ParallelUtil.parallelStream(Arrays.stream(data), DoubleStream::sum, Pools.FJ_POOL);
+
+        assertThat(sum, equalTo(1.0 + 2.5 + 3.14));
     }
 
     @Test

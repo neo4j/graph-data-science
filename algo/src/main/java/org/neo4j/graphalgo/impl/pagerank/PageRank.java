@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeIterator;
 import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
@@ -551,9 +552,11 @@ public class PageRank extends Algorithm<PageRank> {
             double l2Norm = 0.0;
             for (ComputeStep step : steps) {
                 double[] deltas = step.deltas();
-                l2Norm += Arrays.stream(deltas).parallel().map(score -> score * score).sum();
+                l2Norm += ParallelUtil.parallelStream(
+                        Arrays.stream(deltas),
+                        (stream) -> stream.map(score -> score * score).sum(),
+                        Pools.FJ_POOL);
             }
-
             l2Norm = Math.sqrt(l2Norm);
             l2Norm = l2Norm < 0 ? 1 : l2Norm;
             return l2Norm;
