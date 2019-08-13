@@ -69,7 +69,7 @@ public final class ParallelUtil {
             throw new IllegalArgumentException("concurrency must be > 0");
         }
         final int batchSize = Math.max(1, nodeCount / concurrency);
-        int numberOfBatches = ParallelUtil.threadSize(batchSize, nodeCount);
+        int numberOfBatches = ParallelUtil.threadCount(batchSize, nodeCount);
         if (numberOfBatches == 1) {
             return Collections.singleton(new IdMap.IdIterable(0, nodeCount));
         }
@@ -82,34 +82,21 @@ public final class ParallelUtil {
         return Arrays.asList(iterators);
     }
 
-    public static int threadSize(final int batchSize, final int elementCount) {
-        if (batchSize <= 0) {
-            throw new IllegalArgumentException("Invalid batch size: " + batchSize);
-        }
-        if (batchSize >= elementCount) {
-            return 1;
-        }
-        return (int) Math.ceil(elementCount / (double) batchSize);
+    /**
+     * @return the number of threads required to compute elementCount with the given batchSize
+     */
+    public static int threadCount(final int batchSize, final int elementCount) {
+        return Math.toIntExact(threadCount((long) batchSize, elementCount));
     }
 
-    public static long threadSize(final int batchSize, final long elementCount) {
+    public static long threadCount(final long batchSize, final long elementCount) {
         if (batchSize <= 0) {
             throw new IllegalArgumentException("Invalid batch size: " + batchSize);
         }
         if (batchSize >= elementCount) {
             return 1;
         }
-        return (long) Math.ceil(elementCount / (double) batchSize);
-    }
-
-    public static long threadSize(final long batchSize, final long elementCount) {
-        if (batchSize <= 0) {
-            throw new IllegalArgumentException("Invalid batch size: " + batchSize);
-        }
-        if (batchSize >= elementCount) {
-            return 1;
-        }
-        return (long) Math.ceil(elementCount / (double) batchSize);
+        return BitUtil.ceilDiv(elementCount, batchSize);
     }
 
     /**
@@ -123,7 +110,7 @@ public final class ParallelUtil {
         if (concurrency <= 0) {
             concurrency = nodeCount;
         }
-        int targetBatchSize = threadSize(concurrency, nodeCount);
+        int targetBatchSize = threadCount(concurrency, nodeCount);
         return Math.max(minBatchSize, targetBatchSize);
     }
 
@@ -150,7 +137,7 @@ public final class ParallelUtil {
         if (concurrency <= 0) {
             concurrency = (int) Math.min(nodeCount, (long) Integer.MAX_VALUE);
         }
-        long targetBatchSize = threadSize(concurrency, nodeCount);
+        long targetBatchSize = threadCount(concurrency, nodeCount);
         return Math.max(minBatchSize, targetBatchSize);
     }
 
@@ -264,7 +251,7 @@ public final class ParallelUtil {
             final ExecutorService executor,
             final BiLongConsumer task) {
 
-        long batchSize = threadSize(concurrency, size);
+        long batchSize = threadCount(concurrency, size);
         if (!canRunInParallel(executor) || concurrency == 1) {
             for (long start = 0L; start < size; start += batchSize) {
                 long end = Math.min(size, start + batchSize);
@@ -921,7 +908,7 @@ public final class ParallelUtil {
             throw new IllegalArgumentException("no executor available to run the tasks in parallel");
         }
         final List<Future<?>> futures = new ArrayList<>();
-        final int batchSize = threadSize(concurrency, size);
+        final int batchSize = threadCount(concurrency, size);
         for (int i = 0; i < size; i += batchSize) {
             final int start = i;
             final int end = Math.min(size, start + batchSize);

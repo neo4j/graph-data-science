@@ -110,7 +110,7 @@ public final class LargerTriangleCountTest {
         long triangleCount = new TriangleCountForkJoin(
                 graph,
                 Pools.FJ_POOL,
-                ParallelUtil.threadSize(Pools.DEFAULT_CONCURRENCY, TRIANGLE_COUNT)  // 2 * TRIANGLE_COUNT
+                ParallelUtil.threadCount(Pools.DEFAULT_CONCURRENCY, TRIANGLE_COUNT)  // 2 * TRIANGLE_COUNT
         ).compute().getTriangleCount();
         System.out.printf("[%s][par][ forkj] count = %d%n", graphName, triangleCount);
     }

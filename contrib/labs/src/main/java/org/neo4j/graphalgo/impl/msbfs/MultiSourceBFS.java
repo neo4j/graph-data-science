@@ -327,7 +327,7 @@ public final class MultiSourceBFS implements Runnable {
 
     private int numberOfThreads() {
         long sourceLength = sourceLength();
-        long threads = ParallelUtil.threadSize(OMEGA, sourceLength);
+        long threads = ParallelUtil.threadCount(OMEGA, sourceLength);
         if ((int) threads != threads) {
             throw new IllegalArgumentException("Unable run MS-BFS on " + sourceLength + " sources.");
         }

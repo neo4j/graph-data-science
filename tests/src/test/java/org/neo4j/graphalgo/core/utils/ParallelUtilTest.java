@@ -60,7 +60,7 @@ public final class ParallelUtilTest extends RandomizedTest {
         int threads = between(10, 10_000);
         assertEquals(
                 threads,
-                ParallelUtil.threadSize(batchSize, batchSize * threads));
+                ParallelUtil.threadCount(batchSize, batchSize * threads));
     }
 
     @Test
@@ -69,7 +69,7 @@ public final class ParallelUtilTest extends RandomizedTest {
         int batchSize = between(10, 10_000);
         int threads = between(10, 10_000);
         int elements = batchSize * threads + between(1, batchSize - 1);
-        assertEquals(threads + 1, ParallelUtil.threadSize(batchSize, elements));
+        assertEquals(threads + 1, ParallelUtil.threadCount(batchSize, elements));
     }
 
     @Test
@@ -78,7 +78,7 @@ public final class ParallelUtilTest extends RandomizedTest {
         int batchSize = between(2, 1_000_000);
         assertEquals(
                 1,
-                ParallelUtil.threadSize(
+                ParallelUtil.threadCount(
                         batchSize,
                         batchSize - randomInt(batchSize)));
     }
@@ -86,13 +86,13 @@ public final class ParallelUtilTest extends RandomizedTest {
     @Test
     public void threadSizeShouldReturn1ForZeroElements() throws Exception {
         int batchSize = between(2, 1_000_000);
-        assertEquals(1, ParallelUtil.threadSize(batchSize, 0));
+        assertEquals(1, ParallelUtil.threadCount(batchSize, 0));
     }
 
     @Test
     public void threadSizeShouldFailForZeroBatchsize() throws Exception {
         try {
-            ParallelUtil.threadSize(0, randomInt());
+            ParallelUtil.threadCount(0, randomInt());
             fail();
         } catch (IllegalArgumentException e) {
             assertEquals("Invalid batch size: 0", e.getMessage());
@@ -103,7 +103,7 @@ public final class ParallelUtilTest extends RandomizedTest {
     public void threadSizeShouldFailForNegativeBatchsize() throws Exception {
         int batchSize = between(Integer.MIN_VALUE, -1);
         try {
-            ParallelUtil.threadSize(batchSize, randomInt());
+            ParallelUtil.threadCount(batchSize, randomInt());
             fail();
         } catch (IllegalArgumentException e) {
             assertEquals("Invalid batch size: " + batchSize, e.getMessage());

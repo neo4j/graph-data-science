@@ -61,7 +61,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> implements Deg
 
     public void compute() {
         int batchSize = ParallelUtil.adjustBatchSize(nodeCount, concurrency);
-        int taskCount = ParallelUtil.threadSize(batchSize, nodeCount);
+        int taskCount = ParallelUtil.threadCount(batchSize, nodeCount);
         final ArrayList<Runnable> tasks = new ArrayList<>(taskCount);
 
         this.starts = new long[taskCount];

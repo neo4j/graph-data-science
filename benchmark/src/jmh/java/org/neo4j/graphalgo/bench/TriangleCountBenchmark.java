@@ -102,7 +102,7 @@ public class TriangleCountBenchmark {
         }
 
         concurrency = parallel ? Pools.DEFAULT_CONCURRENCY : 1;
-        seqThreshold = parallel ? ParallelUtil.threadSize(Pools.DEFAULT_CONCURRENCY, TRIANGLE_COUNT) : 2 * TRIANGLE_COUNT;
+        seqThreshold = parallel ? ParallelUtil.threadCount(Pools.DEFAULT_CONCURRENCY, TRIANGLE_COUNT) : 2 * TRIANGLE_COUNT;
     }
 
 

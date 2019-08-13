@@ -71,7 +71,7 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
         nodeQueue.set(0);
 
         long batchSize = ParallelUtil.adjustBatchSize(nodeCount, concurrency);
-        long threadSize = ParallelUtil.threadSize(batchSize, nodeCount);
+        long threadSize = ParallelUtil.threadCount(batchSize, nodeCount);
         if (threadSize > Integer.MAX_VALUE) {
             throw new IllegalArgumentException(String.format(
                     "A concurrency of %d is too small to divide graph into at most Integer.MAX_VALUE tasks",

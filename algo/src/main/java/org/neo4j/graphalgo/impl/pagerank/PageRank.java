@@ -274,7 +274,7 @@ public class PageRank extends Algorithm<PageRank> {
         List<ComputeStep> computeSteps = new ArrayList<>(expectedParallelism);
         LongArrayList starts = new LongArrayList(expectedParallelism);
         IntArrayList lengths = new IntArrayList(expectedParallelism);
-        int partitionsPerThread = ParallelUtil.threadSize(
+        int partitionsPerThread = ParallelUtil.threadCount(
                 concurrency + 1,
                 partitions.size());
         Iterator<Partition> parts = partitions.iterator();
@@ -402,7 +402,7 @@ public class PageRank extends Algorithm<PageRank> {
         long perThreadUsage = 0L;
         long sharedUsage = 0L;
         int stepSize = 0;
-        int partitionsPerThread = ParallelUtil.threadSize(concurrency + 1, partitions.size());
+        int partitionsPerThread = ParallelUtil.threadCount(concurrency + 1, partitions.size());
         Iterator<Partition> parts = partitions.iterator();
 
         while (parts.hasNext()) {

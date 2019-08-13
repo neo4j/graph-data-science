@@ -207,7 +207,7 @@ public class IntIdMap {
 
     public Collection<PrimitiveIntIterable> batchIterables(int batchSize) {
         int nodeCount = graphIds.length;
-        int numberOfBatches = ParallelUtil.threadSize(batchSize, nodeCount);
+        int numberOfBatches = ParallelUtil.threadCount(batchSize, nodeCount);
         if (numberOfBatches == 1) {
             return Collections.singleton(this::nodeIterator);
         }

@@ -24,7 +24,6 @@ import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
-import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -74,7 +73,7 @@ public class ParallelUnionFind extends UnionFind<ParallelUnionFind> {
                 concurrency,
                 minBatchSize,
                 Integer.MAX_VALUE);
-        long threadSize = ParallelUtil.threadSize(batchSize, nodeCount);
+        long threadSize = ParallelUtil.threadCount(batchSize, nodeCount);
         if (threadSize > Integer.MAX_VALUE) {
             throw new IllegalArgumentException(String.format(
                     "Too many nodes (%d) to run union find with the given concurrency (%d) and batchSize (%d)",

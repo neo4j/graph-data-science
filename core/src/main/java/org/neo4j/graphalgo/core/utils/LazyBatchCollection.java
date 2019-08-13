@@ -64,7 +64,7 @@ public final class LazyBatchCollection<T> extends AbstractCollection<T> {
         this.supplier = supplier;
         this.nodeCount = nodeCount;
         this.batchSize = batchSize;
-        numberOfBatches = Math.toIntExact(ParallelUtil.threadSize(batchSize, nodeCount));
+        numberOfBatches = Math.toIntExact(ParallelUtil.threadCount(batchSize, nodeCount));
     }
 
     @Override
