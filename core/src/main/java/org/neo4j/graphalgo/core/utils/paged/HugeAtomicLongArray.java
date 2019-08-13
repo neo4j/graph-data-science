@@ -20,12 +20,15 @@
 package org.neo4j.graphalgo.core.utils.paged;
 
 import org.neo4j.graphalgo.core.utils.BitUtil;
+import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.unsafe.impl.internal.dragons.UnsafeUtil;
 
 import java.util.Arrays;
 import java.util.function.IntToLongFunction;
 import java.util.function.LongUnaryOperator;
+import java.util.stream.IntStream;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
@@ -300,18 +303,24 @@ public abstract class HugeAtomicLongArray {
                 pages[i] = new long[PAGE_SIZE];
                 if (gen != null) {
                     long base = ((long) i) << PAGE_SHIFT;
-                    Arrays.parallelSetAll(pages[i], j -> gen.applyAsLong(base + j));
+                    parallelSetAll(pages[i], j -> gen.applyAsLong(base + j));
                 }
             }
             pages[lastPage] = new long[lastPageSize];
             if (gen != null) {
                 long base = ((long) lastPage) << PAGE_SHIFT;
-                Arrays.parallelSetAll(pages[lastPage], j -> gen.applyAsLong(base + j));
+                parallelSetAll(pages[lastPage], j -> gen.applyAsLong(base + j));
             }
 
             long memoryUsed = memoryUsageOfData(size);
             tracker.add(memoryUsed);
             return new PagedHugeAtomicLongArray(size, pages, memoryUsed);
+        }
+
+        private static void parallelSetAll(long[] array, IntToLongFunction generator) {
+            ParallelUtil.parallelStream(IntStream.range(0, array.length), intStream -> {
+                intStream.forEach(i -> array[i] = generator.applyAsLong(i));
+            }, Pools.FJ_POOL);
         }
 
         private static long memoryUsageOfData(long size) {

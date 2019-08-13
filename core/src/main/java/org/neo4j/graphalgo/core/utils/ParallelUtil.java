@@ -50,6 +50,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntConsumer;
 import java.util.function.Supplier;
@@ -76,6 +77,20 @@ public final class ParallelUtil {
     public static <T extends BaseStream<R, T>, R> R parallelStream(T data, Function<T, R> fn, ForkJoinPool pool) {
         try {
             return pool.submit(() -> fn.apply(data.parallel())).get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Executes the given function in parallel on the given {@link BaseStream}, using the provided thread pool.
+     *
+     * @note ForkJoinPool is required here to avoid .spliterator() calls
+     *         on the stream to steal threads from the common pool.
+     */
+    public static <T extends BaseStream<R, T>, R> void parallelStream(T data, Consumer<T> fn, ForkJoinPool pool) {
+        try {
+            pool.submit(() -> fn.accept(data.parallel())).get();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
