@@ -20,37 +20,24 @@
 package org.neo4j.graphalgo.core.huge.loader;
 
 import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.core.huge.loader.AbstractStorePageCacheScanner.RecordConsumer;
 import org.neo4j.kernel.api.StatementConstants;
 import org.neo4j.kernel.impl.store.record.RelationshipRecord;
 
 
-final class RelationshipsBatchBuffer implements RecordConsumer<RelationshipRecord> {
+public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipRecord> {
 
     private final IdMapping idMap;
     private final int type;
 
-    // 4-long blocks for each rel
-    // source, target, rel-id, prop-id
-    private final long[] buffer;
     private final long[] sortCopy;
     private final int[] histogram;
 
-    private int length;
-
-
     RelationshipsBatchBuffer(final IdMapping idMap, final int type, int capacity) {
+        super(Math.multiplyExact(4, capacity));
         this.idMap = idMap;
         this.type = type;
-        int bufferLength = Math.multiplyExact(4, capacity);
-        buffer = new long[bufferLength];
         sortCopy = RadixSort.newCopy(buffer);
         histogram = RadixSort.newHistogram(capacity);
-    }
-
-    boolean scan(AbstractStorePageCacheScanner<RelationshipRecord>.Cursor cursor) {
-        length = 0;
-        return cursor.bulkNext(this);
     }
 
     @Override
@@ -80,10 +67,6 @@ final class RelationshipsBatchBuffer implements RecordConsumer<RelationshipRecor
     long[] sortByTarget() {
         RadixSort.radixSort2(buffer, sortCopy, histogram, length);
         return buffer;
-    }
-
-    int length() {
-        return length;
     }
 
     long[] spareLongs() {

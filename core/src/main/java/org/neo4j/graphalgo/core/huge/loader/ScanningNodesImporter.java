@@ -67,8 +67,8 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
                 scanner,
                 dimensions.labelId(),
                 progress,
-                idMapBuilder,
-                builders.values());
+                new NodeImporter(idMapBuilder, builders.values())
+        );
     }
 
     @Override

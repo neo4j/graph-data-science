@@ -21,18 +21,15 @@ package org.neo4j.graphalgo.core.huge.loader;
 
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
-import org.neo4j.graphalgo.core.loading.ReadHelper;
 import org.neo4j.graphalgo.core.utils.ImportProgress;
+import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.StatementAction;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.internal.kernel.api.CursorFactory;
-import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.store.NodeStore;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.values.storable.Value;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -44,15 +41,13 @@ final class NodesScanner extends StatementAction implements RecordScanner {
             AbstractStorePageCacheScanner<NodeRecord> scanner,
             int label,
             ImportProgress progress,
-            HugeLongArrayBuilder idMapBuilder,
-            Collection<HugeNodePropertiesBuilder> nodePropertyBuilders) {
+            NodeImporter importer) {
         return new NodesScanner.Creator(
                 api,
                 scanner,
                 label,
                 progress,
-                idMapBuilder,
-                nodePropertyBuilders
+                importer
         );
     }
 
@@ -61,22 +56,19 @@ final class NodesScanner extends StatementAction implements RecordScanner {
         private final AbstractStorePageCacheScanner<NodeRecord> scanner;
         private final int label;
         private final ImportProgress progress;
-        private final HugeLongArrayBuilder idMapBuilder;
-        private final IntObjectMap<HugeNodePropertiesBuilder> nodePropertyBuilders;
+        private final NodeImporter importer;
 
         Creator(
                 GraphDatabaseAPI api,
                 AbstractStorePageCacheScanner<NodeRecord> scanner,
                 int label,
                 ImportProgress progress,
-                HugeLongArrayBuilder idMapBuilder,
-                Collection<HugeNodePropertiesBuilder> nodePropertyBuilders) {
+                NodeImporter importer) {
             this.api = api;
             this.scanner = scanner;
             this.label = label;
             this.progress = progress;
-            this.idMapBuilder = idMapBuilder;
-            this.nodePropertyBuilders = mapBuilders(nodePropertyBuilders);
+            this.importer = importer;
         }
 
         @Override
@@ -87,8 +79,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
                     label,
                     index,
                     progress,
-                    idMapBuilder,
-                    nodePropertyBuilders
+                    importer
             );
         }
 
@@ -114,11 +105,9 @@ final class NodesScanner extends StatementAction implements RecordScanner {
     private final int label;
     private final int scannerIndex;
     private final ImportProgress progress;
-    private final HugeLongArrayBuilder idMapBuilder;
-    private final IntObjectMap<HugeNodePropertiesBuilder> nodePropertyBuilders;
-    private long nodePropertiesRead = 0L;
-
-    private volatile long nodesImported;
+    private final NodeImporter importer;
+    private long propertiesImported;
+    private long nodesImported;
 
     private NodesScanner(
             GraphDatabaseAPI api,
@@ -126,16 +115,14 @@ final class NodesScanner extends StatementAction implements RecordScanner {
             int label,
             int threadIndex,
             ImportProgress progress,
-            HugeLongArrayBuilder idMapBuilder,
-            IntObjectMap<HugeNodePropertiesBuilder> nodePropertyBuilders) {
+            NodeImporter importer) {
         super(api);
         this.nodeStore = (NodeStore) scanner.store();
         this.scanner = scanner;
         this.label = label;
         this.scannerIndex = threadIndex;
         this.progress = progress;
-        this.idMapBuilder = idMapBuilder;
-        this.nodePropertyBuilders = nodePropertyBuilders;
+        this.importer = importer;
     }
 
     @Override
@@ -144,7 +131,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
     }
 
     @Override
-    public void accept(final KernelTransaction transaction) {
+    public void accept(KernelTransaction transaction) {
         Read read = transaction.dataRead();
         CursorFactory cursors = transaction.cursors();
         try (AbstractStorePageCacheScanner<NodeRecord>.Cursor cursor = scanner.getCursor()) {
@@ -152,21 +139,22 @@ final class NodesScanner extends StatementAction implements RecordScanner {
                     nodeStore,
                     label,
                     cursor.bulkSize(),
-                    nodePropertyBuilders != null);
-            final ImportProgress progress = this.progress;
-            long allImported = 0L;
+                    importer.readsProperties());
+            ImportProgress progress = this.progress;
             while (batches.scan(cursor)) {
-                int imported = importNodes(batches, read, cursors);
-                progress.nodesImported(imported);
-                allImported += imported;
+                long imported = importer.importNodes(batches, read, cursors);
+                int batchImportedNodes = RawValues.getHead(imported);
+                int batchImportedProperties = RawValues.getTail(imported);
+                progress.nodesImported(batchImportedNodes);
+                nodesImported += batchImportedNodes;
+                propertiesImported += batchImportedProperties;
             }
-            nodesImported = allImported;
         }
     }
 
     @Override
     public long propertiesImported() {
-        return nodePropertiesRead;
+        return propertiesImported;
     }
 
     @Override
@@ -174,69 +162,4 @@ final class NodesScanner extends StatementAction implements RecordScanner {
         return nodesImported;
     }
 
-    private int importNodes(
-            final NodesBatchBuffer buffer,
-            final Read read,
-            final CursorFactory cursors) {
-
-        int batchLength = buffer.length();
-        if (batchLength == 0) {
-            return 0;
-        }
-
-        HugeLongArrayBuilder.BulkAdder<long[]> adder = idMapBuilder.allocate((long) (batchLength));
-        if (adder == null) {
-            return 0;
-        }
-
-        long[] batch = buffer.batch();
-        long[] properties = buffer.properties();
-        int batchOffset = 0;
-        while (adder.nextBuffer()) {
-            int length = adder.length;
-            System.arraycopy(batch, batchOffset, adder.buffer, adder.offset, length);
-
-            if (properties != null) {
-                long start = adder.start;
-                for (int i = 0; i < length; i++) {
-                    long localIndex = start + i;
-                    int batchIndex = batchOffset + i;
-                    readWeight(
-                            batch[batchIndex],
-                            properties[batchIndex],
-                            nodePropertyBuilders,
-                            localIndex,
-                            cursors,
-                            read
-                    );
-                }
-            }
-
-            batchOffset += length;
-        }
-
-        return batchLength;
-    }
-
-    private void readWeight(
-            long nodeReference,
-            long propertiesReference,
-            IntObjectMap<HugeNodePropertiesBuilder> nodeProperties,
-            long internalId,
-            CursorFactory cursors,
-            Read read) {
-        try (PropertyCursor pc = cursors.allocatePropertyCursor()) {
-            read.nodeProperties(nodeReference, propertiesReference, pc);
-            while (pc.next()) {
-                HugeNodePropertiesBuilder props = nodeProperties.get(pc.propertyKey());
-                if (props != null) {
-                    Value value = pc.propertyValue();
-                    double defaultValue = props.defaultValue();
-                    double weight = ReadHelper.extractValue(value, defaultValue);
-                    props.set(internalId, weight);
-                    nodePropertiesRead++;
-                }
-            }
-        }
-    }
 }
