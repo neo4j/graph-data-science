@@ -42,6 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -49,8 +50,10 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
+import java.util.function.Function;
 import java.util.function.IntConsumer;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import static java.lang.String.format;
 
@@ -63,6 +66,20 @@ public final class ParallelUtil {
 
     // prevent instantiation of factory
     private ParallelUtil() {}
+
+    /**
+     * Executes the given function on a parallel stream of the given collection, using the provided thread pool.
+     *
+     * @note ForkJoinPool is required here to avoid .spliterator() calls
+     *         on the stream to steal threads from the common pool.
+     */
+    public static <T, R> R parallelStream(Collection<T> data, Function<Stream<T>, R> fn, ForkJoinPool pool) {
+        try {
+            return pool.submit(() -> fn.apply(data.parallelStream())).get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public static Collection<PrimitiveLongIterable> batchIterables(final int concurrency, final int nodeCount) {
         if (concurrency <= 0) {
