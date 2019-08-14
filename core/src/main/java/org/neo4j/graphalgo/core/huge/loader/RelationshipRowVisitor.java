@@ -17,12 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.heavyweight;
+package org.neo4j.graphalgo.core.huge.loader;
 
-import org.neo4j.graphalgo.core.huge.loader.IdMap;
 import org.neo4j.graphalgo.core.huge.loader.RelationshipImporter.Imports;
 import org.neo4j.graphalgo.core.huge.loader.RelationshipImporter.WeightReader;
-import org.neo4j.graphalgo.core.huge.loader.RelationshipsBatchBuffer;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphdb.Result;
 
@@ -92,7 +90,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         relationshipCount += RawValues.getHead(imported);
     }
 
-    void reset() {
+    private void reset() {
         buffer.reset();
     }
 

@@ -23,7 +23,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory;
+import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
@@ -54,7 +54,7 @@ public class TestSupport {
     public @interface AllGraphTypesTest {}
 
     public static Stream<Class<? extends GraphFactory>> cypherType() {
-        return Stream.of(HeavyCypherGraphFactory.class);
+        return Stream.of(CypherGraphFactory.class);
     }
 
     @Retention(RetentionPolicy.RUNTIME)

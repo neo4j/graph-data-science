@@ -17,38 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.heavyweight;
+package org.neo4j.graphalgo.core.huge.loader;
 
-public class ImportState {
+import org.neo4j.graphdb.Result;
 
-    private final long offset;
-    private final long rows;
-    private final long maxId;
-    private final long count;
+class ResultCountingVisitor implements Result.ResultVisitor<RuntimeException> {
+    private long rows = 0;
 
-    ImportState(
-            long offset,
-            long rows,
-            long maxId,
-            long count
-    ) {
-        this.offset = offset;
-        this.rows = rows;
-        this.maxId = maxId;
-        this.count = count;
+
+    @Override
+    public boolean visit(Result.ResultRow row) throws RuntimeException {
+        rows++;
+        return true;
     }
 
-    long offset() {
-        return offset;
-    }
-
-    long rows() {
+    public long rows() {
         return rows;
     }
 
-    long maxId() {
-        return maxId;
-    }
 
-    long count() { return count; }
 }

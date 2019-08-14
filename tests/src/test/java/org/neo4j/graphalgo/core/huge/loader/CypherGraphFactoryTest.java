@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.heavyweight;
+package org.neo4j.graphalgo.core.huge.loader;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -25,8 +25,8 @@ import org.junit.Test;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.helpers.collection.MapUtil;
@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-public class HeavyCypherGraphFactoryTest {
+public class CypherGraphFactoryTest {
 
     private static GraphDatabaseService db;
 
@@ -82,7 +82,7 @@ public class HeavyCypherGraphFactoryTest {
                         PropertyMapping.of("foo", "foo", 5.0)
                 )
                 .sorted()
-                .load(HeavyCypherGraphFactory.class);
+                .load(CypherGraphFactory.class);
 
         long node1 = graph.toMappedNodeId(id1);
         long node2 = graph.toMappedNodeId(id2);

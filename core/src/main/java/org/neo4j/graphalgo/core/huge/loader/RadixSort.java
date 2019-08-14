@@ -38,7 +38,7 @@ public final class RadixSort {
         radixSort(data, copy, histogram, length, 0);
     }
 
-    public static void radixSort(long[] data, long[] copy, int[] histogram, int length, int shift) {
+    private static void radixSort(long[] data, long[] copy, int[] histogram, int length, int shift) {
         int hlen = Math.min(HIST_SIZE, histogram.length - 1);
         int dlen = Math.min(length, Math.min(data.length, copy.length));
 
@@ -87,7 +87,7 @@ public final class RadixSort {
         radixSort2(data, copy, histogram, length, 0);
     }
 
-    public static void radixSort2(long[] data, long[] copy, int[] histogram, int length, int shift) {
+    private static void radixSort2(long[] data, long[] copy, int[] histogram, int length, int shift) {
         int hlen = Math.min(HIST_SIZE, histogram.length - 1);
         int dlen = Math.min(length, Math.min(data.length, copy.length));
         Arrays.fill(histogram, 0, hlen, 0);

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.heavyweight;
+package org.neo4j.graphalgo.core.huge.loader;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -26,20 +26,19 @@ import org.junit.Test;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DuplicateRelationshipsStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.huge.loader.AdjacencyCompression;
+import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.helpers.collection.Iterators;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
 
-public class HeavyCypherGraphParallelFactoryTest {
+public class CypherGraphParallelFactoryTest {
 
     private static final int COUNT = 10000;
     private static GraphDatabaseService db;
@@ -109,7 +108,7 @@ public class HeavyCypherGraphParallelFactoryTest {
                 .withRelationshipWeightsFromProperty("prop",0D)
                 .withLabel(nodeStatement)
                 .withRelationshipType(relStatement)
-                .load(HeavyCypherGraphFactory.class);
+                .load(CypherGraphFactory.class);
 
         Assert.assertEquals(COUNT, graph.nodeCount());
         AtomicInteger relCount = new AtomicInteger();

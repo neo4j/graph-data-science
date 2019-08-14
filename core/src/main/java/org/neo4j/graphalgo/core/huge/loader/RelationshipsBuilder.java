@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.core.DuplicateRelationshipsStrategy;
 import org.neo4j.graphalgo.core.huge.HugeAdjacencyOffsets;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
-public class RelationshipsBuilder {
+class RelationshipsBuilder {
 
     private final DuplicateRelationshipsStrategy duplicateRelationshipsStrategy;
     private final boolean weighted;

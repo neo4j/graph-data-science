@@ -17,20 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.heavyweight;
+package org.neo4j.graphalgo.core.huge.loader;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.huge.loader.IdsAndProperties;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 /**
  * @author mknblch
  */
-public class HeavyCypherGraphFactory extends GraphFactory {
+public class CypherGraphFactory extends GraphFactory {
 
     static final int NO_BATCH = -1;
     static final String LIMIT = "limit";
@@ -41,7 +41,7 @@ public class HeavyCypherGraphFactory extends GraphFactory {
     private final CypherNodeLoader nodeLoader;
     private final CypherRelationshipLoader relationshipLoader;
 
-    public HeavyCypherGraphFactory(
+    public CypherGraphFactory(
             GraphDatabaseAPI api,
             GraphSetup setup) {
         super(api, setup);

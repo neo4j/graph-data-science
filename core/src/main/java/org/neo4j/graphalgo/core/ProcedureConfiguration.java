@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core;
 
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory;
+import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraph;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
@@ -336,8 +336,8 @@ public class ProcedureConfiguration {
         switch (graphImpl.toLowerCase(Locale.ROOT)) {
             case HeavyGraph.TYPE:
                 return HeavyGraphFactory.class;
-            case HeavyCypherGraphFactory.TYPE:
-                return HeavyCypherGraphFactory.class;
+            case CypherGraphFactory.TYPE:
+                return CypherGraphFactory.class;
             case LightGraph.TYPE:
                 return HeavyGraphFactory.class;
             case GraphView.TYPE:
@@ -352,7 +352,7 @@ public class ProcedureConfiguration {
         }
     }
 
-    private static Set<String> RESERVED = new HashSet<>(asList(HeavyGraph.TYPE, HeavyCypherGraphFactory.TYPE,
+    private static Set<String> RESERVED = new HashSet<>(asList(HeavyGraph.TYPE, CypherGraphFactory.TYPE,
             LightGraph.TYPE, GraphView.TYPE, HeavyGraph.TYPE));
 
     public static boolean validCustomName(String name) {
@@ -485,7 +485,7 @@ public class ProcedureConfiguration {
         if (HeavyGraphFactory.class.isAssignableFrom(cls)) {
             return "heavy";
         }
-        if (HeavyCypherGraphFactory.class.isAssignableFrom(cls)) {
+        if (CypherGraphFactory.class.isAssignableFrom(cls)) {
             return "cypher";
         }
         if (GraphViewFactory.class.isAssignableFrom(cls)) {

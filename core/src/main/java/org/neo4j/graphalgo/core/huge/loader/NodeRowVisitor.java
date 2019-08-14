@@ -17,12 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.heavyweight;
+package org.neo4j.graphalgo.core.huge.loader;
 
 import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.core.huge.loader.HugeNodePropertiesBuilder;
-import org.neo4j.graphalgo.core.huge.loader.NodeImporter;
-import org.neo4j.graphalgo.core.huge.loader.NodesBatchBuffer;
 import org.neo4j.graphdb.Result;
 import org.neo4j.values.storable.Values;
 
@@ -85,7 +82,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
         importer.importCypherNodes(buffer, cypherNodeProperties);
     }
 
-    void reset() {
+    private void reset() {
         buffer.reset();
         cypherNodeProperties.clear();
     }

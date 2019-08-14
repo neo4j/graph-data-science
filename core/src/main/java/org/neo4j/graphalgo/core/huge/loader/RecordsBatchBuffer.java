@@ -23,7 +23,7 @@ package org.neo4j.graphalgo.core.huge.loader;
 import org.neo4j.graphalgo.core.huge.loader.AbstractStorePageCacheScanner.RecordConsumer;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 
-public abstract class RecordsBatchBuffer<Record extends AbstractBaseRecord> implements RecordConsumer<Record> {
+abstract class RecordsBatchBuffer<Record extends AbstractBaseRecord> implements RecordConsumer<Record> {
 
     final long[] buffer;
     int length;

@@ -33,7 +33,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory;
+import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.BitUtil;
@@ -77,7 +77,7 @@ public final class LabelPropagationTest {
     static Stream<Class<? extends GraphFactory>> parameters() {
         return Stream.of(
                 HeavyGraphFactory.class,
-                HeavyCypherGraphFactory.class,
+                CypherGraphFactory.class,
                 HugeGraphFactory.class
         );
     }
@@ -101,7 +101,7 @@ public final class LabelPropagationTest {
                 .withDirection(Direction.OUTGOING)
                 .withDefaultConcurrency();
 
-        if (graphImpl == HeavyCypherGraphFactory.class) {
+        if (graphImpl == CypherGraphFactory.class) {
             graphLoader
                     .withLabel("MATCH (u:User) RETURN id(u) AS id")
                     .withRelationshipType("MATCH (u1:User)-[rel:FOLLOW]->(u2:User) \n" +

@@ -81,7 +81,7 @@ public class RelationshipImporter {
         return null;
     }
 
-    public long importBothOrUndirected(RelationshipsBatchBuffer buffer, WeightReader weightReader) {
+    private long importBothOrUndirected(RelationshipsBatchBuffer buffer, WeightReader weightReader) {
         long[] batch = buffer.sortBySource();
         int importedOut = importRelationships(buffer, batch, null, outAdjacency, tracker);
         batch = buffer.sortByTarget();
@@ -89,7 +89,7 @@ public class RelationshipImporter {
         return RawValues.combineIntInt(importedOut + importedIn, 0);
     }
 
-    public long importBothOrUndirectedWithWeight(RelationshipsBatchBuffer buffer, WeightReader reader) {
+    private long importBothOrUndirectedWithWeight(RelationshipsBatchBuffer buffer, WeightReader reader) {
         int batchLength = buffer.length;
         long[] batch = buffer.sortBySource();
         long[] weightsOut = reader.readWeight(batch, batchLength, outAdjacency.getWeightProperty(), outAdjacency.getDefaultWeight());
@@ -101,12 +101,12 @@ public class RelationshipImporter {
         return RawValues.combineIntInt(importedOut + importedIn, importedOut + importedIn);
     }
 
-    public long importOutgoing(RelationshipsBatchBuffer buffer, WeightReader weightReader) {
+    private long importOutgoing(RelationshipsBatchBuffer buffer, WeightReader weightReader) {
         long[] batch = buffer.sortBySource();
         return RawValues.combineIntInt(importRelationships(buffer, batch, null, outAdjacency, tracker), 0);
     }
 
-    public long importOutgoingWithWeight(RelationshipsBatchBuffer buffer, WeightReader weightReader) {
+    private long importOutgoingWithWeight(RelationshipsBatchBuffer buffer, WeightReader weightReader) {
         int batchLength = buffer.length;
         long[] batch = buffer.sortBySource();
         long[] weightsOut = weightReader.readWeight(batch, batchLength, outAdjacency.getWeightProperty(), outAdjacency.getDefaultWeight());
@@ -114,12 +114,12 @@ public class RelationshipImporter {
         return RawValues.combineIntInt(importedOut, importedOut);
     }
 
-    public long importIncoming(RelationshipsBatchBuffer buffer, WeightReader weightReader) {
+    private long importIncoming(RelationshipsBatchBuffer buffer, WeightReader weightReader) {
         long[] batch = buffer.sortByTarget();
         return RawValues.combineIntInt(importRelationships(buffer, batch, null, inAdjacency, tracker), 0);
     }
 
-    public long importIncomingWithWeight(RelationshipsBatchBuffer buffer, WeightReader weightReader) {
+    private long importIncomingWithWeight(RelationshipsBatchBuffer buffer, WeightReader weightReader) {
         int batchLength = buffer.length;
         long[] batch = buffer.sortByTarget();
         long[] weightsIn = weightReader.readWeight(batch, batchLength, inAdjacency.getWeightProperty(), inAdjacency.getDefaultWeight());

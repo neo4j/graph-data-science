@@ -25,7 +25,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory;
+import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
@@ -48,7 +48,7 @@ public class GraphLoaderCypherTest {
 
     @Before
     public void setup() {
-        this.graphImpl = HeavyCypherGraphFactory.class;
+        this.graphImpl = CypherGraphFactory.class;
     }
 
     @Test

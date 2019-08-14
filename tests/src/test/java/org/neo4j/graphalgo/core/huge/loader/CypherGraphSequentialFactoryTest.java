@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.heavyweight;
+package org.neo4j.graphalgo.core.huge.loader;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DuplicateRelationshipsStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.helpers.collection.Iterators;
@@ -36,7 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
 
-public class HeavyCypherGraphSequentialFactoryTest {
+public class CypherGraphSequentialFactoryTest {
 
     private static final int COUNT = 10000;
     private static GraphDatabaseService db;
@@ -92,7 +93,7 @@ public class HeavyCypherGraphSequentialFactoryTest {
                 .withRelationshipWeightsFromProperty("prop",0D)
                 .withLabel(nodeStatement)
                 .withRelationshipType(relStatement)
-                .load(HeavyCypherGraphFactory.class);
+                .load(CypherGraphFactory.class);
 
         Assert.assertEquals(COUNT, graph.nodeCount());
         AtomicInteger relCount = new AtomicInteger();

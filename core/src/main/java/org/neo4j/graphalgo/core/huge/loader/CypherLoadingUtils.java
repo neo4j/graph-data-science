@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.heavyweight;
+package org.neo4j.graphalgo.core.huge.loader;
 
 import org.neo4j.graphdb.Result;
 
@@ -27,10 +27,10 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import static org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory.LIMIT;
-import static org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory.SKIP;
+import static org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory.LIMIT;
+import static org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory.SKIP;
 
-public class CypherLoadingUtils {
+class CypherLoadingUtils {
     public static  boolean canBatchLoad(boolean loadConcurrent, int batchSize, String statement) {
         return loadConcurrent && batchSize > 0 &&
                 (statement.contains("{" + LIMIT + "}") || statement.contains("$" + LIMIT)) &&

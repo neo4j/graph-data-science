@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.heavyweight;
+package org.neo4j.graphalgo.core.huge.loader;
 
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
-import static org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory.NO_BATCH;
+import static org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory.NO_BATCH;
 
 class CypherNodeCountingLoader {
     private final GraphDatabaseAPI api;

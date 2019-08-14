@@ -26,9 +26,9 @@ import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 
-public final class HugeIdMapBuilder {
+final class HugeIdMapBuilder {
 
-    static IdMap build(
+    private static IdMap build(
             HugeLongArray graphIds,
             long nodeCount,
             long highestNodeId,

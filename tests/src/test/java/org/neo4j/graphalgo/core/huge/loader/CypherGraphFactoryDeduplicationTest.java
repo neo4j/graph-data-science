@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.heavyweight;
+package org.neo4j.graphalgo.core.huge.loader;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -26,13 +26,14 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DuplicateRelationshipsStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.Assert.assertEquals;
 
-public class HeavyCypherGraphFactoryDeduplicationTest {
+public class CypherGraphFactoryDeduplicationTest {
 
     private static GraphDatabaseService db;
 
@@ -69,7 +70,7 @@ public class HeavyCypherGraphFactoryDeduplicationTest {
                 .withLabel(nodes)
                 .withRelationshipType(rels)
                 .withDuplicateRelationshipsStrategy(DuplicateRelationshipsStrategy.SKIP)
-                .load(HeavyCypherGraphFactory.class);
+                .load(CypherGraphFactory.class);
 
         assertEquals(2, graph.nodeCount());
         assertEquals(1, graph.degree(graph.toMappedNodeId(id1), Direction.OUTGOING));

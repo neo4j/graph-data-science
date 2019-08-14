@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory;
+import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -58,7 +58,7 @@ public final class PersonalizedPageRankTest {
     public static Collection<Object[]> data() {
         return Arrays.asList(
                 new Object[]{HeavyGraphFactory.class, "HeavyGraphFactory"},
-                new Object[]{HeavyCypherGraphFactory.class, "HeavyCypherGraphFactory"},
+                new Object[]{CypherGraphFactory.class, "CypherGraphFactory"},
                 new Object[]{HugeGraphFactory.class, "HugeGraphFactory"}
         );
     }
@@ -132,7 +132,7 @@ public final class PersonalizedPageRankTest {
         }
 
         final Graph graph;
-        if (graphImpl.isAssignableFrom(HeavyCypherGraphFactory.class)) {
+        if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
             graph = new GraphLoader(db)
                     .withLabel("MATCH (n) RETURN id(n) as id")
                     .withRelationshipType("MATCH (n)-[:PURCHASED]-(m) RETURN id(n) as source,id(m) as target")

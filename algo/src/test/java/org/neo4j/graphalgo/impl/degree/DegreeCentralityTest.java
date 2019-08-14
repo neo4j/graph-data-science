@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.DuplicateRelationshipsStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory;
+import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
@@ -57,7 +57,7 @@ public final class DegreeCentralityTest {
     public static Collection<Object[]> data() {
         return Arrays.asList(
                 new Object[]{HeavyGraphFactory.class, "HeavyGraphFactory"},
-                new Object[]{HeavyCypherGraphFactory.class, "HeavyCypherGraphFactory"},
+                new Object[]{CypherGraphFactory.class, "CypherGraphFactory"},
                 new Object[]{HugeGraphFactory.class, "HugeGraphFactory"},
                 new Object[]{GraphViewFactory.class, "GraphViewFactory"}
         );
@@ -164,7 +164,7 @@ public final class DegreeCentralityTest {
         }
 
         final Graph graph;
-        if (graphImpl.isAssignableFrom(HeavyCypherGraphFactory.class)) {
+        if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
             graph = new GraphLoader(db)
                     .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
                     .withRelationshipType("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) AS source, id(m) AS target")
@@ -211,7 +211,7 @@ public final class DegreeCentralityTest {
         }
 
         final Graph graph;
-        if (graphImpl.isAssignableFrom(HeavyCypherGraphFactory.class)) {
+        if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
             graph = new GraphLoader(db)
                     .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
                     .withRelationshipType("MATCH (n:Label1)-[type:TYPE1]->(m:Label1) RETURN id(n) AS source, id(m) AS target, type.weight AS weight")
@@ -260,7 +260,7 @@ public final class DegreeCentralityTest {
         }
 
         final Graph graph;
-        if (graphImpl.isAssignableFrom(HeavyCypherGraphFactory.class)) {
+        if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
             graph = new GraphLoader(db)
                     .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
                     .withRelationshipType("MATCH (n:Label1)-[type:TYPE3]->(m:Label1) RETURN id(n) AS source, id(m) AS target, type.weight AS weight")
@@ -310,7 +310,7 @@ public final class DegreeCentralityTest {
         Direction direction = Direction.INCOMING;
 
         final Graph graph;
-        if (graphImpl.isAssignableFrom(HeavyCypherGraphFactory.class)) {
+        if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
             // For Cypher we always treat the graph as outgoing, and let the user
             // handle the direction in the Cypher query
             direction = Direction.OUTGOING;
@@ -363,7 +363,7 @@ public final class DegreeCentralityTest {
         Direction direction = Direction.INCOMING;
 
         Graph graph;
-        if (graphImpl.isAssignableFrom(HeavyCypherGraphFactory.class)) {
+        if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
             // For Cypher we always treat the graph as outgoing, and let the user
             // handle the direction in the Cypher query
             direction = Direction.OUTGOING;
@@ -420,7 +420,7 @@ public final class DegreeCentralityTest {
         }
 
         final Graph graph;
-        if (graphImpl.isAssignableFrom(HeavyCypherGraphFactory.class)) {
+        if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
             graph = new GraphLoader(db)
                     .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
                     .withRelationshipType("MATCH (n:Label1)-[:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target")

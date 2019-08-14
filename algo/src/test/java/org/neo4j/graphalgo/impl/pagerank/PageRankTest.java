@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory;
+import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -124,7 +124,7 @@ public final class PageRankTest {
         }
 
         final Graph graph;
-        if (graphImpl.isAssignableFrom(HeavyCypherGraphFactory.class)) {
+        if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
             graph = new GraphLoader(db)
                     .withLabel("MATCH (n:Label1) RETURN id(n) as id")
                     .withRelationshipType("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
@@ -175,7 +175,7 @@ public final class PageRankTest {
 
         final Graph graph;
         final CentralityResult rankResult;
-        if (graphImpl.isAssignableFrom(HeavyCypherGraphFactory.class)) {
+        if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
             graph = new GraphLoader(db)
                     .withLabel("MATCH (n:Label1) RETURN id(n) as id")
                     .withRelationshipType("MATCH (n:Label1)<-[:TYPE1]-(m:Label1) RETURN id(n) AS source,id(m) AS target")
@@ -213,7 +213,7 @@ public final class PageRankTest {
     public void correctPartitionBoundariesForAllNodes(Class<? extends GraphFactory> graphImpl) {
         final Label label = Label.label("Label1");
         final Graph graph;
-        if (graphImpl.isAssignableFrom(HeavyCypherGraphFactory.class)) {
+        if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
             graph = new GraphLoader(db)
                     .withLabel("MATCH (n:Label1) RETURN id(n) as id")
                     .withRelationshipType("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")

@@ -28,7 +28,7 @@ import java.util.Arrays;
 
 import static org.neo4j.graphalgo.core.huge.loader.VarLongEncoding.encodeVLongs;
 
-public final class AdjacencyCompression {
+final class AdjacencyCompression {
 
     private static long[] growWithDestroy(long[] values, int newLength) {
         if (values.length < newLength) {

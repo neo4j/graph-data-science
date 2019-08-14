@@ -17,18 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.heavyweight;
+package org.neo4j.graphalgo.core.huge.loader;
 
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.huge.HugeAdjacencyList;
 import org.neo4j.graphalgo.core.huge.HugeAdjacencyOffsets;
-import org.neo4j.graphalgo.core.huge.loader.AdjacencyBuilder;
-import org.neo4j.graphalgo.core.huge.loader.IdsAndProperties;
-import org.neo4j.graphalgo.core.huge.loader.ImportSizing;
-import org.neo4j.graphalgo.core.huge.loader.RelationshipImporter;
 import org.neo4j.graphalgo.core.huge.loader.RelationshipImporter.Imports;
-import org.neo4j.graphalgo.core.huge.loader.RelationshipsBatchBuffer;
-import org.neo4j.graphalgo.core.huge.loader.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.kernel.api.StatementConstants;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -40,7 +34,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class CypherRelationshipLoader {
+class CypherRelationshipLoader {
     private final GraphDatabaseAPI api;
     private final GraphSetup setup;
     private final RelationshipsBuilder outgoingRelationshipsBuilder;
@@ -48,7 +42,7 @@ public class CypherRelationshipLoader {
     private long totalRelationshipsImported = 0;
 
 
-    public CypherRelationshipLoader(GraphDatabaseAPI api, GraphSetup setup) {
+    CypherRelationshipLoader(GraphDatabaseAPI api, GraphSetup setup) {
         this.api = api;
         this.setup = setup;
         outgoingRelationshipsBuilder = new RelationshipsBuilder(setup.duplicateRelationshipsStrategy, setup.tracker, setup.shouldLoadRelationshipWeight());
@@ -67,7 +61,7 @@ public class CypherRelationshipLoader {
 
         boolean hasRelationshipWeights = setup.shouldLoadRelationshipWeight();
 
-        org.neo4j.graphalgo.core.huge.loader.RelationshipImporter importer = new org.neo4j.graphalgo.core.huge.loader.RelationshipImporter(setup.tracker, outBuilder, null);
+        RelationshipImporter importer = new RelationshipImporter(setup.tracker, outBuilder, null);
 
         Imports imports = RelationshipImporter.imports(importer, false, true, false, hasRelationshipWeights);
 
@@ -95,27 +89,12 @@ public class CypherRelationshipLoader {
                 outWeightOffsets
         );
 
-//        return new Relationships(
-//                // TODO: rows, relationshipCount -- what is the difference?
-//                //       deduplication, plus rels filtered because source or target is unknown
-//                totalRecordsSeen, totalRelationshipsImported,
-//                incomingRelationshipsBuilder.adjacency.build(),
-//                outgoingRelationshipsBuilder.adjacency.build(),
-//                incomingRelationshipsBuilder.globalAdjacencyOffsets,
-//                outgoingRelationshipsBuilder.globalAdjacencyOffsets,
-//                setup.relationDefaultWeight,
-//                incomingRelationshipsBuilder.weights.build(),
-//                outgoingRelationshipsBuilder.weights.build(),
-//                incomingRelationshipsBuilder.globalWeightOffsets,
-//                outgoingRelationshipsBuilder.globalWeightOffsets
-//        );
-
     }
 
     private void parallelLoadRelationships(
             int batchSize,
             IdsAndProperties nodes,
-            org.neo4j.graphalgo.core.huge.loader.RelationshipImporter importer,
+            RelationshipImporter importer,
             Imports imports) {
         ExecutorService pool = setup.executor;
         int threads = setup.concurrency();
@@ -148,7 +127,7 @@ public class CypherRelationshipLoader {
 
     private void nonParallelLoadRelationships(
             IdsAndProperties nodes,
-            org.neo4j.graphalgo.core.huge.loader.RelationshipImporter importer,
+            RelationshipImporter importer,
             Imports imports) {
         ImportState relationships = loadRelationships(0L, ParallelUtil.DEFAULT_BATCH_SIZE, nodes, importer, imports, false);
         importer.flushTasks().forEach(Runnable::run);
@@ -160,7 +139,7 @@ public class CypherRelationshipLoader {
             long offset,
             int batchSize,
             IdsAndProperties nodes,
-            org.neo4j.graphalgo.core.huge.loader.RelationshipImporter importer,
+            RelationshipImporter importer,
             Imports imports,
             boolean withPaging) {
         boolean hasRelationshipWeights = setup.shouldLoadRelationshipWeight();
