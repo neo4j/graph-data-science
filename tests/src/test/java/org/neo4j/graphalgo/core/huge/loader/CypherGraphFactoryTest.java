@@ -19,60 +19,67 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.DuplicateRelationshipsStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
+import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class CypherGraphFactoryTest {
 
-    private static GraphDatabaseService db;
+    private static final int COUNT = 10000;
+    private static final String QUERY = "UNWIND range(1," + COUNT + ") AS id CREATE (n {id:id})-[:REL {prop:id%10}]->(n)";
+    public static final String SKIP_LIMIT = "WITH * SKIP {skip} LIMIT {limit}";
+
+    private GraphDatabaseAPI db;
 
     private static int id1;
     private static int id2;
     private static int id3;
 
-    @BeforeClass
-    public static void setUp() {
-
+    @BeforeEach
+    public void setUp() {
         db = TestDatabaseCreator.createTestDatabase();
-
-        db.execute(
-                "CREATE (n1 {partition: 6})-[:REL  {prop:1}]->(n2 {foo: 4})-[:REL {prop:2}]->(n3) " +
-                   "CREATE (n1)-[:REL {prop:3}]->(n3) " +
-                   "RETURN id(n1) AS id1, id(n2) AS id2, id(n3) AS id3").accept(row -> {
-            id1 = row.getNumber("id1").intValue();
-            id2 = row.getNumber("id2").intValue();
-            id3 = row.getNumber("id3").intValue();
-            return true;
-        });
+        db.execute(QUERY);
     }
 
-    @AfterClass
-    public static void tearDown() {
+    @AfterEach
+    public void tearDown() {
         db.shutdown();
     }
 
 
     @Test
     public void testLoadCypher() {
-        String nodes = "MATCH (n) RETURN id(n) as id, n.partition AS partition, n.foo AS foo";
-        String rels = "MATCH (n)-[r]->(m) WHERE type(r) = {rel} RETURN id(n) as source, id(m) as target, r.prop as weight ORDER BY id(r) DESC ";
+        db = TestDatabaseCreator.createTestDatabase();
 
-        Graph graph = new GraphLoader((GraphDatabaseAPI) db)
+        db.execute(
+                "CREATE (n1 {partition: 6})-[:REL  {prop:1}]->(n2 {foo: 4})-[:REL {prop:2}]->(n3) " +
+                "CREATE (n1)-[:REL {prop:3}]->(n3) " +
+                "RETURN id(n1) AS id1, id(n2) AS id2, id(n3) AS id3").accept(row -> {
+            id1 = row.getNumber("id1").intValue();
+            id2 = row.getNumber("id2").intValue();
+            id3 = row.getNumber("id3").intValue();
+            return true;
+        });
+        String nodes = "MATCH (n) RETURN id(n) AS id, n.partition AS partition, n.foo AS foo";
+        String rels = "MATCH (n)-[r]->(m) WHERE type(r) = {rel} RETURN id(n) AS source, id(m) AS target, r.prop AS weight ORDER BY id(r) DESC ";
+
+        Graph graph = new GraphLoader(db)
                 .withParams(MapUtil.map("rel", "REL"))
                 .withRelationshipWeightsFromProperty("prop", 0)
                 .withLabel(nodes)
@@ -97,11 +104,11 @@ public class CypherGraphFactoryTest {
             graph.forEachRelationship(n, Direction.OUTGOING, (s, t, w) -> {
                 String rel = "(" + s + ")-->(" + t + ")";
                 if (s == id1 && t == id2) {
-                    assertEquals("weight of " + rel, 1.0, w, 1e-4);
+                    assertEquals(1.0, w, "weight of " + rel);
                 } else if (s == id2 && t == id3) {
-                    assertEquals("weight of " + rel, 2.0, w, 1e-4);
+                    assertEquals(2.0, w, "weight of " + rel);
                 } else if (s == id1 && t == id3) {
-                    assertEquals("weight of " + rel, 3.0, w, 1e-4);
+                    assertEquals(3.0, w, "weight of " + rel);
                 } else {
                     fail("Unexpected relationship " + rel);
                 }
@@ -115,5 +122,124 @@ public class CypherGraphFactoryTest {
         assertEquals(6.0D, graph.nodeProperties("partition").nodeWeight(node1), 0.01);
         assertEquals(5.0D, graph.nodeProperties("foo").nodeWeight(node1), 0.01);
         assertEquals(4.0D, graph.nodeProperties("foo").nodeWeight(node2), 0.01);
+    }
+
+    @ParameterizedTest(name = "parallel={0}")
+    @ValueSource(booleans = {true, false})
+    public void testLoadNoneParallelCypher(boolean parallel) {
+        String nodeStatement = "MATCH (n) RETURN id(n) AS id";
+        String relStatement = "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop AS weight";
+
+        loadAndTestGraph(nodeStatement, relStatement, DuplicateRelationshipsStrategy.NONE, parallel);
+    }
+
+    @ParameterizedTest(name = "parallel={0}")
+    @ValueSource(booleans = {true, false})
+    public void testLoadNodesParallelCypher(boolean parallel) {
+        String pagingQuery = "MATCH (n) %s RETURN id(n) AS id";
+        String nodeStatement = String.format(pagingQuery, parallel ? SKIP_LIMIT : "");
+        String relStatement = "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop AS weight";
+
+        loadAndTestGraph(nodeStatement, relStatement, DuplicateRelationshipsStrategy.NONE, parallel);
+    }
+
+    @ParameterizedTest(name = "parallel={0}")
+    @ValueSource(booleans = {true, false})
+    public void testLoadRelationshipsParallelCypher(boolean parallel) {
+        String nodeStatement = "MATCH (n) RETURN id(n) AS id";
+        String pagingQuery = "MATCH (n)-[r:REL]->(m) %s RETURN id(n) AS source, id(m) AS target, r.prop AS weight";
+        String relStatement = String.format(pagingQuery, parallel ? SKIP_LIMIT : "");
+
+        loadAndTestGraph(nodeStatement, relStatement, DuplicateRelationshipsStrategy.NONE, parallel);
+    }
+
+    @ParameterizedTest(name = "parallel={0}")
+    @ValueSource(booleans = {true, false})
+    public void testLoadRelationshipsParallelAccumulateWeightCypher(boolean parallel) {
+        String nodeStatement = "MATCH (n) RETURN id(n) AS id";
+        String pagingQuery =
+                "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight " +
+                "UNION ALL "+
+                "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight ";
+        String relStatement = String.format(pagingQuery, parallel ? SKIP_LIMIT : "");
+
+        loadAndTestGraph(nodeStatement, relStatement, DuplicateRelationshipsStrategy.SUM, parallel);
+    }
+
+    @ParameterizedTest(name = "parallel={0}")
+    @ValueSource(booleans = {true, false})
+    public void testLoadCypherBothParallel(boolean parallel) {
+        String pagingNodeQuery = "MATCH (n) %s RETURN id(n) AS id";
+        String nodeStatement = String.format(pagingNodeQuery, parallel ? SKIP_LIMIT : "");
+        String pagingRelQuery = "MATCH (n)-[r:REL]->(m) %s RETURN id(n) AS source, id(m) AS target, r.prop AS weight";
+        String relStatement = String.format(pagingRelQuery, parallel ? SKIP_LIMIT : "");
+
+        loadAndTestGraph(nodeStatement, relStatement, DuplicateRelationshipsStrategy.NONE, parallel);
+    }
+
+    @ParameterizedTest(name = "parallel={0}")
+    @ValueSource(booleans = {true, false})
+    public void uniqueRelationships(boolean parallel) {
+        String nodeStatement = "MATCH (n) RETURN id(n) AS id";
+        String pagingQuery = "MATCH (n)-[r:REL]->(m) %s RETURN id(n) AS source, id(m) AS target, r.prop AS weight";
+        String relStatement = String.format(pagingQuery, parallel ? SKIP_LIMIT : "");
+
+        loadAndTestGraph(nodeStatement, relStatement, DuplicateRelationshipsStrategy.NONE, parallel);
+    }
+
+    @ParameterizedTest(name = "parallel={0}")
+    @ValueSource(booleans = {true, false})
+    public void accumulateWeightCypher(boolean parallel) {
+        String nodeStatement = "MATCH (n) RETURN id(n) AS id";
+        String pagingQuery =
+                "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight " +
+                "UNION ALL "+
+                "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight ";
+        String relStatement = String.format(pagingQuery, parallel ? SKIP_LIMIT : "");
+
+        loadAndTestGraph(nodeStatement, relStatement, DuplicateRelationshipsStrategy.SUM, parallel);
+    }
+
+    @ParameterizedTest(name = "parallel={0}")
+    @ValueSource(booleans = {true, false})
+    public void countEachRelationshipOnce(boolean parallel) {
+        String nodeStatement = "MATCH (n) RETURN id(n) AS id";
+        String pagingQuery =
+                "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop AS weight " +
+                "UNION ALL "+
+                "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop AS weight ";
+        String relStatement = String.format(pagingQuery, parallel ? SKIP_LIMIT : "");
+
+        loadAndTestGraph(nodeStatement, relStatement, DuplicateRelationshipsStrategy.SKIP, parallel);
+    }
+
+    private void loadAndTestGraph(String nodeStatement, String relStatement, DuplicateRelationshipsStrategy strategy, boolean parallel) {
+        GraphLoader loader = new GraphLoader(db)
+                .withBatchSize(1000)
+                .withDuplicateRelationshipsStrategy(strategy)
+                .withRelationshipWeightsFromProperty("prop", 0D)
+                .withLabel(nodeStatement)
+                .withRelationshipType(relStatement);
+        if (parallel) {
+            loader.withExecutorService(Pools.DEFAULT);
+        }
+        Graph graph = loader.load(CypherGraphFactory.class);
+
+        assertEquals(COUNT, graph.nodeCount());
+        AtomicInteger relCount = new AtomicInteger();
+        graph.forEachNode(node -> {
+            relCount.addAndGet(graph.degree(node, Direction.OUTGOING));
+            return true;
+        });
+        assertEquals(COUNT, relCount.get());
+        AtomicInteger total = new AtomicInteger();
+        graph.forEachNode(n -> {
+            graph.forEachRelationship(n, Direction.OUTGOING, (s, t, w) -> {
+                total.addAndGet((int) w);
+                return true;
+            });
+            return true;
+        });
+        assertEquals(9 * COUNT / 2, total.get());
     }
 }
