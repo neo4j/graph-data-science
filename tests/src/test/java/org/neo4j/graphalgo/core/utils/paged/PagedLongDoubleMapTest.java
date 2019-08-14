@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -27,6 +28,12 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
 public final class PagedLongDoubleMapTest {
+
+    @Test
+    public void canGetMaxValueFromEmptyMap() {
+        PagedLongDoubleMap map = PagedLongDoubleMap.of(100_000, AllocationTracker.EMPTY);
+        Assert.assertEquals(0D, map.getMaxValue(), 0D);
+    }
 
     @Test
     public void canReadFromPut() {
