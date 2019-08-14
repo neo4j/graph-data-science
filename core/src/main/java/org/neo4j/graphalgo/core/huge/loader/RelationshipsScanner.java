@@ -34,7 +34,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
 
-final class RelationshipsScanner extends StatementAction implements RecordScanner {
+public final class RelationshipsScanner extends StatementAction implements RecordScanner {
 
     static InternalImporter.CreateScanner of(
             GraphDatabaseAPI api,
@@ -165,7 +165,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
             final ImportProgress progress = this.progress;
             final Imports imports = this.imports;
 
-            RelationshipImporter.WeightReader weightReader = importer.weightReader(cursors, read);
+            RelationshipImporter.WeightReader weightReader = importer.storeBackedWeightReader(cursors, read);
 
             long allImportedRels = 0L;
             long allImportedWeights = 0L;

@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
-import com.carrotsearch.hppc.IntObjectHashMap;
-import com.carrotsearch.hppc.IntObjectMap;
 import org.neo4j.graphalgo.core.utils.ImportProgress;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.StatementAction;
@@ -77,7 +75,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
         }
 
         @Override
-        public RecordScanner create(final int index) {
+        public RecordScanner create(int index) {
             return new NodesScanner(
                     api,
                     terminationFlag,
@@ -94,16 +92,6 @@ final class NodesScanner extends StatementAction implements RecordScanner {
             return Collections.emptyList();
         }
 
-        private IntObjectMap<HugeNodePropertiesBuilder> mapBuilders(Collection<HugeNodePropertiesBuilder> builders) {
-            if (builders == null || builders.isEmpty()) {
-                return null;
-            }
-            IntObjectMap<HugeNodePropertiesBuilder> map = new IntObjectHashMap<>(builders.size());
-            for (HugeNodePropertiesBuilder builder : builders) {
-                map.put(builder.propertyId(), builder);
-            }
-            return map;
-        }
     }
 
     private final TerminationFlag terminationFlag;

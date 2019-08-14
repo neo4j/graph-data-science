@@ -19,11 +19,11 @@
  */
 package org.neo4j.graphalgo.core.heavyweight;
 
-import org.neo4j.graphalgo.core.WeightMap;
 import org.neo4j.graphdb.Result;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -37,16 +37,10 @@ public class CypherLoadingUtils {
                 (statement.contains("{" + SKIP + "}") || statement.contains("$" + SKIP));
     }
 
-    public static WeightMap newWeightMapping(boolean needWeights, double defaultValue, int capacity) {
-        return needWeights ? new WeightMap(capacity, defaultValue, -2) : null;
-    }
-
     public static Map<String, Object> params(Map<String, Object> baseParams, long offset, int batchSize) {
         Map<String, Object> params = new HashMap<>(baseParams);
         params.put(SKIP, offset);
-        if (batchSize > 0) {
-            params.put(LIMIT, batchSize);
-        }
+        params.put(LIMIT, batchSize);
         return params;
     }
 
@@ -63,8 +57,9 @@ public class CypherLoadingUtils {
     public static Object getProperty(Result.ResultRow row, String propertyName) {
         try {
             return row.get(propertyName);
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | NoSuchElementException e) {
             return null;
         }
     }
+
 }

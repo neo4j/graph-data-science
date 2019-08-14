@@ -31,6 +31,8 @@ import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.values.storable.Value;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public class NodeImporter {
 
@@ -40,10 +42,12 @@ public class NodeImporter {
 
     private final HugeLongArrayBuilder idMapBuilder;
     private final IntObjectMap<HugeNodePropertiesBuilder> buildersByPropertyId;
+    private final Collection<HugeNodePropertiesBuilder> nodePropertyBuilders;
 
     public NodeImporter(HugeLongArrayBuilder idMapBuilder, Collection<HugeNodePropertiesBuilder> nodePropertyBuilders) {
         this.idMapBuilder = idMapBuilder;
         this.buildersByPropertyId = mapBuildersByPropertyId(nodePropertyBuilders);
+        this.nodePropertyBuilders = nodePropertyBuilders;
     }
 
     boolean readsProperties() {
@@ -53,6 +57,11 @@ public class NodeImporter {
     long importNodes(NodesBatchBuffer buffer, Read read, CursorFactory cursors) {
         return importNodes(buffer, (nodeReference, propertiesReference, internalId) ->
                 readWeight(nodeReference, propertiesReference, buildersByPropertyId, internalId, cursors, read));
+    }
+
+    public long importCypherNodes(NodesBatchBuffer buffer, List<Map<String, Number>> cypherNodeProperties) {
+        return importNodes(buffer,(nodeReference, propertiesReference, internalId) ->
+                readCypherWeight(propertiesReference, internalId, cypherNodeProperties));
     }
 
     private long importNodes(NodesBatchBuffer buffer, WeightReader reader) {
@@ -115,6 +124,23 @@ public class NodeImporter {
             return nodePropertiesRead;
         }
     }
+
+    private int readCypherWeight(
+            long propertiesReference,
+            long internalId,
+            List<Map<String, Number>> cypherNodeProperties) {
+        Map<String, Number> weights = cypherNodeProperties.get((int) propertiesReference);
+        int nodePropertiesRead = 0;
+        for (HugeNodePropertiesBuilder props : nodePropertyBuilders) {
+            Number number = weights.get(props.propertyKey());
+            if (number != null) {
+                props.set(internalId, number.doubleValue());
+                nodePropertiesRead++;
+            }
+        }
+        return nodePropertiesRead;
+    }
+
 
     private IntObjectMap<HugeNodePropertiesBuilder> mapBuildersByPropertyId(Collection<HugeNodePropertiesBuilder> builders) {
         if (builders == null) {

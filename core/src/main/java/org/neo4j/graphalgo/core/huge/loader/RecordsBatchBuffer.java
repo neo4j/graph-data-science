@@ -25,9 +25,6 @@ import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 
 public abstract class RecordsBatchBuffer<Record extends AbstractBaseRecord> implements RecordConsumer<Record> {
 
-    // For nodes: the buffer containes the node ids, consecutive
-    // For relationships: the buffer is divided into 4-long blocks
-    // for each rel: source, target, rel-id, prop-id
     final long[] buffer;
     int length;
 

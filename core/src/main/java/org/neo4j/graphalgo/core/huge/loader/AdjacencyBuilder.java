@@ -32,11 +32,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
-abstract class AdjacencyBuilder {
-
-    abstract void addAdjacencyImporter(AllocationTracker tracker, int pageIndex);
-
-    abstract void finishPreparation();
+public abstract class AdjacencyBuilder {
 
     abstract void addAll(
             long[] batch,
@@ -48,7 +44,7 @@ abstract class AdjacencyBuilder {
 
     abstract Collection<Runnable> flushTasks();
 
-    static AdjacencyBuilder compressing(
+    public static AdjacencyBuilder compressing(
             RelationshipsBuilder globalBuilder,
             int numPages,
             int pageSize,
@@ -67,7 +63,7 @@ abstract class AdjacencyBuilder {
 
         long[][] globalWeightOffsets = weightProperty != StatementConstants.NO_SUCH_PROPERTY_KEY ? new long[numPages][] : null;
 
-        return new CompressingPagedAdjacency(
+        CompressingPagedAdjacency compressingPagedAdjacency = new CompressingPagedAdjacency(
                 globalBuilder,
                 localBuilders,
                 compressedAdjacencyLists,
@@ -78,6 +74,11 @@ abstract class AdjacencyBuilder {
                 relationshipCounter,
                 weightProperty,
                 defaultWeight);
+        for (int idx = 0; idx < numPages; idx++) {
+            compressingPagedAdjacency.addAdjacencyImporter(tracker, idx);
+        }
+        compressingPagedAdjacency.finishPreparation();
+        return compressingPagedAdjacency;
     }
 
     abstract int getWeightProperty();
@@ -128,7 +129,6 @@ abstract class AdjacencyBuilder {
             this.defaultWeight = defaultWeight;
         }
 
-        @Override
         void addAdjacencyImporter(AllocationTracker tracker, int pageIndex) {
             tracker.add(sizeOfObjectPage);
             tracker.add(sizeOfObjectPage);
@@ -148,7 +148,6 @@ abstract class AdjacencyBuilder {
             localBuilders[pageIndex].prepare();
         }
 
-        @Override
         void finishPreparation() {
             globalBuilder.setGlobalAdjacencyOffsets(HugeAdjacencyOffsets.of(globalAdjacencyOffsets, pageSize));
             if (globalWeightOffsets != null) {
@@ -253,16 +252,6 @@ abstract class AdjacencyBuilder {
     private static final class NoAdjacency extends AdjacencyBuilder {
 
         private static final AdjacencyBuilder INSTANCE = new NoAdjacency();
-
-        @Override
-        void addAdjacencyImporter(
-                AllocationTracker tracker,
-                int pageIndex) {
-        }
-
-        @Override
-        void finishPreparation() {
-        }
 
         @Override
         void addAll(

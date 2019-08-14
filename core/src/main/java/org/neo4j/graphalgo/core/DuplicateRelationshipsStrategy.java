@@ -19,17 +19,17 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.neo4j.graphalgo.core.heavyweight.AdjacencyMatrix;
-
-import java.util.concurrent.atomic.LongAdder;
-import java.util.function.Supplier;
-
-import static org.neo4j.graphalgo.core.heavyweight.HeavyGraph.checkSize;
-
 public enum DuplicateRelationshipsStrategy {
+    DEFAULT {
+        public double merge(double runningTotal, double weight) {
+            throw new UnsupportedOperationException(
+                    "Multiple relationships between the same pair of nodes are not expected. " +
+                    "Try using SKIP or some other duplicate relationships strategy.");
+        }
+    },
     NONE {
         public double merge(double runningTotal, double weight) {
-            throw new UnsupportedOperationException();
+            return DEFAULT.merge(runningTotal, weight);
         }
     },
     SKIP {
@@ -55,50 +55,4 @@ public enum DuplicateRelationshipsStrategy {
 
     public abstract double merge(double runningTotal, double weight);
 
-    // TODO: This should not rely on the HeavyGraph implementation, but I don't want to propagate the int -> long
-    //       change further down before I understand the implications.
-    public void handle(long source, long target, AdjacencyMatrix matrix, boolean hasRelationshipWeights, double defaultWeight, Supplier<Number> weightSupplier, LongAdder relationshipCounter) {
-        checkSize(source, target);
-        handle((int) source, (int) target, matrix, hasRelationshipWeights, defaultWeight, weightSupplier, relationshipCounter);
-    }
-
-    public void handle(int source, int target, AdjacencyMatrix matrix, boolean hasRelationshipWeights, double defaultWeight, Supplier<Number> weightSupplier, LongAdder relationshipCounter) {
-        double thisWeight = defaultWeight;
-        if (hasRelationshipWeights) {
-            Number weight = weightSupplier.get();
-            if (weight != null) {
-                thisWeight = weight.doubleValue();
-            }
-        }
-        handle(source, target, matrix, hasRelationshipWeights, thisWeight, relationshipCounter);
-    }
-
-    public void handle(int source, int target, AdjacencyMatrix matrix, boolean hasRelationshipWeights, double weight, LongAdder relationshipCounter) {
-        if (this == DuplicateRelationshipsStrategy.NONE) {
-            relationshipCounter.increment();
-            if (hasRelationshipWeights) {
-                matrix.addOutgoingWithWeight(source, target, weight);
-            } else {
-                matrix.addOutgoing(source, target);
-            }
-        } else {
-            if (hasRelationshipWeights) {
-                int relationshipIndex = matrix.outgoingIndex(source, target);
-                if (relationshipIndex >= 0) {
-                    double oldWeight = matrix.getOutgoingWeight(source, relationshipIndex);
-                    double newWeight = this.merge(oldWeight, weight);
-                    matrix.addOutgoingWeight(source, relationshipIndex, newWeight);
-                } else {
-                    relationshipCounter.increment();
-                    matrix.addOutgoingWithWeight(source, target, weight);
-                }
-            } else {
-                boolean hasRelationship = matrix.hasOutgoing(source, target);
-                if (!hasRelationship) {
-                    relationshipCounter.increment();
-                    matrix.addOutgoing(source, target);
-                }
-            }
-        }
-    }
 }

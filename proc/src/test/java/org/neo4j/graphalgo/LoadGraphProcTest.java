@@ -286,14 +286,14 @@ public class LoadGraphProcTest extends ProcTestBase {
         runQuery("CALL algo.graph.info($name, true)", singletonMap("name", "foo"), row -> {
             assertEquals(12, row.getNumber("nodes").intValue());
             assertEquals(10, row.getNumber("relationships").intValue());
-            assertEquals(graph.equals("cypher") ? "heavy" : graph, row.getString("type"));
+            assertEquals(graph.equals("cypher") ? "huge" : graph, row.getString("type"));
             assertEquals("foo", row.getString("name"));
             assertTrue(row.getBoolean("exists"));
         });
         runQuery("CALL algo.graph.remove($name)", singletonMap("name", "foo"), row -> {
             assertEquals(12, row.getNumber("nodes").intValue());
             assertEquals(10, row.getNumber("relationships").intValue());
-            assertEquals(graph.equals("cypher") ? "heavy" : graph, row.getString("type"));
+            assertEquals(graph.equals("cypher") ? "huge" : graph, row.getString("type"));
             assertEquals("foo", row.getString("name"));
             assertTrue(row.getBoolean("removed"));
         });

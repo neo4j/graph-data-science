@@ -17,29 +17,38 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.huge.loader;
+package org.neo4j.graphalgo.core.heavyweight;
 
-import org.neo4j.graphalgo.api.HugeWeightMapping;
+public class ImportState {
 
-import java.util.Map;
+    private final long offset;
+    private final long rows;
+    private final long maxId;
+    private final long count;
 
-public final class IdsAndProperties {
-
-    final IdMap hugeIdMap;
-    final Map<String, HugeWeightMapping> properties;
-
-    public IdsAndProperties(
-            final IdMap hugeIdMap,
-            final Map<String, HugeWeightMapping> properties) {
-        this.hugeIdMap = hugeIdMap;
-        this.properties = properties;
+    ImportState(
+            long offset,
+            long rows,
+            long maxId,
+            long count
+    ) {
+        this.offset = offset;
+        this.rows = rows;
+        this.maxId = maxId;
+        this.count = count;
     }
 
-    public IdMap idMap() {
-        return hugeIdMap;
+    long offset() {
+        return offset;
     }
 
-    public Map<String, HugeWeightMapping> properties() {
-        return properties;
+    long rows() {
+        return rows;
     }
+
+    long maxId() {
+        return maxId;
+    }
+
+    long count() { return count; }
 }

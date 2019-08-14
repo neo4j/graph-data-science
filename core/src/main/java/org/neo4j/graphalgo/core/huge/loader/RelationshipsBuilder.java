@@ -19,20 +19,22 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
+import org.neo4j.graphalgo.core.DuplicateRelationshipsStrategy;
 import org.neo4j.graphalgo.core.huge.HugeAdjacencyOffsets;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
-class RelationshipsBuilder {
+public class RelationshipsBuilder {
 
-    final HugeAdjacencyListBuilder adjacency;
-    final HugeAdjacencyListBuilder weights;
-
+    private final DuplicateRelationshipsStrategy duplicateRelationshipsStrategy;
     private final boolean weighted;
+    public final HugeAdjacencyListBuilder adjacency;
+    public final HugeAdjacencyListBuilder weights;
 
-    HugeAdjacencyOffsets globalAdjacencyOffsets;
-    HugeAdjacencyOffsets globalWeightOffsets;
+    public HugeAdjacencyOffsets globalAdjacencyOffsets;
+    public HugeAdjacencyOffsets globalWeightOffsets;
 
-    RelationshipsBuilder(AllocationTracker tracker, final boolean weighted) {
+    public RelationshipsBuilder(DuplicateRelationshipsStrategy duplicateRelationshipsStrategy, AllocationTracker tracker, boolean weighted) {
+        this.duplicateRelationshipsStrategy = duplicateRelationshipsStrategy == DuplicateRelationshipsStrategy.DEFAULT ? DuplicateRelationshipsStrategy.SKIP : duplicateRelationshipsStrategy;
         this.weighted = weighted;
         adjacency = HugeAdjacencyListBuilder.newBuilder(tracker);
         weights = weighted ? HugeAdjacencyListBuilder.newBuilder(tracker) : null;
@@ -42,6 +44,7 @@ class RelationshipsBuilder {
             long[] adjacencyOffsets,
             long[] weightOffsets) {
         return new ThreadLocalRelationshipsBuilder(
+                duplicateRelationshipsStrategy,
                 adjacency.newAllocator(),
                 weighted ? weights.newAllocator() : null,
                 adjacencyOffsets,

@@ -24,6 +24,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
@@ -38,29 +39,29 @@ public class CypherRelationshipCountingLoader {
         this.setup = setup;
     }
 
-    public RelationshipCount load() {
+    public ImportState load() {
         int batchSize = setup.batchSize;
         return CypherLoadingUtils.canBatchLoad(setup.loadConcurrent(), batchSize, setup.relationshipType) ?
-                batchLoadRelationships(batchSize) :
-                loadRelationships(0, NO_BATCH);
+                parallelLoadRelationships(batchSize) :
+                nonParallellLoadRelationships(0, NO_BATCH, false);
     }
 
-    private RelationshipCount batchLoadRelationships(int batchSize) {
+    private ImportState parallelLoadRelationships(int batchSize) {
         ExecutorService pool = setup.executor;
         int threads = setup.concurrency();
 
         long offset = 0;
         long lastOffset = 0;
         long total = 0;
-        Collection<Future<RelationshipCount>> futures = new ArrayList<>(threads);
+        Collection<Future<ImportState>> futures = new ArrayList<>(threads);
         boolean working = true;
         do {
             long skip = offset;
-            futures.add(pool.submit(() -> loadRelationships(skip, batchSize)));
+            futures.add(pool.submit(() -> nonParallellLoadRelationships(skip, batchSize, true)));
             offset += batchSize;
             if (futures.size() >= threads) {
-                for (Future<RelationshipCount> future : futures) {
-                    RelationshipCount result = CypherLoadingUtils.get(
+                for (Future<ImportState> future : futures) {
+                    ImportState result = CypherLoadingUtils.get(
                             "Error during loading relationships offset: " + (lastOffset + batchSize),
                             future);
                     lastOffset = result.offset();
@@ -71,33 +72,17 @@ public class CypherRelationshipCountingLoader {
             }
         } while (working);
 
-        return new RelationshipCount(total, 0);
+        return new ImportState(0, total, -1L, -1L);
     }
 
-    private RelationshipCount loadRelationships(long offset, int batchSize) {
+    private ImportState nonParallellLoadRelationships(long offset, int batchSize, boolean withPaging) {
         ResultCountingVisitor visitor = new ResultCountingVisitor();
-        api.execute(setup.relationshipType, CypherLoadingUtils.params(setup.params, offset, batchSize)).accept(visitor);
-        return new RelationshipCount(visitor.rows(), offset);
+        Map<String, Object> parameters = withPaging
+                ? CypherLoadingUtils.params(setup.params, offset, batchSize)
+                : setup.params;
+        api.execute(setup.relationshipType, parameters).accept(visitor);
+        return new ImportState(offset, visitor.rows(), -1L, -1L);
     }
 
-    static class RelationshipCount {
-
-        private final long rows;
-        private final long offset;
-
-        RelationshipCount(final long rows, final long offset) {
-
-            this.rows = rows;
-            this.offset = offset;
-        }
-
-        long offset() {
-            return offset;
-        }
-
-        long rows() {
-            return rows;
-        }
-    }
 
 }

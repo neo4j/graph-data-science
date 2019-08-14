@@ -29,24 +29,28 @@ public final class HugeNodePropertiesBuilder {
     private final double defaultValue;
     private final int propertyId;
     private final PagedLongDoubleMap properties;
+    private final String propertyKey;
 
     public static HugeNodePropertiesBuilder of(
             long numberOfNodes,
             AllocationTracker tracker,
             double defaultValue,
-            int propertyId) {
+            int propertyId,
+            String propertyKey) {
         assert propertyId != StatementConstants.NO_SUCH_PROPERTY_KEY;
         PagedLongDoubleMap properties = PagedLongDoubleMap.of(numberOfNodes, tracker);
-        return new HugeNodePropertiesBuilder(defaultValue, propertyId, properties);
+        return new HugeNodePropertiesBuilder(defaultValue, propertyId, properties, propertyKey);
     }
 
     private HugeNodePropertiesBuilder(
             final double defaultValue,
             final int propertyId,
-            final PagedLongDoubleMap properties) {
+            final PagedLongDoubleMap properties,
+            final String propertyKey) {
         this.defaultValue = defaultValue;
         this.propertyId = propertyId;
         this.properties = properties;
+        this.propertyKey = propertyKey;
     }
 
     double defaultValue() {
@@ -55,6 +59,10 @@ public final class HugeNodePropertiesBuilder {
 
     int propertyId() {
         return propertyId;
+    }
+
+    String propertyKey() {
+        return propertyKey;
     }
 
     public void set(long index, double value) {

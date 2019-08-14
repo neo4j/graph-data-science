@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DuplicateRelationshipsStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.huge.loader.AdjacencyCompression;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -58,7 +59,7 @@ public class HeavyCypherGraphParallelFactoryTest {
 
 
     @Test
-    public void testLoadNoneParallelCypher() throws Exception {
+    public void testLoadNoneParallelCypher() {
         String nodeStatement = "MATCH (n) RETURN id(n) as id";
         String relStatement = "MATCH (n)-[r:REL]->(m) RETURN id(n) as source, id(m) as target, r.prop as weight";
 
@@ -66,7 +67,7 @@ public class HeavyCypherGraphParallelFactoryTest {
     }
 
     @Test
-    public void testLoadNodesParallelCypher() throws Exception {
+    public void testLoadNodesParallelCypher() {
         String nodeStatement = "MATCH (n) WITH n SKIP {skip} LIMIT {limit} RETURN id(n) as id";
         String relStatement = "MATCH (n)-[r:REL]->(m) RETURN id(n) as source, id(m) as target, r.prop as weight";
 
@@ -74,7 +75,7 @@ public class HeavyCypherGraphParallelFactoryTest {
     }
 
     @Test
-    public void testLoadRelationshipsParallelCypher() throws Exception {
+    public void testLoadRelationshipsParallelCypher() {
         String nodeStatement = "MATCH (n) RETURN id(n) as id";
         String relStatement = "MATCH (n)-[r:REL]->(m)  WITH * SKIP {skip} LIMIT {limit} RETURN id(n) as source, id(m) as target, r.prop as weight";
 
@@ -82,18 +83,18 @@ public class HeavyCypherGraphParallelFactoryTest {
     }
 
     @Test
-    public void testLoadRelationshipsParallelAccumulateWeightCypher() throws Exception {
+    public void testLoadRelationshipsParallelAccumulateWeightCypher() {
         String nodeStatement = "MATCH (n) RETURN id(n) as id";
         String relStatement =
-                "MATCH (n)-[r:REL]->(m) WITH * SKIP {skip} LIMIT {limit} RETURN id(n) as source, id(m) as target, r.prop/2.0 as weight " +
+                "MATCH (n)-[r:REL]->(m) WITH * SKIP {skip} LIMIT {limit} RETURN id(n) AS source, id(m) AS target, r.prop/2.0 as weight " +
                 "UNION ALL "+
-                "MATCH (n)-[r:REL]->(m) WITH * SKIP {skip} LIMIT {limit} RETURN id(n) as source, id(m) as target, r.prop/2.0 as weight ";
+                "MATCH (n)-[r:REL]->(m) WITH * SKIP {skip} LIMIT {limit} RETURN id(n) AS source, id(m) AS target, r.prop/2.0 as weight ";
 
         loadAndTestGraph(nodeStatement, relStatement, true);
     }
 
     @Test
-    public void testLoadCypherBothParallel() throws Exception {
+    public void testLoadCypherBothParallel() {
         String nodeStatement = "MATCH (n) WITH n SKIP {skip} LIMIT {limit} RETURN id(n) as id";
         String relStatement = "MATCH (n)-[r:REL]->(m) WITH * SKIP {skip} LIMIT {limit} RETURN id(n) as source, id(m) as target, r.prop as weight";
 

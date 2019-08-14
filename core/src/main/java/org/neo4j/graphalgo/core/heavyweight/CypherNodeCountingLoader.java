@@ -20,84 +20,66 @@
 package org.neo4j.graphalgo.core.heavyweight;
 
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.IntIdMap;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
-import static org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory.INITIAL_NODE_COUNT;
 import static org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory.NO_BATCH;
 
 class CypherNodeCountingLoader {
     private final GraphDatabaseAPI api;
     private final GraphSetup setup;
 
-    public CypherNodeCountingLoader(GraphDatabaseAPI api, GraphSetup setup) {
+    CypherNodeCountingLoader(GraphDatabaseAPI api, GraphSetup setup) {
         this.api = api;
         this.setup = setup;
     }
 
-    public NodeCount load() {
+    public ImportState load() {
         int batchSize = setup.batchSize;
         return CypherLoadingUtils.canBatchLoad(setup.loadConcurrent(), batchSize, setup.startLabel) ?
-                batchLoadNodes(batchSize) :
-                loadNodes(0, NO_BATCH);
+                parallelLoadNodes(batchSize) :
+                nonParallelLoadNodes(0, NO_BATCH, false);
     }
 
-    private NodeCount batchLoadNodes(int batchSize) {
+    private ImportState parallelLoadNodes(int batchSize) {
         ExecutorService pool = setup.executor;
         int threads = setup.concurrency();
 
         long offset = 0;
         long total = 0;
         long lastOffset = 0;
-        List<Future<NodeCount>> futures = new ArrayList<>(threads);
+        List<Future<ImportState>> futures = new ArrayList<>(threads);
         boolean working = true;
         do {
             long skip = offset;
-            futures.add(pool.submit(() -> loadNodes(skip, batchSize)));
+            futures.add(pool.submit(() -> nonParallelLoadNodes(skip, batchSize, true)));
             offset += batchSize;
             if (futures.size() >= threads) {
-                for (Future<NodeCount> future : futures) {
-                    NodeCount result = CypherLoadingUtils.get("Error during loading nodes offset: " + (lastOffset + batchSize), future);
+                for (Future<ImportState> future : futures) {
+                    ImportState result = CypherLoadingUtils.get("Error during loading nodes offset: " + (lastOffset + batchSize), future);
                     lastOffset = result.offset();
                     total += result.rows();
-                    working = result.rows > 0;
+                    working = result.rows() > 0;
                 }
                 futures.clear();
             }
         } while (working);
 
-        return new NodeCount(total, 0);
+        return new ImportState(0, total, -1L, -1L);
     }
 
-    private NodeCount loadNodes(final long offset, final int batchSize) {
+    private ImportState nonParallelLoadNodes(final long offset, final int batchSize, boolean withPaging) {
         ResultCountingVisitor visitor = new ResultCountingVisitor();
-        api.execute(setup.startLabel, CypherLoadingUtils.params(setup.params,offset, batchSize)).accept(visitor);
-        return new NodeCount(visitor.rows(), offset);
+        Map<String, Object> parameters = withPaging
+                ? CypherLoadingUtils.params(setup.params, offset, batchSize)
+                : setup.params;
+        api.execute(setup.startLabel, parameters).accept(visitor);
+        return new ImportState(offset, visitor.rows(), -1L, -1L);
     }
 
-    static class NodeCount {
-
-        private final long rows;
-        private final long offset;
-
-        NodeCount(final long rows, final long offset) {
-
-            this.rows = rows;
-            this.offset = offset;
-        }
-
-        long offset() {
-            return offset;
-        }
-
-        long rows() {
-            return rows;
-        }
-    }
 }

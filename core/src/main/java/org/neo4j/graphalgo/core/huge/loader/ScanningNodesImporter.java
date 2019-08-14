@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.huge.loader;
 
 import org.neo4j.graphalgo.KernelPropertyMapping;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.ImportProgress;
@@ -41,6 +42,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     private final ImportProgress progress;
     private final AllocationTracker tracker;
     private final TerminationFlag terminationFlag;
+    private final PropertyMapping[] propertyMappings;
 
     private Map<String, HugeNodePropertiesBuilder> builders;
     private HugeLongArrayBuilder idMapBuilder;
@@ -52,11 +54,13 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
             AllocationTracker tracker,
             TerminationFlag terminationFlag,
             ExecutorService threadPool,
-            int concurrency) {
+            int concurrency,
+            PropertyMapping[] propertyMappings) {
         super(NodeStoreScanner.NODE_ACCESS, "Node", api, dimensions, threadPool, concurrency);
         this.progress = progress;
         this.tracker = tracker;
         this.terminationFlag = terminationFlag;
+        this.propertyMappings = propertyMappings;
     }
 
     @Override
@@ -84,7 +88,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
                 concurrency,
                 tracker);
         Map<String, HugeWeightMapping> nodeProperties = new HashMap<>();
-        for (KernelPropertyMapping propertyMapping : dimensions.nodeProperties()) {
+        for (PropertyMapping propertyMapping : propertyMappings) {
             HugeNodePropertiesBuilder builder = builders.get(propertyMapping.propertyName);
             HugeWeightMapping props = builder != null ? builder.build() : new HugeNullWeightMap(propertyMapping.defaultValue);
             nodeProperties.put(propertyMapping.propertyName, props);
@@ -101,7 +105,8 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
                         nodeCount,
                         tracker,
                         propertyMapping.defaultValue,
-                        propertyId);
+                        propertyId,
+                        propertyMapping.propertyName);
                 builders.put(propertyMapping.propertyName, builder);
             }
         }

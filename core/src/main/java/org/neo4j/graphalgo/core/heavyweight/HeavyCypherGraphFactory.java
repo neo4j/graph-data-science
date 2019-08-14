@@ -19,17 +19,13 @@
  */
 package org.neo4j.graphalgo.core.heavyweight;
 
-import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.api.WeightMapping;
-import org.neo4j.graphalgo.core.WeightMap;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.core.huge.loader.IdsAndProperties;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author mknblch
@@ -37,14 +33,13 @@ import java.util.Map;
 public class HeavyCypherGraphFactory extends GraphFactory {
 
     static final int NO_BATCH = -1;
-    static final int INITIAL_NODE_COUNT = 1_000_000;
     static final String LIMIT = "limit";
     static final String SKIP = "skip";
     public static final String TYPE = "cypher";
     private final CypherNodeCountingLoader nodeCountingLoader;
     private final CypherRelationshipCountingLoader relationshipCountingLoader;
-    private CypherNodeLoader nodeLoader;
-    private CypherRelationshipLoader relationshipLoader;
+    private final CypherNodeLoader nodeLoader;
+    private final CypherRelationshipLoader relationshipLoader;
 
     public HeavyCypherGraphFactory(
             GraphDatabaseAPI api,
@@ -60,34 +55,34 @@ public class HeavyCypherGraphFactory extends GraphFactory {
     protected void validateTokens() { }
 
     public final MemoryEstimation memoryEstimation() {
-        CypherNodeCountingLoader.NodeCount nodeCount = nodeCountingLoader.load();
+        ImportState nodeCount = nodeCountingLoader.load();
         dimensions.nodeCount(nodeCount.rows());
 
-        CypherRelationshipCountingLoader.RelationshipCount relCount = relationshipCountingLoader.load();
+        ImportState relCount = relationshipCountingLoader.load();
         dimensions.maxRelCount(relCount.rows());
 
         return HeavyGraphFactory.getMemoryEstimation(setup, dimensions);
     }
 
-
     @Override
     public Graph importGraph() {
-        Nodes nodes = nodeLoader.load();
+        ImportState nodeCount = nodeCountingLoader.load();
+        IdsAndProperties nodes = nodeLoader.load(nodeCount.rows());
         Relationships relationships = relationshipLoader.load(nodes);
 
-        if (setup.sort) {
-            relationships.matrix().sortAll(setup.executor, setup.concurrency);
-        }
-
-        Map<String, WeightMapping> nodePropertyMappings = new HashMap<>();
-        for (Map.Entry<PropertyMapping, WeightMap> entry : nodes.nodeProperties().entrySet()) {
-            nodePropertyMappings.put(entry.getKey().propertyName, entry.getValue());
-        }
-
-        return new HeavyGraph(
-                nodes.idMap,
-                relationships.matrix(),
-                relationshipLoader.relationshipCount(),
-                nodePropertyMappings);
+        return new HugeGraph(
+                setup.tracker,
+                nodes.idMap(),
+                nodes.properties(),
+                relationships.relationshipCount(),
+                relationships.inAdjacency(),
+                relationships.outAdjacency(),
+                relationships.inOffsets(),
+                relationships.outOffsets(),
+                relationships.defaultWeight(),
+                relationships.inWeights(),
+                relationships.outWeights(),
+                relationships.inWeightOffsets(),
+                relationships.outWeightOffsets());
     }
 }

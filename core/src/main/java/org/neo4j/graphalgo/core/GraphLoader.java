@@ -81,7 +81,7 @@ public class GraphLoader {
     private int batchSize = ParallelUtil.DEFAULT_BATCH_SIZE;
     private int concurrency;
 
-    private DuplicateRelationshipsStrategy duplicateRelationshipsStrategy = DuplicateRelationshipsStrategy.NONE;
+    private DuplicateRelationshipsStrategy duplicateRelationshipsStrategy = DuplicateRelationshipsStrategy.DEFAULT;
 
     private Log log = NullLog.getInstance();
     private long logMillis = -1;

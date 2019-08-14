@@ -503,7 +503,7 @@ public class ProcedureConfiguration {
 
     public DuplicateRelationshipsStrategy getDuplicateRelationshipsStrategy() {
         String strategy = get("duplicateRelationships", null);
-        return strategy != null ? DuplicateRelationshipsStrategy.valueOf(strategy.toUpperCase()) : DuplicateRelationshipsStrategy.NONE;
+        return strategy != null ? DuplicateRelationshipsStrategy.valueOf(strategy.toUpperCase()) : DuplicateRelationshipsStrategy.DEFAULT;
     }
 
 

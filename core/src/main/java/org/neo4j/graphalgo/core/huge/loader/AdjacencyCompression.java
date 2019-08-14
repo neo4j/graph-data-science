@@ -22,12 +22,13 @@ package org.neo4j.graphalgo.core.huge.loader;
 import com.carrotsearch.hppc.sorting.IndirectComparator;
 import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.apache.lucene.util.LongsRef;
+import org.neo4j.graphalgo.core.DuplicateRelationshipsStrategy;
 
 import java.util.Arrays;
 
 import static org.neo4j.graphalgo.core.huge.loader.VarLongEncoding.encodeVLongs;
 
-final class AdjacencyCompression {
+public final class AdjacencyCompression {
 
     private static long[] growWithDestroy(long[] values, int newLength) {
         if (values.length < newLength) {
@@ -53,13 +54,13 @@ final class AdjacencyCompression {
     }
 
     // TODO: requires lots of additional memory ... inline indirect sort to make reuse of - to be created - buffers
-    static int applyDeltaEncoding(LongsRef data, long[] weights) {
+    static int applyDeltaEncoding(LongsRef data, long[] weights, DuplicateRelationshipsStrategy duplicateRelationshipsStrategy) {
         int[] order = IndirectSort.mergesort(0, data.length, new AscendingLongComparator(data.longs));
 
         long[] sortedValues = new long[data.length];
         long[] sortedWeights = new long[data.length];
 
-        data.length = applyDelta(order, data.longs, sortedValues, weights, sortedWeights, data.length);
+        data.length = applyDelta(order, data.longs, sortedValues, weights, sortedWeights, data.length, duplicateRelationshipsStrategy);
 
         System.arraycopy(sortedValues, 0, data.longs, 0, data.length);
         System.arraycopy(sortedWeights, 0, weights, 0, data.length);
@@ -101,6 +102,7 @@ final class AdjacencyCompression {
         return out;
     }
 
+    public static int counter = 0;
     /**
      * Applies delta encoding to the given {@code values}.
      * Weights are not encoded, {@code outWeights} contains weights according to {@code order}.
@@ -111,7 +113,8 @@ final class AdjacencyCompression {
             long[] outValues,
             long[] weights,
             long[] outWeights,
-            int length) {
+            int length,
+            DuplicateRelationshipsStrategy duplicateRelationshipsStrategy) {
         int firstSortIdx = order[0];
         long value = values[firstSortIdx];
         long delta;
@@ -128,9 +131,16 @@ final class AdjacencyCompression {
             // only keep the relationship if we don't already have
             // one that points to the same target node
             // no support for #parallel-edges
+            // if delta > 0L then the relationship is to a new node
             if (delta > 0L) {
                 outWeights[out] = weights[sortIdx];
                 outValues[out++] = delta;
+            } else {
+                int existingIdx = out - 1;
+                double existingWeight = Double.longBitsToDouble(outWeights[existingIdx]);
+                double newWeight = Double.longBitsToDouble(weights[sortIdx]);
+                newWeight = duplicateRelationshipsStrategy.merge(existingWeight, newWeight);
+                outWeights[existingIdx] = Double.doubleToLongBits(newWeight);
             }
         }
         return out;

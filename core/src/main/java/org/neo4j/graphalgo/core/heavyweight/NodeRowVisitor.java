@@ -20,45 +20,82 @@
 package org.neo4j.graphalgo.core.heavyweight;
 
 import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.core.IntIdMap;
-import org.neo4j.graphalgo.core.WeightMap;
-import org.neo4j.graphalgo.core.utils.RawValues;
+import org.neo4j.graphalgo.core.huge.loader.HugeNodePropertiesBuilder;
+import org.neo4j.graphalgo.core.huge.loader.NodeImporter;
+import org.neo4j.graphalgo.core.huge.loader.NodesBatchBuffer;
 import org.neo4j.graphdb.Result;
+import org.neo4j.values.storable.Values;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private long rows;
-    private IntIdMap idMap;
-    private Map<PropertyMapping, WeightMap> nodeProperties;
+    private long maxNeoId = 0;
+    private Map<PropertyMapping, HugeNodePropertiesBuilder> nodeProperties;
+    private NodesBatchBuffer buffer;
+    private List<Map<String, Number>> cypherNodeProperties;
+    private NodeImporter importer;
 
-    NodeRowVisitor(IntIdMap idMap, Map<PropertyMapping, WeightMap> nodeProperties) {
-        this.idMap = idMap;
+
+    public NodeRowVisitor(Map<PropertyMapping, HugeNodePropertiesBuilder> nodeProperties, NodesBatchBuffer buffer, NodeImporter importer) {
         this.nodeProperties = nodeProperties;
+        this.buffer = buffer;
+        this.importer = importer;
+        this.cypherNodeProperties = new ArrayList<>(buffer.capacity());
     }
 
     @Override
     public boolean visit(Result.ResultRow row) throws RuntimeException {
+        long neoId = row.getNumber("id").longValue();
+        if (neoId > maxNeoId) {
+            maxNeoId = neoId;
+        }
         rows++;
-        long id = row.getNumber("id").longValue();
-        int graphId = idMap.add(id);
 
-        for (Map.Entry<PropertyMapping, WeightMap> entry : nodeProperties.entrySet()) {
+        HashMap<String, Number> weights = new HashMap<>();
+        for (Map.Entry<PropertyMapping, HugeNodePropertiesBuilder> entry : nodeProperties.entrySet()) {
+            PropertyMapping key = entry.getKey();
             Object value = CypherLoadingUtils.getProperty(row, entry.getKey().propertyKey);
             if (value instanceof Number) {
-                // we need to store the weights as (source | target) encoding in our
-                // non-huge relationship weights. Since we're storing properties for
-                // nodes and not relationship, we only have the source available
-                // and have to use -1 as the target id to signal that to the map
-                // so that calls to nodeWeight(int) will be able to find this value again.
-                entry.getValue().put(RawValues.combineIntInt(graphId, -1), ((Number) value).doubleValue());
+                weights.put(key.propertyName, (Number) value);
+            } else if (null == value) {
+                weights.put(key.propertyName, key.defaultValue);
+            } else {
+                throw new IllegalArgumentException(String.format(
+                        "Unsupported type [%s] of value %s. Please use a numeric property.",
+                        Values.of(value).valueGroup(),
+                        value));
             }
         }
 
+        int propRef = cypherNodeProperties.size();
+        cypherNodeProperties.add(weights);
+        buffer.add(neoId, propRef);
+        if (buffer.isFull()) {
+            flush();
+            reset();
+        }
         return true;
+    }
+
+    void flush() {
+        importer.importCypherNodes(buffer, cypherNodeProperties);
+    }
+
+    void reset() {
+        buffer.reset();
+        cypherNodeProperties.clear();
     }
 
     long rows() {
         return rows;
     }
+
+    long maxId() {
+        return maxNeoId;
+    }
+
 }

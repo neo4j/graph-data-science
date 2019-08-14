@@ -19,36 +19,39 @@
  */
 package org.neo4j.graphalgo.core.heavyweight;
 
-import org.neo4j.graphalgo.core.DuplicateRelationshipsStrategy;
-import org.neo4j.graphalgo.core.IntIdMap;
+import org.neo4j.graphalgo.core.huge.loader.IdMap;
+import org.neo4j.graphalgo.core.huge.loader.RelationshipImporter.Imports;
+import org.neo4j.graphalgo.core.huge.loader.RelationshipImporter.WeightReader;
+import org.neo4j.graphalgo.core.huge.loader.RelationshipsBatchBuffer;
+import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphdb.Result;
-
-import java.util.concurrent.atomic.LongAdder;
 
 class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private long lastSourceId = -1, lastTargetId = -1;
-    private int source = -1, target = -1;
+    private long source = -1, target = -1;
     private long rows = 0;
-    private IntIdMap idMap;
-    private boolean hasRelationshipWeights;
-    private double defaultWeight;
-    private AdjacencyMatrix matrix;
-    private DuplicateRelationshipsStrategy duplicateRelationshipsStrategy;
-    private final LongAdder relationshipCounter;
+    private final RelationshipsBatchBuffer buffer;
+    private final IdMap idMap;
+    private final boolean hasRelationshipWeights;
+    private final double defaultWeight;
+    private long relationshipCount;
+    private final Imports imports;
+    private final WeightReader weightReader;
 
     RelationshipRowVisitor(
-            IntIdMap idMap,
+            RelationshipsBatchBuffer buffer,
+            IdMap idMap,
             boolean hasRelationshipWeights,
             double defaultWeight,
-            AdjacencyMatrix matrix,
-            DuplicateRelationshipsStrategy duplicateRelationshipsStrategy,
-            LongAdder relationshipCounter) {
+            org.neo4j.graphalgo.core.huge.loader.RelationshipImporter importer,
+            Imports imports
+    ) {
+        this.buffer = buffer;
         this.idMap = idMap;
         this.hasRelationshipWeights = hasRelationshipWeights;
         this.defaultWeight = defaultWeight;
-        this.matrix = matrix;
-        this.duplicateRelationshipsStrategy = duplicateRelationshipsStrategy;
-        this.relationshipCounter = relationshipCounter;
+        this.imports = imports;
+        this.weightReader = importer.cypherResultsBackedWeightReader();
     }
 
     @Override
@@ -56,7 +59,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         rows++;
         long sourceId = row.getNumber("source").longValue();
         if (sourceId != lastSourceId) {
-            source = idMap.get(sourceId);
+            source = idMap.toMappedNodeId(sourceId);
             lastSourceId = sourceId;
         }
         if (source == -1) {
@@ -64,34 +67,46 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         }
         long targetId = row.getNumber("target").longValue();
         if (targetId != lastTargetId) {
-            target = idMap.get(targetId);
+            target = idMap.toMappedNodeId(targetId);
             lastTargetId = targetId;
         }
         if (target == -1) {
             return true;
         }
-
-        duplicateRelationshipsStrategy.handle(
+        long longWeight = hasRelationshipWeights ? Double.doubleToLongBits(extractWeight(row)) : -1L;
+        buffer.add(
                 source,
                 target,
-                matrix,
-                hasRelationshipWeights,
-                defaultWeight,
-                () -> extractWeight(row),
-                relationshipCounter
+                -1L,
+                longWeight
         );
-
+        if (buffer.isFull()) {
+            flush();
+            reset();
+        }
         return true;
     }
 
-    private Number extractWeight(Result.ResultRow row) {
+    void flush() {
+        long imported = imports.importRels(buffer, weightReader);
+        relationshipCount += RawValues.getHead(imported);
+    }
+
+    void reset() {
+        buffer.reset();
+    }
+
+    private double extractWeight(Result.ResultRow row) {
         Object weight = CypherLoadingUtils.getProperty(row, "weight");
-        return weight instanceof Number ? ((Number) weight).doubleValue() : null;
+        return weight instanceof Number ? ((Number) weight).doubleValue() : defaultWeight;
     }
 
     public long rows() {
         return rows;
     }
 
+    public long relationshipCount() {
+        return relationshipCount;
+    }
 
 }

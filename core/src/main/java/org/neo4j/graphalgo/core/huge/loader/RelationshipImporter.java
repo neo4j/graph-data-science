@@ -149,7 +149,7 @@ public class RelationshipImporter {
     private static final int RELATIONSHIP_REFERENCE_OFFSET = 2;
     private static final int PROPERTIES_REFERENCE_OFFSET = 3;
 
-    WeightReader weightReader(CursorFactory cursors, Read read) {
+    WeightReader storeBackedWeightReader(CursorFactory cursors, Read read) {
         return (batch, batchLength, weightProperty, defaultWeight) -> {
             long[] weights = new long[batchLength / BATCH_ENTRY_SIZE];
             try (PropertyCursor pc = cursors.allocatePropertyCursor()) {
@@ -160,6 +160,17 @@ public class RelationshipImporter {
                     double weight = ReadHelper.readProperty(pc, weightProperty, defaultWeight);
                     weights[i / BATCH_ENTRY_SIZE] = Double.doubleToLongBits(weight);
                 }
+            }
+            return weights;
+        };
+    }
+
+    public WeightReader cypherResultsBackedWeightReader() {
+        return (batch, batchLength, weightProperty, defaultWeight) -> {
+            long[] weights = new long[batchLength / BATCH_ENTRY_SIZE];
+            for (int i = 0; i < batchLength; i += BATCH_ENTRY_SIZE) {
+                long weight = batch[PROPERTIES_REFERENCE_OFFSET + i];
+                weights[i / BATCH_ENTRY_SIZE] = weight;
             }
             return weights;
         };

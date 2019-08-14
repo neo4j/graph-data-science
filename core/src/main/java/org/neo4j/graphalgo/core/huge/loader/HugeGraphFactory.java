@@ -146,8 +146,8 @@ public final class HugeGraphFactory extends GraphFactory {
                 tracker,
                 setup.terminationFlag,
                 threadPool,
-                concurrency
-        )
+                concurrency,
+                setup.nodePropertyMappings)
                 .call(setup.log);
     }
 
@@ -160,13 +160,13 @@ public final class HugeGraphFactory extends GraphFactory {
         RelationshipsBuilder incomingRelationshipsBuilder = null;
 
         if (setup.loadAsUndirected) {
-            outgoingRelationshipsBuilder = new RelationshipsBuilder(tracker, setup.shouldLoadRelationshipWeight());
+            outgoingRelationshipsBuilder = new RelationshipsBuilder(setup.duplicateRelationshipsStrategy, tracker, setup.shouldLoadRelationshipWeight());
         } else {
             if (setup.loadOutgoing) {
-                outgoingRelationshipsBuilder = new RelationshipsBuilder(tracker, setup.shouldLoadRelationshipWeight());
+                outgoingRelationshipsBuilder = new RelationshipsBuilder(setup.duplicateRelationshipsStrategy, tracker, setup.shouldLoadRelationshipWeight());
             }
             if (setup.loadIncoming) {
-                incomingRelationshipsBuilder = new RelationshipsBuilder(tracker, setup.shouldLoadRelationshipWeight());
+                incomingRelationshipsBuilder = new RelationshipsBuilder(setup.duplicateRelationshipsStrategy, tracker, setup.shouldLoadRelationshipWeight());
             }
         }
 

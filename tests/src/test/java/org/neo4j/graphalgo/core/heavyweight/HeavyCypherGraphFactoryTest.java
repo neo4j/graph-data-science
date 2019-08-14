@@ -24,6 +24,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -70,7 +72,7 @@ public class HeavyCypherGraphFactoryTest {
         String nodes = "MATCH (n) RETURN id(n) as id, n.partition AS partition, n.foo AS foo";
         String rels = "MATCH (n)-[r]->(m) WHERE type(r) = {rel} RETURN id(n) as source, id(m) as target, r.prop as weight ORDER BY id(r) DESC ";
 
-        final HeavyGraph graph = (HeavyGraph) new GraphLoader((GraphDatabaseAPI) db)
+        Graph graph = new GraphLoader((GraphDatabaseAPI) db)
                 .withParams(MapUtil.map("rel", "REL"))
                 .withRelationshipWeightsFromProperty("prop", 0)
                 .withLabel(nodes)
@@ -110,8 +112,8 @@ public class HeavyCypherGraphFactoryTest {
         });
         assertEquals(6, total.get());
 
-        assertEquals(6.0D, graph.nodeProperties("partition").nodeWeight((long) node1), 0.01);
-        assertEquals(5.0D, graph.nodeProperties("foo").nodeWeight((long) node1), 0.01);
-        assertEquals(4.0D, graph.nodeProperties("foo").nodeWeight((long) node2), 0.01);
+        assertEquals(6.0D, graph.nodeProperties("partition").nodeWeight(node1), 0.01);
+        assertEquals(5.0D, graph.nodeProperties("foo").nodeWeight(node1), 0.01);
+        assertEquals(4.0D, graph.nodeProperties("foo").nodeWeight(node2), 0.01);
     }
 }

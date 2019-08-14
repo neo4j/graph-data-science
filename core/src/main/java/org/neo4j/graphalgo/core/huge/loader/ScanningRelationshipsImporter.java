@@ -85,14 +85,6 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
                 inRelationshipsBuilder,
                 numberOfPages, pageSize, tracker, relationshipCounter, dimensions.relWeightId(), setup.relationDefaultWeight);
 
-        for (int idx = 0; idx < numberOfPages; idx++) {
-            outBuilder.addAdjacencyImporter(tracker, idx);
-            inBuilder.addAdjacencyImporter(tracker, idx);
-        }
-
-        outBuilder.finishPreparation();
-        inBuilder.finishPreparation();
-
         boolean importWeights = dimensions.relWeightId() != StatementConstants.NO_SUCH_PROPERTY_KEY;
 
         RelationshipImporter importer = new RelationshipImporter(

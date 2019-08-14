@@ -22,16 +22,13 @@ package org.neo4j.graphalgo.core.heavyweight;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DuplicateRelationshipsStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
 
@@ -44,11 +41,10 @@ public class HeavyCypherGraphFactoryDeduplicationTest {
 
     @BeforeClass
     public static void setUp() {
-
         db = TestDatabaseCreator.createTestDatabase();
 
         db.execute(
-                "MERGE (n1 {id: 1}) " + "" +
+                "MERGE (n1 {id: 1}) " +
                    "MERGE (n2 {id: 2}) " +
                    "CREATE (n1)-[:REL {weight: 4}]->(n2) " +
                    "CREATE (n2)-[:REL {weight: 10}]->(n1) " +
@@ -64,13 +60,12 @@ public class HeavyCypherGraphFactoryDeduplicationTest {
         db.shutdown();
     }
 
-
     @Test
-    public void testLoadCypher() throws Exception {
-        String nodes = "MATCH (n) RETURN id(n) as id";
-        String rels = "MATCH (n)-[r]-(m) RETURN id(n) as source, id(m) as target, r.weight as weight";
+    public void testLoadCypher() {
+        String nodes = "MATCH (n) RETURN id(n) AS id";
+        String rels = "MATCH (n)-[r]-(m) RETURN id(n) AS source, id(m) AS target, r.weight AS weight";
 
-        final HeavyGraph graph = (HeavyGraph) new GraphLoader((GraphDatabaseAPI) db)
+        Graph graph = new GraphLoader((GraphDatabaseAPI) db)
                 .withLabel(nodes)
                 .withRelationshipType(rels)
                 .withDuplicateRelationshipsStrategy(DuplicateRelationshipsStrategy.SKIP)

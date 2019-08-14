@@ -26,14 +26,14 @@ import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 
-final class HugeIdMapBuilder {
+public final class HugeIdMapBuilder {
 
     static IdMap build(
-            HugeLongArrayBuilder idMapBuilder,
+            HugeLongArray graphIds,
+            long nodeCount,
             long highestNodeId,
             int concurrency,
             AllocationTracker tracker) {
-        HugeLongArray graphIds = idMapBuilder.build();
 
         SparseNodeMapping.Builder nodeMappingBuilder = SparseNodeMapping.Builder.create(highestNodeId, tracker);
         ParallelUtil.readParallel(
@@ -56,8 +56,18 @@ final class HugeIdMapBuilder {
         );
 
         SparseNodeMapping nodeToGraphIds = nodeMappingBuilder.build();
-        return new IdMap(graphIds, nodeToGraphIds, idMapBuilder.size());
+        return new IdMap(graphIds, nodeToGraphIds, nodeCount);
     }
+
+    public static IdMap build(
+            HugeLongArrayBuilder idMapBuilder,
+            long highestNodeId,
+            int concurrency,
+            AllocationTracker tracker) {
+        HugeLongArray graphIds = idMapBuilder.build();
+        return build(graphIds, idMapBuilder.size(), highestNodeId, concurrency, tracker);
+    }
+
 
     private HugeIdMapBuilder() {
     }

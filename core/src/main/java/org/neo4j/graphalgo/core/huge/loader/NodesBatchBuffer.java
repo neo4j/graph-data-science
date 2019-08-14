@@ -24,7 +24,7 @@ import org.neo4j.kernel.impl.store.NodeLabelsField;
 import org.neo4j.kernel.impl.store.NodeStore;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
 
-final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
+public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
 
     private final int label;
     private final NodeStore nodeStore;
@@ -32,7 +32,7 @@ final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
     // property ids, consecutive
     private final long[] properties;
 
-    NodesBatchBuffer(final NodeStore store, final int label, int capacity, boolean readProperty) {
+    public NodesBatchBuffer(final NodeStore store, final int label, int capacity, boolean readProperty) {
         super(capacity);
         this.label = label;
         this.nodeStore = store;
@@ -42,11 +42,15 @@ final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
     @Override
     public void add(final NodeRecord record) {
         if (hasCorrectLabel(record)) {
-            int len = length++;
-            buffer[len] = record.getId();
-            if (properties != null) {
-                properties[len] = record.getNextProp();
-            }
+            add(record.getId(), record.getNextProp());
+        }
+    }
+
+    public void add(long nodeId, long propertiesIndex) {
+        int len = length++;
+        buffer[len] = nodeId;
+        if (properties != null) {
+            properties[len] = propertiesIndex;
         }
     }
 

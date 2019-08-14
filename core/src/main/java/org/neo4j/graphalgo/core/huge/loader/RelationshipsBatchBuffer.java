@@ -32,7 +32,9 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
     private final long[] sortCopy;
     private final int[] histogram;
 
-    RelationshipsBatchBuffer(final IdMapping idMap, final int type, int capacity) {
+    public RelationshipsBatchBuffer(final IdMapping idMap, final int type, int capacity) {
+        // For relationships: the buffer is divided into 4-long blocks
+        // for each rel: source, target, rel-id, prop-id
         super(Math.multiplyExact(4, capacity));
         this.idMap = idMap;
         this.type = type;
@@ -47,16 +49,20 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
             if (source != -1L) {
                 long target = idMap.toMappedNodeId(record.getSecondNode());
                 if (target != -1L) {
-                    int position = this.length;
-                    long[] buffer = this.buffer;
-                    buffer[position] = source;
-                    buffer[1 + position] = target;
-                    buffer[2 + position] = record.getId();
-                    buffer[3 + position] = record.getNextProp();
-                    this.length = 4 + position;
+                    add(source, target, record.getId(), record.getNextProp());
                 }
             }
         }
+    }
+
+    public void add(long sourceId, long targetId, long relationshipReference, long propertyReference) {
+        int position = this.length;
+        long[] buffer = this.buffer;
+        buffer[position] = sourceId;
+        buffer[1 + position] = targetId;
+        buffer[2 + position] = relationshipReference;
+        buffer[3 + position] = propertyReference;
+        this.length = 4 + position;
     }
 
     long[] sortBySource() {
