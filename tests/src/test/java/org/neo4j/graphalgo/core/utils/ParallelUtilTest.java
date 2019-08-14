@@ -31,10 +31,10 @@ import org.neo4j.helpers.Exceptions;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -48,6 +48,7 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -63,7 +64,7 @@ import static org.mockito.Mockito.when;
 public final class ParallelUtilTest extends RandomizedTest {
 
     @Test
-    public void shouldParallelizeStreams() throws ExecutionException, InterruptedException {
+    public void shouldParallelizeStreams() {
         long firstNum = 1;
         long lastNum = 1_000_000;
 
@@ -72,12 +73,18 @@ public final class ParallelUtilTest extends RandomizedTest {
         ForkJoinPool pool = Pools.FJ_POOL;
         ForkJoinPool commonPool = ForkJoinPool.commonPool();
         Stream<Long> stream = list.stream();
+
         long actualTotal = ParallelUtil.parallelStream(stream, (s) -> {
             assertThat(s.isParallel(), equalTo(true));
+            Thread thread = Thread.currentThread();
+            assertTrue(thread instanceof ForkJoinWorkerThread);
+            ForkJoinPool threadPool = ((ForkJoinWorkerThread) thread).getPool();
+            assertSame(threadPool, pool);
+            assertNotSame(threadPool, commonPool);
+
             return s.reduce(0L, Long::sum);
         }, pool);
 
-        assertThat(commonPool.getStealCount(), equalTo(0L));
         assertEquals((lastNum + firstNum) * lastNum / 2, actualTotal);
     }
 
