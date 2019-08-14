@@ -292,7 +292,7 @@ public final class Exporter extends StatementApi {
 
                             // Only log every 10_000 written nodes
                             // add +1 to avoid logging on the first written node
-                            if ((j + 1) - start % 10_000 == 0) {
+                            if (((j + 1) - start) % 10_000 == 0) {
                                 long currentProgress = progress.addAndGet(10_000);
                                 progressLogger.logProgress(
                                         currentProgress,
@@ -302,7 +302,7 @@ public final class Exporter extends StatementApi {
 
                         // log progress for the last batch of written nodes
                         progressLogger.logProgress(
-                                progress.addAndGet((start - end + 1) % 10_000),
+                                progress.addAndGet((end - start + 1) % 10_000),
                                 nodeCount);
                     });
                 });
