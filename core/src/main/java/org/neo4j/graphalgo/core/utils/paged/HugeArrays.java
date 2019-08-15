@@ -19,16 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
-import org.neo4j.util.FeatureToggles;
-
 final class HugeArrays {
-
-    // Prevents full GC more often as not so much consecutive memory is allocated in one go as
-    // compared to a page shift of 30 or 32. See https://github.com/neo4j-contrib/neo4j-graph-algorithms/pull/859#discussion_r272262734.
-    private static final int SINGLE_PAGE_SHIFT = FeatureToggles
-            .getInteger(HugeArrays.class, "singlePageShift", 28);
-
-    static final int SINGLE_PAGE_SIZE = 1 << SINGLE_PAGE_SHIFT;
 
     static final int PAGE_SHIFT = 14;
     static final int PAGE_SIZE = 1 << PAGE_SHIFT;

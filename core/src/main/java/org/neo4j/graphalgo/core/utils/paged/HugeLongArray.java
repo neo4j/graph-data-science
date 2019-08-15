@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
 import java.util.Arrays;
@@ -29,7 +30,6 @@ import java.util.function.LongUnaryOperator;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SHIFT;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SIZE;
-import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.SINGLE_PAGE_SIZE;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.exclusiveIndexOfPage;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.indexInPage;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.numberOfPages;
@@ -202,7 +202,7 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
      * The tracker is no longer referenced, as the arrays do not dynamically change their size.
      */
     public static HugeLongArray newArray(long size, AllocationTracker tracker) {
-        if (size <= SINGLE_PAGE_SIZE) {
+        if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
             return SingleHugeLongArray.of(size, tracker);
         }
         return PagedHugeLongArray.of(size, tracker);
@@ -211,7 +211,7 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
     public static long memoryEstimation(long size) {
         assert size >= 0;
 
-        if (size <= SINGLE_PAGE_SIZE) {
+        if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
             return sizeOfInstance(SingleHugeLongArray.class) + sizeOfLongArray((int)size);
         }
         long sizeOfInstance = sizeOfInstance(PagedHugeLongArray.class);
@@ -256,7 +256,7 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
     private static final class SingleHugeLongArray extends HugeLongArray {
 
         private static HugeLongArray of(long size, AllocationTracker tracker) {
-            assert size <= SINGLE_PAGE_SIZE;
+            assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
             final int intSize = (int) size;
             long[] page = new long[intSize];
             tracker.add(sizeOfLongArray(intSize));

@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
 import java.util.Arrays;
@@ -32,7 +33,6 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SHIFT;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SIZE;
-import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.SINGLE_PAGE_SIZE;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.exclusiveIndexOfPage;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.indexInPage;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.numberOfPages;
@@ -188,7 +188,7 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
      * The tracker is no longer referenced, as the arrays do not dynamically change their size.
      */
     public static HugeDoubleArray newArray(long size, AllocationTracker tracker) {
-        if (size <= SINGLE_PAGE_SIZE) {
+        if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
             return SingleHugeDoubleArray.of(size, tracker);
         }
         return PagedHugeDoubleArray.of(size, tracker);
@@ -197,7 +197,7 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
     public static long memoryEstimation(long size) {
         assert size >= 0;
 
-        if (size <= SINGLE_PAGE_SIZE) {
+        if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
             return sizeOfInstance(SingleHugeDoubleArray.class) + sizeOfDoubleArray((int)size);
         }
         long sizeOfInstance = sizeOfInstance(PagedHugeDoubleArray.class);
@@ -242,7 +242,7 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
     private static final class SingleHugeDoubleArray extends HugeDoubleArray {
 
         private static HugeDoubleArray of(long size, AllocationTracker tracker) {
-            assert size <= SINGLE_PAGE_SIZE;
+            assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
             final int intSize = (int) size;
             double[] page = new double[intSize];
             tracker.add(sizeOfDoubleArray(intSize));

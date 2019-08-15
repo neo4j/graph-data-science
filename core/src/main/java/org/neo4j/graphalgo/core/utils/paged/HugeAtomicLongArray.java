@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.unsafe.impl.internal.dragons.UnsafeUtil;
@@ -34,7 +35,6 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SHIFT;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SIZE;
-import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.SINGLE_PAGE_SIZE;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.exclusiveIndexOfPage;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.indexInPage;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.numberOfPages;
@@ -145,7 +145,7 @@ public abstract class HugeAtomicLongArray {
      * The values are pre-calculated according to the semantics of {@link Arrays#setAll(long[], IntToLongFunction)}
      */
     public static HugeAtomicLongArray newArray(long size, LongUnaryOperator gen, AllocationTracker tracker) {
-        if (size <= SINGLE_PAGE_SIZE) {
+        if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
             return SingleHugeAtomicLongArray.of(size, gen, tracker);
         }
         return PagedHugeAtomicLongArray.of(size, gen, tracker);
@@ -155,7 +155,7 @@ public abstract class HugeAtomicLongArray {
         assert size >= 0;
         long instanceSize;
         long dataSize;
-        if (size <= SINGLE_PAGE_SIZE) {
+        if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
             instanceSize = sizeOfInstance(SingleHugeAtomicLongArray.class);
             dataSize = sizeOfLongArray((int) size);
         } else {
@@ -215,7 +215,7 @@ public abstract class HugeAtomicLongArray {
     private static final class SingleHugeAtomicLongArray extends HugeAtomicLongArray {
 
         private static HugeAtomicLongArray of(long size, LongUnaryOperator gen, AllocationTracker tracker) {
-            assert size <= SINGLE_PAGE_SIZE;
+            assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
             final int intSize = (int) size;
             tracker.add(sizeOfLongArray(intSize));
             long[] page = new long[intSize];

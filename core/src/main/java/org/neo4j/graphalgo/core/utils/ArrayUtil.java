@@ -19,9 +19,19 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
-import java.util.Arrays;
+import org.neo4j.util.FeatureToggles;
+
 
 public final class ArrayUtil {
+
+    // Prevents full GC more often as not so much consecutive memory is allocated in one go as
+    // compared to a page shift of 30 or 32. See https://github.com/neo4j-contrib/neo4j-graph-algorithms/pull/859#discussion_r272262734.
+    // Feature toggle is there for testing: org.neo4j.graphalgo.core.huge.loader.HugeGraphLoadingTest#testPropertyLoading
+    private static final int MAX_ARRAY_LENGTH_SHIFT = FeatureToggles
+            .getInteger(ArrayUtil.class, "maxArrayLengthShift", 28);
+
+    // Arrays larger than this have a higher risk of triggering a full GC
+    public static final int MAX_ARRAY_LENGTH = 1 << MAX_ARRAY_LENGTH_SHIFT;
 
     public static final int LINEAR_SEARCH_LIMIT = 64;
 

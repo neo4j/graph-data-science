@@ -56,10 +56,10 @@ public final class HugeGraphLoadingTest {
         testPropertyLoading(14);
     }
 
-    private void testPropertyLoading(int singlePageShift) {
+    private void testPropertyLoading(int maxArrayLengthShift) {
         System.setProperty(
-                "org.neo4j.graphalgo.core.utils.paged.HugeArrays.singlePageShift",
-                String.valueOf(singlePageShift));
+                "org.neo4j.graphalgo.core.utils.ArrayUtil.maxArrayLengthShift",
+                String.valueOf(maxArrayLengthShift));
         // something larger than one batch
         int nodeCount = 60_000;
         Label label = Label.label("Foo");

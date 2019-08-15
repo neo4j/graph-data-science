@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
 import java.util.Arrays;
@@ -27,7 +28,6 @@ import java.util.function.LongToIntFunction;
 
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SHIFT;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SIZE;
-import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.SINGLE_PAGE_SIZE;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.exclusiveIndexOfPage;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.indexInPage;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.numberOfPages;
@@ -200,7 +200,7 @@ public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArra
      * The tracker is no longer referenced, as the arrays do not dynamically change their size.
      */
     public static HugeIntArray newArray(long size, AllocationTracker tracker) {
-        if (size <= SINGLE_PAGE_SIZE) {
+        if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
             return SingleHugeIntArray.of(size, tracker);
         }
         return PagedHugeIntArray.of(size, tracker);
@@ -236,7 +236,7 @@ public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArra
     private static final class SingleHugeIntArray extends HugeIntArray {
 
         private static HugeIntArray of(long size, AllocationTracker tracker) {
-            assert size <= SINGLE_PAGE_SIZE;
+            assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
             final int intSize = (int) size;
             int[] page = new int[intSize];
             tracker.add(sizeOfIntArray(intSize));

@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.neo4j.graphalgo.core.utils.ArrayUtil;
+
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.function.IntFunction;
@@ -27,7 +29,6 @@ import java.util.function.Supplier;
 
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SHIFT;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SIZE;
-import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.SINGLE_PAGE_SIZE;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.exclusiveIndexOfPage;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.indexInPage;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.numberOfPages;
@@ -178,7 +179,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
      * The tracker is no longer referenced, as the arrays do not dynamically change their size.
      */
     public static <T> HugeObjectArray<T> newArray(Class<T> componentClass, long size, AllocationTracker tracker) {
-        if (size <= SINGLE_PAGE_SIZE) {
+        if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
             return SingleHugeObjectArray.of(componentClass, size, tracker);
         }
         return PagedHugeObjectArray.of(componentClass, size, tracker);
@@ -202,7 +203,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
     private static final class SingleHugeObjectArray<T> extends HugeObjectArray<T> {
 
         private static <T> HugeObjectArray<T> of(Class<T> componentClass, long size, AllocationTracker tracker) {
-            assert size <= SINGLE_PAGE_SIZE;
+            assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
             final int intSize = (int) size;
             //noinspection unchecked
             T[] page = (T[]) Array.newInstance(componentClass, intSize);
