@@ -276,7 +276,7 @@ public final class Exporter extends StatementApi {
     }
 
     private void writeParallel(WriteConsumer writer) {
-        final long batchSize = ParallelUtil.adjustBatchSize(
+        final long batchSize = ParallelUtil.adjustedBatchSize(
                 nodeCount,
                 concurrency,
                 MIN_BATCH_SIZE,

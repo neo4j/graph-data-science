@@ -70,7 +70,7 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
     public WeightedDegreeCentrality compute(boolean cacheWeights) {
         nodeQueue.set(0);
 
-        long batchSize = ParallelUtil.adjustBatchSize(nodeCount, concurrency);
+        long batchSize = ParallelUtil.adjustedBatchSize(nodeCount, concurrency);
         long threadSize = ParallelUtil.threadCount(batchSize, nodeCount);
         if (threadSize > Integer.MAX_VALUE) {
             throw new IllegalArgumentException(String.format(

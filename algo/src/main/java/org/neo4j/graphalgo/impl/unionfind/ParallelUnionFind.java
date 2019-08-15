@@ -68,7 +68,7 @@ public class ParallelUnionFind extends UnionFind<ParallelUnionFind> {
         this.executor = executor;
         this.tracker = tracker;
         this.nodeCount = graph.nodeCount();
-        this.batchSize = ParallelUtil.adjustBatchSize(
+        this.batchSize = ParallelUtil.adjustedBatchSize(
                 nodeCount,
                 concurrency,
                 minBatchSize,

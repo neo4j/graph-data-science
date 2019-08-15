@@ -208,7 +208,7 @@ public final class LoadGraphProc extends BaseProc {
     }
 
     private Histogram degreeDistribution(Graph graph, final int concurrency, final Direction direction) {
-        int batchSize = Math.toIntExact(ParallelUtil.adjustBatchSize(
+        int batchSize = Math.toIntExact(ParallelUtil.adjustedBatchSize(
                 graph.nodeCount(),
                 concurrency,
                 ParallelUtil.DEFAULT_BATCH_SIZE));

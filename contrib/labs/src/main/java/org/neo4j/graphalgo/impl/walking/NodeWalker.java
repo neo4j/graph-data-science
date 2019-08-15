@@ -22,19 +22,15 @@ package org.neo4j.graphalgo.impl.walking;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.IntBinaryPredicate;
-import org.neo4j.graphalgo.api.RelationshipConsumer;
-import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.QueueBasedSpliterator;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphdb.*;
-import org.neo4j.logging.Log;
 import org.neo4j.procedure.Name;
 
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -47,7 +43,7 @@ public class NodeWalker {
         int timeout = 100;
         int queueSize = 1000;
 
-        int batchSize = ParallelUtil.adjustBatchSize(limit, concurrency, 100);
+        int batchSize = ParallelUtil.adjustedBatchSize(limit, concurrency, 100);
         Collection<Runnable> tasks = new ArrayList<>((limit / batchSize) + 1);
 
         ArrayBlockingQueue<long[]> queue = new ArrayBlockingQueue<>(queueSize);

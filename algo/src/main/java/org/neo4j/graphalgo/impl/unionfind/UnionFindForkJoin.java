@@ -71,7 +71,7 @@ public class UnionFindForkJoin extends UnionFind<UnionFindForkJoin> {
 
         this.nodeCount = graph.nodeCount();
         this.tracker = tracker;
-        this.batchSize = ParallelUtil.adjustBatchSize(
+        this.batchSize = ParallelUtil.adjustedBatchSize(
                 nodeCount,
                 concurrency,
                 minBatchSize);

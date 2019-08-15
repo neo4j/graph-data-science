@@ -177,7 +177,7 @@ final class ParallelUtilTest {
                 maxConcurrency,
                 nodeCount);
 
-        int batchSize = ParallelUtil.adjustBatchSize(
+        int batchSize = ParallelUtil.adjustedBatchSize(
                 nodeCount,
                 maxConcurrency,
                 minBatchSize);

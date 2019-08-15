@@ -81,7 +81,7 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
         this.executor = executor;
         this.tracker = tracker;
         this.disjointSetStruct = initDisjointSetStruct(nodeCount, tracker);
-        this.batchSize = ParallelUtil.adjustBatchSize(
+        this.batchSize = ParallelUtil.adjustedBatchSize(
                 nodeCount,
                 concurrency,
                 minBatchSize);

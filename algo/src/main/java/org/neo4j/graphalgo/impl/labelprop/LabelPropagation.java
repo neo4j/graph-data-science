@@ -149,7 +149,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
 
     private List<StepRunner> stepRunners(Direction direction) {
         long nodeCount = graph.nodeCount();
-        long batchSize = ParallelUtil.adjustBatchSize(nodeCount, (long) this.batchSize);
+        long batchSize = ParallelUtil.adjustedBatchSize(nodeCount, (long) this.batchSize);
 
         Collection<PrimitiveLongIterable> nodeBatches = LazyBatchCollection.of(
                 nodeCount,

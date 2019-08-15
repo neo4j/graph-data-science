@@ -113,7 +113,7 @@ public class SimilarityStreamGenerator<T> {
         int timeout = 100;
         int queueSize = 1000;
 
-        int batchSize = ParallelUtil.adjustBatchSize(length, concurrency, 1);
+        int batchSize = ParallelUtil.adjustedBatchSize(length, concurrency, 1);
         int taskCount = (length / batchSize) + (length % batchSize > 0 ? 1 : 0);
         Collection<Runnable> tasks = new ArrayList<>(taskCount);
 
@@ -145,7 +145,7 @@ public class SimilarityStreamGenerator<T> {
     }
 
     private  Stream<SimilarityResult> similarityParallelStreamTopK(T[] inputs, int length, TerminationFlag terminationFlag, int concurrency, double cutoff, int topK, SimilarityComputer<T> computer, Supplier<RleDecoder> decoderFactory) {
-        int batchSize = ParallelUtil.adjustBatchSize(length, concurrency, 1);
+        int batchSize = ParallelUtil.adjustedBatchSize(length, concurrency, 1);
         int taskCount = (length / batchSize) + (length % batchSize > 0 ? 1 : 0);
         Collection<TopKTask<T>> tasks = new ArrayList<>(taskCount);
 
@@ -225,7 +225,7 @@ public class SimilarityStreamGenerator<T> {
         int timeout = 100;
         int queueSize = 1000;
 
-        int batchSize = ParallelUtil.adjustBatchSize(sourceIdsLength, concurrency, 1);
+        int batchSize = ParallelUtil.adjustedBatchSize(sourceIdsLength, concurrency, 1);
         int taskCount = (sourceIdsLength / batchSize) + (sourceIdsLength % batchSize > 0 ? 1 : 0);
         Collection<Runnable> tasks = new ArrayList<>(taskCount);
 
@@ -269,7 +269,7 @@ public class SimilarityStreamGenerator<T> {
 
         int sourceIdsLength = sourceIndexIds.length > 0 ? sourceIndexIds.length : length;
 
-        int batchSize = ParallelUtil.adjustBatchSize(sourceIdsLength, concurrency, 1);
+        int batchSize = ParallelUtil.adjustedBatchSize(sourceIdsLength, concurrency, 1);
         int taskCount = (sourceIdsLength / batchSize) + (sourceIdsLength % batchSize > 0 ? 1 : 0);
         Collection<SourceTargetTopKTask<T>> tasks = new ArrayList<>(taskCount);
 
