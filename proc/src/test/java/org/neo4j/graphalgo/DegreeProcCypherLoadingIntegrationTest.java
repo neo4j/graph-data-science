@@ -40,12 +40,12 @@ import static org.junit.Assert.*;
 public class DegreeProcCypherLoadingIntegrationTest {
 
     private static GraphDatabaseAPI db;
-    private static Map<Long, Double> incomingExpected = new HashMap<>();
-    private static Map<Long, Double> bothExpected = new HashMap<>();
-    private static Map<Long, Double> outgoingExpected = new HashMap<>();
-    private static Map<Long, Double> incomingWeightedExpected = new HashMap<>();
-    private static Map<Long, Double> bothWeightedExpected = new HashMap<>();
-    private static Map<Long, Double> outgoingWeightedExpected = new HashMap<>();
+    private static final Map<Long, Double> incomingExpected = new HashMap<>();
+    private static final Map<Long, Double> bothExpected = new HashMap<>();
+    private static final Map<Long, Double> outgoingExpected = new HashMap<>();
+    private static final Map<Long, Double> incomingWeightedExpected = new HashMap<>();
+    private static final Map<Long, Double> bothWeightedExpected = new HashMap<>();
+    private static final Map<Long, Double> outgoingWeightedExpected = new HashMap<>();
     public static String graphImpl;
 
     private static final String NODES = "MATCH (n) RETURN id(n) AS id";
@@ -53,19 +53,18 @@ public class DegreeProcCypherLoadingIntegrationTest {
     private static final String BOTH_RELS = "MATCH (a)-[r]-(b) RETURN id(a) AS source, id(b) AS target, r.foo AS weight";
     private static final String OUTGOING_RELS = "MATCH (a)-[r]->(b) RETURN id(a) AS source, id(b) AS target, r.foo AS weight";
 
-    private static final String DB_CYPHER = "" +
-            "CREATE (a:Label1 {name:\"a\"})\n" +
-            "CREATE (b:Label1 {name:\"b\"})\n" +
-            "CREATE (c:Label1 {name:\"c\"})\n" +
-            "CREATE\n" +
-            "  (a)-[:TYPE1{foo:3.0}]->(b),\n" +
-            "  (b)-[:TYPE1{foo:5.0}]->(c),\n" +
-            "  (a)-[:TYPE1{foo:2.1}]->(c),\n" +
-            "  (a)-[:TYPE2{foo:7.1}]->(c)\n";
+    private static final String DB_CYPHER = "CREATE " +
+            "  (a:Label1 {name: 'a'})" +
+            ", (b:Label1 {name: 'b'})" +
+            ", (c:Label1 {name: 'c'})" +
+            ", (a)-[:TYPE1 {foo: 3.0}]->(b)" +
+            ", (b)-[:TYPE1 {foo: 5.0}]->(c)" +
+            ", (a)-[:TYPE1 {foo: 2.1}]->(c)" +
+            ", (a)-[:TYPE2 {foo: 7.1}]->(c)";
 
 
     @AfterClass
-    public static void tearDown() throws Exception {
+    public static void tearDown() {
         if (db != null) db.shutdown();
     }
 
@@ -115,36 +114,43 @@ public class DegreeProcCypherLoadingIntegrationTest {
     }
 
     @Test
-    public void testDegreeIncomingStream() throws Exception {
+    public void testDegreeIncomingStream() {
         final Map<Long, Double> actual = new HashMap<>();
-        runQuery(
-                "CALL algo.degree.stream($nodeQuery, $relQuery, {graph:'"+graphImpl+"', direction:'INCOMING', duplicateRelationships:'skip'}) YIELD nodeId, score",
-                MapUtil.map("nodeQuery", NODES, "relQuery", INCOMING_RELS),
-                row -> actual.put(
-                        (Long)row.get("nodeId"),
-                        (Double) row.get("score")));
 
+        String query = "CALL algo.degree.stream(" +
+                       "    $nodeQuery," +
+                       "    $relQuery, {" +
+                       "        graph: $graph, direction: 'INCOMING', duplicateRelationships: 'skip'" +
+                       "    }" +
+                       ") YIELD nodeId, score";
+        runQuery(query, MapUtil.map("graph", graphImpl, "nodeQuery", NODES, "relQuery", INCOMING_RELS),
+                row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score")));
         assertMapEquals(incomingExpected, actual);
     }
 
     @Test
-    public void testWeightedDegreeIncomingStream() throws Exception {
+    public void testWeightedDegreeIncomingStream() {
         final Map<Long, Double> actual = new HashMap<>();
-        runQuery(
-                "CALL algo.degree.stream($nodeQuery, $relQuery, {graph:'"+graphImpl+"', direction:'INCOMING', weightProperty: 'foo', duplicateRelationships:'sum'}) YIELD nodeId, score",
-                MapUtil.map("nodeQuery", NODES, "relQuery", INCOMING_RELS),
-                row -> actual.put(
-                        (Long)row.get("nodeId"),
-                        (Double) row.get("score")));
-
+        String query = "CALL algo.degree.stream(" +
+                       "    $nodeQuery," +
+                       "    $relQuery, {" +
+                       "        graph: $graph, direction: 'INCOMING', weightProperty: 'foo', duplicateRelationships: 'sum'" +
+                       "    }" +
+                       ") YIELD nodeId, score";
+        runQuery(query, MapUtil.map("graph", graphImpl, "nodeQuery", NODES, "relQuery", INCOMING_RELS),
+                row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score")));
         assertMapEquals(incomingWeightedExpected, actual);
     }
 
     @Test
-    public void testDegreeIncomingWriteBack() throws Exception {
-        runQuery(
-                "CALL algo.degree($nodeQuery, $relQuery,  {graph:'"+graphImpl+"', direction:'INCOMING', duplicateRelationships:'skip'}) YIELD writeMillis, write, writeProperty",
-                MapUtil.map("nodeQuery", NODES, "relQuery", INCOMING_RELS),
+    public void testDegreeIncomingWriteBack() {
+        String query = "CALL algo.degree(" +
+                       "    $nodeQuery," +
+                       "    $relQuery,  {" +
+                       "        graph: $graph, direction: 'INCOMING', duplicateRelationships: 'skip'" +
+                       "    }" +
+                       ") YIELD writeMillis, write, writeProperty";
+        runQuery(query, MapUtil.map("graph", graphImpl, "nodeQuery", NODES, "relQuery", INCOMING_RELS),
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("degree", row.getString("writeProperty"));
@@ -152,15 +158,18 @@ public class DegreeProcCypherLoadingIntegrationTest {
                             "write time not set",
                             row.getNumber("writeMillis").intValue() >= 0);
                 });
-
         assertResult("degree", incomingExpected);
     }
 
     @Test
-    public void testWeightedDegreeIncomingWriteBack() throws Exception {
-        runQuery(
-                "CALL algo.degree($nodeQuery, $relQuery, {graph:'"+graphImpl+"', direction:'INCOMING', weightProperty: 'foo', duplicateRelationships:'sum'}) YIELD writeMillis, write, writeProperty",
-                MapUtil.map("nodeQuery", NODES, "relQuery", INCOMING_RELS),
+    public void testWeightedDegreeIncomingWriteBack() {
+        String query = "CALL algo.degree(" +
+                       "    $nodeQuery," +
+                       "    $relQuery, {" +
+                       "        graph: $graph, direction: 'INCOMING', weightProperty: 'foo', duplicateRelationships: 'sum'" +
+                       "    }" +
+                       ") YIELD writeMillis, write, writeProperty";
+        runQuery(query, MapUtil.map("graph", graphImpl, "nodeQuery", NODES, "relQuery", INCOMING_RELS),
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("degree", row.getString("writeProperty"));
@@ -168,41 +177,45 @@ public class DegreeProcCypherLoadingIntegrationTest {
                             "write time not set",
                             row.getNumber("writeMillis").intValue() >= 0);
                 });
-
         assertResult("degree", incomingWeightedExpected);
     }
 
     @Test
-    public void testDegreeBothStream() throws Exception {
+    public void testDegreeBothStream() {
         final Map<Long, Double> actual = new HashMap<>();
-        runQuery(
-                "CALL algo.degree.stream($nodeQuery, $relQuery, {graph:'"+graphImpl+"', direction:'BOTH', duplicateRelationships:'skip'}) YIELD nodeId, score",
-                MapUtil.map("nodeQuery", NODES, "relQuery", BOTH_RELS),
-                row -> actual.put(
-                        (Long)row.get("nodeId"),
-                        (Double) row.get("score")));
-
+        String query = "CALL algo.degree.stream(" +
+                       "    $nodeQuery," +
+                       "    $relQuery, {" +
+                       "        graph: $graph, direction: 'BOTH', duplicateRelationships: 'skip'" +
+                       "    }" +
+                       ") YIELD nodeId, score";
+        runQuery(query, MapUtil.map("graph", graphImpl, "nodeQuery", NODES, "relQuery", BOTH_RELS),
+                row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score")));
         assertMapEquals(bothExpected, actual);
     }
 
     @Test
-    public void testWeightedDegreeBothStream() throws Exception {
+    public void testWeightedDegreeBothStream() {
         final Map<Long, Double> actual = new HashMap<>();
-        runQuery(
-                "CALL algo.degree.stream($nodeQuery, $relQuery, {graph:'"+graphImpl+"', direction:'BOTH', weightProperty: 'foo', duplicateRelationships:'sum'}) YIELD nodeId, score",
-                MapUtil.map("nodeQuery", NODES, "relQuery", BOTH_RELS),
-                row -> actual.put(
-                        (Long)row.get("nodeId"),
-                        (Double) row.get("score")));
-
+        String query = "CALL algo.degree.stream(" +
+                       "    $nodeQuery, $relQuery, {" +
+                       "        graph: $graph, direction: 'BOTH', weightProperty: 'foo', duplicateRelationships: 'sum'" +
+                       "    }" +
+                       ") YIELD nodeId, score";
+        runQuery(query, MapUtil.map("graph", graphImpl, "nodeQuery", NODES, "relQuery", BOTH_RELS, "graph", graphImpl),
+                row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score")));
         assertMapEquals(bothWeightedExpected, actual);
     }
 
     @Test
-    public void testDegreeBothWriteBack() throws Exception {
-        runQuery(
-                "CALL algo.degree($nodeQuery, $relQuery, {graph:'"+graphImpl+"', direction:'BOTH', duplicateRelationships:'skip'}) YIELD writeMillis, write, writeProperty",
-                MapUtil.map("nodeQuery", NODES, "relQuery", BOTH_RELS),
+    public void testDegreeBothWriteBack() {
+        String query = "CALL algo.degree(" +
+                       "    $nodeQuery," +
+                       "    $relQuery, {" +
+                       "        graph: $graph, direction: 'BOTH', duplicateRelationships: 'skip'" +
+                       "    }" +
+                       ") YIELD writeMillis, write, writeProperty";
+        runQuery(query, MapUtil.map("graph", graphImpl, "nodeQuery", NODES, "relQuery", BOTH_RELS),
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("degree", row.getString("writeProperty"));
@@ -210,15 +223,18 @@ public class DegreeProcCypherLoadingIntegrationTest {
                             "write time not set",
                             row.getNumber("writeMillis").intValue() >= 0);
                 });
-
         assertResult("degree", bothExpected);
     }
 
     @Test
-    public void testWeightedDegreeBothWriteBack() throws Exception {
-        runQuery(
-                "CALL algo.degree($nodeQuery, $relQuery, {graph:'"+graphImpl+"', direction:'BOTH', weightProperty: 'foo', duplicateRelationships:'sum'}) YIELD writeMillis, write, writeProperty",
-                MapUtil.map("nodeQuery", NODES, "relQuery", BOTH_RELS),
+    public void testWeightedDegreeBothWriteBack() {
+        String query = "CALL algo.degree(" +
+                       "    $nodeQuery," +
+                       "    $relQuery, {" +
+                       "        graph: $graph, direction: 'BOTH', weightProperty: 'foo', duplicateRelationships: 'sum'" +
+                       "    }" +
+                       ") YIELD writeMillis, write, writeProperty";
+        runQuery(query, MapUtil.map("graph", graphImpl, "nodeQuery", NODES, "relQuery", BOTH_RELS),
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("degree", row.getString("writeProperty"));
@@ -226,41 +242,36 @@ public class DegreeProcCypherLoadingIntegrationTest {
                             "write time not set",
                             row.getNumber("writeMillis").intValue() >= 0);
                 });
-
         assertResult("degree", bothWeightedExpected);
     }
 
     @Test
-    public void testDegreeOutgoingStream() throws Exception {
+    public void testDegreeOutgoingStream() {
         final Map<Long, Double> actual = new HashMap<>();
-        runQuery(
-                "CALL algo.degree.stream($nodeQuery, $relQuery, {graph:'"+graphImpl+"', direction:'OUTGOING', duplicateRelationships:'skip'}) YIELD nodeId, score",
-                MapUtil.map("nodeQuery", NODES, "relQuery", OUTGOING_RELS),
-                row -> actual.put(
-                        (Long)row.get("nodeId"),
-                        (Double) row.get("score")));
-
+        String query = "CALL algo.degree.stream(" +
+                       "    $nodeQuery," +
+                       "    $relQuery, {" +
+                       "        graph: $graph, direction: 'OUTGOING', duplicateRelationships: 'skip'" +
+                       "    }" +
+                       ") YIELD nodeId, score";
+        runQuery(query, MapUtil.map("graph", graphImpl, "nodeQuery", NODES, "relQuery", OUTGOING_RELS),
+                row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score")));
         assertMapEquals(outgoingExpected, actual);
     }
 
     @Test
-    public void testWeightedDegreeOutgoingStream() throws Exception {
+    public void testWeightedDegreeOutgoingStream() {
         final Map<Long, Double> actual = new HashMap<>();
-        runQuery(
-                "CALL algo.degree.stream($nodeQuery, $relQuery, {graph:'"+graphImpl+"', direction:'OUTGOING', weightProperty: 'foo', duplicateRelationships:'sum'}) YIELD nodeId, score",
-                MapUtil.map("nodeQuery", NODES, "relQuery", OUTGOING_RELS),
-                row -> actual.put(
-                        (Long)row.get("nodeId"),
-                        (Double) row.get("score")));
-
+        String query= "CALL algo.degree.stream($nodeQuery, $relQuery, {graph: $graph, direction:'OUTGOING', weightProperty: 'foo', duplicateRelationships:'sum'}) YIELD nodeId, score";
+        runQuery(query, MapUtil.map("graph", graphImpl, "nodeQuery", NODES, "relQuery", OUTGOING_RELS),
+                row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score")));
         assertMapEquals(outgoingWeightedExpected, actual);
     }
 
     @Test
-    public void testDegreeOutgoingWriteBack() throws Exception {
-        runQuery(
-                "CALL algo.degree($nodeQuery, $relQuery, {graph:'"+graphImpl+"', direction:'OUTGOING', duplicateRelationships:'skip'}) YIELD writeMillis, write, writeProperty",
-                MapUtil.map("nodeQuery", NODES, "relQuery", OUTGOING_RELS),
+    public void testDegreeOutgoingWriteBack() {
+        String query = "CALL algo.degree($nodeQuery, $relQuery, {graph: $graph, direction:'OUTGOING', duplicateRelationships:'skip'}) YIELD writeMillis, write, writeProperty";
+        runQuery(query, MapUtil.map("graph", graphImpl, "nodeQuery", NODES, "relQuery", OUTGOING_RELS),
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("degree", row.getString("writeProperty"));
@@ -268,15 +279,13 @@ public class DegreeProcCypherLoadingIntegrationTest {
                             "write time not set",
                             row.getNumber("writeMillis").intValue() >= 0);
                 });
-
         assertResult("degree", outgoingExpected);
     }
 
     @Test
-    public void testWeightedDegreeOutgoingWriteBack() throws Exception {
-        runQuery(
-                "CALL algo.degree($nodeQuery, $relQuery, {graph:'"+graphImpl+"', direction:'OUTGOING', weightProperty: 'foo', duplicateRelationships:'sum'}) YIELD writeMillis, write, writeProperty",
-                MapUtil.map("nodeQuery", NODES, "relQuery", OUTGOING_RELS),
+    public void testWeightedDegreeOutgoingWriteBack() {
+        String query = "CALL algo.degree($nodeQuery, $relQuery, {graph: $graph, direction:'OUTGOING', weightProperty: 'foo', duplicateRelationships:'sum'}) YIELD writeMillis, write, writeProperty";
+        runQuery(query, MapUtil.map("graph", graphImpl, "nodeQuery", NODES, "relQuery", OUTGOING_RELS),
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("degree", row.getString("writeProperty"));
@@ -284,16 +293,7 @@ public class DegreeProcCypherLoadingIntegrationTest {
                             "write time not set",
                             row.getNumber("writeMillis").intValue() >= 0);
                 });
-
         assertResult("degree", outgoingWeightedExpected);
-    }
-
-
-
-    private static void runQuery(
-            String query,
-            Consumer<Result.ResultRow> check) {
-        runQuery(query, new HashMap<>(), check);
     }
 
     private static void runQuery(

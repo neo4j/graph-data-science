@@ -95,9 +95,21 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
 
         boolean importWeights = dimensions.relWeightId() != StatementConstants.NO_SUCH_PROPERTY_KEY;
 
+        RelationshipImporter importer = new RelationshipImporter(
+                setup.tracker,
+                outBuilder,
+                setup.loadAsUndirected ? outBuilder : inBuilder
+        );
+
         return RelationshipsScanner.of(
-                api, setup, progress, idMap, scanner, dimensions.singleRelationshipTypeId(),
-                tracker, importWeights, outBuilder, inBuilder);
+                api,
+                setup,
+                progress,
+                idMap,
+                scanner,
+                dimensions.singleRelationshipTypeId(),
+                importWeights,
+                importer);
     }
 
     @Override

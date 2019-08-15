@@ -19,34 +19,24 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
-import org.neo4j.graphalgo.core.huge.loader.AbstractStorePageCacheScanner.RecordConsumer;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.kernel.impl.store.NodeLabelsField;
 import org.neo4j.kernel.impl.store.NodeStore;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
 
-
-final class NodesBatchBuffer implements RecordConsumer<NodeRecord> {
+final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
 
     private final int label;
     private final NodeStore nodeStore;
 
-    private int length;
-    // node ids, consecutive
-    private final long[] buffer;
     // property ids, consecutive
     private final long[] properties;
 
     NodesBatchBuffer(final NodeStore store, final int label, int capacity, boolean readProperty) {
+        super(capacity);
         this.label = label;
         this.nodeStore = store;
-        this.buffer = new long[capacity];
         this.properties = readProperty ? new long[capacity] : null;
-    }
-
-    boolean scan(AbstractStorePageCacheScanner<NodeRecord>.Cursor cursor) {
-        length = 0;
-        return cursor.bulkNext(this);
     }
 
     @Override
@@ -73,14 +63,6 @@ final class NodesBatchBuffer implements RecordConsumer<NodeRecord> {
             }
         }
         return false;
-    }
-
-    int length() {
-        return length;
-    }
-
-    long[] batch() {
-        return buffer;
     }
 
     long[] properties() {

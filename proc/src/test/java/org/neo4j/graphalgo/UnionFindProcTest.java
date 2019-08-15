@@ -23,8 +23,7 @@ import com.carrotsearch.hppc.IntIntScatterMap;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.MapUtil;
@@ -83,8 +82,7 @@ public class UnionFindProcTest extends ProcTestBase {
         if (DB != null) DB.shutdown();
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
+    @AllGraphNamesTest
     public void testUnionFind(String graphImpl) {
         String query = "CALL algo.unionFind(" +
                        "    '', '', {" +
@@ -99,8 +97,7 @@ public class UnionFindProcTest extends ProcTestBase {
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
+    @AllGraphNamesTest
     public void testUnionFindWithLabel(String graphImpl) {
         String query = "CALL algo.unionFind(" +
                        "    'Label', '', {" +
@@ -115,8 +112,7 @@ public class UnionFindProcTest extends ProcTestBase {
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
+    @AllGraphNamesTest
     public void testUnionFindWithSeed(String graphImpl) {
         Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
 
@@ -149,8 +145,7 @@ public class UnionFindProcTest extends ProcTestBase {
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
+    @AllGraphNamesTest
     public void testUnionFindReadAndWriteSeed(String graphImpl) {
         Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
 
@@ -183,8 +178,7 @@ public class UnionFindProcTest extends ProcTestBase {
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
+    @AllGraphNamesTest
     public void testUnionFindWithSeedAndConsecutive(String graphImpl) {
         Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
 
@@ -218,8 +212,7 @@ public class UnionFindProcTest extends ProcTestBase {
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
+    @AllGraphNamesTest
     public void testUnionFindWithConsecutiveIds(String graphImpl) {
         String query = "CALL algo.unionFind(" +
                        "    '', '', {" +
@@ -239,8 +232,7 @@ public class UnionFindProcTest extends ProcTestBase {
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
+    @AllGraphNamesTest
     public void testUnionFindWriteBack(String graphImpl) {
         String query = "CALL algo.unionFind(" +
                        "    '', 'TYPE', {" +
@@ -260,8 +252,7 @@ public class UnionFindProcTest extends ProcTestBase {
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
+    @AllGraphNamesTest
     public void testUnionFindWriteBackExplicitWriteProperty(String graphImpl) {
         String query = "CALL algo.unionFind(" +
                        "    '', 'TYPE', {" +
@@ -281,8 +272,7 @@ public class UnionFindProcTest extends ProcTestBase {
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
+    @AllGraphNamesTest
     public void testUnionFindStream(String graphImpl) {
         String query = "CALL algo.unionFind.stream(" +
                        "    '', 'TYPE', {" +
@@ -296,8 +286,7 @@ public class UnionFindProcTest extends ProcTestBase {
         assertMapContains(map, 1, 2, 7);
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
+    @AllGraphNamesTest
     public void testThresholdUnionFindStream(String graphImpl) {
         String query = "CALL algo.unionFind.stream(" +
                        "    '', 'TYPE', {" +
@@ -312,8 +301,7 @@ public class UnionFindProcTest extends ProcTestBase {
         assertMapContains(map, 4, 3, 2, 1);
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
+    @AllGraphNamesTest
     public void testThresholdUnionFindLowThreshold(String graphImpl) {
         String query = "CALL algo.unionFind.stream(" +
                        "    '', 'TYPE', {" +
