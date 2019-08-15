@@ -447,7 +447,7 @@ public class HugeGraph implements Graph {
             HugeAdjacencyList.DecompressingCursor adjacencyCursor,
             HugeAdjacencyOffsets offsets,
             HugeAdjacencyList adjacencyList) {
-        if (null == offsets) {
+        if (offsets == null) {
             return emptyAdjacencyCursor;
         }
         final long offset = offsets.get(node);

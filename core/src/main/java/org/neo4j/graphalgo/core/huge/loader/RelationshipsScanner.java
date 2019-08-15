@@ -50,7 +50,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
                 setup.loadOutgoing,
                 setup.loadIncoming,
                 loadWeights);
-        if (null == imports) {
+        if (imports == null) {
             return InternalImporter.createEmptyScanner();
         }
         return new RelationshipsScanner.Creator(api, progress, idMap, scanner, relType, importer, imports);
