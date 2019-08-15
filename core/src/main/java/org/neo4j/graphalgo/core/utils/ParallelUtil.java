@@ -98,7 +98,7 @@ public final class ParallelUtil {
      * @note ForkJoinPool is required here to avoid .spliterator() calls
      *         on the stream to steal threads from the common pool.
      */
-    public static <T extends BaseStream<?, T>, R> void parallelStreamForeach(T data, Consumer<T> fn) {
+    public static <T extends BaseStream<?, T>> void parallelStreamForeach(T data, Consumer<T> fn) {
         parallelStreamForeach(data, fn, Pools.FJ_POOL);
     }
 
@@ -108,7 +108,7 @@ public final class ParallelUtil {
      * @note ForkJoinPool is required here to avoid .spliterator() calls
      *         on the stream to steal threads from the common pool.
      */
-    public static <T extends BaseStream<?, T>, R> void parallelStreamForeach(T data, Consumer<T> fn, ForkJoinPool pool) {
+    public static <T extends BaseStream<?, T>> void parallelStreamForeach(T data, Consumer<T> fn, ForkJoinPool pool) {
         try {
             pool.submit(() -> fn.accept(data.parallel())).get();
         } catch (Exception e) {

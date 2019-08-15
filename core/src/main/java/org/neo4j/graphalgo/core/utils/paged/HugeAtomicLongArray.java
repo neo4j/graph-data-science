@@ -221,9 +221,15 @@ public abstract class HugeAtomicLongArray {
             tracker.add(sizeOfLongArray(intSize));
             long[] page = new long[intSize];
             if (gen != null) {
-                Arrays.parallelSetAll(page, gen::applyAsLong);
+                parallelSetAll(gen, page);
             }
             return new SingleHugeAtomicLongArray(intSize, page);
+        }
+
+        private static void parallelSetAll(LongUnaryOperator gen, long[] page) {
+            parallelStreamForeach(
+                    IntStream.range(0, page.length),
+                    stream -> stream.forEach(i -> page[i] = gen.applyAsLong(i)));
         }
 
         private final int size;
