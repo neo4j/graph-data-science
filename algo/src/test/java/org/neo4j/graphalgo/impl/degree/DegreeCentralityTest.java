@@ -229,10 +229,6 @@ public final class DegreeCentralityTest {
 
         WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY);
         degreeCentrality.compute(false);
-        IntStream.range(0, expected.size()).forEach(i -> {
-                    long nodeId = graph.toOriginalNodeId(i);
-            System.out.printf("Node#%s: expected %f, got %f%n", nodeId, expected.get(nodeId), degreeCentrality.degrees().get(i));
-        });
 
         IntStream.range(0, expected.size()).forEach(i -> {
             long nodeId = graph.toOriginalNodeId(i);
