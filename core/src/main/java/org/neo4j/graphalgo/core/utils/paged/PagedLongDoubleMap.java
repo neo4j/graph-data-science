@@ -129,6 +129,7 @@ public final class PagedLongDoubleMap {
     public long getMaxValue() {
         return (long) Arrays
                 .stream(pages)
+                .filter(Objects::nonNull)
                 .parallel()
                 .flatMapToDouble(TrackingIntDoubleHashMap::getValuesAsStream)
                 .max()

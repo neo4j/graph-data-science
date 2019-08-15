@@ -19,17 +19,23 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
-public final class PagedLongDoubleMapTest {
+final class PagedLongDoubleMapTest {
 
     @Test
-    public void canReadFromPut() {
+    void canGetMaxValueFromEmptyMap() {
+        PagedLongDoubleMap map = PagedLongDoubleMap.of(100_000, AllocationTracker.EMPTY);
+        assertEquals(0D, map.getMaxValue(), 0D);
+    }
+
+    @Test
+    void canReadFromPut() {
         PagedLongDoubleMap map = PagedLongDoubleMap.of(4L, AllocationTracker.EMPTY);
         map.put(1L, 1.0);
 
@@ -42,7 +48,7 @@ public final class PagedLongDoubleMapTest {
     }
 
     @Test
-    public void supportsZeroKeys() {
+    void supportsZeroKeys() {
         PagedLongDoubleMap map = PagedLongDoubleMap.of(4L, AllocationTracker.EMPTY);
 
         map.put(0L, 1.0);
@@ -51,7 +57,7 @@ public final class PagedLongDoubleMapTest {
     }
 
     @Test
-    public void acceptsInitialSize() {
+    void acceptsInitialSize() {
         AllocationTracker tracker = AllocationTracker.create();
         PagedLongDoubleMap.of(0L, tracker);
         // size 0 creates an empty page array
@@ -69,7 +75,7 @@ public final class PagedLongDoubleMapTest {
     }
 
     @Test
-    public void resizeOnGrowthAndTrackMemoryUsage() {
+    void resizeOnGrowthAndTrackMemoryUsage() {
         AllocationTracker tracker = AllocationTracker.create();
         PagedLongDoubleMap map = PagedLongDoubleMap.of(0L, tracker);
 
@@ -113,7 +119,7 @@ public final class PagedLongDoubleMapTest {
     }
 
     @Test
-    public void releaseMemory() {
+    void releaseMemory() {
         AllocationTracker tracker = AllocationTracker.create();
         PagedLongDoubleMap map = PagedLongDoubleMap.of(4, tracker);
 
