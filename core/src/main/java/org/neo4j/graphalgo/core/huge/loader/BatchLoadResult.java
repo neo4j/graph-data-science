@@ -19,14 +19,14 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
-public class ImportState {
+class BatchLoadResult {
 
     private final long offset;
     private final long rows;
     private final long maxId;
     private final long count;
 
-    ImportState(
+    BatchLoadResult(
             long offset,
             long rows,
             long maxId,

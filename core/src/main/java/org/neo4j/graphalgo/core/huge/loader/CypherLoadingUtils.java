@@ -30,9 +30,11 @@ import java.util.concurrent.Future;
 import static org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory.LIMIT;
 import static org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory.SKIP;
 
-class CypherLoadingUtils {
-    public static  boolean canBatchLoad(boolean loadConcurrent, int batchSize, String statement) {
-        return loadConcurrent && batchSize > 0 &&
+final class CypherLoadingUtils {
+    static final int NO_BATCHING = -1;
+
+    static  boolean canBatchLoad(int concurrency, String statement) {
+        return concurrency > 1 &&
                 (statement.contains("{" + LIMIT + "}") || statement.contains("$" + LIMIT)) &&
                 (statement.contains("{" + SKIP + "}") || statement.contains("$" + SKIP));
     }
@@ -62,4 +64,5 @@ class CypherLoadingUtils {
         }
     }
 
+    private CypherLoadingUtils() {}
 }

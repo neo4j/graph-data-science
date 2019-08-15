@@ -27,38 +27,30 @@ import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-/**
- * @author mknblch
- */
 public class CypherGraphFactory extends GraphFactory {
 
-    static final int NO_BATCH = -1;
+    public static final String TYPE = "cypher";
+
     static final String LIMIT = "limit";
     static final String SKIP = "skip";
-    public static final String TYPE = "cypher";
-    private final CypherNodeCountingLoader nodeCountingLoader;
-    private final CypherRelationshipCountingLoader relationshipCountingLoader;
-    private final CypherNodeLoader nodeLoader;
-    private final CypherRelationshipLoader relationshipLoader;
 
-    public CypherGraphFactory(
-            GraphDatabaseAPI api,
-            GraphSetup setup) {
+    private final GraphDatabaseAPI api;
+    private final GraphSetup setup;
+
+    public CypherGraphFactory(GraphDatabaseAPI api, GraphSetup setup) {
         super(api, setup);
-        this.nodeLoader = new CypherNodeLoader(api, setup);
-        this.relationshipLoader = new CypherRelationshipLoader(api, setup);
-        this.nodeCountingLoader = new CypherNodeCountingLoader(api, setup);
-        this.relationshipCountingLoader = new CypherRelationshipCountingLoader(api, setup);
+        this.api = api;
+        this.setup = setup;
     }
 
     @Override
     protected void validateTokens() { }
 
     public final MemoryEstimation memoryEstimation() {
-        ImportState nodeCount = nodeCountingLoader.load();
+        BatchLoadResult nodeCount = new CypherRecordCountingLoader(setup.startLabel, api, setup).load();
         dimensions.nodeCount(nodeCount.rows());
 
-        ImportState relCount = relationshipCountingLoader.load();
+        BatchLoadResult relCount = new CypherRecordCountingLoader(setup.relationshipType, api, setup).load();
         dimensions.maxRelCount(relCount.rows());
 
         return HeavyGraphFactory.getMemoryEstimation(setup, dimensions);
@@ -66,9 +58,9 @@ public class CypherGraphFactory extends GraphFactory {
 
     @Override
     public Graph importGraph() {
-        ImportState nodeCount = nodeCountingLoader.load();
-        IdsAndProperties nodes = nodeLoader.load(nodeCount.rows());
-        Relationships relationships = relationshipLoader.load(nodes);
+        BatchLoadResult nodeCount = new CypherRecordCountingLoader(setup.startLabel, api, setup).load();
+        IdsAndProperties nodes = new CypherNodeLoader(nodeCount.rows(), api, setup).load();
+        Relationships relationships = new CypherRelationshipLoader(nodes.idMap(), api, setup).load();
 
         return new HugeGraph(
                 setup.tracker,

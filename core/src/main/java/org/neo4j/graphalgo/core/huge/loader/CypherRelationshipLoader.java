@@ -22,54 +22,77 @@ package org.neo4j.graphalgo.core.huge.loader;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.huge.HugeAdjacencyList;
 import org.neo4j.graphalgo.core.huge.HugeAdjacencyOffsets;
-import org.neo4j.graphalgo.core.huge.loader.RelationshipImporter.Imports;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.kernel.api.StatementConstants;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 
-class CypherRelationshipLoader {
-    private final GraphDatabaseAPI api;
-    private final GraphSetup setup;
+class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
+
+    private final IdMap idMap;
     private final RelationshipsBuilder outgoingRelationshipsBuilder;
-    private long totalRecordsSeen = 0;
-    private long totalRelationshipsImported = 0;
+    private final RelationshipImporter importer;
+    private final RelationshipImporter.Imports imports;
+    private final boolean hasRelationshipWeights;
+    private final double relationDefaultWeight;
 
+    private long totalRecordsSeen;
+    private long totalRelationshipsImported;
 
-    CypherRelationshipLoader(GraphDatabaseAPI api, GraphSetup setup) {
-        this.api = api;
-        this.setup = setup;
-        outgoingRelationshipsBuilder = new RelationshipsBuilder(setup.duplicateRelationshipsStrategy, setup.tracker, setup.shouldLoadRelationshipWeight());
-    }
+    CypherRelationshipLoader(IdMap idMap, GraphDatabaseAPI api, GraphSetup setup) {
+        super(setup.relationshipType, idMap.nodeCount(), api, setup);
+        this.idMap = idMap;
+        outgoingRelationshipsBuilder = new RelationshipsBuilder(
+                setup.duplicateRelationshipsStrategy,
+                setup.tracker,
+                setup.shouldLoadRelationshipWeight());
 
-    public Relationships load(IdsAndProperties nodes) {
-        int batchSize = setup.batchSize;
-        ImportSizing importSizing = ImportSizing.of(setup.concurrency, nodes.idMap().nodeCount());
+        ImportSizing importSizing = ImportSizing.of(setup.concurrency, idMap.nodeCount());
         int pageSize = importSizing.pageSize();
         int numberOfPages = importSizing.numberOfPages();
 
+        relationDefaultWeight = setup.relationDefaultWeight;
         AdjacencyBuilder outBuilder = AdjacencyBuilder.compressing(
                 outgoingRelationshipsBuilder,
                 numberOfPages, pageSize,
-                setup.tracker, new AtomicLong(), -2, setup.relationDefaultWeight);
+                setup.tracker, new AtomicLong(), -2, relationDefaultWeight);
 
-        boolean hasRelationshipWeights = setup.shouldLoadRelationshipWeight();
+        hasRelationshipWeights = setup.shouldLoadRelationshipWeight();
+        importer = new RelationshipImporter(setup.tracker, outBuilder, null);
+        imports = RelationshipImporter.imports(importer, false, true, false, hasRelationshipWeights);
+        totalRecordsSeen = 0;
+        totalRelationshipsImported = 0;
+    }
 
-        RelationshipImporter importer = new RelationshipImporter(setup.tracker, outBuilder, null);
+    @Override
+    BatchLoadResult loadOneBatch(long offset, int batchSize, int bufferSize) {
+        RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(
+                idMap,
+                StatementConstants.ANY_RELATIONSHIP_TYPE,
+                bufferSize);
+        RelationshipRowVisitor visitor = new RelationshipRowVisitor(
+                buffer,
+                idMap,
+                hasRelationshipWeights,
+                relationDefaultWeight,
+                importer,
+                imports
+        );
+        runLoadingQuery(offset, batchSize, visitor);
+        visitor.flush();
+        return new BatchLoadResult(offset, visitor.rows(), -1L, visitor.relationshipCount());
+    }
 
-        Imports imports = RelationshipImporter.imports(importer, false, true, false, hasRelationshipWeights);
+    @Override
+    void loaded(BatchLoadResult result) {
+        totalRecordsSeen += result.rows();
+        totalRelationshipsImported += result.count();
+    }
 
-        if (CypherLoadingUtils.canBatchLoad(setup.loadConcurrent(), batchSize, setup.relationshipType)) {
-            parallelLoadRelationships(batchSize, nodes, importer, imports);
-        } else {
-            nonParallelLoadRelationships(nodes, importer, imports);
-        }
+    @Override
+    Relationships buildResult() {
+        ParallelUtil.run(importer.flushTasks(), setup.executor);
 
         HugeAdjacencyList outAdjacencyList = outgoingRelationshipsBuilder.adjacency.build();
         HugeAdjacencyOffsets outAdjacencyOffsets = outgoingRelationshipsBuilder.globalAdjacencyOffsets;
@@ -88,77 +111,5 @@ class CypherRelationshipLoader {
                 null,
                 outWeightOffsets
         );
-
     }
-
-    private void parallelLoadRelationships(
-            int batchSize,
-            IdsAndProperties nodes,
-            RelationshipImporter importer,
-            Imports imports) {
-        ExecutorService pool = setup.executor;
-        int threads = setup.concurrency();
-
-        long offset = 0;
-        long lastOffset = 0;
-        List<Future<ImportState>> futures = new ArrayList<>(threads);
-        boolean working = true;
-        do {
-            long skip = offset;
-            // suboptimal, each sub-call allocates a AdjacencyMatrix of nodeCount size, would be better with a sparse variant
-            futures.add(pool.submit(() -> loadRelationships(skip, batchSize, nodes, importer, imports, true)));
-            offset += batchSize;
-            if (futures.size() >= threads) {
-                for (Future<ImportState> future : futures) {
-                    ImportState result = CypherLoadingUtils.get("Error during loading relationships offset: " + (lastOffset + batchSize), future);
-                    if (0 >= result.rows()) {
-                        working = false;
-                    }
-                    lastOffset = result.offset();
-                    totalRecordsSeen += result.rows();
-                    totalRelationshipsImported += result.count();
-                }
-                futures.clear();
-            }
-        } while (working);
-
-        ParallelUtil.run(importer.flushTasks(), pool);
-    }
-
-    private void nonParallelLoadRelationships(
-            IdsAndProperties nodes,
-            RelationshipImporter importer,
-            Imports imports) {
-        ImportState relationships = loadRelationships(0L, ParallelUtil.DEFAULT_BATCH_SIZE, nodes, importer, imports, false);
-        importer.flushTasks().forEach(Runnable::run);
-        totalRecordsSeen = relationships.rows();
-        totalRelationshipsImported = relationships.count();
-    }
-
-    private ImportState loadRelationships(
-            long offset,
-            int batchSize,
-            IdsAndProperties nodes,
-            RelationshipImporter importer,
-            Imports imports,
-            boolean withPaging) {
-        boolean hasRelationshipWeights = setup.shouldLoadRelationshipWeight();
-        RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(nodes.idMap(), StatementConstants.ANY_RELATIONSHIP_TYPE, batchSize);
-        RelationshipRowVisitor visitor = new RelationshipRowVisitor(
-                buffer,
-                nodes.idMap(),
-                hasRelationshipWeights,
-                setup.relationDefaultWeight,
-                importer,
-                imports
-        );
-        Map<String, Object> parameters = withPaging
-                ? CypherLoadingUtils.params(setup.params, offset, batchSize)
-                : setup.params;
-        api.execute(setup.relationshipType, parameters).accept(visitor);
-        visitor.flush();
-
-        return new ImportState(offset, visitor.rows(), -1L, visitor.relationshipCount());
-    }
-
 }

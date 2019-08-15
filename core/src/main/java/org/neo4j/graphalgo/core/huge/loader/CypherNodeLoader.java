@@ -22,93 +22,54 @@ package org.neo4j.graphalgo.core.huge.loader;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-class CypherNodeLoader {
+class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
 
-    private final GraphDatabaseAPI api;
-    private final GraphSetup setup;
-    private HugeLongArrayBuilder builder;
-    private NodeImporter importer;
-    private Map<PropertyMapping, HugeNodePropertiesBuilder> nodePropertyBuilders;
+    private final HugeLongArrayBuilder builder;
+    private final NodeImporter importer;
+    private final Map<PropertyMapping, HugeNodePropertiesBuilder> nodePropertyBuilders;
+    private long maxNodeId;
 
-    public CypherNodeLoader(GraphDatabaseAPI api, GraphSetup setup) {
-        this.api = api;
-        this.setup = setup;
+    CypherNodeLoader(long nodeCount, GraphDatabaseAPI api, GraphSetup setup) {
+        super(setup.startLabel, nodeCount, api, setup);
+        maxNodeId = 0L;
+        nodePropertyBuilders = nodeProperties(nodeCount, setup);
+        builder = HugeLongArrayBuilder.of(nodeCount, setup.tracker);
+        importer = new NodeImporter(builder, nodePropertyBuilders.values());
     }
 
-    public IdsAndProperties load(long nodeCount) {
-        int batchSize = setup.batchSize;
-        this.nodePropertyBuilders = nodeProperties(nodeCount);
-        this.builder = HugeLongArrayBuilder.of(nodeCount, setup.tracker);
-        this.importer = new NodeImporter(builder, nodePropertyBuilders.values());
-        return CypherLoadingUtils.canBatchLoad(setup.loadConcurrent(), batchSize, setup.startLabel) ?
-                parallelLoadNodes(batchSize) :
-                nonParallelLoadNodes();
+    @Override
+    BatchLoadResult loadOneBatch(long offset, int batchSize, int bufferSize) {
+        NodesBatchBuffer buffer = new NodesBatchBuffer(null, -1, bufferSize, true);
+        NodeRowVisitor visitor = new NodeRowVisitor(nodePropertyBuilders, buffer, importer);
+        runLoadingQuery(offset, batchSize, visitor);
+        visitor.flush();
+        return new BatchLoadResult(offset, visitor.rows(), visitor.maxId(), visitor.rows());
     }
 
-    private IdsAndProperties parallelLoadNodes(int batchSize) {
-        ExecutorService pool = setup.executor;
-        int threads = setup.concurrency();
+    @Override
+    void loaded(BatchLoadResult result) {
+        if (result.maxId() > maxNodeId) {
+            maxNodeId = result.maxId();
+        }
+    }
 
-        long offset = 0;
-        long lastOffset = 0;
-        long maxNodeId = 0;
-        List<Future<ImportState>> futures = new ArrayList<>(threads);
-        boolean working = true;
-        do {
-            long skip = offset;
-            futures.add(pool.submit(() -> loadNodes(skip, batchSize, true)));
-            offset += batchSize;
-            if (futures.size() >= threads) {
-                for (Future<ImportState> future : futures) {
-                    ImportState result = CypherLoadingUtils.get("Error during loading nodes offset: " + (lastOffset + batchSize), future);
-                    lastOffset = result.offset();
-                    working = result.rows() > 0;
-                    maxNodeId = Math.max(maxNodeId, result.maxId());
-                }
-                futures.clear();
-            }
-        } while (working);
-
+    @Override
+    IdsAndProperties buildResult() {
         IdMap idMap = HugeIdMapBuilder.build(builder, maxNodeId, setup.concurrency, setup.tracker);
         Map<String, HugeWeightMapping> nodeProperties = nodePropertyBuilders.entrySet().stream()
                 .collect(Collectors.toMap(e -> e.getKey().propertyName, e -> e.getValue().build()));
         return new IdsAndProperties(idMap, nodeProperties);
     }
 
-    private IdsAndProperties nonParallelLoadNodes() {
-        ImportState nodes = loadNodes(0L, ParallelUtil.DEFAULT_BATCH_SIZE, false);
-        IdMap idMap = HugeIdMapBuilder.build(builder, nodes.maxId(), setup.concurrency, setup.tracker);
-        Map<String, HugeWeightMapping> nodeProperties = nodePropertyBuilders.entrySet().stream()
-                .collect(Collectors.toMap(e -> e.getKey().propertyName, e -> e.getValue().build()));
-        return new IdsAndProperties(idMap, nodeProperties);
-    }
-
-    private ImportState loadNodes(long offset, int batchSize, boolean withPaging) {
-        NodesBatchBuffer buffer = new NodesBatchBuffer(null, -1, batchSize, true);
-
-        NodeRowVisitor visitor = new NodeRowVisitor(nodePropertyBuilders, buffer, importer);
-        Map<String, Object> parameters = withPaging
-                ? CypherLoadingUtils.params(setup.params, offset, batchSize)
-                : setup.params;
-        api.execute(setup.startLabel, parameters).accept(visitor);
-        visitor.flush();
-        return new ImportState(offset, visitor.rows(), visitor.maxId(), visitor.rows());
-    }
-
-    private Map<PropertyMapping, HugeNodePropertiesBuilder> nodeProperties(long capacity) {
+    private Map<PropertyMapping, HugeNodePropertiesBuilder> nodeProperties(long capacity, GraphSetup setup) {
         Map<PropertyMapping, HugeNodePropertiesBuilder> nodeProperties = new HashMap<>();
         for (PropertyMapping propertyMapping : setup.nodePropertyMappings) {
             nodeProperties.put(
@@ -122,5 +83,4 @@ class CypherNodeLoader {
         }
         return nodeProperties;
     }
-
 }
