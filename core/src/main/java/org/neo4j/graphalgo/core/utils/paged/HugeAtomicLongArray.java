@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.utils.paged;
 
 import org.neo4j.graphalgo.core.utils.BitUtil;
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.unsafe.impl.internal.dragons.UnsafeUtil;
@@ -30,6 +29,7 @@ import java.util.function.IntToLongFunction;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.IntStream;
 
+import static org.neo4j.graphalgo.core.utils.ParallelUtil.parallelStreamForeach;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
@@ -318,7 +318,7 @@ public abstract class HugeAtomicLongArray {
         }
 
         private static void parallelSetAll(long[] array, IntToLongFunction generator) {
-            ParallelUtil.parallelStreamForeach(IntStream.range(0, array.length), intStream -> {
+            parallelStreamForeach(IntStream.range(0, array.length), intStream -> {
                 intStream.forEach(i -> array[i] = generator.applyAsLong(i));
             }, Pools.FJ_POOL);
         }

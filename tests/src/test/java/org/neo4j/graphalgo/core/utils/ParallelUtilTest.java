@@ -59,6 +59,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.neo4j.graphalgo.core.utils.ParallelUtil.parallelStream;
 
 @ThreadLeakScope(ThreadLeakScope.Scope.NONE)
 public final class ParallelUtilTest extends RandomizedTest {
@@ -74,7 +75,7 @@ public final class ParallelUtilTest extends RandomizedTest {
         ForkJoinPool commonPool = ForkJoinPool.commonPool();
         Stream<Long> stream = list.stream();
 
-        long actualTotal = ParallelUtil.parallelStream(stream, (s) -> {
+        long actualTotal = parallelStream(stream, (s) -> {
             assertThat(s.isParallel(), equalTo(true));
             Thread thread = Thread.currentThread();
             assertTrue(thread instanceof ForkJoinWorkerThread);
@@ -92,7 +93,7 @@ public final class ParallelUtilTest extends RandomizedTest {
     public void shouldTakeBaseStreams() {
         double[] data = {1.0, 2.5, 3.14};
 
-        double sum = ParallelUtil.parallelStream(Arrays.stream(data), DoubleStream::sum, Pools.FJ_POOL);
+        double sum = parallelStream(Arrays.stream(data), DoubleStream::sum, Pools.FJ_POOL);
 
         assertThat(sum, equalTo(1.0 + 2.5 + 3.14));
     }

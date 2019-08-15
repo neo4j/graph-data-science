@@ -20,6 +20,9 @@
 package org.neo4j.graphalgo.impl.results;
 
 import java.util.Arrays;
+import java.util.stream.DoubleStream;
+
+import static org.neo4j.graphalgo.core.utils.ParallelUtil.parallelStream;
 
 public class NormalizationComputations {
     public static double max(double[][] partitions) {
@@ -47,14 +50,14 @@ public class NormalizationComputations {
     }
 
     static double squaredSum(double[] partition) {
-        return Arrays.stream(partition).parallel().map(value -> value * value).sum();
+        return parallelStream(Arrays.stream(partition), stream -> stream.map(value -> value * value).sum());
     }
 
     static double l1Norm(double[] partition) {
-        return Arrays.stream(partition).parallel().sum();
+        return parallelStream(Arrays.stream(partition), DoubleStream::sum);
     }
 
     public static double max(double[] result, double defaultMax) {
-        return Arrays.stream(result).parallel().max().orElse(defaultMax);
+        return parallelStream(Arrays.stream(result), stream -> stream.max().orElse(defaultMax));
     }
 }

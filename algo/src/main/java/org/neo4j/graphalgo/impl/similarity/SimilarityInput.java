@@ -20,11 +20,14 @@
 package org.neo4j.graphalgo.impl.similarity;
 
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
+import org.neo4j.graphalgo.core.utils.ParallelUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import static org.neo4j.graphalgo.core.utils.ParallelUtil.parallelStream;
 
 public interface SimilarityInput {
     long getId();
@@ -52,7 +55,7 @@ public interface SimilarityInput {
     }
 
     static long[] extractInputIds(SimilarityInput[] inputs) {
-        return Arrays.stream(inputs).parallel().mapToLong(SimilarityInput::getId).toArray();
+        return parallelStream(Arrays.stream(inputs), stream -> stream.mapToLong(SimilarityInput::getId).toArray());
     }
 
     static int[] indexesFor(long[] inputIds, ProcedureConfiguration configuration, String key) {

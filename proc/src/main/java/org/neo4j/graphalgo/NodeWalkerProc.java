@@ -50,6 +50,8 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.core.utils.ParallelUtil.parallelStream;
+
 public class NodeWalkerProc  {
 
     @Context
@@ -106,7 +108,9 @@ public class NodeWalkerProc  {
 
         int limit = (walks == -1) ? nodeCount : Math.toIntExact(walks);
 
-        PrimitiveIterator.OfInt idStream = IntStream.range(0, limit).unordered().parallel().flatMap((s) -> idStream(start, graph, limit)).limit(limit).iterator();
+        PrimitiveIterator.OfInt idStream = parallelStream(
+                IntStream.range(0, limit).unordered(),
+                stream -> stream.flatMap((s) -> idStream(start, graph, limit)).limit(limit).iterator());
 
         Stream<long[]> randomWalks = new NodeWalker().randomWalk(graph, (int) steps, strategy, terminationFlag, concurrency, limit, idStream);
         return randomWalks
