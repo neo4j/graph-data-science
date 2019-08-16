@@ -28,10 +28,6 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
  */
 public interface RelationshipWeights {
 
-    default void setWeight(long source, long target, double value) {
-        throw new NotImplementedException();
-    }
-
     /**
      * get weight between source and target node id
      *
