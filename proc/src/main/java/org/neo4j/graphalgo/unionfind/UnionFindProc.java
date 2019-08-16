@@ -37,9 +37,9 @@ import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
-import org.neo4j.graphalgo.impl.unionfind.UnionFind;
-import org.neo4j.graphalgo.impl.unionfind.UnionFindFactory;
-import org.neo4j.graphalgo.impl.unionfind.UnionFindType;
+import org.neo4j.graphalgo.impl.unionfind.WCC;
+import org.neo4j.graphalgo.impl.unionfind.WCCFactory;
+import org.neo4j.graphalgo.impl.unionfind.WCCType;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -54,11 +54,11 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.impl.unionfind.UnionFindFactory.CONFIG_ALGO_TYPE;
-import static org.neo4j.graphalgo.impl.unionfind.UnionFindFactory.CONFIG_SEED_PROPERTY;
-import static org.neo4j.graphalgo.impl.unionfind.UnionFindFactory.SEED_TYPE;
+import static org.neo4j.graphalgo.impl.unionfind.WCCFactory.CONFIG_ALGO_TYPE;
+import static org.neo4j.graphalgo.impl.unionfind.WCCFactory.CONFIG_SEED_PROPERTY;
+import static org.neo4j.graphalgo.impl.unionfind.WCCFactory.SEED_TYPE;
 
-public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
+public class UnionFindProc<T extends WCC<T>> extends BaseAlgoProc<T> {
 
     private static final String CONFIG_WRITE_PROPERTY = "writeProperty";
     private static final String CONFIG_OLD_WRITE_PROPERTY = "partitionProperty";
@@ -74,7 +74,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        return run(label, relationship, config, UnionFindType.PARALLEL);
+        return run(label, relationship, config, WCCType.PARALLEL);
     }
 
     @Procedure(value = "algo.unionFind.stream")
@@ -86,7 +86,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        return stream(label, relationship, config, UnionFindType.PARALLEL);
+        return stream(label, relationship, config, WCCType.PARALLEL);
     }
 
     @Procedure(value = "algo.unionFind.memrec", mode = Mode.READ)
@@ -112,7 +112,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        return run(label, relationship, config, UnionFindType.PARALLEL);
+        return run(label, relationship, config, WCCType.PARALLEL);
     }
 
     @Deprecated
@@ -125,7 +125,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        return stream(label, relationship, config, UnionFindType.PARALLEL);
+        return stream(label, relationship, config, WCCType.PARALLEL);
     }
 
     @Deprecated
@@ -138,7 +138,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        return run(label, relationship, config, UnionFindType.FJ_MERGE);
+        return run(label, relationship, config, WCCType.FJ_MERGE);
     }
 
     @Deprecated
@@ -151,7 +151,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        return stream(label, relationship, config, UnionFindType.FJ_MERGE);
+        return stream(label, relationship, config, WCCType.FJ_MERGE);
     }
 
     @Deprecated
@@ -164,7 +164,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        return run(label, relationship, config, UnionFindType.FORK_JOIN);
+        return run(label, relationship, config, WCCType.FORK_JOIN);
     }
 
     @Deprecated
@@ -177,7 +177,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        return stream(label, relationship, config, UnionFindType.FORK_JOIN);
+        return stream(label, relationship, config, WCCType.FORK_JOIN);
     }
 
     @Override
@@ -190,11 +190,11 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
     }
 
     @Override
-    protected UnionFindFactory<T> algorithmFactory(final ProcedureConfiguration config) {
+    protected WCCFactory<T> algorithmFactory(final ProcedureConfiguration config) {
         boolean incremental = config.getString(CONFIG_SEED_PROPERTY).isPresent();
-        UnionFindType defaultAlgoType = UnionFindType.PARALLEL;
-        UnionFindType algoType = config.getChecked(CONFIG_ALGO_TYPE, defaultAlgoType, UnionFindType.class);
-        return new UnionFindFactory<>(algoType, incremental);
+        WCCType defaultAlgoType = WCCType.PARALLEL;
+        WCCType algoType = config.getChecked(CONFIG_ALGO_TYPE, defaultAlgoType, WCCType.class);
+        return new WCCFactory<>(algoType, incremental);
     }
 
     @Override
@@ -207,7 +207,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
             String label,
             String relationship,
             Map<String, Object> config,
-            UnionFindType algoType) {
+            WCCType algoType) {
 
         ProcedureSetup setup = setup(label, relationship, config, algoType);
 
@@ -230,7 +230,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
             String label,
             String relationship,
             Map<String, Object> config,
-            UnionFindType algoType) {
+            WCCType algoType) {
 
         ProcedureSetup setup = setup(label, relationship, config, algoType);
 
@@ -267,7 +267,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
             String label,
             String relationship,
             Map<String, Object> config,
-            UnionFindType algoType) {
+            WCCType algoType) {
         final WriteResultBuilder builder = new WriteResultBuilder(callContext.outputFields());
 
         config.put(CONFIG_ALGO_TYPE, algoType);

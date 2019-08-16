@@ -42,7 +42,7 @@ import java.util.concurrent.RecursiveTask;
  * Implementation based on the idea that DisjointSetStruct can be built using
  * just a partition of the nodes which then can be merged pairwise.
  * <p>
- * Like in {@link UnionFindForkJoin} the resulting DSS of each node-partition
+ * Like in {@link WCCForkJoin} the resulting DSS of each node-partition
  * is merged by the ForkJoin pool while calculating the DSS is done by the
  * ExecutorService.
  * <p>
@@ -50,7 +50,7 @@ import java.util.concurrent.RecursiveTask;
  *
  * @author mknblch
  */
-public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
+public class WCCForkJoinMerge extends WCC<WCCForkJoinMerge> {
 
     private final ExecutorService executor;
     private final AllocationTracker tracker;
@@ -59,7 +59,7 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
     private SequentialDisjointSetStruct disjointSetStruct;
 
     public static MemoryEstimation memoryEstimation(final boolean incremental) {
-        return UnionFind.memoryEstimation(incremental, UnionFindForkJoinMerge.class, ThresholdUnionFindProcess.class);
+        return WCC.memoryEstimation(incremental, WCCForkJoinMerge.class, ThresholdUnionFindProcess.class);
     }
 
     /**
@@ -68,12 +68,12 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
      * @param graph
      * @param executor
      */
-    public UnionFindForkJoinMerge(
+    public WCCForkJoinMerge(
             Graph graph,
             ExecutorService executor,
             int minBatchSize,
             int concurrency,
-            UnionFind.Config algoConfig,
+            WCC.Config algoConfig,
             AllocationTracker tracker) {
         super(graph, algoConfig);
 

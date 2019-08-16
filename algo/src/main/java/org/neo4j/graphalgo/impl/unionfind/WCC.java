@@ -30,11 +30,11 @@ import org.neo4j.graphalgo.core.utils.paged.dss.IncrementalDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.NonInrementalDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.SequentialDisjointSetStruct;
 
-public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> {
+public abstract class WCC<ME extends WCC<ME>> extends Algorithm<ME> {
 
     protected Graph graph;
 
-    protected final UnionFind.Config algoConfig;
+    protected final WCC.Config algoConfig;
 
     public static double defaultWeight(double threshold) {
         return threshold + 1;
@@ -42,7 +42,7 @@ public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> 
 
     static MemoryEstimation memoryEstimation(
             final boolean incremental,
-            Class<? extends UnionFind<?>> unionFindClass,
+            Class<? extends WCC<?>> unionFindClass,
             Class<?> taskClass) {
         return MemoryEstimations.builder(unionFindClass)
                 .startField("computeStep", taskClass)
@@ -59,7 +59,7 @@ public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> 
                 .build();
     }
 
-    protected UnionFind(final Graph graph, final UnionFind.Config algoConfig) {
+    protected WCC(final Graph graph, final WCC.Config algoConfig) {
         this.graph = graph;
         this.algoConfig = algoConfig;
     }

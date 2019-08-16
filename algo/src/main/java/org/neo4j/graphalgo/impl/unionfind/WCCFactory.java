@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.logging.Log;
 
-public class UnionFindFactory<A extends UnionFind<A>> extends AlgorithmFactory<A> {
+public class WCCFactory<A extends WCC<A>> extends AlgorithmFactory<A> {
 
     public static final String CONFIG_ALGO_TYPE = "algoType";
     public static final String CONFIG_THRESHOLD = "threshold";
@@ -35,11 +35,11 @@ public class UnionFindFactory<A extends UnionFind<A>> extends AlgorithmFactory<A
 
     public static final String SEED_TYPE = "seed";
 
-    private final UnionFindType algorithmType;
+    private final WCCType algorithmType;
 
     private final boolean incremental;
 
-    public UnionFindFactory(final UnionFindType algorithmType, final boolean incremental) {
+    public WCCFactory(final WCCType algorithmType, final boolean incremental) {
         this.algorithmType = algorithmType;
         this.incremental = incremental;
     }
@@ -54,12 +54,12 @@ public class UnionFindFactory<A extends UnionFind<A>> extends AlgorithmFactory<A
         int concurrency = configuration.getConcurrency();
         int minBatchSize = configuration.getBatchSize();
 
-        UnionFind.Config algoConfig = new UnionFind.Config(
+        WCC.Config algoConfig = new WCC.Config(
                 graph.availableNodeProperties().contains(SEED_TYPE) ? graph.nodeProperties(SEED_TYPE) : null,
                 configuration.get(CONFIG_THRESHOLD, Double.NaN)
         );
 
-        final UnionFind<?> algo = algorithmType.create(
+        final WCC<?> algo = algorithmType.create(
                 graph,
                 Pools.DEFAULT,
                 minBatchSize,

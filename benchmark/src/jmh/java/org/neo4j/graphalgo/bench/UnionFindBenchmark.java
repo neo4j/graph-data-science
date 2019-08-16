@@ -25,8 +25,8 @@ import org.neo4j.graphalgo.core.loading.NullWeightMap;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.graphalgo.impl.unionfind.UnionFind;
-import org.neo4j.graphalgo.impl.unionfind.UnionFindType;
+import org.neo4j.graphalgo.impl.unionfind.WCC;
+import org.neo4j.graphalgo.impl.unionfind.WCCType;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -70,12 +70,12 @@ public class UnionFindBenchmark {
 
     @Benchmark
     public Object unionFind() {
-        UnionFind.Config algoConfig = new UnionFind.Config(
+        WCC.Config algoConfig = new WCC.Config(
                 new NullWeightMap(-1L),
                 Double.NaN
         );
 
-        UnionFind<?> unionFindAlgo = UnionFindType.PARALLEL.create(
+        WCC<?> unionFindAlgo = WCCType.PARALLEL.create(
                 theGraph,
                 Pools.DEFAULT,
                 (int) (theGraph.nodeCount() / Pools.DEFAULT_CONCURRENCY),

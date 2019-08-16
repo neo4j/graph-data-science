@@ -25,18 +25,18 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.util.concurrent.ExecutorService;
 
-public enum UnionFindType {
+public enum WCCType {
 
     PARALLEL {
         @Override
-        public UnionFind<ParallelUnionFind> create(
+        public WCC<ParallelWCC> create(
                 final Graph graph,
                 final ExecutorService executor,
                 final int minBatchSize,
                 final int concurrency,
-                final UnionFind.Config config,
+                final WCC.Config config,
                 final AllocationTracker tracker) {
-            return new ParallelUnionFind(
+            return new ParallelWCC(
                     graph,
                     executor,
                     minBatchSize,
@@ -47,19 +47,19 @@ public enum UnionFindType {
 
         @Override
         public MemoryEstimation memoryEstimation(final boolean incremental) {
-            return ParallelUnionFind.memoryEstimation(incremental);
+            return ParallelWCC.memoryEstimation(incremental);
         }
     },
     FORK_JOIN {
         @Override
-        public UnionFind<UnionFindForkJoin> create(
+        public WCC<WCCForkJoin> create(
                 final Graph graph,
                 final ExecutorService executor,
                 final int minBatchSize,
                 final int concurrency,
-                final UnionFind.Config config,
+                final WCC.Config config,
                 final AllocationTracker tracker) {
-            return new UnionFindForkJoin(
+            return new WCCForkJoin(
                     graph,
                     minBatchSize,
                     concurrency,
@@ -69,19 +69,19 @@ public enum UnionFindType {
 
         @Override
         public MemoryEstimation memoryEstimation(final boolean incremental) {
-            return UnionFindForkJoin.memoryEstimation(incremental);
+            return WCCForkJoin.memoryEstimation(incremental);
         }
     },
     FJ_MERGE {
         @Override
-        public UnionFind<UnionFindForkJoinMerge> create(
+        public WCC<WCCForkJoinMerge> create(
                 final Graph graph,
                 final ExecutorService executor,
                 final int minBatchSize,
                 final int concurrency,
-                final UnionFind.Config config,
+                final WCC.Config config,
                 final AllocationTracker tracker) {
-            return new UnionFindForkJoinMerge(
+            return new WCCForkJoinMerge(
                     graph,
                     executor,
                     minBatchSize,
@@ -92,16 +92,16 @@ public enum UnionFindType {
 
         @Override
         public MemoryEstimation memoryEstimation(boolean incremental) {
-            return UnionFindForkJoinMerge.memoryEstimation(incremental);
+            return WCCForkJoinMerge.memoryEstimation(incremental);
         }
     };
 
-    public abstract UnionFind<? extends UnionFind<?>> create(
+    public abstract WCC<? extends WCC<?>> create(
             Graph graph,
             ExecutorService executor,
             int minBatchSize,
             int concurrency,
-            final UnionFind.Config config,
+            final WCC.Config config,
             AllocationTracker tracker);
 
     MemoryEstimation memoryEstimation() {

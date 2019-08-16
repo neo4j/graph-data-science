@@ -42,7 +42,7 @@ import java.util.concurrent.ExecutorService;
  * @see HugeAtomicDisjointSetStruct
  * @see <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.56.8354&rep=rep1&type=pdf">the paper</a>
  */
-public class ParallelUnionFind extends UnionFind<ParallelUnionFind> {
+public class ParallelWCC extends WCC<ParallelWCC> {
 
     private final ExecutorService executor;
     private final AllocationTracker tracker;
@@ -52,17 +52,17 @@ public class ParallelUnionFind extends UnionFind<ParallelUnionFind> {
 
     public static MemoryEstimation memoryEstimation(boolean incremental) {
         return MemoryEstimations
-            .builder(ParallelUnionFind.class)
+            .builder(ParallelWCC.class)
             .add("dss", HugeAtomicDisjointSetStruct.memoryEstimation(incremental))
             .build();
     }
 
-    public ParallelUnionFind(
+    public ParallelWCC(
             Graph graph,
             ExecutorService executor,
             int minBatchSize,
             int concurrency,
-            UnionFind.Config algoConfig,
+            WCC.Config algoConfig,
             AllocationTracker tracker) {
         super(graph, algoConfig);
         this.executor = executor;

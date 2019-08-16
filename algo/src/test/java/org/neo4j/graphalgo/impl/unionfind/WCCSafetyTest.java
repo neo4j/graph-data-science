@@ -45,22 +45,22 @@ import java.util.stream.IntStream;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 @Deprecated
-final class UnionFindSafetyTest {
+final class WCCSafetyTest {
 
-    private static final UnionFind.Config ALGO_CONFIG = new UnionFind.Config(
+    private static final WCC.Config ALGO_CONFIG = new WCC.Config(
             new NullWeightMap(-1),
             Double.NaN
     );
 
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
     @ParameterizedTest
-    @EnumSource(UnionFindType.class)
-    void testUnionFindSafetyUnderFailure(UnionFindType unionFindType) {
+    @EnumSource(WCCType.class)
+    void testUnionFindSafetyUnderFailure(WCCType wccType) {
         IllegalStateException error = new IllegalStateException("some error");
         Graph graph = new FlakyGraph(100, 10, new Random(42L), error);
         try {
             UnionFindHelper.run(
-                    unionFindType,
+                    wccType,
                     graph,
                     Pools.DEFAULT,
                     10,

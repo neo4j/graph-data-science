@@ -26,8 +26,8 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.unionfind.UnionFind;
-import org.neo4j.graphalgo.impl.unionfind.ParallelUnionFind;
+import org.neo4j.graphalgo.impl.unionfind.ParallelWCC;
+import org.neo4j.graphalgo.impl.unionfind.WCC;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
@@ -83,7 +83,7 @@ public class ParallelUnionFindBenchmark {
 
     private static File storeDir = new File(GRAPH_DIRECTORY);
 
-    private final UnionFind.Config algoConfig = new UnionFind.Config(
+    private final WCC.Config algoConfig = new WCC.Config(
             new NullWeightMap(-1L),
             Double.NaN
     );
@@ -179,19 +179,19 @@ public class ParallelUnionFindBenchmark {
 
     @Benchmark
     public Object parallelUnionFindQueue_200000() {
-        return new ParallelUnionFind(graph, Pools.DEFAULT, 200_000, 8, algoConfig, AllocationTracker.EMPTY)
+        return new ParallelWCC(graph, Pools.DEFAULT, 200_000, 8, algoConfig, AllocationTracker.EMPTY)
                 .compute();
     }
 
     @Benchmark
     public Object parallelParallelUnionFind_400000() {
-        return new ParallelUnionFind(graph, Pools.DEFAULT, 400_000, 8, algoConfig, AllocationTracker.EMPTY)
+        return new ParallelWCC(graph, Pools.DEFAULT, 400_000, 8, algoConfig, AllocationTracker.EMPTY)
                 .compute();
     }
 
     @Benchmark
     public Object parallelParallelUnionFind_800000() {
-        return new ParallelUnionFind(graph, Pools.DEFAULT, 800_000, 8, algoConfig, AllocationTracker.EMPTY)
+        return new ParallelWCC(graph, Pools.DEFAULT, 800_000, 8, algoConfig, AllocationTracker.EMPTY)
                 .compute();
     }
 

@@ -46,14 +46,14 @@ import java.util.concurrent.RecursiveTask;
  *
  * @author mknblch
  */
-public class UnionFindForkJoin extends UnionFind<UnionFindForkJoin> {
+public class WCCForkJoin extends WCC<WCCForkJoin> {
 
     private final AllocationTracker tracker;
     private final long nodeCount;
     private final long batchSize;
 
     public static MemoryEstimation memoryEstimation(final boolean incremental) {
-        return UnionFind.memoryEstimation(incremental, UnionFindForkJoin.class, ThresholdUnionFindTask.class);
+        return WCC.memoryEstimation(incremental, WCCForkJoin.class, ThresholdUnionFindTask.class);
     }
 
     /**
@@ -61,11 +61,11 @@ public class UnionFindForkJoin extends UnionFind<UnionFindForkJoin> {
      *
      * @param graph
      */
-    public UnionFindForkJoin(
+    public WCCForkJoin(
             Graph graph,
             int minBatchSize,
             int concurrency,
-            UnionFind.Config algoConfig,
+            WCC.Config algoConfig,
             AllocationTracker tracker) {
         super(graph, algoConfig);
 

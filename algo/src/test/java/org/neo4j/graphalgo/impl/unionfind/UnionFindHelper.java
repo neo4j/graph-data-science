@@ -28,15 +28,15 @@ import java.util.concurrent.ExecutorService;
 final class UnionFindHelper {
 
     static DisjointSetStruct run(
-            UnionFindType algorithmType,
+            WCCType algorithmType,
             Graph graph,
             ExecutorService executor,
             int minBatchSize,
             int concurrency,
-            final UnionFind.Config config,
+            final WCC.Config config,
             AllocationTracker tracker) {
 
-        UnionFind<? extends UnionFind> algo = algorithmType.create(
+        WCC<? extends WCC> algo = algorithmType.create(
                 graph,
                 executor,
                 minBatchSize,

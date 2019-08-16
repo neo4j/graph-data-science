@@ -39,13 +39,13 @@ abstract class UnionFindTestBase {
 
     static Stream<Arguments> parameters() {
         return TestSupport.allTypesWithoutCypher().
-                flatMap(graphType -> Arrays.stream(UnionFindType.values())
+                flatMap(graphType -> Arrays.stream(WCCType.values())
                         .map(ufType -> Arguments.of(graphType, ufType)));
     }
 
     abstract int communitySize();
 
-    DisjointSetStruct run(UnionFindType uf, Graph graph, UnionFind.Config config) {
+    DisjointSetStruct run(WCCType uf, Graph graph, WCC.Config config) {
         return UnionFindHelper.run(
                 uf,
                 graph,

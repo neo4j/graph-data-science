@@ -35,7 +35,7 @@ import org.neo4j.graphdb.Transaction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class IncrementalUnionFindTest extends UnionFindTestBase {
+class IncrementaWCCTest extends UnionFindTestBase {
 
     private static final String SEED_PROPERTY = "community";
 
@@ -71,7 +71,7 @@ class IncrementalUnionFindTest extends UnionFindTestBase {
 
     @ParameterizedTest(name = "{0} -- {1}")
     @MethodSource("parameters")
-    void shouldComputeComponentsFromSeedProperty(Class<? extends GraphFactory> graphFactory, UnionFindType unionFindType) {
+    void shouldComputeComponentsFromSeedProperty(Class<? extends GraphFactory> graphFactory, WCCType unionFindType) {
         Graph graph = new GraphLoader(DB)
                 .withExecutorService(Pools.DEFAULT)
                 .withAnyLabel()
@@ -79,7 +79,7 @@ class IncrementalUnionFindTest extends UnionFindTestBase {
                 .withRelationshipType(RELATIONSHIP_TYPE)
                 .load(graphFactory);
 
-        UnionFind.Config config = new UnionFind.Config(
+        WCC.Config config = new WCC.Config(
                 graph.nodeProperties(SEED_PROPERTY),
                 Double.NaN
         );
