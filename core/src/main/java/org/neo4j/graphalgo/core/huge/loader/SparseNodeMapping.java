@@ -71,23 +71,23 @@ public final class SparseNodeMapping {
     }
 
     public long get(long index) {
-        assert index < capacity;
         final int pageIndex = pageIndex(index);
-        long[] page = pages[pageIndex];
-        if (page != null) {
-            final int indexInPage = indexInPage(index);
-            return page[indexInPage];
+        if (pageIndex < pages.length) {
+            long[] page = pages[pageIndex];
+            if (page != null) {
+                return page[indexInPage(index)];
+            }
         }
         return NOT_FOUND;
     }
 
     public boolean contains(long index) {
-        assert index < capacity;
         final int pageIndex = pageIndex(index);
-        long[] page = pages[pageIndex];
-        if (page != null) {
-            final int indexInPage = indexInPage(index);
-            return page[indexInPage] != NOT_FOUND;
+        if (pageIndex < pages.length) {
+            long[] page = pages[pageIndex];
+            if (page != null) {
+                return page[indexInPage(index)] != NOT_FOUND;
+            }
         }
         return false;
     }

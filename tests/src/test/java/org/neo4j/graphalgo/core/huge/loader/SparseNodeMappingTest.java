@@ -124,6 +124,14 @@ public final class SparseNodeMappingTest extends RandomizedTest {
     }
 
     @Test
+    public void shouldNotFailOnGetsThatAreoutOfBounds() {
+        SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(10, AllocationTracker.EMPTY);
+        array.set(between(2, 8), between(42, 1337));
+        assertEquals(-1L, array.build().get(between(100_000_000, 200_000_000)));
+        // doesn't fail - good
+    }
+
+    @Test
     public void shouldNotCreateAnyPagesOnInitialization() throws Throwable {
         AllocationTracker tracker = AllocationTracker.create();
         SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(2 * PS, tracker);
