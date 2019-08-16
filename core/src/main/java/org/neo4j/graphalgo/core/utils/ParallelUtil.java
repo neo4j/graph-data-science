@@ -81,7 +81,7 @@ public final class ParallelUtil {
     /**
      * Executes the given function in parallel on the given {@link BaseStream}, using {@link Pools#FJ_POOL}
      */
-    public static <T extends BaseStream<?, T>> void parallelStreamForeach(T data, Consumer<T> fn) {
+    public static <T extends BaseStream<?, T>> void parallelStreamConsume(T data, Consumer<T> fn) {
         try {
             Pools.FJ_POOL.submit(() -> fn.accept(data.parallel())).get();
         } catch (Exception e) {
