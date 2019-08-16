@@ -84,7 +84,7 @@ public final class ParallelUtilTest extends RandomizedTest {
             assertNotSame(threadPool, commonPool);
 
             return s.reduce(0L, Long::sum);
-        }, pool);
+        });
 
         assertEquals((lastNum + firstNum) * lastNum / 2, actualTotal);
     }
@@ -93,7 +93,7 @@ public final class ParallelUtilTest extends RandomizedTest {
     public void shouldTakeBaseStreams() {
         double[] data = {1.0, 2.5, 3.14};
 
-        double sum = parallelStream(Arrays.stream(data), DoubleStream::sum, Pools.FJ_POOL);
+        double sum = parallelStream(Arrays.stream(data), DoubleStream::sum);
 
         assertThat(sum, equalTo(1.0 + 2.5 + 3.14));
     }

@@ -42,7 +42,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -69,48 +68,22 @@ public final class ParallelUtil {
     private ParallelUtil() {}
 
     /**
-     * Executes the given function in parallel on the given {@link BaseStream}, using the provided thread pool.
-     *
-     * @note ForkJoinPool is required here to avoid .spliterator() calls
-     *         on the stream to steal threads from the common pool.
+     * Executes the given function in parallel on the given {@link BaseStream}, using {@link Pools#FJ_POOL}.
      */
     public static <T extends BaseStream<?, T>, R> R parallelStream(T data, Function<T, R> fn) {
-        return parallelStream(data, fn, Pools.FJ_POOL);
-    }
-
-    /**
-     * Executes the given function in parallel on the given {@link BaseStream}, using the provided thread pool.
-     *
-     * @note ForkJoinPool is required here to avoid .spliterator() calls
-     *         on the stream to steal threads from the common pool.
-     */
-    public static <T extends BaseStream<?, T>, R> R parallelStream(T data, Function<T, R> fn, ForkJoinPool pool) {
         try {
-            return pool.submit(() -> fn.apply(data.parallel())).get();
+            return Pools.FJ_POOL.submit(() -> fn.apply(data.parallel())).get();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     /**
-     * Executes the given function in parallel on the given {@link BaseStream}, using the provided thread pool.
-     *
-     * @note ForkJoinPool is required here to avoid .spliterator() calls
-     *         on the stream to steal threads from the common pool.
+     * Executes the given function in parallel on the given {@link BaseStream}, using {@link Pools#FJ_POOL}
      */
     public static <T extends BaseStream<?, T>> void parallelStreamForeach(T data, Consumer<T> fn) {
-        parallelStreamForeach(data, fn, Pools.FJ_POOL);
-    }
-
-    /**
-     * Executes the given function in parallel on the given {@link BaseStream}, using the provided thread pool.
-     *
-     * @note ForkJoinPool is required here to avoid .spliterator() calls
-     *         on the stream to steal threads from the common pool.
-     */
-    public static <T extends BaseStream<?, T>> void parallelStreamForeach(T data, Consumer<T> fn, ForkJoinPool pool) {
         try {
-            pool.submit(() -> fn.accept(data.parallel())).get();
+            Pools.FJ_POOL.submit(() -> fn.accept(data.parallel())).get();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

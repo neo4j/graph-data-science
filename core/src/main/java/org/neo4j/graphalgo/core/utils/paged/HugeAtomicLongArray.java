@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.utils.paged;
 
 import org.neo4j.graphalgo.core.utils.BitUtil;
-import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.unsafe.impl.internal.dragons.UnsafeUtil;
 
@@ -324,9 +323,9 @@ public abstract class HugeAtomicLongArray {
         }
 
         private static void parallelSetAll(long[] array, IntToLongFunction generator) {
-            parallelStreamForeach(IntStream.range(0, array.length), intStream -> {
-                intStream.forEach(i -> array[i] = generator.applyAsLong(i));
-            }, Pools.FJ_POOL);
+            parallelStreamForeach(
+                    IntStream.range(0, array.length),
+                    intStream -> intStream.forEach(i -> array[i] = generator.applyAsLong(i)));
         }
 
         private static long memoryUsageOfData(long size) {
