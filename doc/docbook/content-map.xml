@@ -78,33 +78,33 @@
             </d:tocentry>
 
             <d:tocentry linkend="experimental-algorithms-similarity"><?dbhtml filename="experimental-algorithms/similarity/index.html"?>
-                <d:tocentry linkend="experimental-algorithms-similarity-jaccard"><?dbhtml filename="experimental-algorithms/similarity-jaccard/index.html"?>
+                <d:tocentry linkend="experimental-algorithms-similarity-jaccard"><?dbhtml filename="experimental-algorithms/jaccard/index.html"?>
                 </d:tocentry>
-                <d:tocentry linkend="experimental-algorithms-similarity-cosine"><?dbhtml filename="experimental-algorithms/similarity-cosine/index.html"?>
+                <d:tocentry linkend="experimental-algorithms-similarity-cosine"><?dbhtml filename="experimental-algorithms/cosine/index.html"?>
                 </d:tocentry>
-                <d:tocentry linkend="experimental-algorithms-similarity-pearson"><?dbhtml filename="experimental-algorithms/similarity-pearson/index.html"?>
+                <d:tocentry linkend="experimental-algorithms-similarity-pearson"><?dbhtml filename="experimental-algorithms/pearson/index.html"?>
                 </d:tocentry>
-                <d:tocentry linkend="experimental-algorithms-similarity-euclidean"><?dbhtml filename="experimental-algorithms/similarity-euclidean/index.html"?>
+                <d:tocentry linkend="experimental-algorithms-similarity-euclidean"><?dbhtml filename="experimental-algorithms/euclidean/index.html"?>
                 </d:tocentry>
-                <d:tocentry linkend="experimental-algorithms-similarity-overlap"><?dbhtml filename="experimental-algorithms/similarity-overlap/index.html"?>
+                <d:tocentry linkend="experimental-algorithms-similarity-overlap"><?dbhtml filename="experimental-algorithms/overlap/index.html"?>
                 </d:tocentry>
             </d:tocentry>
 
             <d:tocentry linkend="experimental-algorithms-linkprediction"><?dbhtml filename="experimental-algorithms/linkprediction/index.html"?>
-                <d:tocentry linkend="experimental-algorithms-linkprediction-adamic-adar"><?dbhtml filename="experimental-algorithms/linkprediction-adamic-adar/index.html"?>
+                <d:tocentry linkend="experimental-algorithms-linkprediction-adamic-adar"><?dbhtml filename="experimental-algorithms/adamic-adar/index.html"?>
                 </d:tocentry>
                 <d:tocentry
-                    linkend="experimental-algorithms-linkprediction-common-neighbors"><?dbhtml filename="experimental-algorithms/linkprediction-common-neighbors/index.html"?>
+                    linkend="experimental-algorithms-linkprediction-common-neighbors"><?dbhtml filename="experimental-algorithms/common-neighbors/index.html"?>
                 </d:tocentry>
                 <d:tocentry
-                    linkend="experimental-algorithms-linkprediction-preferential-attachment"><?dbhtml filename="experimental-algorithms/linkprediction-preferential-attachment/index.html"?>
+                    linkend="experimental-algorithms-linkprediction-preferential-attachment"><?dbhtml filename="experimental-algorithms/preferential-attachment/index.html"?>
                 </d:tocentry>
                 <d:tocentry
-                    linkend="experimental-algorithms-linkprediction-resource-allocation"><?dbhtml filename="experimental-algorithms/linkprediction-resource-allocation/index.html"?>
+                    linkend="experimental-algorithms-linkprediction-resource-allocation"><?dbhtml filename="experimental-algorithms/resource-allocation/index.html"?>
                 </d:tocentry>
-                <d:tocentry linkend="experimental-algorithms-linkprediction-same-community"><?dbhtml filename="experimental-algorithms/linkprediction-same-community/index.html"?>
+                <d:tocentry linkend="experimental-algorithms-linkprediction-same-community"><?dbhtml filename="experimental-algorithms/same-community/index.html"?>
                 </d:tocentry>
-                <d:tocentry linkend="experimental-algorithms-linkprediction-total-neighbors"><?dbhtml filename="experimental-algorithms/linkprediction-total-neighbors/index.html"?>
+                <d:tocentry linkend="experimental-algorithms-linkprediction-total-neighbors"><?dbhtml filename="experimental-algorithms/total-neighbors/index.html"?>
                 </d:tocentry>
             </d:tocentry>
 
