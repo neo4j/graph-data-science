@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.impl.MSColoring;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.*;
@@ -51,10 +52,13 @@ public class MSColoringProc {
     @Context
     public Log log;
 
+    @Context
+    public ProcedureCallContext callContext;
+
     @Procedure(value = "algo.unionFind.mscoloring", mode = Mode.WRITE)
     @Description("CALL algo.unionFind.mscoloring(label:String, relationship:String, " +
-            "{property:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition', concurrency:4}) " +
-            "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
+                 "{property:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition', concurrency:4}) " +
+                 "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
     public Stream<UnionFindProc.WriteResult> unionFind(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
@@ -64,7 +68,7 @@ public class MSColoringProc {
                 .setNodeLabelOrQuery(label)
                 .setRelationshipTypeOrQuery(relationship);
 
-        final UnionFindProc.WriteResultBuilder builder = new UnionFindProc.WriteResultBuilder();
+        final UnionFindProc.WriteResultBuilder builder = new UnionFindProc.WriteResultBuilder(callContext.outputFields());
 
         // loading
         AllocationTracker tracker = AllocationTracker.create();
@@ -95,8 +99,8 @@ public class MSColoringProc {
 
     @Procedure(value = "algo.unionFind.mscoloring.stream")
     @Description("CALL algo.unionFind.mscoloring.stream(label:String, relationship:String, " +
-            "{property:'propertyName', threshold:0.42, defaultValue:1.0, concurrency:4) " +
-            "YIELD nodeId, setId - yields a setId to each node id")
+                 "{property:'propertyName', threshold:0.42, defaultValue:1.0, concurrency:4) " +
+                 "YIELD nodeId, setId - yields a setId to each node id")
     public Stream<MSColoring.Result> unionFindStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
@@ -126,7 +130,7 @@ public class MSColoringProc {
             ProcedureConfiguration config,
             AllocationTracker tracker) {
         return new GraphLoader(api, Pools.DEFAULT)
-                .init(log, config.getNodeLabelOrQuery(),config.getRelationshipOrQuery(),config)
+                .init(log, config.getNodeLabelOrQuery(), config.getRelationshipOrQuery(), config)
                 .withAllocationTracker(tracker)
                 .withOptionalRelationshipWeightsFromProperty(
                         config.getWeightProperty(),

@@ -19,25 +19,49 @@
  */
 package org.neo4j.graphalgo.impl.results;
 
+import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 
+import java.util.Optional;
+import java.util.OptionalLong;
+import java.util.Set;
 import java.util.function.IntUnaryOperator;
 import java.util.function.LongToIntFunction;
 import java.util.function.LongUnaryOperator;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author mknblch
  */
 public abstract class AbstractCommunityResultBuilder<T> {
 
+    public static final Pattern PERCENTILE_FIELD_REGEXP = Pattern.compile("^p\\d{1,3}$");
+    public static final Pattern COMMUNITY_COUNT_REGEXP = Pattern.compile("^(community|set)Count$");
     protected long loadDuration = -1;
     protected long evalDuration = -1;
     protected long writeDuration = -1;
     protected boolean write = false;
+    protected Set<String> returnFields;
+    protected boolean buildHistogram;
+    protected boolean buildCommunityCount;
+
+    protected AbstractCommunityResultBuilder(Set<String> returnFields) {
+        this.returnFields = returnFields;
+        this.buildHistogram = returnFields.stream().anyMatch(PERCENTILE_FIELD_REGEXP.asPredicate());
+        this.buildCommunityCount = buildHistogram || returnFields
+                .stream()
+                .anyMatch(COMMUNITY_COUNT_REGEXP.asPredicate());
+    }
+
+    protected AbstractCommunityResultBuilder(Stream<String> returnFields) {
+        this(returnFields.collect(Collectors.toSet()));
+    }
 
     public void setLoadDuration(long loadDuration) {
         this.loadDuration = loadDuration;
@@ -126,33 +150,23 @@ public abstract class AbstractCommunityResultBuilder<T> {
     }
 
     public T buildfromKnownSizes(int nodeCount, IntUnaryOperator sizeForNode) {
-        final ProgressTimer timer = ProgressTimer.start();
-        final Histogram histogram = new Histogram(5);
-        for (int nodeId = 0; nodeId < nodeCount; nodeId++) {
-            final int communitySize = sizeForNode.applyAsInt(nodeId);
-            histogram.recordValue(communitySize);
-        }
-
-        timer.stop();
-
-        return build(
-                loadDuration,
-                evalDuration,
-                writeDuration,
-                timer.getDuration(),
+        return buildfromKnownLongSizes(
                 nodeCount,
-                nodeCount,
-                histogram,
-                write
-        );
+                (nodeId) -> sizeForNode.applyAsInt(Math.toIntExact(nodeId)));
     }
 
     public T buildfromKnownLongSizes(long nodeCount, LongToIntFunction sizeForNode) {
         final ProgressTimer timer = ProgressTimer.start();
-        final Histogram histogram = new Histogram(5);
-        for (long nodeId = 0L; nodeId < nodeCount; nodeId++) {
-            final int communitySize = sizeForNode.applyAsInt(nodeId);
-            histogram.recordValue(communitySize);
+
+        Optional<Histogram> maybeHistorgram = Optional.empty();
+        if (buildHistogram) {
+            final Histogram histogram = new Histogram(5);
+            for (long nodeId = 0L; nodeId < nodeCount; nodeId++) {
+                final int communitySize = sizeForNode.applyAsInt(nodeId);
+                histogram.recordValue(communitySize);
+            }
+
+            maybeHistorgram = Optional.of(histogram);
         }
 
         timer.stop();
@@ -163,8 +177,8 @@ public abstract class AbstractCommunityResultBuilder<T> {
                 writeDuration,
                 timer.getDuration(),
                 nodeCount,
-                nodeCount,
-                histogram,
+                OptionalLong.of(nodeCount),
+                maybeHistorgram,
                 write
         );
     }
@@ -189,19 +203,28 @@ public abstract class AbstractCommunityResultBuilder<T> {
             AllocationTracker tracker,
             long nodeCount,
             LongUnaryOperator fun) {
-        final HugeLongLongMap communitySizeMap = new HugeLongLongMap(expectedNumberOfCommunities, tracker);
+
         final ProgressTimer timer = ProgressTimer.start();
-        for (long nodeId = 0L; nodeId < nodeCount; nodeId++) {
-            final long communityId = fun.applyAsLong(nodeId);
-            communitySizeMap.addTo(communityId, 1L);
+
+        OptionalLong maybeCommunityCount = OptionalLong.empty();
+        Optional<Histogram> maybeHistogram = Optional.empty();
+
+        if (buildCommunityCount) {
+            HugeLongLongMap communitySizeMap = new HugeLongLongMap(expectedNumberOfCommunities, tracker);
+            for (long nodeId = 0L; nodeId < nodeCount; nodeId++) {
+                final long communityId = fun.applyAsLong(nodeId);
+                communitySizeMap.addTo(communityId, 1L);
+            }
+
+            if (buildHistogram) {
+                maybeHistogram = Optional.of(buildFrom(communitySizeMap));
+            }
+
+            maybeCommunityCount = OptionalLong.of(communitySizeMap.size());
+            communitySizeMap.release();
         }
 
-        Histogram histogram = CommunityHistogram.buildFrom(communitySizeMap);
-
         timer.stop();
-
-        long communityCount = communitySizeMap.size();
-        communitySizeMap.release();
 
         return build(
                 loadDuration,
@@ -209,8 +232,8 @@ public abstract class AbstractCommunityResultBuilder<T> {
                 writeDuration,
                 timer.getDuration(),
                 nodeCount,
-                communityCount,
-                histogram,
+                maybeCommunityCount,
+                maybeHistogram,
                 write
         );
     }
@@ -221,8 +244,19 @@ public abstract class AbstractCommunityResultBuilder<T> {
             long writeMillis,
             long postProcessingMillis,
             long nodeCount,
-            long communityCount,
-            Histogram communityHistogram,
+            OptionalLong maybeCommunityCount,
+            Optional<Histogram> maybeCommunityHistogram,
             boolean write);
+
+
+    static Histogram buildFrom(HugeLongLongMap communitySizeMap) {
+        final Histogram histogram = new Histogram(5);
+
+        for (LongLongCursor cursor : communitySizeMap) {
+            histogram.recordValue(cursor.value);
+        }
+
+        return histogram;
+    }
 
 }

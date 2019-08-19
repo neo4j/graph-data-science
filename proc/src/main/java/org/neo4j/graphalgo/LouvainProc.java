@@ -41,6 +41,9 @@ import org.neo4j.procedure.Procedure;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalLong;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -72,7 +75,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        final Builder builder = new Builder();
+        final Builder builder = new Builder(callContext.outputFields());
         AllocationTracker tracker = AllocationTracker.create();
         ProcedureConfiguration configuration = newConfig(label, relationship, config);
         final Graph graph = this.loadGraph(configuration, tracker, builder);
@@ -123,7 +126,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        final Builder builder = new Builder();
+        final Builder builder = new Builder(callContext.outputFields());
         AllocationTracker tracker = AllocationTracker.create();
         ProcedureConfiguration configuration = newConfig(label, relationship, config);
         final Graph graph = this.loadGraph(configuration, tracker, builder);
@@ -325,6 +328,14 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
         private boolean includeIntermediateCommunities;
         private boolean randomNeighbor = false;
 
+        protected Builder(Set<String> returnFields) {
+            super(returnFields);
+        }
+
+        protected Builder(Stream<String> returnFields) {
+            super(returnFields);
+        }
+
         public Builder withWriteProperty(String writeProperty) {
             this.writeProperty = writeProperty;
             return this;
@@ -347,8 +358,8 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
                 long writeMillis,
                 long postProcessingMillis,
                 long nodeCount,
-                long communityCount,
-                Histogram communityHistogram,
+                OptionalLong maybeCommunityCount,
+                Optional<Histogram> maybeCommunityHistogram,
                 boolean write) {
             return new LouvainResult(
                     loadMillis,
@@ -356,17 +367,17 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
                     postProcessingMillis,
                     writeMillis,
                     nodeCount,
-                    communityCount,
-                    communityHistogram.getValueAtPercentile(100),
-                    communityHistogram.getValueAtPercentile(99),
-                    communityHistogram.getValueAtPercentile(95),
-                    communityHistogram.getValueAtPercentile(90),
-                    communityHistogram.getValueAtPercentile(75),
-                    communityHistogram.getValueAtPercentile(50),
-                    communityHistogram.getValueAtPercentile(25),
-                    communityHistogram.getValueAtPercentile(10),
-                    communityHistogram.getValueAtPercentile(5),
-                    communityHistogram.getValueAtPercentile(1),
+                    maybeCommunityCount.orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(100)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(99)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(95)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(90)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(75)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(50)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(25)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(10)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(5)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(1)).orElse(-1L),
                     iterations,
                     modularities,
                     finalModularity,

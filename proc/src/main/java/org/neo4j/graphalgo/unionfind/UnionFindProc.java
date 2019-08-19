@@ -47,6 +47,9 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.OptionalLong;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -265,7 +268,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
             String relationship,
             Map<String, Object> config,
             UnionFindType algoType) {
-        final WriteResultBuilder builder = new WriteResultBuilder();
+        final WriteResultBuilder builder = new WriteResultBuilder(callContext.outputFields());
 
         config.put(CONFIG_ALGO_TYPE, algoType);
         ProcedureConfiguration configuration = newConfig(label, relationship, config);
@@ -486,6 +489,14 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
         private String partitionProperty;
         private String writeProperty;
 
+        WriteResultBuilder(Set<String> returnFields) {
+            super(returnFields);
+        }
+
+        WriteResultBuilder(Stream<String> returnFields) {
+            super(returnFields);
+        }
+
         @Override
         protected WriteResult build(
                 long loadMillis,
@@ -493,26 +504,28 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
                 long writeMillis,
                 long postProcessingMillis,
                 long nodeCount,
-                long communityCount,
-                Histogram communityHistogram,
+                OptionalLong maybeCommunityCount,
+                Optional<Histogram> maybeCommunityHistogram,
                 boolean write) {
+
+
             return new WriteResult(
                     loadMillis,
                     computeMillis,
                     postProcessingMillis,
                     writeMillis,
                     nodeCount,
-                    communityCount,
-                    communityHistogram.getValueAtPercentile(100),
-                    communityHistogram.getValueAtPercentile(99),
-                    communityHistogram.getValueAtPercentile(95),
-                    communityHistogram.getValueAtPercentile(90),
-                    communityHistogram.getValueAtPercentile(75),
-                    communityHistogram.getValueAtPercentile(50),
-                    communityHistogram.getValueAtPercentile(25),
-                    communityHistogram.getValueAtPercentile(10),
-                    communityHistogram.getValueAtPercentile(5),
-                    communityHistogram.getValueAtPercentile(1),
+                    maybeCommunityCount.orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(100)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(99)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(95)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(90)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(75)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(50)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(25)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(10)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(5)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(1)).orElse(-1L),
                     write,
                     partitionProperty,
                     writeProperty

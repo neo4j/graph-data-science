@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.AbstractResultBuilder;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
@@ -45,6 +46,9 @@ public abstract class BaseProc {
 
     @Context
     public KernelTransaction transaction;
+
+    @Context
+    public ProcedureCallContext callContext;
 
     protected abstract GraphLoader configureLoader(
             GraphLoader loader,
