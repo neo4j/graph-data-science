@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 
-public abstract class LouvainTestBase {
+abstract class LouvainTestBase {
 
     static final Louvain.Config DEFAULT_CONFIG = new Louvain.Config(10, 10, false);
 
@@ -54,7 +54,7 @@ public abstract class LouvainTestBase {
         );
     }
 
-    protected Map<String, Integer> nameMap = new HashMap<>();
+    Map<String, Integer> nameMap = new HashMap<>();
 
     @BeforeEach
     void setupGraphDb() {

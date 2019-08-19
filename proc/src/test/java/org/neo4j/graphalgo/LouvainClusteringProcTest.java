@@ -23,10 +23,11 @@ import com.carrotsearch.hppc.IntIntScatterMap;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
+import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
@@ -38,8 +39,10 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -49,25 +52,28 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *  | X |     | X |   (z)
  * (c)-(d)   (g)-(h)
  */
-public class LouvainClusteringProcTest extends ProcTestBase {
+class LouvainClusteringProcTest extends ProcTestBase {
 
     private static final String[] NODES = {"a", "b", "c", "d", "e", "f", "g", "h", "z"};
     private static final int[] NODE_CLUSTER_ID = {0, 0, 0, 0, 1, 1, 1, 1, 2};
 
     @BeforeAll
-    public static void setupGraph() throws KernelException {
+    static void setupGraph() throws KernelException {
 
         DB = TestDatabaseCreator.createTestDatabase();
 
-        final String cypher = "CREATE " +
+        final String cypher =
+                "CREATE " +
                 "  (a:Node {name: 'a', c: 1})" +
                 ", (c:Node {name: 'c', c: 1})" + // shuffled
                 ", (b:Node {name: 'b', c: 1})" +
                 ", (d:Node {name: 'd', c: 1})" +
+
                 ", (e:Node {name: 'e', c: 1})" +
                 ", (g:Node {name: 'g', c: 1})" +
                 ", (f:Node {name: 'f', c: 1})" +
                 ", (h:Node {name: 'h', c: 1})" +
+
                 ", (z:Node {name: 'z', c: 1})" + // assign impossible community to outstanding node
 
                 ", (a)-[:TYPE {weight: 0.5}]->(b)" +
@@ -83,7 +89,8 @@ public class LouvainClusteringProcTest extends ProcTestBase {
                 ", (f)-[:TYPE]->(h)" +
                 ", (f)-[:TYPE]->(g)" +
                 ", (g)-[:TYPE]->(h)" +
-                ", (b)-[:TYPE]->(e)";
+
+                ", (b)-[:TYPE {weight: 42}]->(e)";
 
         Procedures procedures = DB.getDependencyResolver().resolveDependency(Procedures.class);
         procedures.registerProcedure(LouvainProc.class);
@@ -92,14 +99,13 @@ public class LouvainClusteringProcTest extends ProcTestBase {
     }
 
     @BeforeEach
-    public void clearCommunities() {
-        String cypher  ="MATCH (n) REMOVE n.communities REMOVE n.community";
+    void clearCommunities() {
+        String cypher = "MATCH (n) REMOVE n.communities REMOVE n.community";
         DB.execute(cypher);
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void test(String graphImpl) {
+    @AllGraphNamesTest
+    void test(String graphImpl) {
         String query = "CALL algo.louvain(" +
                        "    '', '', {" +
                        "        concurrency: 1, graph: $graph" +
@@ -123,9 +129,8 @@ public class LouvainClusteringProcTest extends ProcTestBase {
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void testInnerIterations(String graphImpl) {
+    @AllGraphNamesTest
+    void testInnerIterations(String graphImpl) {
         String query = "CALL algo.louvain(" +
                        "    '', '', {" +
                        "        concurrency: 1, innerIterations: 100, graph: $graph" +
@@ -149,9 +154,8 @@ public class LouvainClusteringProcTest extends ProcTestBase {
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void testRandomNeighbor(String graphImpl) {
+    @AllGraphNamesTest
+    void testRandomNeighbor(String graphImpl) {
         String query = "CALL algo.louvain(" +
                        "    '', '', {" +
                        "        concurrency: 1, randomNeighbor: true, graph: $graph" +
@@ -175,9 +179,8 @@ public class LouvainClusteringProcTest extends ProcTestBase {
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void testStream(String graphImpl) {
+    @AllGraphNamesTest
+    void testStream(String graphImpl) {
         String query = "CALL algo.louvain.stream(" +
                        "    '', '', {" +
                        "        concurrency: 1, innerIterations: 10, randomNeighbor: false, graph: $graph" +
@@ -193,9 +196,8 @@ public class LouvainClusteringProcTest extends ProcTestBase {
         assertEquals(3, testMap.size());
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void testPredefinedCommunities(String graphImpl) {
+    @AllGraphNamesTest
+    void testPredefinedCommunities(String graphImpl) {
         Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
         String query = "CALL algo.louvain.stream(" +
                        "    '', '', {" +
@@ -206,15 +208,32 @@ public class LouvainClusteringProcTest extends ProcTestBase {
         runQuery(query, MapUtil.map("graph", graphImpl),
                 row -> {
                     long community = (long) row.get("community");
+                    assertEquals(0L, community);
                     testMap.addTo((int) community, 1);
                 }
         );
         assertEquals(1, testMap.size());
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void testStreamNoIntermediateCommunitiesByDefault(String graphImpl) {
+    @AllGraphNamesTest
+    void throwsIfPredefinedCommunityPropertyDoesNotExist(String graphImpl) {
+        Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
+        String query = "CALL algo.louvain.stream(" +
+                       "    '', '', {" +
+                       "        concurrency: 1, communityProperty: 'does_not_exist', graph: $graph" +
+                       "    }" +
+                       ") YIELD nodeId, community, communities";
+        QueryExecutionException exception = assertThrows(QueryExecutionException.class, () -> {
+            runQuery(query, MapUtil.map("graph", graphImpl),
+                    row -> {}
+            );
+        });
+        Throwable rootCause = ExceptionUtil.rootCause(exception);
+        assertEquals("Node property not found: 'does_not_exist'", rootCause.getMessage());
+    }
+
+    @AllGraphNamesTest
+    void testStreamNoIntermediateCommunitiesByDefault(String graphImpl) {
         String query = "CALL algo.louvain.stream(" +
                        "    '', '', {" +
                        "        concurrency: 1, communityProperty: 'c', graph: $graph" +
@@ -228,9 +247,8 @@ public class LouvainClusteringProcTest extends ProcTestBase {
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void testStreamIncludingIntermediateCommunities(String graphImpl) {
+    @AllGraphNamesTest
+    void testStreamIncludingIntermediateCommunities(String graphImpl) {
         String query = "CALL algo.louvain.stream(" +
                        "    '', '', {" +
                        "        concurrency: 1, includeIntermediateCommunities: true, graph: $graph" +
@@ -246,9 +264,8 @@ public class LouvainClusteringProcTest extends ProcTestBase {
         assertEquals(3, testMap.size());
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void testWrite(String graphImpl) {
+    @AllGraphNamesTest
+    void testWrite(String graphImpl) {
         String query = "CALL algo.louvain(" +
                        "    '', '', {" +
                        "        concurrency: 1, graph: $graph" +
@@ -267,9 +284,8 @@ public class LouvainClusteringProcTest extends ProcTestBase {
         assertEquals(3, testMap.size());
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void testWriteIncludingIntermediateCommunities(String graphImpl) {
+    @AllGraphNamesTest
+    void testWriteIncludingIntermediateCommunities(String graphImpl) {
         String query = "CALL algo.louvain(" +
                        "    '', '', {" +
                        "        concurrency: 1, includeIntermediateCommunities: true, graph: $graph" +
@@ -289,9 +305,8 @@ public class LouvainClusteringProcTest extends ProcTestBase {
         assertEquals(3, testMap.size());
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void testWriteNoIntermediateCommunitiesByDefault(String graphImpl) {
+    @AllGraphNamesTest
+    void testWriteNoIntermediateCommunitiesByDefault(String graphImpl) {
         String query = "CALL algo.louvain(" +
                        "    '', '', {" +
                        "        concurrency: 1, graph: $graph" +
@@ -312,9 +327,8 @@ public class LouvainClusteringProcTest extends ProcTestBase {
         assertEquals(9, testInteger.get());
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void testWithLabelRel(String graphImpl) {
+    @AllGraphNamesTest
+    void testWithLabelRel(String graphImpl) {
         String query = "CALL algo.louvain(" +
                        "    'Node', 'TYPE', {" +
                        "        concurrency: 1, graph: $graph" +
@@ -340,9 +354,8 @@ public class LouvainClusteringProcTest extends ProcTestBase {
         assertNodeSets();
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void testWithWeight(String graphImpl) {
+    @AllGraphNamesTest
+    void testWithWeight(String graphImpl) {
         String query = "CALL algo.louvain(" +
                        "    'Node', 'TYPE', {" +
                        "        weightProperty: 'weight', defaultValue: 1.0, concurrency: 1, graph: $graph" +
@@ -357,7 +370,7 @@ public class LouvainClusteringProcTest extends ProcTestBase {
                     long computeMillis = row.getNumber("computeMillis").longValue();
                     long writeMillis = row.getNumber("writeMillis").longValue();
 
-                    assertEquals(3, communityCount);
+                    assertEquals(4, communityCount);
                     assertEquals(9, nodes, "invalid node count");
                     assertTrue(loadMillis >= 0, "invalid loadTime");
                     assertTrue(writeMillis >= 0, "invalid writeTime");
@@ -365,12 +378,35 @@ public class LouvainClusteringProcTest extends ProcTestBase {
                 }
         );
 
-        assertNodeSets();
+        int[] expectedClusterIds = new int[]{0, 1, 0, 0, 1, 2, 2, 2, 3};
+        int[] actualClusterIds = new int[NODES.length];
+        for (int i = 0; i < NODES.length; i++) {
+            String node = NODES[i];
+            int clusterId = getClusterId(node);
+            actualClusterIds[i] = clusterId;
+        }
+        assertArrayEquals(expectedClusterIds, actualClusterIds);
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void shouldAllowHeavyGraph(String graphImpl) {
+    @AllGraphNamesTest
+    void throwsIfWeightPropertyDoesNotExist(String graphImpl) {
+        Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
+        String query = "CALL algo.louvain.stream(" +
+                       "    '', '', {" +
+                       "        weightProperty: 'does_not_exist', graph: $graph" +
+                       "    }" +
+                       ") YIELD nodeId, community, communities";
+        QueryExecutionException exception = assertThrows(QueryExecutionException.class, () -> {
+            runQuery(query, MapUtil.map("graph", graphImpl),
+                    row -> {}
+            );
+        });
+        Throwable rootCause = ExceptionUtil.rootCause(exception);
+        assertEquals("Relationship property not found: 'does_not_exist'", rootCause.getMessage());
+    }
+
+    @AllGraphNamesTest
+    void shouldAllowHeavyGraph(String graphImpl) {
         String query = "CALL algo.louvain(" +
                        "    '', '', {" +
                        "        graph: 'heavy'" +
@@ -383,9 +419,8 @@ public class LouvainClusteringProcTest extends ProcTestBase {
         });
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void shouldAllowHugeGraph(String graphImpl) {
+    @AllGraphNamesTest
+    void shouldAllowHugeGraph(String graphImpl) {
         String query = "CALL algo.louvain(" +
                        "    '', '', {" +
                        "        graph: 'huge'" +
@@ -398,9 +433,8 @@ public class LouvainClusteringProcTest extends ProcTestBase {
         });
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void shouldRunWithSaturatedThreadPool(String graphImpl) {
+    @AllGraphNamesTest
+    void shouldRunWithSaturatedThreadPool(String graphImpl) {
         // ensure that we don't drop task that can't be scheduled while executing the algorithm.
 
         // load graph first to isolate failing behavior to the actual algorithm execution.
@@ -434,9 +468,8 @@ public class LouvainClusteringProcTest extends ProcTestBase {
         }
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void shouldAllowCypherGraph(String graphImpl) {
+    @AllGraphNamesTest
+    void shouldAllowCypherGraph(String graphImpl) {
         String query = "CALL algo.louvain(" +
                        "    'MATCH (n) RETURN id(n) as id'," +
                        "    'MATCH (s)-->(t) RETURN id(s) as source, id(t) as target'," +

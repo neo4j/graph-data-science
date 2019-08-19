@@ -21,9 +21,10 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
+import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphdb.Label;
+import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -33,14 +34,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class PageRankProcTest extends ProcTestBase {
+class PageRankProcTest extends ProcTestBase {
 
     private static Map<Long, Double> expected = new HashMap<>();
     private static Map<Long, Double> weightedExpected = new HashMap<>();
 
-    private static final String DB_CYPHER = "CREATE " +
+    private static final String DB_CYPHER =
+            "CREATE " +
             " (a:Label1 {name: 'a'})" +
             ",(b:Label1 {name: 'b'})" +
             ",(c:Label1 {name: 'c'})" +
@@ -80,12 +83,12 @@ public class PageRankProcTest extends ProcTestBase {
             ",(k)-[:TYPE2 {foo: 4.2,  equalWeight: 1.0}]->(e)";
 
     @AfterAll
-    public static void tearDown() {
+    static void tearDown() {
         if (DB != null) DB.shutdown();
     }
 
     @BeforeAll
-    public static void setup() throws KernelException {
+    static void setup() throws KernelException {
         DB = TestDatabaseCreator.createTestDatabase();
         try (Transaction tx = DB.beginTx()) {
             DB.execute(DB_CYPHER).close();
@@ -123,9 +126,8 @@ public class PageRankProcTest extends ProcTestBase {
         }
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void testPageRankStream(String graphImpl) {
+    @AllGraphNamesTest
+    void testPageRankStream(String graphImpl) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.pageRank.stream(" +
                        "    'Label1', 'TYPE1', {" +
@@ -138,9 +140,8 @@ public class PageRankProcTest extends ProcTestBase {
         assertMapEquals(expected, actual);
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void testWeightedPageRankStream(String graphImpl) {
+    @AllGraphNamesTest
+    void testWeightedPageRankStream(String graphImpl) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.pageRank.stream(" +
                        "    'Label1', 'TYPE1', {" +
@@ -153,9 +154,23 @@ public class PageRankProcTest extends ProcTestBase {
         assertMapEquals(weightedExpected, actual);
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void testWeightedPageRankWithCachedWeightsStream(String graphImpl) {
+    @AllGraphNamesTest
+    void testWeightedPageRankStreamThrowsIfWeightPropertyDoesNotExist(String graphImpl) {
+        final Map<Long, Double> actual = new HashMap<>();
+        String query = "CALL algo.pageRank.stream(" +
+                       "    'Label1', 'TYPE1', {" +
+                       "        graph: $graph, weightProperty: 'does_not_exist'" +
+                       "    }" +
+                       ") YIELD nodeId, score";
+        QueryExecutionException exception = assertThrows(QueryExecutionException.class, () -> {
+            runQuery(query, MapUtil.map("graph", graphImpl), row -> {});
+        });
+        Throwable rootCause = ExceptionUtil.rootCause(exception);
+        assertEquals("Relationship property not found: 'does_not_exist'", rootCause.getMessage());
+    }
+
+    @AllGraphNamesTest
+    void testWeightedPageRankWithCachedWeightsStream(String graphImpl) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.pageRank.stream(" +
                        "    'Label1', 'TYPE1', {" +
@@ -168,9 +183,8 @@ public class PageRankProcTest extends ProcTestBase {
         assertMapEquals(weightedExpected, actual);
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void testWeightedPageRankWithAllRelationshipsEqualStream(String graphImpl) {
+    @AllGraphNamesTest
+    void testWeightedPageRankWithAllRelationshipsEqualStream(String graphImpl) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.pageRank.stream(" +
                        "    'Label1', 'TYPE1', {" +
@@ -184,9 +198,8 @@ public class PageRankProcTest extends ProcTestBase {
     }
 
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void testPageRankWriteBack(String graphImpl) {
+    @AllGraphNamesTest
+    void testPageRankWriteBack(String graphImpl) {
         String query = "CALL algo.pageRank(" +
                        "    'Label1', 'TYPE1', {" +
                        "        graph: $graph" +
@@ -202,9 +215,8 @@ public class PageRankProcTest extends ProcTestBase {
         assertResult("pagerank", expected);
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void testWeightedPageRankWriteBack(String graphImpl) {
+    @AllGraphNamesTest
+    void testWeightedPageRankWriteBack(String graphImpl) {
         String query = "CALL algo.pageRank(" +
                        "    'Label1', 'TYPE1', {" +
                        "        graph: $graph, weightProperty: 'foo'" +
@@ -220,9 +232,8 @@ public class PageRankProcTest extends ProcTestBase {
         assertResult("pagerank", weightedExpected);
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void testPageRankWriteBackUnderDifferentProperty(String graphImpl) {
+    @AllGraphNamesTest
+    void testPageRankWriteBackUnderDifferentProperty(String graphImpl) {
         String query = "CALL algo.pageRank(" +
                        "    'Label1', 'TYPE1', {" +
                        "        writeProperty: 'foobar', graph: $graph" +
@@ -238,9 +249,8 @@ public class PageRankProcTest extends ProcTestBase {
         assertResult("foobar", expected);
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void testPageRankParallelWriteBack(String graphImpl) {
+    @AllGraphNamesTest
+    void testPageRankParallelWriteBack(String graphImpl) {
         String query = "CALL algo.pageRank(" +
                        "    'Label1', 'TYPE1', {" +
                        "        batchSize: 3, write: true, graph: $graph" +
@@ -252,9 +262,8 @@ public class PageRankProcTest extends ProcTestBase {
         assertResult("pagerank", expected);
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void testPageRankParallelExecution(String graphImpl) {
+    @AllGraphNamesTest
+    void testPageRankParallelExecution(String graphImpl) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.pageRank.stream(" +
                        "    'Label1', 'TYPE1', {" +
@@ -270,9 +279,8 @@ public class PageRankProcTest extends ProcTestBase {
         assertMapEquals(expected, actual);
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void testPageRankWithToleranceParam(String graphImpl) {
+    @AllGraphNamesTest
+    void testPageRankWithToleranceParam(String graphImpl) {
         String query;
         query = "CALL algo.pageRank(" +
                 "    'Label1', 'TYPE1', {" +
@@ -287,7 +295,7 @@ public class PageRankProcTest extends ProcTestBase {
                 "    }" +
                 ") YIELD nodes, iterations";
         runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> assertEquals(1L, (long)row.getNumber("iterations")));
+                row -> assertEquals(1L, (long) row.getNumber("iterations")));
         query = "CALL algo.pageRank(" +
                 "    'Label1', 'TYPE1', {" +
                 "        tolerance: 0.20010237991809848, batchSize: 3, graph: $graph" +

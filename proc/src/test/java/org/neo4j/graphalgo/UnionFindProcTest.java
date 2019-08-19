@@ -24,7 +24,9 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
+import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
+import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -37,17 +39,19 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UnionFindProcTest extends ProcTestBase {
 
     @BeforeAll
-    public static void setup() throws KernelException {
-        String createGraph = "CREATE" +
-                " (nA:Label {nodeId: 0, seedId: 42})" +
-                ",(nB:Label {nodeId: 1, seedId: 42})" +
-                ",(nC:Label {nodeId: 2, seedId: 42})" +
-                ",(nD:Label {nodeId: 3, seedId: 42})" +
+    static void setup() throws KernelException {
+        String createGraph =
+                "CREATE" +
+                " (nA:Label {nodeId: 0, seed: 42})" +
+                ",(nB:Label {nodeId: 1, seed: 42})" +
+                ",(nC:Label {nodeId: 2, seed: 42})" +
+                ",(nD:Label {nodeId: 3, seed: 42})" +
                 ",(nE {nodeId: 4})" +
                 ",(nF {nodeId: 5})" +
                 ",(nG {nodeId: 6})" +
@@ -78,12 +82,12 @@ public class UnionFindProcTest extends ProcTestBase {
     }
 
     @AfterAll
-    public static void tearDown() {
+    static void tearDown() {
         if (DB != null) DB.shutdown();
     }
 
     @AllGraphNamesTest
-    public void testUnionFind(String graphImpl) {
+    void testUnionFind(String graphImpl) {
         String query = "CALL algo.unionFind(" +
                        "    '', '', {" +
                        "        graph: $graph" +
@@ -95,10 +99,28 @@ public class UnionFindProcTest extends ProcTestBase {
                     assertEquals(3L, row.getNumber("setCount"));
                 }
         );
+
+        runQuery(
+                "MATCH (n) RETURN n.partition AS partition",
+                row -> assertTrue(row.getNumber("partition").longValue() < 42)
+        );
+
+        runQuery(
+                "MATCH (n) RETURN n.nodeId AS nodeId, n.partition AS partition",
+                row -> {
+                    final long nodeId = row.getNumber("nodeId").longValue();
+                    final long partitionId = row.getNumber("partition").longValue();
+                    if (nodeId >= 0 && nodeId <= 6) {
+                        assertTrue(partitionId >= 0 && partitionId <= 6);
+                    } else {
+                        assertTrue(partitionId > 6 && partitionId < 42);
+                    }
+                }
+        );
     }
 
     @AllGraphNamesTest
-    public void testUnionFindWithLabel(String graphImpl) {
+    void testUnionFindWithLabel(String graphImpl) {
         String query = "CALL algo.unionFind(" +
                        "    'Label', '', {" +
                        "        graph: $graph" +
@@ -113,12 +135,12 @@ public class UnionFindProcTest extends ProcTestBase {
     }
 
     @AllGraphNamesTest
-    public void testUnionFindWithSeed(String graphImpl) {
+    void testUnionFindWithSeed(String graphImpl) {
         Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
 
         String query = "CALL algo.unionFind(" +
                        "    '', '', {" +
-                       "        graph: $graph, seedProperty: 'seedId'" +
+                       "        graph: $graph, seedProperty: 'seed'" +
                        "    }" +
                        ") YIELD setCount, communityCount";
         runQuery(query, MapUtil.map("graph", graphImpl),
@@ -128,11 +150,13 @@ public class UnionFindProcTest extends ProcTestBase {
                 }
         );
 
-        runQuery("MATCH (n) RETURN n.partition AS partition",
+        runQuery(
+                "MATCH (n) RETURN n.partition AS partition",
                 row -> assertTrue(row.getNumber("partition").longValue() >= 42)
         );
 
-        runQuery("MATCH (n) RETURN n.nodeId AS nodeId, n.partition AS partition",
+        runQuery(
+                "MATCH (n) RETURN n.nodeId AS nodeId, n.partition AS partition",
                 row -> {
                     final long nodeId = row.getNumber("nodeId").longValue();
                     final long partitionId = row.getNumber("partition").longValue();
@@ -146,12 +170,29 @@ public class UnionFindProcTest extends ProcTestBase {
     }
 
     @AllGraphNamesTest
-    public void testUnionFindReadAndWriteSeed(String graphImpl) {
+    void testUnionFindThrowsExceptionWhenInitialSeedDoesNotExists(String graphImpl) {
         Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
 
         String query = "CALL algo.unionFind(" +
                        "    '', '', {" +
-                       "        graph: $graph, seedProperty: 'seedId', writeProperty: 'seedId'" +
+                       "        graph: $graph, seedProperty: 'does_not_exist'" +
+                       "    }" +
+                       ") YIELD setCount, communityCount";
+
+        QueryExecutionException exception = assertThrows(QueryExecutionException.class, () -> {
+            runQuery(query, MapUtil.map("graph", graphImpl), row -> {});
+        });
+        Throwable rootCause = ExceptionUtil.rootCause(exception);
+        assertEquals("Node property not found: 'does_not_exist'", rootCause.getMessage());
+    }
+
+    @AllGraphNamesTest
+    void testUnionFindReadAndWriteSeed(String graphImpl) {
+        Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
+
+        String query = "CALL algo.unionFind(" +
+                       "    '', '', {" +
+                       "        graph: $graph, seedProperty: 'seed', writeProperty: 'seed'" +
                        "    }" +
                        ") YIELD setCount, communityCount";
         runQuery(query, MapUtil.map("graph", graphImpl),
@@ -161,11 +202,13 @@ public class UnionFindProcTest extends ProcTestBase {
                 }
         );
 
-        runQuery("MATCH (n) RETURN n.seedId AS partition",
+        runQuery(
+                "MATCH (n) RETURN n.seed AS partition",
                 row -> assertTrue(row.getNumber("partition").longValue() >= 42)
         );
 
-        runQuery("MATCH (n) RETURN n.nodeId AS nodeId, n.seedId AS partition",
+        runQuery(
+                "MATCH (n) RETURN n.nodeId AS nodeId, n.seed AS partition",
                 row -> {
                     final long nodeId = row.getNumber("nodeId").longValue();
                     final long partitionId = row.getNumber("partition").longValue();
@@ -179,12 +222,12 @@ public class UnionFindProcTest extends ProcTestBase {
     }
 
     @AllGraphNamesTest
-    public void testUnionFindWithSeedAndConsecutive(String graphImpl) {
+    void testUnionFindWithSeedAndConsecutive(String graphImpl) {
         Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
 
         String query = "CALL algo.unionFind(" +
                        "    '', '', {" +
-                       "        graph: $graph, seedProperty: 'seedId', consecutiveIds: true" +
+                       "        graph: $graph, seedProperty: 'seed', consecutiveIds: true" +
                        "    }" +
                        ") YIELD setCount, communityCount";
 
@@ -195,11 +238,13 @@ public class UnionFindProcTest extends ProcTestBase {
                 }
         );
 
-        runQuery("MATCH (n) RETURN n.partition AS partition",
+        runQuery(
+                "MATCH (n) RETURN n.partition AS partition",
                 row -> assertThat(row.getNumber("partition").longValue(), greaterThanOrEqualTo(42L))
         );
 
-        runQuery("MATCH (n) RETURN n.nodeId AS nodeId, n.partition AS partition",
+        runQuery(
+                "MATCH (n) RETURN n.nodeId AS nodeId, n.partition AS partition",
                 row -> {
                     final long nodeId = row.getNumber("nodeId").longValue();
                     final long partitionId = row.getNumber("partition").longValue();
@@ -213,7 +258,7 @@ public class UnionFindProcTest extends ProcTestBase {
     }
 
     @AllGraphNamesTest
-    public void testUnionFindWithConsecutiveIds(String graphImpl) {
+    void testUnionFindWithConsecutiveIds(String graphImpl) {
         String query = "CALL algo.unionFind(" +
                        "    '', '', {" +
                        "        graph: $graph, consecutiveIds: true" +
@@ -227,13 +272,14 @@ public class UnionFindProcTest extends ProcTestBase {
                 }
         );
 
-        runQuery("MATCH (n) RETURN collect(distinct n.partition) AS partitions ",
+        runQuery(
+                "MATCH (n) RETURN collect(distinct n.partition) AS partitions ",
                 row -> assertThat((List<Long>) row.get("partitions"), containsInAnyOrder(0L, 1L, 2L))
         );
     }
 
     @AllGraphNamesTest
-    public void testUnionFindWriteBack(String graphImpl) {
+    void testUnionFindWriteBack(String graphImpl) {
         String query = "CALL algo.unionFind(" +
                        "    '', 'TYPE', {" +
                        "        write: true, graph: $graph" +
@@ -253,7 +299,7 @@ public class UnionFindProcTest extends ProcTestBase {
     }
 
     @AllGraphNamesTest
-    public void testUnionFindWriteBackExplicitWriteProperty(String graphImpl) {
+    void testUnionFindWriteBackExplicitWriteProperty(String graphImpl) {
         String query = "CALL algo.unionFind(" +
                        "    '', 'TYPE', {" +
                        "        write: true, graph: $graph, writeProperty: 'unionFind'" +
@@ -273,7 +319,7 @@ public class UnionFindProcTest extends ProcTestBase {
     }
 
     @AllGraphNamesTest
-    public void testUnionFindStream(String graphImpl) {
+    void testUnionFindStream(String graphImpl) {
         String query = "CALL algo.unionFind.stream(" +
                        "    '', 'TYPE', {" +
                        "        graph: $graph" +
@@ -287,7 +333,7 @@ public class UnionFindProcTest extends ProcTestBase {
     }
 
     @AllGraphNamesTest
-    public void testThresholdUnionFindStream(String graphImpl) {
+    void testThresholdUnionFindStream(String graphImpl) {
         String query = "CALL algo.unionFind.stream(" +
                        "    '', 'TYPE', {" +
                        "        weightProperty: 'cost', defaultValue: 10.0, threshold: 5.0, concurrency: 1, graph: $graph" +
@@ -302,7 +348,7 @@ public class UnionFindProcTest extends ProcTestBase {
     }
 
     @AllGraphNamesTest
-    public void testThresholdUnionFindLowThreshold(String graphImpl) {
+    void testThresholdUnionFindLowThreshold(String graphImpl) {
         String query = "CALL algo.unionFind.stream(" +
                        "    '', 'TYPE', {" +
                        "        weightProperty: 'cost', defaultValue: 10.0, concurrency: 1, threshold: 3.14, graph: $graph" +
@@ -315,6 +361,23 @@ public class UnionFindProcTest extends ProcTestBase {
                 }
         );
         assertMapContains(map, 1, 2, 7);
+    }
+
+    @AllGraphNamesTest
+    void testUnionFindThrowsExceptionWhenThresholdPropertyDoesNotExists(String graphImpl) {
+        Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
+
+        String query = "CALL algo.unionFind(" +
+                       "    '', '', {" +
+                       "        graph: $graph, weightProperty: 'does_not_exist', threshold: 3.14" +
+                       "    }" +
+                       ") YIELD setCount, communityCount";
+
+        QueryExecutionException exception = assertThrows(QueryExecutionException.class, () -> {
+            runQuery(query, MapUtil.map("graph", graphImpl), row -> {});
+        });
+        Throwable rootCause = ExceptionUtil.rootCause(exception);
+        assertEquals("Relationship property not found: 'does_not_exist'", rootCause.getMessage());
     }
 
 }

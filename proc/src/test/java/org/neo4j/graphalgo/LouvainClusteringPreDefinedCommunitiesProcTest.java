@@ -21,18 +21,17 @@ package org.neo4j.graphalgo;
 
 import com.carrotsearch.hppc.IntIntScatterMap;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class LouvainClusteringPreDefinedCommunitiesProcTest extends ProcTestBase {
+class LouvainClusteringPreDefinedCommunitiesProcTest extends ProcTestBase {
 
     @BeforeAll
-    public static void setupGraph() throws KernelException {
+    static void setupGraph() throws KernelException {
         DB = TestDatabaseCreator.createTestDatabase();
 
         final String cypher =
@@ -52,9 +51,8 @@ public class LouvainClusteringPreDefinedCommunitiesProcTest extends ProcTestBase
         DB.execute(cypher);
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    public void testStream(String graphImpl) {
+    @AllGraphNamesTest
+    void testStream(String graphImpl) {
         String query = "CALL algo.louvain.stream(" +
                        "    '', '', {" +
                        "        concurrency: 1, community: 'community', randomNeighbor: false, graph: $graph" +

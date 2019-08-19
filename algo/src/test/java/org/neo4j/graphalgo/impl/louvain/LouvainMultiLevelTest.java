@@ -19,11 +19,11 @@
  */
 package org.neo4j.graphalgo.impl.louvain;
 
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.TestProgressLogger;
+import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * (a)-(b)--(g)-(h)
@@ -43,40 +44,41 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public class LouvainMultiLevelTest extends LouvainTestBase {
 
-    private static final String SETUP_QUERY = "CREATE " +
-                    "  (a:Node {name: 'a'})" +
-                    ", (b:Node {name: 'b'})" +
-                    ", (c:Node {name: 'c'})" +
-                    ", (d:Node {name: 'd'})" +
-                    ", (e:Node {name: 'e'})" +
-                    ", (f:Node {name: 'f'})" +
-                    ", (g:Node {name: 'g'})" +
-                    ", (h:Node {name: 'h'})" +
-                    ", (i:Node {name: 'i'})" +
+    private static final String SETUP_QUERY =
+            "CREATE " +
+            "  (a:Node {name: 'a'})" +
+            ", (b:Node {name: 'b'})" +
+            ", (c:Node {name: 'c'})" +
+            ", (d:Node {name: 'd'})" +
+            ", (e:Node {name: 'e'})" +
+            ", (f:Node {name: 'f'})" +
+            ", (g:Node {name: 'g'})" +
+            ", (h:Node {name: 'h'})" +
+            ", (i:Node {name: 'i'})" +
 
-                    ", (a)-[:TYPE {weight: 1.0}]->(b)" +
-                    ", (a)-[:TYPE {weight: 1.0}]->(c)" +
-                    ", (b)-[:TYPE {weight: 1.0}]->(c)" +
+            ", (a)-[:TYPE {weight: 1.0}]->(b)" +
+            ", (a)-[:TYPE {weight: 1.0}]->(c)" +
+            ", (b)-[:TYPE {weight: 1.0}]->(c)" +
 
-                    ", (g)-[:TYPE {weight: 1.0}]->(h)" +
-                    ", (g)-[:TYPE {weight: 1.0}]->(i)" +
-                    ", (h)-[:TYPE {weight: 1.0}]->(i)" +
+            ", (g)-[:TYPE {weight: 1.0}]->(h)" +
+            ", (g)-[:TYPE {weight: 1.0}]->(i)" +
+            ", (h)-[:TYPE {weight: 1.0}]->(i)" +
 
-                    ", (e)-[:TYPE {weight: 1.0}]->(d)" +
-                    ", (e)-[:TYPE {weight: 1.0}]->(f)" +
-                    ", (d)-[:TYPE {weight: 1.0}]->(f)" +
+            ", (e)-[:TYPE {weight: 1.0}]->(d)" +
+            ", (e)-[:TYPE {weight: 1.0}]->(f)" +
+            ", (d)-[:TYPE {weight: 1.0}]->(f)" +
 
-                    ", (a)-[:TYPE {weight: 1.0}]->(g)" +
-                    ", (c)-[:TYPE {weight: 1.0}]->(e)" +
-                    ", (f)-[:TYPE {weight: 1.0}]->(i)";
+            ", (a)-[:TYPE {weight: 1.0}]->(g)" +
+            ", (c)-[:TYPE {weight: 1.0}]->(e)" +
+            ", (f)-[:TYPE {weight: 1.0}]->(i)";
 
     @Override
     void setupGraphDb(Graph graph) {
     }
 
-    @ParameterizedTest
-    @MethodSource("parameters")
-    public void testComplex(Class<? extends GraphFactory> graphImpl) {
+    @AllGraphTypesTest
+    void testComplex(Class<? extends GraphFactory> graphImpl) {
+        assumeTrue(graphImpl != HeavyCypherGraphFactory.class);
         Graph graph = loadGraph(graphImpl, SETUP_QUERY);
         final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
@@ -96,9 +98,9 @@ public class LouvainMultiLevelTest extends LouvainTestBase {
         assertArrayEquals(new double[]{0.53}, algorithm.getModularities(), 0.01);
     }
 
-    @ParameterizedTest
-    @MethodSource("parameters")
-    public void testComplexRNL(Class<? extends GraphFactory> graphImpl) {
+    @AllGraphTypesTest
+    void testComplexRNL(Class<? extends GraphFactory> graphImpl) {
+        assumeTrue(graphImpl != HeavyCypherGraphFactory.class);
         Graph graph = loadGraph(graphImpl, SETUP_QUERY);
         final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
