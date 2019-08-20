@@ -46,25 +46,6 @@ public final class IndirectIntSortTest extends RandomizedTest {
         assertSameIndices(expected, data);
     }
 
-    public void onlySortsTheSmallestAvailableSegment() {
-        int size = iterations(20, 200);
-        // smaller data and value
-        int valuesSize = between(1, size - 1);
-        int[] values = randomArray(valuesSize);
-        int dataSize = between(1, size - 1);
-        float[] data = indexArray(dataSize);
-
-        int smallestSize = Math.min(valuesSize, dataSize);
-        int[] expected = IndirectSort.mergesort(0, smallestSize, new AscendingIntComparator(values));
-        if (dataSize > valuesSize) {
-            expected = Arrays.copyOf(expected, dataSize);
-            System.arraycopy(data, smallestSize, expected, smallestSize, dataSize - smallestSize);
-        }
-
-        IndirectIntSort.sortWithoutDeduplication(values, data, new long[size], size);
-        assertSameIndices(expected, data);
-    }
-
     @Test
     public void removeDuplicates() {
         int size = iterations(10, 100);
