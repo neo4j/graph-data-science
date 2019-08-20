@@ -55,11 +55,32 @@ public class ProcTestBase {
         runQuery(query, Collections.emptyMap(), check);
     }
 
+    protected void runQuery(String query, GraphDatabaseAPI db, Map<String, Object> params) {
+        runQuery(query, db, params, row -> {});
+    }
+
+    protected void runQuery(String query, GraphDatabaseAPI db, Consumer<Result.ResultRow> check) {
+        runQuery(query, db, Collections.emptyMap(), check);
+    }
+
     protected static void runQuery(
             String query,
             Map<String, Object> params,
             Consumer<Result.ResultRow> check) {
         try (Result result = DB.execute(query, params)) {
+            result.accept(row -> {
+                check.accept(row);
+                return true;
+            });
+        }
+    }
+
+    protected static void runQuery(
+            String query,
+            GraphDatabaseAPI db,
+            Map<String, Object> params,
+            Consumer<Result.ResultRow> check) {
+        try (Result result = db.execute(query, params)) {
             result.accept(row -> {
                 check.accept(row);
                 return true;

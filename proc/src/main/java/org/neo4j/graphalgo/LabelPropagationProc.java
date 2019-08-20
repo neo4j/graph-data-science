@@ -166,6 +166,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
         Direction direction = config.getDirection(Direction.OUTGOING);
         if (direction == Direction.BOTH) {
             loader.undirected();
+            config.setDirection(Direction.OUTGOING);
         } else {
             loader.withDirection(direction);
         }

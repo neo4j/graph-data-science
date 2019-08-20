@@ -68,15 +68,17 @@ public class LabelPropagationBetaProcTest extends ProcTestBase {
         );
     }
 
+    GraphDatabaseAPI db;
+
     @BeforeEach
     public void setup() throws KernelException {
-        DB = TestDatabaseCreator.createTestDatabase();
+        db = TestDatabaseCreator.createTestDatabase();
 
-        DB.getDependencyResolver()
+        db.getDependencyResolver()
                 .resolveDependency(Procedures.class)
                 .registerProcedure(LabelPropagationProc.class);
 
-        DB.execute(DB_CYPHER);
+        db.execute(DB_CYPHER);
     }
 
     @ParameterizedTest
@@ -88,7 +90,7 @@ public class LabelPropagationBetaProcTest extends ProcTestBase {
                        "    }" +
                        ")";
 
-        runQuery(query, parParams(parallel, graphImpl),
+        runQuery(query, db, parParams(parallel, graphImpl),
                 row -> {
                     assertEquals(1, row.getNumber("iterations").intValue());
                     assertEquals("weight", row.getString("weightProperty"));
@@ -104,7 +106,7 @@ public class LabelPropagationBetaProcTest extends ProcTestBase {
                 "   }" +
                 ")";
 
-        runQuery(query, parParams(parallel, graphImpl),
+        runQuery(query, db, parParams(parallel, graphImpl),
                 row -> {
                     assertEquals(1, row.getNumber("iterations").intValue());
                     assertEquals("weight", row.getString("weightProperty"));
@@ -124,7 +126,7 @@ public class LabelPropagationBetaProcTest extends ProcTestBase {
                        "    }" +
                        ")";
 
-        runQuery(query, parParams(parallel, graphImpl),
+        runQuery(query, db, parParams(parallel, graphImpl),
                 row -> {
                     assertEquals(1, row.getNumber("iterations").intValue());
                     assertEquals("weight", row.getString("weightProperty"));
@@ -144,7 +146,7 @@ public class LabelPropagationBetaProcTest extends ProcTestBase {
                        "    }" +
                        ")";
 
-        runQuery(query, parParams(parallel, graphImpl),
+        runQuery(query, db, parParams(parallel, graphImpl),
                 row -> {
                     assertTrue(5 >= row.getNumber("iterations").intValue());
                     assertTrue(row.getBoolean("didConverge"));
@@ -167,7 +169,7 @@ public class LabelPropagationBetaProcTest extends ProcTestBase {
                        "WHERE n.id IN [0,1] " +
                        "RETURN n.community AS community";
 
-        runQuery(query, parParams(parallel, graphImpl),
+        runQuery(query, db, parParams(parallel, graphImpl),
                 row -> {
                     assertEquals(12, row.getNumber("nodes").intValue());
                     assertTrue(row.getBoolean("write"));
@@ -176,7 +178,7 @@ public class LabelPropagationBetaProcTest extends ProcTestBase {
                     assertTrue("write time not set", row.getNumber("writeMillis").intValue() >= 0);
                 }
         );
-        runQuery(check, row -> assertEquals(2, row.getNumber("community").intValue()));
+        runQuery(check, db, row -> assertEquals(2, row.getNumber("community").intValue()));
     }
 
     @ParameterizedTest
@@ -190,9 +192,9 @@ public class LabelPropagationBetaProcTest extends ProcTestBase {
         String checkA = "MATCH (n) WHERE n.id = 0 RETURN n.community AS community";
         String checkB = "MATCH (n) WHERE n.id = 1 RETURN n.community AS community";
 
-        runQuery(query, parParams(parallel, graphImpl));
-        runQuery(checkA, row -> assertEquals(2, row.getNumber("community").intValue()));
-        runQuery(checkB, row -> assertEquals(42, row.getNumber("community").intValue()));
+        runQuery(query, db, parParams(parallel, graphImpl));
+        runQuery(checkA, db, row -> assertEquals(2, row.getNumber("community").intValue()));
+        runQuery(checkB, db, row -> assertEquals(42, row.getNumber("community").intValue()));
     }
 
     @ParameterizedTest
@@ -207,8 +209,27 @@ public class LabelPropagationBetaProcTest extends ProcTestBase {
                        "WHERE n.id <> 0 " +
                        "RETURN n.community AS community";
 
-        runQuery(query, parParams(parallel, graphImpl));
-        runQuery(check, row -> assertEquals(42, row.getNumber("community").intValue()));
+        runQuery(query, db, parParams(parallel, graphImpl));
+        runQuery(check, db, row -> assertEquals(42, row.getNumber("community").intValue()));
+    }
+
+    @ParameterizedTest(name = "{1}, parallel={0}")
+    @MethodSource("parameters")
+    public void shouldRunOnUndirected(boolean parallel, String graphImpl) {
+        String query = "CALL algo.beta.labelPropagation(" +
+                       "    'A', 'X', {" +
+                       "        batchSize: $batchSize, direction: 'BOTH', concurrency: $concurrency, graph: $graph, seedProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: $writeProperty" +
+                       "    }" +
+                       ")";
+        String check = "MATCH (n:A) " +
+                       "WHERE n.id <> 0 " +
+                       "RETURN n.community AS community";
+
+        runQuery(query, db, parParams(parallel, graphImpl));
+        runQuery(check, db, row -> {
+            final int community = row.getNumber("community").intValue();
+            assertTrue(community == 2 || community == 42); // this is due to flaky behaviour in the undirected case
+        });
     }
 
     @ParameterizedTest
@@ -220,7 +241,7 @@ public class LabelPropagationBetaProcTest extends ProcTestBase {
                        "        graph: 'cypher', direction: 'OUTGOING', batchSize: $batchSize, concurrency: $concurrency, writeProperty: $writeProperty" +
                        "    }" +
                        ")";
-        runQuery(query, parParams(parallel, graphImpl), row -> assertEquals(12, row.getNumber("nodes").intValue()));
+        runQuery(query, db, parParams(parallel, graphImpl), row -> assertEquals(12, row.getNumber("nodes").intValue()));
     }
 
     @ParameterizedTest
@@ -234,7 +255,7 @@ public class LabelPropagationBetaProcTest extends ProcTestBase {
                                "       iterations: 20, direction: 'OUTGOING', writeProperty: 'lpa', weightProperty: $weightProperty" +
                                "    }" +
                                ")";
-        runQuery(writingQuery, parParams(parallel, graphImpl));
+        runQuery(writingQuery, db, parParams(parallel, graphImpl));
 
         String streamingQuery = "CALL algo.labelPropagation.stream(" +
                                 "    null, null, {" +
@@ -245,7 +266,7 @@ public class LabelPropagationBetaProcTest extends ProcTestBase {
                                 "    WHERE id(node) = nodeId " +
                                 "RETURN node.id AS id, id(node) AS internalNodeId, node.lpa AS seedProperty, label AS community";
 
-        runQuery(streamingQuery, parParams(parallel, graphImpl),
+        runQuery(streamingQuery, db, parParams(parallel, graphImpl),
                 row -> assertEquals(row.getNumber("seedProperty").intValue(), row.getNumber("community").intValue()));
     }
 
