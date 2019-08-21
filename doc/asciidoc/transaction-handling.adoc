@@ -1,0 +1,49 @@
+[[transaction-handling]]
+= Transaction Handling
+
+[abstract]
+--
+This section describes the usage of transactions during the execution of an algorithm.
+--
+
+This section includes:
+
+* <<tx-graph-loading>>
+* <<tx-graph-writing>>
+* <<tx-termination>>
+
+[[tx-graph-loading]]
+== During graph loading
+
+When an algo is called from cypher, the procedure call is executed within the same
+transaction as the cypher statement.
+
+During loading, new transactions are used that do not inherit the transaction state
+of the cypher transaction. This means that changes from the cypher transaction state
+are not visible to the loading transactions.
+
+For example, the following statement will not be able to load any nodes.
+
+[EXAMPLE]
+[source, cypher]
+----
+MATCH (n) SET n:MyLabel CALL algo.graph.load('graph-name', 'MyLabel', '')
+----
+
+
+[[tx-graph-writing]]
+== During graph writing
+
+Properties are written to the graph in new transactions for every chunk of 100000 nodes.
+Those transactions are commited independently from the cypher transaction.
+This means, if the cypher transaction is terminated (either by the user or by the database system),
+already committed write transactions will _not_ be rolled back.
+
+
+[[tx-termination]]
+== Transaction termination
+
+The cypher transaction can be terminated by either the user or the database system.
+This will eventually terminate all transactions that have been opened during loading, writing, or the algorithm execution.
+It is not immediately visible and can take some seconds for the transactions to recognize that the cypher transaction has been terminated.
+
