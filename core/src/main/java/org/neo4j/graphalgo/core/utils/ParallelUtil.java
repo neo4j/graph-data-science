@@ -792,7 +792,8 @@ public final class ParallelUtil {
                 || tasks.size() == 1
                 || concurrency <= 1) {
             Iterator<? extends Runnable> iterator = tasks.iterator();
-            while (iterator.hasNext() && terminationFlag.running()) {
+            while (iterator.hasNext()) {
+                terminationFlag.assertRunning();
                 iterator.next().run();
             }
             return;
@@ -812,9 +813,7 @@ public final class ParallelUtil {
                     && terminationFlag.running()
                     && completionService.trySubmit(ts);) ;
 
-            if (!terminationFlag.running()) {
-                return;
-            }
+            terminationFlag.assertRunning();
 
             // submit all remaining tasks
             int tries = 0;
@@ -827,9 +826,9 @@ public final class ParallelUtil {
                     } catch (CancellationException ignore) {
                     }
                 }
-                if (!terminationFlag.running()) {
-                    return;
-                }
+
+                terminationFlag.assertRunning();
+
                 if (!completionService.trySubmit(ts) && !completionService.hasTasks()) {
                     if (++tries >= maxWaitRetries) {
                         throw new IllegalThreadStateException(format(
@@ -841,7 +840,8 @@ public final class ParallelUtil {
             }
 
             // wait for all tasks to finish
-            while (completionService.hasTasks() && terminationFlag.running()) {
+            while (completionService.hasTasks()) {
+                terminationFlag.assertRunning();
                 try {
                     completionService.awaitNext();
                 } catch (ExecutionException e) {

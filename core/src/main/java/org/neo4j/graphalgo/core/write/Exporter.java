@@ -258,6 +258,7 @@ public final class Exporter extends StatementApi {
 
     private void writeSequential(WriteConsumer writer) {
         acceptInTransaction(stmt -> {
+            terminationFlag.assertRunning();
             long progress = 0L;
             Write ops = stmt.dataWrite();
             for (long i = 0L; i < nodeCount; i++) {
@@ -265,6 +266,7 @@ public final class Exporter extends StatementApi {
                 ++progress;
                 if (progress % 10_000 == 0) {
                     progressLogger.logProgress(progress, nodeCount);
+                    terminationFlag.assertRunning();
                 }
             }
             progressLogger.logProgress(
@@ -285,6 +287,7 @@ public final class Exporter extends StatementApi {
                 batchSize,
                 (start, len) -> () -> {
                     acceptInTransaction(stmt -> {
+                        terminationFlag.assertRunning();
                         long end = start + len;
                         Write ops = stmt.dataWrite();
                         for (long j = start; j < end; j++) {
@@ -297,6 +300,7 @@ public final class Exporter extends StatementApi {
                                 progressLogger.logProgress(
                                         currentProgress,
                                         nodeCount);
+                                terminationFlag.assertRunning();
                             }
                         }
 
