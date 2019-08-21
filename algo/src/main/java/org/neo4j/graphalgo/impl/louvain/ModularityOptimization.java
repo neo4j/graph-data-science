@@ -214,9 +214,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             counter.set(0);
             // run all tasks
             ParallelUtil.runWithConcurrency(concurrency, tasks, terminationFlag, pool);
-            if (!terminationFlag.running()) {
-                break;
-            }
             // take the best candidate
             Task candidate = best(tasks);
             if (null == candidate || candidate.q <= this.q) {
@@ -345,9 +342,9 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                             count,
                             denominator,
                             () -> "round " + iterations);
-
+                    terminationFlag.assertRunning();
                 }
-                return terminationFlag.running();
+                return true;
             });
             this.q = calcModularity();
         }

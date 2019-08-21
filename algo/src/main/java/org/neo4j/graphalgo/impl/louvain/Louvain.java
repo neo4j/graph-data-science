@@ -169,7 +169,8 @@ public final class Louvain extends Algorithm<Louvain> {
         long nodeCount = rootNodeCount;
         Graph graph = rootGraph;
 
-        for (int level = 0; level < maxLevel && running(); level++) {
+        for (int level = 0; level < maxLevel; level++) {
+            assertRunning();
             // start modularity optimization
             final ModularityOptimization modularityOptimization =
                     new ModularityOptimization(

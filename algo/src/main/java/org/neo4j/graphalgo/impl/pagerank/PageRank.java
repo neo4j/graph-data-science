@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeIterator;
 import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
@@ -514,22 +513,22 @@ public class PageRank extends Algorithm<PageRank> {
             final int operations = (iterations << 1) + 1;
             int op = 0;
             boolean algorithmHasStabilized = false;
-            ParallelUtil.runWithConcurrency(concurrency, steps, pool);
+            ParallelUtil.runWithConcurrency(concurrency, steps, terminationFlag, pool);
             getProgressLogger().logProgress(++op, operations, tracker);
-            for (int i = 0; i < iterations && running() && !algorithmHasStabilized; i++) {
+            for (int i = 0; i < iterations && !algorithmHasStabilized; i++) {
                 // calculate scores
-                ParallelUtil.runWithConcurrency(concurrency, steps, pool);
+                ParallelUtil.runWithConcurrency(concurrency, steps, terminationFlag, pool);
                 getProgressLogger().logProgress(++op, operations, tracker);
 
                 // sync scores
                 synchronizeScores();
-                ParallelUtil.runWithConcurrency(concurrency, steps, pool);
+                ParallelUtil.runWithConcurrency(concurrency, steps, terminationFlag, pool);
                 algorithmHasStabilized = checkTolerance();
                 getProgressLogger().logProgress(++op, operations, tracker);
 
                 // normalize deltas
                 normalizeDeltas();
-                ParallelUtil.runWithConcurrency(concurrency, steps, pool);
+                ParallelUtil.runWithConcurrency(concurrency, steps, terminationFlag, pool);
                 getProgressLogger().logProgress(++op, operations, tracker);
 
                 ranIterations++;
