@@ -25,9 +25,12 @@ import org.neo4j.graphalgo.core.huge.loader.RelationshipImporter.Imports;
 import org.neo4j.graphalgo.core.utils.ImportProgress;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.StatementAction;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.impl.store.record.RelationshipRecord;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -53,7 +56,16 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
         if (imports == null) {
             return InternalImporter.createEmptyScanner();
         }
-        return new RelationshipsScanner.Creator(api, progress, idMap, scanner, relType, importer, imports);
+        return new RelationshipsScanner.Creator(
+                api,
+                progress,
+                idMap,
+                scanner,
+                relType,
+                importer,
+                imports,
+                setup.terminationFlag
+        );
     }
 
     static final class Creator implements InternalImporter.CreateScanner {
@@ -64,6 +76,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
         private final int relType;
         private final RelationshipImporter importer;
         private final Imports imports;
+        private final TerminationFlag terminationFlag;
 
         Creator(
                 GraphDatabaseAPI api,
@@ -72,7 +85,8 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
                 AbstractStorePageCacheScanner<RelationshipRecord> scanner,
                 int relType,
                 RelationshipImporter importer,
-                Imports imports) {
+                Imports imports,
+                TerminationFlag terminationFlag) {
             this.api = api;
             this.progress = progress;
             this.idMap = idMap;
@@ -80,11 +94,21 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
             this.relType = relType;
             this.importer = importer;
             this.imports = imports;
+            this.terminationFlag = terminationFlag;
         }
 
         @Override
         public RecordScanner create(final int index) {
-            return new RelationshipsScanner(api, progress, idMap, scanner, relType, index, importer, imports);
+            return new RelationshipsScanner(api,
+                    terminationFlag,
+                    progress,
+                    idMap,
+                    scanner,
+                    relType,
+                    index,
+                    importer,
+                    imports
+            );
         }
 
         @Override
@@ -93,6 +117,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
         }
     }
 
+    private final TerminationFlag terminationFlag;
     private final ImportProgress progress;
     private final IdMapping idMap;
     private final AbstractStorePageCacheScanner<RelationshipRecord> scanner;
@@ -106,6 +131,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
 
     private RelationshipsScanner(
             GraphDatabaseAPI api,
+            TerminationFlag terminationFlag,
             ImportProgress progress,
             IdMapping idMap,
             AbstractStorePageCacheScanner<RelationshipRecord> scanner,
@@ -114,6 +140,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
             RelationshipImporter importer,
             Imports imports) {
         super(api);
+        this.terminationFlag = terminationFlag;
         this.progress = progress;
         this.idMap = idMap;
         this.scanner = scanner;
@@ -145,6 +172,9 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
             long allImportedRels = 0L;
             long allImportedWeights = 0L;
             while (batches.scan(cursor)) {
+                if (!terminationFlag.running()) {
+                    throw new TransactionTerminatedException(Status.Transaction.Terminated);
+                }
                 long imported = imports.importRels(batches, weightReader);
                 int importedRels = RawValues.getHead(imported);
                 int importedWeights = RawValues.getTail(imported);

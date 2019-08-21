@@ -144,6 +144,7 @@ public final class HugeGraphFactory extends GraphFactory {
                 dimensions,
                 progress,
                 tracker,
+                setup.terminationFlag,
                 threadPool,
                 concurrency
         )

@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
@@ -85,6 +86,7 @@ public class GraphLoader {
     private Log log = NullLog.getInstance();
     private long logMillis = -1;
     private AllocationTracker tracker = AllocationTracker.EMPTY;
+    private TerminationFlag terminationFlag = TerminationFlag.RUNNING_TRUE;
     private boolean sorted = false;
     private boolean undirected = false;
     private PropertyMapping[] nodePropertyMappings = new PropertyMapping[0];
@@ -155,6 +157,16 @@ public class GraphLoader {
      */
     public GraphLoader withAllocationTracker(AllocationTracker tracker) {
         this.tracker = (tracker == null) ? AllocationTracker.EMPTY : tracker;
+        return this;
+    }
+
+    /**
+     * Use the given {@link TerminationFlag} to check when the termination has been terminated.
+     *
+     * If the terminationFlag is {@code null}, we use {@link TerminationFlag#RUNNING_TRUE}.
+     */
+    public GraphLoader withTerminationFlag(TerminationFlag terminationFlag) {
+        this.terminationFlag = (terminationFlag == null) ? TerminationFlag.RUNNING_TRUE : terminationFlag;
         return this;
     }
 
@@ -478,6 +490,7 @@ public class GraphLoader {
                 sorted,
                 undirected,
                 tracker,
+                terminationFlag,
                 name,
                 nodePropertyMappings);
     }

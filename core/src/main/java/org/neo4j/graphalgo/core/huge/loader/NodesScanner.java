@@ -24,9 +24,12 @@ import com.carrotsearch.hppc.IntObjectMap;
 import org.neo4j.graphalgo.core.utils.ImportProgress;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.StatementAction;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.impl.store.NodeStore;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -41,14 +44,15 @@ final class NodesScanner extends StatementAction implements RecordScanner {
             AbstractStorePageCacheScanner<NodeRecord> scanner,
             int label,
             ImportProgress progress,
-            NodeImporter importer) {
+            NodeImporter importer,
+            TerminationFlag terminationFlag) {
         return new NodesScanner.Creator(
                 api,
                 scanner,
                 label,
                 progress,
-                importer
-        );
+                importer,
+                terminationFlag);
     }
 
     static final class Creator implements InternalImporter.CreateScanner {
@@ -57,24 +61,27 @@ final class NodesScanner extends StatementAction implements RecordScanner {
         private final int label;
         private final ImportProgress progress;
         private final NodeImporter importer;
+        private final TerminationFlag terminationFlag;
 
         Creator(
                 GraphDatabaseAPI api,
                 AbstractStorePageCacheScanner<NodeRecord> scanner,
                 int label,
                 ImportProgress progress,
-                NodeImporter importer) {
+                NodeImporter importer, TerminationFlag terminationFlag) {
             this.api = api;
             this.scanner = scanner;
             this.label = label;
             this.progress = progress;
             this.importer = importer;
+            this.terminationFlag = terminationFlag;
         }
 
         @Override
         public RecordScanner create(final int index) {
             return new NodesScanner(
                     api,
+                    terminationFlag,
                     scanner,
                     label,
                     index,
@@ -100,6 +107,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
         }
     }
 
+    private final TerminationFlag terminationFlag;
     private final NodeStore nodeStore;
     private final AbstractStorePageCacheScanner<NodeRecord> scanner;
     private final int label;
@@ -111,12 +119,14 @@ final class NodesScanner extends StatementAction implements RecordScanner {
 
     private NodesScanner(
             GraphDatabaseAPI api,
+            TerminationFlag terminationFlag,
             AbstractStorePageCacheScanner<NodeRecord> scanner,
             int label,
             int threadIndex,
             ImportProgress progress,
             NodeImporter importer) {
         super(api);
+        this.terminationFlag = terminationFlag;
         this.nodeStore = (NodeStore) scanner.store();
         this.scanner = scanner;
         this.label = label;
@@ -142,6 +152,9 @@ final class NodesScanner extends StatementAction implements RecordScanner {
                     importer.readsProperties());
             ImportProgress progress = this.progress;
             while (batches.scan(cursor)) {
+                if (!terminationFlag.running()) {
+                    throw new TransactionTerminatedException(Status.Transaction.Terminated);
+                }
                 long imported = importer.importNodes(batches, read, cursors);
                 int batchImportedNodes = RawValues.getHead(imported);
                 int batchImportedProperties = RawValues.getTail(imported);
