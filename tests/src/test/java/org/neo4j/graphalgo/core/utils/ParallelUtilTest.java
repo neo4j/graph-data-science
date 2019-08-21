@@ -19,14 +19,14 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
-import com.carrotsearch.randomizedtesting.RandomizedTest;
-import com.carrotsearch.randomizedtesting.annotations.ThreadLeakScope;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.neo4j.collection.primitive.PrimitiveIntIterable;
 import org.neo4j.collection.primitive.PrimitiveIntStack;
 import org.neo4j.function.ThrowingConsumer;
 import org.neo4j.graphalgo.core.IntIdMap;
+import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.helpers.Exceptions;
+import org.neo4j.kernel.api.exceptions.Status;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -38,6 +38,7 @@ import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
@@ -45,14 +46,13 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.StringContains.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.mock;
@@ -61,11 +61,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.neo4j.graphalgo.core.utils.ParallelUtil.parallelStream;
 
-@ThreadLeakScope(ThreadLeakScope.Scope.NONE)
-public final class ParallelUtilTest extends RandomizedTest {
+final class ParallelUtilTest {
 
     @Test
-    public void shouldParallelizeStreams() {
+    void shouldParallelizeStreams() {
         long firstNum = 1;
         long lastNum = 1_000_000;
 
@@ -76,7 +75,7 @@ public final class ParallelUtilTest extends RandomizedTest {
         Stream<Long> stream = list.stream();
 
         long actualTotal = parallelStream(stream, (s) -> {
-            assertThat(s.isParallel(), equalTo(true));
+            assertTrue(s.isParallel());
             Thread thread = Thread.currentThread();
             assertTrue(thread instanceof ForkJoinWorkerThread);
             ForkJoinPool threadPool = ((ForkJoinWorkerThread) thread).getPool();
@@ -90,72 +89,59 @@ public final class ParallelUtilTest extends RandomizedTest {
     }
 
     @Test
-    public void shouldTakeBaseStreams() {
+    void shouldTakeBaseStreams() {
         double[] data = {1.0, 2.5, 3.14};
 
         double sum = parallelStream(Arrays.stream(data), DoubleStream::sum);
 
-        assertThat(sum, equalTo(1.0 + 2.5 + 3.14));
+        assertEquals(1.0 + 2.5 + 3.14, sum);
     }
 
     @Test
-    public void threadSizeShouldDivideByBatchsize() throws Exception {
-        int batchSize = between(10, 10_000);
-        int threads = between(10, 10_000);
-        assertEquals(
-                threads,
-                ParallelUtil.threadCount(batchSize, batchSize * threads));
+    void threadSizeShouldDivideByBatchsize() {
+        assertEquals(42, ParallelUtil.threadCount(1337, 1337 * 42));
     }
 
     @Test
-    public void threadSizeShouldReturnEnoughThreadsForIncompleteBatches() throws
-            Exception {
-        int batchSize = between(10, 10_000);
-        int threads = between(10, 10_000);
-        int elements = batchSize * threads + between(1, batchSize - 1);
+    void threadSizeShouldReturnEnoughThreadsForIncompleteBatches() {
+        int batchSize = 1337;
+        int threads = 42;
+        int elements = batchSize * threads + 21;
         assertEquals(threads + 1, ParallelUtil.threadCount(batchSize, elements));
     }
 
     @Test
-    public void threadSizeShouldReturn1ForNonCompleteBatches() throws
-            Exception {
-        int batchSize = between(2, 1_000_000);
+    void threadSizeShouldReturn1ForNonCompleteBatches() {
+        int batchSize = 1337;
         assertEquals(
                 1,
-                ParallelUtil.threadCount(
-                        batchSize,
-                        batchSize - randomInt(batchSize)));
+                ParallelUtil.threadCount(batchSize, batchSize - 42));
     }
 
     @Test
-    public void threadSizeShouldReturn1ForZeroElements() throws Exception {
-        int batchSize = between(2, 1_000_000);
+    void threadSizeShouldReturn1ForZeroElements() {
+        int batchSize = 1337;
         assertEquals(1, ParallelUtil.threadCount(batchSize, 0));
     }
 
     @Test
-    public void threadSizeShouldFailForZeroBatchsize() throws Exception {
-        try {
-            ParallelUtil.threadCount(0, randomInt());
-            fail();
-        } catch (IllegalArgumentException e) {
-            assertEquals("Invalid batch size: 0", e.getMessage());
-        }
+    void threadSizeShouldFailForZeroBatchsize() {
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> ParallelUtil.threadCount(0, 42));
+        assertEquals("Invalid batch size: 0", exception.getMessage());
     }
 
     @Test
-    public void threadSizeShouldFailForNegativeBatchsize() throws Exception {
-        int batchSize = between(Integer.MIN_VALUE, -1);
-        try {
-            ParallelUtil.threadCount(batchSize, randomInt());
-            fail();
-        } catch (IllegalArgumentException e) {
-            assertEquals("Invalid batch size: " + batchSize, e.getMessage());
-        }
+    void threadSizeShouldFailForNegativeBatchsize() {
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> ParallelUtil.threadCount(-1337, 42));
+        assertEquals("Invalid batch size: -1337", exception.getMessage());
     }
 
     @Test
-    public void shouldRunBatchesSequentialIfNoExecutorIsGiven() {
+    void shouldRunBatchesSequentialIfNoExecutorIsGiven() {
         PrimitiveIntIterable[] ints = {ints(0, 10), ints(10, 14)};
         IntIdMap batches = mock(IntIdMap.class);
         when(batches.batchIterables(anyInt())).thenReturn(asList(ints));
@@ -180,10 +166,10 @@ public final class ParallelUtilTest extends RandomizedTest {
     }
 
     @Test
-    public void batchingShouldCatenatePartitions() throws Exception {
-        int minBatchSize = randomIntBetween(5, 25);
-        int maxConcurrency = randomIntBetween(2, 10);
-        int nodeCount = randomIntBetween(500, 1500);
+    void batchingShouldCatenatePartitions() {
+        int minBatchSize = 21;
+        int maxConcurrency = 8;
+        int nodeCount = 1337;
 
         String params = String.format(
                 " [bs=%d,c=%d,n=%d]",
@@ -197,15 +183,15 @@ public final class ParallelUtilTest extends RandomizedTest {
                 minBatchSize);
 
         assertTrue(
-                "batchSize smaller than minSize" + params,
-                batchSize >= minBatchSize);
+                batchSize >= minBatchSize,
+                "batchSize smaller than minSize" + params);
         assertTrue(
-                "batchSize too small to satisfy desired concurrency" + params,
-                (int) Math.ceil(nodeCount / (double) batchSize) <= maxConcurrency);
+                (int) Math.ceil(nodeCount / (double) batchSize) <= maxConcurrency,
+                "batchSize too small to satisfy desired concurrency" + params);
     }
 
     @Test
-    public void shouldRunAtMostConcurrencyTasks() {
+    void shouldRunAtMostConcurrencyTasks() {
         int tasks = 6;
         int concurrency = 2;
         int threads = 4;
@@ -219,7 +205,7 @@ public final class ParallelUtilTest extends RandomizedTest {
     }
 
     @Test
-    public void shouldRunSequentially() throws Exception {
+    void shouldRunSequentially() {
         withPool(4, pool -> {
             ExecutorService deadPool = Executors.newFixedThreadPool(4);
             deadPool.shutdown();
@@ -247,7 +233,7 @@ public final class ParallelUtilTest extends RandomizedTest {
     }
 
     @Test
-    public void shouldSubmitAtMostConcurrencyTasksRunSequentially() throws Exception {
+    void shouldSubmitAtMostConcurrencyTasksRunSequentially() {
         withPool(4, pool -> {
             Tasks tasks = new Tasks(4, 10);
             tasks.run(t -> ParallelUtil.runWithConcurrency(2, t, pool));
@@ -258,7 +244,7 @@ public final class ParallelUtilTest extends RandomizedTest {
     }
 
     @Test
-    public void shouldBailOnFullThreadpoolAfterTrying() {
+    void shouldBailOnFullThreadpoolAfterTrying() {
         ThreadPoolExecutor pool = mock(ThreadPoolExecutor.class);
         when(pool.getActiveCount()).thenReturn(Integer.MAX_VALUE);
         Tasks tasks = new Tasks(5, 10);
@@ -273,7 +259,7 @@ public final class ParallelUtilTest extends RandomizedTest {
     }
 
     @Test
-    public void shouldBailOnThreadInterrupt() throws Exception {
+    void shouldBailOnThreadInterrupt() {
         withPool(4, pool -> {
             Tasks tasks = new Tasks(6, 10);
             final Thread thread = new Thread(() -> tasks.run(t ->
@@ -296,26 +282,37 @@ public final class ParallelUtilTest extends RandomizedTest {
     }
 
     @Test
-    public void shouldBailOnTermination() throws Exception {
-        withPool(4, pool -> {
-            Tasks tasks = new Tasks(6, 100);
-            AtomicBoolean running = new AtomicBoolean(true);
-            TerminationFlag isRunning = running::get;
-            final Thread thread = new Thread(() -> tasks.run(t ->
-                    ParallelUtil.runWithConcurrency(2, t, isRunning, pool)));
+    void shouldBailOnTermination() {
+        TransactionTerminatedException exception = assertThrows(
+                TransactionTerminatedException.class,
+                () -> {
+                    withPool(4, pool -> {
+                        Tasks tasks = new Tasks(6, 100);
+                        AtomicReference<RuntimeException> thrownException = new AtomicReference<>();
+                        AtomicBoolean running = new AtomicBoolean(true);
+                        TerminationFlag isRunning = running::get;
+                        final Thread thread = new Thread(() -> tasks.run(t ->
+                                ParallelUtil.runWithConcurrency(2, t, isRunning, pool)));
 
-            thread.start();
-            running.set(false);
-            thread.join();
+                        thread.setUncaughtExceptionHandler((t, e) -> thrownException.set(Exceptions.launderedException(e)));
+                        thread.start();
+                        running.set(false);
+                        thread.join();
 
-            assertTrue(tasks.started() <= 2);
-            assertTrue(tasks.maxRunning() <= 2);
-            assertTrue(tasks.requested() <= 2);
-        });
+                        if (thrownException.get() != null) {
+                            throw thrownException.get();
+                        }
+
+                        assertTrue(tasks.started() <= 2);
+                        assertTrue(tasks.maxRunning() <= 2);
+                        assertTrue(tasks.requested() <= 2);
+                    });
+                });
+        assertEquals(Status.Transaction.Terminated, exception.status());
     }
 
     @Test
-    public void shouldWaitThenThrowOnFullThreadpool() throws Exception {
+    void shouldWaitThenThrowOnFullThreadpool() {
         ThreadPoolExecutor pool = mock(ThreadPoolExecutor.class);
         when(pool.getActiveCount()).thenReturn(Integer.MAX_VALUE);
         Tasks tasks = new Tasks(5, 10);
