@@ -35,9 +35,9 @@ import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
-import org.neo4j.graphalgo.impl.unionfind.WCC;
-import org.neo4j.graphalgo.impl.unionfind.WCCFactory;
-import org.neo4j.graphalgo.impl.unionfind.WCCType;
+import org.neo4j.graphalgo.impl.wcc.WCC;
+import org.neo4j.graphalgo.impl.wcc.WCCFactory;
+import org.neo4j.graphalgo.impl.wcc.WCCType;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Map;
@@ -48,9 +48,9 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.impl.unionfind.WCCFactory.CONFIG_ALGO_TYPE;
-import static org.neo4j.graphalgo.impl.unionfind.WCCFactory.CONFIG_SEED_PROPERTY;
-import static org.neo4j.graphalgo.impl.unionfind.WCCFactory.SEED_TYPE;
+import static org.neo4j.graphalgo.impl.wcc.WCCFactory.CONFIG_ALGO_TYPE;
+import static org.neo4j.graphalgo.impl.wcc.WCCFactory.CONFIG_SEED_PROPERTY;
+import static org.neo4j.graphalgo.impl.wcc.WCCFactory.SEED_TYPE;
 
 public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
 
