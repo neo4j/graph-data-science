@@ -118,8 +118,6 @@ public final class Pregel {
         ParallelUtil.parallelStreamConsume(
                 LongStream.range(0, graph.nodeCount()),
                 nodeIds -> nodeIds.forEach(nodeId -> messageQueues[(int) nodeId] = MpscLinkedQueue.newMpscLinkedQueue()));
-
-
     }
 
     public HugeDoubleArray run(final int maxIterations) {
@@ -268,9 +266,9 @@ public final class Pregel {
             nodeProperties.set(nodeId, value);
         }
 
-        synchronized void sendMessages(final long nodeId, final double message, Direction direction) {
+        void sendMessages(final long nodeId, final double message, Direction direction) {
             relationshipIterator.forEachRelationship(nodeId, direction, (sourceNodeId, targetNodeId) -> {
-                messageQueues[(int) targetNodeId].offer(message);
+                messageQueues[(int) targetNodeId].add(message);
                 messageBits.set(targetNodeId);
                 return true;
             });
