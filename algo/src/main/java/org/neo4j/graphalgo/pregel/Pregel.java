@@ -333,11 +333,10 @@ public final class Pregel {
                 doubleCursors = new DoubleArrayList(degree, ARRAY_SIZING_STRATEGY);
             }
 
-            for (int i = 0; i < degree; i++) {
-                Double nextMessage = messageQueues[(int) nodeId].poll();
-                if (nextMessage != null) {
-                    doubleCursors.add(nextMessage);
-                }
+            Double nextMessage;
+
+            while((nextMessage = messageQueues[(int) nodeId].poll()) != null) {
+                doubleCursors.add(nextMessage);
             }
 
             return doubleCursors.buffer;
