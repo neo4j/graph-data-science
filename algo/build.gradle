@@ -3,6 +3,8 @@ description = 'Neo4j Graph Algorithms :: Algorithms'
 dependencies {
     compile project(':algo-common')
 
+    compile group: 'org.jctools', name: 'jctools-core', version: ver.'jctools-core'
+
     compileOnly group: 'org.neo4j', name: 'neo4j', version: ver.'neo4j'
 
     testCompile project(':test-utils')

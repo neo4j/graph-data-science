@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.pregel;
 import com.carrotsearch.hppc.ArraySizingStrategy;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.DoubleArrayList;
+import org.jctools.maps.NonBlockingHashMapLong;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Degrees;
@@ -37,7 +38,6 @@ import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -116,14 +116,14 @@ public final class Pregel {
         this.messages = new double[(int) graph.nodeCount()][];
 
         if (computation.getMessageDirection() == Direction.BOTH) {
-            outgoingMessages = new ConcurrentHashMap<>((int) graph.nodeCount());
-            incomingMessages = new ConcurrentHashMap<>((int) graph.nodeCount());
+            outgoingMessages = new NonBlockingHashMapLong<>((int) graph.nodeCount());
+            incomingMessages = new NonBlockingHashMapLong<>((int) graph.nodeCount());
         } else if (computation.getMessageDirection() == Direction.OUTGOING) {
-            outgoingMessages = new ConcurrentHashMap<>((int) graph.nodeCount());
+            outgoingMessages = new NonBlockingHashMapLong<>((int) graph.nodeCount());
             incomingMessages = null;
         } else {
             outgoingMessages = null;
-            incomingMessages = new ConcurrentHashMap<>((int) graph.nodeCount());
+            incomingMessages = new NonBlockingHashMapLong<>((int) graph.nodeCount());
         }
     }
 
