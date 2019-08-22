@@ -59,7 +59,7 @@ public class WCCForkJoinMerge extends WCC<WCCForkJoinMerge> {
     private SequentialDisjointSetStruct disjointSetStruct;
 
     public static MemoryEstimation memoryEstimation(final boolean incremental) {
-        return WCC.memoryEstimation(incremental, WCCForkJoinMerge.class, ThresholdUnionFindProcess.class);
+        return WCC.memoryEstimation(incremental, WCCForkJoinMerge.class, ThresholdWCCProcess.class);
     }
 
     /**
@@ -89,9 +89,9 @@ public class WCCForkJoinMerge extends WCC<WCCForkJoinMerge> {
 
     @Override
     public DisjointSetStruct compute(double threshold) {
-        final ArrayList<ThresholdUnionFindProcess> ufProcesses = new ArrayList<>();
+        final ArrayList<ThresholdWCCProcess> ufProcesses = new ArrayList<>();
         for (long i = 0L; i < nodeCount; i += batchSize) {
-            ufProcesses.add(new ThresholdUnionFindProcess(i, batchSize, threshold));
+            ufProcesses.add(new ThresholdWCCProcess(i, batchSize, threshold));
         }
         merge(ufProcesses);
         return disjointSetStruct;
@@ -99,15 +99,15 @@ public class WCCForkJoinMerge extends WCC<WCCForkJoinMerge> {
 
     @Override
     public DisjointSetStruct computeUnrestricted() {
-        final ArrayList<UnionFindProcess> ufProcesses = new ArrayList<>();
+        final ArrayList<WCCProcess> ufProcesses = new ArrayList<>();
         for (long i = 0L; i < nodeCount; i += batchSize) {
-            ufProcesses.add(new UnionFindProcess(i, batchSize));
+            ufProcesses.add(new WCCProcess(i, batchSize));
         }
         merge(ufProcesses);
         return disjointSetStruct;
     }
 
-    private void merge(Collection<? extends AbstractUnionFindTask> ufProcesses) {
+    private void merge(Collection<? extends AbstractWCCTask> ufProcesses) {
         ParallelUtil.run(ufProcesses, executor);
         if (!running()) {
             return;
@@ -122,21 +122,21 @@ public class WCCForkJoinMerge extends WCC<WCCForkJoinMerge> {
         disjointSetStruct = null;
     }
 
-    private abstract class AbstractUnionFindTask implements Runnable {
+    private abstract static class AbstractWCCTask implements Runnable {
         abstract SequentialDisjointSetStruct getDisjointSetStruct();
     }
 
     /**
      * Process for finding unions of weakly connected components
      */
-    private class UnionFindProcess extends AbstractUnionFindTask {
+    private class WCCProcess extends AbstractWCCTask {
 
         private final long offset;
         private final long end;
         private final SequentialDisjointSetStruct struct;
         private final RelationshipIterator rels;
 
-        UnionFindProcess(long offset, long length) {
+        WCCProcess(long offset, long length) {
             this.offset = offset;
             this.end = offset + length;
             struct = initDisjointSetStruct(nodeCount, tracker);
@@ -170,7 +170,7 @@ public class WCCForkJoinMerge extends WCC<WCCForkJoinMerge> {
     /**
      * Process to calc a DisjointSetStruct using a threshold
      */
-    private class ThresholdUnionFindProcess extends AbstractUnionFindTask {
+    private class ThresholdWCCProcess extends AbstractWCCTask {
 
         private final long offset;
         private final long end;
@@ -178,7 +178,7 @@ public class WCCForkJoinMerge extends WCC<WCCForkJoinMerge> {
         private final RelationshipIterator rels;
         private final double threshold;
 
-        ThresholdUnionFindProcess(long offset, long length, double threshold) {
+        ThresholdWCCProcess(long offset, long length, double threshold) {
             this.offset = offset;
             this.end = offset + length;
             this.threshold = threshold;

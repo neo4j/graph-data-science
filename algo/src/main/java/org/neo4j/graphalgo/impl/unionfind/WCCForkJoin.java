@@ -53,7 +53,7 @@ public class WCCForkJoin extends WCC<WCCForkJoin> {
     private final long batchSize;
 
     public static MemoryEstimation memoryEstimation(final boolean incremental) {
-        return WCC.memoryEstimation(incremental, WCCForkJoin.class, ThresholdUnionFindTask.class);
+        return WCC.memoryEstimation(incremental, WCCForkJoin.class, ThresholdWCCTask.class);
     }
 
     /**
@@ -80,21 +80,21 @@ public class WCCForkJoin extends WCC<WCCForkJoin> {
 
     @Override
     public DisjointSetStruct compute(final double threshold) {
-        return ForkJoinPool.commonPool().invoke(new ThresholdUnionFindTask(0, threshold));
+        return ForkJoinPool.commonPool().invoke(new ThresholdWCCTask(0, threshold));
     }
 
     @Override
     public DisjointSetStruct computeUnrestricted() {
-        return ForkJoinPool.commonPool().invoke(new UnionFindTask(0));
+        return ForkJoinPool.commonPool().invoke(new WCCTask(0));
     }
 
-    private class UnionFindTask extends RecursiveTask<SequentialDisjointSetStruct> {
+    private class WCCTask extends RecursiveTask<SequentialDisjointSetStruct> {
 
         private final long offset;
         private final long end;
         private final RelationshipIterator rels;
 
-        UnionFindTask(long offset) {
+        WCCTask(long offset) {
             this.offset = offset;
             this.end = Math.min(offset + batchSize, nodeCount);
             this.rels = graph.concurrentCopy();
@@ -103,7 +103,7 @@ public class WCCForkJoin extends WCC<WCCForkJoin> {
         @Override
         protected SequentialDisjointSetStruct compute() {
             if (nodeCount - end >= batchSize && running()) {
-                final UnionFindTask process = new UnionFindTask(end);
+                final WCCTask process = new WCCTask(end);
                 process.fork();
                 return run().merge(process.join());
             }
@@ -127,14 +127,14 @@ public class WCCForkJoin extends WCC<WCCForkJoin> {
         }
     }
 
-    private class ThresholdUnionFindTask extends RecursiveTask<SequentialDisjointSetStruct> {
+    private class ThresholdWCCTask extends RecursiveTask<SequentialDisjointSetStruct> {
 
         private final long offset;
         private final long end;
         private final RelationshipIterator rels;
         private final double threshold;
 
-        ThresholdUnionFindTask(long offset, double threshold) {
+        ThresholdWCCTask(long offset, double threshold) {
             this.offset = offset;
             this.end = Math.min(offset + batchSize, nodeCount);
             this.rels = graph.concurrentCopy();
@@ -144,7 +144,7 @@ public class WCCForkJoin extends WCC<WCCForkJoin> {
         @Override
         protected SequentialDisjointSetStruct compute() {
             if (nodeCount - end >= batchSize && running()) {
-                final ThresholdUnionFindTask process = new ThresholdUnionFindTask(
+                final ThresholdWCCTask process = new ThresholdWCCTask(
                         offset,
                         end);
                 process.fork();

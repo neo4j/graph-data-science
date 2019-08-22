@@ -99,23 +99,23 @@ public class ParallelWCC extends WCC<ParallelWCC> {
 
         final Collection<Runnable> tasks = new ArrayList<>(threadSize);
         for (long i = 0L; i < this.nodeCount; i += batchSize) {
-            UnionFindTask unionFindTask = Double.isNaN(threshold)
-                    ? new UnionFindTask(dss, i)
-                    : new UnionFindWithThresholdTask(threshold, dss, i);
-            tasks.add(unionFindTask);
+            WCCTask wccTask = Double.isNaN(threshold)
+                    ? new WCCTask(dss, i)
+                    : new WCCWithThresholdTask(threshold, dss, i);
+            tasks.add(wccTask);
         }
         ParallelUtil.run(tasks, executor);
         return dss;
     }
 
-    private class UnionFindTask implements Runnable, RelationshipConsumer {
+    private class WCCTask implements Runnable, RelationshipConsumer {
 
         final DisjointSetStruct struct;
         final RelationshipIterator rels;
         private final long offset;
         private final long end;
 
-        UnionFindTask(
+        WCCTask(
                 DisjointSetStruct struct,
                 long offset) {
             this.struct = struct;
@@ -146,11 +146,11 @@ public class ParallelWCC extends WCC<ParallelWCC> {
         }
     }
 
-    private class UnionFindWithThresholdTask extends UnionFindTask implements WeightedRelationshipConsumer {
+    private class WCCWithThresholdTask extends WCCTask implements WeightedRelationshipConsumer {
 
         private final double threshold;
 
-        UnionFindWithThresholdTask(
+        WCCWithThresholdTask(
                 double threshold,
                 DisjointSetStruct struct,
                 long offset) {
