@@ -62,7 +62,7 @@ public class UnionFindPregel extends UnionFind<UnionFindPregel> {
                 concurrency,
                 minBatchSize,
                 Integer.MAX_VALUE);
-        long threadSize = ParallelUtil.threadSize(batchSize, nodeCount);
+        long threadSize = ParallelUtil.threadCount(batchSize, nodeCount);
         if (threadSize > Integer.MAX_VALUE) {
             throw new IllegalArgumentException(String.format(
                     "Too many nodes (%d) to run union find with the given concurrency (%d) and batchSize (%d)",
