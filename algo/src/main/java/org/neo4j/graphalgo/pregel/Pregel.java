@@ -34,19 +34,20 @@ import org.neo4j.graphalgo.core.utils.LazyMappingCollection;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 
 public final class Pregel {
 
     private final Graph graph;
-    private final HugeWeightMapping nodeValues;
 
+    private final HugeDoubleArray nodeValues;
     private final MpscLinkedQueue<Double>[] messageQueues;
     private final double[][] messages;
 
@@ -92,7 +93,7 @@ public final class Pregel {
     private Pregel(
             final Graph graph,
             final Computation computation,
-            final HugeWeightMapping nodeValues,
+            final HugeWeightMapping nodeProperties,
             final int batchSize,
             final int concurrency,
             final ExecutorService executor,
@@ -106,16 +107,22 @@ public final class Pregel {
         this.executor = executor;
         this.progressLogger = progressLogger;
 
-        this.nodeValues = nodeValues;
+        this.nodeValues = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
+        ParallelUtil.parallelStreamConsume(
+                LongStream.range(0, graph.nodeCount()),
+                nodeIds -> nodeIds.forEach(nodeId -> nodeValues.set(nodeId, nodeProperties.nodeWeight(nodeId)))
+        );
 
         this.messages = new double[(int) graph.nodeCount()][];
         this.messageQueues = new MpscLinkedQueue[(int) graph.nodeCount()];
         ParallelUtil.parallelStreamConsume(
-                IntStream.range(0, (int) graph.nodeCount()),
-                nodeIds -> nodeIds.forEach(nodeId -> messageQueues[nodeId] = MpscLinkedQueue.newMpscLinkedQueue()));
+                LongStream.range(0, graph.nodeCount()),
+                nodeIds -> nodeIds.forEach(nodeId -> messageQueues[(int) nodeId] = MpscLinkedQueue.newMpscLinkedQueue()));
+
+
     }
 
-    public HugeWeightMapping run(final int maxIterations) {
+    public HugeDoubleArray run(final int maxIterations) {
         iterations = 0;
 
         boolean canHalt = false;
@@ -204,7 +211,7 @@ public final class Pregel {
         private final double[][] messages;
         private final PrimitiveLongIterable nodes;
         private final Degrees degrees;
-        private final HugeWeightMapping nodeProperties;
+        private final HugeDoubleArray nodeProperties;
         private final MpscLinkedQueue<Double>[] messageQueues;
         private final RelationshipIterator relationshipIterator;
 
@@ -215,7 +222,7 @@ public final class Pregel {
                 final double[][] messages,
                 final PrimitiveLongIterable nodes,
                 final Degrees degrees,
-                final HugeWeightMapping nodeProperties,
+                final HugeDoubleArray nodeProperties,
                 final MpscLinkedQueue<Double>[] messageQueues,
                 final RelationshipIterator relationshipIterator) {
             this.iteration = iteration;
@@ -254,29 +261,19 @@ public final class Pregel {
         }
 
         double getNodeValue(final long nodeId) {
-            return nodeProperties.nodeWeight(nodeId);
+            return nodeProperties.get(nodeId);
         }
 
         void setNodeValue(final long nodeId, final double value) {
-            nodeProperties.putNodeWeight(nodeId, value);
+            nodeProperties.set(nodeId, value);
         }
 
         synchronized void sendMessages(final long nodeId, final double message, Direction direction) {
-            if (direction == Direction.OUTGOING || direction == Direction.BOTH) {
-                relationshipIterator.forEachRelationship(nodeId, Direction.OUTGOING, (sourceNodeId, targetNodeId) -> {
-                    messageQueues[(int) targetNodeId].offer(message);
-                    messageBits.set(targetNodeId);
-                    return true;
-                });
-            }
-
-            if (direction == Direction.INCOMING || direction == Direction.BOTH) {
-                relationshipIterator.forEachRelationship(nodeId, Direction.INCOMING, (sourceNodeId, targetNodeId) -> {
-                    messageQueues[(int) targetNodeId].offer(message);
-                    messageBits.set(targetNodeId);
-                    return true;
-                });
-            }
+            relationshipIterator.forEachRelationship(nodeId, direction, (sourceNodeId, targetNodeId) -> {
+                messageQueues[(int) targetNodeId].offer(message);
+                messageBits.set(targetNodeId);
+                return true;
+            });
         }
     }
 
@@ -335,7 +332,7 @@ public final class Pregel {
 
             Double nextMessage;
 
-            while((nextMessage = messageQueues[(int) nodeId].poll()) != null) {
+            while ((nextMessage = messageQueues[(int) nodeId].poll()) != null) {
                 doubleCursors.add(nextMessage);
             }
 

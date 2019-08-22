@@ -25,12 +25,12 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.pregel.pagerank.PRComputation;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
@@ -120,7 +120,7 @@ public class PRTest {
                 AllocationTracker.EMPTY,
                 ProgressLogger.NULL_LOGGER);
 
-        final HugeWeightMapping nodeValues = pregelJob.run(maxIterations);
+        final HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
 
         assertValues(graph, nodeValues,
                 0, 0.0276,
@@ -136,7 +136,7 @@ public class PRTest {
                 10, 0.0136);
     }
 
-    private void assertValues(final Graph graph, HugeWeightMapping computedValues, final double... values) {
+    private void assertValues(final Graph graph, HugeDoubleArray computedValues, final double... values) {
         Map<Long, Double> expectedValues = new HashMap<>();
         try (Transaction tx = DB.beginTx()) {
             for (int i = 0; i < values.length; i += 2) {
@@ -147,7 +147,7 @@ public class PRTest {
 
         expectedValues.forEach((idProp, expectedValue) -> {
             long neoId = graph.toOriginalNodeId(idProp);
-            double computedValue = computedValues.nodeWeight(neoId);
+            double computedValue = computedValues.get(neoId);
             Assert.assertEquals(
                     String.format("Node.id = %d should have page rank %f", idProp, expectedValue),
                     expectedValue,

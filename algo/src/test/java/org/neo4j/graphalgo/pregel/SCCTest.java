@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.pregel.components.SCCComputation;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
@@ -110,12 +111,12 @@ public class SCCTest {
                 AllocationTracker.EMPTY,
                 ProgressLogger.NULL_LOGGER);
 
-        HugeWeightMapping nodeValues = pregelJob.run(maxIterations);
+        HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
 
         assertValues(graph, nodeValues,0, 0, 1, 0, 2, 0, 3, 0, 4, 4, 5, 4, 6, 4, 7, 7, 8, 7, 9, 9);
     }
 
-    private void assertValues(final Graph graph, HugeWeightMapping computedValues, final long... values) {
+    private void assertValues(final Graph graph, HugeDoubleArray computedValues, final long... values) {
         Map<Long, Long> expectedValues = new HashMap<>();
         try (Transaction tx = DB.beginTx()) {
             for (int i = 0; i < values.length; i+=2) {
@@ -125,7 +126,7 @@ public class SCCTest {
         }
         expectedValues.forEach((idProp, expectedValue) -> {
             long neoId = graph.toOriginalNodeId(idProp);
-            long computedValue = (long) computedValues.nodeWeight(neoId);
+            long computedValue = (long) computedValues.get(neoId);
             Assert.assertEquals(
                     String.format("Node.id = %d should have component %d", idProp, expectedValue),
                     (long) expectedValue,

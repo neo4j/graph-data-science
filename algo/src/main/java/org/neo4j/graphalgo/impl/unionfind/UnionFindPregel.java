@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.pregel.Pregel;
 import org.neo4j.graphalgo.pregel.components.WCCComputation;
@@ -102,7 +103,7 @@ public class UnionFindPregel extends UnionFind<UnionFindPregel> {
 
     @Override
     public DisjointSetStruct compute(double threshold) {
-        final HugeWeightMapping communities = pregel.run(Integer.MAX_VALUE);
+        final HugeDoubleArray communities = pregel.run(Integer.MAX_VALUE);
 
         return new DisjointSetStruct() {
             @Override
@@ -112,7 +113,7 @@ public class UnionFindPregel extends UnionFind<UnionFindPregel> {
 
             @Override
             public long setIdOf(final long nodeId) {
-                return (long) communities.nodeWeight(nodeId);
+                return (long) communities.get(nodeId);
             }
 
             @Override
