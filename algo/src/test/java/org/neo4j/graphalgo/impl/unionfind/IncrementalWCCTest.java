@@ -35,7 +35,7 @@ import org.neo4j.graphdb.Transaction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class IncrementaWCCTest extends UnionFindTestBase {
+class IncrementalWCCTest extends WCCBaseTest {
 
     private static final String SEED_PROPERTY = "community";
 

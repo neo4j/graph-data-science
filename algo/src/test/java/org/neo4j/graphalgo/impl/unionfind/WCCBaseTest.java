@@ -24,7 +24,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -32,7 +31,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-abstract class UnionFindTestBase {
+abstract class WCCBaseTest {
 
     static GraphDatabaseAPI DB;
     static final RelationshipType RELATIONSHIP_TYPE = RelationshipType.withName("TYPE");
@@ -46,14 +45,13 @@ abstract class UnionFindTestBase {
     abstract int communitySize();
 
     DisjointSetStruct run(WCCType uf, Graph graph, WCC.Config config) {
-        return UnionFindHelper.run(
+        return WCCHelper.run(
                 uf,
                 graph,
-                Pools.DEFAULT,
                 communitySize() / Pools.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT_CONCURRENCY,
-                config,
-                AllocationTracker.EMPTY);
+                config
+        );
     }
 
     /**
@@ -68,5 +66,4 @@ abstract class UnionFindTestBase {
         }
         return sets.cardinality();
     }
-
 }

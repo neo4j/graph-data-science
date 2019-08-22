@@ -23,26 +23,22 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 
-import java.util.concurrent.ExecutorService;
-
-final class UnionFindHelper {
+final class WCCHelper {
 
     static DisjointSetStruct run(
             WCCType algorithmType,
             Graph graph,
-            ExecutorService executor,
             int minBatchSize,
             int concurrency,
-            final WCC.Config config,
-            AllocationTracker tracker) {
+            final WCC.Config config) {
 
         WCC<? extends WCC> algo = algorithmType.create(
                 graph,
-                executor,
+                org.neo4j.graphalgo.core.utils.Pools.DEFAULT,
                 minBatchSize,
                 concurrency,
                 config,
-                tracker);
+                AllocationTracker.EMPTY);
         DisjointSetStruct communities = algo.compute();
         algo.release();
         return communities;

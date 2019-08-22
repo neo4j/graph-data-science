@@ -30,8 +30,6 @@ import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphalgo.core.loading.NullWeightMap;
-import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.Exceptions;
 
@@ -59,14 +57,13 @@ final class WCCSafetyTest {
         IllegalStateException error = new IllegalStateException("some error");
         Graph graph = new FlakyGraph(100, 10, new Random(42L), error);
         try {
-            UnionFindHelper.run(
+            WCCHelper.run(
                     wccType,
                     graph,
-                    Pools.DEFAULT,
                     10,
                     10,
-                    ALGO_CONFIG,
-                    AllocationTracker.EMPTY);
+                    ALGO_CONFIG
+            );
         } catch (Throwable e) {
             assertSame(error, Exceptions.rootCause(e));
         }

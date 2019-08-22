@@ -39,7 +39,7 @@ import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class WCCTest extends UnionFindTestBase {
+class WCCTest extends WCCBaseTest {
 
     private static final int SETS_COUNT = 16;
     private static final int SET_SIZE = 10;
