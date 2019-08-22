@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.unionfind;
+package org.neo4j.graphalgo.wcc;
 
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.utils.BitUtil;
@@ -30,11 +30,11 @@ import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-abstract class UnionFindResultProducer {
+abstract class WccResultProducer {
 
-    private final PropertyTranslator<UnionFindResultProducer> propertyTranslator;
+    private final PropertyTranslator<WccResultProducer> propertyTranslator;
 
-    UnionFindResultProducer(final PropertyTranslator<UnionFindResultProducer> propertyTranslator) {
+    WccResultProducer(final PropertyTranslator<WccResultProducer> propertyTranslator) {
         this.propertyTranslator = propertyTranslator;
     }
 
@@ -46,7 +46,7 @@ abstract class UnionFindResultProducer {
      */
     abstract long setIdOf(long p);
 
-    PropertyTranslator<UnionFindResultProducer> getPropertyTranslator() {
+    PropertyTranslator<WccResultProducer> getPropertyTranslator() {
         return propertyTranslator;
     }
 
@@ -57,18 +57,18 @@ abstract class UnionFindResultProducer {
      * @param idMapping mapping between internal ids and Neo4j ids
      * @return tuples of Neo4j ids and their set ids
      */
-    Stream<UnionFindProc.StreamResult> resultStream(IdMapping idMapping) {
+    Stream<WccBaseProc.StreamResult> resultStream(IdMapping idMapping) {
         return LongStream.range(IdMapping.START_NODE_ID, idMapping.nodeCount())
-                .mapToObj(mappedId -> new UnionFindProc.StreamResult(
+                .mapToObj(mappedId -> new WccBaseProc.StreamResult(
                         idMapping.toOriginalNodeId(mappedId),
                         setIdOf(mappedId)));
     }
 
-    static final class NonConsecutive extends UnionFindResultProducer {
+    static final class NonConsecutive extends WccResultProducer {
 
         private final DisjointSetStruct dss;
 
-        NonConsecutive(final PropertyTranslator<UnionFindResultProducer> translator, final DisjointSetStruct dss) {
+        NonConsecutive(final PropertyTranslator<WccResultProducer> translator, final DisjointSetStruct dss) {
             super(translator);
             this.dss = dss;
         }
@@ -80,7 +80,7 @@ abstract class UnionFindResultProducer {
 
     }
 
-    static final class Consecutive extends UnionFindResultProducer {
+    static final class Consecutive extends WccResultProducer {
 
         // Magic number to estimate the number of communities that need to be mapped into consecutive space
         private static final long MAPPING_SIZE_QUOTIENT = 10L;
@@ -88,7 +88,7 @@ abstract class UnionFindResultProducer {
         private final HugeLongArray communities;
 
         Consecutive(
-                PropertyTranslator<UnionFindResultProducer> propertyTranslator,
+                PropertyTranslator<WccResultProducer> propertyTranslator,
                 DisjointSetStruct dss,
                 AllocationTracker tracker) {
             super(propertyTranslator);
@@ -121,14 +121,14 @@ abstract class UnionFindResultProducer {
     /**
      * Responsible for writing back the set ids to Neo4j.
      */
-    static final class NonSeedingTranslator implements PropertyTranslator.OfLong<UnionFindResultProducer> {
+    static final class NonSeedingTranslator implements PropertyTranslator.OfLong<WccResultProducer> {
 
-        public static final PropertyTranslator<UnionFindResultProducer> INSTANCE = new NonSeedingTranslator();
+        public static final PropertyTranslator<WccResultProducer> INSTANCE = new NonSeedingTranslator();
 
         private NonSeedingTranslator() {}
 
         @Override
-        public long toLong(final UnionFindResultProducer data, final long nodeId) {
+        public long toLong(final WccResultProducer data, final long nodeId) {
             return data.setIdOf(nodeId);
         }
     }
