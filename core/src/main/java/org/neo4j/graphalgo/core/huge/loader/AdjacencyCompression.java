@@ -102,7 +102,6 @@ final class AdjacencyCompression {
         return out;
     }
 
-    public static int counter = 0;
     /**
      * Applies delta encoding to the given {@code values}.
      * Weights are not encoded, {@code outWeights} contains weights according to {@code order}.

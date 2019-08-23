@@ -50,5 +50,7 @@ class BatchLoadResult {
         return maxId;
     }
 
-    long count() { return count; }
+    long count() {
+        return count;
+    }
 }

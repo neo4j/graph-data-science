@@ -38,19 +38,19 @@ abstract class RecordsBatchBuffer<Record extends AbstractBaseRecord> implements 
         return cursor.bulkNext(this);
     }
 
-    public int length() {
+    int length() {
         return length;
     }
 
-    public int capacity() {
+    int capacity() {
         return buffer.length;
     }
 
-    public boolean isFull() {
+    boolean isFull() {
         return length >= buffer.length;
     }
 
-    public void reset() {
+    void reset() {
         this.length = 0;
     }
 

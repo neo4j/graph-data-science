@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
-public abstract class AdjacencyBuilder {
+abstract class AdjacencyBuilder {
 
     abstract void addAll(
             long[] batch,
@@ -44,7 +44,7 @@ public abstract class AdjacencyBuilder {
 
     abstract Collection<Runnable> flushTasks();
 
-    public static AdjacencyBuilder compressing(
+    static AdjacencyBuilder compressing(
             RelationshipsBuilder globalBuilder,
             int numPages,
             int pageSize,

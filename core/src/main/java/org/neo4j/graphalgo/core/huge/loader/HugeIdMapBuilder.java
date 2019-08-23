@@ -64,8 +64,7 @@ final class HugeIdMapBuilder {
             long highestNodeId,
             int concurrency,
             AllocationTracker tracker) {
-        HugeLongArray graphIds = idMapBuilder.build();
-        return build(graphIds, idMapBuilder.size(), highestNodeId, concurrency, tracker);
+        return build(idMapBuilder.build(), idMapBuilder.size(), highestNodeId, concurrency, tracker);
     }
 
 

@@ -41,7 +41,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
             IdMap idMap,
             boolean hasRelationshipWeights,
             double defaultWeight,
-            org.neo4j.graphalgo.core.huge.loader.RelationshipImporter importer,
+            RelationshipImporter importer,
             Imports imports
     ) {
         this.buffer = buffer;

@@ -19,18 +19,23 @@
  */
 package org.neo4j.graphalgo.impl.walking;
 
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.Degrees;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IntBinaryPredicate;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.QueueBasedSpliterator;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphdb.*;
+import org.neo4j.graphdb.Direction;
 import org.neo4j.procedure.Name;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.PrimitiveIterator;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 

@@ -59,8 +59,8 @@ class NodeImporter {
                 readWeight(nodeReference, propertiesReference, buildersByPropertyId, internalId, cursors, read));
     }
 
-    public long importCypherNodes(NodesBatchBuffer buffer, List<Map<String, Number>> cypherNodeProperties) {
-        return importNodes(buffer,(nodeReference, propertiesReference, internalId) ->
+    long importCypherNodes(NodesBatchBuffer buffer, List<Map<String, Number>> cypherNodeProperties) {
+        return importNodes(buffer, (nodeReference, propertiesReference, internalId) ->
                 readCypherWeight(propertiesReference, internalId, cypherNodeProperties));
     }
 

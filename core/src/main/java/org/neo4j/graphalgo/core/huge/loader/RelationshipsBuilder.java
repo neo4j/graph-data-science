@@ -27,13 +27,16 @@ class RelationshipsBuilder {
 
     private final DuplicateRelationshipsStrategy duplicateRelationshipsStrategy;
     private final boolean weighted;
-    public final HugeAdjacencyListBuilder adjacency;
-    public final HugeAdjacencyListBuilder weights;
+    final HugeAdjacencyListBuilder adjacency;
+    final HugeAdjacencyListBuilder weights;
 
-    public HugeAdjacencyOffsets globalAdjacencyOffsets;
-    public HugeAdjacencyOffsets globalWeightOffsets;
+    HugeAdjacencyOffsets globalAdjacencyOffsets;
+    HugeAdjacencyOffsets globalWeightOffsets;
 
-    public RelationshipsBuilder(DuplicateRelationshipsStrategy duplicateRelationshipsStrategy, AllocationTracker tracker, boolean weighted) {
+    RelationshipsBuilder(
+            DuplicateRelationshipsStrategy duplicateRelationshipsStrategy,
+            AllocationTracker tracker,
+            boolean weighted) {
         this.duplicateRelationshipsStrategy = duplicateRelationshipsStrategy == DuplicateRelationshipsStrategy.DEFAULT ? DuplicateRelationshipsStrategy.SKIP : duplicateRelationshipsStrategy;
         this.weighted = weighted;
         adjacency = HugeAdjacencyListBuilder.newBuilder(tracker);

@@ -23,23 +23,23 @@ import org.neo4j.graphalgo.api.HugeWeightMapping;
 
 import java.util.Map;
 
-public final class IdsAndProperties {
+final class IdsAndProperties {
 
     final IdMap hugeIdMap;
     final Map<String, HugeWeightMapping> properties;
 
-    public IdsAndProperties(
+    IdsAndProperties(
             final IdMap hugeIdMap,
             final Map<String, HugeWeightMapping> properties) {
         this.hugeIdMap = hugeIdMap;
         this.properties = properties;
     }
 
-    public IdMap idMap() {
+    IdMap idMap() {
         return hugeIdMap;
     }
 
-    public Map<String, HugeWeightMapping> properties() {
+    Map<String, HugeWeightMapping> properties() {
         return properties;
     }
 }

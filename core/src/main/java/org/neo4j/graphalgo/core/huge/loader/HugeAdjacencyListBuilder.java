@@ -35,7 +35,7 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArrayElements;
 
 
-public final class HugeAdjacencyListBuilder {
+final class HugeAdjacencyListBuilder {
 
     private static final long MAX_SIZE = 1L << (Integer.SIZE - 1 + PAGE_SHIFT);
     private static final long PAGE_SIZE_IN_BYTES = sizeOfByteArray(PAGE_SIZE);
