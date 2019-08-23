@@ -85,13 +85,13 @@ class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
     }
 
     @Override
-    void loaded(BatchLoadResult result) {
+    void updateCounts(BatchLoadResult result) {
         totalRecordsSeen += result.rows();
         totalRelationshipsImported += result.count();
     }
 
     @Override
-    Relationships buildResult() {
+    Relationships result() {
         ParallelUtil.run(importer.flushTasks(), setup.executor);
 
         HugeAdjacencyList outAdjacencyList = outgoingRelationshipsBuilder.adjacency.build();

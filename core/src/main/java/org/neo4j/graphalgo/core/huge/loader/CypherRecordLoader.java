@@ -32,14 +32,17 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 abstract class CypherRecordLoader<R> {
+
+    static final long NO_COUNT = -1L;
+
     private final String loadQuery;
-    private final long nodeCount;
+    private final long recordCount;
     private final GraphDatabaseAPI api;
     final GraphSetup setup;
 
-    CypherRecordLoader(String loadQuery, long nodeCount, GraphDatabaseAPI api, GraphSetup setup) {
+    CypherRecordLoader(String loadQuery, long recordCount, GraphDatabaseAPI api, GraphSetup setup) {
         this.loadQuery = loadQuery;
-        this.nodeCount = nodeCount;
+        this.recordCount = recordCount;
         this.api = api;
         this.setup = setup;
     }
@@ -50,7 +53,7 @@ abstract class CypherRecordLoader<R> {
         } else {
             nonParallelLoad();
         }
-        return buildResult();
+        return result();
     }
 
     abstract BatchLoadResult loadOneBatch(
@@ -59,9 +62,9 @@ abstract class CypherRecordLoader<R> {
             int bufferSize
     );
 
-    abstract void loaded(BatchLoadResult result);
+    abstract void updateCounts(BatchLoadResult result);
 
-    abstract R buildResult();
+    abstract R result();
 
     private boolean loadsInParallel() {
         return CypherLoadingUtils.canBatchLoad(setup.concurrency(), loadQuery);
@@ -73,16 +76,18 @@ abstract class CypherRecordLoader<R> {
         final int threads;
         final int batchSize;
         final int bufferSize;
-        if (nodeCount > 0) {
-            long optimalNumberOfThreads = BitUtil.ceilDiv(nodeCount, ArrayUtil.MAX_ARRAY_LENGTH);
-            threads = (int) Math.min(setup.concurrency(), optimalNumberOfThreads);
-            long optimalBatchSize = BitUtil.ceilDiv(nodeCount, threads);
-            batchSize = (int) Math.min(optimalBatchSize, ArrayUtil.MAX_ARRAY_LENGTH);
-            bufferSize = Math.min(RecordsBatchBuffer.DEFAULT_BUFFER_SIZE, batchSize);
-        } else {
+        // if records are not counted we are a counting loader and must count
+        // otherwise we are an importing node/relationship loader and must import
+        if (recordCount == NO_COUNT) {
             threads = setup.concurrency();
             batchSize = ArrayUtil.MAX_ARRAY_LENGTH;
             bufferSize = RecordsBatchBuffer.DEFAULT_BUFFER_SIZE;
+        } else {
+            long optimalNumberOfThreads = BitUtil.ceilDiv(recordCount, ArrayUtil.MAX_ARRAY_LENGTH);
+            threads = (int) Math.min(setup.concurrency(), optimalNumberOfThreads);
+            long optimalBatchSize = BitUtil.ceilDiv(recordCount, threads);
+            batchSize = (int) Math.min(optimalBatchSize, ArrayUtil.MAX_ARRAY_LENGTH);
+            bufferSize = Math.min(RecordsBatchBuffer.DEFAULT_BUFFER_SIZE, batchSize);
         }
 
         long offset = 0;
@@ -98,7 +103,7 @@ abstract class CypherRecordLoader<R> {
                 BatchLoadResult result = CypherLoadingUtils.get(
                         "Error during loading relationships offset: " + (lastOffset + batchSize),
                         oldestTask);
-                loaded(result);
+                updateCounts(result);
                 lastOffset = result.offset();
                 working = result.rows() > 0;
             }
@@ -107,9 +112,9 @@ abstract class CypherRecordLoader<R> {
     }
 
     private void nonParallelLoad() {
-        int bufferSize = (int) Math.min(nodeCount, RecordsBatchBuffer.DEFAULT_BUFFER_SIZE);
+        int bufferSize = (int) Math.min(recordCount, RecordsBatchBuffer.DEFAULT_BUFFER_SIZE);
         BatchLoadResult result = loadOneBatch(0L, CypherLoadingUtils.NO_BATCHING, bufferSize);
-        loaded(result);
+        updateCounts(result);
     }
 
     final void runLoadingQuery(

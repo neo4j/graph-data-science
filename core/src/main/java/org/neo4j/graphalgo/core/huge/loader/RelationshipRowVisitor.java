@@ -25,6 +25,9 @@ import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphdb.Result;
 
 class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
+
+    private static final long NO_RELATIONSHIP_REFERENCE = -1L;
+
     private long lastSourceId = -1, lastTargetId = -1;
     private long source = -1, target = -1;
     private long rows = 0;
@@ -75,7 +78,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         buffer.add(
                 source,
                 target,
-                -1L,
+                NO_RELATIONSHIP_REFERENCE,
                 longWeight
         );
         if (buffer.isFull()) {

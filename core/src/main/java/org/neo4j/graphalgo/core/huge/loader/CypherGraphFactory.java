@@ -47,10 +47,10 @@ public class CypherGraphFactory extends GraphFactory {
     protected void validateTokens() { }
 
     public final MemoryEstimation memoryEstimation() {
-        BatchLoadResult nodeCount = new CypherRecordCountingLoader(setup.startLabel, api, setup).load();
+        BatchLoadResult nodeCount = new CountingCypherRecordLoader(setup.startLabel, api, setup).load();
         dimensions.nodeCount(nodeCount.rows());
 
-        BatchLoadResult relCount = new CypherRecordCountingLoader(setup.relationshipType, api, setup).load();
+        BatchLoadResult relCount = new CountingCypherRecordLoader(setup.relationshipType, api, setup).load();
         dimensions.maxRelCount(relCount.rows());
 
         return HeavyGraphFactory.getMemoryEstimation(setup, dimensions);
@@ -58,7 +58,7 @@ public class CypherGraphFactory extends GraphFactory {
 
     @Override
     public Graph importGraph() {
-        BatchLoadResult nodeCount = new CypherRecordCountingLoader(setup.startLabel, api, setup).load();
+        BatchLoadResult nodeCount = new CountingCypherRecordLoader(setup.startLabel, api, setup).load();
         IdsAndProperties nodes = new CypherNodeLoader(nodeCount.rows(), api, setup).load();
         Relationships relationships = new CypherRelationshipLoader(nodes.idMap(), api, setup).load();
 

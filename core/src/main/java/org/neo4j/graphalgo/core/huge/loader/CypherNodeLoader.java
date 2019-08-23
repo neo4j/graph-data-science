@@ -55,14 +55,14 @@ class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
     }
 
     @Override
-    void loaded(BatchLoadResult result) {
+    void updateCounts(BatchLoadResult result) {
         if (result.maxId() > maxNodeId) {
             maxNodeId = result.maxId();
         }
     }
 
     @Override
-    IdsAndProperties buildResult() {
+    IdsAndProperties result() {
         IdMap idMap = HugeIdMapBuilder.build(builder, maxNodeId, setup.concurrency, setup.tracker);
         Map<String, HugeWeightMapping> nodeProperties = nodePropertyBuilders.entrySet().stream()
                 .collect(Collectors.toMap(e -> e.getKey().propertyName, e -> e.getValue().build()));

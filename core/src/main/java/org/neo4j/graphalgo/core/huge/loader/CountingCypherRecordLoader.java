@@ -22,12 +22,12 @@ package org.neo4j.graphalgo.core.huge.loader;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-class CypherRecordCountingLoader extends CypherRecordLoader<BatchLoadResult> {
+class CountingCypherRecordLoader extends CypherRecordLoader<BatchLoadResult> {
 
     private long total;
 
-    CypherRecordCountingLoader(String cypherQuery, GraphDatabaseAPI api, GraphSetup setup) {
-        super(cypherQuery, -1L, api, setup);
+    CountingCypherRecordLoader(String cypherQuery, GraphDatabaseAPI api, GraphSetup setup) {
+        super(cypherQuery, NO_COUNT, api, setup);
     }
 
     @Override
@@ -38,12 +38,12 @@ class CypherRecordCountingLoader extends CypherRecordLoader<BatchLoadResult> {
     }
 
     @Override
-    void loaded(BatchLoadResult result) {
+    void updateCounts(BatchLoadResult result) {
         total += result.rows();
     }
 
     @Override
-    BatchLoadResult buildResult() {
+    BatchLoadResult result() {
         return new BatchLoadResult(0, total, -1L, -1L);
     }
 }
