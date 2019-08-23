@@ -137,7 +137,7 @@ public final class Pregel {
             if (messageBits.nextSetBit(0) == -1) {
                 canHalt = true;
             } else {
-                final List<MessageStep> messageSteps = runMessageSteps(messageBits);
+                runMessageSteps(messageBits);
             }
         }
         return nodeValues;
@@ -150,9 +150,9 @@ public final class Pregel {
     private List<ComputeStep> runComputeSteps(final int iteration) {
         Collection<PrimitiveLongIterable> iterables = graph.batchIterables(batchSize);
 
-        int threads = iterables.size();
+        int threadCount = iterables.size();
 
-        final List<ComputeStep> tasks = new ArrayList<>(threads);
+        final List<ComputeStep> tasks = new ArrayList<>(threadCount);
 
         Collection<ComputeStep> computeSteps = LazyMappingCollection.of(
                 iterables,
@@ -175,30 +175,21 @@ public final class Pregel {
         return tasks;
     }
 
-    private List<MessageStep> runMessageSteps(final BitSet messageBits) {
+    private void runMessageSteps(final BitSet messageBits) {
         Collection<PrimitiveLongIterable> iterables = graph.batchIterables(batchSize);
-
-        int threads = iterables.size();
-
-        final List<MessageStep> tasks = new ArrayList<>(threads);
 
         Collection<MessageStep> computeSteps = LazyMappingCollection.of(
                 iterables,
-                nodeIterable -> {
-                    MessageStep task = new MessageStep(
-                            messageBits,
-                            messages,
-                            computation.getMessageDirection(),
-                            nodeIterable,
-                            graph,
-                            messageQueues
-                    );
-                    tasks.add(task);
-                    return task;
-                });
+                nodeIterable -> new MessageStep(
+                        messageBits,
+                        messages,
+                        computation.getMessageDirection(),
+                        nodeIterable,
+                        graph,
+                        messageQueues
+                ));
 
         ParallelUtil.runWithConcurrency(concurrency, computeSteps, executor);
-        return tasks;
     }
 
     public static final class ComputeStep implements Runnable {
