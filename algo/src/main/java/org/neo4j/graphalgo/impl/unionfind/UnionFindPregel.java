@@ -77,7 +77,7 @@ public class UnionFindPregel extends UnionFind<UnionFindPregel> {
         if (communityMap == null || communityMap instanceof HugeNullWeightMap) {
             this.pregel = Pregel.withDefaultNodeValues(
                     graph,
-                    new WCCComputation(),
+                    WCCComputation::new,
                     (int) batchSize,
                     (int) threadSize,
                     executor,
@@ -86,7 +86,7 @@ public class UnionFindPregel extends UnionFind<UnionFindPregel> {
         } else {
             this.pregel = Pregel.withInitialNodeValues(
                     graph,
-                    new WCCComputation(),
+                    WCCComputation::new,
                     communityMap,
                     (int) batchSize,
                     (int) threadSize,

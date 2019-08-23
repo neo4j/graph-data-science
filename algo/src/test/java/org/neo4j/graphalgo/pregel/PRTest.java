@@ -113,7 +113,7 @@ public class PRTest {
 
         Pregel pregelJob = Pregel.withDefaultNodeValues(
                 graph,
-                new PRComputation(graph.nodeCount(), jumpProbability, dampingFactor),
+                () -> new PRComputation(graph.nodeCount(), jumpProbability, dampingFactor),
                 batchSize,
                 Pools.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT,

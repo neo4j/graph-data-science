@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Supplier;
 import java.util.stream.LongStream;
 
 public final class Pregel {
@@ -51,8 +52,7 @@ public final class Pregel {
     private final MpscLinkedQueue<Double>[] messageQueues;
     private final double[][] messages;
 
-
-    private final Computation computation;
+    private final Supplier<Computation> computationFactory;
     private final int batchSize;
     private final int concurrency;
     private final ExecutorService executor;
@@ -63,7 +63,7 @@ public final class Pregel {
 
     public static Pregel withDefaultNodeValues(
             final Graph graph,
-            final Computation computation,
+            final Supplier<Computation> computationFactory,
             final int batchSize,
             final int concurrency,
             final ExecutorService executor,
@@ -71,15 +71,15 @@ public final class Pregel {
             final ProgressLogger progressLogger) {
 
         final HugeWeightMapping nodeValues = HugeNodePropertiesBuilder
-                .of(graph.nodeCount(), tracker, computation.getDefaultNodeValue(), 0)
+                .of(graph.nodeCount(), tracker, computationFactory.get().getDefaultNodeValue(), 0)
                 .build();
 
-        return new Pregel(graph, computation, nodeValues, batchSize, concurrency, executor, tracker, progressLogger);
+        return new Pregel(graph, computationFactory, nodeValues, batchSize, concurrency, executor, tracker, progressLogger);
     }
 
     public static Pregel withInitialNodeValues(
             final Graph graph,
-            final Computation computation,
+            final Supplier<Computation> computationFactory,
             final HugeWeightMapping nodeValues,
             final int batchSize,
             final int concurrency,
@@ -87,12 +87,12 @@ public final class Pregel {
             final AllocationTracker tracker,
             final ProgressLogger progressLogger) {
 
-        return new Pregel(graph, computation, nodeValues, batchSize, concurrency, executor, tracker, progressLogger);
+        return new Pregel(graph, computationFactory, nodeValues, batchSize, concurrency, executor, tracker, progressLogger);
     }
 
     private Pregel(
             final Graph graph,
-            final Computation computation,
+            final Supplier<Computation> computationFactory,
             final HugeWeightMapping nodeProperties,
             final int batchSize,
             final int concurrency,
@@ -100,7 +100,7 @@ public final class Pregel {
             final AllocationTracker tracker,
             final ProgressLogger progressLogger) {
         this.graph = graph;
-        this.computation = computation;
+        this.computationFactory = computationFactory;
         this.tracker = tracker;
         this.batchSize = batchSize;
         this.concurrency = concurrency;
@@ -158,7 +158,7 @@ public final class Pregel {
                 iterables,
                 nodeIterable -> {
                     ComputeStep task = new ComputeStep(
-                            computation,
+                            computationFactory.get(),
                             graph.nodeCount(),
                             iteration,
                             messages,
@@ -177,17 +177,19 @@ public final class Pregel {
 
     private void runMessageSteps(final BitSet messageBits) {
         Collection<PrimitiveLongIterable> iterables = graph.batchIterables(batchSize);
-
+        Direction messageDirection = computationFactory.get().getMessageDirection();
         Collection<MessageStep> computeSteps = LazyMappingCollection.of(
                 iterables,
-                nodeIterable -> new MessageStep(
-                        messageBits,
-                        messages,
-                        computation.getMessageDirection(),
-                        nodeIterable,
-                        graph,
-                        messageQueues
-                ));
+                nodeIterable -> {
+                    return new MessageStep(
+                            messageBits,
+                            messages,
+                            messageDirection,
+                            nodeIterable,
+                            graph,
+                            messageQueues
+                    );
+                });
 
         ParallelUtil.runWithConcurrency(concurrency, computeSteps, executor);
     }
@@ -202,7 +204,7 @@ public final class Pregel {
         private final Degrees degrees;
         private final HugeDoubleArray nodeProperties;
         private final MpscLinkedQueue<Double>[] messageQueues;
-        private final ThreadLocal<RelationshipIterator> relationshipIterator;
+        private final RelationshipIterator relationshipIterator;
 
         private ComputeStep(
                 final Computation computation,
@@ -222,7 +224,7 @@ public final class Pregel {
             this.degrees = degrees;
             this.nodeProperties = nodeProperties;
             this.messageQueues = messageQueues;
-            this.relationshipIterator = ThreadLocal.withInitial(relationshipIterator::concurrentCopy);
+            this.relationshipIterator = relationshipIterator.concurrentCopy();
 
             computation.setComputeStep(this);
         }
@@ -258,7 +260,7 @@ public final class Pregel {
         }
 
         void sendMessages(final long nodeId, final double message, Direction direction) {
-            relationshipIterator.get().forEachRelationship(nodeId, direction, (sourceNodeId, targetNodeId) -> {
+            relationshipIterator.forEachRelationship(nodeId, direction, (sourceNodeId, targetNodeId) -> {
                 messageQueues[(int) targetNodeId].add(message);
                 messageBits.set(targetNodeId);
                 return true;

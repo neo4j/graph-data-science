@@ -100,7 +100,7 @@ public class WCCTest {
 
         Pregel pregelJob = Pregel.withDefaultNodeValues(
                 graph,
-                new WCCComputation(),
+                WCCComputation::new,
                 batchSize,
                 Pools.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT,

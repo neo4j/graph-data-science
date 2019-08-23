@@ -104,7 +104,7 @@ public class SCCTest {
 
         Pregel pregelJob = Pregel.withDefaultNodeValues(
                 graph,
-                new SCCComputation(),
+                SCCComputation::new,
                 batchSize,
                 Pools.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT,
