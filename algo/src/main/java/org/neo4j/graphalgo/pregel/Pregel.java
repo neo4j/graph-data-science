@@ -211,7 +211,7 @@ public final class Pregel {
         private final Degrees degrees;
         private final HugeDoubleArray nodeProperties;
         private final MpscLinkedQueue<Double>[] messageQueues;
-        private final RelationshipIterator relationshipIterator;
+        private final ThreadLocal<RelationshipIterator> relationshipIterator;
 
         private ComputeStep(
                 final Computation computation,
@@ -231,7 +231,7 @@ public final class Pregel {
             this.degrees = degrees;
             this.nodeProperties = nodeProperties;
             this.messageQueues = messageQueues;
-            this.relationshipIterator = relationshipIterator.concurrentCopy();
+            this.relationshipIterator = ThreadLocal.withInitial(relationshipIterator::concurrentCopy);
 
             computation.setComputeStep(this);
         }
@@ -267,7 +267,7 @@ public final class Pregel {
         }
 
         void sendMessages(final long nodeId, final double message, Direction direction) {
-            relationshipIterator.forEachRelationship(nodeId, direction, (sourceNodeId, targetNodeId) -> {
+            relationshipIterator.get().forEachRelationship(nodeId, direction, (sourceNodeId, targetNodeId) -> {
                 messageQueues[(int) targetNodeId].add(message);
                 messageBits.set(targetNodeId);
                 return true;
