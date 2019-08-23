@@ -28,8 +28,8 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
+import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -55,6 +55,7 @@ public final class WeightedDegreeCentralityTest {
     public static Collection<Object[]> data() {
         return Arrays.asList(
                 new Object[]{HeavyGraphFactory.class, "HeavyGraphFactory"},
+                new Object[]{CypherGraphFactory.class, "CypherGraphFactory"},
                 new Object[]{HugeGraphFactory.class, "HugeGraphFactory"}
         );
     }
@@ -131,7 +132,7 @@ public final class WeightedDegreeCentralityTest {
     }
 
     @AfterClass
-    public static void shutdownGraphDb() throws Exception {
+    public static void shutdownGraphDb() {
         if (db!=null) db.shutdown();
     }
 
@@ -142,7 +143,7 @@ public final class WeightedDegreeCentralityTest {
     }
 
     @Test
-    public void buildWeightsArray() throws Exception {
+    public void buildWeightsArray() {
         final Label label = Label.label("Label1");
         final Map<Long, double[]> expected = new HashMap<>();
 
@@ -157,7 +158,7 @@ public final class WeightedDegreeCentralityTest {
             expected.put(db.findNode(label, "name", "h").getId(), new double[] {});
             expected.put(db.findNode(label, "name", "i").getId(), new double[] {});
             expected.put(db.findNode(label, "name", "j").getId(), new double[] {});
-            tx.close();
+            tx.success();
         }
 
         final Graph graph;

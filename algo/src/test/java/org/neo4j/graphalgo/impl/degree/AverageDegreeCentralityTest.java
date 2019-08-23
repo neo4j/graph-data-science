@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
+import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
@@ -51,16 +52,11 @@ public final class AverageDegreeCentralityTest {
 
     @Parameterized.Parameters(name = "{1}")
     public static Collection<Object[]> data() {
-//        return Arrays.asList(
-//                new Object[]{HeavyGraphFactory.class, "HeavyGraphFactory"},
-//                new Object[]{CypherGraphFactory.class, "CypherGraphFactory"},
-//                new Object[]{HugeGraphFactory.class, "HugeGraphFactory"},
-//                new Object[]{GraphViewFactory.class, "GraphViewFactory"}
-//        );
-
         return Arrays.asList(
                 new Object[]{HeavyGraphFactory.class, "HeavyGraphFactory"},
-                new Object[]{HugeGraphFactory.class, "HugeGraphFactory"}
+                new Object[]{CypherGraphFactory.class, "CypherGraphFactory"},
+                new Object[]{HugeGraphFactory.class, "HugeGraphFactory"},
+                new Object[]{GraphViewFactory.class, "GraphViewFactory"}
         );
     }
 
@@ -136,7 +132,7 @@ public final class AverageDegreeCentralityTest {
     }
 
     @AfterClass
-    public static void shutdownGraphDb() throws Exception {
+    public static void shutdownGraphDb() {
         if (db!=null) db.shutdown();
     }
 
@@ -147,7 +143,7 @@ public final class AverageDegreeCentralityTest {
     }
 
     @Test
-    public void averageOutgoingCentrality() throws Exception {
+    public void averageOutgoingCentrality() {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -162,7 +158,7 @@ public final class AverageDegreeCentralityTest {
             expected.put(db.findNode(label, "name", "h").getId(), 0.0);
             expected.put(db.findNode(label, "name", "i").getId(), 0.0);
             expected.put(db.findNode(label, "name", "j").getId(), 0.0);
-            tx.close();
+            tx.success();
         }
 
         final Graph graph;
@@ -187,7 +183,7 @@ public final class AverageDegreeCentralityTest {
     }
 
     @Test
-    public void averageIncomingCentrality() throws Exception {
+    public void averageIncomingCentrality() {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -202,7 +198,7 @@ public final class AverageDegreeCentralityTest {
             expected.put(db.findNode(label, "name", "h").getId(), 0.0);
             expected.put(db.findNode(label, "name", "i").getId(), 0.0);
             expected.put(db.findNode(label, "name", "j").getId(), 0.0);
-            tx.close();
+            tx.success();
         }
 
         final Graph graph;
@@ -227,7 +223,7 @@ public final class AverageDegreeCentralityTest {
     }
 
     @Test
-    public void totalCentrality() throws Exception {
+    public void totalCentrality() {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
