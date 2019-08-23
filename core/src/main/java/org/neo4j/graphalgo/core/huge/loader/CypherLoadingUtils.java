@@ -33,7 +33,7 @@ import static org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory.SKIP;
 final class CypherLoadingUtils {
     static final int NO_BATCHING = -1;
 
-    static  boolean canBatchLoad(int concurrency, String statement) {
+    static boolean canBatchLoad(int concurrency, String statement) {
         return concurrency > 1 &&
                 (statement.contains("{" + LIMIT + "}") || statement.contains("$" + LIMIT)) &&
                 (statement.contains("{" + SKIP + "}") || statement.contains("$" + SKIP));

@@ -36,7 +36,6 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private List<Map<String, Number>> cypherNodeProperties;
     private NodeImporter importer;
 
-
     public NodeRowVisitor(Map<PropertyMapping, HugeNodePropertiesBuilder> nodeProperties, NodesBatchBuffer buffer, NodeImporter importer) {
         this.nodeProperties = nodeProperties;
         this.buffer = buffer;

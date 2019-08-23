@@ -42,8 +42,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class CypherGraphFactoryTest {
 
     private static final int COUNT = 10000;
-    private static final String QUERY = "UNWIND range(1," + COUNT + ") AS id CREATE (n {id:id})-[:REL {prop:id%10}]->(n)";
-    public static final String SKIP_LIMIT = "WITH * SKIP {skip} LIMIT {limit}";
+    private static final String QUERY = "UNWIND range(1, " + COUNT + ") AS id CREATE (n {id: id})-[:REL {prop: id % 10}]->(n)";
+    public static final String SKIP_LIMIT = "WITH * SKIP $skip LIMIT $limit";
 
     private GraphDatabaseAPI db;
 
@@ -68,8 +68,8 @@ public class CypherGraphFactoryTest {
         db = TestDatabaseCreator.createTestDatabase();
 
         db.execute(
-                "CREATE (n1 {partition: 6})-[:REL  {prop:1}]->(n2 {foo: 4})-[:REL {prop:2}]->(n3) " +
-                "CREATE (n1)-[:REL {prop:3}]->(n3) " +
+                "CREATE (n1 {partition: 6})-[:REL {prop:1}]->(n2 {foo: 4})-[:REL {prop: 2}]->(n3) " +
+                "CREATE (n1)-[:REL {prop: 3}]->(n3) " +
                 "RETURN id(n1) AS id1, id(n2) AS id2, id(n3) AS id3").accept(row -> {
             id1 = row.getNumber("id1").intValue();
             id2 = row.getNumber("id2").intValue();
@@ -77,7 +77,7 @@ public class CypherGraphFactoryTest {
             return true;
         });
         String nodes = "MATCH (n) RETURN id(n) AS id, n.partition AS partition, n.foo AS foo";
-        String rels = "MATCH (n)-[r]->(m) WHERE type(r) = {rel} RETURN id(n) AS source, id(m) AS target, r.prop AS weight ORDER BY id(r) DESC ";
+        String rels = "MATCH (n)-[r]->(m) WHERE type(r) = $rel RETURN id(n) AS source, id(m) AS target, r.prop AS weight ORDER BY id(r) DESC ";
 
         Graph graph = new GraphLoader(db)
                 .withParams(MapUtil.map("rel", "REL"))

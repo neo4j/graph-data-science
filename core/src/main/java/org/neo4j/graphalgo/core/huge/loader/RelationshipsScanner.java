@@ -34,7 +34,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
 
-public final class RelationshipsScanner extends StatementAction implements RecordScanner {
+final class RelationshipsScanner extends StatementAction implements RecordScanner {
 
     static InternalImporter.CreateScanner of(
             GraphDatabaseAPI api,
