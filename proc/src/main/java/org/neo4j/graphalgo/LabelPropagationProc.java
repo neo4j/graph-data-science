@@ -100,7 +100,8 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
         return stream(label, relationshipType, config);
     }
 
-    @Procedure(name = "algo.labelPropagation", mode = Mode.WRITE)
+    @Deprecated
+    @Procedure(name = "algo.labelPropagation", mode = Mode.WRITE, deprecatedBy = "algo.beta.labelPropagation")
     @Description("CALL algo.labelPropagation(" +
                  "label:String, relationship:String, direction:String, " +
                  "{iterations: 10, weightProperty: 'weight', seedProperty: 'seed', write: true, concurrency: 4}) " +
@@ -125,7 +126,8 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
         return betaLabelPropagation(label, relationshipType, rawConfig);
     }
 
-    @Procedure(value = "algo.labelPropagation.stream")
+    @Deprecated
+    @Procedure(value = "algo.labelPropagation.stream", deprecatedBy = "algo.beta.labelPropagation.stream")
     @Description("CALL algo.labelPropagation.stream(label:String, relationship:String, " +
                  "{iterations: 10, direction: 'OUTGOING', weightProperty: 'weight', seedProperty: 'seed', concurrency: 4}) " +
                  "YIELD nodeId, label")
