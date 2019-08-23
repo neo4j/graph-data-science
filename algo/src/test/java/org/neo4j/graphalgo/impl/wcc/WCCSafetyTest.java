@@ -53,7 +53,7 @@ final class WCCSafetyTest {
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
     @ParameterizedTest
     @EnumSource(WCCType.class)
-    void testUnionFindSafetyUnderFailure(WCCType wccType) {
+    void testWCCSafetyUnderFailure(WCCType wccType) {
         IllegalStateException error = new IllegalStateException("some error");
         Graph graph = new FlakyGraph(100, 10, new Random(42L), error);
         try {
@@ -135,37 +135,37 @@ final class WCCSafetyTest {
         @Override
         public RelationshipIntersect intersection() {
             throw new UnsupportedOperationException(
-                    "org.neo4j.graphalgo.impl.unionfind.UnionFindSafetyTest.FlakyGraph.intersection is not implemented.");
+                    "org.neo4j.graphalgo.impl.wcc.WCCSafetyTest.FlakyGraph.intersection is not implemented.");
         }
 
         @Override
         public Collection<PrimitiveLongIterable> batchIterables(final int batchSize) {
             throw new UnsupportedOperationException(
-                    "org.neo4j.graphalgo.impl.unionfind.UnionFindSafetyTest.FlakyGraph.hugeBatchIterables is not implemented.");
+                    "org.neo4j.graphalgo.impl.wcc.WCCSafetyTest.FlakyGraph.hugeBatchIterables is not implemented.");
         }
 
         @Override
         public int degree(final long nodeId, final Direction direction) {
             throw new UnsupportedOperationException(
-                    "org.neo4j.graphalgo.impl.unionfind.UnionFindSafetyTest.FlakyGraph.degree is not implemented.");
+                    "org.neo4j.graphalgo.impl.wcc.WCCSafetyTest.FlakyGraph.degree is not implemented.");
         }
 
         @Override
         public long toMappedNodeId(final long nodeId) {
             throw new UnsupportedOperationException(
-                    "org.neo4j.graphalgo.impl.unionfind.UnionFindSafetyTest.FlakyGraph.toHugeMappedNodeId is not implemented.");
+                    "org.neo4j.graphalgo.impl.wcc.WCCSafetyTest.FlakyGraph.toHugeMappedNodeId is not implemented.");
         }
 
         @Override
         public long toOriginalNodeId(final long nodeId) {
             throw new UnsupportedOperationException(
-                    "org.neo4j.graphalgo.impl.unionfind.UnionFindSafetyTest.FlakyGraph.toOriginalNodeId is not implemented.");
+                    "org.neo4j.graphalgo.impl.wcc.WCCSafetyTest.FlakyGraph.toOriginalNodeId is not implemented.");
         }
 
         @Override
         public boolean contains(final long nodeId) {
             throw new UnsupportedOperationException(
-                    "org.neo4j.graphalgo.impl.unionfind.UnionFindSafetyTest.FlakyGraph.contains is not implemented.");
+                    "org.neo4j.graphalgo.impl.wcc.WCCSafetyTest.FlakyGraph.contains is not implemented.");
         }
 
         @Override
@@ -176,19 +176,19 @@ final class WCCSafetyTest {
         @Override
         public PrimitiveLongIterator nodeIterator() {
             throw new UnsupportedOperationException(
-                    "org.neo4j.graphalgo.impl.unionfind.UnionFindSafetyTest.FlakyGraph.hugeNodeIterator is not implemented.");
+                    "org.neo4j.graphalgo.impl.wcc.WCCSafetyTest.FlakyGraph.hugeNodeIterator is not implemented.");
         }
 
         @Override
         public WeightMapping nodeProperties(final String type) {
             throw new UnsupportedOperationException(
-                    "org.neo4j.graphalgo.impl.unionfind.UnionFindSafetyTest.FlakyGraph.hugeNodeProperties is not implemented.");
+                    "org.neo4j.graphalgo.impl.wcc.WCCSafetyTest.FlakyGraph.hugeNodeProperties is not implemented.");
         }
 
         @Override
         public long getTarget(final long nodeId, final long index, final Direction direction) {
             throw new UnsupportedOperationException(
-                    "org.neo4j.graphalgo.impl.unionfind.UnionFindSafetyTest.FlakyGraph.getTarget is not implemented.");
+                    "org.neo4j.graphalgo.impl.wcc.WCCSafetyTest.FlakyGraph.getTarget is not implemented.");
         }
 
         @Override
@@ -204,19 +204,19 @@ final class WCCSafetyTest {
         @Override
         public boolean exists(final long sourceNodeId, final long targetNodeId, final Direction direction) {
             throw new UnsupportedOperationException(
-                    "org.neo4j.graphalgo.impl.unionfind.UnionFindSafetyTest.FlakyGraph.exists is not implemented.");
+                    "org.neo4j.graphalgo.impl.wcc.WCCSafetyTest.FlakyGraph.exists is not implemented.");
         }
 
         @Override
         public double weightOf(final long sourceNodeId, final long targetNodeId, double fallbackValue) {
             throw new UnsupportedOperationException(
-                    "org.neo4j.graphalgo.impl.unionfind.UnionFindSafetyTest.FlakyGraph.weightOf is not implemented.");
+                    "org.neo4j.graphalgo.impl.wcc.WCCSafetyTest.FlakyGraph.weightOf is not implemented.");
         }
 
         @Override
         public Set<String> availableNodeProperties() {
             throw new UnsupportedOperationException(
-                    "org.neo4j.graphalgo.impl.unionfind.UnionFindSafetyTest.FlakyGraph.availableNodeProperties is not implemented.");
+                    "org.neo4j.graphalgo.impl.wcc.WCCSafetyTest.FlakyGraph.availableNodeProperties is not implemented.");
         }
     }
 }
