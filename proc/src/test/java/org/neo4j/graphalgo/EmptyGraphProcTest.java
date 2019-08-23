@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.unionfind.MSColoringProc;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
+import org.neo4j.graphalgo.wcc.WccProc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
@@ -32,9 +33,6 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-/**
- * @author mknblch
- */
 public class EmptyGraphProcTest {
 
     private static GraphDatabaseAPI db;
@@ -45,6 +43,7 @@ public class EmptyGraphProcTest {
         db = TestDatabaseCreator.createTestDatabase();
 
         Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class);
+        procedures.registerProcedure(WccProc.class);
         procedures.registerProcedure(UnionFindProc.class);
         procedures.registerProcedure(MSColoringProc.class);
         procedures.registerProcedure(StronglyConnectedComponentsProc.class);
@@ -66,7 +65,7 @@ public class EmptyGraphProcTest {
     }
 
     @AfterAll
-    public static void tearDown() {
+    static void tearDown() {
         if (db != null) db.shutdown();
     }
 
@@ -81,6 +80,21 @@ public class EmptyGraphProcTest {
     @Test
     public void testUnionFind() throws Exception {
         db.execute("CALL algo.unionFind('', '',{graph:'" + graphImpl + "'}) YIELD nodes")
+                .accept((Result.ResultVisitor<Exception>) row -> {
+                    assertEquals(0L, row.getNumber("nodes"));
+                    return true;
+                });
+    }
+
+    @Test
+    public void testWCCStream() {
+        Result result = db.execute("CALL algo.beta.wcc.stream('', '',{graph:'" + graphImpl + "'})");
+        assertFalse(result.hasNext());
+    }
+
+    @Test
+    public void testWCC() throws Exception {
+        db.execute("CALL algo.beta.wcc('', '',{graph:'" + graphImpl + "'}) YIELD nodes")
                 .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(0L, row.getNumber("nodes"));
                     return true;
