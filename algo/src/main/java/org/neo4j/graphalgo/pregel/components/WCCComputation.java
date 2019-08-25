@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.pregel.components;
 
+import org.jctools.queues.MpscLinkedQueue;
 import org.neo4j.graphalgo.pregel.Computation;
 import org.neo4j.graphdb.Direction;
 
@@ -30,7 +31,11 @@ public class WCCComputation extends Computation {
     }
 
     @Override
-    protected void compute(final long nodeId, double[] messages) {
+    protected void compute(long nodeId, double[] messages) {
+    }
+
+    @Override
+    protected void compute(final long nodeId, MpscLinkedQueue<Double> messages) {
         if (getSuperstep() == 0) {
             double currentValue = getValue(nodeId);
             if (currentValue == getDefaultNodeValue()) {
@@ -43,9 +48,10 @@ public class WCCComputation extends Computation {
             long oldComponentId = (long) getValue(nodeId);
             long newComponentId = oldComponentId;
 
-            for (double message : messages) {
+            Double message;
+            while ((message = messages.poll()) != null) {
                 if (message < newComponentId) {
-                    newComponentId = (long) message;
+                    newComponentId = message.longValue();
                 }
             }
 

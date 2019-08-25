@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.pregel;
 
 
+import org.jctools.queues.MpscLinkedQueue;
 import org.neo4j.graphdb.Direction;
 
 public abstract class Computation {
@@ -36,6 +37,14 @@ public abstract class Computation {
 
     void setComputeStep(final Pregel.ComputeStep computeStep) {
         this.computeStep = computeStep;
+    }
+
+    protected void compute(final long nodeId, MpscLinkedQueue<Double> messages) {
+        double[] messageArray = new double[messages.size()];
+        for (int i = 0; i < messageArray.length; i++) {
+            messageArray[i] = messages.poll();
+        }
+        compute(nodeId, messageArray);
     }
 
     protected abstract void compute(final long nodeId, double[] messages);

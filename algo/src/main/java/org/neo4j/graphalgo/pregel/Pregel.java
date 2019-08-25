@@ -19,9 +19,7 @@
  */
 package org.neo4j.graphalgo.pregel;
 
-import com.carrotsearch.hppc.ArraySizingStrategy;
 import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.DoubleArrayList;
 import org.jctools.queues.MpscLinkedQueue;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
@@ -49,8 +47,8 @@ public final class Pregel {
     private final Graph graph;
 
     private final HugeDoubleArray nodeValues;
-    private final MpscLinkedQueue<Double>[] messageQueues;
-    private final double[][] messages;
+    private final MpscLinkedQueue<Double>[] primaryQueues;
+    private final MpscLinkedQueue<Double>[] secondaryQueues;
 
     private final Supplier<Computation> computationFactory;
     private final int batchSize;
@@ -113,31 +111,35 @@ public final class Pregel {
                 nodeIds -> nodeIds.forEach(nodeId -> nodeValues.set(nodeId, nodeProperties.nodeWeight(nodeId)))
         );
 
-        this.messages = new double[(int) graph.nodeCount()][];
-        this.messageQueues = new MpscLinkedQueue[(int) graph.nodeCount()];
+        this.primaryQueues = new MpscLinkedQueue[(int) graph.nodeCount()];
+        this.secondaryQueues = new MpscLinkedQueue[(int) graph.nodeCount()];
         ParallelUtil.parallelStreamConsume(
                 LongStream.range(0, graph.nodeCount()),
-                nodeIds -> nodeIds.forEach(nodeId -> messageQueues[(int) nodeId] = MpscLinkedQueue.newMpscLinkedQueue()));
+                nodeIds -> nodeIds.forEach(nodeId -> {
+                    primaryQueues[(int) nodeId] = MpscLinkedQueue.newMpscLinkedQueue();
+                    secondaryQueues[(int) nodeId] = MpscLinkedQueue.newMpscLinkedQueue();
+                }));
     }
 
     public HugeDoubleArray run(final int maxIterations) {
         iterations = 0;
 
         boolean canHalt = false;
+        BitSet messageBits = new BitSet(graph.nodeCount());
+
         while (iterations < maxIterations && !canHalt) {
             int iteration = iterations++;
-            final List<ComputeStep> computeSteps = runComputeSteps(iteration);
+
+            final List<ComputeStep> computeSteps = runComputeSteps(iteration, messageBits);
 
             // maybe use AtomicBitSet for memory efficiency?
-            final BitSet messageBits = computeSteps.get(0).getMessageBits();
+            messageBits = computeSteps.get(0).getSenderBits();
             for (int i = 1; i < computeSteps.size(); i++) {
-                messageBits.union(computeSteps.get(i).getMessageBits());
+                messageBits.union(computeSteps.get(i).getSenderBits());
             }
 
             if (messageBits.nextSetBit(0) == -1) {
                 canHalt = true;
-            } else {
-                runMessageSteps(messageBits);
             }
         }
         return nodeValues;
@@ -147,12 +149,15 @@ public final class Pregel {
         return iterations;
     }
 
-    private List<ComputeStep> runComputeSteps(final int iteration) {
+    private List<ComputeStep> runComputeSteps(final int iteration, BitSet messageBits) {
         Collection<PrimitiveLongIterable> iterables = graph.batchIterables(batchSize);
 
         int threadCount = iterables.size();
 
         final List<ComputeStep> tasks = new ArrayList<>(threadCount);
+
+        MpscLinkedQueue<Double>[] senderQueues = (iteration % 2 == 0) ? primaryQueues : secondaryQueues;
+        MpscLinkedQueue<Double>[] receiverQueues = (iteration % 2 == 0) ? secondaryQueues : primaryQueues;
 
         Collection<ComputeStep> computeSteps = LazyMappingCollection.of(
                 iterables,
@@ -161,11 +166,12 @@ public final class Pregel {
                             computationFactory.get(),
                             graph.nodeCount(),
                             iteration,
-                            messages,
                             nodeIterable,
                             graph,
                             nodeValues,
-                            messageQueues,
+                            messageBits,
+                            senderQueues,
+                            receiverQueues,
                             graph);
                     tasks.add(task);
                     return task;
@@ -175,59 +181,45 @@ public final class Pregel {
         return tasks;
     }
 
-    private void runMessageSteps(final BitSet messageBits) {
-        Collection<PrimitiveLongIterable> iterables = graph.batchIterables(batchSize);
-        Direction messageDirection = computationFactory.get().getMessageDirection();
-        Collection<MessageStep> computeSteps = LazyMappingCollection.of(
-                iterables,
-                nodeIterable -> {
-                    return new MessageStep(
-                            messageBits,
-                            messages,
-                            messageDirection,
-                            nodeIterable,
-                            graph,
-                            messageQueues
-                    );
-                });
-
-        ParallelUtil.runWithConcurrency(concurrency, computeSteps, executor);
-    }
-
     public static final class ComputeStep implements Runnable {
 
         private final int iteration;
         private final Computation computation;
-        private final BitSet messageBits;
-        private final double[][] messages;
+        private final BitSet senderBits;
+        private final BitSet receiverBits;
         private final PrimitiveLongIterable nodes;
         private final Degrees degrees;
         private final HugeDoubleArray nodeProperties;
-        private final MpscLinkedQueue<Double>[] messageQueues;
+        private final MpscLinkedQueue<Double>[] senderQueues;
+        private final MpscLinkedQueue<Double>[] receiverQueues;
         private final RelationshipIterator relationshipIterator;
 
         private ComputeStep(
                 final Computation computation,
                 final long totalNodeCount,
                 final int iteration,
-                final double[][] messages,
                 final PrimitiveLongIterable nodes,
                 final Degrees degrees,
                 final HugeDoubleArray nodeProperties,
-                final MpscLinkedQueue<Double>[] messageQueues,
+                final BitSet receiverBits,
+                final MpscLinkedQueue<Double>[] senderQueues,
+                final MpscLinkedQueue<Double>[] receiverQueues,
                 final RelationshipIterator relationshipIterator) {
             this.iteration = iteration;
             this.computation = computation;
-            this.messageBits = new BitSet(totalNodeCount);
-            this.messages = messages;
+            this.senderBits = new BitSet(totalNodeCount);
+            this.receiverBits = receiverBits;
             this.nodes = nodes;
             this.degrees = degrees;
             this.nodeProperties = nodeProperties;
-            this.messageQueues = messageQueues;
+            this.senderQueues = senderQueues;
+            this.receiverQueues = receiverQueues;
             this.relationshipIterator = relationshipIterator.concurrentCopy();
 
             computation.setComputeStep(this);
         }
+
+        private static final MpscLinkedQueue<Double> EMPTY_QUEUE = MpscLinkedQueue.newMpscLinkedQueue();
 
         @Override
         public void run() {
@@ -235,12 +227,16 @@ public final class Pregel {
 
             while (nodesIterator.hasNext()) {
                 final long nodeId = nodesIterator.next();
-                computation.compute(nodeId, messages[(int) nodeId]);
+                if (receiverBits.get(nodeId)) {
+                    computation.compute(nodeId, receiverQueues[(int) nodeId]);
+                } else {
+                    computation.compute(nodeId, EMPTY_QUEUE);
+                }
             }
         }
 
-        BitSet getMessageBits() {
-            return messageBits;
+        BitSet getSenderBits() {
+            return senderBits;
         }
 
         public int getIteration() {
@@ -261,73 +257,10 @@ public final class Pregel {
 
         void sendMessages(final long nodeId, final double message, Direction direction) {
             relationshipIterator.forEachRelationship(nodeId, direction, (sourceNodeId, targetNodeId) -> {
-                messageQueues[(int) targetNodeId].add(message);
-                messageBits.set(targetNodeId);
+                senderQueues[(int) targetNodeId].add(message);
+                senderBits.set(targetNodeId);
                 return true;
             });
-        }
-    }
-
-    public static final class MessageStep implements Runnable {
-        private final BitSet messageBits;
-        private final double[][] messages;
-        private final Direction messageDirection;
-        private final PrimitiveLongIterable nodes;
-        private final Degrees degrees;
-        private final MpscLinkedQueue<Double>[] messageQueues;
-
-        private static final double[] NO_MESSAGES = new double[0];
-
-        private static final ArraySizingStrategy ARRAY_SIZING_STRATEGY =
-                (currentBufferLength, elementsCount, expectedAdditions) -> expectedAdditions + elementsCount;
-
-        MessageStep(
-                final BitSet messageBits,
-                final double[][] messages,
-                final Direction messageDirection,
-                final PrimitiveLongIterable nodes,
-                final Degrees degrees,
-                final MpscLinkedQueue<Double>[] messageQueues) {
-            this.messageBits = messageBits;
-            this.messages = messages;
-            this.messageDirection = messageDirection.reverse();
-            this.nodes = nodes;
-            this.degrees = degrees;
-            this.messageQueues = messageQueues;
-        }
-
-        @Override
-        public void run() {
-            final PrimitiveLongIterator nodesIterator = nodes.iterator();
-
-            while (nodesIterator.hasNext()) {
-                final long nodeId = nodesIterator.next();
-                messages[(int) nodeId] = receiveMessages(nodeId, messageDirection, messages[(int) nodeId]);
-            }
-        }
-
-        private double[] receiveMessages(final long nodeId, Direction direction, double[] messages) {
-            if (!messageBits.get(nodeId)) {
-                return NO_MESSAGES;
-            }
-
-            final int degree = degrees.degree(nodeId, direction);
-            final DoubleArrayList doubleCursors;
-
-            if (messages != null) {
-                doubleCursors = new DoubleArrayList(0, ARRAY_SIZING_STRATEGY);
-                doubleCursors.buffer = messages;
-            } else {
-                doubleCursors = new DoubleArrayList(degree, ARRAY_SIZING_STRATEGY);
-            }
-
-            Double nextMessage;
-
-            while ((nextMessage = messageQueues[(int) nodeId].poll()) != null) {
-                doubleCursors.add(nextMessage);
-            }
-
-            return doubleCursors.buffer;
         }
     }
 }
