@@ -27,7 +27,7 @@ import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphalgo.api.HugeNodeWeights;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.huge.loader.HugeNodePropertiesBuilder;
 import org.neo4j.graphalgo.core.utils.LazyMappingCollection;
@@ -70,7 +70,7 @@ public final class Pregel {
             final AllocationTracker tracker,
             final ProgressLogger progressLogger) {
 
-        final HugeWeightMapping nodeValues = HugeNodePropertiesBuilder
+        final HugeNodeWeights nodeValues = HugeNodePropertiesBuilder
                 .of(graph.nodeCount(), tracker, computationFactory.get().getDefaultNodeValue(), 0)
                 .build();
 
@@ -80,7 +80,7 @@ public final class Pregel {
     public static Pregel withInitialNodeValues(
             final Graph graph,
             final Supplier<Computation> computationFactory,
-            final HugeWeightMapping nodeValues,
+            final HugeNodeWeights nodeValues,
             final int batchSize,
             final int concurrency,
             final ExecutorService executor,
@@ -93,7 +93,7 @@ public final class Pregel {
     private Pregel(
             final Graph graph,
             final Supplier<Computation> computationFactory,
-            final HugeWeightMapping nodeProperties,
+            final HugeNodeWeights nodeProperties,
             final int batchSize,
             final int concurrency,
             final ExecutorService executor,
