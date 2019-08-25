@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.LongStream;
 
@@ -74,7 +75,15 @@ public final class Pregel {
                 .of(graph.nodeCount(), tracker, computationFactory.get().getDefaultNodeValue(), 0)
                 .build();
 
-        return new Pregel(graph, computationFactory, nodeValues, batchSize, concurrency, executor, tracker, progressLogger);
+        return new Pregel(
+                graph,
+                computationFactory,
+                nodeValues,
+                batchSize,
+                concurrency,
+                executor,
+                tracker,
+                progressLogger);
     }
 
     public static Pregel withInitialNodeValues(
@@ -87,7 +96,15 @@ public final class Pregel {
             final AllocationTracker tracker,
             final ProgressLogger progressLogger) {
 
-        return new Pregel(graph, computationFactory, nodeValues, batchSize, concurrency, executor, tracker, progressLogger);
+        return new Pregel(
+                graph,
+                computationFactory,
+                nodeValues,
+                batchSize,
+                concurrency,
+                executor,
+                tracker,
+                progressLogger);
     }
 
     private Pregel(
@@ -126,17 +143,15 @@ public final class Pregel {
 
         // Tracks if a node received messages in the previous iteration
         BitSet receiverBits = new BitSet(graph.nodeCount());
+        BitSet voteBits = new BitSet(graph.nodeCount());
 
         while (iterations < maxIterations && !canHalt) {
             int iteration = iterations++;
 
-            final List<ComputeStep> computeSteps = runComputeSteps(iteration, receiverBits);
+            final List<ComputeStep> computeSteps = runComputeSteps(iteration, receiverBits, voteBits);
 
-            // maybe use AtomicBitSet for memory efficiency?
-            receiverBits = computeSteps.get(0).getSenderBits();
-            for (int i = 1; i < computeSteps.size(); i++) {
-                receiverBits.union(computeSteps.get(i).getSenderBits());
-            }
+            receiverBits = unionBitSets(computeSteps, ComputeStep::getSenders);
+            voteBits = unionBitSets(computeSteps, ComputeStep::getVotes);
 
             // No messages have been sent
             if (receiverBits.nextSetBit(0) == -1) {
@@ -150,7 +165,18 @@ public final class Pregel {
         return iterations;
     }
 
-    private List<ComputeStep> runComputeSteps(final int iteration, BitSet messageBits) {
+    private BitSet unionBitSets(List<ComputeStep> computeSteps, Function<ComputeStep, BitSet> fn) {
+        BitSet target = fn.apply(computeSteps.get(0));
+        for (int i = 1; i < computeSteps.size(); i++) {
+            target.union(fn.apply(computeSteps.get(i)));
+        }
+        return target;
+    }
+
+    private List<ComputeStep> runComputeSteps(
+            final int iteration,
+            BitSet messageBits,
+            BitSet voteToHaltBits) {
         Collection<PrimitiveLongIterable> iterables = graph.batchIterables(batchSize);
 
         int threadCount = iterables.size();
@@ -179,6 +205,7 @@ public final class Pregel {
                             graph,
                             nodeValues,
                             messageBits,
+                            voteToHaltBits,
                             messageQueues,
                             graph);
                     tasks.add(task);
@@ -195,6 +222,7 @@ public final class Pregel {
         private final Computation computation;
         private final BitSet senderBits;
         private final BitSet receiverBits;
+        private final BitSet voteBits;
         private final PrimitiveLongIterable nodes;
         private final Degrees degrees;
         private final HugeDoubleArray nodeProperties;
@@ -209,12 +237,14 @@ public final class Pregel {
                 final Degrees degrees,
                 final HugeDoubleArray nodeProperties,
                 final BitSet receiverBits,
+                final BitSet voteBits,
                 final MpscLinkedQueue<Double>[] messageQueues,
                 final RelationshipIterator relationshipIterator) {
             this.iteration = iteration;
             this.computation = computation;
             this.senderBits = new BitSet(globalNodeCount);
             this.receiverBits = receiverBits;
+            this.voteBits = voteBits;
             this.nodes = nodes;
             this.degrees = degrees;
             this.nodeProperties = nodeProperties;
@@ -230,12 +260,20 @@ public final class Pregel {
 
             while (nodesIterator.hasNext()) {
                 final long nodeId = nodesIterator.next();
-                computation.compute(nodeId, receiveMessages(nodeId));
+
+                if (receiverBits.get(nodeId) || !voteBits.get(nodeId)) {
+                    voteBits.clear(nodeId);
+                    computation.compute(nodeId, receiveMessages(nodeId));
+                }
             }
         }
 
-        BitSet getSenderBits() {
+        BitSet getSenders() {
             return senderBits;
+        }
+
+        BitSet getVotes() {
+            return voteBits;
         }
 
         public int getIteration() {
@@ -252,6 +290,10 @@ public final class Pregel {
 
         void setNodeValue(final long nodeId, final double value) {
             nodeProperties.set(nodeId, value);
+        }
+
+        void voteToHalt(long nodeId) {
+            voteBits.set(nodeId);
         }
 
         void sendMessages(final long nodeId, final double message, Direction direction) {

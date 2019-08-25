@@ -45,6 +45,10 @@ public abstract class Computation {
         return computeStep.getIteration();
     }
 
+    protected void voteToHalt(final long nodeId) {
+        computeStep.voteToHalt(nodeId);
+    }
+
     protected void sendMessages(final long nodeId , final double message) {
         computeStep.sendMessages(nodeId, message, getMessageDirection());
     }

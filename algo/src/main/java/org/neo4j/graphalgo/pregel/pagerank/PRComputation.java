@@ -30,11 +30,15 @@ public class PRComputation extends Computation {
 
     public PRComputation(
             final long nodeCount,
-            final double jumpProbability,
             final double dampingFactor) {
         this.nodeCount = nodeCount;
-        this.jumpProbability = jumpProbability;
+        this.jumpProbability = 1.0 - dampingFactor;
         this.dampingFactor = dampingFactor;
+    }
+
+    @Override
+    protected double getDefaultNodeValue() {
+        return 1.0 / nodeCount;
     }
 
     @Override

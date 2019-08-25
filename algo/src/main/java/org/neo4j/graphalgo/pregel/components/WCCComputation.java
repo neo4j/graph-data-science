@@ -57,6 +57,8 @@ public class WCCComputation extends Computation {
                 setValue(nodeId, newComponentId);
                 sendMessages(nodeId, newComponentId);
             }
+
+            voteToHalt(nodeId);
         }
     }
 }

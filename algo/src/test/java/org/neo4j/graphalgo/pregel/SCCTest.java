@@ -92,8 +92,7 @@ public class SCCTest {
         graph = new GraphLoader(DB)
                 .withAnyRelationshipType()
                 .withAnyLabel()
-                // The following options need to be default for Pregel
-                .withDirection(Direction.BOTH)
+                .withDirection(Direction.OUTGOING)
                 .load(HugeGraphFactory.class);
     }
 

@@ -105,7 +105,7 @@ public class LabelPropagationBenchmarkLdbc {
 
         Pregel pregelJob = Pregel.withDefaultNodeValues(
                 theGraph,
-                () -> new PRComputation(theGraph.nodeCount(), algoConfig.toleranceValue, algoConfig.dampingFactor),
+                () -> new PRComputation(theGraph.nodeCount(), algoConfig.dampingFactor),
                 (int) (theGraph.nodeCount() / Pools.DEFAULT_CONCURRENCY),
                 Pools.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT,

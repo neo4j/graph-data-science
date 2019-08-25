@@ -88,7 +88,6 @@ public class WCCTest {
         graph = new GraphLoader(DB)
                 .withAnyRelationshipType()
                 .withAnyLabel()
-                // The following options need to be default for Pregel
                 .withDirection(Direction.BOTH)
                 .load(HugeGraphFactory.class);
     }

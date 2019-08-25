@@ -98,8 +98,7 @@ public class PRTest {
         graph = new GraphLoader(DB)
                 .withAnyRelationshipType()
                 .withAnyLabel()
-                // The following options need to be default for Pregel
-                .withDirection(Direction.BOTH)
+                .withDirection(Direction.OUTGOING)
                 .load(HugeGraphFactory.class);
     }
 
@@ -107,13 +106,12 @@ public class PRTest {
     public void runPR() {
 
         int batchSize = 10;
-        int maxIterations = 40;
-        float jumpProbability = 0.15f;
+        int maxIterations = 10;
         float dampingFactor = 0.85f;
 
         Pregel pregelJob = Pregel.withDefaultNodeValues(
                 graph,
-                () -> new PRComputation(graph.nodeCount(), jumpProbability, dampingFactor),
+                () -> new PRComputation(graph.nodeCount(), dampingFactor),
                 batchSize,
                 Pools.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT,
@@ -123,17 +121,18 @@ public class PRTest {
         final HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
 
         assertValues(graph, nodeValues,
-                0, 0.0276,
-                1, 0.3138,
-                2, 0.2832,
-                3, 0.0330,
-                4, 0.0682,
-                5, 0.0330,
-                6, 0.0136,
-                7, 0.0136,
-                8, 0.0136,
-                9, 0.0136,
-                10, 0.0136);
+                0, 0.0276, // a
+                1, 0.3483, // b
+                2, 0.2650, // c
+                3, 0.0330, // d
+                4, 0.0682, // e
+                5, 0.0330, // f
+                6, 0.0136, // g
+                7, 0.0136, // h
+                8, 0.0136, // i
+                9, 0.0136, // j
+                10, 0.0136 // k
+        );
     }
 
     private void assertValues(final Graph graph, HugeDoubleArray computedValues, final double... values) {
