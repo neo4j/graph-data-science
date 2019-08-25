@@ -123,20 +123,23 @@ public final class Pregel {
         iterations = 0;
 
         boolean canHalt = false;
-        BitSet messageBits = new BitSet(graph.nodeCount());
+
+        // Tracks if a node received messages in the previous iteration
+        BitSet receiverBits = new BitSet(graph.nodeCount());
 
         while (iterations < maxIterations && !canHalt) {
             int iteration = iterations++;
 
-            final List<ComputeStep> computeSteps = runComputeSteps(iteration, messageBits);
+            final List<ComputeStep> computeSteps = runComputeSteps(iteration, receiverBits);
 
             // maybe use AtomicBitSet for memory efficiency?
-            messageBits = computeSteps.get(0).getSenderBits();
+            receiverBits = computeSteps.get(0).getSenderBits();
             for (int i = 1; i < computeSteps.size(); i++) {
-                messageBits.union(computeSteps.get(i).getSenderBits());
+                receiverBits.union(computeSteps.get(i).getSenderBits());
             }
 
-            if (messageBits.nextSetBit(0) == -1) {
+            // No messages have been sent
+            if (receiverBits.nextSetBit(0) == -1) {
                 canHalt = true;
             }
         }
@@ -154,13 +157,16 @@ public final class Pregel {
 
         final List<ComputeStep> tasks = new ArrayList<>(threadCount);
 
+        // Synchronization barrier:
         // Add termination flag to message queues that
         // received messages in the previous iteration.
-        ParallelUtil.parallelStreamConsume(
-                LongStream.range(0, graph.nodeCount()),
-                nodeIds -> nodeIds.forEach(nodeId -> {
-                    if (messageBits.get(nodeId)) messageQueues[(int) nodeId].add(TERMINATION_SYMBOL);
-                }));
+        if (iteration > 0) {
+            ParallelUtil.parallelStreamConsume(
+                    LongStream.range(0, graph.nodeCount()),
+                    nodeIds -> nodeIds.forEach(nodeId -> {
+                        if (messageBits.get(nodeId)) messageQueues[(int) nodeId].add(TERMINATION_SYMBOL);
+                    }));
+        }
 
         Collection<ComputeStep> computeSteps = LazyMappingCollection.of(
                 iterables,
@@ -197,7 +203,7 @@ public final class Pregel {
 
         private ComputeStep(
                 final Computation computation,
-                final long totalNodeCount,
+                final long globalNodeCount,
                 final int iteration,
                 final PrimitiveLongIterable nodes,
                 final Degrees degrees,
@@ -207,7 +213,7 @@ public final class Pregel {
                 final RelationshipIterator relationshipIterator) {
             this.iteration = iteration;
             this.computation = computation;
-            this.senderBits = new BitSet(totalNodeCount);
+            this.senderBits = new BitSet(globalNodeCount);
             this.receiverBits = receiverBits;
             this.nodes = nodes;
             this.degrees = degrees;
