@@ -39,12 +39,18 @@ public abstract class Computation {
         this.computeStep = computeStep;
     }
 
-    protected void compute(final long nodeId, MpscLinkedQueue<Double> messages) {
-        double[] messageArray = new double[messages.size()];
-        for (int i = 0; i < messageArray.length; i++) {
-            messageArray[i] = messages.poll();
+    private static final double[] NO_MESSAGES = new double[0];
+
+    protected void computeOnQueue(final long nodeId, MpscLinkedQueue<Double> messages) {
+        if (messages == null) {
+            compute(nodeId, NO_MESSAGES);
+        } else {
+            double[] messageArray = new double[messages.size()];
+            for (int i = 0; i < messageArray.length; i++) {
+                messageArray[i] = messages.poll();
+            }
+            compute(nodeId, messageArray);
         }
-        compute(nodeId, messageArray);
     }
 
     protected abstract void compute(final long nodeId, double[] messages);

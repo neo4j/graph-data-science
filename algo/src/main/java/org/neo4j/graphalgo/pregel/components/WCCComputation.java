@@ -35,7 +35,7 @@ public class WCCComputation extends Computation {
     }
 
     @Override
-    protected void compute(final long nodeId, MpscLinkedQueue<Double> messages) {
+    protected void computeOnQueue(final long nodeId, MpscLinkedQueue<Double> messages) {
         if (getSuperstep() == 0) {
             double currentValue = getValue(nodeId);
             if (currentValue == getDefaultNodeValue()) {
@@ -48,10 +48,12 @@ public class WCCComputation extends Computation {
             long oldComponentId = (long) getValue(nodeId);
             long newComponentId = oldComponentId;
 
-            Double message;
-            while ((message = messages.poll()) != null) {
-                if (message < newComponentId) {
-                    newComponentId = message.longValue();
+            if (messages != null) {
+                Double message;
+                while (!(message = messages.poll()).isNaN()) {
+                    if (message < newComponentId) {
+                        newComponentId = message.longValue();
+                    }
                 }
             }
 

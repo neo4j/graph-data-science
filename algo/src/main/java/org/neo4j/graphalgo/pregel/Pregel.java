@@ -44,11 +44,13 @@ import java.util.stream.LongStream;
 
 public final class Pregel {
 
+    // Marks the end of messages from the previous iteration
+    private static final Double TERMINATION_SYMBOL = Double.NaN;
+
     private final Graph graph;
 
     private final HugeDoubleArray nodeValues;
-    private final MpscLinkedQueue<Double>[] primaryQueues;
-    private final MpscLinkedQueue<Double>[] secondaryQueues;
+    private final MpscLinkedQueue<Double>[] messageQueues;
 
     private final Supplier<Computation> computationFactory;
     private final int batchSize;
@@ -111,14 +113,10 @@ public final class Pregel {
                 nodeIds -> nodeIds.forEach(nodeId -> nodeValues.set(nodeId, nodeProperties.nodeWeight(nodeId)))
         );
 
-        this.primaryQueues = new MpscLinkedQueue[(int) graph.nodeCount()];
-        this.secondaryQueues = new MpscLinkedQueue[(int) graph.nodeCount()];
+        this.messageQueues = new MpscLinkedQueue[(int) graph.nodeCount()];
         ParallelUtil.parallelStreamConsume(
                 LongStream.range(0, graph.nodeCount()),
-                nodeIds -> nodeIds.forEach(nodeId -> {
-                    primaryQueues[(int) nodeId] = MpscLinkedQueue.newMpscLinkedQueue();
-                    secondaryQueues[(int) nodeId] = MpscLinkedQueue.newMpscLinkedQueue();
-                }));
+                nodeIds -> nodeIds.forEach(nodeId -> messageQueues[(int) nodeId] = MpscLinkedQueue.newMpscLinkedQueue()));
     }
 
     public HugeDoubleArray run(final int maxIterations) {
@@ -156,8 +154,13 @@ public final class Pregel {
 
         final List<ComputeStep> tasks = new ArrayList<>(threadCount);
 
-        MpscLinkedQueue<Double>[] senderQueues = (iteration % 2 == 0) ? primaryQueues : secondaryQueues;
-        MpscLinkedQueue<Double>[] receiverQueues = (iteration % 2 == 0) ? secondaryQueues : primaryQueues;
+        // Add termination flag to message queues that
+        // received messages in the previous iteration.
+        ParallelUtil.parallelStreamConsume(
+                LongStream.range(0, graph.nodeCount()),
+                nodeIds -> nodeIds.forEach(nodeId -> {
+                    if (messageBits.get(nodeId)) messageQueues[(int) nodeId].add(TERMINATION_SYMBOL);
+                }));
 
         Collection<ComputeStep> computeSteps = LazyMappingCollection.of(
                 iterables,
@@ -170,8 +173,7 @@ public final class Pregel {
                             graph,
                             nodeValues,
                             messageBits,
-                            senderQueues,
-                            receiverQueues,
+                            messageQueues,
                             graph);
                     tasks.add(task);
                     return task;
@@ -190,8 +192,7 @@ public final class Pregel {
         private final PrimitiveLongIterable nodes;
         private final Degrees degrees;
         private final HugeDoubleArray nodeProperties;
-        private final MpscLinkedQueue<Double>[] senderQueues;
-        private final MpscLinkedQueue<Double>[] receiverQueues;
+        private final MpscLinkedQueue<Double>[] messageQueues;
         private final RelationshipIterator relationshipIterator;
 
         private ComputeStep(
@@ -202,8 +203,7 @@ public final class Pregel {
                 final Degrees degrees,
                 final HugeDoubleArray nodeProperties,
                 final BitSet receiverBits,
-                final MpscLinkedQueue<Double>[] senderQueues,
-                final MpscLinkedQueue<Double>[] receiverQueues,
+                final MpscLinkedQueue<Double>[] messageQueues,
                 final RelationshipIterator relationshipIterator) {
             this.iteration = iteration;
             this.computation = computation;
@@ -212,14 +212,11 @@ public final class Pregel {
             this.nodes = nodes;
             this.degrees = degrees;
             this.nodeProperties = nodeProperties;
-            this.senderQueues = senderQueues;
-            this.receiverQueues = receiverQueues;
+            this.messageQueues = messageQueues;
             this.relationshipIterator = relationshipIterator.concurrentCopy();
 
             computation.setComputeStep(this);
         }
-
-        private static final MpscLinkedQueue<Double> EMPTY_QUEUE = MpscLinkedQueue.newMpscLinkedQueue();
 
         @Override
         public void run() {
@@ -227,11 +224,7 @@ public final class Pregel {
 
             while (nodesIterator.hasNext()) {
                 final long nodeId = nodesIterator.next();
-                if (receiverBits.get(nodeId)) {
-                    computation.compute(nodeId, receiverQueues[(int) nodeId]);
-                } else {
-                    computation.compute(nodeId, EMPTY_QUEUE);
-                }
+                computation.computeOnQueue(nodeId, receiveMessages(nodeId));
             }
         }
 
@@ -257,10 +250,14 @@ public final class Pregel {
 
         void sendMessages(final long nodeId, final double message, Direction direction) {
             relationshipIterator.forEachRelationship(nodeId, direction, (sourceNodeId, targetNodeId) -> {
-                senderQueues[(int) targetNodeId].add(message);
+                messageQueues[(int) targetNodeId].add(message);
                 senderBits.set(targetNodeId);
                 return true;
             });
+        }
+
+        private MpscLinkedQueue<Double> receiveMessages(final long nodeId) {
+            return receiverBits.get(nodeId) ? messageQueues[(int) nodeId] : null;
         }
     }
 }
