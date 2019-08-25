@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.pregel.pagerank;
 
+import org.jctools.queues.MpscLinkedQueue;
 import org.neo4j.graphalgo.pregel.Computation;
 
 public class PRComputation extends Computation {
@@ -37,14 +38,17 @@ public class PRComputation extends Computation {
     }
 
     @Override
-    protected void compute(final long nodeId, double[] messages) {
+    protected void compute(final long nodeId, MpscLinkedQueue<Double> messages) {
         double newRank = getValue(nodeId);
 
         // compute new rank based on neighbor ranks
         if (getSuperstep() > 0) {
             double sum = 0;
-            for (double message : messages) {
-                sum += message;
+            if (messages != null) {
+                Double nextMessage;
+                while (!(nextMessage = messages.poll()).isNaN()) {
+                    sum += nextMessage;
+                }
             }
             newRank = (jumpProbability / nodeCount) + dampingFactor * sum;
         }

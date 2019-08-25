@@ -19,29 +19,12 @@
  */
 package org.neo4j.graphalgo.pregel.components;
 
-import org.neo4j.graphalgo.pregel.Computation;
+import org.neo4j.graphdb.Direction;
 
-public class SCCComputation extends Computation {
+public class SCCComputation extends WCCComputation {
 
     @Override
-    protected void compute(final long nodeId, double[] messages) {
-        if (getSuperstep() == 0) {
-            setValue(nodeId, nodeId);
-            sendMessages(nodeId, nodeId);
-        } else {
-            long oldComponentId = (long) getValue(nodeId);
-            long newComponentId = oldComponentId;
-
-            for (double message : messages) {
-                if (message < newComponentId) {
-                    newComponentId = (long) message;
-                }
-            }
-
-            if (newComponentId != oldComponentId) {
-                setValue(nodeId, newComponentId);
-                sendMessages(nodeId, newComponentId);
-            }
-        }
+    protected Direction getMessageDirection() {
+        return Direction.OUTGOING;
     }
 }

@@ -31,11 +31,7 @@ public class WCCComputation extends Computation {
     }
 
     @Override
-    protected void compute(long nodeId, double[] messages) {
-    }
-
-    @Override
-    protected void computeOnQueue(final long nodeId, MpscLinkedQueue<Double> messages) {
+    protected void compute(final long nodeId, MpscLinkedQueue<Double> messages) {
         if (getSuperstep() == 0) {
             double currentValue = getValue(nodeId);
             if (currentValue == getDefaultNodeValue()) {

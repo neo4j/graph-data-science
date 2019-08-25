@@ -224,7 +224,7 @@ public final class Pregel {
 
             while (nodesIterator.hasNext()) {
                 final long nodeId = nodesIterator.next();
-                computation.computeOnQueue(nodeId, receiveMessages(nodeId));
+                computation.compute(nodeId, receiveMessages(nodeId));
             }
         }
 
