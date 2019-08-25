@@ -25,13 +25,13 @@ import org.neo4j.graphalgo.pregel.Computation;
 public class PRComputation extends Computation {
 
     private final long nodeCount;
-    private final float jumpProbability;
-    private final float dampingFactor;
+    private final double jumpProbability;
+    private final double dampingFactor;
 
     public PRComputation(
             final long nodeCount,
-            final float jumpProbability,
-            final float dampingFactor) {
+            final double jumpProbability,
+            final double dampingFactor) {
         this.nodeCount = nodeCount;
         this.jumpProbability = jumpProbability;
         this.dampingFactor = dampingFactor;
