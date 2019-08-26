@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -54,21 +53,18 @@ class HugeGraphFactoryTest {
     @BeforeAll
     static void setup() {
         DB = TestDatabaseCreator.createTestDatabase();
-        try (Transaction tx = DB.beginTx()) {
-            DB.execute("CREATE " +
-                       "(n1:Node1 {prop1: 1})," +
-                       "(n2:Node2 {prop2: 2})," +
-                       "(n3:Node3 {prop3: 3})" +
-                       "CREATE " +
-                       "(n1)-[:REL1 {prop1: 1}]->(n2)," +
-                       "(n1)-[:REL2 {prop2: 2}]->(n3)," +
-                       "(n2)-[:REL1 {prop3: 3, weight: 42}]->(n3)," +
-                       "(n2)-[:REL3 {prop4: 4, weight: 1337}]->(n3);");
-            id1 = DB.execute("MATCH (n:Node1) RETURN id(n) AS id").<Long>columnAs("id").next();
-            id2 = DB.execute("MATCH (n:Node2) RETURN id(n) AS id").<Long>columnAs("id").next();
-            id3 = DB.execute("MATCH (n:Node3) RETURN id(n) AS id").<Long>columnAs("id").next();
-            tx.success();
-        }
+        DB.execute("CREATE " +
+                   "(n1:Node1 {prop1: 1})," +
+                   "(n2:Node2 {prop2: 2})," +
+                   "(n3:Node3 {prop3: 3})" +
+                   "CREATE " +
+                   "(n1)-[:REL1 {prop1: 1}]->(n2)," +
+                   "(n1)-[:REL2 {prop2: 2}]->(n3)," +
+                   "(n2)-[:REL1 {prop3: 3, weight: 42}]->(n3)," +
+                   "(n2)-[:REL3 {prop4: 4, weight: 1337}]->(n3);");
+        id1 = DB.execute("MATCH (n:Node1) RETURN id(n) AS id").<Long>columnAs("id").next();
+        id2 = DB.execute("MATCH (n:Node2) RETURN id(n) AS id").<Long>columnAs("id").next();
+        id3 = DB.execute("MATCH (n:Node3) RETURN id(n) AS id").<Long>columnAs("id").next();
     }
 
     @AfterAll

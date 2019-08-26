@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.huge.DirectIdMapping;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -49,18 +48,15 @@ class ExporterTest {
         DB = (GraphDatabaseAPI) new TestGraphDatabaseFactory()
                 .newImpermanentDatabaseBuilder(new File(UUID.randomUUID().toString()))
                 .newGraphDatabase();
-        try (Transaction tx = DB.beginTx()) {
-            DB.execute("CREATE " +
-                       "(n1:Node1 {prop1: 1})," +
-                       "(n2:Node2 {prop2: 2})," +
-                       "(n3:Node3 {prop3: 3})" +
-                       "CREATE " +
-                       "(n1)-[:REL1 {prop1: 1}]->(n2)," +
-                       "(n1)-[:REL2 {prop2: 2}]->(n3)," +
-                       "(n2)-[:REL1 {prop3: 3, weight: 42}]->(n3)," +
-                       "(n2)-[:REL3 {prop4: 4, weight: 1337}]->(n3);");
-            tx.success();
-        }
+        DB.execute("CREATE " +
+                   "(n1:Node1 {prop1: 1})," +
+                   "(n2:Node2 {prop2: 2})," +
+                   "(n3:Node3 {prop3: 3})" +
+                   "CREATE " +
+                   "(n1)-[:REL1 {prop1: 1}]->(n2)," +
+                   "(n1)-[:REL2 {prop2: 2}]->(n3)," +
+                   "(n2)-[:REL1 {prop3: 3, weight: 42}]->(n3)," +
+                   "(n2)-[:REL3 {prop4: 4, weight: 1337}]->(n3);");
     }
 
     @AfterAll
@@ -79,7 +75,7 @@ class ExporterTest {
     }
 
     private void transactionTerminationTest(ExecutorService executorService) {
-        TerminationFlag terminationFlag = () -> false;
+        TerminationFlag terminationFlag = () -> true;
         Exporter exporter = Exporter.of(DB, new DirectIdMapping(3))
                 .parallel(executorService, 4, terminationFlag)
                 .build();

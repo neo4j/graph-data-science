@@ -30,6 +30,8 @@ public interface TerminationFlag {
 
     TerminationFlag RUNNING_TRUE = () -> true;
 
+    int RUN_CHECK_NODE_COUNT = 10_000;
+
     static TerminationFlag wrap(KernelTransaction transaction) {
         return new TerminationFlagImpl(transaction);
     }

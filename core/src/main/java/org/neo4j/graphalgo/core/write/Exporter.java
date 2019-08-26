@@ -264,7 +264,7 @@ public final class Exporter extends StatementApi {
             for (long i = 0L; i < nodeCount; i++) {
                 writer.accept(ops, i);
                 ++progress;
-                if (progress % 10_000 == 0) {
+                if (progress % TerminationFlag.RUN_CHECK_NODE_COUNT == 0) {
                     progressLogger.logProgress(progress, nodeCount);
                     terminationFlag.assertRunning();
                 }
@@ -295,8 +295,8 @@ public final class Exporter extends StatementApi {
 
                             // Only log every 10_000 written nodes
                             // add +1 to avoid logging on the first written node
-                            if (((j + 1) - start) % 10_000 == 0) {
-                                long currentProgress = progress.addAndGet(10_000);
+                            if (((j + 1) - start) % TerminationFlag.RUN_CHECK_NODE_COUNT == 0) {
+                                long currentProgress = progress.addAndGet(TerminationFlag.RUN_CHECK_NODE_COUNT);
                                 progressLogger.logProgress(
                                         currentProgress,
                                         nodeCount);
@@ -306,7 +306,7 @@ public final class Exporter extends StatementApi {
 
                         // log progress for the last batch of written nodes
                         progressLogger.logProgress(
-                                progress.addAndGet((end - start + 1) % 10_000),
+                                progress.addAndGet((end - start + 1) % TerminationFlag.RUN_CHECK_NODE_COUNT),
                                 nodeCount);
                     });
                 });

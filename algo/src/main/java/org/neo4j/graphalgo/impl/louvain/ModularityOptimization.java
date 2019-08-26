@@ -337,7 +337,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                 final boolean move = move(node, localCommunities);
                 improvement |= move;
                 long count;
-                if (((count = counter.incrementAndGet()) % 10_000 == 0)) {
+                if (((count = counter.incrementAndGet()) % TerminationFlag.RUN_CHECK_NODE_COUNT == 0)) {
                     progressLogger.logProgress(
                             count,
                             denominator,

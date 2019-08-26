@@ -128,7 +128,7 @@ public class ParallelUnionFind extends UnionFind<ParallelUnionFind> {
         public void run() {
             for (long node = offset; node < end; node++) {
                 compute(node);
-                if (node % 10_000 == 0) {
+                if (node % RUN_CHECK_NODE_COUNT == 0) {
                     assertRunning();
                 }
             }

@@ -4,6 +4,7 @@
 [abstract]
 --
 This section describes the usage of transactions during the execution of an algorithm.
+When an algorithm procedure is called from Cypher, the procedure call is executed within the same transaction as the Cypher statement.
 --
 
 This section includes:
@@ -15,14 +16,10 @@ This section includes:
 [[tx-graph-loading]]
 == During graph loading
 
-When an algo is called from cypher, the procedure call is executed within the same
-transaction as the cypher statement.
+During loading, new transactions are used that do not inherit the transaction state of the Cypher transaction.
+This means that changes from the Cypher transaction state are not visible to the loading transactions.
 
-During loading, new transactions are used that do not inherit the transaction state
-of the cypher transaction. This means that changes from the cypher transaction state
-are not visible to the loading transactions.
-
-For example, the following statement will not be able to load any nodes.
+For example, the following statement will not be able to load any nodes:
 
 [EXAMPLE]
 [source, cypher]
@@ -30,13 +27,22 @@ For example, the following statement will not be able to load any nodes.
 MATCH (n) SET n:MyLabel CALL algo.graph.load('graph-name', 'MyLabel', '')
 ----
 
+Similarly, the following statement will execute the algorithm over an empty graph:
+
+[EXAMPLE]
+[source, cypher]
+----
+MATCH (n)
+SET n:MyLabel
+CALL algo.pageRank('MyLabel', null)
+----
 
 [[tx-graph-writing]]
 == During graph writing
 
-Properties are written to the graph in new transactions for every chunk of 100000 nodes.
+Properties are written to the graph in new transactions, batched over a fixed number of nodes.
 Those transactions are commited independently from the Cypher transaction.
-This means that if the Cypher transaction is terminated (either by the user or by the database system), already committed write transactions will _not_ be rolled back.
+This means, if the Cypher transaction is terminated (either by the user or by the database system), already committed write transactions will _not_ be rolled back.
 
 
 [[tx-termination]]
