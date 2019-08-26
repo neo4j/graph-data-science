@@ -171,7 +171,7 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
                        "    }" +
                        ")";
 
-        runQuery(query, parParams(parallel, graphImpl),
+        runQuery(query, db, parParams(parallel, graphImpl),
                 row -> {
                     assertEquals(12, row.getNumber("nodes").intValue());
                     assertTrue(row.getBoolean("write"));
@@ -183,7 +183,7 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
         String check = "MATCH (n) " +
                        "WHERE n.id IN [0,1] " +
                        "RETURN n.community AS community";
-        runQuery(check, row -> assertEquals(2, row.getNumber("community").intValue()));
+        runQuery(check, db, row -> assertEquals(2, row.getNumber("community").intValue()));
     }
 
     @ParameterizedTest
@@ -207,11 +207,11 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
         );
         runQuery(
                 "MATCH (n) WHERE n.id = 0 RETURN n.community AS community",
-                row -> assertEquals(6, row.getNumber("community").intValue())
+                db, row -> assertEquals(6, row.getNumber("community").intValue())
         );
         runQuery(
                 "MATCH (n) WHERE n.id = 1 RETURN n.community AS community",
-                row -> assertEquals(11, row.getNumber("community").intValue())
+                db, row -> assertEquals(11, row.getNumber("community").intValue())
         );
     }
 
@@ -227,7 +227,7 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
         QueryExecutionException exception = assertThrows(QueryExecutionException.class, () -> {
             Map<String, Object> params = parParams(parallel, graphImpl);
             params.put("seedProperty", "does_not_exist");
-            runQuery(query, params, row -> {});
+            runQuery(query, db, params, row -> {});
         });
         Throwable rootCause = ExceptionUtil.rootCause(exception);
         assertEquals("Node property not found: 'does_not_exist'", rootCause.getMessage());
@@ -244,9 +244,9 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
         String checkA = "MATCH (n) WHERE n.id = 0 RETURN n.community AS community";
         String checkB = "MATCH (n) WHERE n.id = 1 RETURN n.community AS community";
 
-        runQuery(query, parParams(parallel, graphImpl));
-        runQuery(checkA, row -> assertEquals(2, row.getNumber("community").intValue()));
-        runQuery(checkB, row -> assertNull(row.getNumber("community")));
+        runQuery(query, db, parParams(parallel, graphImpl));
+        runQuery(checkA, db, row -> assertEquals(2, row.getNumber("community").intValue()));
+        runQuery(checkB, db, row -> assertNull(row.getNumber("community")));
     }
 
     @ParameterizedTest
