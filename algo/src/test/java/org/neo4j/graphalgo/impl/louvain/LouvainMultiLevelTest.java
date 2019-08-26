@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -31,7 +30,6 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * (a)-(b)--(g)-(h)
@@ -78,7 +76,6 @@ public class LouvainMultiLevelTest extends LouvainTestBase {
 
     @AllGraphTypesTest
     void testComplex(Class<? extends GraphFactory> graphImpl) {
-        assumeTrue(graphImpl != HeavyCypherGraphFactory.class);
         Graph graph = loadGraph(graphImpl, SETUP_QUERY);
         final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
@@ -100,7 +97,6 @@ public class LouvainMultiLevelTest extends LouvainTestBase {
 
     @AllGraphTypesTest
     void testComplexRNL(Class<? extends GraphFactory> graphImpl) {
-        assumeTrue(graphImpl != HeavyCypherGraphFactory.class);
         Graph graph = loadGraph(graphImpl, SETUP_QUERY);
         final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)

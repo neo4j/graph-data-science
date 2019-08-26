@@ -20,13 +20,13 @@
 package org.neo4j.graphalgo.impl.louvain;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.TestProgressLogger;
+import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -44,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * | /            -> (abc)-(d)
  * (c)
  */
-public class LouvainTest extends LouvainTestBase {
+class LouvainTest extends LouvainTestBase {
 
     private static final String SETUP_QUERY = "CREATE" +
             "  (a:Node {name:'a'})" +
@@ -56,8 +56,8 @@ public class LouvainTest extends LouvainTestBase {
             ", (c)-[:TYPE {weight: 1.0}]->(a)" +
             ", (a)-[:TYPE {weight: 1.0}]->(c)";
 
-    public static final Label LABEL = Label.label("Node");
-    public static final String ABCD = "abcd";
+    private static final Label LABEL = Label.label("Node");
+    private static final String ABCD = "abcd";
 
     @Override
     void setupGraphDb(Graph graph) {
@@ -71,9 +71,8 @@ public class LouvainTest extends LouvainTestBase {
         }
     }
 
-    @ParameterizedTest
-    @MethodSource("parameters")
-    public void testRunner(Class<? extends GraphFactory> graphImpl) {
+    @AllGraphTypesTest
+    void testRunner(Class<? extends GraphFactory> graphImpl) {
         Graph graph = loadGraph(graphImpl, SETUP_QUERY);
         final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
@@ -88,9 +87,8 @@ public class LouvainTest extends LouvainTestBase {
         assertCommunities(algorithm);
     }
 
-    @ParameterizedTest
-    @MethodSource("parameters")
-    public void testRandomNeighborLouvain(Class<? extends GraphFactory> graphImpl) {
+    @AllGraphTypesTest
+    void testRandomNeighborLouvain(Class<? extends GraphFactory> graphImpl) {
         Graph graph = loadGraph(graphImpl, SETUP_QUERY);
         final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
@@ -105,17 +103,25 @@ public class LouvainTest extends LouvainTestBase {
         assertCommunities(algorithm);
     }
 
-    @ParameterizedTest
-    @MethodSource("parameters")
-    public void testMultithreadedLouvain(Class<? extends GraphFactory> graphImpl) {
+    @AllGraphTypesTest
+    void testMultithreadedLouvain(Class<? extends GraphFactory> graphImpl) {
         GraphBuilder.create(DB)
                 .setLabel("Node")
                 .setRelationship("REL")
                 .newCompleteGraphBuilder()
                 .createCompleteGraph(200, 1.0);
-        Graph graph = new GraphLoader(DB)
-                .withLabel("Node")
-                .withRelationshipType("REL")
+        GraphLoader graphLoader = new GraphLoader(DB);
+        if (graphImpl == HeavyCypherGraphFactory.class) {
+            graphLoader
+                    .withNodeStatement("MATCH (u:Node) RETURN id(u) as id")
+                    .withRelationshipStatement("MATCH (u1:Node)-[rel:REL]-(u2:Node) \n" +
+                                               "RETURN id(u1) AS source, id(u2) AS target");
+        } else {
+            graphLoader
+                    .withLabel("Node")
+                    .withRelationshipType("REL");
+        }
+        Graph graph = graphLoader
                 .withOptionalRelationshipWeightsFromProperty(null, 1.0)
                 .withoutNodeWeights()
                 .sorted()
@@ -138,7 +144,7 @@ public class LouvainTest extends LouvainTestBase {
     }
 
     @Test
-    public void testMemoryEstimationComputation() {
+    void testMemoryEstimationComputation() {
         LouvainFactory factory = new LouvainFactory(DEFAULT_CONFIG);
 
         GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();

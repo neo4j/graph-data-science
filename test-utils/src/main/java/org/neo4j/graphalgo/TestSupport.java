@@ -37,16 +37,24 @@ public class TestSupport {
 
     @Retention(RetentionPolicy.RUNTIME)
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.TestSupport#allGraphTypes")
-    public @interface AllGraphTypesTest {}
+    @MethodSource("org.neo4j.graphalgo.TestSupport#allTypesWithoutCypher")
+    public @interface AllGraphTypesWithoutCypherTest {}
 
-    public static Stream<Class<? extends GraphFactory>> allGraphTypes() {
+    public static Stream<Class<? extends GraphFactory>> allTypesWithoutCypher() {
         return Stream.of(
                 GraphViewFactory.class,
                 HeavyGraphFactory.class,
-                HeavyCypherGraphFactory.class,
                 HugeGraphFactory.class
         );
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @ParameterizedTest
+    @MethodSource({"org.neo4j.graphalgo.TestSupport#allTypesWithoutCypher", "org.neo4j.graphalgo.TestSupport#cypherType"})
+    public @interface AllGraphTypesTest {}
+
+    public static Stream<Class<? extends GraphFactory>> cypherType() {
+        return Stream.of(HeavyCypherGraphFactory.class);
     }
 
     @Retention(RetentionPolicy.RUNTIME)

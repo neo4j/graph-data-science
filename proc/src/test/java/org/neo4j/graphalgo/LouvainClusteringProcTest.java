@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.IntIntScatterMap;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
@@ -406,34 +407,6 @@ class LouvainClusteringProcTest extends ProcTestBase {
     }
 
     @AllGraphNamesTest
-    void shouldAllowHeavyGraph(String graphImpl) {
-        String query = "CALL algo.louvain(" +
-                       "    '', '', {" +
-                       "        graph: 'heavy'" +
-                       "    }" +
-                       ") YIELD nodes, communityCount";
-
-        runQuery(query, row -> {
-            assertEquals(9, row.getNumber("nodes").longValue(), "invalid node count");
-            assertEquals(3, row.getNumber("communityCount").longValue(), "wrong community count");
-        });
-    }
-
-    @AllGraphNamesTest
-    void shouldAllowHugeGraph(String graphImpl) {
-        String query = "CALL algo.louvain(" +
-                       "    '', '', {" +
-                       "        graph: 'huge'" +
-                       "    }" +
-                       ") YIELD nodes, communityCount";
-
-        runQuery(query, row -> {
-            assertEquals(9, row.getNumber("nodes").longValue(), "invalid node count");
-            assertEquals(3, row.getNumber("communityCount").longValue(), "wrong community count");
-        });
-    }
-
-    @AllGraphNamesTest
     void shouldRunWithSaturatedThreadPool(String graphImpl) {
         // ensure that we don't drop task that can't be scheduled while executing the algorithm.
 
@@ -468,8 +441,8 @@ class LouvainClusteringProcTest extends ProcTestBase {
         }
     }
 
-    @AllGraphNamesTest
-    void shouldAllowCypherGraph(String graphImpl) {
+    @Test
+    void shouldAllowCypherGraph() {
         String query = "CALL algo.louvain(" +
                        "    'MATCH (n) RETURN id(n) as id'," +
                        "    'MATCH (s)-->(t) RETURN id(s) as source, id(t) as target'," +

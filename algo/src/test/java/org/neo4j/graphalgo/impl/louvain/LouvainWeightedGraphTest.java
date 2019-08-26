@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -32,7 +31,6 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * (a)-(b)---(e)-(f)
@@ -95,7 +93,6 @@ class LouvainWeightedGraphTest extends LouvainTestBase {
 
     @AllGraphTypesTest
     void testWeightedLouvain(Class<? extends GraphFactory> graphImpl) {
-        assumeTrue(graphImpl != HeavyCypherGraphFactory.class);
         Graph graph = loadGraph(graphImpl, SETUP_QUERY);
         final Louvain louvain =
                 new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
@@ -119,7 +116,6 @@ class LouvainWeightedGraphTest extends LouvainTestBase {
 
     @AllGraphTypesTest
     void testWeightedRandomNeighborLouvain(Class<? extends GraphFactory> graphImpl) {
-        assumeTrue(graphImpl != HeavyCypherGraphFactory.class);
         Graph graph = loadGraph(graphImpl, SETUP_QUERY);
         final Louvain louvain =
                 new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)

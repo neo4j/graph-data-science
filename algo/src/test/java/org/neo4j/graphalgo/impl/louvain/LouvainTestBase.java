@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
@@ -73,13 +74,21 @@ abstract class LouvainTestBase {
 
     Graph loadGraph(Class<? extends GraphFactory> graphImpl, String cypher) {
         DB.execute(cypher);
-        Graph graph = new GraphLoader(DB)
-                .withAnyRelationshipType()
-                .withAnyLabel()
+        GraphLoader loader = new GraphLoader(DB)
                 .withoutNodeProperties()
                 .withOptionalRelationshipWeightsFromProperty("weight", 1.0)
-                .undirected()
-                .load(graphImpl);
+                .undirected();
+        if (graphImpl == HeavyCypherGraphFactory.class) {
+            loader
+                    .withNodeStatement("MATCH (u) RETURN id(u) as id")
+                    .withRelationshipStatement("MATCH (u1)-[rel]-(u2) \n" +
+                                               "RETURN id(u1) AS source, id(u2) AS target, rel.weight as weight");
+        } else {
+            loader
+                    .withAnyRelationshipType()
+                    .withAnyLabel();
+        }
+        Graph graph = loader.load(graphImpl);
         setupGraphDb(graph);
         return graph;
     }

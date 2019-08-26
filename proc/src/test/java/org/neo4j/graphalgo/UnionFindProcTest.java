@@ -180,7 +180,7 @@ public class UnionFindProcTest extends ProcTestBase {
                        ") YIELD setCount, communityCount";
 
         QueryExecutionException exception = assertThrows(QueryExecutionException.class, () -> {
-            runQuery(query, MapUtil.map("graph", graphImpl), row -> {});
+            runQuery(query, MapUtil.map("graph", graphImpl));
         });
         Throwable rootCause = ExceptionUtil.rootCause(exception);
         assertEquals("Node property not found: 'does_not_exist'", rootCause.getMessage());
