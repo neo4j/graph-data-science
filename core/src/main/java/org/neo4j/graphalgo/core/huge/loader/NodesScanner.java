@@ -66,7 +66,8 @@ final class NodesScanner extends StatementAction implements RecordScanner {
                 AbstractStorePageCacheScanner<NodeRecord> scanner,
                 int label,
                 ImportProgress progress,
-                NodeImporter importer, TerminationFlag terminationFlag) {
+                NodeImporter importer, 
+                TerminationFlag terminationFlag) {
             this.api = api;
             this.scanner = scanner;
             this.label = label;

@@ -69,12 +69,12 @@ class ExporterTest {
     }
 
     @Test
-    void stopsExortingWhenTransactionHasBeenTerminated() {
+    void stopsExportingWhenTransactionHasBeenTerminated() {
         transactionTerminationTest(null);
     }
 
     @Test
-    void stopsParallelExortingWhenTransactionHasBeenTerminated() {
+    void stopsParallelExportingWhenTransactionHasBeenTerminated() {
         transactionTerminationTest(Pools.DEFAULT);
     }
 

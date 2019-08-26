@@ -202,7 +202,6 @@ class HugeGraphFactoryTest {
                     new GraphLoader(DB)
                             .withTerminationFlag(terminationFlag)
                             .load(HugeGraphFactory.class);
-
                 });
         assertEquals(Status.Transaction.Terminated, exception.status());
     }
