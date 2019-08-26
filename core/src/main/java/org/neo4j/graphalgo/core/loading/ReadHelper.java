@@ -24,14 +24,20 @@ import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
-import org.neo4j.values.storable.FloatingPointValue;
-import org.neo4j.values.storable.IntegralValue;
+import org.neo4j.values.storable.NumberValue;
+import org.neo4j.values.storable.TemporalValue;
 import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.ValueGroup;
+import org.neo4j.values.storable.Values;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.chrono.ChronoLocalDateTime;
+import java.time.chrono.ChronoZonedDateTime;
+import java.time.temporal.Temporal;
 import java.util.function.LongConsumer;
 
 public final class ReadHelper {
+
     private ReadHelper() {
         throw new UnsupportedOperationException("No instances");
     }
@@ -67,19 +73,40 @@ public final class ReadHelper {
     public static double extractValue(Value value, double defaultValue) {
         // slightly different logic than org.neo4j.values.storable.Values#coerceToDouble
         // b/c we want to fallback to the default weight if the value is empty
-        if (value instanceof FloatingPointValue) {
-            return ((FloatingPointValue) value).doubleValue();
-        } else if (value instanceof IntegralValue) {
-            return (double) ((IntegralValue) value).longValue();
-        } else if (value.valueGroup() == ValueGroup.NO_VALUE) {
-            return defaultValue;
-        } else {
-            // TODO: We used to do be lenient and parse strings/booleans into doubles.
-            //       Do we want to do so or is failing on non numeric properties ok?
-            throw new IllegalArgumentException(String.format(
-                    "Unsupported type [%s] of value %s. Please use a numeric property.",
-                    value.valueGroup(),
-                    value));
+        if (value instanceof NumberValue) {
+            return ((NumberValue) value).doubleValue();
         }
+        if (Values.NO_VALUE.eq(value)) {
+            return defaultValue;
+        }
+        if (value instanceof TemporalValue) {
+            TemporalValue temporalValue = (TemporalValue) value;
+            // we could use temporalValue.get("epochMillis") but that one is only
+            // supports ZonedDateTimes. While the Values.temporalValue constructor
+            // turns every OffsetDateTime into a ZonedDateTime, it doesn't do so for
+            // LocalDateTimes. We do support the LocalDateTime here and also explicitly
+            // support OffsetDateTime as well, just in case the logic inside
+            // Values.temporalValue changes at some point.
+            Temporal temporal = temporalValue.asObjectCopy();
+            if (temporal instanceof ChronoLocalDateTime<?>) {
+                ChronoLocalDateTime<?> ldt = (ChronoLocalDateTime<?>) temporal;
+                return (double) ldt.toInstant(ZoneOffset.UTC).toEpochMilli();
+            }
+            if (temporal instanceof OffsetDateTime) {
+                OffsetDateTime odt = (OffsetDateTime) temporal;
+                return (double) odt.toInstant().toEpochMilli();
+            }
+            if (temporal instanceof ChronoZonedDateTime<?>) {
+                ChronoZonedDateTime<?> zdt = (ChronoZonedDateTime<?>) temporal;
+                return (double) zdt.toInstant().toEpochMilli();
+            }
+        }
+
+        // TODO: We used to do be lenient and parse strings/booleans into doubles.
+        //       Do we want to do so or is failing on non numeric properties ok?
+        throw new IllegalArgumentException(String.format(
+                "Unsupported type [%s] of value %s. Please use a numeric property.",
+                value.valueGroup(),
+                value));
     }
 }
