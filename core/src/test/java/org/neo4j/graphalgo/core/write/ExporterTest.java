@@ -75,7 +75,7 @@ class ExporterTest {
     }
 
     private void transactionTerminationTest(ExecutorService executorService) {
-        TerminationFlag terminationFlag = () -> true;
+        TerminationFlag terminationFlag = () -> false;
         Exporter exporter = Exporter.of(DB, new DirectIdMapping(3))
                 .parallel(executorService, 4, terminationFlag)
                 .build();
