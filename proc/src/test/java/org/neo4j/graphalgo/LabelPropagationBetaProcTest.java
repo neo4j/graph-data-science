@@ -224,7 +224,6 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
                        "    }" +
                        ")";
 
-
         QueryExecutionException exception = assertThrows(QueryExecutionException.class, () -> {
             Map<String, Object> params = parParams(parallel, graphImpl);
             params.put("seedProperty", "does_not_exist");
