@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.heavyweight.HeavyCypherGraphFactory;
+import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -111,7 +111,7 @@ class LouvainTest extends LouvainTestBase {
                 .newCompleteGraphBuilder()
                 .createCompleteGraph(200, 1.0);
         GraphLoader graphLoader = new GraphLoader(DB);
-        if (graphImpl == HeavyCypherGraphFactory.class) {
+        if (graphImpl == CypherGraphFactory.class) {
             graphLoader
                     .withNodeStatement("MATCH (u:Node) RETURN id(u) as id")
                     .withRelationshipStatement("MATCH (u1:Node)-[rel:REL]-(u2:Node) \n" +
