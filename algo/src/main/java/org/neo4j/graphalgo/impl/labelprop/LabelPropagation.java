@@ -122,7 +122,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         List<StepRunner> stepRunners = stepRunners(direction);
 
         long currentIteration = 0L;
-        while (running() && currentIteration < maxIterations) {
+        while (currentIteration < maxIterations) {
             ParallelUtil.runWithConcurrency(concurrency, stepRunners, 1L, MICROSECONDS, terminationFlag, executor);
             ++currentIteration;
         }

@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.KernelPropertyMapping;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.ImportProgress;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.kernel.api.StatementConstants;
@@ -39,6 +40,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
 
     private final ImportProgress progress;
     private final AllocationTracker tracker;
+    private final TerminationFlag terminationFlag;
 
     private Map<String, HugeNodePropertiesBuilder> builders;
     private HugeLongArrayBuilder idMapBuilder;
@@ -48,11 +50,13 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
             GraphDimensions dimensions,
             ImportProgress progress,
             AllocationTracker tracker,
+            TerminationFlag terminationFlag,
             ExecutorService threadPool,
             int concurrency) {
         super(NodeStoreScanner.NODE_ACCESS, "Node", api, dimensions, threadPool, concurrency);
         this.progress = progress;
         this.tracker = tracker;
+        this.terminationFlag = terminationFlag;
     }
 
     @Override
@@ -67,7 +71,8 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
                 scanner,
                 dimensions.labelId(),
                 progress,
-                new NodeImporter(idMapBuilder, builders.values())
+                new NodeImporter(idMapBuilder, builders.values()),
+                terminationFlag
         );
     }
 

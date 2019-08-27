@@ -19,7 +19,9 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
+import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.api.exceptions.Status;
 
 /**
  * @author mknblch
@@ -28,9 +30,20 @@ public interface TerminationFlag {
 
     TerminationFlag RUNNING_TRUE = () -> true;
 
+    int RUN_CHECK_NODE_COUNT = 10_000;
+
     static TerminationFlag wrap(KernelTransaction transaction) {
         return new TerminationFlagImpl(transaction);
     }
 
     boolean running();
+
+    /**
+     * @throws TransactionTerminatedException if the transaction has been termianted
+     */
+    default void assertRunning() {
+        if (!running()) {
+            throw new TransactionTerminatedException(Status.Transaction.Terminated);
+        }
+    }
 }

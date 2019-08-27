@@ -117,6 +117,8 @@ For example, node-ids and computed values.
 For large graphs, the streaming procedure might return millions, or even billions of results.
 In this case it may be more convenient to store the results of the algorithm, and then use them with later queries.
 
+The execution of any algorithm can be canceled by terminating the cypher transaction that is executing the procedure call.
+For more on how transactions are used, see <<transaction-handling, Transaction Handling>>.
 
 include::system-requirements.adoc[leveloffset=2]
 

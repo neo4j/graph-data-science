@@ -258,13 +258,15 @@ public final class Exporter extends StatementApi {
 
     private void writeSequential(WriteConsumer writer) {
         acceptInTransaction(stmt -> {
+            terminationFlag.assertRunning();
             long progress = 0L;
             Write ops = stmt.dataWrite();
             for (long i = 0L; i < nodeCount; i++) {
                 writer.accept(ops, i);
                 ++progress;
-                if (progress % 10_000 == 0) {
+                if (progress % TerminationFlag.RUN_CHECK_NODE_COUNT == 0) {
                     progressLogger.logProgress(progress, nodeCount);
+                    terminationFlag.assertRunning();
                 }
             }
             progressLogger.logProgress(
@@ -285,6 +287,7 @@ public final class Exporter extends StatementApi {
                 batchSize,
                 (start, len) -> () -> {
                     acceptInTransaction(stmt -> {
+                        terminationFlag.assertRunning();
                         long end = start + len;
                         Write ops = stmt.dataWrite();
                         for (long j = start; j < end; j++) {
@@ -292,17 +295,18 @@ public final class Exporter extends StatementApi {
 
                             // Only log every 10_000 written nodes
                             // add +1 to avoid logging on the first written node
-                            if (((j + 1) - start) % 10_000 == 0) {
-                                long currentProgress = progress.addAndGet(10_000);
+                            if (((j + 1) - start) % TerminationFlag.RUN_CHECK_NODE_COUNT == 0) {
+                                long currentProgress = progress.addAndGet(TerminationFlag.RUN_CHECK_NODE_COUNT);
                                 progressLogger.logProgress(
                                         currentProgress,
                                         nodeCount);
+                                terminationFlag.assertRunning();
                             }
                         }
 
                         // log progress for the last batch of written nodes
                         progressLogger.logProgress(
-                                progress.addAndGet((end - start + 1) % 10_000),
+                                progress.addAndGet((end - start + 1) % TerminationFlag.RUN_CHECK_NODE_COUNT),
                                 nodeCount);
                     });
                 });

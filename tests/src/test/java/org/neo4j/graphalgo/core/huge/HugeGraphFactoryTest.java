@@ -19,51 +19,61 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.graphdb.TransactionTerminatedException;
+import org.neo4j.kernel.api.exceptions.Status;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
 import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class HugeGraphFactoryTest {
 
-    @ClassRule
-    public static ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
+class HugeGraphFactoryTest {
+
+    private static GraphDatabaseAPI DB;
 
     private static long id1;
     private static long id2;
     private static long id3;
 
-    @BeforeClass
-    public static void setup() {
+    @BeforeAll
+    static void setup() {
+        DB = TestDatabaseCreator.createTestDatabase();
         DB.execute("CREATE " +
-                "(n1:Node1 {prop1: 1})," +
-                "(n2:Node2 {prop2: 2})," +
-                "(n3:Node3 {prop3: 3})" +
-                "CREATE " +
-                "(n1)-[:REL1 {prop1: 1}]->(n2)," +
-                "(n1)-[:REL2 {prop2: 2}]->(n3)," +
-                "(n2)-[:REL1 {prop3: 3, weight: 42}]->(n3)," +
-                "(n2)-[:REL3 {prop4: 4, weight: 1337}]->(n3);");
+                   "(n1:Node1 {prop1: 1})," +
+                   "(n2:Node2 {prop2: 2})," +
+                   "(n3:Node3 {prop3: 3})" +
+                   "CREATE " +
+                   "(n1)-[:REL1 {prop1: 1}]->(n2)," +
+                   "(n1)-[:REL2 {prop2: 2}]->(n3)," +
+                   "(n2)-[:REL1 {prop3: 3, weight: 42}]->(n3)," +
+                   "(n2)-[:REL3 {prop4: 4, weight: 1337}]->(n3);");
         id1 = DB.execute("MATCH (n:Node1) RETURN id(n) AS id").<Long>columnAs("id").next();
         id2 = DB.execute("MATCH (n:Node2) RETURN id(n) AS id").<Long>columnAs("id").next();
         id3 = DB.execute("MATCH (n:Node3) RETURN id(n) AS id").<Long>columnAs("id").next();
     }
 
-    @Test
-    public void testAnyLabel() {
+    @AfterAll
+    static void tearDown() {
+        if (DB != null) DB.shutdown();
+    }
 
+    @Test
+    void testAnyLabel() {
         final Graph graph = new GraphLoader(DB)
                 .withAnyLabel()
                 .withAnyRelationshipType()
@@ -73,7 +83,7 @@ public class HugeGraphFactoryTest {
     }
 
     @Test
-    public void testWithLabel() {
+    void testWithLabel() {
 
         final Graph graph = new GraphLoader(DB)
                 .withLabel("Node1")
@@ -85,7 +95,7 @@ public class HugeGraphFactoryTest {
     }
 
     @Test
-    public void testAnyRelation() {
+    void testAnyRelation() {
         final Graph graph = new GraphLoader(DB)
                 .withAnyLabel()
                 .withoutRelationshipWeights()
@@ -100,7 +110,7 @@ public class HugeGraphFactoryTest {
     }
 
     @Test
-    public void testWithBothWeightedRelationship() {
+    void testWithBothWeightedRelationship() {
         final Graph graph = new GraphLoader(DB)
                 .withAnyLabel()
                 .withoutRelationshipWeights()
@@ -118,7 +128,7 @@ public class HugeGraphFactoryTest {
     }
 
     @Test
-    public void testWithOutgoingRelationship() {
+    void testWithOutgoingRelationship() {
         final Graph graph = new GraphLoader(DB)
                 .withAnyLabel()
                 .withoutRelationshipWeights()
@@ -133,7 +143,7 @@ public class HugeGraphFactoryTest {
     }
 
     @Test
-    public void testWithProperty() {
+    void testWithProperty() {
 
         final Graph graph = new GraphLoader(DB)
                 .withAnyLabel()
@@ -146,7 +156,7 @@ public class HugeGraphFactoryTest {
     }
 
     @Test
-    public void testWithNodeProperties() {
+    void testWithNodeProperties() {
         final Graph graph = new GraphLoader(DB)
                 .withoutRelationshipWeights()
                 .withAnyRelationshipType()
@@ -163,7 +173,7 @@ public class HugeGraphFactoryTest {
     }
 
     @Test
-    public void testWithHugeNodeProperties() {
+    void testWithHugeNodeProperties() {
         final Graph graph = new GraphLoader(DB)
                 .withoutRelationshipWeights()
                 .withAnyRelationshipType()
@@ -177,6 +187,19 @@ public class HugeGraphFactoryTest {
         assertEquals(1.0, graph.nodeProperties("prop1").nodeWeight(graph.toMappedNodeId(0L)), 0.01);
         assertEquals(2.0, graph.nodeProperties("prop2").nodeWeight(graph.toMappedNodeId(1L)), 0.01);
         assertEquals(3.0, graph.nodeProperties("prop3").nodeWeight(graph.toMappedNodeId(2L)), 0.01);
+    }
+
+    @Test
+    void stopsImportingWhenTransactionHasBeenTerminated() {
+        TerminationFlag terminationFlag = () -> false;
+        TransactionTerminatedException exception = assertThrows(
+                TransactionTerminatedException.class,
+                () -> {
+                    new GraphLoader(DB)
+                            .withTerminationFlag(terminationFlag)
+                            .load(HugeGraphFactory.class);
+                });
+        assertEquals(Status.Transaction.Terminated, exception.status());
     }
 
     private long[] collectTargetIds(final Graph graph, long sourceId) {

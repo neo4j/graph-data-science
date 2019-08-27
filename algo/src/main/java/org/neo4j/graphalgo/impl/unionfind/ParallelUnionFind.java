@@ -28,8 +28,8 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
@@ -128,6 +128,9 @@ public class ParallelUnionFind extends UnionFind<ParallelUnionFind> {
         public void run() {
             for (long node = offset; node < end; node++) {
                 compute(node);
+                if (node % RUN_CHECK_NODE_COUNT == 0) {
+                    assertRunning();
+                }
             }
             getProgressLogger().logProgress((end - 1.0) / (nodeCount - 1.0));
         }

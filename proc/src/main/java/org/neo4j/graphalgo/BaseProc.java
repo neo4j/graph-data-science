@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.AbstractResultBuilder;
@@ -72,7 +73,8 @@ public abstract class BaseProc {
         String relationship = config.getRelationshipOrQuery();
         GraphLoader loader = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, config)
-                .withAllocationTracker(tracker);
+                .withAllocationTracker(tracker)
+                .withTerminationFlag(TerminationFlag.wrap(transaction));
         return configureLoader(loader, config);
     }
 

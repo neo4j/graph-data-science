@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.api;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.core.DuplicateRelationshipsStrategy;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
@@ -65,6 +66,7 @@ public class GraphSetup {
     public final Log log;
     public final long logMillis;
     public final AllocationTracker tracker;
+    public final TerminationFlag terminationFlag;
 
     // the executor service for parallel execution. null means single threaded evaluation.
     public final ExecutorService executor;
@@ -118,6 +120,7 @@ public class GraphSetup {
             boolean sort,
             boolean loadAsUndirected,
             AllocationTracker tracker,
+            TerminationFlag terminationFlag,
             String name,
             PropertyMapping[] nodePropertyMappings) {
 
@@ -140,6 +143,7 @@ public class GraphSetup {
         this.sort = sort;
         this.loadAsUndirected = loadAsUndirected;
         this.tracker = tracker;
+        this.terminationFlag = terminationFlag;
         this.name = name;
         this.nodePropertyMappings = nodePropertyMappings;
     }
@@ -176,6 +180,7 @@ public class GraphSetup {
                 false,
                 false,
                 AllocationTracker.EMPTY,
+                TerminationFlag.RUNNING_TRUE,
                 null,
                 new PropertyMapping[0]
         );
