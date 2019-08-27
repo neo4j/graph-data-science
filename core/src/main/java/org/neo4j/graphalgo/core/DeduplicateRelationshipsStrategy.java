@@ -19,17 +19,17 @@
  */
 package org.neo4j.graphalgo.core;
 
-public enum DuplicateRelationshipsStrategy {
+public enum DeduplicateRelationshipsStrategy {
     DEFAULT {
         public double merge(double runningTotal, double weight) {
-            throw new UnsupportedOperationException(
-                    "Multiple relationships between the same pair of nodes are not expected. " +
-                    "Try using SKIP or some other duplicate relationships strategy.");
+            throw new UnsupportedOperationException();
         }
     },
     NONE {
         public double merge(double runningTotal, double weight) {
-            return DEFAULT.merge(runningTotal, weight);
+            throw new UnsupportedOperationException(
+                    "Multiple relationships between the same pair of nodes are not expected. " +
+                    "Try using SKIP or some other duplicate relationships strategy.");
         }
     },
     SKIP {

@@ -28,13 +28,6 @@ task javadocJar(type: Jar) {
     from(javadoc.destinationDir)
 }
 
-test {
-    maxHeapSize = "1G"
-    useJUnitPlatform {
-        includeEngines 'junit-jupiter', 'junit-vintage'
-    }
-}
-
 publishing {
     publications {
         algo(MavenPublication) {

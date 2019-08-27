@@ -27,9 +27,10 @@ import org.junit.runners.Parameterized;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.core.DeduplicateRelationshipsStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
+import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -248,6 +249,7 @@ public final class AverageDegreeCentralityTest {
             graph = new GraphLoader(db)
                     .withLabel("MATCH (n:Label1) RETURN id(n) as id")
                     .withRelationshipType("MATCH (n:Label1)-[:TYPE1]-(m:Label1) RETURN id(n) as source,id(m) as target")
+                    .withDeduplicateRelationshipsStrategy(DeduplicateRelationshipsStrategy.SKIP)
                     .load(graphImpl);
 
         } else {
@@ -256,6 +258,7 @@ public final class AverageDegreeCentralityTest {
                     .withRelationshipType("TYPE1")
                     .withDirection(Direction.OUTGOING)
                     .undirected()
+                    .sorted()
                     .load(graphImpl);
         }
 

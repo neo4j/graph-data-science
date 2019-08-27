@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.huge.loader;
 
 import org.apache.lucene.util.LongsRef;
-import org.neo4j.graphalgo.core.DuplicateRelationshipsStrategy;
+import org.neo4j.graphalgo.core.DeduplicateRelationshipsStrategy;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -31,19 +31,19 @@ import static org.neo4j.graphalgo.core.huge.loader.AdjacencyCompression.writeDeg
 class ThreadLocalRelationshipsBuilder {
 
     private final ReentrantLock lock;
-    private final DuplicateRelationshipsStrategy duplicateRelationshipsStrategy;
+    private final DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy;
     private final HugeAdjacencyListBuilder.Allocator adjacencyAllocator;
     private final HugeAdjacencyListBuilder.Allocator weightsAllocator;
     private final long[] adjacencyOffsets;
     private final long[] weightOffsets;
 
     ThreadLocalRelationshipsBuilder(
-            DuplicateRelationshipsStrategy duplicateRelationshipsStrategy,
+            DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy,
             HugeAdjacencyListBuilder.Allocator adjacencyAllocator,
             final HugeAdjacencyListBuilder.Allocator weightsAllocator,
             long[] adjacencyOffsets,
             final long[] weightOffsets) {
-        this.duplicateRelationshipsStrategy = duplicateRelationshipsStrategy;
+        this.deduplicateRelationshipsStrategy = deduplicateRelationshipsStrategy;
         this.adjacencyAllocator = adjacencyAllocator;
         this.weightsAllocator = weightsAllocator;
         this.adjacencyOffsets = adjacencyOffsets;
@@ -85,7 +85,7 @@ class ThreadLocalRelationshipsBuilder {
             int localId) {
         byte[] storage = array.storage();
         AdjacencyCompression.copyFrom(buffer, array);
-        int degree = AdjacencyCompression.applyDeltaEncoding(buffer);
+        int degree = AdjacencyCompression.applyDeltaEncoding(buffer, deduplicateRelationshipsStrategy);
         int requiredBytes = AdjacencyCompression.compress(buffer, storage);
         long address = copyIds(storage, requiredBytes, degree);
         adjacencyOffsets[localId] = address;
@@ -100,7 +100,7 @@ class ThreadLocalRelationshipsBuilder {
         byte[] storage = array.storage();
         long[] weights = array.weights();
         AdjacencyCompression.copyFrom(buffer, array);
-        int degree = AdjacencyCompression.applyDeltaEncoding(buffer, weights, duplicateRelationshipsStrategy);
+        int degree = AdjacencyCompression.applyDeltaEncoding(buffer, weights, deduplicateRelationshipsStrategy);
         int requiredBytes = AdjacencyCompression.compress(buffer, storage);
 
         adjacencyOffsets[localId] = copyIds(storage, requiredBytes, degree);

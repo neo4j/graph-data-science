@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.huge.loader;
 import com.carrotsearch.hppc.sorting.IndirectComparator;
 import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.apache.lucene.util.LongsRef;
-import org.neo4j.graphalgo.core.DuplicateRelationshipsStrategy;
+import org.neo4j.graphalgo.core.DeduplicateRelationshipsStrategy;
 
 import java.util.Arrays;
 
@@ -48,19 +48,27 @@ final class AdjacencyCompression {
         into.length = array.uncompress(into.longs);
     }
 
-    static int applyDeltaEncoding(LongsRef data) {
+    static int applyDeltaEncoding(LongsRef data, DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy) {
         Arrays.sort(data.longs, 0, data.length);
-        return data.length = applyDelta(data.longs, data.length);
+        return data.length = applyDelta(data.longs, data.length, deduplicateRelationshipsStrategy);
     }
 
     // TODO: requires lots of additional memory ... inline indirect sort to make reuse of - to be created - buffers
-    static int applyDeltaEncoding(LongsRef data, long[] weights, DuplicateRelationshipsStrategy duplicateRelationshipsStrategy) {
+    static int applyDeltaEncoding(LongsRef data, long[] weights, DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy) {
         int[] order = IndirectSort.mergesort(0, data.length, new AscendingLongComparator(data.longs));
 
         long[] sortedValues = new long[data.length];
         long[] sortedWeights = new long[data.length];
 
-        data.length = applyDelta(order, data.longs, sortedValues, weights, sortedWeights, data.length, duplicateRelationshipsStrategy);
+        data.length = applyDelta(
+                order,
+                data.longs,
+                sortedValues,
+                weights,
+                sortedWeights,
+                data.length,
+                deduplicateRelationshipsStrategy
+        );
 
         System.arraycopy(sortedValues, 0, data.longs, 0, data.length);
         System.arraycopy(sortedWeights, 0, weights, 0, data.length);
@@ -86,16 +94,13 @@ final class AdjacencyCompression {
     }
     //@formatter:on
 
-    private static int applyDelta(long[] values, int length) {
+    private static int applyDelta(long[] values, int length, DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy) {
         long value = values[0], delta;
         int in = 1, out = 1;
         for (; in < length; ++in) {
             delta = values[in] - value;
             value = values[in];
-            // only keep the relationship if we don't already have
-            // one that points to the same target node
-            // no support for #parallel-edges
-            if (delta > 0L) {
+            if (delta > 0L || deduplicateRelationshipsStrategy == DeduplicateRelationshipsStrategy.NONE) {
                 values[out++] = delta;
             }
         }
@@ -113,7 +118,7 @@ final class AdjacencyCompression {
             long[] weights,
             long[] outWeights,
             int length,
-            DuplicateRelationshipsStrategy duplicateRelationshipsStrategy) {
+            DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy) {
         int firstSortIdx = order[0];
         long value = values[firstSortIdx];
         long delta;
@@ -127,18 +132,14 @@ final class AdjacencyCompression {
             delta = values[sortIdx] - value;
             value = values[sortIdx];
 
-            // only keep the relationship if we don't already have
-            // one that points to the same target node
-            // no support for #parallel-edges
-            // if delta > 0L then the relationship is to a new node
-            if (delta > 0L) {
+            if (delta > 0L || deduplicateRelationshipsStrategy == DeduplicateRelationshipsStrategy.NONE) {
                 outWeights[out] = weights[sortIdx];
                 outValues[out++] = delta;
             } else {
                 int existingIdx = out - 1;
                 double existingWeight = Double.longBitsToDouble(outWeights[existingIdx]);
                 double newWeight = Double.longBitsToDouble(weights[sortIdx]);
-                newWeight = duplicateRelationshipsStrategy.merge(existingWeight, newWeight);
+                newWeight = deduplicateRelationshipsStrategy.merge(existingWeight, newWeight);
                 outWeights[existingIdx] = Double.doubleToLongBits(newWeight);
             }
         }

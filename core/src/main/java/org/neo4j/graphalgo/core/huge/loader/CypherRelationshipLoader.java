@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.huge.loader;
 
 import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.core.DeduplicateRelationshipsStrategy;
 import org.neo4j.graphalgo.core.huge.HugeAdjacencyList;
 import org.neo4j.graphalgo.core.huge.HugeAdjacencyOffsets;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
@@ -42,9 +43,13 @@ class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
 
     CypherRelationshipLoader(IdMap idMap, GraphDatabaseAPI api, GraphSetup setup) {
         super(setup.relationshipType, idMap.nodeCount(), api, setup);
-        this.idMap = idMap;
+
+        DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy =
+                setup.deduplicateRelationshipsStrategy == DeduplicateRelationshipsStrategy.DEFAULT
+                        ? DeduplicateRelationshipsStrategy.NONE
+                        : setup.deduplicateRelationshipsStrategy;
         outgoingRelationshipsBuilder = new RelationshipsBuilder(
-                setup.duplicateRelationshipsStrategy,
+                deduplicateRelationshipsStrategy,
                 setup.tracker,
                 setup.shouldLoadRelationshipWeight());
 
@@ -58,6 +63,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
                 numberOfPages, pageSize,
                 setup.tracker, new AtomicLong(), -2, relationDefaultWeight);
 
+        this.idMap = idMap;
         hasRelationshipWeights = setup.shouldLoadRelationshipWeight();
         importer = new RelationshipImporter(setup.tracker, outBuilder, null);
         imports = RelationshipImporter.imports(importer, false, true, false, hasRelationshipWeights);

@@ -81,7 +81,7 @@ public class GraphLoader {
     private int batchSize = ParallelUtil.DEFAULT_BATCH_SIZE;
     private int concurrency;
 
-    private DuplicateRelationshipsStrategy duplicateRelationshipsStrategy = DuplicateRelationshipsStrategy.DEFAULT;
+    private DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy = DeduplicateRelationshipsStrategy.DEFAULT;
 
     private Log log = NullLog.getInstance();
     private long logMillis = -1;
@@ -118,7 +118,7 @@ public class GraphLoader {
                 .withOptionalRelationshipType(relationship)
                 .withConcurrency(config.getReadConcurrency())
                 .withBatchSize(config.getBatchSize())
-                .withDuplicateRelationshipsStrategy(config.getDuplicateRelationshipsStrategy())
+                .withDeduplicateRelationshipsStrategy(config.getDuplicateRelationshipsStrategy())
                 .withParams(config.getParams());
     }
 
@@ -413,10 +413,10 @@ public class GraphLoader {
     }
 
     /**
-     * @param duplicateRelationshipsStrategy strategy for handling duplicate relationships
+     * @param deduplicateRelationshipsStrategy strategy for handling duplicate relationships
      */
-    public GraphLoader withDuplicateRelationshipsStrategy(DuplicateRelationshipsStrategy duplicateRelationshipsStrategy) {
-        this.duplicateRelationshipsStrategy = duplicateRelationshipsStrategy;
+    public GraphLoader withDeduplicateRelationshipsStrategy(DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy) {
+        this.deduplicateRelationshipsStrategy = deduplicateRelationshipsStrategy;
         return this;
     }
 
@@ -484,7 +484,7 @@ public class GraphLoader {
                 executorService,
                 concurrency,
                 batchSize,
-                duplicateRelationshipsStrategy,
+                deduplicateRelationshipsStrategy,
                 log,
                 logMillis,
                 sorted,

@@ -19,13 +19,13 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
-import org.neo4j.graphalgo.core.DuplicateRelationshipsStrategy;
+import org.neo4j.graphalgo.core.DeduplicateRelationshipsStrategy;
 import org.neo4j.graphalgo.core.huge.HugeAdjacencyOffsets;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 class RelationshipsBuilder {
 
-    private final DuplicateRelationshipsStrategy duplicateRelationshipsStrategy;
+    private final DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy;
     private final boolean weighted;
     final HugeAdjacencyListBuilder adjacency;
     final HugeAdjacencyListBuilder weights;
@@ -34,10 +34,13 @@ class RelationshipsBuilder {
     HugeAdjacencyOffsets globalWeightOffsets;
 
     RelationshipsBuilder(
-            DuplicateRelationshipsStrategy duplicateRelationshipsStrategy,
+            DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy,
             AllocationTracker tracker,
             boolean weighted) {
-        this.duplicateRelationshipsStrategy = duplicateRelationshipsStrategy == DuplicateRelationshipsStrategy.DEFAULT ? DuplicateRelationshipsStrategy.SKIP : duplicateRelationshipsStrategy;
+        if (deduplicateRelationshipsStrategy == DeduplicateRelationshipsStrategy.DEFAULT) {
+            throw new IllegalArgumentException("Needs an explicit deduplicateRelationshipsStrategy, but got " + deduplicateRelationshipsStrategy);
+        }
+        this.deduplicateRelationshipsStrategy = deduplicateRelationshipsStrategy;
         this.weighted = weighted;
         adjacency = HugeAdjacencyListBuilder.newBuilder(tracker);
         weights = weighted ? HugeAdjacencyListBuilder.newBuilder(tracker) : null;
@@ -47,7 +50,7 @@ class RelationshipsBuilder {
             long[] adjacencyOffsets,
             long[] weightOffsets) {
         return new ThreadLocalRelationshipsBuilder(
-                duplicateRelationshipsStrategy,
+                deduplicateRelationshipsStrategy,
                 adjacency.newAllocator(),
                 weighted ? weights.newAllocator() : null,
                 adjacencyOffsets,

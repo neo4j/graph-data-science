@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphalgo.core.DeduplicateRelationshipsStrategy;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.huge.HugeAdjacencyList;
 import org.neo4j.graphalgo.core.huge.HugeAdjacencyOffsets;
@@ -159,14 +160,19 @@ public final class HugeGraphFactory extends GraphFactory {
         RelationshipsBuilder outgoingRelationshipsBuilder = null;
         RelationshipsBuilder incomingRelationshipsBuilder = null;
 
+        DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy =
+                setup.deduplicateRelationshipsStrategy == DeduplicateRelationshipsStrategy.DEFAULT
+                        ? DeduplicateRelationshipsStrategy.SKIP
+                        : setup.deduplicateRelationshipsStrategy;
+
         if (setup.loadAsUndirected) {
-            outgoingRelationshipsBuilder = new RelationshipsBuilder(setup.duplicateRelationshipsStrategy, tracker, setup.shouldLoadRelationshipWeight());
+            outgoingRelationshipsBuilder = new RelationshipsBuilder(deduplicateRelationshipsStrategy, tracker, setup.shouldLoadRelationshipWeight());
         } else {
             if (setup.loadOutgoing) {
-                outgoingRelationshipsBuilder = new RelationshipsBuilder(setup.duplicateRelationshipsStrategy, tracker, setup.shouldLoadRelationshipWeight());
+                outgoingRelationshipsBuilder = new RelationshipsBuilder(deduplicateRelationshipsStrategy, tracker, setup.shouldLoadRelationshipWeight());
             }
             if (setup.loadIncoming) {
-                incomingRelationshipsBuilder = new RelationshipsBuilder(setup.duplicateRelationshipsStrategy, tracker, setup.shouldLoadRelationshipWeight());
+                incomingRelationshipsBuilder = new RelationshipsBuilder(deduplicateRelationshipsStrategy, tracker, setup.shouldLoadRelationshipWeight());
             }
         }
 

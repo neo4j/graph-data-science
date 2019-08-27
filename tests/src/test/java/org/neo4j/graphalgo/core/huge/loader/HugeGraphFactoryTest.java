@@ -22,9 +22,12 @@ package org.neo4j.graphalgo.core.huge.loader;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.DeduplicateRelationshipsStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphdb.Direction;
@@ -33,12 +36,12 @@ import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
-import java.util.stream.DoubleStream;
-import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.graphalgo.GraphHelper.collectTargetIds;
+import static org.neo4j.graphalgo.GraphHelper.collectTargetWeights;
 
 
 class HugeGraphFactoryTest {
@@ -83,7 +86,6 @@ class HugeGraphFactoryTest {
 
     @Test
     void testWithLabel() {
-
         final Graph graph = new GraphLoader(DB)
                 .withLabel("Node1")
                 .withoutRelationshipWeights()
@@ -201,24 +203,43 @@ class HugeGraphFactoryTest {
         assertEquals(Status.Transaction.Terminated, exception.status());
     }
 
-    private long[] collectTargetIds(final Graph graph, long sourceId) {
-        LongStream.Builder outIds = LongStream.builder();
-        graph.forEachRelationship(graph.toMappedNodeId(sourceId), Direction.OUTGOING,
-                (sourceNodeId, targetNodeId) -> {
-                    outIds.add(targetNodeId);
-                    return true;
-                });
-        return outIds.build().sorted().toArray();
+    @Test
+    void testLoadDuplicateRelationships() {
+        final Graph graph = new GraphLoader(DB)
+                .withAnyRelationshipType()
+                .withoutRelationshipWeights()
+                .withDeduplicateRelationshipsStrategy(DeduplicateRelationshipsStrategy.NONE)
+                .load(HugeGraphFactory.class);
+
+        long[] out2 = collectTargetIds(graph, id2);
+        assertArrayEquals(expectedIds(graph, id3, id3), out2);
     }
 
-    private double[] collectTargetWeights(final Graph graph, long sourceId) {
-        DoubleStream.Builder outWeights = DoubleStream.builder();
-        graph.forEachRelationship(graph.toMappedNodeId(sourceId), Direction.OUTGOING,
-                (sourceNodeId, targetNodeId, weight) -> {
-                    outWeights.add(weight);
-                    return true;
-                });
-        return outWeights.build().toArray();
+    @Test
+    void testLoadDuplicateRelationshipsWithWeights() {
+        final Graph graph = new GraphLoader(DB)
+                .withAnyRelationshipType()
+                .withRelationshipWeightsFromProperty("weight", 1.0)
+                .withDeduplicateRelationshipsStrategy(DeduplicateRelationshipsStrategy.NONE)
+                .load(HugeGraphFactory.class);
+
+        double[] out1 = collectTargetWeights(graph, id2);
+        assertArrayEquals(expectedWeights(42.0, 1337.0), out1, 1e-4);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"SKIP, 42.0", "SUM, 1379.0", "MAX, 1337.0", "MIN, 42.0"})
+    void testLoadDuplicateRelationshipsWithWeightsAggregation(
+            DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy,
+            double expectedWeight) {
+        final Graph graph = new GraphLoader(DB)
+                .withAnyRelationshipType()
+                .withRelationshipWeightsFromProperty("weight", 1.0)
+                .withDeduplicateRelationshipsStrategy(deduplicateRelationshipsStrategy)
+                .load(HugeGraphFactory.class);
+
+        double[] out1 = collectTargetWeights(graph, id2);
+        assertArrayEquals(expectedWeights(expectedWeight), out1, 1e-4);
     }
 
     private long[] expectedIds(final Graph graph, long... expected) {

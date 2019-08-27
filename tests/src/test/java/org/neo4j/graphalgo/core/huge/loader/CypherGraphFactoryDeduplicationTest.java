@@ -19,61 +19,101 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.DuplicateRelationshipsStrategy;
+import org.neo4j.graphalgo.core.DeduplicateRelationshipsStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.GraphHelper.collectTargetWeights;
 
-public class CypherGraphFactoryDeduplicationTest {
+class CypherGraphFactoryDeduplicationTest {
 
     private static GraphDatabaseService db;
 
     private static int id1;
     private static int id2;
 
-    @BeforeClass
-    public static void setUp() {
+    @BeforeAll
+    static void setUp() {
         db = TestDatabaseCreator.createTestDatabase();
 
         db.execute(
                 "MERGE (n1 {id: 1}) " +
-                   "MERGE (n2 {id: 2}) " +
-                   "CREATE (n1)-[:REL {weight: 4}]->(n2) " +
-                   "CREATE (n2)-[:REL {weight: 10}]->(n1) " +
-                   "RETURN id(n1) AS id1, id(n2) AS id2").accept(row -> {
+                "MERGE (n2 {id: 2}) " +
+                "CREATE (n1)-[:REL {weight: 4}]->(n2) " +
+                "CREATE (n2)-[:REL {weight: 10}]->(n1) " +
+                "RETURN id(n1) AS id1, id(n2) AS id2").accept(row -> {
             id1 = row.getNumber("id1").intValue();
             id2 = row.getNumber("id2").intValue();
             return true;
         });
     }
 
-    @AfterClass
-    public static void tearDown() {
+    @AfterAll
+    static void tearDown() {
         db.shutdown();
     }
 
     @Test
-    public void testLoadCypher() {
+    void testLoadCypher() {
         String nodes = "MATCH (n) RETURN id(n) AS id";
         String rels = "MATCH (n)-[r]-(m) RETURN id(n) AS source, id(m) AS target, r.weight AS weight";
 
         Graph graph = new GraphLoader((GraphDatabaseAPI) db)
                 .withLabel(nodes)
                 .withRelationshipType(rels)
-                .withDuplicateRelationshipsStrategy(DuplicateRelationshipsStrategy.SKIP)
+                .withDeduplicateRelationshipsStrategy(DeduplicateRelationshipsStrategy.SKIP)
                 .load(CypherGraphFactory.class);
 
         assertEquals(2, graph.nodeCount());
         assertEquals(1, graph.degree(graph.toMappedNodeId(id1), Direction.OUTGOING));
         assertEquals(1, graph.degree(graph.toMappedNodeId(id2), Direction.OUTGOING));
+    }
+
+    @Test
+    void testLoadCypherDuplicateRelationshipsWithWeights() {
+        String nodes = "MATCH (n) RETURN id(n) AS id";
+        String rels = "MATCH (n)-[r]-(m) RETURN id(n) AS source, id(m) AS target, r.weight AS weight";
+
+        Graph graph = new GraphLoader((GraphDatabaseAPI) db)
+                .withLabel(nodes)
+                .withRelationshipType(rels)
+                .withRelationshipWeightsFromProperty("weight", 1.0)
+                .withDeduplicateRelationshipsStrategy(DeduplicateRelationshipsStrategy.SKIP)
+                .load(CypherGraphFactory.class);
+
+        double[] weights = collectTargetWeights(graph, graph.toMappedNodeId(id1));
+        assertEquals(1, weights.length);
+        assertTrue(weights[0] == 10.0 || weights[0] == 4.0);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"SUM, 14.0", "MAX, 10.0", "MIN, 4.0"})
+    void testLoadCypherDuplicateRelationshipsWithWeightsAggregation(
+            DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy,
+            double expectedWeight) {
+        String nodes = "MATCH (n) RETURN id(n) AS id";
+        String rels = "MATCH (n)-[r]-(m) RETURN id(n) AS source, id(m) AS target, r.weight AS weight";
+
+        Graph graph = new GraphLoader((GraphDatabaseAPI) db)
+                .withLabel(nodes)
+                .withRelationshipType(rels)
+                .withRelationshipWeightsFromProperty("weight", 1.0)
+                .withDeduplicateRelationshipsStrategy(deduplicateRelationshipsStrategy)
+                .load(CypherGraphFactory.class);
+
+        double[] weights = collectTargetWeights(graph, graph.toMappedNodeId(id1));
+        assertArrayEquals(new double[]{expectedWeight}, weights);
     }
 }

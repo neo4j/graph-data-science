@@ -19,32 +19,41 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.neo4j.graphalgo.core.DuplicateRelationshipsStrategy;
+import org.neo4j.graphalgo.core.DeduplicateRelationshipsStrategy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
-public class DuplicateRelationshipStrategyTest {
+class DeduplicateRelationshipStrategyTest {
 
     private static final double[] inputs = new double[]{0.5, 1.4};
 
     @ParameterizedTest
     @CsvSource({"MAX, 1.4", "MIN, 0.5", "SKIP, 0.5", "SUM, 1.9"})
-    public void testSuccessfulDuplateRelationshipStrategies(DuplicateRelationshipsStrategy strategy, double expected) {
+    void testSuccessfulDuplateRelationshipStrategies(DeduplicateRelationshipsStrategy strategy, double expected) {
         assertEquals(expected, strategy.merge(inputs[0], inputs[1]));
     }
 
-    @ParameterizedTest
-    @CsvSource({"DEFAULT", "NONE"})
-    public void  testFailingDuplicateRelationshipStrategies(DuplicateRelationshipsStrategy strategy) {
+    @Test
+    void testFailingDuplicateRelationshipStrategies() {
         String expected = "Multiple relationships between the same pair of nodes are not expected. Try using SKIP or some other duplicate relationships strategy.";
         UnsupportedOperationException exception = assertThrows(
                 UnsupportedOperationException.class,
-                () -> strategy.merge(42, 42));
+                () -> DeduplicateRelationshipsStrategy.NONE.merge(42, 42));
         assertEquals(expected, exception.getMessage());
+    }
+
+    @Test
+    void testFailingDefaultDuplicateRelationshipStrategies() {
+        UnsupportedOperationException exception = assertThrows(
+                UnsupportedOperationException.class,
+                () -> DeduplicateRelationshipsStrategy.DEFAULT.merge(42, 42));
+        assertNull(exception.getMessage());
     }
 }
 
