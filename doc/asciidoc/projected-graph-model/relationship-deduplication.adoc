@@ -9,7 +9,7 @@ This chapter explains Relationship deduplication in the Neo4j Graph Algorithms l
 --
 endif::env-docs[]
 
-The in-memory graph models available in the Neo4j Graph Algorithms library offer diffrent ways of handly multiple relationships between a given pair of nodes.
+The in-memory graph models available in the Neo4j Graph Algorithms library offer different ways of handling multiple relationships between a given pair of nodes.
 By default, the Huge and Heavy graph assume that the relationship projection only contains one relationship between a pair of nodes and will simply ignore all other relationships.
 A Cypher projected graph will, by default, store all projected relationships without any deduplication.
 
