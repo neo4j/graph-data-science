@@ -83,21 +83,21 @@ public class HugeGraph implements Graph {
 
     public static final double NO_WEIGHT = Double.NaN;
 
-    private final IdMap idMapping;
-    private final AllocationTracker tracker;
+    final IdMap idMapping;
+    final AllocationTracker tracker;
 
-    private final Map<String, HugeWeightMapping> nodeProperties;
-    private final long relationshipCount;
-    private HugeAdjacencyList inAdjacency;
-    private HugeAdjacencyList outAdjacency;
-    private HugeAdjacencyOffsets inOffsets;
-    private HugeAdjacencyOffsets outOffsets;
+    final Map<String, HugeWeightMapping> nodeProperties;
+    final long relationshipCount;
+    HugeAdjacencyList inAdjacency;
+    HugeAdjacencyList outAdjacency;
+    HugeAdjacencyOffsets inOffsets;
+    HugeAdjacencyOffsets outOffsets;
 
-    private final double defaultWeight;
-    private HugeAdjacencyList inWeights;
-    private HugeAdjacencyList outWeights;
-    private HugeAdjacencyOffsets inWeightOffsets;
-    private HugeAdjacencyOffsets outWeightOffsets;
+    final double defaultWeight;
+    HugeAdjacencyList inWeights;
+    HugeAdjacencyList outWeights;
+    HugeAdjacencyOffsets inWeightOffsets;
+    HugeAdjacencyOffsets outWeightOffsets;
 
     private HugeAdjacencyList.DecompressingCursor emptyAdjacencyCursor;
     private HugeAdjacencyList.DecompressingCursor inCache;
@@ -290,7 +290,7 @@ public class HugeGraph implements Graph {
     }
 
     @Override
-    public Graph concurrentCopy() {
+    public HugeGraph concurrentCopy() {
         return new HugeGraph(
                 tracker,
                 idMapping,
@@ -505,9 +505,11 @@ public class HugeGraph implements Graph {
         return (s, t, w) -> consumer.accept(s, t);
     }
 
-    private static class GetTargetConsumer implements WeightedRelationshipConsumer {
+    static class GetTargetConsumer implements WeightedRelationshipConsumer {
+        static final long TARGET_NOT_FOUND = -1L;
+
         private long count;
-        private long target = -1;
+        private long target = TARGET_NOT_FOUND;
 
         public GetTargetConsumer(long count) {
             this.count = count;

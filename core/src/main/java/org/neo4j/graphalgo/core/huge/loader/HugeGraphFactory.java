@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.huge.loader;
 
 import org.neo4j.graphalgo.KernelPropertyMapping;
+import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
@@ -35,10 +36,16 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.helpers.collection.Iterables;
 import org.neo4j.kernel.api.StatementConstants;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import static org.neo4j.graphalgo.core.loading.GraphsByRelationshipType.ALL_IDENTIFIER;
 
 public final class HugeGraphFactory extends GraphFactory {
 
@@ -130,13 +137,43 @@ public final class HugeGraphFactory extends GraphFactory {
 
     @Override
     public Graph importGraph() {
+        RelationshipTypeMapping[] relationshipTypeIds = dimensions.relationshipTypeMappings();
+        if (relationshipTypeIds.length > 1) {
+            throw new IllegalArgumentException(
+                    "{graph:'huge'} does not support multiple relationship types, Please use algo.graph.load for this.");
+        }
+
+        Map<String, HugeGraph> graphs = importAllGraphs();
+        return Iterables.single(graphs.values());
+    }
+
+    public Map<String, HugeGraph> loadGraphs() {
+        validateTokens();
+        return importAllGraphs();
+    }
+
+    private Map<String, HugeGraph> importAllGraphs() {
         GraphDimensions dimensions = this.dimensions;
         int concurrency = setup.concurrency();
         AllocationTracker tracker = setup.tracker;
         IdsAndProperties mappingAndProperties = loadHugeIdMap(tracker, concurrency);
-        Graph graph = loadRelationships(dimensions, tracker, mappingAndProperties, concurrency);
+
+        RelationshipTypeMapping[] relationshipTypeIds = dimensions.relationshipTypeMappings();
+        Map<String, HugeGraph> graphs;
+        if (relationshipTypeIds.length == 0) {
+            HugeGraph graph = loadRelationships(dimensions, tracker, mappingAndProperties, concurrency);
+            graphs = Collections.singletonMap(ALL_IDENTIFIER, graph);
+        } else {
+            graphs = Arrays.stream(relationshipTypeIds).collect(Collectors.toMap(
+                    typeMapping -> typeMapping.typeName,
+                    typeMapping -> {
+                        GraphDimensions graphDimensions = dimensions.withRelationshipTypeMapping(typeMapping);
+                        return loadRelationships(graphDimensions, tracker, mappingAndProperties, concurrency);
+                    }));
+        }
+
         progressLogger.logDone(tracker);
-        return graph;
+        return graphs;
     }
 
     private IdsAndProperties loadHugeIdMap(AllocationTracker tracker, int concurrency) {
@@ -152,7 +189,7 @@ public final class HugeGraphFactory extends GraphFactory {
                 .call(setup.log);
     }
 
-    private Graph loadRelationships(
+    private HugeGraph loadRelationships(
             GraphDimensions dimensions,
             AllocationTracker tracker,
             IdsAndProperties idsAndProperties,
@@ -210,7 +247,7 @@ public final class HugeGraphFactory extends GraphFactory {
                 setup.loadAsUndirected);
     }
 
-    private Graph buildGraph(
+    private HugeGraph buildGraph(
             final AllocationTracker tracker,
             final IdMap idMapping,
             final Map<String, HugeWeightMapping> nodeProperties,

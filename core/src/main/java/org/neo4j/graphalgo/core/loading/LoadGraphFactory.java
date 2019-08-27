@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class LoadGraphFactory extends GraphFactory {
 
-    private static final ConcurrentHashMap<String, Graph> graphs = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, GraphByType> graphs = new ConcurrentHashMap<>();
 
     public LoadGraphFactory(
             final GraphDatabaseAPI api,
@@ -45,7 +45,7 @@ public final class LoadGraphFactory extends GraphFactory {
 
     @Override
     protected Graph importGraph() {
-        return get(setup.name);
+        return get(setup.name, setup.relationshipType);
     }
 
     @Override
@@ -54,7 +54,7 @@ public final class LoadGraphFactory extends GraphFactory {
     }
 
     public final MemoryEstimation memoryEstimation() {
-        Graph graph = get(setup.name);
+        Graph graph = get(setup.name, setup.relationshipType);
         dimensions.nodeCount(graph.nodeCount());
         dimensions.maxRelCount(graph.relationshipCount());
 
@@ -65,21 +65,24 @@ public final class LoadGraphFactory extends GraphFactory {
         }
     }
 
-    public static void set(String name, Graph graph) {
+    public static void set(String name, GraphByType graph) {
         if (name == null || graph == null) {
             throw new IllegalArgumentException("Both name and graph must be not null");
         }
         if (graphs.putIfAbsent(name, graph) != null) {
             throw new IllegalStateException("Graph name " + name + " already loaded");
         }
-        graph.canRelease(false);
     }
 
-    public static Graph get(String name) {
-        if (!exists(name)) {
-            throw new IllegalArgumentException(String.format("Graph with name '%s' does not exist.", name));
+    public static Graph get(String name, String relationshipType) {
+        if (name == null) {
+            return null;
         }
-        return graphs.get(name);
+        GraphByType graphsByRelationshipType = graphs.get(name);
+        if (graphsByRelationshipType == null) {
+            return null;
+        }
+        return graphsByRelationshipType.loadGraph(relationshipType);
     }
 
     public static boolean exists(String name) {
@@ -90,7 +93,7 @@ public final class LoadGraphFactory extends GraphFactory {
         if (!exists(name)) {
             return null;
         }
-        Graph graph = graphs.remove(name);
+        GraphByType graph = graphs.remove(name);
         graph.canRelease(true);
         graph.release();
         return graph;
@@ -98,7 +101,7 @@ public final class LoadGraphFactory extends GraphFactory {
 
     public static String getType(String name) {
         if (name == null) return null;
-        Graph graph = graphs.get(name);
+        GraphByType graph = graphs.get(name);
         return graph == null ? null : graph.getType();
     }
 

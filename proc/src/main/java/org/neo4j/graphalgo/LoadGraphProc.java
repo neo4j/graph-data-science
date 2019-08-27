@@ -27,10 +27,15 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.ProcedureConstants;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.GraphByType;
+import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.graphalgo.core.utils.RelationshipTypes;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -42,6 +47,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public final class LoadGraphProc extends BaseProc {
@@ -57,9 +63,7 @@ public final class LoadGraphProc extends BaseProc {
             @Name(value = "relationship", defaultValue = "") String relationshipType,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
-                .setNodeLabelOrQuery(label)
-                .setRelationshipTypeOrQuery(relationshipType);
+        final ProcedureConfiguration configuration = newConfig(label, relationshipType, config);
 
         LoadGraphStats stats = new LoadGraphStats(name, configuration);
 
@@ -70,14 +74,29 @@ public final class LoadGraphProc extends BaseProc {
         }
 
         try (ProgressTimer timer = ProgressTimer.start()) {
-            Class<? extends GraphFactory> graphImpl = configuration.getGraphImpl();
+            Class<? extends GraphFactory> graphImpl = configuration.getGraphImpl("huge");
+            Set<String> types = RelationshipTypes.parse(configuration.getRelationshipOrQuery());
             GraphLoader loader = newLoader(configuration, AllocationTracker.EMPTY);
-            Graph graph = runWithExceptionLogging("Graph loading failed", () -> loader.load(graphImpl));
+            GraphByType graphFromType;
+            if (types.size() > 1) {
+                if (graphImpl != HugeGraphFactory.class) {
+                    throw new IllegalArgumentException("Only the huge graph supports multiple relationships, please specify {graph:'huge'}.");
+                }
+                HugeGraphFactory graphFactory = loader.build(HugeGraphFactory.class);
+                Map<String, HugeGraph> graphs = runWithExceptionLogging("Graph loading failed", graphFactory::loadGraphs);
+                GraphsByRelationshipType byType = new GraphsByRelationshipType(graphs);
+                stats.nodes = byType.nodeCount();
+                stats.relationships = byType.relationshipCount();
+                graphFromType = byType;
+            } else {
+                Graph graph = runWithExceptionLogging("Graph loading failed", () -> loader.load(graphImpl));
+                stats.nodes = graph.nodeCount();
+                stats.relationships = graph.relationshipCount();
+                graphFromType = new GraphByType.SingleGraph(graph);
+            }
 
-            stats.nodes = graph.nodeCount();
-            stats.relationships = graph.relationshipCount();
             stats.loadMillis = timer.stop().getDuration();
-            LoadGraphFactory.set(name, graph);
+            LoadGraphFactory.set(name, graphFromType);
         }
 
         return Stream.of(stats);
@@ -156,7 +175,7 @@ public final class LoadGraphProc extends BaseProc {
     public Stream<GraphInfo> remove(@Name("name") String name) {
         GraphInfo info = new GraphInfo(name);
 
-        Graph graph = LoadGraphFactory.remove(name);
+        Graph graph = LoadGraphFactory.remove(name, GraphsByRelationshipType.ALL_IDENTIFIER);
         if (graph != null) {
             info.type = graph.getType();
             info.nodes = graph.nodeCount();
@@ -178,7 +197,7 @@ public final class LoadGraphProc extends BaseProc {
         if (!LoadGraphFactory.exists(name)) {
             info = new GraphInfoWithHistogram(name);
         } else {
-            Graph graph = LoadGraphFactory.get(name);
+            Graph graph = LoadGraphFactory.get(name, GraphsByRelationshipType.ALL_IDENTIFIER);
             final boolean calculateDegreeDistribution;
             final ProcedureConfiguration configuration;
             if (Boolean.TRUE.equals(degreeDistribution)) {

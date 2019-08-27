@@ -243,16 +243,15 @@ public final class Louvain extends Algorithm<Louvain> {
                 final long sourceCommunity = communities[start];
 
                 // get transitions from current node
-                graph.forEachOutgoing(base + start, (s, t) -> {
+                graph.forEachRelationship(base + start, Direction.OUTGOING, (s, t, w) -> {
                     // mapping
                     final long targetCommunity = communityIds.get(t);
-                    final double value = graph.weightOf(s, t);
                     if (sourceCommunity == targetCommunity) {
-                        nodeWeights.addTo(sourceCommunity, value);
+                        nodeWeights.addTo(sourceCommunity, w);
                     }
 
                     // add IN and OUT relation and weights
-                    subGraph.add(sourceCommunity, targetCommunity, (float) (value / 2.0)); // TODO validate
+                    subGraph.add(sourceCommunity, targetCommunity, (float) (w / 2.0)); // TODO validate
                     return true;
                 });
 
