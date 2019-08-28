@@ -25,11 +25,10 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.graphalgo.core.DeduplicateRelationshipsStrategy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
-class DeduplicateRelationshipStrategyTest {
+class DeduplicateRelationshipsStrategyTest {
 
     private static final double[] inputs = new double[]{0.5, 1.4};
 
@@ -41,10 +40,10 @@ class DeduplicateRelationshipStrategyTest {
 
     @Test
     void testFailingDuplicateRelationshipStrategies() {
-        String expected = "Multiple relationships between the same pair of nodes are not expected. Try using SKIP or some other duplicate relationships strategy.";
         UnsupportedOperationException exception = assertThrows(
                 UnsupportedOperationException.class,
                 () -> DeduplicateRelationshipsStrategy.NONE.merge(42, 42));
+        String expected = "Multiple relationships between the same pair of nodes are not expected. Try using SKIP or some other duplicate relationships strategy.";
         assertEquals(expected, exception.getMessage());
     }
 
@@ -53,7 +52,8 @@ class DeduplicateRelationshipStrategyTest {
         UnsupportedOperationException exception = assertThrows(
                 UnsupportedOperationException.class,
                 () -> DeduplicateRelationshipsStrategy.DEFAULT.merge(42, 42));
-        assertNull(exception.getMessage());
+        String expected = "This should never be used as a deduplication strategy, just as a placeholder for the default strategy of a given loader.";
+        assertEquals(expected, exception.getMessage());
     }
 }
 

@@ -258,7 +258,6 @@ public final class AverageDegreeCentralityTest {
                     .withRelationshipType("TYPE1")
                     .withDirection(Direction.OUTGOING)
                     .undirected()
-                    .sorted()
                     .load(graphImpl);
         }
 

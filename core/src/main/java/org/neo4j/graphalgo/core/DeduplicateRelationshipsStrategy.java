@@ -22,7 +22,9 @@ package org.neo4j.graphalgo.core;
 public enum DeduplicateRelationshipsStrategy {
     DEFAULT {
         public double merge(double runningTotal, double weight) {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException(
+                    "This should never be used as a deduplication strategy, " +
+                    "just as a placeholder for the default strategy of a given loader.");
         }
     },
     NONE {

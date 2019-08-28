@@ -21,7 +21,7 @@ In order to control the deduplication behavior we can pass the `duplicateRelatio
 * `skip` - keeps the first encountered relationship (and associated weight).
 * `sum` - sums the associated weights of all encountered relationships.
 * `min` - keeps the minimum weight of all encountered relationships.
-* `max` - keeps the maximum weight of relationships encountered.
+* `max` - keeps the maximum weight of all encountered relationships.
 
 Note that setting an explict deduplication strategy, other then `none` or `skip` will increase the relationship loading time.
 
