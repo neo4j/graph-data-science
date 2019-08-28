@@ -20,40 +20,55 @@
 
 package org.neo4j.graphalgo.core.utils;
 
+import org.apache.commons.lang3.StringUtils;
+import org.petitparser.context.Result;
+import org.petitparser.parser.Parser;
+
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+
+import static org.petitparser.parser.primitive.CharacterParser.digit;
+import static org.petitparser.parser.primitive.CharacterParser.letter;
+import static org.petitparser.parser.primitive.CharacterParser.of;
+import static org.petitparser.utils.Functions.withoutSeparators;
+
 
 public final class RelationshipTypes {
 
-    private static final char BACKTICK = '`';
-    private static final Pattern PIPE = Pattern.compile("\\|");
-    private static final Pattern IGNORE_CHARS = Pattern.compile("[<>:]");
+    private static final Parser PARSER;
 
-    public static Set<String> parse(CharSequence relTypes) {
-        if (relTypes == null) {
+    static {
+        Parser underscore = of('_');
+        Parser backtick = of('`');
+        Parser pipe = of('|');
+        Parser colon = of(':');
+        Parser validTypeCharacter = letter().or(underscore, digit("expected letter, digit, or underscore"));
+        Parser unescapedIdentifier = validTypeCharacter.plus().flatten();
+        Parser escapedIdentifier = backtick.seq(backtick.neg().plus().flatten()).seq(backtick).pick(1);
+        Parser identifier = colon.optional().seq(escapedIdentifier.or(unescapedIdentifier)).pick(1);
+        PARSER = identifier.separatedBy(pipe.trim()).map(withoutSeparators()).end("expected letter, digit, or underscore");
+    }
+
+    public static Set<String> parse(String relTypes) {
+        if (relTypes == null || relTypes.isEmpty()) {
             return Collections.emptySet();
         }
-        return PIPE.splitAsStream(relTypes)
-                .map(RelationshipTypes::parseSingle)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-    }
-
-    private static String parseSingle(String def) {
-        return relationshipTypeFor(def);
-    }
-
-    private static String relationshipTypeFor(String name) {
-        if (name.indexOf(BACKTICK) >= 0) {
-            name = name.substring(name.indexOf(BACKTICK) + 1, name.lastIndexOf(BACKTICK));
-        } else {
-            name = IGNORE_CHARS.matcher(name).replaceAll("");
+        Result result = PARSER.parse(relTypes);
+        if (result.isSuccess()) {
+            List<String> types = result.get();
+            return new LinkedHashSet<>(types);
         }
-        return name.trim();
-    }
+        int errorPos = result.getPosition();
+        String errorPointer = "^";
+        errorPointer = StringUtils.leftPad(errorPointer, errorPos + 1, '~');
+        errorPointer = StringUtils.rightPad(errorPointer, relTypes.length(), '~');
 
+        throw new IllegalArgumentException(String.format(
+                "Could not parse relationship types: %s (at position %d):%n%s%n%s",
+                result.getMessage(), errorPos, relTypes, errorPointer));
+    }
 
     private RelationshipTypes() {
         throw new UnsupportedOperationException("No instances");
