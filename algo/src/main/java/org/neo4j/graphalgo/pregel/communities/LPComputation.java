@@ -20,11 +20,11 @@
 
 package org.neo4j.graphalgo.pregel.communities;
 
-import org.jctools.queues.MpscLinkedQueue;
 import org.neo4j.graphalgo.pregel.Computation;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Arrays;
+import java.util.Queue;
 
 /**
  * Basic implementation potentially suffering from osciallating vertex states due to synchronous computation.
@@ -37,7 +37,7 @@ public class LPComputation extends Computation {
     }
 
     @Override
-    protected void compute(long nodeId, MpscLinkedQueue<Double> messages) {
+    protected void compute(long nodeId, Queue<Double> messages) {
         if (getSuperstep() == 0) {
             setValue(nodeId, nodeId);
             sendMessages(nodeId, nodeId);

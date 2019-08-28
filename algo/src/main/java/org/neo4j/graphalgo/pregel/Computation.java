@@ -23,6 +23,8 @@ package org.neo4j.graphalgo.pregel;
 import org.jctools.queues.MpscLinkedQueue;
 import org.neo4j.graphdb.Direction;
 
+import java.util.Queue;
+
 public abstract class Computation {
 
     private Pregel.ComputeStep computeStep;
@@ -39,7 +41,7 @@ public abstract class Computation {
         this.computeStep = computeStep;
     }
 
-    protected abstract void compute(final long nodeId, MpscLinkedQueue<Double> messages);
+    protected abstract void compute(final long nodeId, Queue<Double> messages);
 
     protected int getSuperstep() {
         return computeStep.getIteration();
