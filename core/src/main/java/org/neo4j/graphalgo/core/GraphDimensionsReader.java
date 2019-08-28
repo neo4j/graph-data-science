@@ -36,22 +36,27 @@ import java.util.Set;
 
 public final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
     private final GraphSetup setup;
+    private final boolean readLabelAndType;
 
     public GraphDimensionsReader(
             GraphDatabaseAPI api,
-            GraphSetup setup) {
+            GraphSetup setup,
+            boolean readLabelAndType) {
         super(api);
         this.setup = setup;
+        this.readLabelAndType = readLabelAndType;
     }
 
     @Override
     public GraphDimensions apply(final KernelTransaction transaction) throws RuntimeException {
         TokenRead tokenRead = transaction.tokenRead();
         Read dataRead = transaction.dataRead();
-        final int labelId = setup.loadAnyLabel() ? Read.ANY_LABEL : tokenRead.nodeLabel(setup.startLabel);
+        final int labelId = readLabelAndType && !setup.loadAnyLabel()
+                ? tokenRead.nodeLabel(setup.startLabel)
+                : Read.ANY_LABEL;
 
         RelationshipTypeMapping[] relationshipTypeMappings;
-        if (!setup.loadAnyRelationshipType()) {
+        if (readLabelAndType && !setup.loadAnyRelationshipType()) {
             Set<String> types = RelationshipTypes.parse(setup.relationshipType);
             relationshipTypeMappings = types.stream()
                     .map(name -> {

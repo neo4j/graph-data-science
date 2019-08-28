@@ -51,12 +51,16 @@ public abstract class GraphFactory implements Assessable {
     protected final ProgressLogger progressLogger;
 
     public GraphFactory(GraphDatabaseAPI api, GraphSetup setup) {
+        this(api, setup, true);
+    }
+
+    public GraphFactory(GraphDatabaseAPI api, GraphSetup setup, boolean readLabelAndType) {
         this.threadPool = setup.executor;
         this.api = api;
         this.setup = setup;
         this.log = setup.log;
         this.progressLogger = progressLogger(log, setup.logMillis);
-        dimensions = new GraphDimensionsReader(api, setup).call();
+        dimensions = new GraphDimensionsReader(api, setup, readLabelAndType).call();
         progress = importProgress(progressLogger, dimensions, setup);
     }
 

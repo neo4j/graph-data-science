@@ -56,7 +56,8 @@ public final class GraphDimensions {
         this.relWeightId = relWeightId;
         this.relationshipTypeMappings = relationshipTypeMappings;
         this.nodeProperties = nodeProperties;
-        this.relationshipTypeIds = Arrays.stream(relationshipTypeMappings).mapToInt(t -> t.typeId).toArray();
+        this.relationshipTypeIds = relationshipTypeMappings == null ? null
+                : Arrays.stream(relationshipTypeMappings).mapToInt(t -> t.typeId).toArray();
     }
 
     public long nodeCount() {

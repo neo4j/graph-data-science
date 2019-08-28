@@ -66,6 +66,13 @@ public final class GraphsByRelationshipType implements GraphByType {
     }
 
     @Override
+    public void canRelease(boolean canRelease) {
+        for (HugeGraph graph : graphs.values()) {
+            graph.canRelease(canRelease);
+        }
+    }
+
+    @Override
     public void release() {
         for (Graph graph : graphs.values()) {
             graph.canRelease(true);

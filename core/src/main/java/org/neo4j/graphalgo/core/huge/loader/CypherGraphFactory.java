@@ -38,7 +38,7 @@ public class CypherGraphFactory extends GraphFactory {
     private final GraphSetup setup;
 
     public CypherGraphFactory(GraphDatabaseAPI api, GraphSetup setup) {
-        super(api, setup);
+        super(api, setup, false);
         this.api = api;
         this.setup = setup;
     }

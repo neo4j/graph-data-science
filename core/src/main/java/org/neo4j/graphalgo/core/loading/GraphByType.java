@@ -30,6 +30,8 @@ public interface GraphByType {
 
     String getType();
 
+    void canRelease(boolean canRelease);
+
     final class SingleGraph implements GraphByType {
         private final Graph graph;
 
@@ -40,6 +42,11 @@ public interface GraphByType {
         @Override
         public Graph loadGraph(String relationshipType) {
             return graph;
+        }
+
+        @Override
+        public void canRelease(boolean canRelease) {
+            graph.canRelease(canRelease);
         }
 
         @Override
