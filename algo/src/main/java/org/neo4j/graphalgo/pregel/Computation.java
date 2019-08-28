@@ -64,4 +64,8 @@ public abstract class Computation {
     protected int getDegree(final long nodeId) {
         return computeStep.getDegree(nodeId, getMessageDirection());
     }
+
+    protected boolean isSynchronous() {
+        return true;
+    }
 }

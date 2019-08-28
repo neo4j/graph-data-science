@@ -183,15 +183,17 @@ public final class Pregel {
 
         final List<ComputeStep> tasks = new ArrayList<>(threadCount);
 
-        // Synchronization barrier:
-        // Add termination flag to message queues that
-        // received messages in the previous iteration.
-        if (iteration > 0) {
-            ParallelUtil.parallelStreamConsume(
-                    LongStream.range(0, graph.nodeCount()),
-                    nodeIds -> nodeIds.forEach(nodeId -> {
-                        if (messageBits.get(nodeId)) messageQueues[(int) nodeId].add(TERMINATION_SYMBOL);
-                    }));
+        if (computationFactory.get().isSynchronous()) {
+            // Synchronization barrier:
+            // Add termination flag to message queues that
+            // received messages in the previous iteration.
+            if (iteration > 0) {
+                ParallelUtil.parallelStreamConsume(
+                        LongStream.range(0, graph.nodeCount()),
+                        nodeIds -> nodeIds.forEach(nodeId -> {
+                            if (messageBits.get(nodeId)) messageQueues[(int) nodeId].add(TERMINATION_SYMBOL);
+                        }));
+            }
         }
 
         Collection<ComputeStep> computeSteps = LazyMappingCollection.of(

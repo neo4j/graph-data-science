@@ -31,6 +31,11 @@ public class WCCComputation extends Computation {
     }
 
     @Override
+    protected boolean isSynchronous() {
+        return false;
+    }
+
+    @Override
     protected void compute(final long nodeId, MpscLinkedQueue<Double> messages) {
         if (getSuperstep() == 0) {
             double currentValue = getValue(nodeId);
@@ -46,7 +51,7 @@ public class WCCComputation extends Computation {
 
             if (messages != null) {
                 Double message;
-                while (!(message = messages.poll()).isNaN()) {
+                while ((message = messages.poll()) != null) {
                     if (message < newComponentId) {
                         newComponentId = message.longValue();
                     }
