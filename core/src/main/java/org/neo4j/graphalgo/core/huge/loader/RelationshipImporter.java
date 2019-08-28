@@ -81,6 +81,34 @@ public class RelationshipImporter {
         return null;
     }
 
+    public Imports imports(
+            boolean loadAsUndirected,
+            boolean loadOutgoing,
+            boolean loadIncoming,
+            boolean loadWeights) {
+        if (loadAsUndirected) {
+            return loadWeights
+                    ? this::importBothOrUndirectedWithWeight
+                    : this::importBothOrUndirected;
+        }
+        if (loadOutgoing) {
+            if (loadIncoming) {
+                return loadWeights
+                        ? this::importBothOrUndirectedWithWeight
+                        : this::importBothOrUndirected;
+            }
+            return loadWeights
+                    ? this::importOutgoingWithWeight
+                    : this::importOutgoing;
+        }
+        if (loadIncoming) {
+            return loadWeights
+                    ? this::importIncomingWithWeight
+                    : this::importIncoming;
+        }
+        return null;
+    }
+
     private long importBothOrUndirected(RelationshipsBatchBuffer buffer, WeightReader weightReader) {
         long[] batch = buffer.sortBySource();
         int importedOut = importRelationships(buffer, batch, null, outAdjacency, tracker);

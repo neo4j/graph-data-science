@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.graphalgo.KernelPropertyMapping;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.api.Graph;
@@ -42,8 +43,8 @@ import org.neo4j.kernel.api.StatementConstants;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.core.utils.RelationshipTypes.ALL_IDENTIFIER;
@@ -160,18 +161,14 @@ public final class HugeGraphFactory extends GraphFactory {
         IdsAndProperties mappingAndProperties = loadHugeIdMap(tracker, concurrency);
 
         RelationshipTypeMapping[] relationshipTypeIds = dimensions.relationshipTypeMappings();
-        Map<String, HugeGraph> graphs;
+        GraphDimensions graphDimensions;
         if (relationshipTypeIds.length == 0) {
-            HugeGraph graph = loadRelationships(dimensions, tracker, mappingAndProperties, concurrency);
-            graphs = Collections.singletonMap(ALL_IDENTIFIER, graph);
+            graphDimensions = dimensions.withRelationshipTypeMapping(
+                    new RelationshipTypeMapping(ALL_IDENTIFIER, -1));
         } else {
-            graphs = Arrays.stream(relationshipTypeIds).collect(Collectors.toMap(
-                    typeMapping -> typeMapping.typeName,
-                    typeMapping -> {
-                        GraphDimensions graphDimensions = dimensions.withRelationshipTypeMapping(typeMapping);
-                        return loadRelationships(graphDimensions, tracker, mappingAndProperties, concurrency);
-                    }));
+            graphDimensions = dimensions;
         }
+        Map<String, HugeGraph> graphs = loadRelationships(graphDimensions, tracker, mappingAndProperties, concurrency);
 
         progressLogger.logDone(tracker);
         return graphs;
@@ -190,38 +187,46 @@ public final class HugeGraphFactory extends GraphFactory {
                 .call(setup.log);
     }
 
-    private HugeGraph loadRelationships(
+    private Map<String, HugeGraph> loadRelationships(
             GraphDimensions dimensions,
             AllocationTracker tracker,
             IdsAndProperties idsAndProperties,
             int concurrency) {
-        RelationshipsBuilder outgoingRelationshipsBuilder = null;
-        RelationshipsBuilder incomingRelationshipsBuilder = null;
-
         DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy =
                 setup.deduplicateRelationshipsStrategy == DeduplicateRelationshipsStrategy.DEFAULT
                         ? DeduplicateRelationshipsStrategy.SKIP
                         : setup.deduplicateRelationshipsStrategy;
 
-        if (setup.loadAsUndirected) {
-            outgoingRelationshipsBuilder = new RelationshipsBuilder(
-                    deduplicateRelationshipsStrategy,
-                    tracker,
-                    setup.shouldLoadRelationshipWeight());
-        } else {
-            if (setup.loadOutgoing) {
-                outgoingRelationshipsBuilder = new RelationshipsBuilder(
-                        deduplicateRelationshipsStrategy,
-                        tracker,
-                        setup.shouldLoadRelationshipWeight());
-            }
-            if (setup.loadIncoming) {
-                incomingRelationshipsBuilder = new RelationshipsBuilder(
-                        deduplicateRelationshipsStrategy,
-                        tracker,
-                        setup.shouldLoadRelationshipWeight());
-            }
-        }
+        Map<RelationshipTypeMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> allBuilders = Arrays
+                .stream(dimensions.relationshipTypeMappings())
+                .collect(Collectors.toMap(Function.identity(), mapping -> {
+                    RelationshipsBuilder outgoingRelationshipsBuilder = null;
+                    RelationshipsBuilder incomingRelationshipsBuilder = null;
+
+
+                    if (setup.loadAsUndirected) {
+                        outgoingRelationshipsBuilder = new RelationshipsBuilder(
+                                deduplicateRelationshipsStrategy,
+                                tracker,
+                                setup.shouldLoadRelationshipWeight());
+                    } else {
+                        if (setup.loadOutgoing) {
+                            outgoingRelationshipsBuilder = new RelationshipsBuilder(
+                                    deduplicateRelationshipsStrategy,
+                                    tracker,
+                                    setup.shouldLoadRelationshipWeight());
+                        }
+                        if (setup.loadIncoming) {
+                            incomingRelationshipsBuilder = new RelationshipsBuilder(
+                                    deduplicateRelationshipsStrategy,
+                                    tracker,
+                                    setup.shouldLoadRelationshipWeight());
+                        }
+                    }
+
+
+                    return Pair.of(outgoingRelationshipsBuilder, incomingRelationshipsBuilder);
+                }));
 
         long relationshipCount = new ScanningRelationshipsImporter(
                 setup,
@@ -230,22 +235,27 @@ public final class HugeGraphFactory extends GraphFactory {
                 progress,
                 tracker,
                 idsAndProperties.hugeIdMap,
-                outgoingRelationshipsBuilder,
-                incomingRelationshipsBuilder,
+                allBuilders,
                 threadPool,
                 concurrency)
                 .call(setup.log);
 
-
-        return buildGraph(
-                tracker,
-                idsAndProperties.hugeIdMap,
-                idsAndProperties.properties,
-                incomingRelationshipsBuilder,
-                outgoingRelationshipsBuilder,
-                setup.relationDefaultWeight,
-                relationshipCount,
-                setup.loadAsUndirected);
+        return allBuilders.entrySet().stream().collect(Collectors.toMap(
+                entry -> entry.getKey().typeName,
+                entry -> {
+                    Pair<RelationshipsBuilder, RelationshipsBuilder> builders = entry.getValue();
+                    RelationshipsBuilder outgoingRelationshipsBuilder = builders.getLeft();
+                    RelationshipsBuilder incomingRelationshipsBuilder = builders.getRight();
+                    return buildGraph(
+                            tracker,
+                            idsAndProperties.hugeIdMap,
+                            idsAndProperties.properties,
+                            incomingRelationshipsBuilder,
+                            outgoingRelationshipsBuilder,
+                            setup.relationDefaultWeight,
+                            relationshipCount,
+                            setup.loadAsUndirected);
+                }));
     }
 
     private HugeGraph buildGraph(

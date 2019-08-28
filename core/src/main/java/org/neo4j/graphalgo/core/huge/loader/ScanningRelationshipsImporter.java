@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
+import org.apache.commons.lang3.tuple.Pair;
+import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.GraphDimensions;
@@ -28,8 +30,11 @@ import org.neo4j.kernel.api.StatementConstants;
 import org.neo4j.kernel.impl.store.record.RelationshipRecord;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 
 final class ScanningRelationshipsImporter extends ScanningRecordsImporter<RelationshipRecord, Long> {
@@ -38,8 +43,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
     private final ImportProgress progress;
     private final AllocationTracker tracker;
     private final IdMapping idMap;
-    private final RelationshipsBuilder outRelationshipsBuilder;
-    private final RelationshipsBuilder inRelationshipsBuilder;
+    private final Map<RelationshipTypeMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> allBuilders;
     private final AtomicLong relationshipCounter;
 
     ScanningRelationshipsImporter(
@@ -49,8 +53,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
             ImportProgress progress,
             AllocationTracker tracker,
             IdMapping idMap,
-            RelationshipsBuilder outRelationshipsBuilder,
-            RelationshipsBuilder inRelationshipsBuilder,
+            Map<RelationshipTypeMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> allBuilders,
             ExecutorService threadPool,
             int concurrency) {
         super(
@@ -64,8 +67,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         this.progress = progress;
         this.tracker = tracker;
         this.idMap = idMap;
-        this.outRelationshipsBuilder = outRelationshipsBuilder;
-        this.inRelationshipsBuilder = inRelationshipsBuilder;
+        this.allBuilders = allBuilders;
         this.relationshipCounter = new AtomicLong();
     }
 
@@ -78,20 +80,39 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         int pageSize = sizing.pageSize();
         int numberOfPages = sizing.numberOfPages();
 
-        AdjacencyBuilder outBuilder = AdjacencyBuilder.compressing(
-                outRelationshipsBuilder,
-                numberOfPages, pageSize, tracker, relationshipCounter, dimensions.relWeightId(), setup.relationDefaultWeight);
-        AdjacencyBuilder inBuilder = AdjacencyBuilder.compressing(
-                inRelationshipsBuilder,
-                numberOfPages, pageSize, tracker, relationshipCounter, dimensions.relWeightId(), setup.relationDefaultWeight);
-
         boolean importWeights = dimensions.relWeightId() != StatementConstants.NO_SUCH_PROPERTY_KEY;
 
-        RelationshipImporter importer = new RelationshipImporter(
-                setup.tracker,
-                outBuilder,
-                setup.loadAsUndirected ? outBuilder : inBuilder
-        );
+        List<SingleTypeRelationshipImport> importers = allBuilders.entrySet().stream().map(entry -> {
+            RelationshipTypeMapping mapping = entry.getKey();
+            RelationshipsBuilder outRelationshipsBuilder = entry.getValue().getLeft();
+            RelationshipsBuilder inRelationshipsBuilder = entry.getValue().getRight();
+            AdjacencyBuilder outBuilder = AdjacencyBuilder.compressing(
+                    outRelationshipsBuilder,
+                    numberOfPages,
+                    pageSize,
+                    tracker,
+                    relationshipCounter,
+                    dimensions.relWeightId(),
+                    setup.relationDefaultWeight);
+            AdjacencyBuilder inBuilder = AdjacencyBuilder.compressing(
+                    inRelationshipsBuilder,
+                    numberOfPages,
+                    pageSize,
+                    tracker,
+                    relationshipCounter,
+                    dimensions.relWeightId(),
+                    setup.relationDefaultWeight);
+
+
+            RelationshipImporter importer = new RelationshipImporter(
+                    setup.tracker,
+                    outBuilder,
+                    setup.loadAsUndirected ? outBuilder : inBuilder
+            );
+
+            return new SingleTypeRelationshipImport(mapping, importer);
+        }).collect(Collectors.toList());
+
 
         return RelationshipsScanner.of(
                 api,
@@ -99,9 +120,8 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
                 progress,
                 idMap,
                 scanner,
-                dimensions.singleRelationshipTypeId(),
                 importWeights,
-                importer);
+                importers);
     }
 
     @Override

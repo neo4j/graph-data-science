@@ -20,13 +20,37 @@
 
 package org.neo4j.graphalgo;
 
+import java.util.Objects;
+
 public final class RelationshipTypeMapping {
 
     public final String typeName;
     public final int typeId;
 
     public RelationshipTypeMapping(String typeName, int typeId) {
-        this.typeName = typeName;
+        this.typeName = Objects.requireNonNull(typeName);
         this.typeId = typeId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RelationshipTypeMapping that = (RelationshipTypeMapping) o;
+        return typeId == that.typeId &&
+               typeName.equals(that.typeName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(typeName, typeId);
+    }
+
+    @Override
+    public String toString() {
+        return "RelationshipTypeMapping{" +
+               "typeName='" + typeName + '\'' +
+               ", typeId=" + typeId +
+               '}';
     }
 }
