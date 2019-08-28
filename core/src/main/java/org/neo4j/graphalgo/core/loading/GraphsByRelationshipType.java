@@ -93,4 +93,8 @@ public final class GraphsByRelationshipType implements GraphByType {
     public long relationshipCount() {
         return graphs.values().stream().mapToLong(Graph::relationshipCount).sum();
     }
+
+    public Set<String> availableGraphs() {
+        return graphs.keySet();
+    }
 }

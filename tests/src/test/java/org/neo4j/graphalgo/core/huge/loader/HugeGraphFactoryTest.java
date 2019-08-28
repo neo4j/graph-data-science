@@ -29,6 +29,8 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DeduplicateRelationshipsStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.TransactionTerminatedException;
@@ -36,12 +38,16 @@ import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
+import java.util.Map;
 
+import static java.util.Arrays.asList;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.GraphHelper.collectTargetIds;
 import static org.neo4j.graphalgo.GraphHelper.collectTargetWeights;
+import static org.neo4j.helpers.collection.Iterables.asSet;
 
 
 class HugeGraphFactoryTest {
@@ -240,6 +246,49 @@ class HugeGraphFactoryTest {
 
         double[] out1 = collectTargetWeights(graph, id2);
         assertArrayEquals(expectedWeights(expectedWeight), out1, 1e-4);
+    }
+
+    @Test
+    void testLoadMultipleRelationships() {
+        GraphsByRelationshipType graphs = new GraphLoader(DB)
+                .withAnyLabel()
+                .withoutRelationshipWeights()
+                .withRelationshipType("REL1 | REL2")
+                .build(HugeGraphFactory.class)
+                .loadGraphs();
+
+        assertEquals(2, graphs.availableGraphs().size());
+        assertEquals(graphs.availableGraphs(), asSet(asList("REL1", "REL2")));
+
+        Graph rel1Graph = graphs.loadGraph("REL1");
+        Graph rel2Graph = graphs.loadGraph("REL2");
+        Graph unionGraph = graphs.loadGraph("REL1 | REL2");
+
+        assertArrayEquals(expectedIds(rel1Graph, id2), collectTargetIds(rel1Graph, id1));
+        assertArrayEquals(expectedIds(rel2Graph, id3), collectTargetIds(rel2Graph, id1));
+        assertArrayEquals(expectedIds(unionGraph, id2, id3), collectTargetIds(unionGraph, id1));
+    }
+
+    @Test
+    void testLoadMultipleRelationshipsWithWeights() {
+        GraphsByRelationshipType graphs = new GraphLoader(DB)
+                .withAnyLabel()
+                .withRelationshipType("REL1 | REL2")
+                .withRelationshipWeightsFromProperty("prop1", 42D)
+                .build(HugeGraphFactory.class)
+                .loadGraphs();
+
+        assertEquals(2, graphs.availableGraphs().size());
+        assertEquals(graphs.availableGraphs(), asSet(asList("REL1", "REL2")));
+
+        Graph rel1Graph = graphs.loadGraph("REL1");
+        Graph rel2Graph = graphs.loadGraph("REL2");
+        Graph unionGraph = graphs.loadGraph("REL1 | REL2");
+
+
+        assertArrayEquals(expectedWeights(1D), collectTargetWeights(rel1Graph, id1));
+        assertArrayEquals(expectedWeights(42D), collectTargetWeights(rel2Graph, id1));
+        assertArrayEquals(expectedWeights(1D, 42D), collectTargetWeights(unionGraph, id1));
     }
 
     private long[] expectedIds(final Graph graph, long... expected) {

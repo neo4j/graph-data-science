@@ -94,8 +94,7 @@ public final class LoadGraphProc extends BaseProc {
             GraphByType graphFromType;
             if (types.size() > 1) {
                 HugeGraphFactory graphFactory = loader.build(HugeGraphFactory.class);
-                Map<String, HugeGraph> graphs = graphFactory.loadGraphs();
-                GraphsByRelationshipType byType = new GraphsByRelationshipType(graphs);
+                GraphsByRelationshipType byType = graphFactory.loadGraphs();
                 stats.nodes = byType.nodeCount();
                 stats.relationships = byType.relationshipCount();
                 graphFromType = byType;

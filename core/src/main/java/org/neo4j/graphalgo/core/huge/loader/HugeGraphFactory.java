@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.huge.HugeAdjacencyList;
 import org.neo4j.graphalgo.core.huge.HugeAdjacencyOffsets;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.utils.ApproximatedImportProgress;
 import org.neo4j.graphalgo.core.utils.ImportProgress;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -147,9 +148,9 @@ public final class HugeGraphFactory extends GraphFactory {
         return Iterables.single(graphs.values());
     }
 
-    public Map<String, HugeGraph> loadGraphs() {
+    public GraphsByRelationshipType loadGraphs() {
         validateTokens();
-        return importAllGraphs();
+        return new GraphsByRelationshipType(importAllGraphs());
     }
 
     private Map<String, HugeGraph> importAllGraphs() {
