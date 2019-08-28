@@ -37,6 +37,8 @@ import static org.petitparser.utils.Functions.withoutSeparators;
 
 public final class RelationshipTypes {
 
+    public static final String ALL_IDENTIFIER = "  __ALL__  ";
+
     private static final Parser PARSER;
 
     static {
@@ -52,7 +54,7 @@ public final class RelationshipTypes {
     }
 
     public static Set<String> parse(String relTypes) {
-        if (relTypes == null || relTypes.isEmpty()) {
+        if (relTypes == null || relTypes.isEmpty() || relTypes.equals(ALL_IDENTIFIER)) {
             return Collections.emptySet();
         }
         Result result = PARSER.parse(relTypes);

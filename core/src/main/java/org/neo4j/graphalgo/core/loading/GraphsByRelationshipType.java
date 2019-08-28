@@ -33,8 +33,6 @@ import java.util.stream.Collectors;
 
 public final class GraphsByRelationshipType implements GraphByType {
 
-    public static final String ALL_IDENTIFIER = "  __ALL__  ";
-
     private final Map<String, HugeGraph> graphs;
 
     public GraphsByRelationshipType(Map<String, HugeGraph> graphs) {
@@ -47,12 +45,15 @@ public final class GraphsByRelationshipType implements GraphByType {
     @Override
     public Graph loadGraph(String relationship) {
         Set<String> types = RelationshipTypes.parse(relationship);
-        if (types.isEmpty() || ALL_IDENTIFIER.equals(relationship)) {
+
+        if (types.isEmpty()) {
             return new UnionGraph(graphs.values());
         }
+
         if (types.size() == 1) {
             return getExisting(Iterables.single(types));
         }
+
         List<HugeGraph> graphs = types.stream().map(this::getExisting).collect(Collectors.toList());
         return new UnionGraph(graphs);
     }

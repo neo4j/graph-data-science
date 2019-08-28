@@ -402,6 +402,35 @@ class LoadGraphProcTest extends ProcTestBase {
         });
     }
 
+    @Test
+    void removeGraphWithMultipleRelationshipTypes() {
+        String query = "CALL algo.graph.load(" +
+                       "    'foo', null, 'X | Y', {" +
+                       "        graph: 'huge'" +
+                       "    }" +
+                       ")";
+        runQuery(query);
+
+        runQuery("CALL algo.graph.info($name, true)", singletonMap("name", "foo"), row -> {
+            assertEquals(12, row.getNumber("nodes").intValue());
+            assertEquals(8, row.getNumber("relationships").intValue());
+            assertEquals("huge", row.getString("type"));
+            assertEquals("foo", row.getString("name"));
+            assertTrue(row.getBoolean("exists"));
+        });
+        runQuery("CALL algo.graph.remove($name)", singletonMap("name", "foo"), row -> {
+            assertEquals(12, row.getNumber("nodes").intValue());
+            assertEquals(8, row.getNumber("relationships").intValue());
+            assertEquals("huge", row.getString("type"));
+            assertEquals("foo", row.getString("name"));
+            assertTrue(row.getBoolean("removed"));
+        });
+        runQuery("CALL algo.graph.info($name)", singletonMap("name", "foo"), row -> {
+            assertEquals("foo", row.getString("name"));
+            assertFalse(row.getBoolean("exists"));
+        });
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"heavy", "huge", "kernel", "cypher"})
     void degreeDistribution(String graph) {

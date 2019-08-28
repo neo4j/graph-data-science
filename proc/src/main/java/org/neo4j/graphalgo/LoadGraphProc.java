@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.ProcedureConstants;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.loading.GraphByType;
@@ -51,6 +50,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
+
+import static org.neo4j.graphalgo.core.utils.RelationshipTypes.ALL_IDENTIFIER;
 
 public final class LoadGraphProc extends BaseProc {
     @Procedure(name = "algo.graph.load")
@@ -206,7 +207,7 @@ public final class LoadGraphProc extends BaseProc {
         if (!LoadGraphFactory.exists(name)) {
             info = new GraphInfoWithHistogram(name);
         } else {
-            Graph graph = LoadGraphFactory.get(name, GraphsByRelationshipType.ALL_IDENTIFIER);
+            Graph graph = LoadGraphFactory.get(name, ALL_IDENTIFIER);
             final boolean calculateDegreeDistribution;
             final ProcedureConfiguration configuration;
             if (Boolean.TRUE.equals(degreeDistribution)) {

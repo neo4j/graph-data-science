@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.core.loading.GraphsByRelationshipType.ALL_IDENTIFIER;
+import static org.neo4j.graphalgo.core.utils.RelationshipTypes.ALL_IDENTIFIER;
 
 public final class LoadGraphFactory extends GraphFactory {
 
