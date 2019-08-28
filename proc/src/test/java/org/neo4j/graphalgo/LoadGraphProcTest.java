@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
+import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -46,6 +47,7 @@ import java.util.concurrent.locks.LockSupport;
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -60,14 +62,14 @@ class LoadGraphProcTest extends ProcTestBase {
                                             ", (a)-[:X { weight: 1.0 }]->(:A {id: 2,  weight: 1.0, partition: 1})" +
                                             ", (a)-[:X { weight: 1.0 }]->(:A {id: 3,  weight: 2.0, partition: 1})" +
                                             ", (a)-[:X { weight: 1.0 }]->(:A {id: 4,  weight: 1.0, partition: 1})" +
-                                            ", (a)-[:X { weight: 1.0 }]->(:A {id: 5,  weight: 1.0, partition: 1})" +
+                                            ", (a)-[:Y { weight: 1.0 }]->(:A {id: 5,  weight: 1.0, partition: 1})" +
                                             ", (a)-[:X { weight: 1.0 }]->(:A {id: 6,  weight: 8.0, partition: 2})" +
 
                                             ", (b)-[:X { weight: 42.0 }]->(:B {id: 7,  weight: 1.0, partition: 1})" +
                                             ", (b)-[:X { weight: 42.0 }]->(:B {id: 8,  weight: 2.0, partition: 1})" +
                                             ", (b)-[:X { weight: 42.0 }]->(:B {id: 9,  weight: 1.0, partition: 1})" +
-                                            ", (b)-[:X { weight: 42.0 }]->(:B {id: 10, weight: 1.0, partition: 1})" +
-                                            ", (b)-[:X { weight: 42.0 }]->(:B {id: 11, weight: 8.0, partition: 2})";
+                                            ", (b)-[:Y { weight: 42.0 }]->(:B {id: 10, weight: 1.0, partition: 1})" +
+                                            ", (b)-[:Z { weight: 42.0 }]->(:B {id: 11, weight: 8.0, partition: 2})";
 
     @BeforeEach
     void setup() throws KernelException {
@@ -75,6 +77,7 @@ class LoadGraphProcTest extends ProcTestBase {
         Procedures procedures = DB.getDependencyResolver().resolveDependency(Procedures.class);
         procedures.registerProcedure(LoadGraphProc.class);
         procedures.registerProcedure(PageRankProc.class);
+        procedures.registerProcedure(UnionFindProc.class);
         procedures.registerProcedure(LabelPropagationProc.class);
         DB.execute(DB_CYPHER);
     }
@@ -137,6 +140,37 @@ class LoadGraphProcTest extends ProcTestBase {
         } finally {
             ParallelUtil.awaitTermination(futures);
         }
+    }
+
+    @Test
+    void shouldLoadGraphWithMultipleRelationships() {
+        String query = "CALL algo.graph.load(" +
+                       "    'foo', null, 'X | Y', {" +
+                       "        graph: 'huge'" +
+                       "    }" +
+                       ")";
+
+        runQuery(
+                query,
+                row -> {
+                    assertEquals(12, row.getNumber("nodes").intValue());
+                    assertEquals(8, row.getNumber("relationships").intValue());
+                    assertEquals("huge", row.getString("graph"));
+                    assertFalse(row.getBoolean("alreadyLoaded"));
+                }
+        );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"heavy", "kernel", "cypher"})
+    void shouldLoadasddGraphWithMultipleRelationships(String graphImpl) {
+        String query = String.format("CALL algo.graph.load(" +
+                                     "    'foo', 'null', 'X | Y', {" +
+                                     "        graph: '%s'" +
+                                     "    }" +
+                                     ")", graphImpl);
+
+        assertThrows(QueryExecutionException.class, () -> runQuery(query));
     }
 
     @ParameterizedTest
@@ -229,6 +263,39 @@ class LoadGraphProcTest extends ProcTestBase {
                 row -> assertEquals(12, row.getNumber("nodes").intValue()));
         runQuery(algoQuery, singletonMap("name", "foo"),
                 row -> assertEquals(12, row.getNumber("nodes").intValue()));
+    }
+
+    @Test
+    void multiUseLoadedGraphWithMultipleRelationships() {
+        String query = "CALL algo.graph.load(" +
+                       "    'foo', null, 'X | Y', {" +
+                       "        graph: 'huge'" +
+                       "    }" +
+                       ")";
+
+        runQuery(
+                query,
+                row -> {
+                    assertEquals(12, row.getNumber("nodes").intValue());
+                    assertEquals(8, row.getNumber("relationships").intValue());
+                    assertEquals("huge", row.getString("graph"));
+                    assertFalse(row.getBoolean("alreadyLoaded"));
+                }
+        );
+
+        String algoQuery = "CALL algo.unionFind(" +
+                           "    null, $relType, {" +
+                           "        graph: 'foo', write: false" +
+                           "    }" +
+                           ")";
+        runQuery(algoQuery, singletonMap("relType", "X | Y"),
+                row -> assertEquals(4, row.getNumber("communityCount").intValue()));
+
+        runQuery(algoQuery, singletonMap("relType", "X"),
+                row -> assertEquals(6, row.getNumber("communityCount").intValue()));
+
+        runQuery(algoQuery, singletonMap("relType", "Y"),
+                row -> assertEquals(10, row.getNumber("communityCount").intValue()));
     }
 
     @ParameterizedTest
