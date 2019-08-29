@@ -36,17 +36,17 @@ After usage, named graphs can be removed from memory to free resources used.
 For more information, see:
 
 * <<label-relationship-type-projection>>
-* <<cypher-projection>>
 * <<named-graph>>
+* <<cypher-projection>>
 * <<relationship-deduplication>>
 * <<memory-requirements>>
 * <<transaction-handling>>
 
 include::projected-graph-model/label-relationship-type-projection.adoc[leveloffset=+1]
 
-include::projected-graph-model/cypher-projection.adoc[tag=overview,leveloffset=+1]
-
 include::named-graph.adoc[leveloffset=+1]
+
+include::projected-graph-model/cypher-projection.adoc[tag=overview,leveloffset=+1]
 
 include::projected-graph-model/relationship-deduplication.adoc[leveloffset=+1]
 

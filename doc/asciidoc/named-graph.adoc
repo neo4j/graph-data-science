@@ -71,6 +71,36 @@ We can use our named graph in queries by specifying its name in the `graph` key 
 CALL algo.pageRank(null,null,{graph:'my-graph' /*, ... */})
 ----
 
+== Loading multiple relationship types
+
+Using the `algo.graph.load` procedure it is possible to load more than one relationship type, as opposed to exactly one type or all types.
+In order to specify multiple relationship types, we can provide a relationship type description as known from Cypher `MATCH` pattern declarations.
+
+.The following example will load the graph `my-graph` with relationships that have the type `REL_TYPE1`, `REL_TYPE2` or `REL_TYPE3`:
+[source,cypher]
+----
+CALL algo.graph.load('my-graph', null, 'REL_TYPE1 | REL_TYPE2 | REL_TYPE3', {direction: 'OUTGOING', concurrency: 8 })
+YIELD name, graph, direction, undirected, sorted, nodes, loadMillis, alreadyLoaded,
+      nodeWeight, relationshipWeight, nodeProperty, loadNodes, loadRelationships;
+----
+
+Having loaded a graph with multiple relationship types gives us serveral options how we can use the relationships.
+
+If we call an algorithm with no additional relationship type information, as described in the section above, the algorithm will use all loaded relationships.
+
+However, it is also possible to only use a subset of the loaded relationships by specifying the requested relationship types in the `relationship-type` field of the algorithm.
+.The following example will run PageRank only on relationships of type `REL_TYPE1` or `REL_TYPE2`:
+[source,cypher]
+----
+CALL algo.pageRank(null, 'REL_TYPE1 | REL_TYPE2' ,{graph:'my-graph' /*, ... */})
+----
+
+[NOTE]
+====
+Specifying a subset of relationship types in an algorithm call only works when the graph was explicitly loaded with multiple relationship types.
+If the graph was loaded with `null`, no relationship type information is retained in the graph.
+====
+
 == List all named graphs
 
 We can get an overview over all loaded named graphs.
