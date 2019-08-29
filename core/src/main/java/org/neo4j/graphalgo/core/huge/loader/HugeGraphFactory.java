@@ -199,36 +199,12 @@ public final class HugeGraphFactory extends GraphFactory {
 
         Map<RelationshipTypeMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> allBuilders = Arrays
                 .stream(dimensions.relationshipTypeMappings())
-                .collect(Collectors.toMap(Function.identity(), mapping -> {
-                    RelationshipsBuilder outgoingRelationshipsBuilder = null;
-                    RelationshipsBuilder incomingRelationshipsBuilder = null;
+                .collect(Collectors.toMap(
+                        Function.identity(),
+                        mapping -> createBuilderForRelationshipType(deduplicateRelationshipsStrategy, tracker)
+                ));
 
-
-                    if (setup.loadAsUndirected) {
-                        outgoingRelationshipsBuilder = new RelationshipsBuilder(
-                                deduplicateRelationshipsStrategy,
-                                tracker,
-                                setup.shouldLoadRelationshipWeight());
-                    } else {
-                        if (setup.loadOutgoing) {
-                            outgoingRelationshipsBuilder = new RelationshipsBuilder(
-                                    deduplicateRelationshipsStrategy,
-                                    tracker,
-                                    setup.shouldLoadRelationshipWeight());
-                        }
-                        if (setup.loadIncoming) {
-                            incomingRelationshipsBuilder = new RelationshipsBuilder(
-                                    deduplicateRelationshipsStrategy,
-                                    tracker,
-                                    setup.shouldLoadRelationshipWeight());
-                        }
-                    }
-
-
-                    return Pair.of(outgoingRelationshipsBuilder, incomingRelationshipsBuilder);
-                }));
-
-        long relationshipCount = new ScanningRelationshipsImporter(
+        ScanningRelationshipsImporter scanningImporter = new ScanningRelationshipsImporter(
                 setup,
                 api,
                 dimensions,
@@ -237,8 +213,9 @@ public final class HugeGraphFactory extends GraphFactory {
                 idsAndProperties.hugeIdMap,
                 allBuilders,
                 threadPool,
-                concurrency)
-                .call(setup.log);
+                concurrency
+        );
+        long relationshipCount = scanningImporter.call(setup.log);
 
         return allBuilders.entrySet().stream().collect(Collectors.toMap(
                 entry -> entry.getKey().typeName,
@@ -256,6 +233,36 @@ public final class HugeGraphFactory extends GraphFactory {
                             relationshipCount,
                             setup.loadAsUndirected);
                 }));
+    }
+
+    private Pair<RelationshipsBuilder, RelationshipsBuilder> createBuilderForRelationshipType(
+            DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy,
+            AllocationTracker tracker) {
+        RelationshipsBuilder outgoingRelationshipsBuilder = null;
+        RelationshipsBuilder incomingRelationshipsBuilder = null;
+
+
+        if (setup.loadAsUndirected) {
+            outgoingRelationshipsBuilder = new RelationshipsBuilder(
+                    deduplicateRelationshipsStrategy,
+                    tracker,
+                    setup.shouldLoadRelationshipWeight());
+        } else {
+            if (setup.loadOutgoing) {
+                outgoingRelationshipsBuilder = new RelationshipsBuilder(
+                        deduplicateRelationshipsStrategy,
+                        tracker,
+                        setup.shouldLoadRelationshipWeight());
+            }
+            if (setup.loadIncoming) {
+                incomingRelationshipsBuilder = new RelationshipsBuilder(
+                        deduplicateRelationshipsStrategy,
+                        tracker,
+                        setup.shouldLoadRelationshipWeight());
+            }
+        }
+
+        return Pair.of(outgoingRelationshipsBuilder, incomingRelationshipsBuilder);
     }
 
     private HugeGraph buildGraph(
