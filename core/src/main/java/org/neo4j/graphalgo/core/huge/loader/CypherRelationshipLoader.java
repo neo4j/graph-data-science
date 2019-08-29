@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.kernel.api.StatementConstants;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.LongAdder;
 
 class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
 
@@ -61,7 +61,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
         AdjacencyBuilder outBuilder = AdjacencyBuilder.compressing(
                 outgoingRelationshipsBuilder,
                 numberOfPages, pageSize,
-                setup.tracker, new AtomicLong(), -2, relationDefaultWeight);
+                setup.tracker, new LongAdder(), -2, relationDefaultWeight);
 
         this.idMap = idMap;
         hasRelationshipWeights = setup.shouldLoadRelationshipWeight();

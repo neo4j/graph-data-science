@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.Read;
 
+import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Stream;
 
 final class SingleTypeRelationshipImporter {
@@ -54,12 +55,23 @@ final class SingleTypeRelationshipImporter {
 
         private final RelationshipTypeMapping mapping;
         private final RelationshipImporter importer;
+        private final LongAdder relationshipCounter;
 
         Builder(
                 RelationshipTypeMapping mapping,
-                RelationshipImporter importer) {
+                RelationshipImporter importer,
+                LongAdder relationshipCounter) {
             this.mapping = mapping;
             this.importer = importer;
+            this.relationshipCounter = relationshipCounter;
+        }
+
+        RelationshipTypeMapping mapping() {
+            return mapping;
+        }
+
+        LongAdder relationshipCounter() {
+            return relationshipCounter;
         }
 
         WithImporter loadImporter(

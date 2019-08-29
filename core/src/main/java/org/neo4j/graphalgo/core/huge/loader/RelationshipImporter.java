@@ -31,16 +31,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-public class RelationshipImporter {
+class RelationshipImporter {
 
     private final AllocationTracker tracker;
     private final AdjacencyBuilder outAdjacency;
     private final AdjacencyBuilder inAdjacency;
 
-    public RelationshipImporter(
+    RelationshipImporter(
             AllocationTracker tracker,
             AdjacencyBuilder outAdjacency,
-            AdjacencyBuilder inAdjacency){
+            AdjacencyBuilder inAdjacency) {
         this.tracker = tracker;
         this.outAdjacency = outAdjacency;
         this.inAdjacency = inAdjacency;
@@ -91,11 +91,19 @@ public class RelationshipImporter {
     private long importBothOrUndirectedWithWeight(RelationshipsBatchBuffer buffer, WeightReader reader) {
         int batchLength = buffer.length;
         long[] batch = buffer.sortBySource();
-        long[] weightsOut = reader.readWeight(batch, batchLength, outAdjacency.getWeightProperty(), outAdjacency.getDefaultWeight());
+        long[] weightsOut = reader.readWeight(
+                batch,
+                batchLength,
+                outAdjacency.getWeightProperty(),
+                outAdjacency.getDefaultWeight());
         int importedOut = importRelationships(buffer, batch, weightsOut, outAdjacency, tracker);
         batch = buffer.sortByTarget();
 
-        long[] weightsIn = reader.readWeight(batch, batchLength, inAdjacency.getWeightProperty(), inAdjacency.getDefaultWeight());
+        long[] weightsIn = reader.readWeight(
+                batch,
+                batchLength,
+                inAdjacency.getWeightProperty(),
+                inAdjacency.getDefaultWeight());
         int importedIn = importRelationships(buffer, batch, weightsIn, inAdjacency, tracker);
         return RawValues.combineIntInt(importedOut + importedIn, importedOut + importedIn);
     }
@@ -108,7 +116,11 @@ public class RelationshipImporter {
     private long importOutgoingWithWeight(RelationshipsBatchBuffer buffer, WeightReader weightReader) {
         int batchLength = buffer.length;
         long[] batch = buffer.sortBySource();
-        long[] weightsOut = weightReader.readWeight(batch, batchLength, outAdjacency.getWeightProperty(), outAdjacency.getDefaultWeight());
+        long[] weightsOut = weightReader.readWeight(
+                batch,
+                batchLength,
+                outAdjacency.getWeightProperty(),
+                outAdjacency.getDefaultWeight());
         int importedOut = importRelationships(buffer, batch, weightsOut, outAdjacency, tracker);
         return RawValues.combineIntInt(importedOut, importedOut);
     }
@@ -121,15 +133,20 @@ public class RelationshipImporter {
     private long importIncomingWithWeight(RelationshipsBatchBuffer buffer, WeightReader weightReader) {
         int batchLength = buffer.length;
         long[] batch = buffer.sortByTarget();
-        long[] weightsIn = weightReader.readWeight(batch, batchLength, inAdjacency.getWeightProperty(), inAdjacency.getDefaultWeight());
+        long[] weightsIn = weightReader.readWeight(
+                batch,
+                batchLength,
+                inAdjacency.getWeightProperty(),
+                inAdjacency.getDefaultWeight());
         int importedIn = importRelationships(buffer, batch, weightsIn, inAdjacency, tracker);
         return RawValues.combineIntInt(importedIn, importedIn);
     }
+
     public interface WeightReader {
         long[] readWeight(long[] batch, int batchLength, int weightProperty, double defaultWeight);
     }
 
-    public Collection<Runnable> flushTasks() {
+    Collection<Runnable> flushTasks() {
         if (outAdjacency != null) {
             if (inAdjacency == null || inAdjacency == outAdjacency) {
                 return outAdjacency.flushTasks();
@@ -164,7 +181,7 @@ public class RelationshipImporter {
         };
     }
 
-    public WeightReader cypherResultsBackedWeightReader() {
+    WeightReader cypherResultsBackedWeightReader() {
         return (batch, batchLength, weightProperty, defaultWeight) -> {
             long[] weights = new long[batchLength / BATCH_ENTRY_SIZE];
             for (int i = 0; i < batchLength; i += BATCH_ENTRY_SIZE) {

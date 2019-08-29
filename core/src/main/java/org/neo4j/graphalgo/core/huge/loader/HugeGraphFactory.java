@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
+import com.carrotsearch.hppc.ObjectLongMap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.graphalgo.KernelPropertyMapping;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
@@ -215,7 +216,7 @@ public final class HugeGraphFactory extends GraphFactory {
                 threadPool,
                 concurrency
         );
-        long relationshipCount = scanningImporter.call(setup.log);
+        ObjectLongMap<RelationshipTypeMapping> relationshipCounts = scanningImporter.call(setup.log);
 
         return allBuilders.entrySet().stream().collect(Collectors.toMap(
                 entry -> entry.getKey().typeName,
@@ -230,8 +231,9 @@ public final class HugeGraphFactory extends GraphFactory {
                             incomingRelationshipsBuilder,
                             outgoingRelationshipsBuilder,
                             setup.relationDefaultWeight,
-                            relationshipCount,
-                            setup.loadAsUndirected);
+                            relationshipCounts.getOrDefault(entry.getKey(), 0L),
+                            setup.loadAsUndirected
+                    );
                 }));
     }
 

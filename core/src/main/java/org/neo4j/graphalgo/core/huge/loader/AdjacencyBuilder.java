@@ -27,7 +27,7 @@ import org.neo4j.kernel.api.StatementConstants;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.LongAdder;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
@@ -49,7 +49,7 @@ abstract class AdjacencyBuilder {
             int numPages,
             int pageSize,
             AllocationTracker tracker,
-            AtomicLong relationshipCounter,
+            LongAdder relationshipCounter,
             int weightProperty,
             double defaultWeight) {
         if (globalBuilder == null) {
@@ -98,7 +98,7 @@ abstract class AdjacencyBuilder {
         private final long pageMask;
         private final long sizeOfLongPage;
         private final long sizeOfObjectPage;
-        private final AtomicLong relationshipCounter;
+        private final LongAdder relationshipCounter;
         private final int weightProperty;
         private final double defaultWeight;
 
@@ -110,7 +110,7 @@ abstract class AdjacencyBuilder {
                 long[][] globalAdjacencyOffsets,
                 long[][] globalWeightOffsets,
                 int pageSize,
-                AtomicLong relationshipCounter,
+                LongAdder relationshipCounter,
                 final int weightProperty,
                 final double defaultWeight) {
             this.globalBuilder = globalBuilder;
@@ -121,7 +121,7 @@ abstract class AdjacencyBuilder {
             this.globalWeightOffsets = globalWeightOffsets;
             this.pageSize = pageSize;
             this.pageShift = Integer.numberOfTrailingZeros(pageSize);
-            this.pageMask = (long) (pageSize - 1);
+            this.pageMask = pageSize - 1;
             sizeOfLongPage = sizeOfLongArray(pageSize);
             sizeOfObjectPage = sizeOfObjectArray(pageSize);
             this.relationshipCounter = relationshipCounter;
@@ -233,7 +233,7 @@ abstract class AdjacencyBuilder {
                         allTargets[localId] = null;
                     }
                 }
-                relationshipCounter.addAndGet(importedRelationships);
+                relationshipCounter.add(importedRelationships);
             });
             return Arrays.asList(runnables);
         }
