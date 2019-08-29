@@ -52,36 +52,7 @@ public class RelationshipImporter {
                 WeightReader weightReader);
     }
 
-    public static Imports imports(
-            RelationshipImporter importer,
-            boolean loadAsUndirected,
-            boolean loadOutgoing,
-            boolean loadIncoming,
-            boolean loadWeights) {
-        if (loadAsUndirected) {
-            return loadWeights
-                    ? importer::importBothOrUndirectedWithWeight
-                    : importer::importBothOrUndirected;
-        }
-        if (loadOutgoing) {
-            if (loadIncoming) {
-                return loadWeights
-                        ? importer::importBothOrUndirectedWithWeight
-                        : importer::importBothOrUndirected;
-            }
-            return loadWeights
-                    ? importer::importOutgoingWithWeight
-                    : importer::importOutgoing;
-        }
-        if (loadIncoming) {
-            return loadWeights
-                    ? importer::importIncomingWithWeight
-                    : importer::importIncoming;
-        }
-        return null;
-    }
-
-    public Imports imports(
+    Imports imports(
             boolean loadAsUndirected,
             boolean loadOutgoing,
             boolean loadIncoming,

@@ -45,8 +45,8 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
             IdMapping idMap,
             AbstractStorePageCacheScanner<RelationshipRecord> scanner,
             boolean loadWeights,
-            Collection<SingleTypeRelationshipImport> importer) {
-        List<SingleTypeRelationshipImport.WithImporter> importers = importer
+            Collection<SingleTypeRelationshipImporter.Builder> importerBuilders) {
+        List<SingleTypeRelationshipImporter.Builder.WithImporter> builders = importerBuilders
                 .stream()
                 .map(relImporter -> relImporter.loadImporter(
                         setup.loadAsUndirected,
@@ -56,7 +56,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
                 ))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
-        if (importers.isEmpty()) {
+        if (builders.isEmpty()) {
             return InternalImporter.createEmptyScanner();
         }
         return new RelationshipsScanner.Creator(
@@ -64,7 +64,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
                 progress,
                 idMap,
                 scanner,
-                importers,
+                builders,
                 setup.terminationFlag
         );
     }
@@ -74,7 +74,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
         private final ImportProgress progress;
         private final IdMapping idMap;
         private final AbstractStorePageCacheScanner<RelationshipRecord> scanner;
-        private final List<SingleTypeRelationshipImport.WithImporter> importers;
+        private final List<SingleTypeRelationshipImporter.Builder.WithImporter> importerBuilders;
         private final TerminationFlag terminationFlag;
 
         Creator(
@@ -82,13 +82,13 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
                 ImportProgress progress,
                 IdMapping idMap,
                 AbstractStorePageCacheScanner<RelationshipRecord> scanner,
-                List<SingleTypeRelationshipImport.WithImporter> importers,
+                List<SingleTypeRelationshipImporter.Builder.WithImporter> importerBuilders,
                 TerminationFlag terminationFlag) {
             this.api = api;
             this.progress = progress;
             this.idMap = idMap;
             this.scanner = scanner;
-            this.importers = importers;
+            this.importerBuilders = importerBuilders;
             this.terminationFlag = terminationFlag;
         }
 
@@ -101,14 +101,14 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
                     idMap,
                     scanner,
                     index,
-                    importers
+                    importerBuilders
             );
         }
 
         @Override
         public Collection<Runnable> flushTasks() {
-            return importers.stream()
-                    .flatMap(SingleTypeRelationshipImport.WithImporter::flushTasks)
+            return importerBuilders.stream()
+                    .flatMap(SingleTypeRelationshipImporter.Builder.WithImporter::flushTasks)
                     .collect(Collectors.toList());
         }
     }
@@ -118,7 +118,7 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
     private final IdMapping idMap;
     private final AbstractStorePageCacheScanner<RelationshipRecord> scanner;
     private final int scannerIndex;
-    private final List<SingleTypeRelationshipImport.WithImporter> importers;
+    private final List<SingleTypeRelationshipImporter.Builder.WithImporter> importerBuilders;
 
     private long relationshipsImported;
     private long weightsImported;
@@ -130,14 +130,14 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
             IdMapping idMap,
             AbstractStorePageCacheScanner<RelationshipRecord> scanner,
             int threadIndex,
-            List<SingleTypeRelationshipImport.WithImporter> importers) {
+            List<SingleTypeRelationshipImporter.Builder.WithImporter> importerBuilders) {
         super(api);
         this.terminationFlag = terminationFlag;
         this.progress = progress;
         this.idMap = idMap;
         this.scanner = scanner;
         this.scannerIndex = threadIndex;
-        this.importers = importers;
+        this.importerBuilders = importerBuilders;
     }
 
     @Override
@@ -152,23 +152,23 @@ final class RelationshipsScanner extends StatementAction implements RecordScanne
 
     private void scanRelationships(final Read read, final CursorFactory cursors) {
         try (AbstractStorePageCacheScanner<RelationshipRecord>.Cursor cursor = scanner.getCursor()) {
-            List<SingleTypeRelationshipImport.WithBuffer> importers = this.importers.stream()
+            List<SingleTypeRelationshipImporter> importers = this.importerBuilders.stream()
                     .map(imports -> imports.withBuffer(idMap, cursor.bulkSize(), read, cursors))
                     .collect(Collectors.toList());
 
             RelationshipsBatchBuffer[] buffers = importers
                     .stream()
-                    .map(SingleTypeRelationshipImport.WithBuffer::buffer)
+                    .map(SingleTypeRelationshipImporter::buffer)
                     .toArray(RelationshipsBatchBuffer[]::new);
 
-            CompositeRelationshipsBatchBuffer buffer = new CompositeRelationshipsBatchBuffer(buffers);
+            RecordsBatchBuffer<RelationshipRecord> buffer = CompositeRelationshipsBatchBuffer.of(buffers);
 
             long allImportedRels = 0L;
             long allImportedWeights = 0L;
             while (buffer.scan(cursor)) {
                 terminationFlag.assertRunning();
                 long imported = 0L;
-                for (SingleTypeRelationshipImport.WithBuffer importer : importers) {
+                for (SingleTypeRelationshipImporter importer : importers) {
                     imported += importer.importRels();
                 }
                 int importedRels = RawValues.getHead(imported);

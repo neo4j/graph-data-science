@@ -82,37 +82,11 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
 
         boolean importWeights = dimensions.relWeightId() != StatementConstants.NO_SUCH_PROPERTY_KEY;
 
-        List<SingleTypeRelationshipImport> importers = allBuilders.entrySet().stream().map(entry -> {
-            RelationshipTypeMapping mapping = entry.getKey();
-            RelationshipsBuilder outRelationshipsBuilder = entry.getValue().getLeft();
-            RelationshipsBuilder inRelationshipsBuilder = entry.getValue().getRight();
-            AdjacencyBuilder outBuilder = AdjacencyBuilder.compressing(
-                    outRelationshipsBuilder,
-                    numberOfPages,
-                    pageSize,
-                    tracker,
-                    relationshipCounter,
-                    dimensions.relWeightId(),
-                    setup.relationDefaultWeight);
-            AdjacencyBuilder inBuilder = AdjacencyBuilder.compressing(
-                    inRelationshipsBuilder,
-                    numberOfPages,
-                    pageSize,
-                    tracker,
-                    relationshipCounter,
-                    dimensions.relWeightId(),
-                    setup.relationDefaultWeight);
-
-
-            RelationshipImporter importer = new RelationshipImporter(
-                    setup.tracker,
-                    outBuilder,
-                    setup.loadAsUndirected ? outBuilder : inBuilder
-            );
-
-            return new SingleTypeRelationshipImport(mapping, importer);
-        }).collect(Collectors.toList());
-
+        List<SingleTypeRelationshipImporter.Builder> importerBuilders = allBuilders
+                .entrySet()
+                .stream()
+                .map(entry -> createImporterBuilder(pageSize, numberOfPages, entry))
+                .collect(Collectors.toList());
 
         return RelationshipsScanner.of(
                 api,
@@ -121,7 +95,41 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
                 idMap,
                 scanner,
                 importWeights,
-                importers);
+                importerBuilders
+        );
+    }
+
+    private SingleTypeRelationshipImporter.Builder createImporterBuilder(
+            int pageSize,
+            int numberOfPages,
+            Map.Entry<RelationshipTypeMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> entry) {
+        RelationshipTypeMapping mapping = entry.getKey();
+        RelationshipsBuilder outRelationshipsBuilder = entry.getValue().getLeft();
+        RelationshipsBuilder inRelationshipsBuilder = entry.getValue().getRight();
+        AdjacencyBuilder outBuilder = AdjacencyBuilder.compressing(
+                outRelationshipsBuilder,
+                numberOfPages,
+                pageSize,
+                tracker,
+                relationshipCounter,
+                dimensions.relWeightId(),
+                setup.relationDefaultWeight);
+        AdjacencyBuilder inBuilder = AdjacencyBuilder.compressing(
+                inRelationshipsBuilder,
+                numberOfPages,
+                pageSize,
+                tracker,
+                relationshipCounter,
+                dimensions.relWeightId(),
+                setup.relationDefaultWeight);
+
+        RelationshipImporter importer = new RelationshipImporter(
+                setup.tracker,
+                outBuilder,
+                setup.loadAsUndirected ? outBuilder : inBuilder
+        );
+
+        return new SingleTypeRelationshipImporter.Builder(mapping, importer);
     }
 
     @Override

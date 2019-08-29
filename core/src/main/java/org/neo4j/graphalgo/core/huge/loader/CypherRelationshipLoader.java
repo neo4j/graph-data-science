@@ -66,7 +66,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
         this.idMap = idMap;
         hasRelationshipWeights = setup.shouldLoadRelationshipWeight();
         importer = new RelationshipImporter(setup.tracker, outBuilder, null);
-        imports = RelationshipImporter.imports(importer, false, true, false, hasRelationshipWeights);
+        imports = importer.imports(false, true, false, hasRelationshipWeights);
         totalRecordsSeen = 0;
         totalRelationshipsImported = 0;
     }
