@@ -32,8 +32,8 @@ public class WCCComputation extends Computation {
     }
 
     @Override
-    protected boolean isSynchronous() {
-        return false;
+    protected boolean supportsAsynchronousParallel() {
+        return true;
     }
 
     @Override

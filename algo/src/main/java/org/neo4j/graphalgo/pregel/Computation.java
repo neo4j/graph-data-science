@@ -67,7 +67,7 @@ public abstract class Computation {
         return computeStep.getDegree(nodeId, getMessageDirection());
     }
 
-    protected boolean isSynchronous() {
-        return true;
+    protected boolean supportsAsynchronousParallel() {
+        return false;
     }
 }

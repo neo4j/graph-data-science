@@ -183,7 +183,7 @@ public final class Pregel {
 
         final List<ComputeStep> tasks = new ArrayList<>(threadCount);
 
-        if (computationFactory.get().isSynchronous()) {
+        if (!computationFactory.get().supportsAsynchronousParallel()) {
             // Synchronization barrier:
             // Add termination flag to message queues that
             // received messages in the previous iteration.
