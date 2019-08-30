@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.pregel;
 
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -34,11 +33,9 @@ import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.pregel.pagerank.PRComputation;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
-import java.util.HashMap;
-import java.util.Map;
+import static org.neo4j.graphalgo.pregel.ComputationTestUtil.*;
 
 public class PRTest {
 
@@ -120,38 +117,18 @@ public class PRTest {
 
         final HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
 
-        assertValues(graph, nodeValues,
-                0, 0.0276, // a
-                1, 0.3483, // b
-                2, 0.2650, // c
-                3, 0.0330, // d
-                4, 0.0682, // e
-                5, 0.0330, // f
-                6, 0.0136, // g
-                7, 0.0136, // h
-                8, 0.0136, // i
-                9, 0.0136, // j
-                10, 0.0136 // k
+        assertDoubleValues(DB, NODE_LABEL, ID_PROPERTY, graph, nodeValues, 1e-3,
+                0.0276, // a
+                0.3483, // b
+                0.2650, // c
+                0.0330, // d
+                0.0682, // e
+                0.0330, // f
+                0.0136, // g
+                0.0136, // h
+                0.0136, // i
+                0.0136, // j
+                0.0136 // k
         );
-    }
-
-    private void assertValues(final Graph graph, HugeDoubleArray computedValues, final double... values) {
-        Map<Long, Double> expectedValues = new HashMap<>();
-        try (Transaction tx = DB.beginTx()) {
-            for (int i = 0; i < values.length; i += 2) {
-                expectedValues.put(DB.findNode(NODE_LABEL, ID_PROPERTY, (long) values[i]).getId(), values[i + 1]);
-            }
-            tx.success();
-        }
-
-        expectedValues.forEach((idProp, expectedValue) -> {
-            long neoId = graph.toOriginalNodeId(idProp);
-            double computedValue = computedValues.get(neoId);
-            Assert.assertEquals(
-                    String.format("Node.id = %d should have page rank %f", idProp, expectedValue),
-                    expectedValue,
-                    computedValue,
-                    1e-3);
-        });
     }
 }

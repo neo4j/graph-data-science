@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.pregel;
 
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -31,15 +30,12 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.pregel.components.WCCComputation;
 import org.neo4j.graphalgo.pregel.paths.SSSPComputation;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
-import java.util.HashMap;
-import java.util.Map;
+import static org.neo4j.graphalgo.pregel.ComputationTestUtil.*;
 
 public class SSSPTest {
 
@@ -110,24 +106,16 @@ public class SSSPTest {
 
         HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
 
-        assertValues(graph, nodeValues,0, 0, 1, 1, 2, 1, 3, 2, 4, Long.MAX_VALUE, 5, Long.MAX_VALUE, 6, Long.MAX_VALUE, 7, Long.MAX_VALUE, 8, Long.MAX_VALUE, 9, Long.MAX_VALUE);
-    }
-
-    private void assertValues(final Graph graph, HugeDoubleArray computedValues, final long... values) {
-        Map<Long, Long> expectedValues = new HashMap<>();
-        try (Transaction tx = DB.beginTx()) {
-            for (int i = 0; i < values.length; i+=2) {
-                expectedValues.put(DB.findNode(NODE_LABEL, ID_PROPERTY, values[i]).getId(), values[i + 1]);
-            }
-            tx.success();
-        }
-        expectedValues.forEach((idProp, expectedValue) -> {
-            long neoId = graph.toOriginalNodeId(idProp);
-            long computedValue = (long) computedValues.get(neoId);
-            Assert.assertEquals(
-                    String.format("Node.id = %d should have component %d", idProp, expectedValue),
-                    (long) expectedValue,
-                    computedValue);
-        });
+        assertLongValues(DB, NODE_LABEL, ID_PROPERTY, graph, nodeValues,
+                0,
+                1,
+                1,
+                2,
+                Long.MAX_VALUE,
+                Long.MAX_VALUE,
+                Long.MAX_VALUE,
+                Long.MAX_VALUE,
+                Long.MAX_VALUE,
+                Long.MAX_VALUE);
     }
 }

@@ -20,12 +20,10 @@
 package org.neo4j.graphalgo.pregel;
 
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -35,11 +33,9 @@ import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.pregel.components.SCCComputation;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
-import java.util.HashMap;
-import java.util.Map;
+import static org.neo4j.graphalgo.pregel.ComputationTestUtil.assertLongValues;
 
 public class SCCTest {
 
@@ -112,24 +108,6 @@ public class SCCTest {
 
         HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
 
-        assertValues(graph, nodeValues,0, 0, 1, 0, 2, 0, 3, 0, 4, 4, 5, 4, 6, 4, 7, 7, 8, 7, 9, 9);
-    }
-
-    private void assertValues(final Graph graph, HugeDoubleArray computedValues, final long... values) {
-        Map<Long, Long> expectedValues = new HashMap<>();
-        try (Transaction tx = DB.beginTx()) {
-            for (int i = 0; i < values.length; i+=2) {
-                expectedValues.put(DB.findNode(NODE_LABEL, ID_PROPERTY, values[i]).getId(), values[i + 1]);
-            }
-            tx.success();
-        }
-        expectedValues.forEach((idProp, expectedValue) -> {
-            long neoId = graph.toOriginalNodeId(idProp);
-            long computedValue = (long) computedValues.get(neoId);
-            Assert.assertEquals(
-                    String.format("Node.id = %d should have component %d", idProp, expectedValue),
-                    (long) expectedValue,
-                    computedValue);
-        });
+        assertLongValues(DB, NODE_LABEL, ID_PROPERTY, graph, nodeValues, 0, 0, 0, 0, 4, 4, 4, 7, 7, 9);
     }
 }
