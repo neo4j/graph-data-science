@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo.pregel;
 
-
-import org.jctools.queues.MpscLinkedQueue;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Queue;
@@ -28,6 +26,40 @@ import java.util.Queue;
 public abstract class Computation {
 
     private Pregel.ComputeStep computeStep;
+
+    protected abstract void compute(long nodeId, Queue<Double> messages);
+
+    protected void voteToHalt(long nodeId) {
+        computeStep.voteToHalt(nodeId);
+    }
+
+    protected int getSuperstep() {
+        return computeStep.getIteration();
+    }
+
+    protected double getNodeValue(long nodeId) {
+        return computeStep.getNodeValue(nodeId);
+    }
+
+    protected void setNodeValue(long nodeId, double value) {
+        computeStep.setNodeValue(nodeId, value);
+    }
+
+    protected void sendMessages(long nodeId, double message) {
+        sendMessages(nodeId, message, getMessageDirection());
+    }
+
+    protected void sendMessages(long nodeId, double message, Direction direction) {
+        computeStep.sendMessages(nodeId, message, direction);
+    }
+
+    protected int getDegree(long nodeId) {
+        return getDegree(nodeId, getMessageDirection());
+    }
+
+    protected int getDegree(long nodeId, Direction direction) {
+        return computeStep.getDegree(nodeId, direction);
+    }
 
     protected Direction getMessageDirection() {
         return Direction.OUTGOING;
@@ -37,34 +69,8 @@ public abstract class Computation {
         return -1.0;
     }
 
-    void setComputeStep(final Pregel.ComputeStep computeStep) {
+    void setComputeStep(Pregel.ComputeStep computeStep) {
         this.computeStep = computeStep;
-    }
-
-    protected abstract void compute(final long nodeId, Queue<Double> messages);
-
-    protected int getSuperstep() {
-        return computeStep.getIteration();
-    }
-
-    protected void voteToHalt(final long nodeId) {
-        computeStep.voteToHalt(nodeId);
-    }
-
-    protected void sendMessages(final long nodeId , final double message) {
-        computeStep.sendMessages(nodeId, message, getMessageDirection());
-    }
-
-    protected double getValue(final long nodeId) {
-        return computeStep.getNodeValue(nodeId);
-    }
-
-    protected void setValue(final long nodeId, final double value) {
-        computeStep.setNodeValue(nodeId, value);
-    }
-
-    protected int getDegree(final long nodeId) {
-        return computeStep.getDegree(nodeId, getMessageDirection());
     }
 
     protected boolean supportsAsynchronousParallel() {

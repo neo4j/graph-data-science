@@ -44,7 +44,7 @@ public class PRComputation extends Computation {
 
     @Override
     protected void compute(final long nodeId, Queue<Double> messages) {
-        double newRank = getValue(nodeId);
+        double newRank = getNodeValue(nodeId);
 
         // compute new rank based on neighbor ranks
         if (getSuperstep() > 0) {
@@ -59,7 +59,7 @@ public class PRComputation extends Computation {
         }
 
         // send new rank to neighbors
-        setValue(nodeId, newRank);
+        setNodeValue(nodeId, newRank);
         sendMessages(nodeId, newRank / getDegree(nodeId));
     }
 }

@@ -41,27 +41,28 @@ public class SSSPComputation extends Computation {
     protected void compute(long nodeId, Queue<Double> messages) {
         if (getSuperstep() == 0) {
             if (nodeId == startNode) {
-                setValue(nodeId, 0);
+                setNodeValue(nodeId, 0);
                 sendMessages(nodeId, 1);
             } else {
-                setValue(nodeId, Long.MAX_VALUE);
+                setNodeValue(nodeId, Long.MAX_VALUE);
             }
         } else {
             // This is basically the same message passing as WCC (except the new message)
-            long oldDistance = (long) getValue(nodeId);
-            long newDistance = oldDistance;
+            long newDistance = (long) getNodeValue(nodeId);
+            boolean hasChanged = false;
 
             if (messages != null) {
                 Double message;
                 while ((message = messages.poll()) != null) {
                     if (message < newDistance) {
                         newDistance = message.longValue();
+                        hasChanged = true;
                     }
                 }
             }
 
-            if (newDistance != oldDistance) {
-                setValue(nodeId, newDistance);
+            if (hasChanged) {
+                setNodeValue(nodeId, newDistance);
                 sendMessages(nodeId, newDistance + 1);
             }
 

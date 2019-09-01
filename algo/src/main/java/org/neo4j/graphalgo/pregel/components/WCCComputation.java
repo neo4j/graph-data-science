@@ -26,41 +26,42 @@ import java.util.Queue;
 
 public class WCCComputation extends Computation {
 
-    @Override
-    protected Direction getMessageDirection() {
-        return Direction.BOTH;
-    }
+@Override
+protected Direction getMessageDirection() {
+    return Direction.BOTH;
+}
 
-    @Override
-    protected boolean supportsAsynchronousParallel() {
+@Override
+protected boolean supportsAsynchronousParallel() {
         return true;
     }
 
     @Override
     protected void compute(final long nodeId, Queue<Double> messages) {
         if (getSuperstep() == 0) {
-            double currentValue = getValue(nodeId);
+            double currentValue = getNodeValue(nodeId);
             if (currentValue == getDefaultNodeValue()) {
                 sendMessages(nodeId, nodeId);
-                setValue(nodeId, nodeId);
+                setNodeValue(nodeId, nodeId);
             } else {
                 sendMessages(nodeId, currentValue);
             }
         } else {
-            long oldComponentId = (long) getValue(nodeId);
-            long newComponentId = oldComponentId;
+            long newComponentId = (long) getNodeValue(nodeId);
+            boolean hasChanged = false;
 
             if (messages != null) {
                 Double message;
                 while ((message = messages.poll()) != null) {
                     if (message < newComponentId) {
                         newComponentId = message.longValue();
+                        hasChanged = true;
                     }
                 }
             }
 
-            if (newComponentId != oldComponentId) {
-                setValue(nodeId, newComponentId);
+            if (hasChanged) {
+                setNodeValue(nodeId, newComponentId);
                 sendMessages(nodeId, newComponentId);
             }
 

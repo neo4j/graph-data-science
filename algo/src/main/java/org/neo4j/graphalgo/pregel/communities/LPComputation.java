@@ -39,11 +39,11 @@ public class LPComputation extends Computation {
     @Override
     protected void compute(long nodeId, Queue<Double> messages) {
         if (getSuperstep() == 0) {
-            setValue(nodeId, nodeId);
+            setNodeValue(nodeId, nodeId);
             sendMessages(nodeId, nodeId);
         } else {
             if (messages != null) {
-                long oldValue = (long) getValue(nodeId);
+                long oldValue = (long) getNodeValue(nodeId);
                 long newValue = oldValue;
 
                 // We receive at most |degree| messages
@@ -79,7 +79,7 @@ public class LPComputation extends Computation {
                 }
 
                 if (newValue != oldValue) {
-                    setValue(nodeId, newValue);
+                    setNodeValue(nodeId, newValue);
                     sendMessages(nodeId, newValue);
                 }
             }

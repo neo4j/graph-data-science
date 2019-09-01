@@ -48,12 +48,13 @@ public final class Pregel {
     // Marks the end of messages from the previous iteration
     private static final Double TERMINATION_SYMBOL = Double.NaN;
 
+    private final Supplier<Computation> computationFactory;
+
     private final Graph graph;
 
     private final HugeDoubleArray nodeValues;
     private final MpscLinkedQueue<Double>[] messageQueues;
 
-    private final Supplier<Computation> computationFactory;
     private final int batchSize;
     private final int concurrency;
     private final ExecutorService executor;
@@ -89,7 +90,7 @@ public final class Pregel {
     public static Pregel withInitialNodeValues(
             final Graph graph,
             final Supplier<Computation> computationFactory,
-            final HugeNodeWeights nodeValues,
+            final HugeNodeWeights initialNodeValues,
             final int batchSize,
             final int concurrency,
             final ExecutorService executor,
@@ -99,7 +100,7 @@ public final class Pregel {
         return new Pregel(
                 graph,
                 computationFactory,
-                nodeValues,
+                initialNodeValues,
                 batchSize,
                 concurrency,
                 executor,
@@ -110,7 +111,7 @@ public final class Pregel {
     private Pregel(
             final Graph graph,
             final Supplier<Computation> computationFactory,
-            final HugeNodeWeights nodeProperties,
+            final HugeNodeWeights initialNodeValues,
             final int batchSize,
             final int concurrency,
             final ExecutorService executor,
@@ -124,10 +125,11 @@ public final class Pregel {
         this.executor = executor;
         this.progressLogger = progressLogger;
 
+        // HugeDoubleArray is faster for set operations compared to HugeNodePropertyMap
         this.nodeValues = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
         ParallelUtil.parallelStreamConsume(
                 LongStream.range(0, graph.nodeCount()),
-                nodeIds -> nodeIds.forEach(nodeId -> nodeValues.set(nodeId, nodeProperties.nodeWeight(nodeId)))
+                nodeIds -> nodeIds.forEach(nodeId -> nodeValues.set(nodeId, initialNodeValues.nodeWeight(nodeId)))
         );
 
         this.messageQueues = new MpscLinkedQueue[(int) graph.nodeCount()];
@@ -138,11 +140,10 @@ public final class Pregel {
 
     public HugeDoubleArray run(final int maxIterations) {
         iterations = 0;
-
         boolean canHalt = false;
-
         // Tracks if a node received messages in the previous iteration
         BitSet receiverBits = new BitSet(graph.nodeCount());
+        // Tracks if a node voted to halt in the previous iteration
         BitSet voteBits = new BitSet(graph.nodeCount());
 
         while (iterations < maxIterations && !canHalt) {
@@ -177,9 +178,9 @@ public final class Pregel {
             final int iteration,
             BitSet messageBits,
             BitSet voteToHaltBits) {
-        Collection<PrimitiveLongIterable> iterables = graph.batchIterables(batchSize);
+        Collection<PrimitiveLongIterable> nodeBatches = graph.batchIterables(batchSize);
 
-        int threadCount = iterables.size();
+        int threadCount = nodeBatches.size();
 
         final List<ComputeStep> tasks = new ArrayList<>(threadCount);
 
@@ -197,13 +198,13 @@ public final class Pregel {
         }
 
         Collection<ComputeStep> computeSteps = LazyMappingCollection.of(
-                iterables,
-                nodeIterable -> {
+                nodeBatches,
+                nodeBatch -> {
                     ComputeStep task = new ComputeStep(
                             computationFactory.get(),
                             graph.nodeCount(),
                             iteration,
-                            nodeIterable,
+                            nodeBatch,
                             graph,
                             nodeValues,
                             messageBits,
@@ -225,9 +226,9 @@ public final class Pregel {
         private final BitSet senderBits;
         private final BitSet receiverBits;
         private final BitSet voteBits;
-        private final PrimitiveLongIterable nodes;
+        private final PrimitiveLongIterable nodeBatch;
         private final Degrees degrees;
-        private final HugeDoubleArray nodeProperties;
+        private final HugeDoubleArray nodeValues;
         private final MpscLinkedQueue<Double>[] messageQueues;
         private final RelationshipIterator relationshipIterator;
 
@@ -235,9 +236,9 @@ public final class Pregel {
                 final Computation computation,
                 final long globalNodeCount,
                 final int iteration,
-                final PrimitiveLongIterable nodes,
+                final PrimitiveLongIterable nodeBatch,
                 final Degrees degrees,
-                final HugeDoubleArray nodeProperties,
+                final HugeDoubleArray nodeValues,
                 final BitSet receiverBits,
                 final BitSet voteBits,
                 final MpscLinkedQueue<Double>[] messageQueues,
@@ -247,9 +248,9 @@ public final class Pregel {
             this.senderBits = new BitSet(globalNodeCount);
             this.receiverBits = receiverBits;
             this.voteBits = voteBits;
-            this.nodes = nodes;
+            this.nodeBatch = nodeBatch;
             this.degrees = degrees;
-            this.nodeProperties = nodeProperties;
+            this.nodeValues = nodeValues;
             this.messageQueues = messageQueues;
             this.relationshipIterator = relationshipIterator.concurrentCopy();
 
@@ -258,7 +259,7 @@ public final class Pregel {
 
         @Override
         public void run() {
-            final PrimitiveLongIterator nodesIterator = nodes.iterator();
+            final PrimitiveLongIterator nodesIterator = nodeBatch.iterator();
 
             while (nodesIterator.hasNext()) {
                 final long nodeId = nodesIterator.next();
@@ -287,11 +288,11 @@ public final class Pregel {
         }
 
         double getNodeValue(final long nodeId) {
-            return nodeProperties.get(nodeId);
+            return nodeValues.get(nodeId);
         }
 
         void setNodeValue(final long nodeId, final double value) {
-            nodeProperties.set(nodeId, value);
+            nodeValues.set(nodeId, value);
         }
 
         void voteToHalt(long nodeId) {
