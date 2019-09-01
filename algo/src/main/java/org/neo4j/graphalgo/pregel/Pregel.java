@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
@@ -53,7 +54,7 @@ public final class Pregel {
     private final Graph graph;
 
     private final HugeDoubleArray nodeValues;
-    private final MpscLinkedQueue<Double>[] messageQueues;
+    private final HugeObjectArray<MpscLinkedQueue<Double>> messageQueues;
 
     private final int batchSize;
     private final int concurrency;
@@ -132,10 +133,12 @@ public final class Pregel {
                 nodeIds -> nodeIds.forEach(nodeId -> nodeValues.set(nodeId, initialNodeValues.nodeWeight(nodeId)))
         );
 
-        this.messageQueues = new MpscLinkedQueue[(int) graph.nodeCount()];
+        MpscLinkedQueue<Double> tempQueue = MpscLinkedQueue.newMpscLinkedQueue();
+        Class<MpscLinkedQueue<Double>> queueClass = (Class<MpscLinkedQueue<Double>>) tempQueue.getClass();
+        this.messageQueues = HugeObjectArray.newArray(queueClass, graph.nodeCount(), tracker);
         ParallelUtil.parallelStreamConsume(
                 LongStream.range(0, graph.nodeCount()),
-                nodeIds -> nodeIds.forEach(nodeId -> messageQueues[(int) nodeId] = MpscLinkedQueue.newMpscLinkedQueue()));
+                nodeIds -> nodeIds.forEach(nodeId -> messageQueues.set(nodeId, MpscLinkedQueue.newMpscLinkedQueue())));
     }
 
     public HugeDoubleArray run(final int maxIterations) {
@@ -192,7 +195,9 @@ public final class Pregel {
                 ParallelUtil.parallelStreamConsume(
                         LongStream.range(0, graph.nodeCount()),
                         nodeIds -> nodeIds.forEach(nodeId -> {
-                            if (messageBits.get(nodeId)) messageQueues[(int) nodeId].add(TERMINATION_SYMBOL);
+                            if (messageBits.get(nodeId)) {
+                                messageQueues.get(nodeId).add(TERMINATION_SYMBOL);
+                            }
                         }));
             }
         }
@@ -229,7 +234,7 @@ public final class Pregel {
         private final PrimitiveLongIterable nodeBatch;
         private final Degrees degrees;
         private final HugeDoubleArray nodeValues;
-        private final MpscLinkedQueue<Double>[] messageQueues;
+        private final HugeObjectArray<MpscLinkedQueue<Double>> messageQueues;
         private final RelationshipIterator relationshipIterator;
 
         private ComputeStep(
@@ -241,7 +246,7 @@ public final class Pregel {
                 final HugeDoubleArray nodeValues,
                 final BitSet receiverBits,
                 final BitSet voteBits,
-                final MpscLinkedQueue<Double>[] messageQueues,
+                final HugeObjectArray<MpscLinkedQueue<Double>> messageQueues,
                 final RelationshipIterator relationshipIterator) {
             this.iteration = iteration;
             this.computation = computation;
@@ -301,14 +306,14 @@ public final class Pregel {
 
         void sendMessages(final long nodeId, final double message, Direction direction) {
             relationshipIterator.forEachRelationship(nodeId, direction, (sourceNodeId, targetNodeId) -> {
-                messageQueues[(int) targetNodeId].add(message);
+                messageQueues.get(targetNodeId).add(message);
                 senderBits.set(targetNodeId);
                 return true;
             });
         }
 
         private MpscLinkedQueue<Double> receiveMessages(final long nodeId) {
-            return receiverBits.get(nodeId) ? messageQueues[(int) nodeId] : null;
+            return receiverBits.get(nodeId) ? messageQueues.get(nodeId) : null;
         }
     }
 }
