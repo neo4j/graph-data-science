@@ -83,15 +83,15 @@ public class ShortestPathIntegrationTest {
                         "CREATE (nX:Node{type:'end'})\n" + // end
                         "CREATE\n" +
 
-                        // sum: 5.0
-                        "  (nA)-[:TYPE {cost:5.0}]->(nX),\n" +
-                        // sum: 4.0
-                        "  (nA)-[:TYPE {cost:2.0}]->(nB),\n" +
-                        "  (nB)-[:TYPE {cost:2.0}]->(nX),\n" +
-                        // sum: 3.0
-                        "  (nA)-[:TYPE {cost:1.0}]->(nC),\n" +
-                        "  (nC)-[:TYPE {cost:1.0}]->(nD),\n" +
-                        "  (nD)-[:TYPE {cost:1.0}]->(nX)";
+                        // sum: 9.0
+                        "  (nA)-[:TYPE {cost:9.0}]->(nX),\n" +
+                        // sum: 8.0
+                        "  (nA)-[:TYPE {cost:4.0}]->(nB),\n" +
+                        "  (nB)-[:TYPE {cost:4.0}]->(nX),\n" +
+                        // sum: 6
+                        "  (nA)-[:TYPE {cost:2.0}]->(nC),\n" +
+                        "  (nC)-[:TYPE {cost:2.0}]->(nD),\n" +
+                        "  (nD)-[:TYPE {cost:2.0}]->(nX)";
 
         DB.execute(createGraph).close();
         DB.resolveDependency(Procedures.class).registerProcedure(ShortestPathProc.class);
@@ -170,9 +170,9 @@ public class ShortestPathIntegrationTest {
                 });
         verify(consumer, times(4)).accept(anyLong(), anyDouble());
         verify(consumer, times(1)).accept(anyLong(), eq(0.0));
-        verify(consumer, times(1)).accept(anyLong(), eq(1.0));
         verify(consumer, times(1)).accept(anyLong(), eq(2.0));
-        verify(consumer, times(1)).accept(anyLong(), eq(3.0));
+        verify(consumer, times(1)).accept(anyLong(), eq(4.0));
+        verify(consumer, times(1)).accept(anyLong(), eq(6.0));
     }
 
     @Test
@@ -197,16 +197,16 @@ public class ShortestPathIntegrationTest {
                 .accept(row -> {
                     mock.accept(
                             row.getNumber("id").longValue(),
-                            row.getNumber("step").intValue());
+                            row.getNumber("step").doubleValue());
                     return true;
                 });
 
-        verify(mock, times(4)).accept(anyLong(), anyInt());
+        verify(mock, times(4)).accept(anyLong(), anyDouble());
 
-        verify(mock, times(1)).accept(anyLong(), eq(0));
-        verify(mock, times(1)).accept(anyLong(), eq(1));
-        verify(mock, times(1)).accept(anyLong(), eq(2));
-        verify(mock, times(1)).accept(anyLong(), eq(3));
+        verify(mock, times(1)).accept(anyLong(), eq(0.0));
+        verify(mock, times(1)).accept(anyLong(), eq(2.0));
+        verify(mock, times(1)).accept(anyLong(), eq(4.0));
+        verify(mock, times(1)).accept(anyLong(), eq(6.0));
     }
 
     private interface PathConsumer {
@@ -214,6 +214,6 @@ public class ShortestPathIntegrationTest {
     }
 
     interface StepConsumer {
-        void accept(long nodeId, int step);
+        void accept(long nodeId, double step);
     }
 }
