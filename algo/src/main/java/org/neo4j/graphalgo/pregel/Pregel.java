@@ -74,7 +74,7 @@ public final class Pregel {
             final ProgressLogger progressLogger) {
 
         final HugeNodeWeights nodeValues = HugeNodePropertiesBuilder
-                .of(graph.nodeCount(), tracker, computationFactory.get().getDefaultNodeValue(), 0)
+                .of(graph.nodeCount(), tracker, computationFactory.get().getDefaultNodeValue(), 0, "key")
                 .build();
 
         return new Pregel(

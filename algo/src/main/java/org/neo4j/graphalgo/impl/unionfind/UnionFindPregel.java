@@ -58,7 +58,7 @@ public class UnionFindPregel extends UnionFind<UnionFindPregel> {
             AllocationTracker tracker) {
         super(graph, algoConfig);
         this.nodeCount = graph.nodeCount();
-        this.batchSize = ParallelUtil.adjustBatchSize(
+        this.batchSize = ParallelUtil.adjustedBatchSize(
                 nodeCount,
                 concurrency,
                 minBatchSize,
