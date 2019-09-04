@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.write.Exporter;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
+import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.impl.ShortestPathAStar;
 import org.neo4j.graphalgo.impl.ShortestPathDijkstra;
 import org.neo4j.graphalgo.results.DijkstraResult;
@@ -170,6 +170,7 @@ public class ShortestPathProc {
         if (configuration.isWriteFlag()) {
             try (ProgressTimer timer = builder.timeWrite()) {
                 final IntArrayDeque finalPath = dijkstra.getFinalPath();
+                final double[] finalPathCost = dijkstra.getFinalPathCosts().toArray();
                 dijkstra.release();
 
                 final DequeMapping mapping = new DequeMapping(graph, finalPath);
@@ -178,8 +179,8 @@ public class ShortestPathProc {
                         .build()
                         .write(
                                 configuration.getWriteProperty(DEFAULT_TARGET_PROPERTY),
-                                finalPath,
-                                (PropertyTranslator.OfInt<IntArrayDeque>) (data, nodeId) -> (int) nodeId
+                                finalPathCost,
+                                Translators.DOUBLE_ARRAY_TRANSLATOR
                         );
             }
         }
