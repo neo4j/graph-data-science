@@ -34,6 +34,7 @@ import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -79,11 +80,48 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
     void setup() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase();
 
-        db.getDependencyResolver()
-                .resolveDependency(Procedures.class)
-                .registerProcedure(LabelPropagationProc.class);
+        Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class);
+        procedures.registerProcedure(LabelPropagationProc.class);
+        procedures.registerProcedure(LoadGraphProc.class);
 
         db.execute(DB_CYPHER);
+    }
+
+    @ParameterizedTest
+    @MethodSource("parameters")
+    void shouldRespectDirectionWithLoadedGraph(boolean parallel, String graphImpl) {
+        String testGraph =
+                "CREATE" +
+                " (a:C) " +
+                ",(b:C) " +
+                ",(c:C) " +
+                ",(d:C) " +
+
+                ",(a)-[:Y]->(b) " +
+                ",(c)-[:Y]->(b) " +
+                ",(c)-[:Y]->(d) ";
+
+        db.execute(testGraph);
+
+        String loadQuery = "CALL algo.graph.load(" +
+                           "    'myGraph' ,'C', 'Y', {" +
+                           "       graph: $graph, direction: 'BOTH' " +
+                           "    }" +
+                           ")";
+        runQuery(loadQuery, db, parParams(parallel, graphImpl));
+
+        String query = "CALL algo.beta.labelPropagation(" +
+                       "    null, null, {" +
+                       "        graph: 'myGraph', direction: 'BOTH', write: false" +
+                       "    }" +
+                       ")";
+        runQuery(query, db,
+                row -> {
+                    assertEquals(1, row.getNumber("iterations").intValue());
+                    assertFalse(row.getBoolean("write"));
+                    assertEquals(1, row.getNumber("communityCount").longValue());
+                }
+        );
     }
 
     @ParameterizedTest
@@ -303,10 +341,10 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
         // we intentionally start with no labels defined for any nodes (hence seedProperty = {lpa, lpa2})
 
         String writingQuery = "CALL algo.beta.labelPropagation(" +
-                               "    null, null, {" +
-                               "       iterations: 20, direction: 'OUTGOING', writeProperty: 'lpa', weightProperty: $weightProperty" +
-                               "    }" +
-                               ")";
+                              "    null, null, {" +
+                              "       iterations: 20, direction: 'OUTGOING', writeProperty: 'lpa', weightProperty: $weightProperty" +
+                              "    }" +
+                              ")";
         runQuery(writingQuery, db, parParams(parallel, graphImpl));
 
         String streamingQuery = "CALL algo.labelPropagation.stream(" +

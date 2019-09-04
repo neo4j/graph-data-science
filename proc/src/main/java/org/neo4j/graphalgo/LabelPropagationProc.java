@@ -164,7 +164,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
         final String weightProperty = config.getString(CONFIG_WEIGHT_KEY, null);
 
         Direction direction = config.getDirection(Direction.OUTGOING);
-        if (direction == Direction.BOTH) {
+        if (direction == Direction.BOTH && !config.isLoadedGraph()) {
             loader.undirected();
             config.setDirection(Direction.OUTGOING);
         } else {

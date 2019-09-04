@@ -324,6 +324,10 @@ public class ProcedureConfiguration {
         return getString(ProcedureConstants.GRAPH_IMPL_PARAM, defaultValue);
     }
 
+    public boolean isLoadedGraph() {
+        return getGraphImpl() == LoadGraphFactory.class;
+    }
+
     public Class<? extends GraphFactory> getGraphImpl() {
         return getGraphImpl(ProcedureConstants.DEFAULT_GRAPH_IMPL);
     }
