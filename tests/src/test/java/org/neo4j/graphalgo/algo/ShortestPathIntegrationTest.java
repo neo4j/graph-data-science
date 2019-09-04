@@ -147,14 +147,14 @@ public class ShortestPathIntegrationTest {
                 .accept(row -> {
                     mock.accept(
                             row.getNumber("id").longValue(),
-                            row.getNumber("sssp").intValue());
+                            row.getNumber("sssp").doubleValue());
                     return true;
                 });
 
-        verify(mock, times(2)).accept(anyLong(), anyInt());
+        verify(mock, times(2)).accept(anyLong(), anyDouble());
 
-        verify(mock, times(1)).accept(anyLong(), eq(0));
-        verify(mock, times(1)).accept(anyLong(), eq(1));
+        verify(mock, times(1)).accept(anyLong(), eq(0.0));
+        verify(mock, times(1)).accept(anyLong(), eq(1.0));
     }
 
     @Test
