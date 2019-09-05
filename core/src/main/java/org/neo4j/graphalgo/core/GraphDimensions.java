@@ -21,14 +21,14 @@ package org.neo4j.graphalgo.core;
 
 import org.neo4j.graphalgo.KernelPropertyMapping;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
+import org.neo4j.graphalgo.RelationshipTypeMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.internal.kernel.api.Read;
 
 import java.util.Arrays;
 
+import static java.util.stream.Collectors.joining;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_LABEL;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
-import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
 
 public final class GraphDimensions {
 
@@ -37,8 +37,7 @@ public final class GraphDimensions {
     private long maxRelCount;
     private final int labelId;
     private final int relWeightId;
-    private final RelationshipTypeMapping[] relationshipTypeMappings;
-    private final int[] relationshipTypeIds;
+    private final RelationshipTypeMappings relTypeMappings;
     private final KernelPropertyMapping[] nodeProperties;
 
     public GraphDimensions(
@@ -47,17 +46,15 @@ public final class GraphDimensions {
             long maxRelCount,
             int labelId,
             int relWeightId,
-            RelationshipTypeMapping[] relationshipTypeMappings,
+            RelationshipTypeMappings relTypeMappings,
             KernelPropertyMapping[] nodeProperties) {
         this.nodeCount = nodeCount;
         this.highestNeoId = highestNeoId;
         this.maxRelCount = maxRelCount;
         this.labelId = labelId;
         this.relWeightId = relWeightId;
-        this.relationshipTypeMappings = relationshipTypeMappings;
+        this.relTypeMappings = relTypeMappings;
         this.nodeProperties = nodeProperties;
-        this.relationshipTypeIds = relationshipTypeMappings == null ? null
-                : Arrays.stream(relationshipTypeMappings).mapToInt(t -> t.typeId).toArray();
     }
 
     public long nodeCount() {
@@ -88,16 +85,8 @@ public final class GraphDimensions {
         return labelId;
     }
 
-    public int[] relationshipTypeIds() {
-        return relationshipTypeIds;
-    }
-
-    public RelationshipTypeMapping[] relationshipTypeMappings() {
-        return relationshipTypeMappings;
-    }
-
-    public int singleRelationshipTypeId() {
-        return relationshipTypeMappings.length == 0 ? Read.ANY_RELATIONSHIP_TYPE : relationshipTypeMappings[0].typeId;
+    public RelationshipTypeMappings relationshipTypeMappings() {
+        return relTypeMappings;
     }
 
     public int relWeightId() {
@@ -108,31 +97,23 @@ public final class GraphDimensions {
         return Arrays.asList(nodeProperties);
     }
 
-    public GraphDimensions withRelationshipTypeMapping(RelationshipTypeMapping relationshipTypeMapping) {
-        return new GraphDimensions(
-                nodeCount,
-                highestNeoId,
-                maxRelCount,
-                labelId,
-                relWeightId,
-                new RelationshipTypeMapping[]{relationshipTypeMapping},
-                nodeProperties);
-    }
-
     public void checkValidNodePredicate(GraphSetup setup) {
-        if (!(setup.startLabel == null || setup.startLabel.isEmpty()) && labelId() == NO_SUCH_LABEL) {
+        if (nonEmpty(setup.startLabel) && labelId() == NO_SUCH_LABEL) {
             throw new IllegalArgumentException(String.format("Node label not found: '%s'", setup.startLabel));
         }
     }
 
     public void checkValidRelationshipTypePredicate(GraphSetup setup) {
-        if (!(setup.relationshipType == null || setup.relationshipType.isEmpty())) {
-            for (RelationshipTypeMapping typeMapping : relationshipTypeMappings) {
-                if (typeMapping.typeId == NO_SUCH_RELATIONSHIP_TYPE) {
-                    throw new IllegalArgumentException(String.format(
-                            "Relationship type not found: '%s'",
-                            typeMapping.typeName));
-                }
+        if (nonEmpty(setup.relationshipType)) {
+            String missingTypes = relTypeMappings
+                    .stream()
+                    .filter(m -> !m.doesExist())
+                    .map(RelationshipTypeMapping::typeName)
+                    .collect(joining("', '"));
+            if (!missingTypes.isEmpty()) {
+                throw new IllegalArgumentException(String.format(
+                        "Relationship type(s) not found: '%s'",
+                        missingTypes));
             }
         }
     }
@@ -141,7 +122,7 @@ public final class GraphDimensions {
         for (KernelPropertyMapping nodeProperty : nodeProperties) {
             int id = nodeProperty.propertyKeyId;
             String propertyKey = nodeProperty.propertyKeyNameInGraph;
-            if (!(propertyKey == null || propertyKey.isEmpty()) && id == NO_SUCH_PROPERTY_KEY) {
+            if (nonEmpty(propertyKey) && id == NO_SUCH_PROPERTY_KEY) {
                 throw new IllegalArgumentException(String.format(
                         "Node property not found: '%s'",
                         propertyKey));
@@ -150,11 +131,15 @@ public final class GraphDimensions {
     }
 
     public void checkValidRelationshipProperty(GraphSetup setup) {
-        if (!(setup.relationWeightPropertyName == null || setup.relationWeightPropertyName.isEmpty()) && relWeightId == NO_SUCH_PROPERTY_KEY) {
+        if (nonEmpty(setup.relationWeightPropertyName) && relWeightId == NO_SUCH_PROPERTY_KEY) {
             throw new IllegalArgumentException(String.format(
                     "Relationship property not found: '%s'",
                     setup.relationWeightPropertyName));
         }
+    }
+
+    private static boolean nonEmpty(String s) {
+        return s != null && !s.isEmpty();
     }
 
     public static class Builder {
@@ -163,7 +148,7 @@ public final class GraphDimensions {
         private long maxRelCount;
         private int labelId;
         private int relWeightId;
-        private RelationshipTypeMapping[] relationshipTypeMappings;
+        private RelationshipTypeMappings relationshipTypeMappings;
         private KernelPropertyMapping[] nodeProperties;
 
         public Builder setNodeCount(long nodeCount) {
@@ -186,7 +171,7 @@ public final class GraphDimensions {
             return this;
         }
 
-        public Builder setRelationshipTypeMappings(RelationshipTypeMapping[] relationshipTypeMappings) {
+        public Builder setRelationshipTypeMappings(RelationshipTypeMappings relationshipTypeMappings) {
             this.relationshipTypeMappings = relationshipTypeMappings;
             return this;
         }

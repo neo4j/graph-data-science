@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core;
 import org.neo4j.graphalgo.KernelPropertyMapping;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
+import org.neo4j.graphalgo.RelationshipTypeMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.utils.RelationshipTypes;
 import org.neo4j.graphalgo.core.utils.StatementFunction;
@@ -31,7 +32,6 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.newapi.InternalReadOps;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Arrays;
 import java.util.Set;
 
 public final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
@@ -55,18 +55,16 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
                 ? tokenRead.nodeLabel(setup.startLabel)
                 : Read.ANY_LABEL;
 
-        RelationshipTypeMapping[] relationshipTypeMappings;
+        RelationshipTypeMappings.Builder mappingsBuilder = new RelationshipTypeMappings.Builder();
         if (readLabelAndType && !setup.loadAnyRelationshipType()) {
             Set<String> types = RelationshipTypes.parse(setup.relationshipType);
-            relationshipTypeMappings = types.stream()
-                    .map(name -> {
-                        int relationshipType = tokenRead.relationshipType(name);
-                        return new RelationshipTypeMapping(name, relationshipType);
-                    })
-                    .toArray(RelationshipTypeMapping[]::new);
-        } else {
-            relationshipTypeMappings = new RelationshipTypeMapping[0];
+            for (String type : types) {
+                int relationshipType = tokenRead.relationshipType(type);
+                RelationshipTypeMapping typeMapping = RelationshipTypeMapping.of(type, relationshipType);
+                mappingsBuilder.addMapping(typeMapping);
+            }
         }
+        RelationshipTypeMappings relationshipTypeMappings = mappingsBuilder.build();
         final int relWeightId = propertyKey(
                 tokenRead,
                 setup.shouldLoadRelationshipWeight(),
@@ -83,11 +81,10 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
 
         final long nodeCount = dataRead.countsForNode(labelId);
         final long allNodesCount = InternalReadOps.getHighestPossibleNodeCount(dataRead, api);
-        final long maxRelCount = relationshipTypeMappings.length == 0
-                ? maxRelCountForLabelAndType(dataRead, labelId, Read.ANY_RELATIONSHIP_TYPE)
-                : Arrays.stream(relationshipTypeMappings)
-                .mapToInt(mapping -> mapping.typeId)
-                .mapToLong(id -> maxRelCountForLabelAndType(dataRead, labelId, id))
+        final long maxRelCount = relationshipTypeMappings
+                .stream()
+                .filter(RelationshipTypeMapping::doesExist)
+                .mapToLong(m -> maxRelCountForLabelAndType(dataRead, labelId, m.typeId()))
                 .sum();
 
         return new GraphDimensions.Builder()

@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.ObjectLongMap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.graphalgo.KernelPropertyMapping;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
+import org.neo4j.graphalgo.RelationshipTypeMappings;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
@@ -43,12 +44,9 @@ import org.neo4j.helpers.collection.Iterables;
 import org.neo4j.kernel.api.StatementConstants;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static org.neo4j.graphalgo.core.utils.RelationshipTypes.ALL_IDENTIFIER;
 
 public final class HugeGraphFactory extends GraphFactory {
 
@@ -140,8 +138,8 @@ public final class HugeGraphFactory extends GraphFactory {
 
     @Override
     public Graph importGraph() {
-        RelationshipTypeMapping[] relationshipTypeIds = dimensions.relationshipTypeMappings();
-        if (relationshipTypeIds.length > 1) {
+        RelationshipTypeMappings relationshipTypeIds = dimensions.relationshipTypeMappings();
+        if (relationshipTypeIds.isMultipleTypes()) {
             throw new IllegalArgumentException(
                     "{graph:'huge'} does not support multiple relationship types, Please use algo.graph.load for this.");
         }
@@ -160,16 +158,7 @@ public final class HugeGraphFactory extends GraphFactory {
         int concurrency = setup.concurrency();
         AllocationTracker tracker = setup.tracker;
         IdsAndProperties mappingAndProperties = loadHugeIdMap(tracker, concurrency);
-
-        RelationshipTypeMapping[] relationshipTypeIds = dimensions.relationshipTypeMappings();
-        GraphDimensions graphDimensions;
-        if (relationshipTypeIds.length == 0) {
-            graphDimensions = dimensions.withRelationshipTypeMapping(
-                    new RelationshipTypeMapping(ALL_IDENTIFIER, -1));
-        } else {
-            graphDimensions = dimensions;
-        }
-        Map<String, HugeGraph> graphs = loadRelationships(graphDimensions, tracker, mappingAndProperties, concurrency);
+        Map<String, HugeGraph> graphs = loadRelationships(dimensions, tracker, mappingAndProperties, concurrency);
 
         progressLogger.logDone(tracker);
         return graphs;
@@ -198,8 +187,9 @@ public final class HugeGraphFactory extends GraphFactory {
                         ? DeduplicateRelationshipsStrategy.SKIP
                         : setup.deduplicateRelationshipsStrategy;
 
-        Map<RelationshipTypeMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> allBuilders = Arrays
-                .stream(dimensions.relationshipTypeMappings())
+        Map<RelationshipTypeMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> allBuilders = dimensions
+                .relationshipTypeMappings()
+                .stream()
                 .collect(Collectors.toMap(
                         Function.identity(),
                         mapping -> createBuilderForRelationshipType(deduplicateRelationshipsStrategy, tracker)
@@ -219,7 +209,7 @@ public final class HugeGraphFactory extends GraphFactory {
         ObjectLongMap<RelationshipTypeMapping> relationshipCounts = scanningImporter.call(setup.log);
 
         return allBuilders.entrySet().stream().collect(Collectors.toMap(
-                entry -> entry.getKey().typeName,
+                entry -> entry.getKey().typeName(),
                 entry -> {
                     Pair<RelationshipsBuilder, RelationshipsBuilder> builders = entry.getValue();
                     RelationshipsBuilder outgoingRelationshipsBuilder = builders.getLeft();

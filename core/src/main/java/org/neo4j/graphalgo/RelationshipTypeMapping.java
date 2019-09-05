@@ -20,37 +20,87 @@
 
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphalgo.core.utils.RelationshipTypes;
+import org.neo4j.kernel.api.StatementConstants;
+
 import java.util.Objects;
 
-public final class RelationshipTypeMapping {
+public abstract class RelationshipTypeMapping {
 
-    public final String typeName;
-    public final int typeId;
+    private final String typeName;
 
-    public RelationshipTypeMapping(String typeName, int typeId) {
-        this.typeName = Objects.requireNonNull(typeName);
-        this.typeId = typeId;
+    public static RelationshipTypeMapping of(String typeName, int typeId) {
+        return new Resolved(typeName, typeId);
     }
+
+    public static RelationshipTypeMapping all() {
+        return ALL;
+    }
+
+    private RelationshipTypeMapping(String typeName) {
+        this.typeName = typeName;
+    }
+
+    public final String typeName() {
+        return typeName;
+    }
+
+    public abstract int typeId();
+
+    public abstract boolean doesExist();
+
+    private static class Resolved extends RelationshipTypeMapping {
+
+        private final int typeId;
+
+        Resolved(String typeName, int typeId) {
+            super(typeName);
+            this.typeId = typeId;
+        }
+
+        @Override
+        public int typeId() {
+            return typeId;
+        }
+
+        @Override
+        public boolean doesExist() {
+            return typeId != StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
+        }
+    }
+
+    private static final RelationshipTypeMapping ALL = new RelationshipTypeMapping(RelationshipTypes.ALL_IDENTIFIER) {
+
+        @Override
+        public int typeId() {
+            return StatementConstants.ANY_RELATIONSHIP_TYPE;
+        }
+
+        @Override
+        public boolean doesExist() {
+            return true;
+        }
+    };
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RelationshipTypeMapping that = (RelationshipTypeMapping) o;
-        return typeId == that.typeId &&
+        return typeId() == that.typeId() &&
                typeName.equals(that.typeName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(typeName, typeId);
+        return Objects.hash(typeName, typeId());
     }
 
     @Override
     public String toString() {
         return "RelationshipTypeMapping{" +
                "typeName='" + typeName + '\'' +
-               ", typeId=" + typeId +
+               ", typeId=" + typeId() +
                '}';
     }
 }

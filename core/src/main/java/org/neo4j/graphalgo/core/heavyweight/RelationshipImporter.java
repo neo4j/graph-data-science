@@ -83,7 +83,7 @@ final class RelationshipImporter extends StatementAction {
         this.idMap = idMap;
         this.nodes = nodes;
         this.setup = setup;
-        this.relationId = dimensions.relationshipTypeIds();
+        this.relationId = dimensions.relationshipTypeMappings().relationshipTypeIds();
         this.relWeightId = dimensions.relWeightId();
         this.nodeProperties = new HashMap<>();
         nodePropertiesSupplier.forEach((key, value) -> this.nodeProperties.put(key, value.get()));

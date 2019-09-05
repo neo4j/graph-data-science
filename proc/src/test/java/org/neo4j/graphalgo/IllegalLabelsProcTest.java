@@ -31,6 +31,8 @@ import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
+import static org.neo4j.graphalgo.ThrowableRootCauseMatcher.rootCause;
+
 public class IllegalLabelsProcTest extends HeavyHugeTester {
 
     private static final String DB_CYPHER = "" +
@@ -66,15 +68,28 @@ public class IllegalLabelsProcTest extends HeavyHugeTester {
 
     @Test
     public void testUnionFindStreamWithInvalidRelType() {
-        expected.expect(QueryExecutionException.class);
-        expected.expectMessage("Relationship type not found: 'Y'");
+        expected.expect(rootCause(
+                IllegalArgumentException.class,
+                "Relationship type(s) not found: 'Y'"
+        ));
         db.execute(String.format("CALL algo.unionFind.stream('', 'Y',{graph:'%s'})", graphName));
     }
 
     @Test
     public void testUnionFindStreamWithValidNodeLabelAndInvalidRelType() {
-        expected.expect(QueryExecutionException.class);
-        expected.expectMessage("Relationship type not found: 'Y'");
+        expected.expect(rootCause(
+                IllegalArgumentException.class,
+                "Relationship type(s) not found: 'Y'"
+        ));
         db.execute(String.format("CALL algo.unionFind.stream('A', 'Y',{graph:'%s'})", graphName));
+    }
+
+    @Test
+    public void testUnionFindStreamWithMultipleInvaludRelTypes() {
+        expected.expect(rootCause(
+                IllegalArgumentException.class,
+                "Relationship type(s) not found: 'Y', 'Z'"
+        ));
+        db.execute(String.format("CALL algo.unionFind.stream('A', 'Y | Z',{graph:'%s'})", graphName));
     }
 }

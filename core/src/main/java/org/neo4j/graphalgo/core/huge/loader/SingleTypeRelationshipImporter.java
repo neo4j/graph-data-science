@@ -102,7 +102,7 @@ final class SingleTypeRelationshipImporter {
             }
 
             SingleTypeRelationshipImporter withBuffer(IdMapping idMap, int bulkSize, Read read, CursorFactory cursors) {
-                RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(idMap, mapping.typeId, bulkSize);
+                RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(idMap, mapping.typeId(), bulkSize);
                 RelationshipImporter.WeightReader weightReader = importer.storeBackedWeightReader(cursors, read);
                 return new SingleTypeRelationshipImporter(imports, weightReader, buffer);
             }

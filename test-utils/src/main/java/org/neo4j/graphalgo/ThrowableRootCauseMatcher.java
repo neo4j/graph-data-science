@@ -25,7 +25,7 @@ import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 
-import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.internal.matchers.ThrowableMessageMatcher.hasMessage;
@@ -86,24 +86,17 @@ public class ThrowableRootCauseMatcher<T extends Throwable> extends TypeSafeMatc
     }
 
     /**
-     * Returns a matcher that verifies that the outer exception has a root cause with the given message.
+     * Returns a matcher that verifies that the outer exception has a root cause of the given type and
+     * with the given message.
      *
+     * @param type the type/class to match the root cause against
      * @param message the expected message of the root cause, verified with an equals comparison
      * @param <T> type of the outer exception
      */
     @Factory
-    public static <T extends Throwable> Matcher<T> rootCauseMessage(final String message) {
-        return rootCause(hasMessage(equalTo(message)));
-    }
-
-    /**
-     * Returns a matcher that verifies that the outer exception has a root cause with the given message.
-     *
-     * @param message the expected message of the root cause, verified with an contains comparison
-     * @param <T> type of the outer exception
-     */
-    @Factory
-    public static <T extends Throwable> Matcher<T> rootCauseMessageSubString(final String message) {
-        return rootCause(hasMessage(containsString(message)));
+    public static <T extends Throwable> Matcher<T> rootCause(
+            final Class<? extends Throwable> type,
+            final String message) {
+        return rootCause(allOf(instanceOf(type), hasMessage(equalTo(message))));
     }
 }

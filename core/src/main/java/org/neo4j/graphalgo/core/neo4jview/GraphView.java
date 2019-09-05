@@ -288,7 +288,7 @@ public class GraphView implements Graph {
     }
 
     private LoadRelationships rels(KernelTransaction transaction) {
-        return LoadRelationships.of(transaction.cursors(), dimensions.relationshipTypeIds());
+        return LoadRelationships.of(transaction.cursors(), dimensions.relationshipTypeMappings().relationshipTypeIds());
     }
 
     @Override

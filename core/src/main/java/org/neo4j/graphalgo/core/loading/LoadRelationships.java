@@ -23,7 +23,6 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.collection.Pair;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.NodeCursor;
-import org.neo4j.internal.kernel.api.RelationshipGroupCursor;
 import org.neo4j.internal.kernel.api.RelationshipTraversalCursor;
 import org.neo4j.internal.kernel.api.helpers.Nodes;
 import org.neo4j.internal.kernel.api.helpers.RelationshipSelectionCursor;

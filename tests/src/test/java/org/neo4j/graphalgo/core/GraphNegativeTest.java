@@ -85,7 +85,7 @@ public final class GraphNegativeTest extends RandomGraphTestCase {
     @Test
     public void shouldThrowForNonExistingStringRelType() {
         expected.expect(IllegalArgumentException.class);
-        expected.expectMessage("Relationship type not found: 'foo'");
+        expected.expectMessage("Relationship type(s) not found: 'foo'");
         new GraphLoader(RandomGraphTestCase.db)
                 .withRelationshipType("foo")
                 .load(graphImpl);
@@ -94,7 +94,7 @@ public final class GraphNegativeTest extends RandomGraphTestCase {
     @Test
     public void shouldThrowForNonExistingRelType() {
         expected.expect(IllegalArgumentException.class);
-        expected.expectMessage("Relationship type not found: 'foo'");
+        expected.expectMessage("Relationship type(s) not found: 'foo'");
         new GraphLoader(RandomGraphTestCase.db)
                 .withRelationshipType(RelationshipType.withName("foo"))
                 .load(graphImpl);
