@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.core.huge.loader;
 
 import org.neo4j.kernel.impl.store.record.RelationshipRecord;
 
-
 public final class CompositeRelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipRecord> {
 
     private final RelationshipsBatchBuffer[] buffers;
