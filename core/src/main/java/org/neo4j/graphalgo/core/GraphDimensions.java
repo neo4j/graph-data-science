@@ -166,37 +166,37 @@ public final class GraphDimensions {
         private RelationshipTypeMapping[] relationshipTypeMappings;
         private KernelPropertyMapping[] nodeProperties;
 
-        public Builder setNodeCount(final long nodeCount) {
+        public Builder setNodeCount(long nodeCount) {
             this.nodeCount = nodeCount;
             return this;
         }
 
-        public Builder setHighestNeoId(final long highestNeoId) {
+        public Builder setHighestNeoId(long highestNeoId) {
             this.highestNeoId = highestNeoId;
             return this;
         }
 
-        public Builder setMaxRelCount(final long maxRelCount) {
+        public Builder setMaxRelCount(long maxRelCount) {
             this.maxRelCount = maxRelCount;
             return this;
         }
 
-        public Builder setLabelId(final int labelId) {
+        public Builder setLabelId(int labelId) {
             this.labelId = labelId;
             return this;
         }
 
-        public Builder setRelationshipTypeMappings(final RelationshipTypeMapping[] relationshipTypeMappings) {
+        public Builder setRelationshipTypeMappings(RelationshipTypeMapping[] relationshipTypeMappings) {
             this.relationshipTypeMappings = relationshipTypeMappings;
             return this;
         }
 
-        public Builder setRelWeightId(final int relWeightId) {
+        public Builder setRelWeightId(int relWeightId) {
             this.relWeightId = relWeightId;
             return this;
         }
 
-        public Builder setNodeProperties(final KernelPropertyMapping[] nodeProperties) {
+        public Builder setNodeProperties(KernelPropertyMapping[] nodeProperties) {
             this.nodeProperties = nodeProperties;
             return this;
         }
