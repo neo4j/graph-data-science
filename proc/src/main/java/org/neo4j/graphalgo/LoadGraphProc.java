@@ -207,6 +207,24 @@ public final class LoadGraphProc extends BaseProc {
         return Stream.of(info);
     }
 
+    @Procedure(name = "algo.graph.list")
+    @Description("CALL algo.graph.list() " +
+                 "YIELD names, nodes, relationships, type, direction" +
+                 "List all loaded graph")
+    public Stream<GraphInfo> listLoadedGraphs() {
+
+
+        Map<String, Graph> loadedGraphs = LoadGraphFactory.getLoadedGraphs();
+        Stream.Builder<GraphInfo> result = Stream.builder();
+
+        loadedGraphs.forEach((name, graph) -> {
+            GraphInfo graphInfo = new GraphInfo(name, graph.getType(), graph.nodeCount(), graph.relationshipCount(), graph.getLoadDirection().toString());
+            result.accept(graphInfo);
+        });
+
+        return result.build();
+    }
+
     private Histogram degreeDistribution(Graph graph, final int concurrency, final Direction direction) {
         int batchSize = Math.toIntExact(ParallelUtil.adjustedBatchSize(
                 graph.nodeCount(),
@@ -237,9 +255,23 @@ public final class LoadGraphProc extends BaseProc {
         public boolean exists;
         public boolean removed;
         public long nodes, relationships;
+        public String direction;
 
         public GraphInfo(String name) {
             this.name = name;
+        }
+
+        public GraphInfo(
+                String name,
+                String type,
+                long nodes,
+                long relationships,
+                String direction) {
+            this.name = name;
+            this.type = type;
+            this.nodes = nodes;
+            this.relationships = relationships;
+            this.direction = direction;
         }
     }
 

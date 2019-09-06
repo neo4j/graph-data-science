@@ -71,6 +71,16 @@ We can use our named graph in queries by specifying its name in the `graph` key 
 CALL algo.pageRank(null,null,{graph:'my-graph' /*, ... */})
 ----
 
+== List all named graphs
+
+We can get an overview over all loaded named graphs.
+
+.The following will return an overview over all loaded named graphs:
+[source,cypher]
+----
+CALL algo.graph.list()
+YIELD name, nodes, relationships, type, direction;
+----
 
 == Remove named graph
 

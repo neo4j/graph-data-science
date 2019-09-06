@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class LoadGraphFactory extends GraphFactory {
@@ -95,5 +96,9 @@ public final class LoadGraphFactory extends GraphFactory {
         if (name == null) return null;
         Graph graph = graphs.get(name);
         return graph == null ? null : graph.getType();
+    }
+
+    public static Map<String, Graph> getLoadedGraphs() {
+        return graphs;
     }
 }
