@@ -138,7 +138,8 @@ public class HeavyGraphFactory extends GraphFactory {
                 idMap,
                 nodePropertySuppliers,
                 relationshipCounter.get(),
-                tasks);
+                tasks,
+                setup.loadAsUndirected);
 
         progressLogger.logDone(setup.tracker);
         return graph;
@@ -149,10 +150,11 @@ public class HeavyGraphFactory extends GraphFactory {
             final IntIdMap idMap,
             final Map<String, Supplier<WeightMapping>> nodePropertySuppliers,
             final long relationshipCount,
-            Collection<RelationshipImporter> tasks) {
+            Collection<RelationshipImporter> tasks,
+            boolean loadAsUndirected) {
         if (tasks.size() == 1) {
             RelationshipImporter importer = tasks.iterator().next();
-            final Graph graph = importer.toGraph(idMap, matrix, relationshipCount);
+            final Graph graph = importer.toGraph(idMap, matrix, relationshipCount, loadAsUndirected);
             importer.release();
             return graph;
         }
@@ -169,7 +171,8 @@ public class HeavyGraphFactory extends GraphFactory {
                 idMap,
                 matrix,
                 relationshipCount,
-                nodeProperties);
+                nodeProperties,
+                loadAsUndirected);
     }
 
     private WeightMapping newWeightMap(int propertyId, double defaultValue) {

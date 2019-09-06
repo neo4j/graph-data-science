@@ -63,6 +63,8 @@ public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterab
         return TYPE;
     }
 
+    boolean isUndirected();
+
     Direction getLoadDirection();
 
     void canRelease(boolean canRelease);

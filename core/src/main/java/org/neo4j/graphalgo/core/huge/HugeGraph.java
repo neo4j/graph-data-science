@@ -104,6 +104,8 @@ public class HugeGraph implements Graph {
     private HugeAdjacencyList.DecompressingCursor outCache;
     private boolean canRelease = true;
 
+    private final boolean isUndirected;
+
     public HugeGraph(
             final AllocationTracker tracker,
             final IdMap idMapping,
@@ -117,7 +119,8 @@ public class HugeGraph implements Graph {
             final HugeAdjacencyList inWeights,
             final HugeAdjacencyList outWeights,
             final HugeAdjacencyOffsets inWeightOffsets,
-            final HugeAdjacencyOffsets outWeightOffsets) {
+            final HugeAdjacencyOffsets outWeightOffsets,
+            final boolean isUndirected) {
         this.idMapping = idMapping;
         this.tracker = tracker;
         this.nodeProperties = nodeProperties;
@@ -131,6 +134,7 @@ public class HugeGraph implements Graph {
         this.outWeights = outWeights;
         this.inWeightOffsets = inWeightOffsets;
         this.outWeightOffsets = outWeightOffsets;
+        this.isUndirected = isUndirected;
         inCache = newAdjacencyCursor(this.inAdjacency);
         outCache = newAdjacencyCursor(this.outAdjacency);
         emptyAdjacencyCursor = inCache == null ? newAdjacencyCursor(this.outAdjacency) : newAdjacencyCursor(this.inAdjacency);
@@ -300,7 +304,8 @@ public class HugeGraph implements Graph {
                 inWeights,
                 outWeights,
                 inWeightOffsets,
-                outWeightOffsets);
+                outWeightOffsets,
+                isUndirected);
     }
 
     @Override
@@ -416,6 +421,11 @@ public class HugeGraph implements Graph {
                 tracker.remove(nodeMapping.release());
             }
         }
+    }
+
+    @Override
+    public boolean isUndirected() {
+        return isUndirected;
     }
 
     @Override

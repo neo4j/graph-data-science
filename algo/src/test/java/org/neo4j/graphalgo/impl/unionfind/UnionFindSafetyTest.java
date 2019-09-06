@@ -120,6 +120,11 @@ public final class UnionFindSafetyTest {
         }
 
         @Override
+        public boolean isUndirected() {
+            return false;
+        }
+
+        @Override
         public Direction getLoadDirection() {
             return Direction.OUTGOING;
         }

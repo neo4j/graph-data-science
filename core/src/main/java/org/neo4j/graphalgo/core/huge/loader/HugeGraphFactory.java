@@ -166,13 +166,22 @@ public final class HugeGraphFactory extends GraphFactory {
                         : setup.deduplicateRelationshipsStrategy;
 
         if (setup.loadAsUndirected) {
-            outgoingRelationshipsBuilder = new RelationshipsBuilder(deduplicateRelationshipsStrategy, tracker, setup.shouldLoadRelationshipWeight());
+            outgoingRelationshipsBuilder = new RelationshipsBuilder(
+                    deduplicateRelationshipsStrategy,
+                    tracker,
+                    setup.shouldLoadRelationshipWeight());
         } else {
             if (setup.loadOutgoing) {
-                outgoingRelationshipsBuilder = new RelationshipsBuilder(deduplicateRelationshipsStrategy, tracker, setup.shouldLoadRelationshipWeight());
+                outgoingRelationshipsBuilder = new RelationshipsBuilder(
+                        deduplicateRelationshipsStrategy,
+                        tracker,
+                        setup.shouldLoadRelationshipWeight());
             }
             if (setup.loadIncoming) {
-                incomingRelationshipsBuilder = new RelationshipsBuilder(deduplicateRelationshipsStrategy, tracker, setup.shouldLoadRelationshipWeight());
+                incomingRelationshipsBuilder = new RelationshipsBuilder(
+                        deduplicateRelationshipsStrategy,
+                        tracker,
+                        setup.shouldLoadRelationshipWeight());
             }
         }
 
@@ -197,7 +206,8 @@ public final class HugeGraphFactory extends GraphFactory {
                 incomingRelationshipsBuilder,
                 outgoingRelationshipsBuilder,
                 setup.relationDefaultWeight,
-                relationshipCount);
+                relationshipCount,
+                setup.loadAsUndirected);
     }
 
     private Graph buildGraph(
@@ -207,7 +217,8 @@ public final class HugeGraphFactory extends GraphFactory {
             final RelationshipsBuilder inRelationshipsBuilder,
             final RelationshipsBuilder outRelationshipsBuilder,
             final double defaultWeight,
-            final long relationshipCount) {
+            final long relationshipCount,
+            final boolean loadAsUndirected) {
 
         HugeAdjacencyList outAdjacencyList = null;
         HugeAdjacencyOffsets outAdjacencyOffsets = null;
@@ -238,10 +249,20 @@ public final class HugeGraphFactory extends GraphFactory {
         }
 
         return new HugeGraph(
-                tracker, idMapping, nodeProperties, relationshipCount,
-                inAdjacencyList, outAdjacencyList, inAdjacencyOffsets, outAdjacencyOffsets,
+                tracker,
+                idMapping,
+                nodeProperties,
+                relationshipCount,
+                inAdjacencyList,
+                outAdjacencyList,
+                inAdjacencyOffsets,
+                outAdjacencyOffsets,
                 defaultWeight,
-                inWeightList, outWeightList, inWeightOffsets, outWeightOffsets);
+                inWeightList,
+                outWeightList,
+                inWeightOffsets,
+                outWeightOffsets,
+                loadAsUndirected);
     }
 
 }
