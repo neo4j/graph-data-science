@@ -347,9 +347,10 @@ public class GraphLoader {
      * In any other case, we load the graph using the given direction.
      *
      * @param direction The direction requested
-     * @apiNote This must only be used for algorithms, that do not require storing out- and incoming relationships separately.
+     * @apiNote This must only be used for algorithms, that do not require
+     *         storing outgoing and incoming relationships separately.
      */
-    public GraphLoader withOptimizedRelationshipLoading(Direction direction) {
+    public GraphLoader withReducedRelationshipLoading(Direction direction) {
         if (direction == Direction.BOTH && !isLoadedGraph) {
             return undirected().withDirection(Direction.OUTGOING);
         } else {
@@ -373,7 +374,6 @@ public class GraphLoader {
     /**
      * Instructs the loader to not load any weights. The behavior of using weighted graph-functions
      * on a graph without weights is not specified.
-     *
      */
     public GraphLoader withoutRelationshipWeights() {
         this.relWeightProp = null;
@@ -383,7 +383,6 @@ public class GraphLoader {
 
     /**
      * Instructs the loader to not load any node weights.
-     *
      */
     public GraphLoader withoutNodeWeights() {
         this.nodeWeightProp = null;
@@ -393,7 +392,6 @@ public class GraphLoader {
 
     /**
      * Instructs the loader to not load any node properties.
-     *
      */
     public GraphLoader withoutNodeProperties() {
         this.nodeProp = null;
@@ -467,6 +465,7 @@ public class GraphLoader {
 
     /**
      * Calculates the required memory to load the graph.
+     *
      * @return
      */
     public MemoryEstimation memoryEstimation(Class<? extends GraphFactory> factoryType) {

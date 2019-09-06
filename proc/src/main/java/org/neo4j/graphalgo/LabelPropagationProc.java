@@ -165,7 +165,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
         Direction direction = config.getDirection(Direction.OUTGOING);
 
         return loader
-                .withOptimizedRelationshipLoading(direction)
+                .withReducedRelationshipLoading(direction)
                 .withOptionalRelationshipWeightsFromProperty(weightProperty, 1.0D)
                 .withOptionalNodeProperties(createPropertyMappings(seedProperty, weightProperty));
     }

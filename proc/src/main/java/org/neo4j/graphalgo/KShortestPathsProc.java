@@ -87,7 +87,7 @@ public class KShortestPathsProc {
         try (ProgressTimer timer = builder.timeLoad()) {
             graph = new GraphLoader(api, Pools.DEFAULT)
                     .init(log, configuration.getNodeLabelOrQuery(), configuration.getRelationshipOrQuery(), configuration)
-                    .withOptimizedRelationshipLoading(direction)
+                    .withReducedRelationshipLoading(direction)
                     .withOptionalRelationshipWeightsFromProperty(
                             propertyName,
                             configuration.getWeightPropertyDefaultValue(1.0))
