@@ -74,7 +74,7 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
          * Imports the record at a given position and return the new position.
          * Can also ignore the record if it is not of interest.
          */
-        void add(Record record);
+        void offset(Record record);
     }
 
     public final class Cursor implements AutoCloseable {
@@ -178,8 +178,7 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
             }
 
             int offset = this.offset;
-            long perPage = (long) recordsPerPage;
-            long recordId = page * perPage;
+            long recordId = page * (long) recordsPerPage;
             int recordSize = AbstractStorePageCacheScanner.this.recordSize;
             PageCursor pageCursor = this.pageCursor;
             Record record = this.record;
@@ -195,7 +194,7 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
                     loadAtOffset(offset);
                     offset += recordSize;
                     if (record.inUse()) {
-                        consumer.add(record);
+                        consumer.offset(record);
                     }
                 }
             }
@@ -241,7 +240,7 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
 
         private void preFetchPages() throws IOException {
             PageCursor pageCursor = this.pageCursor;
-            long prefetchSize = (long) AbstractStorePageCacheScanner.this.prefetchSize;
+            long prefetchSize = AbstractStorePageCacheScanner.this.prefetchSize;
             long startPage = nextPageId.getAndAdd(prefetchSize);
             long endPage = Math.min(lastPage, startPage + prefetchSize);
             long preFetchedPage = startPage;
@@ -269,7 +268,7 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
         }
 
         @Override
-        public final void close() {
+        public void close() {
             if (pageCursor != null) {
                 pageCursor.close();
                 pageCursor = null;

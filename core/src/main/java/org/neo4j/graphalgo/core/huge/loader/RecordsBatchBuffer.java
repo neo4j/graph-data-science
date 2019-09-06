@@ -25,7 +25,8 @@ import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 
 abstract class RecordsBatchBuffer<Record extends AbstractBaseRecord> implements RecordConsumer<Record> {
 
-    public static final int DEFAULT_BUFFER_SIZE = 100_000;
+    static final int DEFAULT_BUFFER_SIZE = 100_000;
+
     final long[] buffer;
     int length;
 
