@@ -52,6 +52,8 @@ public class GraphSetup {
     public final boolean loadIncoming;
     // load outgoing relationships.
     public final boolean loadOutgoing;
+    // load outgoing and incoming relationships.
+    public final boolean loadBoth;
     // property of relationship weights. null means NO property (the default value will be used instead).
     public final String relationWeightPropertyName;
     // default property is used for weighted relationships if property is not set.
@@ -127,8 +129,9 @@ public class GraphSetup {
         this.startLabel = startLabel;
         this.endLabel = endLabel;
         this.relationshipType = relationshipType;
-        this.loadIncoming = direction == Direction.INCOMING || direction == Direction.BOTH;
         this.loadOutgoing = direction == Direction.OUTGOING || direction == Direction.BOTH;
+        this.loadIncoming = direction == Direction.INCOMING || direction == Direction.BOTH;
+        this.loadBoth = loadOutgoing && loadIncoming;
         this.relationWeightPropertyName = relationWeightPropertyName;
         this.relationDefaultWeight = relationDefaultWeight;
         this.nodeDefaultWeight = nodeDefaultWeight;

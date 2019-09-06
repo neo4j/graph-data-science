@@ -50,7 +50,7 @@ public final class GraphViewFactory extends GraphFactory {
         ).call();
 
         Direction loadDirection;
-        if (setup.loadAsUndirected) {
+        if (setup.loadAsUndirected|| setup.loadBoth) {
             loadDirection = Direction.BOTH;
         } else if (setup.loadOutgoing) {
             loadDirection = Direction.OUTGOING;
