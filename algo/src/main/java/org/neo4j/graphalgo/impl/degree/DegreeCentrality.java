@@ -48,7 +48,8 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> implements Deg
             Graph graph,
             ExecutorService executor,
             int concurrency,
-            Direction direction, boolean weighted) {
+            Direction direction,
+            boolean weighted) {
 
         this.graph = graph;
         this.executor = executor;

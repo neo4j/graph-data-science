@@ -157,15 +157,8 @@ public final class ArticleRankProc {
         GraphLoader graphLoader = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, configuration)
                 .withAllocationTracker(tracker)
-                .withoutRelationshipWeights();
-
-        Direction direction = configuration.getDirection(Direction.OUTGOING);
-        if (direction == Direction.BOTH) {
-            graphLoader.undirected();
-        } else {
-            graphLoader.withDirection(direction);
-        }
-
+                .withoutRelationshipWeights()
+                .withReducedRelationshipLoading(configuration.getDirection(Direction.OUTGOING));
 
         try (ProgressTimer timer = statsBuilder.timeLoad()) {
             Graph graph = graphLoader.load(graphFactory);

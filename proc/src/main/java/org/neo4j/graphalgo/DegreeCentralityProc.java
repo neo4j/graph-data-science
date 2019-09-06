@@ -96,8 +96,8 @@ public final class DegreeCentralityProc {
                 terminationFlag,
                 configuration,
                 statsBuilder,
-                weightPropertyKey,
-                direction);
+                weightPropertyKey
+        );
 
         logMemoryUsage(tracker);
 
@@ -158,8 +158,8 @@ public final class DegreeCentralityProc {
                 terminationFlag,
                 configuration,
                 statsBuilder,
-                weightPropertyKey,
-                direction);
+                weightPropertyKey
+        );
 
         logMemoryUsage(tracker);
 
@@ -184,11 +184,7 @@ public final class DegreeCentralityProc {
                 .withOptionalRelationshipWeightsFromProperty(
                         weightPropertyKey,
                         configuration.getWeightPropertyDefaultValue(0.0))
-                .withDirection(direction);
-
-        if (direction == Direction.BOTH) {
-            graphLoader.undirected();
-        }
+                .withReducedRelationshipLoading(direction);
 
         try (ProgressTimer timer = statsBuilder.timeLoad()) {
             Graph graph = graphLoader.load(graphFactory);
@@ -203,17 +199,13 @@ public final class DegreeCentralityProc {
             TerminationFlag terminationFlag,
             ProcedureConfiguration configuration,
             CentralityScore.Stats.Builder statsBuilder,
-            String weightPropertyKey, Direction direction) {
-
-        if (direction == Direction.BOTH) {
-            direction = Direction.OUTGOING;
-        }
+            String weightPropertyKey) {
 
         DegreeCentralityAlgorithm algo = new DegreeCentrality(
                 graph,
                 Pools.DEFAULT,
                 configuration.getConcurrency(),
-                direction,
+                graph.getLoadDirection(),
                 weightPropertyKey != null);
         statsBuilder.timeEval(algo::compute);
         Algorithm<?> algorithm = algo.algorithm();
