@@ -160,18 +160,12 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
 
     @Override
     protected GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
-        final String seedProperty = config.getString(CONFIG_SEED_KEY, CONFIG_OLD_SEED_KEY, null);
-        final String weightProperty = config.getString(CONFIG_WEIGHT_KEY, null);
-
+        String seedProperty = config.getString(CONFIG_SEED_KEY, CONFIG_OLD_SEED_KEY, null);
+        String weightProperty = config.getString(CONFIG_WEIGHT_KEY, null);
         Direction direction = config.getDirection(Direction.OUTGOING);
-        if (direction == Direction.BOTH && !config.isLoadedGraph()) {
-            loader.undirected();
-            config.setDirection(Direction.OUTGOING);
-        } else {
-            loader.withDirection(direction);
-        }
 
         return loader
+                .withOptimizedRelationshipLoading(direction)
                 .withOptionalRelationshipWeightsFromProperty(weightProperty, 1.0D)
                 .withOptionalNodeProperties(createPropertyMappings(seedProperty, weightProperty));
     }
@@ -249,7 +243,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
         final HugeLongArray algoResult = runWithExceptionLogging(
                 "LabelPropagation failed",
                 () -> setup.statsBuilder.timeEval(() -> algo.compute(
-                        setup.procedureConfig.getDirection(Direction.OUTGOING),
+                        setup.graph.getLoadDirection(),
                         setup.procedureConfig.getIterations(1)))).labels();
 
         setup.statsBuilder

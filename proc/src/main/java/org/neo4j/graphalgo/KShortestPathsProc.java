@@ -85,19 +85,13 @@ public class KShortestPathsProc {
         Direction direction = configuration.getDirection(Direction.BOTH);
         // load
         try (ProgressTimer timer = builder.timeLoad()) {
-            final GraphLoader graphLoader = new GraphLoader(api, Pools.DEFAULT)
+            graph = new GraphLoader(api, Pools.DEFAULT)
                     .init(log, configuration.getNodeLabelOrQuery(), configuration.getRelationshipOrQuery(), configuration)
+                    .withOptimizedRelationshipLoading(direction)
                     .withOptionalRelationshipWeightsFromProperty(
                             propertyName,
-                            configuration.getWeightPropertyDefaultValue(1.0));
-            // use undirected traversal if direction is BOTH
-            if (direction == Direction.BOTH) {
-                direction = Direction.OUTGOING; // rewrite
-                graphLoader.undirected();
-            } else {
-                graphLoader.withDirection(direction);
-            }
-            graph = graphLoader.load(configuration.getGraphImpl());
+                            configuration.getWeightPropertyDefaultValue(1.0))
+                    .load(configuration.getGraphImpl());
         }
 
         if (graph.isEmpty() || startNode == null || endNode == null) {
@@ -112,7 +106,7 @@ public class KShortestPathsProc {
                     .withTerminationFlag(TerminationFlag.wrap(transaction))
                     .compute(startNode.getId(),
                             endNode.getId(),
-                            direction,
+                            graph.getLoadDirection(),
                             Math.toIntExact(k),
                             configuration.getNumber("maxDepth", Integer.MAX_VALUE).intValue());
             builder.withResultCount(algorithm.getPaths().size());
