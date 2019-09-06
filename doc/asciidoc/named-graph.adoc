@@ -80,8 +80,6 @@ In order to specify multiple relationship types, we can provide a relationship t
 [source,cypher]
 ----
 CALL algo.graph.load('my-graph', null, 'REL_TYPE1 | REL_TYPE2 | REL_TYPE3', {direction: 'OUTGOING', concurrency: 8 })
-YIELD name, graph, direction, undirected, sorted, nodes, loadMillis, alreadyLoaded,
-      nodeWeight, relationshipWeight, nodeProperty, loadNodes, loadRelationships;
 ----
 
 Having loaded a graph with multiple relationship types gives us several options for how we can use the relationships.
@@ -99,6 +97,12 @@ CALL algo.pageRank(null, 'REL_TYPE1 | REL_TYPE2', {graph: 'my-graph'})
 ====
 Specifying a subset of relationship types in an algorithm call only works when the graph was explicitly loaded with multiple relationship types.
 If the graph was loaded with `null`, no relationship type information is retained in the graph.
+====
+
+[CAUTION]
+====
+Loading a lot of multiple relationship types can have a negative impact on performace, both during load and execution time.
+It is best to only load as few types as needed.
 ====
 
 == List all named graphs
