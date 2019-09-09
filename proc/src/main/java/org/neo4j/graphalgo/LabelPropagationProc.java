@@ -47,6 +47,7 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -240,47 +241,13 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
 
         LabelPropagation algo = newAlgorithm(setup.graph, setup.procedureConfig, setup.tracker);
 
-        boolean isUndirected = setup.graph.isUndirected();
         Direction procedureDirection = setup.procedureConfig.getDirection(Direction.OUTGOING);
-        Direction loadDirection = setup.graph.getLoadDirection();
-        Direction tempDirection = null;
+        final Optional<Direction> computeDirection = setup.graph.getCompatibleDirection(procedureDirection);
 
-        switch (procedureDirection) {
-            case OUTGOING:
-                if (!isUndirected && (loadDirection == Direction.BOTH || loadDirection == Direction.OUTGOING)) {
-                    tempDirection = Direction.OUTGOING;
-                }
-                break;
-            case INCOMING:
-                if (!isUndirected && (loadDirection == Direction.BOTH || loadDirection == Direction.INCOMING)) {
-                    tempDirection = Direction.INCOMING;
-                }
-                break;
-            case BOTH:
-                if (isUndirected && loadDirection == Direction.OUTGOING) {
-                    tempDirection = Direction.OUTGOING;
-                }
-                break;
-        }
-
-        if (tempDirection == null) {
-            throw new IllegalArgumentException(String.format(
-                    "Incompatible directions between loaded graph and requested compute direction. Load direction: '%s' Compute direction: '%s'",
-                    loadDirection,
-                    procedureDirection));
-        }
-
-        /*
-        1. LP direction: OUTGOING -> graph.isUndirected == false && graph.loadDirection == BOTH || OUT -> run OUTGOING
-        2. LP direction: INCOMING -> graph.isUndirected == false && graph.loadDirection == BOTH || IN  -> run INCOMING
-        3. LP direction: BOTH     -> graph.isUndirected == true  && graph.loadDirection == OUT         -> run OUTGOING
-        */
-
-        final Direction computeDirection = tempDirection;
         final HugeLongArray algoResult = runWithExceptionLogging(
                 "LabelPropagation failed",
                 () -> setup.statsBuilder.timeEval(() -> algo.compute(
-                        computeDirection,
+                        computeDirection.get(), // This has already been checked during graph loading, we can safely call get()
                         setup.procedureConfig.getIterations(1)))).labels();
 
         setup.statsBuilder

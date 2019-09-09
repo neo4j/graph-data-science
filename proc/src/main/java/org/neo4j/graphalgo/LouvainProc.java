@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.impl.louvain.Louvain;
 import org.neo4j.graphalgo.impl.louvain.LouvainFactory;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
+import org.neo4j.graphdb.Direction;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -162,7 +163,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
             loader.withOptionalNodeProperties(PropertyMapping.of(CLUSTERING_IDENTIFIER, propertyIdentifier, -1));
         });
 
-        return loader.undirected();
+        return loader.undirected().withDirection(Direction.OUTGOING);
     }
 
     @Override

@@ -26,8 +26,10 @@ import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Optional;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -43,7 +45,21 @@ public final class LoadGraphFactory extends GraphFactory {
 
     @Override
     protected Graph importGraph() {
-        return get(setup.name);
+        Graph graph = get(setup.name);
+
+        Direction loadDirection = graph.getLoadDirection();
+        Direction procedureDirection = setup.direction;
+
+        Optional<Direction> tempDirection = graph.getCompatibleDirection(procedureDirection);
+
+        if (!tempDirection.isPresent()) {
+            throw new IllegalArgumentException(String.format(
+                    "Incompatible directions between loaded graph and requested compute direction. Load direction: '%s' Compute direction: '%s'",
+                    loadDirection,
+                    procedureDirection));
+        }
+
+        return graph;
     }
 
     @Override
