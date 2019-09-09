@@ -90,18 +90,18 @@ public final class LoadGraphFactory extends GraphFactory {
     }
 
     public static Graph get(String name) {
-        if (!check(name)) {
+        if (!exists(name)) {
             throw new IllegalArgumentException(String.format("Graph with name '%s' does not exist.", name));
         }
         return graphs.get(name);
     }
 
-    public static boolean check(String name) {
+    public static boolean exists(String name) {
         return name != null && graphs.containsKey(name);
     }
 
     public static Graph remove(String name) {
-        if (!check(name)) {
+        if (!exists(name)) {
             return null;
         }
         Graph graph = graphs.remove(name);

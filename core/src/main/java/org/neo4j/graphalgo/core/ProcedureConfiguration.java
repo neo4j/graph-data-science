@@ -341,7 +341,7 @@ public class ProcedureConfiguration {
             case HugeGraph.TYPE:
                 return HugeGraphFactory.class;
             default:
-                if (validCustomName(graphImpl) && LoadGraphFactory.check(graphImpl)) {
+                if (validCustomName(graphImpl) && LoadGraphFactory.exists(graphImpl)) {
                     return LoadGraphFactory.class;
                 }
                 throw new IllegalArgumentException("Unknown impl: " + graphImpl);
