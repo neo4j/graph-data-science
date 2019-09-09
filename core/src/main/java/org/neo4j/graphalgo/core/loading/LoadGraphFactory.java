@@ -90,7 +90,10 @@ public final class LoadGraphFactory extends GraphFactory {
     }
 
     public static Graph get(String name) {
-        return name == null ? null : graphs.get(name);
+        if (!check(name)) {
+            throw new IllegalArgumentException(String.format("Graph with name '%s' does not exist.", name));
+        }
+        return graphs.get(name);
     }
 
     public static boolean check(String name) {
