@@ -100,15 +100,14 @@ public final class LoadGraphFactory extends GraphFactory {
         return name != null && graphs.containsKey(name);
     }
 
-    public static boolean remove(String name) {
-        if (name == null) return false;
-        Graph graph = graphs.remove(name);
-        if (graph != null) {
-            graph.canRelease(true);
-            graph.release();
-            return true;
+    public static Graph remove(String name) {
+        if (!check(name)) {
+            return null;
         }
-        return false;
+        Graph graph = graphs.remove(name);
+        graph.canRelease(true);
+        graph.release();
+        return graph;
     }
 
     public static String getType(String name) {

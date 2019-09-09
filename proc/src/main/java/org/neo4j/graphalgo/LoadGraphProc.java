@@ -156,12 +156,12 @@ public final class LoadGraphProc extends BaseProc {
     public Stream<GraphInfo> remove(@Name("name") String name) {
         GraphInfo info = new GraphInfo(name);
 
-        Graph graph = LoadGraphFactory.get(name);
+        Graph graph = LoadGraphFactory.remove(name);
         if (graph != null) {
             info.type = graph.getType();
             info.nodes = graph.nodeCount();
             info.relationships = graph.relationshipCount();
-            info.exists = LoadGraphFactory.remove(name);
+            info.exists = true;
             info.removed = true;
         }
         return Stream.of(info);
