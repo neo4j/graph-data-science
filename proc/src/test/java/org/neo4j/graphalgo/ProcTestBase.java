@@ -73,6 +73,10 @@ public class ProcTestBase {
         runQuery(query, Collections.emptyMap(), check);
     }
 
+    protected void runQuery(String query, GraphDatabaseAPI db) {
+        runQuery(query, db, Collections.emptyMap(), row -> {});
+    }
+
     protected void runQuery(String query, GraphDatabaseAPI db, Map<String, Object> params) {
         runQuery(query, db, params, row -> {});
     }

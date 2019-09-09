@@ -40,7 +40,6 @@ public class ProcedureConstants {
     public static final int ITERATIONS_DEFAULT = 1;
     public static final String BATCH_SIZE_PARAM = "batchSize";
     public static final String DIRECTION = "direction";
-    public static final String DIRECTION_DEFAULT = "BOTH";
     public static final String GRAPH_IMPL_PARAM = "graph";
     public static final String DEFAULT_GRAPH_IMPL = "heavy";
     public static final String CONCURRENCY = "concurrency";

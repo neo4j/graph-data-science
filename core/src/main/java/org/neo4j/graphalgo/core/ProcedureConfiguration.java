@@ -304,10 +304,6 @@ public class ProcedureConfiguration {
         return Pools.allowedConcurrency(requestedConcurrency);
     }
 
-    public String getDirectionName() {
-        return getDirectionName(ProcedureConstants.DIRECTION_DEFAULT);
-    }
-
     public String getDirectionName(String defaultDirection) {
         return get(ProcedureConstants.DIRECTION, defaultDirection);
     }
