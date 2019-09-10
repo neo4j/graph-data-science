@@ -52,7 +52,7 @@ public final class RelationshipTypeMappings implements Iterable<RelationshipType
 
     @Override
     public Iterator<RelationshipTypeMapping> iterator() {
-        return Arrays.asList(mappings).iterator();
+        return stream().iterator();
     }
 
     public boolean isMultipleTypes() {
