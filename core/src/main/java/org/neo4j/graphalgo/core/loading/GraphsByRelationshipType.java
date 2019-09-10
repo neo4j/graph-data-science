@@ -58,6 +58,11 @@ public final class GraphsByRelationshipType implements GraphByType {
         return new UnionGraph(graphs);
     }
 
+    @Override
+    public Graph loadAllTypes() {
+        return new UnionGraph(graphs.values());
+    }
+
     private HugeGraph getExisting(String singleType) {
         HugeGraph graph = this.graphs.get(singleType);
         if (graph == null) {

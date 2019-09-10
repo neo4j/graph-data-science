@@ -51,8 +51,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.core.utils.RelationshipTypes.ALL_IDENTIFIER;
-
 public final class LoadGraphProc extends BaseProc {
     @Procedure(name = "algo.graph.load")
     @Description("CALL algo.graph.load(" +
@@ -88,7 +86,8 @@ public final class LoadGraphProc extends BaseProc {
                     ? Collections.emptySet()
                     : RelationshipTypes.parse(config.getRelationshipOrQuery());
             if (types.size() > 1 && graphImpl != HugeGraphFactory.class) {
-                throw new IllegalArgumentException("Only the huge graph supports multiple relationships, please specify {graph:'huge'}.");
+                throw new IllegalArgumentException(
+                        "Only the huge graph supports multiple relationships, please specify {graph:'huge'}.");
             }
 
             GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
@@ -207,7 +206,7 @@ public final class LoadGraphProc extends BaseProc {
         if (!LoadGraphFactory.exists(name)) {
             info = new GraphInfoWithHistogram(name);
         } else {
-            Graph graph = LoadGraphFactory.get(name, ALL_IDENTIFIER);
+            Graph graph = LoadGraphFactory.getAll(name);
             final boolean calculateDegreeDistribution;
             final ProcedureConfiguration configuration;
             if (Boolean.TRUE.equals(degreeDistribution)) {

@@ -26,6 +26,8 @@ public interface GraphByType {
 
     Graph loadGraph(String relationshipType);
 
+    Graph loadAllTypes();
+
     void release();
 
     String getType();
@@ -41,6 +43,11 @@ public interface GraphByType {
 
         @Override
         public Graph loadGraph(String relationshipType) {
+            return graph;
+        }
+
+        @Override
+        public Graph loadAllTypes() {
             return graph;
         }
 

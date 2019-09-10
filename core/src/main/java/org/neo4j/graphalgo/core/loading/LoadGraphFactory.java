@@ -32,8 +32,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.core.utils.RelationshipTypes.ALL_IDENTIFIER;
-
 public final class LoadGraphFactory extends GraphFactory {
 
     private static final ConcurrentHashMap<String, GraphByType> graphs = new ConcurrentHashMap<>();
@@ -54,7 +52,7 @@ public final class LoadGraphFactory extends GraphFactory {
         return importGraph();
     }
 
-    public final MemoryEstimation memoryEstimation() {
+    public MemoryEstimation memoryEstimation() {
         Graph graph = get(setup.name, setup.relationshipType);
         dimensions.nodeCount(graph.nodeCount());
         dimensions.maxRelCount(graph.relationshipCount());
@@ -77,14 +75,11 @@ public final class LoadGraphFactory extends GraphFactory {
     }
 
     public static Graph get(String name, String relationshipType) {
-        if (name == null) {
-            return null;
-        }
-        GraphByType graphsByRelationshipType = graphs.get(name);
-        if (graphsByRelationshipType == null) {
-            return null;
-        }
-        return graphsByRelationshipType.loadGraph(relationshipType);
+        return findGraph(name).loadGraph(relationshipType);
+    }
+
+    public static Graph getAll(String name) {
+        return findGraph(name).loadAllTypes();
     }
 
     public static boolean exists(String name) {
@@ -95,7 +90,7 @@ public final class LoadGraphFactory extends GraphFactory {
         if (!exists(name)) {
             return null;
         }
-        Graph graph = graphs.remove(name).loadGraph(ALL_IDENTIFIER);
+        Graph graph = graphs.remove(name).loadAllTypes();
         graph.canRelease(true);
         graph.release();
         return graph;
@@ -110,7 +105,14 @@ public final class LoadGraphFactory extends GraphFactory {
     public static Map<String, Graph> getLoadedGraphs() {
         return graphs.entrySet().stream().collect(Collectors.toMap(
                 Map.Entry::getKey,
-                e -> e.getValue().loadGraph(ALL_IDENTIFIER)
+                e -> e.getValue().loadAllTypes()
         ));
+    }
+
+    private static GraphByType findGraph(String name) {
+        if (!exists(name)) {
+            throw new IllegalArgumentException(String.format("Graph with name '%s' does not exist.", name));
+        }
+        return graphs.get(name);
     }
 }

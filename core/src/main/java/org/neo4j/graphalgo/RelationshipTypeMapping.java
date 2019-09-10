@@ -20,7 +20,6 @@
 
 package org.neo4j.graphalgo;
 
-import org.neo4j.graphalgo.core.utils.RelationshipTypes;
 import org.neo4j.kernel.api.StatementConstants;
 
 import java.util.Objects;
@@ -69,7 +68,7 @@ public abstract class RelationshipTypeMapping {
         }
     }
 
-    private static final RelationshipTypeMapping ALL = new RelationshipTypeMapping(RelationshipTypes.ALL_IDENTIFIER) {
+    private static final RelationshipTypeMapping ALL = new RelationshipTypeMapping("") {
 
         @Override
         public int typeId() {
