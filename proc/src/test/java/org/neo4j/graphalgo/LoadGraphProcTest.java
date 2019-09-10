@@ -47,6 +47,7 @@ import java.util.concurrent.locks.LockSupport;
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -427,6 +428,18 @@ class LoadGraphProcTest extends ProcTestBase {
         });
         runQuery("CALL algo.graph.info($name)", singletonMap("name", "foo"), row -> {
             assertEquals("foo", row.getString("name"));
+            assertFalse(row.getBoolean("exists"));
+        });
+    }
+
+    @Test
+    void removeMissingGraphIsNoOp() {
+        runQuery("CALL algo.graph.remove($name)", singletonMap("name", "foo"), row -> {
+            assertEquals(0, row.getNumber("nodes").intValue());
+            assertEquals(0, row.getNumber("relationships").intValue());
+            assertNull(row.getString("type"));
+            assertEquals("foo", row.getString("name"));
+            assertFalse(row.getBoolean("removed"));
             assertFalse(row.getBoolean("exists"));
         });
     }
