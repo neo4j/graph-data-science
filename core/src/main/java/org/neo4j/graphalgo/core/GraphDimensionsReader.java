@@ -58,9 +58,9 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         RelationshipTypeMappings.Builder mappingsBuilder = new RelationshipTypeMappings.Builder();
         if (readTokens && !setup.loadAnyRelationshipType()) {
             Set<String> types = RelationshipTypes.parse(setup.relationshipType);
-            for (String type : types) {
-                int relationshipType = tokenRead.relationshipType(type);
-                RelationshipTypeMapping typeMapping = RelationshipTypeMapping.of(type, relationshipType);
+            for (String typeName : types) {
+                int typeId = tokenRead.relationshipType(typeName);
+                RelationshipTypeMapping typeMapping = RelationshipTypeMapping.of(typeName, typeId);
                 mappingsBuilder.addMapping(typeMapping);
             }
         }
