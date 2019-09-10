@@ -40,7 +40,7 @@ final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
     }
 
     @Override
-    public void offset(final NodeRecord record) {
+    public void offer(final NodeRecord record) {
         if (hasCorrectLabel(record)) {
             add(record.getId(), record.getNextProp());
         }

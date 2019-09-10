@@ -38,9 +38,9 @@ public final class CompositeRelationshipsBatchBuffer extends RecordsBatchBuffer<
     }
 
     @Override
-    public void offset(RelationshipRecord record) {
+    public void offer(RelationshipRecord record) {
         for (RelationshipsBatchBuffer buffer : buffers) {
-            buffer.offset(record);
+            buffer.offer(record);
         }
     }
 

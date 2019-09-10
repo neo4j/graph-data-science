@@ -43,7 +43,7 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
     }
 
     @Override
-    public void offset(final RelationshipRecord record) {
+    public void offer(final RelationshipRecord record) {
         if (type == StatementConstants.ANY_RELATIONSHIP_TYPE || type == record.getType()) {
             long source = idMap.toMappedNodeId(record.getFirstNode());
             if (source != -1L) {

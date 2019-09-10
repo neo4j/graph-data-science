@@ -74,7 +74,7 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
          * Imports the record at a given position and return the new position.
          * Can also ignore the record if it is not of interest.
          */
-        void offset(Record record);
+        void offer(Record record);
     }
 
     public final class Cursor implements AutoCloseable {
@@ -194,7 +194,7 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
                     loadAtOffset(offset);
                     offset += recordSize;
                     if (record.inUse()) {
-                        consumer.offset(record);
+                        consumer.offer(record);
                     }
                 }
             }
