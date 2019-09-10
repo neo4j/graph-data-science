@@ -135,7 +135,7 @@ RETURN nodeCount, loadDuration, evalDuration, writeDuration
 | weightProperty    | string  | null     | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
 | delta             | float   | null     | yes      | The grade of concurrency to use.
 | write             | boolean | true     | yes      | Specifies if the result should be written back as a node property
-| writeProperty     | string  | 'sssp'   | yes      | The property name written back to the node sequence of the node in the path
+| writeProperty     | string  | 'sssp'   | yes      | The property name written back to the node sequence of the node in the path. The property contains the cost it takes to get from the start node to the specific node.
 | nodeQuery         | string  | null     | yes      | The label to load from the graph. If null, load all nodes
 | relationshipQuery | string  | null     | yes      | The relationship-type to load from the graph. If null, load all nodes
 | direction         | string  | outgoing | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
@@ -179,7 +179,7 @@ YIELD nodeId, cost
 |===
 | Name   | Type | Description
 | nodeId | int  | Node ID
-| cost   | int  | The cost it takes to get from start node to specific node
+| cost   | int  | The cost it takes to get from the start node to the specific node
 |===
 
 
