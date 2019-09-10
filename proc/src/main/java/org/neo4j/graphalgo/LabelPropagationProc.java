@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -29,6 +30,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.write.Exporter;
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
 import org.neo4j.graphalgo.impl.labelprop.LabelPropagationFactory;
 import org.neo4j.graphalgo.impl.results.LabelPropagationStats;
@@ -44,6 +46,8 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
+import org.neo4j.values.storable.Value;
+import org.neo4j.values.storable.Values;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -196,6 +200,8 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
                     setup.graph,
                     labels,
                     setup.statsBuilder);
+
+            setup.graph.releaseProperties();
         }
 
         return Stream.of(setup.statsBuilder.build(setup.tracker, setup.graph.nodeCount(), labels::get));
@@ -213,6 +219,9 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
         }
 
         final HugeLongArray labels = compute(setup);
+
+        setup.graph.releaseProperties();
+
         return LongStream.range(0L, labels.size())
                 .mapToObj(i -> new BetaStreamResult(setup.graph.toOriginalNodeId(i), labels.get(i)));
     }
@@ -262,7 +271,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
                 .didConverge(algo.didConverge());
 
         algo.release();
-        setup.graph.release();
+        setup.graph.releaseTopology();
 
         return algoResult;
     }
@@ -273,7 +282,12 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
             Graph graph,
             HugeLongArray labels,
             LabelPropagationStats.Builder stats) {
+        log.debug("Writing results");
+
+        // TODO: check if seedProperty == writeProperty for seedingTranslator
+
         try (ProgressTimer ignored = stats.timeWrite()) {
+            final HugeWeightMapping seedProperties = graph.nodeProperties(LabelPropagation.SEED_TYPE);
             Exporter.of(dbAPI, graph)
                     .withLog(log)
                     .parallel(Pools.DEFAULT, concurrency, TerminationFlag.wrap(transaction))
@@ -281,8 +295,24 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
                     .write(
                             labelKey,
                             labels,
-                            HugeLongArray.Translator.INSTANCE
+                            seedProperties == null ? HugeLongArray.Translator.INSTANCE : new SeedingTranslator(seedProperties)
                     );
+        }
+    }
+
+    static final class SeedingTranslator implements PropertyTranslator<HugeLongArray> {
+
+        private final HugeWeightMapping seedProperties;
+
+        SeedingTranslator(HugeWeightMapping seedProperties) {
+            this.seedProperties = seedProperties;
+        }
+
+        @Override
+        public Value toProperty(final int propertyId, final HugeLongArray data, final long nodeId) {
+            double seedValue = seedProperties.nodeWeight(nodeId, Double.NaN);
+            long communityId = data.get(nodeId);
+            return Double.isNaN(seedValue) || ((long) seedValue != communityId) ? Values.longValue(communityId) : null;
         }
     }
 
