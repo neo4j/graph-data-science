@@ -20,7 +20,9 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
@@ -28,11 +30,13 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphdb.QueryExecutionException;
+import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -77,6 +81,7 @@ public class LoadGraphProcTest extends ProcTestBase {
     @AfterEach
     public void tearDown() {
         LoadGraphFactory.remove("foo");
+        LoadGraphFactory.remove("foo2");
     }
 
     @ParameterizedTest
@@ -394,5 +399,42 @@ public class LoadGraphProcTest extends ProcTestBase {
             assertEquals(1, row.getNumber("p99").intValue());
             assertEquals(1, row.getNumber("p999").intValue());
         });
+    }
+
+    @Test
+    public void shouldReturnEmptyList() {
+        runQuery("CALL algo.graph.list() YIELD name, nodes, relationships, type, direction", DB, Assertions::assertNull);
+    }
+
+    @Test
+    public void shouldListAllAvailableGraphs() {
+        String loadQuery = "CALL algo.graph.load(" +
+                           "    $name, null, null, {" +
+                           "        graph: $type, direction: $direction" +
+                           "    }" +
+                           ")";
+
+        Map<String, Object> parameters1 = MapUtil.map("name", "foo", "type", "huge", "direction", "OUTGOING", "nodes", 12L, "relationships", 10L);
+        Map<String, Object> parameters2 = MapUtil.map("name", "foo2", "type", "kernel", "direction", "OUTGOING", "nodes", 12L, "relationships", 10L);
+
+        runQuery(loadQuery, DB, parameters1);
+
+        runQuery(loadQuery, DB, parameters2);
+
+        List<Map<String, Object>> actual = new ArrayList<>();
+
+        runQuery("CALL algo.graph.list() YIELD name, nodes, relationships, type, direction", DB, resultRow -> {
+            Map<String, Object> row = new HashMap<>();
+            row.put("name", resultRow.getString("name"));
+            row.put("type", resultRow.getString("type"));
+            row.put("relationships", resultRow.getNumber("relationships"));
+            row.put("nodes", resultRow.getNumber("nodes"));
+            row.put("direction", resultRow.getString("direction"));
+
+            actual.add(row);
+        });
+
+        assertEquals(parameters1, actual.get(0));
+        assertEquals(parameters2, actual.get(1));
     }
 }

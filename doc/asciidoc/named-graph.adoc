@@ -75,7 +75,7 @@ CALL algo.pageRank(null,null,{graph:'my-graph' /*, ... */})
 
 We can get an overview over all loaded named graphs.
 
-.The following will return an overview over all loaded named graphs:
+.The following will return information about all currently loaded graphs:
 [source,cypher]
 ----
 CALL algo.graph.list()

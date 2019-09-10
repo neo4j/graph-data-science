@@ -20,9 +20,9 @@ This chapter contains a reference of all the procedures in the Neo4j Graph Algor
 | <<algorithms-degree-syntax, algo.degree>>                                     | Degree centrality algorithm writing results back to the graph.
 | <<algorithms-degree-syntax, algo.degree.stream>>                              | Degree centrality algorithm streaming results back to the user.
 | <<named-graph, algo.graph.load>>                                              | Procedure for pre-loading a graph and giving it a name.
+| <<named-graph, algo.graph.list>>                                              | Procedure to list all pre-loaded graph.
 | <<named-graph, algo.graph.remove>>                                            | Procedure for unloading a pre-loaded graph.
 | <<named-graph, algo.graph.info>>                                              | Procedure to compute statistics about a pre-loaded graph.
-| <<named-graph, algo.graph.list>>                                              | Procedure to list all pre-loaded graph.
 | <<algorithms-label-propagation-syntax, algo.labelPropagation>>                | Label propagation algorithm writing results back to the graph.
 | <<algorithms-label-propagation-syntax, algo.labelPropagation.stream>>         | Label propagation algorithm streaming results back to the user.
 | <<algorithms-louvain-syntax, algo.louvain>>                                   | Louvain algorithm writing results back to the graph.

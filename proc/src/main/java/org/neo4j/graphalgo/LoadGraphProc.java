@@ -47,10 +47,10 @@ import java.util.stream.Stream;
 public final class LoadGraphProc extends BaseProc {
     @Procedure(name = "algo.graph.load")
     @Description("CALL algo.graph.load(" +
-            "name:String, label:String, relationship:String" +
-            "{direction:'OUT/IN/BOTH', undirected:true/false, sorted:true/false, nodeProperty:'value', nodeWeight:'weight', relationshipWeight: 'weight', graph:'heavy/huge/cypher'}) " +
-            "YIELD nodes, relationships, loadMillis, computeMillis, writeMillis, write, nodeProperty, nodeWeight, relationshipWeight - " +
-            "load named graph")
+                 "name:String, label:String, relationship:String" +
+                 "{direction:'OUT/IN/BOTH', undirected:true/false, sorted:true/false, nodeProperty:'value', nodeWeight:'weight', relationshipWeight: 'weight', graph:'heavy/huge/cypher'}) " +
+                 "YIELD nodes, relationships, loadMillis, computeMillis, writeMillis, write, nodeProperty, nodeWeight, relationshipWeight - " +
+                 "load named graph")
     public Stream<LoadGraphStats> load(
             @Name(value = "name", defaultValue = "") String name,
             @Name(value = "label", defaultValue = "") String label,
@@ -95,7 +95,9 @@ public final class LoadGraphProc extends BaseProc {
         ProcedureConfiguration config = newConfig(label, relationshipType, configuration);
         GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
         GraphFactory graphFactory = loader.build(config.getGraphImpl());
-        MemoryTree memoryTree = graphFactory.memoryEstimation().estimate(graphFactory.dimensions(), config.getConcurrency());
+        MemoryTree memoryTree = graphFactory
+                .memoryEstimation()
+                .estimate(graphFactory.dimensions(), config.getConcurrency());
         return Stream.of(new MemRecResult(new MemoryTreeWithDimensions(memoryTree, graphFactory.dimensions())));
     }
 
@@ -145,7 +147,8 @@ public final class LoadGraphProc extends BaseProc {
             direction = configuration.getDirection(Direction.OUTGOING).name();
             nodeWeight = configuration.getString(ProcedureConstants.NODE_WEIGHT, null);
             nodeProperty = configuration.getString(ProcedureConstants.NODE_PROPERTY, null);
-            relationshipWeight = configuration.getString(ProcedureConstants.RELATIONSHIP_WEIGHT, null);;
+            relationshipWeight = configuration.getString(ProcedureConstants.RELATIONSHIP_WEIGHT, null);
+            ;
         }
     }
 
@@ -167,8 +170,8 @@ public final class LoadGraphProc extends BaseProc {
 
     @Procedure(name = "algo.graph.info")
     @Description("CALL algo.graph.info(name:String, " +
-            "degreeDistribution:bool | { direction:'OUT/IN/BOTH', concurrency:int }) " +
-            "YIELD name, type, exists, nodes, relationships")
+                 "degreeDistribution:bool | { direction:'OUT/IN/BOTH', concurrency:int }) " +
+                 "YIELD name, type, exists, nodes, relationships")
     public Stream<GraphInfoWithHistogram> info(
             @Name("name") String name,
             @Name(value = "degreeDistribution", defaultValue = "null") Object degreeDistribution) {
@@ -209,20 +212,20 @@ public final class LoadGraphProc extends BaseProc {
 
     @Procedure(name = "algo.graph.list")
     @Description("CALL algo.graph.list() " +
-                 "YIELD names, nodes, relationships, type, direction" +
-                 "List all loaded graph")
-    public Stream<GraphInfo> listLoadedGraphs() {
-
-
+                 "YIELD name, type, nodes, relationships, direction" +
+                 "list all loaded graphs")
+    public Stream<GraphInfo> list() {
         Map<String, Graph> loadedGraphs = LoadGraphFactory.getLoadedGraphs();
-        Stream.Builder<GraphInfo> result = Stream.builder();
 
-        loadedGraphs.forEach((name, graph) -> {
-            GraphInfo graphInfo = new GraphInfo(name, graph.getType(), graph.nodeCount(), graph.relationshipCount(), graph.getLoadDirection().toString());
-            result.accept(graphInfo);
+        return loadedGraphs.entrySet().stream().map(entry -> {
+            Graph graph = entry.getValue();
+            return new GraphInfo(
+                    entry.getKey(),
+                    graph.getType(),
+                    graph.nodeCount(),
+                    graph.relationshipCount(),
+                    graph.getLoadDirection().toString());
         });
-
-        return result.build();
     }
 
     private Histogram degreeDistribution(Graph graph, final int concurrency, final Direction direction) {
@@ -272,6 +275,8 @@ public final class LoadGraphProc extends BaseProc {
             this.nodes = nodes;
             this.relationships = relationships;
             this.direction = direction;
+            this.exists = true;
+            this.removed = false;
         }
     }
 
