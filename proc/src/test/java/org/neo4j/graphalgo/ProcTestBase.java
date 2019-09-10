@@ -21,13 +21,13 @@ package org.neo4j.graphalgo;
 
 import com.carrotsearch.hppc.IntIntMap;
 import com.carrotsearch.hppc.cursors.IntIntCursor;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import javax.management.AttributeList;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -54,6 +54,11 @@ public class ProcTestBase {
 
     static Stream<String[]> graphDirectionCombinations() {
         return graphImplementations().flatMap((impl) -> loadDirections().map((direction) -> new String[]{impl, direction}));
+    }
+
+    @AfterAll
+    static void clearLoadedGraphs() {
+        LoadGraphFactory.getLoadedGraphs().clear();
     }
 
     protected void runQuery(String query) {
