@@ -140,8 +140,13 @@ public final class HugeGraphFactory extends GraphFactory {
     public Graph importGraph() {
         RelationshipTypeMappings relationshipTypeIds = dimensions.relationshipTypeMappings();
         if (relationshipTypeIds.isMultipleTypes()) {
-            throw new IllegalArgumentException(
-                    "{graph:'huge'} does not support multiple relationship types, Please use algo.graph.load for this.");
+            String message = String.format(
+                    "It is not possible to use multiple relationship types in implicit graph loading. Please use `algo.graph.load()` for this. Found relationship types: %s",
+                    relationshipTypeIds
+                            .stream()
+                            .map(RelationshipTypeMapping::typeName)
+                            .collect(Collectors.toList()));
+            throw new IllegalArgumentException(message);
         }
 
         Map<String, HugeGraph> graphs = importAllGraphs();
