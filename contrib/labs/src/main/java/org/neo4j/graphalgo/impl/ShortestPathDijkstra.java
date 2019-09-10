@@ -127,8 +127,8 @@ public class ShortestPathDijkstra extends Algorithm<ShortestPathDijkstra> {
         return finalPath;
     }
 
-    public DoubleArrayDeque getFinalPathCosts() {
-        return finalPathCosts;
+    public double[] getFinalPathCosts() {
+        return finalPathCosts.toArray();
     }
 
     /**

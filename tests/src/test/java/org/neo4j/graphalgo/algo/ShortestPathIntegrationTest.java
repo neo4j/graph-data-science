@@ -141,7 +141,7 @@ public class ShortestPathIntegrationTest {
                     return false;
                 });
 
-        final StepConsumer mock = mock(StepConsumer.class);
+        final CostConsumer mock = mock(CostConsumer.class);
 
         DB.execute("MATCH (n) WHERE exists(n.sssp) RETURN id(n) as id, n.sssp as sssp")
                 .accept(row -> {
@@ -179,7 +179,7 @@ public class ShortestPathIntegrationTest {
     public void testDijkstra() throws Exception {
         DB.execute(
                 "MATCH (start:Node{type:'start'}), (end:Node{type:'end'}) " +
-                        "CALL algo.shortestPath(start, end, 'cost',{graph:'" + graphImpl + "', write:true, writeProperty:'step'}) " +
+                        "CALL algo.shortestPath(start, end, 'cost',{graph:'" + graphImpl + "', write:true, writeProperty:'cost'}) " +
                         "YIELD loadMillis, evalMillis, writeMillis, nodeCount, totalCost\n" +
                         "RETURN loadMillis, evalMillis, writeMillis, nodeCount, totalCost")
                 .accept((Result.ResultVisitor<Exception>) row -> {
@@ -191,13 +191,13 @@ public class ShortestPathIntegrationTest {
                     return false;
                 });
 
-        final StepConsumer mock = mock(StepConsumer.class);
+        final CostConsumer mock = mock(CostConsumer.class);
 
-        DB.execute("MATCH (n) WHERE exists(n.step) RETURN id(n) as id, n.step as step")
+        DB.execute("MATCH (n) WHERE exists(n.cost) RETURN id(n) as id, n.cost as cost")
                 .accept(row -> {
                     mock.accept(
                             row.getNumber("id").longValue(),
-                            row.getNumber("step").doubleValue());
+                            row.getNumber("cost").doubleValue());
                     return true;
                 });
 
@@ -213,7 +213,7 @@ public class ShortestPathIntegrationTest {
         void accept(long nodeId, double cost);
     }
 
-    interface StepConsumer {
-        void accept(long nodeId, double step);
+    interface CostConsumer {
+        void accept(long nodeId, double cost);
     }
 }

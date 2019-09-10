@@ -170,7 +170,7 @@ public class ShortestPathProc {
         if (configuration.isWriteFlag()) {
             try (ProgressTimer timer = builder.timeWrite()) {
                 final IntArrayDeque finalPath = dijkstra.getFinalPath();
-                final double[] finalPathCost = dijkstra.getFinalPathCosts().toArray();
+                final double[] finalPathCost = dijkstra.getFinalPathCosts();
                 dijkstra.release();
 
                 final DequeMapping mapping = new DequeMapping(graph, finalPath);
