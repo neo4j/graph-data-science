@@ -163,7 +163,7 @@ class LoadGraphProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @ValueSource(strings = {"heavy", "kernel", "cypher"})
-    void shouldLoadasddGraphWithMultipleRelationships(String graphImpl) {
+    void shouldFailToLoadGraphWithMultipleRelationships(String graphImpl) {
         String query = String.format("CALL algo.graph.load(" +
                                      "    'foo', 'null', 'X | Y', {" +
                                      "        graph: '%s'" +
