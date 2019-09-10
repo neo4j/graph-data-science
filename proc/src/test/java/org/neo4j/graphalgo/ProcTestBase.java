@@ -25,8 +25,10 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.lang.reflect.Array;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -41,6 +43,14 @@ public class ProcTestBase {
 
     static Stream<String> graphImplementations() {
         return Stream.of("Heavy", "Huge", "Kernel");
+    }
+
+    static Stream<String> loadDirections() {
+        return Stream.of("BOTH", "INCOMING", "OUTGOING");
+    }
+
+    static Stream<String[]> graphDirectionCombinations() {
+        return graphImplementations().flatMap((impl) -> loadDirections().map((direction) -> new String[]{impl, direction}));
     }
 
     protected void runQuery(String query) {

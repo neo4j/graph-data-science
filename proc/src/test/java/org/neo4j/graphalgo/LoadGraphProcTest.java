@@ -24,6 +24,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
@@ -41,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.LockSupport;
+import java.util.stream.Stream;
 
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -273,6 +276,30 @@ public class LoadGraphProcTest extends ProcTestBase {
         Map<String, Object> params = singletonMap("graph", graph);
         assertFalse(DB.execute(query, params).<Boolean>columnAs("loaded").next());
         assertTrue(DB.execute(query, params).<Boolean>columnAs("loaded").next());
+    }
+
+    @ParameterizedTest
+    @MethodSource("graphDirectionCombinations")
+    public void consistentLoadDirection(String graphImpl, String loadDirection) {
+        String queryTemplate = "CALL algo.graph.load(" +
+                               "    'foo', %s, %s, {" +
+                               "        graph: $graph, direction: $direction" +
+                               "    }" +
+                               ") YIELD alreadyLoaded AS loaded " +
+                               "RETURN loaded";
+
+        String query = graphImpl.equals("cypher")
+                ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSIHPS_QUERY)
+                : String.format(queryTemplate, "null", "null");
+
+
+        Map<String, Object> params = MapUtil.map("graph", graphImpl, "direction", loadDirection);
+        DB.execute(query, params);
+
+        runQuery("CALL algo.graph.list()", (resultRow -> {
+            assertEquals(resultRow.getString("type"), graphImpl);
+            assertEquals(resultRow.getString("direction"), loadDirection);
+        }));
     }
 
     @ParameterizedTest
