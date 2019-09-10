@@ -27,11 +27,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.cypher.internal.javacompat.ResultRowImpl;
 import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphdb.QueryExecutionException;
+import org.neo4j.graphdb.Result;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
@@ -56,20 +58,20 @@ public class LoadGraphProcTest extends ProcTestBase {
     private static final String ALL_NODES_QUERY = "'MATCH (n) RETURN id(n) AS id'";
     private static final String ALL_RELATIONSIHPS_QUERY = "'MATCH (s)-->(t) RETURN id(s) AS source, id(t) AS target'";
     private static final String DB_CYPHER = "CREATE " +
-            "  (a:A {id: 0, partition: 42})" +
-            ", (b:B {id: 1, partition: 42})" +
+                                            "  (a:A {id: 0, partition: 42})" +
+                                            ", (b:B {id: 1, partition: 42})" +
 
-            ", (a)-[:X { weight: 1.0 }]->(:A {id: 2,  weight: 1.0, partition: 1})" +
-            ", (a)-[:X { weight: 1.0 }]->(:A {id: 3,  weight: 2.0, partition: 1})" +
-            ", (a)-[:X { weight: 1.0 }]->(:A {id: 4,  weight: 1.0, partition: 1})" +
-            ", (a)-[:X { weight: 1.0 }]->(:A {id: 5,  weight: 1.0, partition: 1})" +
-            ", (a)-[:X { weight: 1.0 }]->(:A {id: 6,  weight: 8.0, partition: 2})" +
+                                            ", (a)-[:X { weight: 1.0 }]->(:A {id: 2,  weight: 1.0, partition: 1})" +
+                                            ", (a)-[:X { weight: 1.0 }]->(:A {id: 3,  weight: 2.0, partition: 1})" +
+                                            ", (a)-[:X { weight: 1.0 }]->(:A {id: 4,  weight: 1.0, partition: 1})" +
+                                            ", (a)-[:X { weight: 1.0 }]->(:A {id: 5,  weight: 1.0, partition: 1})" +
+                                            ", (a)-[:X { weight: 1.0 }]->(:A {id: 6,  weight: 8.0, partition: 2})" +
 
-            ", (b)-[:X { weight: 42.0 }]->(:B {id: 7,  weight: 1.0, partition: 1})" +
-            ", (b)-[:X { weight: 42.0 }]->(:B {id: 8,  weight: 2.0, partition: 1})" +
-            ", (b)-[:X { weight: 42.0 }]->(:B {id: 9,  weight: 1.0, partition: 1})" +
-            ", (b)-[:X { weight: 42.0 }]->(:B {id: 10, weight: 1.0, partition: 1})" +
-            ", (b)-[:X { weight: 42.0 }]->(:B {id: 11, weight: 8.0, partition: 2})";
+                                            ", (b)-[:X { weight: 42.0 }]->(:B {id: 7,  weight: 1.0, partition: 1})" +
+                                            ", (b)-[:X { weight: 42.0 }]->(:B {id: 8,  weight: 2.0, partition: 1})" +
+                                            ", (b)-[:X { weight: 42.0 }]->(:B {id: 9,  weight: 1.0, partition: 1})" +
+                                            ", (b)-[:X { weight: 42.0 }]->(:B {id: 10, weight: 1.0, partition: 1})" +
+                                            ", (b)-[:X { weight: 42.0 }]->(:B {id: 11, weight: 8.0, partition: 2})";
 
     @BeforeEach
     public void setup() throws KernelException {
@@ -173,10 +175,10 @@ public class LoadGraphProcTest extends ProcTestBase {
     @ValueSource(strings = {"huge"})
     public void shouldComputeMemoryEstimationForHugeWithProperties(String graph) {
         String query = "CALL algo.graph.load.memrec(" +
-                               "    null, null, {" +
-                               "        graph: $graph, weightProperty: 'weight'" +
-                               "    }" +
-                               ") YIELD bytesMin, bytesMax";
+                       "    null, null, {" +
+                       "        graph: $graph, weightProperty: 'weight'" +
+                       "    }" +
+                       ") YIELD bytesMin, bytesMax";
 
         runQuery(query, singletonMap("graph", graph),
                 row -> {
@@ -253,7 +255,10 @@ public class LoadGraphProcTest extends ProcTestBase {
                            "    }" +
                            ")";
         try {
-            runQuery(algoQuery, singletonMap("name", "foo"), row -> assertEquals(12, row.getNumber("nodes").intValue()));
+            runQuery(
+                    algoQuery,
+                    singletonMap("name", "foo"),
+                    row -> assertEquals(12, row.getNumber("nodes").intValue()));
         } catch (QueryExecutionException qee) {
             qee.printStackTrace();
             fail("Error using wrong graph type:" + qee.getMessage());
@@ -406,9 +411,10 @@ public class LoadGraphProcTest extends ProcTestBase {
                                "    }" +
                                ")";
         String loadQuery = graph.equals("cypher")
-                ? String.format(queryTemplate,
-                    ALL_NODES_QUERY,
-                    "'MATCH (s)<--(t) RETURN id(s) AS source, id(t) AS target'")
+                ? String.format(
+                queryTemplate,
+                ALL_NODES_QUERY,
+                "'MATCH (s)<--(t) RETURN id(s) AS source, id(t) AS target'")
                 : String.format(queryTemplate, "null", "null");
         runQuery(loadQuery, singletonMap("graph", graph));
 
@@ -430,7 +436,7 @@ public class LoadGraphProcTest extends ProcTestBase {
 
     @Test
     public void shouldReturnEmptyList() {
-        runQuery("CALL algo.graph.list() YIELD name, nodes, relationships, type, direction", DB, Assertions::assertNull);
+        assertEmptyResult("CALL algo.graph.list() YIELD name, nodes, relationships, type, direction", DB);
     }
 
     @Test
@@ -439,14 +445,31 @@ public class LoadGraphProcTest extends ProcTestBase {
                            "    $name, null, null, {" +
                            "        graph: $type, direction: $direction" +
                            "    }" +
-                           ")";
+                           ")" +
+                           "YIELD nodes, relationships";
 
-        Map<String, Object> parameters1 = MapUtil.map("name", "foo", "type", "huge", "direction", "OUTGOING", "nodes", 12L, "relationships", 10L);
-        Map<String, Object> parameters2 = MapUtil.map("name", "foo2", "type", "kernel", "direction", "OUTGOING", "nodes", 12L, "relationships", 10L);
+        List<Map<String, Object>> parameters = new ArrayList<Map<String, Object>>() {{
+            add(MapUtil.map(
+                    "name",
+                    "foo",
+                    "type",
+                    "huge",
+                    "direction",
+                    "OUTGOING"));
+            add(MapUtil.map(
+                    "name",
+                    "foo2",
+                    "type",
+                    "kernel",
+                    "direction",
+                    "OUTGOING"));
+        }};
 
-        runQuery(loadQuery, DB, parameters1);
-
-        runQuery(loadQuery, DB, parameters2);
+        parameters.forEach((parameter) -> runQuery(loadQuery, DB, parameter, resultRow -> {
+                    parameter.put("nodes", resultRow.getNumber("nodes"));
+                    parameter.put("relationships", resultRow.getNumber("relationships"));
+                })
+        );
 
         List<Map<String, Object>> actual = new ArrayList<>();
 
@@ -461,7 +484,7 @@ public class LoadGraphProcTest extends ProcTestBase {
             actual.add(row);
         });
 
-        assertEquals(parameters1, actual.get(0));
-        assertEquals(parameters2, actual.get(1));
+        assertEquals(parameters.get(0), actual.get(0));
+        assertEquals(parameters.get(1), actual.get(1));
     }
 }

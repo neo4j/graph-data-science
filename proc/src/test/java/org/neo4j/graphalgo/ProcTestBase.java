@@ -21,11 +21,14 @@ package org.neo4j.graphalgo;
 
 import com.carrotsearch.hppc.IntIntMap;
 import com.carrotsearch.hppc.cursors.IntIntCursor;
+import org.junit.jupiter.api.Assertions;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import javax.management.AttributeList;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -96,6 +99,21 @@ public class ProcTestBase {
                 return true;
             });
         }
+    }
+
+    protected static void assertEmptyResult(
+            String query,
+            GraphDatabaseAPI db) {
+        assertEmptyResult(query, db, Collections.emptyMap());
+    }
+
+    protected static void assertEmptyResult(
+            String query,
+            GraphDatabaseAPI db,
+            Map<String, Object> params) {
+        List<Result.ResultRow> actual = new ArrayList<>();
+        runQuery(query, db, params, resultRow -> actual.add(resultRow));
+        Assertions.assertTrue(actual.isEmpty());
     }
 
     protected static void assertMapEquals(
