@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
+import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -51,6 +52,7 @@ import org.neo4j.values.storable.Values;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -193,10 +195,12 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
         final HugeLongArray labels = compute(setup);
 
         if (setup.procedureConfig.isWriteFlag()) {
+            String seedProperty = setup.procedureConfig.getString(CONFIG_SEED_KEY, CONFIG_OLD_SEED_KEY, null);
             setup.statsBuilder.withWrite(true);
             write(
                     setup.procedureConfig.getWriteConcurrency(),
                     setup.procedureConfig.getWriteProperty(),
+                    seedProperty,
                     setup.graph,
                     labels,
                     setup.statsBuilder);
@@ -278,24 +282,30 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
 
     private void write(
             int concurrency,
-            String labelKey,
+            String writeProperty,
+            String seedProperty,
             Graph graph,
             HugeLongArray labels,
             LabelPropagationStats.Builder stats) {
         log.debug("Writing results");
 
-        // TODO: check if seedProperty == writeProperty for seedingTranslator
-
         try (ProgressTimer ignored = stats.timeWrite()) {
-            final HugeWeightMapping seedProperties = graph.nodeProperties(LabelPropagation.SEED_TYPE);
+            boolean writePropertyEqualsSeedProperty = Objects.equals(seedProperty, writeProperty);
+            HugeWeightMapping seedProperties = graph.nodeProperties(LabelPropagation.SEED_TYPE);
+            boolean hasSeedProperties = seedProperties != null && !(seedProperties instanceof HugeNullWeightMap);
+
+            PropertyTranslator<HugeLongArray> translator = HugeLongArray.Translator.INSTANCE;
+            if (writePropertyEqualsSeedProperty && hasSeedProperties) {
+                translator = new SeedingTranslator(seedProperties);
+            }
             Exporter.of(dbAPI, graph)
                     .withLog(log)
                     .parallel(Pools.DEFAULT, concurrency, TerminationFlag.wrap(transaction))
                     .build()
                     .write(
-                            labelKey,
+                            writeProperty,
                             labels,
-                            seedProperties == null ? HugeLongArray.Translator.INSTANCE : new SeedingTranslator(seedProperties)
+                            translator
                     );
         }
     }

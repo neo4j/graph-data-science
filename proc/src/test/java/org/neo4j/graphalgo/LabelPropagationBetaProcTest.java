@@ -273,6 +273,32 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
     }
 
     @SingleAndMultiThreadedAllGraphNames
+    @MethodSource("parameters")
+    void shouldRunLabelPropagationWithIdenticalSeedAndWriteProperties(boolean parallel, String graphName) {
+        String query = "CALL algo.beta.labelPropagation(" +
+                       "    null, 'X', {" +
+                       "        batchSize: $batchSize, direction: 'OUTGOING', concurrency: $concurrency, graph: $graph, seedProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: $seedProperty" +
+                       "    }" +
+                       ")";
+
+        runQuery(query, DB, parParams(parallel, graphName),
+                row -> {
+                    assertEquals(12, row.getNumber("nodes").intValue());
+                    assertTrue(row.getBoolean("write"));
+                    assertEquals("seed", row.getString("seedProperty"));
+                    assertEquals("seed", row.getString("writeProperty"));
+                    assertTrue(row.getNumber("loadMillis").intValue() >= 0, "load time not set");
+                    assertTrue(row.getNumber("computeMillis").intValue() >= 0, "compute time not set");
+                    assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
+                }
+        );
+        String check = "MATCH (n) " +
+                       "WHERE n.id IN [0,1] " +
+                       "RETURN n.seed AS community";
+        runQuery(check, DB, row -> assertEquals(2, row.getNumber("community").intValue()));
+    }
+
+    @SingleAndMultiThreadedAllGraphNames
     void shouldRunLabelPropagationWithoutInitialSeed(boolean parallel, String graphName) {
         assumeFalse(graphName.equalsIgnoreCase("kernel"));
         String query = "CALL algo.beta.labelPropagation(" +
