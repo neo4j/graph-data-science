@@ -45,28 +45,14 @@ public final class LoadGraphFactory extends GraphFactory {
 
     @Override
     protected Graph importGraph() {
-        Graph graph = get(setup.name);
-
-        Direction loadDirection = graph.getLoadDirection();
-        Direction procedureDirection = setup.direction;
-
-        Optional<Direction> tempDirection = graph.getCompatibleDirection(procedureDirection);
-
-        if (!tempDirection.isPresent()) {
-            throw new IllegalArgumentException(String.format(
-                    "Incompatible directions between loaded graph and requested compute direction. Load direction: '%s' Compute direction: '%s'",
-                    loadDirection,
-                    procedureDirection));
-        }
-
-        return graph;
+        return get(setup.name);
     }
 
     @Override
     public Graph build() {
         return importGraph();
     }
-    
+
     public final MemoryEstimation memoryEstimation() {
         Graph graph = get(setup.name);
         dimensions.nodeCount(graph.nodeCount());

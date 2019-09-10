@@ -242,12 +242,19 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
         LabelPropagation algo = newAlgorithm(setup.graph, setup.procedureConfig, setup.tracker);
 
         Direction procedureDirection = setup.procedureConfig.getDirection(Direction.OUTGOING);
-        final Optional<Direction> computeDirection = setup.graph.getCompatibleDirection(procedureDirection);
+        Optional<Direction> computeDirection = setup.graph.getCompatibleDirection(procedureDirection);
+
+        if (!computeDirection.isPresent()) {
+            throw new IllegalArgumentException(String.format(
+                    "Incompatible directions between loaded graph and requested compute direction. Load direction: '%s' Compute direction: '%s'",
+                    setup.graph.getLoadDirection(),
+                    procedureDirection));
+        }
 
         final HugeLongArray algoResult = runWithExceptionLogging(
                 "LabelPropagation failed",
                 () -> setup.statsBuilder.timeEval(() -> algo.compute(
-                        computeDirection.get(), // This has already been checked during graph loading, we can safely call get()
+                        computeDirection.get(),
                         setup.procedureConfig.getIterations(1)))).labels();
 
         setup.statsBuilder
