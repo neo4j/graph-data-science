@@ -296,7 +296,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
 
             PropertyTranslator<HugeLongArray> translator = HugeLongArray.Translator.INSTANCE;
             if (writePropertyEqualsSeedProperty && hasSeedProperties) {
-                translator = new SeedingTranslator(seedProperties);
+                translator = new PropertyTranslator.OfLongSeedProperty<>(seedProperties, HugeLongArray::get);
             }
             Exporter.of(dbAPI, graph)
                     .withLog(log)
@@ -307,22 +307,6 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
                             labels,
                             translator
                     );
-        }
-    }
-
-    static final class SeedingTranslator implements PropertyTranslator<HugeLongArray> {
-
-        private final HugeWeightMapping seedProperties;
-
-        SeedingTranslator(HugeWeightMapping seedProperties) {
-            this.seedProperties = seedProperties;
-        }
-
-        @Override
-        public Value toProperty(final int propertyId, final HugeLongArray data, final long nodeId) {
-            double seedValue = seedProperties.nodeWeight(nodeId, Double.NaN);
-            long communityId = data.get(nodeId);
-            return Double.isNaN(seedValue) || ((long) seedValue != communityId) ? Values.longValue(communityId) : null;
         }
     }
 

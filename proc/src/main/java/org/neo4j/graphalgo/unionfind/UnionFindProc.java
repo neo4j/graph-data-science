@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.write.Exporter;
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
 import org.neo4j.graphalgo.impl.unionfind.UnionFind;
@@ -364,7 +365,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
                     tracker);
         } else if (writePropertyEqualsSeedProperty && hasNodeProperties) {
             resultProducer = new UnionFindResultProducer.NonConsecutive(
-                    new UnionFindResultProducer.SeedingTranslator(nodeProperties),
+                    new PropertyTranslator.OfLongSeedProperty<>(nodeProperties, UnionFindResultProducer::setIdOf),
                     dss);
         }
 

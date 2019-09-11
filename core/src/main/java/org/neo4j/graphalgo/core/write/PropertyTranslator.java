@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.write;
 
+import org.eclipse.collections.api.block.function.Function2;
+import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -93,6 +95,24 @@ public interface PropertyTranslator<T> {
                 long nodeId) {
             final long value = toLong(data, nodeId);
             return Values.longValue(value);
+        }
+    }
+
+    final class OfLongSeedProperty<T> implements PropertyTranslator<T> {
+
+        private final HugeWeightMapping seedProperties;
+        private final Function2<T, Long, Long> dataAccess;
+
+        public OfLongSeedProperty(HugeWeightMapping seedProperties, Function2<T, Long, Long> dataAccess) {
+            this.seedProperties = seedProperties;
+            this.dataAccess = dataAccess;
+        }
+
+        @Override
+        public Value toProperty(int propertyId, T data, long nodeId) {
+            double seedValue = seedProperties.nodeWeight(nodeId, Double.NaN);
+            long computedValue = dataAccess.apply(data, nodeId);
+            return Double.isNaN(seedValue) || ((long) seedValue != computedValue) ? Values.longValue(computedValue) : null;
         }
     }
 }

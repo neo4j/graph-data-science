@@ -135,20 +135,4 @@ abstract class UnionFindResultProducer {
             return data.setIdOf(nodeId);
         }
     }
-
-    static final class SeedingTranslator implements PropertyTranslator<UnionFindResultProducer> {
-
-        private final HugeWeightMapping seedProperties;
-
-        SeedingTranslator(HugeWeightMapping seedProperties) {
-            this.seedProperties = seedProperties;
-        }
-
-        @Override
-        public Value toProperty(final int propertyId, final UnionFindResultProducer data, final long nodeId) {
-            double seedValue = seedProperties.nodeWeight(nodeId, Double.NaN);
-            long setId = data.setIdOf(nodeId);
-            return Double.isNaN(seedValue) || ((long) seedValue != setId) ? Values.longValue(setId) : null;
-        }
-    }
 }
