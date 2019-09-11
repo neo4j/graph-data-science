@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -90,6 +91,7 @@ public class GraphLoader {
     private boolean sorted = false;
     private boolean undirected = false;
     private PropertyMapping[] nodePropertyMappings = new PropertyMapping[0];
+    private boolean isLoadedGraph = false;
 
     /**
      * Creates a new serial GraphLoader.
@@ -119,7 +121,8 @@ public class GraphLoader {
                 .withConcurrency(config.getReadConcurrency())
                 .withBatchSize(config.getBatchSize())
                 .withDeduplicateRelationshipsStrategy(config.getDuplicateRelationshipsStrategy())
-                .withParams(config.getParams());
+                .withParams(config.getParams())
+                .withLoadedGraph(config.getGraphImpl() == LoadGraphFactory.class);
     }
 
     /**
@@ -137,6 +140,11 @@ public class GraphLoader {
      */
     public GraphLoader withLogInterval(long value, TimeUnit unit) {
         this.logMillis = unit.toMillis(value);
+        return this;
+    }
+
+    public GraphLoader withLoadedGraph(boolean isLoadedGraph) {
+        this.isLoadedGraph = isLoadedGraph;
         return this;
     }
 
@@ -334,6 +342,23 @@ public class GraphLoader {
     }
 
     /**
+     * If the given direction is {@link Direction#BOTH}, we instruct the loader to load the graph as undirected
+     * and only outgoing relationships. This potentially reduces memory consumption for the loaded graph.
+     * In any other case, we load the graph using the given direction.
+     *
+     * @param direction The direction requested
+     * @apiNote This must only be used for algorithms, that do not require
+     *         storing outgoing and incoming relationships separately.
+     */
+    public GraphLoader withReducedRelationshipLoading(Direction direction) {
+        if (direction == Direction.BOTH && !isLoadedGraph) {
+            return undirected().withDirection(Direction.OUTGOING);
+        } else {
+            return withDirection(direction);
+        }
+    }
+
+    /**
      * Instructs the loader to load relationship weights by reading the given property.
      * If the property is not set at the relationship, the given default value is used.
      *
@@ -349,7 +374,6 @@ public class GraphLoader {
     /**
      * Instructs the loader to not load any weights. The behavior of using weighted graph-functions
      * on a graph without weights is not specified.
-     *
      */
     public GraphLoader withoutRelationshipWeights() {
         this.relWeightProp = null;
@@ -359,7 +383,6 @@ public class GraphLoader {
 
     /**
      * Instructs the loader to not load any node weights.
-     *
      */
     public GraphLoader withoutNodeWeights() {
         this.nodeWeightProp = null;
@@ -369,7 +392,6 @@ public class GraphLoader {
 
     /**
      * Instructs the loader to not load any node properties.
-     *
      */
     public GraphLoader withoutNodeProperties() {
         this.nodeProp = null;
@@ -443,6 +465,7 @@ public class GraphLoader {
 
     /**
      * Calculates the required memory to load the graph.
+     *
      * @return
      */
     public MemoryEstimation memoryEstimation(Class<? extends GraphFactory> factoryType) {

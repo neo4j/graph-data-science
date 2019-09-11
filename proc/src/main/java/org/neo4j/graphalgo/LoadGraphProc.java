@@ -63,7 +63,7 @@ public final class LoadGraphProc extends BaseProc {
 
         LoadGraphStats stats = new LoadGraphStats(name, configuration);
 
-        if (LoadGraphFactory.check(name)) {
+        if (LoadGraphFactory.exists(name)) {
             // return already loaded
             stats.alreadyLoaded = true;
             return Stream.of(stats);
@@ -156,12 +156,12 @@ public final class LoadGraphProc extends BaseProc {
     public Stream<GraphInfo> remove(@Name("name") String name) {
         GraphInfo info = new GraphInfo(name);
 
-        Graph graph = LoadGraphFactory.get(name);
+        Graph graph = LoadGraphFactory.remove(name);
         if (graph != null) {
             info.type = graph.getType();
             info.nodes = graph.nodeCount();
             info.relationships = graph.relationshipCount();
-            info.exists = LoadGraphFactory.remove(name);
+            info.exists = true;
             info.removed = true;
         }
         return Stream.of(info);
@@ -174,11 +174,11 @@ public final class LoadGraphProc extends BaseProc {
     public Stream<GraphInfoWithHistogram> info(
             @Name("name") String name,
             @Name(value = "degreeDistribution", defaultValue = "null") Object degreeDistribution) {
-        Graph graph = LoadGraphFactory.get(name);
         final GraphInfoWithHistogram info;
-        if (graph == null) {
+        if (!LoadGraphFactory.exists(name)) {
             info = new GraphInfoWithHistogram(name);
         } else {
+            Graph graph = LoadGraphFactory.get(name);
             final boolean calculateDegreeDistribution;
             final ProcedureConfiguration configuration;
             if (Boolean.TRUE.equals(degreeDistribution)) {

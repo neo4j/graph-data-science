@@ -21,6 +21,8 @@ package org.neo4j.graphalgo.api;
 
 import org.neo4j.graphdb.Direction;
 
+import java.util.Optional;
+
 /**
  * Composition of often used source interfaces
  *
@@ -63,7 +65,41 @@ public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterab
         return TYPE;
     }
 
+    boolean isUndirected();
+
     Direction getLoadDirection();
+
+    default Direction compatibleDirection(Direction procedureDirection) {
+        return getCompatibleDirection(procedureDirection).get();
+    }
+
+    default Optional<Direction> getCompatibleDirection(Direction procedureDirection) {
+        boolean isUndirected = this.isUndirected();
+        Direction loadDirection = this.getLoadDirection();
+
+        switch (procedureDirection) {
+            case OUTGOING:
+                if (!isUndirected && (loadDirection == Direction.BOTH || loadDirection == Direction.OUTGOING)) {
+                    return Optional.of(Direction.OUTGOING);
+                }
+                break;
+            case INCOMING:
+                if (!isUndirected && (loadDirection == Direction.BOTH || loadDirection == Direction.INCOMING)) {
+                    return Optional.of(Direction.INCOMING);
+                }
+                break;
+            case BOTH:
+                if (isUndirected && loadDirection == Direction.OUTGOING) {
+                    return Optional.of(Direction.OUTGOING);
+                }
+                if (!isUndirected && loadDirection == Direction.BOTH) {
+                    return Optional.of(Direction.BOTH);
+                }
+                break;
+        }
+
+        return Optional.empty();
+    }
 
     void canRelease(boolean canRelease);
 

@@ -48,6 +48,8 @@ public class GraphSetup {
     public final String endLabel;
     // relationtype name. null means any relation.
     public final String relationshipType;
+    // direction for loading the graph.
+    public final Direction direction;
     // load incoming relationships.
     public final boolean loadIncoming;
     // load outgoing relationships.
@@ -132,6 +134,7 @@ public class GraphSetup {
         this.loadOutgoing = direction == Direction.OUTGOING || direction == Direction.BOTH;
         this.loadIncoming = direction == Direction.INCOMING || direction == Direction.BOTH;
         this.loadBoth = loadOutgoing && loadIncoming;
+        this.direction = direction;
         this.relationWeightPropertyName = relationWeightPropertyName;
         this.relationDefaultWeight = relationDefaultWeight;
         this.nodeDefaultWeight = nodeDefaultWeight;

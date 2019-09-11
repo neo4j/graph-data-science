@@ -26,8 +26,10 @@ import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Optional;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -50,7 +52,7 @@ public final class LoadGraphFactory extends GraphFactory {
     public Graph build() {
         return importGraph();
     }
-    
+
     public final MemoryEstimation memoryEstimation() {
         Graph graph = get(setup.name);
         dimensions.nodeCount(graph.nodeCount());
@@ -74,22 +76,24 @@ public final class LoadGraphFactory extends GraphFactory {
     }
 
     public static Graph get(String name) {
-        return name == null ? null : graphs.get(name);
+        if (!exists(name)) {
+            throw new IllegalArgumentException(String.format("Graph with name '%s' does not exist.", name));
+        }
+        return graphs.get(name);
     }
 
-    public static boolean check(String name) {
+    public static boolean exists(String name) {
         return name != null && graphs.containsKey(name);
     }
 
-    public static boolean remove(String name) {
-        if (name == null) return false;
-        Graph graph = graphs.remove(name);
-        if (graph != null) {
-            graph.canRelease(true);
-            graph.release();
-            return true;
+    public static Graph remove(String name) {
+        if (!exists(name)) {
+            return null;
         }
-        return false;
+        Graph graph = graphs.remove(name);
+        graph.canRelease(true);
+        graph.release();
+        return graph;
     }
 
     public static String getType(String name) {

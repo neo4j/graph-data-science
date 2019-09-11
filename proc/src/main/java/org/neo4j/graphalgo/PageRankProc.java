@@ -125,19 +125,13 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
 
     @Override
     protected GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
-        loader.withOptionalRelationshipWeightsFromProperty(
-                config.getString(CONFIG_WEIGHT_PROPERTY, null),
-                config.getWeightPropertyDefaultValue(0.0));
-
+        String weight = config.getString(CONFIG_WEIGHT_PROPERTY, null);
+        double weightPropertyDefaultValue = config.getWeightPropertyDefaultValue(0.0);
         Direction direction = config.getDirection(Direction.OUTGOING);
-        if (direction == Direction.BOTH) {
-            loader.undirected();
-            config.setDirection(Direction.OUTGOING);
-        } else {
-            loader.withDirection(direction);
-        }
 
-        return loader;
+        return loader
+                .withReducedRelationshipLoading(direction)
+                .withOptionalRelationshipWeightsFromProperty(weight, weightPropertyDefaultValue);
     }
 
     @Override

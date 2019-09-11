@@ -43,7 +43,7 @@ import java.util.function.LongPredicate;
  */
 public class HeavyGraph implements Graph {
 
-    public final static String TYPE = "heavy";
+    public static final String TYPE = "heavy";
 
     private final IntIdMap nodeIdMap;
     private AdjacencyMatrix container;
@@ -52,16 +52,19 @@ public class HeavyGraph implements Graph {
     private Map<String, WeightMapping> nodePropertiesMapping;
 
     private boolean canRelease = true;
+    private final boolean isUndirected;
 
     public HeavyGraph(
             IntIdMap nodeIdMap,
             AdjacencyMatrix container,
             long relationshipCount,
-            Map<String, WeightMapping> nodePropertiesMapping) {
+            Map<String, WeightMapping> nodePropertiesMapping,
+            boolean isUndirected) {
         this.nodeIdMap = nodeIdMap;
         this.container = container;
         this.relationshipCount = relationshipCount;
         this.nodePropertiesMapping = nodePropertiesMapping;
+        this.isUndirected = isUndirected;
     }
 
     @Override
@@ -224,6 +227,11 @@ public class HeavyGraph implements Graph {
     @Override
     public String getType() {
         return TYPE;
+    }
+
+    @Override
+    public boolean isUndirected() {
+        return isUndirected;
     }
 
     @Override

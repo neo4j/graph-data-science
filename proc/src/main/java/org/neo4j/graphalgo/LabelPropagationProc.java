@@ -47,6 +47,7 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -160,18 +161,12 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
 
     @Override
     protected GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
-        final String seedProperty = config.getString(CONFIG_SEED_KEY, CONFIG_OLD_SEED_KEY, null);
-        final String weightProperty = config.getString(CONFIG_WEIGHT_KEY, null);
-
+        String seedProperty = config.getString(CONFIG_SEED_KEY, CONFIG_OLD_SEED_KEY, null);
+        String weightProperty = config.getString(CONFIG_WEIGHT_KEY, null);
         Direction direction = config.getDirection(Direction.OUTGOING);
-        if (direction == Direction.BOTH) {
-            loader.undirected();
-            config.setDirection(Direction.OUTGOING);
-        } else {
-            loader.withDirection(direction);
-        }
 
         return loader
+                .withReducedRelationshipLoading(direction)
                 .withOptionalRelationshipWeightsFromProperty(weightProperty, 1.0D)
                 .withOptionalNodeProperties(createPropertyMappings(seedProperty, weightProperty));
     }
@@ -246,10 +241,20 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
 
         LabelPropagation algo = newAlgorithm(setup.graph, setup.procedureConfig, setup.tracker);
 
+        Direction procedureDirection = setup.procedureConfig.getDirection(Direction.OUTGOING);
+        Optional<Direction> computeDirection = setup.graph.getCompatibleDirection(procedureDirection);
+
+        if (!computeDirection.isPresent()) {
+            throw new IllegalArgumentException(String.format(
+                    "Incompatible directions between loaded graph and requested compute direction. Load direction: '%s' Compute direction: '%s'",
+                    setup.graph.getLoadDirection(),
+                    procedureDirection));
+        }
+
         final HugeLongArray algoResult = runWithExceptionLogging(
                 "LabelPropagation failed",
                 () -> setup.statsBuilder.timeEval(() -> algo.compute(
-                        setup.procedureConfig.getDirection(Direction.OUTGOING),
+                        computeDirection.get(),
                         setup.procedureConfig.getIterations(1)))).labels();
 
         setup.statsBuilder

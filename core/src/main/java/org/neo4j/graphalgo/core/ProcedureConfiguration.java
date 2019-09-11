@@ -304,10 +304,6 @@ public class ProcedureConfiguration {
         return Pools.allowedConcurrency(requestedConcurrency);
     }
 
-    public String getDirectionName() {
-        return getDirectionName(ProcedureConstants.DIRECTION_DEFAULT);
-    }
-
     public String getDirectionName(String defaultDirection) {
         return get(ProcedureConstants.DIRECTION, defaultDirection);
     }
@@ -345,7 +341,7 @@ public class ProcedureConfiguration {
             case HugeGraph.TYPE:
                 return HugeGraphFactory.class;
             default:
-                if (validCustomName(graphImpl) && LoadGraphFactory.check(graphImpl)) {
+                if (validCustomName(graphImpl) && LoadGraphFactory.exists(graphImpl)) {
                     return LoadGraphFactory.class;
                 }
                 throw new IllegalArgumentException("Unknown impl: " + graphImpl);

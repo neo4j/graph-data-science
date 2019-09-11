@@ -191,7 +191,6 @@ public class LoadGraphProcTest extends ProcTestBase {
                                "        graph: $graph" +
                                "    }" +
                                ")";
-        System.out.println(String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSIHPS_QUERY));
         String loadQuery = graph.equals("cypher")
                 ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSIHPS_QUERY)
                 : String.format(queryTemplate, "null", "null");

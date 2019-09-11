@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo;
 
+import org.hamcrest.Matchers;
+import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -28,7 +30,6 @@ import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.graphdb.Result;
 import org.neo4j.helpers.collection.Iterators;
-import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -44,6 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.helpers.collection.MapUtil.map;
 
 class LabelPropagationBetaProcTest extends ProcTestBase {
 
@@ -79,11 +81,118 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
     void setup() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase();
 
-        db.getDependencyResolver()
-                .resolveDependency(Procedures.class)
-                .registerProcedure(LabelPropagationProc.class);
+        Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class);
+        procedures.registerProcedure(LabelPropagationProc.class);
+        procedures.registerProcedure(LoadGraphProc.class);
 
         db.execute(DB_CYPHER);
+    }
+
+    static Stream<Arguments> successParameters() {
+        return Stream.of(
+                arguments("heavy", "direction: 'BOTH'", "BOTH", 1),
+                arguments("heavy", "direction: 'BOTH'", "OUTGOING", 2),
+                arguments("heavy", "direction: 'BOTH'", "INCOMING", 2),
+                arguments("heavy", "direction: 'OUTGOING'", "OUTGOING", 2),
+                arguments("heavy", "direction: 'INCOMING'", "INCOMING", 2),
+                arguments("heavy", "undirected: true", "BOTH", 1),
+                arguments("huge", "direction: 'BOTH'", "BOTH", 1),
+                arguments("huge", "direction: 'BOTH'", "OUTGOING", 2),
+                arguments("huge", "direction: 'BOTH'", "INCOMING", 2),
+                arguments("huge", "direction: 'OUTGOING'", "OUTGOING", 2),
+                arguments("huge", "direction: 'INCOMING'", "INCOMING", 2),
+                arguments("huge", "undirected: true", "BOTH", 1)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("successParameters")
+    void succeedingCombinationsForLoadedGraphs(String graphImpl, String loadDirection, String runDirection, long expectedComponents) {
+        String testGraph =
+                "CREATE" +
+                " (a:C) " +
+                ",(b:C) " +
+                ",(c:C) " +
+                ",(d:C) " +
+
+                ",(a)-[:Y]->(b) " +
+                ",(c)-[:Y]->(b) " +
+                ",(c)-[:Y]->(d) ";
+
+        db.execute(testGraph);
+        db.execute("CALL algo.graph.remove('myGraph')");
+
+        String loadQuery = "CALL algo.graph.load(" +
+                           "    'myGraph' ,'C', 'Y', {" +
+                           "       graph: $graph, " + loadDirection +
+                           "    }" +
+                           ")";
+        runQuery(loadQuery, db, parParams(true, graphImpl));
+
+        String query = "CALL algo.beta.labelPropagation(" +
+                       "    null, null, {" +
+                       "        graph: 'myGraph', direction: $runDirection, write: false" +
+                       "    }" +
+                       ")";
+        runQuery(query, db, map("runDirection", runDirection),
+                row -> {
+                    assertEquals(1, row.getNumber("iterations").intValue());
+                    assertFalse(row.getBoolean("write"));
+                    assertEquals(expectedComponents, row.getNumber("communityCount").longValue());
+                }
+        );
+    }
+
+    static Stream<Arguments> failParameters() {
+        return Stream.of(
+                arguments("heavy", "direction: 'OUTGOING'", "INCOMING"),
+                arguments("heavy", "direction: 'OUTGOING'", "BOTH"),
+                arguments("heavy", "direction: 'INCOMING'", "OUTGOING"),
+                arguments("heavy", "direction: 'INCOMING'", "BOTH"),
+                arguments("heavy", "undirected: true", "INCOMING"),
+                arguments("heavy", "undirected: true", "OUTGOING"),
+                arguments("huge", "direction: 'OUTGOING'", "INCOMING"),
+                arguments("huge", "direction: 'OUTGOING'", "BOTH"),
+                arguments("huge", "direction: 'INCOMING'", "OUTGOING"),
+                arguments("huge", "direction: 'INCOMING'", "BOTH"),
+                arguments("huge", "undirected: true", "INCOMING"),
+                arguments("huge", "undirected: true", "OUTGOING")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("failParameters")
+    void failingCombinationsForLoadedGraphs(String graphImpl, String loadDirection, String runDirection) {
+        String testGraph =
+                "CREATE" +
+                " (a:C) " +
+                ",(b:C) " +
+                ",(c:C) " +
+                ",(d:C) " +
+
+                ",(a)-[:Y]->(b) " +
+                ",(c)-[:Y]->(b) " +
+                ",(c)-[:Y]->(d) ";
+
+        db.execute(testGraph);
+        db.execute("CALL algo.graph.remove('myGraph')");
+
+        String loadQuery = "CALL algo.graph.load(" +
+                           "    'myGraph' ,'C', 'Y', {" +
+                           "       graph: $graph, " + loadDirection +
+                           "    }" +
+                           ")";
+        runQuery(loadQuery, db, parParams(true, graphImpl));
+
+        String query = "CALL algo.beta.labelPropagation(" +
+                       "    null, null, {" +
+                       "        graph: 'myGraph', direction: $runDirection, write: false" +
+                       "    }" +
+                       ")";
+        String exceptionMessage = assertThrows(
+                QueryExecutionException.class,
+                () -> runQuery(query, db, map("runDirection", runDirection))).getMessage();
+        Assert.assertThat(exceptionMessage, Matchers.containsString("Incompatible directions between loaded graph and requested compute direction"));
     }
 
     @ParameterizedTest
@@ -303,10 +412,10 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
         // we intentionally start with no labels defined for any nodes (hence seedProperty = {lpa, lpa2})
 
         String writingQuery = "CALL algo.beta.labelPropagation(" +
-                               "    null, null, {" +
-                               "       iterations: 20, direction: 'OUTGOING', writeProperty: 'lpa', weightProperty: $weightProperty" +
-                               "    }" +
-                               ")";
+                              "    null, null, {" +
+                              "       iterations: 20, direction: 'OUTGOING', writeProperty: 'lpa', weightProperty: $weightProperty" +
+                              "    }" +
+                              ")";
         runQuery(writingQuery, db, parParams(parallel, graphImpl));
 
         String streamingQuery = "CALL algo.labelPropagation.stream(" +
@@ -363,7 +472,7 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
     }
 
     private Map<String, Object> parParams(boolean parallel, String graphImpl) {
-        return MapUtil.map(
+        return map(
                 "batchSize", parallel ? 1 : 100,
                 "concurrency", parallel ? 8 : 1,
                 "graph", graphImpl,

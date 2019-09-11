@@ -77,6 +77,11 @@ abstract class SubGraph implements Graph {
     }
 
     @Override
+    public boolean isUndirected() {
+        throw new UnsupportedOperationException("isUndirected is not supported.");
+    }
+
+    @Override
     public final double weightOf(long sourceNodeId, long targetNodeId) {
         throw new UnsupportedOperationException("weightOf is not supported.");
     }

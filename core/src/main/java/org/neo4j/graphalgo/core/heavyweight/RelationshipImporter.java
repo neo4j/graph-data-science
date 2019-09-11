@@ -220,12 +220,17 @@ final class RelationshipImporter extends StatementAction {
         return new RelationshipLoader.ReadUndirected(transaction, matrix, relationId, visitorOut, visitorIn);
     }
 
-    Graph toGraph(final IntIdMap idMap, final AdjacencyMatrix matrix, final long relationshipCount) {
+    Graph toGraph(
+            final IntIdMap idMap,
+            final AdjacencyMatrix matrix,
+            final long relationshipCount,
+            boolean isUndirected) {
         return new HeavyGraph(
                 idMap,
                 matrix,
                 relationshipCount,
-                nodeProperties);
+                nodeProperties,
+                isUndirected);
     }
 
     void writeInto(final Map<String, WeightMapping> nodeProperties) {

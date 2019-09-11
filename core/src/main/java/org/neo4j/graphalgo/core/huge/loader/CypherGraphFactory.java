@@ -75,6 +75,7 @@ public class CypherGraphFactory extends GraphFactory {
                 relationships.inWeights(),
                 relationships.outWeights(),
                 relationships.inWeightOffsets(),
-                relationships.outWeightOffsets());
+                relationships.outWeightOffsets(),
+                setup.loadAsUndirected);
     }
 }

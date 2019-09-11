@@ -96,8 +96,8 @@ public final class DegreeCentralityProc {
                 terminationFlag,
                 configuration,
                 statsBuilder,
-                weightPropertyKey,
-                direction);
+                weightPropertyKey
+        );
 
         logMemoryUsage(tracker);
 
@@ -158,8 +158,8 @@ public final class DegreeCentralityProc {
                 terminationFlag,
                 configuration,
                 statsBuilder,
-                weightPropertyKey,
-                direction);
+                weightPropertyKey
+        );
 
         logMemoryUsage(tracker);
 
@@ -177,18 +177,15 @@ public final class DegreeCentralityProc {
             Class<? extends GraphFactory> graphFactory,
             CentralityScore.Stats.Builder statsBuilder,
             ProcedureConfiguration configuration,
-            String weightPropertyKey, Direction direction) {
+            String weightPropertyKey,
+            Direction direction) {
         GraphLoader graphLoader = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, configuration)
                 .withAllocationTracker(tracker)
                 .withOptionalRelationshipWeightsFromProperty(
                         weightPropertyKey,
                         configuration.getWeightPropertyDefaultValue(0.0))
-                .withDirection(direction);
-
-        if (direction == Direction.BOTH) {
-            graphLoader.undirected();
-        }
+                .withReducedRelationshipLoading(direction);
 
         try (ProgressTimer timer = statsBuilder.timeLoad()) {
             Graph graph = graphLoader.load(graphFactory);
@@ -203,17 +200,15 @@ public final class DegreeCentralityProc {
             TerminationFlag terminationFlag,
             ProcedureConfiguration configuration,
             CentralityScore.Stats.Builder statsBuilder,
-            String weightPropertyKey, Direction direction) {
+            String weightPropertyKey) {
 
-        if (direction == Direction.BOTH) {
-            direction = Direction.OUTGOING;
-        }
+        Direction computeDirection = getDirection(configuration) == Direction.BOTH ? Direction.OUTGOING : getDirection(configuration);
 
         DegreeCentralityAlgorithm algo = new DegreeCentrality(
                 graph,
                 Pools.DEFAULT,
                 configuration.getConcurrency(),
-                direction,
+                computeDirection,
                 weightPropertyKey != null);
         statsBuilder.timeEval(algo::compute);
         Algorithm<?> algorithm = algo.algorithm();

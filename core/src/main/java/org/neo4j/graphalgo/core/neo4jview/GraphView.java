@@ -68,20 +68,21 @@ public class GraphView implements Graph {
     private final Direction loadDirection;
     private final double propertyDefaultWeight;
     private final IntIdMap idMapping;
-    private boolean loadAsUndirected;
+    private final boolean isUndirected;
 
     GraphView(
             GraphDatabaseAPI db,
             GraphDimensions dimensions,
             Direction loadDirection,
             IntIdMap idMapping,
-            double propertyDefaultWeight, boolean loadAsUndirected) {
+            double propertyDefaultWeight,
+            boolean isUndirected) {
         this.tx = new TransactionWrapper(db);
         this.dimensions = dimensions;
         this.loadDirection = loadDirection;
         this.propertyDefaultWeight = propertyDefaultWeight;
         this.idMapping = idMapping;
-        this.loadAsUndirected = loadAsUndirected;
+        this.isUndirected = isUndirected;
     }
 
     @Override
@@ -139,7 +140,7 @@ public class GraphView implements Graph {
                     };
 
                     LoadRelationships loader = rels(transaction);
-                    if (direction == Direction.BOTH || (direction == Direction.OUTGOING && loadAsUndirected) ) {
+                    if (direction == Direction.BOTH || (direction == Direction.OUTGOING && isUndirected) ) {
                         // can't use relationshipsBoth here, b/c we want to be consistent with the other graph impls
                         // that are iteration first over outgoing, then over incoming relationships
                         RelationshipSelectionCursor cursor = loader.relationshipsOut(nc);
@@ -194,7 +195,7 @@ public class GraphView implements Graph {
                 transaction.dataRead().singleNode(toOriginalNodeId(nodeId), nc);
                 if (nc.next()) {
                     LoadRelationships relationships = rels(transaction);
-                    if (direction == Direction.BOTH || loadAsUndirected && direction == Direction.OUTGOING) {
+                    if (direction == Direction.BOTH || isUndirected && direction == Direction.OUTGOING) {
                         return relationships.degreeBoth(nc);
                     }
                     return direction == Direction.OUTGOING ?
@@ -307,6 +308,11 @@ public class GraphView implements Graph {
     @Override
     public String getType() {
         return TYPE;
+    }
+
+    @Override
+    public boolean isUndirected() {
+        return isUndirected;
     }
 
     @Override
