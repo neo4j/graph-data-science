@@ -101,12 +101,14 @@ public class KShortestPathsProc {
 
         // eval
         try (ProgressTimer timer = builder.timeEval()) {
+            Direction computeDirection = direction == Direction.BOTH ? Direction.OUTGOING : direction;
+
             algorithm = new YensKShortestPaths(graph)
                     .withProgressLogger(ProgressLogger.wrap(log, "KShortestPaths(Yen)"))
                     .withTerminationFlag(TerminationFlag.wrap(transaction))
                     .compute(startNode.getId(),
                             endNode.getId(),
-                            graph.getLoadDirection(),
+                            computeDirection,
                             Math.toIntExact(k),
                             configuration.getNumber("maxDepth", Integer.MAX_VALUE).intValue());
             builder.withResultCount(algorithm.getPaths().size());

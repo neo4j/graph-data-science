@@ -177,7 +177,8 @@ public final class DegreeCentralityProc {
             Class<? extends GraphFactory> graphFactory,
             CentralityScore.Stats.Builder statsBuilder,
             ProcedureConfiguration configuration,
-            String weightPropertyKey, Direction direction) {
+            String weightPropertyKey,
+            Direction direction) {
         GraphLoader graphLoader = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, configuration)
                 .withAllocationTracker(tracker)
@@ -201,11 +202,13 @@ public final class DegreeCentralityProc {
             CentralityScore.Stats.Builder statsBuilder,
             String weightPropertyKey) {
 
+        Direction computeDirection = getDirection(configuration) == Direction.BOTH ? Direction.OUTGOING : getDirection(configuration);
+
         DegreeCentralityAlgorithm algo = new DegreeCentrality(
                 graph,
                 Pools.DEFAULT,
                 configuration.getConcurrency(),
-                graph.getLoadDirection(),
+                computeDirection,
                 weightPropertyKey != null);
         statsBuilder.timeEval(algo::compute);
         Algorithm<?> algorithm = algo.algorithm();

@@ -35,7 +35,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class DegreeProcTest extends ProcTestBase {
+public class DegreeCentralityProcTest extends ProcTestBase {
 
     private static final Map<Long, Double> incomingExpected = new HashMap<>();
     private static final Map<Long, Double> bothExpected = new HashMap<>();
