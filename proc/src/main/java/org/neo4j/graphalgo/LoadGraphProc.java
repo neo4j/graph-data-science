@@ -148,7 +148,6 @@ public final class LoadGraphProc extends BaseProc {
             nodeWeight = configuration.getString(ProcedureConstants.NODE_WEIGHT, null);
             nodeProperty = configuration.getString(ProcedureConstants.NODE_PROPERTY, null);
             relationshipWeight = configuration.getString(ProcedureConstants.RELATIONSHIP_WEIGHT, null);
-            ;
         }
     }
 

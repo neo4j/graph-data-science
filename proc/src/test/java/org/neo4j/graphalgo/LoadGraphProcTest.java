@@ -20,32 +20,28 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.cypher.internal.javacompat.ResultRowImpl;
 import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphdb.QueryExecutionException;
-import org.neo4j.graphdb.Result;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.LockSupport;
-import java.util.stream.Stream;
 
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -412,9 +408,9 @@ public class LoadGraphProcTest extends ProcTestBase {
                                ")";
         String loadQuery = graph.equals("cypher")
                 ? String.format(
-                queryTemplate,
-                ALL_NODES_QUERY,
-                "'MATCH (s)<--(t) RETURN id(s) AS source, id(t) AS target'")
+                        queryTemplate,
+                        ALL_NODES_QUERY,
+                        "'MATCH (s)<--(t) RETURN id(s) AS source, id(t) AS target'")
                 : String.format(queryTemplate, "null", "null");
         runQuery(loadQuery, singletonMap("graph", graph));
 
@@ -448,22 +444,10 @@ public class LoadGraphProcTest extends ProcTestBase {
                            ")" +
                            "YIELD nodes, relationships";
 
-        List<Map<String, Object>> parameters = new ArrayList<Map<String, Object>>() {{
-            add(MapUtil.map(
-                    "name",
-                    "foo",
-                    "type",
-                    "huge",
-                    "direction",
-                    "OUTGOING"));
-            add(MapUtil.map(
-                    "name",
-                    "foo2",
-                    "type",
-                    "kernel",
-                    "direction",
-                    "OUTGOING"));
-        }};
+        List<Map<String, Object>> parameters = Arrays.asList(
+                MapUtil.map("name", "foo", "type", "huge", "direction", "OUTGOING"),
+                MapUtil.map("name", "foo2", "type", "kernel", "direction", "OUTGOING")
+        );
 
         parameters.forEach((parameter) -> runQuery(loadQuery, DB, parameter, resultRow -> {
                     parameter.put("nodes", resultRow.getNumber("nodes"));
