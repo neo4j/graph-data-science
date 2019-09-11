@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.pregel;
 
 import com.carrotsearch.hppc.BitSet;
 import org.jctools.queues.MpscLinkedQueue;
+import org.neo4j.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Degrees;
@@ -28,6 +29,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.HugeNodeWeights;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.huge.loader.HugeNodePropertiesBuilder;
+import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.LazyMappingCollection;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -181,7 +183,10 @@ public final class Pregel {
             final int iteration,
             BitSet messageBits,
             BitSet voteToHaltBits) {
-        Collection<PrimitiveLongIterable> nodeBatches = graph.batchIterables(batchSize);
+        Collection<PrimitiveLongIterable> nodeBatches = LazyBatchCollection.of(
+                graph.nodeCount(),
+                batchSize,
+                (start, length) -> () -> PrimitiveLongCollections.range(start, start + length - 1L));
 
         int threadCount = nodeBatches.size();
 
