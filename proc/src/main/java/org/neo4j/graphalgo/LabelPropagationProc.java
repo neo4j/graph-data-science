@@ -227,7 +227,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
             String relationshipType,
             Map<String, Object> config) {
 
-        final LabelPropagationStats.Builder statsBuilder = new LabelPropagationStats.Builder();
+        final LabelPropagationStats.Builder statsBuilder = new LabelPropagationStats.Builder(callContext.outputFields());
 
         AllocationTracker tracker = AllocationTracker.create();
         ProcedureConfiguration configuration = newConfig(label, relationshipType, config);

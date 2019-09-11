@@ -21,6 +21,11 @@ package org.neo4j.graphalgo.impl.results;
 
 import org.HdrHistogram.Histogram;
 
+import java.util.Optional;
+import java.util.OptionalLong;
+import java.util.Set;
+import java.util.stream.Stream;
+
 public class LabelPropagationStats {
 
     public static class BetaStreamResult {
@@ -149,6 +154,14 @@ public class LabelPropagationStats {
         private String seedProperty;
         private String writeProperty;
 
+        Builder(Set<String> returnFields) {
+            super(returnFields);
+        }
+
+        public Builder(Stream<String> returnFields) {
+            super(returnFields);
+        }
+
         public Builder iterations(final long iterations) {
             this.iterations = iterations;
             return this;
@@ -182,8 +195,8 @@ public class LabelPropagationStats {
                 long writeMillis,
                 long postProcessingMillis,
                 long nodeCount,
-                long communityCount,
-                Histogram communityHistogram,
+                OptionalLong maybeCommunityCount,
+                Optional<Histogram> maybeCommunityHistogram,
                 boolean write) {
             return new LabelPropagationStats(
                     loadMillis,
@@ -191,17 +204,17 @@ public class LabelPropagationStats {
                     writeMillis,
                     postProcessingMillis,
                     nodeCount,
-                    communityCount,
-                    communityHistogram.getValueAtPercentile(100),
-                    communityHistogram.getValueAtPercentile(99),
-                    communityHistogram.getValueAtPercentile(95),
-                    communityHistogram.getValueAtPercentile(90),
-                    communityHistogram.getValueAtPercentile(75),
-                    communityHistogram.getValueAtPercentile(50),
-                    communityHistogram.getValueAtPercentile(25),
-                    communityHistogram.getValueAtPercentile(10),
-                    communityHistogram.getValueAtPercentile(5),
-                    communityHistogram.getValueAtPercentile(1),
+                    maybeCommunityCount.orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(100)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(99)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(95)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(90)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(75)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(50)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(25)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(10)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(5)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(1)).orElse(-1L),
                     iterations,
                     write,
                     didConverge,
