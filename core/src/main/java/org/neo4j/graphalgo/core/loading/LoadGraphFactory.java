@@ -120,4 +120,8 @@ public final class LoadGraphFactory extends GraphFactory {
                 e -> e.getValue().loadAllTypes()
         ));
     }
+
+    public static void removeAllLoadedGraphs() {
+        graphs.clear();
+    }
 }

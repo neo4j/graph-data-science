@@ -60,7 +60,7 @@ public class ProcTestBase {
 
     @AfterAll
     static void clearLoadedGraphs() {
-        LoadGraphFactory.getLoadedGraphs().clear();
+        LoadGraphFactory.removeAllLoadedGraphs();
     }
 
     protected void runQuery(String query) {
