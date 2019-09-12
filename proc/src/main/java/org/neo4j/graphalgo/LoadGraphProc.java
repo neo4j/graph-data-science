@@ -43,6 +43,7 @@ import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -52,7 +53,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 public final class LoadGraphProc extends BaseProc {
-    @Procedure(name = "algo.graph.load")
+    @Procedure(name = "algo.graph.load", mode = Mode.WRITE)
     @Description("CALL algo.graph.load(" +
                  "name:String, label:String, relationship:String" +
                  "{direction:'OUT/IN/BOTH', undirected:true/false, sorted:true/false, nodeProperty:'value', nodeWeight:'weight', relationshipWeight: 'weight', graph:'heavy/huge/cypher'}) " +
@@ -179,7 +180,7 @@ public final class LoadGraphProc extends BaseProc {
         }
     }
 
-    @Procedure(name = "algo.graph.remove")
+    @Procedure(name = "algo.graph.remove", mode = Mode.WRITE)
     @Description("CALL algo.graph.remove(name:String)")
     public Stream<GraphInfo> remove(@Name("name") String name) {
         GraphInfo info = new GraphInfo(name);

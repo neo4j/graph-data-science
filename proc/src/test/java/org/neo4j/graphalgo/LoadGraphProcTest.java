@@ -365,7 +365,7 @@ class LoadGraphProcTest extends ProcTestBase {
         DB.execute(query, params);
 
         runQuery("CALL algo.graph.list()", (resultRow -> {
-            assertEquals(resultRow.getString("type"), graphImpl);
+            assertEquals(resultRow.getString("type").toLowerCase(), graphImpl.toLowerCase());
             assertEquals(resultRow.getString("direction"), loadDirection);
         }));
     }
