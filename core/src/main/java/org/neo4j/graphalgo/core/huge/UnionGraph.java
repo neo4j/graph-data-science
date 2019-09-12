@@ -190,4 +190,9 @@ public class UnionGraph implements Graph {
     public Direction getLoadDirection() {
         return first.getLoadDirection();
     }
+
+    @Override
+    public boolean isUndirected() {
+        return first.isUndirected();
+    }
 }
