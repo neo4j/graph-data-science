@@ -105,7 +105,7 @@ class GraphLoaderTest {
         }
         Graph graph = graphLoader
                 .withDirection(Direction.OUTGOING)
-                .withDeduplicateRelationshipsStrategy(DeduplicateRelationshipsStrategy.NONE)
+                .withDeduplicateRelationshipsStrategy(DeduplicationStrategy.NONE)
                 .load(graphImpl);
 
         assertEquals(4L, graph.nodeCount());
@@ -223,7 +223,7 @@ class GraphLoaderTest {
         }
         Graph graph = graphLoader
                 .undirected()
-                .withDeduplicateRelationshipsStrategy(DeduplicateRelationshipsStrategy.SKIP)
+                .withDeduplicateRelationshipsStrategy(DeduplicationStrategy.SKIP)
                 .load(graphImpl);
 
         assertEquals(4L, graph.nodeCount());
@@ -258,7 +258,7 @@ class GraphLoaderTest {
 
         Graph graph = graphLoader
                 .undirected()
-                .withDeduplicateRelationshipsStrategy(DeduplicateRelationshipsStrategy.NONE)
+                .withDeduplicateRelationshipsStrategy(DeduplicationStrategy.NONE)
                 .load(graphImpl);
 
         assertEquals(4L, graph.nodeCount());
@@ -315,7 +315,7 @@ class GraphLoaderTest {
                     .withNodeStatement("MATCH (n) RETURN id(n) AS id")
                     .withRelationshipStatement(
                             "MATCH (n)-->(m) RETURN id(n) AS source, id(m) AS target UNION ALL MATCH (n)<--(m) RETURN id(n) AS source, id(m) AS target")
-                    .withDeduplicateRelationshipsStrategy(DeduplicateRelationshipsStrategy.SKIP);
+                    .withDeduplicateRelationshipsStrategy(DeduplicationStrategy.SKIP);
         } else {
             graphLoader
                     .withAnyLabel()
@@ -366,7 +366,7 @@ class GraphLoaderTest {
                     .withNodeStatement("MATCH (n) RETURN id(n) AS id")
                     .withRelationshipStatement(
                             "MATCH (n)-->(m) RETURN id(n) AS source, id(m) AS target UNION ALL MATCH (n)<--(m) RETURN id(n) AS source, id(m) AS target")
-                    .withDeduplicateRelationshipsStrategy(DeduplicateRelationshipsStrategy.SKIP);
+                    .withDeduplicateRelationshipsStrategy(DeduplicationStrategy.SKIP);
         } else {
             graphLoader
                     .withAnyLabel()

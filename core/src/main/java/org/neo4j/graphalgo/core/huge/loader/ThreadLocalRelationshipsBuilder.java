@@ -20,10 +20,11 @@
 package org.neo4j.graphalgo.core.huge.loader;
 
 import org.apache.lucene.util.LongsRef;
-import org.neo4j.graphalgo.core.DeduplicateRelationshipsStrategy;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static org.neo4j.graphalgo.core.huge.loader.AdjacencyCompression.writeDegree;
@@ -31,21 +32,26 @@ import static org.neo4j.graphalgo.core.huge.loader.AdjacencyCompression.writeDeg
 class ThreadLocalRelationshipsBuilder {
 
     private final ReentrantLock lock;
-    private final DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy;
+    private final DeduplicationStrategy[] deduplicationStrategies;
     private final AdjacencyListBuilder.Allocator adjacencyAllocator;
-    private final AdjacencyListBuilder.Allocator weightsAllocator;
+    private final AdjacencyListBuilder.Allocator[] weightsAllocators;
     private final long[] adjacencyOffsets;
-    private final long[] weightOffsets;
+    private final long[][] weightOffsets;
+    private final boolean noDeduplication;
 
     ThreadLocalRelationshipsBuilder(
-            DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy,
+            DeduplicationStrategy[] deduplicationStrategies,
             AdjacencyListBuilder.Allocator adjacencyAllocator,
-            final AdjacencyListBuilder.Allocator weightsAllocator,
+            final AdjacencyListBuilder.Allocator[] weightsAllocators,
             long[] adjacencyOffsets,
-            final long[] weightOffsets) {
-        this.deduplicateRelationshipsStrategy = deduplicateRelationshipsStrategy;
+            final long[][] weightOffsets) {
+        if (deduplicationStrategies.length == 0) {
+            throw new IllegalArgumentException("Needs at least one deduplication strategy");
+        }
+        this.deduplicationStrategies = deduplicationStrategies;
+        noDeduplication = Arrays.stream(deduplicationStrategies).anyMatch(d -> d == DeduplicationStrategy.NONE);
         this.adjacencyAllocator = adjacencyAllocator;
-        this.weightsAllocator = weightsAllocator;
+        this.weightsAllocators = weightsAllocators;
         this.adjacencyOffsets = adjacencyOffsets;
         this.weightOffsets = weightOffsets;
         this.lock = new ReentrantLock();
@@ -54,8 +60,10 @@ class ThreadLocalRelationshipsBuilder {
     final void prepare() {
         adjacencyAllocator.prepare();
 
-        if (weightsAllocator != null) {
-            weightsAllocator.prepare();
+        for (AdjacencyListBuilder.Allocator weightsAllocator : weightsAllocators) {
+            if (weightsAllocator != null) {
+                weightsAllocator.prepare();
+            }
         }
     }
 
@@ -85,7 +93,7 @@ class ThreadLocalRelationshipsBuilder {
             int localId) {
         byte[] storage = array.storage();
         AdjacencyCompression.copyFrom(buffer, array);
-        int degree = AdjacencyCompression.applyDeltaEncoding(buffer, deduplicateRelationshipsStrategy);
+        int degree = AdjacencyCompression.applyDeltaEncoding(buffer, deduplicationStrategies[0]);
         int requiredBytes = AdjacencyCompression.compress(buffer, storage);
         long address = copyIds(storage, requiredBytes, degree);
         adjacencyOffsets[localId] = address;
@@ -98,13 +106,13 @@ class ThreadLocalRelationshipsBuilder {
             LongsRef buffer,
             int localId) {
         byte[] storage = array.storage();
-        long[] weights = array.weights();
+        long[][] weights = array.weights();
         AdjacencyCompression.copyFrom(buffer, array);
-        int degree = AdjacencyCompression.applyDeltaEncoding(buffer, weights, deduplicateRelationshipsStrategy);
+        int degree = AdjacencyCompression.applyDeltaEncoding(buffer, weights, deduplicationStrategies, noDeduplication);
         int requiredBytes = AdjacencyCompression.compress(buffer, storage);
 
         adjacencyOffsets[localId] = copyIds(storage, requiredBytes, degree);
-        weightOffsets[localId] = copyWeights(weights, degree);
+        copyWeights(weights, degree, localId, weightOffsets);
 
         array.release();
         return degree;
@@ -120,7 +128,16 @@ class ThreadLocalRelationshipsBuilder {
         return address;
     }
 
-    private long copyWeights(long[] weights, int degree) {
+    private void copyWeights(long[][] weights, int degree, int localId, long[][] offsets) {
+        for (int i = 0; i < weights.length; i++) {
+            long[] weight = weights[i];
+            AdjacencyListBuilder.Allocator weightsAllocator = weightsAllocators[i];
+            long address = copyWeights(weight, degree, weightsAllocator);
+            offsets[i][localId] = address;
+        }
+    }
+
+    private long copyWeights(long[] weights, int degree, AdjacencyListBuilder.Allocator weightsAllocator) {
         int requiredBytes = degree * Long.BYTES;
         long address = weightsAllocator.allocate(Integer.BYTES /* degree */ + requiredBytes);
         int offset = weightsAllocator.offset;
@@ -132,9 +149,5 @@ class ThreadLocalRelationshipsBuilder {
                 .put(weights, 0, degree);
         weightsAllocator.offset = (offset + requiredBytes);
         return address;
-    }
-
-    int degree(int localId) {
-        return (int) adjacencyOffsets[localId];
     }
 }

@@ -495,9 +495,9 @@ public class ProcedureConfiguration {
         return (Map<String, Object>) config.getOrDefault("params", Collections.emptyMap());
     }
 
-    public DeduplicateRelationshipsStrategy getDuplicateRelationshipsStrategy() {
+    public DeduplicationStrategy getDuplicateRelationshipsStrategy() {
         String strategy = get("duplicateRelationships", null);
-        return strategy != null ? DeduplicateRelationshipsStrategy.valueOf(strategy.toUpperCase()) : DeduplicateRelationshipsStrategy.DEFAULT;
+        return strategy != null ? DeduplicationStrategy.valueOf(strategy.toUpperCase()) : DeduplicationStrategy.DEFAULT;
     }
 
 

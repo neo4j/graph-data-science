@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.api;
 
 import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.core.DeduplicateRelationshipsStrategy;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -56,14 +56,9 @@ public class GraphSetup {
     public final boolean loadOutgoing;
     // load outgoing and incoming relationships.
     public final boolean loadBoth;
-    // property of relationship weights. null means NO property (the default value will be used instead).
-    public final String relationWeightPropertyName;
     // default property is used for weighted relationships if property is not set.
+    @Deprecated
     public final double relationDefaultWeight;
-    // default property is used for weighted nodes if property is not set.
-    public final double nodeDefaultWeight;
-    // default property is used for node properties if property is not set.
-    public final double nodeDefaultPropertyValue;
 
     public final Map<String, Object> params;
 
@@ -87,7 +82,8 @@ public class GraphSetup {
     public final boolean loadAsUndirected;
 
     public final PropertyMapping[] nodePropertyMappings;
-    public final DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy;
+    public final PropertyMapping[] relationshipPropertyMappings;
+    public final DeduplicationStrategy deduplicationStrategy;
 
     /**
      * main ctor
@@ -95,14 +91,9 @@ public class GraphSetup {
      * @param startLabel                 the start label. null means any label.
      * @param endLabel                   not implemented yet
      * @param relationshipType           the relation type identifier. null for any relationship
-     * @param relationWeightPropertyName property name which holds the weights / costs of a relation.
-     *                                   null means the default value is used for each weight.
-     * @param relationDefaultWeight      the default relationship weight if property is not given.
-     * @param nodeDefaultWeight          the default node weight if property is not given.
-     * @param nodeDefaultPropertyValue   the default node value if property is not given.
      * @param executor                   the executor. null means single threaded evaluation
      * @param batchSize                  batch size for parallel loading
-     * @param deduplicateRelationshipsStrategy     strategy for handling relationship duplicates
+     * @param deduplicationStrategy     strategy for handling relationship duplicates
      * @param sort                       true if relationships should stored in sorted ascending order
      */
     public GraphSetup(
@@ -110,15 +101,11 @@ public class GraphSetup {
             String endLabel,
             String relationshipType,
             Direction direction,
-            String relationWeightPropertyName,
-            double relationDefaultWeight,
-            double nodeDefaultWeight,
-            double nodeDefaultPropertyValue,
             Map<String, Object> params,
             ExecutorService executor,
             int concurrency,
             int batchSize,
-            DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy,
+            DeduplicationStrategy deduplicationStrategy,
             Log log,
             long logMillis,
             boolean sort,
@@ -126,7 +113,8 @@ public class GraphSetup {
             AllocationTracker tracker,
             TerminationFlag terminationFlag,
             String name,
-            PropertyMapping[] nodePropertyMappings) {
+            PropertyMapping[] nodePropertyMappings,
+            PropertyMapping[] relationshipPropertyMappings) {
 
         this.startLabel = startLabel;
         this.endLabel = endLabel;
@@ -135,15 +123,12 @@ public class GraphSetup {
         this.loadIncoming = direction == Direction.INCOMING || direction == Direction.BOTH;
         this.loadBoth = loadOutgoing && loadIncoming;
         this.direction = direction;
-        this.relationWeightPropertyName = relationWeightPropertyName;
-        this.relationDefaultWeight = relationDefaultWeight;
-        this.nodeDefaultWeight = nodeDefaultWeight;
-        this.nodeDefaultPropertyValue = nodeDefaultPropertyValue;
+        this.relationDefaultWeight = relationshipPropertyMappings == null || relationshipPropertyMappings.length == 0 ? 0.0 : relationshipPropertyMappings[0].defaultValue;
         this.params = params == null ? Collections.emptyMap() : params;
         this.executor = executor;
         this.concurrency = concurrency;
         this.batchSize = batchSize;
-        this.deduplicateRelationshipsStrategy = deduplicateRelationshipsStrategy;
+        this.deduplicationStrategy = deduplicationStrategy;
         this.log = log;
         this.logMillis = logMillis;
         this.sort = sort;
@@ -152,6 +137,7 @@ public class GraphSetup {
         this.terminationFlag = terminationFlag;
         this.name = name;
         this.nodePropertyMappings = nodePropertyMappings;
+        this.relationshipPropertyMappings = relationshipPropertyMappings;
     }
 
     /**
@@ -172,15 +158,11 @@ public class GraphSetup {
                 label,
                 relation,
                 Direction.BOTH,
-                weightProperty,
-                defaultWeight,
-                1.0,
-                1.0,
                 Collections.emptyMap(),
                 executor,
                 Pools.DEFAULT_CONCURRENCY,
                 -1,
-                DeduplicateRelationshipsStrategy.NONE,
+                DeduplicationStrategy.NONE,
                 NullLog.getInstance(),
                 -1L,
                 false,
@@ -188,7 +170,8 @@ public class GraphSetup {
                 AllocationTracker.EMPTY,
                 TerminationFlag.RUNNING_TRUE,
                 null,
-                new PropertyMapping[0]
+                new PropertyMapping[0],
+                new PropertyMapping[]{PropertyMapping.of(weightProperty, weightProperty, defaultWeight)}
         );
     }
 
@@ -204,7 +187,7 @@ public class GraphSetup {
     }
 
     public boolean shouldLoadRelationshipWeight() {
-        return relationWeightPropertyName != null;
+        return relationshipPropertyMappings.length > 0;
     }
 
     public boolean loadAnyLabel() {

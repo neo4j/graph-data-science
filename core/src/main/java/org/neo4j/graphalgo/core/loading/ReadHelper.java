@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
@@ -29,6 +30,7 @@ import org.neo4j.values.storable.IntegralValue;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.ValueGroup;
 
+import java.util.Arrays;
 import java.util.function.LongConsumer;
 
 public final class ReadHelper {
@@ -44,6 +46,21 @@ public final class ReadHelper {
             }
         }
         return defaultValue;
+    }
+
+    public static double[] readProperties(PropertyCursor pc, int[] propertyIds, double[] defaultValues) {
+        double[] weights = new double[propertyIds.length];
+        Arrays.setAll(weights, i -> defaultValues[i]);
+        while (pc.next()) {
+            int indexOfPropertyId = ArrayUtil.linearSearchIndex(propertyIds, propertyIds.length, pc.propertyKey());
+            if (indexOfPropertyId >= 0) {
+                Value value = pc.propertyValue();
+                double defaultValue = defaultValues[indexOfPropertyId];
+                double weight = extractValue(value, defaultValue);
+                weights[indexOfPropertyId] = weight;
+            }
+        }
+        return weights;
     }
 
     public static void readNodes(CursorFactory cursors, Read dataRead, int labelId, LongConsumer action) {

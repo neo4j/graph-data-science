@@ -22,19 +22,19 @@ package org.neo4j.graphalgo.core.huge.loader;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.neo4j.graphalgo.core.DeduplicateRelationshipsStrategy;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
-class DeduplicateRelationshipsStrategyTest {
+class DeduplicationStrategyTest {
 
     private static final double[] inputs = new double[]{0.5, 1.4};
 
     @ParameterizedTest
     @CsvSource({"MAX, 1.4", "MIN, 0.5", "SKIP, 0.5", "SUM, 1.9"})
-    void testSuccessfulDuplateRelationshipStrategies(DeduplicateRelationshipsStrategy strategy, double expected) {
+    void testSuccessfulDuplateRelationshipStrategies(DeduplicationStrategy strategy, double expected) {
         assertEquals(expected, strategy.merge(inputs[0], inputs[1]));
     }
 
@@ -42,7 +42,7 @@ class DeduplicateRelationshipsStrategyTest {
     void testFailingDuplicateRelationshipStrategies() {
         UnsupportedOperationException exception = assertThrows(
                 UnsupportedOperationException.class,
-                () -> DeduplicateRelationshipsStrategy.NONE.merge(42, 42));
+                () -> DeduplicationStrategy.NONE.merge(42, 42));
         String expected = "Multiple relationships between the same pair of nodes are not expected. Try using SKIP or some other duplicate relationships strategy.";
         assertEquals(expected, exception.getMessage());
     }
@@ -51,7 +51,7 @@ class DeduplicateRelationshipsStrategyTest {
     void testFailingDefaultDuplicateRelationshipStrategies() {
         UnsupportedOperationException exception = assertThrows(
                 UnsupportedOperationException.class,
-                () -> DeduplicateRelationshipsStrategy.DEFAULT.merge(42, 42));
+                () -> DeduplicationStrategy.DEFAULT.merge(42, 42));
         String expected = "This should never be used as a deduplication strategy, just as a placeholder for the default strategy of a given loader.";
         assertEquals(expected, exception.getMessage());
     }

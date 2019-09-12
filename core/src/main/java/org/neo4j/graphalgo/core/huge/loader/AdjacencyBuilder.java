@@ -37,7 +37,7 @@ abstract class AdjacencyBuilder {
     abstract void addAll(
             long[] batch,
             long[] targets,
-            long[] weights,
+            long[][] weights,
             int[] offsets,
             int length,
             AllocationTracker tracker);
@@ -50,8 +50,8 @@ abstract class AdjacencyBuilder {
             int pageSize,
             AllocationTracker tracker,
             LongAdder relationshipCounter,
-            int weightProperty,
-            double defaultWeight) {
+            int[] weightProperties,
+            double[] defaultWeights) {
         if (globalBuilder == null) {
             return NoAdjacency.INSTANCE;
         }
@@ -61,7 +61,11 @@ abstract class AdjacencyBuilder {
         LongsRef[] buffers = new LongsRef[numPages];
         long[][] globalAdjacencyOffsets = new long[numPages][];
 
-        long[][] globalWeightOffsets = weightProperty != StatementConstants.NO_SUCH_PROPERTY_KEY ? new long[numPages][] : null;
+        long[][][] globalWeightOffsets = new long[weightProperties.length][][];
+        Arrays.setAll(globalWeightOffsets, i -> {
+            int weightProperty = weightProperties[i];
+            return weightProperty != StatementConstants.NO_SUCH_PROPERTY_KEY ? new long[numPages][] : null;
+        });
 
         CompressingPagedAdjacency compressingPagedAdjacency = new CompressingPagedAdjacency(
                 globalBuilder,
@@ -72,8 +76,8 @@ abstract class AdjacencyBuilder {
                 globalWeightOffsets,
                 pageSize,
                 relationshipCounter,
-                weightProperty,
-                defaultWeight);
+                weightProperties,
+                defaultWeights);
         for (int idx = 0; idx < numPages; idx++) {
             compressingPagedAdjacency.addAdjacencyImporter(tracker, idx);
         }
@@ -81,9 +85,9 @@ abstract class AdjacencyBuilder {
         return compressingPagedAdjacency;
     }
 
-    abstract int getWeightProperty();
+    abstract int[] getWeightProperties();
 
-    abstract double getDefaultWeight();
+    abstract double[] getDefaultWeights();
 
     private static final class CompressingPagedAdjacency extends AdjacencyBuilder {
 
@@ -92,15 +96,15 @@ abstract class AdjacencyBuilder {
         private final CompressedLongArray[][] compressedAdjacencyLists;
         private final LongsRef[] buffers;
         private final long[][] globalAdjacencyOffsets;
-        private final long[][] globalWeightOffsets;
+        private final long[][][] globalWeightOffsets;
         private final int pageSize;
         private final int pageShift;
         private final long pageMask;
         private final long sizeOfLongPage;
         private final long sizeOfObjectPage;
         private final LongAdder relationshipCounter;
-        private final int weightProperty;
-        private final double defaultWeight;
+        private final int[] weightProperties;
+        private final double[] defaultWeight;
 
         private CompressingPagedAdjacency(
                 RelationshipsBuilder globalBuilder,
@@ -108,11 +112,11 @@ abstract class AdjacencyBuilder {
                 CompressedLongArray[][] compressedAdjacencyLists,
                 LongsRef[] buffers,
                 long[][] globalAdjacencyOffsets,
-                long[][] globalWeightOffsets,
+                long[][][] globalWeightOffsets,
                 int pageSize,
                 LongAdder relationshipCounter,
-                final int weightProperty,
-                final double defaultWeight) {
+                int[] weightProperties,
+                double[] defaultWeight) {
             this.globalBuilder = globalBuilder;
             this.localBuilders = localBuilders;
             this.compressedAdjacencyLists = compressedAdjacencyLists;
@@ -125,7 +129,7 @@ abstract class AdjacencyBuilder {
             sizeOfLongPage = sizeOfLongArray(pageSize);
             sizeOfObjectPage = sizeOfObjectArray(pageSize);
             this.relationshipCounter = relationshipCounter;
-            this.weightProperty = weightProperty;
+            this.weightProperties = weightProperties;
             this.defaultWeight = defaultWeight;
         }
 
@@ -137,9 +141,12 @@ abstract class AdjacencyBuilder {
             buffers[pageIndex] = new LongsRef();
             long[] localAdjacencyOffsets = globalAdjacencyOffsets[pageIndex] = new long[pageSize];
 
-            long[] localWeightOffsets = null;
-            if (weightProperty != StatementConstants.NO_SUCH_PROPERTY_KEY) {
-                localWeightOffsets = globalWeightOffsets[pageIndex] = new long[pageSize];
+            long[][] localWeightOffsets = new long[weightProperties.length][];
+            for (int i = 0; i < weightProperties.length; i++) {
+                int weightProperty = weightProperties[i];
+                if (weightProperty != StatementConstants.NO_SUCH_PROPERTY_KEY) {
+                    localWeightOffsets[i] = globalWeightOffsets[i][pageIndex] = new long[pageSize];
+                }
             }
 
             localBuilders[pageIndex] = globalBuilder.threadLocalRelationshipsBuilder(
@@ -150,16 +157,22 @@ abstract class AdjacencyBuilder {
 
         void finishPreparation() {
             globalBuilder.setGlobalAdjacencyOffsets(AdjacencyOffsets.of(globalAdjacencyOffsets, pageSize));
-            if (globalWeightOffsets != null) {
-                globalBuilder.setGlobalWeightOffsets(AdjacencyOffsets.of(globalWeightOffsets, pageSize));
-            }
+            AdjacencyOffsets[] globalWeights = new AdjacencyOffsets[globalWeightOffsets.length];
+            Arrays.setAll(globalWeights, i -> {
+                long[][] globalWeightOffset = globalWeightOffsets[i];
+                if (globalWeightOffset != null) {
+                    return AdjacencyOffsets.of(globalWeightOffset, pageSize);
+                }
+                return null;
+            });
+            globalBuilder.setGlobalWeightOffsets(globalWeights);
         }
 
         @Override
         void addAll(
                 long[] batch,
                 long[] targets,
-                long[] weights,
+                long[][] weights,
                 int[] offsets,
                 int length,
                 AllocationTracker tracker) {
@@ -195,7 +208,7 @@ abstract class AdjacencyBuilder {
 
                     CompressedLongArray compressedTargets = this.compressedAdjacencyLists[pageIndex][localId];
                     if (compressedTargets == null) {
-                        compressedTargets = new CompressedLongArray(tracker);
+                        compressedTargets = new CompressedLongArray(tracker, weights == null ? 0 : weights.length);
                         this.compressedAdjacencyLists[pageIndex][localId] = compressedTargets;
                     }
 
@@ -239,12 +252,12 @@ abstract class AdjacencyBuilder {
         }
 
         @Override
-        int getWeightProperty() {
-            return weightProperty;
+        int[] getWeightProperties() {
+            return weightProperties;
         }
 
         @Override
-        double getDefaultWeight() {
+        double[] getDefaultWeights() {
             return defaultWeight;
         }
     }
@@ -257,7 +270,7 @@ abstract class AdjacencyBuilder {
         void addAll(
                 long[] batch,
                 long[] targets,
-                long[] weights,
+                long[][] weights,
                 int[] offsets,
                 int length,
                 AllocationTracker tracker) {
@@ -269,13 +282,13 @@ abstract class AdjacencyBuilder {
         }
 
         @Override
-        int getWeightProperty() {
-            return StatementConstants.NO_SUCH_PROPERTY_KEY;
+        int[] getWeightProperties() {
+            return new int[0];
         }
 
         @Override
-        double getDefaultWeight() {
-            return Double.NaN;
+        double[] getDefaultWeights() {
+            return new double[0];
         }
     }
 }

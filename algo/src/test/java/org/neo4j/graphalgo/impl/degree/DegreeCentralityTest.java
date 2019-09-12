@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.DeduplicateRelationshipsStrategy;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -424,7 +424,7 @@ final class DegreeCentralityTest {
             graph = new GraphLoader(DB)
                     .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
                     .withRelationshipType("MATCH (n:Label1)-[:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target")
-                    .withDeduplicateRelationshipsStrategy(DeduplicateRelationshipsStrategy.SKIP)
+                    .withDeduplicateRelationshipsStrategy(DeduplicationStrategy.SKIP)
                     .load(graphFactory);
         } else {
             graph = new GraphLoader(DB)

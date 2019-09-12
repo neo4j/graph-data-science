@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
+
 public class PropertyMapping {
 
     // property name in the result map Graph.nodeProperties( <propertyName> )
@@ -26,15 +28,29 @@ public class PropertyMapping {
     // property name in the graph (a:Node {<propertyKey>:xyz})
     public final String propertyKey;
     public final double defaultValue;
+    public final DeduplicationStrategy deduplicationStrategy;
 
     public PropertyMapping(String propertyName, String propertyKeyInGraph, double defaultValue) {
+        this(propertyName, propertyKeyInGraph, defaultValue, DeduplicationStrategy.DEFAULT);
+    }
+
+    public PropertyMapping(
+            String propertyName,
+            String propertyKeyInGraph,
+            double defaultValue,
+            DeduplicationStrategy deduplicationStrategy) {
         this.propertyName = propertyName;
         this.propertyKey = propertyKeyInGraph;
         this.defaultValue = defaultValue;
+        this.deduplicationStrategy = deduplicationStrategy;
+    }
+
+    public PropertyMapping withDeduplicationStrategy(DeduplicationStrategy deduplicationStrategy) {
+        return new PropertyMapping(propertyName, propertyKey, defaultValue, deduplicationStrategy);
     }
 
     public KernelPropertyMapping toKernelMapping(int propertyKeyId) {
-        return new KernelPropertyMapping(propertyName, propertyKeyId, defaultValue, propertyKey);
+        return new KernelPropertyMapping(propertyName, propertyKeyId, defaultValue, propertyKey, deduplicationStrategy);
     }
 
     public static PropertyMapping of(String propertyName, String propertyKeyInGraph, double defaultValue) {

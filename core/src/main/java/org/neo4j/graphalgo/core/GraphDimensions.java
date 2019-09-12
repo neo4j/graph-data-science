@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.RelationshipTypeMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static java.util.stream.Collectors.joining;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_LABEL;
@@ -36,25 +37,29 @@ public final class GraphDimensions {
     private final long highestNeoId;
     private long maxRelCount;
     private final int labelId;
-    private final int relWeightId;
-    private final RelationshipTypeMappings relTypeMappings;
+//    private final int relWeightId;
     private final KernelPropertyMapping[] nodeProperties;
+    private final RelationshipTypeMappings relTypeMappings;
+    private final KernelPropertyMapping[] relProperties;
 
     public GraphDimensions(
             long nodeCount,
             long highestNeoId,
             long maxRelCount,
             int labelId,
-            int relWeightId,
+//            int relWeightId,
+            KernelPropertyMapping[] nodeProperties,
             RelationshipTypeMappings relTypeMappings,
-            KernelPropertyMapping[] nodeProperties) {
+            KernelPropertyMapping[] relProperties
+    ) {
         this.nodeCount = nodeCount;
         this.highestNeoId = highestNeoId;
         this.maxRelCount = maxRelCount;
         this.labelId = labelId;
-        this.relWeightId = relWeightId;
-        this.relTypeMappings = relTypeMappings;
+//        this.relWeightId = relWeightId;
         this.nodeProperties = nodeProperties;
+        this.relTypeMappings = relTypeMappings;
+        this.relProperties = relProperties;
     }
 
     public long nodeCount() {
@@ -85,16 +90,26 @@ public final class GraphDimensions {
         return labelId;
     }
 
+    public Iterable<KernelPropertyMapping> nodeProperties() {
+        return Arrays.asList(nodeProperties);
+    }
+
     public RelationshipTypeMappings relationshipTypeMappings() {
         return relTypeMappings;
     }
 
-    public int relWeightId() {
-        return relWeightId;
+    public List<KernelPropertyMapping> relProperties() {
+        return Arrays.asList(relProperties);
     }
 
-    public Iterable<KernelPropertyMapping> nodeProperties() {
-        return Arrays.asList(nodeProperties);
+    @Deprecated
+    public int relWeightId() {
+        return relProperties == null || relProperties.length == 0 ? NO_SUCH_PROPERTY_KEY : relProperties[0].propertyKeyId;
+    }
+
+    @Deprecated
+    public double relDefaultWeight() {
+        return relProperties == null || relProperties.length == 0 ? 0.0 : relProperties[0].defaultValue;
     }
 
     public void checkValidNodePredicate(GraphSetup setup) {
@@ -119,22 +134,27 @@ public final class GraphDimensions {
     }
 
     public void checkValidNodeProperties() {
-        for (KernelPropertyMapping nodeProperty : nodeProperties) {
-            int id = nodeProperty.propertyKeyId;
-            String propertyKey = nodeProperty.propertyKeyNameInGraph;
-            if (nonEmpty(propertyKey) && id == NO_SUCH_PROPERTY_KEY) {
-                throw new IllegalArgumentException(String.format(
-                        "Node property not found: '%s'",
-                        propertyKey));
-            }
-        }
+        checkValidProperties("Node", nodeProperties);
     }
 
-    public void checkValidRelationshipProperty(GraphSetup setup) {
-        if (nonEmpty(setup.relationWeightPropertyName) && relWeightId == NO_SUCH_PROPERTY_KEY) {
+    public void checkValidRelationshipProperty() {
+        checkValidProperties("Relationship", relProperties);
+    }
+
+    private void checkValidProperties(String recordType, KernelPropertyMapping... mappings) {
+        String missingProperties = Arrays.stream(mappings)
+                .filter(mapping -> {
+                    int id = mapping.propertyKeyId;
+                    String propertyKey = mapping.propertyKeyNameInGraph;
+                    return nonEmpty(propertyKey) && id == NO_SUCH_PROPERTY_KEY;
+                })
+                .map(mapping -> mapping.propertyKeyNameInGraph)
+                .collect(joining("', '"));
+        if (!missingProperties.isEmpty()) {
             throw new IllegalArgumentException(String.format(
-                    "Relationship property not found: '%s'",
-                    setup.relationWeightPropertyName));
+                        "%s properties not found: '%s'",
+                        recordType,
+                        missingProperties));
         }
     }
 
@@ -147,9 +167,10 @@ public final class GraphDimensions {
         private long highestNeoId;
         private long maxRelCount;
         private int labelId;
-        private int relWeightId;
-        private RelationshipTypeMappings relationshipTypeMappings;
+//        private int relWeightId;
         private KernelPropertyMapping[] nodeProperties;
+        private RelationshipTypeMappings relationshipTypeMappings;
+        private KernelPropertyMapping[] relProperties;
 
         public Builder setNodeCount(long nodeCount) {
             this.nodeCount = nodeCount;
@@ -171,18 +192,23 @@ public final class GraphDimensions {
             return this;
         }
 
+//        public Builder setRelWeightId(int relWeightId) {
+//            this.relWeightId = relWeightId;
+//            return this;
+//        }
+
+        public Builder setNodeProperties(KernelPropertyMapping[] nodeProperties) {
+            this.nodeProperties = nodeProperties;
+            return this;
+        }
+
         public Builder setRelationshipTypeMappings(RelationshipTypeMappings relationshipTypeMappings) {
             this.relationshipTypeMappings = relationshipTypeMappings;
             return this;
         }
 
-        public Builder setRelWeightId(int relWeightId) {
-            this.relWeightId = relWeightId;
-            return this;
-        }
-
-        public Builder setNodeProperties(KernelPropertyMapping[] nodeProperties) {
-            this.nodeProperties = nodeProperties;
+        public Builder setRelationshipProperties(KernelPropertyMapping[] relProperties) {
+            this.relProperties = relProperties;
             return this;
         }
 
@@ -192,9 +218,11 @@ public final class GraphDimensions {
                     highestNeoId,
                     maxRelCount,
                     labelId,
-                    relWeightId,
+//                    relWeightId,
+                    nodeProperties,
                     relationshipTypeMappings,
-                    nodeProperties);
+                    relProperties
+            );
         }
     }
 }

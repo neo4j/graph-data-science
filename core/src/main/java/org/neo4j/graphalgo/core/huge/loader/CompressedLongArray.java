@@ -24,37 +24,39 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.util.Arrays;
 
-import static org.neo4j.graphalgo.core.huge.loader.ZigZagLongDecoding.zigZagUncompress;
 import static org.neo4j.graphalgo.core.huge.loader.VarLongEncoding.encodeVLongs;
 import static org.neo4j.graphalgo.core.huge.loader.VarLongEncoding.encodedVLongSize;
 import static org.neo4j.graphalgo.core.huge.loader.VarLongEncoding.zigZag;
+import static org.neo4j.graphalgo.core.huge.loader.ZigZagLongDecoding.zigZagUncompress;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfByteArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 
 final class CompressedLongArray {
 
     private static final byte[] EMPTY_BYTES = new byte[0];
-    private static final long[] EMPTY_LONGS = new long[0];
 
     private final AllocationTracker tracker;
     private byte[] storage;
-    private long[] weights;
+    private long[][] weights;
     private int pos;
     private long lastValue;
     private int length;
 
     CompressedLongArray(AllocationTracker tracker) {
+        this(tracker, 0);
+    }
+
+    CompressedLongArray(AllocationTracker tracker, int numberOfProperties) {
         this.tracker = tracker;
         storage = EMPTY_BYTES;
-        weights = EMPTY_LONGS;
+        weights = new long[numberOfProperties][0];
     }
 
     /**
-     * @implNote For memory efficiency, we reuse the {@code values}. They cannot be reused after calling this method.
-     *
      * @param values values to write
-     * @param start start index in values
-     * @param end end index in values
+     * @param start  start index in values
+     * @param end    end index in values
+     * @implNote For memory efficiency, we reuse the {@code values}. They cannot be reused after calling this method.
      */
     void add(long[] values, int start, int end) {
         // not inlined to avoid field access
@@ -77,21 +79,27 @@ final class CompressedLongArray {
     }
 
     /**
-     * @implNote For memory efficiency, we reuse the {@code values}. They cannot be reused after calling this method.
-     *
-     * @param values values to write
+     * @param values  values to write
      * @param weights weights to write
-     * @param start start index in values and weights
-     * @param end end index in values and weights
+     * @param start   start index in values and weights
+     * @param end     end index in values and weights
+     * @implNote For memory efficiency, we reuse the {@code values}. They cannot be reused after calling this method.
      */
-    void add(long[] values, long[] weights, int start, int end) {
+    void add(long[] values, long[][] weights, int start, int end) {
         // write weights
-        int targetCount = end - start;
-        ensureCapacity(length, targetCount, this.weights);
-        System.arraycopy(weights, start, this.weights, this.length, targetCount);
+        for (int i = 0; i < weights.length; i++) {
+            long[] weight = weights[i];
+            addWeights(weight, start, end, i);
+        }
 
         // write values
         add(values, start, end);
+    }
+
+    private void addWeights(long[] weights, int start, int end, int weightIndex) {
+        int targetCount = end - start;
+        ensureCapacity(length, targetCount, weightIndex);
+        System.arraycopy(weights, start, this.weights[weightIndex], this.length, targetCount);
     }
 
     private void ensureCapacity(int pos, int required, byte[] storage) {
@@ -103,12 +111,12 @@ final class CompressedLongArray {
         }
     }
 
-    private void ensureCapacity(int pos, int required, long[] weights) {
-        if (weights.length <= pos + required) {
+    private void ensureCapacity(int pos, int required, int weightIndex) {
+        if (weights[weightIndex].length <= pos + required) {
             int newLength = ArrayUtil.oversize(pos + required, Long.BYTES);
-            tracker.remove(sizeOfDoubleArray(weights.length));
+            tracker.remove(sizeOfDoubleArray(weights[weightIndex].length));
             tracker.add(sizeOfDoubleArray(newLength));
-            this.weights = Arrays.copyOf(weights, newLength);
+            weights[weightIndex] = Arrays.copyOf(weights[weightIndex], newLength);
         }
     }
 
@@ -125,7 +133,7 @@ final class CompressedLongArray {
         return storage;
     }
 
-    long[] weights() {
+    long[][] weights() {
         return weights;
     }
 

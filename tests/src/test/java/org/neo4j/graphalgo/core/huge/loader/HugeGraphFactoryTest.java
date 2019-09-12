@@ -27,9 +27,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.DeduplicateRelationshipsStrategy;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphdb.Direction;
@@ -38,7 +37,6 @@ import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
-import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -214,7 +212,7 @@ class HugeGraphFactoryTest {
         final Graph graph = new GraphLoader(DB)
                 .withAnyRelationshipType()
                 .withoutRelationshipWeights()
-                .withDeduplicateRelationshipsStrategy(DeduplicateRelationshipsStrategy.NONE)
+                .withDeduplicateRelationshipsStrategy(DeduplicationStrategy.NONE)
                 .load(HugeGraphFactory.class);
 
         long[] out2 = collectTargetIds(graph, id2);
@@ -226,7 +224,7 @@ class HugeGraphFactoryTest {
         final Graph graph = new GraphLoader(DB)
                 .withAnyRelationshipType()
                 .withRelationshipWeightsFromProperty("weight", 1.0)
-                .withDeduplicateRelationshipsStrategy(DeduplicateRelationshipsStrategy.NONE)
+                .withDeduplicateRelationshipsStrategy(DeduplicationStrategy.NONE)
                 .load(HugeGraphFactory.class);
 
         double[] out1 = collectTargetWeights(graph, id2);
@@ -236,12 +234,12 @@ class HugeGraphFactoryTest {
     @ParameterizedTest
     @CsvSource({"SKIP, 42.0", "SUM, 1379.0", "MAX, 1337.0", "MIN, 42.0"})
     void testLoadDuplicateRelationshipsWithWeightsAggregation(
-            DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy,
+            DeduplicationStrategy deduplicationStrategy,
             double expectedWeight) {
         final Graph graph = new GraphLoader(DB)
                 .withAnyRelationshipType()
                 .withRelationshipWeightsFromProperty("weight", 1.0)
-                .withDeduplicateRelationshipsStrategy(deduplicateRelationshipsStrategy)
+                .withDeduplicateRelationshipsStrategy(deduplicationStrategy)
                 .load(HugeGraphFactory.class);
 
         double[] out1 = collectTargetWeights(graph, id2);

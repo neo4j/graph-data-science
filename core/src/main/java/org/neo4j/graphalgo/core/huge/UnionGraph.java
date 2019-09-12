@@ -34,7 +34,7 @@ import java.util.Set;
 import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
 
-public class UnionGraph implements Graph {
+public final class UnionGraph implements Graph {
 
     private final Graph first;
     private final Collection<? extends Graph> graphs;

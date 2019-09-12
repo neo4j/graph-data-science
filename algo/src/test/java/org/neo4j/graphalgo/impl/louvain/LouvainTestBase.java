@@ -41,7 +41,7 @@ abstract class LouvainTestBase {
 
     static final Louvain.Config DEFAULT_CONFIG = new Louvain.Config(10, 10, false);
 
-    static GraphDatabaseAPI DB;
+    GraphDatabaseAPI DB;
 
     Map<String, Integer> nameMap = new HashMap<>();
 

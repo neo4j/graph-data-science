@@ -230,7 +230,7 @@ class LouvainClusteringProcTest extends ProcTestBase {
             );
         });
         Throwable rootCause = ExceptionUtil.rootCause(exception);
-        assertEquals("Node property not found: 'does_not_exist'", rootCause.getMessage());
+        assertEquals("Node properties not found: 'does_not_exist'", rootCause.getMessage());
     }
 
     @AllGraphNamesTest
@@ -403,7 +403,7 @@ class LouvainClusteringProcTest extends ProcTestBase {
             );
         });
         Throwable rootCause = ExceptionUtil.rootCause(exception);
-        assertEquals("Relationship property not found: 'does_not_exist'", rootCause.getMessage());
+        assertEquals("Relationship properties not found: 'does_not_exist'", rootCause.getMessage());
     }
 
     @AllGraphNamesTest

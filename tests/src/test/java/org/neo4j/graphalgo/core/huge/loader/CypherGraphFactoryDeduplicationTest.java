@@ -26,7 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.DeduplicateRelationshipsStrategy;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -73,7 +73,7 @@ class CypherGraphFactoryDeduplicationTest {
         Graph graph = new GraphLoader((GraphDatabaseAPI) db)
                 .withLabel(nodes)
                 .withRelationshipType(rels)
-                .withDeduplicateRelationshipsStrategy(DeduplicateRelationshipsStrategy.SKIP)
+                .withDeduplicateRelationshipsStrategy(DeduplicationStrategy.SKIP)
                 .load(CypherGraphFactory.class);
 
         assertEquals(2, graph.nodeCount());
@@ -90,7 +90,7 @@ class CypherGraphFactoryDeduplicationTest {
                 .withLabel(nodes)
                 .withRelationshipType(rels)
                 .withRelationshipWeightsFromProperty("weight", 1.0)
-                .withDeduplicateRelationshipsStrategy(DeduplicateRelationshipsStrategy.SKIP)
+                .withDeduplicateRelationshipsStrategy(DeduplicationStrategy.SKIP)
                 .load(CypherGraphFactory.class);
 
         double[] weights = collectTargetWeights(graph, graph.toMappedNodeId(id1));
@@ -101,7 +101,7 @@ class CypherGraphFactoryDeduplicationTest {
     @ParameterizedTest
     @CsvSource({"SUM, 14.0", "MAX, 10.0", "MIN, 4.0"})
     void testLoadCypherDuplicateRelationshipsWithWeightsAggregation(
-            DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy,
+            DeduplicationStrategy deduplicationStrategy,
             double expectedWeight) {
         String nodes = "MATCH (n) RETURN id(n) AS id";
         String rels = "MATCH (n)-[r]-(m) RETURN id(n) AS source, id(m) AS target, r.weight AS weight";
@@ -110,7 +110,7 @@ class CypherGraphFactoryDeduplicationTest {
                 .withLabel(nodes)
                 .withRelationshipType(rels)
                 .withRelationshipWeightsFromProperty("weight", 1.0)
-                .withDeduplicateRelationshipsStrategy(deduplicateRelationshipsStrategy)
+                .withDeduplicateRelationshipsStrategy(deduplicationStrategy)
                 .load(CypherGraphFactory.class);
 
         double[] weights = collectTargetWeights(graph, graph.toMappedNodeId(id1));

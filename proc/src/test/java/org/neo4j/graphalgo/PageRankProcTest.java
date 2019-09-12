@@ -166,7 +166,7 @@ class PageRankProcTest extends ProcTestBase {
             runQuery(query, MapUtil.map("graph", graphImpl), row -> {});
         });
         Throwable rootCause = ExceptionUtil.rootCause(exception);
-        assertEquals("Relationship property not found: 'does_not_exist'", rootCause.getMessage());
+        assertEquals("Relationship properties not found: 'does_not_exist'", rootCause.getMessage());
     }
 
     @AllGraphNamesTest

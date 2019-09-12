@@ -68,21 +68,15 @@ public class GraphLoader {
     private String name = null;
     private String label = null;
     private String relation = null;
-    private String relWeightProp = null;
-    private String nodeWeightProp = null;
-    private String nodeProp = null;
     private Direction direction = Direction.BOTH;
 
     private final GraphDatabaseAPI api;
     private ExecutorService executorService;
-    private double relWeightDefault = 0.0;
-    private double nodeWeightDefault = 0.0;
     private final Map<String, Object> params = new HashMap<>();
-    private double nodePropDefault = 0.0;
     private int batchSize = ParallelUtil.DEFAULT_BATCH_SIZE;
     private int concurrency;
 
-    private DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy = DeduplicateRelationshipsStrategy.DEFAULT;
+    private DeduplicationStrategy deduplicationStrategy = DeduplicationStrategy.DEFAULT;
 
     private Log log = NullLog.getInstance();
     private long logMillis = -1;
@@ -91,6 +85,7 @@ public class GraphLoader {
     private boolean sorted = false;
     private boolean undirected = false;
     private PropertyMapping[] nodePropertyMappings = new PropertyMapping[0];
+    private PropertyMapping[] relPropertyMappings = new PropertyMapping[0];
     private boolean isLoadedGraph = false;
 
     /**
@@ -191,7 +186,9 @@ public class GraphLoader {
      */
     public GraphLoader withConcurrency(int newConcurrency) {
         if (newConcurrency <= 0) {
-            throw new IllegalArgumentException(String.format("Concurrency less than one is invalid: %d", newConcurrency));
+            throw new IllegalArgumentException(String.format(
+                    "Concurrency less than one is invalid: %d",
+                    newConcurrency));
         }
         this.concurrency = Pools.allowedConcurrency(newConcurrency);
         return this;
@@ -295,35 +292,15 @@ public class GraphLoader {
         return this;
     }
 
-    /**
-     * Instructs the loader to load node weights by reading the given property.
-     * If the property is not set at the relationship, the given default value is used.
-     *
-     * @param property             May be null
-     * @param propertyDefaultValue default value to use if the property is not set
-     */
-    public GraphLoader withOptionalNodeWeightsFromProperty(String property, double propertyDefaultValue) {
-        this.nodeWeightProp = property;
-        this.nodeWeightDefault = propertyDefaultValue;
-        return this;
-    }
-
-    /**
-     * Instructs the loader to load node values by reading the given property.
-     * If the property is not set at the node, the given default value is used.
-     *
-     * @param property             May be null
-     * @param propertyDefaultValue default value to use if the property is not set
-     */
-    public GraphLoader withOptionalNodeProperty(String property, double propertyDefaultValue) {
-        this.nodeProp = property;
-        this.nodePropDefault = propertyDefaultValue;
-        return this;
-    }
-
     public GraphLoader withOptionalNodeProperties(PropertyMapping... nodePropertyMappings) {
         this.nodePropertyMappings = Arrays.stream(nodePropertyMappings)
                 .filter(propMapping -> !(propMapping.propertyKey == null || propMapping.propertyKey.isEmpty()))
+                .toArray(PropertyMapping[]::new);
+        return this;
+    }
+
+    public GraphLoader withOptionalRelationshipProperties(PropertyMapping... relPropertyMappings) {
+        this.relPropertyMappings = Arrays.stream(relPropertyMappings)
                 .toArray(PropertyMapping[]::new);
         return this;
     }
@@ -336,9 +313,11 @@ public class GraphLoader {
      * @param propertyDefaultValue default value to use if the property is not set
      */
     public GraphLoader withRelationshipWeightsFromProperty(String property, double propertyDefaultValue) {
-        this.relWeightProp = Objects.requireNonNull(property);
-        this.relWeightDefault = propertyDefaultValue;
-        return this;
+        return withOptionalRelationshipProperties(PropertyMapping.of(
+                property,
+                property,
+                propertyDefaultValue
+        ));
     }
 
     /**
@@ -366,9 +345,11 @@ public class GraphLoader {
      * @param propertyDefaultValue default value to use if the property is not set
      */
     public GraphLoader withOptionalRelationshipWeightsFromProperty(String property, double propertyDefaultValue) {
-        this.relWeightProp = property;
-        this.relWeightDefault = propertyDefaultValue;
-        return this;
+        return withOptionalRelationshipProperties(PropertyMapping.of(
+                property,
+                property,
+                propertyDefaultValue
+        ));
     }
 
     /**
@@ -376,27 +357,21 @@ public class GraphLoader {
      * on a graph without weights is not specified.
      */
     public GraphLoader withoutRelationshipWeights() {
-        this.relWeightProp = null;
-        this.relWeightDefault = 0.0;
-        return this;
+        return withOptionalRelationshipProperties();
     }
 
     /**
      * Instructs the loader to not load any node weights.
      */
     public GraphLoader withoutNodeWeights() {
-        this.nodeWeightProp = null;
-        this.nodeWeightDefault = 0.0;
-        return this;
+        return withOptionalNodeProperties();
     }
 
     /**
      * Instructs the loader to not load any node properties.
      */
     public GraphLoader withoutNodeProperties() {
-        this.nodeProp = null;
-        this.nodePropDefault = 0.0;
-        return this;
+        return withOptionalNodeProperties();
     }
 
     public GraphLoader withParams(Map<String, Object> params) {
@@ -435,10 +410,10 @@ public class GraphLoader {
     }
 
     /**
-     * @param deduplicateRelationshipsStrategy strategy for handling duplicate relationships
+     * @param deduplicationStrategy strategy for handling duplicate relationships
      */
-    public GraphLoader withDeduplicateRelationshipsStrategy(DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy) {
-        this.deduplicateRelationshipsStrategy = deduplicateRelationshipsStrategy;
+    public GraphLoader withDeduplicateRelationshipsStrategy(DeduplicationStrategy deduplicationStrategy) {
+        this.deduplicationStrategy = deduplicationStrategy;
         return this;
     }
 
@@ -494,20 +469,23 @@ public class GraphLoader {
     }
 
     public GraphSetup toSetup() {
+        PropertyMapping[] relPropertyMappings = deduplicationStrategy == DeduplicationStrategy.DEFAULT
+                ? this.relPropertyMappings
+                : Arrays
+                .stream(this.relPropertyMappings)
+                .map(p -> p.withDeduplicationStrategy(deduplicationStrategy))
+                .toArray(PropertyMapping[]::new);
+
         return new GraphSetup(
                 label,
                 null,
                 relation,
                 direction,
-                relWeightProp,
-                relWeightDefault,
-                nodeWeightDefault,
-                nodePropDefault,
                 params,
                 executorService,
                 concurrency,
                 batchSize,
-                deduplicateRelationshipsStrategy,
+                deduplicationStrategy,
                 log,
                 logMillis,
                 sorted,
@@ -515,6 +493,7 @@ public class GraphLoader {
                 tracker,
                 terminationFlag,
                 name,
-                nodePropertyMappings);
+                nodePropertyMappings,
+                relPropertyMappings);
     }
 }

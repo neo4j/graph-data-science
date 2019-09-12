@@ -101,7 +101,7 @@ public final class GraphNegativeTest extends RandomGraphTestCase {
     @Test
     public void shouldThrowForNonExistingNodeProperty() {
         expected.expect(IllegalArgumentException.class);
-        expected.expectMessage("Node property not found: 'foo'");
+        expected.expectMessage("Node properties not found: 'foo'");
         new GraphLoader(RandomGraphTestCase.db)
                 .withOptionalNodeProperties(new PropertyMapping("foo", "foo", 0.0))
                 .load(graphImpl);

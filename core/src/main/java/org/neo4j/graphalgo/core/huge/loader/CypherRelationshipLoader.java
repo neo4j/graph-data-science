@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.huge.loader;
 
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.core.DeduplicateRelationshipsStrategy;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
@@ -44,14 +44,14 @@ class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
     CypherRelationshipLoader(IdMap idMap, GraphDatabaseAPI api, GraphSetup setup) {
         super(setup.relationshipType, idMap.nodeCount(), api, setup);
 
-        DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy =
-                setup.deduplicateRelationshipsStrategy == DeduplicateRelationshipsStrategy.DEFAULT
-                        ? DeduplicateRelationshipsStrategy.NONE
-                        : setup.deduplicateRelationshipsStrategy;
+        DeduplicationStrategy deduplicationStrategy =
+                setup.deduplicationStrategy == DeduplicationStrategy.DEFAULT
+                        ? DeduplicationStrategy.NONE
+                        : setup.deduplicationStrategy;
         outgoingRelationshipsBuilder = new RelationshipsBuilder(
-                deduplicateRelationshipsStrategy,
+                new DeduplicationStrategy[]{deduplicationStrategy},
                 setup.tracker,
-                setup.shouldLoadRelationshipWeight());
+                setup.shouldLoadRelationshipWeight() ? 1 : 0);
 
         ImportSizing importSizing = ImportSizing.of(setup.concurrency, idMap.nodeCount());
         int pageSize = importSizing.pageSize();
@@ -61,7 +61,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
         AdjacencyBuilder outBuilder = AdjacencyBuilder.compressing(
                 outgoingRelationshipsBuilder,
                 numberOfPages, pageSize,
-                setup.tracker, new LongAdder(), -2, relationDefaultWeight);
+                setup.tracker, new LongAdder(), new int[]{-2}, new double[]{relationDefaultWeight});
 
         this.idMap = idMap;
         hasRelationshipWeights = setup.shouldLoadRelationshipWeight();
@@ -102,8 +102,8 @@ class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
 
         AdjacencyList outAdjacencyList = outgoingRelationshipsBuilder.adjacency.build();
         AdjacencyOffsets outAdjacencyOffsets = outgoingRelationshipsBuilder.globalAdjacencyOffsets;
-        AdjacencyList outWeightList = setup.shouldLoadRelationshipWeight() ? outgoingRelationshipsBuilder.weights.build() : null;
-        AdjacencyOffsets outWeightOffsets = setup.shouldLoadRelationshipWeight() ? outgoingRelationshipsBuilder.globalWeightOffsets : null;
+        AdjacencyList outWeightList = setup.shouldLoadRelationshipWeight() ? outgoingRelationshipsBuilder.weights[0].build() : null;
+        AdjacencyOffsets outWeightOffsets = setup.shouldLoadRelationshipWeight() ? outgoingRelationshipsBuilder.globalWeightOffsets[0] : null;
 
         return new Relationships(
                 totalRecordsSeen, totalRelationshipsImported,

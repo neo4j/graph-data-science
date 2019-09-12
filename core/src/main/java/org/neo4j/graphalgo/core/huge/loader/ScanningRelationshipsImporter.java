@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.huge.loader;
 import com.carrotsearch.hppc.ObjectLongHashMap;
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.apache.commons.lang3.tuple.Pair;
+import org.neo4j.graphalgo.KernelPropertyMapping;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.IdMapping;
@@ -83,7 +84,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         int pageSize = sizing.pageSize();
         int numberOfPages = sizing.numberOfPages();
 
-        boolean importWeights = dimensions.relWeightId() != StatementConstants.NO_SUCH_PROPERTY_KEY;
+        boolean importWeights = dimensions.relProperties().stream().anyMatch(m -> m.propertyKeyId != StatementConstants.NO_SUCH_PROPERTY_KEY);
 
         List<SingleTypeRelationshipImporter.Builder> importerBuilders = allBuilders
                 .entrySet()
@@ -114,6 +115,15 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         RelationshipsBuilder outRelationshipsBuilder = entry.getValue().getLeft();
         RelationshipsBuilder inRelationshipsBuilder = entry.getValue().getRight();
 
+        List<KernelPropertyMapping> relProperties = dimensions.relProperties();
+        int[] weightProperties = new int[relProperties.size()];
+        double[] defaultWeights = new double[relProperties.size()];
+        for (int i = 0; i < relProperties.size(); i++) {
+            KernelPropertyMapping property = relProperties.get(i);
+            weightProperties[i] = property.propertyKeyId;
+            defaultWeights[i] = property.defaultValue;
+        }
+
         LongAdder relationshipCounter = new LongAdder();
         AdjacencyBuilder outBuilder = AdjacencyBuilder.compressing(
                 outRelationshipsBuilder,
@@ -121,16 +131,16 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
                 pageSize,
                 tracker,
                 relationshipCounter,
-                dimensions.relWeightId(),
-                setup.relationDefaultWeight);
+                weightProperties,
+                defaultWeights);
         AdjacencyBuilder inBuilder = AdjacencyBuilder.compressing(
                 inRelationshipsBuilder,
                 numberOfPages,
                 pageSize,
                 tracker,
                 relationshipCounter,
-                dimensions.relWeightId(),
-                setup.relationDefaultWeight);
+                weightProperties,
+                defaultWeights);
 
         RelationshipImporter importer = new RelationshipImporter(
                 setup.tracker,

@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.huge.loader;
 import com.carrotsearch.hppc.sorting.IndirectComparator;
 import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.apache.lucene.util.LongsRef;
-import org.neo4j.graphalgo.core.DeduplicateRelationshipsStrategy;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
 
 import java.util.Arrays;
 
@@ -48,17 +48,17 @@ final class AdjacencyCompression {
         into.length = array.uncompress(into.longs);
     }
 
-    static int applyDeltaEncoding(LongsRef data, DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy) {
+    static int applyDeltaEncoding(LongsRef data, DeduplicationStrategy deduplicationStrategy) {
         Arrays.sort(data.longs, 0, data.length);
-        return data.length = applyDelta(data.longs, data.length, deduplicateRelationshipsStrategy);
+        return data.length = applyDelta(data.longs, data.length, deduplicationStrategy);
     }
 
     // TODO: requires lots of additional memory ... inline indirect sort to make reuse of - to be created - buffers
-    static int applyDeltaEncoding(LongsRef data, long[] weights, DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy) {
+    static int applyDeltaEncoding(LongsRef data, long[][] weights, DeduplicationStrategy[] deduplicationStrategies, boolean noDeduplication) {
         int[] order = IndirectSort.mergesort(0, data.length, new AscendingLongComparator(data.longs));
 
         long[] sortedValues = new long[data.length];
-        long[] sortedWeights = new long[data.length];
+        long[][] sortedWeights = new long[weights.length][data.length];
 
         data.length = applyDelta(
                 order,
@@ -67,11 +67,15 @@ final class AdjacencyCompression {
                 weights,
                 sortedWeights,
                 data.length,
-                deduplicateRelationshipsStrategy
+                deduplicationStrategies,
+                noDeduplication
         );
 
         System.arraycopy(sortedValues, 0, data.longs, 0, data.length);
-        System.arraycopy(sortedWeights, 0, weights, 0, data.length);
+        for (int i = 0; i < sortedWeights.length; i++) {
+            long[] sortedWeight = sortedWeights[i];
+            System.arraycopy(sortedWeight, 0, weights[i], 0, data.length);
+        }
 
         return data.length;
     }
@@ -94,13 +98,13 @@ final class AdjacencyCompression {
     }
     //@formatter:on
 
-    private static int applyDelta(long[] values, int length, DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy) {
+    private static int applyDelta(long[] values, int length, DeduplicationStrategy deduplicationStrategy) {
         long value = values[0], delta;
         int in = 1, out = 1;
         for (; in < length; ++in) {
             delta = values[in] - value;
             value = values[in];
-            if (delta > 0L || deduplicateRelationshipsStrategy == DeduplicateRelationshipsStrategy.NONE) {
+            if (delta > 0L || deduplicationStrategy == DeduplicationStrategy.NONE) {
                 values[out++] = delta;
             }
         }
@@ -115,16 +119,19 @@ final class AdjacencyCompression {
             int[] order,
             long[] values,
             long[] outValues,
-            long[] weights,
-            long[] outWeights,
+            long[][] weights,
+            long[][] outWeights,
             int length,
-            DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy) {
+            DeduplicationStrategy[] deduplicationStrategies,
+            boolean noDeduplication) {
         int firstSortIdx = order[0];
         long value = values[firstSortIdx];
         long delta;
 
         outValues[0] = values[firstSortIdx];
-        outWeights[0] = weights[firstSortIdx];
+        for (int i = 0; i < weights.length; i++) {
+            outWeights[i][0] = weights[i][firstSortIdx];
+        }
 
         int in = 1, out = 1;
         for (; in < length; ++in) {
@@ -132,15 +139,21 @@ final class AdjacencyCompression {
             delta = values[sortIdx] - value;
             value = values[sortIdx];
 
-            if (delta > 0L || deduplicateRelationshipsStrategy == DeduplicateRelationshipsStrategy.NONE) {
-                outWeights[out] = weights[sortIdx];
+            if (delta > 0L || noDeduplication) {
+                for (int i = 0; i < weights.length; i++) {
+                    outWeights[i][out] = weights[i][sortIdx];
+                }
                 outValues[out++] = delta;
             } else {
-                int existingIdx = out - 1;
-                double existingWeight = Double.longBitsToDouble(outWeights[existingIdx]);
-                double newWeight = Double.longBitsToDouble(weights[sortIdx]);
-                newWeight = deduplicateRelationshipsStrategy.merge(existingWeight, newWeight);
-                outWeights[existingIdx] = Double.doubleToLongBits(newWeight);
+                for (int i = 0; i < weights.length; i++) {
+                    DeduplicationStrategy deduplicationStrategy = deduplicationStrategies[i];
+                    int existingIdx = out - 1;
+                    long[] outWeight = outWeights[i];
+                    double existingWeight = Double.longBitsToDouble(outWeight[existingIdx]);
+                    double newWeight = Double.longBitsToDouble(weights[i][sortIdx]);
+                    newWeight = deduplicationStrategy.merge(existingWeight, newWeight);
+                    outWeight[existingIdx] = Double.doubleToLongBits(newWeight);
+                }
             }
         }
         return out;

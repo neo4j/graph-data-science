@@ -28,6 +28,7 @@ import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -91,19 +92,19 @@ class RelationshipImporter {
     private long importBothOrUndirectedWithWeight(RelationshipsBatchBuffer buffer, WeightReader reader) {
         int batchLength = buffer.length;
         long[] batch = buffer.sortBySource();
-        long[] weightsOut = reader.readWeight(
+        long[][] weightsOut = reader.readWeight(
                 batch,
                 batchLength,
-                outAdjacency.getWeightProperty(),
-                outAdjacency.getDefaultWeight());
+                outAdjacency.getWeightProperties(),
+                outAdjacency.getDefaultWeights());
         int importedOut = importRelationships(buffer, batch, weightsOut, outAdjacency, tracker);
         batch = buffer.sortByTarget();
 
-        long[] weightsIn = reader.readWeight(
+        long[][] weightsIn = reader.readWeight(
                 batch,
                 batchLength,
-                inAdjacency.getWeightProperty(),
-                inAdjacency.getDefaultWeight());
+                inAdjacency.getWeightProperties(),
+                inAdjacency.getDefaultWeights());
         int importedIn = importRelationships(buffer, batch, weightsIn, inAdjacency, tracker);
         return RawValues.combineIntInt(importedOut + importedIn, importedOut + importedIn);
     }
@@ -116,11 +117,11 @@ class RelationshipImporter {
     private long importOutgoingWithWeight(RelationshipsBatchBuffer buffer, WeightReader weightReader) {
         int batchLength = buffer.length;
         long[] batch = buffer.sortBySource();
-        long[] weightsOut = weightReader.readWeight(
+        long[][] weightsOut = weightReader.readWeight(
                 batch,
                 batchLength,
-                outAdjacency.getWeightProperty(),
-                outAdjacency.getDefaultWeight());
+                outAdjacency.getWeightProperties(),
+                outAdjacency.getDefaultWeights());
         int importedOut = importRelationships(buffer, batch, weightsOut, outAdjacency, tracker);
         return RawValues.combineIntInt(importedOut, importedOut);
     }
@@ -133,17 +134,17 @@ class RelationshipImporter {
     private long importIncomingWithWeight(RelationshipsBatchBuffer buffer, WeightReader weightReader) {
         int batchLength = buffer.length;
         long[] batch = buffer.sortByTarget();
-        long[] weightsIn = weightReader.readWeight(
+        long[][] weightsIn = weightReader.readWeight(
                 batch,
                 batchLength,
-                inAdjacency.getWeightProperty(),
-                inAdjacency.getDefaultWeight());
+                inAdjacency.getWeightProperties(),
+                inAdjacency.getDefaultWeights());
         int importedIn = importRelationships(buffer, batch, weightsIn, inAdjacency, tracker);
         return RawValues.combineIntInt(importedIn, importedIn);
     }
 
     public interface WeightReader {
-        long[] readWeight(long[] batch, int batchLength, int weightProperty, double defaultWeight);
+        long[][] readWeight(long[] batch, int batchLength, int[] weightProperty, double[] defaultWeight);
     }
 
     Collection<Runnable> flushTasks() {
@@ -166,15 +167,18 @@ class RelationshipImporter {
     private static final int PROPERTIES_REFERENCE_OFFSET = 3;
 
     WeightReader storeBackedWeightReader(CursorFactory cursors, Read read) {
-        return (batch, batchLength, weightProperty, defaultWeight) -> {
-            long[] weights = new long[batchLength / BATCH_ENTRY_SIZE];
+        return (batch, batchLength, weightProperties, defaultWeights) -> {
+            long[][] weights = new long[weightProperties.length][batchLength / BATCH_ENTRY_SIZE];
             try (PropertyCursor pc = cursors.allocatePropertyCursor()) {
                 for (int i = 0; i < batchLength; i += BATCH_ENTRY_SIZE) {
                     long relationshipReference = batch[RELATIONSHIP_REFERENCE_OFFSET + i];
                     long propertiesReference = batch[PROPERTIES_REFERENCE_OFFSET + i];
                     read.relationshipProperties(relationshipReference, propertiesReference, pc);
-                    double weight = ReadHelper.readProperty(pc, weightProperty, defaultWeight);
-                    weights[i / BATCH_ENTRY_SIZE] = Double.doubleToLongBits(weight);
+                    double[] relWeights = ReadHelper.readProperties(pc, weightProperties, defaultWeights);
+                    int weightPos = i / BATCH_ENTRY_SIZE;
+                    for (int j = 0; j < relWeights.length; j++) {
+                        weights[j][weightPos] = Double.doubleToLongBits(relWeights[j]);
+                    }
                 }
             }
             return weights;
@@ -188,14 +192,14 @@ class RelationshipImporter {
                 long weight = batch[PROPERTIES_REFERENCE_OFFSET + i];
                 weights[i / BATCH_ENTRY_SIZE] = weight;
             }
-            return weights;
+            return new long[][]{weights};
         };
     }
 
     private static int importRelationships(
             RelationshipsBatchBuffer buffer,
             long[] batch,
-            long[] weights,
+            long[][] weights,
             AdjacencyBuilder adjacency,
             AllocationTracker tracker
     ) {

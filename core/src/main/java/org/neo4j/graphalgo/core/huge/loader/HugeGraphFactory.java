@@ -22,17 +22,19 @@ package org.neo4j.graphalgo.core.huge.loader;
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.graphalgo.KernelPropertyMapping;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.RelationshipTypeMappings;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.WeightMapping;
-import org.neo4j.graphalgo.core.DeduplicateRelationshipsStrategy;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.utils.ApproximatedImportProgress;
 import org.neo4j.graphalgo.core.utils.ImportProgress;
@@ -44,9 +46,11 @@ import org.neo4j.helpers.collection.Iterables;
 import org.neo4j.kernel.api.StatementConstants;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public final class HugeGraphFactory extends GraphFactory {
 
@@ -63,8 +67,8 @@ public final class HugeGraphFactory extends GraphFactory {
     }
 
     public static MemoryEstimation getMemoryEstimation(
-            final GraphSetup setup,
-            final GraphDimensions dimensions) {
+            GraphSetup setup,
+            GraphDimensions dimensions) {
         MemoryEstimations.Builder builder = MemoryEstimations
                 .builder(HugeGraph.class)
                 .add("nodeIdMap", IdMap.memoryEstimation());
@@ -113,9 +117,9 @@ public final class HugeGraphFactory extends GraphFactory {
 
     @Override
     protected ImportProgress importProgress(
-            final ProgressLogger progressLogger,
-            final GraphDimensions dimensions,
-            final GraphSetup setup) {
+            ProgressLogger progressLogger,
+            GraphDimensions dimensions,
+            GraphSetup setup) {
 
         // ops for scanning degrees
         long relOperations = LOAD_DEGREES ? dimensions.maxRelCount() : 0L;
@@ -149,7 +153,7 @@ public final class HugeGraphFactory extends GraphFactory {
             throw new IllegalArgumentException(message);
         }
 
-        Map<String, HugeGraph> graphs = importAllGraphs();
+        Map<String, Graph> graphs = importAllGraphs();
         return Iterables.single(graphs.values());
     }
 
@@ -158,15 +162,17 @@ public final class HugeGraphFactory extends GraphFactory {
         return new GraphsByRelationshipType(importAllGraphs());
     }
 
-    private Map<String, HugeGraph> importAllGraphs() {
+    private Map<String, Graph> importAllGraphs() {
         GraphDimensions dimensions = this.dimensions;
         int concurrency = setup.concurrency();
         AllocationTracker tracker = setup.tracker;
         IdsAndProperties mappingAndProperties = loadIdMap(tracker, concurrency);
-        Map<String, HugeGraph> graphs = loadRelationships(dimensions, tracker, mappingAndProperties, concurrency);
-
+        Map<String, Map<String, HugeGraph>> graphs = loadRelationships(dimensions, tracker, mappingAndProperties, concurrency);
         progressLogger.logDone(tracker);
-        return graphs;
+        return graphs.entrySet().stream().collect(Collectors.toMap(
+                Map.Entry::getKey,
+                e -> UnionGraph.of(e.getValue().values())
+        ));
     }
 
     private IdsAndProperties loadIdMap(AllocationTracker tracker, int concurrency) {
@@ -182,22 +188,17 @@ public final class HugeGraphFactory extends GraphFactory {
                 .call(setup.log);
     }
 
-    private Map<String, HugeGraph> loadRelationships(
+    private Map<String, Map<String, HugeGraph>> loadRelationships(
             GraphDimensions dimensions,
             AllocationTracker tracker,
             IdsAndProperties idsAndProperties,
             int concurrency) {
-        DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy =
-                setup.deduplicateRelationshipsStrategy == DeduplicateRelationshipsStrategy.DEFAULT
-                        ? DeduplicateRelationshipsStrategy.SKIP
-                        : setup.deduplicateRelationshipsStrategy;
-
         Map<RelationshipTypeMapping, Pair<RelationshipsBuilder, RelationshipsBuilder>> allBuilders = dimensions
                 .relationshipTypeMappings()
                 .stream()
                 .collect(Collectors.toMap(
                         Function.identity(),
-                        mapping -> createBuilderForRelationshipType(deduplicateRelationshipsStrategy, tracker)
+                        mapping -> createBuilderForRelationshipType(tracker)
                 ));
 
         ScanningRelationshipsImporter scanningImporter = new ScanningRelationshipsImporter(
@@ -219,43 +220,80 @@ public final class HugeGraphFactory extends GraphFactory {
                     Pair<RelationshipsBuilder, RelationshipsBuilder> builders = entry.getValue();
                     RelationshipsBuilder outgoingRelationshipsBuilder = builders.getLeft();
                     RelationshipsBuilder incomingRelationshipsBuilder = builders.getRight();
-                    return buildGraph(
-                            tracker,
-                            idsAndProperties.hugeIdMap,
-                            idsAndProperties.properties,
-                            incomingRelationshipsBuilder,
-                            outgoingRelationshipsBuilder,
-                            setup.relationDefaultWeight,
-                            relationshipCounts.getOrDefault(entry.getKey(), 0L),
-                            setup.loadAsUndirected
-                    );
+
+                    if (setup.relationshipPropertyMappings.length == 0) {
+                        HugeGraph graph = buildGraph(
+                                tracker,
+                                idsAndProperties.hugeIdMap,
+                                idsAndProperties.properties,
+                                incomingRelationshipsBuilder,
+                                outgoingRelationshipsBuilder,
+                                0,
+                                0.0,
+                                relationshipCounts.getOrDefault(entry.getKey(), 0L),
+                                setup.loadAsUndirected
+                        );
+                        return Collections.singletonMap("", graph);
+                    }
+
+                    return IntStream.range(0, setup.relationshipPropertyMappings.length)
+                            .mapToObj(weightIndex -> {
+                                HugeGraph graph = buildGraph(
+                                        tracker,
+                                        idsAndProperties.hugeIdMap,
+                                        idsAndProperties.properties,
+                                        incomingRelationshipsBuilder,
+                                        outgoingRelationshipsBuilder,
+                                        weightIndex,
+                                        setup.relationshipPropertyMappings[weightIndex].defaultValue,
+                                        relationshipCounts.getOrDefault(entry.getKey(), 0L),
+                                        setup.loadAsUndirected
+                                );
+                                PropertyMapping property = setup.relationshipPropertyMappings[weightIndex];
+                                return Pair.of(property.propertyName, graph);
+                            })
+                            .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
                 }));
     }
 
-    private Pair<RelationshipsBuilder, RelationshipsBuilder> createBuilderForRelationshipType(
-            DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy,
-            AllocationTracker tracker) {
+    private Pair<RelationshipsBuilder, RelationshipsBuilder> createBuilderForRelationshipType(AllocationTracker tracker) {
         RelationshipsBuilder outgoingRelationshipsBuilder = null;
         RelationshipsBuilder incomingRelationshipsBuilder = null;
 
+        DeduplicationStrategy[] deduplicationStrategies = dimensions
+                .relProperties()
+                .stream()
+                .map(property -> property.deduplicationStrategy == DeduplicationStrategy.DEFAULT
+                        ? DeduplicationStrategy.SKIP
+                        : property.deduplicationStrategy
+                )
+                .toArray(DeduplicationStrategy[]::new);
+        // TODO: backwards compat code
+        if (deduplicationStrategies.length == 0) {
+            DeduplicationStrategy deduplicationStrategy =
+                setup.deduplicationStrategy == DeduplicationStrategy.DEFAULT
+                        ? DeduplicationStrategy.SKIP
+                        : setup.deduplicationStrategy;
+            deduplicationStrategies = new DeduplicationStrategy[]{deduplicationStrategy};
+        }
 
         if (setup.loadAsUndirected) {
             outgoingRelationshipsBuilder = new RelationshipsBuilder(
-                    deduplicateRelationshipsStrategy,
+                    deduplicationStrategies,
                     tracker,
-                    setup.shouldLoadRelationshipWeight());
+                    setup.relationshipPropertyMappings.length);
         } else {
             if (setup.loadOutgoing) {
                 outgoingRelationshipsBuilder = new RelationshipsBuilder(
-                        deduplicateRelationshipsStrategy,
+                        deduplicationStrategies,
                         tracker,
-                        setup.shouldLoadRelationshipWeight());
+                        setup.relationshipPropertyMappings.length);
             }
             if (setup.loadIncoming) {
                 incomingRelationshipsBuilder = new RelationshipsBuilder(
-                        deduplicateRelationshipsStrategy,
+                        deduplicationStrategies,
                         tracker,
-                        setup.shouldLoadRelationshipWeight());
+                        setup.relationshipPropertyMappings.length);
             }
         }
 
@@ -263,14 +301,15 @@ public final class HugeGraphFactory extends GraphFactory {
     }
 
     private HugeGraph buildGraph(
-            final AllocationTracker tracker,
-            final IdMap idMapping,
-            final Map<String, WeightMapping> nodeProperties,
-            final RelationshipsBuilder inRelationshipsBuilder,
-            final RelationshipsBuilder outRelationshipsBuilder,
-            final double defaultWeight,
-            final long relationshipCount,
-            final boolean loadAsUndirected) {
+            AllocationTracker tracker,
+            IdMap idMapping,
+            Map<String, WeightMapping> nodeProperties,
+            RelationshipsBuilder inRelationshipsBuilder,
+            RelationshipsBuilder outRelationshipsBuilder,
+            int weightIndex,
+            double defaultWeight,
+            long relationshipCount,
+            boolean loadAsUndirected) {
 
         AdjacencyList outAdjacencyList = null;
         AdjacencyOffsets outAdjacencyOffsets = null;
@@ -281,8 +320,8 @@ public final class HugeGraphFactory extends GraphFactory {
             outAdjacencyOffsets = outRelationshipsBuilder.globalAdjacencyOffsets;
 
             if (setup.shouldLoadRelationshipWeight()) {
-                outWeightList = outRelationshipsBuilder.weights.build();
-                outWeightOffsets = outRelationshipsBuilder.globalWeightOffsets;
+                outWeightList = outRelationshipsBuilder.weights[weightIndex].build();
+                outWeightOffsets = outRelationshipsBuilder.globalWeightOffsets[weightIndex];
             }
         }
 
@@ -295,8 +334,8 @@ public final class HugeGraphFactory extends GraphFactory {
             inAdjacencyOffsets = inRelationshipsBuilder.globalAdjacencyOffsets;
 
             if (setup.shouldLoadRelationshipWeight()) {
-                inWeightList = inRelationshipsBuilder.weights.build();
-                inWeightOffsets = inRelationshipsBuilder.globalWeightOffsets;
+                inWeightList = inRelationshipsBuilder.weights[weightIndex].build();
+                inWeightOffsets = inRelationshipsBuilder.globalWeightOffsets[weightIndex];
             }
         }
 

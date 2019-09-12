@@ -19,40 +19,52 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
-import org.neo4j.graphalgo.core.DeduplicateRelationshipsStrategy;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
+import java.util.Arrays;
+
 class RelationshipsBuilder {
 
-    private final DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy;
-    private final boolean weighted;
+    private static final AdjacencyListBuilder[] EMPTY_WEIGHTS = new AdjacencyListBuilder[0];
+
+    private final DeduplicationStrategy[] deduplicationStrategies;
     final AdjacencyListBuilder adjacency;
-    final AdjacencyListBuilder weights;
+    final AdjacencyListBuilder[] weights;
 
     AdjacencyOffsets globalAdjacencyOffsets;
-    AdjacencyOffsets globalWeightOffsets;
+    AdjacencyOffsets[] globalWeightOffsets;
 
     RelationshipsBuilder(
-            DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy,
+            DeduplicationStrategy[] deduplicationStrategies,
             AllocationTracker tracker,
-            boolean weighted) {
-        if (deduplicateRelationshipsStrategy == DeduplicateRelationshipsStrategy.DEFAULT) {
-            throw new IllegalArgumentException("Needs an explicit deduplicateRelationshipsStrategy, but got " + deduplicateRelationshipsStrategy);
+            int numberOfRelationshipWeights) {
+        if (Arrays.stream(deduplicationStrategies).anyMatch(d -> d == DeduplicationStrategy.DEFAULT)) {
+            throw new IllegalArgumentException(String.format(
+                    "Needs an explicit deduplicateRelationshipsStrategy, but got %s",
+                    Arrays.toString(deduplicationStrategies)
+            ));
         }
-        this.deduplicateRelationshipsStrategy = deduplicateRelationshipsStrategy;
-        this.weighted = weighted;
+        this.deduplicationStrategies = deduplicationStrategies;
         adjacency = AdjacencyListBuilder.newBuilder(tracker);
-        weights = weighted ? AdjacencyListBuilder.newBuilder(tracker) : null;
+        if (numberOfRelationshipWeights > 0) {
+            weights = new AdjacencyListBuilder[numberOfRelationshipWeights];
+            Arrays.setAll(weights, i -> AdjacencyListBuilder.newBuilder(tracker));
+        } else {
+            weights = EMPTY_WEIGHTS;
+        }
     }
 
     final ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder(
             long[] adjacencyOffsets,
-            long[] weightOffsets) {
+            long[][] weightOffsets) {
         return new ThreadLocalRelationshipsBuilder(
-                deduplicateRelationshipsStrategy,
+                deduplicationStrategies,
                 adjacency.newAllocator(),
-                weighted ? weights.newAllocator() : null,
+                Arrays.stream(weights)
+                        .map(AdjacencyListBuilder::newAllocator)
+                        .toArray(AdjacencyListBuilder.Allocator[]::new),
                 adjacencyOffsets,
                 weightOffsets);
     }
@@ -61,7 +73,7 @@ class RelationshipsBuilder {
         this.globalAdjacencyOffsets = globalAdjacencyOffsets;
     }
 
-    final void setGlobalWeightOffsets(AdjacencyOffsets globalWeightOffsets) {
+    final void setGlobalWeightOffsets(AdjacencyOffsets[] globalWeightOffsets) {
         this.globalWeightOffsets = globalWeightOffsets;
     }
 }

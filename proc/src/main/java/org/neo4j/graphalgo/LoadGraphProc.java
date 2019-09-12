@@ -141,8 +141,6 @@ public final class LoadGraphProc extends BaseProc {
                 .withOptionalRelationshipWeightsFromProperty(
                         config.getWeightProperty(),
                         config.getWeightPropertyDefaultValue(1.0))
-                .withOptionalNodeProperty(nodeProperty, 0.0D)
-                .withOptionalNodeWeightsFromProperty(nodeWeight, 1.0D)
                 .withOptionalNodeProperties(
                         PropertyMapping.of(LabelPropagation.SEED_TYPE, nodeProperty, 0.0D),
                         PropertyMapping.of(LabelPropagation.WEIGHT_TYPE, nodeWeight, 1.0D)

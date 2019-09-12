@@ -32,6 +32,7 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.newapi.InternalReadOps;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Arrays;
 import java.util.Set;
 
 public final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
@@ -65,19 +66,13 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
             }
         }
         RelationshipTypeMappings relationshipTypeMappings = mappingsBuilder.build();
-        final int relWeightId = propertyKey(
-                tokenRead,
-                setup.shouldLoadRelationshipWeight(),
-                setup.relationWeightPropertyName);
+//        final int relWeightId = propertyKey(
+//                tokenRead,
+//                setup.shouldLoadRelationshipWeight(),
+//                setup.relationWeightPropertyName);
 
-        PropertyMapping[] nodePropertyMappings = setup.nodePropertyMappings;
-        KernelPropertyMapping[] nodeProperties = new KernelPropertyMapping[nodePropertyMappings.length];
-        for (int i = 0; i < nodePropertyMappings.length; i++) {
-            PropertyMapping propertyMapping = nodePropertyMappings[i];
-            String propertyKey = nodePropertyMappings[i].propertyKey;
-            int key = propertyKey(tokenRead, propertyKey != null, propertyKey);
-            nodeProperties[i] = propertyMapping.toKernelMapping(key);
-        }
+        KernelPropertyMapping[] nodeProperties = loadPropertyMapping(tokenRead, setup.nodePropertyMappings);
+        KernelPropertyMapping[] relProperties = loadPropertyMapping(tokenRead, setup.relationshipPropertyMappings);
 
         final long nodeCount = dataRead.countsForNode(labelId);
         final long allNodesCount = InternalReadOps.getHighestPossibleNodeCount(dataRead, api);
@@ -92,10 +87,21 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
                 .setHighestNeoId(allNodesCount)
                 .setMaxRelCount(maxRelCount)
                 .setLabelId(labelId)
-                .setRelationshipTypeMappings(relationshipTypeMappings)
-                .setRelWeightId(relWeightId)
                 .setNodeProperties(nodeProperties)
+                .setRelationshipTypeMappings(relationshipTypeMappings)
+                .setRelationshipProperties(relProperties)
                 .build();
+    }
+
+    private KernelPropertyMapping[] loadPropertyMapping(TokenRead tokenRead, PropertyMapping[] propertyMappings) {
+        return Arrays
+                .stream(propertyMappings)
+                .map(mapping -> {
+                    String propertyKey = mapping.propertyKey;
+                    int key = propertyKey(tokenRead, propertyKey != null, propertyKey);
+                    return mapping.toKernelMapping(key);
+                })
+                .toArray(KernelPropertyMapping[]::new);
     }
 
     private static long maxRelCountForLabelAndType(Read dataRead, int labelId, int id) {

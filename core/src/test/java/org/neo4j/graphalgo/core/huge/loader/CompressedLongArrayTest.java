@@ -90,11 +90,11 @@ public class CompressedLongArrayTest {
 
     @Test
     public void addWithWeights() {
-        CompressedLongArray compressedLongArray = new CompressedLongArray(AllocationTracker.EMPTY);
+        CompressedLongArray compressedLongArray = new CompressedLongArray(AllocationTracker.EMPTY, 1);
 
         final long[] inValues = {1, 2, 3, 4};
         final long[] inWeights = DoubleStream.of(1.0, 2.0, 3.0, 4.0).mapToLong(Double::doubleToLongBits).toArray();
-        compressedLongArray.add(inValues.clone(), inWeights.clone(), 0, inValues.length);
+        compressedLongArray.add(inValues.clone(), new long[][]{inWeights.clone()}, 0, inValues.length);
 
         // 10 bytes are enough to store the input values (1 byte each)
         Assert.assertTrue(compressedLongArray.storage().length >= inValues.length);
@@ -104,6 +104,6 @@ public class CompressedLongArrayTest {
         Assert.assertEquals(4, uncompressedValueCount);
         Assert.assertArrayEquals(inValues, outValues);
 
-        Assert.assertArrayEquals(inWeights, Arrays.copyOf(compressedLongArray.weights(), inWeights.length));
+        Assert.assertArrayEquals(inWeights, Arrays.copyOf(compressedLongArray.weights()[0], inWeights.length));
     }
 }

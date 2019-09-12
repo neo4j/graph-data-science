@@ -19,20 +19,25 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
+
 public class KernelPropertyMapping {
     public final String propertyName;
     public final int propertyKeyId;
     public final double defaultValue;
     public final String propertyKeyNameInGraph;
+    public final DeduplicationStrategy deduplicationStrategy;
 
     public KernelPropertyMapping(
             String propertyName,
             int propertyKeyId,
             double defaultValue,
-            String propertyKeyNameInGraph) {
+            String propertyKeyNameInGraph,
+            DeduplicationStrategy deduplicationStrategy) {
         this.propertyName = propertyName;
         this.propertyKeyId = propertyKeyId;
         this.defaultValue = defaultValue;
         this.propertyKeyNameInGraph = propertyKeyNameInGraph;
+        this.deduplicationStrategy = deduplicationStrategy;
     }
 }

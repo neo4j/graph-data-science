@@ -69,7 +69,7 @@ final class LabelPropagationTest {
             ", (nMichael)-[:FOLLOW]->(nBridget)" +
             ", (nCharles)-[:FOLLOW]->(nDoug)";
 
-    private static GraphDatabaseAPI DB;
+    private GraphDatabaseAPI DB;
 
     @BeforeEach
     void setupGraphDb() {

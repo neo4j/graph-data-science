@@ -341,7 +341,7 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
             runQuery(query, DB, params, row -> {});
         });
         Throwable rootCause = ExceptionUtil.rootCause(exception);
-        assertEquals("Node property not found: 'does_not_exist'", rootCause.getMessage());
+        assertEquals("Node properties not found: 'does_not_exist'", rootCause.getMessage());
     }
 
     @SingleAndMultiThreadedAllGraphNames
