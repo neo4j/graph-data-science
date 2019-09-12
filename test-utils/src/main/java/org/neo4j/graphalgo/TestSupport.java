@@ -49,7 +49,7 @@ public class TestSupport {
     }
 
     @Retention(RetentionPolicy.RUNTIME)
-    @ParameterizedTest
+    @ParameterizedTest(name = "graph: {0}")
     @MethodSource({"org.neo4j.graphalgo.TestSupport#allTypesWithoutCypher", "org.neo4j.graphalgo.TestSupport#cypherType"})
     public @interface AllGraphTypesTest {}
 
