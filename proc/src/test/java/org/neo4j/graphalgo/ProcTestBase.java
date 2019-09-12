@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.IntIntMap;
 import com.carrotsearch.hppc.cursors.IntIntCursor;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
@@ -39,6 +40,7 @@ import java.util.stream.Stream;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 public class ProcTestBase {
 
@@ -52,8 +54,8 @@ public class ProcTestBase {
         return Stream.of("BOTH", "INCOMING", "OUTGOING");
     }
 
-    static Stream<String[]> graphDirectionCombinations() {
-        return graphImplementations().flatMap((impl) -> loadDirections().map((direction) -> new String[]{impl, direction}));
+    static Stream<Arguments> graphDirectionCombinations() {
+        return graphImplementations().flatMap(impl -> loadDirections().map(direction -> arguments(impl, direction)));
     }
 
     @AfterAll
@@ -121,7 +123,7 @@ public class ProcTestBase {
             GraphDatabaseAPI db,
             Map<String, Object> params) {
         List<Result.ResultRow> actual = new ArrayList<>();
-        runQuery(query, db, params, resultRow -> actual.add(resultRow));
+        runQuery(query, db, params, actual::add);
         Assertions.assertTrue(actual.isEmpty());
     }
 

@@ -178,27 +178,25 @@ class LoadGraphProcTest extends ProcTestBase {
         assertThrows(QueryExecutionException.class, () -> runQuery(query, db));
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"heavy"})
-    void shouldComputeMemoryEstimationForHeavy(String graph) {
+    @Test
+    void shouldComputeMemoryEstimationForHeavy() {
         String query = "CALL algo.graph.load.memrec(" +
                        "    null, null, {" +
                        "        graph: $graph" +
                        "    }" +
                        ") YIELD requiredMemory";
-        runQuery(query, db, singletonMap("graph", graph),
+        runQuery(query, db, singletonMap("graph", "heavy"),
                 row -> assertEquals(MemoryUsage.humanReadable(992), row.getString("requiredMemory")));
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"huge"})
-    void shouldComputeMemoryEstimationForHuge(String graph) {
+    @Test
+    void shouldComputeMemoryEstimationForHuge() {
         String query = "CALL algo.graph.load.memrec(" +
                        "    null, null, {" +
                        "        graph: $graph" +
                        "    }" +
                        ") YIELD bytesMin, bytesMax";
-        runQuery(query, db, singletonMap("graph", graph),
+        runQuery(query, db, singletonMap("graph", "huge"),
                 row -> {
                     assertEquals(303520, row.getNumber("bytesMin").longValue());
                     assertEquals(303520, row.getNumber("bytesMax").longValue());
@@ -206,16 +204,15 @@ class LoadGraphProcTest extends ProcTestBase {
         );
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"huge"})
-    void shouldComputeMemoryEstimationForHugeWithProperties(String graph) {
+    @Test
+    void shouldComputeMemoryEstimationForHugeWithProperties() {
         String query = "CALL algo.graph.load.memrec(" +
                        "    null, null, {" +
                        "        graph: $graph, weightProperty: 'weight'" +
                        "    }" +
                        ") YIELD bytesMin, bytesMax";
 
-        runQuery(query, db, singletonMap("graph", graph),
+        runQuery(query, db, singletonMap("graph", "huge"),
                 row -> {
                     assertEquals(573952, row.getNumber("bytesMin").longValue());
                     assertEquals(573952, row.getNumber("bytesMax").longValue());
