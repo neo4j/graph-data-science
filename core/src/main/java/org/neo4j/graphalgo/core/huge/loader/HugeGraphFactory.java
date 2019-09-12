@@ -175,7 +175,10 @@ public final class HugeGraphFactory extends GraphFactory {
                 mappingAndProperties,
                 concurrency);
         progressLogger.logDone(tracker);
-        return graphs;
+        return graphs.entrySet().stream().collect(Collectors.toMap(
+                Map.Entry::getKey,
+                e -> UnionGraph.of(e.getValue().values())
+        ));
     }
 
     private IdsAndProperties loadIdMap(AllocationTracker tracker, int concurrency) {
