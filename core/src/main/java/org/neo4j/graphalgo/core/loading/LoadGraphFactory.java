@@ -26,12 +26,13 @@ import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Optional;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+
+import static org.neo4j.graphalgo.core.loading.GraphsByRelationshipType.ALL_IDENTIFIER;
 
 public final class LoadGraphFactory extends GraphFactory {
 
@@ -93,7 +94,7 @@ public final class LoadGraphFactory extends GraphFactory {
         if (!exists(name)) {
             return null;
         }
-        GraphByType graph = graphs.remove(name);
+        Graph graph = graphs.remove(name).loadGraph(ALL_IDENTIFIER);
         graph.canRelease(true);
         graph.release();
         return graph;
@@ -106,6 +107,9 @@ public final class LoadGraphFactory extends GraphFactory {
     }
 
     public static Map<String, Graph> getLoadedGraphs() {
-        return graphs;
+        return graphs.entrySet().stream().collect(Collectors.toMap(
+                Map.Entry::getKey,
+                e -> e.getValue().loadGraph(ALL_IDENTIFIER)
+        ));
     }
 }
