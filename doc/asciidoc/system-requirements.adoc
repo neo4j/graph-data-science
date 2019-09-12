@@ -10,6 +10,7 @@ image::memory-usage.png[width=500]
 
 See <<memory-requirements>> for more details on the memory used by the projected graph model.
 
+[[system-requirements-cpu]]
 == CPU
 
 The library uses multiple CPUs for data loading, processing, and writing back results.

@@ -1,56 +1,172 @@
-[[algorithms-connected-components]]
-= The Connected Components algorithm
+[[algorithms-wcc]]
+= The Weakly Connected Components algorithm
 
 [abstract]
 --
-This section describes the Connected Components algorithm in the Neo4j Graph Algorithms library.
+This section describes the Weakly Connected Components (WCC) algorithm in the Neo4j Graph Algorithms library.
 --
-
-The Connected Components, or `Union Find`, algorithm finds sets of connected nodes in an undirected graph where each node is reachable from any other node in the same set.
-It differs from the Strongly Connected Components algorithm (SCC) because it only needs a path to exist between pairs of nodes in one direction, whereas SCC needs a path to exist in both directions.
-As with SCC, `UnionFind` is often used early in an analysis to understand a graph's structure.
 
 This section includes:
 
-* <<algorithms-connected-components-context, History and explanation>>
-* <<algorithms-connected-components-usecase, Use-cases - when to use the Connected Components algorithm>>
-* <<algorithms-connected-components-sample, Connected Components algorithm sample>>
-** <<algorithms-connected-components-sample-unweighted, Unweighted version>>
-** <<algorithms-connected-components-sample-weighted, Weighted version>>
-* <<algorithms-connected-components-example, Example usage>>
-** <<algorithms-connected-components-example-seeding, Using seed communities>>
-* <<algorithms-connected-components-hgp, Huge graph projection>>
-* <<algorithms-connected-components-cp, Cypher projection>>
-* <<algorithms-connected-components-syntax, Syntax>>
-* <<algorithms-connected-components-imp, Implementations>>
+* <<algorithms-wcc-intro, Introduction>>
+* <<algorithms-wcc-syntax, Syntax>>
+* <<algorithms-wcc-example, Examples>>
+* <<algorithms-wcc-usage-details, Usage Details>>
+
+* <<algorithms-wcc-context, History and explanation>>
+* <<algorithms-wcc-sample, Connected Components algorithm sample>>
+** <<algorithms-wcc-sample-unweighted, Unweighted version>>
+** <<algorithms-wcc-sample-weighted, Weighted version>>
+** <<algorithms-wcc-example-seeding, Using seed communities>>
+* <<algorithms-wcc-hgp, Huge graph projection>>
+* <<algorithms-wcc-cp, Cypher projection>>
+* <<algorithms-wcc-imp, Implementations>>
 * <<algorithms-unionfind-memory-requirements, Memory Requirements>>
 
 
-[[algorithms-connected-components-context]]
-== History and explanation
+[[algorithms-wcc-intro]]
+== Introduction
 
-// tag::explanation[]
-The algorithm was first described by Bernard A. Galler and Michael J. Fischer in 1964.
-The components in a graph are computed using either the breadth-first search or depth-first search algorithms.
-// end::explanation[]
+The WCC algorithm finds sets of connected nodes in an undirected graph, where all nodes in the same set form a connected component.
+// Don't call out to Labs; let Labs call to us
+// It differs from the Strongly Connected Components algorithm (SCC) because it only needs a path to exist between pairs of nodes in one direction, whereas SCC needs a path to exist in both directions.
+WCC is often used early in an analysis to understand the structure of a graph.
 
+WCC was previously known as Union Find.
+Currently, the WCC algorithm still uses the syntax of `algo.unionFind`.
 
-[[algorithms-connected-components-usecase]]
-== Use-cases - when to use the Connected Components algorithm
+WCC can be used to keep track of clusters of database records, as part of the de-duplication process - an important task in master data management applications.
+WCC can also be used to analyse citation networks.
 
-// tag::use-case[]
-* Testing whether a graph is connected is an essential pre-processing step for every graph algorithm.
-  Such tests can be performed so quickly, and easily, that you should always verify that your input graph is connected, even when you know it has to be.
-  Subtle, difficult-to-detect, bugs often result when your algorithm is run only on one component of a disconnected graph.
-* `Union Find` can be used to keep track of clusters of database records, as part of the de-duplication process - an important task in master data management applications.
-  Read more in http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.28.8405["An efficient domain-independent algorithm for detecting approximately duplicate database records"^].
-* Weakly connected components (WCC) can be used to analyse citation networks.
-  One study uses WCC to work out how well connected the network is, and then to see whether the connectivity remains if 'hub' or 'authority' nodes are moved from the graph.
-  Read more in https://pdfs.semanticscholar.org/a8e0/5f803312032569688005acadaa4d4abf0136.pdf["Characterizing and Mining Citation Graph of Computer Science Literature"^].
-// end::use-case[]
+For more information on this algorithm, see:
+
+* http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.28.8405["An efficient domain-independent algorithm for detecting approximately duplicate database records"^].
+* One study uses WCC to work out how well connected the network is, and then to see whether the connectivity remains if 'hub' or 'authority' nodes are moved from the graph: https://link.springer.com/article/10.1007%2Fs10115-003-0128-3["Characterizing and Mining Citation Graph of Computer Science Literature"^]
 
 
-[[algorithms-connected-components-sample]]
+[NOTE]
+====
+Running this algorithm requires sufficient memory availability.
+Before running this algorithm, we recommend that you read <<memory-requirements>>.
+====
+
+
+[[algorithms-wcc-syntax]]
+== Syntax
+
+.The following will load a graph, run the algorithm, and write back results:
+[source, cypher]
+----
+CALL algo.unionFind(label: String, relationship: String, {
+  threshold: 0.42,
+  defaultValue: 1.0,
+  write: true,
+  writeProperty: 'partition',
+  weightProperty: 'weight',
+  concurrency: 4
+})
+YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
+----
+
+.Parameters
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name         | Type    | Default | Optional | Description
+| node label   | string  | null    | yes      | The node label to load from the graph. If null, load all nodes.
+| relationship | string  | null    | yes      | The relationship type to load from the graph. If null, load all relationships.
+| config       | map     | {}      | yes      | Additional configuration, see below.
+|===
+
+.Configuration
+[opts="header",cols="1m,1,1,1,4"]
+|===
+| Name              | Type    | Default                   | Optional | Description
+| concurrency       | int     | available CPUs            | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
+| readConcurrency   | int     | value of 'concurrency'    | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency  | int     | value of 'concurrency'    | yes      | The number of concurrent threads used for writing the result.
+| weightProperty    | string  | `null`                    | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
+| seedProperty      | string  | n/a                       | yes      | Used to set the initial community for a node. The property value needs to be a number.
+| write             | boolean | `true`                    | yes      | Specifies if the result should be written back as a node property.
+| writeProperty     | string  | `'partition'`             | yes      | The property name written back the ID of the partition particular node belongs to.
+| threshold         | float   | `null`                    | yes      | The value of the weight above which the relationship is not thrown away.
+| defaultValue      | float   | `null`                    | yes      | The default value of the weight in case it is missing or invalid.
+| consecutiveIds    | boolean | `false`                   | yes      | Community identifiers are mapped into a consecutive id space (requires additional memory).
+| graph             | string  | `'huge'`                  | yes      | Use `'huge'` when describing the subset of the graph with label and relationship type parameter. Use `'cypher'` for describing the subset using a Cypher query for nodes and relationships.
+|===
+
+.Results
+[opts="header",cols="1m,1,6"]
+|===
+| Name          | Type | Description
+| loadMillis    | int  | Milliseconds for loading data.
+| computeMillis | int  | Milliseconds for running the algorithm.
+| writeMillis   | int  | Milliseconds for writing result data back.
+
+| postProcessingMillis    | int  | Milliseconds for computing percentiles and community count.
+| nodes | int | The number of nodes considered.
+| communityCount | int  | The number of communities found.
+
+| p1                   | double  | The 1 percentile of community size.
+| p5                   | double  | The 5 percentile of community size.
+| p10                   | double  | The 10 percentile of community size.
+| p25                   | double  | The 25 percentile of community size.
+| p50                   | double  | The 50 percentile of community size.
+| p75                   | double  | The 75 percentile of community size.
+| p90                   | double  | The 90 percentile of community size.
+| p95                   | double  | The 95 percentile of community size.
+| p99                   | double  | The 99 percentile of community size.
+| p100                  | double  | The 100 percentile of community size.
+
+| write | boolean | Specifies if the result was written back as a node property.
+| writeProperty | string | The property name written back to.
+|===
+
+
+.The following will run the algorithm and stream results:
+[source, cypher]
+----
+CALL algo.unionFind.stream(label: String, relationship: String, {
+    weightProperty: 'weight',
+    threshold: 0.42,
+    defaultValue: 1.0,
+    concurrency: 4
+})
+YIELD nodeId, setId
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type    | Default        | Optional | Description
+| node label        | string  | `null`         | yes      | The node label to load from the graph. If null, load all nodes.
+| relationship type | string  | `null`         | yes      | The relationship type to load from the graph. If null, load all relationships.
+| config            | map     | `{}`           | yes      | Additional configuration, see below.
+|===
+
+.Configuration
+[opts="header",cols="1m,1,1,1,4"]
+|===
+| Name              | Type    | Default                   | Optional | Description
+| concurrency       | int     | available CPUs            | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
+| readConcurrency   | int     | value of 'concurrency'    | yes      | The number of concurrent threads used for reading the graph.
+| weightProperty    | string  | `null`                    | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
+| seedProperty      | string  | n/a                       | yes      | Used to set the initial community for a node. The property value needs to be a number.
+| threshold         | float   | `null`                    | yes      | The value of the weight above which the relationship is not thrown away.
+| defaultValue      | float   | `null`                    | yes      | The default value of the weight in case it is missing or invalid.
+| consecutiveIds    | boolean | `false`                   | yes      | Community identifiers are mapped into a consecutive id space (requires additional memory).
+| graph             | string  | `'huge'`                  | yes      | Use `'huge'` when describing the subset of the graph with label and relationship-type parameter. Use `'cypher'` for describing the subset using a Cypher query for nodes and relationships.
+|===
+
+.Results
+[opts="header",cols="1m,1,6"]
+|===
+| Name   | Type | Description
+| nodeId | int  | Node ID
+| setId  | int  | Partition ID
+|===
+
+
+[[algorithms-wcc-sample]]
 == Connected Components algorithm sample
 
 If we recall that an undirected graph is connected if, for every pair of vertices there is a path in the graph between those vertices.
@@ -69,7 +185,7 @@ include::scripts/connected-components.cypher[tag=create-sample-graph]
 ----
 
 
-[[algorithms-connected-components-sample-unweighted]]
+[[algorithms-wcc-sample-unweighted]]
 === Unweighted version
 
 .The following will run the algorithm and stream results:
@@ -110,7 +226,7 @@ include::scripts/connected-components.cypher[tag=check-results-sample-graph]
 ----
 
 
-[[algorithms-connected-components-sample-weighted]]
+[[algorithms-wcc-sample-weighted]]
 === Weighted version
 
 If you define the property that holds the weight (`weightProperty`) and the threshold, it means the nodes are only connected, if the threshold on the weight of the relationship is high enough, otherwise the relationship is thrown away.
@@ -146,7 +262,7 @@ In this case we can see that, because the weight of the relationship between Bri
 // end::weighted-stream-sample-graph-explanation[]
 
 
-[[algorithms-connected-components-example]]
+[[algorithms-wcc-example]]
 == Example usage
 
 As mentioned above, connected components are an essential step in preprocessing your data.
@@ -176,7 +292,7 @@ We can now move on to next step of analysis and run centralities on only the big
 We will write back the results to the node, and use centralities with Cypher loading, or set a new community identifier for the biggest component.
 
 
-[[algorithms-connected-components-example-seeding]]
+[[algorithms-wcc-example-seeding]]
 === Using seed communities
 
 It is possible to define preliminary communities of nodes using the `seedProperty` parameter.
@@ -196,7 +312,7 @@ the algorithm only writes properties for nodes where the community has changed.
 If they differ, the algorithm writes properties for all nodes.
 
 
-[[algorithms-connected-components-hgp]]
+[[algorithms-wcc-hgp]]
 == Huge graph projection
 
 include::huge-projection.adoc[tag=explanation]
@@ -209,7 +325,7 @@ include::scripts/connected-components.cypher[tag=huge-projection]
 ----
 
 
-[[algorithms-connected-components-cp]]
+[[algorithms-wcc-cp]]
 == Cypher projection
 
 include::projected-graph-model/cypher-projection.adoc[tag=explanation]
@@ -222,112 +338,7 @@ include::scripts/connected-components.cypher[tag=cypher-loading]
 ----
 
 
-[[algorithms-connected-components-syntax]]
-== Syntax
-
-.The following will run the algorithm and write back results:
-[source, cypher]
-----
-CALL algo.unionFind(label:String, relationship:String, {threshold:0.42,
-    defaultValue:1.0, write: true, writeProperty:'partition', weightProperty:'weight', graph:'huge', concurrency:4})
-YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
-----
-
-.Parameters
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name              | Type    | Default        | Optional | Description
-| node label        | string  | null           | yes      | The label to load from the graph. If null, load all nodes.
-| relationship type | string  | null           | yes      | The relationship type to load from the graph. If null, load all relationships.
-| config            | map     | n/a            | yes      | Additional configuration.
-|===
-
-.Configuration
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name             | Type    | Default                | Optional | Description
-| concurrency      | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
-| readConcurrency  | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| weightProperty   | string  | null                   | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| seedProperty     | string  | n/a                    | yes      | Used to set the initial community for a node. The property value needs to be a number.
-| write            | boolean | true                   | yes      | Specifies if the result should be written back as a node property.
-| writeProperty    | string  | 'partition'            | yes      | The property name written back the ID of the partition particular node belongs to.
-| threshold        | float   | null                   | yes      | The value of the weight above which the relationship is not thrown away.
-| defaultValue     | float   | null                   | yes      | The default value of the weight in case it is missing or invalid.
-| consecutiveIds   | boolean | false                  | yes      | Community identifiers are mapped into a consecutive id space (requires additional memory).
-| graph            | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
-|===
-
-.Results
-[opts="header",cols="1,1,6"]
-|===
-| Name          | Type | Description
-| loadMillis    | int  | Milliseconds for loading data
-| computeMillis | int  | Milliseconds for running the algorithm
-| writeMillis   | int  | Milliseconds for writing result data back
-| postProcessingMillis    | int  | Milliseconds for computing percentiles and community count
-
-| nodes | int | The number of nodes considered
-| communityCount | int  | The number of communities found
-
-| p1                   | double  | The 1 percentile of community size.
-| p5                   | double  | The 5 percentile of community size.
-| p10                   | double  | The 10 percentile of community size.
-| p25                   | double  | The 25 percentile of community size.
-| p50                   | double  | The 50 percentile of community size.
-| p75                   | double  | The 75 percentile of community size.
-| p90                   | double  | The 90 percentile of community size.
-| p95                   | double  | The 95 percentile of community size.
-| p99                   | double  | The 99 percentile of community size.
-| p100                  | double  | The 100 percentile of community size.
-
-| write | boolean | Specifies if the result was written back as a node property
-| writeProperty | string | The property name written back to
-|===
-
-
-.The following will run the algorithm and stream results:
-[source, cypher]
-----
-CALL algo.unionFind.stream(label:String, relationship:String,
-    {weightProperty:'weight', threshold:0.42, defaultValue:1.0, concurrency:4})
-YIELD nodeId, setId - yields a setId to each node id
-----
-
-.Parameters
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name              | Type    | Default        | Optional | Description
-| node label        | string  | null           | yes      | The label to load from the graph. If null, load all nodes.
-| relationship type | string  | null           | yes      | The relationship type to load from the graph. If null, load all relationships.
-| config            | map     | n/a            | yes      | Additional configuration.
-|===
-
-.Configuration
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name             | Type    | Default                | Optional | Description
-| concurrency      | int    | available CPUs          | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
-| readConcurrency  | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| weightProperty   | string  | null                   | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| seedProperty     | string  | n/a                    | yes      | Used to set the initial community for a node. The property value needs to be a number.
-| threshold        | float   | null                   | yes      | The value of the weight above which the relationship is not thrown away.
-| defaultValue     | float   | null                   | yes      | The default value of the weight in case it is missing or invalid.
-| consecutiveIds   | boolean | false                  | yes      | Community identifiers are mapped into a consecutive id space (requires additional memory).
-| graph            | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
-|===
-
-.Results
-[opts="header"]
-|===
-| Name   | Type | Description
-| nodeId | int  | Node ID
-| setId  | int  | Partition ID
-|===
-
-
-[[algorithms-connected-components-imp]]
+[[algorithms-wcc-imp]]
 == Implementation
 
 `algo.unionFind`
