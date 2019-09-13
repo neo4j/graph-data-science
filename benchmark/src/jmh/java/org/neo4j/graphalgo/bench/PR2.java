@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.bench;
 import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -41,26 +40,21 @@ import java.util.stream.StreamSupport;
 public final class PR2 extends BaseMain {
 
     private boolean runHuge = true;
-    private boolean runHeavy = true;
 
     @Override
     void init(final Collection<String> args) {
         runHuge = !args.contains("heavy");
-        runHeavy = !args.contains("huge");
     }
 
     @Override
     Iterable<String> run(String graphToLoad, final Log log) throws Throwable {
         GraphDatabaseAPI db = LdbcDownloader.openDb(graphToLoad);
 
-        AllocationTracker trackerHuge = AllocationTracker.create();
-        AllocationTracker trackerHeavy = AllocationTracker.create();
-
         GraphLoader graphLoader = new GraphLoader(db)
                 .withExecutorService(Pools.DEFAULT)
                 .withLog(log)
                 .withLogInterval(500, TimeUnit.MILLISECONDS)
-                .withAllocationTracker(trackerHuge)
+                .withAllocationTracker(AllocationTracker.create())
                 .withDirection(Direction.OUTGOING)
                 .sorted()
                 .undirected()
@@ -69,19 +63,17 @@ public final class PR2 extends BaseMain {
 
         System.gc();
 
-        Graph huge = null;
-        Graph heavy = null;
+        Graph graph = null;
         List<String> messages = new ArrayList<>();
 
         try {
-
             if (runHuge) {
                 jprofBookmark("start huge load");
 
                 try (ProgressTimer ignored = ProgressTimer.start(time -> messages.add(String.format(
                         "huge load: %d ms",
                         time)))) {
-                    huge = graphLoader.load(HugeGraphFactory.class);
+                    graph = graphLoader.load(HugeGraphFactory.class);
                 }
 
                 jprofBookmark("end huge load");
@@ -93,82 +85,58 @@ public final class PR2 extends BaseMain {
 //                LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(10L));
             }
 
-            if (runHeavy) {
-                jprofBookmark("start heavy load");
-
-                try (ProgressTimer ignored = ProgressTimer.start(time -> messages.add(String.format(
-                        "heavy load: %d ms",
-                        time)))) {
-                    heavy = graphLoader.withAllocationTracker(trackerHeavy).load(HeavyGraphFactory.class);
-                }
-
-                jprofBookmark("end heavy load");
-
-                System.out.println("after loading heavy");
-                System.gc();
-
-                jprofBookmark("heavy usage");
-//                LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(10L));
-            }
         } catch (Exception e) {
             for (final Throwable throwable : flattenSuppressed(e)) {
                 throwable.printStackTrace();
             }
             throw e;
         } finally {
-            if (huge != null && heavy != null) {
-                final Graph heavyGraph = heavy;
-                final Graph hugeGraph = huge;
-                try (ProgressTimer ignored = ProgressTimer.start(time -> messages.add(String.format(
-                        "traversal: %d ms",
-                        time)))) {
-                    LongArrayList mismatches = new LongArrayList();
-                    long[] matches = new long[1];
-                    hugeGraph.forEachNode((long node) -> {
-                        int degree = heavyGraph.degree((int) node, Direction.OUTGOING);
-                        long[] calcDegree = new long[1];
-                        try {
-                            hugeGraph.forEachOutgoing(node, (src, tgt) -> {
-                                ++calcDegree[0];
-                                return true;
-                            });
-                        } catch (RuntimeException e) {
-                            throw new RuntimeException(String.format(
-                                    "Error in (%d)--> after %d relationships",
-                                    node,
-                                    calcDegree[0]), e);
-                        }
-                        if (degree == calcDegree[0]) {
-                            ++matches[0];
-                        } else {
-                            mismatches.add(node);
-                        }
-                        return true;
-                    });
-
-                    messages.add("matches = " + matches[0]);
-                    messages.add("mismatches = " + mismatches.size());
-                    if (!mismatches.isEmpty()) {
-                        long[] first10Mismatches = StreamSupport.stream(mismatches.spliterator(), false)
-                                .mapToLong(cursor -> cursor.value)
-                                .limit(10)
-                                .toArray();
-                        messages.add("first10Mismatches = " + Arrays.toString(first10Mismatches));
+            try (ProgressTimer ignored = ProgressTimer.start(time -> messages.add(String.format(
+                    "traversal: %d ms",
+                    time)))) {
+                final Graph hugeGraph = graph;
+                LongArrayList mismatches = new LongArrayList();
+                long[] matches = new long[1];
+                hugeGraph.forEachNode((long node) -> {
+                    int degree = hugeGraph.degree((int) node, Direction.OUTGOING);
+                    long[] calcDegree = new long[1];
+                    try {
+                        hugeGraph.forEachOutgoing(node, (src, tgt) -> {
+                            ++calcDegree[0];
+                            return true;
+                        });
+                    } catch (RuntimeException e) {
+                        throw new RuntimeException(String.format(
+                                "Error in (%d)--> after %d relationships",
+                                node,
+                                calcDegree[0]), e);
                     }
-                } finally {
-                    System.out.println("after traversing");
-                    System.gc();
+                    if (degree == calcDegree[0]) {
+                        ++matches[0];
+                    } else {
+                        mismatches.add(node);
+                    }
+                    return true;
+                });
+
+                messages.add("matches = " + matches[0]);
+                messages.add("mismatches = " + mismatches.size());
+                if (!mismatches.isEmpty()) {
+                    long[] first10Mismatches = StreamSupport.stream(mismatches.spliterator(), false)
+                            .mapToLong(cursor -> cursor.value)
+                            .limit(10)
+                            .toArray();
+                    messages.add("first10Mismatches = " + Arrays.toString(first10Mismatches));
                 }
+            } finally {
+                System.out.println("after traversing");
+                System.gc();
             }
 //            jprofBookmark("shutdown");
 
-            if (huge != null) {
-                huge.release();
-                huge = null;
-            }
-            if (heavy != null) {
-                heavy.release();
-                heavy = null;
+            if (graph != null) {
+                graph.release();
+                graph = null;
             }
             System.out.println("after graph.release");
             System.gc();

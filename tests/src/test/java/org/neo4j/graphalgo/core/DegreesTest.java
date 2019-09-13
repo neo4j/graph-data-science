@@ -26,7 +26,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
@@ -99,7 +98,6 @@ public class DegreesTest {
     public static Collection<Object[]> data() {
 
         return Arrays.<Object[]>asList(
-                new Object[]{HeavyGraphFactory.class, "heavy"},
                 new Object[]{HugeGraphFactory.class, "huge"}
         );
     }

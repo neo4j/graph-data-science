@@ -31,7 +31,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-public abstract class ConnectedComponentsTest extends HeavyHugeTester {
+public abstract class ConnectedComponentsTest extends HugeTester {
 
     protected static GraphDatabaseAPI api;
     protected static Graph graph;

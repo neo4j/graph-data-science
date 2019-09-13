@@ -25,7 +25,6 @@ import org.junit.Test;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -74,7 +73,7 @@ public class ClosenessCentralityDiscoTest {
 
     @Test
     public void testHeavy() {
-        Graph graph = load(HeavyGraphFactory.class);
+        Graph graph = load(HugeGraphFactory.class);
         test(graph);
     }
 

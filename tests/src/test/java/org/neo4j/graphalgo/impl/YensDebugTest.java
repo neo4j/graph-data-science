@@ -24,8 +24,7 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraph;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
+import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.impl.yens.WeightedPath;
 import org.neo4j.graphalgo.impl.yens.YensKShortestPaths;
 import org.neo4j.graphdb.Direction;
@@ -36,8 +35,7 @@ import org.neo4j.test.rule.ImpermanentDatabaseRule;
 import java.util.List;
 import java.util.function.DoubleConsumer;
 
-import static org.mockito.AdditionalMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 /**
  * Graph:
@@ -82,13 +80,13 @@ public class YensDebugTest {
 
         db.execute(cypher);
 
-        graph = (HeavyGraph) new GraphLoader(db)
+        graph = new GraphLoader(db)
                 .withAnyRelationshipType()
                 .withAnyLabel()
                 .withoutNodeProperties()
                 .withRelationshipWeightsFromProperty("cost", Double.MAX_VALUE)
                 .withDirection(Direction.BOTH)
-                .load(HeavyGraphFactory.class);
+                .load(HugeGraphFactory.class);
     }
 
     @Test

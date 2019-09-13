@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.huge.loader;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -53,7 +52,7 @@ public class CypherGraphFactory extends GraphFactory {
         BatchLoadResult relCount = new CountingCypherRecordLoader(setup.relationshipType, api, setup).load();
         dimensions.maxRelCount(relCount.rows());
 
-        return HeavyGraphFactory.getMemoryEstimation(setup, dimensions);
+        return HugeGraphFactory.getMemoryEstimation(setup, dimensions);
     }
 
     @Override

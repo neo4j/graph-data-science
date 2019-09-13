@@ -58,7 +58,7 @@ import java.util.stream.LongStream;
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 public class WeightedPageRankBenchmarkLdbc {
 
-    @Param({"HEAVY"})
+    @Param({"HUGE"})
     GraphImpl graph;
 
     @Param({"false"})

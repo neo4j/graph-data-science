@@ -19,9 +19,9 @@
 package org.neo4j.graphalgo.bench;
 
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraph;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
+import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -65,12 +65,12 @@ public class LabelPropagationBenchmarkLdbc {
     int iterations;
 
     private GraphDatabaseAPI db;
-    private HeavyGraph graph;
+    private Graph graph;
 
     @Setup
     public void setup() throws IOException {
         db = LdbcDownloader.openDb("L10:8G");
-        graph = (HeavyGraph) new GraphLoader(db)
+        graph = new GraphLoader(db)
                 .withAnyLabel()
                 .withAnyRelationshipType()
                 .withRelationshipWeightsFromProperty("weight", 1.0D)
@@ -79,7 +79,7 @@ public class LabelPropagationBenchmarkLdbc {
                         PropertyMapping.of(SEED_TYPE, SEED_TYPE, 0.0)
                 )
                 .withExecutorService(Pools.DEFAULT)
-                .load(HeavyGraphFactory.class);
+                .load(HugeGraphFactory.class);
     }
 
     @TearDown

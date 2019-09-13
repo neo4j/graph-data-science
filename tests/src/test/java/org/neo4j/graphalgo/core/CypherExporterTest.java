@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -87,24 +86,6 @@ public final class CypherExporterTest {
                 "  (n2)-[:TYPE]->(n3);";
 
         assertEquals(expected, output.toString().trim());
-    }
-
-    @Test
-    public void testDumpByGraphForHeavy() {
-        //language=Cypher
-        String expected =
-                "CREATE (n0 {property:42.0})\n" +
-                "CREATE (n1 {property:42.1337})\n" +
-                "CREATE (n2 {property:42.0})\n" +
-                "CREATE (n3 {property:42.0})\n" +
-                "CREATE\n" +
-                "  (n0)-[ {weight:1337.4200439453125}]->(n2),\n" +
-                "  (n0)-[ {weight:42.0}]->(n1),\n" +
-                "  (n1)-[ {weight:42.0}]->(n2),\n" +
-                "  (n2)-[ {weight:42.0}]->(n3);";
-
-        String output = dumpGraph(HeavyGraphFactory.class);
-        assertEquals(expected, output);
     }
 
     @Test

@@ -58,7 +58,7 @@ import java.util.concurrent.atomic.LongAdder;
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 public class MsBfsBenchmarkLdbc {
 
-    @Param({"HEAVY", "HUGE"})
+    @Param({"HUGE"})
     GraphImpl graph;
 
     @Param({"L01", "L10"})

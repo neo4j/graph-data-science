@@ -26,7 +26,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphdb.Direction;
@@ -66,7 +65,6 @@ public class RelationshipPredicateTest {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(
-                new Object[]{"Heavy", HeavyGraphFactory.class},
                 new Object[]{"Huge", HugeGraphFactory.class},
                 new Object[]{"View", GraphViewFactory.class}
         );
@@ -102,7 +100,7 @@ public class RelationshipPredicateTest {
         final Graph graph = loader()
                 .withDirection(Direction.OUTGOING)
                 .sorted()
-                .load(HeavyGraphFactory.class);
+                .load(HugeGraphFactory.class);
 
         // A -> B
         assertTrue(graph.exists(
@@ -150,7 +148,7 @@ public class RelationshipPredicateTest {
         final Graph graph = loader()
                 .withDirection(Direction.INCOMING)
                 .sorted()
-                .load(HeavyGraphFactory.class);
+                .load(HugeGraphFactory.class);
 
         // B <- A
         assertTrue(graph.exists(
@@ -205,7 +203,7 @@ public class RelationshipPredicateTest {
         final Graph graph = loader()
                 .withDirection(Direction.BOTH)
                 .sorted()
-                .load(HeavyGraphFactory.class);
+                .load(HugeGraphFactory.class);
 
         // A -> B
         assertTrue(graph.exists(

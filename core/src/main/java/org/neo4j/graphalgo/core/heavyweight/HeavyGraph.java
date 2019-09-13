@@ -19,243 +19,226 @@
  */
 package org.neo4j.graphalgo.core.heavyweight;
 
-import org.neo4j.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeWeightMapping;
-import org.neo4j.graphalgo.api.RelationshipConsumer;
-import org.neo4j.graphalgo.api.RelationshipIntersect;
-import org.neo4j.graphalgo.api.WeightMapping;
-import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
-import org.neo4j.graphalgo.core.IntIdMap;
-import org.neo4j.graphalgo.core.utils.RawValues;
-import org.neo4j.graphdb.Direction;
-
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.LongPredicate;
-
 /**
  * Heavy weighted graph built of an adjacency matrix.
  *
  * @author mknblch
  */
-public class HeavyGraph implements Graph {
+public class HeavyGraph {
 
     public static final String TYPE = "heavy";
 
-    private final IntIdMap nodeIdMap;
-    private AdjacencyMatrix container;
-
-    private final long relationshipCount;
-    private Map<String, WeightMapping> nodePropertiesMapping;
-
-    private boolean canRelease = true;
-    private final boolean isUndirected;
-
-    public HeavyGraph(
-            IntIdMap nodeIdMap,
-            AdjacencyMatrix container,
-            long relationshipCount,
-            Map<String, WeightMapping> nodePropertiesMapping,
-            boolean isUndirected) {
-        this.nodeIdMap = nodeIdMap;
-        this.container = container;
-        this.relationshipCount = relationshipCount;
-        this.nodePropertiesMapping = nodePropertiesMapping;
-        this.isUndirected = isUndirected;
-    }
-
-    @Override
-    public long nodeCount() {
-        return nodeIdMap.size();
-    }
-
-    @Override
-    public long relationshipCount() {
-        return relationshipCount;
-    }
-
-    @Override
-    public void forEachNode(LongPredicate consumer) {
-        nodeIdMap.forEachNode(consumer);
-    }
-
-    @Override
-    public PrimitiveLongIterator nodeIterator() {
-        return nodeIdMap.iterator();
-    }
-
-    @Override
-    public Collection<PrimitiveLongIterable> batchIterables(int batchSize) {
-        return nodeIdMap.longBatchIterables(batchSize);
-    }
-
-    @Override
-    public int degree(long nodeId, Direction direction) {
-        return container.degree(nodeId, direction);
-    }
-
-    @Override
-    public void forEachRelationship(long nodeId, Direction direction, RelationshipConsumer consumer) {
-        container.forEach(nodeId, direction, consumer);
-    }
-
-    @Override
-    public void forEachRelationship(
-            final long nodeId,
-            final Direction direction,
-            final WeightedRelationshipConsumer consumer) {
-        container.forEach(nodeId, direction, consumer);
-    }
-
-    @Override
-    public long toMappedNodeId(long originalNodeId) {
-        return nodeIdMap.get(originalNodeId);
-    }
-
-    @Override
-    public long toOriginalNodeId(long mappedNodeId) {
-        return nodeIdMap.toOriginalNodeId(mappedNodeId);
-    }
-
-    @Override
-    public boolean contains(final long nodeId) {
-        return nodeIdMap.contains(nodeId);
-    }
-
-    @Override
-    public double weightOf(final long sourceNodeId, final long targetNodeId) {
-        checkSize(sourceNodeId, targetNodeId);
-        return container.weightOf((int) sourceNodeId, (int) targetNodeId);
-    }
-
-    public boolean hasWeights() {
-        return container.hasWeights();
-    }
-
-    @Override
-    public HugeWeightMapping nodeProperties(String type) {
-        WeightMapping weightMapping = nodePropertiesMapping.get(type);
-
-        // TODO: get rid of that check
-        if (weightMapping == null) {
-            return null;
-        }
-
-        return new HugeWeightMapping() {
-
-            @Override
-            public long size() {
-                return weightMapping.size();
-            }
-
-            @Override
-            public double weight(long source, long target) {
-                checkSize(source, target);
-                return weightMapping.weight((int) source, (int) target);
-            }
-
-            @Override
-            public double weight(long source, long target, double defaultValue) {
-                checkSize(source, target);
-                return weightMapping.weight(RawValues.combineIntInt((int) source, (int) target), defaultValue);
-            }
-
-            @Override
-            public long getMaxValue() {
-                return weightMapping.getMaxValue();
-            }
-
-            @Override
-            public long release() {
-                return 0;
-            }
-        };
-    }
-
-    @Override
-    public Set<String> availableNodeProperties() {
-        return nodePropertiesMapping.keySet();
-    }
-
-    @Override
-    public void releaseTopology() {
-        if (!canRelease) return;
-        container = null;
-    }
-
-    @Override
-    public void releaseProperties() {
-        if (canRelease) {
-            nodePropertiesMapping.clear();
-        }
-    }
-
-    @Override
-    public boolean exists(long sourceNodeId, long targetNodeId, Direction direction) {
-
-        switch (direction) {
-            case OUTGOING:
-                return container.hasOutgoing(sourceNodeId, targetNodeId);
-
-            case INCOMING:
-                return container.hasIncoming(sourceNodeId, targetNodeId);
-
-            default:
-                return container.hasOutgoing(sourceNodeId, targetNodeId) || container.hasIncoming(
-                        sourceNodeId,
-                        targetNodeId);
-        }
-    }
-
-    @Override
-    public long getTarget(long nodeId, long index, Direction direction) {
-        switch (direction) {
-            case OUTGOING:
-                return container.getTargetOutgoing(nodeId, index);
-
-            case INCOMING:
-                return container.getTargetIncoming(nodeId, index);
-
-            default:
-                return container.getTargetBoth(nodeId, index);
-        }
-    }
-
-    @Override
-    public String getType() {
-        return TYPE;
-    }
-
-    @Override
-    public boolean isUndirected() {
-        return isUndirected;
-    }
-
-    @Override
-    public Direction getLoadDirection() {
-        return container.getLoadDirection();
-    }
-
-    @Override
-    public void canRelease(boolean canRelease) {
-        this.canRelease = canRelease;
-    }
-
-    @Override
-    public RelationshipIntersect intersection() {
-        return (nodeId, consumer) -> container.intersectAll(Math.toIntExact(nodeId), consumer);
-    }
-
-    //TODO: Remove this once we have confidence
-    // Could turn into assertion and go with compiling with/without -ea
-    public static void checkSize(long... values) {
-        for (long v : values) {
-            if (v > Integer.MAX_VALUE) {
-                throw new IllegalStateException("Long value too large for int: " + v);
-            }
-        }
-    }
+//    private final IntIdMap nodeIdMap;
+//    private AdjacencyMatrix container;
+//
+//    private final long relationshipCount;
+//    private Map<String, WeightMapping> nodePropertiesMapping;
+//
+//    private boolean canRelease = true;
+//    private final boolean isUndirected;
+//
+//    public HeavyGraph(
+//            IntIdMap nodeIdMap,
+//            AdjacencyMatrix container,
+//            long relationshipCount,
+//            Map<String, WeightMapping> nodePropertiesMapping,
+//            boolean isUndirected) {
+//        this.nodeIdMap = nodeIdMap;
+//        this.container = container;
+//        this.relationshipCount = relationshipCount;
+//        this.nodePropertiesMapping = nodePropertiesMapping;
+//        this.isUndirected = isUndirected;
+//    }
+//
+//    @Override
+//    public long nodeCount() {
+//        return nodeIdMap.size();
+//    }
+//
+//    @Override
+//    public long relationshipCount() {
+//        return relationshipCount;
+//    }
+//
+//    @Override
+//    public void forEachNode(LongPredicate consumer) {
+//        nodeIdMap.forEachNode(consumer);
+//    }
+//
+//    @Override
+//    public PrimitiveLongIterator nodeIterator() {
+//        return nodeIdMap.iterator();
+//    }
+//
+//    @Override
+//    public Collection<PrimitiveLongIterable> batchIterables(int batchSize) {
+//        return nodeIdMap.longBatchIterables(batchSize);
+//    }
+//
+//    @Override
+//    public int degree(long nodeId, Direction direction) {
+//        return container.degree(nodeId, direction);
+//    }
+//
+//    @Override
+//    public void forEachRelationship(long nodeId, Direction direction, RelationshipConsumer consumer) {
+//        container.forEach(nodeId, direction, consumer);
+//    }
+//
+//    @Override
+//    public void forEachRelationship(
+//            final long nodeId,
+//            final Direction direction,
+//            final WeightedRelationshipConsumer consumer) {
+//        container.forEach(nodeId, direction, consumer);
+//    }
+//
+//    @Override
+//    public long toMappedNodeId(long originalNodeId) {
+//        return nodeIdMap.get(originalNodeId);
+//    }
+//
+//    @Override
+//    public long toOriginalNodeId(long mappedNodeId) {
+//        return nodeIdMap.toOriginalNodeId(mappedNodeId);
+//    }
+//
+//    @Override
+//    public boolean contains(final long nodeId) {
+//        return nodeIdMap.contains(nodeId);
+//    }
+//
+//    @Override
+//    public double weightOf(final long sourceNodeId, final long targetNodeId) {
+//        checkSize(sourceNodeId, targetNodeId);
+//        return container.weightOf((int) sourceNodeId, (int) targetNodeId);
+//    }
+//
+//    public boolean hasWeights() {
+//        return container.hasWeights();
+//    }
+//
+//    @Override
+//    public HugeWeightMapping nodeProperties(String type) {
+//        WeightMapping weightMapping = nodePropertiesMapping.get(type);
+//
+//        // TODO: get rid of that check
+//        if (weightMapping == null) {
+//            return null;
+//        }
+//
+//        return new HugeWeightMapping() {
+//
+//            @Override
+//            public long size() {
+//                return weightMapping.size();
+//            }
+//
+//            @Override
+//            public double weight(long source, long target) {
+//                checkSize(source, target);
+//                return weightMapping.weight((int) source, (int) target);
+//            }
+//
+//            @Override
+//            public double weight(long source, long target, double defaultValue) {
+//                checkSize(source, target);
+//                return weightMapping.weight(RawValues.combineIntInt((int) source, (int) target), defaultValue);
+//            }
+//
+//            @Override
+//            public long getMaxValue() {
+//                return weightMapping.getMaxValue();
+//            }
+//
+//            @Override
+//            public long release() {
+//                return 0;
+//            }
+//        };
+//    }
+//
+//    @Override
+//    public Set<String> availableNodeProperties() {
+//        return nodePropertiesMapping.keySet();
+//    }
+//
+//    @Override
+//    public void releaseTopology() {
+//        if (!canRelease) return;
+//        container = null;
+//    }
+//
+//    @Override
+//    public void releaseProperties() {
+//        if (canRelease) {
+//            nodePropertiesMapping.clear();
+//        }
+//    }
+//
+//    @Override
+//    public boolean exists(long sourceNodeId, long targetNodeId, Direction direction) {
+//
+//        switch (direction) {
+//            case OUTGOING:
+//                return container.hasOutgoing(sourceNodeId, targetNodeId);
+//
+//            case INCOMING:
+//                return container.hasIncoming(sourceNodeId, targetNodeId);
+//
+//            default:
+//                return container.hasOutgoing(sourceNodeId, targetNodeId) || container.hasIncoming(
+//                        sourceNodeId,
+//                        targetNodeId);
+//        }
+//    }
+//
+//    @Override
+//    public long getTarget(long nodeId, long index, Direction direction) {
+//        switch (direction) {
+//            case OUTGOING:
+//                return container.getTargetOutgoing(nodeId, index);
+//
+//            case INCOMING:
+//                return container.getTargetIncoming(nodeId, index);
+//
+//            default:
+//                return container.getTargetBoth(nodeId, index);
+//        }
+//    }
+//
+//    @Override
+//    public String getType() {
+//        return TYPE;
+//    }
+//
+//    @Override
+//    public boolean isUndirected() {
+//        return isUndirected;
+//    }
+//
+//    @Override
+//    public Direction getLoadDirection() {
+//        return container.getLoadDirection();
+//    }
+//
+//    @Override
+//    public void canRelease(boolean canRelease) {
+//        this.canRelease = canRelease;
+//    }
+//
+//    @Override
+//    public RelationshipIntersect intersection() {
+//        return (nodeId, consumer) -> container.intersectAll(Math.toIntExact(nodeId), consumer);
+//    }
+//
+//    //TODO: Remove this once we have confidence
+//    // Could turn into assertion and go with compiling with/without -ea
+//    public static void checkSize(long... values) {
+//        for (long v : values) {
+//            if (v > Integer.MAX_VALUE) {
+//                throw new IllegalStateException("Long value too large for int: " + v);
+//            }
+//        }
+//    }
 }

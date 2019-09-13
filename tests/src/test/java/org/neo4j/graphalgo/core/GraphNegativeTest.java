@@ -28,7 +28,6 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphdb.Label;
@@ -51,7 +50,6 @@ public final class GraphNegativeTest extends RandomGraphTestCase {
     @Parameters(name = "{1}")
     public static Collection<Object[]> data() {
         return Arrays.asList(
-                new Object[]{HeavyGraphFactory.class, "HeavyGraphFactory"},
                 new Object[]{GraphViewFactory.class, "GraphViewFactory"},
                 new Object[]{HugeGraphFactory.class, "HugeGraphFactory"}
         );

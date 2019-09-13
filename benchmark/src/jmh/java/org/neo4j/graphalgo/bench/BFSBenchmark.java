@@ -64,7 +64,7 @@ public class BFSBenchmark {
     @Param({"0.2", "0.5", "0.8"})
     private double connectedness;
 
-    @Param({"HEAVY", "HUGE"})
+    @Param({"HUGE"})
     GraphImpl graph;
 
     @Setup

@@ -54,7 +54,7 @@ import java.util.concurrent.TimeUnit;
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
 public class UnionFindBenchmark {
 
-    @Param({"HEAVY", "HUGE"})
+    @Param({"HUGE"})
     GraphImpl graph;
 
     private Graph theGraph;

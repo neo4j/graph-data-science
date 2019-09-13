@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.impl.msbfs;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.neo4j.graphalgo.HeavyHugeTester;
+import org.neo4j.graphalgo.HugeTester;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
@@ -53,7 +53,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.neo4j.graphdb.Direction.OUTGOING;
 
-public final class MultiSourceBFSTest extends HeavyHugeTester {
+public final class MultiSourceBFSTest extends HugeTester {
 
     private static final String PAPER_CYPHER = "" +
             "CREATE (a:Foo {id:\"1\"})\n" +

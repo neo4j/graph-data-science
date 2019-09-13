@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.bench;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeWeights;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
+import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -72,7 +72,7 @@ public class InfoMapGraph {
                 .withAnyLabel()
                 .withAnyRelationshipType()
                 .undirected()
-                .load(HeavyGraphFactory.class);
+                .load(HugeGraphFactory.class);
 
 
         final PageRank.Config algoConfig = new PageRank.Config(iterations, 1.0 - tau, PageRank.DEFAULT_TOLERANCE);

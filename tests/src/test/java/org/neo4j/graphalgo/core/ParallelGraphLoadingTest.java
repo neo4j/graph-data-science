@@ -27,10 +27,8 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.PrivateLookup;
-import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
@@ -78,8 +76,6 @@ public class ParallelGraphLoadingTest extends RandomGraphTestCase {
     @Parameters(name = "{2}")
     public static Collection<Object[]> data() {
         return Arrays.asList(
-                new Object[]{30, HeavyGraphFactory.class, "Heavy, parallel"},
-                new Object[]{100000, HeavyGraphFactory.class, "Heavy, sequential"},
                 new Object[]{30, HugeGraphFactory.class, "Huge, parallel"},
                 new Object[]{100000, HugeGraphFactory.class, "Huge, sequential"}
         );

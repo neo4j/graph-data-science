@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.impl.unionfind;
 import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -42,9 +41,6 @@ public abstract class UnionFindTestBase {
 
     static Stream<Arguments> parameters() {
         return Stream.of(
-                arguments("Heavy", HeavyGraphFactory.class, UnionFindType.PARALLEL),
-                arguments("Heavy", HeavyGraphFactory.class, UnionFindType.FJ_MERGE),
-                arguments("Heavy", HeavyGraphFactory.class, UnionFindType.FORK_JOIN),
                 arguments("Huge", HugeGraphFactory.class, UnionFindType.PARALLEL),
                 arguments("Huge", HugeGraphFactory.class, UnionFindType.FJ_MERGE),
                 arguments("Huge", HugeGraphFactory.class, UnionFindType.FORK_JOIN),

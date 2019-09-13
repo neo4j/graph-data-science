@@ -59,7 +59,7 @@ public class WeightedPageRankBenchmark {
     @Param({"5", "20", "100"})
     int iterations;
 
-    @Param({"HEAVY", "VIEW", "HUGE"})
+    @Param({"VIEW", "HUGE"})
     GraphImpl impl;
 
     private GraphDatabaseAPI db;

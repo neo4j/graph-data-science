@@ -38,7 +38,6 @@ import java.util.Collections;
 import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.core.heavyweight.HeavyGraph.checkSize;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
@@ -170,7 +169,6 @@ public class IntIdMap {
     }
 
     public long toOriginalNodeId(long nodeId) {
-        checkSize(nodeId);
         return graphIds[(int) nodeId];
     }
 

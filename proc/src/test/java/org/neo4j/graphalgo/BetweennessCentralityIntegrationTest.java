@@ -28,10 +28,7 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.helper.graphbuilder.DefaultBuilder;
 import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.impl.betweenness.BetweennessCentrality;
@@ -54,7 +51,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author mknblch
  */
-public class BetweennessCentralityIntegrationTest extends HeavyHugeTester {
+public class BetweennessCentralityIntegrationTest extends HugeTester {
 
     public static final String TYPE = "TYPE";
     private final String graphName;

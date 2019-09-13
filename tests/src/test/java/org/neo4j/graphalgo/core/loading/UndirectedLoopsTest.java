@@ -25,7 +25,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
+import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
@@ -68,7 +68,7 @@ public final class UndirectedLoopsTest {
                 .withRelationshipWeightsFromProperty("cost", Double.MAX_VALUE)
                 .withDirection(Direction.OUTGOING)
                 .undirected()
-                .load(HeavyGraphFactory.class);
+                .load(HugeGraphFactory.class);
 
         LongArrayList nodes = new LongArrayList();
         graph.forEachNode(nodeId -> {

@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.core;
 
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraph;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
@@ -330,14 +329,12 @@ public class ProcedureConfiguration {
     public Class<? extends GraphFactory> getGraphImpl(String defaultGraphImpl) {
         final String graphImpl = getGraphName(defaultGraphImpl);
         switch (graphImpl.toLowerCase(Locale.ROOT)) {
-            case HeavyGraph.TYPE:
-                return HeavyGraphFactory.class;
             case CypherGraphFactory.TYPE:
                 return CypherGraphFactory.class;
-            case LightGraph.TYPE:
-                return HeavyGraphFactory.class;
             case GraphView.TYPE:
                 return GraphViewFactory.class;
+            case LightGraph.TYPE:
+            case HeavyGraph.TYPE:
             case HugeGraph.TYPE:
                 return HugeGraphFactory.class;
             default:
@@ -478,9 +475,6 @@ public class ProcedureConfiguration {
     }
 
     private static String reverseGraphLookup(Class<? extends GraphFactory> cls) {
-        if (HeavyGraphFactory.class.isAssignableFrom(cls)) {
-            return "heavy";
-        }
         if (CypherGraphFactory.class.isAssignableFrom(cls)) {
             return "cypher";
         }

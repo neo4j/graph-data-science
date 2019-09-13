@@ -24,7 +24,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 
@@ -43,7 +42,6 @@ public class TestSupport {
     public static Stream<Class<? extends GraphFactory>> allTypesWithoutCypher() {
         return Stream.of(
                 GraphViewFactory.class,
-                HeavyGraphFactory.class,
                 HugeGraphFactory.class
         );
     }

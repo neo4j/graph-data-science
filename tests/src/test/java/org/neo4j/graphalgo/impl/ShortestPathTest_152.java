@@ -25,7 +25,7 @@ import org.junit.Test;
 import org.neo4j.graphalgo.ShortestPathProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
+import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
@@ -92,7 +92,7 @@ public class ShortestPathTest_152 {
                 .withOptionalLabel("Loc")
                 .withRelationshipType("ROAD")
                 .withOptionalRelationshipWeightsFromProperty("d", 0)
-                .load(HeavyGraphFactory.class);
+                .load(HugeGraphFactory.class);
 
         new ShortestPathDijkstra(graph)
                 .compute(startNodeId, endNodeId)
@@ -115,7 +115,7 @@ public class ShortestPathTest_152 {
                 .withOptionalLabel("Loc")
                 .withAnyRelationshipType()
                 .withOptionalRelationshipWeightsFromProperty("d", 0)
-                .load(HeavyGraphFactory.class);
+                .load(HugeGraphFactory.class);
 
         new ShortestPathDijkstra(graph)
                 .compute(startNodeId, endNodeId)

@@ -29,7 +29,7 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
-import org.neo4j.graphalgo.HeavyHugeTester;
+import org.neo4j.graphalgo.HugeTester;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -46,7 +46,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class BetweennessCentralityTest extends HeavyHugeTester {
+public class BetweennessCentralityTest extends HugeTester {
 
     public static final String TYPE = "TYPE";
     private static Graph graph;
