@@ -169,7 +169,11 @@ public final class HugeGraphFactory extends GraphFactory {
         int concurrency = setup.concurrency();
         AllocationTracker tracker = setup.tracker;
         IdsAndProperties mappingAndProperties = loadIdMap(tracker, concurrency);
-        Map<String, Map<String, HugeGraph>> graphs = loadRelationships(dimensions, tracker, mappingAndProperties, concurrency);
+        Map<String, Map<String, HugeGraph>> graphs = loadRelationships(
+                dimensions,
+                tracker,
+                mappingAndProperties,
+                concurrency);
         progressLogger.logDone(tracker);
         return graphs;
     }
@@ -220,6 +224,16 @@ public final class HugeGraphFactory extends GraphFactory {
                     RelationshipsBuilder outgoingRelationshipsBuilder = builders.getLeft();
                     RelationshipsBuilder incomingRelationshipsBuilder = builders.getRight();
 
+                    AdjacencyList outAdjacencyList = outgoingRelationshipsBuilder != null
+                            ? outgoingRelationshipsBuilder.adjacency.build() : null;
+                    AdjacencyOffsets outAdjacencyOffsets = outgoingRelationshipsBuilder != null
+                            ? outgoingRelationshipsBuilder.globalAdjacencyOffsets : null;
+
+                    AdjacencyList inAdjacencyList = incomingRelationshipsBuilder != null
+                            ? incomingRelationshipsBuilder.adjacency.build() : null;
+                    AdjacencyOffsets inAdjacencyOffsets = incomingRelationshipsBuilder != null
+                            ? incomingRelationshipsBuilder.globalAdjacencyOffsets : null;
+
                     if (setup.relationshipPropertyMappings.length == 0) {
                         HugeGraph graph = buildGraph(
                                 tracker,
@@ -227,6 +241,10 @@ public final class HugeGraphFactory extends GraphFactory {
                                 idsAndProperties.properties,
                                 incomingRelationshipsBuilder,
                                 outgoingRelationshipsBuilder,
+                                outAdjacencyList,
+                                outAdjacencyOffsets,
+                                inAdjacencyList,
+                                inAdjacencyOffsets,
                                 0,
                                 0.0,
                                 relationshipCounts.getOrDefault(entry.getKey(), 0L),
@@ -243,6 +261,10 @@ public final class HugeGraphFactory extends GraphFactory {
                                         idsAndProperties.properties,
                                         incomingRelationshipsBuilder,
                                         outgoingRelationshipsBuilder,
+                                        outAdjacencyList,
+                                        outAdjacencyOffsets,
+                                        inAdjacencyList,
+                                        inAdjacencyOffsets,
                                         weightIndex,
                                         setup.relationshipPropertyMappings[weightIndex].defaultValue,
                                         relationshipCounts.getOrDefault(entry.getKey(), 0L),
@@ -270,9 +292,9 @@ public final class HugeGraphFactory extends GraphFactory {
         // TODO: backwards compat code
         if (deduplicationStrategies.length == 0) {
             DeduplicationStrategy deduplicationStrategy =
-                setup.deduplicationStrategy == DeduplicationStrategy.DEFAULT
-                        ? DeduplicationStrategy.SKIP
-                        : setup.deduplicationStrategy;
+                    setup.deduplicationStrategy == DeduplicationStrategy.DEFAULT
+                            ? DeduplicationStrategy.SKIP
+                            : setup.deduplicationStrategy;
             deduplicationStrategies = new DeduplicationStrategy[]{deduplicationStrategy};
         }
 
@@ -305,33 +327,27 @@ public final class HugeGraphFactory extends GraphFactory {
             Map<String, WeightMapping> nodeProperties,
             RelationshipsBuilder inRelationshipsBuilder,
             RelationshipsBuilder outRelationshipsBuilder,
+            AdjacencyList outAdjacencyList,
+            AdjacencyOffsets outAdjacencyOffsets,
+            AdjacencyList inAdjacencyList,
+            AdjacencyOffsets inAdjacencyOffsets,
             int weightIndex,
             double defaultWeight,
             long relationshipCount,
             boolean loadAsUndirected) {
 
-        AdjacencyList outAdjacencyList = null;
-        AdjacencyOffsets outAdjacencyOffsets = null;
         AdjacencyList outWeightList = null;
         AdjacencyOffsets outWeightOffsets = null;
         if (outRelationshipsBuilder != null) {
-            outAdjacencyList = outRelationshipsBuilder.adjacency.build();
-            outAdjacencyOffsets = outRelationshipsBuilder.globalAdjacencyOffsets;
-
             if (setup.shouldLoadRelationshipWeight()) {
                 outWeightList = outRelationshipsBuilder.weights[weightIndex].build();
                 outWeightOffsets = outRelationshipsBuilder.globalWeightOffsets[weightIndex];
             }
         }
 
-        AdjacencyList inAdjacencyList = null;
-        AdjacencyOffsets inAdjacencyOffsets = null;
         AdjacencyList inWeightList = null;
         AdjacencyOffsets inWeightOffsets = null;
         if (inRelationshipsBuilder != null) {
-            inAdjacencyList = inRelationshipsBuilder.adjacency.build();
-            inAdjacencyOffsets = inRelationshipsBuilder.globalAdjacencyOffsets;
-
             if (setup.shouldLoadRelationshipWeight()) {
                 inWeightList = inRelationshipsBuilder.weights[weightIndex].build();
                 inWeightOffsets = inRelationshipsBuilder.globalWeightOffsets[weightIndex];
