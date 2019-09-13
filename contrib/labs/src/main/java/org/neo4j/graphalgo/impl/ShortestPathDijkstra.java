@@ -127,6 +127,10 @@ public class ShortestPathDijkstra extends Algorithm<ShortestPathDijkstra> {
         return finalPath;
     }
 
+    public double[] getFinalPathCosts() {
+        return finalPathCosts.toArray();
+    }
+
     /**
      * get the distance sum of the path
      *

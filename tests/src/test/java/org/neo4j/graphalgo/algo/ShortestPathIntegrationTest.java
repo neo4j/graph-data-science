@@ -83,15 +83,15 @@ public class ShortestPathIntegrationTest {
                         "CREATE (nX:Node{type:'end'})\n" + // end
                         "CREATE\n" +
 
-                        // sum: 5.0
-                        "  (nA)-[:TYPE {cost:5.0}]->(nX),\n" +
-                        // sum: 4.0
-                        "  (nA)-[:TYPE {cost:2.0}]->(nB),\n" +
-                        "  (nB)-[:TYPE {cost:2.0}]->(nX),\n" +
-                        // sum: 3.0
-                        "  (nA)-[:TYPE {cost:1.0}]->(nC),\n" +
-                        "  (nC)-[:TYPE {cost:1.0}]->(nD),\n" +
-                        "  (nD)-[:TYPE {cost:1.0}]->(nX)";
+                        // sum: 9.0
+                        "  (nA)-[:TYPE {cost:9.0}]->(nX),\n" +
+                        // sum: 8.0
+                        "  (nA)-[:TYPE {cost:4.0}]->(nB),\n" +
+                        "  (nB)-[:TYPE {cost:4.0}]->(nX),\n" +
+                        // sum: 6
+                        "  (nA)-[:TYPE {cost:2.0}]->(nC),\n" +
+                        "  (nC)-[:TYPE {cost:2.0}]->(nD),\n" +
+                        "  (nD)-[:TYPE {cost:2.0}]->(nX)";
 
         DB.execute(createGraph).close();
         DB.resolveDependency(Procedures.class).registerProcedure(ShortestPathProc.class);
@@ -141,20 +141,20 @@ public class ShortestPathIntegrationTest {
                     return false;
                 });
 
-        final StepConsumer mock = mock(StepConsumer.class);
+        final CostConsumer mock = mock(CostConsumer.class);
 
         DB.execute("MATCH (n) WHERE exists(n.sssp) RETURN id(n) as id, n.sssp as sssp")
                 .accept(row -> {
                     mock.accept(
                             row.getNumber("id").longValue(),
-                            row.getNumber("sssp").intValue());
+                            row.getNumber("sssp").doubleValue());
                     return true;
                 });
 
-        verify(mock, times(2)).accept(anyLong(), anyInt());
+        verify(mock, times(2)).accept(anyLong(), anyDouble());
 
-        verify(mock, times(1)).accept(anyLong(), eq(0));
-        verify(mock, times(1)).accept(anyLong(), eq(1));
+        verify(mock, times(1)).accept(anyLong(), eq(0.0));
+        verify(mock, times(1)).accept(anyLong(), eq(1.0));
     }
 
     @Test
@@ -170,16 +170,16 @@ public class ShortestPathIntegrationTest {
                 });
         verify(consumer, times(4)).accept(anyLong(), anyDouble());
         verify(consumer, times(1)).accept(anyLong(), eq(0.0));
-        verify(consumer, times(1)).accept(anyLong(), eq(1.0));
         verify(consumer, times(1)).accept(anyLong(), eq(2.0));
-        verify(consumer, times(1)).accept(anyLong(), eq(3.0));
+        verify(consumer, times(1)).accept(anyLong(), eq(4.0));
+        verify(consumer, times(1)).accept(anyLong(), eq(6.0));
     }
 
     @Test
     public void testDijkstra() throws Exception {
         DB.execute(
                 "MATCH (start:Node{type:'start'}), (end:Node{type:'end'}) " +
-                        "CALL algo.shortestPath(start, end, 'cost',{graph:'" + graphImpl + "', write:true, writeProperty:'step'}) " +
+                        "CALL algo.shortestPath(start, end, 'cost',{graph:'" + graphImpl + "', write:true, writeProperty:'cost'}) " +
                         "YIELD loadMillis, evalMillis, writeMillis, nodeCount, totalCost\n" +
                         "RETURN loadMillis, evalMillis, writeMillis, nodeCount, totalCost")
                 .accept((Result.ResultVisitor<Exception>) row -> {
@@ -191,29 +191,29 @@ public class ShortestPathIntegrationTest {
                     return false;
                 });
 
-        final StepConsumer mock = mock(StepConsumer.class);
+        final CostConsumer mock = mock(CostConsumer.class);
 
-        DB.execute("MATCH (n) WHERE exists(n.step) RETURN id(n) as id, n.step as step")
+        DB.execute("MATCH (n) WHERE exists(n.cost) RETURN id(n) as id, n.cost as cost")
                 .accept(row -> {
                     mock.accept(
                             row.getNumber("id").longValue(),
-                            row.getNumber("step").intValue());
+                            row.getNumber("cost").doubleValue());
                     return true;
                 });
 
-        verify(mock, times(4)).accept(anyLong(), anyInt());
+        verify(mock, times(4)).accept(anyLong(), anyDouble());
 
-        verify(mock, times(1)).accept(anyLong(), eq(0));
-        verify(mock, times(1)).accept(anyLong(), eq(1));
-        verify(mock, times(1)).accept(anyLong(), eq(2));
-        verify(mock, times(1)).accept(anyLong(), eq(3));
+        verify(mock, times(1)).accept(anyLong(), eq(0.0));
+        verify(mock, times(1)).accept(anyLong(), eq(2.0));
+        verify(mock, times(1)).accept(anyLong(), eq(4.0));
+        verify(mock, times(1)).accept(anyLong(), eq(6.0));
     }
 
     private interface PathConsumer {
         void accept(long nodeId, double cost);
     }
 
-    interface StepConsumer {
-        void accept(long nodeId, int step);
+    interface CostConsumer {
+        void accept(long nodeId, double cost);
     }
 }
