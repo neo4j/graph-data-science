@@ -33,9 +33,9 @@ import java.util.stream.Collectors;
 
 public final class GraphsByRelationshipType implements GraphByType {
 
-    private final Map<String, HugeGraph> graphs;
+    private final Map<String, ? extends Graph> graphs;
 
-    public GraphsByRelationshipType(Map<String, HugeGraph> graphs) {
+    public GraphsByRelationshipType(Map<String, ? extends Graph> graphs) {
         this.graphs = graphs;
         for (Graph graph : graphs.values()) {
             graph.canRelease(false);
@@ -47,24 +47,24 @@ public final class GraphsByRelationshipType implements GraphByType {
         Set<String> types = RelationshipTypes.parse(relationship);
 
         if (types.isEmpty()) {
-            return new UnionGraph(graphs.values());
+            return UnionGraph.of(graphs.values());
         }
 
         if (types.size() == 1) {
             return getExisting(Iterables.single(types));
         }
 
-        List<HugeGraph> graphs = types.stream().map(this::getExisting).collect(Collectors.toList());
-        return new UnionGraph(graphs);
+        List<Graph> graphs = types.stream().map(this::getExisting).collect(Collectors.toList());
+        return UnionGraph.of(graphs);
     }
 
     @Override
     public Graph loadAllTypes() {
-        return new UnionGraph(graphs.values());
+        return UnionGraph.of(graphs.values());
     }
 
-    private HugeGraph getExisting(String singleType) {
-        HugeGraph graph = this.graphs.get(singleType);
+    private Graph getExisting(String singleType) {
+        Graph graph = this.graphs.get(singleType);
         if (graph == null) {
             throw new IllegalArgumentException("No graph was loaded for " + singleType);
         }
@@ -73,7 +73,7 @@ public final class GraphsByRelationshipType implements GraphByType {
 
     @Override
     public void canRelease(boolean canRelease) {
-        for (HugeGraph graph : graphs.values()) {
+        for (Graph graph : graphs.values()) {
             graph.canRelease(canRelease);
         }
     }

@@ -36,13 +36,20 @@ import java.util.stream.Collectors;
 
 public class UnionGraph implements Graph {
 
-    private final HugeGraph first;
-    private final Collection<HugeGraph> graphs;
+    private final Graph first;
+    private final Collection<? extends Graph> graphs;
 
-    public UnionGraph(Collection<HugeGraph> graphs) {
+    public static Graph of(Collection<? extends Graph> graphs) {
         if (graphs.isEmpty()) {
             throw new IllegalArgumentException("no graphs");
         }
+        if (graphs.size() == 1) {
+            return Iterables.single(graphs);
+        }
+        return new UnionGraph(graphs);
+    }
+
+    private UnionGraph(Collection<? extends Graph> graphs) {
         first = Iterables.first(graphs);
         this.graphs = graphs;
     }
@@ -54,7 +61,7 @@ public class UnionGraph implements Graph {
 
     @Override
     public long relationshipCount() {
-        return graphs.stream().mapToLong(HugeGraph::relationshipCount).sum();
+        return graphs.stream().mapToLong(Graph::relationshipCount).sum();
     }
 
     @Override
@@ -104,14 +111,14 @@ public class UnionGraph implements Graph {
 
     @Override
     public void forEachRelationship(long nodeId, Direction direction, RelationshipConsumer consumer) {
-        for (HugeGraph graph : graphs) {
+        for (Graph graph : graphs) {
             graph.forEachRelationship(nodeId, direction, consumer);
         }
     }
 
     @Override
     public void forEachRelationship(long nodeId, Direction direction, WeightedRelationshipConsumer consumer) {
-        for (HugeGraph graph : graphs) {
+        for (Graph graph : graphs) {
             graph.forEachRelationship(nodeId, direction, consumer);
         }
     }
@@ -123,21 +130,21 @@ public class UnionGraph implements Graph {
 
     @Override
     public void forEachIncoming(long node, final RelationshipConsumer consumer) {
-        for (HugeGraph graph : graphs) {
+        for (Graph graph : graphs) {
             graph.forEachIncoming(node, consumer);
         }
     }
 
     @Override
     public void forEachOutgoing(long node, final RelationshipConsumer consumer) {
-        for (HugeGraph graph : graphs) {
+        for (Graph graph : graphs) {
             graph.forEachOutgoing(node, consumer);
         }
     }
 
     @Override
     public Graph concurrentCopy() {
-        return new UnionGraph(graphs.stream().map(HugeGraph::concurrentCopy).collect(Collectors.toList()));
+        return of(graphs.stream().map(graph -> (Graph) graph.concurrentCopy()).collect(Collectors.toList()));
     }
 
     @Override
@@ -167,21 +174,21 @@ public class UnionGraph implements Graph {
 
     @Override
     public void canRelease(boolean canRelease) {
-        for (HugeGraph graph : graphs) {
+        for (Graph graph : graphs) {
             graph.canRelease(canRelease);
         }
     }
 
     @Override
     public void releaseTopology() {
-        for (HugeGraph graph : graphs) {
+        for (Graph graph : graphs) {
             graph.releaseProperties();
         }
     }
 
     @Override
     public void releaseProperties() {
-        for (HugeGraph graph : graphs) {
+        for (Graph graph : graphs) {
             graph.releaseProperties();
         }
     }
