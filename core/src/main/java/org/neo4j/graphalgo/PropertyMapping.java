@@ -46,7 +46,10 @@ public class PropertyMapping {
     }
 
     public PropertyMapping withDeduplicationStrategy(DeduplicationStrategy deduplicationStrategy) {
-        return new PropertyMapping(propertyName, propertyKey, defaultValue, deduplicationStrategy);
+        if (this.deduplicationStrategy == DeduplicationStrategy.DEFAULT) {
+            return new PropertyMapping(propertyName, propertyKey, defaultValue, deduplicationStrategy);
+        }
+        return this;
     }
 
     public KernelPropertyMapping toKernelMapping(int propertyKeyId) {
