@@ -22,8 +22,10 @@ package org.neo4j.graphalgo;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraph;
-import org.neo4j.graphalgo.core.utils.*;
+import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
+import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.impl.Traverse;
 import org.neo4j.graphalgo.impl.walking.WalkPath;
 import org.neo4j.graphalgo.impl.walking.WalkResult;
@@ -31,7 +33,10 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
-import org.neo4j.procedure.*;
+import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
 
 import java.util.Collections;
 import java.util.List;
@@ -75,7 +80,8 @@ public class TraverseProc {
                 .withOptionalRelationshipWeightsFromProperty(configuration.getWeightProperty(), 1.)
                 .withDirection(configuration.getDirection(Direction.OUTGOING))
                 .withLog(log)
-                .load(configuration.getGraphImpl(HeavyGraph.TYPE));
+                .load(HugeGraphFactory.class);
+
         final Traverse traverse = new Traverse(graph)
                 .withProgressLogger(ProgressLogger.wrap(log, "BFS"))
                 .withTerminationFlag(TerminationFlag.wrap(transaction));
@@ -132,6 +138,7 @@ public class TraverseProc {
                 .setDirection(direction)
                 .setNodeLabelOrQuery(label)
                 .setRelationshipTypeOrQuery(relationship);
+
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .withOptionalLabel(label)
                 .withOptionalRelationshipType(relationship)
@@ -139,7 +146,8 @@ public class TraverseProc {
                 .withOptionalRelationshipWeightsFromProperty(configuration.getWeightProperty(), 1.)
                 .withDirection(configuration.getDirection(Direction.OUTGOING))
                 .withLog(log)
-                .load(configuration.getGraphImpl(HeavyGraph.TYPE));
+                .load(HugeGraphFactory.class);
+
         final Traverse traverse = new Traverse(graph)
                 .withProgressLogger(ProgressLogger.wrap(log, "DFS"))
                 .withTerminationFlag(TerminationFlag.wrap(transaction));

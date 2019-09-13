@@ -57,7 +57,6 @@ public class ShortestPathIntegrationTest599 {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(
-                new Object[]{"Heavy"},
                 new Object[]{"Huge"},
                 new Object[]{"Kernel"}
         );

@@ -19,11 +19,7 @@
  */
 package org.neo4j.graphalgo.api;
 
-import org.neo4j.graphdb.Direction;
-
 /**
- * TODO: What is the contract of this interface? Huge and Heavy calls back on the consumer differently
- *
  * Intersect adjacency lists of two nodes.
  * Only {@link org.neo4j.graphdb.Direction#OUTGOING} is used for intersection.
  * If you want to intersect on {@link org.neo4j.graphdb.Direction#BOTH}, you have to
@@ -31,16 +27,6 @@ import org.neo4j.graphdb.Direction;
  * set to {@code true}.
  */
 public interface RelationshipIntersect {
-
-    /**
-     * @see Degrees#degree(long, Direction)
-     */
-//    int degree(long nodeId);
-
-    /**
-     * @see RelationshipIterator#forEachOutgoing(long, HugeRelationshipConsumer)
-     */
-//    void forEachRelationship(long nodeId, HugeRelationshipConsumer consumer);
 
     void intersectAll(long nodeIdA, IntersectionConsumer consumer);
 }

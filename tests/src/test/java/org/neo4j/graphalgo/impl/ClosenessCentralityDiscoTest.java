@@ -72,12 +72,6 @@ public class ClosenessCentralityDiscoTest {
     }
 
     @Test
-    public void testHeavy() {
-        Graph graph = load(HugeGraphFactory.class);
-        test(graph);
-    }
-
-    @Test
     public void testHuge() {
         Graph graph = load(HugeGraphFactory.class);
         test(graph);

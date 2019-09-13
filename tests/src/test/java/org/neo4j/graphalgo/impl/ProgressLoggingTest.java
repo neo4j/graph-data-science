@@ -44,6 +44,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 
 import static org.junit.Assert.assertTrue;
 
@@ -61,11 +62,7 @@ public class ProgressLoggingTest {
 
     @Parameterized.Parameters(name = "{1}")
     public static Collection<Object[]> data() {
-        return Arrays.<Object[]>asList(
-//                new Object[]{LightGraphFactory.class, "LightGraphFactory"}, // doesn't log yet
-//                new Object[]{GraphViewFactory.class, "GraphViewFactory"}, // doesn't log yet
-                new Object[]{HugeGraphFactory.class, "HugeGraphFactory"}
-        );
+        return Collections.singletonList(new Object[]{HugeGraphFactory.class, "HugeGraphFactory"});
     }
 
     private Class<? extends GraphFactory> graphImpl;

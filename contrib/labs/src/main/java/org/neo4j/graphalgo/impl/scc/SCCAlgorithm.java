@@ -98,7 +98,7 @@ public interface SCCAlgorithm {
 
     /**
      * returns a initialized SCC algorithm based on which
-     * type of graph (huge, heavy) has been supplied.
+     * type of graph has been supplied.
      *
      * @param graph
      * @param tracker

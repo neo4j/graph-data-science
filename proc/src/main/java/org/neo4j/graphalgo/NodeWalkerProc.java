@@ -65,7 +65,7 @@ public class NodeWalkerProc  {
 
 
     @Procedure(name = "algo.randomWalk.stream", mode = Mode.READ)
-    @Description("CALL algo.randomWalk.stream(start:null=all/[ids]/label, steps, walks, {graph: 'heavy/cypher', nodeQuery:nodeLabel/query, relationshipQuery:relType/query, mode:random/node2vec, return:1.0, inOut:1.0, path:false/true concurrency:4, direction:'BOTH'}) " +
+    @Description("CALL algo.randomWalk.stream(start:null=all/[ids]/label, steps, walks, {graph: 'huge/cypher', nodeQuery:nodeLabel/query, relationshipQuery:relType/query, mode:random/node2vec, return:1.0, inOut:1.0, path:false/true concurrency:4, direction:'BOTH'}) " +
             "YIELD nodes, path - computes random walks from given starting points")
     public Stream<WalkResult> randomWalk(
             @Name(value = "start", defaultValue = "null") Object start,

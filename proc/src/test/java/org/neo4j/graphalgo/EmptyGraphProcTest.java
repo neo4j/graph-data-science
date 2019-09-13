@@ -70,7 +70,7 @@ public class EmptyGraphProcTest {
         if (db != null) db.shutdown();
     }
 
-    public String graphImpl = "heavy";
+    public String graphImpl = "huge";
 
     @Test
     public void testUnionFindStream() {

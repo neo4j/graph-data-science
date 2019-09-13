@@ -61,8 +61,6 @@ public class LabelPropagationDeprecatedProcTest extends ProcTestBase {
 
     static Stream<Arguments> parameters() {
         return Stream.of(
-                arguments(false, "heavy"),
-                arguments(true,  "heavy"),
                 arguments(false, "huge"),
                 arguments(true,  "huge")
         );

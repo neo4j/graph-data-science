@@ -68,8 +68,6 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
 
     static Stream<Arguments> parameters() {
         return Stream.of(
-                arguments(false, "heavy"),
-                arguments(true, "heavy"),
                 arguments(false, "huge"),
                 arguments(true, "huge")
         );
@@ -90,12 +88,6 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
 
     static Stream<Arguments> successParameters() {
         return Stream.of(
-                arguments("heavy", "direction: 'BOTH'", "BOTH", 1),
-                arguments("heavy", "direction: 'BOTH'", "OUTGOING", 2),
-                arguments("heavy", "direction: 'BOTH'", "INCOMING", 2),
-                arguments("heavy", "direction: 'OUTGOING'", "OUTGOING", 2),
-                arguments("heavy", "direction: 'INCOMING'", "INCOMING", 2),
-                arguments("heavy", "undirected: true", "BOTH", 1),
                 arguments("huge", "direction: 'BOTH'", "BOTH", 1),
                 arguments("huge", "direction: 'BOTH'", "OUTGOING", 2),
                 arguments("huge", "direction: 'BOTH'", "INCOMING", 2),
@@ -145,12 +137,6 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
 
     static Stream<Arguments> failParameters() {
         return Stream.of(
-                arguments("heavy", "direction: 'OUTGOING'", "INCOMING"),
-                arguments("heavy", "direction: 'OUTGOING'", "BOTH"),
-                arguments("heavy", "direction: 'INCOMING'", "OUTGOING"),
-                arguments("heavy", "direction: 'INCOMING'", "BOTH"),
-                arguments("heavy", "undirected: true", "INCOMING"),
-                arguments("heavy", "undirected: true", "OUTGOING"),
                 arguments("huge", "direction: 'OUTGOING'", "INCOMING"),
                 arguments("huge", "direction: 'OUTGOING'", "BOTH"),
                 arguments("huge", "direction: 'INCOMING'", "OUTGOING"),

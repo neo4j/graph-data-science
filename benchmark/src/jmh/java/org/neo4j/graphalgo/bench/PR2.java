@@ -39,12 +39,8 @@ import java.util.stream.StreamSupport;
 
 public final class PR2 extends BaseMain {
 
-    private boolean runHuge = true;
-
     @Override
-    void init(final Collection<String> args) {
-        runHuge = !args.contains("heavy");
-    }
+    void init(Collection<String> args) { }
 
     @Override
     Iterable<String> run(String graphToLoad, final Log log) throws Throwable {
@@ -67,23 +63,21 @@ public final class PR2 extends BaseMain {
         List<String> messages = new ArrayList<>();
 
         try {
-            if (runHuge) {
-                jprofBookmark("start huge load");
+            jprofBookmark("start huge load");
 
-                try (ProgressTimer ignored = ProgressTimer.start(time -> messages.add(String.format(
-                        "huge load: %d ms",
-                        time)))) {
-                    graph = graphLoader.load(HugeGraphFactory.class);
-                }
-
-                jprofBookmark("end huge load");
-
-                System.out.println("after loading huge");
-                System.gc();
-
-                jprofBookmark("huge usage");
-//                LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(10L));
+            try (ProgressTimer ignored = ProgressTimer.start(time -> messages.add(String.format(
+                    "huge load: %d ms",
+                    time)))) {
+                graph = graphLoader.load(HugeGraphFactory.class);
             }
+
+            jprofBookmark("end huge load");
+
+            System.out.println("after loading huge");
+            System.gc();
+
+            jprofBookmark("huge usage");
+//                LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(10L));
 
         } catch (Exception e) {
             for (final Throwable throwable : flattenSuppressed(e)) {

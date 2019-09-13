@@ -79,18 +79,6 @@ public class BalancedTriadsIntegrationTest {
         DB.resolveDependency(Procedures.class).registerProcedure(BalancedTriadsProc.class);
     }
 
-    @Rule
-    public ExpectedException noSupportForHeavy = ExpectedException.none();
-
-    @Test
-    public void testHeavy() throws Exception {
-        noSupportForHeavy.expect(QueryExecutionException.class);
-        noSupportForHeavy.expectMessage("The graph algorithm only supports these graph types; [huge]");
-        DB.execute(
-                "CALL algo.balancedTriads('Node', 'TYPE', {weightProperty:'w', graph: 'heavy'}) YIELD loadMillis, computeMillis, writeMillis, nodeCount, balancedTriadCount, unbalancedTriadCount"
-        ).resultAsString();
-    }
-
     @Test
     public void testHuge() throws Exception {
         DB.execute(
@@ -100,15 +88,6 @@ public class BalancedTriadsIntegrationTest {
                     assertEquals(3L, row.getNumber("unbalancedTriadCount"));
                     return true;
                 });
-    }
-
-    @Test
-    public void testHeavyStream() throws Exception {
-        noSupportForHeavy.expect(QueryExecutionException.class);
-        noSupportForHeavy.expectMessage("The graph algorithm only supports these graph types; [huge]");
-        DB.execute(
-                "CALL algo.balancedTriads.stream('Node', 'TYPE', {weightProperty:'w', graph: 'heavy'}) YIELD nodeId, balanced, unbalanced"
-        ).resultAsString();
     }
 
     @Test

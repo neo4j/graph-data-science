@@ -72,12 +72,6 @@ public class KSpanningTreeTest {
     @Parameterized.Parameters(name = "{1}")
     public static Collection<Object[]> data() {
         return Collections.singleton(new Object[]{HugeGraphFactory.class, "Huge"});
-//        return Arrays.asList(
-//                new Object[]{HeavyGraphFactory.class, "Heavy"},
-//                new Object[]{LightGraphFactory.class, "Light"},
-//                new Object[]{HugeGraphFactory.class, "Huge"},
-//                new Object[]{GraphViewFactory.class, "View"}
-//        );
     }
 
     private int a, b, c, d, x;

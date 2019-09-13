@@ -83,7 +83,6 @@ public class AllShortestPathsComparisionBenchmark {
         params.put("head", lines.get(0).getId());
         params.put("delta", 2.5);
 
-//        graph = new GraphLoader(db).withRelationshipWeightsFromProperty("cost", 1.0).load(HeavyGraphFactory.class);
         graph = new GraphLoader(db).withRelationshipWeightsFromProperty("cost", 1.0).load(HugeGraphFactory.class);
     }
 

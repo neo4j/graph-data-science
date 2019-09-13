@@ -56,7 +56,7 @@ public final class LoadGraphProc extends BaseProc {
     @Procedure(name = "algo.graph.load", mode = Mode.WRITE)
     @Description("CALL algo.graph.load(" +
                  "name:String, label:String, relationship:String" +
-                 "{direction:'OUT/IN/BOTH', undirected:true/false, sorted:true/false, nodeProperty:'value', nodeWeight:'weight', relationshipWeight: 'weight', graph:'heavy/huge/cypher'}) " +
+                 "{direction:'OUT/IN/BOTH', undirected:true/false, sorted:true/false, nodeProperty:'value', nodeWeight:'weight', relationshipWeight: 'weight', graph:'huge/cypher'}) " +
                  "YIELD nodes, relationships, loadMillis, computeMillis, writeMillis, write, nodeProperty, nodeWeight, relationshipWeight - " +
                  "load named graph")
     public Stream<LoadGraphStats> load(
@@ -115,7 +115,7 @@ public final class LoadGraphProc extends BaseProc {
     @Procedure(name = "algo.graph.load.memrec")
     @Description("CALL algo.graph.load.memrec(" +
                  "label:String, relationship:String" +
-                 "{direction:'OUT/IN/BOTH', undirected:true/false, sorted:true/false, nodeProperty:'value', nodeWeight:'weight', relationshipWeight: 'weight', graph:'heavy/huge'}) " +
+                 "{direction:'OUT/IN/BOTH', undirected:true/false, sorted:true/false, nodeProperty:'value', nodeWeight:'weight', relationshipWeight: 'weight', graph:'cypher/huge'}) " +
                  "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for the graph")
     public Stream<MemRecResult> loadMemRec(
             @Name(value = "label", defaultValue = "") String label,
@@ -168,7 +168,7 @@ public final class LoadGraphProc extends BaseProc {
 
         LoadGraphStats(String graphName, ProcedureConfiguration configuration) {
             name = graphName;
-            graph = configuration.getString(ProcedureConstants.GRAPH_IMPL_PARAM, "heavy");
+            graph = configuration.getString(ProcedureConstants.GRAPH_IMPL_PARAM, "huge");
             undirected = configuration.get(ProcedureConstants.UNDIRECTED, false);
             sorted = configuration.get(ProcedureConstants.SORTED, false);
             loadNodes = configuration.getNodeLabelOrQuery();

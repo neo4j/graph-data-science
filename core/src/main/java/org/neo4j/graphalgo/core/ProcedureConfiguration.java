@@ -345,8 +345,12 @@ public class ProcedureConfiguration {
         }
     }
 
-    private static Set<String> RESERVED = new HashSet<>(asList(HeavyGraph.TYPE, CypherGraphFactory.TYPE,
-            LightGraph.TYPE, GraphView.TYPE, HeavyGraph.TYPE));
+    private static final Set<String> RESERVED = new HashSet<>(asList(
+            CypherGraphFactory.TYPE,
+            LightGraph.TYPE,
+            GraphView.TYPE,
+            HugeGraph.TYPE,
+            HeavyGraph.TYPE));
 
     public static boolean validCustomName(String name) {
         return name != null && !name.trim().isEmpty() && !RESERVED.contains(name.trim().toLowerCase());

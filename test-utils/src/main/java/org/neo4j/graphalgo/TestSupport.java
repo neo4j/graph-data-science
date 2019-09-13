@@ -61,7 +61,7 @@ public class TestSupport {
     public @interface AllGraphNamesTest {}
 
     public static Stream<String> allGraphNames() {
-        return Stream.of("heavy", "huge", "kernel");
+        return Stream.of("huge", "kernel");
     }
 
 }
