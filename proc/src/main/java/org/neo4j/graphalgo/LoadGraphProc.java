@@ -221,7 +221,7 @@ public final class LoadGraphProc extends BaseProc {
             }
 
             if (calculateDegreeDistribution) {
-                final Direction direction = configuration.getDirection(Direction.OUTGOING);
+                final Direction direction = configuration.getDirection(graph.getLoadDirection());
                 int concurrency = configuration.getReadConcurrency();
                 Histogram distribution = degreeDistribution(graph, concurrency, direction);
                 info = new GraphInfoWithHistogram(name, distribution);
