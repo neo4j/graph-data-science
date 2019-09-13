@@ -300,14 +300,7 @@ public class GraphLoader {
     }
 
     public GraphLoader withOptionalRelationshipProperties(PropertyMapping... relPropertyMappings) {
-        this.relPropertyMappings = Arrays.stream(relPropertyMappings)
-                .toArray(PropertyMapping[]::new);
-        return this;
-    }
-
-    public GraphLoader withOptionalRelationshipProperties(PropertyMapping... relPropertyMappings) {
-        this.relPropertyMappings = Arrays.stream(relPropertyMappings)
-                .toArray(PropertyMapping[]::new);
+        this.relPropertyMappings = Arrays.stream(relPropertyMappings).toArray(PropertyMapping[]::new);
         return this;
     }
 

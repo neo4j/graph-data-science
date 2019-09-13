@@ -62,14 +62,6 @@ public class PropertyMapping {
     }
 
     public static PropertyMapping of(
-            String propertyKey,
-            String neoPropertyKey,
-            double defaultValue,
-            DeduplicationStrategy deduplicationStrategy) {
-        return new PropertyMapping(propertyKey, neoPropertyKey, defaultValue, deduplicationStrategy);
-    }
-
-    public static PropertyMapping of(
             String propertyName,
             String propertyKeyInGraph,
             double defaultValue,
