@@ -19,10 +19,10 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
-import com.carrotsearch.hppc.sorting.IndirectComparator;
 import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.apache.lucene.util.LongsRef;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.utils.AscendingLongComparator;
 
 import java.util.Arrays;
 
@@ -160,23 +160,5 @@ final class AdjacencyCompression {
     }
 
     private AdjacencyCompression() {
-    }
-
-    private static class AscendingLongComparator implements IndirectComparator {
-        private final long[] array;
-
-        AscendingLongComparator(long[] array) {
-            this.array = array;
-        }
-
-        public int compare(int indexA, int indexB) {
-            long a = this.array[indexA];
-            long b = this.array[indexB];
-            if (a < b) {
-                return -1;
-            } else {
-                return a > b ? 1 : 0;
-            }
-        }
     }
 }
