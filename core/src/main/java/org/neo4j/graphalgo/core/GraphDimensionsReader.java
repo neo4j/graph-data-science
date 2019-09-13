@@ -66,10 +66,6 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
             }
         }
         RelationshipTypeMappings relationshipTypeMappings = mappingsBuilder.build();
-//        final int relWeightId = propertyKey(
-//                tokenRead,
-//                setup.shouldLoadRelationshipWeight(),
-//                setup.relationWeightPropertyName);
 
         KernelPropertyMapping[] nodeProperties = loadPropertyMapping(tokenRead, setup.nodePropertyMappings);
         KernelPropertyMapping[] relProperties = loadPropertyMapping(tokenRead, setup.relationshipPropertyMappings);
@@ -114,5 +110,4 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
     private int propertyKey(TokenRead tokenRead, boolean load, String propertyName) {
         return load ? tokenRead.propertyKey(propertyName) : TokenRead.NO_TOKEN;
     }
-
 }

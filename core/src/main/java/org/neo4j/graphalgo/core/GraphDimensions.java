@@ -37,7 +37,6 @@ public final class GraphDimensions {
     private final long highestNeoId;
     private long maxRelCount;
     private final int labelId;
-//    private final int relWeightId;
     private final KernelPropertyMapping[] nodeProperties;
     private final RelationshipTypeMappings relTypeMappings;
     private final KernelPropertyMapping[] relProperties;
@@ -47,7 +46,6 @@ public final class GraphDimensions {
             long highestNeoId,
             long maxRelCount,
             int labelId,
-//            int relWeightId,
             KernelPropertyMapping[] nodeProperties,
             RelationshipTypeMappings relTypeMappings,
             KernelPropertyMapping[] relProperties
@@ -56,7 +54,6 @@ public final class GraphDimensions {
         this.highestNeoId = highestNeoId;
         this.maxRelCount = maxRelCount;
         this.labelId = labelId;
-//        this.relWeightId = relWeightId;
         this.nodeProperties = nodeProperties;
         this.relTypeMappings = relTypeMappings;
         this.relProperties = relProperties;
@@ -167,7 +164,6 @@ public final class GraphDimensions {
         private long highestNeoId;
         private long maxRelCount;
         private int labelId;
-//        private int relWeightId;
         private KernelPropertyMapping[] nodeProperties;
         private RelationshipTypeMappings relationshipTypeMappings;
         private KernelPropertyMapping[] relProperties;
@@ -192,11 +188,6 @@ public final class GraphDimensions {
             return this;
         }
 
-//        public Builder setRelWeightId(int relWeightId) {
-//            this.relWeightId = relWeightId;
-//            return this;
-//        }
-
         public Builder setNodeProperties(KernelPropertyMapping[] nodeProperties) {
             this.nodeProperties = nodeProperties;
             return this;
@@ -218,7 +209,6 @@ public final class GraphDimensions {
                     highestNeoId,
                     maxRelCount,
                     labelId,
-//                    relWeightId,
                     nodeProperties,
                     relationshipTypeMappings,
                     relProperties
