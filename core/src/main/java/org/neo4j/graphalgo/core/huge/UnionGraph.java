@@ -106,7 +106,7 @@ public final class UnionGraph implements Graph {
 
     @Override
     public double weightOf(final long sourceNodeId, final long targetNodeId) {
-        throw new UnsupportedOperationException("#weightOf is not supported for multiple relationship types");
+        return first.weightOf(sourceNodeId, targetNodeId);
     }
 
     @Override

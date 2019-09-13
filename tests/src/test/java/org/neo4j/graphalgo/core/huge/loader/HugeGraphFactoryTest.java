@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
+import org.neo4j.graphalgo.core.loading.GraphByType;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.TransactionTerminatedException;
@@ -39,7 +39,6 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.Arrays;
 
 import static java.util.Arrays.asList;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -248,15 +247,15 @@ class HugeGraphFactoryTest {
 
     @Test
     void testLoadMultipleRelationships() {
-        GraphsByRelationshipType graphs = new GraphLoader(DB)
+        GraphByType graphs = new GraphLoader(DB)
                 .withAnyLabel()
                 .withoutRelationshipWeights()
                 .withRelationshipType("REL1 | REL2")
                 .build(HugeGraphFactory.class)
                 .loadGraphs();
 
-        assertEquals(2, graphs.availableGraphs().size());
-        assertEquals(graphs.availableGraphs(), asSet(asList("REL1", "REL2")));
+        assertEquals(2, graphs.availableRelationshipTypes().size());
+        assertEquals(graphs.availableRelationshipTypes(), asSet(asList("REL1", "REL2")));
 
         Graph rel1Graph = graphs.loadGraph("REL1");
         Graph rel2Graph = graphs.loadGraph("REL2");
@@ -269,15 +268,15 @@ class HugeGraphFactoryTest {
 
     @Test
     void testLoadMultipleRelationshipsWithWeights() {
-        GraphsByRelationshipType graphs = new GraphLoader(DB)
+        GraphByType graphs = new GraphLoader(DB)
                 .withAnyLabel()
                 .withRelationshipType("REL1 | REL2")
                 .withRelationshipWeightsFromProperty("prop1", 42D)
                 .build(HugeGraphFactory.class)
                 .loadGraphs();
 
-        assertEquals(2, graphs.availableGraphs().size());
-        assertEquals(graphs.availableGraphs(), asSet(asList("REL1", "REL2")));
+        assertEquals(2, graphs.availableRelationshipTypes().size());
+        assertEquals(graphs.availableRelationshipTypes(), asSet(asList("REL1", "REL2")));
 
         Graph rel1Graph = graphs.loadGraph("REL1");
         Graph rel2Graph = graphs.loadGraph("REL2");

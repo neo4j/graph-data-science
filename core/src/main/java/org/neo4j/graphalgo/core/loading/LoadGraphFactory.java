@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -72,7 +73,7 @@ public final class LoadGraphFactory extends GraphFactory {
         if (!exists(name)) {
             throw new IllegalArgumentException(String.format("Graph with name '%s' does not exist.", name));
         }
-        return graphs.get(name).loadGraph(relationshipType);
+        return graphs.get(name).loadGraph(relationshipType, Optional.empty());
     }
 
     public static Graph getAll(String name) {

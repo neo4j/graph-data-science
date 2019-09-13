@@ -56,4 +56,12 @@ public class PropertyMapping {
     public static PropertyMapping of(String propertyName, String propertyKeyInGraph, double defaultValue) {
         return new PropertyMapping(propertyName, propertyKeyInGraph, defaultValue);
     }
+
+    public static PropertyMapping of(
+            String propertyName,
+            String propertyKeyInGraph,
+            double defaultValue,
+            DeduplicationStrategy deduplicationStrategy) {
+        return new PropertyMapping(propertyName, propertyKeyInGraph, defaultValue, deduplicationStrategy);
+    }
 }

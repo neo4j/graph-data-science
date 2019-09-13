@@ -22,9 +22,17 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.api.Graph;
 
+import java.util.Collections;
+import java.util.Optional;
+import java.util.Set;
+
 public interface GraphByType {
 
-    Graph loadGraph(String relationshipType);
+    Graph loadGraph(String relationshipType, Optional<String> relationshipWeight);
+
+    default Graph loadGraph(String relationshipType) {
+        return loadGraph(relationshipType, Optional.empty());
+    }
 
     Graph loadAllTypes();
 
@@ -34,6 +42,12 @@ public interface GraphByType {
 
     void canRelease(boolean canRelease);
 
+    long nodeCount();
+
+    long relationshipCount();
+
+    Set<String> availableRelationshipTypes();
+
     final class SingleGraph implements GraphByType {
         private final Graph graph;
 
@@ -42,7 +56,7 @@ public interface GraphByType {
         }
 
         @Override
-        public Graph loadGraph(String relationshipType) {
+        public Graph loadGraph(String relationshipType, Optional<String> relationshipWeight) {
             return graph;
         }
 
@@ -64,6 +78,21 @@ public interface GraphByType {
         @Override
         public String getType() {
             return graph.getType();
+        }
+
+        @Override
+        public long nodeCount() {
+            return graph.nodeCount();
+        }
+
+        @Override
+        public long relationshipCount() {
+            return graph.relationshipCount();
+        }
+
+        @Override
+        public Set<String> availableRelationshipTypes() {
+            return Collections.emptySet();
         }
     }
 }

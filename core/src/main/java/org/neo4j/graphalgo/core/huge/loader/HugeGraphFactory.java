@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
+import org.neo4j.graphalgo.core.loading.GraphByType;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.utils.ApproximatedImportProgress;
 import org.neo4j.graphalgo.core.utils.ImportProgress;
@@ -153,26 +154,24 @@ public final class HugeGraphFactory extends GraphFactory {
             throw new IllegalArgumentException(message);
         }
 
-        Map<String, Graph> graphs = importAllGraphs();
-        return Iterables.single(graphs.values());
+        Map<String, Map<String, HugeGraph>> graphsByTypeAndProperty = importAllGraphs();
+        Map<String, HugeGraph> graphsByProperty = Iterables.single(graphsByTypeAndProperty.values());
+        return UnionGraph.of(graphsByProperty.values());
     }
 
-    public GraphsByRelationshipType loadGraphs() {
+    public GraphByType loadGraphs() {
         validateTokens();
-        return new GraphsByRelationshipType(importAllGraphs());
+        return GraphsByRelationshipType.of(importAllGraphs());
     }
 
-    private Map<String, Graph> importAllGraphs() {
+    private Map<String, Map<String, HugeGraph>> importAllGraphs() {
         GraphDimensions dimensions = this.dimensions;
         int concurrency = setup.concurrency();
         AllocationTracker tracker = setup.tracker;
         IdsAndProperties mappingAndProperties = loadIdMap(tracker, concurrency);
         Map<String, Map<String, HugeGraph>> graphs = loadRelationships(dimensions, tracker, mappingAndProperties, concurrency);
         progressLogger.logDone(tracker);
-        return graphs.entrySet().stream().collect(Collectors.toMap(
-                Map.Entry::getKey,
-                e -> UnionGraph.of(e.getValue().values())
-        ));
+        return graphs;
     }
 
     private IdsAndProperties loadIdMap(AllocationTracker tracker, int concurrency) {
