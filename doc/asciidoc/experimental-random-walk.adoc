@@ -136,7 +136,7 @@ include::scripts/random-walk.cypher[tag=cypher-loading]
 [source, cypher]
 ----
 CALL algo.randomWalk.stream(start:Object, steps: 100, walks: 10000,
-    {graph:'heavy', nodeQuery:'label or query', relationshipQuery:' type or query', direction:"IN/OUT/BOTH",
+    {graph:'huge', nodeQuery:'label or query', relationshipQuery:' type or query', direction:"IN/OUT/BOTH",
      mode:"node2vec"/"random", inOut: 1.0, return: 1.0, path:false, concurrency:4})
 YIELD nodes, path
 ----
@@ -148,7 +148,7 @@ YIELD nodes, path
 | start         | object | null           | yes      | starting points: null - whole graph, "Label" - nodes with that label, node-id - that node, list of node-ids - these nodes
 | steps         | int    | 10             | yes      | length of paths returned, in case of error only path of lenght 1 is returned
 | walks         | int    | 1              | yes      | number of paths returned
-| graph         | string | 'heavy'        | yes      | Use 'heavy' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
+| graph         | string | 'huge'         | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
 | nodeQuery         | string | null           | yes      | The label or node-query to load from the graph. If null, load all nodes
 | relationshipQuery  | string | null           | yes      | The relationship-type or query to load from the graph. If null, load all relationships.
 | direction     | string | 'BOTH'         | yes      | direction of relationships to follow

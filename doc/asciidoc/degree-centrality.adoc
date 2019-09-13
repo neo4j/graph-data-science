@@ -224,9 +224,9 @@ YIELD nodes, loadMillis, computeMillis, writeMillis, write, writeProperty
 | concurrency   | int     | available CPUs | yes      | The number of concurrent threads.
 | dampingFactor | float   | 0.85           | yes      | The damping factor of the PageRank calculation.
 | weightProperty | string | null           | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| defaultValue   | float  | 0.0           | yes      | The default value of the weight in case it is missing or invalid.
+| defaultValue   | float  | 0.0            | yes      | The default value of the weight in case it is missing or invalid.
 | write         | boolean | true           | yes      | Specify if the result should be written back as a node property.
-| graph         | string  | 'heavy'        | yes      | Use 'heavy' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement.
+| graph         | string  | 'huge'         | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement.
 |===
 
 .Results
@@ -257,9 +257,9 @@ YIELD node, score
 | relationship  | string | null           | yes      | The relationship-type to load from the graph. If null, load all nodes.
 | direction | string | incoming | yes | The relationship direction to load from the graph. If 'both', treats the relationships as undirected.
 | concurrency   | int    | available CPUs | yes      | The number of concurrent threads.
-| weightProperty | string | null           | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
+| weightProperty | string | null          | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
 | defaultValue   | float  | 0.0           | yes      | The default value of the weight in case it is missing or invalid.
-| graph         | string | 'heavy'        | yes      | Use 'heavy' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement.
+| graph         | string | 'huge'         | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement.
 |===
 
 .Results

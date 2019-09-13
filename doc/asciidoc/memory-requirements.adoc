@@ -13,9 +13,9 @@ image::graph-model-memory.png[width=500]
 
 The model contains three types of data:
 
-* Node ids - up to 2^31^ ("2 billion") for `graph: "heavy"` and up to 2^45^ ("35 trillion") for `graph: "huge"`
+* Node ids - up to 2^45^ ("35 trillion") for `graph: "huge"`
 * Relationships - pairs of node ids. Relationships are stored twice if `direction: "BOTH"` config provided.
-* Weights - stored as floats (4 bytes per node) in an array (`graph: "heavy"`) and in a https://github.com/carrotsearch/hppc[HPPC^] map (`graph: "huge"`)
+* Weights - stored as floats (4 bytes per node) in a https://github.com/carrotsearch/hppc[HPPC^] map (`graph: "huge"`)
 
 Memory configuration depends on the graph projection that we're using.
 
@@ -45,7 +45,7 @@ CALL algo.memrec(label, relationship, algorithm, config)
 | algorithm | string  | null     | yes      | The name of a graph algorithm or `graph.load` to return the memory requirements for the in memory graph only.
 h| Config ||||
 | direction     | string  | 'OUTGOING'     | yes      | The relationship-direction to use in the algorithm
-| graph         | string  | 'heavy'        | yes      | Use 'heavy' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
+| graph         | string  | 'huge'         | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
 | concurrency   | int     | available CPUs | yes      | The number of concurrent threads
 |===
 
@@ -89,58 +89,9 @@ CALL apoc.merge.relationship(source, "INTERACTS_SEASON" + season, {}, {}, target
 SET rel.weight = toInteger(row.Weight);
 ----
 
-=== Heavy graph projection
-
-This is the default graph projection, and supports graphs up to 2 billion nodes and 2 billion relationships.
-
-.The following computes the amount of memory required by the heavy in memory graph for any node label and any relationship type:
-[source,cypher]
-----
-CALL algo.memrec(null, null, "graph.load")
-YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax
-RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
-----
-
-.Results
-[opts="header",cols="1,1,1,1,1"]
-|===
-| Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
-| 400 | 3551 | 40 KiB  | 41456    | 41456
-|===
-
-.The following computes the amount of memory required by the heavy in memory graph for node label `Character` and relationship type `INTERACTS_SEASON1`:
-[source,cypher]
-----
-CALL algo.memrec("Character", "INTERACTS_SEASON1", "graph.load")
-YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax
-RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
-----
-
-.Results
-[opts="header",cols="1,1,1,1,1"]
-|===
-| Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
-| 400 | 550 | 27 KiB  | 28656    | 28656
-|===
-
-.The following computes the amount of memory required by the heavy in memory graph for node label `Character`, relationship type `INTERACTS_SEASON1`, and direction `BOTH`:
-[source,cypher]
-----
-CALL algo.memrec("Character", "INTERACTS_SEASON1", "graph.load", {direction: "BOTH"})
-YIELD nodes, relationships, requiredMemory, bytesMin, bytesMax
-RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
-----
-
-.Results
-[opts="header",cols="1,1,1,1,1"]
-|===
-| Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
-| 400 | 550 | 40 KiB  | 41488    | 41488
-|===
-
-
 === Huge graph projection
 
+This is the default graph projection, and supports graphs up to 2 billion nodes and 2 billion relationships.
 This graph projection supports graphs with more than 2 billion nodes or 2 billion relationships.
 
 .The following computes the amount of memory required by the huge in memory graph for any node label and any relationship type:
@@ -218,7 +169,7 @@ RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
 | 400 | 3551 | 40 KiB  | 41456    | 41456
 |===
 
-.The following computes the amount of memory required by the heavy in memory graph for node label `Character` and relationship type `INTERACTS_SEASON1`:
+.The following computes the amount of memory required by the huge in memory graph for node label `Character` and relationship type `INTERACTS_SEASON1`:
 [source,cypher]
 ----
 CALL algo.memrec(
@@ -241,7 +192,7 @@ RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
 === Named Graph
 
 
-.The following creates a heavy in memory graph named `my-graph` for the node label `Character` and relationship type `INTERACTS_SEASON3`:
+.The following creates a huge in memory graph named `my-graph` for the node label `Character` and relationship type `INTERACTS_SEASON3`:
 [source,cypher]
 ----
 CALL algo.graph.load("my-graph6", "Character", "INTERACTS_SEASON3")
@@ -253,7 +204,7 @@ RETURN name, graph, direction, nodes, relationships
 [opts="header"]
 |===
 | Name | Graph | Direction | Nodes | Relationships
-| my-graph | heavy | OUTGOING | 400 | 504
+| my-graph | huge | OUTGOING | 400 | 504
 |===
 
 .The following computes the amount of memory being used by the graph named `my-graph`:
@@ -277,12 +228,6 @@ RETURN nodes, relationships, requiredMemory, bytesMin, bytesMax
 Below are the memory requirements for various sample datasets.
 These numbers are computed by running the following queries:
 
-.Heavy Graph
-[source,cypher]
-----
-CALL algo.memrec(null, null, "graph.load", {graph: "heavy"})
-----
-
 .Huge Graph
 [source,cypher]
 ----
@@ -297,7 +242,6 @@ This dataset contains people and friends relationships from https://snap.stanfor
 [opts="header", cols="1,1,1,2,1,1"]
 |===
 | Graph Type | Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
-| Heavy | 1,632,803 | 30,622,564 | 222 MiB  | 233205960    | 233205960
 | Huge | 1,632,803 | 30,622,564 | 	[74 MiB...130 MiB]  | 78560176    | 137284912
 |===
 
@@ -311,7 +255,6 @@ Instructions for importing this dataset are available from https://github.com/je
 [opts="header", cols="1,1,1,2,1,1"]
 |===
 | Graph Type | Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
-| Heavy | 11,474,730 | 116,601,029 | 1067 MiB  | 1119305360    | 1119305360
 | Huge | 11,474,730 | 116,601,029 | 	[438 MiB...657 MiB]  | 459722704    | 689148984
 |===
 
@@ -323,7 +266,6 @@ This dataset contains users and followers from a crawl of Twitter presented by H
 [opts="header", cols="1,1,1,2,1,1"]
 |===
 | Graph Type | Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
-| Heavy | 41,652,230 | 1,468,365,182 | 7759 MiB  | 8136099216    | 8136099216
 | Huge | 41,652,230 | 1,468,365,182 | 	[2582 MiB...5363 MiB]  | 2708130496    | 5623918504
 |===
 
@@ -335,7 +277,6 @@ This dataset contains people and friends relationships from https://snap.stanfor
 [opts="header", cols="1,1,1,2,1,1"]
 |===
 | Graph Type | Nodes | Relationships | Required Memory | Bytes Min | Bytes Max
-| Heavy | 65,608,366 | 1,806,067,135 | 10545 MiB  | 11058217808    | 11058217808
 | Huge | 65,608,366 | 1,806,067,135 | 	[3567 MiB...8635 MiB]  | 3740896712    | 9055485320
 |===
 

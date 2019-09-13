@@ -229,7 +229,7 @@ include::scripts/connected-components.cypher[tag=cypher-loading]
 [source, cypher]
 ----
 CALL algo.unionFind(label:String, relationship:String, {threshold:0.42,
-    defaultValue:1.0, write: true, writeProperty:'partition', weightProperty:'weight', graph:'heavy', concurrency:4})
+    defaultValue:1.0, write: true, writeProperty:'partition', weightProperty:'weight', graph:'huge', concurrency:4})
 YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
 ----
 
@@ -256,7 +256,7 @@ YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
 | threshold         | float   | null                      | yes      | The value of the weight above which the relationship is not thrown away.
 | defaultValue      | float   | null                      | yes      | The default value of the weight in case it is missing or invalid.
 | consecutiveIds    | boolean | false                     | yes      | Community identifiers are mapped into a consecutive id space (requires additional memory).
-| graph             | string  | 'heavy'                   | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement.
+| graph             | string  | 'huge'                    | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement.
 |===
 
 .Results
@@ -316,7 +316,7 @@ YIELD nodeId, setId - yields a setId to each node id
 | threshold         | float   | null                      | yes      | The value of the weight above which the relationship is not thrown away.
 | defaultValue      | float   | null                      | yes      | The default value of the weight in case it is missing or invalid.
 | consecutiveIds    | boolean | false                     | yes      | Community identifiers are mapped into a consecutive id space (requires additional memory).
-| graph             | string  | 'heavy'                   | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement.
+| graph             | string  | 'huge'                    | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement.
 |===
 
 .Results
@@ -346,18 +346,7 @@ YIELD nodeId, setId - yields a setId to each node id
 
 We can use the <<algo-memrec-procedure>> to compute the memory requirements of running graph algorithms.
 
-.The following returns the memory requirements for running Louvain on the Heavy Graph:
-:graph: "heavy"
-include::memrec.adoc[tags=overview]
-
-.Results
-[opts="header",cols="1,1,2"]
-|===
-| Nodes | Relationships | Required Memory
-| 6 | 7 | [3880 Bytes ... 4776 Bytes]
-|===
-
-.The following returns the memory requirements for running Louvain on the Heavy Graph:
+.The following returns the memory requirements for running Louvain on the Huge Graph:
 :graph: "huge"
 include::memrec.adoc[tags=overview]
 
@@ -369,18 +358,6 @@ include::memrec.adoc[tags=overview]
 |===
 
 We can also get a break down of where that memory is assigned from the `mapView` field.
-
-.The following returns the memory break down for running Louvain on the Heavy Graph:
-:graph: "heavy"
-include::memrec.adoc[tags=component]
-
-.Results
-[opts="header",cols="1,2"]
-|===
-| Component | Memory Usage
-| Louvain | [3176 Bytes ... 4072 Bytes]
-| HeavyGraph | 704 Bytes
-|===
 
 .The following returns the memory break down for running Louvain on the Huge Graph:
 :graph: "huge"
@@ -405,7 +382,6 @@ This dataset contains people and friends relationships from https://snap.stanfor
 [opts="header", cols="1,1,1,2,2,2"]
 |===
 | Graph Type | Nodes | Relationships | Required Memory | In Memory Graph | Algorithm
-| Heavy | 1,632,803 | 30,622,564 | 421 MiB | 222 MiB   | 199 MiB
 | Huge | 1,632,803 | 30,622,564 | 	[274 MiB...330 MiB] | [74 MiB...130 MiB] | 199 MiB
 |===
 
@@ -419,7 +395,6 @@ Instructions for importing this dataset are available from https://github.com/je
 [opts="header", cols="1,1,1,2,2,2"]
 |===
 | Graph Type | Nodes | Relationships | Required Memory | In Memory Graph | Algorithm
-| Heavy | 11,474,730 | 116,601,029 | 2468 MiB | 1067 MiB | 1400 MiB
 | Huge | 11,474,730 | 116,601,029 | 	[1839 MiB...2057 MiB] | [438 MiB...657 MiB] | 1400 MiB
 |===
 
@@ -431,7 +406,6 @@ This dataset contains users and followers from a crawl of Twitter presented by H
 [opts="header", cols="1,1,1,2,2,2"]
 |===
 | Graph Type | Nodes | Relationships | Required Memory | In Memory Graph | Algorithm
-| Heavy | 41,652,230 | 1,468,365,182 | 12843 MiB  | 7759 MiB    | 5084 MiB
 | Huge | 41,652,230 | 1,468,365,182 | 	[7669 MiB...10449 MiB] | [3570 MiB...8638 MiB]   | 5084 MiB
 |===
 
@@ -443,7 +417,6 @@ This dataset contains people and friends relationships from https://snap.stanfor
 [opts="header", cols="1,1,1,2,2,2"]
 |===
 | Graph Type | Nodes | Relationships | Required Memory | In Memory Graph | Algorithm
-| Heavy | 65,608,366 | 1,806,067,135 | 18 GiB  | 10545 MiB  | 8008 MiB
 | Huge | 65,608,366 | 1,806,067,135 | 	[11579 MiB...16 GiB]  | [3570 MiB...8638 MiB]   | 8008 MiB
 |===
 

@@ -176,7 +176,7 @@ include::scripts/closeness-centrality.cypher[tag=cypher-loading]
 [source, cypher]
 ----
 CALL algo.closeness(label:String, relationship:String,
-    {write:true, writeProperty:'centrality',graph:'heavy', concurrency:4})
+    {write:true, writeProperty:'centrality',graph:'huge', concurrency:4})
 YIELD nodes, loadMillis, computeMillis, writeMillis
 ----
 
@@ -189,7 +189,7 @@ YIELD nodes, loadMillis, computeMillis, writeMillis
 | write         | boolean | true           | yes      | Specifies if the result should be written back as a node property
 | concurrency   | int     | available CPUs | yes      | The number of concurrent threads
 | writeProperty | string  | 'centrality'   | yes      | The property name written back to
-| graph         | string  | 'heavy'        | yes      | Use 'heavy' when describing the subset of the graph with label and relationship-type parameter,. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
+| graph         | string  | 'huge'         | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter,. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
 |===
 
 .Results
@@ -217,7 +217,7 @@ YIELD nodeId, centrality
 | label        | string | null           | yes      | The label to load from the graph. If null, load all nodes
 | relationship | string | null           | yes      | The relationship-type to load from the graph. If null, load all relationships
 | concurrency  | int    | available CPUs | yes      | The number of concurrent threads
-| graph        | string | 'heavy'        | yes      | Use 'heavy' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
+| graph        | string | 'huge'         | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
 |===
 
 .Results

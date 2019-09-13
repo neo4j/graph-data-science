@@ -142,7 +142,7 @@ The new approach allows us to separate different data sets from importing and th
 
 - some algorithms need repeated access to the data
 - buffering the data locally is therefore needed for efficient access
-- we tried several strategies which are implemented in Heavy-, Light- and Kernel-Graph
+- we tried several strategies which are implemented in Huge- and Kernel-Graph
 - all of them implement the original Graph interface
 - they have different memory and performance characteristics
 - Loading is done in Factories

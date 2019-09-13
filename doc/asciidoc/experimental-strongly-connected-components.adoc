@@ -132,7 +132,7 @@ include::scripts/strongly-connected-components.cypher[tag=cypher-loading]
 [source, cypher]
 ----
 CALL algo.scc(label:String, relationship:String,
-    {write:true,writeProperty:'partition',concurrency:4, graph:'heavy'})
+    {write:true,writeProperty:'partition',concurrency:4, graph:'huge'})
 YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize
 ----
 
@@ -145,7 +145,7 @@ YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize
 | write             | boolean | true           | yes      | Specifies if the result should be written back as a node property
 | writeProperty | string  | 'partition'    | yes      | The property name written back to
 | concurrency       | int     | available CPUs | yes      | The number of concurrent threads
-| graph             | string  | 'heavy'        | yes      | Use 'heavy' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
+| graph             | string  | 'huge'         | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
 |===
 
 .Results
@@ -190,7 +190,7 @@ YIELD nodeId, partition
 | label        | string | null           | yes      | The label to load from the graph. If null, load all nodes
 | relationship | string | null           | yes      | The relationship-type to load from the graph. If null, load all relationships
 | concurrency  | int    | available CPUs | yes      | The number of concurrent threads
-| graph        | string | 'heavy'        | yes      | Use 'heavy' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
+| graph        | string | 'huge'         | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
 |===
 
 .Results

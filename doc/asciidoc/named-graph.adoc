@@ -18,7 +18,7 @@ We can load named graphs using any of the approaches described in the <<projecte
 .The following will load a graph with the name `my-graph`, for node label `Label` and relationship type `REL_TYPE`
 [source,cypher]
 ----
-CALL algo.graph.load('my-graph','Label','REL_TYPE',{graph:'heavy' /*, ... other config */})
+CALL algo.graph.load('my-graph','Label','REL_TYPE',{graph:'huge' /*, ... other config */})
 YIELD name, graph, direction, undirected, sorted, nodes, loadMillis, alreadyLoaded,
       nodeWeight, relationshipWeight, nodeProperty, loadNodes, loadRelationships;
 ----

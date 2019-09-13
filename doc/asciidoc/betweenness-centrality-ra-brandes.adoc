@@ -81,7 +81,7 @@ YIELD nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMil
 | write | boolean | true | yes | Specifies if the result should be written back as a node property
 | stats | boolean | true | yes | Specifies if stats about centrality should be returned
 | writeProperty | string | 'centrality' | yes | The property name written back to
-| graph | string | 'heavy' | yes | Use 'heavy' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
+| graph | string | 'huge' | yes | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
 | concurrency | int | available CPUs | yes | The number of concurrent threads
 |===
 
@@ -149,7 +149,7 @@ YIELD nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMil
 | maxDepth | int | Integer.MAX | yes | The depth of the shortest paths traversal
 | stats | boolean | true | yes | Specifies if stats about centrality should be returned
 | writeProperty | string | 'centrality' | yes | The property name written back to
-| graph | string | 'heavy' | yes | Use 'heavy' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
+| graph | string | 'huge' | yes | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
 | concurrency | int | available CPUs | yes | The number of concurrent threads
 |===
 
