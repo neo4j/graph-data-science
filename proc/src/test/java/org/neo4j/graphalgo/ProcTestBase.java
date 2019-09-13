@@ -47,7 +47,7 @@ public class ProcTestBase {
     static GraphDatabaseAPI DB;
 
     static Stream<String> graphImplementations() {
-        return Stream.of("Heavy", "Huge", "Kernel");
+        return Stream.of("Huge", "Kernel");
     }
 
     static Stream<String> loadDirections() {

@@ -31,6 +31,7 @@
 //import org.neo4j.graphalgo.api.Graph;
 //import org.neo4j.graphalgo.api.RelationshipConsumer;
 //import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
+//import org.neo4j.graphalgo.core.DeduplicateRelationshipsStrategy;
 //import org.neo4j.graphalgo.core.GraphLoader;
 //import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 //import org.neo4j.graphdb.Direction;
@@ -131,6 +132,7 @@
 //                .withAnyLabel()
 //                .withoutRelationshipWeights()
 //                .withAnyRelationshipType()
+//                .withDeduplicateRelationshipsStrategy(DeduplicateRelationshipsStrategy.NONE)
 //                .load(HugeGraphFactory.class);
 //
 //        graph.forEachRelationship(graph.toMappedNodeId(id1), Direction.OUTGOING, relationConsumer);

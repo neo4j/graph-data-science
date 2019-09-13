@@ -24,6 +24,7 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.neo4j.graphalgo.ShortestPathProc;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.DeduplicateRelationshipsStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -114,6 +115,7 @@ public class ShortestPathTest_152 {
         final Graph graph = new GraphLoader(DB, Pools.DEFAULT)
                 .withOptionalLabel("Loc")
                 .withAnyRelationshipType()
+                .withDeduplicateRelationshipsStrategy(DeduplicateRelationshipsStrategy.NONE)
                 .withOptionalRelationshipWeightsFromProperty("d", 0)
                 .load(HugeGraphFactory.class);
 

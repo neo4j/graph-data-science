@@ -93,7 +93,7 @@ class LoadGraphProcTest extends ProcTestBase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"heavy", "huge", "kernel", "cypher"})
+    @ValueSource(strings = {"huge", "kernel", "cypher"})
     void shouldLoadGraph(String graphImpl) {
         String queryTemplate = "CALL algo.graph.load(" +
                                "    'foo', %s, %s, {" +
@@ -115,7 +115,7 @@ class LoadGraphProcTest extends ProcTestBase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"heavy", "huge", "kernel", "cypher"})
+    @ValueSource(strings = {"huge", "kernel", "cypher"})
     void shouldLoadGraphWithSaturatedThreadPool(String graphImpl) {
         // ensure that we don't drop task that can't be scheduled while importing a graph.
 
@@ -167,7 +167,7 @@ class LoadGraphProcTest extends ProcTestBase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"heavy", "kernel", "cypher"})
+    @ValueSource(strings = {"kernel", "cypher"})
     void shouldFailToLoadGraphWithMultipleRelationships(String graphImpl) {
         String query = String.format("CALL algo.graph.load(" +
                                      "    'foo', 'null', 'X | Y', {" +
@@ -176,17 +176,6 @@ class LoadGraphProcTest extends ProcTestBase {
                                      ")", graphImpl);
 
         assertThrows(QueryExecutionException.class, () -> runQuery(query, db));
-    }
-
-    @Test
-    void shouldComputeMemoryEstimationForHeavy() {
-        String query = "CALL algo.graph.load.memrec(" +
-                       "    null, null, {" +
-                       "        graph: $graph" +
-                       "    }" +
-                       ") YIELD requiredMemory";
-        runQuery(query, db, singletonMap("graph", "heavy"),
-                row -> assertEquals(MemoryUsage.humanReadable(992), row.getString("requiredMemory")));
     }
 
     @Test
@@ -220,7 +209,7 @@ class LoadGraphProcTest extends ProcTestBase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"heavy", "huge", "kernel", "cypher"})
+    @ValueSource(strings = {"huge", "kernel", "cypher"})
     void shouldUseLoadedGraph(String graph) {
         String queryTemplate = "CALL algo.graph.load(" +
                                "    'foo', %s, %s, {" +
@@ -243,7 +232,7 @@ class LoadGraphProcTest extends ProcTestBase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"heavy", "huge", "kernel", "cypher"})
+    @ValueSource(strings = {"huge", "kernel", "cypher"})
     void multiUseLoadedGraph(String graph) {
         String queryTemplate = "CALL algo.graph.load(" +
                                "    'foo', %s, %s, {" +
@@ -302,7 +291,7 @@ class LoadGraphProcTest extends ProcTestBase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"heavy", "huge", "kernel", "cypher"})
+    @ValueSource(strings = {"huge", "kernel", "cypher"})
     void shouldWorkWithLimitedTypes(String graph) {
         String queryTemplate = "CALL algo.graph.load(" +
                                "    'foo', %s, %s, {" +
@@ -332,7 +321,7 @@ class LoadGraphProcTest extends ProcTestBase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"heavy", "huge", "kernel", "cypher"})
+    @ValueSource(strings = {"huge", "kernel", "cypher"})
     void dontDoubleLoad(String graph) {
         String queryTemplate = "CALL algo.graph.load(" +
                                "    'foo', %s, %s, {" +
@@ -374,7 +363,7 @@ class LoadGraphProcTest extends ProcTestBase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"heavy", "huge", "kernel", "cypher"})
+    @ValueSource(strings = {"huge", "kernel", "cypher"})
     void removeGraph(String graph) {
         String queryTemplate = "CALL algo.graph.load(" +
                                "    'foo', %s, %s, {" +
@@ -448,7 +437,7 @@ class LoadGraphProcTest extends ProcTestBase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"heavy", "huge", "kernel", "cypher"})
+    @ValueSource(strings = {"huge", "kernel", "cypher"})
     void degreeDistribution(String graph) {
         String queryTemplate = "CALL algo.graph.load(" +
                                "    'foo', %s, %s, {" +
@@ -510,7 +499,7 @@ class LoadGraphProcTest extends ProcTestBase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"heavy", "huge", "kernel", "cypher"})
+    @ValueSource(strings = {"huge", "kernel", "cypher"})
     void incomingDegreeDistribution(String graph) {
         String queryTemplate = "CALL algo.graph.load(" +
                                "    'foo', %s, %s, {" +
