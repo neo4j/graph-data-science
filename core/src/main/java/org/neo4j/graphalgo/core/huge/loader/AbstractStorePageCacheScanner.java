@@ -38,7 +38,6 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Predicate;
 
 import static org.neo4j.kernel.impl.store.RecordPageLocationCalculator.offsetForId;
 
@@ -98,8 +97,6 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
         private long fetchedUntilPage;
         // the current offset into the page
         private int offset;
-        // the end offset of the current page - exclusive
-        private int endOffset;
 
         Cursor(PageCursor pageCursor, Record record) {
             this.lastOffset = offsetForId(maxId, pageSize, recordSize);
@@ -107,7 +104,7 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
             this.pageCursor = pageCursor;
             this.record = record;
             this.offset = pageSize; // trigger page load as first action
-            this.endOffset = pageSize;
+            this.currentPage = -1;
         }
 
         int bulkSize() {
@@ -121,30 +118,6 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
                 lastPageId += 1;
             }
             return lastPageId;
-        }
-
-        public boolean next(Predicate<Record> filter) {
-            if (recordId == -1L) {
-                return false;
-            }
-
-            try {
-                do {
-                    if (loadFromCurrentPage(filter)) {
-                        return true;
-                    }
-
-                    if (loadNextPage()) {
-                        continue;
-                    }
-
-                    record.setId(recordId = -1L);
-                    record.clear();
-                    return false;
-                } while (true);
-            } catch (IOException e) {
-                throw new UnderlyingStorageException(e);
-            }
         }
 
         boolean bulkNext(RecordConsumer<Record> consumer) {
@@ -163,6 +136,9 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
             int endOffset;
             long page;
             long endPage;
+            if (currentPage < lastPage) {
+                preFetchPages();
+            }
             if (currentPage == lastPage) {
                 page = lastPage;
                 endOffset = lastOffset;
@@ -171,10 +147,9 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
                 this.recordId = -1L;
                 return false;
             } else {
-                preFetchPages();
                 page = currentPage;
                 endPage = fetchedUntilPage;
-                endOffset = this.endOffset;
+                endOffset = AbstractStorePageCacheScanner.this.pageSize;
             }
 
             int offset = this.offset;
@@ -204,38 +179,6 @@ public class AbstractStorePageCacheScanner<Record extends AbstractBaseRecord> {
             this.recordId = recordId;
 
             return true;
-        }
-
-        private boolean loadFromCurrentPage(Predicate<Record> filter) throws IOException {
-            while (offset < endOffset) {
-                record.setId(recordId++);
-                loadAtOffset(offset);
-                offset += recordSize;
-                if (record.inUse() && filter.test(record)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        private boolean loadNextPage() throws IOException {
-            long current = currentPage++;
-            if (current < fetchedUntilPage) {
-                offset = 0;
-                recordId = current * recordsPerPage;
-                return pageCursor.next(current);
-            }
-            if (current < lastPage) {
-                preFetchPages();
-                return loadNextPage();
-            }
-            if (current == lastPage) {
-                offset = 0;
-                endOffset = lastOffset;
-                recordId = current * recordsPerPage;
-                return pageCursor.next(current);
-            }
-            return false;
         }
 
         private void preFetchPages() throws IOException {
