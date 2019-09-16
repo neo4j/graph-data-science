@@ -25,15 +25,9 @@ import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.values.storable.NumberValue;
-import org.neo4j.values.storable.TemporalValue;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.time.chrono.ChronoLocalDateTime;
-import java.time.chrono.ChronoZonedDateTime;
-import java.time.temporal.Temporal;
 import java.util.function.LongConsumer;
 
 public final class ReadHelper {
@@ -78,28 +72,6 @@ public final class ReadHelper {
         }
         if (Values.NO_VALUE.eq(value)) {
             return defaultValue;
-        }
-        if (value instanceof TemporalValue) {
-            TemporalValue temporalValue = (TemporalValue) value;
-            // we could use temporalValue.get("epochMillis") but that one is only
-            // supports ZonedDateTimes. While the Values.temporalValue constructor
-            // turns every OffsetDateTime into a ZonedDateTime, it doesn't do so for
-            // LocalDateTimes. We do support the LocalDateTime here and also explicitly
-            // support OffsetDateTime as well, just in case the logic inside
-            // Values.temporalValue changes at some point.
-            Temporal temporal = temporalValue.asObjectCopy();
-            if (temporal instanceof ChronoLocalDateTime<?>) {
-                ChronoLocalDateTime<?> ldt = (ChronoLocalDateTime<?>) temporal;
-                return (double) ldt.toInstant(ZoneOffset.UTC).toEpochMilli();
-            }
-            if (temporal instanceof OffsetDateTime) {
-                OffsetDateTime odt = (OffsetDateTime) temporal;
-                return (double) odt.toInstant().toEpochMilli();
-            }
-            if (temporal instanceof ChronoZonedDateTime<?>) {
-                ChronoZonedDateTime<?> zdt = (ChronoZonedDateTime<?>) temporal;
-                return (double) zdt.toInstant().toEpochMilli();
-            }
         }
 
         // TODO: We used to do be lenient and parse strings/booleans into doubles.
