@@ -191,7 +191,6 @@ This graph has two connected components, each with three nodes.
 The relationships that connect the nodes in each component has a property which determines the strength of the relationship.
 
 The following examples demonstrate using the Connected Components algorithm.
-The first treats the graph as unweighted and the second treats it as weighted, where you can define the threshold of the weight above which relationships are included.
 
 
 [[algorithms-wcc-examples-unweighted]]
@@ -293,54 +292,25 @@ YIELD nodes AS Nodes, setCount AS NbrOfComponents, writeProperty AS PropertyName
 As we can see from the results, Bridget is now in their own component, due to the relationship weight not being above the configured threshold.
 
 
-[[algorithms-wcc-example]]
-== Example usage
+[[algorithms-wcc-examples-seeding]]
+=== Seeded components
 
-As mentioned above, connected components are an essential step in preprocessing your data.
-One reason is that most centralities suffer from disconnected components, or you just want to find disconnected groups of nodes.
-Int his example, Yelp's social network will be used to demonstrate how to proceed when dealing with real world data.
-A typical social network consists of one big component and a number of small disconnected components.
-
-.The following will get the count of connected components:
-[source, cypher]
-----
-include::scripts/connected-components.cypher[tag=count-component-yelp]
-----
-
-We get back the count of disconnected components being 18512 if we do not count users without friends.
-Let's now check the size of top 20 components to get a better picture:
-
-.The following will get the size of top 20 components:
-[source, cypher]
-----
-include::scripts/connected-components.cypher[tag=top-20-component-yelp]
-----
-
-The biggest component has 8938630 out of total 8981389 (99,5%).
-It is quite high, but not shocking, as we have a friendship social network where we can expect small world effect and 6 degree of separation rule, where you can get to any person in a social network, just depends how long is the path.
-
-We can now move on to next step of analysis and run centralities on only the biggest components, so that our results will be more accurate.
-We will write back the results to the node, and use centralities with Cypher loading, or set a new community identifier for the biggest component.
-
-
-[[algorithms-wcc-example-seeding]]
-=== Using seed communities
-
-It is possible to define preliminary communities of nodes using the `seedProperty` parameter.
-This is helpful if we want to retain communities from a previous run.
+It is possible to define preliminary component IDs for nodes using the `seedProperty` configuration parameter.
+This is helpful if we want to retain components from a previous run.
 The property value needs to be a number.
 
-The algorithm first checks if there is a seed community assigned to the node.
-If there is one, that community is used.
-Otherwise, a new unique community is assigned to the node.
+The algorithm first checks if there is a seeded component ID assigned to the node.
+If there is one, that component ID is used.
+Otherwise, a new unique component ID is assigned to the node.
 
-Once every node has a community, the algorithm runs and merges communities of nodes that are connected.
-When merging communities, the resulting community is always the one with the lower community id.
+Once every node belongs to a component, the algorithm merges components of connected nodes.
+When components are merged, the resulting component is always the one with the lower component ID.
 
 [NOTE]
-If the `seedProperty` option is the same as the `writeProperty` option,
-the algorithm only writes properties for nodes where the community has changed.
+If the `seedProperty` configuration parameter has the same value as `writeProperty`, the algorithm only writes properties for nodes where the component ID has changed.
 If they differ, the algorithm writes properties for all nodes.
+
+//TODO: add some Cypher and show an actual example
 
 
 [[algorithms-wcc-hgp]]
