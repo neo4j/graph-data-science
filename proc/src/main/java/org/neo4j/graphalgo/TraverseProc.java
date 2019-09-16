@@ -80,7 +80,7 @@ public class TraverseProc {
                 .withOptionalRelationshipWeightsFromProperty(configuration.getWeightProperty(), 1.)
                 .withDirection(configuration.getDirection(Direction.OUTGOING))
                 .withLog(log)
-                .load(HugeGraphFactory.class);
+                .load(configuration.getGraphImpl());
 
         final Traverse traverse = new Traverse(graph)
                 .withProgressLogger(ProgressLogger.wrap(log, "BFS"))
@@ -146,7 +146,7 @@ public class TraverseProc {
                 .withOptionalRelationshipWeightsFromProperty(configuration.getWeightProperty(), 1.)
                 .withDirection(configuration.getDirection(Direction.OUTGOING))
                 .withLog(log)
-                .load(HugeGraphFactory.class);
+                .load(configuration.getGraphImpl());
 
         final Traverse traverse = new Traverse(graph)
                 .withProgressLogger(ProgressLogger.wrap(log, "DFS"))
