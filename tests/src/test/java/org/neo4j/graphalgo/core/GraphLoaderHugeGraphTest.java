@@ -25,6 +25,8 @@ import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
@@ -427,6 +429,49 @@ class GraphLoaderTest {
         checkOutWeights(p2, 3);
     }
 
+    @ParameterizedTest
+    @CsvSource({
+            "SKIP, 43, 45, 1338, 1340",
+            "MIN, 42, 45, 1337, 1340",
+            "MAX, 44, 46, 1339, 1341",
+            "SUM, 129, 91, 4014, 2681",
+    })
+    void multipleRelPropertiesWithDeduplication(
+            DeduplicationStrategy deduplicationStrategy,
+            double expectedNodeAP1,
+            double expectedNodeBP1,
+            double expectedNodeAP2,
+            double expectedNodeBP2) {
+        db.execute("" +
+                   "CREATE (a:Node),(b:Node) " +
+                   "CREATE" +
+                   " (a)-[:REL {p1: 43, p2: 1338}]->(a)," +
+                   " (a)-[:REL {p1: 42, p2: 1337}]->(a)," +
+                   " (a)-[:REL {p1: 44, p2: 1339}]->(a)," +
+                   " (b)-[:REL {p1: 45, p2: 1340}]->(b)," +
+                   " (b)-[:REL {p1: 46, p2: 1341}]->(b)");
+        GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT);
+        GraphByType graph = graphLoader.withAnyLabel()
+                .withAnyRelationshipType()
+                .withOptionalRelationshipProperties(
+                        PropertyMapping.of("p1", "p1", 1.0, deduplicationStrategy),
+                        PropertyMapping.of("p2", "p2", 2.0, deduplicationStrategy)
+                )
+                .withDirection(Direction.OUTGOING)
+                .build(HugeGraphFactory.class)
+                .loadGraphs();
+
+        Graph p1 = graph.loadGraph("", Optional.of("p1"));
+        assertEquals(2L, p1.nodeCount());
+        checkOutWeights(p1, 0, expectedNodeAP1);
+        checkOutWeights(p1, 1, expectedNodeBP1);
+
+        Graph p2 = graph.loadGraph("", Optional.of("p2"));
+        assertEquals(2L, p2.nodeCount());
+        checkOutWeights(p2, 0, expectedNodeAP2);
+        checkOutWeights(p2, 1, expectedNodeBP2);
+    }
+
     private void checkOutRelationships(Graph graph, long node, long... expected) {
         LongArrayList idList = new LongArrayList();
         graph.forEachOutgoing(node, (s, t) -> {
@@ -439,7 +484,7 @@ class GraphLoaderTest {
         assertArrayEquals(expected, ids);
     }
 
-    private void checkOutWeights(Graph graph, int node, double... expected) {
+    private void checkOutWeights(Graph graph, long node, double... expected) {
         LongArrayList idList = new LongArrayList(expected.length);
         DoubleArrayList weightList = new DoubleArrayList(expected.length);
         graph.forEachRelationship(node, Direction.OUTGOING, (s, t, w) -> {
@@ -457,7 +502,7 @@ class GraphLoaderTest {
         assertArrayEquals(expected, weights);
     }
 
-    private void checkInRelationships(Graph graph, int node, long... expected) {
+    private void checkInRelationships(Graph graph, long node, long... expected) {
         LongArrayList idList = new LongArrayList();
         graph.forEachIncoming(node, (s, t) -> {
             idList.add(t);
