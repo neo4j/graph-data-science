@@ -19,17 +19,14 @@
  */
 package org.neo4j.graphalgo.impl.pagerank;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphdb.Direction;
@@ -38,8 +35,6 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -48,106 +43,87 @@ import java.util.stream.LongStream;
 import static org.junit.Assert.assertEquals;
 import static org.neo4j.graphalgo.impl.pagerank.PageRankTest.DEFAULT_CONFIG;
 
-@RunWith(Parameterized.class)
-public final class PersonalizedPageRankTest {
+final class PersonalizedPageRankTest {
 
-    private Class<? extends GraphFactory> graphImpl;
+    private static final String DB_CYPHER = "CREATE" +
+                                            "  (iphone:Product {name: 'iPhone5'})" +
+                                            ", (kindle:Product {name: 'Kindle Fire'})" +
+                                            ", (fitbit:Product {name: 'Fitbit Flex Wireless'})" +
+                                            ", (potter:Product {name: 'Harry Potter'})" +
+                                            ", (hobbit:Product {name: 'Hobbit'})" +
 
-    @Parameterized.Parameters(name = "{1}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(
-                new Object[]{CypherGraphFactory.class, "CypherGraphFactory"},
-                new Object[]{HugeGraphFactory.class, "HugeGraphFactory"}
-        );
-    }
-    private static final String DB_CYPHER = "" +
-            "CREATE (iphone:Product {name:\"iPhone5\"})\n" +
-            "CREATE (kindle:Product {name:\"Kindle Fire\"})\n" +
-            "CREATE (fitbit:Product {name:\"Fitbit Flex Wireless\"})\n" +
-            "CREATE (potter:Product {name:\"Harry Potter\"})\n" +
-            "CREATE (hobbit:Product {name:\"Hobbit\"})\n" +
+                                            ", (todd:Person {name: 'Todd'})" +
+                                            ", (mary:Person {name: 'Mary'})" +
+                                            ", (jill:Person {name: 'Jill'})" +
+                                            ", (john:Person {name: 'John'})" +
 
-            "CREATE (todd:Person {name:\"Todd\"})\n" +
-            "CREATE (mary:Person {name:\"Mary\"})\n" +
-            "CREATE (jill:Person {name:\"Jill\"})\n" +
-            "CREATE (john:Person {name:\"John\"})\n" +
+                                            ",  (john)-[:PURCHASED]->(iphone)" +
+                                            ",  (john)-[:PURCHASED]->(kindle)" +
+                                            ",  (mary)-[:PURCHASED]->(iphone)" +
+                                            ",  (mary)-[:PURCHASED]->(kindle)" +
+                                            ",  (mary)-[:PURCHASED]->(fitbit)" +
+                                            ",  (jill)-[:PURCHASED]->(iphone)" +
+                                            ",  (jill)-[:PURCHASED]->(kindle)" +
+                                            ",  (jill)-[:PURCHASED]->(fitbit)" +
+                                            ",  (todd)-[:PURCHASED]->(fitbit)" +
+                                            ",  (todd)-[:PURCHASED]->(potter)" +
+                                            ",  (todd)-[:PURCHASED]->(hobbit)";
 
-            "CREATE\n" +
-            "  (john)-[:PURCHASED]->(iphone),\n" +
-            "  (john)-[:PURCHASED]->(kindle),\n" +
-            "  (mary)-[:PURCHASED]->(iphone),\n" +
-            "  (mary)-[:PURCHASED]->(kindle),\n" +
-            "  (mary)-[:PURCHASED]->(fitbit),\n" +
-            "  (jill)-[:PURCHASED]->(iphone),\n" +
-            "  (jill)-[:PURCHASED]->(kindle),\n" +
-            "  (jill)-[:PURCHASED]->(fitbit),\n" +
-            "  (todd)-[:PURCHASED]->(fitbit),\n" +
-            "  (todd)-[:PURCHASED]->(potter),\n" +
-            "  (todd)-[:PURCHASED]->(hobbit)";
+    private static GraphDatabaseAPI DB;
 
-    private static GraphDatabaseAPI db;
-
-    @BeforeClass
-    public static void setupGraphDb() {
-        db = TestDatabaseCreator.createTestDatabase();
-        try (Transaction tx = db.beginTx()) {
-            db.execute(DB_CYPHER).close();
-            tx.success();
-        }
+    @BeforeAll
+    static void setupGraphDb() {
+        DB = TestDatabaseCreator.createTestDatabase();
+        DB.execute(DB_CYPHER);
     }
 
-    @AfterClass
-    public static void shutdownGraphDb() throws Exception {
-        if (db!=null) db.shutdown();
+    @AfterAll
+    static void shutdownGraphDb() {
+        if (DB != null) DB.shutdown();
     }
 
-    public PersonalizedPageRankTest(
-            Class<? extends GraphFactory> graphImpl,
-            String nameIgnoredOnlyForTestName) {
-        this.graphImpl = graphImpl;
-    }
-
-    @Test
-    public void test() throws Exception {
+    @TestSupport.AllGraphTypesTest
+    void test(Class<? extends GraphFactory> graphFactory) {
         Label personLabel = Label.label("Person");
         Label productLabel = Label.label("Product");
         final Map<Long, Double> expected = new HashMap<>();
 
-        try (Transaction tx = db.beginTx()) {
+        try (Transaction tx = DB.beginTx()) {
 
-            expected.put(db.findNode(personLabel, "name", "John").getId(), 0.24851499999999993);
-            expected.put(db.findNode(personLabel, "name", "Jill").getId(), 0.12135449999999998);
-            expected.put(db.findNode(personLabel, "name", "Mary").getId(), 0.12135449999999998);
-            expected.put(db.findNode(personLabel, "name", "Todd").getId(), 0.043511499999999995);
+            expected.put(DB.findNode(personLabel, "name", "John").getId(), 0.24851499999999993);
+            expected.put(DB.findNode(personLabel, "name", "Jill").getId(), 0.12135449999999998);
+            expected.put(DB.findNode(personLabel, "name", "Mary").getId(), 0.12135449999999998);
+            expected.put(DB.findNode(personLabel, "name", "Todd").getId(), 0.043511499999999995);
 
-            expected.put(db.findNode(productLabel, "name", "Kindle Fire").getId(), 0.17415649999999996);
-            expected.put(db.findNode(productLabel, "name", "iPhone5").getId(), 0.17415649999999996);
-            expected.put(db.findNode(productLabel, "name", "Fitbit Flex Wireless").getId(), 0.08085200000000001);
-            expected.put(db.findNode(productLabel, "name", "Harry Potter").getId(), 0.01224);
-            expected.put(db.findNode(productLabel, "name", "Hobbit").getId(), 0.01224);
+            expected.put(DB.findNode(productLabel, "name", "Kindle Fire").getId(), 0.17415649999999996);
+            expected.put(DB.findNode(productLabel, "name", "iPhone5").getId(), 0.17415649999999996);
+            expected.put(DB.findNode(productLabel, "name", "Fitbit Flex Wireless").getId(), 0.08085200000000001);
+            expected.put(DB.findNode(productLabel, "name", "Harry Potter").getId(), 0.01224);
+            expected.put(DB.findNode(productLabel, "name", "Hobbit").getId(), 0.01224);
 
             tx.success();
         }
 
         final Graph graph;
-        if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
-            graph = new GraphLoader(db)
+        if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
+            graph = new GraphLoader(DB)
                     .withLabel("MATCH (n) RETURN id(n) as id")
                     .withRelationshipType("MATCH (n)-[:PURCHASED]-(m) RETURN id(n) as source,id(m) as target")
-                    .load(graphImpl);
+                    .load(graphFactory);
 
         } else {
-            graph = new GraphLoader(db)
+            graph = new GraphLoader(DB)
                     .withDirection(Direction.BOTH)
                     .withRelationshipType("PURCHASED")
                     .undirected()
-                    .load(graphImpl);
+                    .load(graphFactory);
         }
 
         LongStream sourceNodeIds;
-        try(Transaction tx = db.beginTx()) {
-            Node node = db.findNode(personLabel, "name", "John");
+        try (Transaction tx = DB.beginTx()) {
+            Node node = DB.findNode(personLabel, "name", "John");
             sourceNodeIds = LongStream.of(node.getId());
+            tx.success();
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.NON_WEIGHTED
@@ -164,8 +140,5 @@ public final class PersonalizedPageRankTest {
                     1e-2
             );
         });
-
     }
-
-
 }

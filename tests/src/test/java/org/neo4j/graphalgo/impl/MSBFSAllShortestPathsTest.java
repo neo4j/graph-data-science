@@ -19,25 +19,18 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
-import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
-
-import java.util.Arrays;
-import java.util.Collection;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyDouble;
@@ -61,54 +54,37 @@ import static org.mockito.Mockito.verify;
  * 1 | 1  | 1
  * v    v
  * (8)->(9)
- *
- * @author mknblch
  */
-@RunWith(Parameterized.class)
-public class MSBFSAllShortestPathsTest {
-
-    @ClassRule
-    public static final ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
+class MSBFSAllShortestPathsTest {
 
     private static final int width = 2, height = 5;
 
     private static final String LABEL = "Node";
     private static final String RELATIONSHIP = "REL";
 
-    private Graph graph;
+    private static GraphDatabaseAPI DB;
 
-    @Parameterized.Parameters(name = "{1}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(
-                new Object[]{HugeGraphFactory.class, "Huge"},
-                new Object[]{GraphViewFactory.class, "View"}
-        );
+    @BeforeAll
+    static void setup() {
+        DB = TestDatabaseCreator.createTestDatabase();
+        GraphBuilder.create(DB)
+                .setLabel(LABEL)
+                .setRelationship(RELATIONSHIP)
+                .newGridBuilder()
+                .createGrid(width, height);
     }
 
-    @BeforeClass
-    public static void setup() throws Exception {
-        try (ProgressTimer ignored = ProgressTimer.start(t -> System.out.println(
-                "setup took " + t + "ms"))) {
-            GraphBuilder.create(DB)
-                    .setLabel(LABEL)
-                    .setRelationship(RELATIONSHIP)
-                    .newGridBuilder()
-                    .createGrid(width, height);
-        }
+    @AfterAll
+    static void shutdown() {
+        if (DB != null) DB.shutdown();
     }
 
-    public MSBFSAllShortestPathsTest(
-            Class<? extends GraphFactory> graphImpl,
-            String nameIgnoredOnlyForTestName) {
-
-        graph = new GraphLoader(DB)
+    @TestSupport.AllGraphTypesWithoutCypherTest
+    void testResults(Class<? extends GraphFactory> graphImpl) {
+        Graph graph = new GraphLoader(DB)
                 .withLabel(LABEL)
                 .withRelationshipType(RELATIONSHIP)
                 .load(graphImpl);
-    }
-
-    @Test
-    public void testResults() throws Exception {
         testASP(new MSBFSAllShortestPaths(graph, AllocationTracker.EMPTY, Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT, Direction.OUTGOING));
     }
 
@@ -130,7 +106,6 @@ public class MSBFSAllShortestPathsTest {
     }
 
     interface ResultConsumer {
-
         void test(long source, long target, double distance);
     }
 }

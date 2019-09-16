@@ -19,11 +19,12 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -31,116 +32,106 @@ import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.impl.infomap.InfoMap;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 
 /**
  * --------- Graph 3x2 ---------
  *
- *        (b)        (e)
- *       /  \       /  \    (x)
- *     (a)--(c)---(d)--(f)
+ * (b)        (e)
+ * /  \       /  \    (x)
+ * (a)--(c)---(d)--(f)
  *
  * --------- Graph 4x2 ---------
  *
- *      (a)-(b)---(e)-(f)
- *       | X |     | X |    (z)
- *      (c)-(d)   (g)-(h)
- *
- * @author mknblch
+ * (a)-(b)---(e)-(f)
+ * | X |     | X |    (z)
+ * (c)-(d)   (g)-(h)
  */
-@RunWith(Parameterized.class)
-public class InfoMapTest {
+class InfoMapTest {
 
-    @ClassRule
-    public static ImpermanentDatabaseRule db = new ImpermanentDatabaseRule();
+    private static final String CYPHER_2x4 = "CREATE" +
+                                             "  (a:Node {name: 'a'})" +
+                                             ", (c:Node {name: 'c'})" +
+                                             ", (b:Node {name: 'b'})" +
+                                             ", (d:Node {name: 'd'})" +
+                                             ", (e:Node {name: 'e'})" +
+                                             ", (g:Node {name: 'g'})" +
+                                             ", (f:Node {name: 'f'})" +
+                                             ", (h:Node {name: 'h'})" +
+                                             ", (z:Node {name: 'z'})" +
 
-    private static Graph graph;
+                                             ", (a)-[:TYPE]->(b)" +
+                                             ", (a)-[:TYPE]->(c)" +
+                                             ", (a)-[:TYPE]->(d)" +
+                                             ", (b)-[:TYPE]->(c)" +
+                                             ", (c)-[:TYPE]->(d)" +
+                                             ", (b)-[:TYPE]->(d)" +
 
-    @Parameterized.Parameters
-    public static Collection<Object[]> data() {
-        return Arrays.asList(
-                new Object[]{CYPHER_2x3},
-                new Object[]{CYPHER_2x4}
-        );
+                                             ", (f)-[:TYPE]->(e)" +
+                                             ", (e)-[:TYPE]->(h)" +
+                                             ", (e)-[:TYPE]->(g)" +
+                                             ", (f)-[:TYPE]->(g)" +
+                                             ", (f)-[:TYPE]->(h)" +
+                                             ", (g)-[:TYPE]->(h)" +
+                                             ", (b)-[:TYPE]->(e)";
+
+    private static final String CYPHER_2x3 = "CREATE" +
+                                             "  (a:Node {name: 'a'})" +
+                                             ", (b:Node {name: 'b'})" +
+                                             ", (c:Node {name: 'c'})" +
+                                             ", (d:Node {name: 'd'})" +
+                                             ", (e:Node {name: 'e'})" +
+                                             ", (f:Node {name: 'f'})" +
+                                             ", (x:Node {name: 'x'})" +
+
+                                             ", (b)-[:TYPE]->(a)" +
+                                             ", (a)-[:TYPE]->(c)" +
+                                             ", (c)-[:TYPE]->(a)" +
+
+                                             ", (d)-[:TYPE]->(c)" +
+
+                                             ", (d)-[:TYPE]->(e)" +
+                                             ", (d)-[:TYPE]->(f)" +
+                                             ", (e)-[:TYPE]->(f)";
+
+    static Stream<String> cypherQueries() {
+        return Stream.of(CYPHER_2x4, CYPHER_2x3);
     }
 
-    private static final String CYPHER_2x4 =
-            "CREATE (a:Node {name:'a'})\n" +
-                    "CREATE (c:Node {name:'c'})\n" + // shuffled
-                    "CREATE (b:Node {name:'b'})\n" +
-                    "CREATE (d:Node {name:'d'})\n" +
-                    "CREATE (e:Node {name:'e'})\n" +
-                    "CREATE (g:Node {name:'g'})\n" +
-                    "CREATE (f:Node {name:'f'})\n" +
-                    "CREATE (h:Node {name:'h'})\n" +
-                    "CREATE (z:Node {name:'z'})\n" +
+    private static GraphDatabaseAPI DB;
 
-                    "CREATE" +
-
-                    " (a)-[:TYPE]->(b),\n" +
-                    " (a)-[:TYPE]->(c),\n" +
-                    " (a)-[:TYPE]->(d),\n" +
-                    " (b)-[:TYPE]->(c),\n" +
-                    " (c)-[:TYPE]->(d),\n" +
-                    " (b)-[:TYPE]->(d),\n" +
-
-                    " (f)-[:TYPE]->(e),\n" +
-                    " (e)-[:TYPE]->(h),\n" +
-                    " (e)-[:TYPE]->(g),\n" +
-                    " (f)-[:TYPE]->(g),\n" +
-                    " (f)-[:TYPE]->(h),\n" +
-                    " (g)-[:TYPE]->(h),\n" +
-                    " (b)-[:TYPE]->(e)";
-
-    private static final String CYPHER_2x3 =
-            "CREATE (a:Node {name:'a'})\n" +
-                    "CREATE (b:Node {name:'b'})\n" +
-                    "CREATE (c:Node {name:'c'})\n" +
-                    "CREATE (d:Node {name:'d'})\n" +
-                    "CREATE (e:Node {name:'e'})\n" +
-                    "CREATE (f:Node {name:'f'})\n" +
-                    "CREATE (x:Node {name:'x'})\n" +
-                    "CREATE" +
-                    " (b)-[:TYPE]->(a),\n" +
-                    " (a)-[:TYPE]->(c),\n" +
-                    " (c)-[:TYPE]->(a),\n" +
-
-                    " (d)-[:TYPE]->(c),\n" +
-
-                    " (d)-[:TYPE]->(e),\n" +
-                    " (d)-[:TYPE]->(f),\n" +
-                    " (e)-[:TYPE]->(f)";
-
-
-    public InfoMapTest(String cypher) {
-        this.cypher = cypher;
+    @BeforeAll
+    static void setupDb() {
+        DB = TestDatabaseCreator.createTestDatabase();
     }
 
-    private final String cypher;
+    @AfterEach
+    void clearDb() {
+        DB.execute("MATCH (n) detach delete n");
+    }
 
-    @Before
-    public void setupGraph() throws KernelException {
+    @AfterAll
+    static void shutdown() {
+        if (DB != null) {
+            DB.shutdown();
+        }
+    }
 
-        db.execute("MATCH (n) detach delete n");
-        db.execute(cypher);
-
-        graph = new GraphLoader(db)
+    @ParameterizedTest
+    @MethodSource("cypherQueries")
+    void testClustering(String cypher) {
+        DB.execute(cypher);
+        Graph graph = new GraphLoader(DB)
                 .withAnyRelationshipType()
                 .withAnyLabel()
                 .withoutNodeProperties()
                 .undirected()
                 .load(HugeGraphFactory.class);
-
-    }
-
-    @Test
-    public void testClustering() throws Exception {
 
         // trigger parallel exec on small set size
         InfoMap.MIN_MODS_PARALLEL_EXEC = 2;
@@ -158,9 +149,9 @@ public class InfoMapTest {
         // should be 3 communities in each graph
         assertEquals(3, algo.getCommunityCount());
 
-        System.out.printf("%27s | %d iterations%n",
+        System.out.printf(
+                "%27s | %d iterations%n",
                 Arrays.toString(algo.getCommunities()),
                 algo.getIterations());
     }
-
 }

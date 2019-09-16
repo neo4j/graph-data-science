@@ -19,20 +19,15 @@
  */
 package org.neo4j.graphalgo.algo;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.neo4j.graphalgo.ShortestPathDeltaSteppingProc;
-import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.function.DoubleConsumer;
 
 import static org.junit.Assert.assertNotEquals;
@@ -52,86 +47,71 @@ import static org.mockito.Mockito.verify;
  *
  * S->X: {S,G,H,I,X}:8, {S,D,E,F,X}:12, {S,A,B,C,X}:20
  */
-@RunWith(Parameterized.class)
-public final class ShortestPathDeltaSteppingProcTest {
+final class ShortestPathDeltaSteppingProcTest {
 
-    private static GraphDatabaseAPI api;
+    private static final String DB_CYPHER = "CREATE" +
+                                            "  (s:Node {name:'s'})" +
+                                            ", (a:Node {name:'a'})" +
+                                            ", (b:Node {name:'b'})" +
+                                            ", (c:Node {name:'c'})" +
+                                            ", (d:Node {name:'d'})" +
+                                            ", (e:Node {name:'e'})" +
+                                            ", (f:Node {name:'f'})" +
+                                            ", (g:Node {name:'g'})" +
+                                            ", (h:Node {name:'h'})" +
+                                            ", (i:Node {name:'i'})" +
+                                            ", (x:Node {name:'x'})" +
 
-    @BeforeClass
-    public static void setup() throws KernelException {
-        final String cypher =
-                "CREATE (s:Node {name:'s'})\n" +
-                        "CREATE (a:Node {name:'a'})\n" +
-                        "CREATE (b:Node {name:'b'})\n" +
-                        "CREATE (c:Node {name:'c'})\n" +
-                        "CREATE (d:Node {name:'d'})\n" +
-                        "CREATE (e:Node {name:'e'})\n" +
-                        "CREATE (f:Node {name:'f'})\n" +
-                        "CREATE (g:Node {name:'g'})\n" +
-                        "CREATE (h:Node {name:'h'})\n" +
-                        "CREATE (i:Node {name:'i'})\n" +
-                        "CREATE (x:Node {name:'x'})\n" +
-                        "CREATE" +
+                                            ", (x)-[:TYPE {cost:5}]->(s)" + // creates cycle
 
-                        " (x)-[:TYPE {cost:5}]->(s),\n" + // creates cycle
+                                            ", (s)-[:TYPE {cost:5}]->(a)" + // line 1
+                                            ", (a)-[:TYPE {cost:5}]->(b)" +
+                                            ", (b)-[:TYPE {cost:5}]->(c)" +
+                                            ", (c)-[:TYPE {cost:5}]->(x)" +
 
-                        " (s)-[:TYPE {cost:5}]->(a),\n" + // line 1
-                        " (a)-[:TYPE {cost:5}]->(b),\n" +
-                        " (b)-[:TYPE {cost:5}]->(c),\n" +
-                        " (c)-[:TYPE {cost:5}]->(x),\n" +
+                                            ", (s)-[:TYPE {cost:3}]->(d)" + // line 2
+                                            ", (d)-[:TYPE {cost:3}]->(e)" +
+                                            ", (e)-[:TYPE {cost:3}]->(f)" +
+                                            ", (f)-[:TYPE {cost:3}]->(x)" +
 
-                        " (s)-[:TYPE {cost:3}]->(d),\n" + // line 2
-                        " (d)-[:TYPE {cost:3}]->(e),\n" +
-                        " (e)-[:TYPE {cost:3}]->(f),\n" +
-                        " (f)-[:TYPE {cost:3}]->(x),\n" +
+                                            ", (s)-[:TYPE {cost:2}]->(g)" + // line 3
+                                            ", (g)-[:TYPE {cost:2}]->(h)" +
+                                            ", (h)-[:TYPE {cost:2}]->(i)" +
+                                            ", (i)-[:TYPE {cost:2}]->(x)";
 
-                        " (s)-[:TYPE {cost:2}]->(g),\n" + // line 3
-                        " (g)-[:TYPE {cost:2}]->(h),\n" +
-                        " (h)-[:TYPE {cost:2}]->(i),\n" +
-                        " (i)-[:TYPE {cost:2}]->(x)";
+    private static GraphDatabaseAPI DB;
 
-        api = TestDatabaseCreator.createTestDatabase();
-
-        api.getDependencyResolver()
+    @BeforeAll
+    static void setup() throws KernelException {
+        DB = TestDatabaseCreator.createTestDatabase();
+        DB.getDependencyResolver()
                 .resolveDependency(Procedures.class)
                 .registerProcedure(ShortestPathDeltaSteppingProc.class);
-
-        try (Transaction tx = api.beginTx()) {
-            api.execute(cypher);
-            tx.success();
-        }
+        DB.execute(DB_CYPHER);
     }
 
-    @AfterClass
-    public static void shutdownGraph() throws Exception {
-       if (api != null) api.shutdown();
+    @AfterAll
+    static void shutdownGraph() {
+        if (DB != null) DB.shutdown();
     }
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(
-                new Object[]{"Huge"},
-                new Object[]{"Kernel"}
-        );
-    }
-
-    @Parameterized.Parameter
-    public String graphImpl;
-
-    @Test
-    public void testResultStream() throws Exception {
+    @AllGraphNamesTest
+    void testResultStream(String graphName) {
 
         final DoubleConsumer consumer = mock(DoubleConsumer.class);
 
-        final String cypher = "MATCH(n:Node {name:'s'}) WITH n CALL algo.shortestPath.deltaStepping.stream(n, 'cost', 3.0,{graph:'"+graphImpl+"'}) " +
+        final String cypher =
+                "MATCH(n:Node {name:'s'}) " +
+                "WITH n CALL algo.shortestPath.deltaStepping.stream(n, 'cost', 3.0,{graph:'" + graphName + "'}) " +
                 "YIELD nodeId, distance RETURN nodeId, distance";
 
-        api.execute(cypher).accept(row -> {
+        DB.execute(cypher).accept(row -> {
             long nodeId = row.getNumber("nodeId").longValue();
             double distance = row.getNumber("distance").doubleValue();
 
             consumer.accept(distance);
-            System.out.printf("%d:%.1f, ",
+            System.out.printf(
+                    "%d:%.1f, ",
                     nodeId,
                     distance);
             return true;
@@ -141,20 +121,23 @@ public final class ShortestPathDeltaSteppingProcTest {
         verify(consumer, times(1)).accept(eq(8D, 0.1D));
     }
 
-    @Test
-    public void testOutgoingResultStream() throws Exception {
+    @AllGraphNamesTest
+    void testOutgoingResultStream(String graphName) throws Exception {
 
         final DoubleConsumer consumer = mock(DoubleConsumer.class);
 
-        final String cypher = "MATCH(n:Node {name:'s'}) WITH n CALL algo.shortestPath.deltaStepping.stream(n, 'cost', 3.0,{graph:'"+graphImpl+"', direction: 'INCOMING'}) " +
+        final String cypher =
+                "MATCH(n:Node {name:'s'}) " +
+                "WITH n CALL algo.shortestPath.deltaStepping.stream(n, 'cost', 3.0,{graph:'" + graphName + "', direction: 'INCOMING'}) " +
                 "YIELD nodeId, distance RETURN nodeId, distance";
 
-        api.execute(cypher).accept(row -> {
+        DB.execute(cypher).accept(row -> {
             long nodeId = row.getNumber("nodeId").longValue();
             double distance = row.getNumber("distance").doubleValue();
 
             consumer.accept(distance);
-            System.out.printf("%d:%.1f, ",
+            System.out.printf(
+                    "%d:%.1f, ",
                     nodeId,
                     distance);
             return true;
@@ -164,13 +147,15 @@ public final class ShortestPathDeltaSteppingProcTest {
         verify(consumer, times(1)).accept(eq(8D, 0.1D));
     }
 
-    @Test
-    public void testWriteBack() throws Exception {
+    @AllGraphNamesTest
+    void testWriteBack(String graphName) throws Exception {
 
-        final String matchCypher = "MATCH(n:Node {name:'s'}) WITH n CALL algo.shortestPath.deltaStepping(n, 'cost', 3.0, {write:true, writeProperty:'sp', graph:'"+graphImpl+"'}) " +
+        final String matchCypher =
+                "MATCH(n:Node {name:'s'}) " +
+                "WITH n CALL algo.shortestPath.deltaStepping(n, 'cost', 3.0, {write:true, writeProperty:'sp', graph:'" + graphName + "'}) " +
                 "YIELD nodeCount, loadDuration, evalDuration, writeDuration RETURN nodeCount, loadDuration, evalDuration, writeDuration";
 
-        api.execute(matchCypher).accept(row -> {
+        DB.execute(matchCypher).accept(row -> {
             System.out.println("loadDuration = " + row.getNumber("loadDuration").longValue());
             System.out.println("evalDuration = " + row.getNumber("evalDuration").longValue());
             long writeDuration = row.getNumber("writeDuration").longValue();
@@ -184,7 +169,7 @@ public final class ShortestPathDeltaSteppingProcTest {
 
         final String testCypher = "MATCH(n:Node) WHERE exists(n.sp) WITH n RETURN id(n) as id, n.sp as sp";
 
-        api.execute(testCypher).accept(row -> {
+        DB.execute(testCypher).accept(row -> {
             double sp = row.getNumber("sp").doubleValue();
             consumer.accept(sp);
             return true;

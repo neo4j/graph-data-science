@@ -19,25 +19,19 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.mockito.AdditionalMatchers;
+import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
-import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.closeness.HarmonicCentrality;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
-
-import java.util.Arrays;
-import java.util.Collection;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.mock;
@@ -67,50 +61,39 @@ import static org.mockito.Mockito.verify;
  *
  * instead of calculating the farness we sum the inverse
  * of each cell and multiply by 1/(n-1)
- *
- * @author mknblch
  */
-@RunWith(Parameterized.class)
-public class HarmonicCentralityTest {
+class HarmonicCentralityTest {
 
-    @ClassRule
-    public static final ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
+    private static final String CYPHER = "CREATE " +
+                                         "  (a:Node {name:'a'})" +
+                                         ", (b:Node {name:'b'})" +
+                                         ", (c:Node {name:'c'})" +
+                                         ", (d:Node {name:'d'})" +
+                                         ", (e:Node {name:'e'})" +
+                                         ", (a)-[:TYPE]->(b)" +
+                                         ", (b)-[:TYPE]->(c)" +
+                                         ", (d)-[:TYPE]->(e)";
 
-    @Parameterized.Parameters(name = "{1}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(
-                new Object[]{HugeGraphFactory.class, "Huge"},
-                new Object[]{GraphViewFactory.class, "View"}
-        );
+    private static GraphDatabaseAPI DB;
+
+    @BeforeAll
+    static void setupGraph() {
+        DB = TestDatabaseCreator.createTestDatabase();
+        DB.execute(CYPHER);
     }
 
-    @BeforeClass
-    public static void setupGraph() throws KernelException {
-        DB.execute("CREATE (a:Node {name:'a'})\n" +
-                "CREATE (b:Node {name:'b'})\n" +
-                "CREATE (c:Node {name:'c'})\n" +
-                "CREATE (d:Node {name:'d'})\n" +
-                "CREATE (e:Node {name:'e'})\n" +
-                "CREATE" +
-                " (a)-[:TYPE]->(b),\n" +
-                " (b)-[:TYPE]->(c),\n" +
-                " (d)-[:TYPE]->(e)");
+    @AfterAll
+    static void shutdown() {
+        if (DB != null) DB.shutdown();
     }
 
-    private Graph graph;
-
-    public HarmonicCentralityTest(
-            Class<? extends GraphFactory> graphImpl,
-            String nameIgnoredOnlyForTestName) {
-        graph = new GraphLoader(DB)
+    @AllGraphTypesWithoutCypherTest
+    void testStream(Class<? extends GraphFactory> graphImpl) {
+        Graph graph = new GraphLoader(DB)
                 .withAnyRelationshipType()
                 .withAnyLabel()
                 .withoutNodeProperties()
                 .load(graphImpl);
-    }
-
-    @Test
-    public void testStream() throws Exception {
 
         final Consumer mock = mock(Consumer.class);
 

@@ -43,66 +43,65 @@ import static org.neo4j.graphalgo.impl.pagerank.PageRankTest.DEFAULT_CONFIG;
 
 final class ArticleRankTest {
 
-    private static final String DB_CYPHER = "" +
-            "CREATE (_:Label0 {name:\"_\"})\n" +
-            "CREATE (a:Label1 {name:\"a\"})\n" +
-            "CREATE (b:Label1 {name:\"b\"})\n" +
-            "CREATE (c:Label1 {name:\"c\"})\n" +
-            "CREATE (d:Label1 {name:\"d\"})\n" +
-            "CREATE (e:Label1 {name:\"e\"})\n" +
-            "CREATE (f:Label1 {name:\"f\"})\n" +
-            "CREATE (g:Label1 {name:\"g\"})\n" +
-            "CREATE (h:Label1 {name:\"h\"})\n" +
-            "CREATE (i:Label1 {name:\"i\"})\n" +
-            "CREATE (j:Label1 {name:\"j\"})\n" +
-            "CREATE (k:Label2 {name:\"k\"})\n" +
-            "CREATE (l:Label2 {name:\"l\"})\n" +
-            "CREATE (m:Label2 {name:\"m\"})\n" +
-            "CREATE (n:Label2 {name:\"n\"})\n" +
-            "CREATE (o:Label2 {name:\"o\"})\n" +
-            "CREATE (p:Label2 {name:\"p\"})\n" +
-            "CREATE (q:Label2 {name:\"q\"})\n" +
-            "CREATE (r:Label2 {name:\"r\"})\n" +
-            "CREATE (s:Label2 {name:\"s\"})\n" +
-            "CREATE (t:Label2 {name:\"t\"})\n" +
-            "CREATE\n" +
-            "  (b)-[:TYPE1]->(c),\n" +
+    private static final String DB_CYPHER = "CREATE" +
+                                            "  (_:Label0 {name: '_'})" +
+                                            ", (a:Label1 {name: 'a'})" +
+                                            ", (b:Label1 {name: 'b'})" +
+                                            ", (c:Label1 {name: 'c'})" +
+                                            ", (d:Label1 {name: 'd'})" +
+                                            ", (e:Label1 {name: 'e'})" +
+                                            ", (f:Label1 {name: 'f'})" +
+                                            ", (g:Label1 {name: 'g'})" +
+                                            ", (h:Label1 {name: 'h'})" +
+                                            ", (i:Label1 {name: 'i'})" +
+                                            ", (j:Label1 {name: 'j'})" +
+                                            ", (k:Label2 {name: 'k'})" +
+                                            ", (l:Label2 {name: 'l'})" +
+                                            ", (m:Label2 {name: 'm'})" +
+                                            ", (n:Label2 {name: 'n'})" +
+                                            ", (o:Label2 {name: 'o'})" +
+                                            ", (p:Label2 {name: 'p'})" +
+                                            ", (q:Label2 {name: 'q'})" +
+                                            ", (r:Label2 {name: 'r'})" +
+                                            ", (s:Label2 {name: 's'})" +
+                                            ", (t:Label2 {name: 't'})" +
 
-            "  (c)-[:TYPE1]->(b),\n" +
+                                            ", (b)-[:TYPE1]->(c)" +
+                                            ", (c)-[:TYPE1]->(b)" +
 
-            "  (d)-[:TYPE1]->(a),\n" +
-            "  (d)-[:TYPE1]->(b),\n" +
+                                            ", (d)-[:TYPE1]->(a)" +
+                                            ", (d)-[:TYPE1]->(b)" +
 
-            "  (e)-[:TYPE1]->(b),\n" +
-            "  (e)-[:TYPE1]->(d),\n" +
-            "  (e)-[:TYPE1]->(f),\n" +
+                                            ", (e)-[:TYPE1]->(b)" +
+                                            ", (e)-[:TYPE1]->(d)" +
+                                            ", (e)-[:TYPE1]->(f)" +
 
-            "  (f)-[:TYPE1]->(b),\n" +
-            "  (f)-[:TYPE1]->(e),\n" +
+                                            ", (f)-[:TYPE1]->(b)" +
+                                            ", (f)-[:TYPE1]->(e)" +
 
-            "  (g)-[:TYPE2]->(b),\n" +
-            "  (g)-[:TYPE2]->(e),\n" +
-            "  (h)-[:TYPE2]->(b),\n" +
-            "  (h)-[:TYPE2]->(e),\n" +
-            "  (i)-[:TYPE2]->(b),\n" +
-            "  (i)-[:TYPE2]->(e),\n" +
-            "  (j)-[:TYPE2]->(e),\n" +
-            "  (k)-[:TYPE2]->(e)\n";
+                                            ", (g)-[:TYPE2]->(b)" +
+                                            ", (g)-[:TYPE2]->(e)" +
+                                            ", (h)-[:TYPE2]->(b)" +
+                                            ", (h)-[:TYPE2]->(e)" +
+                                            ", (i)-[:TYPE2]->(b)" +
+                                            ", (i)-[:TYPE2]->(e)" +
+                                            ", (j)-[:TYPE2]->(e)" +
+                                            ", (k)-[:TYPE2]->(e)";
 
-    private static GraphDatabaseAPI db;
+    private static GraphDatabaseAPI DB;
 
     @BeforeAll
     static void setupGraphDb() {
-        db = TestDatabaseCreator.createTestDatabase();
-        try (Transaction tx = db.beginTx()) {
-            db.execute(DB_CYPHER).close();
+        DB = TestDatabaseCreator.createTestDatabase();
+        try (Transaction tx = DB.beginTx()) {
+            DB.execute(DB_CYPHER).close();
             tx.success();
         }
     }
 
     @AfterAll
     static void shutdownGraphDb() {
-        if (db!=null) db.shutdown();
+        if (DB != null) DB.shutdown();
     }
 
     @AllGraphTypesTest
@@ -110,29 +109,29 @@ final class ArticleRankTest {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        try (Transaction tx = db.beginTx()) {
-            expected.put(db.findNode(label, "name", "a").getId(), 0.2071625);
-            expected.put(db.findNode(label, "name", "b").getId(), 0.4706795);
-            expected.put(db.findNode(label, "name", "c").getId(), 0.3605195);
-            expected.put(db.findNode(label, "name", "d").getId(), 0.195118);
-            expected.put(db.findNode(label, "name", "e").getId(), 0.2071625);
-            expected.put(db.findNode(label, "name", "f").getId(), 0.195118);
-            expected.put(db.findNode(label, "name", "g").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "h").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "i").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "j").getId(), 0.15);
+        try (Transaction tx = DB.beginTx()) {
+            expected.put(DB.findNode(label, "name", "a").getId(), 0.2071625);
+            expected.put(DB.findNode(label, "name", "b").getId(), 0.4706795);
+            expected.put(DB.findNode(label, "name", "c").getId(), 0.3605195);
+            expected.put(DB.findNode(label, "name", "d").getId(), 0.195118);
+            expected.put(DB.findNode(label, "name", "e").getId(), 0.2071625);
+            expected.put(DB.findNode(label, "name", "f").getId(), 0.195118);
+            expected.put(DB.findNode(label, "name", "g").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "h").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "i").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "j").getId(), 0.15);
             tx.success();
         }
 
         final Graph graph;
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
-            graph = new GraphLoader(db)
+            graph = new GraphLoader(DB)
                     .withLabel("MATCH (n:Label1) RETURN id(n) as id")
                     .withRelationshipType("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
                     .load(graphFactory);
 
         } else {
-            graph = new GraphLoader(db)
+            graph = new GraphLoader(DB)
                     .withLabel(label)
                     .withRelationshipType("TYPE1")
                     .withDirection(Direction.OUTGOING)

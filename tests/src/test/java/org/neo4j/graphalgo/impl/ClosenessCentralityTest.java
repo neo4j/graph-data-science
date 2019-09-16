@@ -19,24 +19,17 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
-import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.closeness.MSClosenessCentrality;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
-
-import java.util.Arrays;
-import java.util.Collection;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.Assert.assertArrayEquals;
 
@@ -61,57 +54,43 @@ import static org.junit.Assert.assertArrayEquals;
  *  S | 10    7     6     7     10      // sum each column
  *  ==|=============================
  * k/S| 0.4  0.57  0.67  0.57   0.4     // normalized centrality
- *
- * @author mknblch
  */
-@RunWith(Parameterized.class)
-public class ClosenessCentralityTest {
+class ClosenessCentralityTest {
+
+    private static final String DB_CYPHER = "CREATE " +
+                                            "  (a:Node {name:'a'})" +
+                                            ", (b:Node {name:'b'})" +
+                                            ", (c:Node {name:'c'})" +
+                                            ", (d:Node {name:'d'})" +
+                                            ", (e:Node {name:'e'})" +
+                                            ", (a)-[:TYPE]->(b)" +
+                                            ", (b)-[:TYPE]->(a)" +
+                                            ", (b)-[:TYPE]->(c)" +
+                                            ", (c)-[:TYPE]->(b)" +
+                                            ", (c)-[:TYPE]->(d)" +
+                                            ", (d)-[:TYPE]->(c)" +
+                                            ", (d)-[:TYPE]->(e)" +
+                                            ", (e)-[:TYPE]->(d)";
 
     private static final double[] EXPECTED = new double[]{0.4, 0.57, 0.66, 0.57, 0.4};
+    private static GraphDatabaseAPI DB;
 
-    @ClassRule
-    public static final ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
-
-    @Parameterized.Parameters(name = "{1}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(
-                new Object[]{HugeGraphFactory.class, "Huge"},
-                new Object[]{GraphViewFactory.class, "View"}
-        );
+    @BeforeAll
+    static void setupGraph() {
+        DB = TestDatabaseCreator.createTestDatabase();
+        DB.execute(DB_CYPHER);
     }
 
-    @BeforeClass
-    public static void setupGraph() throws KernelException {
-        DB.execute("CREATE (a:Node {name:'a'})\n" +
-                "CREATE (b:Node {name:'b'})\n" +
-                "CREATE (c:Node {name:'c'})\n" +
-                "CREATE (d:Node {name:'d'})\n" +
-                "CREATE (e:Node {name:'e'})\n" +
-                "CREATE" +
-                " (a)-[:TYPE]->(b),\n" +
-                " (b)-[:TYPE]->(a),\n" +
-                " (b)-[:TYPE]->(c),\n" +
-                " (c)-[:TYPE]->(b),\n" +
-                " (c)-[:TYPE]->(d),\n" +
-                " (d)-[:TYPE]->(c),\n" +
-                " (d)-[:TYPE]->(e),\n" +
-                " (e)-[:TYPE]->(d)");
+    @AfterAll
+    static void shutdown() {
+        if (DB != null) DB.shutdown();
     }
 
     private Graph graph;
 
-    public ClosenessCentralityTest(
-            Class<? extends GraphFactory> graphImpl,
-            String nameIgnoredOnlyForTestName) {
-        graph = new GraphLoader(DB)
-                .withAnyRelationshipType()
-                .withAnyLabel()
-                .withoutNodeProperties()
-                .load(graphImpl);
-    }
-
-    @Test
-    public void testGetCentrality() throws Exception {
+    @AllGraphTypesWithoutCypherTest
+    void testGetCentrality(Class<? extends GraphFactory> graphFactory) {
+        setup(graphFactory);
         final double[] centrality =
                 new MSClosenessCentrality(
                         graph,
@@ -125,8 +104,9 @@ public class ClosenessCentralityTest {
         assertArrayEquals(EXPECTED, centrality, 0.1);
     }
 
-    @Test
-    public void testStream() throws Exception {
+    @AllGraphTypesWithoutCypherTest
+    void testStream(Class<? extends GraphFactory> graphFactory) {
+        setup(graphFactory);
         final double[] centrality = new double[(int) graph.nodeCount()];
 
         new MSClosenessCentrality(graph, AllocationTracker.EMPTY, Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT, false)
@@ -135,5 +115,13 @@ public class ClosenessCentralityTest {
                 .forEach(r -> centrality[Math.toIntExact(graph.toMappedNodeId(r.nodeId))] = r.centrality);
 
         assertArrayEquals(EXPECTED, centrality, 0.1);
+    }
+
+    private void setup(Class<? extends GraphFactory> graphImpl) {
+        graph = new GraphLoader(DB)
+                .withAnyRelationshipType()
+                .withAnyLabel()
+                .withoutNodeProperties()
+                .load(graphImpl);
     }
 }

@@ -56,339 +56,340 @@ import static org.hamcrest.Matchers.is;
 @RunWith(Parameterized.class)
 public class WeightedAllShortestPaths427Test {
 
-    private static final String GRAPH =
-            "CREATE (n00:Node)\n" +
-                    ",(n01:Node)\n" +
-                    ",(n02:Node)\n" +
-                    ",(n03:Node)\n" +
-                    ",(n04:Node)\n" +
-                    ",(n05:Node)\n" +
-                    ",(n06:Node)\n" +
-                    ",(n07:Node)\n" +
-                    ",(n08:Node)\n" +
-                    ",(n09:Node)\n" +
-                    ",(n10:Node)\n" +
-                    ",(n11:Node)\n" +
-                    ",(n12:Node)\n" +
-                    ",(n13:Node)\n" +
-                    ",(n14:Node)\n" +
-                    ",(n15:Node)\n" +
-                    ",(n16:Node)\n" +
-                    ",(n17:Node)\n" +
-                    ",(n18:Node)\n" +
-                    ",(n19:Node)\n" +
-                    ",(n20:Node)\n" +
-                    ",(n21:Node)\n" +
-                    ",(n22:Node)\n" +
-                    ",(n23:Node)\n" +
-                    ",(n24:Node)\n" +
-                    ",(n25:Node)\n" +
-                    ",(n26:Node)\n" +
-                    ",(n27:Node)\n" +
-                    ",(n28:Node)\n" +
-                    ",(n29:Node)\n" +
-                    ",(n30:Node)\n" +
-                    ",(n31:Node)\n" +
-                    ",(n32:Node)\n" +
-                    ",(n33:Node)\n" +
-                    ",(n34:Node)\n" +
-                    ",(n35:Node)\n" +
-                    ",(n36:Node)\n" +
-                    ",(n37:Node)\n" +
-                    ",(n38:Node)\n" +
-                    ",(n39:Node)\n" +
-                    ",(n40:Node)\n" +
-                    ",(n41:Node)\n" +
-                    ",(n42:Node)\n" +
-                    ",(n43:Node)\n" +
-                    ",(n44:Node)\n" +
-                    ",(n45:Node)\n" +
-                    ",(n46:Node)\n" +
-                    ",(n47:Node)\n" +
-                    ",(n48:Node)\n" +
-                    ",(n49:Node)\n" +
-                    ",(n50:Node)\n" +
-                    ",(n51:Node)\n" +
-                    ",(n52:Node)\n" +
-                    ",(n53:Node)\n" +
-                    ",(n54:Node)\n" +
-                    ",(n55:Node)\n" +
-                    ",(n56:Node)\n" +
-                    ",(n57:Node)\n" +
-                    ",(n58:Node)\n" +
-                    ",(n59:Node)\n" +
-                    ",(n60:Node)\n" +
-                    ",(n61:Node)\n" +
-                    ",(n62:Node)\n" +
-                    ",(n63:Node)\n" +
-                    ",(n64:Node)\n" +
-                    ",(n65:Node)\n" +
-                    ",(n66:Node)\n" +
-                    ",(n67:Node)\n" +
-                    ",(n68:Node)\n" +
-                    ",(n69:Node)\n" +
-                    ",(n70:Node)\n" +
-                    ",(n71:Node)\n" +
-                    ",(n72:Node)\n" +
-                    ",(n73:Node)\n" +
-                    ",(n74:Node)\n" +
-                    ",(n75:Node)\n" +
-                    ",(n76:Node)\n" +
-                    "CREATE (n01)-[:LINK {weight:1}]->(n00)\n" +
-                    ",(n02)-[:LINK {weight:8}]->(n00)\n" +
-                    ",(n03)-[:LINK {weight:0}]->(n00)\n" +
-                    ",(n03)-[:LINK {weight:6}]->(n02)\n" +
-                    ",(n04)-[:LINK {weight:1}]->(n00)\n" +
-                    ",(n05)-[:LINK {weight:1}]->(n00)\n" +
-                    ",(n06)-[:LINK {weight:1}]->(n00)\n" +
-                    ",(n07)-[:LINK {weight:1}]->(n00)\n" +
-                    ",(n08)-[:LINK {weight:2}]->(n00)\n" +
-                    ",(n09)-[:LINK {weight:1}]->(n00)\n" +
-                    ",(n11)-[:LINK {weight:1}]->(n10)\n" +
-                    ",(n11)-[:LINK {weight:3}]->(n02)\n" +
-                    ",(n11)-[:LINK {weight:3}]->(n03)\n" +
-                    ",(n11)-[:LINK {weight:5}]->(n00)\n" +
-                    ",(n12)-[:LINK {weight:1}]->(n11)\n" +
-                    ",(n13)-[:LINK {weight:1}]->(n11)\n" +
-                    ",(n14)-[:LINK {weight:1}]->(n11)\n" +
-                    ",(n15)-[:LINK {weight:1}]->(n11)\n" +
-                    ",(n17)-[:LINK {weight:4}]->(n16)\n" +
-                    ",(n18)-[:LINK {weight:4}]->(n16)\n" +
-                    ",(n18)-[:LINK {weight:4}]->(n17)\n" +
-                    ",(n19)-[:LINK {weight:4}]->(n16)\n" +
-                    ",(n19)-[:LINK {weight:4}]->(n17)\n" +
-                    ",(n19)-[:LINK {weight:4}]->(n18)\n" +
-                    ",(n20)-[:LINK {weight:3}]->(n16)\n" +
-                    ",(n20)-[:LINK {weight:3}]->(n17)\n" +
-                    ",(n20)-[:LINK {weight:3}]->(n18)\n" +
-                    ",(n20)-[:LINK {weight:4}]->(n19)\n" +
-                    ",(n21)-[:LINK {weight:3}]->(n16)\n" +
-                    ",(n21)-[:LINK {weight:3}]->(n17)\n" +
-                    ",(n21)-[:LINK {weight:3}]->(n18)\n" +
-                    ",(n21)-[:LINK {weight:3}]->(n19)\n" +
-                    ",(n21)-[:LINK {weight:5}]->(n20)\n" +
-                    ",(n22)-[:LINK {weight:3}]->(n16)\n" +
-                    ",(n22)-[:LINK {weight:3}]->(n17)\n" +
-                    ",(n22)-[:LINK {weight:3}]->(n18)\n" +
-                    ",(n22)-[:LINK {weight:3}]->(n19)\n" +
-                    ",(n22)-[:LINK {weight:4}]->(n20)\n" +
-                    ",(n22)-[:LINK {weight:4}]->(n21)\n" +
-                    ",(n23)-[:LINK {weight:2}]->(n12)\n" +
-                    ",(n23)-[:LINK {weight:3}]->(n16)\n" +
-                    ",(n23)-[:LINK {weight:3}]->(n17)\n" +
-                    ",(n23)-[:LINK {weight:3}]->(n18)\n" +
-                    ",(n23)-[:LINK {weight:3}]->(n19)\n" +
-                    ",(n23)-[:LINK {weight:4}]->(n20)\n" +
-                    ",(n23)-[:LINK {weight:4}]->(n21)\n" +
-                    ",(n23)-[:LINK {weight:4}]->(n22)\n" +
-                    ",(n23)-[:LINK {weight:9}]->(n11)\n" +
-                    ",(n24)-[:LINK {weight:2}]->(n23)\n" +
-                    ",(n24)-[:LINK {weight:7}]->(n11)\n" +
-                    ",(n25)-[:LINK {weight:1}]->(n23)\n" +
-                    ",(n25)-[:LINK {weight:2}]->(n11)\n" +
-                    ",(n25)-[:LINK {weight:3}]->(n24)\n" +
-                    ",(n26)-[:LINK {weight:1}]->(n11)\n" +
-                    ",(n26)-[:LINK {weight:1}]->(n16)\n" +
-                    ",(n26)-[:LINK {weight:1}]->(n25)\n" +
-                    ",(n26)-[:LINK {weight:4}]->(n24)\n" +
-                    ",(n27)-[:LINK {weight:1}]->(n24)\n" +
-                    ",(n27)-[:LINK {weight:1}]->(n26)\n" +
-                    ",(n27)-[:LINK {weight:5}]->(n23)\n" +
-                    ",(n27)-[:LINK {weight:5}]->(n25)\n" +
-                    ",(n27)-[:LINK {weight:7}]->(n11)\n" +
-                    ",(n28)-[:LINK {weight:1}]->(n27)\n" +
-                    ",(n28)-[:LINK {weight:8}]->(n11)\n" +
-                    ",(n29)-[:LINK {weight:1}]->(n23)\n" +
-                    ",(n29)-[:LINK {weight:1}]->(n27)\n" +
-                    ",(n29)-[:LINK {weight:2}]->(n11)\n" +
-                    ",(n30)-[:LINK {weight:1}]->(n23)\n" +
-                    ",(n31)-[:LINK {weight:1}]->(n27)\n" +
-                    ",(n31)-[:LINK {weight:2}]->(n23)\n" +
-                    ",(n31)-[:LINK {weight:2}]->(n30)\n" +
-                    ",(n31)-[:LINK {weight:3}]->(n11)\n" +
-                    ",(n32)-[:LINK {weight:1}]->(n11)\n" +
-                    ",(n33)-[:LINK {weight:1}]->(n27)\n" +
-                    ",(n33)-[:LINK {weight:2}]->(n11)\n" +
-                    ",(n34)-[:LINK {weight:2}]->(n29)\n" +
-                    ",(n34)-[:LINK {weight:3}]->(n11)\n" +
-                    ",(n35)-[:LINK {weight:2}]->(n29)\n" +
-                    ",(n35)-[:LINK {weight:3}]->(n11)\n" +
-                    ",(n35)-[:LINK {weight:3}]->(n34)\n" +
-                    ",(n36)-[:LINK {weight:1}]->(n29)\n" +
-                    ",(n36)-[:LINK {weight:2}]->(n11)\n" +
-                    ",(n36)-[:LINK {weight:2}]->(n34)\n" +
-                    ",(n36)-[:LINK {weight:2}]->(n35)\n" +
-                    ",(n37)-[:LINK {weight:1}]->(n29)\n" +
-                    ",(n37)-[:LINK {weight:2}]->(n11)\n" +
-                    ",(n37)-[:LINK {weight:2}]->(n34)\n" +
-                    ",(n37)-[:LINK {weight:2}]->(n35)\n" +
-                    ",(n37)-[:LINK {weight:2}]->(n36)\n" +
-                    ",(n38)-[:LINK {weight:1}]->(n29)\n" +
-                    ",(n38)-[:LINK {weight:2}]->(n11)\n" +
-                    ",(n38)-[:LINK {weight:2}]->(n34)\n" +
-                    ",(n38)-[:LINK {weight:2}]->(n35)\n" +
-                    ",(n38)-[:LINK {weight:2}]->(n36)\n" +
-                    ",(n38)-[:LINK {weight:2}]->(n37)\n" +
-                    ",(n39)-[:LINK {weight:1}]->(n25)\n" +
-                    ",(n40)-[:LINK {weight:1}]->(n25)\n" +
-                    ",(n41)-[:LINK {weight:2}]->(n24)\n" +
-                    ",(n41)-[:LINK {weight:3}]->(n25)\n" +
-                    ",(n42)-[:LINK {weight:1}]->(n24)\n" +
-                    ",(n42)-[:LINK {weight:2}]->(n25)\n" +
-                    ",(n42)-[:LINK {weight:2}]->(n41)\n" +
-                    ",(n43)-[:LINK {weight:1}]->(n26)\n" +
-                    ",(n43)-[:LINK {weight:1}]->(n27)\n" +
-                    ",(n43)-[:LINK {weight:3}]->(n11)\n" +
-                    ",(n44)-[:LINK {weight:1}]->(n11)\n" +
-                    ",(n44)-[:LINK {weight:3}]->(n28)\n" +
-                    ",(n45)-[:LINK {weight:2}]->(n28)\n" +
-                    ",(n47)-[:LINK {weight:1}]->(n46)\n" +
-                    ",(n48)-[:LINK {weight:1}]->(n11)\n" +
-                    ",(n48)-[:LINK {weight:1}]->(n25)\n" +
-                    ",(n48)-[:LINK {weight:1}]->(n27)\n" +
-                    ",(n48)-[:LINK {weight:2}]->(n47)\n" +
-                    ",(n49)-[:LINK {weight:2}]->(n11)\n" +
-                    ",(n49)-[:LINK {weight:3}]->(n26)\n" +
-                    ",(n50)-[:LINK {weight:1}]->(n24)\n" +
-                    ",(n50)-[:LINK {weight:1}]->(n49)\n" +
-                    ",(n51)-[:LINK {weight:2}]->(n11)\n" +
-                    ",(n51)-[:LINK {weight:2}]->(n26)\n" +
-                    ",(n51)-[:LINK {weight:9}]->(n49)\n" +
-                    ",(n52)-[:LINK {weight:1}]->(n39)\n" +
-                    ",(n52)-[:LINK {weight:1}]->(n51)\n" +
-                    ",(n53)-[:LINK {weight:1}]->(n51)\n" +
-                    ",(n54)-[:LINK {weight:1}]->(n26)\n" +
-                    ",(n54)-[:LINK {weight:1}]->(n49)\n" +
-                    ",(n54)-[:LINK {weight:2}]->(n51)\n" +
-                    ",(n55)-[:LINK {weight:1}]->(n16)\n" +
-                    ",(n55)-[:LINK {weight:1}]->(n26)\n" +
-                    ",(n55)-[:LINK {weight:1}]->(n39)\n" +
-                    ",(n55)-[:LINK {weight:1}]->(n54)\n" +
-                    ",(n55)-[:LINK {weight:2}]->(n25)\n" +
-                    ",(n55)-[:LINK {weight:2}]->(n49)\n" +
-                    ",(n55)-[:LINK {weight:4}]->(n48)\n" +
-                    ",(n55)-[:LINK {weight:5}]->(n41)\n" +
-                    ",(n55)-[:LINK {weight:6}]->(n51)\n" +
-                    ",(n55)-[:LINK {weight:9}]->(n11)\n" +
-                    ",(n56)-[:LINK {weight:1}]->(n49)\n" +
-                    ",(n56)-[:LINK {weight:1}]->(n55)\n" +
-                    ",(n57)-[:LINK {weight:1}]->(n41)\n" +
-                    ",(n57)-[:LINK {weight:1}]->(n48)\n" +
-                    ",(n57)-[:LINK {weight:1}]->(n55)\n" +
-                    ",(n58)-[:LINK {weight:1}]->(n57)\n" +
-                    ",(n58)-[:LINK {weight:4}]->(n11)\n" +
-                    ",(n58)-[:LINK {weight:6}]->(n27)\n" +
-                    ",(n58)-[:LINK {weight:7}]->(n48)\n" +
-                    ",(n58)-[:LINK {weight:7}]->(n55)\n" +
-                    ",(n59)-[:LINK {weight:2}]->(n57)\n" +
-                    ",(n59)-[:LINK {weight:5}]->(n55)\n" +
-                    ",(n59)-[:LINK {weight:5}]->(n58)\n" +
-                    ",(n59)-[:LINK {weight:6}]->(n48)\n" +
-                    ",(n60)-[:LINK {weight:1}]->(n48)\n" +
-                    ",(n60)-[:LINK {weight:2}]->(n59)\n" +
-                    ",(n60)-[:LINK {weight:4}]->(n58)\n" +
-                    ",(n61)-[:LINK {weight:1}]->(n55)\n" +
-                    ",(n61)-[:LINK {weight:1}]->(n57)\n" +
-                    ",(n61)-[:LINK {weight:2}]->(n48)\n" +
-                    ",(n61)-[:LINK {weight:2}]->(n60)\n" +
-                    ",(n61)-[:LINK {weight:5}]->(n59)\n" +
-                    ",(n61)-[:LINK {weight:6}]->(n58)\n" +
-                    ",(n62)-[:LINK {weight:1}]->(n41)\n" +
-                    ",(n62)-[:LINK {weight:2}]->(n57)\n" +
-                    ",(n62)-[:LINK {weight:3}]->(n59)\n" +
-                    ",(n62)-[:LINK {weight:3}]->(n60)\n" +
-                    ",(n62)-[:LINK {weight:6}]->(n61)\n" +
-                    ",(n62)-[:LINK {weight:7}]->(n48)\n" +
-                    ",(n62)-[:LINK {weight:7}]->(n58)\n" +
-                    ",(n62)-[:LINK {weight:9}]->(n55)\n" +
-                    ",(n63)-[:LINK {weight:1}]->(n55)\n" +
-                    ",(n63)-[:LINK {weight:2}]->(n57)\n" +
-                    ",(n63)-[:LINK {weight:2}]->(n60)\n" +
-                    ",(n63)-[:LINK {weight:3}]->(n61)\n" +
-                    ",(n63)-[:LINK {weight:4}]->(n58)\n" +
-                    ",(n63)-[:LINK {weight:5}]->(n48)\n" +
-                    ",(n63)-[:LINK {weight:5}]->(n59)\n" +
-                    ",(n63)-[:LINK {weight:6}]->(n62)\n" +
-                    ",(n64)-[:LINK {weight:0}]->(n58)\n" +
-                    ",(n64)-[:LINK {weight:1}]->(n11)\n" +
-                    ",(n64)-[:LINK {weight:1}]->(n57)\n" +
-                    ",(n64)-[:LINK {weight:2}]->(n60)\n" +
-                    ",(n64)-[:LINK {weight:2}]->(n62)\n" +
-                    ",(n64)-[:LINK {weight:4}]->(n63)\n" +
-                    ",(n64)-[:LINK {weight:5}]->(n48)\n" +
-                    ",(n64)-[:LINK {weight:5}]->(n55)\n" +
-                    ",(n64)-[:LINK {weight:6}]->(n61)\n" +
-                    ",(n64)-[:LINK {weight:9}]->(n59)\n" +
-                    ",(n65)-[:LINK {weight:1}]->(n57)\n" +
-                    ",(n65)-[:LINK {weight:2}]->(n55)\n" +
-                    ",(n65)-[:LINK {weight:2}]->(n60)\n" +
-                    ",(n65)-[:LINK {weight:3}]->(n48)\n" +
-                    ",(n65)-[:LINK {weight:5}]->(n58)\n" +
-                    ",(n65)-[:LINK {weight:5}]->(n59)\n" +
-                    ",(n65)-[:LINK {weight:5}]->(n61)\n" +
-                    ",(n65)-[:LINK {weight:5}]->(n62)\n" +
-                    ",(n65)-[:LINK {weight:5}]->(n63)\n" +
-                    ",(n65)-[:LINK {weight:7}]->(n64)\n" +
-                    ",(n66)-[:LINK {weight:1}]->(n48)\n" +
-                    ",(n66)-[:LINK {weight:1}]->(n59)\n" +
-                    ",(n66)-[:LINK {weight:1}]->(n60)\n" +
-                    ",(n66)-[:LINK {weight:1}]->(n61)\n" +
-                    ",(n66)-[:LINK {weight:1}]->(n63)\n" +
-                    ",(n66)-[:LINK {weight:2}]->(n62)\n" +
-                    ",(n66)-[:LINK {weight:2}]->(n65)\n" +
-                    ",(n66)-[:LINK {weight:3}]->(n58)\n" +
-                    ",(n66)-[:LINK {weight:3}]->(n64)\n" +
-                    ",(n67)-[:LINK {weight:3}]->(n57)\n" +
-                    ",(n68)-[:LINK {weight:1}]->(n11)\n" +
-                    ",(n68)-[:LINK {weight:1}]->(n24)\n" +
-                    ",(n68)-[:LINK {weight:1}]->(n27)\n" +
-                    ",(n68)-[:LINK {weight:1}]->(n41)\n" +
-                    ",(n68)-[:LINK {weight:1}]->(n48)\n" +
-                    ",(n68)-[:LINK {weight:5}]->(n25)\n" +
-                    ",(n69)-[:LINK {weight:1}]->(n11)\n" +
-                    ",(n69)-[:LINK {weight:1}]->(n24)\n" +
-                    ",(n69)-[:LINK {weight:1}]->(n41)\n" +
-                    ",(n69)-[:LINK {weight:1}]->(n48)\n" +
-                    ",(n69)-[:LINK {weight:2}]->(n27)\n" +
-                    ",(n69)-[:LINK {weight:6}]->(n25)\n" +
-                    ",(n69)-[:LINK {weight:6}]->(n68)\n" +
-                    ",(n70)-[:LINK {weight:1}]->(n11)\n" +
-                    ",(n70)-[:LINK {weight:1}]->(n24)\n" +
-                    ",(n70)-[:LINK {weight:1}]->(n27)\n" +
-                    ",(n70)-[:LINK {weight:1}]->(n41)\n" +
-                    ",(n70)-[:LINK {weight:1}]->(n58)\n" +
-                    ",(n70)-[:LINK {weight:4}]->(n25)\n" +
-                    ",(n70)-[:LINK {weight:4}]->(n68)\n" +
-                    ",(n70)-[:LINK {weight:4}]->(n69)\n" +
-                    ",(n71)-[:LINK {weight:1}]->(n11)\n" +
-                    ",(n71)-[:LINK {weight:1}]->(n25)\n" +
-                    ",(n71)-[:LINK {weight:1}]->(n27)\n" +
-                    ",(n71)-[:LINK {weight:1}]->(n41)\n" +
-                    ",(n71)-[:LINK {weight:1}]->(n48)\n" +
-                    ",(n71)-[:LINK {weight:2}]->(n68)\n" +
-                    ",(n71)-[:LINK {weight:2}]->(n69)\n" +
-                    ",(n71)-[:LINK {weight:2}]->(n70)\n" +
-                    ",(n72)-[:LINK {weight:1}]->(n11)\n" +
-                    ",(n72)-[:LINK {weight:1}]->(n27)\n" +
-                    ",(n72)-[:LINK {weight:2}]->(n26)\n" +
-                    ",(n73)-[:LINK {weight:2}]->(n48)\n" +
-                    ",(n74)-[:LINK {weight:2}]->(n48)\n" +
-                    ",(n74)-[:LINK {weight:3}]->(n73)\n" +
-                    ",(n75)-[:LINK {weight:1}]->(n41)\n" +
-                    ",(n75)-[:LINK {weight:1}]->(n48)\n" +
-                    ",(n75)-[:LINK {weight:1}]->(n70)\n" +
-                    ",(n75)-[:LINK {weight:1}]->(n71)\n" +
-                    ",(n75)-[:LINK {weight:3}]->(n25)\n" +
-                    ",(n75)-[:LINK {weight:3}]->(n68)\n" +
-                    ",(n75)-[:LINK {weight:3}]->(n69)\n" +
-                    ",(n76)-[:LINK {weight:1}]->(n48)\n" +
-                    ",(n76)-[:LINK {weight:1}]->(n58)\n" +
-                    ",(n76)-[:LINK {weight:1}]->(n62)\n" +
-                    ",(n76)-[:LINK {weight:1}]->(n63)\n" +
-                    ",(n76)-[:LINK {weight:1}]->(n64)\n" +
-                    ",(n76)-[:LINK {weight:1}]->(n65)\n" +
-                    ",(n76)-[:LINK {weight:1}]->(n66)\n";
+    private static final String GRAPH = "CREATE" +
+                                        "  (n00:Node)" +
+                                        ", (n01:Node)" +
+                                        ", (n02:Node)" +
+                                        ", (n03:Node)" +
+                                        ", (n04:Node)" +
+                                        ", (n05:Node)" +
+                                        ", (n06:Node)" +
+                                        ", (n07:Node)" +
+                                        ", (n08:Node)" +
+                                        ", (n09:Node)" +
+                                        ", (n10:Node)" +
+                                        ", (n11:Node)" +
+                                        ", (n12:Node)" +
+                                        ", (n13:Node)" +
+                                        ", (n14:Node)" +
+                                        ", (n15:Node)" +
+                                        ", (n16:Node)" +
+                                        ", (n17:Node)" +
+                                        ", (n18:Node)" +
+                                        ", (n19:Node)" +
+                                        ", (n20:Node)" +
+                                        ", (n21:Node)" +
+                                        ", (n22:Node)" +
+                                        ", (n23:Node)" +
+                                        ", (n24:Node)" +
+                                        ", (n25:Node)" +
+                                        ", (n26:Node)" +
+                                        ", (n27:Node)" +
+                                        ", (n28:Node)" +
+                                        ", (n29:Node)" +
+                                        ", (n30:Node)" +
+                                        ", (n31:Node)" +
+                                        ", (n32:Node)" +
+                                        ", (n33:Node)" +
+                                        ", (n34:Node)" +
+                                        ", (n35:Node)" +
+                                        ", (n36:Node)" +
+                                        ", (n37:Node)" +
+                                        ", (n38:Node)" +
+                                        ", (n39:Node)" +
+                                        ", (n40:Node)" +
+                                        ", (n41:Node)" +
+                                        ", (n42:Node)" +
+                                        ", (n43:Node)" +
+                                        ", (n44:Node)" +
+                                        ", (n45:Node)" +
+                                        ", (n46:Node)" +
+                                        ", (n47:Node)" +
+                                        ", (n48:Node)" +
+                                        ", (n49:Node)" +
+                                        ", (n50:Node)" +
+                                        ", (n51:Node)" +
+                                        ", (n52:Node)" +
+                                        ", (n53:Node)" +
+                                        ", (n54:Node)" +
+                                        ", (n55:Node)" +
+                                        ", (n56:Node)" +
+                                        ", (n57:Node)" +
+                                        ", (n58:Node)" +
+                                        ", (n59:Node)" +
+                                        ", (n60:Node)" +
+                                        ", (n61:Node)" +
+                                        ", (n62:Node)" +
+                                        ", (n63:Node)" +
+                                        ", (n64:Node)" +
+                                        ", (n65:Node)" +
+                                        ", (n66:Node)" +
+                                        ", (n67:Node)" +
+                                        ", (n68:Node)" +
+                                        ", (n69:Node)" +
+                                        ", (n70:Node)" +
+                                        ", (n71:Node)" +
+                                        ", (n72:Node)" +
+                                        ", (n73:Node)" +
+                                        ", (n74:Node)" +
+                                        ", (n75:Node)" +
+                                        ", (n76:Node)" +
+                                        ", (n01)-[:LINK {weight:1}]->(n00)" +
+                                        ", (n02)-[:LINK {weight:8}]->(n00)" +
+                                        ", (n03)-[:LINK {weight:0}]->(n00)" +
+                                        ", (n03)-[:LINK {weight:6}]->(n02)" +
+                                        ", (n04)-[:LINK {weight:1}]->(n00)" +
+                                        ", (n05)-[:LINK {weight:1}]->(n00)" +
+                                        ", (n06)-[:LINK {weight:1}]->(n00)" +
+                                        ", (n07)-[:LINK {weight:1}]->(n00)" +
+                                        ", (n08)-[:LINK {weight:2}]->(n00)" +
+                                        ", (n09)-[:LINK {weight:1}]->(n00)" +
+                                        ", (n11)-[:LINK {weight:1}]->(n10)" +
+                                        ", (n11)-[:LINK {weight:3}]->(n02)" +
+                                        ", (n11)-[:LINK {weight:3}]->(n03)" +
+                                        ", (n11)-[:LINK {weight:5}]->(n00)" +
+                                        ", (n12)-[:LINK {weight:1}]->(n11)" +
+                                        ", (n13)-[:LINK {weight:1}]->(n11)" +
+                                        ", (n14)-[:LINK {weight:1}]->(n11)" +
+                                        ", (n15)-[:LINK {weight:1}]->(n11)" +
+                                        ", (n17)-[:LINK {weight:4}]->(n16)" +
+                                        ", (n18)-[:LINK {weight:4}]->(n16)" +
+                                        ", (n18)-[:LINK {weight:4}]->(n17)" +
+                                        ", (n19)-[:LINK {weight:4}]->(n16)" +
+                                        ", (n19)-[:LINK {weight:4}]->(n17)" +
+                                        ", (n19)-[:LINK {weight:4}]->(n18)" +
+                                        ", (n20)-[:LINK {weight:3}]->(n16)" +
+                                        ", (n20)-[:LINK {weight:3}]->(n17)" +
+                                        ", (n20)-[:LINK {weight:3}]->(n18)" +
+                                        ", (n20)-[:LINK {weight:4}]->(n19)" +
+                                        ", (n21)-[:LINK {weight:3}]->(n16)" +
+                                        ", (n21)-[:LINK {weight:3}]->(n17)" +
+                                        ", (n21)-[:LINK {weight:3}]->(n18)" +
+                                        ", (n21)-[:LINK {weight:3}]->(n19)" +
+                                        ", (n21)-[:LINK {weight:5}]->(n20)" +
+                                        ", (n22)-[:LINK {weight:3}]->(n16)" +
+                                        ", (n22)-[:LINK {weight:3}]->(n17)" +
+                                        ", (n22)-[:LINK {weight:3}]->(n18)" +
+                                        ", (n22)-[:LINK {weight:3}]->(n19)" +
+                                        ", (n22)-[:LINK {weight:4}]->(n20)" +
+                                        ", (n22)-[:LINK {weight:4}]->(n21)" +
+                                        ", (n23)-[:LINK {weight:2}]->(n12)" +
+                                        ", (n23)-[:LINK {weight:3}]->(n16)" +
+                                        ", (n23)-[:LINK {weight:3}]->(n17)" +
+                                        ", (n23)-[:LINK {weight:3}]->(n18)" +
+                                        ", (n23)-[:LINK {weight:3}]->(n19)" +
+                                        ", (n23)-[:LINK {weight:4}]->(n20)" +
+                                        ", (n23)-[:LINK {weight:4}]->(n21)" +
+                                        ", (n23)-[:LINK {weight:4}]->(n22)" +
+                                        ", (n23)-[:LINK {weight:9}]->(n11)" +
+                                        ", (n24)-[:LINK {weight:2}]->(n23)" +
+                                        ", (n24)-[:LINK {weight:7}]->(n11)" +
+                                        ", (n25)-[:LINK {weight:1}]->(n23)" +
+                                        ", (n25)-[:LINK {weight:2}]->(n11)" +
+                                        ", (n25)-[:LINK {weight:3}]->(n24)" +
+                                        ", (n26)-[:LINK {weight:1}]->(n11)" +
+                                        ", (n26)-[:LINK {weight:1}]->(n16)" +
+                                        ", (n26)-[:LINK {weight:1}]->(n25)" +
+                                        ", (n26)-[:LINK {weight:4}]->(n24)" +
+                                        ", (n27)-[:LINK {weight:1}]->(n24)" +
+                                        ", (n27)-[:LINK {weight:1}]->(n26)" +
+                                        ", (n27)-[:LINK {weight:5}]->(n23)" +
+                                        ", (n27)-[:LINK {weight:5}]->(n25)" +
+                                        ", (n27)-[:LINK {weight:7}]->(n11)" +
+                                        ", (n28)-[:LINK {weight:1}]->(n27)" +
+                                        ", (n28)-[:LINK {weight:8}]->(n11)" +
+                                        ", (n29)-[:LINK {weight:1}]->(n23)" +
+                                        ", (n29)-[:LINK {weight:1}]->(n27)" +
+                                        ", (n29)-[:LINK {weight:2}]->(n11)" +
+                                        ", (n30)-[:LINK {weight:1}]->(n23)" +
+                                        ", (n31)-[:LINK {weight:1}]->(n27)" +
+                                        ", (n31)-[:LINK {weight:2}]->(n23)" +
+                                        ", (n31)-[:LINK {weight:2}]->(n30)" +
+                                        ", (n31)-[:LINK {weight:3}]->(n11)" +
+                                        ", (n32)-[:LINK {weight:1}]->(n11)" +
+                                        ", (n33)-[:LINK {weight:1}]->(n27)" +
+                                        ", (n33)-[:LINK {weight:2}]->(n11)" +
+                                        ", (n34)-[:LINK {weight:2}]->(n29)" +
+                                        ", (n34)-[:LINK {weight:3}]->(n11)" +
+                                        ", (n35)-[:LINK {weight:2}]->(n29)" +
+                                        ", (n35)-[:LINK {weight:3}]->(n11)" +
+                                        ", (n35)-[:LINK {weight:3}]->(n34)" +
+                                        ", (n36)-[:LINK {weight:1}]->(n29)" +
+                                        ", (n36)-[:LINK {weight:2}]->(n11)" +
+                                        ", (n36)-[:LINK {weight:2}]->(n34)" +
+                                        ", (n36)-[:LINK {weight:2}]->(n35)" +
+                                        ", (n37)-[:LINK {weight:1}]->(n29)" +
+                                        ", (n37)-[:LINK {weight:2}]->(n11)" +
+                                        ", (n37)-[:LINK {weight:2}]->(n34)" +
+                                        ", (n37)-[:LINK {weight:2}]->(n35)" +
+                                        ", (n37)-[:LINK {weight:2}]->(n36)" +
+                                        ", (n38)-[:LINK {weight:1}]->(n29)" +
+                                        ", (n38)-[:LINK {weight:2}]->(n11)" +
+                                        ", (n38)-[:LINK {weight:2}]->(n34)" +
+                                        ", (n38)-[:LINK {weight:2}]->(n35)" +
+                                        ", (n38)-[:LINK {weight:2}]->(n36)" +
+                                        ", (n38)-[:LINK {weight:2}]->(n37)" +
+                                        ", (n39)-[:LINK {weight:1}]->(n25)" +
+                                        ", (n40)-[:LINK {weight:1}]->(n25)" +
+                                        ", (n41)-[:LINK {weight:2}]->(n24)" +
+                                        ", (n41)-[:LINK {weight:3}]->(n25)" +
+                                        ", (n42)-[:LINK {weight:1}]->(n24)" +
+                                        ", (n42)-[:LINK {weight:2}]->(n25)" +
+                                        ", (n42)-[:LINK {weight:2}]->(n41)" +
+                                        ", (n43)-[:LINK {weight:1}]->(n26)" +
+                                        ", (n43)-[:LINK {weight:1}]->(n27)" +
+                                        ", (n43)-[:LINK {weight:3}]->(n11)" +
+                                        ", (n44)-[:LINK {weight:1}]->(n11)" +
+                                        ", (n44)-[:LINK {weight:3}]->(n28)" +
+                                        ", (n45)-[:LINK {weight:2}]->(n28)" +
+                                        ", (n47)-[:LINK {weight:1}]->(n46)" +
+                                        ", (n48)-[:LINK {weight:1}]->(n11)" +
+                                        ", (n48)-[:LINK {weight:1}]->(n25)" +
+                                        ", (n48)-[:LINK {weight:1}]->(n27)" +
+                                        ", (n48)-[:LINK {weight:2}]->(n47)" +
+                                        ", (n49)-[:LINK {weight:2}]->(n11)" +
+                                        ", (n49)-[:LINK {weight:3}]->(n26)" +
+                                        ", (n50)-[:LINK {weight:1}]->(n24)" +
+                                        ", (n50)-[:LINK {weight:1}]->(n49)" +
+                                        ", (n51)-[:LINK {weight:2}]->(n11)" +
+                                        ", (n51)-[:LINK {weight:2}]->(n26)" +
+                                        ", (n51)-[:LINK {weight:9}]->(n49)" +
+                                        ", (n52)-[:LINK {weight:1}]->(n39)" +
+                                        ", (n52)-[:LINK {weight:1}]->(n51)" +
+                                        ", (n53)-[:LINK {weight:1}]->(n51)" +
+                                        ", (n54)-[:LINK {weight:1}]->(n26)" +
+                                        ", (n54)-[:LINK {weight:1}]->(n49)" +
+                                        ", (n54)-[:LINK {weight:2}]->(n51)" +
+                                        ", (n55)-[:LINK {weight:1}]->(n16)" +
+                                        ", (n55)-[:LINK {weight:1}]->(n26)" +
+                                        ", (n55)-[:LINK {weight:1}]->(n39)" +
+                                        ", (n55)-[:LINK {weight:1}]->(n54)" +
+                                        ", (n55)-[:LINK {weight:2}]->(n25)" +
+                                        ", (n55)-[:LINK {weight:2}]->(n49)" +
+                                        ", (n55)-[:LINK {weight:4}]->(n48)" +
+                                        ", (n55)-[:LINK {weight:5}]->(n41)" +
+                                        ", (n55)-[:LINK {weight:6}]->(n51)" +
+                                        ", (n55)-[:LINK {weight:9}]->(n11)" +
+                                        ", (n56)-[:LINK {weight:1}]->(n49)" +
+                                        ", (n56)-[:LINK {weight:1}]->(n55)" +
+                                        ", (n57)-[:LINK {weight:1}]->(n41)" +
+                                        ", (n57)-[:LINK {weight:1}]->(n48)" +
+                                        ", (n57)-[:LINK {weight:1}]->(n55)" +
+                                        ", (n58)-[:LINK {weight:1}]->(n57)" +
+                                        ", (n58)-[:LINK {weight:4}]->(n11)" +
+                                        ", (n58)-[:LINK {weight:6}]->(n27)" +
+                                        ", (n58)-[:LINK {weight:7}]->(n48)" +
+                                        ", (n58)-[:LINK {weight:7}]->(n55)" +
+                                        ", (n59)-[:LINK {weight:2}]->(n57)" +
+                                        ", (n59)-[:LINK {weight:5}]->(n55)" +
+                                        ", (n59)-[:LINK {weight:5}]->(n58)" +
+                                        ", (n59)-[:LINK {weight:6}]->(n48)" +
+                                        ", (n60)-[:LINK {weight:1}]->(n48)" +
+                                        ", (n60)-[:LINK {weight:2}]->(n59)" +
+                                        ", (n60)-[:LINK {weight:4}]->(n58)" +
+                                        ", (n61)-[:LINK {weight:1}]->(n55)" +
+                                        ", (n61)-[:LINK {weight:1}]->(n57)" +
+                                        ", (n61)-[:LINK {weight:2}]->(n48)" +
+                                        ", (n61)-[:LINK {weight:2}]->(n60)" +
+                                        ", (n61)-[:LINK {weight:5}]->(n59)" +
+                                        ", (n61)-[:LINK {weight:6}]->(n58)" +
+                                        ", (n62)-[:LINK {weight:1}]->(n41)" +
+                                        ", (n62)-[:LINK {weight:2}]->(n57)" +
+                                        ", (n62)-[:LINK {weight:3}]->(n59)" +
+                                        ", (n62)-[:LINK {weight:3}]->(n60)" +
+                                        ", (n62)-[:LINK {weight:6}]->(n61)" +
+                                        ", (n62)-[:LINK {weight:7}]->(n48)" +
+                                        ", (n62)-[:LINK {weight:7}]->(n58)" +
+                                        ", (n62)-[:LINK {weight:9}]->(n55)" +
+                                        ", (n63)-[:LINK {weight:1}]->(n55)" +
+                                        ", (n63)-[:LINK {weight:2}]->(n57)" +
+                                        ", (n63)-[:LINK {weight:2}]->(n60)" +
+                                        ", (n63)-[:LINK {weight:3}]->(n61)" +
+                                        ", (n63)-[:LINK {weight:4}]->(n58)" +
+                                        ", (n63)-[:LINK {weight:5}]->(n48)" +
+                                        ", (n63)-[:LINK {weight:5}]->(n59)" +
+                                        ", (n63)-[:LINK {weight:6}]->(n62)" +
+                                        ", (n64)-[:LINK {weight:0}]->(n58)" +
+                                        ", (n64)-[:LINK {weight:1}]->(n11)" +
+                                        ", (n64)-[:LINK {weight:1}]->(n57)" +
+                                        ", (n64)-[:LINK {weight:2}]->(n60)" +
+                                        ", (n64)-[:LINK {weight:2}]->(n62)" +
+                                        ", (n64)-[:LINK {weight:4}]->(n63)" +
+                                        ", (n64)-[:LINK {weight:5}]->(n48)" +
+                                        ", (n64)-[:LINK {weight:5}]->(n55)" +
+                                        ", (n64)-[:LINK {weight:6}]->(n61)" +
+                                        ", (n64)-[:LINK {weight:9}]->(n59)" +
+                                        ", (n65)-[:LINK {weight:1}]->(n57)" +
+                                        ", (n65)-[:LINK {weight:2}]->(n55)" +
+                                        ", (n65)-[:LINK {weight:2}]->(n60)" +
+                                        ", (n65)-[:LINK {weight:3}]->(n48)" +
+                                        ", (n65)-[:LINK {weight:5}]->(n58)" +
+                                        ", (n65)-[:LINK {weight:5}]->(n59)" +
+                                        ", (n65)-[:LINK {weight:5}]->(n61)" +
+                                        ", (n65)-[:LINK {weight:5}]->(n62)" +
+                                        ", (n65)-[:LINK {weight:5}]->(n63)" +
+                                        ", (n65)-[:LINK {weight:7}]->(n64)" +
+                                        ", (n66)-[:LINK {weight:1}]->(n48)" +
+                                        ", (n66)-[:LINK {weight:1}]->(n59)" +
+                                        ", (n66)-[:LINK {weight:1}]->(n60)" +
+                                        ", (n66)-[:LINK {weight:1}]->(n61)" +
+                                        ", (n66)-[:LINK {weight:1}]->(n63)" +
+                                        ", (n66)-[:LINK {weight:2}]->(n62)" +
+                                        ", (n66)-[:LINK {weight:2}]->(n65)" +
+                                        ", (n66)-[:LINK {weight:3}]->(n58)" +
+                                        ", (n66)-[:LINK {weight:3}]->(n64)" +
+                                        ", (n67)-[:LINK {weight:3}]->(n57)" +
+                                        ", (n68)-[:LINK {weight:1}]->(n11)" +
+                                        ", (n68)-[:LINK {weight:1}]->(n24)" +
+                                        ", (n68)-[:LINK {weight:1}]->(n27)" +
+                                        ", (n68)-[:LINK {weight:1}]->(n41)" +
+                                        ", (n68)-[:LINK {weight:1}]->(n48)" +
+                                        ", (n68)-[:LINK {weight:5}]->(n25)" +
+                                        ", (n69)-[:LINK {weight:1}]->(n11)" +
+                                        ", (n69)-[:LINK {weight:1}]->(n24)" +
+                                        ", (n69)-[:LINK {weight:1}]->(n41)" +
+                                        ", (n69)-[:LINK {weight:1}]->(n48)" +
+                                        ", (n69)-[:LINK {weight:2}]->(n27)" +
+                                        ", (n69)-[:LINK {weight:6}]->(n25)" +
+                                        ", (n69)-[:LINK {weight:6}]->(n68)" +
+                                        ", (n70)-[:LINK {weight:1}]->(n11)" +
+                                        ", (n70)-[:LINK {weight:1}]->(n24)" +
+                                        ", (n70)-[:LINK {weight:1}]->(n27)" +
+                                        ", (n70)-[:LINK {weight:1}]->(n41)" +
+                                        ", (n70)-[:LINK {weight:1}]->(n58)" +
+                                        ", (n70)-[:LINK {weight:4}]->(n25)" +
+                                        ", (n70)-[:LINK {weight:4}]->(n68)" +
+                                        ", (n70)-[:LINK {weight:4}]->(n69)" +
+                                        ", (n71)-[:LINK {weight:1}]->(n11)" +
+                                        ", (n71)-[:LINK {weight:1}]->(n25)" +
+                                        ", (n71)-[:LINK {weight:1}]->(n27)" +
+                                        ", (n71)-[:LINK {weight:1}]->(n41)" +
+                                        ", (n71)-[:LINK {weight:1}]->(n48)" +
+                                        ", (n71)-[:LINK {weight:2}]->(n68)" +
+                                        ", (n71)-[:LINK {weight:2}]->(n69)" +
+                                        ", (n71)-[:LINK {weight:2}]->(n70)" +
+                                        ", (n72)-[:LINK {weight:1}]->(n11)" +
+                                        ", (n72)-[:LINK {weight:1}]->(n27)" +
+                                        ", (n72)-[:LINK {weight:2}]->(n26)" +
+                                        ", (n73)-[:LINK {weight:2}]->(n48)" +
+                                        ", (n74)-[:LINK {weight:2}]->(n48)" +
+                                        ", (n74)-[:LINK {weight:3}]->(n73)" +
+                                        ", (n75)-[:LINK {weight:1}]->(n41)" +
+                                        ", (n75)-[:LINK {weight:1}]->(n48)" +
+                                        ", (n75)-[:LINK {weight:1}]->(n70)" +
+                                        ", (n75)-[:LINK {weight:1}]->(n71)" +
+                                        ", (n75)-[:LINK {weight:3}]->(n25)" +
+                                        ", (n75)-[:LINK {weight:3}]->(n68)" +
+                                        ", (n75)-[:LINK {weight:3}]->(n69)" +
+                                        ", (n76)-[:LINK {weight:1}]->(n48)" +
+                                        ", (n76)-[:LINK {weight:1}]->(n58)" +
+                                        ", (n76)-[:LINK {weight:1}]->(n62)" +
+                                        ", (n76)-[:LINK {weight:1}]->(n63)" +
+                                        ", (n76)-[:LINK {weight:1}]->(n64)" +
+                                        ", (n76)-[:LINK {weight:1}]->(n65)" +
+                                        ", (n76)-[:LINK {weight:1}]->(n66)";
 
+    // TODO: remove when https://trello.com/c/E9wdovX5/1297-refactor-weightedallshortestpaths427test is fixed
     @Parameterized.Parameters(name = "{1}")
     public static Collection<Object[]> data() {
         return Arrays.asList(
@@ -528,7 +529,7 @@ public class WeightedAllShortestPaths427Test {
 
         private static final CostEvaluator<Double> WEIGHT = new DoubleEvaluator("weight");
 
-        TestDijkstra(Node startNode, final boolean withWeights ) {
+        TestDijkstra(Node startNode, final boolean withWeights) {
             super(
                     0.0D,
                     startNode,
@@ -561,11 +562,11 @@ public class WeightedAllShortestPaths427Test {
         @Override
         public String toString() {
             return "Result{" +
-                    "source=" + source +
-                    ", target=" + target +
-                    ", distance=" + distance +
-                    ", path=" + Arrays.toString(path) +
-                    '}';
+                   "source=" + source +
+                   ", target=" + target +
+                   ", distance=" + distance +
+                   ", path=" + Arrays.toString(path) +
+                   '}';
         }
 
         @Override
@@ -574,8 +575,8 @@ public class WeightedAllShortestPaths427Test {
             if (o == null || getClass() != o.getClass()) return false;
             final Result result = (Result) o;
             return source == result.source &&
-                    target == result.target &&
-                    Double.compare(result.distance, distance) == 0;
+                   target == result.target &&
+                   Double.compare(result.distance, distance) == 0;
         }
 
         @Override

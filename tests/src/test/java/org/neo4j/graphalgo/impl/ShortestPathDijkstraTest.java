@@ -47,66 +47,67 @@ import static org.junit.Assert.assertEquals;
 public final class ShortestPathDijkstraTest {
 
     // https://en.wikipedia.org/wiki/Shortest_path_problem#/media/File:Shortest_path_with_direct_weights.svg
-    private static final String DB_CYPHER = "" +
-            "CREATE (a:Label1 {name:\"a\"})\n" +
-            "CREATE (b:Label1 {name:\"b\"})\n" +
-            "CREATE (c:Label1 {name:\"c\"})\n" +
-            "CREATE (d:Label1 {name:\"d\"})\n" +
-            "CREATE (e:Label1 {name:\"e\"})\n" +
-            "CREATE (f:Label1 {name:\"f\"})\n" +
-            "CREATE\n" +
-            "  (a)-[:TYPE1 {cost:4}]->(b),\n" +
-            "  (a)-[:TYPE1 {cost:2}]->(c),\n" +
-            "  (b)-[:TYPE1 {cost:5}]->(c),\n" +
-            "  (b)-[:TYPE1 {cost:10}]->(d),\n" +
-            "  (c)-[:TYPE1 {cost:3}]->(e),\n" +
-            "  (d)-[:TYPE1 {cost:11}]->(f),\n" +
-            "  (e)-[:TYPE1 {cost:4}]->(d),\n" +
-            "  (a)-[:TYPE2 {cost:1}]->(d),\n" +
-            "  (b)-[:TYPE2 {cost:1}]->(f)\n";
+    private static final String DB_CYPHER = "CREATE" +
+                                            "  (a:Label1 {name: 'a'})" +
+                                            ", (b:Label1 {name: 'b'})" +
+                                            ", (c:Label1 {name: 'c'})" +
+                                            ", (d:Label1 {name: 'd'})" +
+                                            ", (e:Label1 {name: 'e'})" +
+                                            ", (f:Label1 {name: 'f'})" +
+
+                                            ", (a)-[:TYPE1 {cost: 4}]->(b)" +
+                                            ", (a)-[:TYPE1 {cost: 2}]->(c)" +
+                                            ", (b)-[:TYPE1 {cost: 5}]->(c)" +
+                                            ", (b)-[:TYPE1 {cost: 10}]->(d)" +
+                                            ", (c)-[:TYPE1 {cost: 3}]->(e)" +
+                                            ", (d)-[:TYPE1 {cost: 11}]->(f)" +
+                                            ", (e)-[:TYPE1 {cost: 4}]->(d)" +
+                                            ", (a)-[:TYPE2 {cost: 1}]->(d)" +
+                                            ", (b)-[:TYPE2 {cost: 1}]->(f)";
 
     // https://www.cise.ufl.edu/~sahni/cop3530/slides/lec326.pdf
     // without the additional 14 edge
-    private static final String DB_CYPHER2 = "" +
-            "CREATE (n1:Label2 {name:\"1\"})\n" +
-            "CREATE (n2:Label2 {name:\"2\"})\n" +
-            "CREATE (n3:Label2 {name:\"3\"})\n" +
-            "CREATE (n4:Label2 {name:\"4\"})\n" +
-            "CREATE (n5:Label2 {name:\"5\"})\n" +
-            "CREATE (n6:Label2 {name:\"6\"})\n" +
-            "CREATE (n7:Label2 {name:\"7\"})\n" +
-            "CREATE\n" +
-            "  (n1)-[:TYPE2 {cost:6}]->(n2),\n" +
-            "  (n1)-[:TYPE2 {cost:2}]->(n3),\n" +
-            "  (n1)-[:TYPE2 {cost:16}]->(n4),\n" +
-            "  (n2)-[:TYPE2 {cost:4}]->(n5),\n" +
-            "  (n2)-[:TYPE2 {cost:5}]->(n4),\n" +
-            "  (n3)-[:TYPE2 {cost:7}]->(n2),\n" +
-            "  (n3)-[:TYPE2 {cost:3}]->(n5),\n" +
-            "  (n3)-[:TYPE2 {cost:8}]->(n6),\n" +
-            "  (n4)-[:TYPE2 {cost:7}]->(n3),\n" +
-            "  (n5)-[:TYPE2 {cost:4}]->(n4),\n" +
-            "  (n5)-[:TYPE2 {cost:10}]->(n7),\n" +
-            "  (n6)-[:TYPE2 {cost:1}]->(n7)\n";
+    private static final String DB_CYPHER2 = "CREATE" +
+                                             "  (n1:Label2 {name: '1'})" +
+                                             ", (n2:Label2 {name: '2'})" +
+                                             ", (n3:Label2 {name: '3'})" +
+                                             ", (n4:Label2 {name: '4'})" +
+                                             ", (n5:Label2 {name: '5'})" +
+                                             ", (n6:Label2 {name: '6'})" +
+                                             ", (n7:Label2 {name: '7'})" +
 
-    private static final String DB_CYPHER_599 = "" +
-            "CREATE (n1:Label599 {id:\"1\"})\n" +
-            "CREATE (n2:Label599 {id:\"2\"})\n" +
-            "CREATE (n3:Label599 {id:\"3\"})\n" +
-            "CREATE (n4:Label599 {id:\"4\"})\n" +
-            "CREATE (n5:Label599 {id:\"5\"})\n" +
-            "CREATE (n6:Label599 {id:\"6\"})\n" +
-            "CREATE (n7:Label599 {id:\"7\"})\n" +
-            "CREATE\n" +
-            "  (n1)-[:TYPE599 {cost:0.5}]->(n2),\n" +
-            "  (n1)-[:TYPE599 {cost:5.0}]->(n3),\n" +
-            "  (n2)-[:TYPE599 {cost:0.5}]->(n5),\n" +
-            "  (n3)-[:TYPE599 {cost:2.0}]->(n4),\n" +
-            "  (n5)-[:TYPE599 {cost:0.5}]->(n6),\n" +
-            "  (n6)-[:TYPE599 {cost:0.5}]->(n3),\n" +
-            "  (n6)-[:TYPE599 {cost:23.0}]->(n7),\n" +
-            "  (n1)-[:TYPE599 {cost:5.0}]->(n4)";
+                                             ", (n1)-[:TYPE2 {cost: 6}]->(n2)" +
+                                             ", (n1)-[:TYPE2 {cost: 2}]->(n3)" +
+                                             ", (n1)-[:TYPE2 {cost: 16}]->(n4)" +
+                                             ", (n2)-[:TYPE2 {cost: 4}]->(n5)" +
+                                             ", (n2)-[:TYPE2 {cost: 5}]->(n4)" +
+                                             ", (n3)-[:TYPE2 {cost: 7}]->(n2)" +
+                                             ", (n3)-[:TYPE2 {cost: 3}]->(n5)" +
+                                             ", (n3)-[:TYPE2 {cost: 8}]->(n6)" +
+                                             ", (n4)-[:TYPE2 {cost: 7}]->(n3)" +
+                                             ", (n5)-[:TYPE2 {cost: 4}]->(n4)" +
+                                             ", (n5)-[:TYPE2 {cost: 10}]->(n7)" +
+                                             ", (n6)-[:TYPE2 {cost: 1}]->(n7)";
 
+    private static final String DB_CYPHER_599 = "CREATE" +
+                                                "  (n1:Label599 {id: '1'})" +
+                                                ", (n2:Label599 {id: '2'})" +
+                                                ", (n3:Label599 {id: '3'})" +
+                                                ", (n4:Label599 {id: '4'})" +
+                                                ", (n5:Label599 {id: '5'})" +
+                                                ", (n6:Label599 {id: '6'})" +
+                                                ", (n7:Label599 {id: '7'})" +
+
+                                                ", (n1)-[:TYPE599 {cost:0.5}]->(n2)" +
+                                                ", (n1)-[:TYPE599 {cost:5.0}]->(n3)" +
+                                                ", (n2)-[:TYPE599 {cost:0.5}]->(n5)" +
+                                                ", (n3)-[:TYPE599 {cost:2.0}]->(n4)" +
+                                                ", (n5)-[:TYPE599 {cost:0.5}]->(n6)" +
+                                                ", (n6)-[:TYPE599 {cost:0.5}]->(n3)" +
+                                                ", (n6)-[:TYPE599 {cost:23.0}]->(n7)" +
+                                                ", (n1)-[:TYPE599 {cost:5.0}]->(n4)";
+
+    // TODO: refactor when https://trello.com/c/xSP3H20e/1291-refactor-shortestpathdijkstratest is fixed
     @Parameterized.Parameters(name = "{1}")
     public static Collection<Object[]> data() {
         return Arrays.asList(
@@ -126,7 +127,6 @@ public final class ShortestPathDijkstraTest {
     }
 
     private Class<? extends GraphFactory> graphImpl;
-
 
 
     public ShortestPathDijkstraTest(
@@ -157,7 +157,10 @@ public final class ShortestPathDijkstraTest {
 
         final ShortestPathDijkstra shortestPathDijkstra = new ShortestPathDijkstra(graph);
         shortestPathDijkstra.compute(nodeIds[0], nodeIds[nodeIds.length - 1], Direction.OUTGOING);
-        final long[] path = Arrays.stream(shortestPathDijkstra.getFinalPath().toArray()).mapToLong(graph::toOriginalNodeId).toArray();
+        final long[] path = Arrays
+                .stream(shortestPathDijkstra.getFinalPath().toArray())
+                .mapToLong(graph::toOriginalNodeId)
+                .toArray();
 
         assertEquals(expected.weight, shortestPathDijkstra.getTotalCost(), 0.1);
         assertArrayEquals(nodeIds, path);
@@ -183,13 +186,18 @@ public final class ShortestPathDijkstraTest {
 
         final ShortestPathDijkstra shortestPathDijkstra = new ShortestPathDijkstra(graph);
         shortestPathDijkstra.compute(nodeIds[0], nodeIds[nodeIds.length - 1], Direction.OUTGOING);
-        final long[] path = Arrays.stream(shortestPathDijkstra.getFinalPath().toArray()).mapToLong(graph::toOriginalNodeId).toArray();
+        final long[] path = Arrays
+                .stream(shortestPathDijkstra.getFinalPath().toArray())
+                .mapToLong(graph::toOriginalNodeId)
+                .toArray();
 
         assertEquals(expected.weight, shortestPathDijkstra.getTotalCost(), 0.1);
         assertArrayEquals(nodeIds, path);
     }
 
-    /** @see <a href="https://github.com/neo4j-contrib/neo4j-graph-algorithms/issues/599">Issue #599</a> */
+    /**
+     * @see <a href="https://github.com/neo4j-contrib/neo4j-graph-algorithms/issues/599">Issue #599</a>
+     */
     @Test
     public void test599() {
         Label label = Label.label("Label599");
@@ -258,7 +266,7 @@ public final class ShortestPathDijkstraTest {
             Node prev = null;
             long[] nodeIds = new long[kvPairs.length / 2];
             for (int i = 0; i < nodeIds.length; i++) {
-                Node current = db.findNode(label, kvPairs[2*i], kvPairs[2*i + 1]);
+                Node current = db.findNode(label, kvPairs[2 * i], kvPairs[2 * i + 1]);
                 long id = current.getId();
                 nodeIds[i] = id;
                 if (prev != null) {

@@ -19,23 +19,18 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.impl.spanningTrees.Prim;
 import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
-
-import java.util.Arrays;
-import java.util.Collection;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.Assert.assertEquals;
 
@@ -51,59 +46,103 @@ import static org.junit.Assert.assertEquals;
  *     4       5          |      |          |       |
  *     |       |          |      |          |       |
  *     d --6-- e          d      e          d-------e
- *
- * @author mknobloch
  */
-@RunWith(Parameterized.class)
-public class PrimTest {
+class PrimTest {
 
-    private final Label label;
-    private int a, b, c, d, e, y, z;
+    private static final String DB_CYPHER = "CREATE" +
+                                            "  (a:Node {name: 'a'})" +
+                                            ", (b:Node {name: 'b'})" +
+                                            ", (c:Node {name: 'c'})" +
+                                            ", (d:Node {name: 'd'})" +
+                                            ", (e:Node {name: 'e'})" +
+                                            ", (y:Node {name: 'y'})" +
+                                            ", (z:Node {name: 'z'})" +
+                                            ", (a)-[:TYPE {cost: 1.0}]->(b)" +
+                                            ", (a)-[:TYPE {cost: 2.0}]->(c)" +
+                                            ", (b)-[:TYPE {cost: 3.0}]->(c)" +
+                                            ", (b)-[:TYPE {cost: 4.0}]->(d)" +
+                                            ", (c)-[:TYPE {cost: 5.0}]->(e)" +
+                                            ", (d)-[:TYPE {cost: 6.0}]->(e)";
 
-    private static final String cypher =
-            "CREATE (a:Node {name:'a'})\n" +
-            "CREATE (b:Node {name:'b'})\n" +
-            "CREATE (c:Node {name:'c'})\n" +
-            "CREATE (d:Node {name:'d'})\n" +
-            "CREATE (e:Node {name:'e'})\n" +
-            "CREATE (y:Node {name:'y'})\n" +
-            "CREATE (z:Node {name:'z'})\n" +
-            "CREATE" +
-            " (a)-[:TYPE {cost:1.0}]->(b),\n" +
-            " (a)-[:TYPE {cost:2.0}]->(c),\n" +
-            " (b)-[:TYPE {cost:3.0}]->(c),\n" +
-            " (b)-[:TYPE {cost:4.0}]->(d),\n" +
-            " (c)-[:TYPE {cost:5.0}]->(e),\n" +
-            " (d)-[:TYPE {cost:6.0}]->(e)";
+    private static GraphDatabaseAPI DB;
 
-    @ClassRule
-    public static final ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
+    private static final Label label = Label.label("Node");
+    private static int a, b, c, d, e, y, z;
 
-    private final Graph graph;
+    private Graph graph;
 
-    @BeforeClass
-    public static void setupGraph() {
-        try (Transaction tx = DB.beginTx()) {
-            DB.execute(cypher);
-            tx.success();
-        }
+    @BeforeAll
+    static void setupGraph() {
+        DB = TestDatabaseCreator.createTestDatabase();
+        DB.execute(DB_CYPHER);
     }
 
-
-    @Parameterized.Parameters(name = "{1}")
-    public static Collection<Object[]> data() {
-        return Arrays.<Object[]>asList(
-                new Object[]{HugeGraphFactory.class, "Huge"}
-        );
+    @AfterAll
+    static void shutdown() {
+        if (DB != null) DB.shutdown();
     }
 
+    @AllGraphTypesWithoutCypherTest
+    void testMaximumFromA(Class<? extends GraphFactory> graphFactory) {
+        setup(graphFactory);
+        assertMaximum(new Prim(graph, graph).computeMaximumSpanningTree(a).getSpanningTree());
+    }
 
-    public PrimTest(
-            Class<? extends GraphFactory> graphImpl,
-            String nameIgnoredOnlyForTestName) {
+    @AllGraphTypesWithoutCypherTest
+    void testMaximumFromB(Class<? extends GraphFactory> graphFactory) {
+        setup(graphFactory);
+        assertMaximum(new Prim(graph, graph).computeMaximumSpanningTree(b).getSpanningTree());
+    }
 
-        label = Label.label("Node");
+    @AllGraphTypesWithoutCypherTest
+    void testMaximumFromC(Class<? extends GraphFactory> graphFactory) {
+        setup(graphFactory);
+        assertMaximum(new Prim(graph, graph).computeMaximumSpanningTree(c).getSpanningTree());
+    }
 
+    @AllGraphTypesWithoutCypherTest
+    void testMaximumFromD(Class<? extends GraphFactory> graphFactory) {
+        setup(graphFactory);
+        assertMaximum(new Prim(graph, graph).computeMaximumSpanningTree(d).getSpanningTree());
+    }
+
+    @AllGraphTypesWithoutCypherTest
+    void testMaximumFromE(Class<? extends GraphFactory> graphFactory) {
+        setup(graphFactory);
+        assertMaximum(new Prim(graph, graph).computeMaximumSpanningTree(e).getSpanningTree());
+    }
+
+    @AllGraphTypesWithoutCypherTest
+    void testMinimumFromA(Class<? extends GraphFactory> graphFactory) {
+        setup(graphFactory);
+        assertMinimum(new Prim(graph, graph).computeMinimumSpanningTree(a).getSpanningTree());
+    }
+
+    @AllGraphTypesWithoutCypherTest
+    void testMinimumFromB(Class<? extends GraphFactory> graphFactory) {
+        setup(graphFactory);
+        assertMinimum(new Prim(graph, graph).computeMinimumSpanningTree(b).getSpanningTree());
+    }
+
+    @AllGraphTypesWithoutCypherTest
+    void testMinimumFromC(Class<? extends GraphFactory> graphFactory) {
+        setup(graphFactory);
+        assertMinimum(new Prim(graph, graph).computeMinimumSpanningTree(c).getSpanningTree());
+    }
+
+    @AllGraphTypesWithoutCypherTest
+    void testMinimumFromD(Class<? extends GraphFactory> graphFactory) {
+        setup(graphFactory);
+        assertMinimum(new Prim(graph, graph).computeMinimumSpanningTree(d).getSpanningTree());
+    }
+
+    @AllGraphTypesWithoutCypherTest
+    void testMinimumFromE(Class<? extends GraphFactory> graphFactory) {
+        setup(graphFactory);
+        assertMinimum(new Prim(graph, graph).computeMinimumSpanningTree(d).getSpanningTree());
+    }
+
+    private void setup(Class<? extends GraphFactory> graphImpl) {
         graph = new GraphLoader(DB)
                 .withLabel(label)
                 .withRelationshipType("TYPE")
@@ -124,56 +163,6 @@ public class PrimTest {
         }
     }
 
-    @Test
-    public void testMaximumFromA() throws Exception {
-        assertMaximum(new Prim(graph, graph).computeMaximumSpanningTree(a).getSpanningTree());
-    }
-
-    @Test
-    public void testMaximumFromB() throws Exception {
-        assertMaximum(new Prim(graph, graph).computeMaximumSpanningTree(b).getSpanningTree());
-    }
-
-    @Test
-    public void testMaximumFromC() throws Exception {
-        assertMaximum(new Prim(graph, graph).computeMaximumSpanningTree(c).getSpanningTree());
-    }
-
-    @Test
-    public void testMaximumFromD() throws Exception {
-        assertMaximum(new Prim(graph, graph).computeMaximumSpanningTree(d).getSpanningTree());
-    }
-
-    @Test
-    public void testMaximumFromE() throws Exception {
-        assertMaximum(new Prim(graph, graph).computeMaximumSpanningTree(e).getSpanningTree());
-    }
-
-    @Test
-    public void testMinimumFromA() throws Exception {
-        assertMinimum(new Prim(graph, graph).computeMinimumSpanningTree(a).getSpanningTree());
-    }
-
-    @Test
-    public void testMinimumFromB() throws Exception {
-        assertMinimum(new Prim(graph, graph).computeMinimumSpanningTree(b).getSpanningTree());
-    }
-
-    @Test
-    public void testMinimumFromC() throws Exception {
-        assertMinimum(new Prim(graph, graph).computeMinimumSpanningTree(c).getSpanningTree());
-    }
-
-    @Test
-    public void testMinimumFromD() throws Exception {
-        assertMinimum(new Prim(graph, graph).computeMinimumSpanningTree(d).getSpanningTree());
-    }
-
-    @Test
-    public void testMinimumFromE() throws Exception {
-        assertMinimum(new Prim(graph, graph).computeMinimumSpanningTree(d).getSpanningTree());
-    }
-
     private void assertMinimum(SpanningTree mst) {
         assertEquals(5, mst.effectiveNodeCount);
         assertEquals(-1 , mst.parent[y]);
@@ -185,5 +174,4 @@ public class PrimTest {
         assertEquals(-1 , mst.parent[y]);
         assertEquals(-1 , mst.parent[z]);
     }
-
 }

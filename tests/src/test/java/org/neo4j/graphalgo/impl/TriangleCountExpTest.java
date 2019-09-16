@@ -19,15 +19,15 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.Assume;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
+import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicDoubleArray;
@@ -41,21 +41,14 @@ import org.neo4j.graphalgo.impl.triangle.TriangleCountForkJoin;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
 import static org.junit.Assert.assertEquals;
 
-/**
- *
- * @author mknblch
- */
-@RunWith(Parameterized.class)
-public class TriangleCountExpTest {
+class TriangleCountExpTest {
 
     private static final String LABEL = "Node";
     private static final String RELATIONSHIP = "REL";
@@ -64,58 +57,43 @@ public class TriangleCountExpTest {
 
     private static long centerId;
 
-    @ClassRule
-    public static final ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
+    private static GraphDatabaseAPI DB;
 
-    @Parameterized.Parameters(name = "{1}")
-    public static Collection<Object[]> data() {
-        return Arrays.<Object[]>asList(
-                new Object[]{HugeGraphFactory.class, "Huge"}
-        );
+    @BeforeAll
+    static void setup() {
+        DB = TestDatabaseCreator.createTestDatabase();
+        final RelationshipType type = RelationshipType.withName(RELATIONSHIP);
+        final DefaultBuilder builder = GraphBuilder.create(DB)
+                .setLabel(LABEL)
+                .setRelationship(RELATIONSHIP)
+                .newDefaultBuilder();
+        final Node center = builder.createNode();
+        builder.newRingBuilder()
+                .createRing((int) TRIANGLE_COUNT)
+                .forEachNodeInTx(node -> {
+                    center.createRelationshipTo(node, type);
+                });
+        centerId = center.getId();
     }
 
-    @BeforeClass
-    public static void setup() {
-        try (ProgressTimer timer = ProgressTimer.start(t -> System.out.println("setup took " + t + "ms for " + TRIANGLE_COUNT + " nodes"))) {
-            final RelationshipType type = RelationshipType.withName(RELATIONSHIP);
-            final DefaultBuilder builder = GraphBuilder.create(DB)
-                    .setLabel(LABEL)
-                    .setRelationship(RELATIONSHIP)
-                    .newDefaultBuilder();
-            final Node center = builder.createNode();
-            builder.newRingBuilder()
-                    .createRing((int) TRIANGLE_COUNT)
-                    .forEachNodeInTx(node -> {
-                        center.createRelationshipTo(node, type);
-                    });
-            centerId = center.getId();
+    @AfterAll
+    static void shutdown() {
+        if (DB != null) {
+            DB.shutdown();
         }
     }
-
 
     private Graph graph;
 
-    public TriangleCountExpTest(
-            Class<? extends GraphFactory> graphImpl,
-            String nameIgnoredOnlyForTestName) {
-        try (ProgressTimer timer = ProgressTimer.start(t -> System.out.println("load took " + t + "ms"))) {
-            graph = new GraphLoader(DB)
-                    .withLabel(LABEL)
-                    .withRelationshipType(RELATIONSHIP)
-                    .withoutRelationshipWeights()
-                    .withoutNodeWeights()
-                    .withDirection(Direction.BOTH)
-                    .sorted()
-                    .undirected()
-                    .load(graphImpl);
-        }
-    }
-
-
-    @Test
-    public void testQueue() {
-
-        final IntersectingTriangleCount algo = new IntersectingTriangleCount(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY);
+    @AllGraphTypesWithoutCypherTest
+    void testQueue(Class<? extends GraphFactory> graphFactory) {
+        Assume.assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
+        setup(graphFactory);
+        final IntersectingTriangleCount algo = new IntersectingTriangleCount(
+                graph,
+                Pools.DEFAULT,
+                1,
+                AllocationTracker.EMPTY);
         try (ProgressTimer start = ProgressTimer.start(l -> System.out.println("took " + l + "ms"))) {
             algo.compute();
         }
@@ -125,9 +103,15 @@ public class TriangleCountExpTest {
         assertEquals(EXPECTED_COEFFICIENT, algo.getAverageCoefficient(), 0.001);
     }
 
-    @Test
-    public void testQueueParallel() {
-        final IntersectingTriangleCount algo = new IntersectingTriangleCount(graph, Pools.DEFAULT, 4, AllocationTracker.EMPTY);
+    @AllGraphTypesWithoutCypherTest
+    void testQueueParallel(Class<? extends GraphFactory> graphFactory) {
+        Assume.assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
+        setup(graphFactory);
+        final IntersectingTriangleCount algo = new IntersectingTriangleCount(
+                graph,
+                Pools.DEFAULT,
+                4,
+                AllocationTracker.EMPTY);
         try (ProgressTimer start = ProgressTimer.start(l -> System.out.println("took " + l + "ms"))) {
             algo.compute();
         }
@@ -137,8 +121,10 @@ public class TriangleCountExpTest {
         assertEquals(EXPECTED_COEFFICIENT, algo.getAverageCoefficient(), 0.001);
     }
 
-    @Test
-    public void testForkJoin() {
+    @AllGraphTypesWithoutCypherTest
+    void testForkJoin(Class<? extends GraphFactory> graphFactory) {
+        Assume.assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
+        setup(graphFactory);
         final TriangleCountForkJoin algo = new TriangleCountForkJoin(graph, ForkJoinPool.commonPool(), 100_000);
         try (ProgressTimer start = ProgressTimer.start(l -> System.out.println("took " + l + "ms"))) {
             algo.compute();
@@ -149,8 +135,10 @@ public class TriangleCountExpTest {
         assertEquals(EXPECTED_COEFFICIENT, algo.getAverageClusteringCoefficient(), 0.001);
     }
 
-    @Test
-    public void testForkJoinParallel() {
+    @AllGraphTypesWithoutCypherTest
+    void testForkJoinParallel(Class<? extends GraphFactory> graphFactory) {
+        Assume.assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
+        setup(graphFactory);
         final TriangleCountForkJoin algo = new TriangleCountForkJoin(graph, ForkJoinPool.commonPool(), 100);
         try (ProgressTimer start = ProgressTimer.start(l -> System.out.println("took " + l + "ms"))) {
             algo.compute();
@@ -164,7 +152,7 @@ public class TriangleCountExpTest {
     private void assertTriangles(Object triangles) {
         if (triangles instanceof PagedAtomicIntegerArray) {
             assertTriangle((PagedAtomicIntegerArray) triangles);
-        } else if (triangles instanceof AtomicIntegerArray){
+        } else if (triangles instanceof AtomicIntegerArray) {
             assertTriangle((AtomicIntegerArray) triangles);
         }
     }
@@ -196,7 +184,7 @@ public class TriangleCountExpTest {
             assertClusteringCoefficient((double[]) coefficients);
         } else if (coefficients instanceof PagedAtomicDoubleArray) {
             assertClusteringCoefficient((PagedAtomicDoubleArray) coefficients);
-        } else if (coefficients instanceof AtomicDoubleArray){
+        } else if (coefficients instanceof AtomicDoubleArray) {
             assertClusteringCoefficient((AtomicDoubleArray) coefficients);
         }
     }
@@ -229,5 +217,17 @@ public class TriangleCountExpTest {
             }
             assertEquals(EXPECTED_COEFFICIENT, coefficients.get(i), 0.01);
         }
+    }
+
+    private void setup(Class<? extends GraphFactory> graphImpl) {
+        graph = new GraphLoader(DB)
+                .withLabel(LABEL)
+                .withRelationshipType(RELATIONSHIP)
+                .withoutRelationshipWeights()
+                .withoutNodeWeights()
+                .withDirection(Direction.BOTH)
+                .sorted()
+                .undirected()
+                .load(graphImpl);
     }
 }

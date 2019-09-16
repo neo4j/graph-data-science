@@ -19,17 +19,16 @@
  */
 package org.neo4j.graphalgo.impl.degree;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.Assume;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
+import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
@@ -37,147 +36,133 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertArrayEquals;
 
-@RunWith(Parameterized.class)
-public final class WeightedDegreeCentralityTest {
+final class WeightedDegreeCentralityTest {
 
-    private Class<? extends GraphFactory> graphImpl;
+    private static final String DB_CYPHER = "" + "CREATE " +
+                                            "  (_:Label0 {name: '_'})" +
+                                            ", (a:Label1 {name: 'a'})" +
+                                            ", (b:Label1 {name: 'b'})" +
+                                            ", (c:Label1 {name: 'c'})" +
+                                            ", (d:Label1 {name: 'd'})" +
+                                            ", (e:Label1 {name: 'e'})" +
+                                            ", (f:Label1 {name: 'f'})" +
+                                            ", (g:Label1 {name: 'g'})" +
+                                            ", (h:Label1 {name: 'h'})" +
+                                            ", (i:Label1 {name: 'i'})" +
+                                            ", (j:Label1 {name: 'j'})" +
+                                            ", (k:Label2 {name: 'k'})" +
+                                            ", (l:Label2 {name: 'l'})" +
+                                            ", (m:Label2 {name: 'm'})" +
+                                            ", (n:Label2 {name: 'n'})" +
+                                            ", (o:Label2 {name: 'o'})" +
+                                            ", (p:Label2 {name: 'p'})" +
+                                            ", (q:Label2 {name: 'q'})" +
+                                            ", (r:Label2 {name: 'r'})" +
+                                            ", (s:Label2 {name: 's'})" +
+                                            ", (t:Label2 {name: 't'})" +
 
-    @Parameterized.Parameters(name = "{1}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(
-                new Object[]{CypherGraphFactory.class, "CypherGraphFactory"},
-                new Object[]{HugeGraphFactory.class, "HugeGraphFactory"}
-        );
-    }
+                                            ", (b)-[:TYPE1 {weight: 2.0}]->(c)" +
+                                            ", (c)-[:TYPE1 {weight: 2.0}]->(b)" +
 
-    private static final String DB_CYPHER = "" +
-            "CREATE (_:Label0 {name:\"_\"})\n" +
-            "CREATE (a:Label1 {name:\"a\"})\n" +
-            "CREATE (b:Label1 {name:\"b\"})\n" +
-            "CREATE (c:Label1 {name:\"c\"})\n" +
-            "CREATE (d:Label1 {name:\"d\"})\n" +
-            "CREATE (e:Label1 {name:\"e\"})\n" +
-            "CREATE (f:Label1 {name:\"f\"})\n" +
-            "CREATE (g:Label1 {name:\"g\"})\n" +
-            "CREATE (h:Label1 {name:\"h\"})\n" +
-            "CREATE (i:Label1 {name:\"i\"})\n" +
-            "CREATE (j:Label1 {name:\"j\"})\n" +
-            "CREATE (k:Label2 {name:\"k\"})\n" +
-            "CREATE (l:Label2 {name:\"l\"})\n" +
-            "CREATE (m:Label2 {name:\"m\"})\n" +
-            "CREATE (n:Label2 {name:\"n\"})\n" +
-            "CREATE (o:Label2 {name:\"o\"})\n" +
-            "CREATE (p:Label2 {name:\"p\"})\n" +
-            "CREATE (q:Label2 {name:\"q\"})\n" +
-            "CREATE (r:Label2 {name:\"r\"})\n" +
-            "CREATE (s:Label2 {name:\"s\"})\n" +
-            "CREATE (t:Label2 {name:\"t\"})\n" +
-            "CREATE\n" +
-            "  (b)-[:TYPE1 {weight: 2.0}]->(c),\n" +
-            "  (c)-[:TYPE1 {weight: 2.0}]->(b),\n" +
+                                            ", (d)-[:TYPE1 {weight: 5.0}]->(a)" +
+                                            ", (d)-[:TYPE1 {weight: 2.0}]->(b)" +
 
-            "  (d)-[:TYPE1 {weight: 5.0}]->(a),\n" +
-            "  (d)-[:TYPE1 {weight: 2.0}]->(b),\n" +
+                                            ", (e)-[:TYPE1 {weight: 2.0}]->(b)" +
+                                            ", (e)-[:TYPE1 {weight: 7.0}]->(d)" +
+                                            ", (e)-[:TYPE1 {weight: 1.0}]->(f)" +
 
-            "  (e)-[:TYPE1 {weight: 2.0}]->(b),\n" +
-            "  (e)-[:TYPE1 {weight: 7.0}]->(d),\n" +
-            "  (e)-[:TYPE1 {weight: 1.0}]->(f),\n" +
+                                            ", (f)-[:TYPE1 {weight: 2.0}]->(b)" +
+                                            ", (f)-[:TYPE1 {weight: 2.0}]->(e)" +
 
-            "  (f)-[:TYPE1 {weight: 2.0}]->(b),\n" +
-            "  (f)-[:TYPE1 {weight: 2.0}]->(e),\n" +
+                                            ", (a)-[:TYPE3 {weight: -2.0}]->(b)" +
 
-            "  (a)-[:TYPE3 {weight: -2.0}]->(b),\n" +
+                                            ", (b)-[:TYPE3 {weight: 2.0}]->(c)" +
+                                            ", (c)-[:TYPE3 {weight: 2.0}]->(b)" +
 
-            "  (b)-[:TYPE3 {weight: 2.0}]->(c),\n" +
-            "  (c)-[:TYPE3 {weight: 2.0}]->(b),\n" +
+                                            ", (d)-[:TYPE3 {weight: 2.0}]->(a)" +
+                                            ", (d)-[:TYPE3 {weight: 2.0}]->(b)" +
 
-            "  (d)-[:TYPE3 {weight: 2.0}]->(a),\n" +
-            "  (d)-[:TYPE3 {weight: 2.0}]->(b),\n" +
+                                            ", (e)-[:TYPE3 {weight: 2.0}]->(b)" +
+                                            ", (e)-[:TYPE3 {weight: 2.0}]->(d)" +
+                                            ", (e)-[:TYPE3 {weight: 2.0}]->(f)" +
 
-            "  (e)-[:TYPE3 {weight: 2.0}]->(b),\n" +
-            "  (e)-[:TYPE3 {weight: 2.0}]->(d),\n" +
-            "  (e)-[:TYPE3 {weight: 2.0}]->(f),\n" +
+                                            ", (f)-[:TYPE3 {weight: 2.0}]->(b)" +
+                                            ", (f)-[:TYPE3 {weight: 2.0}]->(e)" +
 
-            "  (f)-[:TYPE3 {weight: 2.0}]->(b),\n" +
-            "  (f)-[:TYPE3 {weight: 2.0}]->(e),\n" +
+                                            ", (g)-[:TYPE2]->(b)" +
+                                            ", (g)-[:TYPE2]->(e)" +
+                                            ", (h)-[:TYPE2]->(b)" +
+                                            ", (h)-[:TYPE2]->(e)" +
+                                            ", (i)-[:TYPE2]->(b)" +
+                                            ", (i)-[:TYPE2]->(e)" +
+                                            ", (j)-[:TYPE2]->(e)" +
+                                            ", (k)-[:TYPE2]->(e)";
 
-            "  (g)-[:TYPE2]->(b),\n" +
-            "  (g)-[:TYPE2]->(e),\n" +
-            "  (h)-[:TYPE2]->(b),\n" +
-            "  (h)-[:TYPE2]->(e),\n" +
-            "  (i)-[:TYPE2]->(b),\n" +
-            "  (i)-[:TYPE2]->(e),\n" +
-            "  (j)-[:TYPE2]->(e),\n" +
-            "  (k)-[:TYPE2]->(e)\n";
+    private static GraphDatabaseAPI DB;
 
-    private static GraphDatabaseAPI db;
-
-    @BeforeClass
-    public static void setupGraphDb() {
-        db = TestDatabaseCreator.createTestDatabase();
-        try (Transaction tx = db.beginTx()) {
-            db.execute(DB_CYPHER).close();
+    @BeforeAll
+    static void setupGraphDb() {
+        DB = TestDatabaseCreator.createTestDatabase();
+        try (Transaction tx = DB.beginTx()) {
+            DB.execute(DB_CYPHER).close();
             tx.success();
         }
     }
 
-    @AfterClass
-    public static void shutdownGraphDb() {
-        if (db!=null) db.shutdown();
+    @AfterAll
+    static void shutdownGraphDb() {
+        if (DB != null) DB.shutdown();
     }
 
-    public WeightedDegreeCentralityTest(
-            Class<? extends GraphFactory> graphImpl,
-            String nameIgnoredOnlyForTestName) {
-        this.graphImpl = graphImpl;
-    }
-
-    @Test
-    public void buildWeightsArray() {
+    @AllGraphTypesTest
+    void buildWeightsArray(Class<? extends GraphFactory> graphFactory) {
+        Assume.assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
         final Label label = Label.label("Label1");
         final Map<Long, double[]> expected = new HashMap<>();
 
-        try (Transaction tx = db.beginTx()) {
-            expected.put(db.findNode(label, "name", "a").getId(), new double[] {});
-            expected.put(db.findNode(label, "name", "b").getId(), new double[] {2.0});
-            expected.put(db.findNode(label, "name", "c").getId(), new double[] {2.0});
-            expected.put(db.findNode(label, "name", "d").getId(), new double[] {5.0,2.0});
-            expected.put(db.findNode(label, "name", "e").getId(), new double[] {2.0,7.0,1.0});
-            expected.put(db.findNode(label, "name", "f").getId(), new double[] {2.0,2.0});
-            expected.put(db.findNode(label, "name", "g").getId(), new double[] {});
-            expected.put(db.findNode(label, "name", "h").getId(), new double[] {});
-            expected.put(db.findNode(label, "name", "i").getId(), new double[] {});
-            expected.put(db.findNode(label, "name", "j").getId(), new double[] {});
+        try (Transaction tx = DB.beginTx()) {
+            expected.put(DB.findNode(label, "name", "a").getId(), new double[]{});
+            expected.put(DB.findNode(label, "name", "b").getId(), new double[]{2.0});
+            expected.put(DB.findNode(label, "name", "c").getId(), new double[]{2.0});
+            expected.put(DB.findNode(label, "name", "d").getId(), new double[]{5.0, 2.0});
+            expected.put(DB.findNode(label, "name", "e").getId(), new double[]{2.0, 7.0, 1.0});
+            expected.put(DB.findNode(label, "name", "f").getId(), new double[]{2.0, 2.0});
+            expected.put(DB.findNode(label, "name", "g").getId(), new double[]{});
+            expected.put(DB.findNode(label, "name", "h").getId(), new double[]{});
+            expected.put(DB.findNode(label, "name", "i").getId(), new double[]{});
+            expected.put(DB.findNode(label, "name", "j").getId(), new double[]{});
             tx.success();
         }
 
         final Graph graph;
-        if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
-            graph = new GraphLoader(db)
+        if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
+            graph = new GraphLoader(DB)
                     .withLabel("MATCH (n:Label1) RETURN id(n) as id")
-                    .withRelationshipType("MATCH (n:Label1)-[type:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target, type.weight AS weight")
+                    .withRelationshipType(
+                            "MATCH (n:Label1)-[type:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target, type.weight AS weight")
                     .withOptionalRelationshipWeightsFromProperty("weight", 1.0)
-                    .load(graphImpl);
+                    .load(graphFactory);
 
         } else {
-            graph = new GraphLoader(db)
+            graph = new GraphLoader(DB)
                     .withLabel(label)
                     .withRelationshipType("TYPE1")
                     .withDirection(Direction.OUTGOING)
                     .withOptionalRelationshipWeightsFromProperty("weight", 1.0)
-                    .sorted()
-                    .load(graphImpl);
+                    .load(graphFactory);
         }
 
-        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph, Pools.DEFAULT, 1, AllocationTracker.EMPTY);
+        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(
+                graph,
+                Pools.DEFAULT,
+                1,
+                AllocationTracker.EMPTY);
         degreeCentrality.compute(true);
 
         IntStream.range(0, expected.size()).forEach(i -> {

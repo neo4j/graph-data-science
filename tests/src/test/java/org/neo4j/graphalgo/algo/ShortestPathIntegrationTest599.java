@@ -20,81 +20,70 @@
 package org.neo4j.graphalgo.algo;
 
 import org.hamcrest.Matcher;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.neo4j.graphalgo.ShortestPathProc;
+import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphdb.Result;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyDouble;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
-/**
- * @author mknblch
- */
-@RunWith(Parameterized.class)
-public class ShortestPathIntegrationTest599 {
+class ShortestPathIntegrationTest599 {
 
-    @Rule
-    public final ImpermanentDatabaseRule db_599 = new ImpermanentDatabaseRule().startLazily();
+    private static final String DB_CYPHER = "CREATE" +
+                                            "  (v1:Node {VID: 1})" +
+                                            ", (v2:Node {VID: 2})" +
+                                            ", (v3:Node {VID: 3})" +
+                                            ", (v4:Node {VID: 4})" +
+                                            ", (v5:Node {VID: 5})" +
+                                            ", (v6:Node {VID: 6})" +
+                                            ", (v7:Node {VID: 7})" +
+                                            ", (v1)-[:EDGE {WEIGHT: 0.5}]->(v2)" +
+                                            ", (v1)-[:EDGE {WEIGHT: 5.0}]->(v3)" +
+                                            ", (v2)-[:EDGE {WEIGHT: 0.5}]->(v5)" +
+                                            ", (v3)-[:EDGE {WEIGHT: 2.0}]->(v4)" +
+                                            ", (v5)-[:EDGE {WEIGHT: 0.5}]->(v6)" +
+                                            ", (v6)-[:EDGE {WEIGHT: 0.5}]->(v3)" +
+                                            ", (v6)-[:EDGE {WEIGHT: 23.0}]->(v7)" +
+                                            ", (v1)-[:EDGE {WEIGHT: 5.0}]->(v4)" +
+                                            "";
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(
-                new Object[]{"Huge"},
-                new Object[]{"Kernel"}
-        );
+    private static GraphDatabaseAPI DB;
+
+    @BeforeAll
+    static void setupGraphDb() throws KernelException {
+        DB = TestDatabaseCreator.createTestDatabase();
+        DB.execute(DB_CYPHER);
+        DB.getDependencyResolver()
+                .resolveDependency(Procedures.class)
+                .registerProcedure(ShortestPathProc.class);
     }
 
-    @Parameterized.Parameter
-    public String graphImpl;
+    @AfterAll
+    static void shutdownGraphDb() {
+        if (DB != null) DB.shutdown();
+    }
 
     /** @see <a href="https://github.com/neo4j-contrib/neo4j-graph-algorithms/issues/599">Issue #599</a> */
-    @Test
-    public void test599() throws KernelException {
-        db_599.resolveDependency(Procedures.class).registerProcedure(ShortestPathProc.class);
-        final String create = "CREATE\n" +
-                "    (v1:Node {VID: 1})\n" +
-                "  , (v2:Node {VID: 2})\n" +
-                "  , (v3:Node {VID: 3})\n" +
-                "  , (v4:Node {VID: 4})\n" +
-                "  , (v5:Node {VID: 5})\n" +
-                "  , (v6:Node {VID: 6})\n" +
-                "  , (v7:Node {VID: 7})\n" +
-                "  ,(v1)-[:EDGE {WEIGHT: 0.5}]->(v2)\n" +
-                "  ,(v1)-[:EDGE {WEIGHT: 5.0}]->(v3)\n" +
-                "  ,(v2)-[:EDGE {WEIGHT: 0.5}]->(v5)\n" +
-                "  ,(v3)-[:EDGE {WEIGHT: 2.0}]->(v4)\n" +
-                "  ,(v5)-[:EDGE {WEIGHT: 0.5}]->(v6)\n" +
-                "  ,(v6)-[:EDGE {WEIGHT: 0.5}]->(v3)\n" +
-                "  ,(v6)-[:EDGE {WEIGHT: 23.0}]->(v7)\n" +
-                "  ,(v1)-[:EDGE {WEIGHT: 5.0}]->(v4)\n" +
-                "";
-        db_599.execute(create);
-
-        final String totalCostCommand = "" +
+    @TestSupport.AllGraphNamesTest
+    void test599(String graphName) {
+        final String totalCostCommand = String.format("" +
                 "MATCH (startNode {VID: 1}), (endNode {VID: 4})\n" +
-                "CALL algo.shortestPath(startNode, endNode, 'WEIGHT', {direction: 'OUTGOING'})\n" +
+                "CALL algo.shortestPath(startNode, endNode, 'WEIGHT', {graph: '%s', direction: 'OUTGOING'})\n" +
                 "YIELD nodeCount, totalCost, loadMillis, evalMillis, writeMillis\n" +
-                "RETURN totalCost\n";
+                "RETURN totalCost\n", graphName);
 
-        double totalCost = db_599
+        double totalCost = DB
                 .execute(totalCostCommand)
                 .<Double>columnAs("totalCost")
                 .stream()
@@ -103,12 +92,12 @@ public class ShortestPathIntegrationTest599 {
 
         assertEquals(4.0, totalCost, 1e-4);
 
-        final String pathCommand = "" +
+        final String pathCommand = String.format("" +
                 "MATCH (startNode {VID: 1}), (endNode {VID: 4})\n" +
-                "CALL algo.shortestPath.stream(startNode, endNode, 'WEIGHT', {direction: 'OUTGOING'})\n" +
+                "CALL algo.shortestPath.stream(startNode, endNode, 'WEIGHT', {graph: '%s', direction: 'OUTGOING'})\n" +
                 "YIELD nodeId, cost\n" +
                 "MATCH (n1) WHERE id(n1) = nodeId\n" +
-                "RETURN n1.VID as id, cost as weight\n";
+                "RETURN n1.VID as id, cost as weight\n", graphName);
 
         List<Matcher<Number>> expectedList = Arrays.asList(
                 is(1L), is(0.0),
@@ -119,19 +108,11 @@ public class ShortestPathIntegrationTest599 {
                 is(4L), is(4.0));
         Iterator<Matcher<Number>> expected = expectedList.iterator();
 
-        final Result pathResult = db_599.execute(pathCommand);
+        final Result pathResult = DB.execute(pathCommand);
         pathResult.forEachRemaining(res -> {
             assertThat((Number) res.get("id"), expected.next());
             assertThat((Number) res.get("weight"), expected.next());
         });
         pathResult.close();
-    }
-
-    private interface PathConsumer {
-        void accept(long nodeId, double cost);
-    }
-
-    interface StepConsumer {
-        void accept(long nodeId, int step);
     }
 }

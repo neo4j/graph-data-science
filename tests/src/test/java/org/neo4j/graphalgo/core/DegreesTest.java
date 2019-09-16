@@ -19,23 +19,21 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ErrorCollector;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.Assume;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
+import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
-
-import java.util.Arrays;
-import java.util.Collection;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.Assert.assertEquals;
+import static org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 
 /**
  * A->B; A->C; B->C;
@@ -45,64 +43,109 @@ import static org.junit.Assert.assertEquals;
  * A:     2      0      2
  * B:     1      1      2
  * C:     0      2      2
- *
- *
- *
- * @author mknblch
  */
-@RunWith(Parameterized.class)
-public class DegreesTest {
+class DegreesTest {
 
-    private static final String unidirectional =
-                    "CREATE (a:Node {name:'a'})\n" +
-                    "CREATE (b:Node {name:'b'})\n" +
-                    "CREATE (c:Node {name:'c'})\n" + // shuffled
+    private static final String UNI_DIRECTIONAL = "CREATE" +
+                                                  "  (a:Node {name:'a'})" +
+                                                  ", (b:Node {name:'b'})" +
+                                                  ", (c:Node {name:'c'})" + // shuffled
+                                                  ", (a)-[:TYPE]->(b)" +
+                                                  ", (a)-[:TYPE]->(c)" +
+                                                  ", (b)-[:TYPE]->(c)";
 
-                    "CREATE" +
+    private static final String BI_DIRECTIONAL = "CREATE" +
+                                                 "  (a:Node {name:'a'})" +
+                                                 ", (b:Node {name:'b'})" +
+                                                 ", (c:Node {name:'c'})" + // shuffled
+                                                 ", (a)-[:TYPE]->(b)" +
+                                                 ", (b)-[:TYPE]->(a)" +
+                                                 ", (a)-[:TYPE]->(c)" +
+                                                 ", (c)-[:TYPE]->(a)" +
+                                                 ", (b)-[:TYPE]->(c)" +
+                                                 ", (c)-[:TYPE]->(b)";
 
-                    " (a)-[:TYPE]->(b),\n" +
-                    " (a)-[:TYPE]->(c),\n" +
-                    " (b)-[:TYPE]->(c)";
+    private static GraphDatabaseAPI DB;
 
-    private static final String bidirectional =
-                    "CREATE (a:Node {name:'a'})\n" +
-                    "CREATE (b:Node {name:'b'})\n" +
-                    "CREATE (c:Node {name:'c'})\n" + // shuffled
+    @BeforeAll
+    static void setupGraphDb() {
+        DB = TestDatabaseCreator.createTestDatabase();
+    }
 
-                    "CREATE" +
+    @AfterEach
+    void clearDb() {
+        DB.execute("MATCH (n) DETACH DELETE n");
+    }
 
-                    " (a)-[:TYPE]->(b),\n" +
-                    " (b)-[:TYPE]->(a),\n" +
-                    " (a)-[:TYPE]->(c),\n" +
-                    " (c)-[:TYPE]->(a),\n" +
-                    " (b)-[:TYPE]->(c),\n" +
-                    " (c)-[:TYPE]->(b)";
+    @AfterAll
+    static void shutdownGraphDb() {
+        if (DB != null) DB.shutdown();
+    }
 
-
-    @Rule
-    public ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
-
-    @Rule
-    public ErrorCollector collector = new ErrorCollector();
-
-    private Class<? extends GraphFactory> graphImpl;
     private Graph graph;
 
-    public DegreesTest(
-            Class<? extends GraphFactory> graphImpl,
-            String name) {
-        this.graphImpl = graphImpl;
+    @AllGraphTypesWithoutCypherTest
+    void testUnidirectionalOutgoing(Class<? extends GraphFactory> graphFactory) {
+        setup(UNI_DIRECTIONAL, Direction.OUTGOING, graphFactory);
+        assertEquals(2, graph.degree(nodeId("a"), Direction.OUTGOING));
+        assertEquals(1, graph.degree(nodeId("b"), Direction.OUTGOING));
+        assertEquals(0, graph.degree(nodeId("c"), Direction.OUTGOING));
     }
 
-    @Parameterized.Parameters(name = "{1}")
-    public static Collection<Object[]> data() {
-
-        return Arrays.<Object[]>asList(
-                new Object[]{HugeGraphFactory.class, "huge"}
-        );
+    @AllGraphTypesWithoutCypherTest
+    void testUnidirectionalIncoming(Class<? extends GraphFactory> graphFactory) {
+        setup(UNI_DIRECTIONAL, Direction.INCOMING, graphFactory);
+        assertEquals(0, graph.degree(nodeId("a"), Direction.INCOMING));
+        assertEquals(1, graph.degree(nodeId("b"), Direction.INCOMING));
+        assertEquals(2, graph.degree(nodeId("c"), Direction.INCOMING));
     }
 
-    private void setup(String cypher, Direction direction) {
+    @AllGraphTypesWithoutCypherTest
+    void testUnidirectionalUndirected(Class<? extends GraphFactory> graphFactory) {
+
+        setup(UNI_DIRECTIONAL, Direction.BOTH, graphFactory);
+        assertEquals(2, graph.degree(nodeId("a"), Direction.BOTH));
+        assertEquals(2, graph.degree(nodeId("b"), Direction.BOTH));
+        assertEquals(2, graph.degree(nodeId("c"), Direction.BOTH));
+    }
+
+    @AllGraphTypesWithoutCypherTest
+    void testBidirectionalOutgoing(Class<? extends GraphFactory> graphFactory) {
+        setup(BI_DIRECTIONAL, Direction.OUTGOING, graphFactory);
+        assertEquals(2, graph.degree(nodeId("a"), Direction.OUTGOING));
+        assertEquals(2, graph.degree(nodeId("b"), Direction.OUTGOING));
+        assertEquals(2, graph.degree(nodeId("c"), Direction.OUTGOING));
+    }
+
+    @AllGraphTypesWithoutCypherTest
+    void testBidirectionalIncoming(Class<? extends GraphFactory> graphFactory) {
+        setup(BI_DIRECTIONAL, Direction.INCOMING, graphFactory);
+        assertEquals(2, graph.degree(nodeId("a"), Direction.INCOMING));
+        assertEquals(2, graph.degree(nodeId("b"), Direction.INCOMING));
+        assertEquals(2, graph.degree(nodeId("c"), Direction.INCOMING));
+    }
+
+    @AllGraphTypesWithoutCypherTest
+    void testBidirectionalBoth(Class<? extends GraphFactory> graphFactory) {
+        Assume.assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
+        setup(BI_DIRECTIONAL, Direction.BOTH, graphFactory);
+        assertEquals(4, graph.degree(nodeId("a"), Direction.BOTH));
+        assertEquals(4, graph.degree(nodeId("b"), Direction.BOTH));
+        assertEquals(4, graph.degree(nodeId("c"), Direction.BOTH));
+    }
+
+    @AllGraphTypesWithoutCypherTest
+    void testBidirectionalUndirected(Class<? extends GraphFactory> graphFactory) {
+        setup(BI_DIRECTIONAL, null, graphFactory);
+        assertEquals(2, graph.degree(nodeId("a"), Direction.OUTGOING));
+        assertEquals(2, graph.degree(nodeId("b"), Direction.OUTGOING));
+        assertEquals(2, graph.degree(nodeId("c"), Direction.OUTGOING));
+    }
+
+    private void setup(
+            String cypher,
+            Direction direction,
+            Class<? extends GraphFactory> graphFactory) {
         DB.execute(cypher);
         GraphLoader graphLoader = new GraphLoader(DB)
                 .withAnyRelationshipType()
@@ -112,73 +155,12 @@ public class DegreesTest {
         if (direction == null) {
             graphLoader.undirected();
         }
-        graph = graphLoader
-                .load(graphImpl);
+        graph = graphLoader.load(graphFactory);
     }
 
     private long nodeId(String name) {
-        try (Transaction transaction = DB.beginTx()) {
+        try (Transaction ignored = DB.beginTx()) {
             return graph.toMappedNodeId(DB.findNodes(Label.label("Node"), "name", name).next().getId());
         }
     }
-
-    @Test
-    public void testUnidirectionalOutgoing() {
-        setup(unidirectional, Direction.OUTGOING);
-        assertEquals(2, graph.degree(nodeId("a"), Direction.OUTGOING));
-        assertEquals(1, graph.degree(nodeId("b"), Direction.OUTGOING));
-        assertEquals(0, graph.degree(nodeId("c"), Direction.OUTGOING));
-    }
-
-    @Test
-    public void testUnidirectionalIncoming() {
-        setup(unidirectional, Direction.INCOMING);
-        assertEquals(0, graph.degree(nodeId("a"), Direction.INCOMING));
-        assertEquals(1, graph.degree(nodeId("b"), Direction.INCOMING));
-        assertEquals(2, graph.degree(nodeId("c"), Direction.INCOMING));
-    }
-
-    @Test
-    public void testUnidirectionalUndirected() {
-
-        setup(unidirectional, Direction.BOTH);
-        assertEquals(2, graph.degree(nodeId("a"), Direction.BOTH));
-        assertEquals(2, graph.degree(nodeId("b"), Direction.BOTH));
-        assertEquals(2, graph.degree(nodeId("c"), Direction.BOTH));
-    }
-
-    @Test
-    public void testBidirectionalOutgoing() {
-        setup(bidirectional, Direction.OUTGOING);
-        assertEquals(2, graph.degree(nodeId("a"), Direction.OUTGOING));
-        assertEquals(2, graph.degree(nodeId("b"), Direction.OUTGOING));
-        assertEquals(2, graph.degree(nodeId("c"), Direction.OUTGOING));
-    }
-
-    @Test
-    public void testBidirectionalIncoming() {
-        setup(bidirectional, Direction.INCOMING);
-        assertEquals(2, graph.degree(nodeId("a"), Direction.INCOMING));
-        assertEquals(2, graph.degree(nodeId("b"), Direction.INCOMING));
-        assertEquals(2, graph.degree(nodeId("c"), Direction.INCOMING));
-    }
-
-    @Test
-    public void testBidirectionalBoth() {
-
-        setup(bidirectional, Direction.BOTH);
-        assertEquals(4, graph.degree(nodeId("a"), Direction.BOTH));
-        assertEquals(4, graph.degree(nodeId("b"), Direction.BOTH));
-        assertEquals(4, graph.degree(nodeId("c"), Direction.BOTH));
-    }
-
-    @Test
-    public void testBidirectionalUndirected() {
-
-        setup(bidirectional, null);
-        assertEquals(2, graph.degree(nodeId("a"), Direction.OUTGOING));
-        assertEquals(2, graph.degree(nodeId("b"), Direction.OUTGOING));
-        assertEquals(2, graph.degree(nodeId("c"), Direction.OUTGOING));
-    }
-
 }

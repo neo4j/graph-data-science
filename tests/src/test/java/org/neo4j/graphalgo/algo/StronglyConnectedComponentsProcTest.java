@@ -19,84 +19,58 @@
  */
 package org.neo4j.graphalgo.algo;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.neo4j.graphalgo.StronglyConnectedComponentsProc;
-import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.graphalgo.TestDatabaseCreator;
-
-import java.util.Arrays;
-import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-/**
- * @author mknblch
- */
-@RunWith(Parameterized.class)
-public class StronglyConnectedComponentsProcIntegrationTest {
+class StronglyConnectedComponentsProcTest {
 
-    private static final RelationshipType type = RelationshipType.withName("TYPE");
-    private static GraphDatabaseAPI db;
+    private static final String DB_CYPHER = "CREATE" +
+                                            "  (a:Node) " +
+                                            ", (b:Node) " +
+                                            ", (c:Node) " +
+                                            ", (d:Node) " +
+                                            ", (e:Node) " +
+                                            // group 1
+                                            ", (a)-[:TYPE]->(b)" +
+                                            ", (a)<-[:TYPE]-(b)" +
+                                            ", (a)-[:TYPE]->(c)" +
+                                            ", (a)<-[:TYPE]-(c)" +
+                                            ", (b)-[:TYPE]->(c)" +
+                                            ", (b)<-[:TYPE]-(c)" +
+                                            // group 2
+                                            ", (d)-[:TYPE]->(e)" +
+                                            ", (d)<-[:TYPE]-(e)";
 
-    @BeforeClass
-    public static void setup() throws KernelException {
+    private static GraphDatabaseAPI DB;
 
-        String cypher = "CREATE(a:Node) " +
-                "CREATE(b:Node) " +
-                "CREATE(c:Node) " +
-                "CREATE(d:Node) " +
-                "CREATE(e:Node) " +
-                // group 1
-                "CREATE (a)-[:TYPE]->(b) " +
-                "CREATE (a)<-[:TYPE]-(b) " +
-                "CREATE (a)-[:TYPE]->(c) " +
-                "CREATE (a)<-[:TYPE]-(c) " +
-                "CREATE (b)-[:TYPE]->(c) " +
-                "CREATE (b)<-[:TYPE]-(c) " +
-                // group 2
-                "CREATE (d)-[:TYPE]->(e) " +
-                "CREATE (d)<-[:TYPE]-(e) " ;
-
-        db = TestDatabaseCreator.createTestDatabase();
-
-        try (Transaction tx = db.beginTx()) {
-            db.execute(cypher);
-            tx.success();
-        }
-
-        db.getDependencyResolver()
+    @BeforeAll
+    static void setup() throws KernelException {
+        DB = TestDatabaseCreator.createTestDatabase();
+        DB.execute(DB_CYPHER);
+        DB.getDependencyResolver()
                 .resolveDependency(Procedures.class)
                 .registerProcedure(StronglyConnectedComponentsProc.class);
     }
 
-    @AfterClass
-    public static void tearDown() throws Exception {
-        if (db != null) db.shutdown();
+    @AfterAll
+    static void tearDown() {
+        if (DB != null) DB.shutdown();
     }
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(
-                new Object[]{"Huge"},
-                new Object[]{"Kernel"}
-        );
-    }
-
-    @Parameterized.Parameter
-    public String graphImpl;
-
-    @Test
-    public void testScc() throws Exception {
-        db.execute("CALL algo.scc('Node', 'TYPE', {write:true, graph:'"+graphImpl+"'}) YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize, partitionProperty, writeProperty")
+    @AllGraphNamesTest
+    void testScc(String graphName) {
+        DB
+                .execute("CALL algo.scc('Node', 'TYPE', {write:true, graph:'" + graphName + "'}) " +
+                         "YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize, partitionProperty, writeProperty")
                 .accept(row -> {
                     assertNotEquals(-1L, row.getNumber("computeMillis").longValue());
                     assertNotEquals(-1L, row.getNumber("writeMillis").longValue());
@@ -110,9 +84,11 @@ public class StronglyConnectedComponentsProcIntegrationTest {
                 });
     }
 
-    @Test
-    public void explicitWriteProperty() throws Exception {
-        db.execute("CALL algo.scc('Node', 'TYPE', {write:true, graph:'"+graphImpl+"', writeProperty: 'scc'}) YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize, partitionProperty, writeProperty")
+    @AllGraphNamesTest
+    void explicitWriteProperty(String graphName) {
+        DB
+                .execute("CALL algo.scc('Node', 'TYPE', {write:true, graph:'" + graphName + "', writeProperty: 'scc'}) " +
+                         "YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize, partitionProperty, writeProperty")
                 .accept(row -> {
                     assertNotEquals(-1L, row.getNumber("computeMillis").longValue());
                     assertNotEquals(-1L, row.getNumber("writeMillis").longValue());

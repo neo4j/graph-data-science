@@ -20,70 +20,70 @@
 package org.neo4j.graphalgo.core.huge;
 
 import com.carrotsearch.hppc.LongArrayList;
-import org.junit.Rule;
+import org.junit.Assume;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
+import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
-import java.util.Collection;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-@RunWith(Parameterized.class)
-public final class LoadingTest {
+final class LoadingTest {
 
-    @Rule
-    public ImpermanentDatabaseRule db = new ImpermanentDatabaseRule();
+    private static GraphDatabaseAPI DB;
 
-    @Parameterized.Parameters(name = "{1}")
-    public static Collection<Object[]> data() {
-        return Arrays.<Object[]>asList(
-                new Object[]{HugeGraphFactory.class, "huge"}
-        );
+    @BeforeAll
+    static void setupGraphDb() {
+        DB = TestDatabaseCreator.createTestDatabase();
     }
 
-    private final Class<? extends GraphFactory> graphImpl;
-
-    @SuppressWarnings("unused")
-    public LoadingTest(
-            Class<? extends GraphFactory> graphImpl,
-            String nameIgnoredOnlyForTestName) {
-        this.graphImpl = graphImpl;
+    @AfterEach
+    void clearDb() {
+        DB.execute("MATCH (n) DETACH DELETE n");
     }
 
-    @Test
-    public void testBasicLoading() {
-        db.execute("CREATE (a:Node {name:'a'})\n" +
-                "CREATE (b:Node {name:'b'})\n" +
-                "CREATE (c:Node {name:'c'})\n" +
-                "CREATE (d:Node2 {name:'d'})\n" +
-                "CREATE (e:Node2 {name:'e'})\n" +
+    @AfterAll
+    static void shutdownGraphDb() {
+        if (DB != null) DB.shutdown();
+    }
 
-                "CREATE" +
-                " (a)-[:TYPE {prop:1}]->(b),\n" +
-                " (e)-[:TYPE {prop:2}]->(d),\n" +
-                " (d)-[:TYPE {prop:3}]->(c),\n" +
-                " (a)-[:TYPE {prop:4}]->(c),\n" +
-                " (a)-[:TYPE {prop:5}]->(d),\n" +
-                " (a)-[:TYPE2 {prop:6}]->(d),\n" +
-                " (b)-[:TYPE2 {prop:7}]->(e),\n" +
-                " (a)-[:TYPE2 {prop:8}]->(e)");
+    @AllGraphTypesWithoutCypherTest
+    void testBasicLoading(Class<? extends GraphFactory> graphFactory) {
+        Assume.assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
+        DB.execute("CREATE (a:Node {name:'a'})\n" +
+                   "CREATE (b:Node {name:'b'})\n" +
+                   "CREATE (c:Node {name:'c'})\n" +
+                   "CREATE (d:Node2 {name:'d'})\n" +
+                   "CREATE (e:Node2 {name:'e'})\n" +
 
-        final Graph graph = new GraphLoader(db)
+                   "CREATE" +
+                   " (a)-[:TYPE {prop:1}]->(b),\n" +
+                   " (e)-[:TYPE {prop:2}]->(d),\n" +
+                   " (d)-[:TYPE {prop:3}]->(c),\n" +
+                   " (a)-[:TYPE {prop:4}]->(c),\n" +
+                   " (a)-[:TYPE {prop:5}]->(d),\n" +
+                   " (a)-[:TYPE2 {prop:6}]->(d),\n" +
+                   " (b)-[:TYPE2 {prop:7}]->(e),\n" +
+                   " (a)-[:TYPE2 {prop:8}]->(e)");
+
+        final Graph graph = new GraphLoader(DB)
                 .withDirection(Direction.OUTGOING)
                 .withExecutorService(Pools.DEFAULT)
                 .withLabel("Node")
                 .withRelationshipType("TYPE")
-                .load(graphImpl);
+                .load(graphFactory);
 
         assertEquals(3, graph.nodeCount());
 

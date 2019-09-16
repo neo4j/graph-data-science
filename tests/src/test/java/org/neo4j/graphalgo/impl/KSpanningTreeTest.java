@@ -19,26 +19,23 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.Assume;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
+import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.impl.spanningTrees.KSpanningTree;
 import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Collection;
-import java.util.Collections;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 /**
  *          1
@@ -46,65 +43,43 @@ import static org.junit.Assert.*;
  *      /3 \2 /3   =>     /     /
  *    (b)---(c)         (b)   (c)
  *        1
- *
- * @author mknblch
  */
-@RunWith(Parameterized.class)
-public class KSpanningTreeTest {
+class KSpanningTreeTest {
 
-    private static final String cypher =
-            "CREATE (a:Node {name:'a'})\n" +
-                    "CREATE (b:Node {name:'b'})\n" +
-                    "CREATE (c:Node {name:'c'})\n" +
-                    "CREATE (d:Node {name:'d'})\n" +
-                    "CREATE (x:Node {name:'x'})\n" +
+    private static final String CYPHER = "CREATE " +
+                                         "  (a:Node {name: 'a'})" +
+                                         ", (b:Node {name: 'b'})" +
+                                         ", (c:Node {name: 'c'})" +
+                                         ", (d:Node {name: 'd'})" +
+                                         ", (x:Node {name: 'x'})" +
+                                         ", (a)-[:TYPE {w: 3.0}]->(b)" +
+                                         ", (a)-[:TYPE {w: 2.0}]->(c)" +
+                                         ", (a)-[:TYPE {w: 1.0}]->(d)" +
+                                         ", (b)-[:TYPE {w: 1.0}]->(c)" +
+                                         ", (d)-[:TYPE {w: 3.0}]->(c)";
 
-                    "CREATE" +
-                    " (a)-[:TYPE {w:3.0}]->(b),\n" +
-                    " (a)-[:TYPE {w:2.0}]->(c),\n" +
-                    " (a)-[:TYPE {w:1.0}]->(d),\n" +
-                    " (b)-[:TYPE {w:1.0}]->(c),\n" +
-                    " (d)-[:TYPE {w:3.0}]->(c)";
+    private static final Label node = Label.label("Node");
 
-    @ClassRule
-    public static final ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
+    private static GraphDatabaseAPI DB;
 
-    @Parameterized.Parameters(name = "{1}")
-    public static Collection<Object[]> data() {
-        return Collections.singleton(new Object[]{HugeGraphFactory.class, "Huge"});
+    @BeforeAll
+    static void setupGraph() {
+        DB = TestDatabaseCreator.createTestDatabase();
+        DB.execute(CYPHER);
     }
 
-    private int a, b, c, d, x;
-
-    @BeforeClass
-    public static void setupGraph() throws KernelException {
-        DB.execute(cypher);
+    @AfterAll
+    static void shutdown() {
+        if (DB != null) DB.shutdown();
     }
 
     private Graph graph;
+    private int a, b, c, d, x;
 
-    public KSpanningTreeTest(
-            Class<? extends GraphFactory> graphImpl,
-            String nameIgnoredOnlyForTestName) {
-        graph = new GraphLoader(DB)
-                .withRelationshipWeightsFromProperty("w", 1.0)
-                .withAnyRelationshipType()
-                .withAnyLabel()
-                .undirected()
-                .load(graphImpl);
-
-        try (Transaction tx = DB.beginTx()) {
-            a = Math.toIntExact(graph.toMappedNodeId(DB.findNode(Label.label("Node"), "name", "a").getId()));
-            b = Math.toIntExact(graph.toMappedNodeId(DB.findNode(Label.label("Node"), "name", "b").getId()));
-            c = Math.toIntExact(graph.toMappedNodeId(DB.findNode(Label.label("Node"), "name", "c").getId()));
-            d = Math.toIntExact(graph.toMappedNodeId(DB.findNode(Label.label("Node"), "name", "d").getId()));
-            x = Math.toIntExact(graph.toMappedNodeId(DB.findNode(Label.label("Node"), "name", "x").getId()));
-            tx.success();
-        };
-    }
-
-    @Test
-    public void testMaximumKSpanningTree() throws Exception {
+    @AllGraphTypesWithoutCypherTest
+    void testMaximumKSpanningTree(Class<? extends GraphFactory> graphFactory) {
+        Assume.assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
+        setup(graphFactory);
         final SpanningTree spanningTree = new KSpanningTree(graph, graph, graph)
                 .compute(a, 2, true)
                 .getSpanningTree();
@@ -116,8 +91,9 @@ public class KSpanningTreeTest {
         assertNotEquals(spanningTree.head(c), spanningTree.head(x));
     }
 
-    @Test
-    public void testMinimumKSpanningTree() throws Exception {
+    @AllGraphTypesWithoutCypherTest
+    void testMinimumKSpanningTree(Class<? extends GraphFactory> graphFactory) {
+        setup(graphFactory);
         final SpanningTree spanningTree = new KSpanningTree(graph, graph, graph)
                 .compute(a, 2, false)
                 .getSpanningTree();
@@ -127,5 +103,23 @@ public class KSpanningTreeTest {
         assertNotEquals(spanningTree.head(a), spanningTree.head(b));
         assertNotEquals(spanningTree.head(a), spanningTree.head(x));
         assertNotEquals(spanningTree.head(b), spanningTree.head(x));
+    }
+
+    private void setup(Class<? extends GraphFactory> graphImpl) {
+        graph = new GraphLoader(DB)
+                .withRelationshipWeightsFromProperty("w", 1.0)
+                .withAnyRelationshipType()
+                .withAnyLabel()
+                .undirected()
+                .load(graphImpl);
+
+        try (Transaction tx = DB.beginTx()) {
+            a = Math.toIntExact(graph.toMappedNodeId(DB.findNode(node, "name", "a").getId()));
+            b = Math.toIntExact(graph.toMappedNodeId(DB.findNode(node, "name", "b").getId()));
+            c = Math.toIntExact(graph.toMappedNodeId(DB.findNode(node, "name", "c").getId()));
+            d = Math.toIntExact(graph.toMappedNodeId(DB.findNode(node, "name", "d").getId()));
+            x = Math.toIntExact(graph.toMappedNodeId(DB.findNode(node, "name", "x").getId()));
+            tx.success();
+        }
     }
 }

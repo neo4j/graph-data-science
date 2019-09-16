@@ -19,23 +19,16 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
-import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
-
-import java.util.Arrays;
-import java.util.Collection;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -45,62 +38,49 @@ import static org.junit.Assert.assertTrue;
  *      (A)-->(B)-->(C)
  *       ^           |
  *       °-----------°
- *
- * @author mknblch
  */
-@RunWith(Parameterized.class)
 public class RelationshipPredicateTest {
 
-    public static final Label LABEL = Label.label("Node");
+    private static final String DB_CYPHER = "CREATE" +
+                                            "  (a:Node {name:'a'})" +
+                                            ", (b:Node {name:'b'})" +
+                                            ", (c:Node {name:'c'})" +
+                                            ", (a)-[:TYPE]->(b)" +
+                                            ", (b)-[:TYPE]->(c)" +
+                                            ", (c)-[:TYPE]->(a)";
 
-    @ClassRule
-    public static ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
+    public static final Label LABEL = Label.label("Node");
 
     private static long nodeA;
     private static long nodeB;
     private static long nodeC;
 
-    private final Class<? extends GraphFactory> graphImpl;
+    private static GraphDatabaseAPI DB;
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(
-                new Object[]{"Huge", HugeGraphFactory.class},
-                new Object[]{"View", GraphViewFactory.class}
-        );
-    }
-
-    public RelationshipPredicateTest(
-            String ignoredNameForNiceTestDisplay,
-            Class<? extends GraphFactory> graphImpl) {
-        this.graphImpl = graphImpl;
-    }
-
-    @BeforeClass
-    public static void setupGraph() throws KernelException {
-        DB.execute("CREATE (a:Node {name:'a'})\n" +
-                "CREATE (b:Node {name:'b'})\n" +
-                "CREATE (c:Node {name:'c'})\n" +
-                "CREATE" +
-                " (a)-[:TYPE]->(b),\n" +
-                " (b)-[:TYPE]->(c),\n" +
-                " (c)-[:TYPE]->(a)");
-
-        try (Transaction transaction = DB.beginTx()) {
+    @BeforeAll
+    static void setupGraph() {
+        DB = TestDatabaseCreator.createTestDatabase();
+        DB.execute(DB_CYPHER);
+        try (Transaction tx = DB.beginTx()) {
             nodeA = DB.findNode(LABEL, "name", "a").getId();
             nodeB = DB.findNode(LABEL, "name", "b").getId();
             nodeC = DB.findNode(LABEL, "name", "c").getId();
-            transaction.success();
-        };
+            tx.success();
+        }
     }
 
-    @Test
-    public void testOutgoing() throws Exception {
+    @AfterAll
+    static void shutdown() {
+        if (DB != null) DB.shutdown();
+    }
+
+    @AllGraphTypesWithoutCypherTest
+    void testOutgoing(Class<? extends GraphFactory> graphFactory) {
 
         final Graph graph = loader()
                 .withDirection(Direction.OUTGOING)
                 .sorted()
-                .load(HugeGraphFactory.class);
+                .load(graphFactory);
 
         // A -> B
         assertTrue(graph.exists(
@@ -114,7 +94,6 @@ public class RelationshipPredicateTest {
                 graph.toMappedNodeId(nodeA)
         ));
 
-
         // B -> C
         assertTrue(graph.exists(
                 graph.toMappedNodeId(nodeB),
@@ -126,7 +105,6 @@ public class RelationshipPredicateTest {
                 graph.toMappedNodeId(nodeC),
                 graph.toMappedNodeId(nodeB)
         ));
-
 
         // C -> A
         assertTrue(graph.exists(
@@ -142,13 +120,13 @@ public class RelationshipPredicateTest {
     }
 
 
-    @Test
-    public void testIncoming() throws Exception {
+    @AllGraphTypesWithoutCypherTest
+    void testIncoming(Class<? extends GraphFactory> graphFactory) {
 
         final Graph graph = loader()
                 .withDirection(Direction.INCOMING)
                 .sorted()
-                .load(HugeGraphFactory.class);
+                .load(graphFactory);
 
         // B <- A
         assertTrue(graph.exists(
@@ -163,8 +141,6 @@ public class RelationshipPredicateTest {
                 graph.toMappedNodeId(nodeB),
                 Direction.INCOMING
         ));
-
-
 
         // C <- B
         assertTrue(graph.exists(
@@ -197,13 +173,13 @@ public class RelationshipPredicateTest {
     }
 
 
-    @Test
-    public void testBoth() throws Exception {
+    @AllGraphTypesWithoutCypherTest
+    void testBoth(Class<? extends GraphFactory> graphFactory) {
 
         final Graph graph = loader()
                 .withDirection(Direction.BOTH)
                 .sorted()
-                .load(HugeGraphFactory.class);
+                .load(graphFactory);
 
         // A -> B
         assertTrue(graph.exists(
@@ -229,8 +205,6 @@ public class RelationshipPredicateTest {
                 graph.toMappedNodeId(nodeC),
                 graph.toMappedNodeId(nodeB)
         ));
-
-
 
         // C -> A
         assertTrue(graph.exists(
@@ -273,8 +247,6 @@ public class RelationshipPredicateTest {
                 Direction.INCOMING
         ));
 
-
-
         // A <- C
         assertTrue(graph.exists(
                 graph.toMappedNodeId(nodeA),
@@ -288,7 +260,6 @@ public class RelationshipPredicateTest {
                 graph.toMappedNodeId(nodeA),
                 Direction.INCOMING
         ));
-
 
         // A <-> B
         assertTrue(graph.exists(
@@ -304,7 +275,6 @@ public class RelationshipPredicateTest {
                 Direction.BOTH
         ));
 
-
         // B <-> C
         assertTrue(graph.exists(
                 graph.toMappedNodeId(nodeB),
@@ -318,7 +288,6 @@ public class RelationshipPredicateTest {
                 graph.toMappedNodeId(nodeB),
                 Direction.BOTH
         ));
-
 
         // C <-> A
         assertTrue(graph.exists(

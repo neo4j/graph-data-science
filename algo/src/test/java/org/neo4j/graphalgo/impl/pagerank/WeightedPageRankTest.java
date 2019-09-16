@@ -19,26 +19,20 @@
  */
 package org.neo4j.graphalgo.impl.pagerank;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
-import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -47,139 +41,122 @@ import java.util.stream.LongStream;
 import static org.junit.Assert.assertEquals;
 import static org.neo4j.graphalgo.impl.pagerank.PageRankTest.DEFAULT_CONFIG;
 
-@RunWith(Parameterized.class)
-public final class WeightedPageRankTest {
-    private Class<? extends GraphFactory> graphImpl;
+final class WeightedPageRankTest {
 
-    @Parameterized.Parameters(name = "{1}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(
-                new Object[]{CypherGraphFactory.class, "CypherGraphFactory"},
-                new Object[]{HugeGraphFactory.class, "HugeGraphFactory"},
-                new Object[]{GraphViewFactory.class, "GraphViewFactory"}
-        );
-    }
+    private static final String DB_CYPHER = "CREATE" +
+                                            "  (_:Label0 {name: '_'})" +
+                                            ", (a:Label1 {name: 'a'})" +
+                                            ", (b:Label1 {name: 'b'})" +
+                                            ", (c:Label1 {name: 'c'})" +
+                                            ", (d:Label1 {name: 'd'})" +
+                                            ", (e:Label1 {name: 'e'})" +
+                                            ", (f:Label1 {name: 'f'})" +
+                                            ", (g:Label1 {name: 'g'})" +
+                                            ", (h:Label1 {name: 'h'})" +
+                                            ", (i:Label1 {name: 'i'})" +
+                                            ", (j:Label1 {name: 'j'})" +
+                                            ", (k:Label2 {name: 'k'})" +
+                                            ", (l:Label2 {name: 'l'})" +
+                                            ", (m:Label2 {name: 'm'})" +
+                                            ", (n:Label2 {name: 'n'})" +
+                                            ", (o:Label2 {name: 'o'})" +
+                                            ", (p:Label2 {name: 'p'})" +
+                                            ", (q:Label2 {name: 'q'})" +
+                                            ", (r:Label2 {name: 'r'})" +
+                                            ", (s:Label2 {name: 's'})" +
+                                            ", (t:Label2 {name: 't'})" +
 
-    private static final String DB_CYPHER = "" +
-            "CREATE (_:Label0 {name:\"_\"})\n" +
-            "CREATE (a:Label1 {name:\"a\"})\n" +
-            "CREATE (b:Label1 {name:\"b\"})\n" +
-            "CREATE (c:Label1 {name:\"c\"})\n" +
-            "CREATE (d:Label1 {name:\"d\"})\n" +
-            "CREATE (e:Label1 {name:\"e\"})\n" +
-            "CREATE (f:Label1 {name:\"f\"})\n" +
-            "CREATE (g:Label1 {name:\"g\"})\n" +
-            "CREATE (h:Label1 {name:\"h\"})\n" +
-            "CREATE (i:Label1 {name:\"i\"})\n" +
-            "CREATE (j:Label1 {name:\"j\"})\n" +
-            "CREATE (k:Label2 {name:\"k\"})\n" +
-            "CREATE (l:Label2 {name:\"l\"})\n" +
-            "CREATE (m:Label2 {name:\"m\"})\n" +
-            "CREATE (n:Label2 {name:\"n\"})\n" +
-            "CREATE (o:Label2 {name:\"o\"})\n" +
-            "CREATE (p:Label2 {name:\"p\"})\n" +
-            "CREATE (q:Label2 {name:\"q\"})\n" +
-            "CREATE (r:Label2 {name:\"r\"})\n" +
-            "CREATE (s:Label2 {name:\"s\"})\n" +
-            "CREATE (t:Label2 {name:\"t\"})\n" +
-            "CREATE\n" +
-            "  (b)-[:TYPE1]->(c),\n" +
-            "  (c)-[:TYPE1]->(b),\n" +
-            "  (d)-[:TYPE1]->(a),\n" +
-            "  (d)-[:TYPE1]->(b),\n" +
-            "  (e)-[:TYPE1]->(b),\n" +
-            "  (e)-[:TYPE1]->(d),\n" +
-            "  (e)-[:TYPE1]->(f),\n" +
-            "  (f)-[:TYPE1]->(b),\n" +
-            "  (f)-[:TYPE1]->(e),\n" +
+                                            ", (b)-[:TYPE1]->(c)" +
+                                            ", (c)-[:TYPE1]->(b)" +
+                                            ", (d)-[:TYPE1]->(a)" +
+                                            ", (d)-[:TYPE1]->(b)" +
+                                            ", (e)-[:TYPE1]->(b)" +
+                                            ", (e)-[:TYPE1]->(d)" +
+                                            ", (e)-[:TYPE1]->(f)" +
+                                            ", (f)-[:TYPE1]->(b)" +
+                                            ", (f)-[:TYPE1]->(e)" +
 
-            "  (b)-[:TYPE2 {weight: 1}]->(c),\n" +
-            "  (c)-[:TYPE2 {weight: 1}]->(b),\n" +
-            "  (d)-[:TYPE2 {weight: 1}]->(a),\n" +
-            "  (d)-[:TYPE2 {weight: 1}]->(b),\n" +
-            "  (e)-[:TYPE2 {weight: 1}]->(b),\n" +
-            "  (e)-[:TYPE2 {weight: 1}]->(d),\n" +
-            "  (e)-[:TYPE2 {weight: 1}]->(f),\n" +
-            "  (f)-[:TYPE2 {weight: 1}]->(b),\n" +
-            "  (f)-[:TYPE2 {weight: 1}]->(e),\n" +
+                                            ", (b)-[:TYPE2 {weight: 1}]->(c)" +
+                                            ", (c)-[:TYPE2 {weight: 1}]->(b)" +
+                                            ", (d)-[:TYPE2 {weight: 1}]->(a)" +
+                                            ", (d)-[:TYPE2 {weight: 1}]->(b)" +
+                                            ", (e)-[:TYPE2 {weight: 1}]->(b)" +
+                                            ", (e)-[:TYPE2 {weight: 1}]->(d)" +
+                                            ", (e)-[:TYPE2 {weight: 1}]->(f)" +
+                                            ", (f)-[:TYPE2 {weight: 1}]->(b)" +
+                                            ", (f)-[:TYPE2 {weight: 1}]->(e)" +
 
-            "  (b)-[:TYPE3 {weight: 1.0}]->(c),\n" +
-            "  (c)-[:TYPE3 {weight: 1.0}]->(b),\n" +
-            "  (d)-[:TYPE3 {weight: 0.3}]->(a),\n" +
-            "  (d)-[:TYPE3 {weight: 0.7}]->(b),\n" +
-            "  (e)-[:TYPE3 {weight: 0.9}]->(b),\n" +
-            "  (e)-[:TYPE3 {weight: 0.05}]->(d),\n" +
-            "  (e)-[:TYPE3 {weight: 0.05}]->(f),\n" +
-            "  (f)-[:TYPE3 {weight: 0.9}]->(b),\n" +
-            "  (f)-[:TYPE3 {weight: 0.1}]->(e),\n" +
+                                            ", (b)-[:TYPE3 {weight: 1.0}]->(c)" +
+                                            ", (c)-[:TYPE3 {weight: 1.0}]->(b)" +
+                                            ", (d)-[:TYPE3 {weight: 0.3}]->(a)" +
+                                            ", (d)-[:TYPE3 {weight: 0.7}]->(b)" +
+                                            ", (e)-[:TYPE3 {weight: 0.9}]->(b)" +
+                                            ", (e)-[:TYPE3 {weight: 0.05}]->(d)" +
+                                            ", (e)-[:TYPE3 {weight: 0.05}]->(f)" +
+                                            ", (f)-[:TYPE3 {weight: 0.9}]->(b)" +
+                                            ", (f)-[:TYPE3 {weight: 0.1}]->(e)" +
 
-            "  (b)-[:TYPE4 {weight: 1.0}]->(c),\n" +
-            "  (c)-[:TYPE4 {weight: 1.0}]->(b),\n" +
-            "  (d)-[:TYPE4 {weight: 0.3}]->(a),\n" +
-            "  (d)-[:TYPE4 {weight: 0.7}]->(b),\n" +
-            "  (e)-[:TYPE4 {weight: 0.9}]->(b),\n" +
-            "  (e)-[:TYPE4 {weight: 0.05}]->(d),\n" +
-            "  (e)-[:TYPE4 {weight: 0.05}]->(f),\n" +
-            "  (f)-[:TYPE4 {weight: 0.9}]->(b),\n" +
-            "  (f)-[:TYPE4 {weight: -0.9}]->(a),\n" +
-            "  (f)-[:TYPE4 {weight: 0.1}]->(e)\n";
+                                            ", (b)-[:TYPE4 {weight: 1.0}]->(c)" +
+                                            ", (c)-[:TYPE4 {weight: 1.0}]->(b)" +
+                                            ", (d)-[:TYPE4 {weight: 0.3}]->(a)" +
+                                            ", (d)-[:TYPE4 {weight: 0.7}]->(b)" +
+                                            ", (e)-[:TYPE4 {weight: 0.9}]->(b)" +
+                                            ", (e)-[:TYPE4 {weight: 0.05}]->(d)" +
+                                            ", (e)-[:TYPE4 {weight: 0.05}]->(f)" +
+                                            ", (f)-[:TYPE4 {weight: 0.9}]->(b)" +
+                                            ", (f)-[:TYPE4 {weight: -0.9}]->(a)" +
+                                            ", (f)-[:TYPE4 {weight: 0.1}]->(e)";
 
-    private static GraphDatabaseAPI db;
+    private static GraphDatabaseAPI DB;
 
-    @BeforeClass
-    public static void setupGraphDb() {
-        db = TestDatabaseCreator.createTestDatabase();
-        try (Transaction tx = db.beginTx()) {
-            db.execute(DB_CYPHER).close();
+    @BeforeAll
+    static void setupGraphDb() {
+        DB = TestDatabaseCreator.createTestDatabase();
+        try (Transaction tx = DB.beginTx()) {
+            DB.execute(DB_CYPHER).close();
             tx.success();
         }
     }
 
-    @AfterClass
-    public static void shutdownGraphDb() throws Exception {
-        if (db!=null) db.shutdown();
+    @AfterAll
+    static void shutdownGraphDb() {
+        if (DB != null) DB.shutdown();
     }
 
-    public WeightedPageRankTest(
-            Class<? extends GraphFactory> graphImpl,
-            String nameIgnoredOnlyForTestName) {
-        this.graphImpl = graphImpl;
-    }
-
-    @Test
-    public void defaultWeightOf0MeansNoDiffusionOfPageRank() throws Exception {
+    @AllGraphTypesTest
+    void defaultWeightOf0MeansNoDiffusionOfPageRank(Class<? extends GraphFactory> graphFactory) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        try (Transaction tx = db.beginTx()) {
-            expected.put(db.findNode(label, "name", "a").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "b").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "c").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "d").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "e").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "f").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "g").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "h").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "i").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "j").getId(), 0.15);
-            tx.close();
+        try (Transaction tx = DB.beginTx()) {
+            expected.put(DB.findNode(label, "name", "a").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "b").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "c").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "d").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "e").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "f").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "g").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "h").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "i").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "j").getId(), 0.15);
+            tx.success();
         }
 
         final Graph graph;
-        if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
-            graph = new GraphLoader(db)
+        if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
+            graph = new GraphLoader(DB)
                     .withLabel("MATCH (n:Label1) RETURN id(n) as id")
                     .withRelationshipType("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
                     .withRelationshipWeightsFromProperty("weight", 0)
-                    .load(graphImpl);
+                    .load(graphFactory);
 
         } else {
-            graph = new GraphLoader(db)
+            graph = new GraphLoader(DB)
                     .withLabel(label)
                     .withRelationshipType("TYPE1")
                     .withRelationshipWeightsFromProperty("weight", 0)
                     .withDirection(Direction.OUTGOING)
-                    .load(graphImpl);
+                    .load(graphFactory);
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
@@ -198,40 +175,40 @@ public final class WeightedPageRankTest {
         });
     }
 
-    @Test
-    public void defaultWeightOf1ShouldBeTheSameAsPageRank() throws Exception {
+    @AllGraphTypesTest
+    void defaultWeightOf1ShouldBeTheSameAsPageRank(Class<? extends GraphFactory> graphFactory) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        try (Transaction tx = db.beginTx()) {
-            expected.put(db.findNode(label, "name", "a").getId(), 0.243007);
-            expected.put(db.findNode(label, "name", "b").getId(), 1.9183995);
-            expected.put(db.findNode(label, "name", "c").getId(), 1.7806315);
-            expected.put(db.findNode(label, "name", "d").getId(), 0.21885);
-            expected.put(db.findNode(label, "name", "e").getId(), 0.243007);
-            expected.put(db.findNode(label, "name", "f").getId(), 0.21885);
-            expected.put(db.findNode(label, "name", "g").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "h").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "i").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "j").getId(), 0.15);
-            tx.close();
+        try (Transaction tx = DB.beginTx()) {
+            expected.put(DB.findNode(label, "name", "a").getId(), 0.243007);
+            expected.put(DB.findNode(label, "name", "b").getId(), 1.9183995);
+            expected.put(DB.findNode(label, "name", "c").getId(), 1.7806315);
+            expected.put(DB.findNode(label, "name", "d").getId(), 0.21885);
+            expected.put(DB.findNode(label, "name", "e").getId(), 0.243007);
+            expected.put(DB.findNode(label, "name", "f").getId(), 0.21885);
+            expected.put(DB.findNode(label, "name", "g").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "h").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "i").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "j").getId(), 0.15);
+            tx.success();
         }
 
         final Graph graph;
-        if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
-            graph = new GraphLoader(db)
+        if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
+            graph = new GraphLoader(DB)
                     .withLabel("MATCH (n:Label1) RETURN id(n) as id")
                     .withRelationshipType("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
                     .withRelationshipWeightsFromProperty("weight", 1)
-                    .load(graphImpl);
+                    .load(graphFactory);
 
         } else {
-            graph = new GraphLoader(db)
+            graph = new GraphLoader(DB)
                     .withLabel(label)
                     .withRelationshipType("TYPE1")
                     .withRelationshipWeightsFromProperty("weight", 1)
                     .withDirection(Direction.OUTGOING)
-                    .load(graphImpl);
+                    .load(graphFactory);
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
@@ -250,40 +227,41 @@ public final class WeightedPageRankTest {
         });
     }
 
-    @Test
-    public void allWeightsTheSameShouldBeTheSameAsPageRank() throws Exception {
+    @AllGraphTypesTest
+    void allWeightsTheSameShouldBeTheSameAsPageRank(Class<? extends GraphFactory> graphFactory) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        try (Transaction tx = db.beginTx()) {
-            expected.put(db.findNode(label, "name", "a").getId(), 0.243007);
-            expected.put(db.findNode(label, "name", "b").getId(), 1.9183995);
-            expected.put(db.findNode(label, "name", "c").getId(), 1.7806315);
-            expected.put(db.findNode(label, "name", "d").getId(), 0.21885);
-            expected.put(db.findNode(label, "name", "e").getId(), 0.243007);
-            expected.put(db.findNode(label, "name", "f").getId(), 0.21885);
-            expected.put(db.findNode(label, "name", "g").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "h").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "i").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "j").getId(), 0.15);
-            tx.close();
+        try (Transaction tx = DB.beginTx()) {
+            expected.put(DB.findNode(label, "name", "a").getId(), 0.243007);
+            expected.put(DB.findNode(label, "name", "b").getId(), 1.9183995);
+            expected.put(DB.findNode(label, "name", "c").getId(), 1.7806315);
+            expected.put(DB.findNode(label, "name", "d").getId(), 0.21885);
+            expected.put(DB.findNode(label, "name", "e").getId(), 0.243007);
+            expected.put(DB.findNode(label, "name", "f").getId(), 0.21885);
+            expected.put(DB.findNode(label, "name", "g").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "h").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "i").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "j").getId(), 0.15);
+            tx.success();
         }
 
         final Graph graph;
-        if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
-            graph = new GraphLoader(db)
+        if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
+            graph = new GraphLoader(DB)
                     .withLabel("MATCH (n:Label1) RETURN id(n) as id")
-                    .withRelationshipType("MATCH (n:Label1)-[r:TYPE2]->(m:Label1) RETURN id(n) as source,id(m) as target, r.weight AS weight")
+                    .withRelationshipType(
+                            "MATCH (n:Label1)-[r:TYPE2]->(m:Label1) RETURN id(n) as source,id(m) as target, r.weight AS weight")
                     .withRelationshipWeightsFromProperty("weight", 0)
-                    .load(graphImpl);
+                    .load(graphFactory);
 
         } else {
-            graph = new GraphLoader(db)
+            graph = new GraphLoader(DB)
                     .withLabel(label)
                     .withRelationshipType("TYPE2")
                     .withRelationshipWeightsFromProperty("weight", 0)
                     .withDirection(Direction.OUTGOING)
-                    .load(graphImpl);
+                    .load(graphFactory);
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
@@ -302,40 +280,41 @@ public final class WeightedPageRankTest {
         });
     }
 
-    @Test
-    public void higherWeightsLeadToHigherPageRank() throws Exception {
+    @AllGraphTypesTest
+    void higherWeightsLeadToHigherPageRank(Class<? extends GraphFactory> graphFactory) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        try (Transaction tx = db.beginTx()) {
-            expected.put(db.findNode(label, "name", "a").getId(), 0.1900095);
-            expected.put(db.findNode(label, "name", "b").getId(), 2.2152279);
-            expected.put(db.findNode(label, "name", "c").getId(), 2.0325884);
-            expected.put(db.findNode(label, "name", "d").getId(), 0.1569275);
-            expected.put(db.findNode(label, "name", "e").getId(), 0.1633280);
-            expected.put(db.findNode(label, "name", "f").getId(), 0.1569275);
-            expected.put(db.findNode(label, "name", "g").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "h").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "i").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "j").getId(), 0.15);
-            tx.close();
+        try (Transaction tx = DB.beginTx()) {
+            expected.put(DB.findNode(label, "name", "a").getId(), 0.1900095);
+            expected.put(DB.findNode(label, "name", "b").getId(), 2.2152279);
+            expected.put(DB.findNode(label, "name", "c").getId(), 2.0325884);
+            expected.put(DB.findNode(label, "name", "d").getId(), 0.1569275);
+            expected.put(DB.findNode(label, "name", "e").getId(), 0.1633280);
+            expected.put(DB.findNode(label, "name", "f").getId(), 0.1569275);
+            expected.put(DB.findNode(label, "name", "g").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "h").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "i").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "j").getId(), 0.15);
+            tx.success();
         }
 
         final Graph graph;
-        if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
-            graph = new GraphLoader(db)
+        if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
+            graph = new GraphLoader(DB)
                     .withLabel("MATCH (n:Label1) RETURN id(n) as id")
-                    .withRelationshipType("MATCH (n:Label1)-[r:TYPE3]->(m:Label1) RETURN id(n) as source,id(m) as target, r.weight AS weight")
+                    .withRelationshipType(
+                            "MATCH (n:Label1)-[r:TYPE3]->(m:Label1) RETURN id(n) as source,id(m) as target, r.weight AS weight")
                     .withRelationshipWeightsFromProperty("weight", 0)
-                    .load(graphImpl);
+                    .load(graphFactory);
 
         } else {
-            graph = new GraphLoader(db)
+            graph = new GraphLoader(DB)
                     .withLabel(label)
                     .withRelationshipType("TYPE3")
                     .withRelationshipWeightsFromProperty("weight", 0)
                     .withDirection(Direction.OUTGOING)
-                    .load(graphImpl);
+                    .load(graphFactory);
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
@@ -354,40 +333,41 @@ public final class WeightedPageRankTest {
         });
     }
 
-    @Test
-    public void shouldExcludeNegativeWeights() throws Exception {
+    @AllGraphTypesTest
+    void shouldExcludeNegativeWeights(Class<? extends GraphFactory> graphFactory) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        try (Transaction tx = db.beginTx()) {
-            expected.put(db.findNode(label, "name", "a").getId(), 0.1900095);
-            expected.put(db.findNode(label, "name", "b").getId(), 2.2152279);
-            expected.put(db.findNode(label, "name", "c").getId(), 2.0325884);
-            expected.put(db.findNode(label, "name", "d").getId(), 0.1569275);
-            expected.put(db.findNode(label, "name", "e").getId(), 0.1633280);
-            expected.put(db.findNode(label, "name", "f").getId(), 0.1569275);
-            expected.put(db.findNode(label, "name", "g").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "h").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "i").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "j").getId(), 0.15);
-            tx.close();
+        try (Transaction tx = DB.beginTx()) {
+            expected.put(DB.findNode(label, "name", "a").getId(), 0.1900095);
+            expected.put(DB.findNode(label, "name", "b").getId(), 2.2152279);
+            expected.put(DB.findNode(label, "name", "c").getId(), 2.0325884);
+            expected.put(DB.findNode(label, "name", "d").getId(), 0.1569275);
+            expected.put(DB.findNode(label, "name", "e").getId(), 0.1633280);
+            expected.put(DB.findNode(label, "name", "f").getId(), 0.1569275);
+            expected.put(DB.findNode(label, "name", "g").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "h").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "i").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "j").getId(), 0.15);
+            tx.success();
         }
 
         final Graph graph;
-        if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
-            graph = new GraphLoader(db)
+        if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
+            graph = new GraphLoader(DB)
                     .withLabel("MATCH (n:Label1) RETURN id(n) as id")
-                    .withRelationshipType("MATCH (n:Label1)-[r:TYPE4]->(m:Label1) RETURN id(n) as source,id(m) as target, r.weight AS weight")
+                    .withRelationshipType(
+                            "MATCH (n:Label1)-[r:TYPE4]->(m:Label1) RETURN id(n) as source,id(m) as target, r.weight AS weight")
                     .withRelationshipWeightsFromProperty("weight", 0)
-                    .load(graphImpl);
+                    .load(graphFactory);
 
         } else {
-            graph = new GraphLoader(db)
+            graph = new GraphLoader(DB)
                     .withLabel(label)
                     .withRelationshipType("TYPE4")
                     .withRelationshipWeightsFromProperty("weight", 0)
                     .withDirection(Direction.OUTGOING)
-                    .load(graphImpl);
+                    .load(graphFactory);
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.WEIGHTED
