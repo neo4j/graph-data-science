@@ -20,6 +20,7 @@ package org.neo4j.graphalgo.bench;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -69,9 +70,6 @@ public class TriangleCountBenchmark {
     @Param({"true", "false"})
     private boolean parallel;
 
-    @Param({"HUGE"})
-    GraphImpl graph;
-
     private int concurrency;
     private int seqThreshold;
 
@@ -98,7 +96,7 @@ public class TriangleCountBenchmark {
                     .withoutNodeWeights()
                     .sorted()
                     .undirected()
-                    .load(graph.impl);
+                    .load(HugeGraphFactory.class);
         }
 
         concurrency = parallel ? Pools.DEFAULT_CONCURRENCY : 1;

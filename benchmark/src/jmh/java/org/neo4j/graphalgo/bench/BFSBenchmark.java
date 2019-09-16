@@ -20,6 +20,7 @@ package org.neo4j.graphalgo.bench;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.impl.Traverse;
@@ -64,9 +65,6 @@ public class BFSBenchmark {
     @Param({"0.2", "0.5", "0.8"})
     private double connectedness;
 
-    @Param({"HUGE"})
-    GraphImpl graph;
-
     @Setup
     public void setup() {
         api = (GraphDatabaseAPI)
@@ -87,7 +85,7 @@ public class BFSBenchmark {
                 .withoutNodeWeights()
                 .sorted()
                 .undirected()
-                .load(graph.impl);
+                .load(HugeGraphFactory.class);
     }
 
 

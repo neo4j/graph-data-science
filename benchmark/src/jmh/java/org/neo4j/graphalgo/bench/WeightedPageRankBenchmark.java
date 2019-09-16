@@ -20,6 +20,7 @@ package org.neo4j.graphalgo.bench;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
 import org.neo4j.graphalgo.impl.pagerank.PageRankAlgorithmType;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
@@ -58,9 +59,6 @@ public class WeightedPageRankBenchmark {
 
     @Param({"5", "20", "100"})
     int iterations;
-
-    @Param({"VIEW", "HUGE"})
-    GraphImpl impl;
 
     private GraphDatabaseAPI db;
 
@@ -115,7 +113,7 @@ public class WeightedPageRankBenchmark {
         final Graph graph = new GraphLoader(db)
                 .withDirection(Direction.OUTGOING)
                 .withRelationshipWeightsFromProperty("weight", 0.0)
-                .load(impl.impl);
+                .load(HugeGraphFactory.class);
         try {
             final PageRank.Config algoConfig = new PageRank.Config(iterations, 0.85, PageRank.DEFAULT_TOLERANCE);
             return PageRankAlgorithmType.WEIGHTED

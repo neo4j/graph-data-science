@@ -19,6 +19,7 @@
 package org.neo4j.graphalgo.bench;
 
 import org.neo4j.graphalgo.ClosenessCentralityProc;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphdb.Node;
@@ -50,9 +51,6 @@ public class ClosenessCentralityBenchmark {
 
     public static final RelationshipType RELATIONSHIP_TYPE = RelationshipType.withName("TYPE");
 
-    @Param({"HUGE"})
-    public GraphImpl graph;
-
     @Param({"30"})
     public int netSize;
 
@@ -74,7 +72,7 @@ public class ClosenessCentralityBenchmark {
             createNet(netSize); // size^2 nodes; size^3 edges
         }
 
-        params = MapUtil.map("graph", graph.name());
+        params = MapUtil.map("graph", HugeGraph.TYPE);
     }
 
     @TearDown

@@ -20,6 +20,7 @@ package org.neo4j.graphalgo.bench;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -32,7 +33,6 @@ import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
-import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
@@ -54,14 +54,11 @@ import java.util.concurrent.TimeUnit;
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
 public class UnionFindBenchmark {
 
-    @Param({"HUGE"})
-    GraphImpl graph;
-
     private Graph theGraph;
 
     @Setup
     public void setup(HeroGraph heroGraph) {
-        theGraph = new GraphLoader(heroGraph.db).load(graph.impl);
+        theGraph = new GraphLoader(heroGraph.db).load(HugeGraphFactory.class);
         heroGraph.db.shutdown();
     }
 

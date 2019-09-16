@@ -20,6 +20,7 @@ package org.neo4j.graphalgo.bench;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
@@ -58,9 +59,6 @@ import java.util.concurrent.atomic.LongAdder;
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 public class MsBfsBenchmarkLdbc {
 
-    @Param({"HUGE"})
-    GraphImpl graph;
-
     @Param({"L01", "L10"})
     String graphId;
 
@@ -73,7 +71,7 @@ public class MsBfsBenchmarkLdbc {
         grph = new GraphLoader(db, Pools.DEFAULT)
                 .withDirection(Direction.OUTGOING)
                 .withoutRelationshipWeights()
-                .load(graph.impl);
+                .load(HugeGraphFactory.class);
     }
 
     @TearDown

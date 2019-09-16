@@ -20,6 +20,7 @@ package org.neo4j.graphalgo.bench;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
@@ -57,9 +58,6 @@ import java.util.stream.LongStream;
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 public class WeightedPageRankBenchmarkLdbc {
-
-    @Param({"HUGE"})
-    GraphImpl graph;
 
     @Param({"false"})
     boolean parallel;
@@ -100,7 +98,7 @@ public class WeightedPageRankBenchmarkLdbc {
         grph = new GraphLoader(db, Pools.DEFAULT)
                 .withDirection(Direction.OUTGOING)
                 .withRelationshipWeightsFromProperty("weight", 1.0)
-                .load(graph.impl);
+                .load(HugeGraphFactory.class);
 
         batchSize = parallel ? 10_000 : 2_000_000_000;
     }

@@ -20,6 +20,7 @@ package org.neo4j.graphalgo.bench;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -67,9 +68,6 @@ public class LouvainBenchmarkLdbc {
     @Param({"L01"})
     String db;
 
-    @Param({"HUGE"})
-    GraphImpl graph;
-
     private Graph g;
     private GraphDatabaseAPI gdb;
 
@@ -83,7 +81,7 @@ public class LouvainBenchmarkLdbc {
                 .withAnyRelationshipType()
                 .withOptionalRelationshipWeightsFromProperty(null, 1.0)
                 .undirected()
-                .load(graph.impl);
+                .load(HugeGraphFactory.class);
     }
 
     @TearDown
