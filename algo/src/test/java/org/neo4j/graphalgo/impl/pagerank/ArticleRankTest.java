@@ -19,46 +19,29 @@
  */
 package org.neo4j.graphalgo.impl.pagerank;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
-import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
+import static org.junit.Assert.assertEquals;
 import static org.neo4j.graphalgo.impl.pagerank.PageRankTest.DEFAULT_CONFIG;
 
-@RunWith(Parameterized.class)
-public final class ArticleRankTest {
-
-    private Class<? extends GraphFactory> graphImpl;
-
-    @Parameterized.Parameters(name = "{1}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(
-                new Object[]{CypherGraphFactory.class, "CypherGraphFactory"},
-                new Object[]{HugeGraphFactory.class, "HugeGraphFactory"},
-                new Object[]{GraphViewFactory.class, "GraphViewFactory"}
-        );
-    }
+final class ArticleRankTest {
 
     private static final String DB_CYPHER = "" +
             "CREATE (_:Label0 {name:\"_\"})\n" +
@@ -108,8 +91,8 @@ public final class ArticleRankTest {
 
     private static GraphDatabaseAPI db;
 
-    @BeforeClass
-    public static void setupGraphDb() {
+    @BeforeAll
+    static void setupGraphDb() {
         db = TestDatabaseCreator.createTestDatabase();
         try (Transaction tx = db.beginTx()) {
             db.execute(DB_CYPHER).close();
@@ -117,19 +100,13 @@ public final class ArticleRankTest {
         }
     }
 
-    @AfterClass
-    public static void shutdownGraphDb() throws Exception {
+    @AfterAll
+    static void shutdownGraphDb() {
         if (db!=null) db.shutdown();
     }
 
-    public ArticleRankTest(
-            Class<? extends GraphFactory> graphImpl,
-            String nameIgnoredOnlyForTestName) {
-        this.graphImpl = graphImpl;
-    }
-
-    @Test
-    public void test() throws Exception {
+    @AllGraphTypesTest
+    void test(Class<? extends GraphFactory> graphFactory) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
@@ -144,22 +121,22 @@ public final class ArticleRankTest {
             expected.put(db.findNode(label, "name", "h").getId(), 0.15);
             expected.put(db.findNode(label, "name", "i").getId(), 0.15);
             expected.put(db.findNode(label, "name", "j").getId(), 0.15);
-            tx.close();
+            tx.success();
         }
 
         final Graph graph;
-        if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
+        if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
             graph = new GraphLoader(db)
                     .withLabel("MATCH (n:Label1) RETURN id(n) as id")
                     .withRelationshipType("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
-                    .load(graphImpl);
+                    .load(graphFactory);
 
         } else {
             graph = new GraphLoader(db)
                     .withLabel(label)
                     .withRelationshipType("TYPE1")
                     .withDirection(Direction.OUTGOING)
-                    .load(graphImpl);
+                    .load(graphFactory);
         }
 
         final CentralityResult rankResult = PageRankAlgorithmType.ARTICLE_RANK
@@ -169,13 +146,12 @@ public final class ArticleRankTest {
 
         IntStream.range(0, expected.size()).forEach(i -> {
             final long nodeId = graph.toOriginalNodeId(i);
-            System.out.println(nodeId + " -> " + rankResult.score(i));
-//            assertEquals(
-//                    "Node#" + nodeId,
-//                    expected.get(nodeId),
-//                    rankResult.score(i),
-//                    1e-2
-//            );
+            assertEquals(
+                    "Node#" + nodeId,
+                    expected.get(nodeId),
+                    rankResult.score(i),
+                    1e-2
+            );
         });
     }
 }
