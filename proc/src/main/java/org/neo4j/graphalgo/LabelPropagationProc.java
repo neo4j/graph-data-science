@@ -47,8 +47,6 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
-import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -296,7 +294,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
 
             PropertyTranslator<HugeLongArray> translator = HugeLongArray.Translator.INSTANCE;
             if (writePropertyEqualsSeedProperty && hasSeedProperties) {
-                translator = new PropertyTranslator.OfLongSeedProperty<>(seedProperties, HugeLongArray::get);
+                translator = new PropertyTranslator.OfLongIfChanged<>(seedProperties, HugeLongArray::get);
             }
             Exporter.of(dbAPI, graph)
                     .withLog(log)

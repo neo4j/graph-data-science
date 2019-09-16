@@ -104,20 +104,20 @@ public interface PropertyTranslator<T> {
 
     }
 
-    final class OfLongSeedProperty<T> implements PropertyTranslator<T> {
+    final class OfLongIfChanged<T> implements PropertyTranslator<T> {
 
-        private final HugeWeightMapping seedProperties;
-        private final SeededDataAccessFunction dataAccess;
+        private final HugeWeightMapping currentProperties;
+        private final SeededDataAccessFunction newPropertiesFn;
 
-        public OfLongSeedProperty(HugeWeightMapping seedProperties, SeededDataAccessFunction<T> dataAccess) {
-            this.seedProperties = seedProperties;
-            this.dataAccess = dataAccess;
+        public OfLongIfChanged(HugeWeightMapping currentProperties, SeededDataAccessFunction<T> newPropertiesFn) {
+            this.currentProperties = currentProperties;
+            this.newPropertiesFn = newPropertiesFn;
         }
 
         @Override
         public Value toProperty(int propertyId, T data, long nodeId) {
-            double seedValue = seedProperties.nodeWeight(nodeId, Double.NaN);
-            long computedValue = dataAccess.getValue(data, nodeId);
+            double seedValue = currentProperties.nodeWeight(nodeId, Double.NaN);
+            long computedValue = newPropertiesFn.getValue(data, nodeId);
             return Double.isNaN(seedValue) || ((long) seedValue != computedValue) ? Values.longValue(computedValue) : null;
         }
     }

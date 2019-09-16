@@ -365,7 +365,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
                     tracker);
         } else if (writePropertyEqualsSeedProperty && hasNodeProperties) {
             resultProducer = new UnionFindResultProducer.NonConsecutive(
-                    new PropertyTranslator.OfLongSeedProperty<>(nodeProperties, UnionFindResultProducer::setIdOf),
+                    new PropertyTranslator.OfLongIfChanged<>(nodeProperties, UnionFindResultProducer::setIdOf),
                     dss);
         }
 
