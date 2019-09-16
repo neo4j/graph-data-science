@@ -20,15 +20,16 @@
 package org.neo4j.graphalgo.core;
 
 import com.carrotsearch.hppc.IntArrayList;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
 
@@ -36,37 +37,41 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
 
-/**
- * @author mknblch
- */
-public class GraphLoaderCypherTest {
+class GraphLoaderCypherGraphTest {
 
-    @Rule
-    public ImpermanentDatabaseRule db = new ImpermanentDatabaseRule();
+    private static GraphDatabaseAPI DB;
 
-    private Class<? extends GraphFactory> graphImpl;
+    @BeforeAll
+    static void setupGraphDb() {
+        DB = TestDatabaseCreator.createTestDatabase();
+    }
 
-    @Before
-    public void setup() {
-        this.graphImpl = CypherGraphFactory.class;
+    @AfterEach
+    void clearDb() {
+        DB.execute("MATCH (n) DETACH DELETE n");
+    }
+
+    @AfterAll
+    static void shutdownGraphDb() {
+        if (DB != null) DB.shutdown();
     }
 
     @Test
-    public void both() {
-        db.execute("" +
-                "CREATE (a:Node),(b:Node),(c:Node),(d:Node) " +
-                "CREATE" +
-                " (a)-[:REL]->(a)," +
-                " (b)-[:REL]->(b)," +
-                " (a)-[:REL]->(b)," +
-                " (b)-[:REL]->(c)," +
-                " (b)-[:REL]->(d)");
-        GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT);
+    void both() {
+        DB.execute("" +
+                   "CREATE (a:Node),(b:Node),(c:Node),(d:Node) " +
+                   "CREATE" +
+                   " (a)-[:REL]->(a)," +
+                   " (b)-[:REL]->(b)," +
+                   " (a)-[:REL]->(b)," +
+                   " (b)-[:REL]->(c)," +
+                   " (b)-[:REL]->(d)");
+        GraphLoader graphLoader = new GraphLoader(DB, Pools.DEFAULT);
         Graph graph = graphLoader.withLabel("MATCH (n) RETURN id(n) AS id")
                 .withRelationshipType("MATCH (a)--(b) RETURN id(a) AS source, id(b) AS target")
                 .withDirection(Direction.BOTH)
                 .undirected()
-                .load(graphImpl);
+                .load(CypherGraphFactory.class);
 
         assertEquals(4L, graph.nodeCount());
         checkRelationships(graph, 0, 0, 1);
@@ -76,20 +81,20 @@ public class GraphLoaderCypherTest {
     }
 
     @Test
-    public void outgoing() {
-        db.execute("" +
-                "CREATE (a:Node),(b:Node),(c:Node),(d:Node) " +
-                "CREATE" +
-                " (a)-[:REL]->(a)," +
-                " (b)-[:REL]->(b)," +
-                " (a)-[:REL]->(b)," +
-                " (b)-[:REL]->(c)," +
-                " (b)-[:REL]->(d)");
-        GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT);
+    void outgoing() {
+        DB.execute("" +
+                   "CREATE (a:Node),(b:Node),(c:Node),(d:Node) " +
+                   "CREATE" +
+                   " (a)-[:REL]->(a)," +
+                   " (b)-[:REL]->(b)," +
+                   " (a)-[:REL]->(b)," +
+                   " (b)-[:REL]->(c)," +
+                   " (b)-[:REL]->(d)");
+        GraphLoader graphLoader = new GraphLoader(DB, Pools.DEFAULT);
         Graph graph = graphLoader.withLabel("MATCH (n) RETURN id(n) AS id")
                 .withRelationshipType("MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target")
                 .withDirection(Direction.OUTGOING)
-                .load(graphImpl);
+                .load(CypherGraphFactory.class);
 
         assertEquals(4L, graph.nodeCount());
         checkRelationships(graph, 0, 0, 1);
@@ -99,20 +104,20 @@ public class GraphLoaderCypherTest {
     }
 
     @Test
-    public void incoming() {
-        db.execute("" +
-                "CREATE (a:Node),(b:Node),(c:Node),(d:Node) " +
-                "CREATE" +
-                " (a)-[:REL]->(a)," +
-                " (b)-[:REL]->(b)," +
-                " (a)-[:REL]->(b)," +
-                " (b)-[:REL]->(c)," +
-                " (b)-[:REL]->(d)");
-        GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT);
+    void incoming() {
+        DB.execute("" +
+                   "CREATE (a:Node),(b:Node),(c:Node),(d:Node) " +
+                   "CREATE" +
+                   " (a)-[:REL]->(a)," +
+                   " (b)-[:REL]->(b)," +
+                   " (a)-[:REL]->(b)," +
+                   " (b)-[:REL]->(c)," +
+                   " (b)-[:REL]->(d)");
+        GraphLoader graphLoader = new GraphLoader(DB, Pools.DEFAULT);
         Graph graph = graphLoader.withLabel("MATCH (n) RETURN id(n) AS id")
                 .withRelationshipType("MATCH (a)<--(b) RETURN id(a) AS source, id(b) AS target")
                 .withDirection(Direction.INCOMING)
-                .load(graphImpl);
+                .load(CypherGraphFactory.class);
 
         assertEquals(4L, graph.nodeCount());
         checkRelationships(graph, 0, 0);
@@ -125,18 +130,6 @@ public class GraphLoaderCypherTest {
     private void checkRelationships(Graph graph, int node, int... expected) {
         IntArrayList idList = new IntArrayList();
         graph.forEachOutgoing(node, longToIntConsumer((s, t) -> {
-            idList.add(t);
-            return true;
-        }));
-        final int[] ids = idList.toArray();
-        Arrays.sort(ids);
-        Arrays.sort(expected);
-        assertArrayEquals(expected, ids);
-    }
-
-    private void checkIncomingRelationships(Graph graph, int node, int... expected) {
-        IntArrayList idList = new IntArrayList();
-        graph.forEachIncoming(node, longToIntConsumer((s, t) -> {
             idList.add(t);
             return true;
         }));
