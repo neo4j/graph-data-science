@@ -24,8 +24,10 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -41,6 +43,28 @@ public final class PropertyMappings implements Iterable<PropertyMapping> {
             mappings = new PropertyMapping[0];
         }
         return new PropertyMappings(mappings);
+    }
+
+    public static PropertyMappings fromObject(Object relPropertyMapping) {
+        if (relPropertyMapping instanceof String) {
+            String propertyMapping = (String) relPropertyMapping;
+            fromObject(Collections.singletonMap(propertyMapping, propertyMapping));
+        } else if(relPropertyMapping instanceof Map) {
+            PropertyMapping[] propertyMappings = (PropertyMapping[]) ((Map) relPropertyMapping).entrySet().stream().map(entry -> {
+                if (entry instanceof Map.Entry) {
+                    final Map.Entry mapEntry = (Map.Entry) entry;
+                    Object propertyName = mapEntry.getKey();
+                    if (propertyName instanceof String) {
+                        PropertyMapping.fromObject((String) propertyName, mapEntry.getValue());
+                    }
+
+                }
+                return true;
+            }).toArray(PropertyMapping[]::new);
+            return PropertyMappings.of(propertyMappings);
+        }
+
+        return null;
     }
 
     private PropertyMappings(PropertyMapping... mappings) {

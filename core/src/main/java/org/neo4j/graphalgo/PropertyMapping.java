@@ -22,28 +22,88 @@ package org.neo4j.graphalgo;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.kernel.api.StatementConstants;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.OptionalDouble;
+
 public abstract class PropertyMapping {
 
-    // property name in the result map Graph.nodeProperties( <propertyName> )
-    public final String propertyKey;
-    // property name in the neo4j graph (a:Node {<propertyKey>:xyz})
-    public final String neoPropertyKey;
-    public final double defaultValue;
-    public final DeduplicationStrategy deduplicationStrategy;
+    public static final String PROPERTY_KEY = "property";
+    public static final String AGGREGATION_KEY = "aggregate";
+    public static final String DEFAULT_WEIGHT_KEY = "defaultWeight";
 
-    public PropertyMapping(String propertyKey, String propertyKeyInGraph, double defaultValue) {
-        this(propertyKey, propertyKeyInGraph, defaultValue, DeduplicationStrategy.DEFAULT);
-    }
+    public final String propertyKey;
+    public final String neoPropertyKey;
+    public final OptionalDouble defaultValue;
+    public final DeduplicationStrategy deduplicationStrategy;
 
     public PropertyMapping(
             String propertyKey,
             String neoPropertyKey,
-            double defaultValue,
+            OptionalDouble defaultValue,
             DeduplicationStrategy deduplicationStrategy) {
         this.propertyKey = propertyKey;
         this.neoPropertyKey = neoPropertyKey;
         this.defaultValue = defaultValue;
         this.deduplicationStrategy = deduplicationStrategy;
+    }
+
+    public static PropertyMapping fromObject(String propertyIdentifier, Object stringOrMap) {
+        if (stringOrMap instanceof String) {
+            String propertyNameInGraph = (String) stringOrMap;
+            fromObject(propertyIdentifier, Collections.singletonMap(PROPERTY_KEY, propertyNameInGraph));
+        } else if (stringOrMap instanceof Map) {
+            Map relPropertyMap = (Map) stringOrMap;
+
+            final Object propertyNameValue = relPropertyMap.get(PROPERTY_KEY);
+            if (propertyNameValue == null) {
+                throw new IllegalStateException(String.format(
+                        "Property was not set. Missing entry with key %s.",
+                        PROPERTY_KEY));
+            }
+            if (!(propertyNameValue instanceof String)) {
+                throw new IllegalStateException(String.format(
+                        "Expected the property name to be of type String, but was %s",
+                        propertyNameValue.getClass().getSimpleName()));
+            }
+            String propertyNameInGraph = (String) propertyNameValue;
+
+            final Object aggregationValue = relPropertyMap.get(AGGREGATION_KEY);
+            DeduplicationStrategy deduplicationStrategy;
+            if (aggregationValue == null) {
+                deduplicationStrategy = DeduplicationStrategy.DEFAULT;
+            } else if (aggregationValue instanceof String) {
+                deduplicationStrategy = DeduplicationStrategy.valueOf(((String) aggregationValue).toUpperCase());
+            } else {
+                throw new IllegalStateException(String.format(
+                        "Expected the aggregation to be of type String, but was %s",
+                        aggregationValue.getClass().getSimpleName()));
+            }
+
+            final Object defaultWeightValue = relPropertyMap.get(DEFAULT_WEIGHT_KEY);
+            OptionalDouble defaultWeight;
+            if (defaultWeightValue == null) {
+                defaultWeight = OptionalDouble.empty();
+            } else if (defaultWeightValue instanceof Number) {
+                defaultWeight = OptionalDouble.of(((Number) defaultWeightValue).doubleValue());
+            } else {
+                throw new IllegalStateException(String.format(
+                        "Expected the default defaultWeightValue to be of type double, but was %s",
+                        defaultWeightValue.getClass().getSimpleName()));
+            }
+
+            return PropertyMapping.of(
+                    propertyIdentifier,
+                    propertyNameInGraph,
+                    defaultWeight,
+                    deduplicationStrategy);
+        } else {
+            throw new IllegalStateException(String.format(
+                    "Expected stringOrMap to be of type String or Map, but got %s",
+                    stringOrMap.getClass().getSimpleName()));
+        }
+
+        return null;
     }
 
     /**
@@ -60,7 +120,7 @@ public abstract class PropertyMapping {
         return propertyNameInGraph;
     }
 
-    public double defaultValue() {
+    public OptionalDouble defaultValue() {
         return defaultValue;
     }
 
@@ -94,7 +154,7 @@ public abstract class PropertyMapping {
         private Unresolved(
                 String propertyIdentifier,
                 String propertyNameInGraph,
-                double defaultValue,
+                OptionalDouble defaultValue,
                 DeduplicationStrategy deduplicationStrategy) {
             super(propertyIdentifier, propertyNameInGraph, defaultValue, deduplicationStrategy);
         }
@@ -111,7 +171,12 @@ public abstract class PropertyMapping {
 
         @Override
         public PropertyMapping resolveWith(int propertyKeyId) {
-            return new Resolved(propertyKeyId, propertyIdentifier(), propertyNameInGraph(), defaultValue(), deduplicationStrategy());
+            return new Resolved(
+                    propertyKeyId,
+                    propertyIdentifier(),
+                    propertyNameInGraph(),
+                    defaultValue(),
+                    deduplicationStrategy());
         }
     }
 
@@ -122,7 +187,7 @@ public abstract class PropertyMapping {
                 int propertyKeyId,
                 String propertyIdentifier,
                 String propertyNameInGraph,
-                double defaultValue,
+                OptionalDouble defaultValue,
                 DeduplicationStrategy deduplicationStrategy) {
             super(propertyIdentifier, propertyNameInGraph, defaultValue, deduplicationStrategy);
             this.propertyKeyId = propertyKeyId;
@@ -135,7 +200,12 @@ public abstract class PropertyMapping {
 
         @Override
         PropertyMapping copyWithDeduplicationStrategy(DeduplicationStrategy deduplicationStrategy) {
-            return new Resolved(propertyKeyId, propertyIdentifier(), propertyNameInGraph(), defaultValue(), deduplicationStrategy);
+            return new Resolved(
+                    propertyKeyId,
+                    propertyIdentifier(),
+                    propertyNameInGraph(),
+                    defaultValue(),
+                    deduplicationStrategy);
         }
 
         @Override
@@ -151,14 +221,14 @@ public abstract class PropertyMapping {
     }
 
 
-    public static PropertyMapping of(String propertyIdentifier, String propertyNameInGraph, double defaultValue) {
+    public static PropertyMapping of(String propertyIdentifier, String propertyNameInGraph, OptionalDouble defaultValue) {
         return of(propertyIdentifier, propertyNameInGraph, defaultValue, DeduplicationStrategy.DEFAULT);
     }
 
     public static PropertyMapping of(
             String propertyIdentifier,
             String propertyNameInGraph,
-            double defaultValue,
+            OptionalDouble defaultValue,
             DeduplicationStrategy deduplicationStrategy) {
         return new Unresolved(propertyIdentifier, propertyNameInGraph, defaultValue, deduplicationStrategy);
     }
