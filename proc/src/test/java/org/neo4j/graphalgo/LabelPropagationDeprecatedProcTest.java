@@ -19,10 +19,8 @@
  */
 package org.neo4j.graphalgo;
 
+import org.junit.Assume;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphdb.Result;
 import org.neo4j.helpers.collection.Iterators;
 import org.neo4j.helpers.collection.MapUtil;
@@ -32,13 +30,12 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.graphalgo.TestSupport.*;
 
 @Deprecated
 public class LabelPropagationDeprecatedProcTest extends ProcTestBase {
@@ -59,13 +56,6 @@ public class LabelPropagationDeprecatedProcTest extends ProcTestBase {
             ",(b)-[:X]->(:B {id: 10, weight: 1.0, score: 1.0, community: 1}) " +
             ",(b)-[:X]->(:B {id: 11, weight: 8.0, score: 8.0, community: 2})";
 
-    static Stream<Arguments> parameters() {
-        return Stream.of(
-                arguments(false, "huge"),
-                arguments(true,  "huge")
-        );
-    }
-
     @BeforeEach
     public void setup() throws KernelException {
         DB = TestDatabaseCreator.createTestDatabase();
@@ -77,16 +67,15 @@ public class LabelPropagationDeprecatedProcTest extends ProcTestBase {
         DB.execute(DB_CYPHER);
     }
 
-    @ParameterizedTest
-    @MethodSource("parameters")
-    public void shouldTakeDifferentSeedProperties(boolean parallel, String graphImpl) {
+    @SingleAndMultiThreadedAllGraphNames
+    public void shouldTakeDifferentSeedProperties(boolean parallel, String graphName) {
         String query = "CALL algo.labelPropagation(" +
                        "    null, null, null, {" +
                        "        seedProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: 'lpa'" +
                        "    }" +
                        ")";
 
-        runQuery(query, parParams(parallel, graphImpl),
+        runQuery(query, parParams(parallel, graphName),
                 row -> {
                     assertEquals(1, row.getNumber("iterations").intValue());
                     assertEquals("weight", row.getString("weightProperty"));
@@ -102,7 +91,7 @@ public class LabelPropagationDeprecatedProcTest extends ProcTestBase {
                 "   }" +
                 ")";
 
-        runQuery(query, parParams(parallel, graphImpl),
+        runQuery(query, parParams(parallel, graphName),
                 row -> {
                     assertEquals(1, row.getNumber("iterations").intValue());
                     assertEquals("weight", row.getString("weightProperty"));
@@ -113,16 +102,15 @@ public class LabelPropagationDeprecatedProcTest extends ProcTestBase {
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("parameters")
-    public void explicitWriteProperty(boolean parallel, String graphImpl) {
+    @SingleAndMultiThreadedAllGraphNames
+    public void explicitWriteProperty(boolean parallel, String graphName) {
         String query = "CALL algo.labelPropagation(" +
                        "    null, null, null, {" +
                        "        seedProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: 'lpa'" +
                        "    }" +
                        ")";
 
-        runQuery(query, parParams(parallel, graphImpl),
+        runQuery(query, parParams(parallel, graphName),
                 row -> {
                     assertEquals(1, row.getNumber("iterations").intValue());
                     assertEquals("weight", row.getString("weightProperty"));
@@ -133,16 +121,15 @@ public class LabelPropagationDeprecatedProcTest extends ProcTestBase {
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("parameters")
-    public void shouldTakeParametersFromConfig(boolean parallel, String graphImpl) {
+    @SingleAndMultiThreadedAllGraphNames
+    public void shouldTakeParametersFromConfig(boolean parallel, String graphName) {
         String query = "CALL algo.labelPropagation(" +
                        "    null, null, null, {" +
                        "        iterations: 5, write: false, weightProperty: 'score', seedProperty: $seedProperty" +
                        "    }" +
                        ")";
 
-        runQuery(query, parParams(parallel, graphImpl),
+        runQuery(query, parParams(parallel, graphName),
                 row -> {
                     assertTrue(5 >= row.getNumber("iterations").intValue());
                     assertTrue(row.getBoolean("didConverge"));
@@ -153,9 +140,9 @@ public class LabelPropagationDeprecatedProcTest extends ProcTestBase {
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("parameters")
-    public void shouldRunLabelPropagation(boolean parallel, String graphImpl) {
+    @SingleAndMultiThreadedAllGraphNames
+    public void shouldRunLabelPropagation(boolean parallel, String graphName) {
+        Assume.assumeFalse(graphName.equalsIgnoreCase("kernel"));
         String query = "CALL algo.labelPropagation(" +
                        "    null, 'X', 'OUTGOING', {" +
                        "        batchSize: $batchSize, concurrency: $concurrency, graph: $graph, seedProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: $writeProperty" +
@@ -163,7 +150,7 @@ public class LabelPropagationDeprecatedProcTest extends ProcTestBase {
                        ")";
         String check = "MATCH (n) WHERE n.id IN [0,1] RETURN n.community AS community";
 
-        runQuery(query, parParams(parallel, graphImpl),
+        runQuery(query, parParams(parallel, graphName),
                 row -> {
                     assertEquals(12, row.getNumber("nodes").intValue());
                     assertTrue(row.getBoolean("write"));
@@ -182,9 +169,8 @@ public class LabelPropagationDeprecatedProcTest extends ProcTestBase {
         runQuery(check, row -> assertEquals(2, row.getNumber("community").intValue()));
     }
 
-    @ParameterizedTest
-    @MethodSource("parameters")
-    public void shouldFilterByLabel(boolean parallel, String graphImpl) {
+    @SingleAndMultiThreadedAllGraphNames
+    public void shouldFilterByLabel(boolean parallel, String graphName) {
         String query = "CALL algo.labelPropagation(" +
                        "    'A', 'X', 'OUTGOING', {" +
                        "        batchSize: $batchSize, concurrency: $concurrency, graph: $graph, writeProperty: $writeProperty" +
@@ -193,14 +179,14 @@ public class LabelPropagationDeprecatedProcTest extends ProcTestBase {
         String checkA = "MATCH (n) WHERE n.id = 0 RETURN n.community AS community";
         String checkB = "MATCH (n) WHERE n.id = 1 RETURN n.community AS community";
 
-        runQuery(query, parParams(parallel, graphImpl));
+        runQuery(query, parParams(parallel, graphName));
         runQuery(checkA, row -> assertEquals(2, row.getNumber("community").intValue()));
         runQuery(checkB, row -> assertEquals(42, row.getNumber("community").intValue()));
     }
 
-    @ParameterizedTest
-    @MethodSource("parameters")
-    public void shouldPropagateIncoming(boolean parallel, String graphImpl) {
+    @SingleAndMultiThreadedAllGraphNames
+    public void shouldPropagateIncoming(boolean parallel, String graphName) {
+        Assume.assumeFalse(graphName.equalsIgnoreCase("kernel"));
         String query = "CALL algo.labelPropagation(" +
                        "    'A', 'X', 'INCOMING', {" +
                        "        batchSize: $batchSize, concurrency: $concurrency, graph: $graph, seedProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: $writeProperty" +
@@ -208,13 +194,12 @@ public class LabelPropagationDeprecatedProcTest extends ProcTestBase {
                        ")";
         String check = "MATCH (n:A) WHERE n.id <> 0 RETURN n.community AS community";
 
-        runQuery(query, parParams(parallel, graphImpl));
+        runQuery(query, parParams(parallel, graphName));
         runQuery(check, row -> assertEquals(42, row.getNumber("community").intValue()));
     }
 
-    @ParameterizedTest
-    @MethodSource("parameters")
-    public void shouldAllowCypherGraph(boolean parallel, String graphImpl) {
+    @SingleAndMultiThreadedAllGraphNames
+    public void shouldAllowCypherGraph(boolean parallel, String graphName) {
         String query = "CALL algo.labelPropagation(" +
                        "    'MATCH (n) RETURN id(n) AS id, n.weight AS weight, n.seed AS value', " +
                        "    'MATCH (s)-[r:X]->(t) RETURN id(s) AS source, id(t) AS target, r.weight AS weight', " +
@@ -222,12 +207,11 @@ public class LabelPropagationDeprecatedProcTest extends ProcTestBase {
                        "        graph: 'cypher', batchSize: $batchSize, concurrency: $concurrency, writeProperty: $writeProperty" +
                        "    }" +
                        ")";
-        runQuery(query, parParams(parallel, graphImpl), row -> assertEquals(12, row.getNumber("nodes").intValue()));
+        runQuery(query, parParams(parallel, graphName), row -> assertEquals(12, row.getNumber("nodes").intValue()));
     }
 
-    @ParameterizedTest
-    @MethodSource("parameters")
-    public void testGeneratedAndProvidedLabelsDontConflict(boolean parallel, String graphImpl) throws KernelException {
+    @SingleAndMultiThreadedAllGraphNames
+    public void testGeneratedAndProvidedLabelsDontConflict(boolean parallel, String graphName) throws KernelException {
         GraphDatabaseAPI db = TestDatabaseCreator.createTestDatabase();
         db.getDependencyResolver()
                 .resolveDependency(Procedures.class)
@@ -269,11 +253,11 @@ public class LabelPropagationDeprecatedProcTest extends ProcTestBase {
         assertArrayEquals(new long[]{1, 1, 1, newLabel}, sets, "Incorrect result assuming initial labels are neo4j id");
     }
 
-    private Map<String, Object> parParams(boolean parallel, String graphImpl) {
+    private Map<String, Object> parParams(boolean parallel, String graphName) {
         return MapUtil.map(
                 "batchSize", parallel ? 1 : 100,
                 "concurrency", parallel ? 8: 1,
-                "graph", graphImpl,
+                "graph", graphName,
                 "seedProperty", "community",
                 "weightProperty", "weight",
                 "writeProperty", "community"

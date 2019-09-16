@@ -20,11 +20,10 @@
 package org.neo4j.graphalgo;
 
 import org.hamcrest.Matchers;
+import org.junit.Assume;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.TestSupport.SingleAndMultiThreadedAllGraphNames;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.helpers.collection.MapUtil;
@@ -37,10 +36,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 public class LabelPropagationProcLoadPredefinedLabelsTest extends ProcTestBase {
 
@@ -52,13 +49,6 @@ public class LabelPropagationProcLoadPredefinedLabelsTest extends ProcTestBase {
             ", (e:E {id: 4, community: 29})" +
             ", (f:F {id: 5, community: 29})" +
             ", (g:G {id: 6, community: 29})";
-
-    static Stream<Arguments> parameters() {
-        return Stream.of(
-                arguments(false, "huge"),
-                arguments(true,  "huge")
-        );
-    }
 
     @BeforeEach
     public void setup() throws KernelException {
@@ -81,9 +71,10 @@ public class LabelPropagationProcLoadPredefinedLabelsTest extends ProcTestBase {
         DB.shutdown();
     }
 
-    @ParameterizedTest
-    @MethodSource("parameters")
-    public void shouldUseDefaultValues(boolean parallel, String graphImpl) {
+    @SingleAndMultiThreadedAllGraphNames
+    public void shouldUseDefaultValues(boolean parallel, String graphName) {
+        Assume.assumeFalse(graphName.equalsIgnoreCase("kernel"));
+
         String query = "CALL algo.labelPropagation.stream(" +
                        "    null, null, {" +
                        "        batchSize: $batchSize, concurrency: $concurrency, graph: $graph, seedProperty: 'community'" +
@@ -92,7 +83,7 @@ public class LabelPropagationProcLoadPredefinedLabelsTest extends ProcTestBase {
                        "RETURN algo.asNode(nodeId) AS id, label AS community " +
                        "ORDER BY id";
 
-        Result result = DB.execute(query, parParams(parallel, graphImpl));
+        Result result = DB.execute(query, parParams(parallel, graphName));
 
         List<Integer> labels = result.columnAs("community").stream()
                 .mapToInt(value -> ((Long)value).intValue()).boxed().collect(Collectors.toList());
