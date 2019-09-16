@@ -409,7 +409,7 @@ class GraphLoaderHugeGraphTest {
         GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT);
         GraphByType graph = graphLoader.withAnyLabel()
                 .withAnyRelationshipType()
-                .withOptionalRelationshipProperties(
+                .withRelationshipProperties(
                         PropertyMapping.of("p1", "p1", 1.0, DeduplicationStrategy.NONE),
                         PropertyMapping.of("p2", "p2", 2.0, DeduplicationStrategy.NONE)
                 )
@@ -533,7 +533,7 @@ class GraphLoaderHugeGraphTest {
         GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT);
         GraphByType graph = graphLoader.withAnyLabel()
                 .withAnyRelationshipType()
-                .withOptionalRelationshipProperties(
+                .withRelationshipProperties(
                         PropertyMapping.of("p1", "p1", 1.0, deduplicationStrategy),
                         PropertyMapping.of("p2", "p2", 2.0, deduplicationStrategy)
                 )

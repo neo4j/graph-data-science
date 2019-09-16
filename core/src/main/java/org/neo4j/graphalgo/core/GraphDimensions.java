@@ -19,13 +19,11 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.neo4j.graphalgo.KernelPropertyMapping;
+import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.RelationshipTypeMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
-
-import java.util.Arrays;
-import java.util.List;
 
 import static java.util.stream.Collectors.joining;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_LABEL;
@@ -37,18 +35,18 @@ public final class GraphDimensions {
     private final long highestNeoId;
     private long maxRelCount;
     private final int labelId;
-    private final KernelPropertyMapping[] nodeProperties;
+    private final PropertyMappings nodeProperties;
     private final RelationshipTypeMappings relTypeMappings;
-    private final KernelPropertyMapping[] relProperties;
+    private final PropertyMappings relProperties;
 
     public GraphDimensions(
             long nodeCount,
             long highestNeoId,
             long maxRelCount,
             int labelId,
-            KernelPropertyMapping[] nodeProperties,
+            PropertyMappings nodeProperties,
             RelationshipTypeMappings relTypeMappings,
-            KernelPropertyMapping[] relProperties
+            PropertyMappings relProperties
     ) {
         this.nodeCount = nodeCount;
         this.highestNeoId = highestNeoId;
@@ -87,26 +85,16 @@ public final class GraphDimensions {
         return labelId;
     }
 
-    public Iterable<KernelPropertyMapping> nodeProperties() {
-        return Arrays.asList(nodeProperties);
+    public PropertyMappings nodeProperties() {
+        return nodeProperties;
     }
 
     public RelationshipTypeMappings relationshipTypeMappings() {
         return relTypeMappings;
     }
 
-    public List<KernelPropertyMapping> relProperties() {
-        return Arrays.asList(relProperties);
-    }
-
-    @Deprecated
-    public int relWeightId() {
-        return relProperties == null || relProperties.length == 0 ? NO_SUCH_PROPERTY_KEY : relProperties[0].neoPropertyKeyId;
-    }
-
-    @Deprecated
-    public double relDefaultWeight() {
-        return relProperties == null || relProperties.length == 0 ? 0.0 : relProperties[0].defaultValue;
+    public PropertyMappings relProperties() {
+        return relProperties;
     }
 
     public void checkValidNodePredicate(GraphSetup setup) {
@@ -138,20 +126,21 @@ public final class GraphDimensions {
         checkValidProperties("Relationship", relProperties);
     }
 
-    private void checkValidProperties(String recordType, KernelPropertyMapping... mappings) {
-        String missingProperties = Arrays.stream(mappings)
+    private void checkValidProperties(String recordType, PropertyMappings mappings) {
+        String missingProperties = mappings
+                .stream()
                 .filter(mapping -> {
-                    int id = mapping.neoPropertyKeyId;
-                    String propertyKey = mapping.neoPropertyKey;
+                    int id = mapping.propertyKeyId();
+                    String propertyKey = mapping.propertyNameInGraph();
                     return nonEmpty(propertyKey) && id == NO_SUCH_PROPERTY_KEY;
                 })
-                .map(mapping -> mapping.neoPropertyKey)
+                .map(PropertyMapping::propertyNameInGraph)
                 .collect(joining("', '"));
         if (!missingProperties.isEmpty()) {
             throw new IllegalArgumentException(String.format(
-                        "%s properties not found: '%s'",
-                        recordType,
-                        missingProperties));
+                    "%s properties not found: '%s'",
+                    recordType,
+                    missingProperties));
         }
     }
 
@@ -164,9 +153,9 @@ public final class GraphDimensions {
         private long highestNeoId;
         private long maxRelCount;
         private int labelId;
-        private KernelPropertyMapping[] nodeProperties;
+        private PropertyMappings nodeProperties;
         private RelationshipTypeMappings relationshipTypeMappings;
-        private KernelPropertyMapping[] relProperties;
+        private PropertyMappings relProperties;
 
         public Builder setNodeCount(long nodeCount) {
             this.nodeCount = nodeCount;
@@ -188,7 +177,7 @@ public final class GraphDimensions {
             return this;
         }
 
-        public Builder setNodeProperties(KernelPropertyMapping[] nodeProperties) {
+        public Builder setNodeProperties(PropertyMappings nodeProperties) {
             this.nodeProperties = nodeProperties;
             return this;
         }
@@ -198,7 +187,7 @@ public final class GraphDimensions {
             return this;
         }
 
-        public Builder setRelationshipProperties(KernelPropertyMapping[] relProperties) {
+        public Builder setRelationshipProperties(PropertyMappings relProperties) {
             this.relProperties = relProperties;
             return this;
         }

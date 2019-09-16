@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core;
 
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
@@ -84,8 +85,8 @@ public class GraphLoader {
     private TerminationFlag terminationFlag = TerminationFlag.RUNNING_TRUE;
     private boolean sorted = false;
     private boolean undirected = false;
-    private PropertyMapping[] nodePropertyMappings = new PropertyMapping[0];
-    private PropertyMapping[] relPropertyMappings = new PropertyMapping[0];
+    private final PropertyMappings.Builder nodePropertyMappings = new PropertyMappings.Builder();
+    private final PropertyMappings.Builder relPropertyMappings = new PropertyMappings.Builder();
     private boolean isLoadedGraph = false;
 
     /**
@@ -293,14 +294,12 @@ public class GraphLoader {
     }
 
     public GraphLoader withOptionalNodeProperties(PropertyMapping... nodePropertyMappings) {
-        this.nodePropertyMappings = Arrays.stream(nodePropertyMappings)
-                .filter(propMapping -> !(propMapping.neoPropertyKey == null || propMapping.neoPropertyKey.isEmpty()))
-                .toArray(PropertyMapping[]::new);
+        this.nodePropertyMappings.addAllOptionalMappings(nodePropertyMappings);
         return this;
     }
 
-    public GraphLoader withOptionalRelationshipProperties(PropertyMapping... relPropertyMappings) {
-        this.relPropertyMappings = Arrays.stream(relPropertyMappings).toArray(PropertyMapping[]::new);
+    public GraphLoader withRelationshipProperties(PropertyMapping... relPropertyMappings) {
+        this.relPropertyMappings.addAllMappings(relPropertyMappings);
         return this;
     }
 
@@ -312,7 +311,7 @@ public class GraphLoader {
      * @param propertyDefaultValue default value to use if the property is not set
      */
     public GraphLoader withRelationshipWeightsFromProperty(String property, double propertyDefaultValue) {
-        return withOptionalRelationshipProperties(PropertyMapping.of(
+        return withRelationshipProperties(PropertyMapping.of(
                 property,
                 property,
                 propertyDefaultValue
@@ -344,7 +343,7 @@ public class GraphLoader {
      * @param propertyDefaultValue default value to use if the property is not set
      */
     public GraphLoader withOptionalRelationshipWeightsFromProperty(String property, double propertyDefaultValue) {
-        return withOptionalRelationshipProperties(PropertyMapping.of(
+        return withRelationshipProperties(PropertyMapping.of(
                 property,
                 property,
                 propertyDefaultValue
@@ -356,7 +355,7 @@ public class GraphLoader {
      * on a graph without weights is not specified.
      */
     public GraphLoader withoutRelationshipWeights() {
-        return withOptionalRelationshipProperties();
+        return withRelationshipProperties();
     }
 
     /**
@@ -482,12 +481,12 @@ public class GraphLoader {
                     "Conflicting relationship property deduplication strategies, it is not allowed to mix `NONE` with aggregations.");
         }
 
-        PropertyMapping[] relPropertyMappings = deduplicationStrategy == DeduplicationStrategy.DEFAULT
-                ? this.relPropertyMappings
-                : Arrays
-                .stream(this.relPropertyMappings)
-                .map(p -> p.withDeduplicationStrategy(deduplicationStrategy))
-                .toArray(PropertyMapping[]::new);
+        PropertyMappings relMappings = this.relPropertyMappings.build();
+        if (deduplicationStrategy != DeduplicationStrategy.DEFAULT) {
+            relMappings = new PropertyMappings.Builder()
+                    .addAllMappings(relMappings.stream().map(p -> p.withDeduplicationStrategy(deduplicationStrategy)))
+                    .build();
+        }
 
         return new GraphSetup(
                 label,
@@ -506,7 +505,7 @@ public class GraphLoader {
                 tracker,
                 terminationFlag,
                 name,
-                nodePropertyMappings,
-                relPropertyMappings);
+                nodePropertyMappings.build(),
+                relMappings);
     }
 }

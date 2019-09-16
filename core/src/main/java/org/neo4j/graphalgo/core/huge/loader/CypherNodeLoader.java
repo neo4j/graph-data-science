@@ -65,7 +65,7 @@ class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
     IdsAndProperties result() {
         IdMap idMap = IdMapBuilder.build(builder, maxNodeId, setup.concurrency, setup.tracker);
         Map<String, WeightMapping> nodeProperties = nodePropertyBuilders.entrySet().stream()
-                .collect(Collectors.toMap(e -> e.getKey().propertyKey, e -> e.getValue().build()));
+                .collect(Collectors.toMap(e -> e.getKey().propertyIdentifier(), e -> e.getValue().build()));
         return new IdsAndProperties(idMap, nodeProperties);
     }
 
@@ -77,9 +77,9 @@ class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
                     HugeNodePropertiesBuilder.of(
                             capacity,
                             AllocationTracker.EMPTY,
-                            propertyMapping.defaultValue,
+                            propertyMapping.defaultValue(),
                             -2,
-                            propertyMapping.propertyKey));
+                            propertyMapping.propertyIdentifier()));
         }
         return nodeProperties;
     }

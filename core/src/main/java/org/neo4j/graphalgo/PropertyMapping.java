@@ -20,8 +20,9 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.kernel.api.StatementConstants;
 
-public class PropertyMapping {
+public abstract class PropertyMapping {
 
     // property name in the result map Graph.nodeProperties( <propertyName> )
     public final String propertyKey;
@@ -45,27 +46,120 @@ public class PropertyMapping {
         this.deduplicationStrategy = deduplicationStrategy;
     }
 
+    /**
+     * property name in the result map Graph.nodeProperties(`propertyName`)
+     */
+    public String propertyIdentifier() {
+        return propertyIdentifier;
+    }
+
+    /**
+     * property name in the graph (a:Node {`propertyKey`:xyz})
+     */
+    public String propertyNameInGraph() {
+        return propertyNameInGraph;
+    }
+
+    public double defaultValue() {
+        return defaultValue;
+    }
+
+    public DeduplicationStrategy deduplicationStrategy() {
+        return deduplicationStrategy;
+    }
+
+    public abstract int propertyKeyId();
+
+    public boolean hasValidName() {
+        return propertyNameInGraph != null && !propertyNameInGraph.isEmpty();
+    }
+
+    public boolean exists() {
+        return propertyKeyId() != StatementConstants.NO_SUCH_PROPERTY_KEY;
+    }
+
     public PropertyMapping withDeduplicationStrategy(DeduplicationStrategy deduplicationStrategy) {
-        if (this.deduplicationStrategy == DeduplicationStrategy.DEFAULT) {
-            return new PropertyMapping(propertyKey, neoPropertyKey, defaultValue, deduplicationStrategy);
+        if (this.deduplicationStrategy != DeduplicationStrategy.DEFAULT) {
+            return this;
         }
-        return this;
+        return copyWithDeduplicationStrategy(deduplicationStrategy);
     }
 
-    public KernelPropertyMapping toKernelMapping(int propertyKeyId) {
-        return new KernelPropertyMapping(propertyKey, propertyKeyId, defaultValue,
-                neoPropertyKey, deduplicationStrategy);
+    abstract PropertyMapping copyWithDeduplicationStrategy(DeduplicationStrategy deduplicationStrategy);
+
+    public abstract PropertyMapping resolveWith(int propertyKeyId);
+
+    private static final class Unresolved extends PropertyMapping {
+
+        private Unresolved(
+                String propertyIdentifier,
+                String propertyNameInGraph,
+                double defaultValue,
+                DeduplicationStrategy deduplicationStrategy) {
+            super(propertyIdentifier, propertyNameInGraph, defaultValue, deduplicationStrategy);
+        }
+
+        @Override
+        public int propertyKeyId() {
+            return StatementConstants.NO_SUCH_PROPERTY_KEY;
+        }
+
+        @Override
+        PropertyMapping copyWithDeduplicationStrategy(DeduplicationStrategy deduplicationStrategy) {
+            return new Unresolved(propertyIdentifier(), propertyNameInGraph(), defaultValue(), deduplicationStrategy);
+        }
+
+        @Override
+        public PropertyMapping resolveWith(int propertyKeyId) {
+            return new Resolved(propertyKeyId, propertyIdentifier(), propertyNameInGraph(), defaultValue(), deduplicationStrategy());
+        }
     }
 
-    public static PropertyMapping of(String propertyKey, String neoPropertyKey, double defaultValue) {
-        return new PropertyMapping(propertyKey, neoPropertyKey, defaultValue);
+    private static final class Resolved extends PropertyMapping {
+        private final int propertyKeyId;
+
+        private Resolved(
+                int propertyKeyId,
+                String propertyIdentifier,
+                String propertyNameInGraph,
+                double defaultValue,
+                DeduplicationStrategy deduplicationStrategy) {
+            super(propertyIdentifier, propertyNameInGraph, defaultValue, deduplicationStrategy);
+            this.propertyKeyId = propertyKeyId;
+        }
+
+        @Override
+        public int propertyKeyId() {
+            return propertyKeyId;
+        }
+
+        @Override
+        PropertyMapping copyWithDeduplicationStrategy(DeduplicationStrategy deduplicationStrategy) {
+            return new Resolved(propertyKeyId, propertyIdentifier(), propertyNameInGraph(), defaultValue(), deduplicationStrategy);
+        }
+
+        @Override
+        public PropertyMapping resolveWith(int propertyKeyId) {
+            if (propertyKeyId != this.propertyKeyId) {
+                throw new IllegalArgumentException(String.format(
+                        "Different PropertyKeyIds: %d != %d",
+                        this.propertyKeyId,
+                        propertyKeyId));
+            }
+            return this;
+        }
+    }
+
+
+    public static PropertyMapping of(String propertyIdentifier, String propertyNameInGraph, double defaultValue) {
+        return of(propertyIdentifier, propertyNameInGraph, defaultValue, DeduplicationStrategy.DEFAULT);
     }
 
     public static PropertyMapping of(
-            String propertyName,
-            String propertyKeyInGraph,
+            String propertyIdentifier,
+            String propertyNameInGraph,
             double defaultValue,
             DeduplicationStrategy deduplicationStrategy) {
-        return new PropertyMapping(propertyName, propertyKeyInGraph, defaultValue, deduplicationStrategy);
+        return new Unresolved(propertyIdentifier, propertyNameInGraph, defaultValue, deduplicationStrategy);
     }
 }

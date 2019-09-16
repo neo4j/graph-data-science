@@ -22,14 +22,12 @@ package org.neo4j.graphalgo.core.huge.loader;
 import com.carrotsearch.hppc.ObjectLongHashMap;
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.apache.commons.lang3.tuple.Pair;
-import org.neo4j.graphalgo.KernelPropertyMapping;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.ImportProgress;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.kernel.api.StatementConstants;
 import org.neo4j.kernel.impl.store.record.RelationshipRecord;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -84,7 +82,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         int pageSize = sizing.pageSize();
         int numberOfPages = sizing.numberOfPages();
 
-        boolean importWeights = dimensions.relProperties().stream().anyMatch(m -> m.neoPropertyKeyId != StatementConstants.NO_SUCH_PROPERTY_KEY);
+        boolean importWeights = dimensions.relProperties().atLeastOneExists();
 
         List<SingleTypeRelationshipImporter.Builder> importerBuilders = allBuilders
                 .entrySet()
@@ -115,14 +113,8 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         RelationshipsBuilder outRelationshipsBuilder = entry.getValue().getLeft();
         RelationshipsBuilder inRelationshipsBuilder = entry.getValue().getRight();
 
-        List<KernelPropertyMapping> relProperties = dimensions.relProperties();
-        int[] weightProperties = new int[relProperties.size()];
-        double[] defaultWeights = new double[relProperties.size()];
-        for (int i = 0; i < relProperties.size(); i++) {
-            KernelPropertyMapping property = relProperties.get(i);
-            weightProperties[i] = property.neoPropertyKeyId;
-            defaultWeights[i] = property.defaultValue;
-        }
+        int[] weightProperties = dimensions.relProperties().allPropertyKeyIds();
+        double[] defaultWeights = dimensions.relProperties().allDefaultWeights();
 
         LongAdder relationshipCounter = new LongAdder();
         AdjacencyBuilder outBuilder = AdjacencyBuilder.compressing(

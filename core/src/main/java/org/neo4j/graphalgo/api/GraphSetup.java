@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.api;
 
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -81,8 +82,8 @@ public class GraphSetup {
     // in/out adjacencies are allowed to be merged into an undirected view of the graph
     public final boolean loadAsUndirected;
 
-    public final PropertyMapping[] nodePropertyMappings;
-    public final PropertyMapping[] relationshipPropertyMappings;
+    public final PropertyMappings nodePropertyMappings;
+    public final PropertyMappings relationshipPropertyMappings;
     public final DeduplicationStrategy deduplicationStrategy;
 
     /**
@@ -113,8 +114,8 @@ public class GraphSetup {
             AllocationTracker tracker,
             TerminationFlag terminationFlag,
             String name,
-            PropertyMapping[] nodePropertyMappings,
-            PropertyMapping[] relationshipPropertyMappings) {
+            PropertyMappings nodePropertyMappings,
+            PropertyMappings relationshipPropertyMappings) {
 
         this.startLabel = startLabel;
         this.endLabel = endLabel;
@@ -123,7 +124,7 @@ public class GraphSetup {
         this.loadIncoming = direction == Direction.INCOMING || direction == Direction.BOTH;
         this.loadBoth = loadOutgoing && loadIncoming;
         this.direction = direction;
-        this.relationDefaultWeight = relationshipPropertyMappings == null || relationshipPropertyMappings.length == 0 ? 0.0 : relationshipPropertyMappings[0].defaultValue;
+        this.relationDefaultWeight = relationshipPropertyMappings.defaultWeight();
         this.params = params == null ? Collections.emptyMap() : params;
         this.executor = executor;
         this.concurrency = concurrency;
@@ -170,8 +171,8 @@ public class GraphSetup {
                 AllocationTracker.EMPTY,
                 TerminationFlag.RUNNING_TRUE,
                 null,
-                new PropertyMapping[0],
-                new PropertyMapping[]{PropertyMapping.of(weightProperty, weightProperty, defaultWeight)}
+                PropertyMappings.of(),
+                PropertyMappings.of(PropertyMapping.of(weightProperty, weightProperty, defaultWeight))
         );
     }
 
@@ -187,7 +188,7 @@ public class GraphSetup {
     }
 
     public boolean shouldLoadRelationshipWeight() {
-        return relationshipPropertyMappings.length > 0;
+        return relationshipPropertyMappings.hasMappings();
     }
 
     public boolean loadAnyLabel() {

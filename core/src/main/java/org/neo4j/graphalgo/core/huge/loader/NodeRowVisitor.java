@@ -54,11 +54,11 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
         HashMap<String, Number> weights = new HashMap<>();
         for (Map.Entry<PropertyMapping, HugeNodePropertiesBuilder> entry : nodeProperties.entrySet()) {
             PropertyMapping key = entry.getKey();
-            Object value = CypherLoadingUtils.getProperty(row, entry.getKey().neoPropertyKey);
+            Object value = CypherLoadingUtils.getProperty(row, entry.getKey().propertyNameInGraph());
             if (value instanceof Number) {
-                weights.put(key.propertyKey, (Number) value);
+                weights.put(key.propertyIdentifier(), (Number) value);
             } else if (null == value) {
-                weights.put(key.propertyKey, key.defaultValue);
+                weights.put(key.propertyIdentifier(), key.defaultValue());
             } else {
                 throw new IllegalArgumentException(String.format(
                         "Unsupported type [%s] of value %s. Please use a numeric property.",

@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.core.huge.loader;
 
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.apache.commons.lang3.tuple.Pair;
-import org.neo4j.graphalgo.KernelPropertyMapping;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.RelationshipTypeMappings;
@@ -51,7 +50,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public final class HugeGraphFactory extends GraphFactory {
 
@@ -75,17 +73,16 @@ public final class HugeGraphFactory extends GraphFactory {
                 .add("nodeIdMap", IdMap.memoryEstimation());
 
         // Node properties
-        for (KernelPropertyMapping propertyMapping : dimensions.nodeProperties()) {
-            int propertyId = propertyMapping.neoPropertyKeyId;
-            if (propertyId == StatementConstants.NO_SUCH_PROPERTY_KEY) {
-                builder.add(propertyMapping.propertyKey, NullWeightMap.MEMORY_USAGE);
+        for (PropertyMapping propertyMapping : dimensions.nodeProperties()) {
+            if (propertyMapping.exists()) {
+                builder.add(propertyMapping.propertyIdentifier(), NodePropertyMap.memoryEstimation());
             } else {
-                builder.add(propertyMapping.propertyKey, NodePropertyMap.memoryEstimation());
+                builder.add(propertyMapping.propertyIdentifier(), NullWeightMap.MEMORY_USAGE);
             }
         }
 
         // Relationship weight properties
-        if (dimensions.relWeightId() != StatementConstants.NO_SUCH_PROPERTY_KEY) {
+        if (dimensions.relProperties().weightId() != StatementConstants.NO_SUCH_PROPERTY_KEY) {
             // Adjacency lists and Adjacency offsets
             MemoryEstimation adjacencyListSize = AdjacencyList.uncompressedMemoryEstimation(setup.loadAsUndirected);
             MemoryEstimation adjacencyOffsetsSetup = AdjacencyOffsets.memoryEstimation();
@@ -99,6 +96,22 @@ public final class HugeGraphFactory extends GraphFactory {
                 builder.add("incoming weight offsets", adjacencyOffsetsSetup);
             }
         }
+//        for (PropertyMapping mapping : dimensions.relProperties()) {
+//            if (mapping.exists()) {
+//                // Adjacency lists and Adjacency offsets
+//                MemoryEstimation adjacencyListSize = HugeAdjacencyList.uncompressedMemoryEstimation(setup.loadAsUndirected);
+//                MemoryEstimation adjacencyOffsetsSetup = HugeAdjacencyOffsets.memoryEstimation();
+//                if (setup.loadOutgoing || setup.loadAsUndirected) {
+//                    builder.add("outgoing weights for " + mapping.propertyIdentifier(), adjacencyListSize);
+//                    builder.add("outgoing weight offsets for " + mapping.propertyIdentifier(), adjacencyOffsetsSetup);
+//
+//                }
+//                if (setup.loadIncoming && !setup.loadAsUndirected) {
+//                    builder.add("incoming weights for " + mapping.propertyIdentifier(), adjacencyListSize);
+//                    builder.add("incoming weight offsets for " + mapping.propertyIdentifier(), adjacencyOffsetsSetup);
+//                }
+//            }
+//        }
 
         // Adjacency lists and Adjacency offsets
         MemoryEstimation adjacencyListSize = AdjacencyList.compressedMemoryEstimation(setup.loadAsUndirected);
@@ -234,7 +247,7 @@ public final class HugeGraphFactory extends GraphFactory {
                     AdjacencyOffsets inAdjacencyOffsets = incomingRelationshipsBuilder != null
                             ? incomingRelationshipsBuilder.globalAdjacencyOffsets : null;
 
-                    if (setup.relationshipPropertyMappings.length == 0) {
+                    if (!setup.relationshipPropertyMappings.hasMappings()) {
                         HugeGraph graph = buildGraph(
                                 tracker,
                                 idsAndProperties.hugeIdMap,
@@ -253,27 +266,26 @@ public final class HugeGraphFactory extends GraphFactory {
                         return Collections.singletonMap("", graph);
                     }
 
-                    return IntStream.range(0, setup.relationshipPropertyMappings.length)
-                            .mapToObj(weightIndex -> {
-                                HugeGraph graph = buildGraph(
-                                        tracker,
-                                        idsAndProperties.hugeIdMap,
-                                        idsAndProperties.properties,
-                                        incomingRelationshipsBuilder,
-                                        outgoingRelationshipsBuilder,
-                                        outAdjacencyList,
-                                        outAdjacencyOffsets,
-                                        inAdjacencyList,
-                                        inAdjacencyOffsets,
-                                        weightIndex,
-                                        dimensions.relProperties().get(weightIndex),
-                                        relationshipCounts.getOrDefault(entry.getKey(), 0L),
-                                        setup.loadAsUndirected
-                                );
-                                PropertyMapping property = setup.relationshipPropertyMappings[weightIndex];
-                                return Pair.of(property.propertyKey, graph);
-                            })
-                            .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+                    return setup.relationshipPropertyMappings.enumerate().map(propertyEntry -> {
+                        int weightIndex = propertyEntry.getKey();
+                        PropertyMapping property = propertyEntry.getValue();
+                        HugeGraph graph = buildGraph(
+                                tracker,
+                                idsAndProperties.hugeIdMap,
+                                idsAndProperties.properties,
+                                incomingRelationshipsBuilder,
+                                outgoingRelationshipsBuilder,
+                                outAdjacencyList,
+                                outAdjacencyOffsets,
+                                inAdjacencyList,
+                                inAdjacencyOffsets,
+                                weightIndex,
+                                property.defaultValue(),
+                                relationshipCounts.getOrDefault(entry.getKey(), 0L),
+                                setup.loadAsUndirected
+                        );
+                        return Pair.of(property.propertyIdentifier(), graph);
+                    }).collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
                 }));
     }
 
@@ -284,9 +296,9 @@ public final class HugeGraphFactory extends GraphFactory {
         DeduplicationStrategy[] deduplicationStrategies = dimensions
                 .relProperties()
                 .stream()
-                .map(property -> property.deduplicationStrategy == DeduplicationStrategy.DEFAULT
+                .map(property -> property.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
                         ? DeduplicationStrategy.SKIP
-                        : property.deduplicationStrategy
+                        : property.deduplicationStrategy()
                 )
                 .toArray(DeduplicationStrategy[]::new);
         // TODO: backwards compat code
@@ -302,19 +314,19 @@ public final class HugeGraphFactory extends GraphFactory {
             outgoingRelationshipsBuilder = new RelationshipsBuilder(
                     deduplicationStrategies,
                     tracker,
-                    setup.relationshipPropertyMappings.length);
+                    setup.relationshipPropertyMappings.numberOfMappings());
         } else {
             if (setup.loadOutgoing) {
                 outgoingRelationshipsBuilder = new RelationshipsBuilder(
                         deduplicationStrategies,
                         tracker,
-                        setup.relationshipPropertyMappings.length);
+                        setup.relationshipPropertyMappings.numberOfMappings());
             }
             if (setup.loadIncoming) {
                 incomingRelationshipsBuilder = new RelationshipsBuilder(
                         deduplicationStrategies,
                         tracker,
-                        setup.relationshipPropertyMappings.length);
+                        setup.relationshipPropertyMappings.numberOfMappings());
             }
         }
 
