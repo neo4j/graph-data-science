@@ -21,16 +21,25 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class ReadHelperTest {
 
@@ -63,22 +72,48 @@ class ReadHelperTest {
         assertEquals(1337421337420.0, ReadHelper.extractValue(Values.temporalValue(zdt), 42.0));
     }
 
-    @Test
-    void extractValueFailsForNonNumericTypes() {
-        IllegalArgumentException exception;
+    @ParameterizedTest
+    @MethodSource("invalidProperties")
+    void extractValueFailsForNonNumericTypes(Value value, String typePart, String valuePart) {
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> ReadHelper.extractValue(value, 42.0)
+        );
+        String expectedErrorMessage = String.format(
+                "Unsupported type [%s] of value %s. Please use a numeric property.",
+                typePart,
+                valuePart
+        );
+        assertEquals(expectedErrorMessage, exception.getMessage());
+    }
 
-        exception = assertThrows(IllegalArgumentException.class, () -> {
-            ReadHelper.extractValue(Values.booleanValue(true), 42.0);
-        });
-        assertEquals(
-                "Unsupported type [BOOLEAN] of value Boolean('true'). Please use a numeric property.",
-                exception.getMessage());
-
-        exception = assertThrows(IllegalArgumentException.class, () -> {
-            ReadHelper.extractValue(Values.stringValue("42"), 42.0);
-        });
-        assertEquals(
-                "Unsupported type [TEXT] of value String(\"42\"). Please use a numeric property.",
-                exception.getMessage());
+    static Stream<Arguments> invalidProperties() {
+        return Stream.of(
+                arguments(Values.booleanValue(true), "BOOLEAN", "Boolean('true')"),
+                arguments(Values.stringValue("42"), "TEXT", "String(\"42\")"),
+                arguments(
+                        Values.temporalValue(LocalDateTime.ofEpochSecond(42, 0, ZoneOffset.UTC)),
+                        "LOCAL_DATE_TIME",
+                        "1970-01-01T00:00:42"),
+                arguments(
+                        Values.temporalValue(ZonedDateTime.of(
+                                LocalDateTime.ofEpochSecond(42, 0, ZoneOffset.UTC),
+                                ZoneOffset.UTC)),
+                        "ZONED_DATE_TIME",
+                        "1970-01-01T00:00:42Z"),
+                // offset date times are stored internally as zoned date times in Neo4j
+                arguments(
+                        Values.temporalValue(OffsetDateTime.of(
+                                LocalDateTime.ofEpochSecond(42, 0, ZoneOffset.UTC),
+                                ZoneOffset.UTC)),
+                        "ZONED_DATE_TIME",
+                        "1970-01-01T00:00:42Z"),
+                arguments(Values.temporalValue(LocalDate.ofEpochDay(42)), "DATE", "1970-02-12"),
+                arguments(Values.temporalValue(LocalTime.ofSecondOfDay(42)), "LOCAL_TIME", "00:00:42"),
+                arguments(
+                        Values.temporalValue(OffsetTime.of(LocalTime.ofSecondOfDay(42), ZoneOffset.UTC)),
+                        "ZONED_TIME",
+                        "00:00:42Z")
+        );
     }
 }
