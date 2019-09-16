@@ -15,7 +15,7 @@ The model contains three types of data:
 
 * Node ids - up to 2^45^ ("35 trillion") for `graph: "huge"`
 * Relationships - pairs of node ids. Relationships are stored twice if `direction: "BOTH"` config provided.
-* Weights - stored as floats (4 bytes per node) in a https://github.com/carrotsearch/hppc[HPPC^] map (`graph: "huge"`)
+* Weights - stored as doubles (8 bytes per node) in an array-like data structure next to the relationships
 
 Memory configuration depends on the graph projection that we're using.
 
@@ -91,8 +91,7 @@ SET rel.weight = toInteger(row.Weight);
 
 === Huge graph projection
 
-This is the default graph projection, and supports graphs up to 2 billion nodes and 2 billion relationships.
-This graph projection supports graphs with more than 2 billion nodes or 2 billion relationships.
+This is the default graph projection, and supports graphs up to 35 trillion nodes and relationships.
 
 .The following computes the amount of memory required by the huge in memory graph for any node label and any relationship type:
 [source,cypher]
