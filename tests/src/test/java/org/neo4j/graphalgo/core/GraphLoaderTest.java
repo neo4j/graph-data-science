@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core;
 
-import com.carrotsearch.hppc.IntArrayList;
+import com.carrotsearch.hppc.LongArrayList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestDatabaseCreator;
@@ -38,7 +38,6 @@ import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
-import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
 
 /**
  * @author mknblch
@@ -388,25 +387,25 @@ class GraphLoaderTest {
         checkOutRelationships(graph, 3, 1);
     }
 
-    private void checkOutRelationships(Graph graph, int node, int... expected) {
-        IntArrayList idList = new IntArrayList();
-        graph.forEachOutgoing(node, longToIntConsumer((s, t) -> {
+    private void checkOutRelationships(Graph graph, long node, long... expected) {
+        LongArrayList idList = new LongArrayList();
+        graph.forEachOutgoing(node, (s, t) -> {
             idList.add(t);
             return true;
-        }));
-        final int[] ids = idList.toArray();
+        });
+        final long[] ids = idList.toArray();
         Arrays.sort(ids);
         Arrays.sort(expected);
         assertArrayEquals(expected, ids);
     }
 
-    private void checkInRelationships(Graph graph, int node, int... expected) {
-        IntArrayList idList = new IntArrayList();
-        graph.forEachIncoming(node, longToIntConsumer((s, t) -> {
+    private void checkInRelationships(Graph graph, long node, long... expected) {
+        LongArrayList idList = new LongArrayList();
+        graph.forEachIncoming(node, (s, t) -> {
             idList.add(t);
             return true;
-        }));
-        final int[] ids = idList.toArray();
+        });
+        final long[] ids = idList.toArray();
         Arrays.sort(ids);
         Arrays.sort(expected);
         assertArrayEquals(expected, ids);
