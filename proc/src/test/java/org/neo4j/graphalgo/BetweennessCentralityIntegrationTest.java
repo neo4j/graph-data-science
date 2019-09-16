@@ -51,7 +51,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author mknblch
  */
-public class BetweennessCentralityIntegrationTest extends HugeTester {
+public class BetweennessCentralityIntegrationTest extends GraphTester {
 
     public static final String TYPE = "TYPE";
     private final String graphName;

@@ -23,23 +23,25 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
+import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 
 import java.util.Arrays;
 import java.util.Collection;
 
 @RunWith(Parameterized.class)
-public abstract class HugeTester {
+public abstract class GraphTester {
 
     protected Class<? extends GraphFactory> graphImpl;
 
     @Parameterized.Parameters(name = "{1}")
     public static Collection<Object[]> data() {
         return Arrays.<Object[]>asList(
-                new Object[]{HugeGraphFactory.class, "huge"}
+                new Object[]{HugeGraphFactory.class, "huge"},
+                new Object[]{GraphViewFactory.class, "kernel"}
         );
     }
 
-    protected HugeTester(Class<? extends GraphFactory> graphImpl) {
+    protected GraphTester(Class<? extends GraphFactory> graphImpl) {
         this.graphImpl = graphImpl;
     }
 }

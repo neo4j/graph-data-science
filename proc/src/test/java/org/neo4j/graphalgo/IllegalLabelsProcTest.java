@@ -33,7 +33,7 @@ import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
 import static org.neo4j.graphalgo.ThrowableRootCauseMatcher.rootCause;
 
-public class IllegalLabelsProcTest extends HugeTester {
+public class IllegalLabelsProcTest extends GraphTester {
 
     private static final String DB_CYPHER = "" +
             "CREATE (a:A {id: 0}) " +

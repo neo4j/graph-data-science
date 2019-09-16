@@ -26,7 +26,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
-import org.neo4j.graphalgo.HugeTester;
+import org.neo4j.graphalgo.GraphTester;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
@@ -55,7 +55,7 @@ import static org.mockito.Mockito.verify;
  *   .0                 .0
  * @author mknblch
  */
-public class BetweennessCentralityTest2 extends HugeTester {
+public class BetweennessCentralityTest2 extends GraphTester {
 
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
