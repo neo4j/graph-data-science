@@ -176,8 +176,6 @@ That means that the direction of the relationships in our graph are ignored - we
 We have two implementations of the Connected Components algorithm.
 The first treats the graph as unweighted and the second treats it as weighted, where you can define the threshold of the weight above which relationships are included.
 
-image::connected_components.png[]
-
 .The following will create a sample graph:
 [source, cypher]
 ----

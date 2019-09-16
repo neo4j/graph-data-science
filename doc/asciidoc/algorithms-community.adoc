@@ -16,5 +16,5 @@ include::louvain.adoc[leveloffset=+1]
 
 include::label-propagation.adoc[leveloffset=+1]
 
-include::connected_components.adoc[leveloffset=+1]
+include::wcc.adoc[leveloffset=+1]
 
