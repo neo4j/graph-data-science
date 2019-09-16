@@ -7,7 +7,7 @@ dependencies {
     compileOnly group: 'org.neo4j',              name: 'neo4j',              version: ver.'neo4j'
     testCompile group: 'org.neo4j',              name: 'neo4j',              version: ver.'neo4j'
     testCompile group: 'org.neo4j.community',    name: 'it-test-support',    version: ver.'neo4j'
-    testCompile group: 'org.mockito',            name: 'mockito-core',       version: ver.'mockito-core'
+    testCompile group: 'org.mockito',            name: 'mockito-core',       version: ver.'mockito'
 
     testCompile     dep.junit4
     testCompile     platform(dep.junit5bom)
