@@ -21,6 +21,7 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
@@ -30,6 +31,8 @@ import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.stream.Stream;
+
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 
 public class TestSupport {
@@ -62,6 +65,15 @@ public class TestSupport {
 
     public static Stream<String> allGraphNames() {
         return Stream.of("huge", "kernel");
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @ParameterizedTest(name = "parallel: {0}, graph: {1}")
+    @MethodSource({"org.neo4j.graphalgo.TestSupport#singleAndMultiThreadedGraphNames"})
+    public @interface SingleAndMultiThreadedAllGraphNames {}
+
+    public static Stream<Arguments> singleAndMultiThreadedGraphNames() {
+        return Stream.of(true, false).flatMap(parallel -> allGraphNames().map(direction -> arguments(parallel, direction)));
     }
 
 }
