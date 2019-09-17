@@ -19,12 +19,12 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -41,21 +41,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.LongConsumer;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
  * @author mknblch
  */
-@RunWith(MockitoJUnitRunner.class)
-public class ParallelTraverseTest {
+@ExtendWith(MockitoExtension.class)
+class ParallelTraverseTest {
 
 
     private static final String LABEL = "Node";
     private static final String RELATIONSHIP = "REL";
 
-    private static GraphDatabaseAPI db;
+    private static GraphDatabaseAPI DB;
     private static GridBuilder gridBuilder;
     private static Graph graph;
     private static long rootNodeId;
@@ -64,13 +64,12 @@ public class ParallelTraverseTest {
     @Mock
     LongConsumer mock;
 
-    @BeforeClass
-    public static void setup() throws Exception {
-
-        db = TestDatabaseCreator.createTestDatabase();
+    @BeforeAll
+    static void setup() {
+        DB = TestDatabaseCreator.createTestDatabase();
 
         try (ProgressTimer timer = ProgressTimer.start(t -> System.out.println("setup took " + t + "ms"))) {
-            gridBuilder = GraphBuilder.create(db)
+            gridBuilder = GraphBuilder.create(DB)
                     .setLabel(LABEL)
                     .setRelationship(RELATIONSHIP)
                     .newGridBuilder()
@@ -78,7 +77,7 @@ public class ParallelTraverseTest {
         }
 
         try (ProgressTimer timer = ProgressTimer.start(t -> System.out.println("load took " + t + "ms"))) {
-            graph = new GraphLoader(db)
+            graph = new GraphLoader(DB)
                     .withLabel(LABEL)
                     .withRelationshipType(RELATIONSHIP)
                     .load(HugeGraphFactory.class);
@@ -92,15 +91,13 @@ public class ParallelTraverseTest {
         }
     }
 
-    @AfterClass
-    public static void tearDown() {
-        db.shutdown();
+    @AfterAll
+    static void tearDown() {
+        DB.shutdown();
     }
 
-
     @Test
-    public void testTraverseLocal() {
-
+    void testTraverseLocal() {
         final ParallelLocalQueueBFS traverse = new ParallelLocalQueueBFS(graph, Pools.DEFAULT, 10);
 
         traverse
@@ -110,13 +107,12 @@ public class ParallelTraverseTest {
 
         System.out.println("traverse.getThreadsCreated() = " + traverse.getThreadsCreated());
 
-        verify(mock, times(nodeCount)).accept(anyInt());
+        verify(mock, times(nodeCount)).accept(anyLong());
 
     }
 
     @Test
-    public void testTraverseLocal2() {
-
+    void testTraverseLocal2() {
         final ParallelLocalQueueBFS traverse = new ParallelLocalQueueBFS(graph, Pools.DEFAULT, 10);
         final AtomicInteger ai = new AtomicInteger(0);
 
@@ -132,8 +128,5 @@ public class ParallelTraverseTest {
 
             assertEquals("Iteration " + i + " results in error", nodeCount, ai.get());
         }
-
     }
-
-
 }

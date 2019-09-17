@@ -190,7 +190,7 @@ final class MultiSourceBFSTest {
     @AllGraphTypesWithoutCypherTest
     void testParallel(Class<? extends GraphFactory> graphFactory) {
         // each node should only be traversed once for every source node
-        int maxNodes = 512;
+        int maxNodes = 256;
         int[][] seen = new int[maxNodes][maxNodes];
         withGrid(
                 gb -> gb.newCompleteGraphBuilder().createCompleteGraph(maxNodes),
@@ -284,7 +284,7 @@ final class MultiSourceBFSTest {
             public boolean exists(final long sourceNodeId, final long targetNodeId, final Direction direction) {
                 return false;
             }
-        } ;
+        };
 
         final long[] sources = new long[sourceCount];
         Arrays.setAll(sources, i -> i);
@@ -321,7 +321,7 @@ final class MultiSourceBFSTest {
             String cypher,
             Consumer<? super Graph> block,
             Class<? extends GraphFactory> graphImpl) {
-                DB.execute(cypher).close();
+        DB.execute(cypher).close();
         block.accept(new GraphLoader(DB).load(graphImpl));
     }
 
@@ -337,7 +337,7 @@ final class MultiSourceBFSTest {
             tx.success();
         }
         Graph graph = new GraphLoader(DB).load(graphImpl);
-                block.accept(graph);
+        block.accept(graph);
     }
 
     private static BfsSources toList(
