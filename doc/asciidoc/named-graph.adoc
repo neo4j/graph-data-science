@@ -117,6 +117,15 @@ CALL algo.graph.list()
 YIELD name, nodes, relationships, type, direction;
 ----
 
+.The following will remove all currently loaded graphs:
+[source,cypher]
+----
+CALL algo.graph.list() YIELD name
+CALL algo.graph.remove(name) YIELD removed
+RETURN name, removed
+----
+
+
 == Remove named graph
 
 Once we've finished using the named graph we can remove them to free up memory.
