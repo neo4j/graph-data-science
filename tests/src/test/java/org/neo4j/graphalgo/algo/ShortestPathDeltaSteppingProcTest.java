@@ -32,7 +32,7 @@ import java.util.function.DoubleConsumer;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.AdditionalMatchers.eq;
-import static org.mockito.Matchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -106,14 +106,8 @@ final class ShortestPathDeltaSteppingProcTest {
                 "YIELD nodeId, distance RETURN nodeId, distance";
 
         DB.execute(cypher).accept(row -> {
-            long nodeId = row.getNumber("nodeId").longValue();
             double distance = row.getNumber("distance").doubleValue();
-
             consumer.accept(distance);
-            System.out.printf(
-                    "%d:%.1f, ",
-                    nodeId,
-                    distance);
             return true;
         });
 
@@ -122,7 +116,7 @@ final class ShortestPathDeltaSteppingProcTest {
     }
 
     @AllGraphNamesTest
-    void testOutgoingResultStream(String graphName) throws Exception {
+    void testOutgoingResultStream(String graphName) {
 
         final DoubleConsumer consumer = mock(DoubleConsumer.class);
 
@@ -132,14 +126,8 @@ final class ShortestPathDeltaSteppingProcTest {
                 "YIELD nodeId, distance RETURN nodeId, distance";
 
         DB.execute(cypher).accept(row -> {
-            long nodeId = row.getNumber("nodeId").longValue();
             double distance = row.getNumber("distance").doubleValue();
-
             consumer.accept(distance);
-            System.out.printf(
-                    "%d:%.1f, ",
-                    nodeId,
-                    distance);
             return true;
         });
 
@@ -148,7 +136,7 @@ final class ShortestPathDeltaSteppingProcTest {
     }
 
     @AllGraphNamesTest
-    void testWriteBack(String graphName) throws Exception {
+    void testWriteBack(String graphName) {
 
         final String matchCypher =
                 "MATCH(n:Node {name:'s'}) " +
@@ -156,11 +144,7 @@ final class ShortestPathDeltaSteppingProcTest {
                 "YIELD nodeCount, loadDuration, evalDuration, writeDuration RETURN nodeCount, loadDuration, evalDuration, writeDuration";
 
         DB.execute(matchCypher).accept(row -> {
-            System.out.println("loadDuration = " + row.getNumber("loadDuration").longValue());
-            System.out.println("evalDuration = " + row.getNumber("evalDuration").longValue());
             long writeDuration = row.getNumber("writeDuration").longValue();
-            System.out.println("writeDuration = " + writeDuration);
-            System.out.println("nodeCount = " + row.getNumber("nodeCount").longValue());
             assertNotEquals(-1L, writeDuration);
             return false;
         });

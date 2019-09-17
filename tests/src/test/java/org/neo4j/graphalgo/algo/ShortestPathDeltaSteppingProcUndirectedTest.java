@@ -31,7 +31,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.function.DoubleConsumer;
 
 import static org.mockito.AdditionalMatchers.eq;
-import static org.mockito.Matchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -88,12 +88,12 @@ final class ShortestPathDeltaSteppingProcUndirectedTest {
     }
 
     @AfterAll
-    static void shutdownGraph() throws Exception {
+    static void shutdownGraph() {
         if (DB != null) DB.shutdown();
     }
 
     @AllGraphNamesTest
-    void testOutgoingResultStream(String graphName) throws Exception {
+    void testOutgoingResultStream(String graphName) {
 
         final DoubleConsumer consumer = mock(DoubleConsumer.class);
 
@@ -102,14 +102,8 @@ final class ShortestPathDeltaSteppingProcUndirectedTest {
                               "YIELD nodeId, distance RETURN nodeId, distance";
 
         DB.execute(cypher).accept(row -> {
-            long nodeId = row.getNumber("nodeId").longValue();
             double distance = row.getNumber("distance").doubleValue();
-
             consumer.accept(distance);
-            System.out.printf(
-                    "%d:%.1f, ",
-                    nodeId,
-                    distance);
             return true;
         });
 
@@ -118,7 +112,7 @@ final class ShortestPathDeltaSteppingProcUndirectedTest {
     }
 
     @AllGraphNamesTest
-    void testUndirectedResultStream(String graphName) throws Exception {
+    void testUndirectedResultStream(String graphName) {
 
         final DoubleConsumer consumer = mock(DoubleConsumer.class);
 
@@ -127,14 +121,8 @@ final class ShortestPathDeltaSteppingProcUndirectedTest {
                               "YIELD nodeId, distance RETURN nodeId, distance";
 
         DB.execute(cypher).accept(row -> {
-            long nodeId = row.getNumber("nodeId").longValue();
             double distance = row.getNumber("distance").doubleValue();
-
             consumer.accept(distance);
-            System.out.printf(
-                    "%d:%.1f, ",
-                    nodeId,
-                    distance);
             return true;
         });
 
