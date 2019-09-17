@@ -26,8 +26,6 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 /**
  * WeightMapping implementation which always returns
  * a given default weight upon invocation
- *
- * @author mknblch
  */
 public class NullWeightMap implements WeightMapping {
 
@@ -71,21 +69,6 @@ public class NullWeightMap implements WeightMapping {
 
     @Override
     public double weight(final long id, final double defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
-    public double weight(final int source, final int target) {
-        return defaultValue;
-    }
-
-    @Override
-    public double nodeWeight(final int id) {
-        return defaultValue;
-    }
-
-    @Override
-    public double nodeWeight(final int id, final double defaultValue) {
         return defaultValue;
     }
 

@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo.api;
 
-import org.neo4j.graphalgo.core.utils.RawValues;
-
 import static org.neo4j.graphalgo.core.utils.RawValues.getHead;
 import static org.neo4j.graphalgo.core.utils.RawValues.getTail;
 
@@ -37,9 +35,6 @@ public interface WeightMapping extends NodeWeights {
      */
     double weight(long source, long target, double defaultValue);
 
-    /**
-     * Returns the weight for a node or the loaded default weight if no weight has been defined.
-     */
     @Override
     default double nodeWeight(long nodeId) {
         return weight(nodeId, -1L);
@@ -64,31 +59,7 @@ public interface WeightMapping extends NodeWeights {
      * Returns the weight for ID if set or the given default weight otherwise.
      */
     default double weight(long id, final double defaultValue) {
-        return weight((long) getHead(id), (long) getTail(id), defaultValue);
-    }
-
-    /**
-     * Release internal data structures and return an estimate how many bytes were freed.
-     *
-     * Note that the mapping is not usable afterwards.
-     */
-    long release();
-
-    /**
-     * Returns the number of keys stored in that mapping.
-     */
-    long size();
-
-    default double weight(int source, int target) {
-        return weight(RawValues.combineIntInt(source, target));
-    }
-
-    default double nodeWeight(int id) {
-        return weight(id, -1);
-    }
-
-    default double nodeWeight(int id, double defaultValue) {
-        return weight(RawValues.combineIntInt(id, -1), defaultValue);
+        return weight(getHead(id), getTail(id), defaultValue);
     }
 
     /**
@@ -103,9 +74,20 @@ public interface WeightMapping extends NodeWeights {
 
     /**
      * Returns the maximum value contained in the mapping.
-     * @return
      */
     default long getMaxValue() {
         return -1L;
     }
+
+    /**
+     * Release internal data structures and return an estimate how many bytes were freed.
+     *
+     * Note that the mapping is not usable afterwards.
+     */
+    long release();
+
+    /**
+     * Returns the number of keys stored in that mapping.
+     */
+    long size();
 }

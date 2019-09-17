@@ -174,9 +174,9 @@ class HugeGraphFactoryTest {
                 )
                 .load(HugeGraphFactory.class);
 
-        assertEquals(1.0, graph.nodeProperties("prop1").nodeWeight((int) graph.toMappedNodeId(0L)), 0.01);
-        assertEquals(2.0, graph.nodeProperties("prop2").nodeWeight((int) graph.toMappedNodeId(1L)), 0.01);
-        assertEquals(3.0, graph.nodeProperties("prop3").nodeWeight((int) graph.toMappedNodeId(2L)), 0.01);
+        assertEquals(1.0, graph.nodeProperties("prop1").nodeWeight(graph.toMappedNodeId(0L)), 0.01);
+        assertEquals(2.0, graph.nodeProperties("prop2").nodeWeight(graph.toMappedNodeId(1L)), 0.01);
+        assertEquals(3.0, graph.nodeProperties("prop3").nodeWeight(graph.toMappedNodeId(2L)), 0.01);
     }
 
     @Test
