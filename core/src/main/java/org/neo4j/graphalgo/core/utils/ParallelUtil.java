@@ -19,19 +19,14 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
-import org.neo4j.collection.primitive.PrimitiveIntIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.api.BatchNodeIterable;
-import org.neo4j.graphalgo.core.IntIdMap;
-import org.neo4j.graphalgo.core.huge.loader.IdMap;
 import org.neo4j.helpers.Exceptions;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
@@ -89,24 +84,6 @@ public final class ParallelUtil {
         }
     }
 
-    public static Collection<PrimitiveLongIterable> batchIterables(final int concurrency, final int nodeCount) {
-        if (concurrency <= 0) {
-            throw new IllegalArgumentException("concurrency must be > 0");
-        }
-        final int batchSize = Math.max(1, nodeCount / concurrency);
-        int numberOfBatches = ParallelUtil.threadCount(batchSize, nodeCount);
-        if (numberOfBatches == 1) {
-            return Collections.singleton(new IdMap.IdIterable(0, nodeCount));
-        }
-        PrimitiveLongIterable[] iterators = new PrimitiveLongIterable[numberOfBatches];
-        Arrays.setAll(iterators, i -> {
-            int start = i * batchSize;
-            int length = Math.min(batchSize, nodeCount - start);
-            return new IntIdMap.IdIterable(start, length);
-        });
-        return Arrays.asList(iterators);
-    }
-
     /**
      * @return the number of threads required to compute elementCount with the given batchSize
      */
@@ -140,9 +117,9 @@ public final class ParallelUtil {
     }
 
     /**
-     * @see #adjustedBatchSize(int, int, int)
      * @return a batch size, so that {@code nodeCount} is equally divided by {@code concurrency}
      *         but no smaller than {@link #DEFAULT_BATCH_SIZE}.
+     * @see #adjustedBatchSize(int, int, int)
      */
     public static int adjustedBatchSize(
             final int nodeCount,
@@ -151,25 +128,25 @@ public final class ParallelUtil {
     }
 
     /**
-     * @see #adjustedBatchSize(int, int, int)
      * @return a batch size, so that {@code nodeCount} is equally divided by {@code concurrency}
      *         but no smaller than {@link #DEFAULT_BATCH_SIZE}.
+     * @see #adjustedBatchSize(int, int, int)
      */
     public static long adjustedBatchSize(
             final long nodeCount,
             int concurrency,
             final long minBatchSize) {
         if (concurrency <= 0) {
-            concurrency = (int) Math.min(nodeCount, (long) Integer.MAX_VALUE);
+            concurrency = (int) Math.min(nodeCount, Integer.MAX_VALUE);
         }
         long targetBatchSize = threadCount(concurrency, nodeCount);
         return Math.max(minBatchSize, targetBatchSize);
     }
 
     /**
-     * @see #adjustedBatchSize(long, int, long)
      * @return a batch size, so that {@code nodeCount} is equally divided by {@code concurrency}
      *         but no smaller than {@code minBatchSize} and no larger than {@code maxBatchSize}.
+     * @see #adjustedBatchSize(long, int, long)
      */
     public static long adjustedBatchSize(
             final long nodeCount,
@@ -198,44 +175,6 @@ public final class ParallelUtil {
 
     public static boolean canRunInParallel(final ExecutorService executor) {
         return executor != null && !(executor.isShutdown() || executor.isTerminated());
-    }
-
-    /**
-     * Executes read operations in parallel, based on the given batch size
-     * and executor.
-     */
-    public static <T extends Runnable> List<T> readParallel(
-            final int concurrency,
-            final int batchSize,
-            final IntIdMap idMapping,
-            final ParallelGraphImporter<T> importer,
-            final ExecutorService executor) {
-
-        Collection<PrimitiveIntIterable> iterators =
-                idMapping.batchIterables(batchSize);
-
-        int threads = iterators.size();
-
-        if (!canRunInParallel(executor) || threads == 1) {
-            int nodeOffset = 0;
-            List<T> tasks = new ArrayList<>(threads);
-            for (PrimitiveIntIterable iterator : iterators) {
-                final T task = importer.newImporter(nodeOffset, iterator);
-                tasks.add(task);
-                task.run();
-                nodeOffset += batchSize;
-            }
-            return tasks;
-        } else {
-            List<T> tasks = new ArrayList<>(threads);
-            int nodeOffset = 0;
-            for (PrimitiveIntIterable iterator : iterators) {
-                tasks.add(importer.newImporter(nodeOffset, iterator));
-                nodeOffset += batchSize;
-            }
-            runWithConcurrency(concurrency, tasks, executor);
-            return tasks;
-        }
     }
 
     /**
@@ -283,7 +222,7 @@ public final class ParallelUtil {
                 task.apply(start, end);
             }
         } else {
-            List<Runnable> threads = new ArrayList<>(concurrency);
+            Collection<Runnable> threads = new ArrayList<>(concurrency);
             for (long start = 0L; start < size; start += batchSize) {
                 long end = Math.min(size, start + batchSize);
                 final long finalStart = start;
@@ -296,7 +235,7 @@ public final class ParallelUtil {
     public static Collection<Runnable> tasks(
             final int concurrency,
             final Supplier<? extends Runnable> newTask) {
-        final List<Runnable> tasks = new ArrayList<>();
+        final Collection<Runnable> tasks = new ArrayList<>();
         for (int i = 0; i < concurrency; i++) {
             tasks.add(newTask.get());
         }
@@ -789,12 +728,11 @@ public final class ParallelUtil {
             final TerminationFlag terminationFlag,
             final ExecutorService executor) {
         if (!canRunInParallel(executor)
-                || tasks.size() == 1
-                || concurrency <= 1) {
-            Iterator<? extends Runnable> iterator = tasks.iterator();
-            while (iterator.hasNext()) {
+            || tasks.size() == 1
+            || concurrency <= 1) {
+            for (Runnable task : tasks) {
                 terminationFlag.assertRunning();
-                iterator.next().run();
+                task.run();
             }
             return;
         }
@@ -810,8 +748,9 @@ public final class ParallelUtil {
         try {
             //noinspection StatementWithEmptyBody - add first concurrency tasks
             for (int i = concurrency; i-- > 0
-                    && terminationFlag.running()
-                    && completionService.trySubmit(ts);) ;
+                                      && terminationFlag.running()
+                                      && completionService.trySubmit(ts); )
+                ;
 
             terminationFlag.assertRunning();
 
@@ -833,7 +772,9 @@ public final class ParallelUtil {
                     if (++tries >= maxWaitRetries) {
                         throw new IllegalThreadStateException(format(
                                 "Attempted to submit tasks for %d times with a %d nanosecond delay (%d milliseconds) between each attempt, but ran out of time",
-                                tries, waitNanos, TimeUnit.NANOSECONDS.toMillis(waitNanos)));
+                                tries,
+                                waitNanos,
+                                TimeUnit.NANOSECONDS.toMillis(waitNanos)));
                     }
                     LockSupport.parkNanos(waitNanos);
                 }
@@ -932,7 +873,7 @@ public final class ParallelUtil {
         if (!canRunInParallel(executorService)) {
             throw new IllegalArgumentException("no executor available to run the tasks in parallel");
         }
-        final List<Future<?>> futures = new ArrayList<>();
+        final Collection<Future<?>> futures = new ArrayList<>();
         final int batchSize = threadCount(concurrency, size);
         for (int i = 0; i < size; i += batchSize) {
             final int start = i;
@@ -1008,8 +949,7 @@ public final class ParallelUtil {
         boolean submit(final Runnable task) {
             Objects.requireNonNull(task);
             if (canSubmit()) {
-                QueueingFuture future = new QueueingFuture(task);
-                executor.execute(future);
+                executor.execute(new QueueingFuture(task));
                 return true;
             }
             return false;

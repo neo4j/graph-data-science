@@ -19,120 +19,19 @@
  */
 package org.neo4j.graphalgo.core;
 
-import com.carrotsearch.hppc.LongHashSet;
-import com.carrotsearch.randomizedtesting.RandomizedTest;
-import com.carrotsearch.randomizedtesting.annotations.ThreadLeakScope;
-import org.junit.Before;
-import org.junit.Test;
-import org.neo4j.collection.primitive.PrimitiveIntIterable;
-import org.neo4j.collection.primitive.PrimitiveIntIterator;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
-import java.util.Collection;
-import java.util.function.IntToLongFunction;
+import static org.junit.Assert.assertEquals;
 
-import static org.junit.Assert.*;
-
-@ThreadLeakScope(ThreadLeakScope.Scope.NONE)
-public final class IntIdMapTest extends RandomizedTest {
-
-    private IntIdMap idMap;
-    private long[] ids;
-
-    @Before
-    public void beforeEach() {
-        idMap = new IntIdMap(20);
-        ids = addRandomIds(idMap);
-        idMap.buildMappedIds(AllocationTracker.EMPTY);
-    }
+final class IntIdMapTest {
 
     @Test
-    public void shouldReturnSingleIteratorForLargeBatchSize() throws Exception {
-        Collection<PrimitiveIntIterable> iterables = idMap.batchIterables(100);
-        assertEquals(1, iterables.size());
-
-        assertIterables(idMap, ids, iterables);
-    }
-
-    @Test
-    public void shouldReturnMultipleIteratorsForSmallBatchSize() throws Exception {
-        int expectedBatches = ids.length / 3;
-        if (ids.length % 3 != 0) {
-            expectedBatches++;
-        }
-
-        Collection<PrimitiveIntIterable> iterables = idMap.batchIterables(3);
-        assertEquals(expectedBatches, iterables.size());
-
-        assertIterables(idMap, ids, iterables);
-    }
-
-    @Test
-    public void shouldFailForZeroBatchSize() throws Exception {
-        try {
-            idMap.batchIterables(0);
-            fail();
-        } catch (IllegalArgumentException e) {
-            assertEquals("Invalid batch size: 0", e.getMessage());
-        }
-    }
-
-    @Test
-    public void shouldFailForNegativeBatchSize() throws Exception {
-        int batchSize = between(Integer.MIN_VALUE, -1);
-
-        try {
-            idMap.batchIterables(batchSize);
-            fail();
-        } catch (IllegalArgumentException e) {
-            assertEquals("Invalid batch size: " + batchSize, e.getMessage());
-        }
-    }
-
-    @Test
-    public void shouldComputeMemoryEstimation() throws Exception {
+    void shouldComputeMemoryEstimation() {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100).build();
         MemoryTree memRec = IntIdMap.memoryEstimation().estimate(dimensions, 1);
 
         assertEquals(memRec.memoryUsage().min, 4048L);
         assertEquals(memRec.memoryUsage().max, 4048L);
-    }
-
-    private void assertIterables(
-            final IntIdMap idMap,
-            final long[] ids,
-            final Collection<PrimitiveIntIterable> iterables) {
-        int i = 0;
-        for (PrimitiveIntIterable iterable : iterables) {
-            PrimitiveIntIterator iterator = iterable.iterator();
-            while (iterator.hasNext()) {
-                int next = iterator.next();
-                long id = ids[i];
-                assertEquals(i++, next);
-                assertEquals(id, idMap.toOriginalNodeId(next));
-            }
-        }
-    }
-
-    private long[] addRandomIds(final IntIdMap idMap) {
-        LongHashSet seen = new LongHashSet();
-        return addSomeIds(idMap, i -> {
-            long id;
-            do {
-                id = between(42L, 1337L);
-            } while (!seen.add(id));
-            return id;
-        });
-    }
-
-    private long[] addSomeIds(final IntIdMap idMap, IntToLongFunction newId) {
-        int iterations = between(10, 20);
-        long[] ids = new long[iterations];
-        for (int i = 0; i < iterations; i++) {
-            ids[i] = newId.applyAsLong(i);
-            idMap.add(ids[i]);
-        }
-        return ids;
     }
 }

@@ -20,23 +20,15 @@
 package org.neo4j.graphalgo.core;
 
 import com.carrotsearch.hppc.LongIntHashMap;
-import com.carrotsearch.hppc.LongIntMap;
 import com.carrotsearch.hppc.OpenHashContainers;
 import com.carrotsearch.hppc.cursors.LongIntCursor;
-import org.neo4j.collection.primitive.PrimitiveIntIterable;
 import org.neo4j.collection.primitive.PrimitiveIntIterator;
-import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.function.LongPredicate;
-import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
@@ -55,47 +47,26 @@ public class IntIdMap {
             .perNode("buffers", nodeCount -> {
                 int bufferSize = OpenHashContainers.expectedBufferSize((int) nodeCount);
                 return sizeOfLongArray(bufferSize) +
-                        sizeOfIntArray(bufferSize);
+                       sizeOfIntArray(bufferSize);
             })
             .endField()
             .build();
 
-    /**
-     * defines the lower bound of mapped node ids
-     */
-    public static int START_NODE_ID = 0;
-
     private final IdIterator iter;
     private int nextGraphId;
     private long[] graphIds;
-    private LongIntHashMap nodeToGraphIds;
+    private final LongIntHashMap nodeToGraphIds;
 
     /**
      * initialize the map with maximum node capacity
      */
-    public IntIdMap(final int capacity) {
+    IntIdMap(final int capacity) {
         nodeToGraphIds = new LongIntHashMap(capacity);
         iter = new IdIterator();
     }
 
     public static MemoryEstimation memoryEstimation() {
         return ESTIMATION;
-    }
-
-    /**
-     * CTor used by deserializing logic
-     */
-    public IntIdMap(
-            long[] graphIds,
-            LongIntHashMap nodeToGraphIds) {
-        this.nextGraphId = graphIds.length;
-        this.graphIds = graphIds;
-        this.nodeToGraphIds = nodeToGraphIds;
-        iter = new IdIterator();
-    }
-
-    private PrimitiveIntIterator nodeIterator() {
-        return new IdIterator().reset(graphIds.length);
     }
 
     public PrimitiveLongIterator iterator() {
@@ -113,7 +84,7 @@ public class IntIdMap {
         };
     }
 
-    public int mapOrGet(long longValue) {
+    private int mapOrGet(long longValue) {
         int intValue = nodeToGraphIds.getOrDefault(longValue, -1);
         if (intValue == -1) {
             intValue = nextGraphId++;
@@ -132,7 +103,7 @@ public class IntIdMap {
         return nodeToGraphIds.getOrDefault(longValue, -1);
     }
 
-    public void buildMappedIds(AllocationTracker tracker) {
+    void buildMappedIds(AllocationTracker tracker) {
         tracker.add(sizeOfInstance(IntIdMap.class));
         tracker.add(sizeOfLongArray(nodeToGraphIds.keys.length));
         tracker.add(sizeOfIntArray(nodeToGraphIds.values.length));
@@ -145,14 +116,6 @@ public class IntIdMap {
 
     public int size() {
         return nextGraphId;
-    }
-
-    public long[] mappedIds() {
-        return graphIds;
-    }
-
-    public LongIntMap nodeToGraphIds() {
-        return nodeToGraphIds;
     }
 
     public void forEachNode(LongPredicate consumer) {
@@ -180,71 +143,14 @@ public class IntIdMap {
         return graphIds.length;
     }
 
-    public Collection<PrimitiveLongIterable> longBatchIterables(int batchSize) {
-        Collection<PrimitiveIntIterable> base = batchIterables(batchSize);
-        return base.stream().map((intIterable) -> new PrimitiveLongIterable() {
-            PrimitiveIntIterator base1 = intIterable.iterator();
-
-            @Override
-            public PrimitiveLongIterator iterator() {
-                return new PrimitiveLongIterator() {
-
-                    @Override
-                    public boolean hasNext() {
-                        return base1.hasNext();
-                    }
-
-                    @Override
-                    public long next() {
-                        return base1.next();
-                    }
-                };
-            }
-        }).collect(Collectors.toList());
-    }
-
-    public Collection<PrimitiveIntIterable> batchIterables(int batchSize) {
-        int nodeCount = graphIds.length;
-        int numberOfBatches = ParallelUtil.threadCount(batchSize, nodeCount);
-        if (numberOfBatches == 1) {
-            return Collections.singleton(this::nodeIterator);
-        }
-        PrimitiveIntIterable[] iterators = new PrimitiveIntIterable[numberOfBatches];
-        Arrays.setAll(iterators, i -> {
-            int start = i * batchSize;
-            int length = Math.min(batchSize, nodeCount - start);
-            return new IdIterable(start, length);
-        });
-        return Arrays.asList(iterators);
-    }
-
-    public static final class IdIterable implements PrimitiveIntIterable {
-        private final int start;
-        private final int length;
-
-        public IdIterable(int start, int length) {
-            this.start = start;
-            this.length = length;
-        }
-
-        @Override
-        public PrimitiveIntIterator iterator() {
-            return new IdIterator().reset(start, length);
-        }
-    }
-
     private static final class IdIterator implements PrimitiveIntIterator {
 
         private int current;
         private int limit; // exclusive upper bound
 
         private PrimitiveIntIterator reset(int length) {
-            return reset(0, length);
-        }
-
-        private PrimitiveIntIterator reset(int start, int length) {
-            current = start;
-            this.limit = start + length;
+            current = 0;
+            limit = length;
             return this;
         }
 

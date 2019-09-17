@@ -20,16 +20,15 @@
 package org.neo4j.graphalgo.core.utils;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.collection.primitive.PrimitiveIntIterable;
-import org.neo4j.collection.primitive.PrimitiveIntStack;
+import org.neo4j.collection.primitive.PrimitiveLongCollections;
+import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.function.ThrowingConsumer;
-import org.neo4j.graphalgo.core.IntIdMap;
+import org.neo4j.graphalgo.api.BatchNodeIterable;
 import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.helpers.Exceptions;
 import org.neo4j.kernel.api.exceptions.Status;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -53,8 +52,8 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -142,27 +141,26 @@ final class ParallelUtilTest {
 
     @Test
     void shouldRunBatchesSequentialIfNoExecutorIsGiven() {
-        PrimitiveIntIterable[] ints = {ints(0, 10), ints(10, 14)};
-        IntIdMap batches = mock(IntIdMap.class);
+        PrimitiveLongIterable[] ints = {longs(0, 10), longs(10, 14)};
+        BatchNodeIterable batches = mock(BatchNodeIterable.class);
         when(batches.batchIterables(anyInt())).thenReturn(asList(ints));
+        long currentThreadId = Thread.currentThread().getId();
         Runnable task = () -> {
+            assertEquals(Thread.currentThread().getId(), currentThreadId);
         };
-        ParallelGraphImporter importer = mock(ParallelGraphImporter.class);
+        HugeParallelGraphImporter importer = mock(HugeParallelGraphImporter.class);
         when(importer.newImporter(anyInt(), any())).thenReturn(task);
 
-        final Collection tasks = ParallelUtil.readParallel(
+        ParallelUtil.readParallel(
                 100,
                 10,
                 batches,
-                importer,
-                null);
+                null,
+                importer
+        );
 
         verify(importer, times(1)).newImporter(0, ints[0]);
         verify(importer, times(1)).newImporter(10, ints[1]);
-        assertEquals(2, tasks.size());
-        for (Object t : tasks) {
-            assertSame(task, t);
-        }
     }
 
     @Test
@@ -354,11 +352,7 @@ final class ParallelUtilTest {
         }
     }
 
-    private PrimitiveIntIterable ints(int from, int size) {
-        final PrimitiveIntStack stack = new PrimitiveIntStack(size);
-        for (int i = 0; i < size; i++) {
-            stack.push(i + from);
-        }
-        return stack;
+    private PrimitiveLongIterable longs(int from, int size) {
+        return () -> PrimitiveLongCollections.range(from, from + size - 1);
     }
 }
