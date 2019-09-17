@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.huge.loader;
 
 import org.neo4j.graphalgo.KernelPropertyMapping;
 import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.ImportProgress;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -87,10 +87,10 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
                 dimensions.highestNeoId(),
                 concurrency,
                 tracker);
-        Map<String, HugeWeightMapping> nodeProperties = new HashMap<>();
+        Map<String, WeightMapping> nodeProperties = new HashMap<>();
         for (PropertyMapping propertyMapping : propertyMappings) {
             HugeNodePropertiesBuilder builder = builders.get(propertyMapping.propertyName);
-            HugeWeightMapping props = builder != null ? builder.build() : new HugeNullWeightMap(propertyMapping.defaultValue);
+            WeightMapping props = builder != null ? builder.build() : new NullWeightMap(propertyMapping.defaultValue);
             nodeProperties.put(propertyMapping.propertyName, props);
         }
         return new IdsAndProperties(hugeIdMap, Collections.unmodifiableMap(nodeProperties));

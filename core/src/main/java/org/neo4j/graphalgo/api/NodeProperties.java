@@ -32,7 +32,7 @@ public interface NodeProperties {
      * @param type       the node property type
      * @return the mapping associated with that type
      */
-    HugeWeightMapping nodeProperties(String type);
+    WeightMapping nodeProperties(String type);
 
     Set<String> availableNodeProperties();
 

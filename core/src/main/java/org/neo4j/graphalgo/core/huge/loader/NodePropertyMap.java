@@ -19,15 +19,15 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
-import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.PagedLongDoubleMap;
 
-final class HugeNodePropertyMap implements HugeWeightMapping {
+final class NodePropertyMap implements WeightMapping {
 
     private static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations
-            .builder(HugeNodePropertyMap.class)
+            .builder(NodePropertyMap.class)
             .add("properties", PagedLongDoubleMap.memoryEstimation())
             .build();
 
@@ -39,7 +39,7 @@ final class HugeNodePropertyMap implements HugeWeightMapping {
         return MEMORY_ESTIMATION;
     }
 
-    HugeNodePropertyMap(PagedLongDoubleMap properties, double defaultValue, int propertyId) {
+    NodePropertyMap(PagedLongDoubleMap properties, double defaultValue, int propertyId) {
         this.properties = properties;
         this.defaultValue = defaultValue;
         this.propertyId = propertyId;

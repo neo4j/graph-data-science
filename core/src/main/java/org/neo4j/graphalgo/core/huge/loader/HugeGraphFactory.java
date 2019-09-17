@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.RelationshipTypeMappings;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.core.DeduplicateRelationshipsStrategy;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
@@ -73,9 +73,9 @@ public final class HugeGraphFactory extends GraphFactory {
         for (KernelPropertyMapping propertyMapping : dimensions.nodeProperties()) {
             int propertyId = propertyMapping.propertyKeyId;
             if (propertyId == StatementConstants.NO_SUCH_PROPERTY_KEY) {
-                builder.add(propertyMapping.propertyName, HugeNullWeightMap.MEMORY_USAGE);
+                builder.add(propertyMapping.propertyName, NullWeightMap.MEMORY_USAGE);
             } else {
-                builder.add(propertyMapping.propertyName, HugeNodePropertyMap.memoryEstimation());
+                builder.add(propertyMapping.propertyName, NodePropertyMap.memoryEstimation());
             }
         }
 
@@ -265,7 +265,7 @@ public final class HugeGraphFactory extends GraphFactory {
     private HugeGraph buildGraph(
             final AllocationTracker tracker,
             final IdMap idMapping,
-            final Map<String, HugeWeightMapping> nodeProperties,
+            final Map<String, WeightMapping> nodeProperties,
             final RelationshipsBuilder inRelationshipsBuilder,
             final RelationshipsBuilder outRelationshipsBuilder,
             final double defaultWeight,

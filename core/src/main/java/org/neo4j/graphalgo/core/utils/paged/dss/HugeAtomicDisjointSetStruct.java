@@ -19,12 +19,11 @@
  */
 package org.neo4j.graphalgo.core.utils.paged.dss;
 
-import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -84,7 +83,7 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
         this.maxCommunityId = null;
     }
 
-    public HugeAtomicDisjointSetStruct(long capacity, HugeWeightMapping communityMapping, AllocationTracker tracker) {
+    public HugeAtomicDisjointSetStruct(long capacity, WeightMapping communityMapping, AllocationTracker tracker) {
         this.parent = HugeAtomicLongArray.newArray(capacity, i -> i, tracker);
         this.communities = HugeAtomicLongArray.newArray(capacity, nodeId -> {
             double communityIdValue = communityMapping.nodeWeight(nodeId, Double.NaN);

@@ -26,7 +26,7 @@ import org.neo4j.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeNodeWeights;
+import org.neo4j.graphalgo.api.NodeWeights;
 import org.neo4j.graphalgo.api.NodeIterator;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.sources.RandomNodeIterator;
@@ -82,7 +82,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private final long nodeCount;
     private final int concurrency;
     private final AllocationTracker tracker;
-    private final HugeNodeWeights nodeWeights;
+    private final NodeWeights nodeWeights;
     private Graph graph;
     private ExecutorService pool;
     private final NodeIterator nodeIterator;
@@ -100,7 +100,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
     ModularityOptimization(
             final Graph graph,
-            final HugeNodeWeights nodeWeights,
+            final NodeWeights nodeWeights,
             final ExecutorService pool,
             final int concurrency,
             final AllocationTracker tracker) {

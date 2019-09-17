@@ -25,11 +25,11 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
-import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
+import org.neo4j.graphalgo.core.huge.loader.NullWeightMap;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
@@ -48,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 public final class UnionFindSafetyTest {
 
     UnionFind.Config algoConfig = new UnionFind.Config(
-            new HugeNullWeightMap(-1),
+            new NullWeightMap(-1),
             Double.NaN
     );
 
@@ -198,7 +198,7 @@ public final class UnionFindSafetyTest {
         }
 
         @Override
-        public HugeWeightMapping nodeProperties(final String type) {
+        public WeightMapping nodeProperties(final String type) {
             throw new UnsupportedOperationException(
                     "org.neo4j.graphalgo.impl.unionfind.UnionFindSafetyTest.FlakyGraph.hugeNodeProperties is not implemented.");
         }

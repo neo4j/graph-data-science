@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.impl.unionfind;
 
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -91,10 +91,10 @@ public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> 
 
     public static class Config {
 
-        public final HugeWeightMapping communityMap;
+        public final WeightMapping communityMap;
         public final double threshold;
 
-        public Config(final HugeWeightMapping communityMap, final double threshold) {
+        public Config(final WeightMapping communityMap, final double threshold) {
             this.communityMap = communityMap;
             this.threshold = threshold;
         }

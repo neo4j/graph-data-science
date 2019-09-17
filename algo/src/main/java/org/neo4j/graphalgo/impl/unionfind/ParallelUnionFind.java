@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.impl.unionfind;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
@@ -92,7 +92,7 @@ public class ParallelUnionFind extends UnionFind<ParallelUnionFind> {
     @Override
     public DisjointSetStruct compute(double threshold) {
         long nodeCount = graph.nodeCount();
-        HugeWeightMapping communityMap = algoConfig.communityMap;
+        WeightMapping communityMap = algoConfig.communityMap;
         DisjointSetStruct dss = communityMap == null
                 ? new HugeAtomicDisjointSetStruct(nodeCount, tracker)
                 : new HugeAtomicDisjointSetStruct(nodeCount, communityMap, tracker);

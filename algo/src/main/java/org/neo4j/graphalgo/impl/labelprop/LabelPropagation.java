@@ -23,8 +23,8 @@ import org.neo4j.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeWeightMapping;
-import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
+import org.neo4j.graphalgo.api.WeightMapping;
+import org.neo4j.graphalgo.core.huge.loader.NullWeightMap;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -45,8 +45,8 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
 
     private final long nodeCount;
     private final AllocationTracker tracker;
-    private final HugeWeightMapping nodeProperties;
-    private final HugeWeightMapping nodeWeights;
+    private final WeightMapping nodeProperties;
+    private final WeightMapping nodeWeights;
     private final int batchSize;
     private final int concurrency;
     private final ExecutorService executor;
@@ -71,15 +71,15 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         this.executor = executor;
         this.tracker = tracker;
 
-        HugeWeightMapping seedProperty = graph.nodeProperties(SEED_TYPE);
+        WeightMapping seedProperty = graph.nodeProperties(SEED_TYPE);
         if (seedProperty == null) {
-            seedProperty = new HugeNullWeightMap(0.0);
+            seedProperty = new NullWeightMap(0.0);
         }
         this.nodeProperties = seedProperty;
 
-        HugeWeightMapping weightProperty = graph.nodeProperties(WEIGHT_TYPE);
+        WeightMapping weightProperty = graph.nodeProperties(WEIGHT_TYPE);
         if (weightProperty == null) {
-            weightProperty = new HugeNullWeightMap(1.0);
+            weightProperty = new NullWeightMap(1.0);
         }
         this.nodeWeights = weightProperty;
         maxLabelId = nodeProperties.getMaxValue();

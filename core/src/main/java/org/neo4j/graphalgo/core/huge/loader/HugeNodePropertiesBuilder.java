@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
-import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedLongDoubleMap;
 import org.neo4j.kernel.api.StatementConstants;
@@ -69,7 +69,7 @@ public final class HugeNodePropertiesBuilder {
         properties.put(index, value);
     }
 
-    public HugeWeightMapping build() {
-        return new HugeNodePropertyMap(properties, defaultValue, propertyId);
+    public WeightMapping build() {
+        return new NodePropertyMap(properties, defaultValue, propertyId);
     }
 }

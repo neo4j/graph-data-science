@@ -23,10 +23,10 @@ import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.BaseAlgoProc;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
-import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
+import org.neo4j.graphalgo.core.huge.loader.NullWeightMap;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -340,7 +340,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
 
     private UnionFindResultProducer getResultProducer(
             final DisjointSetStruct dss,
-            final HugeWeightMapping nodeProperties,
+            final WeightMapping nodeProperties,
             final ProcedureConfiguration procedureConfiguration,
             final AllocationTracker tracker) {
         String writeProperty = procedureConfiguration.get(
@@ -352,7 +352,7 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
         boolean withConsecutiveIds = procedureConfiguration.get(CONFIG_CONSECUTIVE_IDS_PROPERTY, false);
         boolean withSeeding = seedProperty != null;
         boolean writePropertyEqualsSeedProperty = Objects.equals(seedProperty, writeProperty);
-        boolean hasNodeProperties = nodeProperties != null && !(nodeProperties instanceof HugeNullWeightMap);
+        boolean hasNodeProperties = nodeProperties != null && !(nodeProperties instanceof NullWeightMap);
 
         UnionFindResultProducer resultProducer = new UnionFindResultProducer.NonConsecutive(
                 UnionFindResultProducer.NonSeedingTranslator.INSTANCE,

@@ -21,18 +21,18 @@ package org.neo4j.graphalgo.impl.labelprop;
 
 import com.carrotsearch.hppc.LongDoubleScatterMap;
 import com.carrotsearch.hppc.cursors.LongDoubleCursor;
-import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 final class ComputeStepConsumer implements WeightedRelationshipConsumer {
 
-    private final HugeWeightMapping nodeWeights;
+    private final WeightMapping nodeWeights;
     private final HugeLongArray existingLabels;
     private final LongDoubleScatterMap votes;
 
     ComputeStepConsumer(
-            HugeWeightMapping nodeWeights,
+            WeightMapping nodeWeights,
             HugeLongArray existingLabels) {
         this.existingLabels = existingLabels;
         this.nodeWeights = nodeWeights;

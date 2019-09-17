@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.huge;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
@@ -73,7 +73,7 @@ public class UnionGraph implements Graph {
     }
 
     @Override
-    public HugeWeightMapping nodeProperties(final String type) {
+    public WeightMapping nodeProperties(final String type) {
         return first.nodeProperties(type);
     }
 

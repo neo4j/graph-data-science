@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.huge.loader;
 
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -64,7 +64,7 @@ class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
     @Override
     IdsAndProperties result() {
         IdMap idMap = IdMapBuilder.build(builder, maxNodeId, setup.concurrency, setup.tracker);
-        Map<String, HugeWeightMapping> nodeProperties = nodePropertyBuilders.entrySet().stream()
+        Map<String, WeightMapping> nodeProperties = nodePropertyBuilders.entrySet().stream()
                 .collect(Collectors.toMap(e -> e.getKey().propertyName, e -> e.getValue().build()));
         return new IdsAndProperties(idMap, nodeProperties);
     }

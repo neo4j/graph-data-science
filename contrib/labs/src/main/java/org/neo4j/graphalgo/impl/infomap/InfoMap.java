@@ -486,11 +486,11 @@ public class InfoMap extends Algorithm<InfoMap> {
                 if (s != t) {
                     final double v = weights.weightOf(s, t);
                     w += v;
-                    wi.put(t, v * pageRank.weightOf(s) + weights.weightOf(t, s) * pageRank.weightOf(t));
+                    wi.put(t, v * pageRank.nodeWeight(s) + weights.weightOf(t, s) * pageRank.nodeWeight(t));
                 }
                 return true;
             });
-            p = pageRank.weightOf(startNode);
+            p = pageRank.nodeWeight(startNode);
             w *= p;
             q = tau * p + tau1 * w;
         }

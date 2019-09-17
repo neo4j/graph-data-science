@@ -23,13 +23,13 @@ import org.neo4j.collection.primitive.PrimitiveIntCollections;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.IntIdMap;
-import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
+import org.neo4j.graphalgo.core.huge.loader.NullWeightMap;
 import org.neo4j.graphalgo.core.loading.LoadRelationships;
 import org.neo4j.graphalgo.core.loading.ReadHelper;
 import org.neo4j.graphalgo.core.utils.RawValues;
@@ -266,8 +266,8 @@ public class GraphView implements Graph {
     }
 
     @Override
-    public HugeWeightMapping nodeProperties(String type) {
-        return new HugeNullWeightMap(1D);
+    public WeightMapping nodeProperties(String type) {
+        return new NullWeightMap(1D);
     }
 
     @Override

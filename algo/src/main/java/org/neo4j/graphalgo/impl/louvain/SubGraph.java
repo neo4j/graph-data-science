@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.impl.louvain;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
@@ -117,7 +117,7 @@ abstract class SubGraph implements Graph {
     }
 
     @Override
-    public final HugeWeightMapping nodeProperties(String type) {
+    public final WeightMapping nodeProperties(String type) {
         throw new UnsupportedOperationException("hugeNodeProperties is not supported.");
     }
 

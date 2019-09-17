@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.bench;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
-import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
+import org.neo4j.graphalgo.core.huge.loader.NullWeightMap;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
@@ -71,7 +71,7 @@ public class UnionFindBenchmark {
     @Benchmark
     public Object unionFind() {
         UnionFind.Config algoConfig = new UnionFind.Config(
-                new HugeNullWeightMap(-1L),
+                new NullWeightMap(-1L),
                 Double.NaN
         );
 

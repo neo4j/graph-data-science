@@ -19,12 +19,10 @@
  */
 package org.neo4j.graphalgo.api;
 
-/**
- * TODO: remove
- *
- * @author mknblch
- */
 public interface NodeWeights {
 
-    double weightOf(int nodeId); // TODO default weight?
+    /**
+     * returns the weight for a node or the loaded default weight if no weight has been defined.
+     */
+    double nodeWeight(long nodeId);
 }

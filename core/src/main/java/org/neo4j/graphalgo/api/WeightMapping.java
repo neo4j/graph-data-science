@@ -21,25 +21,63 @@ package org.neo4j.graphalgo.api;
 
 import org.neo4j.graphalgo.core.utils.RawValues;
 
-/**
- * @author mknobloch
- */
-public interface WeightMapping {
+import static org.neo4j.graphalgo.core.utils.RawValues.getHead;
+import static org.neo4j.graphalgo.core.utils.RawValues.getTail;
+
+public interface WeightMapping extends NodeWeights {
+    /**
+     * Returns the weight for the relationship defined by their start and end nodes.
+     */
+    double weight(long source, long target);
+
+    /**
+     * Returns the weight for the relationship defined by their start and end nodes
+     * or the given default weight if no weight has been defined.
+     * The default weight has precedence over the default weight defined by the loader.
+     */
+    double weight(long source, long target, double defaultValue);
+
+    /**
+     * Returns the weight for a node or the loaded default weight if no weight has been defined.
+     */
+    @Override
+    default double nodeWeight(long nodeId) {
+        return weight(nodeId, -1L);
+    }
+
+    /**
+     * Returns the weight for a node or the given default weight if no weight has been defined.
+     * The default weight has precedence over the default weight defined by the loader.
+     */
+    default double nodeWeight(long nodeId, double defaultValue) {
+        return weight(nodeId, -1L, defaultValue);
+    }
+
+    /**
+     * Returns the weight for ID if set or the load-time specified default weight otherwise.
+     */
+    default double weight(long id) {
+        return weight((long) getHead(id), (long) getTail(id));
+    }
+
+    /**
+     * Returns the weight for ID if set or the given default weight otherwise.
+     */
+    default double weight(long id, final double defaultValue) {
+        return weight((long) getHead(id), (long) getTail(id), defaultValue);
+    }
+
+    /**
+     * Release internal data structures and return an estimate how many bytes were freed.
+     *
+     * Note that the mapping is not usable afterwards.
+     */
+    long release();
 
     /**
      * Returns the number of keys stored in that mapping.
      */
     long size();
-
-    /**
-     * Returns the weight for ID if set or the load-time specified default weight otherwise.
-     */
-    double weight(long id);
-
-    /**
-     * Returns the weight for ID if set or the given default weight otherwise.
-     */
-    double weight(long id, double defaultValue);
 
     default double weight(int source, int target) {
         return weight(RawValues.combineIntInt(source, target));

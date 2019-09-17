@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.huge;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
@@ -86,7 +86,7 @@ public class HugeGraph implements Graph {
     private final IdMap idMapping;
     private final AllocationTracker tracker;
 
-    private final Map<String, HugeWeightMapping> nodeProperties;
+    private final Map<String, WeightMapping> nodeProperties;
     private final long relationshipCount;
     private AdjacencyList inAdjacency;
     private AdjacencyList outAdjacency;
@@ -109,7 +109,7 @@ public class HugeGraph implements Graph {
     public HugeGraph(
             final AllocationTracker tracker,
             final IdMap idMapping,
-            final Map<String, HugeWeightMapping> nodeProperties,
+            final Map<String, WeightMapping> nodeProperties,
             final long relationshipCount,
             final AdjacencyList inAdjacency,
             final AdjacencyList outAdjacency,
@@ -213,7 +213,7 @@ public class HugeGraph implements Graph {
     }
 
     @Override
-    public HugeWeightMapping nodeProperties(final String type) {
+    public WeightMapping nodeProperties(final String type) {
         return nodeProperties.get(type);
     }
 
@@ -417,7 +417,7 @@ public class HugeGraph implements Graph {
     @Override
     public void releaseProperties() {
         if (canRelease) {
-            for (final HugeWeightMapping nodeMapping : nodeProperties.values()) {
+            for (final WeightMapping nodeMapping : nodeProperties.values()) {
                 tracker.remove(nodeMapping.release());
             }
         }

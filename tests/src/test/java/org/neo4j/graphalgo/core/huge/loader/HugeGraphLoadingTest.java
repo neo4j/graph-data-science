@@ -24,7 +24,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
@@ -76,7 +76,7 @@ public final class HugeGraphLoadingTest {
                 .withOptionalNodeProperties(PropertyMapping.of("bar", "bar", -1.0))
                 .load(HugeGraphFactory.class);
 
-        HugeWeightMapping nodeProperties = graph.nodeProperties("bar");
+        WeightMapping nodeProperties = graph.nodeProperties("bar");
         long propertyCountDiff = nodeCount - nodeProperties.size();
         String errorMessage = String.format(
                 "Expected %d properties to be imported. Actually imported %d properties (missing %d properties).",

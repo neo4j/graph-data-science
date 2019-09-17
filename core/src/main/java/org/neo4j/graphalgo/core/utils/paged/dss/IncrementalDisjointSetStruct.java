@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.utils.paged.dss;
 
 
-import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -44,7 +44,7 @@ public final class IncrementalDisjointSetStruct extends SequentialDisjointSetStr
 
     private final HugeLongArray parent;
     private final HugeLongLongMap internalToProvidedIds;
-    private final HugeWeightMapping communityMapping;
+    private final WeightMapping communityMapping;
     private final long size;
     private long maxCommunity;
 
@@ -59,7 +59,7 @@ public final class IncrementalDisjointSetStruct extends SequentialDisjointSetStr
      */
     public IncrementalDisjointSetStruct(
             long size,
-            HugeWeightMapping communityMapping,
+            WeightMapping communityMapping,
             AllocationTracker tracker) {
         this.parent = HugeLongArray.newArray(size, tracker);
         this.internalToProvidedIds = new HugeLongLongMap(size, tracker);
