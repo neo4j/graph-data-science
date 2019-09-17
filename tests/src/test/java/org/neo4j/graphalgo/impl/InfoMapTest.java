@@ -34,7 +34,6 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.impl.infomap.InfoMap;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
@@ -148,10 +147,5 @@ class InfoMapTest {
 
         // should be 3 communities in each graph
         assertEquals(3, algo.getCommunityCount());
-
-        System.out.printf(
-                "%27s | %d iterations%n",
-                Arrays.toString(algo.getCommunities()),
-                algo.getIterations());
     }
 }
