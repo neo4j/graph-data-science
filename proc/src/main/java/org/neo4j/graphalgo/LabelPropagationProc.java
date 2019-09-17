@@ -20,10 +20,10 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
-import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
+import org.neo4j.graphalgo.core.huge.loader.NullWeightMap;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -289,8 +289,8 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
 
         try (ProgressTimer ignored = stats.timeWrite()) {
             boolean writePropertyEqualsSeedProperty = Objects.equals(seedProperty, writeProperty);
-            HugeWeightMapping seedProperties = graph.nodeProperties(LabelPropagation.SEED_TYPE);
-            boolean hasSeedProperties = seedProperties != null && !(seedProperties instanceof HugeNullWeightMap);
+            WeightMapping seedProperties = graph.nodeProperties(LabelPropagation.SEED_TYPE);
+            boolean hasSeedProperties = seedProperties != null && !(seedProperties instanceof NullWeightMap);
 
             PropertyTranslator<HugeLongArray> translator = HugeLongArray.Translator.INSTANCE;
             if (writePropertyEqualsSeedProperty && hasSeedProperties) {

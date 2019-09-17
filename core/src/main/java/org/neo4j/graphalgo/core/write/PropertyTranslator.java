@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.write;
 
-import org.neo4j.graphalgo.api.HugeWeightMapping;
+import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -106,10 +106,10 @@ public interface PropertyTranslator<T> {
 
     final class OfLongIfChanged<T> implements PropertyTranslator<T> {
 
-        private final HugeWeightMapping currentProperties;
+        private final WeightMapping currentProperties;
         private final SeededDataAccessFunction newPropertiesFn;
 
-        public OfLongIfChanged(HugeWeightMapping currentProperties, SeededDataAccessFunction<T> newPropertiesFn) {
+        public OfLongIfChanged(WeightMapping currentProperties, SeededDataAccessFunction<T> newPropertiesFn) {
             this.currentProperties = currentProperties;
             this.newPropertiesFn = newPropertiesFn;
         }
