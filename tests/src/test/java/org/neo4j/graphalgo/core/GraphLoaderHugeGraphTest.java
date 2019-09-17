@@ -26,10 +26,8 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -40,9 +38,6 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-/**
- * @author mknblch
- */
 class GraphLoaderTest {
 
     private GraphDatabaseAPI db;
@@ -240,7 +235,7 @@ class GraphLoaderTest {
 
     @AllGraphTypesTest
     void undirectedWithoutDeduplication(Class<? extends GraphFactory> graphImpl) {
-        assumeTrue(graphImpl != GraphViewFactory.class && graphImpl != HeavyGraphFactory.class);
+        assumeTrue(graphImpl.isAssignableFrom(GraphViewFactory.class));
         db.execute("" +
                    "CREATE (a:Node),(b:Node),(c:Node),(d:Node) " +
                    "CREATE" +
