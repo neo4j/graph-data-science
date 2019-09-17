@@ -273,8 +273,8 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
     }
 
     @SingleAndMultiThreadedAllGraphNames
-    @MethodSource("parameters")
     void shouldRunLabelPropagationWithIdenticalSeedAndWriteProperties(boolean parallel, String graphName) {
+        assumeFalse(graphName.equalsIgnoreCase("kernel"));
         String query = "CALL algo.beta.labelPropagation(" +
                        "    null, 'X', {" +
                        "        batchSize: $batchSize, direction: 'OUTGOING', concurrency: $concurrency, graph: $graph, seedProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: $seedProperty" +
