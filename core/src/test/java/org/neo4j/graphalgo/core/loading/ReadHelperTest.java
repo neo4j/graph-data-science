@@ -60,18 +60,6 @@ class ReadHelperTest {
         assertEquals(42.0, ReadHelper.extractValue(Values.NO_VALUE, 42.0));
     }
 
-    @Test
-    void extractValueReadsDatesAsEpochMillis() {
-        LocalDateTime ldt = LocalDateTime.ofEpochSecond(1337421337, 420_000_000, ZoneOffset.UTC);
-        assertEquals(1337421337420.0, ReadHelper.extractValue(Values.temporalValue(ldt), 42.0));
-
-        OffsetDateTime odt = OffsetDateTime.of(ldt, ZoneOffset.UTC);
-        assertEquals(1337421337420.0, ReadHelper.extractValue(Values.temporalValue(odt), 42.0));
-
-        ZonedDateTime zdt = ZonedDateTime.of(ldt, ZoneOffset.UTC);
-        assertEquals(1337421337420.0, ReadHelper.extractValue(Values.temporalValue(zdt), 42.0));
-    }
-
     @ParameterizedTest
     @MethodSource("invalidProperties")
     void extractValueFailsForNonNumericTypes(Value value, String typePart, String valuePart) {
