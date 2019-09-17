@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
-import org.neo4j.graphalgo.core.huge.HugeAdjacencyList;
+import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
@@ -27,15 +27,15 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static org.neo4j.graphalgo.core.huge.HugeAdjacencyList.PAGE_MASK;
-import static org.neo4j.graphalgo.core.huge.HugeAdjacencyList.PAGE_SHIFT;
-import static org.neo4j.graphalgo.core.huge.HugeAdjacencyList.PAGE_SIZE;
+import static org.neo4j.graphalgo.core.huge.AdjacencyList.PAGE_MASK;
+import static org.neo4j.graphalgo.core.huge.AdjacencyList.PAGE_SHIFT;
+import static org.neo4j.graphalgo.core.huge.AdjacencyList.PAGE_SIZE;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfByteArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArrayElements;
 
 
-final class HugeAdjacencyListBuilder {
+final class AdjacencyListBuilder {
 
     private static final long MAX_SIZE = 1L << (Integer.SIZE - 1 + PAGE_SHIFT);
     private static final long PAGE_SIZE_IN_BYTES = sizeOfByteArray(PAGE_SIZE);
@@ -51,11 +51,11 @@ final class HugeAdjacencyListBuilder {
 
     private byte[][] pages;
 
-    static HugeAdjacencyListBuilder newBuilder(AllocationTracker tracker) {
-        return new HugeAdjacencyListBuilder(tracker);
+    static AdjacencyListBuilder newBuilder(AllocationTracker tracker) {
+        return new AdjacencyListBuilder(tracker);
     }
 
-    private HugeAdjacencyListBuilder(AllocationTracker tracker) {
+    private AdjacencyListBuilder(AllocationTracker tracker) {
         this.tracker = tracker;
         growLock = new ReentrantLock(true);
         size = new AtomicLong();
@@ -69,8 +69,8 @@ final class HugeAdjacencyListBuilder {
         return new Allocator(this);
     }
 
-    public HugeAdjacencyList build() {
-        return new HugeAdjacencyList(pages);
+    public AdjacencyList build() {
+        return new AdjacencyList(pages);
     }
 
     private long allocateNewPages(Allocator into) {
@@ -153,7 +153,7 @@ final class HugeAdjacencyListBuilder {
 
     static final class Allocator {
 
-        private final HugeAdjacencyListBuilder builder;
+        private final AdjacencyListBuilder builder;
 
         private long top;
 
@@ -165,7 +165,7 @@ final class HugeAdjacencyListBuilder {
         public byte[] page;
         public int offset;
 
-        private Allocator(final HugeAdjacencyListBuilder builder) {
+        private Allocator(final AdjacencyListBuilder builder) {
             this.builder = builder;
             prevOffset = -1;
         }

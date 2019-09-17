@@ -21,8 +21,8 @@ package org.neo4j.graphalgo.core.huge.loader;
 
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.DeduplicateRelationshipsStrategy;
-import org.neo4j.graphalgo.core.huge.HugeAdjacencyList;
-import org.neo4j.graphalgo.core.huge.HugeAdjacencyOffsets;
+import org.neo4j.graphalgo.core.huge.AdjacencyList;
+import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.kernel.api.StatementConstants;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -100,10 +100,10 @@ class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
     Relationships result() {
         ParallelUtil.run(importer.flushTasks(), setup.executor);
 
-        HugeAdjacencyList outAdjacencyList = outgoingRelationshipsBuilder.adjacency.build();
-        HugeAdjacencyOffsets outAdjacencyOffsets = outgoingRelationshipsBuilder.globalAdjacencyOffsets;
-        HugeAdjacencyList outWeightList = setup.shouldLoadRelationshipWeight() ? outgoingRelationshipsBuilder.weights.build() : null;
-        HugeAdjacencyOffsets outWeightOffsets = setup.shouldLoadRelationshipWeight() ? outgoingRelationshipsBuilder.globalWeightOffsets : null;
+        AdjacencyList outAdjacencyList = outgoingRelationshipsBuilder.adjacency.build();
+        AdjacencyOffsets outAdjacencyOffsets = outgoingRelationshipsBuilder.globalAdjacencyOffsets;
+        AdjacencyList outWeightList = setup.shouldLoadRelationshipWeight() ? outgoingRelationshipsBuilder.weights.build() : null;
+        AdjacencyOffsets outWeightOffsets = setup.shouldLoadRelationshipWeight() ? outgoingRelationshipsBuilder.globalWeightOffsets : null;
 
         return new Relationships(
                 totalRecordsSeen, totalRelationshipsImported,

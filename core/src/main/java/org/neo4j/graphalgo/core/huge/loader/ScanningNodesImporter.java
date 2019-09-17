@@ -82,7 +82,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
 
     @Override
     IdsAndProperties build() {
-        IdMap hugeIdMap = HugeIdMapBuilder.build(
+        IdMap hugeIdMap = IdMapBuilder.build(
                 idMapBuilder,
                 dimensions.highestNeoId(),
                 concurrency,

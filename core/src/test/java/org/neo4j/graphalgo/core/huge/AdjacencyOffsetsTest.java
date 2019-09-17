@@ -27,12 +27,12 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 
 import static org.junit.Assert.assertEquals;
 
-public class HugeAdjacencyOffsetsTest {
+public class AdjacencyOffsetsTest {
 
     @Test
     public void shouldComputeMemoryEstimationForSinglePage() {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100).build();
-        MemoryTree memRec = HugeAdjacencyOffsets
+        MemoryTree memRec = AdjacencyOffsets
                 .memoryEstimation(4096, 1)
                 .estimate(dimensions, 1);
         MemoryRange expected = MemoryRange.of(16L /* Page.class */ + BitUtil.align(16 + 4096 * 8, 8) /* data */);
@@ -44,7 +44,7 @@ public class HugeAdjacencyOffsetsTest {
     public void shouldComputeMemoryEstimationForMultiplePages() {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100_000).build();
         int numberOfPages = (int) BitUtil.ceilDiv(100_000, 4096);
-        MemoryTree memRec = HugeAdjacencyOffsets
+        MemoryTree memRec = AdjacencyOffsets
                 .memoryEstimation(4096, numberOfPages)
                 .estimate(dimensions, 1);
 

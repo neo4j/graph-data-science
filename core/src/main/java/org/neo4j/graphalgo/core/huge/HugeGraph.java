@@ -88,20 +88,20 @@ public class HugeGraph implements Graph {
 
     private final Map<String, HugeWeightMapping> nodeProperties;
     private final long relationshipCount;
-    private HugeAdjacencyList inAdjacency;
-    private HugeAdjacencyList outAdjacency;
-    private HugeAdjacencyOffsets inOffsets;
-    private HugeAdjacencyOffsets outOffsets;
+    private AdjacencyList inAdjacency;
+    private AdjacencyList outAdjacency;
+    private AdjacencyOffsets inOffsets;
+    private AdjacencyOffsets outOffsets;
 
     private final double defaultWeight;
-    private HugeAdjacencyList inWeights;
-    private HugeAdjacencyList outWeights;
-    private HugeAdjacencyOffsets inWeightOffsets;
-    private HugeAdjacencyOffsets outWeightOffsets;
+    private AdjacencyList inWeights;
+    private AdjacencyList outWeights;
+    private AdjacencyOffsets inWeightOffsets;
+    private AdjacencyOffsets outWeightOffsets;
 
-    private HugeAdjacencyList.DecompressingCursor emptyAdjacencyCursor;
-    private HugeAdjacencyList.DecompressingCursor inCache;
-    private HugeAdjacencyList.DecompressingCursor outCache;
+    private AdjacencyList.DecompressingCursor emptyAdjacencyCursor;
+    private AdjacencyList.DecompressingCursor inCache;
+    private AdjacencyList.DecompressingCursor outCache;
     private boolean canRelease = true;
 
     private final boolean isUndirected;
@@ -111,15 +111,15 @@ public class HugeGraph implements Graph {
             final IdMap idMapping,
             final Map<String, HugeWeightMapping> nodeProperties,
             final long relationshipCount,
-            final HugeAdjacencyList inAdjacency,
-            final HugeAdjacencyList outAdjacency,
-            final HugeAdjacencyOffsets inOffsets,
-            final HugeAdjacencyOffsets outOffsets,
+            final AdjacencyList inAdjacency,
+            final AdjacencyList outAdjacency,
+            final AdjacencyOffsets inOffsets,
+            final AdjacencyOffsets outOffsets,
             final double defaultWeight,
-            final HugeAdjacencyList inWeights,
-            final HugeAdjacencyList outWeights,
-            final HugeAdjacencyOffsets inWeightOffsets,
-            final HugeAdjacencyOffsets outWeightOffsets,
+            final AdjacencyList inWeights,
+            final AdjacencyList outWeights,
+            final AdjacencyOffsets inWeightOffsets,
+            final AdjacencyOffsets outWeightOffsets,
             final boolean isUndirected) {
         this.idMapping = idMapping;
         this.tracker = tracker;
@@ -190,15 +190,15 @@ public class HugeGraph implements Graph {
     private double findWeight(
             final long fromId,
             final long toId,
-            final HugeAdjacencyList weights,
-            final HugeAdjacencyOffsets weightOffsets,
-            final HugeAdjacencyList adjacencies,
-            final HugeAdjacencyOffsets adjacencyOffsets) {
+            final AdjacencyList weights,
+            final AdjacencyOffsets weightOffsets,
+            final AdjacencyList adjacencies,
+            final AdjacencyOffsets adjacencyOffsets) {
         long relOffset = adjacencyOffsets.get(fromId);
         long weightOffset = weightOffsets.get(fromId);
 
-        HugeAdjacencyList.DecompressingCursor relDecompressingCursor = adjacencies.decompressingCursor(relOffset);
-        HugeAdjacencyList.Cursor weightCursor = weights.cursor(weightOffset);
+        AdjacencyList.DecompressingCursor relDecompressingCursor = adjacencies.decompressingCursor(relOffset);
+        AdjacencyList.Cursor weightCursor = weights.cursor(weightOffset);
 
         while (relDecompressingCursor.hasNextVLong() && weightCursor.hasNextLong() && relDecompressingCursor.nextVLong() != toId) {
             weightCursor.nextLong();
@@ -347,12 +347,12 @@ public class HugeGraph implements Graph {
             runForEach(sourceNodeId, Direction.INCOMING, consumer, reuseCursor);
             return;
         }
-        HugeAdjacencyList.DecompressingCursor adjacencyCursor = adjacencyCursorForIteration(sourceNodeId, direction, reuseCursor);
-        HugeAdjacencyList.Cursor weightCursor = weightCursorForIteration(sourceNodeId, direction);
+        AdjacencyList.DecompressingCursor adjacencyCursor = adjacencyCursorForIteration(sourceNodeId, direction, reuseCursor);
+        AdjacencyList.Cursor weightCursor = weightCursorForIteration(sourceNodeId, direction);
         consumeAdjacentNodes(sourceNodeId, adjacencyCursor, weightCursor, consumer);
     }
 
-    private HugeAdjacencyList.DecompressingCursor adjacencyCursorForIteration(
+    private AdjacencyList.DecompressingCursor adjacencyCursorForIteration(
             long sourceNodeId,
             Direction direction,
             boolean reuseCursor) {
@@ -371,7 +371,7 @@ public class HugeGraph implements Graph {
         }
     }
 
-    private HugeAdjacencyList.Cursor weightCursorForIteration(long sourceNodeId, Direction direction) {
+    private AdjacencyList.Cursor weightCursorForIteration(long sourceNodeId, Direction direction) {
         if (direction == Direction.OUTGOING) {
             return weightCursor(
                     sourceNodeId,
@@ -440,11 +440,11 @@ public class HugeGraph implements Graph {
         }
     }
 
-    private HugeAdjacencyList.DecompressingCursor newAdjacencyCursor(final HugeAdjacencyList adjacency) {
+    private AdjacencyList.DecompressingCursor newAdjacencyCursor(final AdjacencyList adjacency) {
         return adjacency != null ? adjacency.rawDecompressingCursor() : null;
     }
 
-    private int degree(long node, HugeAdjacencyOffsets offsets, HugeAdjacencyList array) {
+    private int degree(long node, AdjacencyOffsets offsets, AdjacencyList array) {
         long offset = offsets.get(node);
         if (offset == 0L) {
             return 0;
@@ -452,11 +452,11 @@ public class HugeGraph implements Graph {
         return array.getDegree(offset);
     }
 
-    private HugeAdjacencyList.DecompressingCursor adjacencyCursor(
+    private AdjacencyList.DecompressingCursor adjacencyCursor(
             long node,
-            HugeAdjacencyList.DecompressingCursor adjacencyCursor,
-            HugeAdjacencyOffsets offsets,
-            HugeAdjacencyList adjacencyList) {
+            AdjacencyList.DecompressingCursor adjacencyCursor,
+            AdjacencyOffsets offsets,
+            AdjacencyList adjacencyList) {
         if (offsets == null) {
             return emptyAdjacencyCursor;
         }
@@ -467,24 +467,24 @@ public class HugeGraph implements Graph {
         return adjacencyList.decompressingCursor(adjacencyCursor, offset);
     }
 
-    private HugeAdjacencyList.Cursor weightCursor(
+    private AdjacencyList.Cursor weightCursor(
             long node,
-            HugeAdjacencyOffsets offsets,
-            HugeAdjacencyList weights) {
+            AdjacencyOffsets offsets,
+            AdjacencyList weights) {
         if (weights == null || offsets == null) {
-            return HugeAdjacencyList.Cursor.EMPTY;
+            return AdjacencyList.Cursor.EMPTY;
         }
         final long offset = offsets.get(node);
         if (offset == 0L) {
-            return HugeAdjacencyList.Cursor.EMPTY;
+            return AdjacencyList.Cursor.EMPTY;
         }
         return weights.cursor(offset);
     }
 
     private void consumeAdjacentNodes(
             long startNode,
-            HugeAdjacencyList.DecompressingCursor adjacencyCursor,
-            HugeAdjacencyList.Cursor weightCursor,
+            AdjacencyList.DecompressingCursor adjacencyCursor,
+            AdjacencyList.Cursor weightCursor,
             WeightedRelationshipConsumer consumer) {
         while (adjacencyCursor.hasNextVLong()) {
             long targetNodeId = adjacencyCursor.nextVLong();

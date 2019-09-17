@@ -31,7 +31,7 @@ import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 import static org.neo4j.graphalgo.core.utils.paged.PageUtil.indexInPage;
 import static org.neo4j.graphalgo.core.utils.paged.PageUtil.pageIndex;
 
-public final class HugeAdjacencyList {
+public final class AdjacencyList {
 
     public static final int PAGE_SHIFT = 18;
     public static final int PAGE_SIZE = 262144; // 1 << PAGE_SHIFT
@@ -43,7 +43,7 @@ public final class HugeAdjacencyList {
     public static MemoryEstimation compressedMemoryEstimation(boolean undirected) {
 
         return MemoryEstimations
-                .builder(HugeAdjacencyList.class)
+                .builder(AdjacencyList.class)
                 .rangePerGraphDimension("pages", dim -> {
                     long nodeCount = dim.nodeCount();
                     long relCount = undirected ? dim.maxRelCount() * 2 : dim.maxRelCount();
@@ -77,7 +77,7 @@ public final class HugeAdjacencyList {
     public static MemoryEstimation uncompressedMemoryEstimation(boolean undirected) {
 
         return MemoryEstimations
-                .builder(HugeAdjacencyList.class)
+                .builder(AdjacencyList.class)
                 .perGraphDimension("pages", dim -> {
                     long nodeCount = dim.nodeCount();
                     long relCount = undirected ? dim.maxRelCount() * 2 : dim.maxRelCount();
@@ -100,7 +100,7 @@ public final class HugeAdjacencyList {
         return (degreeByteSize + firstAdjacencyIdAvgByteSize + compressedAdjacencyByteSize) * nodeCount;
     }
 
-    public HugeAdjacencyList(byte[][] pages) {
+    public AdjacencyList(byte[][] pages) {
         this.pages = pages;
         this.allocatedMemory = memoryOfPages(pages);
     }

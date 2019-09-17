@@ -32,15 +32,15 @@ class ThreadLocalRelationshipsBuilder {
 
     private final ReentrantLock lock;
     private final DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy;
-    private final HugeAdjacencyListBuilder.Allocator adjacencyAllocator;
-    private final HugeAdjacencyListBuilder.Allocator weightsAllocator;
+    private final AdjacencyListBuilder.Allocator adjacencyAllocator;
+    private final AdjacencyListBuilder.Allocator weightsAllocator;
     private final long[] adjacencyOffsets;
     private final long[] weightOffsets;
 
     ThreadLocalRelationshipsBuilder(
             DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy,
-            HugeAdjacencyListBuilder.Allocator adjacencyAllocator,
-            final HugeAdjacencyListBuilder.Allocator weightsAllocator,
+            AdjacencyListBuilder.Allocator adjacencyAllocator,
+            final AdjacencyListBuilder.Allocator weightsAllocator,
             long[] adjacencyOffsets,
             final long[] weightOffsets) {
         this.deduplicateRelationshipsStrategy = deduplicateRelationshipsStrategy;

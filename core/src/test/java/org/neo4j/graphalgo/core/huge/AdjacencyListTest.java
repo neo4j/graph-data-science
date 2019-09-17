@@ -28,12 +28,12 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
 import static org.junit.Assert.assertEquals;
-import static org.neo4j.graphalgo.core.huge.HugeAdjacencyList.PAGE_MASK;
-import static org.neo4j.graphalgo.core.huge.HugeAdjacencyList.PAGE_SHIFT;
-import static org.neo4j.graphalgo.core.huge.HugeAdjacencyList.computeAdjacencyByteSize;
+import static org.neo4j.graphalgo.core.huge.AdjacencyList.PAGE_MASK;
+import static org.neo4j.graphalgo.core.huge.AdjacencyList.PAGE_SHIFT;
+import static org.neo4j.graphalgo.core.huge.AdjacencyList.computeAdjacencyByteSize;
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 
-public class HugeAdjacencyListTest {
+public class AdjacencyListTest {
 
     @Test
     public void shouldComputeCompressedMemoryEstimationForSinglePage() {
@@ -42,7 +42,7 @@ public class HugeAdjacencyListTest {
                 .setMaxRelCount(100)
                 .build();
 
-        MemoryTree memRec = HugeAdjacencyList.compressedMemoryEstimation(false).estimate(dimensions, 1);
+        MemoryTree memRec = AdjacencyList.compressedMemoryEstimation(false).estimate(dimensions, 1);
 
         long classSize = 24;
         long bestCaseAdjacencySize = 500;
@@ -66,7 +66,7 @@ public class HugeAdjacencyListTest {
                 .setMaxRelCount(100)
                 .build();
 
-        MemoryTree memRec = HugeAdjacencyList.uncompressedMemoryEstimation(false).estimate(dimensions, 1);
+        MemoryTree memRec = AdjacencyList.uncompressedMemoryEstimation(false).estimate(dimensions, 1);
 
         long classSize = 24;
         long uncompressedAdjacencySize = 1200;
@@ -87,7 +87,7 @@ public class HugeAdjacencyListTest {
                 .setMaxRelCount(100_000_000_000L)
                 .build();
 
-        MemoryTree memRec = HugeAdjacencyList.compressedMemoryEstimation(false).estimate(dimensions, 1);
+        MemoryTree memRec = AdjacencyList.compressedMemoryEstimation(false).estimate(dimensions, 1);
 
         long classSize = 24;
         long bestCaseAdjacencySize = 100_500_000_000L;
@@ -111,7 +111,7 @@ public class HugeAdjacencyListTest {
                 .setMaxRelCount(100_000_000_000L)
                 .build();
 
-        MemoryTree memRec = HugeAdjacencyList.uncompressedMemoryEstimation(false).estimate(dimensions, 1);
+        MemoryTree memRec = AdjacencyList.uncompressedMemoryEstimation(false).estimate(dimensions, 1);
 
         long classSize = 24;
 

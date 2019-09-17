@@ -19,34 +19,34 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
-import org.neo4j.graphalgo.core.huge.HugeAdjacencyList;
-import org.neo4j.graphalgo.core.huge.HugeAdjacencyOffsets;
+import org.neo4j.graphalgo.core.huge.AdjacencyList;
+import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 
 class Relationships {
     private final long rows;
     private final long relationshipCount;
-    private final HugeAdjacencyList inAdjacency;
-    private final HugeAdjacencyList outAdjacency;
-    private final HugeAdjacencyOffsets inOffsets;
-    private final HugeAdjacencyOffsets outOffsets;
+    private final AdjacencyList inAdjacency;
+    private final AdjacencyList outAdjacency;
+    private final AdjacencyOffsets inOffsets;
+    private final AdjacencyOffsets outOffsets;
     private final double defaultWeight;
-    private final HugeAdjacencyList inWeights;
-    private final HugeAdjacencyList outWeights;
-    private final HugeAdjacencyOffsets inWeightOffsets;
-    private final HugeAdjacencyOffsets outWeightOffsets;
+    private final AdjacencyList inWeights;
+    private final AdjacencyList outWeights;
+    private final AdjacencyOffsets inWeightOffsets;
+    private final AdjacencyOffsets outWeightOffsets;
 
     Relationships(
             long rows,
             long relationshipCount,
-            HugeAdjacencyList inAdjacency,
-            HugeAdjacencyList outAdjacency,
-            HugeAdjacencyOffsets inOffsets,
-            HugeAdjacencyOffsets outOffsets,
+            AdjacencyList inAdjacency,
+            AdjacencyList outAdjacency,
+            AdjacencyOffsets inOffsets,
+            AdjacencyOffsets outOffsets,
             double defaultWeight,
-            HugeAdjacencyList inWeights,
-            HugeAdjacencyList outWeights,
-            HugeAdjacencyOffsets inWeightOffsets,
-            HugeAdjacencyOffsets outWeightOffsets) {
+            AdjacencyList inWeights,
+            AdjacencyList outWeights,
+            AdjacencyOffsets inWeightOffsets,
+            AdjacencyOffsets outWeightOffsets) {
         this.rows = rows;
         this.relationshipCount = relationshipCount;
         this.inAdjacency = inAdjacency;
@@ -66,21 +66,21 @@ class Relationships {
 
     long relationshipCount() { return relationshipCount; }
 
-    HugeAdjacencyList inAdjacency() { return inAdjacency; }
+    AdjacencyList inAdjacency() { return inAdjacency; }
 
-    HugeAdjacencyList outAdjacency() { return outAdjacency; }
+    AdjacencyList outAdjacency() { return outAdjacency; }
 
-    HugeAdjacencyOffsets inOffsets() { return inOffsets; }
+    AdjacencyOffsets inOffsets() { return inOffsets; }
 
-    HugeAdjacencyOffsets outOffsets() { return outOffsets; }
+    AdjacencyOffsets outOffsets() { return outOffsets; }
 
     double defaultWeight() { return defaultWeight; }
 
-    HugeAdjacencyList inWeights() { return inWeights; }
+    AdjacencyList inWeights() { return inWeights; }
 
-    HugeAdjacencyList outWeights() { return outWeights; }
+    AdjacencyList outWeights() { return outWeights; }
 
-    HugeAdjacencyOffsets inWeightOffsets() { return inWeightOffsets; }
+    AdjacencyOffsets inWeightOffsets() { return inWeightOffsets; }
 
-    HugeAdjacencyOffsets outWeightOffsets() { return outWeightOffsets; }
+    AdjacencyOffsets outWeightOffsets() { return outWeightOffsets; }
 }

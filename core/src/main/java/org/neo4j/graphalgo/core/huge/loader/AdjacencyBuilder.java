@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.huge.loader;
 
 import org.apache.lucene.util.LongsRef;
-import org.neo4j.graphalgo.core.huge.HugeAdjacencyOffsets;
+import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.kernel.api.StatementConstants;
 
@@ -149,9 +149,9 @@ abstract class AdjacencyBuilder {
         }
 
         void finishPreparation() {
-            globalBuilder.setGlobalAdjacencyOffsets(HugeAdjacencyOffsets.of(globalAdjacencyOffsets, pageSize));
+            globalBuilder.setGlobalAdjacencyOffsets(AdjacencyOffsets.of(globalAdjacencyOffsets, pageSize));
             if (globalWeightOffsets != null) {
-                globalBuilder.setGlobalWeightOffsets(HugeAdjacencyOffsets.of(globalWeightOffsets, pageSize));
+                globalBuilder.setGlobalWeightOffsets(AdjacencyOffsets.of(globalWeightOffsets, pageSize));
             }
         }
 

@@ -30,8 +30,8 @@ import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.HugeWeightMapping;
 import org.neo4j.graphalgo.core.DeduplicateRelationshipsStrategy;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.huge.HugeAdjacencyList;
-import org.neo4j.graphalgo.core.huge.HugeAdjacencyOffsets;
+import org.neo4j.graphalgo.core.huge.AdjacencyList;
+import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.utils.ApproximatedImportProgress;
@@ -82,8 +82,8 @@ public final class HugeGraphFactory extends GraphFactory {
         // Relationship weight properties
         if (dimensions.relWeightId() != StatementConstants.NO_SUCH_PROPERTY_KEY) {
             // Adjacency lists and Adjacency offsets
-            MemoryEstimation adjacencyListSize = HugeAdjacencyList.uncompressedMemoryEstimation(setup.loadAsUndirected);
-            MemoryEstimation adjacencyOffsetsSetup = HugeAdjacencyOffsets.memoryEstimation();
+            MemoryEstimation adjacencyListSize = AdjacencyList.uncompressedMemoryEstimation(setup.loadAsUndirected);
+            MemoryEstimation adjacencyOffsetsSetup = AdjacencyOffsets.memoryEstimation();
             if (setup.loadOutgoing || setup.loadAsUndirected) {
                 builder.add("outgoing weights", adjacencyListSize);
                 builder.add("outgoing weight offsets", adjacencyOffsetsSetup);
@@ -96,8 +96,8 @@ public final class HugeGraphFactory extends GraphFactory {
         }
 
         // Adjacency lists and Adjacency offsets
-        MemoryEstimation adjacencyListSize = HugeAdjacencyList.compressedMemoryEstimation(setup.loadAsUndirected);
-        MemoryEstimation adjacencyOffsetsSetup = HugeAdjacencyOffsets.memoryEstimation();
+        MemoryEstimation adjacencyListSize = AdjacencyList.compressedMemoryEstimation(setup.loadAsUndirected);
+        MemoryEstimation adjacencyOffsetsSetup = AdjacencyOffsets.memoryEstimation();
         if (setup.loadOutgoing || setup.loadAsUndirected) {
             builder.add("outgoing", adjacencyListSize);
             builder.add("outgoing offsets", adjacencyOffsetsSetup);
@@ -162,14 +162,14 @@ public final class HugeGraphFactory extends GraphFactory {
         GraphDimensions dimensions = this.dimensions;
         int concurrency = setup.concurrency();
         AllocationTracker tracker = setup.tracker;
-        IdsAndProperties mappingAndProperties = loadHugeIdMap(tracker, concurrency);
+        IdsAndProperties mappingAndProperties = loadIdMap(tracker, concurrency);
         Map<String, HugeGraph> graphs = loadRelationships(dimensions, tracker, mappingAndProperties, concurrency);
 
         progressLogger.logDone(tracker);
         return graphs;
     }
 
-    private IdsAndProperties loadHugeIdMap(AllocationTracker tracker, int concurrency) {
+    private IdsAndProperties loadIdMap(AllocationTracker tracker, int concurrency) {
         return new ScanningNodesImporter(
                 api,
                 dimensions,
@@ -272,10 +272,10 @@ public final class HugeGraphFactory extends GraphFactory {
             final long relationshipCount,
             final boolean loadAsUndirected) {
 
-        HugeAdjacencyList outAdjacencyList = null;
-        HugeAdjacencyOffsets outAdjacencyOffsets = null;
-        HugeAdjacencyList outWeightList = null;
-        HugeAdjacencyOffsets outWeightOffsets = null;
+        AdjacencyList outAdjacencyList = null;
+        AdjacencyOffsets outAdjacencyOffsets = null;
+        AdjacencyList outWeightList = null;
+        AdjacencyOffsets outWeightOffsets = null;
         if (outRelationshipsBuilder != null) {
             outAdjacencyList = outRelationshipsBuilder.adjacency.build();
             outAdjacencyOffsets = outRelationshipsBuilder.globalAdjacencyOffsets;
@@ -286,10 +286,10 @@ public final class HugeGraphFactory extends GraphFactory {
             }
         }
 
-        HugeAdjacencyList inAdjacencyList = null;
-        HugeAdjacencyOffsets inAdjacencyOffsets = null;
-        HugeAdjacencyList inWeightList = null;
-        HugeAdjacencyOffsets inWeightOffsets = null;
+        AdjacencyList inAdjacencyList = null;
+        AdjacencyOffsets inAdjacencyOffsets = null;
+        AdjacencyList inWeightList = null;
+        AdjacencyOffsets inWeightOffsets = null;
         if (inRelationshipsBuilder != null) {
             inAdjacencyList = inRelationshipsBuilder.adjacency.build();
             inAdjacencyOffsets = inRelationshipsBuilder.globalAdjacencyOffsets;

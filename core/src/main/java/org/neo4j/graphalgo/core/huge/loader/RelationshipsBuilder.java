@@ -20,18 +20,18 @@
 package org.neo4j.graphalgo.core.huge.loader;
 
 import org.neo4j.graphalgo.core.DeduplicateRelationshipsStrategy;
-import org.neo4j.graphalgo.core.huge.HugeAdjacencyOffsets;
+import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 class RelationshipsBuilder {
 
     private final DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy;
     private final boolean weighted;
-    final HugeAdjacencyListBuilder adjacency;
-    final HugeAdjacencyListBuilder weights;
+    final AdjacencyListBuilder adjacency;
+    final AdjacencyListBuilder weights;
 
-    HugeAdjacencyOffsets globalAdjacencyOffsets;
-    HugeAdjacencyOffsets globalWeightOffsets;
+    AdjacencyOffsets globalAdjacencyOffsets;
+    AdjacencyOffsets globalWeightOffsets;
 
     RelationshipsBuilder(
             DeduplicateRelationshipsStrategy deduplicateRelationshipsStrategy,
@@ -42,8 +42,8 @@ class RelationshipsBuilder {
         }
         this.deduplicateRelationshipsStrategy = deduplicateRelationshipsStrategy;
         this.weighted = weighted;
-        adjacency = HugeAdjacencyListBuilder.newBuilder(tracker);
-        weights = weighted ? HugeAdjacencyListBuilder.newBuilder(tracker) : null;
+        adjacency = AdjacencyListBuilder.newBuilder(tracker);
+        weights = weighted ? AdjacencyListBuilder.newBuilder(tracker) : null;
     }
 
     final ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder(
@@ -57,11 +57,11 @@ class RelationshipsBuilder {
                 weightOffsets);
     }
 
-    final void setGlobalAdjacencyOffsets(HugeAdjacencyOffsets globalAdjacencyOffsets) {
+    final void setGlobalAdjacencyOffsets(AdjacencyOffsets globalAdjacencyOffsets) {
         this.globalAdjacencyOffsets = globalAdjacencyOffsets;
     }
 
-    final void setGlobalWeightOffsets(HugeAdjacencyOffsets globalWeightOffsets) {
+    final void setGlobalWeightOffsets(AdjacencyOffsets globalWeightOffsets) {
         this.globalWeightOffsets = globalWeightOffsets;
     }
 }

@@ -27,13 +27,13 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
-public abstract class HugeAdjacencyOffsets {
+public abstract class AdjacencyOffsets {
 
     abstract long get(long index);
 
     abstract long release();
 
-    public static HugeAdjacencyOffsets of(long[][] pages, int pageSize) {
+    public static AdjacencyOffsets of(long[][] pages, int pageSize) {
         if (pages.length == 1) {
             return new SinglePageOffsets(pages[0]);
         }
@@ -53,17 +53,17 @@ public abstract class HugeAdjacencyOffsets {
                 "adjacency offsets",
                 (dimensions, concurrency) -> {
                     ImportSizing importSizing = ImportSizing.of(concurrency, dimensions.nodeCount());
-                    return HugeAdjacencyOffsets.memoryEstimation(
+                    return AdjacencyOffsets.memoryEstimation(
                             importSizing.pageSize(),
                             importSizing.numberOfPages());
                 });
     }
 
-    public static HugeAdjacencyOffsets of(long[] page) {
+    public static AdjacencyOffsets of(long[] page) {
         return new SinglePageOffsets(page);
     }
 
-    private static final class PagedOffsets extends HugeAdjacencyOffsets {
+    private static final class PagedOffsets extends AdjacencyOffsets {
 
         private final int pageShift;
         private final long pageMask;
@@ -104,7 +104,7 @@ public abstract class HugeAdjacencyOffsets {
         }
     }
 
-    private static final class SinglePageOffsets extends HugeAdjacencyOffsets {
+    private static final class SinglePageOffsets extends AdjacencyOffsets {
 
         private long[] page;
 
