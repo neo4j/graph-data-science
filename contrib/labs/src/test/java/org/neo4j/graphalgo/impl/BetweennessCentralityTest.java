@@ -19,17 +19,13 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.mockito.Matchers;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
-import org.neo4j.graphalgo.GraphTester;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -40,41 +36,32 @@ import org.neo4j.graphalgo.impl.betweenness.BetweennessCentrality;
 import org.neo4j.graphalgo.impl.betweenness.BetweennessCentralitySuccessorBrandes;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class BetweennessCentralityTest extends GraphTester {
+@ExtendWith(MockitoExtension.class)
+class BetweennessCentralityTest {
 
-    public static final String TYPE = "TYPE";
-    private static Graph graph;
-    private static DefaultBuilder builder;
+    private static GraphDatabaseAPI DB;
+    private static final RelationshipType TYPE = RelationshipType.withName("TYPE");
+
     private static long centerNodeId;
-
-    @ClassRule
-    public static ImpermanentDatabaseRule db = new ImpermanentDatabaseRule();
-
-    @Rule
-    public MockitoRule rule = MockitoJUnit.rule();
 
     @Mock
     private BetweennessCentrality.ResultConsumer consumer;
 
-    @Before
-    public void setupMocks() {
-        when(consumer.consume(Matchers.anyLong(), Matchers.anyDouble()))
-                .thenReturn(true);
-    }
-
-    @BeforeClass
-    public static void setup() {
-        builder = GraphBuilder.create(db)
+    @BeforeAll
+    static void setup() {
+        DB = TestDatabaseCreator.createTestDatabase();
+        DefaultBuilder builder = GraphBuilder.create(DB)
                 .setLabel("Node")
-                .setRelationship(TYPE);
-
-        final RelationshipType type = RelationshipType.withName(TYPE);
+                .setRelationship(TYPE.name());
 
         /**
          * create two rings of nodes where each node of ring A
@@ -90,39 +77,31 @@ public class BetweennessCentralityTest extends GraphTester {
         builder.newRingBuilder()
                 .createRing(5)
                 .forEachNodeInTx(node -> {
-                    node.createRelationshipTo(center, type);
+                    node.createRelationshipTo(center, TYPE);
                 })
                 .newRingBuilder()
                 .createRing(5)
                 .forEachNodeInTx(node -> {
-                    center.createRelationshipTo(node, type);
+                    center.createRelationshipTo(node, TYPE);
                 });
     }
 
-    @AfterClass
-    public static void tearDown() throws Exception {
-        if (db != null) db.shutdown();
-        graph = null;
+    @AfterAll
+    static void tearDown() throws Exception {
+        if (DB != null) DB.shutdown();
     }
 
-
-    public BetweennessCentralityTest(final Class<? extends GraphFactory> graphImpl, String name) {
-        super(graphImpl);
-
-        graph = new GraphLoader(db)
+    @AllGraphTypesWithoutCypherTest
+    void testSuccessorBCDirect(Class<? extends GraphFactory> graphFactory) {
+        Graph graph = new GraphLoader(DB)
                 .withAnyRelationshipType()
                 .withAnyLabel()
                 .withoutNodeProperties()
-                .load(graphImpl);
-    }
+                .load(graphFactory);
 
-    @Test
-    public void testSuccessorBCDirect() {
-        new BetweennessCentralitySuccessorBrandes(graph, Pools.DEFAULT)
-                .compute()
-                .forEach(consumer);
-        verify(consumer, times(10)).consume(Matchers.anyLong(), Matchers.eq(6.0));
-        verify(consumer, times(1)).consume(Matchers.eq(centerNodeId), Matchers.eq(25.0));
+        when(consumer.consume(anyLong(), anyDouble())).thenReturn(true);
+        new BetweennessCentralitySuccessorBrandes(graph, Pools.DEFAULT).compute().forEach(consumer);
+        verify(consumer, times(10)).consume(anyLong(), eq(6.0));
+        verify(consumer, times(1)).consume(eq(centerNodeId), eq(25.0));
     }
-
 }

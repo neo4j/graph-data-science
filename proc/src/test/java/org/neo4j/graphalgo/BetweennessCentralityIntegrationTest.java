@@ -19,16 +19,13 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.mockito.Matchers;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
-import org.neo4j.graphalgo.api.GraphFactory;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.helper.graphbuilder.DefaultBuilder;
 import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.impl.betweenness.BetweennessCentrality;
@@ -37,7 +34,7 @@ import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Result;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collections;
 
@@ -45,43 +42,28 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
+class BetweennessCentralityIntegrationTest {
 
-/**
- * @author mknblch
- */
-public class BetweennessCentralityIntegrationTest extends GraphTester {
+    private static GraphDatabaseAPI DB;
+    private static final RelationshipType TYPE = RelationshipType.withName("TYPE");
 
-    public static final String TYPE = "TYPE";
-    private final String graphName;
-
-    private static DefaultBuilder builder;
     private static long centerNodeId;
-
-    @ClassRule
-    public static ImpermanentDatabaseRule db = new ImpermanentDatabaseRule();
-
-    @Rule
-    public MockitoRule rule = MockitoJUnit.rule();
 
     @Mock
     private BetweennessCentrality.ResultConsumer consumer;
 
-    @Before
-    public void setupMocks() {
-        when(consumer.consume(Matchers.anyLong(), Matchers.anyDouble()))
-                .thenReturn(true);
-    }
+    @BeforeAll
+    static void setupGraph() throws KernelException {
+        DB = TestDatabaseCreator.createTestDatabase();
+        DB.getDependencyResolver()
+                .resolveDependency(Procedures.class)
+                .registerProcedure(BetweennessCentralityProc.class);
 
-    @BeforeClass
-    public static void setupGraph() throws KernelException {
-
-        builder = GraphBuilder.create(db)
+        DefaultBuilder builder = GraphBuilder.create(DB)
                 .setLabel("Node")
-                .setRelationship(TYPE);
-
-        final RelationshipType type = RelationshipType.withName(TYPE);
+                .setRelationship(TYPE.name());
 
         /**
          * create two rings of nodes where each node of ring A
@@ -97,42 +79,38 @@ public class BetweennessCentralityIntegrationTest extends GraphTester {
         builder.newRingBuilder()
                 .createRing(5)
                 .forEachNodeInTx(node -> {
-                    node.createRelationshipTo(center, type);
+                    node.createRelationshipTo(center, TYPE);
                 })
                 .newRingBuilder()
                 .createRing(5)
                 .forEachNodeInTx(node -> {
-                    center.createRelationshipTo(node, type);
+                    center.createRelationshipTo(node, TYPE);
                 });
-
-        db.getDependencyResolver()
-                .resolveDependency(Procedures.class)
-                .registerProcedure(BetweennessCentralityProc.class);
     }
 
-    public BetweennessCentralityIntegrationTest(final Class<? extends GraphFactory> graphImpl, String name) {
-        super(graphImpl);
-        this.graphName = name;
+    @AfterAll
+    static void tearDown() throws Exception {
+        if (DB != null) DB.shutdown();
     }
 
-    @Test
-    public void testBetweennessStream() throws Exception {
+    @AllGraphNamesTest
+    void testBetweennessStream(String graphName) throws Exception {
         String query = "CALL algo.betweenness.stream('Node', 'TYPE', {graph: $graph}) YIELD nodeId, centrality";
-        db.execute(query, Collections.singletonMap("graph", graphName))
+        DB.execute(query, Collections.singletonMap("graph", graphName))
                 .accept((Result.ResultVisitor<Exception>) row -> {
                     consumer.consume(
                             (long) row.getNumber("nodeId"),
                             (double) row.getNumber("centrality"));
                     return true;
                 });
-        verify(consumer, times(10)).consume(Matchers.anyLong(), Matchers.eq(6.0));
-        verify(consumer, times(1)).consume(Matchers.eq(centerNodeId), Matchers.eq(25.0));
+        verify(consumer, times(10)).consume(ArgumentMatchers.anyLong(), ArgumentMatchers.eq(6.0));
+        verify(consumer, times(1)).consume(ArgumentMatchers.eq(centerNodeId), ArgumentMatchers.eq(25.0));
     }
 
-    @Test
-    public void testParallelBetweennessStream() throws Exception {
+    @AllGraphNamesTest
+    void testParallelBetweennessStream(String graphName) throws Exception {
         String query = "CALL algo.betweenness.stream('Node', 'TYPE', {graph: $graph, concurrency: 4}) YIELD nodeId, centrality";
-        db.execute(query, Collections.singletonMap("graph", graphName))
+        DB.execute(query, Collections.singletonMap("graph", graphName))
                 .accept((Result.ResultVisitor<Exception>) row -> {
                     consumer.consume(
                             row.getNumber("nodeId").intValue(),
@@ -140,15 +118,15 @@ public class BetweennessCentralityIntegrationTest extends GraphTester {
                     return true;
                 });
 
-        verify(consumer, times(10)).consume(Matchers.anyLong(), Matchers.eq(6.0));
-        verify(consumer, times(1)).consume(Matchers.eq(centerNodeId), Matchers.eq(25.0));
+        verify(consumer, times(10)).consume(ArgumentMatchers.anyLong(), ArgumentMatchers.eq(6.0));
+        verify(consumer, times(1)).consume(ArgumentMatchers.eq(centerNodeId), ArgumentMatchers.eq(25.0));
     }
 
-    @Test
-    public void testParallelBetweennessWrite() throws Exception {
+    @AllGraphNamesTest
+    void testParallelBetweennessWrite(String graphName) throws Exception {
         String query = "CALL algo.betweenness('','', {graph: $graph, concurrency:4, write:true, stats:true, writeProperty:'centrality'}) YIELD " +
-                "nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis";
-        db.execute(query, Collections.singletonMap("graph", graphName))
+                       "nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis";
+        DB.execute(query, Collections.singletonMap("graph", graphName))
                 .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(85.0, (double) row.getNumber("sumCentrality"), 0.01);
                     assertEquals(25.0, (double) row.getNumber("maxCentrality"), 0.01);
@@ -160,11 +138,11 @@ public class BetweennessCentralityIntegrationTest extends GraphTester {
                 });
     }
 
-    @Test
-    public void testParallelBetweennessWriteWithDirection() throws Exception {
+    @AllGraphNamesTest
+    void testParallelBetweennessWriteWithDirection(String graphName) throws Exception {
         String query = "CALL algo.betweenness('','', {graph: $graph, direction:'<>', concurrency:4, write:true, stats:true, writeProperty:'centrality'}) YIELD " +
-                "nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis";
-        db.execute(query, Collections.singletonMap("graph", graphName))
+                       "nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis";
+        DB.execute(query, Collections.singletonMap("graph", graphName))
                 .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(35.0, (double) row.getNumber("sumCentrality"), 0.01);
                     assertEquals(30.0, (double) row.getNumber("maxCentrality"), 0.01);
@@ -176,11 +154,11 @@ public class BetweennessCentralityIntegrationTest extends GraphTester {
                 });
     }
 
-    @Test
-    public void testBetweennessWrite() throws Exception {
+    @AllGraphNamesTest
+    void testBetweennessWrite(String graphName) throws Exception {
         String query = "CALL algo.betweenness('','', {graph: $graph, write:true, stats:true, writeProperty:'centrality'}) YIELD " +
-                "nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis";
-        db.execute(query, Collections.singletonMap("graph", graphName))
+                       "nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis";
+        DB.execute(query, Collections.singletonMap("graph", graphName))
                 .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(85.0, (double) row.getNumber("sumCentrality"), 0.01);
                     assertEquals(25.0, (double) row.getNumber("maxCentrality"), 0.01);
@@ -192,11 +170,11 @@ public class BetweennessCentralityIntegrationTest extends GraphTester {
                 });
     }
 
-    @Test
-    public void testBetweennessWriteWithDirection() throws Exception {
+    @AllGraphNamesTest
+    void testBetweennessWriteWithDirection(String graphName) throws Exception {
         String query = "CALL algo.betweenness('','', {graph: $graph, direction:'both', write:true, stats:true, writeProperty:'centrality'}) " +
-                "YIELD nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis";
-        db.execute(query, Collections.singletonMap("graph", graphName))
+                       "YIELD nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis";
+        DB.execute(query, Collections.singletonMap("graph", graphName))
                 .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(35.0, (double) row.getNumber("sumCentrality"), 0.01);
                     assertEquals(30.0, (double) row.getNumber("maxCentrality"), 0.01);
@@ -208,12 +186,12 @@ public class BetweennessCentralityIntegrationTest extends GraphTester {
                 });
     }
 
-    @Test
-    public void testRABrandesHighProbability() throws Exception {
+    @AllGraphNamesTest
+    void testRABrandesHighProbability(String graphName) throws Exception {
         String query = "CALL algo.betweenness.sampled('','', {graph: $graph,strategy:'random', probability:1.0, write:true, " +
-                "stats:true, writeProperty:'centrality'}) YIELD " +
-                "nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis";
-        db.execute(query, Collections.singletonMap("graph", graphName))
+                       "stats:true, writeProperty:'centrality'}) YIELD " +
+                       "nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis";
+        DB.execute(query, Collections.singletonMap("graph", graphName))
                 .accept((Result.ResultVisitor<Exception>) row -> {
                     assertEquals(85.0, (double) row.getNumber("sumCentrality"), 0.1);
                     assertEquals(25.0, (double) row.getNumber("maxCentrality"), 0.1);
@@ -225,12 +203,12 @@ public class BetweennessCentralityIntegrationTest extends GraphTester {
                 });
     }
 
-    @Test
-    public void testRABrandesNoProbability() throws Exception {
+    @AllGraphNamesTest
+    void testRABrandesNoProbability(String graphName) throws Exception {
         String query = "CALL algo.betweenness.sampled('','', {graph: $graph,strategy:'random', write:true, stats:true, " +
-                "writeProperty:'centrality'}) YIELD " +
-                "nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis";
-        db.execute(query, Collections.singletonMap("graph", graphName))
+                       "writeProperty:'centrality'}) YIELD " +
+                       "nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis";
+        DB.execute(query, Collections.singletonMap("graph", graphName))
                 .accept((Result.ResultVisitor<Exception>) row -> {
                     assertNotEquals(-1L, row.getNumber("writeMillis"));
                     assertNotEquals(-1L, row.getNumber("computeMillis"));
@@ -239,12 +217,12 @@ public class BetweennessCentralityIntegrationTest extends GraphTester {
                 });
     }
 
-    @Test
-    public void testRABrandeseWrite() throws Exception {
+    @AllGraphNamesTest
+    void testRABrandeseWrite(String graphName) throws Exception {
         String query = "CALL algo.betweenness.sampled('','', {graph: $graph,strategy:'random', probability:1.0, " +
-                "write:true, stats:true, writeProperty:'centrality'}) YIELD " +
-                "nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis";
-        db.execute(query, Collections.singletonMap("graph", graphName))
+                       "write:true, stats:true, writeProperty:'centrality'}) YIELD " +
+                       "nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMillis, writeMillis";
+        DB.execute(query, Collections.singletonMap("graph", graphName))
                 .accept((Result.ResultVisitor<Exception>) row -> {
                     assertNotEquals(-1L, row.getNumber("writeMillis"));
                     assertNotEquals(-1L, row.getNumber("computeMillis"));
@@ -253,11 +231,11 @@ public class BetweennessCentralityIntegrationTest extends GraphTester {
                 });
     }
 
-    @Test
-    public void testRABrandesStream() throws Exception {
+    @AllGraphNamesTest
+    void testRABrandesStream(String graphName) throws Exception {
         String query = "CALL algo.betweenness.sampled.stream('','', {graph: $graph, strategy:'random', probability:1.0, " +
-                "write:true, stats:true, writeProperty:'centrality'}) YIELD nodeId, centrality";
-        db.execute(query, Collections.singletonMap("graph", graphName))
+                       "write:true, stats:true, writeProperty:'centrality'}) YIELD nodeId, centrality";
+        DB.execute(query, Collections.singletonMap("graph", graphName))
                 .accept((Result.ResultVisitor<Exception>) row -> {
                     consumer.consume(
                             row.getNumber("nodeId").intValue(),
@@ -265,9 +243,7 @@ public class BetweennessCentralityIntegrationTest extends GraphTester {
                     return true;
                 });
 
-        verify(consumer, times(10)).consume(Matchers.anyLong(), Matchers.eq(6.0));
-        verify(consumer, times(1)).consume(Matchers.eq(centerNodeId), Matchers.eq(25.0));
+        verify(consumer, times(10)).consume(ArgumentMatchers.anyLong(), ArgumentMatchers.eq(6.0));
+        verify(consumer, times(1)).consume(ArgumentMatchers.eq(centerNodeId), ArgumentMatchers.eq(25.0));
     }
-
-
 }

@@ -19,21 +19,18 @@
  */
 package org.neo4j.graphalgo.impl.betweenness;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
-import org.neo4j.graphalgo.GraphTester;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.concurrent.atomic.AtomicIntegerArray;
@@ -53,14 +50,29 @@ import static org.mockito.Mockito.verify;
  *   | /              \  |
  *  (b)                (g)
  *   .0                 .0
- * @author mknblch
  */
-public class BetweennessCentralityTest2 extends GraphTester {
+@ExtendWith(MockitoExtension.class)
+class BetweennessCentralityTest2 {
 
-    @Rule
-    public MockitoRule rule = MockitoJUnit.rule();
+    private static final String CYPHER = "CREATE" +
+                                         "  (a:Node {name: 'a'})" +
+                                         ", (b:Node {name: 'b'})" +
+                                         ", (c:Node {name: 'c'})" +
+                                         ", (d:Node {name: 'd'})" +
+                                         ", (e:Node {name: 'e'})" +
+                                         ", (f:Node {name: 'f'})" +
+                                         ", (g:Node {name: 'g'})" +
 
-    private static GraphDatabaseAPI db;
+                                         ", (a)-[:TYPE]->(b)" +
+                                         ", (a)-[:TYPE]->(c)" +
+                                         ", (b)-[:TYPE]->(c)" +
+                                         ", (c)-[:TYPE]->(d)" +
+                                         ", (d)-[:TYPE]->(e)" +
+                                         ", (e)-[:TYPE]->(f)" +
+                                         ", (e)-[:TYPE]->(g)" +
+                                         ", (f)-[:TYPE]->(g)";
+
+    private static GraphDatabaseAPI DB;
     private static Graph graph;
 
     interface TestConsumer {
@@ -70,64 +82,20 @@ public class BetweennessCentralityTest2 extends GraphTester {
     @Mock
     private TestConsumer testConsumer;
 
-    @BeforeClass
-    public static void setupGraphDb() {
-
-        final String cypher =
-                "CREATE (a:Node {name:'a'})\n" +
-                        "CREATE (b:Node {name:'b'})\n" +
-                        "CREATE (c:Node {name:'c'})\n" +
-                        "CREATE (d:Node {name:'d'})\n" +
-                        "CREATE (e:Node {name:'e'})\n" +
-                        "CREATE (f:Node {name:'f'})\n" +
-                        "CREATE (g:Node {name:'g'})\n" +
-
-                        "CREATE" +
-                        " (a)-[:TYPE]->(b),\n" +
-                        " (a)-[:TYPE]->(c),\n" +
-                        " (b)-[:TYPE]->(c),\n" +
-                        " (c)-[:TYPE]->(d),\n" +
-                        " (d)-[:TYPE]->(e),\n" +
-                        " (e)-[:TYPE]->(f),\n" +
-                        " (e)-[:TYPE]->(g),\n" +
-                        " (f)-[:TYPE]->(g)";
-
-        db = TestDatabaseCreator.createTestDatabase();
-
-        try (Transaction tx = db.beginTx()) {
-            db.execute(cypher);
-            tx.success();
-        }
+    @BeforeAll
+    static void setupGraphDb() {
+        DB = TestDatabaseCreator.createTestDatabase();
+        DB.execute(CYPHER);
     }
 
-    @AfterClass
-    public static void shutdownGraphDb() {
-        if (db != null) db.shutdown();
-        graph = null;
+    @AfterAll
+    static void shutdownGraphDb() {
+        if (DB != null) DB.shutdown();
     }
 
-    public BetweennessCentralityTest2(final Class<? extends GraphFactory> graphImpl, String name) {
-        super(graphImpl);
-
-        graph = new GraphLoader(db)
-                .withAnyRelationshipType()
-                .withAnyLabel()
-                .withoutNodeProperties()
-                .load(graphImpl);
-    }
-
-    private String name(long id) {
-        String[] name = {""};
-        db.execute("MATCH (n:Node) WHERE id(n) = " + id + " RETURN n.name as name")
-                .accept(row -> {
-                    name[0] = row.getString("name");
-                    return false;
-                });
-        return name[0];
-    }
-
-    @Test
-    public void testBC() {
+    @AllGraphTypesWithoutCypherTest
+    void testBC(Class<? extends GraphFactory> graphFactory) {
+        setup(graphFactory);
 
         new BetweennessCentrality(graph)
                 .compute()
@@ -137,8 +105,9 @@ public class BetweennessCentralityTest2 extends GraphTester {
         verifyMock(testConsumer);
     }
 
-    @Test
-    public void testPBC() {
+    @AllGraphTypesWithoutCypherTest
+    void testPBC(Class<? extends GraphFactory> graphFactory) {
+        setup(graphFactory);
 
         new ParallelBetweennessCentrality(graph, Pools.DEFAULT, 4)
                 .compute()
@@ -148,7 +117,7 @@ public class BetweennessCentralityTest2 extends GraphTester {
         verifyMock(testConsumer);
     }
 
-    public void verifyMock(TestConsumer mock) {
+    void verifyMock(TestConsumer mock) {
         verify(mock, times(1)).accept(eq("a"), eq(0.0));
         verify(mock, times(1)).accept(eq("b"), eq(0.0));
         verify(mock, times(1)).accept(eq("c"), eq(8.0));
@@ -159,8 +128,9 @@ public class BetweennessCentralityTest2 extends GraphTester {
     }
 
 
-    @Test
-    public void testIterateParallel() {
+    @AllGraphTypesWithoutCypherTest
+    void testIterateParallel(Class<? extends GraphFactory> graphFactory) {
+        setup(graphFactory);
 
         final AtomicIntegerArray ai = new AtomicIntegerArray(1001);
 
@@ -173,4 +143,21 @@ public class BetweennessCentralityTest2 extends GraphTester {
         }
     }
 
+    private void setup(Class<? extends GraphFactory> graphImpl) {
+        graph = new GraphLoader(DB)
+                .withAnyRelationshipType()
+                .withAnyLabel()
+                .withoutNodeProperties()
+                .load(graphImpl);
+    }
+
+    private String name(long id) {
+        String[] name = {""};
+        DB.execute("MATCH (n:Node) WHERE id(n) = " + id + " RETURN n.name as name")
+                .accept(row -> {
+                    name[0] = row.getString("name");
+                    return false;
+                });
+        return name[0];
+    }
 }

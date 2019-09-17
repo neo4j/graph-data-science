@@ -19,9 +19,12 @@
  */
 package org.neo4j.graphalgo.impl.msbfs;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.neo4j.graphalgo.GraphTester;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
@@ -34,8 +37,9 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.helper.graphbuilder.DefaultBuilder;
 import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.Pair;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,39 +57,49 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.neo4j.graphdb.Direction.OUTGOING;
 
-public final class MultiSourceBFSTest extends GraphTester {
+final class MultiSourceBFSTest {
 
-    private static final String PAPER_CYPHER = "" +
-            "CREATE (a:Foo {id:\"1\"})\n" +
-            "CREATE (b:Foo {id:\"2\"})\n" +
-            "CREATE (c:Foo {id:\"3\"})\n" +
-            "CREATE (d:Foo {id:\"4\"})\n" +
-            "CREATE (e:Foo {id:\"5\"})\n" +
-            "CREATE (f:Foo {id:\"6\"})\n" +
-            "CREATE\n" +
-            "  (a)-[:BAR]->(c),\n" +
-            "  (a)-[:BAR]->(d),\n" +
-            "  (b)-[:BAR]->(c),\n" +
-            "  (b)-[:BAR]->(d),\n" +
-            "  (c)-[:BAR]->(a),\n" +
-            "  (c)-[:BAR]->(b),\n" +
-            "  (c)-[:BAR]->(e),\n" +
-            "  (d)-[:BAR]->(a),\n" +
-            "  (d)-[:BAR]->(b),\n" +
-            "  (d)-[:BAR]->(f),\n" +
-            "  (e)-[:BAR]->(c),\n" +
-            "  (f)-[:BAR]->(d)\n";
+    private static final String DB_CYPHER = "CREATE" +
+                                            "  (a:Foo {id: '1'})" +
+                                            ", (b:Foo {id: '2'})" +
+                                            ", (c:Foo {id: '3'})" +
+                                            ", (d:Foo {id: '4'})" +
+                                            ", (e:Foo {id: '5'})" +
+                                            ", (f:Foo {id: '6'})" +
 
-    @Rule
-    public ImpermanentDatabaseRule db = new ImpermanentDatabaseRule();
+                                            ",  (a)-[:BAR]->(c)" +
+                                            ",  (a)-[:BAR]->(d)" +
+                                            ",  (b)-[:BAR]->(c)" +
+                                            ",  (b)-[:BAR]->(d)" +
+                                            ",  (c)-[:BAR]->(a)" +
+                                            ",  (c)-[:BAR]->(b)" +
+                                            ",  (c)-[:BAR]->(e)" +
+                                            ",  (d)-[:BAR]->(a)" +
+                                            ",  (d)-[:BAR]->(b)" +
+                                            ",  (d)-[:BAR]->(f)" +
+                                            ",  (e)-[:BAR]->(c)" +
+                                            ",  (f)-[:BAR]->(d)";
 
-    public MultiSourceBFSTest(Class<? extends GraphFactory> graphImpl, String name) {
-        super(graphImpl);
+    private static GraphDatabaseAPI DB;
+
+    @BeforeAll
+    static void setupGraphDb() {
+        DB = TestDatabaseCreator.createTestDatabase();
     }
 
-    @Test
-    public void testPaperExample() {
-        withGraph(PAPER_CYPHER, graph -> {
+    @AfterEach
+    void clearDb() {
+        DB.execute("MATCH (n) DETACH DELETE n");
+    }
+
+    @AfterAll
+    static void shutdown() {
+        if (DB != null) DB.shutdown();
+    }
+
+    @AllGraphTypesWithoutCypherTest
+    void testPaperExample(Class<? extends GraphFactory> graphFactory) {
+        withGraph(DB_CYPHER, graph -> {
             BfsConsumer mock = mock(BfsConsumer.class);
             MultiSourceBFS msbfs = new MultiSourceBFS(
                     graph,
@@ -105,12 +119,12 @@ public final class MultiSourceBFSTest extends GraphTester {
             verify(mock).accept(1, 2, toList(2));
             verify(mock).accept(2, 2, toList(1));
             verifyNoMoreInteractions(mock);
-        });
+        }, graphFactory);
     }
 
-    @Test
-    public void testPaperExampleWithAllSources() {
-        withGraph(PAPER_CYPHER, graph -> {
+    @AllGraphTypesWithoutCypherTest
+    void testPaperExampleWithAllSources(Class<? extends GraphFactory> graphFactory) {
+        withGraph(DB_CYPHER, graph -> {
             BfsConsumer mock = mock(BfsConsumer.class);
             MultiSourceBFS msbfs = new MultiSourceBFS(
                     graph,
@@ -145,11 +159,11 @@ public final class MultiSourceBFSTest extends GraphTester {
             verify(mock).accept(6, 4, toList(5));
 
             verifyNoMoreInteractions(mock);
-        });
+        }, graphFactory);
     }
 
-    @Test
-    public void testSequentialInvariant() {
+    @AllGraphTypesWithoutCypherTest
+    void testSequentialInvariant(Class<? extends GraphFactory> graphFactory) {
         // for a single run with < ω nodes, the same node may only be traversed once at a given depth
         withGrid(
                 gb -> gb.newGridBuilder().createGrid(8, 4),
@@ -170,11 +184,11 @@ public final class MultiSourceBFSTest extends GraphTester {
                             AllocationTracker.EMPTY
                     );
                     msbfs.run(1, null);
-                });
+                }, graphFactory);
     }
 
-    @Test
-    public void testParallel() {
+    @AllGraphTypesWithoutCypherTest
+    void testParallel(Class<? extends GraphFactory> graphFactory) {
         // each node should only be traversed once for every source node
         int maxNodes = 512;
         int[][] seen = new int[maxNodes][maxNodes];
@@ -195,7 +209,7 @@ public final class MultiSourceBFSTest extends GraphTester {
                             },
                             AllocationTracker.EMPTY);
                     msbfs.run(Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT);
-                });
+                }, graphFactory);
 
         for (int i = 0; i < maxNodes; i++) {
             final int[] ints = seen[i];
@@ -206,8 +220,8 @@ public final class MultiSourceBFSTest extends GraphTester {
         }
     }
 
-    @Test
-    public void testSize() {
+    @AllGraphTypesWithoutCypherTest
+    void testSize(Class<? extends GraphFactory> graphFactory) {
         int maxNodes = 100;
         // [ last i, expected source from, expected source to ]
         int[] state = {-1, 0, MultiSourceBFS.OMEGA};
@@ -243,11 +257,11 @@ public final class MultiSourceBFSTest extends GraphTester {
                             AllocationTracker.EMPTY);
                     // run sequentially to guarantee order
                     msbfs.run(1, null);
-                });
+                }, graphFactory);
     }
 
     @Test
-    public void testLarger() throws Exception {
+    void testLarger() {
         final int nodeCount = 8192;
         final int sourceCount = 1024;
 
@@ -305,21 +319,24 @@ public final class MultiSourceBFSTest extends GraphTester {
 
     private void withGraph(
             String cypher,
-            Consumer<? super Graph> block) {
-                db.execute(cypher).close();
-        block.accept(new GraphLoader(db).load(graphImpl));
+            Consumer<? super Graph> block,
+            Class<? extends GraphFactory> graphImpl) {
+                DB.execute(cypher).close();
+        block.accept(new GraphLoader(DB).load(graphImpl));
     }
 
     private void withGrid(
             Consumer<? super GraphBuilder<?>> build,
-            Consumer<? super Graph> block) {
-        db.executeAndCommit((dba) -> {
-                DefaultBuilder graphBuilder = GraphBuilder.create(db)
-                        .setLabel("Foo")
-                        .setRelationship("BAR");
-                build.accept(graphBuilder);
-        });
-        Graph graph = new GraphLoader(db).load(graphImpl);
+            Consumer<? super Graph> block,
+            Class<? extends GraphFactory> graphImpl) {
+        try (Transaction tx = DB.beginTx()) {
+            DefaultBuilder graphBuilder = GraphBuilder.create(DB)
+                    .setLabel("Foo")
+                    .setRelationship("BAR");
+            build.accept(graphBuilder);
+            tx.success();
+        }
+        Graph graph = new GraphLoader(DB).load(graphImpl);
                 block.accept(graph);
     }
 

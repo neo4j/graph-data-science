@@ -19,20 +19,14 @@
  */
 package org.neo4j.graphalgo.impl.betweenness;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
-import org.neo4j.graphalgo.GraphTester;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashMap;
@@ -49,76 +43,42 @@ import static org.hamcrest.Matchers.closeTo;
  *  |     |     |
  *  |     ↓     ↓
  * (A)-->(F)<--(E)
- *
  */
-public class BetweennessCentralityTest3 extends GraphTester {
+class BetweennessCentralityTest3 {
 
-    @Rule
-    public MockitoRule rule = MockitoJUnit.rule();
+    private static final String DB_CYPHER = "CREATE" +
+                                            "  (a:Node {name: 'a'})" +
+                                            ", (b:Node {name: 'b'})" +
+                                            ", (c:Node {name: 'c'})" +
+                                            ", (d:Node {name: 'd'})" +
+                                            ", (e:Node {name: 'e'})" +
+                                            ", (f:Node {name: 'f'})" +
+                                            ", (a)-[:TYPE]->(b)" +
+                                            ", (a)-[:TYPE]->(f)" +
+                                            ", (b)-[:TYPE]->(c)" +
+                                            ", (c)-[:TYPE]->(d)" +
+                                            ", (c)-[:TYPE]->(f)" +
+                                            ", (e)-[:TYPE]->(f)" +
+                                            ", (d)-[:TYPE]->(e)";
 
-    private static GraphDatabaseAPI db;
+
+    private static GraphDatabaseAPI DB;
     private static Graph graph;
 
-    interface TestConsumer {
-        void accept(String name, double centrality);
+    @BeforeAll
+    static void setupGraphDb() {
+        DB = TestDatabaseCreator.createTestDatabase();
+        DB.execute(DB_CYPHER);
     }
 
-    @Mock
-    private TestConsumer testConsumer;
-
-    @BeforeClass
-    public static void setupGraphDb() {
-        final String cypher =
-                "CREATE (a:Node {name:'a'})\n" +
-                        "CREATE (b:Node {name:'b'})\n" +
-                        "CREATE (c:Node {name:'c'})\n" +
-                        "CREATE (d:Node {name:'d'})\n" +
-                        "CREATE (e:Node {name:'e'})\n" +
-                        "CREATE (f:Node {name:'f'})\n" +
-                        "CREATE" +
-                        " (a)-[:TYPE]->(b),\n" +
-                        " (a)-[:TYPE]->(f),\n" +
-                        " (b)-[:TYPE]->(c),\n" +
-                        " (c)-[:TYPE]->(d),\n" +
-                        " (c)-[:TYPE]->(f),\n" +
-                        " (e)-[:TYPE]->(f),\n" +
-                        " (d)-[:TYPE]->(e)";
-
-        db = TestDatabaseCreator.createTestDatabase();
-
-        try (Transaction tx = db.beginTx()) {
-            db.execute(cypher);
-            tx.success();
-        }
+    @AfterAll
+    static void shutdownGraphDb() {
+        if (DB != null) DB.shutdown();
     }
 
-    @AfterClass
-    public static void shutdownGraphDb() {
-        if (db != null) db.shutdown();
-        graph = null;
-    }
-
-    public BetweennessCentralityTest3(final Class<? extends GraphFactory> graphImpl, String name) {
-        super(graphImpl);
-        graph = new GraphLoader(db)
-                .withAnyRelationshipType()
-                .withAnyLabel()
-                .withoutNodeProperties()
-                .load(graphImpl);
-    }
-
-    private String name(long id) {
-        String[] name = {""};
-        db.execute("MATCH (n:Node) WHERE id(n) = " + id + " RETURN n.name as name")
-                .accept(row -> {
-                    name[0] = row.getString("name");
-                    return false;
-                });
-        return name[0];
-    }
-
-    @Test
-    public void testBetweennessCentralityOutgoing() {
+    @AllGraphTypesWithoutCypherTest
+    void testBetweennessCentralityOutgoing(Class<? extends GraphFactory> graphFactory) {
+        setup(graphFactory);
         Map<String, Double> actual = new BetweennessCentrality(graph)
                 .withDirection(Direction.OUTGOING)
                 .compute()
@@ -137,8 +97,9 @@ public class BetweennessCentralityTest3 extends GraphTester {
         expected.forEach((key, value) -> assertThat(actual.get(key), closeTo(value, 1e-14)));
     }
 
-    @Test
-    public void testBetweennessCentralityIncoming() {
+    @AllGraphTypesWithoutCypherTest
+    void testBetweennessCentralityIncoming(Class<? extends GraphFactory> graphFactory) {
+        setup(graphFactory);
         Map<String, Double> actual = new BetweennessCentrality(graph)
                 .withDirection(Direction.INCOMING)
                 .compute()
@@ -157,8 +118,9 @@ public class BetweennessCentralityTest3 extends GraphTester {
         expected.forEach((key, value) -> assertThat(actual.get(key), closeTo(value, 1e-14)));
     }
 
-    @Test
-    public void testBetweennessCentralityBoth() {
+    @AllGraphTypesWithoutCypherTest
+    void testBetweennessCentralityBoth(Class<? extends GraphFactory> graphFactory) {
+        setup(graphFactory);
         Map<String, Double> actual = new BetweennessCentrality(graph)
                 .withDirection(Direction.BOTH)
                 .compute()
@@ -166,15 +128,33 @@ public class BetweennessCentralityTest3 extends GraphTester {
                 .collect(Collectors.toMap(r -> name(r.nodeId), r -> r.centrality));
 
         Map<String, Double> expected = new HashMap<>();
-        expected.put("a", 5.0/6.0);
-        expected.put("b", 5.0/6.0);
-        expected.put("c", 10.0/3.0);
-        expected.put("d", 5.0/6.0);
-        expected.put("e", 5.0/6.0);
-        expected.put("f", 10.0/3.0);
+        expected.put("a", 5.0 / 6.0);
+        expected.put("b", 5.0 / 6.0);
+        expected.put("c", 10.0 / 3.0);
+        expected.put("d", 5.0 / 6.0);
+        expected.put("e", 5.0 / 6.0);
+        expected.put("f", 10.0 / 3.0);
 
         assertThat(actual.keySet(), equalTo(expected.keySet()));
         expected.forEach((key, value) -> assertThat(actual.get(key), closeTo(value, 1e-14)));
+    }
+
+    private void setup(Class<? extends GraphFactory> graphFactory) {
+        graph = new GraphLoader(DB)
+                .withAnyRelationshipType()
+                .withAnyLabel()
+                .withoutNodeProperties()
+                .load(graphFactory);
+    }
+
+    private String name(long id) {
+        String[] name = {""};
+        DB.execute("MATCH (n:Node) WHERE id(n) = " + id + " RETURN n.name as name")
+                .accept(row -> {
+                    name[0] = row.getString("name");
+                    return false;
+                });
+        return name[0];
     }
 
 }

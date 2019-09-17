@@ -24,7 +24,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -53,7 +53,6 @@ import static org.mockito.Mockito.verify;
  *   | /              \  |
  *  (b)                (g)
  *   .0                 .0
- * @author mknblch
  */
 @RunWith(MockitoJUnitRunner.class)
 public class BetweennessCentralityTest2 {

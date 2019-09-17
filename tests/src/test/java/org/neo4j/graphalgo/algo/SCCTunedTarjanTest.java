@@ -21,23 +21,20 @@ package org.neo4j.graphalgo.algo;
 
 import com.carrotsearch.hppc.IntIntScatterMap;
 import com.carrotsearch.hppc.cursors.IntIntCursor;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.neo4j.graphalgo.ConnectedComponentsTest;
 import org.neo4j.graphalgo.StronglyConnectedComponentsProc;
+import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.impl.scc.SCCTunedTarjan;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNull;
 
 /**        _______
  *        /       \
@@ -46,70 +43,53 @@ import static org.junit.Assert.assertNull;
  *        (2)  (6) (5)
  *             / \
  *           (7)-(8)
- *
- * @author mknblch
  */
-public class SCCTunedTarjanTest extends ConnectedComponentsTest {
+class SCCTunedTarjanTest extends ConnectedComponentsTest {
 
-    public SCCTunedTarjanTest(final Class<? extends GraphFactory> graphImpl, String name) {
-        super(graphImpl);
-    }
+    private static final String DB_CYPHER = "CREATE" +
+                                            "  (a:Node {name:'a'})" +
+                                            ", (b:Node {name:'b'})" +
+                                            ", (c:Node {name:'c'})" +
+                                            ", (d:Node {name:'d'})" +
+                                            ", (e:Node {name:'e'})" +
+                                            ", (f:Node {name:'f'})" +
+                                            ", (g:Node {name:'g'})" +
+                                            ", (h:Node {name:'h'})" +
+                                            ", (i:Node {name:'i'})" +
 
-    @BeforeClass
-    public static void setup() throws KernelException {
-        final String cypher =
-                "CREATE (a:Node {name:'a'})\n" +
-                        "CREATE (b:Node {name:'b'})\n" +
-                        "CREATE (c:Node {name:'c'})\n" +
-                        "CREATE (d:Node {name:'d'})\n" +
-                        "CREATE (e:Node {name:'e'})\n" +
-                        "CREATE (f:Node {name:'f'})\n" +
-                        "CREATE (g:Node {name:'g'})\n" +
-                        "CREATE (h:Node {name:'h'})\n" +
-                        "CREATE (i:Node {name:'i'})\n" +
-                        "CREATE" +
-                        " (a)-[:TYPE {cost:5}]->(b),\n" +
-                        " (b)-[:TYPE {cost:5}]->(c),\n" +
-                        " (c)-[:TYPE {cost:5}]->(a),\n" +
+                                            ", (a)-[:TYPE {cost:5}]->(b)" +
+                                            ", (b)-[:TYPE {cost:5}]->(c)" +
+                                            ", (c)-[:TYPE {cost:5}]->(a)" +
 
-                        " (d)-[:TYPE {cost:2}]->(e),\n" +
-                        " (e)-[:TYPE {cost:2}]->(f),\n" +
-                        " (f)-[:TYPE {cost:2}]->(d),\n" +
+                                            ", (d)-[:TYPE {cost:2}]->(e)" +
+                                            ", (e)-[:TYPE {cost:2}]->(f)" +
+                                            ", (f)-[:TYPE {cost:2}]->(d)" +
 
-                        " (a)-[:TYPE {cost:2}]->(d),\n" +
+                                            ", (a)-[:TYPE {cost:2}]->(d)" +
 
-                        " (g)-[:TYPE {cost:3}]->(h),\n" +
-                        " (h)-[:TYPE {cost:3}]->(i),\n" +
-                        " (i)-[:TYPE {cost:3}]->(g)";
+                                            ", (g)-[:TYPE {cost:3}]->(h)" +
+                                            ", (h)-[:TYPE {cost:3}]->(i)" +
+                                            ", (i)-[:TYPE {cost:3}]->(g)";
 
-        api = TestDatabaseCreator.createTestDatabase();
-
-        api.getDependencyResolver()
+    @BeforeAll
+    static void setupGraphDb() throws KernelException {
+        DB = TestDatabaseCreator.createTestDatabase();
+        DB.getDependencyResolver()
                 .resolveDependency(Procedures.class)
                 .registerProcedure(StronglyConnectedComponentsProc.class);
-
-        try (Transaction tx = api.beginTx()) {
-            api.execute(cypher);
-            tx.success();
-        }
-
-        graph = new GraphLoader(api)
-                .withLabel("Node")
-                .withRelationshipType("TYPE")
-                .withRelationshipWeightsFromProperty("cost", Double.MAX_VALUE)
-                .load(HugeGraphFactory.class);
+        DB.execute(DB_CYPHER);
     }
 
-    @AfterClass
-    public static void shutdownGraph() throws Exception {
-        if (api != null) api.shutdown();
+    @AfterAll
+    static void shutdownGraph() {
+        if (DB != null) DB.shutdown();
     }
 
-    @Test
-    public void testDirect() throws Exception {
+    @AllGraphTypesWithoutCypherTest
+    void testDirect(Class<? extends GraphFactory> graphFactory) {
+        setup(graphFactory);
 
-        final SCCTunedTarjan tarjan = new SCCTunedTarjan(graph)
-                .compute();
+        final SCCTunedTarjan tarjan = new SCCTunedTarjan(graph).compute();
 
         assertCC(tarjan.getConnectedComponents());
 
@@ -118,12 +98,13 @@ public class SCCTunedTarjanTest extends ConnectedComponentsTest {
         assertEquals(3, tarjan.getSetCount());
     }
 
-    @Test
-    public void testCypher() throws Exception {
+    @AllGraphTypesWithoutCypherTest
+    void testCypher(Class<? extends GraphFactory> graphFactory) {
+        setup(graphFactory);
 
         String cypher = "CALL algo.scc.recursive.tunedTarjan('', '', {write:true}) YIELD loadMillis, computeMillis, writeMillis";
 
-        api.execute(cypher).accept(row -> {
+        DB.execute(cypher).accept(row -> {
             final long loadMillis = row.getNumber("loadMillis").longValue();
             final long computeMillis = row.getNumber("computeMillis").longValue();
             final long writeMillis = row.getNumber("writeMillis").longValue();
@@ -135,7 +116,7 @@ public class SCCTunedTarjanTest extends ConnectedComponentsTest {
 
         String cypher2 = "MATCH (n) RETURN n.partition as c";
         final IntIntScatterMap testMap = new IntIntScatterMap();
-        api.execute(cypher2).accept(row -> {
+        DB.execute(cypher2).accept(row -> {
             testMap.addTo(row.getNumber("c").intValue(), 1);
             return true;
         });
@@ -148,14 +129,15 @@ public class SCCTunedTarjanTest extends ConnectedComponentsTest {
     }
 
 
-    @Test
-    public void testCypherStream() throws Exception {
+    @AllGraphTypesWithoutCypherTest
+    void testCypherStream(Class<? extends GraphFactory> graphFactory) {
+        setup(graphFactory);
 
         final IntIntScatterMap testMap = new IntIntScatterMap();
 
         String cypher = "CALL algo.scc.recursive.tunedTarjan.stream() YIELD nodeId, partition";
 
-        api.execute(cypher).accept(row -> {
+        DB.execute(cypher).accept(row -> {
             testMap.addTo(row.getNumber("partition").intValue(), 1);
             return true;
         });
@@ -165,5 +147,13 @@ public class SCCTunedTarjanTest extends ConnectedComponentsTest {
         for (IntIntCursor cursor : testMap) {
             assertEquals(3, cursor.value);
         }
+    }
+
+    private void setup(Class<? extends GraphFactory> graphFactory) {
+        graph = new GraphLoader(DB)
+                .withLabel("Node")
+                .withRelationshipType("TYPE")
+                .withRelationshipWeightsFromProperty("cost", Double.MAX_VALUE)
+                .load(graphFactory);
     }
 }

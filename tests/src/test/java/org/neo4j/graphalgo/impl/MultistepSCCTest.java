@@ -19,18 +19,15 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import com.carrotsearch.hppc.IntScatterSet;
-import com.carrotsearch.hppc.IntSet;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.neo4j.graphalgo.ConnectedComponentsTest;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.impl.multistepscc.MultistepSCC;
-import org.neo4j.graphdb.Transaction;
 
 import static org.junit.Assert.assertEquals;
 
@@ -41,73 +38,49 @@ import static org.junit.Assert.assertEquals;
  *        (2)  (6) (5)
  *             / \
  *           (7)-(8)
- *
- * @author mknblch
  */
-public class MultistepSCCTest extends ConnectedComponentsTest {
+class MultistepSCCTest extends ConnectedComponentsTest {
 
+    private static final String DB_CYPHER = "CREATE" +
+                                            "  (a:Node {name: 'a'})" +
+                                            ", (b:Node {name: 'b'})" +
+                                            ", (c:Node {name: 'c'})" +
+                                            ", (d:Node {name: 'd'})" +
+                                            ", (e:Node {name: 'e'})" +
+                                            ", (f:Node {name: 'f'})" +
+                                            ", (g:Node {name: 'g'})" +
+                                            ", (h:Node {name: 'h'})" +
+                                            ", (i:Node {name: 'i'})" +
+                                            ", (x:Node {name: 'x'})" +
 
-    public MultistepSCCTest(Class<? extends GraphFactory> graphImpl, String name) {
-        super(graphImpl);
-        graph = new GraphLoader(api)
-                .withLabel("Node")
-                .withRelationshipType("TYPE")
-                .withRelationshipWeightsFromProperty("cost", Double.MAX_VALUE)
-                .load(graphImpl);
+                                            ", (a)-[:TYPE {cost: 5}]->(b)" +
+                                            ", (b)-[:TYPE {cost: 5}]->(c)" +
+                                            ", (c)-[:TYPE {cost: 5}]->(a)" +
+
+                                            ", (d)-[:TYPE {cost: 2}]->(e)" +
+                                            ", (e)-[:TYPE {cost: 2}]->(f)" +
+                                            ", (f)-[:TYPE {cost: 2}]->(d)" +
+
+                                            ", (a)-[:TYPE {cost: 2}]->(d)" +
+
+                                            ", (g)-[:TYPE {cost: 3}]->(h)" +
+                                            ", (h)-[:TYPE {cost: 3}]->(i)" +
+                                            ", (i)-[:TYPE {cost: 3}]->(g)";
+
+    @BeforeAll
+    static void setupGraphDb() {
+        DB = TestDatabaseCreator.createTestDatabase();
+        DB.execute(DB_CYPHER);
     }
 
-    @BeforeClass
-    public static void setup() {
-        final String cypher =
-                "CREATE (a:Node {name:'a'})\n" +
-                        "CREATE (b:Node {name:'b'})\n" +
-                        "CREATE (c:Node {name:'c'})\n" +
-                        "CREATE (d:Node {name:'d'})\n" +
-                        "CREATE (e:Node {name:'e'})\n" +
-                        "CREATE (f:Node {name:'f'})\n" +
-                        "CREATE (g:Node {name:'g'})\n" +
-                        "CREATE (h:Node {name:'h'})\n" +
-                        "CREATE (i:Node {name:'i'})\n" +
-                        "CREATE (x:Node {name:'x'})\n" +
-                        "CREATE" +
-                        " (a)-[:TYPE {cost:5}]->(b),\n" +
-                        " (b)-[:TYPE {cost:5}]->(c),\n" +
-                        " (c)-[:TYPE {cost:5}]->(a),\n" +
-
-                        " (d)-[:TYPE {cost:2}]->(e),\n" +
-                        " (e)-[:TYPE {cost:2}]->(f),\n" +
-                        " (f)-[:TYPE {cost:2}]->(d),\n" +
-
-                        " (a)-[:TYPE {cost:2}]->(d),\n" +
-
-                        " (g)-[:TYPE {cost:3}]->(h),\n" +
-                        " (h)-[:TYPE {cost:3}]->(i),\n" +
-                        " (i)-[:TYPE {cost:3}]->(g)";
-
-        api = TestDatabaseCreator.createTestDatabase();
-        try (Transaction tx = api.beginTx()) {
-            api.execute(cypher);
-            tx.success();
-        }
+    @AfterAll
+    static void tearDown() {
+        if (DB != null) DB.shutdown();
     }
 
-    @AfterClass
-    public static void tearDown() throws Exception {
-        if (api != null) api.shutdown();
-        graph = null;
-    }
-
-    private IntSet allNodes() {
-        final IntScatterSet nodes = new IntScatterSet();
-        for (int i = 0; i < graph.nodeCount(); i++) {
-            nodes.add(i);
-        }
-        return nodes;
-    }
-
-    @Test
-    public void testSequential() throws Exception {
-
+    @AllGraphTypesWithoutCypherTest
+    void testSequential(Class<? extends GraphFactory> graphFactory) {
+        setup(graphFactory);
         final MultistepSCC multistep = new MultistepSCC(graph, Pools.DEFAULT, 1, 0)
                 .compute();
 
@@ -119,9 +92,9 @@ public class MultistepSCCTest extends ConnectedComponentsTest {
 
     }
 
-    @Test
-    public void testParallel() throws Exception {
-
+    @AllGraphTypesWithoutCypherTest
+    void testParallel(Class<? extends GraphFactory> graphFactory) {
+        setup(graphFactory);
         final MultistepSCC multistep = new MultistepSCC(graph, Pools.DEFAULT, 4, 0)
                 .compute();
 
@@ -132,9 +105,9 @@ public class MultistepSCCTest extends ConnectedComponentsTest {
         assertEquals(3, multistep.getSetCount());
     }
 
-    @Test
-    public void testHighCut() throws Exception {
-
+    @AllGraphTypesWithoutCypherTest
+    void testHighCut(Class<? extends GraphFactory> graphFactory) {
+        setup(graphFactory);
         final MultistepSCC multistep = new MultistepSCC(graph, Pools.DEFAULT, 4, 100_000)
                 .compute();
 
@@ -145,4 +118,11 @@ public class MultistepSCCTest extends ConnectedComponentsTest {
         assertEquals(3, multistep.getSetCount());
     }
 
+    private void setup(Class<? extends GraphFactory> graphImpl) {
+        graph = new GraphLoader(DB)
+                .withLabel("Node")
+                .withRelationshipType("TYPE")
+                .withRelationshipWeightsFromProperty("cost", Double.MAX_VALUE)
+                .load(graphImpl);
+    }
 }

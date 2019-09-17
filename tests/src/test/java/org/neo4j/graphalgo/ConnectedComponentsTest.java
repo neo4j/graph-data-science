@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Node;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -31,18 +30,31 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-public abstract class ConnectedComponentsTest extends GraphTester {
+public abstract class ConnectedComponentsTest {
 
-    protected static GraphDatabaseAPI api;
+    protected static GraphDatabaseAPI DB;
     protected static Graph graph;
 
-    protected ConnectedComponentsTest(final Class<? extends GraphFactory> graphImpl) {
-        super(graphImpl);
+    private static void assertBelongSameSet(HugeLongArray data, Long... expected) {
+        // check if all belong to same set
+        final long needle = data.get(expected[0]);
+        for (long l : expected) {
+            assertEquals(needle, data.get(l));
+        }
+
+        final List<Long> exp = Arrays.asList(expected);
+        // check no other element belongs to this set
+        for (long i = 0; i < data.size(); i++) {
+            if (exp.contains(i)) {
+                continue;
+            }
+            assertNotEquals(needle, data.get(i));
+        }
     }
 
-    public long getMappedNodeId(String name) {
+    private long getMappedNodeId(String name) {
         final Node[] node = new Node[1];
-        api.execute("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n").accept(row -> {
+        DB.execute("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n").accept(row -> {
             node[0] = row.getNode("n");
             return false;
         });
@@ -66,22 +78,5 @@ public abstract class ConnectedComponentsTest extends GraphTester {
                 getMappedNodeId("g"),
                 getMappedNodeId("h"),
                 getMappedNodeId("i"));
-    }
-
-    private static void assertBelongSameSet(HugeLongArray data, Long... expected) {
-        // check if all belong to same set
-        final long needle = data.get(expected[0]);
-        for (long l : expected) {
-            assertEquals(needle, data.get(l));
-        }
-
-        final List<Long> exp = Arrays.asList(expected);
-        // check no other element belongs to this set
-        for (long i = 0; i < data.size(); i++) {
-            if (exp.contains(i)) {
-                continue;
-            }
-            assertNotEquals(needle, data.get(i));
-        }
     }
 }
