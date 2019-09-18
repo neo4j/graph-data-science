@@ -37,7 +37,6 @@ public class ProcedureConstants {
     public static final double DEFAULT_PROPERTY_VALUE_DEFAULT = 1.0;
     public static final String ITERATIONS_PARAM = "iterations";
     public static final String TOLERANCE_PARAM = "tolerance";
-    public static final int ITERATIONS_DEFAULT = 1;
     public static final String BATCH_SIZE_PARAM = "batchSize";
     public static final String DIRECTION = "direction";
     public static final String GRAPH_IMPL_PARAM = "graph";

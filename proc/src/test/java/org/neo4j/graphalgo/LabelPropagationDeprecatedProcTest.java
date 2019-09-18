@@ -72,7 +72,7 @@ public class LabelPropagationDeprecatedProcTest extends ProcTestBase {
     public void shouldTakeDifferentSeedProperties(boolean parallel, String graphName) {
         String query = "CALL algo.labelPropagation(" +
                        "    null, null, null, {" +
-                       "        seedProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: 'lpa'" +
+                       "         iterations: 1, seedProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: 'lpa'" +
                        "    }" +
                        ")";
 
@@ -88,7 +88,7 @@ public class LabelPropagationDeprecatedProcTest extends ProcTestBase {
 
         query = "CALL algo.labelPropagation(" +
                 "   null, null, null, {" +
-                "       partitionProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: 'lpa'" +
+                "       iterations: 1, partitionProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: 'lpa'" +
                 "   }" +
                 ")";
 
@@ -107,7 +107,7 @@ public class LabelPropagationDeprecatedProcTest extends ProcTestBase {
     public void explicitWriteProperty(boolean parallel, String graphName) {
         String query = "CALL algo.labelPropagation(" +
                        "    null, null, null, {" +
-                       "        seedProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: 'lpa'" +
+                       "        iterations: 1, seedProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: 'lpa'" +
                        "    }" +
                        ")";
 
