@@ -22,6 +22,13 @@ package org.neo4j.graphalgo;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 
 public class KernelPropertyMapping {
+    public static final KernelPropertyMapping EMPTY_WEIGHT_PROPERTY = new KernelPropertyMapping(
+            "",
+            -1,
+            0.0,
+            "",
+            DeduplicationStrategy.DEFAULT);
+
     public final String propertyName;
     public final int propertyKeyId;
     public final double defaultValue;

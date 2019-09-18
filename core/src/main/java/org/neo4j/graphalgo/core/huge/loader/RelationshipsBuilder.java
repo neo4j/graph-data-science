@@ -50,6 +50,8 @@ class RelationshipsBuilder {
         adjacency = AdjacencyListBuilder.newBuilder(tracker);
         if (numberOfRelationshipWeights > 0) {
             weights = new AdjacencyListBuilder[numberOfRelationshipWeights];
+            // TODO: can we avoid to create an allocator/complete adjacency list
+            //  if we know that the property does not exist?
             Arrays.setAll(weights, i -> AdjacencyListBuilder.newBuilder(tracker));
         } else {
             weights = EMPTY_WEIGHTS;
