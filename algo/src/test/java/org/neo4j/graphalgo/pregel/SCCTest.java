@@ -44,30 +44,30 @@ public class SCCTest {
     private static final Label NODE_LABEL = Label.label("Node");
 
     private static final String TEST_GRAPH =
-            "CREATE (nA:Node { id: 0 })\n" +
-            "CREATE (nB:Node { id: 1 })\n" +
-            "CREATE (nC:Node { id: 2 })\n" +
-            "CREATE (nD:Node { id: 3 })\n" +
-            "CREATE (nE:Node { id: 4 })\n" +
-            "CREATE (nF:Node { id: 5 })\n" +
-            "CREATE (nG:Node { id: 6 })\n" +
-            "CREATE (nH:Node { id: 7 })\n" +
-            "CREATE (nI:Node { id: 8 })\n" +
+            "CREATE" +
+            "  (nA:Node { id: 0 })" +
+            ", (nB:Node { id: 1 })" +
+            ", (nC:Node { id: 2 })" +
+            ", (nD:Node { id: 3 })" +
+            ", (nE:Node { id: 4 })" +
+            ", (nF:Node { id: 5 })" +
+            ", (nG:Node { id: 6 })" +
+            ", (nH:Node { id: 7 })" +
+            ", (nI:Node { id: 8 })" +
             // {J}
-            "CREATE (nJ:Node { id: 9 })\n" +
-            "CREATE\n" +
+            ", (nJ:Node { id: 9 })" +
             // {A, B, C, D}
-            "  (nA)-[:TYPE]->(nB),\n" +
-            "  (nB)-[:TYPE]->(nC),\n" +
-            "  (nC)-[:TYPE]->(nD),\n" +
-            "  (nD)-[:TYPE]->(nA),\n" +
+            ", (nA)-[:TYPE]->(nB)" +
+            ", (nB)-[:TYPE]->(nC)" +
+            ", (nC)-[:TYPE]->(nD)" +
+            ", (nD)-[:TYPE]->(nA)" +
             // {E, F, G}
-            "  (nE)-[:TYPE]->(nF),\n" +
-            "  (nF)-[:TYPE]->(nG),\n" +
-            "  (nG)-[:TYPE]->(nE),\n" +
+            ", (nE)-[:TYPE]->(nF)" +
+            ", (nF)-[:TYPE]->(nG)" +
+            ", (nG)-[:TYPE]->(nE)" +
             // {H, I}
-            "  (nI)-[:TYPE]->(nH),\n" +
-            "  (nH)-[:TYPE]->(nI)";
+            ", (nI)-[:TYPE]->(nH)" +
+            ", (nH)-[:TYPE]->(nI)";
 
     @ClassRule
     public static final ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();

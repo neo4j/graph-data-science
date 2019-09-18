@@ -98,20 +98,4 @@ public class LabelPropagationBenchmarkLdbc {
                 AllocationTracker.EMPTY
         ).compute(Direction.OUTGOING, iterations);
     }
-
-    @Benchmark
-    public Object pregel() {
-        PageRank.Config algoConfig = new PageRank.Config(iterations, 0.85, 1 - 0.85);
-
-        Pregel pregelJob = Pregel.withDefaultNodeValues(
-                theGraph,
-                () -> new PRComputation(theGraph.nodeCount(), algoConfig.dampingFactor),
-                (int) (theGraph.nodeCount() / Pools.DEFAULT_CONCURRENCY),
-                Pools.DEFAULT_CONCURRENCY,
-                Pools.DEFAULT,
-                AllocationTracker.EMPTY,
-                ProgressLogger.NULL_LOGGER);
-
-        return pregelJob.run(iterations);
-    }
 }

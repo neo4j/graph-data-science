@@ -21,8 +21,8 @@
 package org.neo4j.graphalgo.impl.unionfind;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.HugeWeightMapping;
-import org.neo4j.graphalgo.core.huge.loader.HugeNullWeightMap;
+import org.neo4j.graphalgo.api.WeightMapping;
+import org.neo4j.graphalgo.core.huge.loader.NullWeightMap;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -72,9 +72,9 @@ public class UnionFindPregel extends UnionFind<UnionFindPregel> {
                     batchSize));
         }
 
-        HugeWeightMapping communityMap = algoConfig.communityMap;
+        WeightMapping communityMap = algoConfig.communityMap;
 
-        if (communityMap == null || communityMap instanceof HugeNullWeightMap) {
+        if (communityMap == null || communityMap instanceof NullWeightMap) {
             this.pregel = Pregel.withDefaultNodeValues(
                     graph,
                     WCCComputation::new,

@@ -44,37 +44,36 @@ public class PRTest {
     private static final Label NODE_LABEL = Label.label("Node");
 
     // https://en.wikipedia.org/wiki/PageRank#/media/File:PageRanks-Example.jpg
-    private static final String TEST_GRAPH = "" +
-                                             "CREATE (a:Node { id: 0, name: 'a' })\n" +
-                                             "CREATE (b:Node { id: 1, name: 'b' })\n" +
-                                             "CREATE (c:Node { id: 2, name: 'c' })\n" +
-                                             "CREATE (d:Node { id: 3, name: 'd' })\n" +
-                                             "CREATE (e:Node { id: 4, name: 'e' })\n" +
-                                             "CREATE (f:Node { id: 5, name: 'f' })\n" +
-                                             "CREATE (g:Node { id: 6, name: 'g' })\n" +
-                                             "CREATE (h:Node { id: 7, name: 'h' })\n" +
-                                             "CREATE (i:Node { id: 8, name: 'i' })\n" +
-                                             "CREATE (j:Node { id: 9, name: 'j' })\n" +
-                                             "CREATE (k:Node { id: 10, name: 'k' })\n" +
-                                             "CREATE\n" +
-                                             "  (b)-[:REL]->(c),\n" +
-                                             "  (c)-[:REL]->(b),\n" +
-                                             "  (d)-[:REL]->(a),\n" +
-                                             "  (d)-[:REL]->(b),\n" +
-                                             "  (e)-[:REL]->(b),\n" +
-                                             "  (e)-[:REL]->(d),\n" +
-                                             "  (e)-[:REL]->(f),\n" +
-                                             "  (f)-[:REL]->(b),\n" +
-                                             "  (f)-[:REL]->(e),\n" +
-                                             "  (g)-[:REL]->(b),\n" +
-                                             "  (g)-[:REL]->(e),\n" +
-                                             "  (h)-[:REL]->(b),\n" +
-                                             "  (h)-[:REL]->(e),\n" +
-                                             "  (i)-[:REL]->(b),\n" +
-                                             "  (i)-[:REL]->(e),\n" +
-                                             "  (j)-[:REL]->(e),\n" +
-                                             "  (k)-[:REL]->(e)\n";
-
+    private static final String TEST_GRAPH =
+            "CREATE" +
+            "  (a:Node { id: 0, name: 'a' })" +
+            ", (b:Node { id: 1, name: 'b' })" +
+            ", (c:Node { id: 2, name: 'c' })" +
+            ", (d:Node { id: 3, name: 'd' })" +
+            ", (e:Node { id: 4, name: 'e' })" +
+            ", (f:Node { id: 5, name: 'f' })" +
+            ", (g:Node { id: 6, name: 'g' })" +
+            ", (h:Node { id: 7, name: 'h' })" +
+            ", (i:Node { id: 8, name: 'i' })" +
+            ", (j:Node { id: 9, name: 'j' })" +
+            ", (k:Node { id: 10, name: 'k' })" +
+            ", (b)-[:REL]->(c)" +
+            ", (c)-[:REL]->(b)" +
+            ", (d)-[:REL]->(a)" +
+            ", (d)-[:REL]->(b)" +
+            ", (e)-[:REL]->(b)" +
+            ", (e)-[:REL]->(d)" +
+            ", (e)-[:REL]->(f)" +
+            ", (f)-[:REL]->(b)" +
+            ", (f)-[:REL]->(e)" +
+            ", (g)-[:REL]->(b)" +
+            ", (g)-[:REL]->(e)" +
+            ", (h)-[:REL]->(b)" +
+            ", (h)-[:REL]->(e)" +
+            ", (i)-[:REL]->(b)" +
+            ", (i)-[:REL]->(e)" +
+            ", (j)-[:REL]->(e)" +
+            ", (k)-[:REL]->(e)";
 
     @ClassRule
     public static final ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();

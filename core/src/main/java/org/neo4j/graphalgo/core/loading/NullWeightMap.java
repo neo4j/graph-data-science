@@ -43,9 +43,6 @@ public class NullWeightMap implements WeightMapping {
     }
 
     @Override
-    public void put(final long source, final long target, final double value) { }
-
-    @Override
     public double weight(final long source, final long target) {
         return defaultValue;
     }
