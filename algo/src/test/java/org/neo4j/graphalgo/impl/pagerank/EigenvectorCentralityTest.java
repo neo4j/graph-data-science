@@ -88,20 +88,17 @@ final class EigenvectorCentralityTest {
                                             ",  (k)-[:TYPE2]->(e)";
 
     private static final PageRank.Config DEFAULT_EIGENVECTOR_CONFIG = new PageRank.Config(40, 1, PageRank.DEFAULT_TOLERANCE);
-    private static GraphDatabaseAPI db;
+    private static GraphDatabaseAPI DB;
 
     @BeforeAll
     static void setupGraphDb() {
-        db = TestDatabaseCreator.createTestDatabase();
-        try (Transaction tx = db.beginTx()) {
-            db.execute(DB_CYPHER).close();
-            tx.success();
-        }
+        DB = TestDatabaseCreator.createTestDatabase();
+        DB.execute(DB_CYPHER);
     }
 
     @AfterAll
     static void shutdownGraphDb() {
-        if (db != null) db.shutdown();
+        if (DB != null) DB.shutdown();
     }
 
     @AllGraphTypesTest
@@ -109,29 +106,29 @@ final class EigenvectorCentralityTest {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        try (Transaction tx = db.beginTx()) {
-            expected.put(db.findNode(label, "name", "a").getId(), 1.762540000000000);
-            expected.put(db.findNode(label, "name", "b").getId(), 31.156790000000008);
-            expected.put(db.findNode(label, "name", "c").getId(), 28.694439999999993);
-            expected.put(db.findNode(label, "name", "d").getId(), 1.7625400000000004);
-            expected.put(db.findNode(label, "name", "e").getId(), 1.7625400000000004);
-            expected.put(db.findNode(label, "name", "f").getId(), 1.7625400000000004);
-            expected.put(db.findNode(label, "name", "g").getId(), 0.1);
-            expected.put(db.findNode(label, "name", "h").getId(), 0.1);
-            expected.put(db.findNode(label, "name", "i").getId(), 0.1);
-            expected.put(db.findNode(label, "name", "j").getId(), 0.1);
+        try (Transaction tx = DB.beginTx()) {
+            expected.put(DB.findNode(label, "name", "a").getId(), 1.762540000000000);
+            expected.put(DB.findNode(label, "name", "b").getId(), 31.156790000000008);
+            expected.put(DB.findNode(label, "name", "c").getId(), 28.694439999999993);
+            expected.put(DB.findNode(label, "name", "d").getId(), 1.7625400000000004);
+            expected.put(DB.findNode(label, "name", "e").getId(), 1.7625400000000004);
+            expected.put(DB.findNode(label, "name", "f").getId(), 1.7625400000000004);
+            expected.put(DB.findNode(label, "name", "g").getId(), 0.1);
+            expected.put(DB.findNode(label, "name", "h").getId(), 0.1);
+            expected.put(DB.findNode(label, "name", "i").getId(), 0.1);
+            expected.put(DB.findNode(label, "name", "j").getId(), 0.1);
             tx.success();
         }
 
         final Graph graph;
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
-            graph = new GraphLoader(db)
+            graph = new GraphLoader(DB)
                     .withLabel("MATCH (n:Label1) RETURN id(n) as id")
                     .withRelationshipType("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
                     .load(graphFactory);
 
         } else {
-            graph = new GraphLoader(db)
+            graph = new GraphLoader(DB)
                     .withLabel(label)
                     .withRelationshipType("TYPE1")
                     .withDirection(Direction.OUTGOING)

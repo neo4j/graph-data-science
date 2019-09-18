@@ -25,9 +25,9 @@ import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 
 import java.util.concurrent.ExecutorService;
 
-public final class UnionFindHelper {
+final class UnionFindHelper {
 
-    public static DisjointSetStruct run(
+    static DisjointSetStruct run(
             UnionFindType algorithmType,
             Graph graph,
             ExecutorService executor,

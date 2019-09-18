@@ -28,14 +28,11 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
-import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
@@ -46,13 +43,6 @@ abstract class LouvainTestBase {
 
     static GraphDatabaseAPI DB;
 
-    static Stream<Class<? extends GraphFactory>> parameters() {
-        return Stream.of(
-                HugeGraphFactory.class,
-                GraphViewFactory.class
-        );
-    }
-
     Map<String, Integer> nameMap = new HashMap<>();
 
     @BeforeEach
@@ -62,10 +52,7 @@ abstract class LouvainTestBase {
 
     @AfterEach
     void shutdownGraphDb() {
-        if (null != DB) {
-            DB.shutdown();
-            DB = null;
-        }
+        if (DB != null) DB.shutdown();
     }
 
     abstract void setupGraphDb(Graph graph);

@@ -25,9 +25,9 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
+import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphalgo.core.huge.loader.NullWeightMap;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -45,9 +45,9 @@ import java.util.stream.IntStream;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 @Deprecated
-public final class UnionFindSafetyTest {
+final class UnionFindSafetyTest {
 
-    UnionFind.Config algoConfig = new UnionFind.Config(
+    private UnionFind.Config algoConfig = new UnionFind.Config(
             new NullWeightMap(-1),
             Double.NaN
     );
@@ -55,7 +55,7 @@ public final class UnionFindSafetyTest {
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
     @ParameterizedTest
     @EnumSource(UnionFindType.class)
-    public void testUnionFindSafetyUnderFailure(UnionFindType unionFindType) {
+    void testUnionFindSafetyUnderFailure(UnionFindType unionFindType) {
         IllegalStateException error = new IllegalStateException("some error");
         Graph graph = new FlakyGraph(100, 10, new Random(42L), error);
         try {
@@ -75,7 +75,7 @@ public final class UnionFindSafetyTest {
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
     @ParameterizedTest
     @EnumSource(UnionFindType.class)
-    public void testHugeUnionFindSafetyUnderFailure(UnionFindType unionFindType) {
+    void testHugeUnionFindSafetyUnderFailure(UnionFindType unionFindType) {
         IllegalStateException error = new IllegalStateException("some error");
         Graph graph = new FlakyGraph(100, 10, new Random(42L), error);
         try {

@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -36,7 +37,7 @@ import org.neo4j.graphdb.Transaction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class IncrementalUnionFindTest extends UnionFindTestBase {
+class IncrementalUnionFindTest extends UnionFindTestBase {
 
     private static final String SEED_PROPERTY = "community";
 
@@ -70,11 +71,11 @@ public class IncrementalUnionFindTest extends UnionFindTestBase {
         source.createRelationshipTo(target, RELATIONSHIP_TYPE);
     }
 
-    @ParameterizedTest(name = "{0} -- {2}")
+    @ParameterizedTest(name = "{0} -- {1}")
     @MethodSource("parameters")
-    void test(String graphName, Class<? extends GraphFactory> graphImpl, UnionFindType uf) {
+    void test(Class<? extends GraphFactory> graphFactory, UnionFindType unionFindType) {
         // TODO: Why can't we run this test for kernel graph / graph view?
-        Assumptions.assumeFalse(graphName.equalsIgnoreCase("kernel"));
+        Assumptions.assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
         Graph graph = new GraphLoader(DB)
                 .withExecutorService(Pools.DEFAULT)
                 .withAnyLabel()
@@ -82,7 +83,7 @@ public class IncrementalUnionFindTest extends UnionFindTestBase {
                         PropertyMapping.of(SEED_PROPERTY, SEED_PROPERTY, -1L)
                 )
                 .withRelationshipType(RELATIONSHIP_TYPE)
-                .load(graphImpl);
+                .load(graphFactory);
 
         UnionFind.Config config = new UnionFind.Config(
                 graph.nodeProperties(SEED_PROPERTY),
@@ -90,7 +91,7 @@ public class IncrementalUnionFindTest extends UnionFindTestBase {
         );
 
         // We expect that UF connects pairs of communites
-        DisjointSetStruct result = run(uf, graph, config);
+        DisjointSetStruct result = run(unionFindType, graph, config);
         assertEquals(COMMUNITY_COUNT / 2, getSetCount(result));
 
         graph.forEachNode((nodeId) -> {

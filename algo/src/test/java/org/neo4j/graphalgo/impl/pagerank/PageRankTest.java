@@ -45,93 +45,90 @@ import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public final class PageRankTest {
+final class PageRankTest {
 
     static PageRank.Config DEFAULT_CONFIG = new PageRank.Config(40, 0.85, PageRank.DEFAULT_TOLERANCE);
 
-    private static final String DB_CYPHER = "CREATE " +
-            "  (_:Label0 {name: '_'})" +
-            ", (a:Label1 {name: 'a'})" +
-            ", (b:Label1 {name: 'b'})" +
-            ", (c:Label1 {name: 'c'})" +
-            ", (d:Label1 {name: 'd'})" +
-            ", (e:Label1 {name: 'e'})" +
-            ", (f:Label1 {name: 'f'})" +
-            ", (g:Label1 {name: 'g'})" +
-            ", (h:Label1 {name: 'h'})" +
-            ", (i:Label1 {name: 'i'})" +
-            ", (j:Label1 {name: 'j'})" +
-            ", (k:Label2 {name: 'k'})" +
-            ", (l:Label2 {name: 'l'})" +
-            ", (m:Label2 {name: 'm'})" +
-            ", (n:Label2 {name: 'n'})" +
-            ", (o:Label2 {name: 'o'})" +
-            ", (p:Label2 {name: 'p'})" +
-            ", (q:Label2 {name: 'q'})" +
-            ", (r:Label2 {name: 'r'})" +
-            ", (s:Label2 {name: 's'})" +
-            ", (t:Label2 {name: 't'})" +
-            ", (b)-[:TYPE1]->(c)" +
-            ", (c)-[:TYPE1]->(b)" +
-            ", (d)-[:TYPE1]->(a)" +
-            ", (d)-[:TYPE1]->(b)" +
-            ", (e)-[:TYPE1]->(b)" +
-            ", (e)-[:TYPE1]->(d)" +
-            ", (e)-[:TYPE1]->(f)" +
-            ", (f)-[:TYPE1]->(b)" +
-            ", (f)-[:TYPE1]->(e)" +
-            ", (g)-[:TYPE2]->(b)" +
-            ", (g)-[:TYPE2]->(e)" +
-            ", (h)-[:TYPE2]->(b)" +
-            ", (h)-[:TYPE2]->(e)" +
-            ", (i)-[:TYPE2]->(b)" +
-            ", (i)-[:TYPE2]->(e)" +
-            ", (j)-[:TYPE2]->(e)" +
-            ", (k)-[:TYPE2]->(e)";
+    private static final String DB_CYPHER = "CREATE" +
+                                            "  (_:Label0 {name: '_'})" +
+                                            ", (a:Label1 {name: 'a'})" +
+                                            ", (b:Label1 {name: 'b'})" +
+                                            ", (c:Label1 {name: 'c'})" +
+                                            ", (d:Label1 {name: 'd'})" +
+                                            ", (e:Label1 {name: 'e'})" +
+                                            ", (f:Label1 {name: 'f'})" +
+                                            ", (g:Label1 {name: 'g'})" +
+                                            ", (h:Label1 {name: 'h'})" +
+                                            ", (i:Label1 {name: 'i'})" +
+                                            ", (j:Label1 {name: 'j'})" +
+                                            ", (k:Label2 {name: 'k'})" +
+                                            ", (l:Label2 {name: 'l'})" +
+                                            ", (m:Label2 {name: 'm'})" +
+                                            ", (n:Label2 {name: 'n'})" +
+                                            ", (o:Label2 {name: 'o'})" +
+                                            ", (p:Label2 {name: 'p'})" +
+                                            ", (q:Label2 {name: 'q'})" +
+                                            ", (r:Label2 {name: 'r'})" +
+                                            ", (s:Label2 {name: 's'})" +
+                                            ", (t:Label2 {name: 't'})" +
+                                            ", (b)-[:TYPE1]->(c)" +
+                                            ", (c)-[:TYPE1]->(b)" +
+                                            ", (d)-[:TYPE1]->(a)" +
+                                            ", (d)-[:TYPE1]->(b)" +
+                                            ", (e)-[:TYPE1]->(b)" +
+                                            ", (e)-[:TYPE1]->(d)" +
+                                            ", (e)-[:TYPE1]->(f)" +
+                                            ", (f)-[:TYPE1]->(b)" +
+                                            ", (f)-[:TYPE1]->(e)" +
+                                            ", (g)-[:TYPE2]->(b)" +
+                                            ", (g)-[:TYPE2]->(e)" +
+                                            ", (h)-[:TYPE2]->(b)" +
+                                            ", (h)-[:TYPE2]->(e)" +
+                                            ", (i)-[:TYPE2]->(b)" +
+                                            ", (i)-[:TYPE2]->(e)" +
+                                            ", (j)-[:TYPE2]->(e)" +
+                                            ", (k)-[:TYPE2]->(e)";
 
-    private static GraphDatabaseAPI db;
+    private static GraphDatabaseAPI DB;
 
     @BeforeAll
-    public static void setupGraphDb() {
-        db = TestDatabaseCreator.createTestDatabase();
-        try (Transaction tx = db.beginTx()) {
-            db.execute(DB_CYPHER).close();
-            tx.success();
-        }
+    static void setupGraphDb() {
+        DB = TestDatabaseCreator.createTestDatabase();
+        DB.execute(DB_CYPHER);
     }
 
     @AfterAll
-    public static void shutdownGraphDb() {
-        if (db != null) db.shutdown();
+    static void shutdownGraphDb() {
+        if (DB != null) DB.shutdown();
     }
 
     @AllGraphTypesTest
-    public void testOnOutgoingRelationships(Class<? extends GraphFactory> graphImpl) {
+    void testOnOutgoingRelationships(Class<? extends GraphFactory> graphImpl) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        try (Transaction tx = db.beginTx()) {
-            expected.put(db.findNode(label, "name", "a").getId(), 0.243007);
-            expected.put(db.findNode(label, "name", "b").getId(), 1.9183995);
-            expected.put(db.findNode(label, "name", "c").getId(), 1.7806315);
-            expected.put(db.findNode(label, "name", "d").getId(), 0.21885);
-            expected.put(db.findNode(label, "name", "e").getId(), 0.243007);
-            expected.put(db.findNode(label, "name", "f").getId(), 0.21885);
-            expected.put(db.findNode(label, "name", "g").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "h").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "i").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "j").getId(), 0.15);
+        try (Transaction tx = DB.beginTx()) {
+            expected.put(DB.findNode(label, "name", "a").getId(), 0.243007);
+            expected.put(DB.findNode(label, "name", "b").getId(), 1.9183995);
+            expected.put(DB.findNode(label, "name", "c").getId(), 1.7806315);
+            expected.put(DB.findNode(label, "name", "d").getId(), 0.21885);
+            expected.put(DB.findNode(label, "name", "e").getId(), 0.243007);
+            expected.put(DB.findNode(label, "name", "f").getId(), 0.21885);
+            expected.put(DB.findNode(label, "name", "g").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "h").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "i").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "j").getId(), 0.15);
         }
 
         final Graph graph;
         if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
-            graph = new GraphLoader(db)
+            graph = new GraphLoader(DB)
                     .withLabel("MATCH (n:Label1) RETURN id(n) as id")
                     .withRelationshipType("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
                     .load(graphImpl);
 
         } else {
-            graph = new GraphLoader(db)
+            graph = new GraphLoader(DB)
                     .withLabel(label)
                     .withRelationshipType("TYPE1")
                     .withDirection(Direction.OUTGOING)
@@ -155,28 +152,28 @@ public final class PageRankTest {
     }
 
     @AllGraphTypesTest
-    public void testOnIncomingRelationships(Class<? extends GraphFactory> graphImpl) {
+    void testOnIncomingRelationships(Class<? extends GraphFactory> graphImpl) {
         final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        try (Transaction tx = db.beginTx()) {
-            expected.put(db.findNode(label, "name", "a").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "b").getId(), 0.3386727);
-            expected.put(db.findNode(label, "name", "c").getId(), 0.2219679);
-            expected.put(db.findNode(label, "name", "d").getId(), 0.3494679);
-            expected.put(db.findNode(label, "name", "e").getId(), 2.5463981);
-            expected.put(db.findNode(label, "name", "f").getId(), 2.3858317);
-            expected.put(db.findNode(label, "name", "g").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "h").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "i").getId(), 0.15);
-            expected.put(db.findNode(label, "name", "j").getId(), 0.15);
+        try (Transaction tx = DB.beginTx()) {
+            expected.put(DB.findNode(label, "name", "a").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "b").getId(), 0.3386727);
+            expected.put(DB.findNode(label, "name", "c").getId(), 0.2219679);
+            expected.put(DB.findNode(label, "name", "d").getId(), 0.3494679);
+            expected.put(DB.findNode(label, "name", "e").getId(), 2.5463981);
+            expected.put(DB.findNode(label, "name", "f").getId(), 2.3858317);
+            expected.put(DB.findNode(label, "name", "g").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "h").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "i").getId(), 0.15);
+            expected.put(DB.findNode(label, "name", "j").getId(), 0.15);
             tx.close();
         }
 
         final Graph graph;
         final CentralityResult rankResult;
         if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
-            graph = new GraphLoader(db)
+            graph = new GraphLoader(DB)
                     .withLabel("MATCH (n:Label1) RETURN id(n) as id")
                     .withRelationshipType("MATCH (n:Label1)<-[:TYPE1]-(m:Label1) RETURN id(n) AS source,id(m) AS target")
                     .load(graphImpl);
@@ -186,7 +183,7 @@ public final class PageRankTest {
                     .compute()
                     .result();
         } else {
-            graph = new GraphLoader(db)
+            graph = new GraphLoader(DB)
                     .withLabel(label)
                     .withRelationshipType("TYPE1")
                     .withDirection(Direction.INCOMING)
@@ -210,17 +207,17 @@ public final class PageRankTest {
     }
 
     @AllGraphTypesTest
-    public void correctPartitionBoundariesForAllNodes(Class<? extends GraphFactory> graphImpl) {
+    void correctPartitionBoundariesForAllNodes(Class<? extends GraphFactory> graphImpl) {
         final Label label = Label.label("Label1");
         final Graph graph;
         if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
-            graph = new GraphLoader(db)
+            graph = new GraphLoader(DB)
                     .withLabel("MATCH (n:Label1) RETURN id(n) as id")
                     .withRelationshipType("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
                     .load(graphImpl);
 
         } else {
-            graph = new GraphLoader(db)
+            graph = new GraphLoader(DB)
                     .withLabel(label)
                     .withRelationshipType("TYPE1")
                     .withDirection(Direction.OUTGOING)
@@ -242,21 +239,21 @@ public final class PageRankTest {
     }
 
     @Test
-    public void shouldComputeMemoryEstimation1Thread() {
+    void shouldComputeMemoryEstimation1Thread() {
         long nodeCount = 100_000L;
         int concurrency = 1;
         assertMemoryEstimation(nodeCount, concurrency);
     }
 
     @Test
-    public void shouldComputeMemoryEstimation4Threads() {
+    void shouldComputeMemoryEstimation4Threads() {
         long nodeCount = 100_000L;
         int concurrency = 4;
         assertMemoryEstimation(nodeCount, concurrency);
     }
 
     @Test
-    public void shouldComputeMemoryEstimation42Threads() {
+    void shouldComputeMemoryEstimation42Threads() {
         long nodeCount = 100_000L;
         int concurrency = 42;
         assertMemoryEstimation(nodeCount, concurrency);

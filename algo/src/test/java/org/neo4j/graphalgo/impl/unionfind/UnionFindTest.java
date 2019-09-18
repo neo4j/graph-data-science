@@ -40,7 +40,7 @@ import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class UnionFindTest extends UnionFindTestBase {
+class UnionFindTest extends UnionFindTestBase {
 
     private static final int SETS_COUNT = 16;
     private static final int SET_SIZE = 10;
@@ -60,16 +60,16 @@ public class UnionFindTest extends UnionFindTestBase {
 
     @ParameterizedTest(name = "{0} -- {2}")
     @MethodSource("parameters")
-    void test(String graphName, Class<? extends GraphFactory> graphImpl, UnionFindType uf) {
+    void test(Class<? extends GraphFactory> graphFactory, UnionFindType unionFindType) {
         Graph graph = new GraphLoader(DB)
                 .withExecutorService(Pools.DEFAULT)
                 .withAnyLabel()
                 .withRelationshipType(RELATIONSHIP_TYPE)
-                .load(graphImpl);
+                .load(graphFactory);
 
         UnionFind.Config config = new UnionFind.Config(null, Double.NaN);
 
-        DisjointSetStruct result = run(uf, graph, config);
+        DisjointSetStruct result = run(unionFindType, graph, config);
 
         Assert.assertEquals(SETS_COUNT, getSetCount(result));
         long[] setRegions = new long[SETS_COUNT];

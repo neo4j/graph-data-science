@@ -40,35 +40,34 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * \  /
  * (f)
  */
-public class LouvainMultiLevelTest extends LouvainTestBase {
+class LouvainMultiLevelTest extends LouvainTestBase {
 
-    private static final String SETUP_QUERY =
-            "CREATE " +
-            "  (a:Node {name: 'a'})" +
-            ", (b:Node {name: 'b'})" +
-            ", (c:Node {name: 'c'})" +
-            ", (d:Node {name: 'd'})" +
-            ", (e:Node {name: 'e'})" +
-            ", (f:Node {name: 'f'})" +
-            ", (g:Node {name: 'g'})" +
-            ", (h:Node {name: 'h'})" +
-            ", (i:Node {name: 'i'})" +
+    private static final String DB_CYPHER = "CREATE" +
+                                            "  (a:Node {name: 'a'})" +
+                                            ", (b:Node {name: 'b'})" +
+                                            ", (c:Node {name: 'c'})" +
+                                            ", (d:Node {name: 'd'})" +
+                                            ", (e:Node {name: 'e'})" +
+                                            ", (f:Node {name: 'f'})" +
+                                            ", (g:Node {name: 'g'})" +
+                                            ", (h:Node {name: 'h'})" +
+                                            ", (i:Node {name: 'i'})" +
 
-            ", (a)-[:TYPE {weight: 1.0}]->(b)" +
-            ", (a)-[:TYPE {weight: 1.0}]->(c)" +
-            ", (b)-[:TYPE {weight: 1.0}]->(c)" +
+                                            ", (a)-[:TYPE {weight: 1.0}]->(b)" +
+                                            ", (a)-[:TYPE {weight: 1.0}]->(c)" +
+                                            ", (b)-[:TYPE {weight: 1.0}]->(c)" +
 
-            ", (g)-[:TYPE {weight: 1.0}]->(h)" +
-            ", (g)-[:TYPE {weight: 1.0}]->(i)" +
-            ", (h)-[:TYPE {weight: 1.0}]->(i)" +
+                                            ", (g)-[:TYPE {weight: 1.0}]->(h)" +
+                                            ", (g)-[:TYPE {weight: 1.0}]->(i)" +
+                                            ", (h)-[:TYPE {weight: 1.0}]->(i)" +
 
-            ", (e)-[:TYPE {weight: 1.0}]->(d)" +
-            ", (e)-[:TYPE {weight: 1.0}]->(f)" +
-            ", (d)-[:TYPE {weight: 1.0}]->(f)" +
+                                            ", (e)-[:TYPE {weight: 1.0}]->(d)" +
+                                            ", (e)-[:TYPE {weight: 1.0}]->(f)" +
+                                            ", (d)-[:TYPE {weight: 1.0}]->(f)" +
 
-            ", (a)-[:TYPE {weight: 1.0}]->(g)" +
-            ", (c)-[:TYPE {weight: 1.0}]->(e)" +
-            ", (f)-[:TYPE {weight: 1.0}]->(i)";
+                                            ", (a)-[:TYPE {weight: 1.0}]->(g)" +
+                                            ", (c)-[:TYPE {weight: 1.0}]->(e)" +
+                                            ", (f)-[:TYPE {weight: 1.0}]->(i)";
 
     @Override
     void setupGraphDb(Graph graph) {
@@ -76,7 +75,7 @@ public class LouvainMultiLevelTest extends LouvainTestBase {
 
     @AllGraphTypesTest
     void testComplex(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = loadGraph(graphImpl, SETUP_QUERY);
+        Graph graph = loadGraph(graphImpl, DB_CYPHER);
         final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
@@ -86,7 +85,6 @@ public class LouvainMultiLevelTest extends LouvainTestBase {
             if (null == dendogram[i - 1]) {
                 break;
             }
-            System.out.println("level " + i + ": " + dendogram[i - 1]);
         }
 
         assertArrayEquals(new long[]{0, 0, 0, 1, 1, 1, 2, 2, 2}, dendogram[0].toArray());
@@ -97,7 +95,7 @@ public class LouvainMultiLevelTest extends LouvainTestBase {
 
     @AllGraphTypesTest
     void testComplexRNL(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = loadGraph(graphImpl, SETUP_QUERY);
+        Graph graph = loadGraph(graphImpl, DB_CYPHER);
         final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
@@ -107,7 +105,6 @@ public class LouvainMultiLevelTest extends LouvainTestBase {
             if (null == dendogram[i - 1]) {
                 break;
             }
-            System.out.println("level " + i + ": " + dendogram[i - 1]);
         }
 
     }

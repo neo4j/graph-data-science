@@ -21,33 +21,26 @@ package org.neo4j.graphalgo.impl.unionfind;
 
 import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.params.provider.Arguments;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
-import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Arrays;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.params.provider.Arguments.arguments;
-
-public abstract class UnionFindTestBase {
+abstract class UnionFindTestBase {
 
     static GraphDatabaseAPI DB;
     static final RelationshipType RELATIONSHIP_TYPE = RelationshipType.withName("TYPE");
 
     static Stream<Arguments> parameters() {
-        return Stream.of(
-                arguments("Huge", HugeGraphFactory.class, UnionFindType.PARALLEL),
-                arguments("Huge", HugeGraphFactory.class, UnionFindType.FJ_MERGE),
-                arguments("Huge", HugeGraphFactory.class, UnionFindType.FORK_JOIN),
-                arguments("Kernel", GraphViewFactory.class, UnionFindType.PARALLEL),
-                arguments("Kernel", GraphViewFactory.class, UnionFindType.FJ_MERGE),
-                arguments("Kernel", GraphViewFactory.class, UnionFindType.FORK_JOIN)
-        );
+        return TestSupport.allTypesWithoutCypher().
+                flatMap(graphType -> Arrays.stream(UnionFindType.values())
+                        .map(ufType -> Arguments.of(graphType, ufType)));
     }
 
     abstract int communitySize();

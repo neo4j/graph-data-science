@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.labelprop;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
@@ -34,36 +35,40 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class NonStabilizingLabelPropagationTest {
+class NonStabilizingLabelPropagationTest {
 
-    private static final String GRAPH =
-            "CREATE " +
-            " (a {community:1})" +
-            ",(b {community:1})" +
-            ",(c {community:1})" +
-            ",(d {community:2})" +
-            ",(e {community:2})" +
-            ",(f {community:2})" +
-            ",(g {community:3})" +
-            ",(h {community:4})" +
-            "CREATE " +
-            " (g)-[:R]->(a)" +
-            ",(a)-[:R]->(d)" +
-            ",(d)-[:R]->(b)" +
-            ",(b)-[:R]->(e)" +
-            ",(e)-[:R]->(c)" +
-            ",(c)-[:R]->(f)" +
-            ",(f)-[:R]->(h)";
+    private static final String DB_CYPHER = "CREATE" +
+                                            "  (a {community: 1})" +
+                                            ", (b {community: 1})" +
+                                            ", (c {community: 1})" +
+                                            ", (d {community: 2})" +
+                                            ", (e {community: 2})" +
+                                            ", (f {community: 2})" +
+                                            ", (g {community: 3})" +
+                                            ", (h {community: 4})" +
+                                            ", (g)-[:R]->(a)" +
+                                            ", (a)-[:R]->(d)" +
+                                            ", (d)-[:R]->(b)" +
+                                            ", (b)-[:R]->(e)" +
+                                            ", (e)-[:R]->(c)" +
+                                            ", (c)-[:R]->(f)" +
+                                            ", (f)-[:R]->(h)";
 
-    static GraphDatabaseAPI DB;
+    private static GraphDatabaseAPI DB;
 
     @BeforeAll
-    public static void setupGraphDB() {
+    static void setupGraphDB() {
         DB = TestDatabaseCreator.createTestDatabase();
-        DB.execute(GRAPH).close();
+        DB.execute(DB_CYPHER).close();
     }
 
-    public Graph loadGraph(Class<? extends GraphFactory> graphImpl) {
+    @AfterAll
+    static void shutdownGraphDb() {
+        if (DB != null) DB.shutdown();
+    }
+
+
+    Graph loadGraph(Class<? extends GraphFactory> graphImpl) {
         GraphLoader graphLoader = new GraphLoader(DB, Pools.DEFAULT)
                 .undirected()
                 .withDefaultConcurrency();
@@ -87,9 +92,14 @@ public class NonStabilizingLabelPropagationTest {
     // LabelPropagation will not converge unless the iteration is random. However, we don't seem to be affected by this.
     // [1]: https://arxiv.org/pdf/0709.2938.pdf, page 5
     @AllGraphTypesTest
-    public void testLabelPropagationDoesStabilize(Class<? extends GraphFactory> graphImpl) {
+    void testLabelPropagationDoesStabilize(Class<? extends GraphFactory> graphImpl) {
         Graph graph = loadGraph(graphImpl);
-        LabelPropagation labelPropagation = new LabelPropagation(graph, ParallelUtil.DEFAULT_BATCH_SIZE, Pools.DEFAULT_CONCURRENCY, Pools.DEFAULT, AllocationTracker.EMPTY);
+        LabelPropagation labelPropagation = new LabelPropagation(
+                graph,
+                ParallelUtil.DEFAULT_BATCH_SIZE,
+                Pools.DEFAULT_CONCURRENCY,
+                Pools.DEFAULT,
+                AllocationTracker.EMPTY);
         LabelPropagation compute = labelPropagation.compute(Direction.OUTGOING, 10);
         compute.labels();
         assertTrue(compute.didConverge(), "Should converge");

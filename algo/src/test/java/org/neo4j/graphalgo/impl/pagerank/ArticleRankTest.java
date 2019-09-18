@@ -93,10 +93,7 @@ final class ArticleRankTest {
     @BeforeAll
     static void setupGraphDb() {
         DB = TestDatabaseCreator.createTestDatabase();
-        try (Transaction tx = DB.beginTx()) {
-            DB.execute(DB_CYPHER).close();
-            tx.success();
-        }
+        DB.execute(DB_CYPHER);
     }
 
     @AfterAll

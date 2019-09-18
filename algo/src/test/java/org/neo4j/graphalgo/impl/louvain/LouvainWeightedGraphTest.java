@@ -39,33 +39,32 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class LouvainWeightedGraphTest extends LouvainTestBase {
 
-    private static final String SETUP_QUERY =
-            "CREATE " +
-            "  (a:Node {name: 'a'})" +
-            ", (b:Node {name: 'b'})" +
-            ", (c:Node {name: 'c'})" +
-            ", (d:Node {name: 'd'})" +
-            ", (e:Node {name: 'e'})" +
-            ", (f:Node {name: 'f'})" +
-            ", (g:Node {name: 'g'})" +
-            ", (h:Node {name: 'h'})" +
-            ", (z:Node {name: 'z'})" +
+    private static final String DB_CYPHER = "CREATE" +
+                                            "  (a:Node {name: 'a'})" +
+                                            ", (b:Node {name: 'b'})" +
+                                            ", (c:Node {name: 'c'})" +
+                                            ", (d:Node {name: 'd'})" +
+                                            ", (e:Node {name: 'e'})" +
+                                            ", (f:Node {name: 'f'})" +
+                                            ", (g:Node {name: 'g'})" +
+                                            ", (h:Node {name: 'h'})" +
+                                            ", (z:Node {name: 'z'})" +
 
-            ", (a)-[:TYPE]->(b)" +
-            ", (a)-[:TYPE]->(c)" +
-            ", (a)-[:TYPE]->(d)" +
-            ", (c)-[:TYPE]->(d)" +
-            ", (c)-[:TYPE]->(b)" +
-            ", (b)-[:TYPE]->(d)" +
+                                            ", (a)-[:TYPE]->(b)" +
+                                            ", (a)-[:TYPE]->(c)" +
+                                            ", (a)-[:TYPE]->(d)" +
+                                            ", (c)-[:TYPE]->(d)" +
+                                            ", (c)-[:TYPE]->(b)" +
+                                            ", (b)-[:TYPE]->(d)" +
 
-            ", (e)-[:TYPE]->(f)" +
-            ", (e)-[:TYPE]->(g)" +
-            ", (e)-[:TYPE]->(h)" +
-            ", (f)-[:TYPE]->(h)" +
-            ", (f)-[:TYPE]->(g)" +
-            ", (g)-[:TYPE]->(h)" +
+                                            ", (e)-[:TYPE]->(f)" +
+                                            ", (e)-[:TYPE]->(g)" +
+                                            ", (e)-[:TYPE]->(h)" +
+                                            ", (f)-[:TYPE]->(h)" +
+                                            ", (f)-[:TYPE]->(g)" +
+                                            ", (g)-[:TYPE]->(h)" +
 
-            ", (e)-[:TYPE {weight: 4}]->(b)";
+                                            ", (e)-[:TYPE {weight: 4}]->(b)";
 
     private static final int MAX_ITERATIONS = 10;
     private static final Label LABEL = Label.label("Node");
@@ -93,7 +92,7 @@ class LouvainWeightedGraphTest extends LouvainTestBase {
 
     @AllGraphTypesTest
     void testWeightedLouvain(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = loadGraph(graphImpl, SETUP_QUERY);
+        Graph graph = loadGraph(graphImpl, DB_CYPHER);
         final Louvain louvain =
                 new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                         .withProgressLogger(TestProgressLogger.INSTANCE)
@@ -116,7 +115,7 @@ class LouvainWeightedGraphTest extends LouvainTestBase {
 
     @AllGraphTypesTest
     void testWeightedRandomNeighborLouvain(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = loadGraph(graphImpl, SETUP_QUERY);
+        Graph graph = loadGraph(graphImpl, DB_CYPHER);
         final Louvain louvain =
                 new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                         .withProgressLogger(TestProgressLogger.INSTANCE)

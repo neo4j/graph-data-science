@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.impl.results;
 
 import org.HdrHistogram.Histogram;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 
@@ -36,7 +36,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-public final class AbstractCommunityResultBuilderTest {
+final class AbstractCommunityResultBuilderTest {
 
     private static final Set<String> COMMUNITY_COUNT_FIELD = Collections.singleton("communityCount");
     private static final Set<String> SET_COUNT_FIELD = Collections.singleton("setCount");
@@ -48,7 +48,7 @@ public final class AbstractCommunityResultBuilderTest {
     }};
 
     @Test
-    public void countCommunitySizesOverHugeCommunities() {
+    void countCommunitySizesOverHugeCommunities() {
         AbstractCommunityResultBuilder<Void> builder = builder((maybeCommunityCount, maybeHistogram) -> {
             assertTrue(maybeCommunityCount.isPresent());
             assertTrue(maybeHistogram.isPresent());
@@ -64,7 +64,7 @@ public final class AbstractCommunityResultBuilderTest {
     }
 
     @Test
-    public void countCommunitySizesOverPresizedHugeCommunities() {
+    void countCommunitySizesOverPresizedHugeCommunities() {
         AbstractCommunityResultBuilder<Void> builder = builder((maybeCommunityCount, maybeHistogram) -> {
             assertTrue(maybeCommunityCount.isPresent());
             assertTrue(maybeHistogram.isPresent());
@@ -80,7 +80,7 @@ public final class AbstractCommunityResultBuilderTest {
     }
 
     @Test
-    public void countCommunitySizesOverIntegerCommunities() {
+    void countCommunitySizesOverIntegerCommunities() {
         AbstractCommunityResultBuilder<Void> builder = builder((maybeCommunityCount, maybeHistogram) -> {
             assertTrue(maybeCommunityCount.isPresent());
             assertTrue(maybeHistogram.isPresent());
@@ -100,7 +100,7 @@ public final class AbstractCommunityResultBuilderTest {
     }
 
     @Test
-    public void countCommunitySizesOverLongCommunities() {
+    void countCommunitySizesOverLongCommunities() {
         AbstractCommunityResultBuilder<Void> builder = builder((maybeCommunityCount, maybeHistogram) -> {
             assertTrue(maybeCommunityCount.isPresent());
             assertTrue(maybeHistogram.isPresent());
@@ -119,7 +119,7 @@ public final class AbstractCommunityResultBuilderTest {
     }
 
     @Test
-    public void doNotGenerateCommunityCountOrHistorgram() {
+    void doNotGenerateCommunityCountOrHistorgram() {
         AbstractCommunityResultBuilder<Void> builder = builder((maybeCommunityCount, maybeHistogram) -> {
             assertFalse(maybeCommunityCount.isPresent());
             assertFalse(maybeHistogram.isPresent());
@@ -128,7 +128,7 @@ public final class AbstractCommunityResultBuilderTest {
     }
 
     @Test
-    public void doNotGenerateHistogram() {
+    void doNotGenerateHistogram() {
         AbstractCommunityResultBuilder<Void> builder = builder((maybeCommunityCount, maybeHistogram) -> {
             assertTrue(maybeCommunityCount.isPresent());
             assertFalse(maybeHistogram.isPresent());
@@ -143,7 +143,7 @@ public final class AbstractCommunityResultBuilderTest {
     }
 
     @Test
-    public void oneCommunityFromHugeMap() {
+    void oneCommunityFromHugeMap() {
         HugeLongLongMap communitySizeMap = new HugeLongLongMap(AllocationTracker.EMPTY);
         communitySizeMap.addTo(1, 4);
 
@@ -153,7 +153,7 @@ public final class AbstractCommunityResultBuilderTest {
     }
 
     @Test
-    public void multipleCommunitiesFromHugeMap() {
+    void multipleCommunitiesFromHugeMap() {
         HugeLongLongMap communitySizeMap = new HugeLongLongMap(AllocationTracker.EMPTY);
         communitySizeMap.addTo(1, 4);
         communitySizeMap.addTo(2, 10);
