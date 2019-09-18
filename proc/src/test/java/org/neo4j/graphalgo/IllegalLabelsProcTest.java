@@ -36,10 +36,11 @@ import static org.neo4j.graphalgo.core.utils.ExceptionUtil.rootCause;
 
 class IllegalLabelsProcTest {
 
-    private static final String DB_CYPHER = "CREATE" +
-                                            "  (a:A {id: 0}) " +
-                                            ", (b:B {id: 1}) " +
-                                            ", (a)-[:X]->(b)";
+    private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a:A {id: 0}) " +
+            ", (b:B {id: 1}) " +
+            ", (a)-[:X]->(b)";
 
     private static GraphDatabaseAPI DB;
 

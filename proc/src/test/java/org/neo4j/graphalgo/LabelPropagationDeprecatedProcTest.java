@@ -40,21 +40,22 @@ import static org.neo4j.graphalgo.TestSupport.*;
 @Deprecated
 public class LabelPropagationDeprecatedProcTest extends ProcTestBase {
 
-    private static final String DB_CYPHER = "CREATE" +
-            " (a:A {id: 0, community: 42}) " +
-            ",(b:B {id: 1, community: 42}) " +
+    private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a:A {id: 0, community: 42}) " +
+            ", (b:B {id: 1, community: 42}) " +
 
-            ",(a)-[:X]->(:A {id: 2,  weight: 1.0, score: 1.0, community: 1}) " +
-            ",(a)-[:X]->(:A {id: 3,  weight: 2.0, score: 2.0, community: 1}) " +
-            ",(a)-[:X]->(:A {id: 4,  weight: 1.0, score: 1.0, community: 1}) " +
-            ",(a)-[:X]->(:A {id: 5,  weight: 1.0, score: 1.0, community: 1}) " +
-            ",(a)-[:X]->(:A {id: 6,  weight: 8.0, score: 8.0, community: 2}) " +
+            ", (a)-[:X]->(:A {id: 2,  weight: 1.0, score: 1.0, community: 1}) " +
+            ", (a)-[:X]->(:A {id: 3,  weight: 2.0, score: 2.0, community: 1}) " +
+            ", (a)-[:X]->(:A {id: 4,  weight: 1.0, score: 1.0, community: 1}) " +
+            ", (a)-[:X]->(:A {id: 5,  weight: 1.0, score: 1.0, community: 1}) " +
+            ", (a)-[:X]->(:A {id: 6,  weight: 8.0, score: 8.0, community: 2}) " +
 
-            ",(b)-[:X]->(:B {id: 7,  weight: 1.0, score: 1.0, community: 1}) " +
-            ",(b)-[:X]->(:B {id: 8,  weight: 2.0, score: 2.0, community: 1}) " +
-            ",(b)-[:X]->(:B {id: 9,  weight: 1.0, score: 1.0, community: 1}) " +
-            ",(b)-[:X]->(:B {id: 10, weight: 1.0, score: 1.0, community: 1}) " +
-            ",(b)-[:X]->(:B {id: 11, weight: 8.0, score: 8.0, community: 2})";
+            ", (b)-[:X]->(:B {id: 7,  weight: 1.0, score: 1.0, community: 1}) " +
+            ", (b)-[:X]->(:B {id: 8,  weight: 2.0, score: 2.0, community: 1}) " +
+            ", (b)-[:X]->(:B {id: 9,  weight: 1.0, score: 1.0, community: 1}) " +
+            ", (b)-[:X]->(:B {id: 10, weight: 1.0, score: 1.0, community: 1}) " +
+            ", (b)-[:X]->(:B {id: 11, weight: 8.0, score: 8.0, community: 2})";
 
     @BeforeEach
     public void setup() throws KernelException {

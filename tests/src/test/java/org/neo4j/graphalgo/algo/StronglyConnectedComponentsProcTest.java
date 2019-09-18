@@ -33,22 +33,23 @@ import static org.junit.Assert.assertNotEquals;
 
 class StronglyConnectedComponentsProcTest {
 
-    private static final String DB_CYPHER = "CREATE" +
-                                            "  (a:Node) " +
-                                            ", (b:Node) " +
-                                            ", (c:Node) " +
-                                            ", (d:Node) " +
-                                            ", (e:Node) " +
-                                            // group 1
-                                            ", (a)-[:TYPE]->(b)" +
-                                            ", (a)<-[:TYPE]-(b)" +
-                                            ", (a)-[:TYPE]->(c)" +
-                                            ", (a)<-[:TYPE]-(c)" +
-                                            ", (b)-[:TYPE]->(c)" +
-                                            ", (b)<-[:TYPE]-(c)" +
-                                            // group 2
-                                            ", (d)-[:TYPE]->(e)" +
-                                            ", (d)<-[:TYPE]-(e)";
+    private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a:Node) " +
+            ", (b:Node) " +
+            ", (c:Node) " +
+            ", (d:Node) " +
+            ", (e:Node) " +
+            // group 1
+            ", (a)-[:TYPE]->(b)" +
+            ", (a)<-[:TYPE]-(b)" +
+            ", (a)-[:TYPE]->(c)" +
+            ", (a)<-[:TYPE]-(c)" +
+            ", (b)-[:TYPE]->(c)" +
+            ", (b)<-[:TYPE]-(c)" +
+            // group 2
+            ", (d)-[:TYPE]->(e)" +
+            ", (d)<-[:TYPE]-(e)";
 
     private static GraphDatabaseAPI DB;
 

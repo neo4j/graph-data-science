@@ -33,7 +33,7 @@ import java.util.Map;
 
 public class DegreeProcIssue848Test extends ProcTestBase {
 
-    private static final String DB_CYPHER = "" +
+    private static final String DB_CYPHER =
             "UNWIND range(1, 10001) AS s " +
             "CREATE (:Node {id: s})";
 

@@ -59,26 +59,27 @@ import static org.neo4j.graphdb.Direction.OUTGOING;
 
 final class MultiSourceBFSTest {
 
-    private static final String DB_CYPHER = "CREATE" +
-                                            "  (a:Foo {id: '1'})" +
-                                            ", (b:Foo {id: '2'})" +
-                                            ", (c:Foo {id: '3'})" +
-                                            ", (d:Foo {id: '4'})" +
-                                            ", (e:Foo {id: '5'})" +
-                                            ", (f:Foo {id: '6'})" +
+    private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a:Foo {id: '1'})" +
+            ", (b:Foo {id: '2'})" +
+            ", (c:Foo {id: '3'})" +
+            ", (d:Foo {id: '4'})" +
+            ", (e:Foo {id: '5'})" +
+            ", (f:Foo {id: '6'})" +
 
-                                            ",  (a)-[:BAR]->(c)" +
-                                            ",  (a)-[:BAR]->(d)" +
-                                            ",  (b)-[:BAR]->(c)" +
-                                            ",  (b)-[:BAR]->(d)" +
-                                            ",  (c)-[:BAR]->(a)" +
-                                            ",  (c)-[:BAR]->(b)" +
-                                            ",  (c)-[:BAR]->(e)" +
-                                            ",  (d)-[:BAR]->(a)" +
-                                            ",  (d)-[:BAR]->(b)" +
-                                            ",  (d)-[:BAR]->(f)" +
-                                            ",  (e)-[:BAR]->(c)" +
-                                            ",  (f)-[:BAR]->(d)";
+            ", (a)-[:BAR]->(c)" +
+            ", (a)-[:BAR]->(d)" +
+            ", (b)-[:BAR]->(c)" +
+            ", (b)-[:BAR]->(d)" +
+            ", (c)-[:BAR]->(a)" +
+            ", (c)-[:BAR]->(b)" +
+            ", (c)-[:BAR]->(e)" +
+            ", (d)-[:BAR]->(a)" +
+            ", (d)-[:BAR]->(b)" +
+            ", (d)-[:BAR]->(f)" +
+            ", (e)-[:BAR]->(c)" +
+            ", (f)-[:BAR]->(d)";
 
     private static GraphDatabaseAPI DB;
 

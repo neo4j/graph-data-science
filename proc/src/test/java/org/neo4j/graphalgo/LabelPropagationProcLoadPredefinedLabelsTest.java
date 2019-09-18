@@ -39,9 +39,10 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class LabelPropagationProcLoadPredefinedLabelsTest extends ProcTestBase {
+class LabelPropagationProcLoadPredefinedLabelsTest extends ProcTestBase {
 
-    private static final String DB_CYPHER = "CREATE " +
+    private static final String DB_CYPHER =
+            "CREATE" +
             "  (a:A {id: 0, community: 42})" +
             ", (b:B {id: 1, community: 42})" +
             ", (c:C {id: 2, community: 42})" +
@@ -51,7 +52,7 @@ public class LabelPropagationProcLoadPredefinedLabelsTest extends ProcTestBase {
             ", (g:G {id: 6, community: 29})";
 
     @BeforeEach
-    public void setup() throws KernelException {
+    void setup() throws KernelException {
         DB = (GraphDatabaseAPI) new TestGraphDatabaseFactory()
                 .newImpermanentDatabaseBuilder()
                 .setConfig(GraphDatabaseSettings.procedure_unrestricted,"algo.*")
@@ -67,12 +68,12 @@ public class LabelPropagationProcLoadPredefinedLabelsTest extends ProcTestBase {
     }
 
     @AfterAll
-    public static void tearDown() {
+    static void tearDown() {
         DB.shutdown();
     }
 
     @SingleAndMultiThreadedAllGraphNames
-    public void shouldUseDefaultValues(boolean parallel, String graphName) {
+    void shouldUseDefaultValues(boolean parallel, String graphName) {
         Assume.assumeFalse(graphName.equalsIgnoreCase("kernel"));
 
         String query = "CALL algo.labelPropagation.stream(" +

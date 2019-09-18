@@ -47,23 +47,24 @@ import static org.junit.Assert.assertEquals;
 public final class ShortestPathDijkstraTest {
 
     // https://en.wikipedia.org/wiki/Shortest_path_problem#/media/File:Shortest_path_with_direct_weights.svg
-    private static final String DB_CYPHER = "CREATE" +
-                                            "  (a:Label1 {name: 'a'})" +
-                                            ", (b:Label1 {name: 'b'})" +
-                                            ", (c:Label1 {name: 'c'})" +
-                                            ", (d:Label1 {name: 'd'})" +
-                                            ", (e:Label1 {name: 'e'})" +
-                                            ", (f:Label1 {name: 'f'})" +
+    private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a:Label1 {name: 'a'})" +
+            ", (b:Label1 {name: 'b'})" +
+            ", (c:Label1 {name: 'c'})" +
+            ", (d:Label1 {name: 'd'})" +
+            ", (e:Label1 {name: 'e'})" +
+            ", (f:Label1 {name: 'f'})" +
 
-                                            ", (a)-[:TYPE1 {cost: 4}]->(b)" +
-                                            ", (a)-[:TYPE1 {cost: 2}]->(c)" +
-                                            ", (b)-[:TYPE1 {cost: 5}]->(c)" +
-                                            ", (b)-[:TYPE1 {cost: 10}]->(d)" +
-                                            ", (c)-[:TYPE1 {cost: 3}]->(e)" +
-                                            ", (d)-[:TYPE1 {cost: 11}]->(f)" +
-                                            ", (e)-[:TYPE1 {cost: 4}]->(d)" +
-                                            ", (a)-[:TYPE2 {cost: 1}]->(d)" +
-                                            ", (b)-[:TYPE2 {cost: 1}]->(f)";
+            ", (a)-[:TYPE1 {cost: 4}]->(b)" +
+            ", (a)-[:TYPE1 {cost: 2}]->(c)" +
+            ", (b)-[:TYPE1 {cost: 5}]->(c)" +
+            ", (b)-[:TYPE1 {cost: 10}]->(d)" +
+            ", (c)-[:TYPE1 {cost: 3}]->(e)" +
+            ", (d)-[:TYPE1 {cost: 11}]->(f)" +
+            ", (e)-[:TYPE1 {cost: 4}]->(d)" +
+            ", (a)-[:TYPE2 {cost: 1}]->(d)" +
+            ", (b)-[:TYPE2 {cost: 1}]->(f)";
 
     // https://www.cise.ufl.edu/~sahni/cop3530/slides/lec326.pdf
     // without the additional 14 edge

@@ -43,45 +43,46 @@ class PersonalizedPageRankProcTest {
 
     private static final Map<Long, Double> EXPECTED = new HashMap<>();
 
-    private static final String DB_CYPHER = "CREATE" +
-                                            "  (a:Label1 {name: 'a'})" +
-                                            ", (b:Label1 {name: 'b'})" +
-                                            ", (c:Label1 {name: 'c'})" +
-                                            ", (d:Label1 {name: 'd'})" +
-                                            ", (e:Label1 {name: 'e'})" +
-                                            ", (f:Label1 {name: 'f'})" +
-                                            ", (g:Label1 {name: 'g'})" +
-                                            ", (h:Label1 {name: 'h'})" +
-                                            ", (i:Label1 {name: 'i'})" +
-                                            ", (j:Label1 {name: 'j'})" +
-                                            ", (k:Label2 {name: 'k'})" +
-                                            ", (l:Label2 {name: 'l'})" +
-                                            ", (m:Label2 {name: 'm'})" +
-                                            ", (n:Label2 {name: 'n'})" +
-                                            ", (o:Label2 {name: 'o'})" +
-                                            ", (p:Label2 {name: 'p'})" +
-                                            ", (q:Label2 {name: 'q'})" +
-                                            ", (r:Label2 {name: 'r'})" +
-                                            ", (s:Label2 {name: 's'})" +
-                                            ", (t:Label2 {name: 't'})" +
+    private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a:Label1 {name: 'a'})" +
+            ", (b:Label1 {name: 'b'})" +
+            ", (c:Label1 {name: 'c'})" +
+            ", (d:Label1 {name: 'd'})" +
+            ", (e:Label1 {name: 'e'})" +
+            ", (f:Label1 {name: 'f'})" +
+            ", (g:Label1 {name: 'g'})" +
+            ", (h:Label1 {name: 'h'})" +
+            ", (i:Label1 {name: 'i'})" +
+            ", (j:Label1 {name: 'j'})" +
+            ", (k:Label2 {name: 'k'})" +
+            ", (l:Label2 {name: 'l'})" +
+            ", (m:Label2 {name: 'm'})" +
+            ", (n:Label2 {name: 'n'})" +
+            ", (o:Label2 {name: 'o'})" +
+            ", (p:Label2 {name: 'p'})" +
+            ", (q:Label2 {name: 'q'})" +
+            ", (r:Label2 {name: 'r'})" +
+            ", (s:Label2 {name: 's'})" +
+            ", (t:Label2 {name: 't'})" +
 
-                                            ", (b)-[:TYPE1{foo:1.0}]->(c)" +
-                                            ", (c)-[:TYPE1{foo:1.2}]->(b)" +
-                                            ", (d)-[:TYPE1{foo:1.3}]->(a)" +
-                                            ", (d)-[:TYPE1{foo:1.7}]->(b)" +
-                                            ", (e)-[:TYPE1{foo:1.1}]->(b)" +
-                                            ", (e)-[:TYPE1{foo:2.2}]->(d)" +
-                                            ", (e)-[:TYPE1{foo:1.5}]->(f)" +
-                                            ", (f)-[:TYPE1{foo:3.5}]->(b)" +
-                                            ", (f)-[:TYPE1{foo:2.9}]->(e)" +
-                                            ", (g)-[:TYPE2{foo:3.2}]->(b)" +
-                                            ", (g)-[:TYPE2{foo:5.3}]->(e)" +
-                                            ", (h)-[:TYPE2{foo:9.5}]->(b)" +
-                                            ", (h)-[:TYPE2{foo:0.3}]->(e)" +
-                                            ", (i)-[:TYPE2{foo:5.4}]->(b)" +
-                                            ", (i)-[:TYPE2{foo:3.2}]->(e)" +
-                                            ", (j)-[:TYPE2{foo:9.5}]->(e)" +
-                                            ", (k)-[:TYPE2{foo:4.2}]->(e)";
+            ", (b)-[:TYPE1{foo:1.0}]->(c)" +
+            ", (c)-[:TYPE1{foo:1.2}]->(b)" +
+            ", (d)-[:TYPE1{foo:1.3}]->(a)" +
+            ", (d)-[:TYPE1{foo:1.7}]->(b)" +
+            ", (e)-[:TYPE1{foo:1.1}]->(b)" +
+            ", (e)-[:TYPE1{foo:2.2}]->(d)" +
+            ", (e)-[:TYPE1{foo:1.5}]->(f)" +
+            ", (f)-[:TYPE1{foo:3.5}]->(b)" +
+            ", (f)-[:TYPE1{foo:2.9}]->(e)" +
+            ", (g)-[:TYPE2{foo:3.2}]->(b)" +
+            ", (g)-[:TYPE2{foo:5.3}]->(e)" +
+            ", (h)-[:TYPE2{foo:9.5}]->(b)" +
+            ", (h)-[:TYPE2{foo:0.3}]->(e)" +
+            ", (i)-[:TYPE2{foo:5.4}]->(b)" +
+            ", (i)-[:TYPE2{foo:3.2}]->(e)" +
+            ", (j)-[:TYPE2{foo:9.5}]->(e)" +
+            ", (k)-[:TYPE2{foo:4.2}]->(e)";
 
     private static GraphDatabaseAPI DB;
 

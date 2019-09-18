@@ -41,31 +41,32 @@ import static org.junit.Assert.assertEquals;
  */
 class MultistepSCCTest extends ConnectedComponentsTest {
 
-    private static final String DB_CYPHER = "CREATE" +
-                                            "  (a:Node {name: 'a'})" +
-                                            ", (b:Node {name: 'b'})" +
-                                            ", (c:Node {name: 'c'})" +
-                                            ", (d:Node {name: 'd'})" +
-                                            ", (e:Node {name: 'e'})" +
-                                            ", (f:Node {name: 'f'})" +
-                                            ", (g:Node {name: 'g'})" +
-                                            ", (h:Node {name: 'h'})" +
-                                            ", (i:Node {name: 'i'})" +
-                                            ", (x:Node {name: 'x'})" +
+    private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a:Node {name: 'a'})" +
+            ", (b:Node {name: 'b'})" +
+            ", (c:Node {name: 'c'})" +
+            ", (d:Node {name: 'd'})" +
+            ", (e:Node {name: 'e'})" +
+            ", (f:Node {name: 'f'})" +
+            ", (g:Node {name: 'g'})" +
+            ", (h:Node {name: 'h'})" +
+            ", (i:Node {name: 'i'})" +
+            ", (x:Node {name: 'x'})" +
 
-                                            ", (a)-[:TYPE {cost: 5}]->(b)" +
-                                            ", (b)-[:TYPE {cost: 5}]->(c)" +
-                                            ", (c)-[:TYPE {cost: 5}]->(a)" +
+            ", (a)-[:TYPE {cost: 5}]->(b)" +
+            ", (b)-[:TYPE {cost: 5}]->(c)" +
+            ", (c)-[:TYPE {cost: 5}]->(a)" +
 
-                                            ", (d)-[:TYPE {cost: 2}]->(e)" +
-                                            ", (e)-[:TYPE {cost: 2}]->(f)" +
-                                            ", (f)-[:TYPE {cost: 2}]->(d)" +
+            ", (d)-[:TYPE {cost: 2}]->(e)" +
+            ", (e)-[:TYPE {cost: 2}]->(f)" +
+            ", (f)-[:TYPE {cost: 2}]->(d)" +
 
-                                            ", (a)-[:TYPE {cost: 2}]->(d)" +
+            ", (a)-[:TYPE {cost: 2}]->(d)" +
 
-                                            ", (g)-[:TYPE {cost: 3}]->(h)" +
-                                            ", (h)-[:TYPE {cost: 3}]->(i)" +
-                                            ", (i)-[:TYPE {cost: 3}]->(g)";
+            ", (g)-[:TYPE {cost: 3}]->(h)" +
+            ", (h)-[:TYPE {cost: 3}]->(i)" +
+            ", (i)-[:TYPE {cost: 3}]->(g)";
 
     @BeforeAll
     static void setupGraphDb() {

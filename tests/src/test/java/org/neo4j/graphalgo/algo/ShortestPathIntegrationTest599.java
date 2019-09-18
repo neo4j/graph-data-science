@@ -40,23 +40,24 @@ import static org.junit.Assert.assertThat;
 
 class ShortestPathIntegrationTest599 {
 
-    private static final String DB_CYPHER = "CREATE" +
-                                            "  (v1:Node {VID: 1})" +
-                                            ", (v2:Node {VID: 2})" +
-                                            ", (v3:Node {VID: 3})" +
-                                            ", (v4:Node {VID: 4})" +
-                                            ", (v5:Node {VID: 5})" +
-                                            ", (v6:Node {VID: 6})" +
-                                            ", (v7:Node {VID: 7})" +
-                                            ", (v1)-[:EDGE {WEIGHT: 0.5}]->(v2)" +
-                                            ", (v1)-[:EDGE {WEIGHT: 5.0}]->(v3)" +
-                                            ", (v2)-[:EDGE {WEIGHT: 0.5}]->(v5)" +
-                                            ", (v3)-[:EDGE {WEIGHT: 2.0}]->(v4)" +
-                                            ", (v5)-[:EDGE {WEIGHT: 0.5}]->(v6)" +
-                                            ", (v6)-[:EDGE {WEIGHT: 0.5}]->(v3)" +
-                                            ", (v6)-[:EDGE {WEIGHT: 23.0}]->(v7)" +
-                                            ", (v1)-[:EDGE {WEIGHT: 5.0}]->(v4)" +
-                                            "";
+    private static final String DB_CYPHER =
+            "CREATE" +
+            "  (v1:Node {VID: 1})" +
+            ", (v2:Node {VID: 2})" +
+            ", (v3:Node {VID: 3})" +
+            ", (v4:Node {VID: 4})" +
+            ", (v5:Node {VID: 5})" +
+            ", (v6:Node {VID: 6})" +
+            ", (v7:Node {VID: 7})" +
+            ", (v1)-[:EDGE {WEIGHT: 0.5}]->(v2)" +
+            ", (v1)-[:EDGE {WEIGHT: 5.0}]->(v3)" +
+            ", (v2)-[:EDGE {WEIGHT: 0.5}]->(v5)" +
+            ", (v3)-[:EDGE {WEIGHT: 2.0}]->(v4)" +
+            ", (v5)-[:EDGE {WEIGHT: 0.5}]->(v6)" +
+            ", (v6)-[:EDGE {WEIGHT: 0.5}]->(v3)" +
+            ", (v6)-[:EDGE {WEIGHT: 23.0}]->(v7)" +
+            ", (v1)-[:EDGE {WEIGHT: 5.0}]->(v4)" +
+            "";
 
     private static GraphDatabaseAPI DB;
 

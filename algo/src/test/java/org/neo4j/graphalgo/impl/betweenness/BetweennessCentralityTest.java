@@ -44,16 +44,17 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class BetweennessCentralityTest {
 
-    private static final String DB_CYPHER = "CREATE" +
-                                            "  (a:Node {name:'a'})" +
-                                            ", (b:Node {name: 'b'})" +
-                                            ", (c:Node {name: 'c'})" +
-                                            ", (d:Node {name: 'd'})" +
-                                            ", (e:Node {name: 'e'})" +
-                                            ", (a)-[:TYPE]->(b)" +
-                                            ", (b)-[:TYPE]->(c)" +
-                                            ", (c)-[:TYPE]->(d)" +
-                                            ", (d)-[:TYPE]->(e)";
+    private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a:Node {name:'a'})" +
+            ", (b:Node {name: 'b'})" +
+            ", (c:Node {name: 'c'})" +
+            ", (d:Node {name: 'd'})" +
+            ", (e:Node {name: 'e'})" +
+            ", (a)-[:TYPE]->(b)" +
+            ", (b)-[:TYPE]->(c)" +
+            ", (c)-[:TYPE]->(d)" +
+            ", (d)-[:TYPE]->(e)";
 
     private static GraphDatabaseAPI DB;
     private static Graph graph;

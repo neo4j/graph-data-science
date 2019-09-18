@@ -42,47 +42,48 @@ import static org.neo4j.graphalgo.impl.pagerank.PageRankTest.DEFAULT_CONFIG;
 
 final class PageRankWikiTest {
 
-    private static final String DB_CYPHER = "CREATE" +
-                                            "  (a:Node {name: 'a'})" +
-                                            ", (b:Node {name: 'b'})" +
-                                            ", (c:Node {name: 'c'})" +
-                                            ", (d:Node {name: 'd'})" +
-                                            ", (e:Node {name: 'e'})" +
-                                            ", (f:Node {name: 'f'})" +
-                                            ", (g:Node {name: 'g'})" +
-                                            ", (h:Node {name: 'h'})" +
-                                            ", (i:Node {name: 'i'})" +
-                                            ", (j:Node {name: 'j'})" +
-                                            ", (k:Node {name: 'k'})" +
+    private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a:Node {name: 'a'})" +
+            ", (b:Node {name: 'b'})" +
+            ", (c:Node {name: 'c'})" +
+            ", (d:Node {name: 'd'})" +
+            ", (e:Node {name: 'e'})" +
+            ", (f:Node {name: 'f'})" +
+            ", (g:Node {name: 'g'})" +
+            ", (h:Node {name: 'h'})" +
+            ", (i:Node {name: 'i'})" +
+            ", (j:Node {name: 'j'})" +
+            ", (k:Node {name: 'k'})" +
 
-                                            // a (dangling node)
-                                            // b
-                                            ", (b)-[:TYPE]->(c)" +
-                                            // c
-                                            ", (c)-[:TYPE]->(b)" +
-                                            // d
-                                            ", (d)-[:TYPE]->(a)" +
-                                            ", (d)-[:TYPE]->(b)" +
-                                            // e
-                                            ", (e)-[:TYPE]->(b)" +
-                                            ", (e)-[:TYPE]->(d)" +
-                                            ", (e)-[:TYPE]->(f)" +
-                                            // f
-                                            ", (f)-[:TYPE]->(b)" +
-                                            ", (f)-[:TYPE]->(e)" +
-                                            // g
-                                            ", (g)-[:TYPE]->(b)" +
-                                            ", (g)-[:TYPE]->(e)" +
-                                            // h
-                                            ", (h)-[:TYPE]->(b)" +
-                                            ", (h)-[:TYPE]->(e)" +
-                                            // i
-                                            ", (i)-[:TYPE]->(b)" +
-                                            ", (i)-[:TYPE]->(e)" +
-                                            // j
-                                            ", (j)-[:TYPE]->(e)" +
-                                            // k
-                                            ", (k)-[:TYPE]->(e)";
+            // a (dangling node)
+            // b
+            ", (b)-[:TYPE]->(c)" +
+            // c
+            ", (c)-[:TYPE]->(b)" +
+            // d
+            ", (d)-[:TYPE]->(a)" +
+            ", (d)-[:TYPE]->(b)" +
+            // e
+            ", (e)-[:TYPE]->(b)" +
+            ", (e)-[:TYPE]->(d)" +
+            ", (e)-[:TYPE]->(f)" +
+            // f
+            ", (f)-[:TYPE]->(b)" +
+            ", (f)-[:TYPE]->(e)" +
+            // g
+            ", (g)-[:TYPE]->(b)" +
+            ", (g)-[:TYPE]->(e)" +
+            // h
+            ", (h)-[:TYPE]->(b)" +
+            ", (h)-[:TYPE]->(e)" +
+            // i
+            ", (i)-[:TYPE]->(b)" +
+            ", (i)-[:TYPE]->(e)" +
+            // j
+            ", (j)-[:TYPE]->(e)" +
+            // k
+            ", (k)-[:TYPE]->(e)";
 
     private static GraphDatabaseAPI DB;
 

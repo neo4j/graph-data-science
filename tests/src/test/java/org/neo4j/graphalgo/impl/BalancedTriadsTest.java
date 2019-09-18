@@ -43,27 +43,29 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
 @ExtendWith(MockitoExtension.class)
 class BalancedTriadsTest {
 
-    private static final String DB_CYPHER = "CREATE (a:Node {name:'a'})" + // center node
-                                            ", (b:Node {name:'b'})" +
-                                            ", (c:Node {name:'c'})" +
-                                            ", (d:Node {name:'d'})" +
-                                            ", (e:Node {name:'e'})" +
-                                            ", (f:Node {name:'f'})" +
-                                            ", (g:Node {name:'g'})" +
+    private static final String DB_CYPHER =
+            "CREATE " +
+            "  (a:Node {name: 'a'})" + // center node
+            ", (b:Node {name: 'b'})" +
+            ", (c:Node {name: 'c'})" +
+            ", (d:Node {name: 'd'})" +
+            ", (e:Node {name: 'e'})" +
+            ", (f:Node {name: 'f'})" +
+            ", (g:Node {name: 'g'})" +
 
-                                            ", (a)-[:TYPE {w:1.0}]->(b)" +
-                                            ", (a)-[:TYPE {w:-1.0}]->(c)" +
-                                            ", (a)-[:TYPE {w:1.0}]->(d)" +
-                                            ", (a)-[:TYPE {w:-1.0}]->(e)" +
-                                            ", (a)-[:TYPE {w:1.0}]->(f)" +
-                                            ", (a)-[:TYPE {w:-1.0}]->(g)" +
-                                            
-                                            ", (b)-[:TYPE {w:-1.0}]->(c)" +
-                                            ", (c)-[:TYPE {w:1.0}]->(d)" +
-                                            ", (d)-[:TYPE {w:-1.0}]->(e)" +
-                                            ", (e)-[:TYPE {w:1.0}]->(f)" +
-                                            ", (f)-[:TYPE {w:-1.0}]->(g)" +
-                                            ", (g)-[:TYPE {w:1.0}]->(b)";
+            ", (a)-[:TYPE {w: 1.0}]->(b)" +
+            ", (a)-[:TYPE {w: -1.0}]->(c)" +
+            ", (a)-[:TYPE {w: 1.0}]->(d)" +
+            ", (a)-[:TYPE {w: -1.0}]->(e)" +
+            ", (a)-[:TYPE {w: 1.0}]->(f)" +
+            ", (a)-[:TYPE {w: -1.0}]->(g)" +
+
+            ", (b)-[:TYPE {w: -1.0}]->(c)" +
+            ", (c)-[:TYPE {w: 1.0}]->(d)" +
+            ", (d)-[:TYPE {w: -1.0}]->(e)" +
+            ", (e)-[:TYPE {w: 1.0}]->(f)" +
+            ", (f)-[:TYPE {w: -1.0}]->(g)" +
+            ", (g)-[:TYPE {w: 1.0}]->(b)";
 
     private static GraphDatabaseAPI DB;
 

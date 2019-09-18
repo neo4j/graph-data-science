@@ -57,20 +57,21 @@ import static org.junit.Assert.assertArrayEquals;
  */
 class ClosenessCentralityTest {
 
-    private static final String DB_CYPHER = "CREATE " +
-                                            "  (a:Node {name:'a'})" +
-                                            ", (b:Node {name:'b'})" +
-                                            ", (c:Node {name:'c'})" +
-                                            ", (d:Node {name:'d'})" +
-                                            ", (e:Node {name:'e'})" +
-                                            ", (a)-[:TYPE]->(b)" +
-                                            ", (b)-[:TYPE]->(a)" +
-                                            ", (b)-[:TYPE]->(c)" +
-                                            ", (c)-[:TYPE]->(b)" +
-                                            ", (c)-[:TYPE]->(d)" +
-                                            ", (d)-[:TYPE]->(c)" +
-                                            ", (d)-[:TYPE]->(e)" +
-                                            ", (e)-[:TYPE]->(d)";
+    private static final String DB_CYPHER =
+            "CREATE " +
+            "  (a:Node {name: 'a'})" +
+            ", (b:Node {name: 'b'})" +
+            ", (c:Node {name: 'c'})" +
+            ", (d:Node {name: 'd'})" +
+            ", (e:Node {name: 'e'})" +
+            ", (a)-[:TYPE]->(b)" +
+            ", (b)-[:TYPE]->(a)" +
+            ", (b)-[:TYPE]->(c)" +
+            ", (c)-[:TYPE]->(b)" +
+            ", (c)-[:TYPE]->(d)" +
+            ", (d)-[:TYPE]->(c)" +
+            ", (d)-[:TYPE]->(e)" +
+            ", (e)-[:TYPE]->(d)";
 
     private static final double[] EXPECTED = new double[]{0.4, 0.57, 0.66, 0.57, 0.4};
     private static GraphDatabaseAPI DB;

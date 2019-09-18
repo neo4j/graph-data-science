@@ -50,23 +50,24 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class LabelPropagationTest {
 
-    private static final String DB_CYPHER = "CREATE" +
-                                            "  (nAlice:User   {id: 'Alice',   seedId: 2})" +
-                                            ", (nBridget:User {id: 'Bridget', seedId: 3})" +
-                                            ", (nCharles:User {id: 'Charles', seedId: 4})" +
-                                            ", (nDoug:User    {id: 'Doug',    seedId: 3})" +
-                                            ", (nMark:User    {id: 'Mark',    seedId: 4})" +
-                                            ", (nMichael:User {id:'Michael',  seedId: 2})" +
-                                            ", (nAlice)-[:FOLLOW]->(nBridget)" +
-                                            ", (nAlice)-[:FOLLOW]->(nCharles)" +
-                                            ", (nMark)-[:FOLLOW]->(nDoug)" +
-                                            ", (nBridget)-[:FOLLOW]->(nMichael)" +
-                                            ", (nDoug)-[:FOLLOW]->(nMark)" +
-                                            ", (nMichael)-[:FOLLOW]->(nAlice)" +
-                                            ", (nAlice)-[:FOLLOW]->(nMichael)" +
-                                            ", (nBridget)-[:FOLLOW]->(nAlice)" +
-                                            ", (nMichael)-[:FOLLOW]->(nBridget)" +
-                                            ", (nCharles)-[:FOLLOW]->(nDoug)";
+    private static final String DB_CYPHER =
+            "CREATE" +
+            "  (nAlice:User   {id: 'Alice',   seedId: 2})" +
+            ", (nBridget:User {id: 'Bridget', seedId: 3})" +
+            ", (nCharles:User {id: 'Charles', seedId: 4})" +
+            ", (nDoug:User    {id: 'Doug',    seedId: 3})" +
+            ", (nMark:User    {id: 'Mark',    seedId: 4})" +
+            ", (nMichael:User {id:'Michael',  seedId: 2})" +
+            ", (nAlice)-[:FOLLOW]->(nBridget)" +
+            ", (nAlice)-[:FOLLOW]->(nCharles)" +
+            ", (nMark)-[:FOLLOW]->(nDoug)" +
+            ", (nBridget)-[:FOLLOW]->(nMichael)" +
+            ", (nDoug)-[:FOLLOW]->(nMark)" +
+            ", (nMichael)-[:FOLLOW]->(nAlice)" +
+            ", (nAlice)-[:FOLLOW]->(nMichael)" +
+            ", (nBridget)-[:FOLLOW]->(nAlice)" +
+            ", (nMichael)-[:FOLLOW]->(nBridget)" +
+            ", (nCharles)-[:FOLLOW]->(nDoug)";
 
     private static GraphDatabaseAPI DB;
 

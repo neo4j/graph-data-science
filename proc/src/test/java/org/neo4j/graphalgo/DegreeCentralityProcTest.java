@@ -44,14 +44,15 @@ public class DegreeCentralityProcTest extends ProcTestBase {
     private static final Map<Long, Double> bothWeightedExpected = new HashMap<>();
     private static final Map<Long, Double> outgoingWeightedExpected = new HashMap<>();
 
-    private static final String DB_CYPHER = "CREATE " +
-            " (a:Label1 {name: 'a'})" +
-            ",(b:Label1 {name: 'b'})" +
-            ",(c:Label1 {name: 'c'})" +
-            ",(a)-[:TYPE1 {foo: 3.0}]->(b)" +
-            ",(b)-[:TYPE1 {foo: 5.0}]->(c)" +
-            ",(a)-[:TYPE1 {foo: 2.1}]->(c)" +
-            ",(a)-[:TYPE2 {foo: 7.1}]->(c)";
+    private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a:Label1 {name: 'a'})" +
+            ", (b:Label1 {name: 'b'})" +
+            ", (c:Label1 {name: 'c'})" +
+            ", (a)-[:TYPE1 {foo: 3.0}]->(b)" +
+            ", (b)-[:TYPE1 {foo: 5.0}]->(c)" +
+            ", (a)-[:TYPE1 {foo: 2.1}]->(c)" +
+            ", (a)-[:TYPE2 {foo: 7.1}]->(c)";
 
     @AfterAll
     public static void tearDown() {

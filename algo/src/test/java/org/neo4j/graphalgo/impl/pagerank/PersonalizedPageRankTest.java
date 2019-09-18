@@ -45,29 +45,30 @@ import static org.neo4j.graphalgo.impl.pagerank.PageRankTest.DEFAULT_CONFIG;
 
 final class PersonalizedPageRankTest {
 
-    private static final String DB_CYPHER = "CREATE" +
-                                            "  (iphone:Product {name: 'iPhone5'})" +
-                                            ", (kindle:Product {name: 'Kindle Fire'})" +
-                                            ", (fitbit:Product {name: 'Fitbit Flex Wireless'})" +
-                                            ", (potter:Product {name: 'Harry Potter'})" +
-                                            ", (hobbit:Product {name: 'Hobbit'})" +
+    private static final String DB_CYPHER =
+            "CREATE" +
+            "  (iphone:Product {name: 'iPhone5'})" +
+            ", (kindle:Product {name: 'Kindle Fire'})" +
+            ", (fitbit:Product {name: 'Fitbit Flex Wireless'})" +
+            ", (potter:Product {name: 'Harry Potter'})" +
+            ", (hobbit:Product {name: 'Hobbit'})" +
 
-                                            ", (todd:Person {name: 'Todd'})" +
-                                            ", (mary:Person {name: 'Mary'})" +
-                                            ", (jill:Person {name: 'Jill'})" +
-                                            ", (john:Person {name: 'John'})" +
+            ", (todd:Person {name: 'Todd'})" +
+            ", (mary:Person {name: 'Mary'})" +
+            ", (jill:Person {name: 'Jill'})" +
+            ", (john:Person {name: 'John'})" +
 
-                                            ",  (john)-[:PURCHASED]->(iphone)" +
-                                            ",  (john)-[:PURCHASED]->(kindle)" +
-                                            ",  (mary)-[:PURCHASED]->(iphone)" +
-                                            ",  (mary)-[:PURCHASED]->(kindle)" +
-                                            ",  (mary)-[:PURCHASED]->(fitbit)" +
-                                            ",  (jill)-[:PURCHASED]->(iphone)" +
-                                            ",  (jill)-[:PURCHASED]->(kindle)" +
-                                            ",  (jill)-[:PURCHASED]->(fitbit)" +
-                                            ",  (todd)-[:PURCHASED]->(fitbit)" +
-                                            ",  (todd)-[:PURCHASED]->(potter)" +
-                                            ",  (todd)-[:PURCHASED]->(hobbit)";
+            ",  (john)-[:PURCHASED]->(iphone)" +
+            ",  (john)-[:PURCHASED]->(kindle)" +
+            ",  (mary)-[:PURCHASED]->(iphone)" +
+            ",  (mary)-[:PURCHASED]->(kindle)" +
+            ",  (mary)-[:PURCHASED]->(fitbit)" +
+            ",  (jill)-[:PURCHASED]->(iphone)" +
+            ",  (jill)-[:PURCHASED]->(kindle)" +
+            ",  (jill)-[:PURCHASED]->(fitbit)" +
+            ",  (todd)-[:PURCHASED]->(fitbit)" +
+            ",  (todd)-[:PURCHASED]->(potter)" +
+            ",  (todd)-[:PURCHASED]->(hobbit)";
 
     private static GraphDatabaseAPI DB;
 

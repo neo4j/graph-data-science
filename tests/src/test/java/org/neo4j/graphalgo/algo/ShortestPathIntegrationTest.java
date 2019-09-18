@@ -40,21 +40,22 @@ import static org.mockito.Mockito.verify;
 
 class ShortestPathIntegrationTest {
 
-    private static final String DB_CYPHER = "CREATE" +
-                                            "  (nA:Node{type:'start'})" + // start
-                                            ", (nB:Node)" +
-                                            ", (nC:Node)" +
-                                            ", (nD:Node)" +
-                                            ", (nX:Node{type:'end'})" + // end
-                                            // sum: 9.0
-                                            ", (nA)-[:TYPE {cost:9.0}]->(nX)" +
-                                            // sum: 8.0
-                                            ", (nA)-[:TYPE {cost:4.0}]->(nB)" +
-                                            ", (nB)-[:TYPE {cost:4.0}]->(nX)" +
-                                            // sum: 6
-                                            ", (nA)-[:TYPE {cost:2.0}]->(nC)" +
-                                            ", (nC)-[:TYPE {cost:2.0}]->(nD)" +
-                                            ", (nD)-[:TYPE {cost:2.0}]->(nX)";
+    private static final String DB_CYPHER =
+            "CREATE" +
+            "  (nA:Node {type: 'start'})" + // start
+            ", (nB:Node)" +
+            ", (nC:Node)" +
+            ", (nD:Node)" +
+            ", (nX:Node {type: 'end'})" + // end
+            // sum: 9.0
+            ", (nA)-[:TYPE {cost: 9.0}]->(nX)" +
+            // sum: 8.0
+            ", (nA)-[:TYPE {cost: 4.0}]->(nB)" +
+            ", (nB)-[:TYPE {cost: 4.0}]->(nX)" +
+            // sum: 6
+            ", (nA)-[:TYPE {cost: 2.0}]->(nC)" +
+            ", (nC)-[:TYPE {cost: 2.0}]->(nD)" +
+            ", (nD)-[:TYPE {cost: 2.0}]->(nX)";
 
     private static GraphDatabaseAPI DB;
 

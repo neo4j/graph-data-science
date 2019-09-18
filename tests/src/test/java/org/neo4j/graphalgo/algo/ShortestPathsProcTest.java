@@ -53,35 +53,36 @@ import static org.mockito.Mockito.verify;
  */
 final class ShortestPathsProcTest {
 
-    private static final String DB_CYPHER = "CREATE " +
-                                            "  (s:Node {name:'s'})" +
-                                            ", (a:Node {name:'a'})" +
-                                            ", (b:Node {name:'b'})" +
-                                            ", (c:Node {name:'c'})" +
-                                            ", (d:Node {name:'d'})" +
-                                            ", (e:Node {name:'e'})" +
-                                            ", (f:Node {name:'f'})" +
-                                            ", (g:Node {name:'g'})" +
-                                            ", (h:Node {name:'h'})" +
-                                            ", (i:Node {name:'i'})" +
-                                            ", (x:Node {name:'x'})" +
+    private static final String DB_CYPHER =
+            "CREATE" +
+            "  (s:Node {name: 's'})" +
+            ", (a:Node {name: 'a'})" +
+            ", (b:Node {name: 'b'})" +
+            ", (c:Node {name: 'c'})" +
+            ", (d:Node {name: 'd'})" +
+            ", (e:Node {name: 'e'})" +
+            ", (f:Node {name: 'f'})" +
+            ", (g:Node {name: 'g'})" +
+            ", (h:Node {name: 'h'})" +
+            ", (i:Node {name: 'i'})" +
+            ", (x:Node {name: 'x'})" +
 
-                                            ", (x)-[:TYPE {cost:5}]->(s)" + // creates cycle
+            ", (x)-[:TYPE {cost: 5}]->(s)" + // creates cycle
 
-                                            ", (s)-[:TYPE {cost:5}]->(a)" + // line 1
-                                            ", (a)-[:TYPE {cost:5}]->(b)" +
-                                            ", (b)-[:TYPE {cost:5}]->(c)" +
-                                            ", (c)-[:TYPE {cost:5}]->(x)" +
+            ", (s)-[:TYPE {cost: 5}]->(a)" + // line 1
+            ", (a)-[:TYPE {cost: 5}]->(b)" +
+            ", (b)-[:TYPE {cost: 5}]->(c)" +
+            ", (c)-[:TYPE {cost: 5}]->(x)" +
 
-                                            ", (s)-[:TYPE {cost:3}]->(d)" + // line 2
-                                            ", (d)-[:TYPE {cost:3}]->(e)" +
-                                            ", (e)-[:TYPE {cost:3}]->(f)" +
-                                            ", (f)-[:TYPE {cost:3}]->(x)" +
+            ", (s)-[:TYPE {cost: 3}]->(d)" + // line 2
+            ", (d)-[:TYPE {cost: 3}]->(e)" +
+            ", (e)-[:TYPE {cost: 3}]->(f)" +
+            ", (f)-[:TYPE {cost: 3}]->(x)" +
 
-                                            ", (s)-[:TYPE {cost:2}]->(g)" + // line 3
-                                            ", (g)-[:TYPE {cost:2}]->(h)" +
-                                            ", (h)-[:TYPE {cost:2}]->(i)" +
-                                            ", (i)-[:TYPE {cost:2}]->(x)";
+            ", (s)-[:TYPE {cost: 2}]->(g)" + // line 3
+            ", (g)-[:TYPE {cost: 2}]->(h)" +
+            ", (h)-[:TYPE {cost: 2}]->(i)" +
+            ", (i)-[:TYPE {cost: 2}]->(x)";
 
     private static long startNode;
     private static long endNode;

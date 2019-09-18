@@ -41,13 +41,14 @@ import static org.junit.Assert.assertTrue;
  */
 public class RelationshipPredicateTest {
 
-    private static final String DB_CYPHER = "CREATE" +
-                                            "  (a:Node {name:'a'})" +
-                                            ", (b:Node {name:'b'})" +
-                                            ", (c:Node {name:'c'})" +
-                                            ", (a)-[:TYPE]->(b)" +
-                                            ", (b)-[:TYPE]->(c)" +
-                                            ", (c)-[:TYPE]->(a)";
+    private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a:Node {name: 'a'})" +
+            ", (b:Node {name: 'b'})" +
+            ", (c:Node {name: 'c'})" +
+            ", (a)-[:TYPE]->(b)" +
+            ", (b)-[:TYPE]->(c)" +
+            ", (c)-[:TYPE]->(a)";
 
     public static final Label LABEL = Label.label("Node");
 

@@ -46,15 +46,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 class LouvainTest extends LouvainTestBase {
 
-    private static final String DB_CYPHER = "CREATE" +
-                                            "  (a:Node {name:'a'})" +
-                                            ", (b:Node {name:'b'})" +
-                                            ", (c:Node {name:'c'})" +
-                                            ", (d:Node {name:'d'})" +
-                                            ", (a)-[:TYPE {weight: 1.0}]->(b)" +
-                                            ", (b)-[:TYPE {weight: 1.0}]->(c)" +
-                                            ", (c)-[:TYPE {weight: 1.0}]->(a)" +
-                                            ", (a)-[:TYPE {weight: 1.0}]->(c)";
+    private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a:Node {name:'a'})" +
+            ", (b:Node {name:'b'})" +
+            ", (c:Node {name:'c'})" +
+            ", (d:Node {name:'d'})" +
+            ", (a)-[:TYPE {weight: 1.0}]->(b)" +
+            ", (b)-[:TYPE {weight: 1.0}]->(c)" +
+            ", (c)-[:TYPE {weight: 1.0}]->(a)" +
+            ", (a)-[:TYPE {weight: 1.0}]->(c)";
 
     private static final Label LABEL = Label.label("Node");
     private static final String ABCD = "abcd";

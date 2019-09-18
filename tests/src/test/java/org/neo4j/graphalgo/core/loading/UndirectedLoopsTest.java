@@ -38,22 +38,22 @@ public final class UndirectedLoopsTest {
     @Rule
     public ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
 
-    private static final String DB_CYPHER = "" +
-            "CREATE (a:Label1 {name:\"a\"})\n" +
-            "CREATE (b:Label1 {name:\"b\"})\n" +
-            "CREATE (c:Label1 {name:\"c\"})\n" +
-            "CREATE (d:Label1 {name:\"d\"})\n" +
-            "CREATE (e:Label1 {name:\"e\"})\n" +
-            "CREATE (f:Label1 {name:\"f\"})\n" +
-            "CREATE (g:Label1 {name:\"g\"})\n" +
-            "CREATE\n" +
+    private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a:Label1 {name: 'a'})" +
+            ", (b:Label1 {name: 'b'})" +
+            ", (c:Label1 {name: 'c'})" +
+            ", (d:Label1 {name: 'd'})" +
+            ", (e:Label1 {name: 'e'})" +
+            ", (f:Label1 {name: 'f'})" +
+            ", (g:Label1 {name: 'g'})" +
 
-            "  (g)-[:TYPE4 {cost:4}]->(c),\n" +
-            "  (b)-[:TYPE5 {cost:4}]->(g),\n" +
-            "  (g)-[:ZZZZ {cost:4}]->(g),\n" +
-            "  (g)-[:TYPE6 {cost:4}]->(d),\n" +
-            "  (b)-[:TYPE6 {cost:4}]->(g),\n" +
-            "  (g)-[:TYPE99 {cost:4}]->(g)";
+            ", (g)-[:TYPE4 {cost:4}]->(c)" +
+            ", (b)-[:TYPE5 {cost:4}]->(g)" +
+            ", (g)-[:ZZZZ {cost:4}]->(g)" +
+            ", (g)-[:TYPE6 {cost:4}]->(d)" +
+            ", (b)-[:TYPE6 {cost:4}]->(g)" +
+            ", (g)-[:TYPE99 {cost:4}]->(g)";
 
     @Before
     public void setUp() {

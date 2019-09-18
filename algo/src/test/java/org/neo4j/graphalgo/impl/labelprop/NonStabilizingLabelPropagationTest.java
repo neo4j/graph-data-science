@@ -37,22 +37,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class NonStabilizingLabelPropagationTest {
 
-    private static final String DB_CYPHER = "CREATE" +
-                                            "  (a {community: 1})" +
-                                            ", (b {community: 1})" +
-                                            ", (c {community: 1})" +
-                                            ", (d {community: 2})" +
-                                            ", (e {community: 2})" +
-                                            ", (f {community: 2})" +
-                                            ", (g {community: 3})" +
-                                            ", (h {community: 4})" +
-                                            ", (g)-[:R]->(a)" +
-                                            ", (a)-[:R]->(d)" +
-                                            ", (d)-[:R]->(b)" +
-                                            ", (b)-[:R]->(e)" +
-                                            ", (e)-[:R]->(c)" +
-                                            ", (c)-[:R]->(f)" +
-                                            ", (f)-[:R]->(h)";
+    private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a {community: 1})" +
+            ", (b {community: 1})" +
+            ", (c {community: 1})" +
+            ", (d {community: 2})" +
+            ", (e {community: 2})" +
+            ", (f {community: 2})" +
+            ", (g {community: 3})" +
+            ", (h {community: 4})" +
+            ", (g)-[:R]->(a)" +
+            ", (a)-[:R]->(d)" +
+            ", (d)-[:R]->(b)" +
+            ", (b)-[:R]->(e)" +
+            ", (e)-[:R]->(c)" +
+            ", (c)-[:R]->(f)" +
+            ", (f)-[:R]->(h)";
 
     private static GraphDatabaseAPI DB;
 

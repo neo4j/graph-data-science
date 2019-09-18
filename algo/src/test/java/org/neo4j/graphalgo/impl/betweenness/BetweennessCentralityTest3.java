@@ -46,21 +46,21 @@ import static org.hamcrest.Matchers.closeTo;
  */
 class BetweennessCentralityTest3 {
 
-    private static final String DB_CYPHER = "CREATE" +
-                                            "  (a:Node {name: 'a'})" +
-                                            ", (b:Node {name: 'b'})" +
-                                            ", (c:Node {name: 'c'})" +
-                                            ", (d:Node {name: 'd'})" +
-                                            ", (e:Node {name: 'e'})" +
-                                            ", (f:Node {name: 'f'})" +
-                                            ", (a)-[:TYPE]->(b)" +
-                                            ", (a)-[:TYPE]->(f)" +
-                                            ", (b)-[:TYPE]->(c)" +
-                                            ", (c)-[:TYPE]->(d)" +
-                                            ", (c)-[:TYPE]->(f)" +
-                                            ", (e)-[:TYPE]->(f)" +
-                                            ", (d)-[:TYPE]->(e)";
-
+    private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a:Node {name: 'a'})" +
+            ", (b:Node {name: 'b'})" +
+            ", (c:Node {name: 'c'})" +
+            ", (d:Node {name: 'd'})" +
+            ", (e:Node {name: 'e'})" +
+            ", (f:Node {name: 'f'})" +
+            ", (a)-[:TYPE]->(b)" +
+            ", (a)-[:TYPE]->(f)" +
+            ", (b)-[:TYPE]->(c)" +
+            ", (c)-[:TYPE]->(d)" +
+            ", (c)-[:TYPE]->(f)" +
+            ", (e)-[:TYPE]->(f)" +
+            ", (d)-[:TYPE]->(e)";
 
     private static GraphDatabaseAPI DB;
     private static Graph graph;

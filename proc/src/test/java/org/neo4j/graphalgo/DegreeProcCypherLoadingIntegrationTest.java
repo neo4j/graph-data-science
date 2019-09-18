@@ -53,7 +53,8 @@ public class DegreeProcCypherLoadingIntegrationTest {
     private static final String BOTH_RELS = "MATCH (a)-[r]-(b) RETURN id(a) AS source, id(b) AS target, r.foo AS weight";
     private static final String OUTGOING_RELS = "MATCH (a)-[r]->(b) RETURN id(a) AS source, id(b) AS target, r.foo AS weight";
 
-    private static final String DB_CYPHER = "CREATE " +
+    private static final String DB_CYPHER =
+            "CREATE" +
             "  (a:Label1 {name: 'a'})" +
             ", (b:Label1 {name: 'b'})" +
             ", (c:Label1 {name: 'c'})" +

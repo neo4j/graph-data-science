@@ -49,20 +49,21 @@ import static org.junit.Assert.assertEquals;
  */
 class PrimTest {
 
-    private static final String DB_CYPHER = "CREATE" +
-                                            "  (a:Node {name: 'a'})" +
-                                            ", (b:Node {name: 'b'})" +
-                                            ", (c:Node {name: 'c'})" +
-                                            ", (d:Node {name: 'd'})" +
-                                            ", (e:Node {name: 'e'})" +
-                                            ", (y:Node {name: 'y'})" +
-                                            ", (z:Node {name: 'z'})" +
-                                            ", (a)-[:TYPE {cost: 1.0}]->(b)" +
-                                            ", (a)-[:TYPE {cost: 2.0}]->(c)" +
-                                            ", (b)-[:TYPE {cost: 3.0}]->(c)" +
-                                            ", (b)-[:TYPE {cost: 4.0}]->(d)" +
-                                            ", (c)-[:TYPE {cost: 5.0}]->(e)" +
-                                            ", (d)-[:TYPE {cost: 6.0}]->(e)";
+    private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a:Node {name: 'a'})" +
+            ", (b:Node {name: 'b'})" +
+            ", (c:Node {name: 'c'})" +
+            ", (d:Node {name: 'd'})" +
+            ", (e:Node {name: 'e'})" +
+            ", (y:Node {name: 'y'})" +
+            ", (z:Node {name: 'z'})" +
+            ", (a)-[:TYPE {cost: 1.0}]->(b)" +
+            ", (a)-[:TYPE {cost: 2.0}]->(c)" +
+            ", (b)-[:TYPE {cost: 3.0}]->(c)" +
+            ", (b)-[:TYPE {cost: 4.0}]->(d)" +
+            ", (c)-[:TYPE {cost: 5.0}]->(e)" +
+            ", (d)-[:TYPE {cost: 6.0}]->(e)";
 
     private static GraphDatabaseAPI DB;
 

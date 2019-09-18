@@ -54,23 +54,24 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class BetweennessCentralityTest2 {
 
-    private static final String CYPHER = "CREATE" +
-                                         "  (a:Node {name: 'a'})" +
-                                         ", (b:Node {name: 'b'})" +
-                                         ", (c:Node {name: 'c'})" +
-                                         ", (d:Node {name: 'd'})" +
-                                         ", (e:Node {name: 'e'})" +
-                                         ", (f:Node {name: 'f'})" +
-                                         ", (g:Node {name: 'g'})" +
+    private static final String CYPHER =
+            "CREATE" +
+            "  (a:Node {name: 'a'})" +
+            ", (b:Node {name: 'b'})" +
+            ", (c:Node {name: 'c'})" +
+            ", (d:Node {name: 'd'})" +
+            ", (e:Node {name: 'e'})" +
+            ", (f:Node {name: 'f'})" +
+            ", (g:Node {name: 'g'})" +
 
-                                         ", (a)-[:TYPE]->(b)" +
-                                         ", (a)-[:TYPE]->(c)" +
-                                         ", (b)-[:TYPE]->(c)" +
-                                         ", (c)-[:TYPE]->(d)" +
-                                         ", (d)-[:TYPE]->(e)" +
-                                         ", (e)-[:TYPE]->(f)" +
-                                         ", (e)-[:TYPE]->(g)" +
-                                         ", (f)-[:TYPE]->(g)";
+            ", (a)-[:TYPE]->(b)" +
+            ", (a)-[:TYPE]->(c)" +
+            ", (b)-[:TYPE]->(c)" +
+            ", (c)-[:TYPE]->(d)" +
+            ", (d)-[:TYPE]->(e)" +
+            ", (e)-[:TYPE]->(f)" +
+            ", (e)-[:TYPE]->(g)" +
+            ", (f)-[:TYPE]->(g)";
 
     private static GraphDatabaseAPI DB;
     private static Graph graph;
