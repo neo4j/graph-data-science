@@ -128,18 +128,6 @@ final class LabelPropagationTest {
         testClustering(graph, 2);
     }
 
-    @AllGraphTypesTest
-    void testHugeSingleThreadClustering(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = loadGraph(graphImpl);
-        testClustering(graph, 100);
-    }
-
-    @AllGraphTypesTest
-    void testHugeMultiThreadClustering(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = loadGraph(graphImpl);
-        testClustering(graph, 2);
-    }
-
     private void testClustering(Graph graph, int batchSize) {
         for (int i = 0; i < 20; i++) {
             testLPClustering(graph, batchSize);

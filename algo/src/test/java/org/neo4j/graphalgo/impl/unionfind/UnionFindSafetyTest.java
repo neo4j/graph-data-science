@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 @Deprecated
 final class UnionFindSafetyTest {
 
-    private UnionFind.Config algoConfig = new UnionFind.Config(
+    private static final UnionFind.Config ALGO_CONFIG = new UnionFind.Config(
             new NullWeightMap(-1),
             Double.NaN
     );
@@ -65,27 +65,7 @@ final class UnionFindSafetyTest {
                     Pools.DEFAULT,
                     10,
                     10,
-                    algoConfig,
-                    AllocationTracker.EMPTY);
-        } catch (Throwable e) {
-            assertSame(error, Exceptions.rootCause(e));
-        }
-    }
-
-    @Timeout(value = 10, unit = TimeUnit.SECONDS)
-    @ParameterizedTest
-    @EnumSource(UnionFindType.class)
-    void testHugeUnionFindSafetyUnderFailure(UnionFindType unionFindType) {
-        IllegalStateException error = new IllegalStateException("some error");
-        Graph graph = new FlakyGraph(100, 10, new Random(42L), error);
-        try {
-            UnionFindHelper.run(
-                    unionFindType,
-                    graph,
-                    Pools.DEFAULT,
-                    10,
-                    10,
-                    algoConfig,
+                    ALGO_CONFIG,
                     AllocationTracker.EMPTY);
         } catch (Throwable e) {
             assertSame(error, Exceptions.rootCause(e));

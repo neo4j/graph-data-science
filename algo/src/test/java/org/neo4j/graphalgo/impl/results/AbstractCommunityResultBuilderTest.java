@@ -115,6 +115,7 @@ final class AbstractCommunityResultBuilderTest {
             assertEquals("should build 10 communities with 4 members", 10L, histogram.getCountAtValue(4L));
             assertEquals("should build 2 communities with 5 members", 2L, histogram.getCountAtValue(5L));
         }, ALL_FIELDS);
+
         builder.buildfromKnownLongSizes(42, n -> ((int) n / 10) + 1);
     }
 
