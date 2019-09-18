@@ -60,7 +60,7 @@ class UnionFindTest extends UnionFindTestBase {
 
     @ParameterizedTest(name = "{0} -- {2}")
     @MethodSource("parameters")
-    void test(Class<? extends GraphFactory> graphFactory, UnionFindType unionFindType) {
+    void shouldComputeComponents(Class<? extends GraphFactory> graphFactory, UnionFindType unionFindType) {
         Graph graph = new GraphLoader(DB)
                 .withExecutorService(Pools.DEFAULT)
                 .withAnyLabel()

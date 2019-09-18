@@ -73,7 +73,7 @@ class IncrementalUnionFindTest extends UnionFindTestBase {
 
     @ParameterizedTest(name = "{0} -- {1}")
     @MethodSource("parameters")
-    void test(Class<? extends GraphFactory> graphFactory, UnionFindType unionFindType) {
+    void shouldComputeComponentsFromSeedProperty(Class<? extends GraphFactory> graphFactory, UnionFindType unionFindType) {
         // TODO: Why can't we run this test for kernel graph / graph view?
         Assumptions.assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
         Graph graph = new GraphLoader(DB)
