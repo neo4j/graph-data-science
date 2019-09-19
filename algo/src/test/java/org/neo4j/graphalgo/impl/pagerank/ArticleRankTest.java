@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.impl.pagerank.PageRankTest.DEFAULT_CONFIG;
 
 final class ArticleRankTest {
@@ -144,10 +144,10 @@ final class ArticleRankTest {
         IntStream.range(0, expected.size()).forEach(i -> {
             final long nodeId = graph.toOriginalNodeId(i);
             assertEquals(
-                    "Node#" + nodeId,
                     expected.get(nodeId),
                     rankResult.score(i),
-                    1e-2
+                    1e-2,
+                    "Node#" + nodeId
             );
         });
     }

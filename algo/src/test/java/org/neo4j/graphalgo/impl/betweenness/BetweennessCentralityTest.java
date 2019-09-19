@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.impl.betweenness;
 
-import org.junit.Ignore;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -119,7 +119,7 @@ class BetweennessCentralityTest {
         verify(testConsumer, times(1)).accept(eq("e"), eq(0.0));
     }
 
-    @Ignore
+    @Disabled
     void testRABrandes(Class<? extends GraphFactory> graphFactory) {
         setup(graphFactory);
         new RABrandesBetweennessCentrality(graph, Pools.DEFAULT, 3, new RandomSelectionStrategy(graph, 0.3, 5))

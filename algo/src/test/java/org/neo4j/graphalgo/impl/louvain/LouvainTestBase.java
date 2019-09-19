@@ -34,8 +34,8 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.HashMap;
 import java.util.Map;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 abstract class LouvainTestBase {
 
@@ -90,9 +90,9 @@ abstract class LouvainTestBase {
                 current = communityIds[id];
             } else {
                 assertEquals(
-                        "Node " + name + " belongs to wrong community " + communityIds[id],
                         current,
-                        communityIds[id]);
+                        communityIds[id],
+                        "Node " + name + " belongs to wrong community " + communityIds[id]);
             }
         }
     }
@@ -102,7 +102,7 @@ abstract class LouvainTestBase {
         final LongSet set = new LongHashSet();
         for (String name : nodeNames) {
             final long communityId = communityIds[nameMap.get(name)];
-            assertTrue("Node " + name + " belongs to wrong community " + communityId, set.add(communityId));
+            assertTrue(set.add(communityId), "Node " + name + " belongs to wrong community " + communityId);
         }
     }
 }

@@ -39,7 +39,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 final class DegreeCentralityTest {
 
@@ -163,10 +163,10 @@ final class DegreeCentralityTest {
         IntStream.range(0, expected.size()).forEach(i -> {
             final long nodeId = graph.toOriginalNodeId(i);
             assertEquals(
-                    "Node#" + nodeId,
                     expected.get(nodeId),
                     degreeCentrality.result().score(i),
-                    1e-2
+                    1e-2,
+                    "Node#" + nodeId
             );
         });
     }
@@ -218,10 +218,10 @@ final class DegreeCentralityTest {
         IntStream.range(0, expected.size()).forEach(i -> {
             long nodeId = graph.toOriginalNodeId(i);
             assertEquals(
-                    "Node#" + nodeId,
                     expected.get(nodeId),
                     degreeCentrality.degrees().get(i),
-                    1e-2
+                    1e-2,
+                    "Node#" + nodeId
             );
         });
     }
@@ -272,10 +272,10 @@ final class DegreeCentralityTest {
         IntStream.range(0, expected.size()).forEach(i -> {
             final long nodeId = graph.toOriginalNodeId(i);
             assertEquals(
-                    "Node#" + nodeId,
                     expected.get(nodeId),
                     degreeCentrality.degrees().get(i),
-                    1e-2
+                    1e-2,
+                    "Node#" + nodeId
             );
         });
     }
@@ -327,10 +327,10 @@ final class DegreeCentralityTest {
         IntStream.range(0, expected.size()).forEach(i -> {
             final long nodeId = graph.toOriginalNodeId(i);
             assertEquals(
-                    "Node#" + nodeId,
                     expected.get(nodeId),
                     degreeCentrality.result().score(i),
-                    1e-2
+                    1e-2,
+                    "Node#" + nodeId
             );
         });
     }
@@ -390,10 +390,10 @@ final class DegreeCentralityTest {
         IntStream.range(0, expected.size()).forEach(i -> {
             final long nodeId = graph.toOriginalNodeId(i);
             assertEquals(
-                    "Node#" + nodeId,
                     expected.get(nodeId),
                     degreeCentrality.degrees().get(i),
-                    1e-2
+                    1e-2,
+                    "Node#" + nodeId
             );
         });
     }
@@ -446,10 +446,10 @@ final class DegreeCentralityTest {
         IntStream.range(0, expected.size()).forEach(i -> {
             long nodeId = graph.toOriginalNodeId(i);
             assertEquals(
-                    "Node#" + nodeId + "[" + i + "]",
                     expected.get(nodeId),
                     degreeCentrality.result().score(i),
-                    1e-2
+                    1e-2,
+                    "Node#" + nodeId + "[" + i + "]"
             );
         });
     }

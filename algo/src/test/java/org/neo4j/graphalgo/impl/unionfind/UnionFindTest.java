@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.impl.unionfind;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -71,7 +70,7 @@ class UnionFindTest extends UnionFindTestBase {
 
         DisjointSetStruct result = run(unionFindType, graph, config);
 
-        Assert.assertEquals(SETS_COUNT, getSetCount(result));
+        assertEquals(SETS_COUNT, getSetCount(result));
         long[] setRegions = new long[SETS_COUNT];
         Arrays.fill(setRegions, -1);
 

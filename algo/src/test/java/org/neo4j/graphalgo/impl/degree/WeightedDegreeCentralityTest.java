@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.impl.degree;
 
-import org.junit.Assume;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.neo4j.graphalgo.TestDatabaseCreator;
@@ -40,7 +39,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 final class WeightedDegreeCentralityTest {
 
@@ -123,7 +123,7 @@ final class WeightedDegreeCentralityTest {
 
     @AllGraphTypesTest
     void buildWeightsArray(Class<? extends GraphFactory> graphFactory) {
-        Assume.assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
+        assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
         final Label label = Label.label("Label1");
         final Map<Long, double[]> expected = new HashMap<>();
 
@@ -169,10 +169,10 @@ final class WeightedDegreeCentralityTest {
         IntStream.range(0, expected.size()).forEach(i -> {
             final long nodeId = graph.toOriginalNodeId(i);
             assertArrayEquals(
-                    "Node#" + nodeId,
                     expected.get(nodeId),
                     degreeCentrality.weights().get(i).toArray(),
-                    0.01D
+                    0.01D,
+                    "Node#" + nodeId
 
             );
         });

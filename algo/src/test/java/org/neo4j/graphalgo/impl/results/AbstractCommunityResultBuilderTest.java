@@ -32,9 +32,9 @@ import java.util.OptionalLong;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class AbstractCommunityResultBuilderTest {
 
@@ -56,9 +56,9 @@ final class AbstractCommunityResultBuilderTest {
             long communityCount = maybeCommunityCount.orElse(-1);
             Histogram histogram = maybeHistogram.get();
 
-            assertEquals("should build 10 communities", 10L, communityCount);
-            assertEquals("should 2 communities with 5 members", 2L, histogram.getCountAtValue(5L));
-            assertEquals("should build 8 communities with 4 members", 8L, histogram.getCountAtValue(4L));
+            assertEquals(10L, communityCount, "should build 10 communities");
+            assertEquals(2L, histogram.getCountAtValue(5L), "should 2 communities with 5 members");
+            assertEquals(8L, histogram.getCountAtValue(4L), "should build 8 communities with 4 members");
         }, ALL_FIELDS);
         builder.build(AllocationTracker.EMPTY, 42L, n -> n % 10L);
     }
@@ -72,9 +72,9 @@ final class AbstractCommunityResultBuilderTest {
             long communityCount = maybeCommunityCount.orElse(-1);
             Histogram histogram = maybeHistogram.get();
 
-            assertEquals("should build 10 communities", 10L, communityCount);
-            assertEquals("should 2 communities with 5 members", 2L, histogram.getCountAtValue(5L));
-            assertEquals("should build 8 communities with 4 members", 8L, histogram.getCountAtValue(4L));
+            assertEquals(10L, communityCount, "should build 10 communities");
+            assertEquals(2L, histogram.getCountAtValue(5L), "should 2 communities with 5 members");
+            assertEquals(8L, histogram.getCountAtValue(4L), "should build 8 communities with 4 members");
         }, ALL_FIELDS);
         builder.build(10L, AllocationTracker.EMPTY, 42L, n -> n % 10L);
     }
@@ -88,12 +88,12 @@ final class AbstractCommunityResultBuilderTest {
             long communityCount = maybeCommunityCount.orElse(-1);
             Histogram histogram = maybeHistogram.get();
 
-            assertEquals("should build 42 communities", 42L, communityCount);
-            assertEquals("should build 10 communities with 1 member", 10L, histogram.getCountAtValue(1L));
-            assertEquals("should build 10 communities with 2 members", 10L, histogram.getCountAtValue(2L));
-            assertEquals("should build 10 communities with 3 members", 10L, histogram.getCountAtValue(3L));
-            assertEquals("should build 10 communities with 4 members", 10L, histogram.getCountAtValue(4L));
-            assertEquals("should build 2 communities with 5 members", 2L, histogram.getCountAtValue(5L));
+            assertEquals(42L, communityCount, "should build 42 communities");
+            assertEquals(10L, histogram.getCountAtValue(1L), "should build 10 communities with 1 member");
+            assertEquals(10L, histogram.getCountAtValue(2L), "should build 10 communities with 2 members");
+            assertEquals(10L, histogram.getCountAtValue(3L), "should build 10 communities with 3 members");
+            assertEquals(10L, histogram.getCountAtValue(4L), "should build 10 communities with 4 members");
+            assertEquals(2L, histogram.getCountAtValue(5L), "should build 2 communities with 5 members");
         }, ALL_FIELDS);
 
         builder.buildfromKnownSizes(42, n -> (n / 10) + 1);
@@ -108,12 +108,12 @@ final class AbstractCommunityResultBuilderTest {
             long communityCount = maybeCommunityCount.orElse(-1);
             Histogram histogram = maybeHistogram.get();
 
-            assertEquals("should build 42 communities", 42L, communityCount);
-            assertEquals("should build 10 communities with 1 member", 10L, histogram.getCountAtValue(1L));
-            assertEquals("should build 10 communities with 2 members", 10L, histogram.getCountAtValue(2L));
-            assertEquals("should build 10 communities with 3 members", 10L, histogram.getCountAtValue(3L));
-            assertEquals("should build 10 communities with 4 members", 10L, histogram.getCountAtValue(4L));
-            assertEquals("should build 2 communities with 5 members", 2L, histogram.getCountAtValue(5L));
+            assertEquals(42L, communityCount, "should build 42 communities");
+            assertEquals(10L, histogram.getCountAtValue(1L), "should build 10 communities with 1 member");
+            assertEquals(10L, histogram.getCountAtValue(2L), "should build 10 communities with 2 members");
+            assertEquals(10L, histogram.getCountAtValue(3L), "should build 10 communities with 3 members");
+            assertEquals(10L, histogram.getCountAtValue(4L), "should build 10 communities with 4 members");
+            assertEquals(2L, histogram.getCountAtValue(5L), "should build 2 communities with 5 members");
         }, ALL_FIELDS);
 
         builder.buildfromKnownLongSizes(42, n -> ((int) n / 10) + 1);
