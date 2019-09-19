@@ -131,10 +131,10 @@ public final class GraphDimensions {
                 .stream()
                 .filter(mapping -> {
                     int id = mapping.propertyKeyId();
-                    String propertyKey = mapping.propertyNameInGraph();
+                    String propertyKey = mapping.neoPropertyKey();
                     return nonEmpty(propertyKey) && id == NO_SUCH_PROPERTY_KEY;
                 })
-                .map(PropertyMapping::propertyNameInGraph)
+                .map(PropertyMapping::neoPropertyKey)
                 .collect(joining("', '"));
         if (!missingProperties.isEmpty()) {
             throw new IllegalArgumentException(String.format(

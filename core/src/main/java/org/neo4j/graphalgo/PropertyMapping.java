@@ -55,10 +55,10 @@ public abstract class PropertyMapping {
         this.deduplicationStrategy = deduplicationStrategy;
     }
 
-    public static PropertyMapping fromObject(String propertyIdentifier, Object stringOrMap) {
+    public static PropertyMapping fromObject(String propertyKey, Object stringOrMap) {
         if (stringOrMap instanceof String) {
-            String propertyNameInGraph = (String) stringOrMap;
-            fromObject(propertyIdentifier, Collections.singletonMap(PROPERTY_KEY, propertyNameInGraph));
+            String neoPropertyKey = (String) stringOrMap;
+            fromObject(propertyKey, Collections.singletonMap(PROPERTY_KEY, neoPropertyKey));
         } else if (stringOrMap instanceof Map) {
             Map relPropertyMap = (Map) stringOrMap;
 
@@ -73,7 +73,7 @@ public abstract class PropertyMapping {
                         "Expected the property name to be of type String, but was %s",
                         propertyNameValue.getClass().getSimpleName()));
             }
-            String propertyNameInGraph = (String) propertyNameValue;
+            String neoPropertyKey = (String) propertyNameValue;
 
             final Object aggregationValue = relPropertyMap.get(AGGREGATION_KEY);
             DeduplicationStrategy deduplicationStrategy;
@@ -100,8 +100,8 @@ public abstract class PropertyMapping {
             }
 
             return PropertyMapping.of(
-                    propertyIdentifier,
-                    propertyNameInGraph,
+                    propertyKey,
+                    neoPropertyKey,
                     defaultWeight,
                     deduplicationStrategy);
         } else {
@@ -114,16 +114,16 @@ public abstract class PropertyMapping {
     }
 
     /**
-     * property name in the result map Graph.nodeProperties(`propertyName`)
+     * property key in the result map Graph.nodeProperties(`propertyKey`)
      */
-    public String propertyIdentifier() {
+    public String propertyKey() {
         return propertyKey;
     }
 
     /**
      * property name in the graph (a:Node {`propertyKey`:xyz})
      */
-    public String propertyNameInGraph() {
+    public String neoPropertyKey() {
         return neoPropertyKey;
     }
 
@@ -135,6 +135,9 @@ public abstract class PropertyMapping {
         return deduplicationStrategy;
     }
 
+    /**
+     * Property identifier from Neo4j token store
+     */
     public abstract int propertyKeyId();
 
     public boolean hasValidName() {
@@ -159,11 +162,11 @@ public abstract class PropertyMapping {
     private static final class Unresolved extends PropertyMapping {
 
         private Unresolved(
-                String propertyIdentifier,
-                String propertyNameInGraph,
+                String propertyKey,
+                String neoPropertyKey,
                 double defaultValue,
                 DeduplicationStrategy deduplicationStrategy) {
-            super(propertyIdentifier, propertyNameInGraph, defaultValue, deduplicationStrategy);
+            super(propertyKey, neoPropertyKey, defaultValue, deduplicationStrategy);
         }
 
         @Override
@@ -173,15 +176,15 @@ public abstract class PropertyMapping {
 
         @Override
         PropertyMapping copyWithDeduplicationStrategy(DeduplicationStrategy deduplicationStrategy) {
-            return new Unresolved(propertyIdentifier(), propertyNameInGraph(), defaultValue(), deduplicationStrategy);
+            return new Unresolved(propertyKey(), neoPropertyKey(), defaultValue(), deduplicationStrategy);
         }
 
         @Override
         public PropertyMapping resolveWith(int propertyKeyId) {
             return new Resolved(
                     propertyKeyId,
-                    propertyIdentifier(),
-                    propertyNameInGraph(),
+                    propertyKey(),
+                    neoPropertyKey(),
                     defaultValue(),
                     deduplicationStrategy());
         }
@@ -192,11 +195,11 @@ public abstract class PropertyMapping {
 
         private Resolved(
                 int propertyKeyId,
-                String propertyIdentifier,
-                String propertyNameInGraph,
+                String propertyKey,
+                String neoPropertyKey,
                 double defaultValue,
                 DeduplicationStrategy deduplicationStrategy) {
-            super(propertyIdentifier, propertyNameInGraph, defaultValue, deduplicationStrategy);
+            super(propertyKey, neoPropertyKey, defaultValue, deduplicationStrategy);
             this.propertyKeyId = propertyKeyId;
         }
 
@@ -209,8 +212,8 @@ public abstract class PropertyMapping {
         PropertyMapping copyWithDeduplicationStrategy(DeduplicationStrategy deduplicationStrategy) {
             return new Resolved(
                     propertyKeyId,
-                    propertyIdentifier(),
-                    propertyNameInGraph(),
+                    propertyKey(),
+                    neoPropertyKey(),
                     defaultValue(),
                     deduplicationStrategy);
         }
@@ -227,16 +230,15 @@ public abstract class PropertyMapping {
         }
     }
 
-
-    public static PropertyMapping of(String propertyIdentifier, String propertyNameInGraph, double defaultValue) {
-        return of(propertyIdentifier, propertyNameInGraph, defaultValue, DeduplicationStrategy.DEFAULT);
+    public static PropertyMapping of(String propertyKey, String neoPropertyKey, double defaultValue) {
+        return of(propertyKey, neoPropertyKey, defaultValue, DeduplicationStrategy.DEFAULT);
     }
 
     public static PropertyMapping of(
-            String propertyIdentifier,
-            String propertyNameInGraph,
+            String propertyKey,
+            String neoPropertyKey,
             double defaultValue,
             DeduplicationStrategy deduplicationStrategy) {
-        return new Unresolved(propertyIdentifier, propertyNameInGraph, defaultValue, deduplicationStrategy);
+        return new Unresolved(propertyKey, neoPropertyKey, defaultValue, deduplicationStrategy);
     }
 }
