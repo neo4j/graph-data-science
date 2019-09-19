@@ -14,6 +14,7 @@ This section includes:
 ** <<algorithms-wcc-examples-unweighted, Unweighted>>
 ** <<algorithms-wcc-examples-weighted, Weighted>>
 ** <<algorithms-wcc-examples-seeding, Seeded components>>
+//** <<algorithms-wcc-examples-threshold, Threshold>>
 * <<algorithms-wcc-usage-details, Usage Details>>
 
 * <<algorithms-wcc-hgp, Huge graph projection>>
@@ -330,16 +331,10 @@ If they differ, the algorithm writes properties for all nodes.
 //TODO: add some Cypher and show an actual example
 
 
-[[algorithms-wcc-imp]]
-== Implementation
+//[[algorithms-wcc-examples-threshold]]
+//=== Threshold
 
-`algo.unionFind`
-
-* If a threshold configuration parameter is supplied, only relationships with a property value higher than the threshold are merged.
-* Parallel `Union Find`, using `ExecutorService` only.
-* Algorithm based on the idea that `DisjointSetStruct` can be built using just a partition of the nodes, which are then merged pairwise.
-* The implementation is based on a queue which acts as a buffer for each computed `DisjointSetStruct`.
-  As long as there are more elements on the queue, the algorithm takes two, merges them, and adds its result to the queue until only 1 element remains.
+//TODO: add example for threshold
 
 
 ifndef::env-docs[]
