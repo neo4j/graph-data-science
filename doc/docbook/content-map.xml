@@ -37,7 +37,7 @@
             </d:tocentry>
             <d:tocentry linkend="algorithms-label-propagation"><?dbhtml filename="algorithms/label-propagation/index.html"?>
             </d:tocentry>
-            <d:tocentry linkend="algorithms-connected-components"><?dbhtml filename="algorithms/connected-components/index.html"?>
+            <d:tocentry linkend="algorithms-wcc"><?dbhtml filename="algorithms/wcc/index.html"?>
             </d:tocentry>
         </d:tocentry>
 

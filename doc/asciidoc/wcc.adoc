@@ -6,7 +6,7 @@
 This section describes the Weakly Connected Components (WCC) algorithm in the Neo4j Graph Algorithms library.
 --
 
-This section includes:
+This topic includes:
 
 * <<algorithms-wcc-intro, Introduction>>
 * <<algorithms-wcc-syntax, Syntax>>
@@ -15,12 +15,7 @@ This section includes:
 ** <<algorithms-wcc-examples-weighted, Weighted>>
 ** <<algorithms-wcc-examples-seeding, Seeded components>>
 //** <<algorithms-wcc-examples-threshold, Threshold>>
-* <<algorithms-wcc-usage-details, Usage Details>>
-
-* <<algorithms-wcc-hgp, Huge graph projection>>
-* <<algorithms-wcc-cp, Cypher projection>>
-* <<algorithms-wcc-imp, Implementations>>
-* <<algorithms-unionfind-memory-requirements, Memory Requirements>>
+//* <<algorithms-wcc-usage-details, Usage Details>>
 
 
 [[algorithms-wcc-intro]]
@@ -34,8 +29,7 @@ WCC is often used early in an analysis to understand the structure of a graph.
 WCC was previously known as Union Find.
 Currently, the WCC algorithm still uses the syntax of `algo.unionFind`.
 
-WCC can be used to keep track of clusters of database records, as part of the de-duplication process - an important task in master data management applications.
-WCC can also be used to analyse citation networks.
+// TODO: something about use cases
 
 For more information on this algorithm, see:
 
@@ -70,8 +64,8 @@ YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name         | Type    | Default | Optional | Description
-| node label   | string  | null    | yes      | The node label to load from the graph. If null, load all nodes.
-| relationship | string  | null    | yes      | The relationship type to load from the graph. If null, load all relationships.
+| node label   | string  | null    | yes      | The node label to load from the graph. If `null`, load all nodes.
+| relationship | string  | null    | yes      | The relationship type to load from the graph. If `null`, load all relationships.
 | config       | map     | {}      | yes      | Additional configuration, see below.
 |===
 
@@ -82,7 +76,7 @@ YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
 | concurrency       | int     | available CPUs            | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
 | readConcurrency   | int     | value of 'concurrency'    | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency  | int     | value of 'concurrency'    | yes      | The number of concurrent threads used for writing the result.
-| weightProperty    | string  | `null`                    | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
+| weightProperty    | string  | `null`                    | yes      | The property name that contains weight. If `null`, treats the graph as unweighted. Must be numeric.
 | seedProperty      | string  | n/a                       | yes      | Used to set the initial community for a node. The property value needs to be a number.
 | write             | boolean | `true`                    | yes      | Specifies if the result should be written back as a node property.
 | writeProperty     | string  | `'partition'`             | yes      | The property name written back the ID of the partition particular node belongs to.
@@ -124,10 +118,10 @@ YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
 [source, cypher]
 ----
 CALL algo.unionFind.stream(label: String, relationship: String, {
-    weightProperty: 'weight',
-    threshold: 0.42,
-    defaultValue: 1.0,
-    concurrency: 4
+  weightProperty: 'weight',
+  threshold: 0.42,
+  defaultValue: 1.0,
+  concurrency: 4
 })
 YIELD nodeId, setId
 ----
@@ -186,7 +180,8 @@ CREATE (nMark)-[:LINK {weight: 2}]->(nMichael);
 
 This graph has two connected components, each with three nodes.
 The relationships that connect the nodes in each component has a property which determines the strength of the relationship.
-We load this graph under the name `'wcc-graph'` like so:
+
+We load this graph under the name `'wcc-graph'`, as below:
 
 [source, cypher]
 ----

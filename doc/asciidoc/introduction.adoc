@@ -39,7 +39,7 @@ The following community detection algorithms evaluate how a group is clustered o
 
 * <<algorithms-louvain, Louvain>> (`algo.louvain`)
 * <<algorithms-label-propagation, Label Propagation>> (`algo.labelPropagation`)
-* <<algorithms-connected-components, Connected Components>> (`algo.unionFind`)
+* <<algorithms-wcc, Weakly Connected Components>> (`algo.unionFind`)
 
 // include::algorithms-path-finding.adoc[tags=header,leveloffset=3]
 // 

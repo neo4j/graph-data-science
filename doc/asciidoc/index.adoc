@@ -56,7 +56,7 @@ include::procedures.adoc[leveloffset=+1]
 
 include::algorithms-centrality.adoc[leveloffset=+1]
 
-include::algorithms-community.adoc[leveloffset=+1]
+include::algorithms-community-detection.adoc[leveloffset=+1]
 
 include::experimental-algorithms.adoc[leveloffset=+1]
 

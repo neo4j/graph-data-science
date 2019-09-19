@@ -29,7 +29,7 @@ This chapter contains a reference of all the procedures in the Neo4j Graph Algor
 | <<algorithms-louvain-syntax, algo.louvain.stream>>                            | Louvain algorithm streaming results back to the user.
 | <<algorithms-pagerank-syntax, algo.pageRank>>                                 | Page rank algorithm writing results back to the graph.
 | <<algorithms-pagerank-syntax, algo.pageRank.stream>>                          | Page rank algorithm streaming results back to the user.
-| <<algorithms-connected-components-syntax, algo.unionfind>>                    | Union find algorithm writing results back to the graph.
-| <<algorithms-connected-components-syntax, algo.unionfind.stream>>             | Union find algorithm streaming results back to the user.
+| <<algorithms-wcc-syntax, algo.unionfind>>                    | Union find algorithm writing results back to the graph.
+| <<algorithms-wcc-syntax, algo.unionfind.stream>>             | Union find algorithm streaming results back to the user.
 |===
 
