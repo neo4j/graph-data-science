@@ -79,17 +79,17 @@ final class CompressedLongArray {
     }
 
     /**
-     * @param values  values to write
-     * @param weights weights to write
-     * @param start   start index in values and weights
-     * @param end     end index in values and weights
+     * @param values        values to write
+     * @param allWeights    weights to write
+     * @param start         start index in values and weights
+     * @param end           end index in values and weights
      * @implNote For memory efficiency, we reuse the {@code values}. They cannot be reused after calling this method.
      */
-    void add(long[] values, long[][] weights, int start, int end) {
+    void add(long[] values, long[][] allWeights, int start, int end) {
         // write weights
-        for (int i = 0; i < weights.length; i++) {
-            long[] weight = weights[i];
-            addWeights(weight, start, end, i);
+        for (int i = 0; i < allWeights.length; i++) {
+            long[] weights = allWeights[i];
+            addWeights(weights, start, end, i);
         }
 
         // write values

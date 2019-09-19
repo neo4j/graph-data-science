@@ -93,7 +93,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         return Arrays
                 .stream(propertyMappings)
                 .map(mapping -> {
-                    String propertyKey = mapping.propertyKey;
+                    String propertyKey = mapping.neoPropertyKey;
                     int key = propertyKey(tokenRead, propertyKey != null, propertyKey);
                     return mapping.toKernelMapping(key);
                 })

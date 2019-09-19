@@ -78,9 +78,9 @@ public final class HugeGraphFactory extends GraphFactory {
         for (KernelPropertyMapping propertyMapping : dimensions.nodeProperties()) {
             int propertyId = propertyMapping.propertyKeyId;
             if (propertyId == StatementConstants.NO_SUCH_PROPERTY_KEY) {
-                builder.add(propertyMapping.propertyName, NullWeightMap.MEMORY_USAGE);
+                builder.add(propertyMapping.propertyIdentifier, NullWeightMap.MEMORY_USAGE);
             } else {
-                builder.add(propertyMapping.propertyName, NodePropertyMap.memoryEstimation());
+                builder.add(propertyMapping.propertyIdentifier, NodePropertyMap.memoryEstimation());
             }
         }
 
@@ -271,7 +271,7 @@ public final class HugeGraphFactory extends GraphFactory {
                                         setup.loadAsUndirected
                                 );
                                 PropertyMapping property = setup.relationshipPropertyMappings[weightIndex];
-                                return Pair.of(property.propertyName, graph);
+                                return Pair.of(property.propertyIdentifier, graph);
                             })
                             .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
                 }));

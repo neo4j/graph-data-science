@@ -24,47 +24,48 @@ import org.neo4j.graphalgo.core.DeduplicationStrategy;
 public class PropertyMapping {
 
     // property name in the result map Graph.nodeProperties( <propertyName> )
-    public final String propertyName;
-    // property name in the graph (a:Node {<propertyKey>:xyz})
-    public final String propertyKey;
+    public final String propertyIdentifier;
+    // property name in the neo4j graph (a:Node {<propertyKey>:xyz})
+    public final String neoPropertyKey;
     public final double defaultValue;
     public final DeduplicationStrategy deduplicationStrategy;
 
-    public PropertyMapping(String propertyName, String propertyKeyInGraph, double defaultValue) {
-        this(propertyName, propertyKeyInGraph, defaultValue, DeduplicationStrategy.DEFAULT);
+    public PropertyMapping(String propertyIdentifier, String propertyKeyInGraph, double defaultValue) {
+        this(propertyIdentifier, propertyKeyInGraph, defaultValue, DeduplicationStrategy.DEFAULT);
     }
 
     public PropertyMapping(
-            String propertyName,
-            String propertyKeyInGraph,
+            String propertyIdentifier,
+            String neoPropertyKey,
             double defaultValue,
             DeduplicationStrategy deduplicationStrategy) {
-        this.propertyName = propertyName;
-        this.propertyKey = propertyKeyInGraph;
+        this.propertyIdentifier = propertyIdentifier;
+        this.neoPropertyKey = neoPropertyKey;
         this.defaultValue = defaultValue;
         this.deduplicationStrategy = deduplicationStrategy;
     }
 
     public PropertyMapping withDeduplicationStrategy(DeduplicationStrategy deduplicationStrategy) {
         if (this.deduplicationStrategy == DeduplicationStrategy.DEFAULT) {
-            return new PropertyMapping(propertyName, propertyKey, defaultValue, deduplicationStrategy);
+            return new PropertyMapping(propertyIdentifier, neoPropertyKey, defaultValue, deduplicationStrategy);
         }
         return this;
     }
 
     public KernelPropertyMapping toKernelMapping(int propertyKeyId) {
-        return new KernelPropertyMapping(propertyName, propertyKeyId, defaultValue, propertyKey, deduplicationStrategy);
+        return new KernelPropertyMapping(propertyIdentifier, propertyKeyId, defaultValue,
+                neoPropertyKey, deduplicationStrategy);
     }
 
-    public static PropertyMapping of(String propertyName, String propertyKeyInGraph, double defaultValue) {
-        return new PropertyMapping(propertyName, propertyKeyInGraph, defaultValue);
+    public static PropertyMapping of(String propertyIdentifier, String neoPropertyKey, double defaultValue) {
+        return new PropertyMapping(propertyIdentifier, neoPropertyKey, defaultValue);
     }
 
     public static PropertyMapping of(
-            String propertyName,
-            String propertyKeyInGraph,
+            String propertyIdentifier,
+            String neoPropertyKey,
             double defaultValue,
             DeduplicationStrategy deduplicationStrategy) {
-        return new PropertyMapping(propertyName, propertyKeyInGraph, defaultValue, deduplicationStrategy);
+        return new PropertyMapping(propertyIdentifier, neoPropertyKey, defaultValue, deduplicationStrategy);
     }
 }

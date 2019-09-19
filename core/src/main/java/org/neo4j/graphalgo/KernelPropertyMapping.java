@@ -29,22 +29,22 @@ public class KernelPropertyMapping {
             "",
             DeduplicationStrategy.DEFAULT);
 
-    public final String propertyName;
+    public final String propertyIdentifier;
     public final int propertyKeyId;
     public final double defaultValue;
-    public final String propertyKeyNameInGraph;
+    public final String neoPropertyName;
     public final DeduplicationStrategy deduplicationStrategy;
 
     public KernelPropertyMapping(
-            String propertyName,
+            String propertyIdentifier,
             int propertyKeyId,
             double defaultValue,
-            String propertyKeyNameInGraph,
+            String neoPropertyName,
             DeduplicationStrategy deduplicationStrategy) {
-        this.propertyName = propertyName;
+        this.propertyIdentifier = propertyIdentifier;
         this.propertyKeyId = propertyKeyId;
         this.defaultValue = defaultValue;
-        this.propertyKeyNameInGraph = propertyKeyNameInGraph;
+        this.neoPropertyName = neoPropertyName;
         this.deduplicationStrategy = deduplicationStrategy;
     }
 }

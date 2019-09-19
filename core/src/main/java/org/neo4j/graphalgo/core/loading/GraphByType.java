@@ -38,7 +38,7 @@ public interface GraphByType {
 
     void release();
 
-    String getType();
+    String getGraphType();
 
     void canRelease(boolean canRelease);
 
@@ -76,7 +76,7 @@ public interface GraphByType {
         }
 
         @Override
-        public String getType() {
+        public String getGraphType() {
             return graph.getType();
         }
 

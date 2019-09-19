@@ -89,9 +89,9 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
                 tracker);
         Map<String, WeightMapping> nodeProperties = new HashMap<>();
         for (PropertyMapping propertyMapping : propertyMappings) {
-            HugeNodePropertiesBuilder builder = builders.get(propertyMapping.propertyName);
+            HugeNodePropertiesBuilder builder = builders.get(propertyMapping.propertyIdentifier);
             WeightMapping props = builder != null ? builder.build() : new NullWeightMap(propertyMapping.defaultValue);
-            nodeProperties.put(propertyMapping.propertyName, props);
+            nodeProperties.put(propertyMapping.propertyIdentifier, props);
         }
         return new IdsAndProperties(hugeIdMap, Collections.unmodifiableMap(nodeProperties));
     }
@@ -106,8 +106,8 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
                         tracker,
                         propertyMapping.defaultValue,
                         propertyId,
-                        propertyMapping.propertyName);
-                builders.put(propertyMapping.propertyName, builder);
+                        propertyMapping.propertyIdentifier);
+                builders.put(propertyMapping.propertyIdentifier, builder);
             }
         }
         return builders;

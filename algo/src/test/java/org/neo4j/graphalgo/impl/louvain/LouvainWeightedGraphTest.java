@@ -73,10 +73,10 @@ class LouvainWeightedGraphTest extends LouvainTestBase {
 
     @Override
     void setupGraphDb(Graph graph) {
-        try (Transaction transaction = DB.beginTx()) {
+        try (Transaction transaction = db.beginTx()) {
             for (int i = 0; i < ABCDEFGHZ.length(); i++) {
                 final String value = String.valueOf(ABCDEFGHZ.charAt(i));
-                final long id = graph.toMappedNodeId(DB.findNode(LABEL, "name", value).getId());
+                final long id = graph.toMappedNodeId(db.findNode(LABEL, "name", value).getId());
                 nameMap.put(value, (int) id);
             }
             transaction.success();
@@ -84,10 +84,10 @@ class LouvainWeightedGraphTest extends LouvainTestBase {
     }
 
     void printCommunities(Louvain louvain) {
-        try (Transaction ignored = DB.beginTx()) {
+        try (Transaction ignored = db.beginTx()) {
             louvain
                     .resultStream()
-                    .forEach(r -> System.out.println(DB.getNodeById(r.nodeId).getProperty("name") + ":" + r.community));
+                    .forEach(r -> System.out.println(db.getNodeById(r.nodeId).getProperty("name") + ":" + r.community));
         }
     }
 

@@ -106,7 +106,7 @@ public final class LoadGraphFactory extends GraphFactory {
     public static String getType(String name) {
         if (name == null) return null;
         GraphByType graph = graphs.get(name);
-        return graph == null ? null : graph.getType();
+        return graph == null ? null : graph.getGraphType();
     }
 
     public static Map<String, Graph> getLoadedGraphs() {

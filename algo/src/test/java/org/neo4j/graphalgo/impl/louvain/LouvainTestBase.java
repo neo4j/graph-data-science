@@ -41,25 +41,25 @@ abstract class LouvainTestBase {
 
     static final Louvain.Config DEFAULT_CONFIG = new Louvain.Config(10, 10, false);
 
-    GraphDatabaseAPI DB;
+    GraphDatabaseAPI db;
 
     Map<String, Integer> nameMap = new HashMap<>();
 
     @BeforeEach
     void setupGraphDb() {
-        DB = TestDatabaseCreator.createTestDatabase();
+        db = TestDatabaseCreator.createTestDatabase();
     }
 
     @AfterEach
     void shutdownGraphDb() {
-        if (DB != null) DB.shutdown();
+        if (db != null) db.shutdown();
     }
 
     abstract void setupGraphDb(Graph graph);
 
     Graph loadGraph(Class<? extends GraphFactory> graphImpl, String cypher) {
-        DB.execute(cypher);
-        GraphLoader loader = new GraphLoader(DB)
+        db.execute(cypher);
+        GraphLoader loader = new GraphLoader(db)
                 .withoutNodeProperties()
                 .withOptionalRelationshipWeightsFromProperty("weight", 1.0)
                 .undirected();

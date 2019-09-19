@@ -294,7 +294,7 @@ public class GraphLoader {
 
     public GraphLoader withOptionalNodeProperties(PropertyMapping... nodePropertyMappings) {
         this.nodePropertyMappings = Arrays.stream(nodePropertyMappings)
-                .filter(propMapping -> !(propMapping.propertyKey == null || propMapping.propertyKey.isEmpty()))
+                .filter(propMapping -> !(propMapping.neoPropertyKey == null || propMapping.neoPropertyKey.isEmpty()))
                 .toArray(PropertyMapping[]::new);
         return this;
     }

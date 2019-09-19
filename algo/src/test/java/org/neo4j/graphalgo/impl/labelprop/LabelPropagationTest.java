@@ -69,21 +69,21 @@ final class LabelPropagationTest {
             ", (nMichael)-[:FOLLOW]->(nBridget)" +
             ", (nCharles)-[:FOLLOW]->(nDoug)";
 
-    private GraphDatabaseAPI DB;
+    private GraphDatabaseAPI db;
 
     @BeforeEach
     void setupGraphDb() {
-        DB = TestDatabaseCreator.createTestDatabase();
+        db = TestDatabaseCreator.createTestDatabase();
     }
 
     @AfterEach
     void shutdownGraphDb() {
-        if (DB != null) DB.shutdown();
+        if (db != null) db.shutdown();
     }
 
     Graph loadGraph(Class<? extends GraphFactory> graphImpl) {
-        DB.execute(DB_CYPHER).close();
-        GraphLoader graphLoader = new GraphLoader(DB, Pools.DEFAULT)
+        db.execute(DB_CYPHER).close();
+        GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT)
                 .withDirection(Direction.OUTGOING)
                 .withDefaultConcurrency();
 

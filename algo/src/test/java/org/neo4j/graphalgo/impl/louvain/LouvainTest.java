@@ -62,10 +62,10 @@ class LouvainTest extends LouvainTestBase {
 
     @Override
     void setupGraphDb(Graph graph) {
-        try (Transaction transaction = DB.beginTx()) {
+        try (Transaction transaction = db.beginTx()) {
             for (int i = 0; i < ABCD.length(); i++) {
                 final String value = String.valueOf(ABCD.charAt(i));
-                final long id = graph.toMappedNodeId(DB.findNode(LABEL, "name", value).getId());
+                final long id = graph.toMappedNodeId(db.findNode(LABEL, "name", value).getId());
                 nameMap.put(value, (int) id);
             }
             transaction.success();
@@ -106,12 +106,12 @@ class LouvainTest extends LouvainTestBase {
 
     @AllGraphTypesTest
     void testMultithreadedLouvain(Class<? extends GraphFactory> graphImpl) {
-        GraphBuilder.create(DB)
+        GraphBuilder.create(db)
                 .setLabel("Node")
                 .setRelationship("REL")
                 .newCompleteGraphBuilder()
                 .createCompleteGraph(200, 1.0);
-        GraphLoader graphLoader = new GraphLoader(DB);
+        GraphLoader graphLoader = new GraphLoader(db);
         if (graphImpl == CypherGraphFactory.class) {
             graphLoader
                     .withNodeStatement("MATCH (u:Node) RETURN id(u) as id")

@@ -124,7 +124,7 @@ public final class GraphsByRelationshipType implements GraphByType {
     }
 
     @Override
-    public String getType() {
+    public String getGraphType() {
         return HugeGraph.TYPE;
     }
 

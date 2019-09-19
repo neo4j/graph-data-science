@@ -93,7 +93,7 @@ public class GraphSetup {
      * @param relationshipType           the relation type identifier. null for any relationship
      * @param executor                   the executor. null means single threaded evaluation
      * @param batchSize                  batch size for parallel loading
-     * @param deduplicationStrategy     strategy for handling relationship duplicates
+     * @param deduplicationStrategy      strategy for handling relationship duplicates
      * @param sort                       true if relationships should stored in sorted ascending order
      */
     public GraphSetup(

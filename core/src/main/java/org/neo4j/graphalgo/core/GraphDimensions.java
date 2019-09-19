@@ -142,10 +142,10 @@ public final class GraphDimensions {
         String missingProperties = Arrays.stream(mappings)
                 .filter(mapping -> {
                     int id = mapping.propertyKeyId;
-                    String propertyKey = mapping.propertyKeyNameInGraph;
+                    String propertyKey = mapping.neoPropertyName;
                     return nonEmpty(propertyKey) && id == NO_SUCH_PROPERTY_KEY;
                 })
-                .map(mapping -> mapping.propertyKeyNameInGraph)
+                .map(mapping -> mapping.neoPropertyName)
                 .collect(joining("', '"));
         if (!missingProperties.isEmpty()) {
             throw new IllegalArgumentException(String.format(
