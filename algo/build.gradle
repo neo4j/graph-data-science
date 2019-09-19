@@ -1,7 +1,7 @@
 description = 'Neo4j Graph Algorithms :: Algorithms'
 
 dependencies {
-    compile project(':community-core')
+    compile project(':core')
 
     compile group: 'io.dropwizard.metrics',     name: 'metrics-core',       version: ver.'metrics-core'
     compile group: 'org.hdrhistogram',          name: 'HdrHistogram',       version: ver.'HdrHistogram'

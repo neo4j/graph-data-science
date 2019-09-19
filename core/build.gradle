@@ -1,4 +1,4 @@
-description = 'Neo4j Graph Algorithms :: Community Core'
+description = 'Neo4j Graph Algorithms :: Core'
 
 dependencies {
     compile group: 'com.carrotsearch',           name: 'hppc',               version: ver.hppc
