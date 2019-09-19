@@ -19,11 +19,9 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.Rule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
-import org.junit.rules.ErrorCollector;
+import org.junit.jupiter.api.function.Executable;
 import org.neo4j.graphalgo.CostEvaluator;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
@@ -46,11 +44,12 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
-import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@EnableRuleMigrationSupport
 public class WeightedAllShortestPaths427Test {
 
     private static final String DB_CYPHER =
@@ -400,9 +399,6 @@ public class WeightedAllShortestPaths427Test {
         DB.shutdown();
     }
 
-    @Rule
-    ErrorCollector collector = new ErrorCollector();
-
     @AllGraphTypesWithoutCypherTest
     void testWeighted(Class<? extends GraphFactory> graphImpl) {
         Graph graph = new GraphLoader(DB, Pools.DEFAULT)
@@ -440,6 +436,7 @@ public class WeightedAllShortestPaths427Test {
     private List<Result> calculateExpected(Graph graph, boolean withWeights) {
         List<Result> expected = new ArrayList<>();
         ShortestPathDijkstra spd = new ShortestPathDijkstra(graph);
+        List<Executable> assertions = new ArrayList<>();
         try (Transaction tx = DB.beginTx()) {
             graph.forEachNode(algoSourceId -> {
                 long neoSourceId = graph.toOriginalNodeId(algoSourceId);
@@ -473,10 +470,14 @@ public class WeightedAllShortestPaths427Test {
                                 algoResult = new Result(neoSourceId, neoTargetId, totalCost, pathIds);
                             }
 
-                            collector.checkThat(
-                                    String.format("Neo vs Algo (%d)-[..]*->(%d)", neoSourceId, neoTargetId),
-                                    algoResult,
-                                    is(neoResult)
+                            final Result expect = neoResult;
+                            final Result actual = algoResult;
+                            assertions.add(
+                                    () -> assertEquals(
+                                            expect,
+                                            actual,
+                                            String.format("Neo vs Algo (%d)-[*]->(%d)", neoSourceId, neoTargetId)
+                                    )
                             );
                         }
                     }
@@ -486,6 +487,7 @@ public class WeightedAllShortestPaths427Test {
             });
             tx.success();
         }
+        assertAll(assertions);
 
         expected.sort(Comparator.naturalOrder());
         return expected;
@@ -502,16 +504,19 @@ public class WeightedAllShortestPaths427Test {
                 .sorted()
                 .collect(toList());
 
-        for (int i = 0; i < expected.size(); i++) {
-            Result expect = expected.get(i);
-            Result actual = results.get(i);
+        assertAll(
+                IntStream.range(0, expected.size())
+                        .mapToObj((i) -> {
+                            Result expect = expected.get(i);
+                            Result actual = results.get(i);
+                            return () -> assertEquals(
+                                    expect,
+                                    actual,
+                                    String.format("Neo vs wASP (%d)-[*]->(%d)", expect.source, expect.target)
+                            );
+                        })
+        );
 
-            collector.checkThat(
-                    String.format("Neo vs wASP (%d)-[..]*->(%d)", expect.source, expect.target),
-                    actual,
-                    is(expect)
-            );
-        }
     }
 
     private static final class TestDijkstra extends SingleSourceShortestPathDijkstra<Double> {
