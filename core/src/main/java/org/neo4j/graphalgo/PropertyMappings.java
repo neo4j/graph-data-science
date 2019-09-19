@@ -21,6 +21,7 @@
 package org.neo4j.graphalgo;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -161,7 +162,17 @@ public final class PropertyMappings implements Iterable<PropertyMapping> {
         }
 
         public PropertyMappings build() {
+            long noneStrategyCount = this.mappings.stream()
+                    .filter(d -> d.deduplicationStrategy == DeduplicationStrategy.NONE)
+                    .count();
+
+            if (noneStrategyCount > 0 && noneStrategyCount < this.mappings.size()) {
+                throw new IllegalArgumentException(
+                        "Conflicting relationship property deduplication strategies, it is not allowed to mix `NONE` with aggregations.");
+            }
+
             PropertyMapping[] mappings = this.mappings.toArray(new PropertyMapping[0]);
+
             return of(mappings);
         }
     }

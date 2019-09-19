@@ -20,13 +20,20 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.kernel.api.StatementConstants;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.OptionalDouble;
 
 public abstract class PropertyMapping {
+
+    public static final PropertyMapping EMPTY_PROPERTY = new PropertyMapping.Resolved(
+            -1,
+            "",
+            "",
+            0.0,
+            DeduplicationStrategy.DEFAULT);
 
     public static final String PROPERTY_KEY = "property";
     public static final String AGGREGATION_KEY = "aggregate";
@@ -34,13 +41,13 @@ public abstract class PropertyMapping {
 
     public final String propertyKey;
     public final String neoPropertyKey;
-    public final OptionalDouble defaultValue;
+    public final double defaultValue;
     public final DeduplicationStrategy deduplicationStrategy;
 
     public PropertyMapping(
             String propertyKey,
             String neoPropertyKey,
-            OptionalDouble defaultValue,
+            double defaultValue,
             DeduplicationStrategy deduplicationStrategy) {
         this.propertyKey = propertyKey;
         this.neoPropertyKey = neoPropertyKey;
@@ -81,11 +88,11 @@ public abstract class PropertyMapping {
             }
 
             final Object defaultWeightValue = relPropertyMap.get(DEFAULT_WEIGHT_KEY);
-            OptionalDouble defaultWeight;
+            double defaultWeight;
             if (defaultWeightValue == null) {
-                defaultWeight = OptionalDouble.empty();
+                defaultWeight = HugeGraph.NO_WEIGHT;
             } else if (defaultWeightValue instanceof Number) {
-                defaultWeight = OptionalDouble.of(((Number) defaultWeightValue).doubleValue());
+                defaultWeight = ((Number) defaultWeightValue).doubleValue();
             } else {
                 throw new IllegalStateException(String.format(
                         "Expected the default defaultWeightValue to be of type double, but was %s",
@@ -110,17 +117,17 @@ public abstract class PropertyMapping {
      * property name in the result map Graph.nodeProperties(`propertyName`)
      */
     public String propertyIdentifier() {
-        return propertyIdentifier;
+        return propertyKey;
     }
 
     /**
      * property name in the graph (a:Node {`propertyKey`:xyz})
      */
     public String propertyNameInGraph() {
-        return propertyNameInGraph;
+        return neoPropertyKey;
     }
 
-    public OptionalDouble defaultValue() {
+    public double defaultValue() {
         return defaultValue;
     }
 
@@ -131,7 +138,7 @@ public abstract class PropertyMapping {
     public abstract int propertyKeyId();
 
     public boolean hasValidName() {
-        return propertyNameInGraph != null && !propertyNameInGraph.isEmpty();
+        return neoPropertyKey != null && !neoPropertyKey.isEmpty();
     }
 
     public boolean exists() {
@@ -154,7 +161,7 @@ public abstract class PropertyMapping {
         private Unresolved(
                 String propertyIdentifier,
                 String propertyNameInGraph,
-                OptionalDouble defaultValue,
+                double defaultValue,
                 DeduplicationStrategy deduplicationStrategy) {
             super(propertyIdentifier, propertyNameInGraph, defaultValue, deduplicationStrategy);
         }
@@ -187,7 +194,7 @@ public abstract class PropertyMapping {
                 int propertyKeyId,
                 String propertyIdentifier,
                 String propertyNameInGraph,
-                OptionalDouble defaultValue,
+                double defaultValue,
                 DeduplicationStrategy deduplicationStrategy) {
             super(propertyIdentifier, propertyNameInGraph, defaultValue, deduplicationStrategy);
             this.propertyKeyId = propertyKeyId;
@@ -221,14 +228,14 @@ public abstract class PropertyMapping {
     }
 
 
-    public static PropertyMapping of(String propertyIdentifier, String propertyNameInGraph, OptionalDouble defaultValue) {
+    public static PropertyMapping of(String propertyIdentifier, String propertyNameInGraph, double defaultValue) {
         return of(propertyIdentifier, propertyNameInGraph, defaultValue, DeduplicationStrategy.DEFAULT);
     }
 
     public static PropertyMapping of(
             String propertyIdentifier,
             String propertyNameInGraph,
-            OptionalDouble defaultValue,
+            double defaultValue,
             DeduplicationStrategy deduplicationStrategy) {
         return new Unresolved(propertyIdentifier, propertyNameInGraph, defaultValue, deduplicationStrategy);
     }

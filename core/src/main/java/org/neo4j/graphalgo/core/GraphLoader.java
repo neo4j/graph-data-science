@@ -471,16 +471,6 @@ public class GraphLoader {
     }
 
     public GraphSetup toSetup() {
-        long noneStrategyCount = Arrays
-                .stream(this.relPropertyMappings)
-                .filter(d -> d.deduplicationStrategy == DeduplicationStrategy.NONE)
-                .count();
-
-        if (noneStrategyCount > 0 && noneStrategyCount < this.relPropertyMappings.length) {
-            throw new IllegalArgumentException(
-                    "Conflicting relationship property deduplication strategies, it is not allowed to mix `NONE` with aggregations.");
-        }
-
         PropertyMappings relMappings = this.relPropertyMappings.build();
         if (deduplicationStrategy != DeduplicationStrategy.DEFAULT) {
             relMappings = new PropertyMappings.Builder()
