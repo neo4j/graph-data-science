@@ -49,7 +49,7 @@ class ThreadLocalRelationshipsBuilder {
             throw new IllegalArgumentException("Needs at least one deduplication strategy");
         }
         this.deduplicationStrategies = deduplicationStrategies;
-        noDeduplication = Arrays.stream(deduplicationStrategies).anyMatch(d -> d == DeduplicationStrategy.NONE);
+        this.noDeduplication = Arrays.stream(deduplicationStrategies).allMatch(d -> d == DeduplicationStrategy.NONE);
         this.adjacencyAllocator = adjacencyAllocator;
         this.weightsAllocators = weightsAllocators;
         this.adjacencyOffsets = adjacencyOffsets;

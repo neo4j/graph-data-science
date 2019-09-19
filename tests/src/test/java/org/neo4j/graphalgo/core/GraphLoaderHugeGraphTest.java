@@ -44,8 +44,11 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.Arrays;
 import java.util.Optional;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 class GraphLoaderTest {
@@ -427,6 +430,32 @@ class GraphLoaderTest {
         checkOutWeights(p2, 1, 1340, 1341);
         checkOutWeights(p2, 2);
         checkOutWeights(p2, 3);
+    }
+
+    @Test
+    void multipleRelPropertiesWithIncompatibleDeduplicationStrategies() {
+        db.execute("" +
+                   "CREATE (a:Node),(b:Node),(c:Node),(d:Node) " +
+                   "CREATE" +
+                   " (a)-[:REL {p1: 42, p2: 1337}]->(a)," +
+                   " (a)-[:REL {p1: 43, p2: 1338}]->(a)," +
+                   " (a)-[:REL {p1: 44, p2: 1339}]->(b)," +
+                   " (b)-[:REL {p1: 45, p2: 1340}]->(c)," +
+                   " (b)-[:REL {p1: 46, p2: 1341}]->(d)");
+        GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT);
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                graphLoader.withAnyLabel()
+                        .withAnyRelationshipType()
+                        .withOptionalRelationshipProperties(
+                                PropertyMapping.of("p1", "p1", 1.0, DeduplicationStrategy.NONE),
+                                PropertyMapping.of("p2", "p2", 2.0, DeduplicationStrategy.SUM)
+                        )
+                        .withDirection(Direction.OUTGOING)
+                        .build(HugeGraphFactory.class)
+                        .loadGraphs());
+
+        assertThat(ex.getMessage(), containsString("Conflicting relationship property deduplication strategies, it is not allowed to mix `NONE` with aggregations."));
     }
 
     @ParameterizedTest
