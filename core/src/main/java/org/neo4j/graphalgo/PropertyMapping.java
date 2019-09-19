@@ -58,19 +58,19 @@ public abstract class PropertyMapping {
     public static PropertyMapping fromObject(String propertyKey, Object stringOrMap) {
         if (stringOrMap instanceof String) {
             String neoPropertyKey = (String) stringOrMap;
-            fromObject(propertyKey, Collections.singletonMap(PROPERTY_KEY, neoPropertyKey));
+            return fromObject(propertyKey, Collections.singletonMap(PROPERTY_KEY, neoPropertyKey));
         } else if (stringOrMap instanceof Map) {
             Map relPropertyMap = (Map) stringOrMap;
 
             final Object propertyNameValue = relPropertyMap.get(PROPERTY_KEY);
             if (propertyNameValue == null) {
-                throw new IllegalStateException(String.format(
+                throw new IllegalArgumentException(String.format(
                         "Property was not set. Missing entry with key %s.",
                         PROPERTY_KEY));
             }
             if (!(propertyNameValue instanceof String)) {
-                throw new IllegalStateException(String.format(
-                        "Expected the property name to be of type String, but was %s",
+                throw new IllegalArgumentException(String.format(
+                        "Expected the property name to be of type String, but was %s.",
                         propertyNameValue.getClass().getSimpleName()));
             }
             String neoPropertyKey = (String) propertyNameValue;
@@ -109,8 +109,6 @@ public abstract class PropertyMapping {
                     "Expected stringOrMap to be of type String or Map, but got %s",
                     stringOrMap.getClass().getSimpleName()));
         }
-
-        return null;
     }
 
     /**
