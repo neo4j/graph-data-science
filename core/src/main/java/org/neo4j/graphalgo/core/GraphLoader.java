@@ -410,7 +410,11 @@ public class GraphLoader {
     }
 
     /**
-     * @param deduplicationStrategy strategy for handling duplicate relationships
+     * Defines the default strategy for relationship deduplication.
+     *
+     * If set, this overrides the deduplication strategy for all {@link PropertyMapping}s where the deduplication strategy is not set.
+     *
+     * @param deduplicationStrategy strategy for handling duplicate relationships unless not explicitly specified in the property mappings
      */
     public GraphLoader withDeduplicateRelationshipsStrategy(DeduplicationStrategy deduplicationStrategy) {
         this.deduplicationStrategy = deduplicationStrategy;

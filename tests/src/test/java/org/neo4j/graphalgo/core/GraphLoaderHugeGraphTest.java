@@ -455,7 +455,58 @@ class GraphLoaderTest {
                         .build(HugeGraphFactory.class)
                         .loadGraphs());
 
-        assertThat(ex.getMessage(), containsString("Conflicting relationship property deduplication strategies, it is not allowed to mix `NONE` with aggregations."));
+        assertThat(ex.getMessage(),
+                containsString(
+                        "Conflicting relationship property deduplication strategies, it is not allowed to mix `NONE` with aggregations."));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "MAX,       DEFAULT, DEFAULT,   44, 46, 1339, 1341",
+            "MIN,       DEFAULT, MAX,       42, 45, 1339, 1341",
+            "DEFAULT,   DEFAULT, DEFAULT,   42, 45, 1337, 1340",
+            "DEFAULT,   DEFAULT, SUM,       42, 45, 4014, 2681",
+            "DEFAULT,   MAX,     SUM,       44, 46, 4014, 2681"
+    })
+    void multipleRelPropertiesWithGlobalAndLocalDeduplicationStrategy(
+            DeduplicationStrategy globalDeduplicationStrategy,
+            DeduplicationStrategy localDeduplicationStrategy1,
+            DeduplicationStrategy localDeduplicationStrategy2,
+            double expectedNodeAP1,
+            double expectedNodeBP1,
+            double expectedNodeAP2,
+            double expectedNodeBP2
+    ) {
+        db.execute("" +
+                   "CREATE (a:Node),(b:Node),(c:Node),(d:Node) " +
+                   "CREATE" +
+                   " (a)-[:REL {p1: 42, p2: 1337}]->(a)," +
+                   " (a)-[:REL {p1: 43, p2: 1338}]->(a)," +
+                   " (a)-[:REL {p1: 44, p2: 1339}]->(a)," +
+                   " (b)-[:REL {p1: 45, p2: 1340}]->(b)," +
+                   " (b)-[:REL {p1: 46, p2: 1341}]->(b)");
+        GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT);
+
+        final GraphByType graph = graphLoader.withAnyLabel()
+                .withAnyRelationshipType()
+                .withDeduplicateRelationshipsStrategy(globalDeduplicationStrategy)
+                .withOptionalRelationshipProperties(
+                        PropertyMapping.of("p1", "p1", 1.0, localDeduplicationStrategy1),
+                        PropertyMapping.of("p2", "p2", 2.0, localDeduplicationStrategy2)
+                )
+                .withDirection(Direction.OUTGOING)
+                .build(HugeGraphFactory.class)
+                .loadGraphs();
+
+        Graph p1 = graph.loadGraph("", Optional.of("p1"));
+        assertEquals(4L, p1.nodeCount());
+        checkOutWeights(p1, 0, expectedNodeAP1);
+        checkOutWeights(p1, 1, expectedNodeBP1);
+
+        Graph p2 = graph.loadGraph("", Optional.of("p2"));
+        assertEquals(4L, p2.nodeCount());
+        checkOutWeights(p2, 0, expectedNodeAP2);
+        checkOutWeights(p2, 1, expectedNodeBP2);
     }
 
     @ParameterizedTest
