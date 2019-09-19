@@ -24,22 +24,22 @@ import org.neo4j.graphalgo.core.DeduplicationStrategy;
 public class PropertyMapping {
 
     // property name in the result map Graph.nodeProperties( <propertyName> )
-    public final String propertyIdentifier;
+    public final String propertyKey;
     // property name in the neo4j graph (a:Node {<propertyKey>:xyz})
     public final String neoPropertyKey;
     public final double defaultValue;
     public final DeduplicationStrategy deduplicationStrategy;
 
-    public PropertyMapping(String propertyIdentifier, String propertyKeyInGraph, double defaultValue) {
-        this(propertyIdentifier, propertyKeyInGraph, defaultValue, DeduplicationStrategy.DEFAULT);
+    public PropertyMapping(String propertyKey, String propertyKeyInGraph, double defaultValue) {
+        this(propertyKey, propertyKeyInGraph, defaultValue, DeduplicationStrategy.DEFAULT);
     }
 
     public PropertyMapping(
-            String propertyIdentifier,
+            String propertyKey,
             String neoPropertyKey,
             double defaultValue,
             DeduplicationStrategy deduplicationStrategy) {
-        this.propertyIdentifier = propertyIdentifier;
+        this.propertyKey = propertyKey;
         this.neoPropertyKey = neoPropertyKey;
         this.defaultValue = defaultValue;
         this.deduplicationStrategy = deduplicationStrategy;
@@ -47,25 +47,25 @@ public class PropertyMapping {
 
     public PropertyMapping withDeduplicationStrategy(DeduplicationStrategy deduplicationStrategy) {
         if (this.deduplicationStrategy == DeduplicationStrategy.DEFAULT) {
-            return new PropertyMapping(propertyIdentifier, neoPropertyKey, defaultValue, deduplicationStrategy);
+            return new PropertyMapping(propertyKey, neoPropertyKey, defaultValue, deduplicationStrategy);
         }
         return this;
     }
 
     public KernelPropertyMapping toKernelMapping(int propertyKeyId) {
-        return new KernelPropertyMapping(propertyIdentifier, propertyKeyId, defaultValue,
+        return new KernelPropertyMapping(propertyKey, propertyKeyId, defaultValue,
                 neoPropertyKey, deduplicationStrategy);
     }
 
-    public static PropertyMapping of(String propertyIdentifier, String neoPropertyKey, double defaultValue) {
-        return new PropertyMapping(propertyIdentifier, neoPropertyKey, defaultValue);
+    public static PropertyMapping of(String propertyKey, String neoPropertyKey, double defaultValue) {
+        return new PropertyMapping(propertyKey, neoPropertyKey, defaultValue);
     }
 
     public static PropertyMapping of(
-            String propertyIdentifier,
+            String propertyKey,
             String neoPropertyKey,
             double defaultValue,
             DeduplicationStrategy deduplicationStrategy) {
-        return new PropertyMapping(propertyIdentifier, neoPropertyKey, defaultValue, deduplicationStrategy);
+        return new PropertyMapping(propertyKey, neoPropertyKey, defaultValue, deduplicationStrategy);
     }
 }

@@ -31,8 +31,9 @@ import java.util.concurrent.atomic.LongAdder;
 
 class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
 
-    private static final int SINGLE_REL_WEIGHT = 1;
-    private static final int NO_REL_WEIGHT = 0;
+    private static final int SINGLE_RELATIONSHIP_WEIGHT = 1;
+    private static final int NO_RELATIONSHIP_WEIGHT = 0;
+    private static final int DEFAULT_WEIGHT_PROPERTY_ID = -2;
 
     private final IdMap idMap;
     private final RelationshipsBuilder outgoingRelationshipsBuilder;
@@ -54,7 +55,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
         outgoingRelationshipsBuilder = new RelationshipsBuilder(
                 new DeduplicationStrategy[]{deduplicationStrategy},
                 setup.tracker,
-                setup.shouldLoadRelationshipWeight() ? SINGLE_REL_WEIGHT : NO_REL_WEIGHT);
+                setup.shouldLoadRelationshipWeight() ? SINGLE_RELATIONSHIP_WEIGHT : NO_RELATIONSHIP_WEIGHT);
 
         ImportSizing importSizing = ImportSizing.of(setup.concurrency, idMap.nodeCount());
         int pageSize = importSizing.pageSize();
@@ -67,7 +68,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
                 pageSize,
                 setup.tracker,
                 new LongAdder(),
-                new int[]{-2},
+                new int[]{DEFAULT_WEIGHT_PROPERTY_ID},
                 new double[]{relationDefaultWeight}
         );
 

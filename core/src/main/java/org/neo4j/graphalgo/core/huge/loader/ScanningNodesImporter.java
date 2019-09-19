@@ -89,9 +89,9 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
                 tracker);
         Map<String, WeightMapping> nodeProperties = new HashMap<>();
         for (PropertyMapping propertyMapping : propertyMappings) {
-            HugeNodePropertiesBuilder builder = builders.get(propertyMapping.propertyIdentifier);
+            HugeNodePropertiesBuilder builder = builders.get(propertyMapping.propertyKey);
             WeightMapping props = builder != null ? builder.build() : new NullWeightMap(propertyMapping.defaultValue);
-            nodeProperties.put(propertyMapping.propertyIdentifier, props);
+            nodeProperties.put(propertyMapping.propertyKey, props);
         }
         return new IdsAndProperties(hugeIdMap, Collections.unmodifiableMap(nodeProperties));
     }
@@ -99,15 +99,15 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     private Map<String, HugeNodePropertiesBuilder> propertyBuilders(long nodeCount) {
         Map<String, HugeNodePropertiesBuilder> builders = new HashMap<>();
         for (KernelPropertyMapping propertyMapping : dimensions.nodeProperties()) {
-            int propertyId = propertyMapping.propertyKeyId;
+            int propertyId = propertyMapping.neoPropertyKeyId;
             if (propertyId != StatementConstants.NO_SUCH_PROPERTY_KEY) {
                 HugeNodePropertiesBuilder builder = HugeNodePropertiesBuilder.of(
                         nodeCount,
                         tracker,
                         propertyMapping.defaultValue,
                         propertyId,
-                        propertyMapping.propertyIdentifier);
-                builders.put(propertyMapping.propertyIdentifier, builder);
+                        propertyMapping.propertyKey);
+                builders.put(propertyMapping.propertyKey, builder);
             }
         }
         return builders;

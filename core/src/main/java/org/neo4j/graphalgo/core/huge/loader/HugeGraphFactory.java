@@ -76,11 +76,11 @@ public final class HugeGraphFactory extends GraphFactory {
 
         // Node properties
         for (KernelPropertyMapping propertyMapping : dimensions.nodeProperties()) {
-            int propertyId = propertyMapping.propertyKeyId;
+            int propertyId = propertyMapping.neoPropertyKeyId;
             if (propertyId == StatementConstants.NO_SUCH_PROPERTY_KEY) {
-                builder.add(propertyMapping.propertyIdentifier, NullWeightMap.MEMORY_USAGE);
+                builder.add(propertyMapping.propertyKey, NullWeightMap.MEMORY_USAGE);
             } else {
-                builder.add(propertyMapping.propertyIdentifier, NodePropertyMap.memoryEstimation());
+                builder.add(propertyMapping.propertyKey, NodePropertyMap.memoryEstimation());
             }
         }
 
@@ -271,7 +271,7 @@ public final class HugeGraphFactory extends GraphFactory {
                                         setup.loadAsUndirected
                                 );
                                 PropertyMapping property = setup.relationshipPropertyMappings[weightIndex];
-                                return Pair.of(property.propertyIdentifier, graph);
+                                return Pair.of(property.propertyKey, graph);
                             })
                             .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
                 }));
@@ -339,7 +339,7 @@ public final class HugeGraphFactory extends GraphFactory {
         AdjacencyList outWeightList = null;
         AdjacencyOffsets outWeightOffsets = null;
         if (outRelationshipsBuilder != null) {
-            if (weightProperty.propertyKeyId != StatementConstants.NO_SUCH_PROPERTY_KEY) {
+            if (weightProperty.neoPropertyKeyId != StatementConstants.NO_SUCH_PROPERTY_KEY) {
                 outWeightOffsets = outRelationshipsBuilder.globalWeightOffsets[weightIndex];
                 if (outWeightOffsets != null) {
                     outWeightList = outRelationshipsBuilder.weights[weightIndex].build();
@@ -350,7 +350,7 @@ public final class HugeGraphFactory extends GraphFactory {
         AdjacencyList inWeightList = null;
         AdjacencyOffsets inWeightOffsets = null;
         if (inRelationshipsBuilder != null) {
-            if (weightProperty.propertyKeyId != StatementConstants.NO_SUCH_PROPERTY_KEY) {
+            if (weightProperty.neoPropertyKeyId != StatementConstants.NO_SUCH_PROPERTY_KEY) {
                 inWeightOffsets = inRelationshipsBuilder.globalWeightOffsets[weightIndex];
                 if (inWeightOffsets != null) {
                     inWeightList = inRelationshipsBuilder.weights[weightIndex].build();

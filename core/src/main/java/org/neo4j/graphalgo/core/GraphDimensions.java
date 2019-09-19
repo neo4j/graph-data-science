@@ -101,7 +101,7 @@ public final class GraphDimensions {
 
     @Deprecated
     public int relWeightId() {
-        return relProperties == null || relProperties.length == 0 ? NO_SUCH_PROPERTY_KEY : relProperties[0].propertyKeyId;
+        return relProperties == null || relProperties.length == 0 ? NO_SUCH_PROPERTY_KEY : relProperties[0].neoPropertyKeyId;
     }
 
     @Deprecated
@@ -141,11 +141,11 @@ public final class GraphDimensions {
     private void checkValidProperties(String recordType, KernelPropertyMapping... mappings) {
         String missingProperties = Arrays.stream(mappings)
                 .filter(mapping -> {
-                    int id = mapping.propertyKeyId;
-                    String propertyKey = mapping.neoPropertyName;
+                    int id = mapping.neoPropertyKeyId;
+                    String propertyKey = mapping.neoPropertyKey;
                     return nonEmpty(propertyKey) && id == NO_SUCH_PROPERTY_KEY;
                 })
-                .map(mapping -> mapping.neoPropertyName)
+                .map(mapping -> mapping.neoPropertyKey)
                 .collect(joining("', '"));
         if (!missingProperties.isEmpty()) {
             throw new IllegalArgumentException(String.format(

@@ -84,7 +84,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         int pageSize = sizing.pageSize();
         int numberOfPages = sizing.numberOfPages();
 
-        boolean importWeights = dimensions.relProperties().stream().anyMatch(m -> m.propertyKeyId != StatementConstants.NO_SUCH_PROPERTY_KEY);
+        boolean importWeights = dimensions.relProperties().stream().anyMatch(m -> m.neoPropertyKeyId != StatementConstants.NO_SUCH_PROPERTY_KEY);
 
         List<SingleTypeRelationshipImporter.Builder> importerBuilders = allBuilders
                 .entrySet()
@@ -120,7 +120,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         double[] defaultWeights = new double[relProperties.size()];
         for (int i = 0; i < relProperties.size(); i++) {
             KernelPropertyMapping property = relProperties.get(i);
-            weightProperties[i] = property.propertyKeyId;
+            weightProperties[i] = property.neoPropertyKeyId;
             defaultWeights[i] = property.defaultValue;
         }
 

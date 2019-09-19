@@ -56,9 +56,9 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
             PropertyMapping key = entry.getKey();
             Object value = CypherLoadingUtils.getProperty(row, entry.getKey().neoPropertyKey);
             if (value instanceof Number) {
-                weights.put(key.propertyIdentifier, (Number) value);
+                weights.put(key.propertyKey, (Number) value);
             } else if (null == value) {
-                weights.put(key.propertyIdentifier, key.defaultValue);
+                weights.put(key.propertyKey, key.defaultValue);
             } else {
                 throw new IllegalArgumentException(String.format(
                         "Unsupported type [%s] of value %s. Please use a numeric property.",
