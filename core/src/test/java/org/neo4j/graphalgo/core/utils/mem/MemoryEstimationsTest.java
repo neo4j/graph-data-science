@@ -19,17 +19,17 @@
  */
 package org.neo4j.graphalgo.core.utils.mem;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.GraphDimensions;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MemoryEstimationsTest {
+class MemoryEstimationsTest {
     private final static GraphDimensions DIMENSIONS_100_NODES = new GraphDimensions.Builder().setNodeCount(100).build();
 
     @Test
-    public void testEmptyBuilder() {
+    void testEmptyBuilder() {
         MemoryEstimation empty = MemoryEstimations.empty();
         assertEquals("", empty.description());
         assertTrue(empty.components().isEmpty());
@@ -39,7 +39,7 @@ public class MemoryEstimationsTest {
     }
 
     @Test
-    public void testBuilderForClass() {
+    void testBuilderForClass() {
         MemoryEstimation memoryEstimation1 = MemoryEstimations.builder(Foo.class).build();
         MemoryEstimation memoryEstimation2 = MemoryEstimations
                 .builder()
@@ -58,7 +58,7 @@ public class MemoryEstimationsTest {
     }
 
     @Test
-    public void testFixed() {
+    void testFixed() {
         MemoryEstimation memoryEstimation = MemoryEstimations.builder()
                 .fixed("bar", 23L)
                 .fixed("baz", MemoryRange.of(19))
@@ -68,7 +68,7 @@ public class MemoryEstimationsTest {
     }
 
     @Test
-    public void testAdd() {
+    void testAdd() {
         MemoryEstimation memoryEstimation = MemoryEstimations.builder()
                 .add("foo", MemoryEstimations.of(Foo.class))
                 .add(MemoryEstimations.of(Foo.class))
@@ -78,7 +78,7 @@ public class MemoryEstimationsTest {
     }
 
     @Test
-    public void testPerNode() {
+    void testPerNode() {
         MemoryEstimation memoryEstimation = MemoryEstimations.builder()
                 .perNode("foo", nodeCount -> nodeCount * 42)
                 .perNode("bar", MemoryEstimations.of(Foo.class))
@@ -91,7 +91,7 @@ public class MemoryEstimationsTest {
     }
 
     @Test
-    public void testPerThread() {
+    void testPerThread() {
         MemoryEstimation memoryEstimation = MemoryEstimations.builder()
                 .perThread("foo", concurrency -> concurrency * 42)
                 .perThread("bar", MemoryEstimations.of(Foo.class))
@@ -101,7 +101,7 @@ public class MemoryEstimationsTest {
     }
 
     @Test
-    public void testPerGraphDimension() {
+    void testPerGraphDimension() {
         MemoryEstimation memoryEstimation = MemoryEstimations.builder()
                 .perGraphDimension("foo", graphDimensions -> graphDimensions.nodeCount() * 42)
                 .rangePerGraphDimension("bar", graphDimensions -> MemoryRange.of(23).times(graphDimensions.nodeCount()))
@@ -113,7 +113,7 @@ public class MemoryEstimationsTest {
     }
 
     @Test
-    public void testSetup() {
+    void testSetup() {
         final MemoryEstimation memoryEstimation = MemoryEstimations.setup(
                 "foo",
                 (dimensions, concurrency) -> MemoryEstimations.builder()
@@ -126,7 +126,7 @@ public class MemoryEstimationsTest {
     }
 
     @Test
-    public void testSetupFromGraphDimensions() {
+    void testSetupFromGraphDimensions() {
         final MemoryEstimation memoryEstimation = MemoryEstimations.setup(
                 "foo",
                 (dimensions) -> MemoryEstimations.builder()

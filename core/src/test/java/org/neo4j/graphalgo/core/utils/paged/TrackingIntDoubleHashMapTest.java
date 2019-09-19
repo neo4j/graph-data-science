@@ -19,17 +19,17 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TrackingIntDoubleHashMapTest {
+class TrackingIntDoubleHashMapTest {
 
     @Test
-    public void shouldComputeMemoryEstimationForSinglePage() {
+    void shouldComputeMemoryEstimationForSinglePage() {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100).build();
         MemoryRange memoryRange = TrackingIntDoubleHashMap
                 .memoryEstimation()
@@ -52,7 +52,7 @@ public class TrackingIntDoubleHashMapTest {
     }
 
     @Test
-    public void shouldComputeMemoryEstimationForMultiplePages() {
+    void shouldComputeMemoryEstimationForMultiplePages() {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100_000).build();
         MemoryRange memoryRange = TrackingIntDoubleHashMap
                 .memoryEstimation()

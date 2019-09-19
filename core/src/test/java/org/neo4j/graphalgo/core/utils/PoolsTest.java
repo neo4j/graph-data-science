@@ -28,7 +28,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 class PoolsTest {
 
     @Test
-    public void forkJoinPoolShouldBeLimited() {
+    void forkJoinPoolShouldBeLimited() {
         assertThat(Pools.FJ_POOL.getParallelism(), equalTo(Pools.DEFAULT_CONCURRENCY));
     }
 

@@ -19,18 +19,18 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class AdjacencyOffsetsTest {
+class AdjacencyOffsetsTest {
 
     @Test
-    public void shouldComputeMemoryEstimationForSinglePage() {
+    void shouldComputeMemoryEstimationForSinglePage() {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100).build();
         MemoryTree memRec = AdjacencyOffsets
                 .memoryEstimation(4096, 1)
@@ -41,7 +41,7 @@ public class AdjacencyOffsetsTest {
     }
 
     @Test
-    public void shouldComputeMemoryEstimationForMultiplePages() {
+    void shouldComputeMemoryEstimationForMultiplePages() {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100_000).build();
         int numberOfPages = (int) BitUtil.ceilDiv(100_000, 4096);
         MemoryTree memRec = AdjacencyOffsets

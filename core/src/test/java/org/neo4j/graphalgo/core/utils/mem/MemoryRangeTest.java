@@ -19,17 +19,18 @@
  */
 package org.neo4j.graphalgo.core.utils.mem;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public final class MemoryRangeTest {
+final class MemoryRangeTest {
 
     @Test
-    public void testFactoryMethods() {
+    void testFactoryMethods() {
         MemoryRange range;
 
         range = MemoryRange.of(42);
@@ -42,7 +43,7 @@ public final class MemoryRangeTest {
     }
 
     @Test
-    public void rangeMustNotBeNegative() {
+    void rangeMustNotBeNegative() {
         try {
             MemoryRange.of(-42);
             fail();
@@ -58,7 +59,7 @@ public final class MemoryRangeTest {
     }
 
     @Test
-    public void minMustBeSmallerThanMax() {
+    void minMustBeSmallerThanMax() {
         try {
             MemoryRange.of(1337, 42);
             fail();
@@ -68,14 +69,14 @@ public final class MemoryRangeTest {
     }
 
     @Test
-    public void emptyHasZeroMinMax() {
+    void emptyHasZeroMinMax() {
         MemoryRange empty = MemoryRange.empty();
         assertEquals(0L, empty.min);
         assertEquals(0L, empty.max);
     }
 
     @Test
-    public void isEmptyChecksForZeroMinMax() {
+    void isEmptyChecksForZeroMinMax() {
         MemoryRange empty = MemoryRange.empty();
         assertTrue(empty.isEmpty());
 
@@ -87,7 +88,7 @@ public final class MemoryRangeTest {
     }
 
     @Test
-    public void equalsChecksForValueEquality() {
+    void equalsChecksForValueEquality() {
         MemoryRange range1 = MemoryRange.of(42);
         MemoryRange range2 = MemoryRange.of(42);
         MemoryRange range3 = MemoryRange.of(42, 1337);
@@ -98,7 +99,7 @@ public final class MemoryRangeTest {
     }
 
     @Test
-    public void addAddsTheirMinAndMaxValues() {
+    void addAddsTheirMinAndMaxValues() {
         MemoryRange range1 = MemoryRange.of(42);
         MemoryRange range2 = MemoryRange.of(1337);
         assertEquals(MemoryRange.of(42 + 1337), range1.add(range2));
@@ -109,7 +110,7 @@ public final class MemoryRangeTest {
     }
 
     @Test
-    public void additionLaws() {
+    void additionLaws() {
         MemoryRange range1 = MemoryRange.of(42);
         MemoryRange range2 = MemoryRange.of(1337);
         MemoryRange range3 = MemoryRange.of(42, 1337);
@@ -123,13 +124,13 @@ public final class MemoryRangeTest {
         assertEquals(range1, MemoryRange.empty().add(range1));
     }
 
-    @Test(expected = ArithmeticException.class)
-    public void addFailsOnOverflow() {
-        MemoryRange.of(Long.MAX_VALUE).add(MemoryRange.of(42));
+    @Test
+    void addFailsOnOverflow() {
+        assertThrows(ArithmeticException.class, () -> MemoryRange.of(Long.MAX_VALUE).add(MemoryRange.of(42)));
     }
 
     @Test
-    public void timesMultipliesTheirMinAndMaxValues() {
+    void timesMultipliesTheirMinAndMaxValues() {
         MemoryRange range = MemoryRange.of(42);
         assertEquals(MemoryRange.of(42 * 1337), range.times(1337));
 
@@ -139,7 +140,7 @@ public final class MemoryRangeTest {
     }
 
     @Test
-    public void multiplicationLaws() {
+    void multiplicationLaws() {
         MemoryRange range1 = MemoryRange.of(42);
         MemoryRange range2 = MemoryRange.of(1337);
         MemoryRange range3 = MemoryRange.of(42, 1337);
@@ -156,7 +157,7 @@ public final class MemoryRangeTest {
     }
 
     @Test
-    public void unionCombinesTwoRanges() {
+    void unionCombinesTwoRanges() {
         MemoryRange range1 = MemoryRange.of(42);
         MemoryRange range2 = MemoryRange.of(1337);
         MemoryRange range3 = MemoryRange.of(42, 1337);
@@ -167,13 +168,13 @@ public final class MemoryRangeTest {
         assertEquals(MemoryRange.of(42, 13371337), range3.union(range4));
     }
 
-    @Test(expected = ArithmeticException.class)
-    public void timesFailsOnOverflow() {
-        MemoryRange.of(Long.MAX_VALUE / 2).times(3);
+    @Test
+    void timesFailsOnOverflow() {
+        assertThrows(ArithmeticException.class, () -> MemoryRange.of(Long.MAX_VALUE / 2).times(3));
     }
 
     @Test
-    public void toStringProducesSingleHumanReadableOutputIfMinEqualsMax() {
+    void toStringProducesSingleHumanReadableOutputIfMinEqualsMax() {
         assertEquals("42 Bytes", MemoryRange.of(42).toString());
         assertEquals("1337 Bytes", MemoryRange.of(1337).toString());
         assertEquals("54 KiB", MemoryRange.of(1337 * 42).toString());
@@ -182,7 +183,7 @@ public final class MemoryRangeTest {
     }
 
     @Test
-    public void toStringProducesHumanReadableRangeOutput() {
+    void toStringProducesHumanReadableRangeOutput() {
         assertEquals("[42 Bytes ... 1337 Bytes]", MemoryRange.of(42, 1337).toString());
         assertEquals("[54 KiB ... 124 GiB]", MemoryRange.of(1337 * 42, 133_742_133_742L).toString());
     }

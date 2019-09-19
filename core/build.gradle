@@ -5,25 +5,17 @@ dependencies {
     compile group: 'com.github.petitparser',     name: 'petitparser-core',   version: ver.petitparser
 
     compileOnly group: 'org.neo4j',              name: 'neo4j',              version: ver.'neo4j'
+
     testCompile group: 'org.neo4j',              name: 'neo4j',              version: ver.'neo4j'
     testCompile group: 'org.neo4j.community',    name: 'it-test-support',    version: ver.'neo4j'
-    testCompile group: 'org.mockito',            name: 'mockito-core',       version: ver.'mockito'
-    testCompile project(':test-utils')
+    testCompile group: 'org.hamcrest',           name: 'hamcrest-library',   version: ver.'hamcrest2'
 
-    testCompile     dep.junit4
     testCompile     platform(dep.junit5bom)
     testCompile     dep.junit5jupiter
-    testRuntimeOnly dep.junit5vintage
     testRuntimeOnly dep.junit5platform
 }
 
 task javadocJar(type: Jar) {
     classifier = 'javadoc'
     from(javadoc.destinationDir)
-}
-
-test {
-    useJUnitPlatform {
-        includeEngines 'junit-jupiter', 'junit-vintage'
-    }
 }

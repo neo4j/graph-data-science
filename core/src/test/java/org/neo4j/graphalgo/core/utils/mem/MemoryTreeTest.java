@@ -19,21 +19,21 @@
  */
 package org.neo4j.graphalgo.core.utils.mem;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.neo4j.helpers.collection.MapUtil;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.IsIterableContaining.hasItem;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public final class MemoryTreeTest {
+final class MemoryTreeTest {
 
     @Test
-    public void renderLeaf() {
+    void renderLeaf() {
         MemoryTree memoryTree = new LeafTree("description", MemoryRange.of(12L));
         Map<String, Object> value = memoryTree.renderMap();
 
@@ -42,7 +42,7 @@ public final class MemoryTreeTest {
     }
 
     @Test
-    public void renderChildren() {
+    void renderChildren() {
         MemoryTree level2A = new LeafTree("level2A", MemoryRange.of(12L));
         MemoryTree level2B = new LeafTree("level2B", MemoryRange.of(22L));
 

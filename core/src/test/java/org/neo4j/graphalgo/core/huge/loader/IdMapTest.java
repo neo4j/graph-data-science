@@ -19,17 +19,17 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class IdMapTest {
+class IdMapTest {
 
     @Test
-    public void shouldComputeMemoryEstimation() {
+    void shouldComputeMemoryEstimation() {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(0).setHighestNeoId(0).build();
         MemoryTree memRec = IdMap.memoryEstimation().estimate(dimensions, 1);
         assertEquals(MemoryRange.of(32L + 40L + 40L), memRec.memoryUsage());

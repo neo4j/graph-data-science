@@ -19,24 +19,23 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.core.huge.AdjacencyList.PAGE_MASK;
 import static org.neo4j.graphalgo.core.huge.AdjacencyList.PAGE_SHIFT;
 import static org.neo4j.graphalgo.core.huge.AdjacencyList.computeAdjacencyByteSize;
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 
-public class AdjacencyListTest {
+class AdjacencyListTest {
 
     @Test
-    public void shouldComputeCompressedMemoryEstimationForSinglePage() {
+    void shouldComputeCompressedMemoryEstimationForSinglePage() {
         GraphDimensions dimensions = new GraphDimensions.Builder()
                 .setNodeCount(100)
                 .setMaxRelCount(100)
@@ -60,7 +59,7 @@ public class AdjacencyListTest {
     }
 
     @Test
-    public void shouldComputeUncompressedMemoryEstimationForSinglePage() {
+    void shouldComputeUncompressedMemoryEstimationForSinglePage() {
         GraphDimensions dimensions = new GraphDimensions.Builder()
                 .setNodeCount(100)
                 .setMaxRelCount(100)
@@ -81,7 +80,7 @@ public class AdjacencyListTest {
     }
 
     @Test
-    public void shouldComputeCompressedMemoryEstimationForMultiplePage() {
+    void shouldComputeCompressedMemoryEstimationForMultiplePage() {
         GraphDimensions dimensions = new GraphDimensions.Builder()
                 .setNodeCount(100_000_000L)
                 .setMaxRelCount(100_000_000_000L)
@@ -105,7 +104,7 @@ public class AdjacencyListTest {
     }
 
     @Test
-    public void shouldComputeUncompressedMemoryEstimationForMultiplePage() {
+    void shouldComputeUncompressedMemoryEstimationForMultiplePage() {
         GraphDimensions dimensions = new GraphDimensions.Builder()
                 .setNodeCount(100_000_000L)
                 .setMaxRelCount(100_000_000_000L)
@@ -127,7 +126,7 @@ public class AdjacencyListTest {
     }
 
     @Test
-    public void shouldComputeAdjacencyByteSize() {
+    void shouldComputeAdjacencyByteSize() {
         long avgDegree = 1000;
         long nodeCount = 100_000_000;
         long delta = 100_000;
@@ -139,22 +138,22 @@ public class AdjacencyListTest {
         long compressedAdjacencyByteSize = relationshipByteSize * (avgDegree - 1);
         long expected = (degreeByteSize + firstAdjacencyIdAvgByteSize + compressedAdjacencyByteSize) * nodeCount;
 
-        Assert.assertEquals(expected, computeAdjacencyByteSize(avgDegree, nodeCount, delta));
+        assertEquals(expected, computeAdjacencyByteSize(avgDegree, nodeCount, delta));
     }
 
     @Test
-    public void shouldComputeAdjacencyByteSizeNoNodes() {
+    void shouldComputeAdjacencyByteSizeNoNodes() {
         long avgDegree = 0;
         long nodeCount = 0;
         long delta = 0;
-        Assert.assertEquals(0, computeAdjacencyByteSize(avgDegree, nodeCount, delta));
+        assertEquals(0, computeAdjacencyByteSize(avgDegree, nodeCount, delta));
     }
 
     @Test
-    public void shouldComputeAdjacencyByteSizeNoRelationships() {
+    void shouldComputeAdjacencyByteSizeNoRelationships() {
         long avgDegree = 0;
         long nodeCount = 100;
         long delta = 0;
-        Assert.assertEquals(400, computeAdjacencyByteSize(avgDegree, nodeCount, delta));
+        assertEquals(400, computeAdjacencyByteSize(avgDegree, nodeCount, delta));
     }
 }
