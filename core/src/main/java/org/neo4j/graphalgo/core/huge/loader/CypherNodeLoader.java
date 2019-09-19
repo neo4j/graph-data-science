@@ -34,7 +34,7 @@ class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
 
     private final HugeLongArrayBuilder builder;
     private final NodeImporter importer;
-    private final Map<PropertyMapping, HugeNodePropertiesBuilder> nodePropertyBuilders;
+    private final Map<PropertyMapping, NodePropertiesBuilder> nodePropertyBuilders;
     private long maxNodeId;
 
     CypherNodeLoader(long nodeCount, GraphDatabaseAPI api, GraphSetup setup) {
@@ -69,12 +69,12 @@ class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
         return new IdsAndProperties(idMap, nodeProperties);
     }
 
-    private Map<PropertyMapping, HugeNodePropertiesBuilder> nodeProperties(long capacity, GraphSetup setup) {
-        Map<PropertyMapping, HugeNodePropertiesBuilder> nodeProperties = new HashMap<>();
+    private Map<PropertyMapping, NodePropertiesBuilder> nodeProperties(long capacity, GraphSetup setup) {
+        Map<PropertyMapping, NodePropertiesBuilder> nodeProperties = new HashMap<>();
         for (PropertyMapping propertyMapping : setup.nodePropertyMappings) {
             nodeProperties.put(
                     propertyMapping,
-                    HugeNodePropertiesBuilder.of(
+                    NodePropertiesBuilder.of(
                             capacity,
                             AllocationTracker.EMPTY,
                             propertyMapping.defaultValue(),

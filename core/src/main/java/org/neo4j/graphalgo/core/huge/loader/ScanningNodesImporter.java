@@ -43,7 +43,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     private final TerminationFlag terminationFlag;
     private final PropertyMappings propertyMappings;
 
-    private Map<String, HugeNodePropertiesBuilder> builders;
+    private Map<String, NodePropertiesBuilder> builders;
     private HugeLongArrayBuilder idMapBuilder;
 
     ScanningNodesImporter(
@@ -88,18 +88,18 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
                 tracker);
         Map<String, WeightMapping> nodeProperties = new HashMap<>();
         for (PropertyMapping propertyMapping : propertyMappings) {
-            HugeNodePropertiesBuilder builder = builders.get(propertyMapping.propertyIdentifier());
+            NodePropertiesBuilder builder = builders.get(propertyMapping.propertyIdentifier());
             WeightMapping props = builder != null ? builder.build() : new NullWeightMap(propertyMapping.defaultValue());
             nodeProperties.put(propertyMapping.propertyIdentifier(), props);
         }
         return new IdsAndProperties(hugeIdMap, Collections.unmodifiableMap(nodeProperties));
     }
 
-    private Map<String, HugeNodePropertiesBuilder> propertyBuilders(long nodeCount) {
-        Map<String, HugeNodePropertiesBuilder> builders = new HashMap<>();
+    private Map<String, NodePropertiesBuilder> propertyBuilders(long nodeCount) {
+        Map<String, NodePropertiesBuilder> builders = new HashMap<>();
         for (PropertyMapping propertyMapping : dimensions.nodeProperties()) {
             if (propertyMapping.exists()) {
-                HugeNodePropertiesBuilder builder = HugeNodePropertiesBuilder.of(
+                NodePropertiesBuilder builder = NodePropertiesBuilder.of(
                         nodeCount,
                         tracker,
                         propertyMapping.defaultValue(),
