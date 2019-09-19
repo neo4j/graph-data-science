@@ -19,20 +19,19 @@
  */
 package org.neo4j.graphalgo.impl.similarity;
 
-import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-@RunWith(JUnitQuickcheck.class)
-public class RleReaderTest {
+class RleReaderTest {
+
     @Test
-    public void nothingRepeats() throws Exception {
+    void nothingRepeats() {
         // given
         List<Number> vector1List = asList(5.0, 4.0, 5.0, 4.0, 5.0);
 
@@ -47,7 +46,7 @@ public class RleReaderTest {
     }
 
     @Test
-    public void everythingRepeats() throws Exception {
+    void everythingRepeats() {
         // given
         List<Number> vector1List = asList(5.0, 5.0, 5.0, 5.0, 5.0);
 
@@ -62,7 +61,7 @@ public class RleReaderTest {
     }
 
     @Test
-    public void mixedRepeats() throws Exception {
+    void mixedRepeats() {
         // given
         List<Number> vector1List = asList(5.0, 5.0, 5.0, 5.0, 5.0, 4.0, 5.0);
 
@@ -78,7 +77,7 @@ public class RleReaderTest {
     }
 
     @Test
-    public void readTheSameItemMultipleTimes() throws Exception {
+    void readTheSameItemMultipleTimes() {
         // given
         List<Number> vector1List = asList(5.0, 5.0, 5.0, 5.0, 5.0, 4.0, 5.0);
 

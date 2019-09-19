@@ -19,14 +19,15 @@
  */
 package org.neo4j.graphalgo.impl.results;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.impl.utils.Normalization;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class NormalizedCentralityResultTest {
+
     @Test
     public void maxNormalization() {
         CentralityResult centralityResult = mock(CentralityResult.class);

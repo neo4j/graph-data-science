@@ -19,25 +19,25 @@
  */
 package org.neo4j.graphalgo.impl.similarity;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-public class WeightsTest {
+class WeightsTest {
 
     @Test
-    public void shouldTransformListToArray() throws Exception {
+    void shouldTransformListToArray() {
         Number[] values = {1.0, 2.0, 3.0, 4.0};
         List<Number> weightList = Arrays.asList(values);
         assertArrayEquals(new double[]{1.0, 2.0, 3.0, 4.0}, Weights.buildWeights(weightList), 0.01);
     }
 
     @Test
-    public void nans() throws Exception {
+    void nans() {
         Number[] values = {Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN};
         List<Number> weightList = Arrays.asList(values);
         double[] actuals = Weights.buildRleWeights(weightList, 3);
@@ -48,7 +48,7 @@ public class WeightsTest {
     }
 
     @Test
-    public void rleWithOneRepeatedValue() throws Exception {
+    void rleWithOneRepeatedValue() {
         Number[] values = {4.0, 4.0};
         List<Number> weightList = Arrays.asList(values);
         double[] actuals = Weights.buildRleWeights(weightList, 1);
@@ -57,7 +57,7 @@ public class WeightsTest {
     }
 
     @Test
-    public void rleWithMoreThanOneRepeatedValue() throws Exception {
+    void rleWithMoreThanOneRepeatedValue() {
         Number[] values = {2.0, 2.0, 4.0, 4.0, 6.0, 6.0};
         List<Number> weightList = Arrays.asList(values);
         double[] actuals = Weights.buildRleWeights(weightList, 1);
@@ -69,7 +69,7 @@ public class WeightsTest {
     }
 
     @Test
-    public void rleWithMoreThanOneRepeatedValueOfDifferentSizes() throws Exception {
+    void rleWithMoreThanOneRepeatedValueOfDifferentSizes() {
         Number[] values = {2.0, 2.0, 4.0, 4.0, 4.0, 4.0, 6.0, 6.0};
         List<Number> weightList = Arrays.asList(values);
         double[] actuals = Weights.buildRleWeights(weightList, 1);
@@ -81,7 +81,7 @@ public class WeightsTest {
     }
 
     @Test
-    public void rleWithMixedValues() throws Exception {
+    void rleWithMixedValues() {
         Number[] values = {7.0, 2.0, 2.0, 4.0, 4.0, 6.0, 6.0, 7.0};
         List<Number> weightList = Arrays.asList(values);
         double[] actuals = Weights.buildRleWeights(weightList, 1);
@@ -95,7 +95,7 @@ public class WeightsTest {
     }
 
     @Test
-    public void rleWithNoRepeats() throws Exception {
+    void rleWithNoRepeats() {
         Number[] values = {7.0, 2.0, 2.0, 4.0, 4.0, 6.0, 6.0, 7.0};
         List<Number> weightList = Arrays.asList(values);
         double[] actuals = Weights.buildRleWeights(weightList, 5);
@@ -103,7 +103,7 @@ public class WeightsTest {
     }
 
     @Test
-    public void rleWithEmptyArray() throws Exception {
+    void rleWithEmptyArray() {
         List<Number> weightList = Collections.emptyList();
         double[] actuals = Weights.buildRleWeights(weightList, 5);
         assertArrayEquals(new double[0], actuals, 0.01);

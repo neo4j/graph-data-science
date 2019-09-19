@@ -19,15 +19,16 @@
  */
 package org.neo4j.graphalgo.impl.similarity;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-public class RleDecoderTest {
+class RleDecoderTest {
+
     @Test
-    public void readTwoArrays() {
+    void readTwoArrays() {
         RleDecoder rleDecoder = new RleDecoder(2);
 
         double[] item1 = Weights.buildRleWeights(Arrays.asList(4.0, 4.0), 1);
@@ -40,7 +41,7 @@ public class RleDecoderTest {
     }
 
     @Test
-    public void readSameArraysAgain() {
+    void readSameArraysAgain() {
         RleDecoder rleDecoder = new RleDecoder(2);
 
         double[] item1 = Weights.buildRleWeights(Arrays.asList(4.0, 4.0), 1);
@@ -58,7 +59,7 @@ public class RleDecoderTest {
     }
 
     @Test
-    public void readDifferentArrays() {
+    void readDifferentArrays() {
         RleDecoder rleDecoder = new RleDecoder(5);
 
         double[] item1 = Weights.buildRleWeights(Arrays.asList(4.0, 4.0, 3.0, 1.5, 5.3), 1);

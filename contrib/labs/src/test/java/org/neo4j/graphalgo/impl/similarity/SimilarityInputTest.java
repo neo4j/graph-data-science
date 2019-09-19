@@ -19,34 +19,31 @@
  */
 package org.neo4j.graphalgo.impl.similarity;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.impl.similarity.SimilarityInput.extractInputIds;
 
-public class SimilarityInputTest {
-
-    @Rule
-    public ExpectedException expectedEx = ExpectedException.none();
+class SimilarityInputTest {
 
     @Test
-    public void findOneItem() {
+    void findOneItem() {
         CategoricalInput[] ids = new CategoricalInput[3];
         ids[0] = new CategoricalInput(5, new long[]{});
         ids[1] = new CategoricalInput(6, new long[]{});
         ids[2] = new CategoricalInput(7, new long[]{});
 
-        int[] indexes = SimilarityInput.indexes(extractInputIds(ids), Arrays.asList( 5L));
+        int[] indexes = SimilarityInput.indexes(extractInputIds(ids), Collections.singletonList(5L));
 
         assertArrayEquals(indexes, new int[] {0});
     }
 
     @Test
-    public void findMultipleItems() {
+    void findMultipleItems() {
         CategoricalInput[] ids = new CategoricalInput[5];
         ids[0] = new CategoricalInput(5, new long[]{});
         ids[1] = new CategoricalInput(6, new long[]{});
@@ -54,60 +51,59 @@ public class SimilarityInputTest {
         ids[3] = new CategoricalInput(8, new long[]{});
         ids[4] = new CategoricalInput(9, new long[]{});
 
-        int[] indexes = SimilarityInput.indexes(extractInputIds(ids), Arrays.asList( 5L, 9L));
+        int[] indexes = SimilarityInput.indexes(extractInputIds(ids), Arrays.asList(5L, 9L));
 
         assertArrayEquals(indexes, new int[] {0, 4});
     }
 
     @Test
-    public void missingItem() {
-        expectedEx.expect(IllegalArgumentException.class);
-        expectedEx.expectMessage("Node ids [10] do not exist in node ids list");
+    void missingItem() {
+        assertThrows(IllegalArgumentException.class, () -> {
+                    CategoricalInput[] ids = new CategoricalInput[5];
+                    ids[0] = new CategoricalInput(5, new long[]{});
+                    ids[1] = new CategoricalInput(6, new long[]{});
+                    ids[2] = new CategoricalInput(7, new long[]{});
+                    ids[3] = new CategoricalInput(8, new long[]{});
+                    ids[4] = new CategoricalInput(9, new long[]{});
 
-        CategoricalInput[] ids = new CategoricalInput[5];
-        ids[0] = new CategoricalInput(5, new long[]{});
-        ids[1] = new CategoricalInput(6, new long[]{});
-        ids[2] = new CategoricalInput(7, new long[]{});
-        ids[3] = new CategoricalInput(8, new long[]{});
-        ids[4] = new CategoricalInput(9, new long[]{});
+                    int[] indexes = SimilarityInput.indexes(extractInputIds(ids), Collections.singletonList(10L));
 
-        int[] indexes = SimilarityInput.indexes(extractInputIds(ids), Arrays.asList( 10L));
-
-        assertArrayEquals(indexes, new int[] {});
+                    assertArrayEquals(indexes, new int[] {});
+                }, "Node ids [10] do not exist in node ids list"
+        );
     }
 
     @Test
-    public void allMissing() {
-        expectedEx.expect(IllegalArgumentException.class);
-        expectedEx.expectMessage("Node ids [10, 11, -1, 29] do not exist in node ids list");
+    void allMissing() {
+        assertThrows(IllegalArgumentException.class, () -> {
+                    CategoricalInput[] ids = new CategoricalInput[5];
+                    ids[0] = new CategoricalInput(5, new long[]{});
+                    ids[1] = new CategoricalInput(6, new long[]{});
+                    ids[2] = new CategoricalInput(7, new long[]{});
+                    ids[3] = new CategoricalInput(8, new long[]{});
+                    ids[4] = new CategoricalInput(9, new long[]{});
 
-        CategoricalInput[] ids = new CategoricalInput[5];
-        ids[0] = new CategoricalInput(5, new long[]{});
-        ids[1] = new CategoricalInput(6, new long[]{});
-        ids[2] = new CategoricalInput(7, new long[]{});
-        ids[3] = new CategoricalInput(8, new long[]{});
-        ids[4] = new CategoricalInput(9, new long[]{});
+                    int[] indexes = SimilarityInput.indexes(extractInputIds(ids), Arrays.asList(10L, 11L, -1L, 29L));
 
-        int[] indexes = SimilarityInput.indexes(extractInputIds(ids), Arrays.asList( 10L ,11L, -1L, 29L));
-
-        assertArrayEquals(indexes, new int[] {});
+                    assertArrayEquals(indexes, new int[]{});
+                }, "Node ids [10, 11, -1, 29] do not exist in node ids list"
+        );
     }
 
     @Test
-    public void someMissingSomeFound() {
-        expectedEx.expect(IllegalArgumentException.class);
-        expectedEx.expectMessage("Node ids [10, 12] do not exist in node ids list");
+    void someMissingSomeFound() {
+        assertThrows(IllegalArgumentException.class, () -> {
+                    CategoricalInput[] ids = new CategoricalInput[5];
+                    ids[0] = new CategoricalInput(5, new long[]{});
+                    ids[1] = new CategoricalInput(6, new long[]{});
+                    ids[2] = new CategoricalInput(7, new long[]{});
+                    ids[3] = new CategoricalInput(8, new long[]{});
+                    ids[4] = new CategoricalInput(9, new long[]{});
 
-        CategoricalInput[] ids = new CategoricalInput[5];
-        ids[0] = new CategoricalInput(5, new long[]{});
-        ids[1] = new CategoricalInput(6, new long[]{});
-        ids[2] = new CategoricalInput(7, new long[]{});
-        ids[3] = new CategoricalInput(8, new long[]{});
-        ids[4] = new CategoricalInput(9, new long[]{});
+                    int[] indexes = SimilarityInput.indexes(extractInputIds(ids), Arrays.asList(10L, 5L, 7L, 12L));
 
-        int[] indexes = SimilarityInput.indexes(extractInputIds(ids), Arrays.asList( 10L ,5L, 7L, 12L));
-
-        assertArrayEquals(indexes, new int[] {0, 2});
+                    assertArrayEquals(indexes, new int[]{0, 2});
+                }, "Node ids [10, 12] do not exist in node ids list"
+        );
     }
-
 }

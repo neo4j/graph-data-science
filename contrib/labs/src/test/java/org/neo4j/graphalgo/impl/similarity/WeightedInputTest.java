@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.similarity;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.impl.results.SimilarityResult;
 import org.neo4j.helpers.collection.MapUtil;
 
@@ -28,12 +28,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class WeightedInputTest {
+class WeightedInputTest {
+
     @Test
-    public void degreeCutoffBasedOnSkipValue() {
+    void degreeCutoffBasedOnSkipValue() {
         List<Map<String, Object>> data = new ArrayList<>();
         data.add(MapUtil.map("item", 1L,"weights", Arrays.asList(2.0, 3.0, 4.0)));
         data.add(MapUtil.map("item", 2L,"weights", Arrays.asList(2.0, 3.0, Double.NaN)));
@@ -44,7 +45,7 @@ public class WeightedInputTest {
     }
 
     @Test
-    public void degreeCutoffWithoutSkipValue() {
+    void degreeCutoffWithoutSkipValue() {
         List<Map<String, Object>> data = new ArrayList<>();
         data.add(MapUtil.map("item", 1L,"weights", Arrays.asList(2.0, 3.0, 4.0)));
         data.add(MapUtil.map("item", 2L,"weights", Arrays.asList(2.0, 3.0, Double.NaN)));
@@ -55,7 +56,7 @@ public class WeightedInputTest {
     }
 
     @Test
-    public void degreeCutoffWithNumericSkipValue() {
+    void degreeCutoffWithNumericSkipValue() {
         List<Map<String, Object>> data = new ArrayList<>();
         data.add(MapUtil.map("item", 1L,"weights", Arrays.asList(2.0, 3.0, 4.0)));
         data.add(MapUtil.map("item", 2L,"weights", Arrays.asList(2.0, 3.0, 5.0)));
@@ -66,7 +67,7 @@ public class WeightedInputTest {
     }
 
     @Test
-    public void pearsonNoCompression() {
+    void pearsonNoCompression() {
         double[] weights1 = new double[]{1, 2, 3, 4, 4, 4, 4, 5, 6};
         double[] weights2 = new double[]{1, 2, 3, 4, 4, 4, 4, 5, 6};
 
@@ -79,7 +80,7 @@ public class WeightedInputTest {
     }
 
     @Test
-    public void pearsonCompression() {
+    void pearsonCompression() {
         double[] weights1 = new double[]{1, 2, 3, 4, 4, 4, 4, 5, 6};
         double[] weights2 = new double[]{1, 2, 3, 4, 4, 4, 4, 5, 6};
 
@@ -94,7 +95,7 @@ public class WeightedInputTest {
     }
 
     @Test
-    public void pearsonSkipNoCompression() {
+    void pearsonSkipNoCompression() {
         double[] weights1 = new double[]{1, 2, 3, 4, 4, 4, 4, 5, 6};
         double[] weights2 = new double[]{1, 2, 3, 4, 4, 4, 4, 5, 6};
 
@@ -107,7 +108,7 @@ public class WeightedInputTest {
     }
 
     @Test
-    public void pearsonSkipCompression() {
+    void pearsonSkipCompression() {
         double[] weights1 = new double[]{1, 2, 3, 4, 4, 4, 4, 5, 6, 0, 0, 0, 0};
         double[] weights2 = new double[]{1, 2, 3, 4, 4, 4, 4, 5, 6, 0, 0, 0, 0};
 
@@ -122,7 +123,7 @@ public class WeightedInputTest {
     }
 
     @Test
-    public void pearsonNaNReturns0() {
+    void pearsonNaNReturns0() {
         double[] weights1 = new double[]{};
         double[] weights2 = new double[]{};
 
@@ -134,7 +135,7 @@ public class WeightedInputTest {
     }
 
     @Test
-    public void pearsonNaNRespectsSimilarityCutOff() {
+    void pearsonNaNRespectsSimilarityCutOff() {
         double[] weights1 = new double[]{};
         double[] weights2 = new double[]{};
 
@@ -146,7 +147,7 @@ public class WeightedInputTest {
     }
 
     @Test
-    public void pearsonWithNonOverlappingValues() {
+    void pearsonWithNonOverlappingValues() {
         double[] weights1 = new double[]{1,          2,3, Double.NaN, 4};   // ave = 10/4 = 2.5
         double[] weights2 = new double[]{Double.NaN, 2,3, 1,          4};  // ave = 10/4 = 2.5
 
@@ -159,7 +160,7 @@ public class WeightedInputTest {
     }
 
     @Test
-    public void cosineNoCompression() {
+    void cosineNoCompression() {
         double[] weights1 = new double[]{1, 2, 3, 4, 4, 4, 4, 5, 6};
         double[] weights2 = new double[]{1, 2, 3, 4, 4, 4, 4, 5, 6};
 
@@ -172,7 +173,7 @@ public class WeightedInputTest {
     }
 
     @Test
-    public void cosineCompression() {
+    void cosineCompression() {
         double[] weights1 = new double[]{1, 2, 3, 4, 4, 4, 4, 5, 6};
         double[] weights2 = new double[]{1, 2, 3, 4, 4, 4, 4, 5, 6};
 
@@ -187,7 +188,7 @@ public class WeightedInputTest {
     }
 
     @Test
-    public void cosineSkipNoCompression() {
+    void cosineSkipNoCompression() {
         double[] weights1 = new double[]{1, 2, 3, 4, 4, 4, 4, 5, 6};
         double[] weights2 = new double[]{1, 2, 3, 4, 4, 4, 4, 5, 6};
 
@@ -200,7 +201,7 @@ public class WeightedInputTest {
     }
 
     @Test
-    public void cosineSkipCompression() {
+    void cosineSkipCompression() {
         double[] weights1 = new double[]{1, 2, 3, 4, 4, 4, 4, 5, 6, 0, 0, 0, 0};
         double[] weights2 = new double[]{1, 2, 3, 4, 4, 4, 4, 5, 6, 0, 0, 0, 0};
 
@@ -215,7 +216,7 @@ public class WeightedInputTest {
     }
 
     @Test
-    public void euclideanNoCompression() {
+    void euclideanNoCompression() {
         double[] weights1 = new double[]{1, 2, 3, 4, 4, 4, 4, 5, 6};
         double[] weights2 = new double[]{1, 2, 3, 4, 4, 4, 4, 5, 6};
 
@@ -228,7 +229,7 @@ public class WeightedInputTest {
     }
 
     @Test
-    public void euclideanCompression() {
+    void euclideanCompression() {
         double[] weights1 = new double[]{1, 2, 3, 4, 4, 4, 4, 5, 6};
         double[] weights2 = new double[]{1, 2, 3, 4, 4, 4, 4, 5, 6};
 
@@ -243,7 +244,7 @@ public class WeightedInputTest {
     }
 
     @Test
-    public void euclideanSkipNoCompression() {
+    void euclideanSkipNoCompression() {
         double[] weights1 = new double[]{1, 2, 3, 4, 4, 4, 4, 5, 6};
         double[] weights2 = new double[]{1, 2, 3, 4, 4, 4, 4, 5, 6};
 
@@ -256,7 +257,7 @@ public class WeightedInputTest {
     }
 
     @Test
-    public void euclideanSkipCompression() {
+    void euclideanSkipCompression() {
         double[] weights1 = new double[]{1, 2, 3, 4, 4, 4, 4, 5, 6, 0, 0, 0, 0};
         double[] weights2 = new double[]{1, 2, 3, 4, 4, 4, 4, 5, 6, 0, 0, 0, 0};
 

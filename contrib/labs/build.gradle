@@ -1,5 +1,12 @@
 description = 'Neo4j Labs :: Graph Algorithms'
 
+configurations {
+    testCompile {
+        exclude(group: 'com.carrotsearch.randomizedtesting', module: 'randomizedtesting-runner')
+        exclude(group: 'junit', module: 'junit')
+    }
+}
+
 dependencies {
     compile project(':algo')
 
@@ -15,16 +22,18 @@ dependencies {
 //    annotationProcessor group: 'net.biville.florent',   name: 'neo4j-sproc-compiler',   version: ver.'neo4j-sproc-compiler'
 
     testCompile project(':test-utils')
-    testCompile group: 'com.pholser',   name: 'junit-quickcheck-core',          version: ver.'junit-quickcheck-core'
-    testCompile group: 'com.pholser',   name: 'junit-quickcheck-generators',    version: ver.'junit-quickcheck-generators'
     testCompile group: 'org.neo4j',     name: 'neo4j',                          version: ver.'neo4j'
     testCompile group: 'org.neo4j',     name: 'neo4j-kernel',                   version: ver.'neo4j'
     testCompile group: 'org.neo4j',     name: 'neo4j-kernel-api',               version: ver.'neo4j'
     testCompile group: 'org.neo4j',     name: 'neo4j-io',                       version: ver.'neo4j'
-    testCompile dep.junit4
-    testCompile group: 'org.hamcrest',  name: 'hamcrest-library',               version: ver.'hamcrest'
-    testCompile group: 'org.mockito',   name: 'mockito-core',                   version: ver.'mockito'
-    testCompile group: 'org.mockito',   name: 'mockito-inline',                 version: ver.'mockito'
+    testCompile group: 'net.jqwik',     name: 'jqwik',                          version: ver.'jqwik'
+}
+
+test {
+    useJUnitPlatform {
+        includeEngines "jqwik"
+    }
+    include '**/*Test.class'
 }
 
 task javadocJar(type: Jar) {

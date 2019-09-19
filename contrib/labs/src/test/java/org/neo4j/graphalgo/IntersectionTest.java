@@ -20,18 +20,18 @@
 package org.neo4j.graphalgo;
 
 import com.carrotsearch.hppc.LongHashSet;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.Intersections;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author mh
  * @since 26.08.18
  */
-public class IntersectionTest {
+class IntersectionTest {
 
     private long[][][] data = {
             {{1,2,4},{1,3,5},{1}},
@@ -52,15 +52,16 @@ public class IntersectionTest {
             {{1,2,4,5},{2,5},{2}},
             {{1,2,4},{0,3,5},{0}}
     };
+
     @Test
-    public void intersection() throws Exception {
+    void intersection() {
         for (long[][] row : data) {
             assertEquals(row[2][0], Intersections.intersection(LongHashSet.from(row[0]),LongHashSet.from(row[1])));
         }
     }
 
     @Test
-    public void intersection2() throws Exception {
+    void intersection2() {
         for (long[][] row : data) {
             assertEquals(row[2][0], Intersections.intersection2(row[0],row[1]));
         }
@@ -68,17 +69,17 @@ public class IntersectionTest {
     }
 
     @Test
-    public void intersection3() throws Exception {
+    void intersection3() {
         for (long[][] row : data) {
             System.out.println(Arrays.deepToString(row));
-            assertEquals(Arrays.toString(row),row[2][0], Intersections.intersection3(row[0],row[1]));
+            assertEquals(row[2][0], Intersections.intersection3(row[0],row[1]), Arrays.toString(row));
         }
     }
     @Test
-    public void intersection4() throws Exception {
+    void intersection4() {
         for (long[][] row : data) {
             System.out.println(Arrays.deepToString(row));
-            assertEquals(Arrays.toString(row),row[2][0], Intersections.intersection4(row[0],row[1]));
+            assertEquals(row[2][0], Intersections.intersection4(row[0],row[1]), Arrays.toString(row));
         }
     }
 

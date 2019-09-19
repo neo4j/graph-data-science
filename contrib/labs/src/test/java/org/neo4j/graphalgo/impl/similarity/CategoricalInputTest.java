@@ -19,15 +19,16 @@
  */
 package org.neo4j.graphalgo.impl.similarity;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.impl.results.SimilarityResult;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class CategoricalInputTest {
+class CategoricalInputTest {
 
     @Test
-    public void overlapShowsSmallerSideFirst() {
+    void overlapShowsSmallerSideFirst() {
         CategoricalInput one = new CategoricalInput(3, new long[]{1, 2, 3, 4});
         CategoricalInput two = new CategoricalInput(7, new long[]{1, 2, 3});
 
@@ -42,7 +43,7 @@ public class CategoricalInputTest {
     }
 
     @Test
-    public void overlapShouldNotInferReverseIfRequestedNotTo() {
+    void overlapShouldNotInferReverseIfRequestedNotTo() {
         CategoricalInput one = new CategoricalInput(3, new long[]{1, 2, 3, 4});
         CategoricalInput two = new CategoricalInput(7, new long[]{1, 2, 3});
 

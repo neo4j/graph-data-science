@@ -63,7 +63,7 @@ class BetweennessCentralityTest {
                 .setLabel("Node")
                 .setRelationship(TYPE.name());
 
-        /**
+        /*
          * create two rings of nodes where each node of ring A
          * is connected to center while center is connected to
          * each node of ring B.
@@ -76,18 +76,14 @@ class BetweennessCentralityTest {
 
         builder.newRingBuilder()
                 .createRing(5)
-                .forEachNodeInTx(node -> {
-                    node.createRelationshipTo(center, TYPE);
-                })
+                .forEachNodeInTx(node -> node.createRelationshipTo(center, TYPE))
                 .newRingBuilder()
                 .createRing(5)
-                .forEachNodeInTx(node -> {
-                    center.createRelationshipTo(node, TYPE);
-                });
+                .forEachNodeInTx(node -> center.createRelationshipTo(node, TYPE));
     }
 
     @AfterAll
-    static void tearDown() throws Exception {
+    static void tearDown() {
         if (DB != null) DB.shutdown();
     }
 
