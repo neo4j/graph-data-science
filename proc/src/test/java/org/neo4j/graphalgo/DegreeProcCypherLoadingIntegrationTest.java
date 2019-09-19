@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
@@ -35,9 +35,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class DegreeProcCypherLoadingIntegrationTest {
+class DegreeProcCypherLoadingIntegrationTest {
 
     private static GraphDatabaseAPI db;
     private static final Map<Long, Double> incomingExpected = new HashMap<>();
@@ -64,13 +66,13 @@ public class DegreeProcCypherLoadingIntegrationTest {
             ", (a)-[:TYPE2 {foo: 7.1}]->(c)";
 
 
-    @AfterClass
-    public static void tearDown() {
+    @AfterAll
+    static void tearDown() {
         if (db != null) db.shutdown();
     }
 
-    @BeforeClass
-    public static void setup() throws KernelException {
+    @BeforeAll
+    static void setup() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase();
         try (Transaction tx = db.beginTx()) {
             db.execute(DB_CYPHER).close();
@@ -115,7 +117,7 @@ public class DegreeProcCypherLoadingIntegrationTest {
     }
 
     @Test
-    public void testDegreeIncomingStream() {
+    void testDegreeIncomingStream() {
         final Map<Long, Double> actual = new HashMap<>();
 
         String query = "CALL algo.degree.stream(" +
@@ -130,7 +132,7 @@ public class DegreeProcCypherLoadingIntegrationTest {
     }
 
     @Test
-    public void testWeightedDegreeIncomingStream() {
+    void testWeightedDegreeIncomingStream() {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.degree.stream(" +
                        "    $nodeQuery," +
@@ -144,7 +146,7 @@ public class DegreeProcCypherLoadingIntegrationTest {
     }
 
     @Test
-    public void testDegreeIncomingWriteBack() {
+    void testDegreeIncomingWriteBack() {
         String query = "CALL algo.degree(" +
                        "    $nodeQuery," +
                        "    $relQuery,  {" +
@@ -156,14 +158,14 @@ public class DegreeProcCypherLoadingIntegrationTest {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("degree", row.getString("writeProperty"));
                     assertTrue(
-                            "write time not set",
-                            row.getNumber("writeMillis").intValue() >= 0);
+                            row.getNumber("writeMillis").intValue() >= 0,
+                            "write time not set");
                 });
         assertResult("degree", incomingExpected);
     }
 
     @Test
-    public void testWeightedDegreeIncomingWriteBack() {
+    void testWeightedDegreeIncomingWriteBack() {
         String query = "CALL algo.degree(" +
                        "    $nodeQuery," +
                        "    $relQuery, {" +
@@ -175,14 +177,14 @@ public class DegreeProcCypherLoadingIntegrationTest {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("degree", row.getString("writeProperty"));
                     assertTrue(
-                            "write time not set",
-                            row.getNumber("writeMillis").intValue() >= 0);
+                            row.getNumber("writeMillis").intValue() >= 0,
+                            "write time not set");
                 });
         assertResult("degree", incomingWeightedExpected);
     }
 
     @Test
-    public void testDegreeBothStream() {
+    void testDegreeBothStream() {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.degree.stream(" +
                        "    $nodeQuery," +
@@ -196,7 +198,7 @@ public class DegreeProcCypherLoadingIntegrationTest {
     }
 
     @Test
-    public void testWeightedDegreeBothStream() {
+    void testWeightedDegreeBothStream() {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.degree.stream(" +
                        "    $nodeQuery, $relQuery, {" +
@@ -209,7 +211,7 @@ public class DegreeProcCypherLoadingIntegrationTest {
     }
 
     @Test
-    public void testDegreeBothWriteBack() {
+    void testDegreeBothWriteBack() {
         String query = "CALL algo.degree(" +
                        "    $nodeQuery," +
                        "    $relQuery, {" +
@@ -221,14 +223,14 @@ public class DegreeProcCypherLoadingIntegrationTest {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("degree", row.getString("writeProperty"));
                     assertTrue(
-                            "write time not set",
-                            row.getNumber("writeMillis").intValue() >= 0);
+                            row.getNumber("writeMillis").intValue() >= 0,
+                            "write time not set");
                 });
         assertResult("degree", bothExpected);
     }
 
     @Test
-    public void testWeightedDegreeBothWriteBack() {
+    void testWeightedDegreeBothWriteBack() {
         String query = "CALL algo.degree(" +
                        "    $nodeQuery," +
                        "    $relQuery, {" +
@@ -240,14 +242,14 @@ public class DegreeProcCypherLoadingIntegrationTest {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("degree", row.getString("writeProperty"));
                     assertTrue(
-                            "write time not set",
-                            row.getNumber("writeMillis").intValue() >= 0);
+                            row.getNumber("writeMillis").intValue() >= 0,
+                            "write time not set");
                 });
         assertResult("degree", bothWeightedExpected);
     }
 
     @Test
-    public void testDegreeOutgoingStream() {
+    void testDegreeOutgoingStream() {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.degree.stream(" +
                        "    $nodeQuery," +
@@ -261,7 +263,7 @@ public class DegreeProcCypherLoadingIntegrationTest {
     }
 
     @Test
-    public void testWeightedDegreeOutgoingStream() {
+    void testWeightedDegreeOutgoingStream() {
         final Map<Long, Double> actual = new HashMap<>();
         String query= "CALL algo.degree.stream($nodeQuery, $relQuery, {graph: $graph, direction:'OUTGOING', weightProperty: 'foo', duplicateRelationships:'sum'}) YIELD nodeId, score";
         runQuery(query, MapUtil.map("graph", graphImpl, "nodeQuery", NODES, "relQuery", OUTGOING_RELS),
@@ -270,29 +272,29 @@ public class DegreeProcCypherLoadingIntegrationTest {
     }
 
     @Test
-    public void testDegreeOutgoingWriteBack() {
+    void testDegreeOutgoingWriteBack() {
         String query = "CALL algo.degree($nodeQuery, $relQuery, {graph: $graph, direction:'OUTGOING', duplicateRelationships:'skip'}) YIELD writeMillis, write, writeProperty";
         runQuery(query, MapUtil.map("graph", graphImpl, "nodeQuery", NODES, "relQuery", OUTGOING_RELS),
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("degree", row.getString("writeProperty"));
                     assertTrue(
-                            "write time not set",
-                            row.getNumber("writeMillis").intValue() >= 0);
+                            row.getNumber("writeMillis").intValue() >= 0,
+                            "write time not set");
                 });
         assertResult("degree", outgoingExpected);
     }
 
     @Test
-    public void testWeightedDegreeOutgoingWriteBack() {
+    void testWeightedDegreeOutgoingWriteBack() {
         String query = "CALL algo.degree($nodeQuery, $relQuery, {graph: $graph, direction:'OUTGOING', weightProperty: 'foo', duplicateRelationships:'sum'}) YIELD writeMillis, write, writeProperty";
         runQuery(query, MapUtil.map("graph", graphImpl, "nodeQuery", NODES, "relQuery", OUTGOING_RELS),
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("degree", row.getString("writeProperty"));
                     assertTrue(
-                            "write time not set",
-                            row.getNumber("writeMillis").intValue() >= 0);
+                            row.getNumber("writeMillis").intValue() >= 0,
+                            "write time not set");
                 });
         assertResult("degree", outgoingWeightedExpected);
     }
@@ -316,10 +318,10 @@ public class DegreeProcCypherLoadingIntegrationTest {
                         .getNodeById(entry.getKey())
                         .getProperty(scoreProperty)).doubleValue();
                 assertEquals(
-                        "score for " + entry.getKey(),
                         entry.getValue(),
                         score,
-                        0.1);
+                        0.1,
+                        "score for " + entry.getKey());
             }
             tx.success();
         }
@@ -328,17 +330,17 @@ public class DegreeProcCypherLoadingIntegrationTest {
     private static void assertMapEquals(
             Map<Long, Double> expected,
             Map<Long, Double> actual) {
-        assertEquals("number of elements", expected.size(), actual.size());
+        assertEquals(expected.size(), actual.size(), "number of elements");
         HashSet<Long> expectedKeys = new HashSet<>(expected.keySet());
         for (Map.Entry<Long, Double> entry : actual.entrySet()) {
             assertTrue(
-                    "unknown key " + entry.getKey(),
-                    expectedKeys.remove(entry.getKey()));
+                    expectedKeys.remove(entry.getKey()),
+                    "unknown key " + entry.getKey());
             assertEquals(
-                    "value for " + entry.getKey(),
                     expected.get(entry.getKey()),
                     entry.getValue(),
-                    0.1);
+                    0.1,
+                    "value for " + entry.getKey());
         }
         for (Long expectedKey : expectedKeys) {
             fail("missing key " + expectedKey);

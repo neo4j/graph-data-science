@@ -19,13 +19,13 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.AdditionalMatchers;
 import org.mockito.Matchers;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -41,13 +41,13 @@ import static org.mockito.Mockito.verify;
  *
  * @author mknblch
  */
-@RunWith(MockitoJUnitRunner.class)
-public class BetweennessCentralityIntegrationTest_148 {
+@ExtendWith(MockitoExtension.class)
+class BetweennessCentralityIntegrationTest_148 {
 
     private static GraphDatabaseAPI db;
 
-    @BeforeClass
-    public static void setupGraph() throws KernelException {
+    @BeforeAll
+    static void setupGraph() throws KernelException {
 
         db = TestDatabaseCreator.createTestDatabase();
 
@@ -76,8 +76,8 @@ public class BetweennessCentralityIntegrationTest_148 {
 
     }
 
-    @AfterClass
-    public static void tearDown() throws Exception {
+    @AfterAll
+    static void tearDown() throws Exception {
         if (db != null) db.shutdown();
     }
 
@@ -95,7 +95,7 @@ public class BetweennessCentralityIntegrationTest_148 {
     }
 
     @Test
-    public void testBCStreamDirectionBoth() throws Exception {
+    void testBCStreamDirectionBoth() throws Exception {
 
         final Consumer mock = mock(Consumer.class);
         final String evalQuery = "CALL algo.betweenness.stream('User', 'FRIEND', {direction:'B'}) YIELD nodeId, centrality";

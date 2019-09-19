@@ -37,15 +37,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class EigenvectorCentralityProcTest extends ProcTestBase {
+class EigenvectorCentralityProcTest extends ProcTestBase {
 
-    private static Map<Long, Double> expected = new HashMap<>();
+    private static final Map<Long, Double> expected = new HashMap<>();
 
     @BeforeAll
-    public static void setup() throws KernelException {
+    static void setup() throws KernelException {
         ClassLoader classLoader = EigenvectorCentralityProcTest.class.getClassLoader();
         File file = new File(classLoader.getResource("got/got-s1-nodes.csv").getFile());
 
@@ -96,13 +96,13 @@ public class EigenvectorCentralityProcTest extends ProcTestBase {
     }
 
     @AfterAll
-    public static void tearDown() {
+    static void tearDown() {
         if (DB != null) DB.shutdown();
     }
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testStream(String graphImpl) {
+    void testStream(String graphImpl) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.eigenvector.stream(" +
                        "    'Character', 'INTERACTS_SEASON1', {" +
@@ -122,7 +122,7 @@ public class EigenvectorCentralityProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testWriteBack(String graphImpl) {
+    void testWriteBack(String graphImpl) {
         String query = "CALL algo.eigenvector(" +
                        "    'Character', 'INTERACTS_SEASON1', {" +
                        "        graph: $graph, direction: 'BOTH'" +
@@ -132,14 +132,14 @@ public class EigenvectorCentralityProcTest extends ProcTestBase {
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("eigenvector", row.getString("writeProperty"));
-                    assertTrue("write time not set", row.getNumber("writeMillis").intValue() >= 0);
+                    assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
         });
         assertResult("eigenvector", expected);
     }
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testWriteBackUnderDifferentProperty(String graphImpl) {
+    void testWriteBackUnderDifferentProperty(String graphImpl) {
         String query = "CALL algo.eigenvector(" +
                        "    'Character', 'INTERACTS_SEASON1', {" +
                        "        writeProperty: 'foobar', graph: $graph, direction: 'BOTH'" +
@@ -149,28 +149,28 @@ public class EigenvectorCentralityProcTest extends ProcTestBase {
                 row -> {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("foobar", row.getString("writeProperty"));
-                    assertTrue("write time not set", row.getNumber("writeMillis").intValue() >= 0);
+                    assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
         });
         assertResult("foobar", expected);
     }
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testParallelWriteBack(String graphImpl) {
+    void testParallelWriteBack(String graphImpl) {
         String query = "CALL algo.eigenvector(" +
                        "    'Character', 'INTERACTS_SEASON1', {" +
                        "        batchSize: 3, concurrency: 2, write: true, graph: $graph, direction: 'BOTH'" +
                        "    }" +
                        ") YIELD writeMillis, write, writeProperty, iterations";
         runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> assertTrue("write time not set", row.getNumber("writeMillis").intValue() >= 0)
+                row -> assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set")
         );
         assertResult("eigenvector", expected);
     }
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testParallelExecution(String graphImpl) {
+    void testParallelExecution(String graphImpl) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.eigenvector.stream(" +
                        "    'Character', 'INTERACTS_SEASON1', {" +

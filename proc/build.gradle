@@ -2,6 +2,13 @@ description = 'Neo4j Graph Algorithms :: Procedures'
 
 apply plugin: 'com.github.johnrengelman.shadow'
 
+configurations {
+    testCompile {
+        exclude(group: 'com.carrotsearch.randomizedtesting', module: 'randomizedtesting-runner')
+        exclude(group: 'junit', module: 'junit')
+    }
+}
+
 dependencies {
     compile project(':labs')
 
@@ -11,16 +18,6 @@ dependencies {
 
     testCompile group: 'org.neo4j.community',         name: 'it-test-support',      version: ver.'neo4j'
     testCompile group: 'org.hamcrest',                name: 'hamcrest-library',     version: ver.'hamcrest'
-    testCompile group: 'org.mockito',                 name: 'mockito-core',         version: ver.'mockito'
-    testCompile group: 'org.mockito',                 name: 'mockito-inline',       version: ver.'mockito'
-
-    testCompile     dep.junit4
-
-    testCompile     platform(dep.junit5bom)
-    testCompile     dep.junit5jupiter
-    testCompile     dep.junit5migration
-    testRuntimeOnly dep.junit5vintage
-    testRuntimeOnly dep.junit5platform
 }
 
 task javadocJar(type: Jar) {

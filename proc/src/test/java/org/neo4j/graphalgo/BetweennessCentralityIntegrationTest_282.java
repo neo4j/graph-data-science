@@ -19,18 +19,18 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 
 /**
@@ -44,10 +44,10 @@ import static org.junit.Assert.assertArrayEquals;
  *
  * @author mknblch
  */
-@RunWith(MockitoJUnitRunner.class)
-public class BetweennessCentralityIntegrationTest_282 {
+@ExtendWith(MockitoExtension.class)
+class BetweennessCentralityIntegrationTest_282 {
 
-    public static final double[] EXPECTED = {
+    private static final double[] EXPECTED = {
             0.0,
             1.33333,
             1.33333,
@@ -60,8 +60,8 @@ public class BetweennessCentralityIntegrationTest_282 {
 
     private static GraphDatabaseAPI db;
 
-    @BeforeClass
-    public static void setupGraph() throws KernelException {
+    @BeforeAll
+    static void setupGraph() throws KernelException {
 
         db = TestDatabaseCreator.createTestDatabase();
 
@@ -98,8 +98,8 @@ public class BetweennessCentralityIntegrationTest_282 {
 
     }
 
-    @AfterClass
-    public static void tearDown() throws Exception {
+    @AfterAll
+    static void tearDown() throws Exception {
         if (db != null) db.shutdown();
     }
 
@@ -109,7 +109,7 @@ public class BetweennessCentralityIntegrationTest_282 {
      * @throws Exception
      */
     @Test
-    public void testBCWriteBack() throws Exception {
+    void testBCWriteBack() throws Exception {
 
         final String evalQuery = "CALL algo.betweenness('Node', 'EDGE', {write:true, stats:true, writeProperty:'centrality'})\n" +
                 "YIELD nodes, minCentrality, maxCentrality, sumCentrality";
@@ -148,7 +148,7 @@ public class BetweennessCentralityIntegrationTest_282 {
      * @throws Exception
      */
     @Test
-    public void testBCWriteBackParallel() throws Exception {
+    void testBCWriteBackParallel() throws Exception {
 
         final String evalQuery = "CALL algo.betweenness('Node', 'EDGE', {write:true, stats:true, writeProperty:'centrality', concurrency:4})\n" +
                 "YIELD nodes, minCentrality, maxCentrality, sumCentrality";

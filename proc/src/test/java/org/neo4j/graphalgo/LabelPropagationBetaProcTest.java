@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo;
 
 import org.hamcrest.Matchers;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -40,13 +39,14 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.junit.Assume.assumeFalse;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
@@ -172,7 +172,7 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
         String exceptionMessage = assertThrows(
                 QueryExecutionException.class,
                 () -> runQuery(query, DB, map("runDirection", runDirection))).getMessage();
-        Assert.assertThat(exceptionMessage, Matchers.containsString("Incompatible directions between loaded graph and requested compute direction"));
+        assertThat(exceptionMessage, Matchers.containsString("Incompatible directions between loaded graph and requested compute direction"));
     }
 
     @SingleAndMultiThreadedAllGraphNames

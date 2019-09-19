@@ -31,19 +31,19 @@ import org.neo4j.kernel.impl.proc.Procedures;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DegreeProcIssue848Test extends ProcTestBase {
+class DegreeProcIssue848Test extends ProcTestBase {
 
     private static final String DB_CYPHER =
             "UNWIND range(1, 10001) AS s " +
             "CREATE (:Node {id: s})";
 
     @AfterAll
-    public static void tearDown() {
+    static void tearDown() {
         if (DB != null) DB.shutdown();
     }
 
     @BeforeAll
-    public static void setup() throws KernelException {
+    static void setup() throws KernelException {
         DB = TestDatabaseCreator.createTestDatabase();
         try (Transaction tx = DB.beginTx()) {
             DB.execute(DB_CYPHER).close();
@@ -57,7 +57,7 @@ public class DegreeProcIssue848Test extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void multipleBatches(String graphImpl) {
+    void multipleBatches(String graphImpl) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.degree.stream('Node', '', {graph: $graph, direction: 'incoming'}) " +
                        "YIELD nodeId, score";

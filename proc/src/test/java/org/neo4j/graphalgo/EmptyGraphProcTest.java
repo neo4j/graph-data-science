@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.unionfind.MSColoringProc;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphdb.Result;
@@ -29,8 +29,8 @@ import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
  * @author mknblch
@@ -39,7 +39,7 @@ public class EmptyGraphProcTest {
 
     private static GraphDatabaseAPI db;
 
-    @BeforeClass
+    @BeforeAll
     public static void setup() throws KernelException {
 
         db = TestDatabaseCreator.createTestDatabase();
@@ -65,8 +65,8 @@ public class EmptyGraphProcTest {
         procedures.registerProcedure(ShortestPathDeltaSteppingProc.class);
     }
 
-    @AfterClass
-    public static void tearDown() throws Exception {
+    @AfterAll
+    public static void tearDown() {
         if (db != null) db.shutdown();
     }
 
@@ -365,13 +365,13 @@ public class EmptyGraphProcTest {
     }
 
     @Test
-    public void testShortestPathAStarStream() throws Exception {
+    public void testShortestPathAStarStream() {
         Result result = db.execute("CALL algo.shortestPath.astar.stream(null, null, '', '', '', {graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
 
     @Test
-    public void testShortestPathStream() throws Exception {
+    public void testShortestPathStream() {
         Result result = db.execute("CALL algo.shortestPath.stream(null, null, '', {graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
@@ -386,7 +386,7 @@ public class EmptyGraphProcTest {
     }
 
     @Test
-    public void testShortestPathsStream() throws Exception {
+    public void testShortestPathsStream() {
         Result result = db.execute("CALL algo.shortestPaths.stream(null, '', {graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }
@@ -410,7 +410,7 @@ public class EmptyGraphProcTest {
     }
 
     @Test
-    public void testShortestPathsDeltaSteppingStream() throws Exception {
+    public void testShortestPathsDeltaSteppingStream() {
         Result result = db.execute("CALL algo.shortestPath.deltaStepping.stream(null, '', 0, {graph:'" + graphImpl + "'})");
         assertFalse(result.hasNext());
     }

@@ -19,20 +19,19 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.Test;
-import org.neo4j.graphalgo.OneHotEncodingFunc;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class OneHotEncodingFuncTest {
+class OneHotEncodingFuncTest {
 
     @Test
-    public void singleCategorySelected() {
+    void singleCategorySelected() {
         List<Object> values = asList("Italian", "Indian", "Chinese");
         List<Object> selectedValues = Collections.singletonList("Italian");
 
@@ -40,7 +39,7 @@ public class OneHotEncodingFuncTest {
     }
 
     @Test
-    public void noCategoriesSelected() {
+    void noCategoriesSelected() {
         List<Object> values = asList("Italian", "Indian", "Chinese");
         List<Object> selectedValues = Collections.emptyList();
 
@@ -48,7 +47,7 @@ public class OneHotEncodingFuncTest {
     }
 
     @Test
-    public void moreThanOneSelected() {
+    void moreThanOneSelected() {
         List<Object> values = asList("Italian", "Indian", "Chinese");
         List<Object> selectedValues = Arrays.asList("Italian", "Chinese");
 
@@ -56,7 +55,7 @@ public class OneHotEncodingFuncTest {
     }
 
     @Test
-    public void allSelected() {
+    void allSelected() {
         List<Object> values = asList("Italian", "Indian", "Chinese");
         List<Object> selectedValues = Arrays.asList("Italian", "Chinese", "Indian");
 
@@ -64,7 +63,7 @@ public class OneHotEncodingFuncTest {
     }
 
     @Test
-    public void nonExistentSelected() {
+    void nonExistentSelected() {
         List<Object> values = asList("Italian", "Indian", "Chinese");
         List<Object> selectedValues = Collections.singletonList("British");
 
@@ -72,7 +71,7 @@ public class OneHotEncodingFuncTest {
     }
 
     @Test
-    public void oneNonExistentSelected() {
+    void oneNonExistentSelected() {
         List<Object> values = asList("Italian", "Indian", "Chinese");
         List<Object> selectedValues = Arrays.asList("British", "Chinese");
 
@@ -80,14 +79,14 @@ public class OneHotEncodingFuncTest {
     }
 
     @Test
-    public void nullSelectedMeansNoneSelected() {
+    void nullSelectedMeansNoneSelected() {
         List<Object> values = asList("Italian", "Indian", "Chinese");
 
         assertEquals(asList(0L, 0L, 0L), new OneHotEncodingFunc().oneHotEncoding(values, null));
     }
 
     @Test
-    public void nullAvailableMeansEmptyArray() {
+    void nullAvailableMeansEmptyArray() {
         assertEquals(Collections.emptyList(), new OneHotEncodingFunc().oneHotEncoding(null, null));
     }
 

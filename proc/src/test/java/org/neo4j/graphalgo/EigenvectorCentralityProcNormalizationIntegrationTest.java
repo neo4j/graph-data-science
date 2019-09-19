@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
@@ -38,23 +38,25 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class EigenvectorCentralityProcNormalizationIntegrationTest {
+class EigenvectorCentralityProcNormalizationIntegrationTest {
 
     private static GraphDatabaseAPI db;
-    private static Map<Long, Double> expected = new HashMap<>();
-    private static Map<Long, Double> maxNormExpected = new HashMap<>();
-    private static Map<Long, Double> l2NormExpected = new HashMap<>();
-    private static Map<Long, Double> l1NormExpected = new HashMap<>();
+    private static final Map<Long, Double> expected = new HashMap<>();
+    private static final Map<Long, Double> maxNormExpected = new HashMap<>();
+    private static final Map<Long, Double> l2NormExpected = new HashMap<>();
+    private static final Map<Long, Double> l1NormExpected = new HashMap<>();
 
-    @AfterClass
-    public static void tearDown() throws Exception {
+    @AfterAll
+    static void tearDown() {
         if (db != null) db.shutdown();
     }
 
-    @BeforeClass
-    public static void setup() throws KernelException {
+    @BeforeAll
+    static void setup() throws KernelException {
         ClassLoader classLoader = EigenvectorCentralityProcNormalizationIntegrationTest.class.getClassLoader();
         File file = new File(classLoader.getResource("got/got-s1-nodes.csv").getFile());
 
@@ -147,7 +149,7 @@ public class EigenvectorCentralityProcNormalizationIntegrationTest {
     }
 
     @Test
-    public void noNormalizing() throws Exception {
+    void noNormalizing() {
         final Map<Long, Double> actual = new HashMap<>();
         runQuery(
                 "CALL algo.eigenvector.stream('Character', 'INTERACTS_SEASON1', {direction: 'BOTH'}) " +
@@ -163,7 +165,7 @@ public class EigenvectorCentralityProcNormalizationIntegrationTest {
     }
 
     @Test
-    public void maxNorm() throws Exception {
+    void maxNorm() {
         final Map<Long, Double> actual = new HashMap<>();
         runQuery(
                 "CALL algo.eigenvector.stream('Character', 'INTERACTS_SEASON1', {direction: 'BOTH', normalization: 'max'}) " +
@@ -179,7 +181,7 @@ public class EigenvectorCentralityProcNormalizationIntegrationTest {
     }
 
     @Test
-    public void l2Norm() throws Exception {
+    void l2Norm() {
         final Map<Long, Double> actual = new HashMap<>();
         runQuery(
                 "CALL algo.eigenvector.stream('Character', 'INTERACTS_SEASON1', {direction: 'BOTH', normalization: 'l2Norm'}) " +
@@ -196,7 +198,7 @@ public class EigenvectorCentralityProcNormalizationIntegrationTest {
     }
 
     @Test
-    public void l1Norm() throws Exception {
+    void l1Norm() {
         final Map<Long, Double> actual = new HashMap<>();
         runQuery(
                 "CALL algo.eigenvector.stream('Character', 'INTERACTS_SEASON1', {direction: 'BOTH', normalization: 'l1Norm'}) " +
@@ -212,7 +214,7 @@ public class EigenvectorCentralityProcNormalizationIntegrationTest {
     }
 
     @Test
-    public void l1NormWrite() throws Exception {
+    void l1NormWrite() {
         final Map<Long, Double> actual = new HashMap<>();
         runQuery(
                 "CALL algo.eigenvector('Character', 'INTERACTS_SEASON1', {direction: 'BOTH', normalization: 'l1Norm', writeProperty: 'eigen'}) ",
@@ -255,10 +257,10 @@ public class EigenvectorCentralityProcNormalizationIntegrationTest {
                         .getNodeById(entry.getKey())
                         .getProperty(scoreProperty)).doubleValue();
                 assertEquals(
-                        "score for " + entry.getKey(),
                         entry.getValue(),
                         score,
-                        0.1);
+                        0.1,
+                        "score for " + entry.getKey());
             }
             tx.success();
         }
@@ -267,17 +269,17 @@ public class EigenvectorCentralityProcNormalizationIntegrationTest {
     private static void assertMapEquals(
             Map<Long, Double> expected,
             Map<Long, Double> actual) {
-        assertEquals("number of elements", expected.size(), actual.size());
+        assertEquals(expected.size(), actual.size(), "number of elements");
         HashSet<Long> expectedKeys = new HashSet<>(expected.keySet());
         for (Map.Entry<Long, Double> entry : actual.entrySet()) {
             assertTrue(
-                    "unknown key " + entry.getKey(),
-                    expectedKeys.remove(entry.getKey()));
+                    expectedKeys.remove(entry.getKey()),
+                    "unknown key " + entry.getKey());
             assertEquals(
-                    "value for " + entry.getKey(),
                     expected.get(entry.getKey()),
                     entry.getValue(),
-                    0.1);
+                    0.1,
+                    "value for " + entry.getKey());
         }
         for (Long expectedKey : expectedKeys) {
             fail("missing key " + expectedKey);

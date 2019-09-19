@@ -35,9 +35,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class PersonalizedPageRankProcTest {
 
@@ -135,8 +135,8 @@ class PersonalizedPageRankProcTest {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("pagerank", row.getString("writeProperty"));
                     assertTrue(
-                            "write time not set",
-                            row.getNumber("writeMillis").intValue() >= 0);
+                            row.getNumber("writeMillis").intValue() >= 0,
+                            "write time not set");
                 });
 
         assertResult("pagerank");
@@ -150,8 +150,8 @@ class PersonalizedPageRankProcTest {
                     assertTrue(row.getBoolean("write"));
                     assertEquals("foobar", row.getString("writeProperty"));
                     assertTrue(
-                            "write time not set",
-                            row.getNumber("writeMillis").intValue() >= 0);
+                            row.getNumber("writeMillis").intValue() >= 0,
+                            "write time not set");
                 });
 
         assertResult("foobar");
@@ -162,8 +162,8 @@ class PersonalizedPageRankProcTest {
         runQuery(
                 "CALL algo.pageRank('Label1', 'TYPE1', {batchSize:3, write:true, graph:'" + graphName + "'}) YIELD writeMillis, write, writeProperty",
                 row -> assertTrue(
-                        "write time not set",
-                        row.getNumber("writeMillis").intValue() >= 0));
+                        row.getNumber("writeMillis").intValue() >= 0,
+                        "write time not set"));
 
         assertResult("pagerank");
     }
@@ -205,27 +205,27 @@ class PersonalizedPageRankProcTest {
                         .getNodeById(entry.getKey())
                         .getProperty(scoreProperty)).doubleValue();
                 assertEquals(
-                        "score for " + entry.getKey(),
                         entry.getValue(),
                         score,
-                        0.1);
+                        0.1,
+                        "score for " + entry.getKey());
             }
             tx.success();
         }
     }
 
     private static void assertMapEquals(Map<Long, Double> actual) {
-        assertEquals("number of elements", EXPECTED.size(), actual.size());
+        assertEquals(EXPECTED.size(), actual.size(), "number of elements");
         Set<Long> expectedKeys = new HashSet<>(EXPECTED.keySet());
         for (Map.Entry<Long, Double> entry : actual.entrySet()) {
             assertTrue(
-                    "unknown key " + entry.getKey(),
-                    expectedKeys.remove(entry.getKey()));
+                    expectedKeys.remove(entry.getKey()),
+                    "unknown key " + entry.getKey());
             assertEquals(
-                    "value for " + entry.getKey(),
                     EXPECTED.get(entry.getKey()),
                     entry.getValue(),
-                    0.1);
+                    0.1,
+                    "value for " + entry.getKey());
         }
         for (Long expectedKey : expectedKeys) {
             fail("missing key " + expectedKey);

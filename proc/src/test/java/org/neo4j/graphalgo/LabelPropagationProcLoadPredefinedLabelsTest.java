@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo;
 
 import org.hamcrest.Matchers;
-import org.junit.Assume;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.SingleAndMultiThreadedAllGraphNames;
@@ -38,6 +37,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 class LabelPropagationProcLoadPredefinedLabelsTest extends ProcTestBase {
 
@@ -74,7 +74,7 @@ class LabelPropagationProcLoadPredefinedLabelsTest extends ProcTestBase {
 
     @SingleAndMultiThreadedAllGraphNames
     void shouldUseDefaultValues(boolean parallel, String graphName) {
-        Assume.assumeFalse(graphName.equalsIgnoreCase("kernel"));
+        assumeFalse(graphName.equalsIgnoreCase("kernel"));
 
         String query = "CALL algo.labelPropagation.stream(" +
                        "    null, null, {" +

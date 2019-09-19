@@ -22,7 +22,6 @@ package org.neo4j.graphalgo;
 import com.carrotsearch.hppc.IntIntMap;
 import com.carrotsearch.hppc.cursors.IntIntCursor;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
 import org.neo4j.graphdb.Result;
@@ -37,9 +36,9 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 public class ProcTestBase {
@@ -124,23 +123,23 @@ public class ProcTestBase {
             Map<String, Object> params) {
         List<Result.ResultRow> actual = new ArrayList<>();
         runQuery(query, db, params, actual::add);
-        Assertions.assertTrue(actual.isEmpty());
+        assertTrue(actual.isEmpty());
     }
 
     protected static void assertMapEquals(
             Map<Long, Double> expected,
             Map<Long, Double> actual) {
-        assertEquals("number of elements", expected.size(), actual.size());
+        assertEquals(expected.size(), actual.size(), "number of elements");
         HashSet<Long> expectedKeys = new HashSet<>(expected.keySet());
         for (Map.Entry<Long, Double> entry : actual.entrySet()) {
             assertTrue(
-                    "unknown key " + entry.getKey(),
-                    expectedKeys.remove(entry.getKey()));
+                    expectedKeys.remove(entry.getKey()),
+                    "unknown key " + entry.getKey());
             assertEquals(
-                    "value for " + entry.getKey(),
                     expected.get(entry.getKey()),
                     entry.getValue(),
-                    0.1);
+                    0.1,
+                    "value for " + entry.getKey());
         }
         for (Long expectedKey : expectedKeys) {
             fail("missing key " + expectedKey);
@@ -148,9 +147,9 @@ public class ProcTestBase {
     }
 
     protected static void assertMapContains(IntIntMap map, int... values) {
-        assertEquals("set count does not match", values.length, map.size());
+        assertEquals(values.length, map.size(), "set count does not match");
         for (int count : values) {
-            assertTrue("set size " + count + " does not match", mapContainsValue(map, count));
+            assertTrue(mapContainsValue(map, count), "set size " + count + " does not match");
         }
     }
 
@@ -170,10 +169,10 @@ public class ProcTestBase {
                         .getNodeById(entry.getKey())
                         .getProperty(scoreProperty)).doubleValue();
                 assertEquals(
-                        "score for " + entry.getKey(),
                         entry.getValue(),
                         score,
-                        0.1);
+                        0.1,
+                        "score for " + entry.getKey());
             }
             tx.success();
         }

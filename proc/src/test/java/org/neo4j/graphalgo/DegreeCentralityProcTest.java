@@ -35,7 +35,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class DegreeCentralityProcTest extends ProcTestBase {
+class DegreeCentralityProcTest extends ProcTestBase {
 
     private static final Map<Long, Double> incomingExpected = new HashMap<>();
     private static final Map<Long, Double> bothExpected = new HashMap<>();
@@ -55,12 +55,12 @@ public class DegreeCentralityProcTest extends ProcTestBase {
             ", (a)-[:TYPE2 {foo: 7.1}]->(c)";
 
     @AfterAll
-    public static void tearDown() {
+    static void tearDown() {
         if (DB != null) DB.shutdown();
     }
 
     @BeforeAll
-    public static void setup() throws KernelException {
+    static void setup() throws KernelException {
         DB = TestDatabaseCreator.createTestDatabase();
         try (Transaction tx = DB.beginTx()) {
             DB.execute(DB_CYPHER).close();
@@ -104,7 +104,7 @@ public class DegreeCentralityProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testDegreeIncomingStream(String graphImpl) {
+    void testDegreeIncomingStream(String graphImpl) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.degree.stream(" +
                        "    'Label1', 'TYPE1', {" +
@@ -119,7 +119,7 @@ public class DegreeCentralityProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testWeightedDegreeIncomingStream(String graphImpl) {
+    void testWeightedDegreeIncomingStream(String graphImpl) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.degree.stream(" +
                        "    'Label1', 'TYPE1', {" +
@@ -134,7 +134,7 @@ public class DegreeCentralityProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testDegreeIncomingWriteBack(String graphImpl) {
+    void testDegreeIncomingWriteBack(String graphImpl) {
         String query = "CALL algo.degree(" +
                        "    'Label1', 'TYPE1', {" +
                        "        graph: $graph, direction: 'INCOMING'" +
@@ -154,7 +154,7 @@ public class DegreeCentralityProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testWeightedDegreeIncomingWriteBack(String graphImpl) {
+    void testWeightedDegreeIncomingWriteBack(String graphImpl) {
         String query = "CALL algo.degree(" +
                        "    'Label1', 'TYPE1', {" +
                        "        graph: $graph, direction: 'INCOMING', weightProperty: 'foo'" +
@@ -174,7 +174,7 @@ public class DegreeCentralityProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testDegreeBothStream(String graphImpl) {
+    void testDegreeBothStream(String graphImpl) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.degree.stream(" +
                        "    'Label1', 'TYPE1', {" +
@@ -189,7 +189,7 @@ public class DegreeCentralityProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testWeightedDegreeBothStream(String graphImpl) {
+    void testWeightedDegreeBothStream(String graphImpl) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.degree.stream(" +
                        "    'Label1', 'TYPE1', {" +
@@ -204,7 +204,7 @@ public class DegreeCentralityProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testDegreeBothWriteBack(String graphImpl) {
+    void testDegreeBothWriteBack(String graphImpl) {
         String query = "CALL algo.degree(" +
                        "    'Label1', 'TYPE1', {" +
                        "        graph: $graph, direction: 'BOTH'" +
@@ -222,7 +222,7 @@ public class DegreeCentralityProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testWeightedDegreeBothWriteBack(String graphImpl) {
+    void testWeightedDegreeBothWriteBack(String graphImpl) {
         String query = "CALL algo.degree(" +
                        "    'Label1', 'TYPE1', {" +
                        "        graph: $graph, direction: 'BOTH', weightProperty: 'foo'" +
@@ -240,7 +240,7 @@ public class DegreeCentralityProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testDegreeOutgoingStream(String graphImpl) {
+    void testDegreeOutgoingStream(String graphImpl) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.degree.stream(" +
                        "    'Label1', 'TYPE1', {" +
@@ -255,7 +255,7 @@ public class DegreeCentralityProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testWeightedDegreeOutgoingStream(String graphImpl) {
+    void testWeightedDegreeOutgoingStream(String graphImpl) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.degree.stream(" +
                        "    'Label1', 'TYPE1', {" +
@@ -270,7 +270,7 @@ public class DegreeCentralityProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testDegreeOutgoingWriteBack(String graphImpl) {
+    void testDegreeOutgoingWriteBack(String graphImpl) {
         String query = "CALL algo.degree(" +
                        "    'Label1', 'TYPE1', {" +
                        "        graph: $graph, direction: 'OUTGOING'" +
@@ -288,7 +288,7 @@ public class DegreeCentralityProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @MethodSource("graphImplementations")
-    public void testWeightedDegreeOutgoingWriteBack(String graphImpl) {
+    void testWeightedDegreeOutgoingWriteBack(String graphImpl) {
         String query = "CALL algo.degree(" +
                        "    'Label1', 'TYPE1', {" +
                        "        graph: $graph, direction: 'OUTGOING', weightProperty: 'foo'" +

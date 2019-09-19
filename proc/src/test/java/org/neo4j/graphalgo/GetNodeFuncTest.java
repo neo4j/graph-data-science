@@ -19,13 +19,14 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.helpers.collection.MapUtil;
+import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.TestGraphDatabaseFactory;
@@ -34,14 +35,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class GetNodeFuncTest {
-    public static GraphDatabaseService DB;
+class GetNodeFuncTest {
 
-    @BeforeClass
-    public static void setUp() throws Exception {
+    private static GraphDatabaseService DB;
+
+    @BeforeAll
+    static void setUp() throws KernelException {
         DB = new TestGraphDatabaseFactory()
                 .newImpermanentDatabaseBuilder()
                 .setConfig(GraphDatabaseSettings.procedure_unrestricted,"algo.*")
@@ -53,13 +55,13 @@ public class GetNodeFuncTest {
         proceduresService.registerFunction(GetNodeFunc.class, true);
     }
 
-    @AfterClass
-    public static void tearDown() {
+    @AfterAll
+    static void tearDown() {
         DB.shutdown();
     }
 
     @Test
-    public void lookupNode() throws Exception {
+    void lookupNode() {
         String createNodeQuery = "CREATE (p:Person {name: 'Mark'}) RETURN p AS node";
         Node savedNode = (Node) DB.execute(createNodeQuery).next().get("node");
 
@@ -71,7 +73,7 @@ public class GetNodeFuncTest {
     }
 
     @Test
-    public void lookupNonExistentNode() throws Exception {
+    void lookupNonExistentNode() {
         Map<String, Object> row = DB.execute(
                 "RETURN algo.asNode(3) AS node").next();
 
@@ -79,7 +81,7 @@ public class GetNodeFuncTest {
     }
 
     @Test
-    public void lookupNodes() throws Exception {
+    void lookupNodes() {
         String createNodeQuery = "CREATE (p1:Person {name: 'Mark'}) CREATE (p2:Person {name: 'Arya'}) RETURN p1, p2";
         Map<String, Object> savedRow = DB.execute(createNodeQuery).next();
         Node savedNode1 = (Node) savedRow.get("p1");
@@ -93,7 +95,7 @@ public class GetNodeFuncTest {
     }
 
     @Test
-    public void lookupNonExistentNodes() throws Exception {
+    void lookupNonExistentNodes() {
         Map<String, Object> row = DB.execute(
                 "RETURN algo.getNodesById([3,4,5]) AS nodes").next();
 
