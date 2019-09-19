@@ -37,7 +37,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 @RunWith(Parameterized.class)
-public final class GraphNegativeTest extends RandomGraphTestCase {
+public final class GraphLoaderNegativeTest extends RandomGraphTestCase {
 
     private Class<? extends GraphFactory> graphImpl;
 
@@ -56,7 +56,7 @@ public final class GraphNegativeTest extends RandomGraphTestCase {
     }
 
     @SuppressWarnings("unchecked")
-    public GraphNegativeTest(
+    public GraphLoaderNegativeTest(
             Class<?> graphImpl,
             String nameIgnoredOnlyForTestName) {
         this.graphImpl = (Class<? extends GraphFactory>) graphImpl;
