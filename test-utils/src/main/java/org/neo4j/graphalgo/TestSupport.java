@@ -73,7 +73,7 @@ public class TestSupport {
     public @interface SingleAndMultiThreadedAllGraphNames {}
 
     public static Stream<Arguments> singleAndMultiThreadedGraphNames() {
-        return Stream.of(true, false).flatMap(parallel -> allGraphNames().map(direction -> arguments(parallel, direction)));
+        return Stream.of(true, false).flatMap(parallel -> allGraphNames().map(name -> arguments(parallel, name)));
     }
 
 }
