@@ -247,7 +247,7 @@ public final class HugeGraphFactory extends GraphFactory {
                     AdjacencyOffsets inAdjacencyOffsets = incomingRelationshipsBuilder != null
                             ? incomingRelationshipsBuilder.globalAdjacencyOffsets : null;
 
-                    if (!setup.relationshipPropertyMappings.hasMappings()) {
+                    if (!dimensions.relProperties().hasMappings()) {
                         HugeGraph graph = buildGraph(
                                 tracker,
                                 idsAndProperties.hugeIdMap,
@@ -266,7 +266,7 @@ public final class HugeGraphFactory extends GraphFactory {
                         return Collections.singletonMap("", graph);
                     }
 
-                    return setup.relationshipPropertyMappings.enumerate().map(propertyEntry -> {
+                    return dimensions.relProperties().enumerate().map(propertyEntry -> {
                         int weightIndex = propertyEntry.getKey();
                         PropertyMapping property = propertyEntry.getValue();
                         HugeGraph graph = buildGraph(
