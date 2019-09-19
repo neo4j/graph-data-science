@@ -41,7 +41,6 @@ For more information on this algorithm, see:
 * http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.28.8405["An efficient domain-independent algorithm for detecting approximately duplicate database records"^].
 * One study uses WCC to work out how well connected the network is, and then to see whether the connectivity remains if 'hub' or 'authority' nodes are moved from the graph: https://link.springer.com/article/10.1007%2Fs10115-003-0128-3["Characterizing and Mining Citation Graph of Computer Science Literature"^]
 
-
 [NOTE]
 ====
 Running this algorithm requires sufficient memory availability.
@@ -341,40 +340,6 @@ If they differ, the algorithm writes properties for all nodes.
 * Algorithm based on the idea that `DisjointSetStruct` can be built using just a partition of the nodes, which are then merged pairwise.
 * The implementation is based on a queue which acts as a buffer for each computed `DisjointSetStruct`.
   As long as there are more elements on the queue, the algorithm takes two, merges them, and adds its result to the queue until only 1 element remains.
-
-
-[[algorithms-unionfind-memory-requirements]]
-== Memory Requirements for the Union Find algorithm
-:algorithm: "unionFind"
-
-We can use the <<algo-memrec-procedure>> to compute the memory requirements of running graph algorithms.
-
-.The following returns the memory requirements for running Louvain on the Huge Graph:
-:graph: "huge"
-include::memrec.adoc[tags=overview]
-
-.Results
-[opts="header",cols="1,1,2"]
-|===
-| Nodes | Relationships | Required Memory
-| 6 | 7 | [299 KiB ... 300 KiB]
-|===
-
-We can also get a break down of where that memory is assigned from the `mapView` field.
-
-.The following returns the memory break down for running Louvain on the Huge Graph:
-:graph: "huge"
-include::memrec.adoc[tags=component]
-
-.Results
-[opts="header",cols="1,2"]
-|===
-| Component | Memory Usage
-| Louvain | [3176 Bytes ... 4072 Bytes]
-| HugeGraph | 296 KiB
-|===
-
-Below are the memory requirements for various sample datasets.
 
 
 === Pokec
