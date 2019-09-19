@@ -11,14 +11,11 @@ This section includes:
 * <<algorithms-wcc-intro, Introduction>>
 * <<algorithms-wcc-syntax, Syntax>>
 * <<algorithms-wcc-examples, Examples>>
+** <<algorithms-wcc-examples-unweighted, Unweighted>>
+** <<algorithms-wcc-examples-weighted, Weighted>>
+** <<algorithms-wcc-examples-seeding, Seeded components>>
 * <<algorithms-wcc-usage-details, Usage Details>>
 
-* <<algorithms-wcc-sample, Connected Components algorithm sample>>
-** <<algorithms-wcc-sample-unweighted, Unweighted version>>
-** <<algorithms-wcc-sample-weighted, Weighted version>>
-** <<algorithms-wcc-example-seeding, Using seed communities>>
-
-* <<algorithms-wcc-context, History and explanation>>
 * <<algorithms-wcc-hgp, Huge graph projection>>
 * <<algorithms-wcc-cp, Cypher projection>>
 * <<algorithms-wcc-imp, Implementations>>
@@ -189,6 +186,22 @@ CREATE (nMark)-[:LINK {weight: 2}]->(nMichael);
 
 This graph has two connected components, each with three nodes.
 The relationships that connect the nodes in each component has a property which determines the strength of the relationship.
+We load this graph under the name `'wcc-graph'` like so:
+
+[source, cypher]
+----
+CALL algo.graph.load('wcc-graph', 'User', 'LINK')
+YIELD name AS Name, nodes AS Nodes, relationships AS Relationships
+----
+// TODO: verify these results now that Heavy is removed:
+
+.Results
+[opts="header",cols="1m,1m,1m"]
+|===
+| Name        | Nodes | Relationships
+| "wcc-graph" | 6     | 4
+|===
+
 
 The following examples demonstrate using the Connected Components algorithm.
 
@@ -199,7 +212,9 @@ The following examples demonstrate using the Connected Components algorithm.
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL algo.unionFind.stream('User', 'LINK')
+CALL algo.unionFind.stream('User', 'LINK', {
+  graph: 'wcc-graph'
+})
 YIELD nodeId, setId
 RETURN algo.asNode(nodeId).name AS Name, setId AS ComponentId
 ORDER BY ComponentId
@@ -223,6 +238,7 @@ To instead write the component ID to a node property in the Neo4j graph, use thi
 [source, cypher]
 ----
 CALL algo.unionFind('User', 'LINK', {
+  graph: 'wcc-graph',
   write: true,
   writeProperty: 'componentId'
 })
@@ -249,6 +265,7 @@ Only relationships with a weight strictly greater than the threshold value will 
 [source, cypher]
 ----
 CALL algo.unionFind.stream('User', 'LINK', {
+  graph: 'wcc-graph',
   weightProperty: 'weight',
   threshold: 1.0
 })
@@ -274,6 +291,7 @@ RETURN algo.asNode(nodeId).name AS Name, setId AS ComponentId
 [source, cypher]
 ----
 CALL algo.unionFind('User', 'LINK', {
+  graph: 'wcc-graph',
   write: true,
   writeProperty: "componentId",
   weightProperty: 'weight',
@@ -311,32 +329,6 @@ If the `seedProperty` configuration parameter has the same value as `writeProper
 If they differ, the algorithm writes properties for all nodes.
 
 //TODO: add some Cypher and show an actual example
-
-
-[[algorithms-wcc-hgp]]
-== Huge graph projection
-
-include::huge-projection.adoc[tag=explanation]
-
-.Set `graph:'huge'` in the config:
-
-[source, cypher]
-----
-include::scripts/connected-components.cypher[tag=huge-projection]
-----
-
-
-[[algorithms-wcc-cp]]
-== Cypher projection
-
-include::projected-graph-model/cypher-projection.adoc[tag=explanation]
-
-.Set `graph:'cypher'` in the config:
-
-[source, cypher]
-----
-include::scripts/connected-components.cypher[tag=cypher-loading]
-----
 
 
 [[algorithms-wcc-imp]]
