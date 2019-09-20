@@ -77,7 +77,7 @@ public class TraverseProc {
                 .withOptionalLabel(label)
                 .withOptionalRelationshipType(relationship)
                 .withoutNodeWeights()
-                .withOptionalRelationshipWeightsFromProperty(configuration.getWeightProperty(), 1.)
+                .withRelationshipProperties(PropertyMapping.of(configuration.getWeightProperty(), 1.))
                 .withDirection(configuration.getDirection(Direction.OUTGOING))
                 .withLog(log)
                 .load(configuration.getGraphImpl());
@@ -143,7 +143,7 @@ public class TraverseProc {
                 .withOptionalLabel(label)
                 .withOptionalRelationshipType(relationship)
                 .withoutNodeWeights()
-                .withOptionalRelationshipWeightsFromProperty(configuration.getWeightProperty(), 1.)
+                .withRelationshipProperties(PropertyMapping.of(configuration.getWeightProperty(), 1.))
                 .withDirection(configuration.getDirection(Direction.OUTGOING))
                 .withLog(log)
                 .load(configuration.getGraphImpl());

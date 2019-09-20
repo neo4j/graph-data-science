@@ -303,6 +303,11 @@ public class GraphLoader {
         return this;
     }
 
+    public GraphLoader withRelationshipProperties(PropertyMappings relPropertyMappings) {
+        this.relPropertyMappings.addAllMappings(relPropertyMappings.stream());
+        return this;
+    }
+
     /**
      * Instructs the loader to load relationship weights by reading the given property.
      * If the property is not set, the given default value is used.

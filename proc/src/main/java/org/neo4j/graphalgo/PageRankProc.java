@@ -131,7 +131,7 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
 
         return loader
                 .withReducedRelationshipLoading(direction)
-                .withOptionalRelationshipWeightsFromProperty(weight, weightPropertyDefaultValue);
+                .withRelationshipProperties(PropertyMapping.of(weight, weightPropertyDefaultValue));
     }
 
     @Override

@@ -88,9 +88,9 @@ public class KShortestPathsProc {
             graph = new GraphLoader(api, Pools.DEFAULT)
                     .init(log, configuration.getNodeLabelOrQuery(), configuration.getRelationshipOrQuery(), configuration)
                     .withReducedRelationshipLoading(direction)
-                    .withOptionalRelationshipWeightsFromProperty(
+                    .withRelationshipProperties(PropertyMapping.of(
                             propertyName,
-                            configuration.getWeightPropertyDefaultValue(1.0))
+                            configuration.getWeightPropertyDefaultValue(1.0)))
                     .load(configuration.getGraphImpl());
         }
 
@@ -150,9 +150,9 @@ public class KShortestPathsProc {
             graph = new GraphLoader(api, Pools.DEFAULT)
                     .init(log, configuration.getNodeLabelOrQuery(), configuration.getRelationshipOrQuery(), configuration)
                     .withReducedRelationshipLoading(direction)
-                    .withOptionalRelationshipWeightsFromProperty(
+                    .withRelationshipProperties(PropertyMapping.of(
                             propertyName,
-                            configuration.getWeightPropertyDefaultValue(1.0))
+                            configuration.getWeightPropertyDefaultValue(1.0)))
                     .load(configuration.getGraphImpl());
         }
 

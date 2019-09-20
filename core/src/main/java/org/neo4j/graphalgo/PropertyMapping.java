@@ -228,6 +228,13 @@ public abstract class PropertyMapping {
         }
     }
 
+    /**
+     * Creates a PropertyMapping. The given property key is also used for internal reference.
+     */
+    public static PropertyMapping of(String neoPropertyKey, double defaultValue) {
+        return of(neoPropertyKey, neoPropertyKey, defaultValue, DeduplicationStrategy.DEFAULT);
+    }
+
     public static PropertyMapping of(String propertyKey, String neoPropertyKey, double defaultValue) {
         return of(propertyKey, neoPropertyKey, defaultValue, DeduplicationStrategy.DEFAULT);
     }

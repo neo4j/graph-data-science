@@ -190,9 +190,9 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
         }
 
         return loader
-                .withOptionalRelationshipWeightsFromProperty(
+                .withRelationshipProperties(PropertyMapping.of(
                         config.getWeightProperty(),
-                        config.getWeightPropertyDefaultValue(1.0))
+                        config.getWeightPropertyDefaultValue(1.0)))
                 .withDirection(Direction.OUTGOING);
     }
 

@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.impl.degree;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
@@ -196,7 +197,7 @@ final class DegreeCentralityTest {
                     .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
                     .withRelationshipType(
                             "MATCH (n:Label1)-[type:TYPE1]->(m:Label1) RETURN id(n) AS source, id(m) AS target, type.weight AS weight")
-                    .withOptionalRelationshipWeightsFromProperty("weight", 1.0)
+                    .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
                     .withDirection(Direction.OUTGOING)
                     .load(graphFactory);
         } else {
@@ -204,7 +205,7 @@ final class DegreeCentralityTest {
                     .withLabel(label)
                     .withRelationshipType("TYPE1")
                     .withDirection(Direction.OUTGOING)
-                    .withOptionalRelationshipWeightsFromProperty("weight", 1.0)
+                    .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
                     .load(graphFactory);
         }
 
@@ -251,14 +252,14 @@ final class DegreeCentralityTest {
                     .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
                     .withRelationshipType(
                             "MATCH (n:Label1)-[type:TYPE3]->(m:Label1) RETURN id(n) AS source, id(m) AS target, type.weight AS weight")
-                    .withOptionalRelationshipWeightsFromProperty("weight", 1.0)
+                    .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
                     .load(graphFactory);
         } else {
             graph = new GraphLoader(DB)
                     .withLabel(label)
                     .withRelationshipType("TYPE3")
                     .withDirection(Direction.OUTGOING)
-                    .withOptionalRelationshipWeightsFromProperty("weight", 1.0)
+                    .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
                     .load(graphFactory);
         }
 
@@ -367,7 +368,7 @@ final class DegreeCentralityTest {
                     .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
                     .withRelationshipType(
                             "MATCH (n:Label1)<-[t:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target, t.weight AS weight")
-                    .withOptionalRelationshipWeightsFromProperty("weight", 1.0)
+                    .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
                     .withDirection(direction)
                     .load(graphFactory);
 
@@ -375,7 +376,7 @@ final class DegreeCentralityTest {
             graph = new GraphLoader(DB)
                     .withLabel(label)
                     .withRelationshipType("TYPE1")
-                    .withOptionalRelationshipWeightsFromProperty("weight", 1.0)
+                    .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
                     .withDirection(direction)
                     .load(graphFactory);
         }

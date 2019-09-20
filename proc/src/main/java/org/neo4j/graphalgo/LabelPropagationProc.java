@@ -172,7 +172,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
 
         return loader
                 .withReducedRelationshipLoading(direction)
-                .withOptionalRelationshipWeightsFromProperty(weightProperty, 1.0D)
+                .withRelationshipProperties(PropertyMapping.of(weightProperty, 1.0D))
                 .withOptionalNodeProperties(createPropertyMappings(seedProperty, weightProperty));
     }
 

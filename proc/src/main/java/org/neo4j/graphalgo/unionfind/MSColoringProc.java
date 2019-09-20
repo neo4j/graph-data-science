@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.unionfind;
 
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
@@ -32,7 +33,11 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
-import org.neo4j.procedure.*;
+import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Mode;
+import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicIntegerArray;
@@ -132,9 +137,9 @@ public class MSColoringProc {
         return new GraphLoader(api, Pools.DEFAULT)
                 .init(log, config.getNodeLabelOrQuery(), config.getRelationshipOrQuery(), config)
                 .withAllocationTracker(tracker)
-                .withOptionalRelationshipWeightsFromProperty(
+                .withRelationshipProperties(PropertyMapping.of(
                         config.getWeightProperty(),
-                        config.getWeightPropertyDefaultValue(1.0))
+                        config.getWeightPropertyDefaultValue(1.0)))
                 .withDirection(Direction.OUTGOING)
                 .load(config.getGraphImpl());
     }

@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.impl.louvain;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
@@ -123,7 +124,7 @@ class LouvainTest extends LouvainTestBase {
                     .withRelationshipType("REL");
         }
         Graph graph = graphLoader
-                .withOptionalRelationshipWeightsFromProperty(null, 1.0)
+                .withRelationshipProperties(PropertyMapping.of(null, 1.0))
                 .withoutNodeWeights()
                 .sorted()
                 .undirected()

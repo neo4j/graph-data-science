@@ -134,9 +134,7 @@ final class CypherExporterTest {
                                 "property", "property", 42
                         )
                 )
-                .withOptionalRelationshipWeightsFromProperty(
-                        "property", 42
-                )
+                .withRelationshipProperties(PropertyMapping.of("property", 42))
                 .load(graphImpl);
 
         StringWriter output = new StringWriter();

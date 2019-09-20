@@ -49,5 +49,6 @@ public class ProcedureConstants {
     public static final String NODE_WEIGHT = "nodeWeight";
     public static final String NODE_PROPERTY = "nodeProperty";
     public static final String RELATIONSHIP_WEIGHT = "relationshipWeight";
+    public static final String RELATIONSHIP_PROPERTIES = "relationshipProperties";
     public static final String SKIP_VALUE = "skipValue";
 }

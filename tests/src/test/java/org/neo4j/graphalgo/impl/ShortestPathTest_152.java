@@ -96,7 +96,7 @@ class ShortestPathTest_152 {
         final Graph graph = new GraphLoader(db, Pools.DEFAULT)
                 .withOptionalLabel("Loc")
                 .withRelationshipType("ROAD")
-                .withOptionalRelationshipWeightsFromProperty("d", 0)
+                .withRelationshipProperties(PropertyMapping.of("d", 0))
                 .load(HugeGraphFactory.class);
 
         new ShortestPathDijkstra(graph)
@@ -119,7 +119,7 @@ class ShortestPathTest_152 {
                 .withOptionalLabel("Loc")
                 .withAnyRelationshipType()
                 .withDeduplicateRelationshipsStrategy(DeduplicationStrategy.NONE)
-                .withOptionalRelationshipWeightsFromProperty("d", 0)
+                .withRelationshipProperties(PropertyMapping.of("d", 0))
                 .load(HugeGraphFactory.class);
 
         new ShortestPathDijkstra(graph)
