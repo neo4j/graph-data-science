@@ -24,14 +24,14 @@ import org.neo4j.graphalgo.api.WeightMapping;
 
 import java.util.Arrays;
 
-public final class TestWeightMapping implements WeightMapping {
+final class TestWeightMapping implements WeightMapping {
     private final IntIntHashMap weights;
 
-    public TestWeightMapping(final IntIntHashMap weights) {
+    private TestWeightMapping(final IntIntHashMap weights) {
         this.weights = weights;
     }
 
-    public TestWeightMapping(int... values) {
+    TestWeightMapping(int... values) {
         this(toMap(values));
     }
 

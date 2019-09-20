@@ -19,59 +19,59 @@
  */
 package org.neo4j.graphalgo.algo;
 
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.KSpanningTreeProc;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashMap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  *
  * @author mknblch
  */
-public class KSpanningTreeTest {
+class KSpanningTreeTest {
 
-    @ClassRule
-    public static ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
+    private GraphDatabaseAPI db;
 
-    @BeforeClass
-    public static void setupGraph() throws KernelException {
-
+    @BeforeEach
+    void setupGraph() throws KernelException {
+        db = TestDatabaseCreator.createTestDatabase();
         final String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
-                        "CREATE (b:Node {name:'b'})\n" +
-                        "CREATE (c:Node {name:'c'})\n" +
-                        "CREATE (d:Node {name:'d'})\n" +
+                "CREATE (b:Node {name:'b'})\n" +
+                "CREATE (c:Node {name:'c'})\n" +
+                "CREATE (d:Node {name:'d'})\n" +
 
-                        "CREATE" +
-                        " (a)-[:TYPE {w:3.0}]->(b),\n" +
-                        " (a)-[:TYPE {w:2.0}]->(c),\n" +
-                        " (a)-[:TYPE {w:1.0}]->(d),\n" +
-                        " (b)-[:TYPE {w:1.0}]->(c),\n" +
-                        " (d)-[:TYPE {w:3.0}]->(c)";
+                "CREATE" +
+                " (a)-[:TYPE {w:3.0}]->(b),\n" +
+                " (a)-[:TYPE {w:2.0}]->(c),\n" +
+                " (a)-[:TYPE {w:1.0}]->(d),\n" +
+                " (b)-[:TYPE {w:1.0}]->(c),\n" +
+                " (d)-[:TYPE {w:3.0}]->(c)";
 
-        DB.resolveDependency(Procedures.class).registerProcedure(KSpanningTreeProc.class);
-        DB.execute(cypher);
+        db.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(KSpanningTreeProc.class);
+        db.execute(cypher);
     }
 
-    @Rule
-    public ExpectedException exceptions = ExpectedException.none();
+    @AfterEach
+    void teardownGraph() {
+        db.shutdown();
+    }
 
     @Test
-    public void testMax() {
+    void testMax() {
         final String cypher = "MATCH (n:Node {name:'a'}) WITH n CALL algo.spanningTree.kmax(null, null, 'w', id(n), 2, {graph:'huge'}) " +
                 "YIELD loadMillis, computeMillis, writeMillis RETURN loadMillis, computeMillis, writeMillis";
-        DB.execute(cypher).accept(row -> {
+        db.execute(cypher).accept(row -> {
 
             assertTrue(row.getNumber("loadMillis").longValue() >= 0);
             assertTrue(row.getNumber("writeMillis").longValue() >= 0);
@@ -81,7 +81,7 @@ public class KSpanningTreeTest {
 
         final HashMap<String, Integer> communities = new HashMap<>();
 
-        DB.execute("MATCH (n) WHERE exists(n.partition) RETURN n.name as name, n.partition as p").accept(row -> {
+        db.execute("MATCH (n) WHERE exists(n.partition) RETURN n.name as name, n.partition as p").accept(row -> {
             final String name = row.getString("name");
             final int p = row.getNumber("p").intValue();
             communities.put(name, p);
@@ -92,11 +92,12 @@ public class KSpanningTreeTest {
         assertEquals(communities.get("d"), communities.get("c"));
         assertNotEquals(communities.get("a"), communities.get("c"));
     }
+
     @Test
-    public void testMin() {
+    void testMin() {
         final String cypher = "MATCH (n:Node {name:'a'}) WITH n CALL algo.spanningTree.kmin(null, null, 'w', id(n), 2, {graph:'huge'}) " +
                 "YIELD loadMillis, computeMillis, writeMillis RETURN loadMillis, computeMillis, writeMillis";
-        DB.execute(cypher).accept(row -> {
+        db.execute(cypher).accept(row -> {
 
             assertTrue(row.getNumber("loadMillis").longValue() >= 0);
             assertTrue(row.getNumber("writeMillis").longValue() >= 0);
@@ -106,7 +107,7 @@ public class KSpanningTreeTest {
 
         final HashMap<String, Integer> communities = new HashMap<>();
 
-        DB.execute("MATCH (n) WHERE exists(n.partition) RETURN n.name as name, n.partition as p").accept(row -> {
+        db.execute("MATCH (n) WHERE exists(n.partition) RETURN n.name as name, n.partition as p").accept(row -> {
             final String name = row.getString("name");
             final int p = row.getNumber("p").intValue();
             communities.put(name, p);

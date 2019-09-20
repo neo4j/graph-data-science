@@ -1,17 +1,18 @@
 description = 'Neo4j Graph Algorithms :: Tests'
 
+configurations {
+    testCompile {
+        exclude(group: 'com.carrotsearch.randomizedtesting', module: 'randomizedtesting-runner')
+        exclude(group: 'junit', module: 'junit')
+    }
+}
+
 dependencies {
     compile project(':proc')
     
     testCompile project(':test-utils')
 
-    testCompile     dep.junit4
-
-    testCompile     platform(dep.junit5bom)
-    testCompile     dep.junit5jupiter
-    testCompile     dep.junit5migration
-    testRuntimeOnly dep.junit5vintage
-    testRuntimeOnly dep.junit5platform
+    testCompile group: 'io.qala.datagen',   name: 'qala-datagen-junit5',  version: ver.'qala-datagen'
 }
 
 task javadocJar(type: Jar) {

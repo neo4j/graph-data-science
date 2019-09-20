@@ -19,8 +19,8 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.neo4j.graphalgo.SimpleGraphSetup;
 import org.neo4j.graphalgo.SimpleGraphTestCase;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
@@ -28,12 +28,12 @@ import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 /**
  * @author mknobloch
  */
-public class HugeGraphTest extends SimpleGraphTestCase {
+class HugeGraphTest extends SimpleGraphTestCase {
 
     private static SimpleGraphSetup setup;
 
-    @BeforeClass
-    public static void setupGraph() {
+    @BeforeAll
+    static void setupGraph() {
         setup = new SimpleGraphSetup();
         graph = setup.build(HugeGraphFactory.class);
         v0 = setup.getV0();
@@ -41,8 +41,8 @@ public class HugeGraphTest extends SimpleGraphTestCase {
         v2 = setup.getV2();
     }
 
-    @AfterClass
-    public static void tearDown() throws Exception {
+    @AfterAll
+    static void tearDown() throws Exception {
         if (setup != null) setup.shutdown();
         if (db != null) db.shutdown();
     }

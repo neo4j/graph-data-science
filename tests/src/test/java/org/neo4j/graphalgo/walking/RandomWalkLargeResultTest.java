@@ -19,11 +19,9 @@
  */
 package org.neo4j.graphalgo.walking;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeWalkerProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Result;
@@ -35,36 +33,27 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collections;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class RandomWalkLargeResultTest {
+class RandomWalkLargeResultTest {
 
     private static final int NODE_COUNT = 20000;
 
-    private static GraphDatabaseAPI db;
+    private GraphDatabaseAPI db;
     private Transaction tx;
 
-    @BeforeClass
-    public static void beforeClass() throws KernelException {
+    @BeforeEach
+    void beforeClass() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase();
         db.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(NodeWalkerProc.class);
-
         db.execute(buildDatabaseQuery(), Collections.singletonMap("count",NODE_COUNT)).close();
-    }
-
-    @AfterClass
-    public static void AfterClass() {
-        db.shutdown();
-    }
-
-    @Before
-    public void setUp() throws Exception {
         tx = db.beginTx();
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterEach
+    void AfterClass() {
         tx.close();
+        db.shutdown();
     }
 
     private static String buildDatabaseQuery() {
@@ -76,9 +65,8 @@ public class RandomWalkLargeResultTest {
     }
 
     @Test
-    public void shouldHandleLargeResults() {
+    void shouldHandleLargeResults() {
         Result results = db.execute("CALL algo.randomWalk.stream(null, 100, 100000)");
-
         assertEquals(100000,Iterators.count(results));
     }
 }

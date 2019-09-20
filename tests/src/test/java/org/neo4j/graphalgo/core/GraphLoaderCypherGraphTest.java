@@ -33,8 +33,8 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
 
 class GraphLoaderCypherGraphTest {

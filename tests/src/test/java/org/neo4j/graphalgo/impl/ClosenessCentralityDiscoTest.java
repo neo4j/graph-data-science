@@ -19,9 +19,10 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -29,7 +30,7 @@ import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.closeness.MSClosenessCentrality;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.function.DoubleConsumer;
 
@@ -47,32 +48,37 @@ import static org.mockito.Mockito.verify;
  *
  * @author mknblch
  */
-public class ClosenessCentralityDiscoTest {
+class ClosenessCentralityDiscoTest {
 
-    @ClassRule
-    public static final ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
+    private static GraphDatabaseAPI DB;
 
-    @BeforeClass
-    public static void setup() {
-        final String cypher =
+    @BeforeEach
+    void setup() {
+        DB = TestDatabaseCreator.createTestDatabase();
+        String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
-                        "CREATE (b:Node {name:'b'})\n" +
-                        "CREATE (c:Node {name:'c'})\n" +
-                        "CREATE (d:Node {name:'d'})\n" +
-                        "CREATE (e:Node {name:'e'})\n" +
+                "CREATE (b:Node {name:'b'})\n" +
+                "CREATE (c:Node {name:'c'})\n" +
+                "CREATE (d:Node {name:'d'})\n" +
+                "CREATE (e:Node {name:'e'})\n" +
 
-                        "CREATE" +
-                        " (a)-[:TYPE]->(b),\n" +
-                        " (a)-[:TYPE]->(c),\n" +
-                        " (b)-[:TYPE]->(c),\n" +
+                "CREATE" +
+                " (a)-[:TYPE]->(b),\n" +
+                " (a)-[:TYPE]->(c),\n" +
+                " (b)-[:TYPE]->(c),\n" +
 
-                        " (d)-[:TYPE]->(e)";
+                " (d)-[:TYPE]->(e)";
 
         DB.execute(cypher);
     }
 
+    @AfterEach
+    void teardown() {
+        DB.shutdown();
+    }
+
     @Test
-    public void testHuge() {
+    void testHuge() {
         Graph graph = load(HugeGraphFactory.class);
         test(graph);
     }

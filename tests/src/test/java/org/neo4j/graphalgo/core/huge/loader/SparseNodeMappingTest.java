@@ -19,84 +19,82 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
-import com.carrotsearch.randomizedtesting.RandomizedTest;
-import com.carrotsearch.randomizedtesting.annotations.ThreadLeakScope;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.PrivateLookup;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 
 import java.lang.invoke.MethodHandle;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static io.qala.datagen.RandomShortApi.integer;
+import static io.qala.datagen.RandomValue.between;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
-
-@ThreadLeakScope(ThreadLeakScope.Scope.NONE)
-public final class SparseNodeMappingTest extends RandomizedTest {
+final class SparseNodeMappingTest {
 
     private static final int PS = PageUtil.pageSizeFor(Long.BYTES);
     private static final MethodHandle PAGES = PrivateLookup.field(SparseNodeMapping.Builder.class, AtomicReferenceArray.class, "pages");
 
     @Test
-    public void shouldSetAndGet() {
+    void shouldSetAndGet() {
         SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(10, AllocationTracker.EMPTY);
-        int index = between(2, 8);
-        int value = between(42, 1337);
+        int index = integer(2, 8);
+        int value = integer(42, 1337);
         array.set(index, value);
         assertEquals(value, array.build().get(index));
     }
 
     @Test
-    public void shouldSetValuesInPageSizedChunks() {
+    void shouldSetValuesInPageSizedChunks() {
         SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(10, AllocationTracker.EMPTY);
         // larger than the desired size, but still within a single page
-        array.set(between(11, PS - 1), 1337);
+        array.set(integer(11, PS - 1), 1337);
         // doesn't fail - good
     }
 
     // capacity check is only an assert
     @Test
-    public void shouldUseCapacityInPageSizedChunks() {
+    void shouldUseCapacityInPageSizedChunks() {
         SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(10, AllocationTracker.EMPTY);
         // larger than the desired size, but still within a single page
         try {
-            array.set(between(PS, 2 * PS - 1), 1337);
+            array.set(integer(PS, 2 * PS - 1), 1337);
             fail("should have failed out of capacity");
         } catch (AssertionError | ArrayIndexOutOfBoundsException ignore) {
         }
     }
 
     @Test
-    public void shouldHaveContains() {
+    void shouldHaveContains() {
         SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(10, AllocationTracker.EMPTY);
-        int index = between(2, 8);
-        int value = between(42, 1337);
+        int index = integer(2, 8);
+        int value = integer(42, 1337);
         array.set(index, value);
         SparseNodeMapping longArray = array.build();
         for (int i = 0; i < 10; i++) {
             if (i == index) {
-                assertTrue("Expected index " + i + " to be contained, but it was not", longArray.contains(i));
+                assertTrue(longArray.contains(i), "Expected index " + i + " to be contained, but it was not");
             } else {
-                assertFalse("Expected index " + i + " not to be contained, but it actually was", longArray.contains(i));
+                assertFalse(longArray.contains(i), "Expected index " + i + " not to be contained, but it actually was");
             }
         }
     }
 
     @Test
-    public void shouldReturnNegativeOneForMissingValues() {
+    void shouldReturnNegativeOneForMissingValues() {
         SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(10, AllocationTracker.EMPTY);
-        int index = between(2, 8);
-        int value = between(42, 1337);
+        int index = integer(2, 8);
+        int value = integer(42, 1337);
         array.set(index, value);
         SparseNodeMapping longArray = array.build();
         for (int i = 0; i < 10; i++) {
@@ -105,34 +103,34 @@ public final class SparseNodeMappingTest extends RandomizedTest {
             String message = expectedContains
                     ? "Expected value at index " + i + " to be set to " + value + ", but got " + actual + " instead"
                     : "Expected value at index " + i + " to be missing (-1), but got " + actual + " instead";
-            assertEquals(message, expectedContains ? value : -1L, actual);
+            assertEquals(expectedContains ? value : -1L, actual, message);
         }
     }
 
     @Test
-    public void shouldReturnNegativeOneForOutOfRangeValues() {
+    void shouldReturnNegativeOneForOutOfRangeValues() {
         SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(10, AllocationTracker.EMPTY);
-        array.set(between(2, 8), between(42, 1337));
-        assertEquals(-1L, array.build().get(between(100, 200)));
+        array.set(integer(2, 8), integer(42, 1337));
+        assertEquals(-1L, array.build().get(integer(100, 200)));
     }
 
     @Test
-    public void shouldReturnNegativeOneForUnsetPages() {
+    void shouldReturnNegativeOneForUnsetPages() {
         SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(PS + 10, AllocationTracker.EMPTY);
-        array.set(5000, between(42, 1337));
-        assertEquals(-1L, array.build().get(between(100, 200)));
+        array.set(5000, integer(42, 1337));
+        assertEquals(-1L, array.build().get(integer(100, 200)));
     }
 
     @Test
-    public void shouldNotFailOnGetsThatAreoutOfBounds() {
+    void shouldNotFailOnGetsThatAreoutOfBounds() {
         SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(10, AllocationTracker.EMPTY);
-        array.set(between(2, 8), between(42, 1337));
-        assertEquals(-1L, array.build().get(between(100_000_000, 200_000_000)));
+        array.set(integer(2, 8), integer(42, 1337));
+        assertEquals(-1L, array.build().get(integer(100_000_000, 200_000_000)));
         // doesn't fail - good
     }
 
     @Test
-    public void shouldNotCreateAnyPagesOnInitialization() throws Throwable {
+    void shouldNotCreateAnyPagesOnInitialization() throws Throwable {
         AllocationTracker tracker = AllocationTracker.create();
         SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(2 * PS, tracker);
 
@@ -148,12 +146,12 @@ public final class SparseNodeMappingTest extends RandomizedTest {
     }
 
     @Test
-    public void shouldCreateAndTrackSparsePagesOnDemand() throws Throwable {
+    void shouldCreateAndTrackSparsePagesOnDemand() throws Throwable {
         AllocationTracker tracker = AllocationTracker.create();
         SparseNodeMapping.Builder array = SparseNodeMapping.Builder.create(2 * PS, tracker);
 
-        int index = between(PS, 2 * PS - 1);
-        int value = between(42, 1337);
+        int index = integer(PS, 2 * PS - 1);
+        int value = integer(42, 1337);
         array.set(index, value);
 
         final AtomicReferenceArray<long[]> pages = getPages(array);
@@ -170,22 +168,22 @@ public final class SparseNodeMappingTest extends RandomizedTest {
     }
 
     @Test
-    public void shouldComputeMemoryEstimationForBestCase() {
-        long size = randomInt(Integer.MAX_VALUE);
+    void shouldComputeMemoryEstimationForBestCase() {
+        long size = integer(Integer.MAX_VALUE);
         final MemoryRange memoryRange = SparseNodeMapping.memoryEstimation(size, size);
         assertEquals(memoryRange.min, memoryRange.max);
     }
 
     @Test
-    public void shouldComputeMemoryEstimationForWorstCase() {
-        long size = randomInt(Integer.MAX_VALUE);
-        long highestId = between(size + 4096, size * 4096);
+    void shouldComputeMemoryEstimationForWorstCase() {
+        long size = integer(Integer.MAX_VALUE);
+        long highestId = between(size + 4096L, size * 4096L).Long();
         final MemoryRange memoryRange = SparseNodeMapping.memoryEstimation(highestId, size);
         assertTrue(memoryRange.min < memoryRange.max);
     }
 
     @Test
-    public void shouldComputeMemoryEstimation() {
+    void shouldComputeMemoryEstimation() {
         assertEquals(MemoryRange.of(40L), SparseNodeMapping.memoryEstimation(0L, 0L));
         assertEquals(MemoryRange.of(32832L), SparseNodeMapping.memoryEstimation(100L, 100L));
         assertEquals(MemoryRange.of(97_689_080L), SparseNodeMapping.memoryEstimation(100_000_000_000L, 1L));
@@ -194,7 +192,7 @@ public final class SparseNodeMappingTest extends RandomizedTest {
     }
 
     @Test
-    public void shouldComputeMemoryEstimationDocumented() {
+    void shouldComputeMemoryEstimationDocumented() {
         int pageSize = 4096;
         // int numPagesForSize = PageUtil.numPagesFor(size, PAGE_SHIFT, (int) PAGE_MASK);
         int size = 10_000;

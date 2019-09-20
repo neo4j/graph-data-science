@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.algo;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.mockito.AdditionalMatchers;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TriangleProc;
@@ -30,11 +30,13 @@ import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**        _______
  *        /       \
@@ -46,26 +48,26 @@ import static org.mockito.Mockito.*;
  *
  * @author mknblch
  */
-public class ClusteringCoefficientIntegrationTest {
+class ClusteringCoefficientIntegrationTest {
 
     private static GraphDatabaseAPI api;
 
-    @BeforeClass
-    public static void setup() throws KernelException {
+    @BeforeAll
+    static void setup() throws KernelException {
         final String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
-                        "CREATE (b:Node {name:'b'})\n" +
-                        "CREATE (c:Node {name:'c'})\n" +
-                        "CREATE (d:Node {name:'d'})\n" +
-                        "CREATE (e:Node {name:'e'})\n" +
-                        "CREATE (f:Node {name:'f'})\n" +
-                        "CREATE (g:Node {name:'g'})\n" +
-                        "CREATE (h:Node {name:'h'})\n" +
-                        "CREATE (i:Node {name:'i'})\n" +
-                        "CREATE" +
-                        " (a)-[:TYPE]->(b),\n" +
-                        " (b)-[:TYPE]->(c),\n" +
-                        " (c)-[:TYPE]->(a),\n" +
+                "CREATE (b:Node {name:'b'})\n" +
+                "CREATE (c:Node {name:'c'})\n" +
+                "CREATE (d:Node {name:'d'})\n" +
+                "CREATE (e:Node {name:'e'})\n" +
+                "CREATE (f:Node {name:'f'})\n" +
+                "CREATE (g:Node {name:'g'})\n" +
+                "CREATE (h:Node {name:'h'})\n" +
+                "CREATE (i:Node {name:'i'})\n" +
+                "CREATE" +
+                " (a)-[:TYPE]->(b),\n" +
+                " (b)-[:TYPE]->(c),\n" +
+                " (c)-[:TYPE]->(a),\n" +
 
                         " (d)-[:TYPE]->(e),\n" +
                         " (e)-[:TYPE]->(f),\n" +
@@ -89,13 +91,13 @@ public class ClusteringCoefficientIntegrationTest {
         }
     }
 
-    @AfterClass
-    public static void shutdownGraph() throws Exception {
+    @AfterAll
+    static void shutdownGraph() {
         api.shutdown();
     }
 
     @Test
-    public void testTriangleCountWriteCypher() throws Exception {
+    void testTriangleCountWriteCypher() {
         final String cypher = "CALL algo.triangleCount('Node', '', {concurrency:4, write:true, clusterCoefficientProperty:'c'})";
         api.execute(cypher).accept(row -> {
             final long loadMillis = row.getNumber("loadMillis").longValue();
@@ -126,7 +128,7 @@ public class ClusteringCoefficientIntegrationTest {
     }
 
     @Test
-    public void testTriangleCountStream() throws Exception {
+    void testTriangleCountStream() {
         final TriangleCountConsumer mock = mock(TriangleCountConsumer.class);
         final String cypher = "CALL algo.triangleCount.stream('Node', '', {concurrency:4}) YIELD nodeId, triangles, coefficient";
         api.execute(cypher).accept(row -> {

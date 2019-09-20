@@ -19,27 +19,28 @@
  */
 package org.neo4j.graphalgo.algo;
 
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.KShortestPathsProc;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toList;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
  * Graph:
@@ -52,40 +53,44 @@ import static org.junit.Assert.assertFalse;
  *
  * @author mknblch
  */
-public class YensKShortestPathsStreamingTest {
+class YensKShortestPathsStreamingTest {
 
-    @ClassRule
-    public static ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
+    private static GraphDatabaseAPI DB;
 
-    @BeforeClass
-    public static void setupGraph() throws KernelException {
-
-        final String cypher =
+    @BeforeAll
+    static void setupGraph() throws KernelException {
+        DB = TestDatabaseCreator.createTestDatabase();
+        String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
-                        "CREATE (b:Node {name:'b'})\n" +
-                        "CREATE (c:Node {name:'c'})\n" +
-                        "CREATE (d:Node {name:'d'})\n" +
-                        "CREATE (e:Node {name:'e'})\n" +
-                        "CREATE (f:Node {name:'f'})\n" +
-                        "CREATE (a)-[:TYPE {cost:1.0}]->(b)\n" +
-                        "CREATE (a)-[:TYPE {cost:5.0}]->(d)\n" +
-                        "CREATE (a)-[:TYPE {cost:7.0}]->(e)\n" +
-                        "CREATE (e)-[:TYPE {cost:3.0}]->(f)\n" +
-                        "CREATE (f)-[:TYPE {cost:4.0}]->(d)\n" +
-                        "CREATE (b)-[:TYPE {cost:2.0}]->(d)\n";
+                "CREATE (b:Node {name:'b'})\n" +
+                "CREATE (c:Node {name:'c'})\n" +
+                "CREATE (d:Node {name:'d'})\n" +
+                "CREATE (e:Node {name:'e'})\n" +
+                "CREATE (f:Node {name:'f'})\n" +
+                "CREATE (a)-[:TYPE {cost:1.0}]->(b)\n" +
+                "CREATE (a)-[:TYPE {cost:5.0}]->(d)\n" +
+                "CREATE (a)-[:TYPE {cost:7.0}]->(e)\n" +
+                "CREATE (e)-[:TYPE {cost:3.0}]->(f)\n" +
+                "CREATE (f)-[:TYPE {cost:4.0}]->(d)\n" +
+                "CREATE (b)-[:TYPE {cost:2.0}]->(d)\n";
 
         DB.execute(cypher);
         DB.execute("MATCH (c:Node {name: 'c'}) DELETE c");
-        DB.resolveDependency(Procedures.class).registerProcedure(KShortestPathsProc.class);
+        DB.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(KShortestPathsProc.class);
+    }
+
+    @AfterAll
+    static void teardownGraph() {
+        DB.shutdown();
     }
 
     @Test
-    public void shouldReturnNodesAndCosts() throws Exception {
+    void shouldReturnNodesAndCosts() {
         final String cypher =
                 "MATCH (a:Node{name:'a'}), (d:Node{name:'d'}) " +
-                        "CALL algo.kShortestPaths.stream(a, d, 42, 'cost') " +
-                        "YIELD index, sourceNodeId, targetNodeId, nodeIds, costs\n" +
-                        "RETURN *";
+                "CALL algo.kShortestPaths.stream(a, d, 42, 'cost') " +
+                "YIELD index, sourceNodeId, targetNodeId, nodeIds, costs\n" +
+                "RETURN *";
 
         Map<Long, List<Long>> expectedNodes = new HashMap<>();
         expectedNodes.put(0L, getNodeIds("a", "b", "d"));
@@ -108,7 +113,7 @@ public class YensKShortestPathsStreamingTest {
     }
 
     @Test
-    public void shouldReturnPaths() throws Exception {
+    void shouldReturnPaths() {
         final String cypher =
                 "MATCH (a:Node{name:'a'}), (d:Node{name:'d'}) " +
                         "CALL algo.kShortestPaths.stream(a, d, 42, 'cost', {path: true}) " +
@@ -141,7 +146,7 @@ public class YensKShortestPathsStreamingTest {
     }
 
     @Test
-    public void shouldNotStoreWeightsOnVirtualPathIfIgnoringProperty() throws Exception {
+    void shouldNotStoreWeightsOnVirtualPathIfIgnoringProperty() {
         final String cypher =
                 "MATCH (a:Node{name:'a'}), (d:Node{name:'d'}) " +
                         "CALL algo.kShortestPaths.stream(a, d, 42, null, {path: true}) " +

@@ -19,20 +19,21 @@
  */
 package org.neo4j.graphalgo.core.utils.container;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author mknblch
  */
-public class AtomicBitSetTest {
+class AtomicBitSetTest {
 
     private final AtomicBitSet set = new AtomicBitSet(Integer.MAX_VALUE);
 
     @Test
-    public void testSmallNumber() throws Exception {
+    void testSmallNumber() {
         assertFalse(set.get(0));
         set.set(0);
         assertTrue(set.get(0));
@@ -41,7 +42,7 @@ public class AtomicBitSetTest {
     }
 
     @Test
-    public void testBigNumber() throws Exception {
+    void testBigNumber() {
         assertFalse(set.get(Integer.MAX_VALUE));
         set.set(Integer.MAX_VALUE);
         assertTrue(set.get(Integer.MAX_VALUE));
@@ -49,18 +50,18 @@ public class AtomicBitSetTest {
         assertFalse(set.get(Integer.MAX_VALUE));
     }
 
-    @Test(expected = IndexOutOfBoundsException.class)
-    public void testGetInvalidValue() throws Exception {
-        assertFalse(set.get(-1));
-    }
-
-    @Test(expected = IndexOutOfBoundsException.class)
-    public void testSetInvalidValue() throws Exception {
-        set.set(-1);
+    @Test
+    void testGetInvalidValue() {
+        assertThrows(IndexOutOfBoundsException.class, () -> set.get(-1));
     }
 
     @Test
-    public void test() throws Exception {
+    void testSetInvalidValue() {
+        assertThrows(IndexOutOfBoundsException.class, () -> set.set(-1));
+    }
+
+    @Test
+    void test() {
         final AtomicBitSet set = new AtomicBitSet(2);
 
         set.set(0);
@@ -81,6 +82,5 @@ public class AtomicBitSetTest {
         set.unset(1);
         assertFalse(set.get(0));
         assertFalse(set.get(1));
-
     }
 }

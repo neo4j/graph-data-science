@@ -19,11 +19,11 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.junit.Rule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.rules.ErrorCollector;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.function.Executable;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
@@ -33,34 +33,29 @@ import org.neo4j.graphalgo.core.neo4jview.GraphView;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.hamcrest.Matchers.closeTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-public class RelationshipWeightImportTest {
-
-    @Rule
-    public ErrorCollector collector = new ErrorCollector();
+class RelationshipWeightImportTest {
 
     private Graph graph;
 
-    private static GraphDatabaseAPI db;
+    private GraphDatabaseAPI db;
 
-    @BeforeAll
-    static void setupGraphDb() {
+    @BeforeEach
+    void setupGraphDb() {
         db = TestDatabaseCreator.createTestDatabase();
     }
 
-    @AfterAll
-    static void shutdownGraphDb() {
-        if (db != null) db.shutdown();
-    }
-
     @AfterEach
-    void clearDb() {
-        db.execute("MATCH (n) DETACH DELETE n");
+    void shutdownGraphDb() {
+        db.shutdown();
     }
 
     @AllGraphTypesWithoutCypherTest
@@ -107,7 +102,7 @@ public class RelationshipWeightImportTest {
         // therefore the final weight for in/outs of either a/b is 1,
         // the weight of 2 is discarded.
         // This cannot be represented in the graph view
-        assumeFalse("GraphView is not able to represent the test case", graph instanceof GraphView);
+        assumeFalse(graph instanceof GraphView, "GraphView is not able to represent the test case");
 
         checkWeight(0, Direction.OUTGOING, 1.0);
         checkWeight(1, Direction.OUTGOING, 2.0);
@@ -152,28 +147,32 @@ public class RelationshipWeightImportTest {
     }
 
     private void checkWeight(int nodeId, Direction direction, double... expecteds) {
-        graph.forEachRelationship(nodeId, direction, checks(direction, expecteds, expecteds));
+        List<Executable> assertions = new ArrayList<>();
+        graph.forEachRelationship(nodeId, direction, checks(direction, expecteds, expecteds, assertions));
+        assertAll(assertions);
     }
 
     private void checkWeight(int nodeId, Direction direction, double[] expectedFromGraph, double... expectedFromIterator) {
-        graph.forEachRelationship(nodeId, direction, checks(direction, expectedFromIterator, expectedFromGraph));
+        List<Executable> assertions = new ArrayList<>();
+        graph.forEachRelationship(nodeId, direction, checks(direction, expectedFromIterator, expectedFromGraph, assertions));
+        assertAll(assertions);
     }
 
-    private WeightedRelationshipConsumer checks(Direction direction, double[] expectedFromIterator, double[] expectedFromGraph) {
+    private WeightedRelationshipConsumer checks(Direction direction, double[] expectedFromIterator, double[] expectedFromGraph, List<Executable> assertions) {
         AtomicInteger i = new AtomicInteger();
         int limit = Math.min(expectedFromIterator.length, expectedFromGraph.length);
         return (s, t, w) -> {
             String rel = String.format("(%d %s %d)", s, arrow(direction), t);
             if (i.get() >= limit) {
-                collector.addError(new RuntimeException(String.format("Unexpected relationship: %s = %.1f", rel, w)));
+                assertions.add(() -> assertFalse(i.get() >= limit, String.format("Unexpected relationship: %s = %.1f", rel, w)));
                 return false;
             }
             double actual = (direction == Direction.INCOMING) ? graph.weightOf(t, s) : graph.weightOf(s, t);
             final int index = i.getAndIncrement();
             double expectedIterator = expectedFromIterator[index];
             double expectedGraph = expectedFromGraph[index];
-            collector.checkThat(String.format("%s (RI+W): %.1f != %.1f", rel, actual, expectedGraph), actual, is(closeTo(expectedGraph, 1e-4)));
-            collector.checkThat(String.format("%s (WRI): %.1f != %.1f", rel, w, expectedIterator), w, is(closeTo(expectedIterator, 1e-4)));
+            assertions.add(() -> assertEquals(expectedGraph, actual, 1e-4, String.format("%s (RI+W): %.1f != %.1f", rel, actual, expectedGraph)));
+            assertions.add(() -> assertEquals(expectedIterator, w, 1e-4, String.format("%s (WRI): %.1f != %.1f", rel, w, expectedIterator)));
             return true;
         };
     }

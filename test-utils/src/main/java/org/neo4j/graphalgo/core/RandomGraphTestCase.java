@@ -19,22 +19,19 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Rule;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 
-import java.io.File;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 public abstract class RandomGraphTestCase {
     private static boolean hasFailures = false;
@@ -62,13 +59,14 @@ public abstract class RandomGraphTestCase {
     private static final String RANDOM_LABELS =
             "MATCH (n) WHERE rand() < 0.5 SET n:Label2";
 
-    @BeforeClass
-    public static void setupGraph() {
+    @BeforeEach
+    void setupGraph() {
+        db = TestDatabaseCreator.createTestDatabase();
         db = buildGraph(NODE_COUNT);
     }
 
-    @AfterClass
-    public static void shutdownGraph() throws Exception {
+    @AfterEach
+    public static void shutdownGraph() {
         if (hasFailures) {
             try {
                 PrintWriter pw = new PrintWriter(System.out);
@@ -79,7 +77,7 @@ public abstract class RandomGraphTestCase {
                 System.err.println("Error exporting graph "+e.getMessage());
             }
         }
-        if (db!=null) db.shutdown();
+        db.shutdown();
     }
 
     static GraphDatabaseAPI buildGraph(int nodeCount) {

@@ -37,10 +37,10 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public final class ShortestPathDijkstraTest {
+final class ShortestPathDijkstraTest {
 
     // https://en.wikipedia.org/wiki/Shortest_path_problem#/media/File:Shortest_path_with_direct_weights.svg
     private static final String DB_CYPHER =
@@ -122,7 +122,7 @@ public final class ShortestPathDijkstraTest {
     }
 
     @AllGraphTypesWithoutCypherTest
-    public void test1(Class<? extends GraphFactory> graphImpl) {
+    void test1(Class<? extends GraphFactory> graphImpl) {
         final Label label = Label.label("Label1");
         RelationshipType type = RelationshipType.withName("TYPE1");
 
@@ -153,7 +153,7 @@ public final class ShortestPathDijkstraTest {
     }
 
     @AllGraphTypesWithoutCypherTest
-    public void test2(Class<? extends GraphFactory> graphImpl) {
+    void test2(Class<? extends GraphFactory> graphImpl) {
         final Label label = Label.label("Label2");
         RelationshipType type = RelationshipType.withName("TYPE2");
         ShortestPath expected = expected(label, type,
@@ -185,7 +185,7 @@ public final class ShortestPathDijkstraTest {
      * @see <a href="https://github.com/neo4j-contrib/neo4j-graph-algorithms/issues/599">Issue #599</a>
      */
     @AllGraphTypesWithoutCypherTest
-    public void test599(Class<? extends GraphFactory> graphImpl) {
+    void test599(Class<? extends GraphFactory> graphImpl) {
         Label label = Label.label("Label599");
         RelationshipType type = RelationshipType.withName("TYPE599");
         ShortestPath expected = expected(
@@ -216,7 +216,7 @@ public final class ShortestPathDijkstraTest {
     }
 
     @AllGraphTypesWithoutCypherTest
-    public void testResultStream(Class<? extends GraphFactory> graphImpl) {
+    void testResultStream(Class<? extends GraphFactory> graphImpl) {
         final Label label = Label.label("Label1");
         RelationshipType type = RelationshipType.withName("TYPE1");
         ShortestPath expected = expected(label, type,

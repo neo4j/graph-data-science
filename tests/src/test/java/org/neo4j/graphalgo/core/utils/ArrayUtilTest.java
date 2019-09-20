@@ -25,16 +25,16 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ArrayUtilTest {
+class ArrayUtilTest {
 
     static Stream<Integer> testDataSizes() {
         return Stream.of(32, 33, 64, 65, 2048, 2049, 4096, 4097);
     }
 
-    public int[] setup(int size) {
+    private int[] setup(int size) {
         int[] testData = new int[size];
         Arrays.setAll(testData, i -> (i + 1) * 2);
         return testData;
@@ -45,8 +45,8 @@ public class ArrayUtilTest {
     void testBinarySearch(int size) {
         int[] testData = setup(size);
         for (int i = 0; i < testData.length; i++) {
-            assertTrue(String.format("False negative at %d value %d%n", i, testData[i]), ArrayUtil.binarySearch(testData, testData.length, (i + 1) * 2));
-            assertFalse(String.format("False positive at %d value %d%n", i, testData[i]), ArrayUtil.binarySearch(testData, testData.length, (i * 2) + 1));
+            assertTrue(ArrayUtil.binarySearch(testData, testData.length, (i + 1) * 2), String.format("False negative at %d value %d%n", i, testData[i]));
+            assertFalse(ArrayUtil.binarySearch(testData, testData.length, (i * 2) + 1), String.format("False positive at %d value %d%n", i, testData[i]));
         }
     }
 
@@ -55,8 +55,8 @@ public class ArrayUtilTest {
     void testLinearSearch(int size) {
         int[] testData = setup(size);
         for (int i = 0; i < testData.length; i++) {
-            assertTrue(String.format("False negative at %d value %d%n", i, testData[i]), ArrayUtil.linearSearch(testData, testData.length, (i + 1) * 2));
-            assertFalse(String.format("False positive at %d value %d%n", i, testData[i]), ArrayUtil.linearSearch(testData, testData.length, (i * 2) + 1));
+            assertTrue(ArrayUtil.linearSearch(testData, testData.length, (i + 1) * 2), String.format("False negative at %d value %d%n", i, testData[i]));
+            assertFalse(ArrayUtil.linearSearch(testData, testData.length, (i * 2) + 1), String.format("False positive at %d value %d%n", i, testData[i]));
         }
     }
 }

@@ -19,15 +19,15 @@
  */
 package org.neo4j.graphalgo.core.utils.paged.dss;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.neo4j.graphalgo.core.utils.paged.dss.IncrementalDisjointSetStruct.memoryEstimation;
 
-public class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
+class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
 
     @Override
     SequentialDisjointSetStruct newSet(final int capacity) {
@@ -43,7 +43,7 @@ public class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
     }
 
     @Test
-    public void shouldRunWithLessInitialCommunities() {
+    void shouldRunWithLessInitialCommunities() {
         TestWeightMapping communities = new TestWeightMapping(0, 0, 1, 0);
         SequentialDisjointSetStruct dss = newSet(4, communities);
 
@@ -56,7 +56,7 @@ public class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
     }
 
     @Test
-    public void shouldRunWithLessInitialCommunitiesAndLargerIdSpace() {
+    void shouldRunWithLessInitialCommunitiesAndLargerIdSpace() {
         TestWeightMapping communities = new TestWeightMapping(0, 10, 1, 10);
         SequentialDisjointSetStruct dss = newSet(4, communities);
 
@@ -69,7 +69,7 @@ public class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
     }
 
     @Test
-    public void shouldRunWithLessInitialCommunitiesAndOverlappingIdSpace() {
+    void shouldRunWithLessInitialCommunitiesAndOverlappingIdSpace() {
         TestWeightMapping communities = new TestWeightMapping(0, 3, 1, 3);
         SequentialDisjointSetStruct dss = newSet(4, communities);
 
@@ -82,7 +82,7 @@ public class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
     }
 
     @Test
-    public void shouldComputeMemoryEstimation() {
+    void shouldComputeMemoryEstimation() {
         assertMemoryEstimation(memoryEstimation(), 0, MemoryRange.of(296));
         assertMemoryEstimation(memoryEstimation(), 100, MemoryRange.of(2696));
         assertMemoryEstimation(memoryEstimation(), 100_000_000_000L, MemoryRange.of(2_400_366_211_280L));

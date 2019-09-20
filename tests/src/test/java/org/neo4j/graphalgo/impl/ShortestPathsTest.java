@@ -20,9 +20,9 @@
 package org.neo4j.graphalgo.impl;
 
 import com.carrotsearch.hppc.IntDoubleMap;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -31,7 +31,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 /**         5     5      5
@@ -45,52 +45,52 @@ import static org.junit.Assert.assertEquals;
  */
 public final class ShortestPathsTest {
 
-    private static GraphDatabaseAPI api;
+    private GraphDatabaseAPI api;
 
-    private static Graph graph;
+    private Graph graph;
 
     private static long head, tail, outstanding;
 
-    @BeforeClass
-    public static void setup() {
-        final String cypher =
+    @BeforeEach
+    public void setup() {
+        String cypher =
                 "CREATE (s:Node {name:'s'})\n" +
-                        "CREATE (a:Node {name:'a'})\n" +
-                        "CREATE (b:Node {name:'b'})\n" +
-                        "CREATE (c:Node {name:'c'})\n" +
-                        "CREATE (d:Node {name:'d'})\n" +
-                        "CREATE (e:Node {name:'e'})\n" +
-                        "CREATE (f:Node {name:'f'})\n" +
-                        "CREATE (g:Node {name:'g'})\n" +
-                        "CREATE (h:Node {name:'h'})\n" +
-                        "CREATE (i:Node {name:'i'})\n" +
-                        "CREATE (x:Node {name:'x'})\n" +
-                        "CREATE (q:Node {name:'q'})\n" + // outstanding node
-                        "CREATE" +
-                        " (s)-[:TYPE {cost:5}]->(a),\n" +
-                        " (a)-[:TYPE {cost:5}]->(b),\n" +
-                        " (b)-[:TYPE {cost:5}]->(c),\n" +
-                        " (c)-[:TYPE {cost:5}]->(x),\n" +
+                "CREATE (a:Node {name:'a'})\n" +
+                "CREATE (b:Node {name:'b'})\n" +
+                "CREATE (c:Node {name:'c'})\n" +
+                "CREATE (d:Node {name:'d'})\n" +
+                "CREATE (e:Node {name:'e'})\n" +
+                "CREATE (f:Node {name:'f'})\n" +
+                "CREATE (g:Node {name:'g'})\n" +
+                "CREATE (h:Node {name:'h'})\n" +
+                "CREATE (i:Node {name:'i'})\n" +
+                "CREATE (x:Node {name:'x'})\n" +
+                "CREATE (q:Node {name:'q'})\n" + // outstanding node
+                "CREATE" +
+                " (s)-[:TYPE {cost:5}]->(a),\n" +
+                " (a)-[:TYPE {cost:5}]->(b),\n" +
+                " (b)-[:TYPE {cost:5}]->(c),\n" +
+                " (c)-[:TYPE {cost:5}]->(x),\n" +
 
-                        " (a)-[:TYPE {cost:2}]->(g),\n" +
-                        " (b)-[:TYPE {cost:2}]->(h),\n" +
-                        " (c)-[:TYPE {cost:2}]->(i),\n" +
+                " (a)-[:TYPE {cost:2}]->(g),\n" +
+                " (b)-[:TYPE {cost:2}]->(h),\n" +
+                " (c)-[:TYPE {cost:2}]->(i),\n" +
 
-                        " (s)-[:TYPE {cost:3}]->(d),\n" +
-                        " (d)-[:TYPE {cost:3}]->(e),\n" +
-                        " (e)-[:TYPE {cost:3}]->(f),\n" +
-                        " (f)-[:TYPE {cost:3}]->(x),\n" +
+                " (s)-[:TYPE {cost:3}]->(d),\n" +
+                " (d)-[:TYPE {cost:3}]->(e),\n" +
+                " (e)-[:TYPE {cost:3}]->(f),\n" +
+                " (f)-[:TYPE {cost:3}]->(x),\n" +
 
-                        " (d)-[:TYPE {cost:3}]->(g),\n" +
-                        " (e)-[:TYPE {cost:3}]->(h),\n" +
-                        " (f)-[:TYPE {cost:3}]->(i),\n" +
+                " (d)-[:TYPE {cost:3}]->(g),\n" +
+                " (e)-[:TYPE {cost:3}]->(h),\n" +
+                " (f)-[:TYPE {cost:3}]->(i),\n" +
 
-                        " (s)-[:TYPE {cost:2}]->(g),\n" +
-                        " (g)-[:TYPE {cost:2}]->(h),\n" +
-                        " (h)-[:TYPE {cost:2}]->(i),\n" +
-                        " (i)-[:TYPE {cost:2}]->(x),\n" +
+                " (s)-[:TYPE {cost:2}]->(g),\n" +
+                " (g)-[:TYPE {cost:2}]->(h),\n" +
+                " (h)-[:TYPE {cost:2}]->(i),\n" +
+                " (i)-[:TYPE {cost:2}]->(x),\n" +
 
-                        " (x)-[:TYPE {cost:2}]->(s)"; // create cycle
+                " (x)-[:TYPE {cost:2}]->(s)"; // create cycle
 
         api = TestDatabaseCreator.createTestDatabase();
         try (Transaction tx = api.beginTx()) {
@@ -109,14 +109,14 @@ public final class ShortestPathsTest {
                 .load(HugeGraphFactory.class);
     }
 
-    @AfterClass
-    public static void tearDown() throws Exception {
-        if (api != null) api.shutdown();
+    @AfterEach
+    public void tearDown() {
+        api.shutdown();
         graph = null;
     }
 
     @Test
-    public void testPaths() throws Exception {
+    public void testPaths() {
 
         final ShortestPaths sssp = new ShortestPaths(graph);
 
@@ -127,7 +127,7 @@ public final class ShortestPathsTest {
         assertEquals(Double.POSITIVE_INFINITY, sp.get(Math.toIntExact(graph.toMappedNodeId(outstanding))),0.1);
     }
 
-    public static Node getNode(String name) {
+    public Node getNode(String name) {
         final Node[] node = new Node[1];
         api.execute("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n").accept(row -> {
             node[0] = row.getNode("n");

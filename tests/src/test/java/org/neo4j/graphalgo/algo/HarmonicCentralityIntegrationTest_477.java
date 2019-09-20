@@ -19,56 +19,45 @@
  */
 package org.neo4j.graphalgo.algo;
 
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.AdditionalMatchers;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.graphalgo.HarmonicCentralityProc;
-import org.neo4j.graphalgo.helper.graphbuilder.DefaultBuilder;
-import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.Result;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
-
-import static org.junit.Assert.assertNotEquals;
-import static org.mockito.Mockito.*;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 
 /**
  * @author mknblch
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class HarmonicCentralityIntegrationTest_477 {
 
     public static final String TYPE = "TYPE";
 
-    @ClassRule
-    public static final ImpermanentDatabaseRule db = new ImpermanentDatabaseRule();
+    private static GraphDatabaseAPI db;
 
-    @BeforeClass
-    public static void setupGraph() throws KernelException {
-
+    @BeforeAll
+    static void setupGraph() throws KernelException {
+        db = TestDatabaseCreator.createTestDatabase();
         db.execute(
-                "CREATE (alice:Person{id:\"Alice\"}),\n" +
-                        "       (michael:Person{id:\"Michael\"}),\n" +
-                        "       (karin:Person{id:\"Karin\"}),\n" +
-                        "       (chris:Person{id:\"Chris\"}),\n" +
-                        "       (will:Person{id:\"Will\"}),\n" +
-                        "       (mark:Person{id:\"Mark\"})\n" +
-                        "CREATE (michael)-[:KNOWS]->(karin),\n" +
-                        "       (michael)-[:KNOWS]->(chris),\n" +
-                        "       (will)-[:KNOWS]->(michael),\n" +
-                        "       (mark)-[:KNOWS]->(michael),\n" +
-                        "       (mark)-[:KNOWS]->(will),\n" +
-                        "       (alice)-[:KNOWS]->(michael),\n" +
-                        "       (will)-[:KNOWS]->(chris),\n" +
-                        "       (chris)-[:KNOWS]->(karin);"
+                  "CREATE (alice:Person{id:\"Alice\"}),\n" +
+                    "       (michael:Person{id:\"Michael\"}),\n" +
+                    "       (karin:Person{id:\"Karin\"}),\n" +
+                    "       (chris:Person{id:\"Chris\"}),\n" +
+                    "       (will:Person{id:\"Will\"}),\n" +
+                    "       (mark:Person{id:\"Mark\"})\n" +
+                    "CREATE (michael)-[:KNOWS]->(karin),\n" +
+                    "       (michael)-[:KNOWS]->(chris),\n" +
+                    "       (will)-[:KNOWS]->(michael),\n" +
+                    "       (mark)-[:KNOWS]->(michael),\n" +
+                    "       (mark)-[:KNOWS]->(will),\n" +
+                    "       (alice)-[:KNOWS]->(michael),\n" +
+                    "       (will)-[:KNOWS]->(chris),\n" +
+                    "       (chris)-[:KNOWS]->(karin);"
         );
 
         db.getDependencyResolver()
@@ -77,7 +66,7 @@ public class HarmonicCentralityIntegrationTest_477 {
     }
 
     @Test
-    public void testLoad() {
+    void testLoad() {
         String cypher =
                 "CALL algo.closeness.harmonic.stream(" +
                 "    'MATCH (u:Person) RETURN id(u) as id'," +

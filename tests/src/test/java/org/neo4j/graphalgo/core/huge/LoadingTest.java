@@ -20,8 +20,6 @@
 package org.neo4j.graphalgo.core.huge;
 
 import com.carrotsearch.hppc.LongArrayList;
-import org.junit.Assume;
-import org.junit.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -37,8 +35,9 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 final class LoadingTest {
 
@@ -61,7 +60,7 @@ final class LoadingTest {
 
     @AllGraphTypesWithoutCypherTest
     void testBasicLoading(Class<? extends GraphFactory> graphFactory) {
-        Assume.assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
+        assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
         DB.execute("CREATE (a:Node {name:'a'})\n" +
                    "CREATE (b:Node {name:'b'})\n" +
                    "CREATE (c:Node {name:'c'})\n" +

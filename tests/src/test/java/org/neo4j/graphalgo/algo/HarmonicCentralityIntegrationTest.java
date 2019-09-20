@@ -19,14 +19,16 @@
  */
 package org.neo4j.graphalgo.algo;
 
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.AdditionalMatchers;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.graphalgo.HarmonicCentralityProc;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.helper.graphbuilder.DefaultBuilder;
 import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Node;
@@ -34,51 +36,50 @@ import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Result;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.junit.Assert.assertNotEquals;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 
 /**
  * @author mknblch
  */
-@RunWith(MockitoJUnitRunner.class)
-public class HarmonicCentralityIntegrationTest {
+@ExtendWith(MockitoExtension.class)
+class HarmonicCentralityIntegrationTest {
 
     public static final String TYPE = "TYPE";
 
-    @ClassRule
-    public static final ImpermanentDatabaseRule db = new ImpermanentDatabaseRule();
+    private GraphDatabaseAPI db;
 
     private static DefaultBuilder builder;
     private static long centerNodeId;
 
-
-
     interface TestConsumer {
-
         void accept(long nodeId, double centrality);
     }
 
     @Mock
     private TestConsumer consumer;
 
-    @BeforeClass
-    public static void setupGraph() throws KernelException {
-
+    @BeforeEach
+    void setupGraph() throws KernelException {
+        db = TestDatabaseCreator.createTestDatabase();
         builder = GraphBuilder.create(db)
                 .setLabel("Node")
                 .setRelationship(TYPE);
 
-        final RelationshipType type = RelationshipType.withName(TYPE);
+        RelationshipType type = RelationshipType.withName(TYPE);
 
-        /**
+        /*
          * create two rings of nodes where each node of ring A
          * is connected to center while center is connected to
          * each node of ring B.
          */
-        final Node center = builder.newDefaultBuilder()
+        Node center = builder.newDefaultBuilder()
                 .setLabel("Node")
                 .createNode();
 
@@ -100,8 +101,13 @@ public class HarmonicCentralityIntegrationTest {
                 .registerProcedure(HarmonicCentralityProc.class);
     }
 
+    @AfterEach
+    void teardown() {
+        db.shutdown();
+    }
+
     @Test
-    public void testHarmonicStream() throws Exception {
+    void testHarmonicStream() throws Exception {
 
         db.execute("CALL algo.closeness.harmonic.stream('Node', 'TYPE') YIELD nodeId, centrality")
                 .accept((Result.ResultVisitor<Exception>) row -> {
@@ -116,7 +122,7 @@ public class HarmonicCentralityIntegrationTest {
 
 
     @Test
-    public void testHugeHarmonicStream() throws Exception {
+    void testHugeHarmonicStream() throws Exception {
 
         db.execute("CALL algo.closeness.harmonic.stream('Node', 'TYPE', {graph:'huge'}) YIELD nodeId, centrality")
                 .accept((Result.ResultVisitor<Exception>) row -> {
@@ -130,7 +136,7 @@ public class HarmonicCentralityIntegrationTest {
     }
 
     @Test
-    public void testHarmonicWrite() throws Exception {
+    void testHarmonicWrite() throws Exception {
 
         db.execute("CALL algo.closeness.harmonic('','', {write:true, stats:true, writeProperty:'centrality'}) YIELD " +
                 "nodes, loadMillis, computeMillis, writeMillis")
@@ -153,7 +159,7 @@ public class HarmonicCentralityIntegrationTest {
     }
 
     @Test
-    public void testHugeHarmonicWrite() throws Exception {
+    void testHugeHarmonicWrite() throws Exception {
 
         db.execute("CALL algo.closeness.harmonic('','', {write:true, stats:true, writeProperty:'centrality', graph:'huge'}) YIELD " +
                 "nodes, loadMillis, computeMillis, writeMillis")

@@ -19,20 +19,17 @@
  */
 package org.neo4j.graphalgo.algo;
 
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.KShortestPathsProc;
-import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Graph:
@@ -45,29 +42,33 @@ import static org.junit.Assert.assertEquals;
  *
  * @author mknblch
  */
-public class YensKShortestPathsRelationshipCostsTest {
+class YensKShortestPathsRelationshipCostsTest {
 
-    @ClassRule
-    public static ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
+    private static GraphDatabaseAPI DB;
 
-    @BeforeClass
-    public static void setupGraph() throws KernelException {
-
-        final String cypher =
+    @BeforeAll
+    static void setupGraph() throws KernelException {
+        DB = TestDatabaseCreator.createTestDatabase();
+        String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
-                        "CREATE (b:Node {name:'b'})\n" +
-                        "CREATE (c:Node {name:'c'})\n" +
-                        "CREATE" +
-                        " (a)-[:TYPE {cost:3.0}]->(b),\n" +
-                        " (b)-[:TYPE {cost:2.0}]->(c)";
+                "CREATE (b:Node {name:'b'})\n" +
+                "CREATE (c:Node {name:'c'})\n" +
+                "CREATE" +
+                " (a)-[:TYPE {cost:3.0}]->(b),\n" +
+                " (b)-[:TYPE {cost:2.0}]->(c)";
 
         DB.execute(cypher);
-        DB.resolveDependency(Procedures.class).registerProcedure(KShortestPathsProc.class);
+        DB.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(KShortestPathsProc.class);
+    }
+
+    @AfterAll
+    static void teardownGraph() {
+        DB.shutdown();
     }
 
     @Test
-    public void test() {
-        final String cypher =
+    void test() {
+        String cypher =
                 "MATCH (c:Node{name:'c'}), (a:Node{name:'a'}) " +
                 "CALL algo.kShortestPaths(c, a, 1, 'cost') " +
                 "YIELD resultCount RETURN resultCount";

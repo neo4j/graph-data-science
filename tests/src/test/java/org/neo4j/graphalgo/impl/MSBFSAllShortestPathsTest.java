@@ -32,7 +32,7 @@ import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Matchers.anyDouble;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.mock;

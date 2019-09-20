@@ -19,10 +19,11 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -31,23 +32,32 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public final class HugeGraphLoadingTest {
+final class HugeGraphLoadingTest {
 
-    @Rule
-    public ImpermanentDatabaseRule db = new ImpermanentDatabaseRule();
+    private GraphDatabaseAPI db;
+
+    @BeforeEach
+    void setup() {
+        db = TestDatabaseCreator.createTestDatabase();
+    }
+
+    @AfterEach
+    void teardown() {
+        db.shutdown();
+    }
 
     @Test
-    public void testDefaultPropertyLoading() {
+    void testDefaultPropertyLoading() {
         // default value
         testPropertyLoading(28);
     }
 
     @Test
-    public void testPagedPropertyLoading() {
+    void testPagedPropertyLoading() {
         // set low page shift so that 100k nodes will trigger the usage of the paged
         // huge array, which will trigger multi page code paths.
         // we import nodes in batches of 54600 nodes, using a page shift of 14
@@ -63,14 +73,15 @@ public final class HugeGraphLoadingTest {
         // something larger than one batch
         int nodeCount = 60_000;
         Label label = Label.label("Foo");
-        db.executeAndCommit(gdb -> {
+        try (Transaction tx = db.beginTx()) {
             for (int j = 0; j < nodeCount; j++) {
-                Node node = gdb.createNode(label);
+                Node node = db.createNode(label);
                 node.setProperty("bar", node.getId());
             }
-        });
+            tx.success();
+        }
 
-        final Graph graph = new GraphLoader(db)
+        Graph graph = new GraphLoader(db)
                 .withDirection(Direction.OUTGOING)
                 .withLabel(label)
                 .withOptionalNodeProperties(PropertyMapping.of("bar", "bar", -1.0))
@@ -82,17 +93,17 @@ public final class HugeGraphLoadingTest {
                 "Expected %d properties to be imported. Actually imported %d properties (missing %d properties).",
                 nodeCount, nodeProperties.size(), propertyCountDiff
         );
-        assertEquals(errorMessage, 0, propertyCountDiff);
+        assertEquals(0, propertyCountDiff, errorMessage);
 
         for (int nodeId = 0; nodeId < nodeCount; nodeId++) {
             double weight = nodeProperties.nodeWeight(nodeId);
             long neoId = graph.toOriginalNodeId(nodeId);
-            assertEquals(String.format("Property for node %d (neo = %d) was overwritten.", nodeId, neoId), neoId, (long) weight);
+            assertEquals(neoId, (long) weight, String.format("Property for node %d (neo = %d) was overwritten.", nodeId, neoId));
         }
     }
 
     @Test
-    public void testFullPageLoading() {
+    void testFullPageLoading() {
         final int recordsPerPage = 546;
 
         // IdGeneration in Neo4j happens in chunks of 20. In order to get completely occupied pages
@@ -101,11 +112,12 @@ public final class HugeGraphLoadingTest {
         final int pages = 10;
         int nodeCount = recordsPerPage * pages;
 
-        db.executeAndCommit(gdb -> {
+        try (Transaction tx = db.beginTx()) {
             for (int i = 0; i < nodeCount; i++) {
-                gdb.createNode();
+                db.createNode();
             }
-        });
+            tx.success();
+        }
 
         final Graph graph = new GraphLoader(db).load(HugeGraphFactory.class);
 
@@ -113,7 +125,7 @@ public final class HugeGraphLoadingTest {
     }
 
     @Test
-    public void testParallelEdgeWithHugeOffsetLoading() {
+    void testParallelEdgeWithHugeOffsetLoading() {
         RelationshipType fooRelType = RelationshipType.withName("FOO");
         int nodeCount = 1_000;
         int parallelEdgeCount = 10;
@@ -139,6 +151,6 @@ public final class HugeGraphLoadingTest {
                 .withOptionalRelationshipWeightsFromProperty("weight", 1.0)
                 .load(HugeGraphFactory.class);
 
-        Assert.assertEquals(2, graph.relationshipCount());
+        assertEquals(2, graph.relationshipCount());
     }
 }

@@ -19,92 +19,60 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ErrorCollector;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
-import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.RelationshipType;
 
-import java.util.Arrays;
-import java.util.Collection;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@RunWith(Parameterized.class)
-public final class GraphLoaderNegativeTest extends RandomGraphTestCase {
+final class GraphLoaderNegativeTest extends RandomGraphTestCase {
 
-    private Class<? extends GraphFactory> graphImpl;
-
-    @Rule
-    public ErrorCollector collector = new ErrorCollector();
-
-    @Rule
-    public ExpectedException expected = ExpectedException.none();
-
-    @Parameters(name = "{1}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(
-                new Object[]{GraphViewFactory.class, "GraphViewFactory"},
-                new Object[]{HugeGraphFactory.class, "HugeGraphFactory"}
+    @AllGraphTypesWithoutCypherTest
+    void shouldThrowForNonExistingStringLabel(Class<? extends GraphFactory> graphImpl) {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new GraphLoader(RandomGraphTestCase.db).withLabel("foo").load(graphImpl),
+                "Node label not found: 'foo'"
         );
     }
 
-    @SuppressWarnings("unchecked")
-    public GraphLoaderNegativeTest(
-            Class<?> graphImpl,
-            String nameIgnoredOnlyForTestName) {
-        this.graphImpl = (Class<? extends GraphFactory>) graphImpl;
+    @AllGraphTypesWithoutCypherTest
+    void shouldThrowForNonExistingLabel(Class<? extends GraphFactory> graphImpl) {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new GraphLoader(RandomGraphTestCase.db).withLabel(Label.label("foo")).load(graphImpl),
+                "Node label not found: 'foo'"
+        );
     }
 
-    @Test
-    public void shouldThrowForNonExistingStringLabel() {
-        expected.expect(IllegalArgumentException.class);
-        expected.expectMessage("Node label not found: 'foo'");
-        new GraphLoader(RandomGraphTestCase.db)
-                .withLabel("foo")
-                .load(graphImpl);
+    @AllGraphTypesWithoutCypherTest
+    void shouldThrowForNonExistingStringRelType(Class<? extends GraphFactory> graphImpl) {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new GraphLoader(RandomGraphTestCase.db).withRelationshipType("foo").load(graphImpl),
+                ("Relationship type(s) not found: 'foo'")
+        );
     }
 
-    @Test
-    public void shouldThrowForNonExistingLabel() {
-        expected.expect(IllegalArgumentException.class);
-        expected.expectMessage("Node label not found: 'foo'");
-        new GraphLoader(RandomGraphTestCase.db)
-                .withLabel(Label.label("foo"))
-                .load(graphImpl);
+    @AllGraphTypesWithoutCypherTest
+    void shouldThrowForNonExistingRelType(Class<? extends GraphFactory> graphImpl) {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new GraphLoader(RandomGraphTestCase.db).withRelationshipType(RelationshipType.withName("foo")).load(graphImpl),
+                "Relationship type(s) not found: 'foo'"
+        );
     }
 
-    @Test
-    public void shouldThrowForNonExistingStringRelType() {
-        expected.expect(IllegalArgumentException.class);
-        expected.expectMessage("Relationship type(s) not found: 'foo'");
-        new GraphLoader(RandomGraphTestCase.db)
-                .withRelationshipType("foo")
-                .load(graphImpl);
+    @AllGraphTypesWithoutCypherTest
+    void shouldThrowForNonExistingNodeProperty(Class<? extends GraphFactory> graphImpl) {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new GraphLoader(RandomGraphTestCase.db)
+                        .withOptionalNodeProperties(new PropertyMapping("foo", "foo", 0.0))
+                        .load(graphImpl),
+                "Node properties not found: 'foo'"
+        );
     }
-
-    @Test
-    public void shouldThrowForNonExistingRelType() {
-        expected.expect(IllegalArgumentException.class);
-        expected.expectMessage("Relationship type(s) not found: 'foo'");
-        new GraphLoader(RandomGraphTestCase.db)
-                .withRelationshipType(RelationshipType.withName("foo"))
-                .load(graphImpl);
-    }
-
-    @Test
-    public void shouldThrowForNonExistingNodeProperty() {
-        expected.expect(IllegalArgumentException.class);
-        expected.expectMessage("Node properties not found: 'foo'");
-        new GraphLoader(RandomGraphTestCase.db)
-                .withOptionalNodeProperties(new PropertyMapping("foo", "foo", 0.0))
-                .load(graphImpl);
-    }
-
 }

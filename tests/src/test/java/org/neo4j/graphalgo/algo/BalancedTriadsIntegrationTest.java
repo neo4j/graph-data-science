@@ -19,19 +19,17 @@
  */
 package org.neo4j.graphalgo.algo;
 
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.AdditionalMatchers;
 import org.neo4j.graphalgo.BalancedTriadsProc;
-import org.neo4j.graphdb.QueryExecutionException;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -45,43 +43,47 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
  */
 public class BalancedTriadsIntegrationTest {
 
-    @ClassRule
-    public static final ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
+    private GraphDatabaseAPI db;
 
-    @BeforeClass
-    public static void setup() throws KernelException {
-
-        final String cypher =
+    @BeforeEach
+    void setup() throws KernelException {
+        db = TestDatabaseCreator.createTestDatabase();
+        String cypher =
                 "CREATE (a:Node {name:'a'})\n" + // center node
-                        "CREATE (b:Node {name:'b'})\n" +
-                        "CREATE (c:Node {name:'c'})\n" +
-                        "CREATE (d:Node {name:'d'})\n" +
-                        "CREATE (e:Node {name:'e'})\n" +
-                        "CREATE (f:Node {name:'f'})\n" +
-                        "CREATE (g:Node {name:'g'})\n" +
-                        "CREATE" +
+                "CREATE (b:Node {name:'b'})\n" +
+                "CREATE (c:Node {name:'c'})\n" +
+                "CREATE (d:Node {name:'d'})\n" +
+                "CREATE (e:Node {name:'e'})\n" +
+                "CREATE (f:Node {name:'f'})\n" +
+                "CREATE (g:Node {name:'g'})\n" +
+                "CREATE" +
 
-                        " (a)-[:TYPE {w:1.0}]->(b),\n" +
-                        " (a)-[:TYPE {w:-1.0}]->(c),\n" +
-                        " (a)-[:TYPE {w:1.0}]->(d),\n" +
-                        " (a)-[:TYPE {w:-1.0}]->(e),\n" +
-                        " (a)-[:TYPE {w:1.0}]->(f),\n" +
-                        " (a)-[:TYPE {w:-1.0}]->(g),\n" +
+                " (a)-[:TYPE {w:1.0}]->(b),\n" +
+                " (a)-[:TYPE {w:-1.0}]->(c),\n" +
+                " (a)-[:TYPE {w:1.0}]->(d),\n" +
+                " (a)-[:TYPE {w:-1.0}]->(e),\n" +
+                " (a)-[:TYPE {w:1.0}]->(f),\n" +
+                " (a)-[:TYPE {w:-1.0}]->(g),\n" +
 
-                        " (b)-[:TYPE {w:-1.0}]->(c),\n" +
-                        " (c)-[:TYPE {w:1.0}]->(d),\n" +
-                        " (d)-[:TYPE {w:-1.0}]->(e),\n" +
-                        " (e)-[:TYPE {w:1.0}]->(f),\n" +
-                        " (f)-[:TYPE {w:-1.0}]->(g),\n" +
-                        " (g)-[:TYPE {w:1.0}]->(b)";
+                " (b)-[:TYPE {w:-1.0}]->(c),\n" +
+                " (c)-[:TYPE {w:1.0}]->(d),\n" +
+                " (d)-[:TYPE {w:-1.0}]->(e),\n" +
+                " (e)-[:TYPE {w:1.0}]->(f),\n" +
+                " (f)-[:TYPE {w:-1.0}]->(g),\n" +
+                " (g)-[:TYPE {w:1.0}]->(b)";
 
-        DB.execute(cypher);
-        DB.resolveDependency(Procedures.class).registerProcedure(BalancedTriadsProc.class);
+        db.execute(cypher);
+        db.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(BalancedTriadsProc.class);
+    }
+
+    @AfterEach
+    void teardown() {
+        db.shutdown();
     }
 
     @Test
-    public void testHuge() throws Exception {
-        DB.execute(
+    void testHuge() {
+        db.execute(
                 "CALL algo.balancedTriads('Node', 'TYPE', {weightProperty:'w', graph: 'huge'}) YIELD loadMillis, computeMillis, writeMillis, nodeCount, balancedTriadCount, unbalancedTriadCount")
                 .accept(row -> {
                     assertEquals(3L, row.getNumber("balancedTriadCount"));
@@ -91,9 +93,9 @@ public class BalancedTriadsIntegrationTest {
     }
 
     @Test
-    public void testHugeStream() throws Exception {
+    void testHugeStream() {
         final BalancedTriadsConsumer mock = mock(BalancedTriadsConsumer.class);
-        DB.execute("CALL algo.balancedTriads.stream('Node', 'TYPE', {weightProperty:'w', graph: 'huge'}) YIELD nodeId, balanced, unbalanced")
+        db.execute("CALL algo.balancedTriads.stream('Node', 'TYPE', {weightProperty:'w', graph: 'huge'}) YIELD nodeId, balanced, unbalanced")
                 .accept(row -> {
                     final long nodeId = row.getNumber("nodeId").longValue();
                     final double balanced = row.getNumber("balanced").doubleValue();

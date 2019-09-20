@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.impl.multistepscc.MultistepSCC;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**        _______
  *        /       \

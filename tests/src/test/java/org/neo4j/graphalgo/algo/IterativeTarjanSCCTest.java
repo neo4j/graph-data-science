@@ -34,8 +34,8 @@ import org.neo4j.graphalgo.impl.scc.SCCIterativeTarjan;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 /**        _______
  *        /       \
@@ -105,9 +105,9 @@ class IterativeTarjanSCCTest extends ConnectedComponentsTest {
         String cypher = "CALL algo.scc.iterative('', '', {write:true}) YIELD loadMillis, computeMillis, writeMillis";
 
         DB.execute(cypher).accept(row -> {
-            final long loadMillis = row.getNumber("loadMillis").longValue();
-            final long computeMillis = row.getNumber("computeMillis").longValue();
-            final long writeMillis = row.getNumber("writeMillis").longValue();
+            long loadMillis = row.getNumber("loadMillis").longValue();
+            long computeMillis = row.getNumber("computeMillis").longValue();
+            long writeMillis = row.getNumber("writeMillis").longValue();
             assertNotEquals(-1, loadMillis);
             assertNotEquals(-1, computeMillis);
             assertNotEquals(-1, writeMillis);

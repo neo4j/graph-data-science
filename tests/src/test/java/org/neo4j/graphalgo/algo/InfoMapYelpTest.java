@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.algo;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.InfoMapProc;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -34,24 +34,24 @@ import java.io.IOException;
 /**
  * @author mknblch
  */
-public class InfoMapYelpTest {
+class InfoMapYelpTest {
 
     private static GraphDatabaseService db;
 
-    @BeforeClass
-    public static void setUp() throws KernelException, IOException {
+    @BeforeAll
+    static void setUp() throws KernelException, IOException {
         db = LdbcDownloader.openDb("Yelp");
         Procedures proceduresService = ((GraphDatabaseAPI) db).getDependencyResolver().resolveDependency(Procedures.class);
         proceduresService.registerProcedure(InfoMapProc.class, true);
     }
 
-    @AfterClass
-    public static void tearDown() {
+    @AfterAll
+    static void tearDown() {
         db.shutdown();
     }
 
     @Test
-    public void testWeighted() throws Exception {
+    void testWeighted() {
         db.execute("CALL algo.infoMap('MATCH (c:Category) RETURN id(c) AS id',\n" +
                 "  'MATCH (c1:Category)<-[:IN_CATEGORY]-()-[:IN_CATEGORY]->(c2:Category)\n" +
                 "   WHERE id(c1) < id(c2)\n" +
@@ -66,7 +66,7 @@ public class InfoMapYelpTest {
     }
 
     @Test
-    public void testUnweighted() throws Exception {
+    void testUnweighted() {
         db.execute("CALL algo.infoMap('MATCH (c:Category) RETURN id(c) AS id',\n" +
                 "  'MATCH (c1:Category)<-[:IN_CATEGORY]-()-[:IN_CATEGORY]->(c2:Category)\n" +
                 "   WHERE id(c1) < id(c2)\n" +

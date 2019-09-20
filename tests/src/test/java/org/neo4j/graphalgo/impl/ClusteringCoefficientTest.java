@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -32,8 +32,8 @@ import org.neo4j.graphalgo.impl.triangle.IntersectingTriangleCount;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  *
@@ -59,7 +59,7 @@ import static org.junit.Assert.assertEquals;
  *
  * @author mknblch
  */
-public class ClusteringCoefficientTest {
+class ClusteringCoefficientTest {
 
     private static final double[] EXPECTED = {
         1.0, 1.0, 3.0/10, 1.0, 1.0, 2.0/3
@@ -70,28 +70,28 @@ public class ClusteringCoefficientTest {
     private static GraphDatabaseAPI db;
     private static Graph graph;
 
-    @BeforeClass
-    public static void setup() throws Exception {
+    @BeforeAll
+    static void setup() {
 
-        final String setupCypher =
+        String setupCypher =
                 "CREATE (a:Node {name:'a'})\n" +
-                        "CREATE (b:Node {name:'b'})\n" +
-                        "CREATE (c:Node {name:'c'})\n" +
-                        "CREATE (d:Node {name:'d'})\n" +
-                        "CREATE (e:Node {name:'e'})\n" +
-                        "CREATE (f:Node {name:'f'})\n" +
+                "CREATE (b:Node {name:'b'})\n" +
+                "CREATE (c:Node {name:'c'})\n" +
+                "CREATE (d:Node {name:'d'})\n" +
+                "CREATE (e:Node {name:'e'})\n" +
+                "CREATE (f:Node {name:'f'})\n" +
 
-                        "CREATE" +
-                        " (a)-[:TYPE]->(b),\n" +
-                        " (a)-[:TYPE]->(c),\n" +
-                        " (b)-[:TYPE]->(c),\n" +
+                "CREATE" +
+                " (a)-[:TYPE]->(b),\n" +
+                " (a)-[:TYPE]->(c),\n" +
+                " (b)-[:TYPE]->(c),\n" +
 
-                        " (c)-[:TYPE]->(e),\n" +
-                        " (e)-[:TYPE]->(f),\n" +
+                " (c)-[:TYPE]->(e),\n" +
+                " (e)-[:TYPE]->(f),\n" +
 
-                        " (c)-[:TYPE]->(d),\n" +
-                        " (c)-[:TYPE]->(f),\n" +
-                        " (d)-[:TYPE]->(f)";
+                " (c)-[:TYPE]->(d),\n" +
+                " (c)-[:TYPE]->(f),\n" +
+                " (d)-[:TYPE]->(f)";
 
         db = TestDatabaseCreator.createTestDatabase();
 
@@ -108,15 +108,15 @@ public class ClusteringCoefficientTest {
                 .load(HugeGraphFactory.class);
     }
 
-    @AfterClass
-    public static void tearDown() throws Exception {
-        if (db != null) db.shutdown();
+    @AfterAll
+    static void tearDown() {
+        db.shutdown();
         graph = null;
     }
 
 
     @Test
-    public void test() throws Exception {
+    void test() {
 
         final IntersectingTriangleCount algo =
                 new IntersectingTriangleCount(graph, Pools.DEFAULT, 4, AllocationTracker.EMPTY)

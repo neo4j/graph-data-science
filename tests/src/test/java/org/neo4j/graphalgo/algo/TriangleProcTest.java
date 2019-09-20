@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.algo;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TriangleProc;
 import org.neo4j.graphdb.Label;
@@ -32,10 +32,10 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashSet;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -51,40 +51,40 @@ import static org.mockito.Mockito.verify;
  *
  * @author mknblch
  */
-public class TriangleProcTest {
+class TriangleProcTest {
 
-    public static final Label LABEL = Label.label("Node");
+    private static final Label LABEL = Label.label("Node");
     private static GraphDatabaseAPI api;
     private static String[] idToName;
 
-    @BeforeClass
-    public static void setup() throws KernelException {
+    @BeforeAll
+    static void setup() throws KernelException {
         final String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
-                        "CREATE (b:Node {name:'b'})\n" +
-                        "CREATE (c:Node {name:'c'})\n" +
-                        "CREATE (d:Node {name:'d'})\n" +
-                        "CREATE (e:Node {name:'e'})\n" +
-                        "CREATE (f:Node {name:'f'})\n" +
-                        "CREATE (g:Node {name:'g'})\n" +
-                        "CREATE (h:Node {name:'h'})\n" +
-                        "CREATE (i:Node {name:'i'})\n" +
-                        "CREATE" +
-                        " (a)-[:TYPE]->(b),\n" +
-                        " (b)-[:TYPE]->(c),\n" +
-                        " (c)-[:TYPE]->(a),\n" +
+                "CREATE (b:Node {name:'b'})\n" +
+                "CREATE (c:Node {name:'c'})\n" +
+                "CREATE (d:Node {name:'d'})\n" +
+                "CREATE (e:Node {name:'e'})\n" +
+                "CREATE (f:Node {name:'f'})\n" +
+                "CREATE (g:Node {name:'g'})\n" +
+                "CREATE (h:Node {name:'h'})\n" +
+                "CREATE (i:Node {name:'i'})\n" +
+                "CREATE" +
+                " (a)-[:TYPE]->(b),\n" +
+                " (b)-[:TYPE]->(c),\n" +
+                " (c)-[:TYPE]->(a),\n" +
 
-                        " (c)-[:TYPE]->(h),\n" +
+                " (c)-[:TYPE]->(h),\n" +
 
-                        " (d)-[:TYPE]->(e),\n" +
-                        " (e)-[:TYPE]->(f),\n" +
-                        " (f)-[:TYPE]->(d),\n" +
+                " (d)-[:TYPE]->(e),\n" +
+                " (e)-[:TYPE]->(f),\n" +
+                " (f)-[:TYPE]->(d),\n" +
 
-                        " (b)-[:TYPE]->(d),\n" +
+                " (b)-[:TYPE]->(d),\n" +
 
-                        " (g)-[:TYPE]->(h),\n" +
-                        " (h)-[:TYPE]->(i),\n" +
-                        " (i)-[:TYPE]->(g)";
+                " (g)-[:TYPE]->(h),\n" +
+                " (h)-[:TYPE]->(i),\n" +
+                " (i)-[:TYPE]->(g)";
 
         api = TestDatabaseCreator.createTestDatabase();
 
@@ -108,8 +108,8 @@ public class TriangleProcTest {
         }
     }
 
-    @AfterClass
-    public static void shutdownGraph() throws Exception {
+    @AfterAll
+    static void shutdownGraph() {
         if (api != null) api.shutdown();
     }
 
@@ -126,7 +126,7 @@ public class TriangleProcTest {
     }
 
     @Test
-    public void testTriangleCountWriteCypher() throws Exception {
+    void testTriangleCountWriteCypher() {
         final String cypher = "CALL algo.triangleCount('Node', '', {concurrency:4, write:true}) " +
                 "YIELD loadMillis, computeMillis, writeMillis, nodeCount, triangleCount";
         api.execute(cypher).accept(row -> {
@@ -153,7 +153,7 @@ public class TriangleProcTest {
 
 
     @Test
-    public void testTriangleCountExp1WriteCypher() throws Exception {
+    void testTriangleCountExp1WriteCypher() {
         final String cypher = "CALL algo.triangleCount.forkJoin('Node', '', {concurrency:4, write:true}) " +
                 "YIELD loadMillis, computeMillis, writeMillis, nodeCount, triangleCount";
         api.execute(cypher).accept(row -> {
@@ -179,7 +179,7 @@ public class TriangleProcTest {
     }
 
     @Test
-    public void testTriangleCountStream() throws Exception {
+    void testTriangleCountStream() {
         final TriangleCountConsumer mock = mock(TriangleCountConsumer.class);
         final String cypher = "CALL algo.triangleCount.stream('Node', '', {concurrency:4}) YIELD nodeId, triangles";
         api.execute(cypher).accept(row -> {
@@ -192,7 +192,7 @@ public class TriangleProcTest {
     }
 
     @Test
-    public void testTriangleCountExp1Stream() throws Exception {
+    void testTriangleCountExp1Stream() {
         final TriangleCountConsumer mock = mock(TriangleCountConsumer.class);
         final String cypher = "CALL algo.triangleCount.forkJoin.stream('Node', '', {concurrency:4}) YIELD nodeId, triangles";
         api.execute(cypher).accept(row -> {
@@ -205,7 +205,7 @@ public class TriangleProcTest {
     }
 
     @Test
-    public void testTriangleStream() throws Exception {
+    void testTriangleStream() {
         HashSet<Integer> sums = new HashSet<>();
         final TripleConsumer consumer = (a, b, c) -> sums.add(idsum(a, b, c));
         final String cypher = "CALL algo.triangle.stream('Node', '', {concurrency:4}) YIELD nodeA, nodeB, nodeC";

@@ -20,9 +20,10 @@
 package org.neo4j.graphalgo.impl;
 
 import com.carrotsearch.hppc.procedures.IntProcedure;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
@@ -30,9 +31,8 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * expected path OUTGOING:  abcf
@@ -49,7 +49,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class DirectedDijkstraSPTest {
 
-    public static final String cypher =
+    public static final String DB_CYPHER =
         "CREATE (d:Node {name:'d'})\n" +
         "CREATE (a:Node {name:'a'})\n" +
         "CREATE (c:Node {name:'c'})\n" +
@@ -66,42 +66,40 @@ public class DirectedDijkstraSPTest {
             "  (e)-[:REL {cost:1}]->(d),\n" +
             "  (d)-[:REL {cost:1}]->(a)\n";
 
-    private static GraphDatabaseAPI api;
-    private static Graph graph;
+    private GraphDatabaseAPI db;
+    private Graph graph;
 
-    @BeforeClass
-    public static void setup() {
+    @BeforeEach
+    void setup() {
+        db = TestDatabaseCreator.createTestDatabase();
 
-        api = TestDatabaseCreator.createTestDatabase();
-
-        try (Transaction tx = api.beginTx()) {
-            api.execute(cypher);
+        try (Transaction tx = db.beginTx()) {
+            db.execute(DB_CYPHER);
             tx.success();
         }
 
-        graph = new GraphLoader(api)
+        graph = new GraphLoader(db)
                 .withNodeStatement("Node")
                 .withRelationshipType("REL")
                 .withRelationshipWeightsFromProperty("cost", Double.MAX_VALUE)
                 .load(HugeGraphFactory.class);
     }
 
-    @AfterClass
-    public static void tearDown() throws Exception {
-        if (api != null) api.shutdown();
+    @AfterEach
+    void tearDown() {
+        db.shutdown();
         graph = null;
     }
 
-
-    private static long id(String name) {
-        try (Transaction transaction = api.beginTx()) {
-            return api.findNode(Label.label("Node"), "name", name).getId();
+    private long id(String name) {
+        try (Transaction transaction = db.beginTx()) {
+            return db.findNode(Label.label("Node"), "name", name).getId();
         }
     }
 
-    private static String name(long id) {
+    private String name(long id) {
         final String[] name = {""};
-        api.execute(String.format("MATCH (n:Node) WHERE id(n)=%d RETURN n.name as name", id)).accept(row -> {
+        db.execute(String.format("MATCH (n:Node) WHERE id(n)=%d RETURN n.name as name", id)).accept(row -> {
             name[0] = row.getString("name");
             return false;
         });
@@ -109,7 +107,7 @@ public class DirectedDijkstraSPTest {
     }
 
     @Test
-    public void testOutgoing() throws Exception {
+    void testOutgoing() {
 
         final StringBuilder path = new StringBuilder();
         final ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph)
@@ -123,7 +121,7 @@ public class DirectedDijkstraSPTest {
     }
 
     @Test
-    public void testIncoming() throws Exception {
+    void testIncoming() {
 
         final StringBuilder path = new StringBuilder();
         final ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph)
@@ -137,7 +135,7 @@ public class DirectedDijkstraSPTest {
     }
 
     @Test
-    public void testBoth() throws Exception {
+    void testBoth() {
 
         final StringBuilder path = new StringBuilder();
         final ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph)
@@ -151,7 +149,7 @@ public class DirectedDijkstraSPTest {
     }
 
     @Test
-    public void testUnreachableOutgoing() throws Exception {
+    void testUnreachableOutgoing() {
 
         final StringBuilder path = new StringBuilder();
         final ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph)
@@ -164,7 +162,7 @@ public class DirectedDijkstraSPTest {
     }
 
     @Test
-    public void testUnreachableIncoming() throws Exception {
+    void testUnreachableIncoming() {
 
         final StringBuilder path = new StringBuilder();
         final ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph)
@@ -177,7 +175,7 @@ public class DirectedDijkstraSPTest {
     }
 
     @Test
-    public void testUnreachableBoth() throws Exception {
+    void testUnreachableBoth() {
 
         final StringBuilder path = new StringBuilder();
         final ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph)

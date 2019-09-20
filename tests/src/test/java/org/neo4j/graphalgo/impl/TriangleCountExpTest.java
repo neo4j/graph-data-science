@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.Assume;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.neo4j.graphalgo.TestDatabaseCreator;
@@ -29,13 +28,13 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
+import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.graphalgo.helper.graphbuilder.DefaultBuilder;
 import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
-import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.impl.triangle.IntersectingTriangleCount;
 import org.neo4j.graphalgo.impl.triangle.TriangleCountForkJoin;
 import org.neo4j.graphdb.Direction;
@@ -46,7 +45,8 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 class TriangleCountExpTest {
 
@@ -70,9 +70,7 @@ class TriangleCountExpTest {
         final Node center = builder.createNode();
         builder.newRingBuilder()
                 .createRing((int) TRIANGLE_COUNT)
-                .forEachNodeInTx(node -> {
-                    center.createRelationshipTo(node, type);
-                });
+                .forEachNodeInTx(node -> center.createRelationshipTo(node, type));
         centerId = center.getId();
     }
 
@@ -87,7 +85,7 @@ class TriangleCountExpTest {
 
     @AllGraphTypesWithoutCypherTest
     void testQueue(Class<? extends GraphFactory> graphFactory) {
-        Assume.assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
+        assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
         setup(graphFactory);
         final IntersectingTriangleCount algo = new IntersectingTriangleCount(
                 graph,
@@ -105,7 +103,7 @@ class TriangleCountExpTest {
 
     @AllGraphTypesWithoutCypherTest
     void testQueueParallel(Class<? extends GraphFactory> graphFactory) {
-        Assume.assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
+        assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
         setup(graphFactory);
         final IntersectingTriangleCount algo = new IntersectingTriangleCount(
                 graph,
@@ -123,7 +121,7 @@ class TriangleCountExpTest {
 
     @AllGraphTypesWithoutCypherTest
     void testForkJoin(Class<? extends GraphFactory> graphFactory) {
-        Assume.assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
+        assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
         setup(graphFactory);
         final TriangleCountForkJoin algo = new TriangleCountForkJoin(graph, ForkJoinPool.commonPool(), 100_000);
         try (ProgressTimer start = ProgressTimer.start(l -> System.out.println("took " + l + "ms"))) {
@@ -137,7 +135,7 @@ class TriangleCountExpTest {
 
     @AllGraphTypesWithoutCypherTest
     void testForkJoinParallel(Class<? extends GraphFactory> graphFactory) {
-        Assume.assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
+        assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
         setup(graphFactory);
         final TriangleCountForkJoin algo = new TriangleCountForkJoin(graph, ForkJoinPool.commonPool(), 100);
         try (ProgressTimer start = ProgressTimer.start(l -> System.out.println("took " + l + "ms"))) {

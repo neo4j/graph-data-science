@@ -19,24 +19,25 @@
  */
 package org.neo4j.graphalgo.algo.linkprediction;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
+import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TotalNeighborsProcIntegrationTest {
-    private static final String SETUP =
+class TotalNeighborsProcIntegrationTest {
+    private static final String DB_CYPHER =
             "CREATE (mark:Person {name: 'Mark'})\n" +
             "CREATE (michael:Person {name: 'Michael'})\n" +
             "CREATE (praveena:Person {name: 'Praveena'})\n" +
@@ -49,8 +50,8 @@ public class TotalNeighborsProcIntegrationTest {
 
     private static GraphDatabaseService db;
 
-    @BeforeClass
-    public static void setUp() throws Exception {
+    @BeforeAll
+    static void setUp() throws KernelException {
         db = new TestGraphDatabaseFactory()
                 .newImpermanentDatabaseBuilder()
                 .setConfig(GraphDatabaseSettings.procedure_unrestricted,"algo.*")
@@ -60,21 +61,21 @@ public class TotalNeighborsProcIntegrationTest {
                 .resolveDependency(Procedures.class)
                 .registerFunction(LinkPredictionFunc.class);
 
-        db.execute(SETUP).close();
+        db.execute(DB_CYPHER).close();
     }
 
-    @AfterClass
-    public static void tearDown() {
+    @AfterAll
+    static void tearDown() {
         db.shutdown();
     }
 
     @Test
-    public void sameNodesHaveNeighborCount() throws Exception {
+    void sameNodesHaveNeighborCount() {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Jennifer'})\n" +
-                        "MATCH (p2:Person {name: 'Jennifer'})\n" +
-                        "RETURN algo.linkprediction.totalNeighbors(p1, p2) AS score, " +
-                        "       2.0 AS cypherScore";
+                "MATCH (p2:Person {name: 'Jennifer'})\n" +
+                "RETURN algo.linkprediction.totalNeighbors(p1, p2) AS score, " +
+                "       2.0 AS cypherScore";
 
         try (Transaction tx = db.beginTx()) {
             Result result = db.execute(controlQuery);
@@ -84,12 +85,12 @@ public class TotalNeighborsProcIntegrationTest {
     }
 
     @Test
-    public void countDuplicateNeighboursOnce() throws Exception {
+    void countDuplicateNeighboursOnce() {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Jennifer'})\n" +
-                        "MATCH (p2:Person {name: 'Mark'})\n" +
-                        "RETURN algo.linkprediction.totalNeighbors(p1, p2) AS score, " +
-                        "       3.0 AS cypherScore";
+                "MATCH (p2:Person {name: 'Mark'})\n" +
+                "RETURN algo.linkprediction.totalNeighbors(p1, p2) AS score, " +
+                "       3.0 AS cypherScore";
 
         try (Transaction tx = db.beginTx()) {
             Result result = db.execute(controlQuery);
@@ -99,12 +100,12 @@ public class TotalNeighborsProcIntegrationTest {
     }
 
     @Test
-    public void theOtherNodeCountsAsANeighbor() throws Exception {
+    void theOtherNodeCountsAsANeighbor() {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Praveena'})\n" +
-                        "MATCH (p2:Person {name: 'Michael'})\n" +
-                        "RETURN algo.linkprediction.totalNeighbors(p1, p2) AS score, " +
-                        "       4.0 AS cypherScore";
+                "MATCH (p2:Person {name: 'Michael'})\n" +
+                "RETURN algo.linkprediction.totalNeighbors(p1, p2) AS score, " +
+                "       4.0 AS cypherScore";
 
         try (Transaction tx = db.beginTx()) {
             Result result = db.execute(controlQuery);

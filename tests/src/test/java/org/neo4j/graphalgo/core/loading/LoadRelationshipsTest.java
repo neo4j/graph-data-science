@@ -19,19 +19,19 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.junit.Test;
-import org.neo4j.internal.kernel.api.RelationshipGroupCursor;
+import org.junit.jupiter.api.Test;
 import org.neo4j.internal.kernel.api.RelationshipTraversalCursor;
 import org.neo4j.internal.kernel.api.helpers.StubCursorFactory;
 import org.neo4j.internal.kernel.api.helpers.StubNodeCursor;
 import org.neo4j.internal.kernel.api.helpers.StubRelationshipCursor;
 import org.neo4j.internal.kernel.api.helpers.TestRelationshipChain;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class LoadRelationshipsTest {
+class LoadRelationshipsTest {
+
     @Test
-    public void allRelationshipsUnique() {
+    void allRelationshipsUnique() {
         StubNodeCursor stubNodeCursor = new StubNodeCursor(false);
 
         StubCursorFactory stubCursorFactory = new StubCursorFactory();
@@ -50,7 +50,7 @@ public class LoadRelationshipsTest {
     }
 
     @Test
-    public void countMultipleRelationshipsBetweenNodesOnce() {
+    void countMultipleRelationshipsBetweenNodesOnce() {
         StubNodeCursor stubNodeCursor = new StubNodeCursor(false);
 
         StubCursorFactory stubCursorFactory = new StubCursorFactory();
@@ -69,7 +69,7 @@ public class LoadRelationshipsTest {
     }
 
     @Test
-    public void countMultipleRelationshipsBetweenNodesOnceType() {
+    void countMultipleRelationshipsBetweenNodesOnceType() {
         StubNodeCursor stubNodeCursor = new StubNodeCursor(false);
 
         StubCursorFactory stubCursorFactory = new StubCursorFactory();

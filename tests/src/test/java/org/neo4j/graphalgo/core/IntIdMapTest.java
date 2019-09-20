@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 final class IntIdMapTest {
 

@@ -21,10 +21,10 @@ package org.neo4j.graphalgo.algo;
 
 import com.carrotsearch.hppc.LongLongScatterMap;
 import com.carrotsearch.hppc.cursors.LongLongCursor;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.StronglyConnectedComponentsProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
@@ -37,46 +37,46 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.function.Consumer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author mknblch
  */
-@Ignore
-public class MultistepSCCProcTest {
+@Disabled
+class MultistepSCCProcTest {
 
     private static GraphDatabaseAPI api;
 
     private static Graph graph;
 
-    @BeforeClass
-    public static void setup() throws KernelException {
+    @BeforeAll
+    static void setup() throws KernelException {
         final String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
-                        "CREATE (b:Node {name:'b'})\n" +
-                        "CREATE (c:Node {name:'c'})\n" +
-                        "CREATE (d:Node {name:'d'})\n" +
-                        "CREATE (e:Node {name:'e'})\n" +
-                        "CREATE (f:Node {name:'f'})\n" +
-                        "CREATE (g:Node {name:'g'})\n" +
-                        "CREATE (h:Node {name:'h'})\n" +
-                        "CREATE (i:Node {name:'i'})\n" +
-                        "CREATE (x:Node {name:'x'})\n" +
-                        "CREATE" +
-                        " (a)-[:TYPE {cost:5}]->(b),\n" +
-                        " (b)-[:TYPE {cost:5}]->(c),\n" +
-                        " (c)-[:TYPE {cost:5}]->(a),\n" +
+                "CREATE (b:Node {name:'b'})\n" +
+                "CREATE (c:Node {name:'c'})\n" +
+                "CREATE (d:Node {name:'d'})\n" +
+                "CREATE (e:Node {name:'e'})\n" +
+                "CREATE (f:Node {name:'f'})\n" +
+                "CREATE (g:Node {name:'g'})\n" +
+                "CREATE (h:Node {name:'h'})\n" +
+                "CREATE (i:Node {name:'i'})\n" +
+                "CREATE (x:Node {name:'x'})\n" +
+                "CREATE" +
+                " (a)-[:TYPE {cost:5}]->(b),\n" +
+                " (b)-[:TYPE {cost:5}]->(c),\n" +
+                " (c)-[:TYPE {cost:5}]->(a),\n" +
 
-                        " (d)-[:TYPE {cost:2}]->(e),\n" +
-                        " (e)-[:TYPE {cost:2}]->(f),\n" +
-                        " (f)-[:TYPE {cost:2}]->(d),\n" +
+                " (d)-[:TYPE {cost:2}]->(e),\n" +
+                " (e)-[:TYPE {cost:2}]->(f),\n" +
+                " (f)-[:TYPE {cost:2}]->(d),\n" +
 
-                        " (a)-[:TYPE {cost:2}]->(d),\n" +
+                " (a)-[:TYPE {cost:2}]->(d),\n" +
 
-                        " (g)-[:TYPE {cost:3}]->(h),\n" +
-                        " (h)-[:TYPE {cost:3}]->(i),\n" +
-                        " (i)-[:TYPE {cost:3}]->(g)";
+                " (g)-[:TYPE {cost:3}]->(h),\n" +
+                " (h)-[:TYPE {cost:3}]->(i),\n" +
+                " (i)-[:TYPE {cost:3}]->(g)";
 
         api = TestDatabaseCreator.createTestDatabase();
         try (Transaction tx = api.beginTx()) {
@@ -96,13 +96,13 @@ public class MultistepSCCProcTest {
                 .load(HugeGraphFactory.class);
     }
 
-    @AfterClass
-    public static void shutdownGraph() throws Exception {
+    @AfterAll
+    static void shutdownGraph() {
         api.shutdown();
     }
 
     @Test
-    public void testWrite() throws Exception {
+    void testWrite() {
         String cypher = "CALL algo.scc.multistep('Node', 'TYPE', {concurrency:4, cutoff:0}) " +
                 "YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize " +
                 "RETURN loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize";
@@ -122,7 +122,7 @@ public class MultistepSCCProcTest {
     }
 
     @Test
-    public void testStream() throws Exception {
+    void testStream() {
         String cypher = "CALL algo.scc.multistep.stream('Node', 'TYPE', {write:true, concurrency:4, cutoff:0}) YIELD nodeId, cluster RETURN nodeId, cluster";
         final LongLongScatterMap testMap = new LongLongScatterMap();
         api.execute(cypher).accept(row -> {
@@ -132,8 +132,6 @@ public class MultistepSCCProcTest {
         // we expect 3 clusters
         assertEquals(3, testMap.size());
         // with 3 elements each
-        testMap.forEach((Consumer<? super LongLongCursor>) cursor -> {
-            assertEquals(3, cursor.value);
-        });
+        testMap.forEach((Consumer<? super LongLongCursor>) cursor -> assertEquals(3, cursor.value));
     }
 }

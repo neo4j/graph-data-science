@@ -19,21 +19,21 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
-import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.Matchers.anyDouble;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.mock;
@@ -58,7 +58,7 @@ import static org.mockito.Mockito.verify;
  *
  * @author mknblch
  */
-public class WeightedAllShortestPathsTest {
+class WeightedAllShortestPathsTest {
 
     private static final int width = 2, height = 5;
 
@@ -66,12 +66,11 @@ public class WeightedAllShortestPathsTest {
     private static final String LABEL = "Node";
     private static final String RELATIONSHIP = "REL";
 
-    private static GraphDatabaseAPI db;
-    private static Graph graph;
+    private GraphDatabaseAPI db;
+    private Graph graph;
 
-    @BeforeClass
-    public static void setup() throws Exception {
-
+    @BeforeEach
+    void setup() {
         db = TestDatabaseCreator.createTestDatabase();
 
         try (ProgressTimer timer = ProgressTimer.start(t -> System.out.println("setup took " + t + "ms"))) {
@@ -94,13 +93,13 @@ public class WeightedAllShortestPathsTest {
         }
     }
 
-    @AfterClass
-    public static void tearDown() {
-        if (db!=null) db.shutdown();
+    @AfterEach
+    void tearDown() {
+        db.shutdown();
     }
 
     @Test
-    public void testResults() throws Exception {
+    void testResults() {
 
         final ResultConsumer mock = mock(ResultConsumer.class);
 

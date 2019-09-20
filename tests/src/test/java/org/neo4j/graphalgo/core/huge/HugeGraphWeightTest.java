@@ -19,8 +19,11 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
@@ -28,28 +31,36 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.TokenWrite;
-import org.neo4j.internal.kernel.api.Write;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
-import org.neo4j.values.storable.Values;
 
-import static org.junit.Assert.assertEquals;
+import java.util.concurrent.TimeUnit;
 
-public final class HugeGraphWeightTest {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+final class HugeGraphWeightTest {
 
     private static final int WEIGHT_BATCH_SIZE = PageUtil.pageSizeFor(MemoryUsage.BYTES_OBJECT_REF);
     // make sure that multiple threads are loading the same batch
     private static final int BATCH_SIZE = 100;
+    public static final RelationshipType TYPE = RelationshipType.withName("TYPE");
 
-    @Rule
-    public ImpermanentDatabaseRule db = new ImpermanentDatabaseRule();
+    private GraphDatabaseAPI db;
+
+    @BeforeEach
+    void setup() {
+        db = TestDatabaseCreator.createTestDatabase();
+    }
+
+    @AfterEach
+    void teardown() {
+        db.shutdown();
+    }
 
     @Test
-    public void shouldLoadCorrectWeights() throws Exception {
+    void shouldLoadCorrectWeights() {
         mkDb(WEIGHT_BATCH_SIZE * 2, 2);
 
         Graph graph = loadGraph(db);
@@ -59,34 +70,30 @@ public final class HugeGraphWeightTest {
                 long weight = (long) graph.weightOf(src, tgt);
                 int fakeId = ((int) src << 16) | (int) tgt & 0xFFFF;
                 assertEquals(
-                        "Wrong weight for (" + src + ")->(" + tgt + ")",
-                        fakeId, weight);
+                        fakeId,
+                        weight,
+                        "Wrong weight for (" + src + ")->(" + tgt + ")"
+                );
                 return true;
             });
             return true;
         });
     }
 
-    @Test(timeout = 10000)
-    public void shouldLoadMoreWeights() throws Exception {
+    @Test
+    @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
+    void shouldLoadMoreWeights() {
         mkDb(WEIGHT_BATCH_SIZE, 4);
         loadGraph(db);
     }
 
-    private void mkDb(final int nodes, final int relsPerNode) {
-        try (Transaction __ = db.beginTx()) {
-            KernelTransaction tx = db.transaction();
-            TokenWrite token = tx.tokenWrite();
-            int type = token.relationshipTypeGetOrCreateForName("TYPE");
-            int key = token.propertyKeyGetOrCreateForName("weight");
-            Write write = tx.dataWrite();
-            NewRel newRel = newRel(write, type, key);
+    private void mkDb(int nodes, int relsPerNode) {
+        long[] nodeIds = new long[nodes];
 
-            long[] nodeIds = new long[nodes];
+        try (Transaction tx = db.beginTx()) {
             for (int i = 0; i < nodes; i++) {
-                nodeIds[i] = write.nodeCreate();
+                nodeIds[i] = db.createNode().getId();
             }
-
             int pageSize = PageUtil.pageSizeFor(MemoryUsage.BYTES_OBJECT_REF);
             for (int i = 0; i < nodes; i += pageSize) {
                 int max = Math.min(pageSize, nodes - i);
@@ -98,14 +105,15 @@ public final class HugeGraphWeightTest {
                             targetIndex = j - k;
                         }
                         long targetId = nodeIds[i + targetIndex];
-                        newRel.mk(sourceId, targetId);
+                        int weight = ((int) sourceId << 16) | (int) targetId & 0xFFFF;
+                        Relationship relationship = db
+                                .getNodeById(sourceId)
+                                .createRelationshipTo(db.getNodeById(targetId), TYPE);
+                        relationship.setProperty("weight", weight);
                     }
                 }
             }
             tx.success();
-            __.success();
-        } catch (KernelException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -118,18 +126,4 @@ public final class HugeGraphWeightTest {
                 .load(HugeGraphFactory.class);
     }
 
-    private interface NewRel {
-        void mk(long source, long target) throws KernelException;
-    }
-
-    private static NewRel newRel(
-            Write write,
-            int type,
-            int key) {
-        return (source, target) -> {
-            int fakeId = ((int) source << 16) | (int) target & 0xFFFF;
-            long rel = write.relationshipCreate(source, type, target);
-            write.relationshipSetProperty(rel, key, Values.intValue(fakeId));
-        };
-    }
 }

@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.utils;
 
 import com.carrotsearch.hppc.BitSet;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -28,28 +28,29 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.ToLongFunction;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public final class RandomLongIteratorTest {
+final class RandomLongIteratorTest {
 
     @Test
-    public void shouldRandomlyEmitNumbers() {
+    void shouldRandomlyEmitNumbers() {
         testIterator(0L, 10L);
     }
 
     @Test
-    public void shouldSupportNonZeroStarts() {
+    void shouldSupportNonZeroStarts() {
         testIterator(13L, 37L);
     }
 
-    @Test(expected = IndexOutOfBoundsException.class)
-    public void shouldFailOnNegativeRange() {
-        testIterator(37L, 13L);
+    @Test
+    void shouldFailOnNegativeRange() {
+        assertThrows(IndexOutOfBoundsException.class, () -> testIterator(37L, 13L));
     }
 
     @Test
-    public void shouldEmitLargeSequences() {
+    void shouldEmitLargeSequences() {
         testIterator(1337L, 420_000_000L);
     }
 
@@ -93,10 +94,10 @@ public final class RandomLongIteratorTest {
                 overflow.add(value);
             }
         }
-        assertEquals("Should not produce collisions, but got " + collisions, 0L, collisions);
-        assertEquals("Should emit exactly " + expectedCount + " values, but got " + count, expectedCount, count);
-        assertTrue("All values should be greater than " + (start - 1L) + " but got " + underflow, underflow.isEmpty());
-        assertTrue("All values should be lower than " + end + " but got " + overflow, overflow.isEmpty());
-        assertEquals("Should add up to " + expectedSum + " but got " + sum, expectedSum, sum);
+        assertEquals(0L, collisions, "Should not produce collisions, but got " + collisions);
+        assertEquals(expectedCount, count, "Should emit exactly " + expectedCount + " values, but got " + count);
+        assertTrue(underflow.isEmpty(), "All values should be greater than " + (start - 1L) + " but got " + underflow);
+        assertTrue(overflow.isEmpty(), "All values should be lower than " + end + " but got " + overflow);
+        assertEquals(expectedSum, sum, "Should add up to " + expectedSum + " but got " + sum);
     }
 }

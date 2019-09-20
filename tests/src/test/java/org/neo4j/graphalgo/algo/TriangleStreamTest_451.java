@@ -19,13 +19,14 @@
  */
 package org.neo4j.graphalgo.algo;
 
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TriangleProc;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 /**
  *
@@ -33,12 +34,17 @@ import org.neo4j.test.rule.ImpermanentDatabaseRule;
  */
 public class TriangleStreamTest_451 {
 
-    @ClassRule
-    public static ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
+    private static GraphDatabaseAPI DB;
 
-    @BeforeClass
+    @BeforeAll
     public static void setup() throws KernelException {
-        DB.resolveDependency(Procedures.class).registerProcedure(TriangleProc.class);
+        DB = TestDatabaseCreator.createTestDatabase();
+        DB.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(TriangleProc.class);
+    }
+
+    @AfterAll
+    static void teardownGraph() {
+        DB.shutdown();
     }
 
     @Test

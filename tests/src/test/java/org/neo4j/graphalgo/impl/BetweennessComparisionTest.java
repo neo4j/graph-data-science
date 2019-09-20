@@ -19,10 +19,10 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
@@ -30,32 +30,34 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.helper.graphbuilder.DefaultBuilder;
 import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
-import org.neo4j.graphalgo.impl.betweenness.*;
+import org.neo4j.graphalgo.impl.betweenness.BetweennessCentrality;
+import org.neo4j.graphalgo.impl.betweenness.MaxDepthBetweennessCentrality;
+import org.neo4j.graphalgo.impl.betweenness.ParallelBetweennessCentrality;
+import org.neo4j.graphalgo.impl.betweenness.RABrandesBetweennessCentrality;
+import org.neo4j.graphalgo.impl.betweenness.RandomSelectionStrategy;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author mknblch
  */
-@Ignore("approximations")
+@Disabled("approximations")
 public class BetweennessComparisionTest {
 
-    @ClassRule
-    public static final ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
+    private static GraphDatabaseAPI DB;
 
     public static final String TYPE = "TYPE";
-    public static final int NODE_COUNT = 500;
+    private static final int NODE_COUNT = 500;
     private static Graph graph;
     private static int centerId;
     private static double[] expected;
 
-    @BeforeClass
-    public static void setupGraph() throws KernelException {
-
+    @BeforeAll
+    static void setupGraph() {
+        DB = TestDatabaseCreator.createTestDatabase();
         long cId;
         try (ProgressTimer start = ProgressTimer.start(l -> System.out.println("build took " + l + "ms"))) {
 
@@ -99,7 +101,7 @@ public class BetweennessComparisionTest {
     }
 
     @Test
-    public void testMaxDepth() throws Exception {
+    void testMaxDepth() {
         for (int d = 2; d < 5; d++) {
             final double[] centrality = new MaxDepthBetweennessCentrality(graph, d)
                     .compute()
@@ -109,7 +111,7 @@ public class BetweennessComparisionTest {
     }
 
     @Test
-    public void test() throws Exception {
+    void test() {
 
         final double[] centrality = new RABrandesBetweennessCentrality(graph, Pools.DEFAULT, 1,
                 new RandomSelectionStrategy(graph, 0.5))
@@ -122,7 +124,7 @@ public class BetweennessComparisionTest {
 
 
     @Test
-    public void testParallel() throws Exception {
+    void testParallel() {
 
         final double[] centrality = new ParallelBetweennessCentrality(graph, Pools.DEFAULT, 4)
                 .compute()
@@ -137,8 +139,8 @@ public class BetweennessComparisionTest {
         System.out.println("meanError = " + e.mean());
         System.out.println("maxError = " + e.max());
         System.out.println("centerError = " + e.error(centerId));
-        assertEquals("mean error exceeds 20%", 0.0, e.mean(), 0.2);
-        assertEquals("error at most important node exceeded 10%", 0.0, e.error(centerId), 0.1);
+        assertEquals(0.0, e.mean(), 0.2, "mean error exceeds 20%");
+        assertEquals(0.0, e.error(centerId), 0.1, "error at most important node exceeded 10%");
     }
 
     private class Error {
@@ -149,7 +151,7 @@ public class BetweennessComparisionTest {
         double sum = 0.0;
 
 
-        public Error(double[] centrality) {
+        Error(double[] centrality) {
             for (int i = 0; i < NODE_COUNT; i++) {
                 absError[i] = Math.abs(expected[i] - centrality[i]);
                 fMin = Math.min(fMin, absError[i]);
@@ -158,11 +160,11 @@ public class BetweennessComparisionTest {
             }
         }
 
-        public double mean() {
+        double mean() {
             return sum > 0.0 ? (sum / (fMax - fMin)) * (1.0 / NODE_COUNT) : 0.0;
         }
 
-        public double error(int nodeId) {
+        double error(int nodeId) {
             return absError[nodeId] > 0.0 ? (absError[nodeId] / (fMax - fMin)) : 0.0;
         }
 

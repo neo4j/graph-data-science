@@ -20,23 +20,22 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.LongArrayList;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-public final class UndirectedLoopsTest {
+final class UndirectedLoopsTest {
 
-    @Rule
-    public ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
+    private GraphDatabaseAPI db;
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -55,14 +54,15 @@ public final class UndirectedLoopsTest {
             ", (b)-[:TYPE6 {cost:4}]->(g)" +
             ", (g)-[:TYPE99 {cost:4}]->(g)";
 
-    @Before
-    public void setUp() {
-        DB.execute(DB_CYPHER).close();
+    @BeforeEach
+    void setUp() {
+        db = TestDatabaseCreator.createTestDatabase();
+        db.execute(DB_CYPHER).close();
     }
 
     @Test
-    public void undirectedWithMultipleLoopsShouldSucceed() {
-        Graph graph = new GraphLoader(DB)
+    void undirectedWithMultipleLoopsShouldSucceed() {
+        Graph graph = new GraphLoader(db)
                 .withLabel("")
                 .withRelationshipType("")
                 .withRelationshipWeightsFromProperty("cost", Double.MAX_VALUE)

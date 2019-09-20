@@ -19,24 +19,25 @@
  */
 package org.neo4j.graphalgo.algo.linkprediction;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
+import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ResourceAllocationSimilarityIntegrationTest {
-    private static final String SETUP =
+class ResourceAllocationSimilarityIntegrationTest {
+    private static final String DB_CYPHER =
             "CREATE (mark:Person {name: 'Mark'})\n" +
             "CREATE (michael:Person {name: 'Michael'})\n" +
             "CREATE (praveena:Person {name: 'Praveena'})\n" +
@@ -57,8 +58,8 @@ public class ResourceAllocationSimilarityIntegrationTest {
 
     private static GraphDatabaseService db;
 
-    @BeforeClass
-    public static void setUp() throws Exception {
+    @BeforeAll
+    static void setUp() throws KernelException {
         db = new TestGraphDatabaseFactory()
                 .newImpermanentDatabaseBuilder()
                 .setConfig(GraphDatabaseSettings.procedure_unrestricted,"algo.*")
@@ -68,16 +69,16 @@ public class ResourceAllocationSimilarityIntegrationTest {
                 .resolveDependency(Procedures.class)
                 .registerFunction(LinkPredictionFunc.class);
 
-        db.execute(SETUP).close();
+        db.execute(DB_CYPHER).close();
     }
 
-    @AfterClass
-    public static void tearDown() {
+    @AfterAll
+    static void tearDown() {
         db.shutdown();
     }
 
     @Test
-    public void oneNodeInCommon() throws Exception {
+    void oneNodeInCommon() {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Mark'})\n" +
                 "MATCH (p2:Person {name: 'Praveena'})\n" +
@@ -92,7 +93,7 @@ public class ResourceAllocationSimilarityIntegrationTest {
     }
 
     @Test
-    public void oneNodeInCommonExplicit() throws Exception {
+    void oneNodeInCommonExplicit() {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Mark'})\n" +
                         "MATCH (p2:Person {name: 'Praveena'})\n" +
@@ -108,7 +109,7 @@ public class ResourceAllocationSimilarityIntegrationTest {
     }
 
     @Test
-    public void twoNodesInCommon() throws Exception {
+    void twoNodesInCommon() {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Jennifer'})\n" +
                         "MATCH (p2:Person {name: 'Elaine'})\n" +
@@ -123,7 +124,7 @@ public class ResourceAllocationSimilarityIntegrationTest {
     }
 
     @Test
-    public void noNeighbors() throws Exception {
+    void noNeighbors() {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Jennifer'})\n" +
                         "MATCH (p2:Person {name: 'Ryan'})\n" +
@@ -138,7 +139,7 @@ public class ResourceAllocationSimilarityIntegrationTest {
     }
 
     @Test
-    public void bothNodesTheSame() throws Exception {
+    void bothNodesTheSame() {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Praveena'})\n" +
                         "MATCH (p2:Person {name: 'Praveena'})\n" +

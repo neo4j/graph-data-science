@@ -19,13 +19,10 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
-import com.carrotsearch.randomizedtesting.RandomizedTest;
-import com.carrotsearch.randomizedtesting.annotations.ThreadLeakScope;
-import junit.framework.AssertionFailedError;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.neo4j.function.ThrowingConsumer;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
+import org.opentest4j.AssertionFailedError;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -36,14 +33,17 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
 import java.util.function.LongUnaryOperator;
 
+import static io.qala.datagen.RandomShortApi.bool;
+import static io.qala.datagen.RandomShortApi.integer;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Many of the following tests were taken from the AtomicLongArray test from the OpenJDK sources.
@@ -54,8 +54,7 @@ import static org.junit.Assert.fail;
  * @see <a href="https://hg.openjdk.java.net/jdk/jdk13/file/9e0c80381e32/jdk/test/java/util/concurrent/tck/JSR166TestCase.java">OpenJDK sources for JSR166TestCase.java</a>
  * @see <a href="https://hg.openjdk.java.net/jdk/jdk13/file/9e0c80381e32/jdk/test/java/util/concurrent/atomic/LongAdderDemo.java">OpenJDK sources for LongAdderDemo.java</a>
  */
-@ThreadLeakScope(ThreadLeakScope.Scope.NONE)
-public final class HugeAtomicLongArrayTest extends RandomizedTest {
+final class HugeAtomicLongArrayTest {
 
     private static final int SIZE = 20;
     private static final long LONG_DELAY_MS = 10_000L;
@@ -64,7 +63,7 @@ public final class HugeAtomicLongArrayTest extends RandomizedTest {
      * constructor creates array of given size with all elements zero
      */
     @Test
-    public void testConstructor() {
+    void testConstructor() {
         testArray(SIZE, aa -> {
             for (int i = 0; i < SIZE; i++) {
                 assertEquals(0, aa.get(i));
@@ -76,7 +75,7 @@ public final class HugeAtomicLongArrayTest extends RandomizedTest {
      * constructor with array is of same size and has all elements
      */
     @Test
-    public void testConstructor2() {
+    void testConstructor2() {
         long[] a = {17L, 3L, -42L, 99L, -7L};
         testArray(a.length, i -> a[(int) i], aa -> {
             assertEquals(a.length, aa.size());
@@ -90,7 +89,7 @@ public final class HugeAtomicLongArrayTest extends RandomizedTest {
      * get and set for out of bound indices throw IndexOutOfBoundsException
      */
     @Test
-    public void testIndexing() {
+    void testIndexing() {
         testArray(SIZE, aa -> {
             for (int index : new int[]{-1, SIZE}) {
                 try {
@@ -116,7 +115,7 @@ public final class HugeAtomicLongArrayTest extends RandomizedTest {
      * get returns the last value set at index
      */
     @Test
-    public void testGetSet() {
+    void testGetSet() {
         testArray(SIZE, aa -> {
             for (int i = 0; i < SIZE; i++) {
                 aa.set(i, 1);
@@ -133,7 +132,7 @@ public final class HugeAtomicLongArrayTest extends RandomizedTest {
      * compareAndSet succeeds in changing value if equal to expected else fails
      */
     @Test
-    public void testCompareAndSet() {
+    void testCompareAndSet() {
         testArray(SIZE, aa -> {
             for (int i = 0; i < SIZE; i++) {
                 aa.set(i, 1);
@@ -153,7 +152,7 @@ public final class HugeAtomicLongArrayTest extends RandomizedTest {
      * to succeed
      */
     @Test
-    public void testCompareAndSetInMultipleThreads() throws InterruptedException {
+    void testCompareAndSetInMultipleThreads() throws InterruptedException {
         testArray(1, a -> {
             a.set(0, 1);
             Thread t = new Thread(new CheckedRunnable() {
@@ -179,7 +178,7 @@ public final class HugeAtomicLongArrayTest extends RandomizedTest {
      * getAndUpdate returns previous value and updates result of supplied function
      */
     @Test
-    public void testAddAndGet() {
+    void testAddAndGet() {
         testArray(SIZE, aa -> {
             for (int i = 0; i < SIZE; i++) {
                 aa.set(i, 1);
@@ -238,10 +237,10 @@ public final class HugeAtomicLongArrayTest extends RandomizedTest {
     }
 
     @Test
-    public final void shouldSetAndGet() {
+    final void shouldSetAndGet() {
         testArray(10, array -> {
-            int index = between(2, 8);
-            int value = between(42, 1337);
+            int index = integer(2, 8);
+            int value = integer(42, 1337);
 
             array.set(index, value);
             assertEquals(value, array.get(index));
@@ -249,16 +248,16 @@ public final class HugeAtomicLongArrayTest extends RandomizedTest {
     }
 
     @Test
-    public final void shouldReportSize() {
-        int size = between(10, 20);
+    final void shouldReportSize() {
+        int size = integer(10, 20);
         testArray(size, array -> {
             assertEquals(size, array.size());
         });
     }
 
     @Test
-    public final void shouldFreeMemoryUsed() {
-        int size = between(10, 20);
+    final void shouldFreeMemoryUsed() {
+        int size = integer(10, 20);
         long expected = MemoryUsage.sizeOfLongArray(size);
         testArray(size, array -> {
             long freed = array.release();
@@ -267,19 +266,19 @@ public final class HugeAtomicLongArrayTest extends RandomizedTest {
     }
 
     @Test
-    public void shouldComputeMemoryEstimation() {
-        Assert.assertEquals(40, HugeAtomicLongArray.memoryEstimation(0L));
-        Assert.assertEquals(840, HugeAtomicLongArray.memoryEstimation(100L));
-        Assert.assertEquals(800_122_070_368L, HugeAtomicLongArray.memoryEstimation(100_000_000_000L));
-    }
-
-    @Test(expected = AssertionError.class)
-    public void shouldFailForNegativeMemRecSize() {
-        HugeAtomicLongArray.memoryEstimation(-1L);
+    void shouldComputeMemoryEstimation() {
+        assertEquals(40, HugeAtomicLongArray.memoryEstimation(0L));
+        assertEquals(840, HugeAtomicLongArray.memoryEstimation(100L));
+        assertEquals(800_122_070_368L, HugeAtomicLongArray.memoryEstimation(100_000_000_000L));
     }
 
     @Test
-    public void testAdder() {
+    void shouldFailForNegativeMemRecSize() {
+        assertThrows(AssertionError.class, () -> HugeAtomicLongArray.memoryEstimation(-1L));
+    }
+
+    @Test
+    void testAdder() {
         int incsPerThread = 10_000;
         int ncpu = Runtime.getRuntime().availableProcessors();
         int maxThreads = ncpu * 2;
@@ -333,7 +332,7 @@ public final class HugeAtomicLongArrayTest extends RandomizedTest {
     }
 
     private <E extends Exception> void testArray(int size, ThrowingConsumer<HugeAtomicLongArray, E> block) throws E {
-        if (randomBoolean()) {
+        if (bool()) {
             block.accept(singleArray(size));
             block.accept(pagedArray(size));
         } else {
@@ -343,7 +342,7 @@ public final class HugeAtomicLongArrayTest extends RandomizedTest {
     }
 
     private void testArray(int size, LongUnaryOperator gen, Consumer<HugeAtomicLongArray> block) {
-        if (randomBoolean()) {
+        if (bool()) {
             block.accept(singleArray(size, gen));
             block.accept(pagedArray(size, gen));
         } else {

@@ -20,9 +20,9 @@
 package org.neo4j.graphalgo.impl;
 
 import com.carrotsearch.hppc.LongArrayList;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
@@ -32,11 +32,11 @@ import org.neo4j.graphalgo.impl.yens.WeightedPath;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
 
 /**
@@ -53,35 +53,34 @@ import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
  *
  * @author mknblch
  */
-public class DijkstraTest {
+class DijkstraTest {
 
-    @ClassRule
-    public static ImpermanentDatabaseRule db = new ImpermanentDatabaseRule();
+    private GraphDatabaseAPI db;
 
     private static Graph graph;
     private static LongArrayList edgeBlackList;
     private static Dijkstra dijkstra;
 
-    @BeforeClass
-    public static void setupGraph() throws KernelException {
-
-        final String cypher =
+    @BeforeEach
+    void setupGraph() throws KernelException {
+        db = TestDatabaseCreator.createTestDatabase();
+        String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
-                        "CREATE (b:Node {name:'b'})\n" +
-                        "CREATE (c:Node {name:'c'})\n" +
-                        "CREATE (d:Node {name:'d'})\n" +
-                        "CREATE (e:Node {name:'e'})\n" +
-                        "CREATE (f:Node {name:'f'})\n" +
-                        "CREATE (g:Node {name:'g'})\n" +
-                        "CREATE" +
-                        " (a)-[:TYPE {cost:2.0}]->(b),\n" +
-                        " (a)-[:TYPE {cost:1.0}]->(c),\n" +
-                        " (b)-[:TYPE {cost:1.0}]->(d),\n" +
-                        " (c)-[:TYPE {cost:2.0}]->(d),\n" +
-                        " (d)-[:TYPE {cost:1.0}]->(e),\n" +
-                        " (d)-[:TYPE {cost:2.0}]->(f),\n" +
-                        " (e)-[:TYPE {cost:2.0}]->(g),\n" +
-                        " (f)-[:TYPE {cost:1.0}]->(g)";
+                "CREATE (b:Node {name:'b'})\n" +
+                "CREATE (c:Node {name:'c'})\n" +
+                "CREATE (d:Node {name:'d'})\n" +
+                "CREATE (e:Node {name:'e'})\n" +
+                "CREATE (f:Node {name:'f'})\n" +
+                "CREATE (g:Node {name:'g'})\n" +
+                "CREATE" +
+                " (a)-[:TYPE {cost:2.0}]->(b),\n" +
+                " (a)-[:TYPE {cost:1.0}]->(c),\n" +
+                " (b)-[:TYPE {cost:1.0}]->(d),\n" +
+                " (c)-[:TYPE {cost:2.0}]->(d),\n" +
+                " (d)-[:TYPE {cost:1.0}]->(e),\n" +
+                " (d)-[:TYPE {cost:2.0}]->(f),\n" +
+                " (e)-[:TYPE {cost:2.0}]->(g),\n" +
+                " (f)-[:TYPE {cost:1.0}]->(g)";
 
         db.execute(cypher);
 
@@ -100,8 +99,8 @@ public class DijkstraTest {
                 .withFilter(longToIntConsumer((s, t) -> !edgeBlackList.contains(RawValues.combineIntInt(s, t))));
     }
 
-    private static int id(String name) {
-        final Node[] node = new Node[1];
+    private int id(String name) {
+        Node[] node = new Node[1];
         db.execute("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n").accept(row -> {
             node[0] = row.getNode("n");
             return false;
@@ -110,7 +109,7 @@ public class DijkstraTest {
     }
 
     @Test
-    public void testNoFilter() throws Exception {
+    void testNoFilter() {
         edgeBlackList.clear();
         final WeightedPath weightedPath = dijkstra();
         assertEquals(5, weightedPath.size());
@@ -118,7 +117,7 @@ public class DijkstraTest {
     }
 
     @Test
-    public void testFilterACDF() throws Exception {
+    void testFilterACDF() {
         edgeBlackList.clear();
         edgeBlackList.add(RawValues.combineIntInt(id("a"), id("c")));
         edgeBlackList.add(RawValues.combineIntInt(id("d"), id("f")));
@@ -129,7 +128,7 @@ public class DijkstraTest {
     }
 
     @Test
-    public void testFilterABDE() throws Exception {
+    void testFilterABDE() {
         edgeBlackList.clear();
         edgeBlackList.add(RawValues.combineIntInt(id("a"), id("b")));
         edgeBlackList.add(RawValues.combineIntInt(id("d"), id("e")));
@@ -140,7 +139,7 @@ public class DijkstraTest {
     }
 
     @Test
-    public void testMaxDepth() throws Exception {
+    void testMaxDepth() {
         assertTrue(dijkstra.compute(id("a"), id("d"), 4).isPresent());
         assertFalse(dijkstra.compute(id("a"), id("d"), 3).isPresent());
     }

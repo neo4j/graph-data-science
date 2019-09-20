@@ -19,32 +19,40 @@
  */
 package org.neo4j.graphalgo.algo;
 
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.IsFiniteFunc;
+import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
 import java.util.List;
 
 import static java.util.Collections.singletonMap;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class IsFiniteFuncTest {
-    @ClassRule
-    public static ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
+class IsFiniteFuncTest {
 
-    @BeforeClass
-    public static void setUp() throws Exception {
-        DB.resolveDependency(Procedures.class).registerFunction(IsFiniteFunc.class);
+    private static GraphDatabaseAPI DB;
+
+    @BeforeAll
+    static void setUp() throws KernelException {
+        DB = TestDatabaseCreator.createTestDatabase();
+        DB.getDependencyResolver().resolveDependency(Procedures.class).registerFunction(IsFiniteFunc.class);
+    }
+
+    @AfterAll
+    static void tearDown() {
+        DB.shutdown();
     }
 
     @Test
-    public void isFinite() throws Exception {
+    void isFinite() {
         assertFalse(callIsFinite(null));
         assertFalse(callIsFinite(Double.NaN));
         assertFalse(callIsFinite(Double.POSITIVE_INFINITY));
@@ -61,7 +69,7 @@ public class IsFiniteFuncTest {
     }
 
     @Test
-    public void isInfinite() throws Exception {
+    void isInfinite() {
         assertTrue(callIsInfinite(null));
         assertTrue(callIsInfinite(Double.NaN));
         assertTrue(callIsInfinite(Double.POSITIVE_INFINITY));
@@ -78,7 +86,7 @@ public class IsFiniteFuncTest {
     }
 
     @Test
-    public void testInfinityAndNaN() throws Exception {
+    void testInfinityAndNaN() {
         double[] actual = DB.execute(
                 "WITH [42, algo.Infinity(), 13.37, 0, algo.NaN(), 1.7976931348623157e308, -13] AS values RETURN filter(x IN values WHERE algo.isFinite(x)) as xs")
                 .<List<Number>>columnAs("xs")

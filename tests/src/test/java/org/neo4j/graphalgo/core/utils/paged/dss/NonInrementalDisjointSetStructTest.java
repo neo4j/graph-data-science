@@ -19,13 +19,13 @@
  */
 package org.neo4j.graphalgo.core.utils.paged.dss;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import static org.neo4j.graphalgo.core.utils.paged.dss.NonInrementalDisjointSetStruct.memoryEstimation;
 
-public class NonInrementalDisjointSetStructTest extends DisjointSetStructTest {
+class NonInrementalDisjointSetStructTest extends DisjointSetStructTest {
 
     @Override
     SequentialDisjointSetStruct newSet(final int capacity) {
@@ -36,7 +36,7 @@ public class NonInrementalDisjointSetStructTest extends DisjointSetStructTest {
     }
 
     @Test
-    public void shouldComputeMemoryEstimation() {
+    void shouldComputeMemoryEstimation() {
         assertMemoryEstimation(memoryEstimation(), 0, MemoryRange.of(64));
         assertMemoryEstimation(memoryEstimation(), 100, MemoryRange.of(864));
         assertMemoryEstimation(memoryEstimation(), 100_000_000_000L, MemoryRange.of(800_122_070_392L));

@@ -19,59 +19,61 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
-import static org.junit.Assert.assertEquals;
+import static io.qala.datagen.RandomShortApi.integer;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public final class HugeLongArrayTest extends HugeArrayTestBase<long[], Long, HugeLongArray> {
+final class HugeLongArrayTest extends HugeArrayTestBase<long[], Long, HugeLongArray> {
 
     @Test
-    public void shouldBinaryOrValues() {
+    void shouldBinaryOrValues() {
         testArray(10, array -> {
-            int index = between(2, 8);
-            int value = between(42, 1337);
+            int index = integer(2, 8);
+            int value = integer(42, 1337);
             array.set(index, value);
-            int newValue = between(42, 1337);
+            int newValue = integer(42, 1337);
             array.or(index, newValue);
             assertEquals(value | newValue, array.get(index));
         });
     }
 
     @Test
-    public void shouldBinaryAndValues() {
+    void shouldBinaryAndValues() {
         testArray(10, array -> {
-            int index = between(2, 8);
-            int value = between(42, 1337);
+            int index = integer(2, 8);
+            int value = integer(42, 1337);
             array.set(index, value);
-            int newValue = between(42, 1337);
+            int newValue = integer(42, 1337);
             array.and(index, newValue);
             assertEquals(value & newValue, array.get(index));
         });
     }
 
     @Test
-    public final void shouldAddToValues() {
+    void shouldAddToValues() {
         testArray(10, array -> {
-            int index = between(2, 8);
-            int value = between(42, 1337);
+            int index = integer(2, 8);
+            int value = integer(42, 1337);
             array.set(index, value);
-            int newValue = between(42, 1337);
+            int newValue = integer(42, 1337);
             array.addTo(index, newValue);
             assertEquals(value + newValue, array.get(index));
         });
     }
 
     @Test
-    public void shouldComputeMemoryEstimation() {
+    void shouldComputeMemoryEstimation() {
         assertEquals(40, HugeLongArray.memoryEstimation(0L));
         assertEquals(840, HugeLongArray.memoryEstimation(100L));
         assertEquals(800_122_070_368L, HugeLongArray.memoryEstimation(100_000_000_000L));
     }
 
-    @Test(expected = AssertionError.class)
-    public void shouldFailForNegativeMemRecSize() {
-        HugeLongArray.memoryEstimation(-1L);
+    @Test
+    void shouldFailForNegativeMemRecSize() {
+        assertThrows(AssertionError.class, () -> HugeLongArray.memoryEstimation(-1L));
     }
 
     @Override

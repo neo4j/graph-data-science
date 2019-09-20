@@ -19,15 +19,15 @@
  */
 package org.neo4j.internal.kernel.api.helpers;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.core.loading.NodesHelper.countUndirected;
 
-public final class NodesHelperTest {
+final class NodesHelperTest {
 
     @Test
-    public void shouldCountUndirectedDense() {
+    void shouldCountUndirectedDense() {
         StubGroupCursor groupCursor = new StubGroupCursor(
                 group().withOutCount(1).withInCount(1).withLoopCount(5),
                 group().withOutCount(1).withInCount(1).withLoopCount(3),
@@ -43,7 +43,7 @@ public final class NodesHelperTest {
     }
 
     @Test
-    public void shouldCountUndirectedSparse() {
+    void shouldCountUndirectedSparse() {
         StubRelationshipCursor relationshipCursor = new StubRelationshipCursor(
                 new TestRelationshipChain(11)
                         .outgoing(55, 0, 1)
@@ -61,7 +61,7 @@ public final class NodesHelperTest {
     }
 
     @Test
-    public void shouldCountUndirectedWithTypeDense() {
+    void shouldCountUndirectedWithTypeDense() {
         StubGroupCursor groupCursor = new StubGroupCursor(
                 group(1).withOutCount(1).withInCount(1).withLoopCount(5),
                 group(2).withOutCount(1).withInCount(1).withLoopCount(3)
@@ -76,7 +76,7 @@ public final class NodesHelperTest {
     }
 
     @Test
-    public void shouldCountUndirectedWithTypeSparse() {
+    void shouldCountUndirectedWithTypeSparse() {
         StubRelationshipCursor relationshipCursor = new StubRelationshipCursor(
                 new TestRelationshipChain(11)
                         .outgoing(55, 0, 1)

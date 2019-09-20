@@ -19,15 +19,22 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
-import static org.neo4j.graphalgo.core.utils.BitUtil.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.core.utils.BitUtil.align;
+import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
+import static org.neo4j.graphalgo.core.utils.BitUtil.isPowerOfTwo;
+import static org.neo4j.graphalgo.core.utils.BitUtil.nearbyPowerOfTwo;
+import static org.neo4j.graphalgo.core.utils.BitUtil.nextHighestPowerOfTwo;
+import static org.neo4j.graphalgo.core.utils.BitUtil.previousPowerOfTwo;
 
-public final class BitUtilTest {
+final class BitUtilTest {
 
     @Test
-    public void shouldDetectPowersOfTwoForInts() {
+    void shouldDetectPowersOfTwoForInts() {
         assertTrue(isPowerOfTwo(1));
         assertTrue(isPowerOfTwo(2));
         assertTrue(isPowerOfTwo(4));
@@ -45,7 +52,7 @@ public final class BitUtilTest {
     }
 
     @Test
-    public void shouldDetectPowersOfTwoForLongs() {
+    void shouldDetectPowersOfTwoForLongs() {
         assertTrue(isPowerOfTwo(1L));
         assertTrue(isPowerOfTwo(2L));
         assertTrue(isPowerOfTwo(4L));
@@ -67,7 +74,7 @@ public final class BitUtilTest {
     }
 
     @Test
-    public void shouldReturnNextPowerOfTwoForInts() {
+    void shouldReturnNextPowerOfTwoForInts() {
         assertEquals(Integer.MIN_VALUE, nextHighestPowerOfTwo(Integer.MIN_VALUE));
         assertEquals(0, nextHighestPowerOfTwo(Integer.MIN_VALUE + 1));
         assertEquals(0, nextHighestPowerOfTwo(-1));
@@ -85,7 +92,7 @@ public final class BitUtilTest {
     }
 
     @Test
-    public void shouldReturnNextPowerOfTwoForLongs() {
+    void shouldReturnNextPowerOfTwoForLongs() {
         assertEquals(Long.MIN_VALUE, nextHighestPowerOfTwo(Long.MIN_VALUE));
         assertEquals(0L, nextHighestPowerOfTwo(Long.MIN_VALUE + 1L));
         assertEquals(0L, nextHighestPowerOfTwo(-1L));
@@ -103,7 +110,7 @@ public final class BitUtilTest {
     }
 
     @Test
-    public void shouldReturnPreviousPowerOfTwoForInts() {
+    void shouldReturnPreviousPowerOfTwoForInts() {
         assertEquals(Integer.MIN_VALUE, previousPowerOfTwo(Integer.MIN_VALUE));
         assertEquals(Integer.MIN_VALUE, previousPowerOfTwo(Integer.MIN_VALUE + 1));
         assertEquals(Integer.MIN_VALUE, previousPowerOfTwo(-1));
@@ -121,7 +128,7 @@ public final class BitUtilTest {
     }
 
     @Test
-    public void shouldReturnPreviousPowerOfTwoForLongs() {
+    void shouldReturnPreviousPowerOfTwoForLongs() {
         assertEquals(Long.MIN_VALUE, previousPowerOfTwo(Long.MIN_VALUE));
         assertEquals(Long.MIN_VALUE, previousPowerOfTwo(Long.MIN_VALUE + 1));
         assertEquals(Long.MIN_VALUE, previousPowerOfTwo(-1L));
@@ -139,7 +146,7 @@ public final class BitUtilTest {
     }
 
     @Test
-    public void shouldReturnNearbyPowerOfTwoForInts() {
+    void shouldReturnNearbyPowerOfTwoForInts() {
         assertEquals(Integer.MIN_VALUE, nearbyPowerOfTwo(Integer.MIN_VALUE));
         assertEquals(0, nearbyPowerOfTwo(Integer.MIN_VALUE + 1));
         assertEquals(0, nearbyPowerOfTwo(-1));
@@ -162,7 +169,7 @@ public final class BitUtilTest {
     }
 
     @Test
-    public void shouldReturnNearbyPowerOfTwoForLongs() {
+    void shouldReturnNearbyPowerOfTwoForLongs() {
         assertEquals(Long.MIN_VALUE, nearbyPowerOfTwo(Long.MIN_VALUE));
         assertEquals(0L, nearbyPowerOfTwo(Long.MIN_VALUE + 1));
         assertEquals(0L, nearbyPowerOfTwo(-1L));
@@ -185,7 +192,7 @@ public final class BitUtilTest {
     }
 
     @Test
-    public void shouldAlignToNextMultipleOfALignment() {
+    void shouldAlignToNextMultipleOfALignment() {
         assertEquals(0L, align(0L, 4));
         assertEquals(4L, align(1L, 4));
         assertEquals(4L, align(3L, 4));
@@ -200,7 +207,7 @@ public final class BitUtilTest {
     }
 
     @Test
-    public void ceilDivRoundsTowardsPositiveInfinity() {
+    void ceilDivRoundsTowardsPositiveInfinity() {
         assertEquals(0L, ceilDiv(0L, 1L));
         assertEquals(1L, ceilDiv(1L, 1L));
         assertEquals(1L, ceilDiv(1L, 2L));

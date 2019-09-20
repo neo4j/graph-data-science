@@ -19,24 +19,25 @@
  */
 package org.neo4j.graphalgo.algo.linkprediction;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
+import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class PreferentialAttachmentProcIntegrationTest {
-    private static final String SETUP =
+class PreferentialAttachmentProcIntegrationTest {
+    private static final String DB_CYPHER =
             "CREATE (mark:Person {name: 'Mark'})\n" +
             "CREATE (michael:Person {name: 'Michael'})\n" +
             "CREATE (praveena:Person {name: 'Praveena'})\n" +
@@ -58,8 +59,8 @@ public class PreferentialAttachmentProcIntegrationTest {
 
     private static GraphDatabaseService db;
 
-    @BeforeClass
-    public static void setUp() throws Exception {
+    @BeforeAll
+    static void setUp() throws KernelException {
         db = new TestGraphDatabaseFactory()
                 .newImpermanentDatabaseBuilder()
                 .setConfig(GraphDatabaseSettings.procedure_unrestricted,"algo.*")
@@ -69,16 +70,16 @@ public class PreferentialAttachmentProcIntegrationTest {
                 .resolveDependency(Procedures.class)
                 .registerFunction(LinkPredictionFunc.class);
 
-        db.execute(SETUP).close();
+        db.execute(DB_CYPHER).close();
     }
 
-    @AfterClass
-    public static void tearDown() {
+    @AfterAll
+    static void tearDown() {
         db.shutdown();
     }
 
     @Test
-    public void sameNodesHaveDegreeSquared() throws Exception {
+    void sameNodesHaveDegreeSquared() {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Jennifer'})\n" +
                         "MATCH (p2:Person {name: 'Jennifer'})\n" +
@@ -94,7 +95,7 @@ public class PreferentialAttachmentProcIntegrationTest {
 
 
     @Test
-    public void oneIsolatedNode() throws Exception {
+    void oneIsolatedNode() {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Mark'})\n" +
                 "MATCH (p2:Person {name: 'Arya'})\n" +
@@ -109,7 +110,7 @@ public class PreferentialAttachmentProcIntegrationTest {
     }
 
     @Test
-    public void nodesOnlyLinkToEachOther() throws Exception {
+    void nodesOnlyLinkToEachOther() {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Karin'})\n" +
                         "MATCH (p2:Person {name: 'Elaine'})\n" +
@@ -124,7 +125,7 @@ public class PreferentialAttachmentProcIntegrationTest {
     }
 
     @Test
-    public void multipleRelationshipsBetweenSameNodesAreIncluded() throws Exception {
+    void multipleRelationshipsBetweenSameNodesAreIncluded() {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Praveena'})\n" +
                         "MATCH (p2:Person {name: 'Jennifer'})\n" +
@@ -139,7 +140,7 @@ public class PreferentialAttachmentProcIntegrationTest {
     }
 
     @Test
-    public void multipleRelationshipsOfSpecificTypeBetweenSameNodesAreIncluded() throws Exception {
+    void multipleRelationshipsOfSpecificTypeBetweenSameNodesAreIncluded() {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Praveena'})\n" +
                         "MATCH (p2:Person {name: 'Jennifer'})\n" +
@@ -154,7 +155,7 @@ public class PreferentialAttachmentProcIntegrationTest {
     }
 
     @Test
-    public void directionIsConsidered() throws Exception {
+    void directionIsConsidered() {
         String controlQuery =
                 "MATCH (p1:Person {name: 'Praveena'})\n" +
                         "MATCH (p2:Person {name: 'Jennifer'})\n" +

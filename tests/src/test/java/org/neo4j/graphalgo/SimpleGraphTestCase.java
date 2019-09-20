@@ -19,18 +19,18 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 
 import java.util.function.LongPredicate;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
@@ -43,7 +43,7 @@ import static org.neo4j.graphdb.Direction.OUTGOING;
 /**
  * @author mknobloch
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public abstract class SimpleGraphTestCase extends Neo4jTestCase {
 
     protected static Graph graph;
@@ -56,15 +56,9 @@ public abstract class SimpleGraphTestCase extends Neo4jTestCase {
     @Mock
     private LongPredicate nodeConsumer;
 
-    @Before
-    public void setupMocks() {
-        when(nodeConsumer.test(anyLong())).thenReturn(true);
-        when(relationConsumer.accept(anyLong(), anyLong())).thenReturn(true);
-    }
-
     @Test
-    public void testForEachNode() throws Exception {
-
+    void testForEachNode() {
+        when(nodeConsumer.test(anyLong())).thenReturn(true);
         graph.forEachNode(nodeConsumer);
         verify(nodeConsumer, times(3)).test(anyLong());
         verify(nodeConsumer, times(1)).test(eq(v0));
@@ -73,7 +67,8 @@ public abstract class SimpleGraphTestCase extends Neo4jTestCase {
     }
 
     @Test
-    public void testNodeIterator() throws Exception {
+    void testNodeIterator() {
+        when(nodeConsumer.test(anyLong())).thenReturn(true);
         final PrimitiveLongIterator iterator = graph.nodeIterator();
         while(iterator.hasNext()) {
             nodeConsumer.test(iterator.next());
@@ -84,7 +79,8 @@ public abstract class SimpleGraphTestCase extends Neo4jTestCase {
     }
 
     @Test
-    public void testV0OutgoingForEach() throws Exception {
+    void testV0OutgoingForEach() {
+        when(relationConsumer.accept(anyLong(), anyLong())).thenReturn(true);
         graph.forEachRelationship(v0, OUTGOING, relationConsumer);
         verify(relationConsumer, times(2)).accept(anyLong(), anyLong());
         verify(relationConsumer, times(1)).accept(eq(v0), eq(v1));
@@ -92,31 +88,34 @@ public abstract class SimpleGraphTestCase extends Neo4jTestCase {
     }
 
     @Test
-    public void testV1OutgoingForEach() throws Exception {
+    void testV1OutgoingForEach() {
+        when(relationConsumer.accept(anyLong(), anyLong())).thenReturn(true);
         graph.forEachRelationship(v1, OUTGOING, relationConsumer);
         verify(relationConsumer, times(1)).accept(eq(v1), eq(v2));
     }
 
     @Test
-    public void testV2OutgoingForEach() throws Exception {
+    void testV2OutgoingForEach() {
         graph.forEachRelationship(v2, OUTGOING, relationConsumer);
         verify(relationConsumer, never()).accept(anyLong(), anyLong());
     }
 
     @Test
-    public void testV0IncomingForEach() throws Exception {
+    void testV0IncomingForEach() {
         graph.forEachRelationship(v0, INCOMING, relationConsumer);
         verify(relationConsumer, never()).accept(anyLong(), anyLong());
     }
 
     @Test
-    public void testV1IncomingForEach() throws Exception {
+    void testV1IncomingForEach() {
+        when(relationConsumer.accept(anyLong(), anyLong())).thenReturn(true);
         graph.forEachRelationship(v1, INCOMING, relationConsumer);
         verify(relationConsumer, times(1)).accept(eq(v1), eq(v0));
     }
 
     @Test
-    public void testV2IncomingForEach() throws Exception {
+    void testV2IncomingForEach() {
+        when(relationConsumer.accept(anyLong(), anyLong())).thenReturn(true);
         graph.forEachRelationship(v2, INCOMING, relationConsumer);
         verify(relationConsumer, times(2)).accept(anyLong(), anyLong());
         verify(relationConsumer, times(1)).accept(eq(v2), eq(v0));
@@ -124,8 +123,7 @@ public abstract class SimpleGraphTestCase extends Neo4jTestCase {
     }
 
     @Test
-    public void testDegree() throws Exception {
-
+    void testDegree() {
         assertEquals(3, graph.nodeCount());
 
         assertEquals(2, graph.degree(v0, OUTGOING));

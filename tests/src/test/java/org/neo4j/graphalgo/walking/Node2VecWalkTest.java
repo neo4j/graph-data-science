@@ -19,48 +19,54 @@
  */
 package org.neo4j.graphalgo.walking;
 
-import org.junit.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.neo4j.graphalgo.NodeWalkerProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphdb.*;
+import org.neo4j.graphdb.Label;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Path;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.ResourceIterator;
+import org.neo4j.graphdb.Result;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.Iterators;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class Node2VecWalkTest {
+class Node2VecWalkTest {
 
     private static final int NODE_COUNT = 54;
 
-    private static GraphDatabaseAPI db;
+    private GraphDatabaseAPI db;
     private Transaction tx;
 
-    @BeforeClass
-    public static void beforeClass() throws KernelException {
+    @BeforeEach
+    void beforeClass() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase();
         db.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(NodeWalkerProc.class);
-
         db.execute(buildDatabaseQuery(), Collections.singletonMap("count",NODE_COUNT-4)).close();
-    }
-
-    @AfterClass
-    public static void AfterClass() {
-        db.shutdown();
-    }
-
-    @Before
-    public void setUp() throws Exception {
         tx = db.beginTx();
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterEach
+    void AfterClass() {
         tx.close();
+        db.shutdown();
     }
 
     private static String buildDatabaseQuery() {
@@ -81,7 +87,7 @@ public class Node2VecWalkTest {
     }
 
     @Test
-    public void shouldHaveGivenStartNodeRandom() {
+    void shouldHaveGivenStartNodeRandom() {
         try (ResourceIterator<List<Long>> result = db.execute("CALL algo.randomWalk.stream(1, 1, 1)").columnAs("nodeIds")) {
 
             List<Long> path = result.next();
@@ -90,28 +96,27 @@ public class Node2VecWalkTest {
         }
     }
 
-    @Test(timeout = 100)
-    public void shouldHaveResultsRandom() {
+    @Test
+    @Timeout(100)
+    void shouldHaveResultsRandom() {
         Result results = db.execute("CALL algo.randomWalk.stream(null, 1, 5)");
-
         assertTrue(results.hasNext());
     }
 
     @Test
-    public void shouldHandleLargeResults() {
+    void shouldHandleLargeResults() {
         Result results = db.execute("CALL algo.randomWalk.stream(null, 100, 100000)");
-
         assertEquals(100000,Iterators.count(results));
     }
 
     @Test
-    public void shouldHaveSameTypesForStartNodesRandom() {
+    void shouldHaveSameTypesForStartNodesRandom() {
         // TODO: make this test predictable (i.e. set random seed)
         ResourceIterator<Path> results = db.execute("CALL algo.randomWalk.stream('Fred', 2, 5,{path:true})").columnAs("path");
         int count = 0;
         while (results.hasNext()) {
             Path path = results.next();
-            assertTrue("Nodes should be of type 'Fred'.", path.startNode().hasLabel(Label.label("Fred")));
+            assertTrue(path.startNode().hasLabel(Label.label("Fred")), "Nodes should be of type 'Fred'.");
             assertEquals(2, path.length());
             Relationship firstRel = path.relationships().iterator().next();
             assertEquals(path.startNode(), firstRel.getStartNode());
@@ -120,8 +125,9 @@ public class Node2VecWalkTest {
         assertEquals(5, count);
     }
 
-    @Test(timeout = 200)
-    public void shouldHaveStartedFromEveryNodeRandom() {
+    @Test
+    @Timeout(200)
+    void shouldHaveStartedFromEveryNodeRandom() {
         ResourceIterator<List<Long>> results = db.execute("CALL algo.randomWalk.stream(null,1,100)").columnAs("nodeIds");
 
         Set<Long> nodeIds = new HashSet<>();
@@ -129,16 +135,16 @@ public class Node2VecWalkTest {
             List<Long> path = results.next();
             nodeIds.add(path.get(0));
         }
-        assertEquals("Should have visited all nodes.", NODE_COUNT, nodeIds.size());
+        assertEquals(NODE_COUNT, nodeIds.size(), "Should have visited all nodes.");
     }
 
     @Test
-    public void shouldNotFailRandom() {
+    void shouldNotFailRandom() {
         Result results = db.execute("CALL algo.randomWalk.stream(2, 7, 2)");
 
         results.next();
         results.next();
-        assertTrue("There should be only two results.", !results.hasNext());
+        assertTrue(!results.hasNext(), "There should be only two results.");
     }
 
     private Node getStartNode(Path path) {
@@ -150,21 +156,21 @@ public class Node2VecWalkTest {
     }
 
     @Test
-    public void shouldHaveGivenStartNode() {
+    void shouldHaveGivenStartNode() {
         List<Long> result = db.execute("CALL algo.randomWalk.stream(1, 1, 1, {mode:'node2vec', return: 1, inOut:1})").<List<Long>>columnAs("nodeIds").next();
-
         assertThat( 1L, equalTo(result.get(0)));
     }
 
-    @Test(timeout = 100)
-    public void shouldHaveResultsN2V() {
+    @Test
+    @Timeout(100)
+    void shouldHaveResultsN2V() {
         ResourceIterator<List<Long>> results = db.execute("CALL algo.randomWalk.stream(null, 1, 5, {mode:'node2vec', return: 1, inOut:1})").columnAs("nodeIds");
 
         assertTrue(results.hasNext());
     }
 
     @Test
-    public void shouldHaveStartedFromEveryNodeN2V() {
+    void shouldHaveStartedFromEveryNodeN2V() {
         ResourceIterator<List<Long>> results = db.execute("CALL algo.randomWalk.stream(null, 1, 100, {mode:'node2vec', return: 1, inOut:1})").columnAs("nodeIds");
 
         Set<Long> nodeIds = new HashSet<>();
@@ -172,15 +178,15 @@ public class Node2VecWalkTest {
             List<Long> record = results.next();
             nodeIds.add(record.get(0));
         }
-        assertEquals("Should have visited all nodes.",  NODE_COUNT, nodeIds.size());
+        assertEquals(NODE_COUNT,  nodeIds.size(), "Should have visited all nodes.");
     }
 
     @Test
-    public void shouldNotFailN2V() {
+    void shouldNotFailN2V() {
         ResourceIterator<List<Long>> results = db.execute("CALL algo.randomWalk.stream(2, 7, 2, {mode:'node2vec', return: 1, inOut:1})").columnAs("nodeIds");
 
         results.next();
         results.next();
-        assertTrue("There should be only two results.", !results.hasNext());
+        assertTrue(!results.hasNext(), "There should be only two results.");
     }
 }

@@ -19,18 +19,19 @@
  */
 package org.neo4j.graphalgo.algo;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.PrimProc;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 /**
  *
@@ -51,12 +52,12 @@ public class PrimProcIntegrationTest {
     private static final RelationshipType type = RelationshipType.withName("TYPE");
     private static GraphDatabaseAPI db;
 
-    @AfterClass
-    public static void tearDown() throws Exception {
+    @AfterAll
+    public static void tearDown() {
         if (db != null) db.shutdown();
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void setup() throws KernelException {
 
         String cypher = "CREATE(a:Node {start:true}) " +
@@ -85,7 +86,7 @@ public class PrimProcIntegrationTest {
     }
 
     @Test
-    public void testMinimum() throws Exception {
+    public void testMinimum() {
 
         db.execute("MATCH(n:Node{start:true}) WITH n CALL algo.spanningTree('Node', 'TYPE', 'cost', id(n), {graph:'huge', write:true, stats:true}) " +
                 "YIELD loadMillis, computeMillis, writeMillis, effectiveNodeCount " +
@@ -111,7 +112,7 @@ public class PrimProcIntegrationTest {
     }
 
     @Test
-    public void testMaximum() throws Exception {
+    public void testMaximum() {
 
         db.execute("MATCH(n:Node{start:true}) WITH n CALL algo.spanningTree.maximum('Node', 'TYPE', 'cost', id(n), {writeProperty:'MAX', graph:'huge', write:true, stats:true}) " +
                 "YIELD loadMillis, computeMillis, writeMillis, effectiveNodeCount " +

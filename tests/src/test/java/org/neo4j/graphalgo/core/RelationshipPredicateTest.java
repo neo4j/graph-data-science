@@ -30,8 +30,8 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  *
@@ -39,7 +39,7 @@ import static org.junit.Assert.assertTrue;
  *       ^           |
  *       °-----------°
  */
-public class RelationshipPredicateTest {
+class RelationshipPredicateTest {
 
     private static final String DB_CYPHER =
             "CREATE" +

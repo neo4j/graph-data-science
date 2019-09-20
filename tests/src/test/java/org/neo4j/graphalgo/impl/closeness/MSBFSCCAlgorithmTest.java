@@ -19,14 +19,15 @@
  */
 package org.neo4j.graphalgo.impl.closeness;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.impl.closeness.MSClosenessCentrality.centrality;
 
-public class MSBFSCCAlgorithmTest {
+class MSBFSCCAlgorithmTest {
+
     @Test
-    public void testCentralityFormula() {
+    void testCentralityFormula() {
         /*
             C(u) = \frac{n - 1}{\sum_{v=1}^{n-1} d(v, u)}
 

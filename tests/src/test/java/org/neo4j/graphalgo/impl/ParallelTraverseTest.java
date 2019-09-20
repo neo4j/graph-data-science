@@ -40,7 +40,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.LongConsumer;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -126,7 +126,7 @@ class ParallelTraverseTest {
                     .bfs(rootNodeId, Direction.OUTGOING, n -> true, node -> ai.incrementAndGet())
                     .awaitTermination();
 
-            assertEquals("Iteration " + i + " results in error", nodeCount, ai.get());
+            assertEquals(nodeCount, ai.get(), "Iteration " + i + " results in error");
         }
     }
 }

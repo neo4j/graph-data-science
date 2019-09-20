@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.impl.betweenness.BetweennessCentralitySuccessorBrandes;
 import org.neo4j.graphalgo.impl.betweenness.MaxDepthBetweennessCentrality;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.mockito.Matchers.eq;
@@ -45,25 +44,25 @@ import static org.mockito.Mockito.verify;
  *
  * @author mknblch
  */
-public class BetweennessCentralityTest {
+class BetweennessCentralityTest {
 
     private static GraphDatabaseAPI db;
     private static Graph graph;
 
-    @BeforeClass
-    public static void setupGraph() throws KernelException {
+    @BeforeAll
+    static void setupGraph() {
 
-        final String cypher =
+        String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
-                        "CREATE (b:Node {name:'b'})\n" +
-                        "CREATE (c:Node {name:'c'})\n" +
-                        "CREATE (d:Node {name:'d'})\n" +
-                        "CREATE (e:Node {name:'e'})\n" +
-                        "CREATE" +
-                        " (a)-[:TYPE]->(b),\n" +
-                        " (b)-[:TYPE]->(c),\n" +
-                        " (c)-[:TYPE]->(d),\n" +
-                        " (d)-[:TYPE]->(e)";
+                "CREATE (b:Node {name:'b'})\n" +
+                "CREATE (c:Node {name:'c'})\n" +
+                "CREATE (d:Node {name:'d'})\n" +
+                "CREATE (e:Node {name:'e'})\n" +
+                "CREATE" +
+                " (a)-[:TYPE]->(b),\n" +
+                " (b)-[:TYPE]->(c),\n" +
+                " (c)-[:TYPE]->(d),\n" +
+                " (d)-[:TYPE]->(e)";
 
 
         db = TestDatabaseCreator.createTestDatabase();
@@ -81,8 +80,8 @@ public class BetweennessCentralityTest {
 
     }
 
-    @AfterClass
-    public static void tearDown() throws Exception {
+    @AfterAll
+    static void tearDown() {
         if (db != null) db.shutdown();
         graph = null;
     }
@@ -98,7 +97,7 @@ public class BetweennessCentralityTest {
     }
 
     @Test
-    public void testMBC() throws Exception {
+    void testMBC() {
 
         new MaxDepthBetweennessCentrality(graph, 3)
                 .compute()
@@ -107,7 +106,7 @@ public class BetweennessCentralityTest {
     }
 
     @Test
-    public void testSuccessorBrandes() throws Exception {
+    void testSuccessorBrandes() {
 
         final TestConsumer mock = mock(TestConsumer.class);
 

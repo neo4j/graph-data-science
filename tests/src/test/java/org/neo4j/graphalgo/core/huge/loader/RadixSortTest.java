@@ -19,28 +19,28 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-public final class RadixSortTest {
+final class RadixSortTest {
 
     @Test
-    public void testSortBySource() {
+    void testSortBySource() {
         long[] data = testData();
         RadixSort.radixSort(data, RadixSort.newCopy(data), RadixSort.newHistogram(0), data.length);
         assertArrayEquals(expectedBySource(), data);
     }
 
     @Test
-    public void testSortByTarget() {
+    void testSortByTarget() {
         long[] data = testData();
         RadixSort.radixSort2(data, RadixSort.newCopy(data), RadixSort.newHistogram(0), data.length);
         assertArrayEquals(expectedByTarget(), data);
     }
 
     @Test
-    public void sortLargeBatch() {
+    void sortLargeBatch() {
         long[] testcase = new long[7680];
         int index = 0;
         for (long i = 0L; i < 920L; i++) {

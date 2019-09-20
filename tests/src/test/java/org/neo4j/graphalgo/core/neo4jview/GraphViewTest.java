@@ -19,8 +19,8 @@
  */
 package org.neo4j.graphalgo.core.neo4jview;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.neo4j.graphalgo.SimpleGraphSetup;
 import org.neo4j.graphalgo.SimpleGraphTestCase;
 import org.neo4j.graphalgo.api.GraphSetup;
@@ -30,12 +30,12 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
  * @author mknobloch
  */
 //@Ignore("weights faulty")
-public class GraphViewTest extends SimpleGraphTestCase {
+class GraphViewTest extends SimpleGraphTestCase {
 
     private static SimpleGraphSetup setup = new SimpleGraphSetup();
 
-    @BeforeClass
-    public static void setupGraph() {
+    @BeforeAll
+    static void setupGraph() {
         GraphSetup graphSetup = new GraphSetup(LABEL, RELATION, WEIGHT_PROPERTY, 0.0, null);
         graph = new GraphViewFactory((GraphDatabaseAPI) setup.getDb(), graphSetup).build();
         v0 = 0;
@@ -43,8 +43,8 @@ public class GraphViewTest extends SimpleGraphTestCase {
         v2 = 2;
     }
 
-    @AfterClass
-    public static void tearDown() {
+    @AfterAll
+    static void tearDown() {
         if (setup != null) setup.shutdown();
         if (db != null) db.shutdown();
     }

@@ -20,21 +20,21 @@
 package org.neo4j.graphalgo.core.utils.paged;
 
 import com.carrotsearch.hppc.LongLongHashMap;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
-public final class HugeLongLongMapTest {
+final class HugeLongLongMapTest {
 
     @Test
-    public void canReadFromAddTo() {
+    void canReadFromAddTo() {
         HugeLongLongMap map = new HugeLongLongMap(AllocationTracker.EMPTY);
         map.addTo(1L, 1L);
 
@@ -47,7 +47,7 @@ public final class HugeLongLongMapTest {
     }
 
     @Test
-    public void supportsNullKeys() {
+    void supportsNullKeys() {
         HugeLongLongMap map = new HugeLongLongMap(AllocationTracker.EMPTY);
 
         map.addTo(0L, 1L);
@@ -60,7 +60,7 @@ public final class HugeLongLongMapTest {
     }
 
     @Test
-    public void addToAddsValues() {
+    void addToAddsValues() {
         HugeLongLongMap map = new HugeLongLongMap(AllocationTracker.EMPTY);
         map.addTo(1L, 1L);
         map.addTo(1L, 2L);
@@ -72,7 +72,7 @@ public final class HugeLongLongMapTest {
     }
 
     @Test
-    public void acceptsInitialSize() {
+    void acceptsInitialSize() {
         HugeLongLongMap map = new HugeLongLongMap(0L, AllocationTracker.EMPTY);
         map.addTo(1L, 1L);
         long actual = map.getOrDefault(1L, 0L);
@@ -90,7 +90,7 @@ public final class HugeLongLongMapTest {
     }
 
     @Test
-    public void hasSize() {
+    void hasSize() {
         HugeLongLongMap map = new HugeLongLongMap(AllocationTracker.EMPTY);
         assertEquals(0L, map.size());
 
@@ -106,7 +106,7 @@ public final class HugeLongLongMapTest {
     }
 
     @Test
-    public void hasIsEmpty() {
+    void hasIsEmpty() {
         HugeLongLongMap map = new HugeLongLongMap(AllocationTracker.EMPTY);
         assertTrue(map.isEmpty());
         map.addTo(1L, 1L);
@@ -114,7 +114,7 @@ public final class HugeLongLongMapTest {
     }
 
     @Test
-    public void resizeOnGrowthAndTrackMemoryUsage() {
+    void resizeOnGrowthAndTrackMemoryUsage() {
         long firstSize = sizeOfLongArray(8) + sizeOfDoubleArray(8);
         long secondSize = sizeOfLongArray(16) + sizeOfDoubleArray(16);
         long thirdSize = sizeOfLongArray(32) + sizeOfDoubleArray(32);
@@ -137,7 +137,7 @@ public final class HugeLongLongMapTest {
     }
 
     @Test
-    public void releaseMemory() {
+    void releaseMemory() {
         AllocationTracker tracker = AllocationTracker.create();
         HugeLongLongMap map = new HugeLongLongMap(tracker);
 
@@ -149,7 +149,7 @@ public final class HugeLongLongMapTest {
     }
 
     @Test
-    public void hasStringRepresentation() {
+    void hasStringRepresentation() {
         HugeLongLongMap map = new HugeLongLongMap(AllocationTracker.EMPTY);
         LongLongHashMap compare = new LongLongHashMap();
 

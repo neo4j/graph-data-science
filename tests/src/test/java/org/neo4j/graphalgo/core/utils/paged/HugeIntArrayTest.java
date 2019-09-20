@@ -19,44 +19,45 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
-import static org.junit.Assert.assertEquals;
+import static io.qala.datagen.RandomShortApi.integer;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public final class HugeIntArrayTest extends HugeArrayTestBase<int[], Integer, HugeIntArray> {
+final class HugeIntArrayTest extends HugeArrayTestBase<int[], Integer, HugeIntArray> {
 
     @Test
-    public final void shouldBinaryOrValues() {
+    final void shouldBinaryOrValues() {
         testArray(10, array -> {
-            int index = between(2, 8);
-            int value = between(42, 1337);
+            int index = integer(2, 8);
+            int value = integer(42, 1337);
             array.set(index, value);
-            int newValue = between(42, 1337);
+            int newValue = integer(42, 1337);
             array.or(index, newValue);
             assertEquals(value | newValue, array.get(index));
         });
     }
 
     @Test
-    public final void shouldBinaryAndValues() {
+    final void shouldBinaryAndValues() {
         testArray(10, array -> {
-            int index = between(2, 8);
-            int value = between(42, 1337);
+            int index = integer(2, 8);
+            int value = integer(42, 1337);
             array.set(index, value);
-            int newValue = between(42, 1337);
+            int newValue = integer(42, 1337);
             array.and(index, newValue);
             assertEquals(value & newValue, array.get(index));
         });
     }
 
     @Test
-    public final void shouldAddToValues() {
+    final void shouldAddToValues() {
         testArray(10, array -> {
-            int index = between(2, 8);
-            int value = between(42, 1337);
+            int index = integer(2, 8);
+            int value = integer(42, 1337);
             array.set(index, value);
-            int newValue = between(42, 1337);
+            int newValue = integer(42, 1337);
             array.addTo(index, newValue);
             assertEquals(value + newValue, array.get(index));
         });

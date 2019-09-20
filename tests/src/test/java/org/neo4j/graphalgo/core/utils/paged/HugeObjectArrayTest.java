@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.utils.paged;
 
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
-public final class HugeObjectArrayTest extends HugeArrayTestBase<String[], String, HugeObjectArray<String>> {
+final class HugeObjectArrayTest extends HugeArrayTestBase<String[], String, HugeObjectArray<String>> {
 
     @Override
     HugeObjectArray<String> singleArray(final int size) {

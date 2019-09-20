@@ -19,25 +19,27 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TerminateProcedure;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphdb.*;
+import org.neo4j.graphdb.Result;
+import org.neo4j.graphdb.TransactionFailureException;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.impl.api.KernelTransactions;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**        _______
  *        /       \
@@ -49,29 +51,24 @@ import static org.junit.Assert.assertNotEquals;
  *
  * @author mknblch
  */
-public class TerminationTest {
+class TerminationTest {
 
-    private static GraphDatabaseAPI api;
+    private GraphDatabaseAPI api;
 
-    private static KernelTransactions kernelTransactions;
+    private KernelTransactions kernelTransactions;
 
-    @BeforeClass
-    public static void setup() throws KernelException {
-
+    @BeforeEach
+    void setup() throws KernelException {
         api = TestDatabaseCreator.createTestDatabase();
-
         final Procedures procedures = api.getDependencyResolver()
                 .resolveDependency(Procedures.class);
-
         procedures.registerProcedure(TerminateProcedure.class);
-
         kernelTransactions = api.getDependencyResolver().resolveDependency(KernelTransactions.class);
-
     }
 
-    @AfterClass
-    public static void tearDown() throws Exception {
-        if (api != null) api.shutdown();
+    @AfterEach
+    void tearDown() {
+        api.shutdown();
     }
 
     // terminate a transaction by its id
@@ -131,14 +128,18 @@ public class TerminationTest {
         ParallelUtil.run(runnables, Pools.DEFAULT);
     }
 
-    @Test(expected = TransactionFailureException.class)
-    public void test() throws Throwable {
-
-        try {
-            executeAndKill("CALL test.testProc()", 2000L, row -> true);
-        } catch (RuntimeException e) {
-            throw e.getCause();
-        }
+    @Test
+    void test() {
+        assertThrows(
+                TransactionFailureException.class,
+                () -> {
+                    try {
+                        executeAndKill("CALL test.testProc()", 2000L, row -> true);
+                    } catch (RuntimeException e) {
+                        throw e.getCause();
+                    }
+                }
+        );
     }
 
 }

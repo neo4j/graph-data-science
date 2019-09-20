@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.impl.yens.YensKShortestPaths;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.List;
 import java.util.function.DoubleConsumer;
@@ -52,31 +52,30 @@ public class YensDebugTest {
 
     public static final double DELTA = 0.001;
 
-    @ClassRule
-    public static ImpermanentDatabaseRule db = new ImpermanentDatabaseRule();
+    private GraphDatabaseAPI db;
 
-    private static Graph graph;
+    private Graph graph;
 
-    @BeforeClass
-    public static void setupGraph() throws KernelException {
-
-        final String cypher =
+    @BeforeEach
+    void setupGraph() throws KernelException {
+        db = TestDatabaseCreator.createTestDatabase();
+        String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
-                        "CREATE (b:Node {name:'b'})\n" +
-                        "CREATE (c:Node {name:'c'})\n" +
-                        "CREATE (d:Node {name:'d'})\n" +
-                        "CREATE (e:Node {name:'e'})\n" +
-                        "CREATE (f:Node {name:'f'})\n" +
-                        "CREATE (g:Node {name:'g'})\n" +
-                        "CREATE" +
-                        " (a)-[:TYPE {cost:2.0}]->(b),\n" +
-                        " (a)-[:TYPE {cost:1.0}]->(c),\n" +
-                        " (b)-[:TYPE {cost:1.0}]->(d),\n" +
-                        " (c)-[:TYPE {cost:2.0}]->(d),\n" +
-                        " (d)-[:TYPE {cost:1.0}]->(e),\n" +
-                        " (d)-[:TYPE {cost:2.0}]->(f),\n" +
-                        " (e)-[:TYPE {cost:2.0}]->(g),\n" +
-                        " (f)-[:TYPE {cost:1.0}]->(g)";
+                "CREATE (b:Node {name:'b'})\n" +
+                "CREATE (c:Node {name:'c'})\n" +
+                "CREATE (d:Node {name:'d'})\n" +
+                "CREATE (e:Node {name:'e'})\n" +
+                "CREATE (f:Node {name:'f'})\n" +
+                "CREATE (g:Node {name:'g'})\n" +
+                "CREATE" +
+                " (a)-[:TYPE {cost:2.0}]->(b),\n" +
+                " (a)-[:TYPE {cost:1.0}]->(c),\n" +
+                " (b)-[:TYPE {cost:1.0}]->(d),\n" +
+                " (c)-[:TYPE {cost:2.0}]->(d),\n" +
+                " (d)-[:TYPE {cost:1.0}]->(e),\n" +
+                " (d)-[:TYPE {cost:2.0}]->(f),\n" +
+                " (e)-[:TYPE {cost:2.0}]->(g),\n" +
+                " (f)-[:TYPE {cost:1.0}]->(g)";
 
         db.execute(cypher);
 
@@ -90,18 +89,14 @@ public class YensDebugTest {
     }
 
     @Test
-    public void test() throws Exception {
-
-        final YensKShortestPaths yens = new YensKShortestPaths(graph).compute(
+    void test() {
+        YensKShortestPaths yens = new YensKShortestPaths(graph).compute(
                 getNode("a").getId(),
                 getNode("g").getId(),
                 Direction.BOTH,
                 5, 4);
-
-        final List<WeightedPath> paths = yens.getPaths();
-
-        final DoubleConsumer mock = mock(DoubleConsumer.class);
-
+        List<WeightedPath> paths = yens.getPaths();
+        DoubleConsumer mock = mock(DoubleConsumer.class);
         for (int i = 0; i < paths.size(); i++) {
             final WeightedPath path = paths.get(i);
             mock.accept(path.getCost());
@@ -109,7 +104,7 @@ public class YensDebugTest {
         }
     }
 
-    private static Node getNode(String name) {
+    private Node getNode(String name) {
         final Node[] node = new Node[1];
         db.execute("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n").accept(row -> {
             node[0] = row.getNode("n");

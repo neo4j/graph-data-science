@@ -23,16 +23,16 @@ import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongLongMap;
 import com.carrotsearch.hppc.LongLongScatterMap;
 import com.carrotsearch.hppc.cursors.LongLongCursor;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public abstract class DisjointSetStructTest {
 
@@ -42,13 +42,13 @@ public abstract class DisjointSetStructTest {
 
     abstract DisjointSetStruct newSet(int capacity);
 
-    @Before
-    public final void setup() {
+    @BeforeEach
+    final void setup() {
         struct = newSet(CAPACITY);
     }
 
     @Test
-    public final void testSetUnion() {
+    final void testSetUnion() {
         // {0}{1}{2}{3}{4}{5}{6}
         assertFalse(connected(struct,0, 1));
         assertEquals(7, getSetSize(struct).size());
@@ -123,7 +123,7 @@ public abstract class DisjointSetStructTest {
     }
 
     @Test
-    public final void testMergeDSS() {
+    final void testMergeDSS() {
         final DisjointSetStruct a = create(10, set(0, 1, 2, 3), set(4, 5, 6), set(7, 8), set(9));
         final DisjointSetStruct b = create(10, set(0, 5), set(7, 9));
         if (a instanceof SequentialDisjointSetStruct) {
@@ -138,7 +138,7 @@ public abstract class DisjointSetStructTest {
         }
     }
 
-    public static int[] set(int... elements) {
+    private static int[] set(int... elements) {
         return elements;
     }
 

@@ -19,19 +19,20 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author mknblch
  */
-public class PagedSimpleBitSetTest {
+class PagedSimpleBitSetTest {
 
     private final PagedSimpleBitSet set = PagedSimpleBitSet.newBitSet(Integer.MAX_VALUE + 100L, AllocationTracker.EMPTY);
 
     @Test
-    public void testLowValues() throws Exception {
+    void testLowValues() throws Exception {
         assertFalse(set.contains(123));
         set.put(123);
         assertTrue(set.contains(123));
@@ -40,7 +41,7 @@ public class PagedSimpleBitSetTest {
     }
 
     @Test
-    public void testHighValues() throws Exception {
+    void testHighValues() throws Exception {
         assertFalse(set.contains(Integer.MAX_VALUE + 42L));
         set.put(Integer.MAX_VALUE + 42L);
         assertTrue(set.contains(Integer.MAX_VALUE + 42L));

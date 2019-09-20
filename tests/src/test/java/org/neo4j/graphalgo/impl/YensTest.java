@@ -20,9 +20,9 @@
 package org.neo4j.graphalgo.impl;
 
 import com.carrotsearch.hppc.LongArrayList;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
@@ -34,16 +34,15 @@ import org.neo4j.graphalgo.impl.yens.WeightedPath;
 import org.neo4j.graphalgo.impl.yens.YensKShortestPaths;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.function.DoubleConsumer;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.AdditionalMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -61,37 +60,36 @@ import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
  *
  * @author mknblch
  */
-public class YensTest {
+class YensTest {
 
-    public static final double DELTA = 0.001;
+    private static final double DELTA = 0.001;
 
-    @ClassRule
-    public static ImpermanentDatabaseRule db = new ImpermanentDatabaseRule();
+    private GraphDatabaseAPI db;
 
-    private static Graph graph;
+    private Graph graph;
 
-    @BeforeClass
-    public static void setupGraph() throws KernelException {
-
-        final String cypher =
+    @BeforeEach
+    void setupGraph() {
+        db = TestDatabaseCreator.createTestDatabase();
+        String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
-                        "CREATE (b:Node {name:'b'})\n" +
-                        "CREATE (c:Node {name:'c'})\n" +
-                        "CREATE (d:Node {name:'d'})\n" +
-                        "CREATE (e:Node {name:'e'})\n" +
-                        "CREATE (f:Node {name:'f'})\n" +
-                        "CREATE" +
-                        " (a)-[:TYPE {cost:1.0}]->(b),\n" +
-                        " (b)-[:TYPE {cost:1.0}]->(c),\n" +
-                        " (c)-[:TYPE {cost:1.0}]->(d),\n" +
-                        " (e)-[:TYPE {cost:1.0}]->(d),\n" +
-                        " (a)-[:TYPE {cost:1.0}]->(e),\n" +
+                "CREATE (b:Node {name:'b'})\n" +
+                "CREATE (c:Node {name:'c'})\n" +
+                "CREATE (d:Node {name:'d'})\n" +
+                "CREATE (e:Node {name:'e'})\n" +
+                "CREATE (f:Node {name:'f'})\n" +
+                "CREATE" +
+                " (a)-[:TYPE {cost:1.0}]->(b),\n" +
+                " (b)-[:TYPE {cost:1.0}]->(c),\n" +
+                " (c)-[:TYPE {cost:1.0}]->(d),\n" +
+                " (e)-[:TYPE {cost:1.0}]->(d),\n" +
+                " (a)-[:TYPE {cost:1.0}]->(e),\n" +
 
-                        " (a)-[:TYPE {cost:5.0}]->(f),\n" +
-                        " (b)-[:TYPE {cost:4.0}]->(f),\n" +
-                        " (c)-[:TYPE {cost:1.0}]->(f),\n" +
-                        " (d)-[:TYPE {cost:1.0}]->(f),\n" +
-                        " (e)-[:TYPE {cost:4.0}]->(f)";
+                " (a)-[:TYPE {cost:5.0}]->(f),\n" +
+                " (b)-[:TYPE {cost:4.0}]->(f),\n" +
+                " (c)-[:TYPE {cost:1.0}]->(f),\n" +
+                " (d)-[:TYPE {cost:1.0}]->(f),\n" +
+                " (e)-[:TYPE {cost:4.0}]->(f)";
 
         db.execute(cypher);
 
@@ -105,12 +103,12 @@ public class YensTest {
     }
 
     @Test
-    public void test() throws Exception {
-        final YensKShortestPaths yens = new YensKShortestPaths(graph)
+    void test() {
+        YensKShortestPaths yens = new YensKShortestPaths(graph)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .compute(id("a"), id("f"), Direction.OUTGOING, 42, 10);
-        final List<WeightedPath> paths = yens.getPaths();
-        final DoubleConsumer mock = mock(DoubleConsumer.class);
+        List<WeightedPath> paths = yens.getPaths();
+        DoubleConsumer mock = mock(DoubleConsumer.class);
         for (int i = 0; i < paths.size(); i++) {
             final WeightedPath path = paths.get(i);
             System.out.println("path " + path + " : " + path.getCost());
@@ -123,7 +121,7 @@ public class YensTest {
     }
 
     @Test
-    public void test04325() throws Exception {
+    void test04325() {
         final RelationshipConsumer filter04325 = filter(
                 id("a"), id("f"),
                 id("e"), id("f"),
@@ -142,7 +140,7 @@ public class YensTest {
     }
 
     @Test
-    public void test01235() throws Exception {
+    void test01235() {
         final RelationshipConsumer filter01235 = filter(
                 id("a"), id("f"),
                 id("b"), id("f"),

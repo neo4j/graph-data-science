@@ -19,19 +19,19 @@
  */
 package org.neo4j.graphalgo.core.utils.container;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public final class UndirectedTreeTest {
+final class UndirectedTreeTest {
 
     @Test
-    public void shouldFailForNegativeCapacity() throws Exception {
+    void shouldFailForNegativeCapacity() {
         try {
             new UndirectedTree(-1);
             fail();
@@ -41,7 +41,7 @@ public final class UndirectedTreeTest {
     }
 
     @Test
-    public void shouldFailForTooLargeCapacity() throws Exception {
+    void shouldFailForTooLargeCapacity() {
         try {
             new UndirectedTree(Integer.MAX_VALUE);
             fail();
@@ -53,7 +53,7 @@ public final class UndirectedTreeTest {
     }
 
     @Test
-    public void shouldNotResizeDynamically() throws Exception {
+    void shouldNotResizeDynamically() {
         try {
             new UndirectedTree(1)
                     .addRelationship(0, 1);
@@ -65,28 +65,27 @@ public final class UndirectedTreeTest {
     }
 
     @Test
-    public void shouldDiscardSelfRelationships() throws Exception {
+    void shouldDiscardSelfRelationships() {
         UndirectedTree tree = new UndirectedTree(0);
         tree.addRelationship(0, 0);
         assertEquals(0, tree.size());
     }
 
     @Test
-    public void shouldAddSingleRelationshipRegardlessOfOrder() throws
-            Exception {
+    void shouldAddSingleRelationshipRegardlessOfOrder() {
         UndirectedTree tree = new UndirectedTree(2);
         tree.addRelationship(0, 1);
         tree.addRelationship(1, 0);
         assertEquals(1, tree.size());
         tree.forEachBFS(0, (src, tgt) -> {
-            assertEquals("source should be 0", 0, src);
-            assertEquals("target should be 1", 0, src);
+            assertEquals(0, src, "source should be 0");
+            assertEquals(0, src, "target should be 1");
             return true;
         });
     }
 
     @Test
-    public void testLinearTree() throws Exception {
+    void testLinearTree() {
         UndirectedTree tree = new UndirectedTree(4);
         tree.addRelationship(0, 1);
         tree.addRelationship(2, 3);
@@ -97,7 +96,7 @@ public final class UndirectedTreeTest {
     }
 
     @Test
-    public void testSimpleBranchTree() throws Exception {
+    void testSimpleBranchTree() {
         UndirectedTree tree = new UndirectedTree(4);
         tree.addRelationship(0, 2);
         tree.addRelationship(1, 0);
@@ -108,7 +107,7 @@ public final class UndirectedTreeTest {
     }
 
     @Test
-    public void testLargerTree() throws Exception {
+    void testLargerTree() {
         UndirectedTree tree = new UndirectedTree(12);
         tree.addRelationship(0, 1);
         tree.addRelationship(0, 4);
@@ -151,7 +150,7 @@ public final class UndirectedTreeTest {
     }
 
     @Test
-    public void testRemoval() throws Exception {
+    void testRemoval() {
         UndirectedTree tree = new UndirectedTree(12);
         tree.addRelationship(0, 1);
         tree.addRelationship(0, 4);
@@ -174,7 +173,7 @@ public final class UndirectedTreeTest {
     }
 
     @Test
-    public void shouldReportInvalidTrees() throws Exception {
+    void shouldReportInvalidTrees() {
         UndirectedTree tree = new UndirectedTree(6);
         tree.addRelationship(0, 1);
         tree.addRelationship(0, 2);
@@ -195,13 +194,6 @@ public final class UndirectedTreeTest {
             int root,
             String... expected) {
         assertArrayEquals(expected, bfs(tree, root).toArray());
-    }
-
-    private static void testDfs(
-            UndirectedTree tree,
-            int root,
-            String... expected) {
-        assertArrayEquals(expected, dfs(tree, root).toArray());
     }
 
     private static void testBfs(UndirectedTree tree, String... expected) {

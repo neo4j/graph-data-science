@@ -19,21 +19,22 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
+import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.helper.graphbuilder.GridBuilder;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 
 import java.util.concurrent.Executors;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 /**
  * The test creates a grid of nodes and computes a reference array
@@ -43,7 +44,7 @@ import java.util.concurrent.Executors;
  *
  * @author mknblch
  */
-public class ParallelDeltaSteppingTest {
+class ParallelDeltaSteppingTest {
 
     private static final String PROPERTY = "property";
     private static final String LABEL = "Node";
@@ -55,9 +56,8 @@ public class ParallelDeltaSteppingTest {
     private static double[] reference;
     private static long rootNodeId;
 
-    @BeforeClass
-    public static void setup() throws Exception {
-
+    @BeforeEach
+    void setup() {
         db = TestDatabaseCreator.createTestDatabase();
 
         try (ProgressTimer timer = ProgressTimer.start(t -> System.out.println("setup took " + t + "ms"))) {
@@ -87,25 +87,26 @@ public class ParallelDeltaSteppingTest {
         reference = compute(1);
     }
 
-    @AfterClass
-    public static void tearDown() {
+    @AfterEach
+    void tearDown() {
         db.shutdown();
     }
 
     @Test
-    public void testParallelBehaviour() throws Exception {
+    void testParallelBehaviour() {
         final int n = 20;
         try (ProgressTimer timer = ProgressTimer.start(t -> System.out.println(n + "x eval took " + t + "ms"))) {
             for (int i = 0; i < n; i++) {
-                Assert.assertArrayEquals("error in iteration " + i,
+                assertArrayEquals(
                         reference,
                         compute((n % 7) + 2),
-                        0.001);
+                        0.001,
+                        "error in iteration " + i);
             }
         }
     }
 
-    private static double[] compute(int threads) throws Exception {
+    private double[] compute(int threads) {
         return new ShortestPathDeltaStepping(graph, 2.5, Direction.OUTGOING)
                 .withExecutorService(Executors.newFixedThreadPool(threads))
                 .compute(rootNodeId)

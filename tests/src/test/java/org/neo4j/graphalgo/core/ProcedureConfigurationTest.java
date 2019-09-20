@@ -19,19 +19,19 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.neo4j.helpers.collection.MapUtil;
 
 import java.util.Collections;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class ProcedureConfigurationTest {
+class ProcedureConfigurationTest {
 
     @Test
-    public void useDefault() {
+    void useDefault() {
         Map<String, Object> map = Collections.emptyMap();
         ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
         String value = procedureConfiguration.get("partitionProperty", "defaultValue");
@@ -39,7 +39,7 @@ public class ProcedureConfigurationTest {
     }
 
     @Test
-    public void returnValueIfPresent() {
+    void returnValueIfPresent() {
         Map<String, Object> map = MapUtil.map("partitionProperty", "partition");
         ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
         String value = procedureConfiguration.get("partitionProperty", "defaultValue");
@@ -47,7 +47,7 @@ public class ProcedureConfigurationTest {
     }
 
     @Test
-    public void newKeyIfPresent() {
+    void newKeyIfPresent() {
         Map<String, Object> map = MapUtil.map("partitionProperty", "old", "writeProperty", "new");
         ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
         String value = procedureConfiguration.get("writeProperty", "partitionProperty", "defaultValue");
@@ -55,7 +55,7 @@ public class ProcedureConfigurationTest {
     }
 
     @Test
-    public void oldKeyIfNewKeyNotPresent() {
+    void oldKeyIfNewKeyNotPresent() {
         Map<String, Object> map = MapUtil.map("partitionProperty", "old");
         ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
         String value = procedureConfiguration.get("writeProperty", "partitionProperty", "defaultValue");
@@ -63,7 +63,7 @@ public class ProcedureConfigurationTest {
     }
 
     @Test
-    public void defaultIfNoKeysPresent() {
+    void defaultIfNoKeysPresent() {
         Map<String, Object> map = Collections.emptyMap();
         ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
         String value = procedureConfiguration.get("writeProperty", "partitionProperty", "defaultValue");
@@ -71,35 +71,35 @@ public class ProcedureConfigurationTest {
     }
 
     @Test
-    public void defaultIfKeyMissing() {
+    void defaultIfKeyMissing() {
         Map<String, Object> map = Collections.emptyMap();
         ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
         assertEquals("defaultValue", procedureConfiguration.getString("writeProperty", "defaultValue"));
     }
 
     @Test
-    public void defaultIfKeyPresentButNoValue() {
+    void defaultIfKeyPresentButNoValue() {
         Map<String, Object> map = MapUtil.map("writeProperty", "");
         ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
         assertEquals("defaultValue", procedureConfiguration.getString("writeProperty", "defaultValue"));
     }
 
     @Test
-    public void valueIfKeyPresent() {
+    void valueIfKeyPresent() {
         Map<String, Object> map = MapUtil.map("writeProperty", "scc");
         ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
         assertEquals("scc", procedureConfiguration.getString("writeProperty", "defaultValue"));
     }
 
     @Test
-    public void convertNonDoubleDefaultValues() {
+    void convertNonDoubleDefaultValues() {
         Map<String, Object> map = MapUtil.map("defaultValue", 1L);
         ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
         assertEquals(1.0, procedureConfiguration.getWeightPropertyDefaultValue(0.0), 0.001);
     }
 
     @Test
-    public void returnDefaultConcurrencyIfNoReadOrWriteConcurrencyIsGiven() {
+    void returnDefaultConcurrencyIfNoReadOrWriteConcurrencyIsGiven() {
         Map<String, Object> map = MapUtil.map("concurrency", 2L);
         ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
         assertEquals(2L, procedureConfiguration.getReadConcurrency(1));

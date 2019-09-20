@@ -19,53 +19,49 @@
  */
 package org.neo4j.graphalgo.algo.linkprediction;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.linkprediction.NeighborsFinder;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
 
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NeighborsFinderTest {
 
-    @Rule
-    public final ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
+    private GraphDatabaseAPI DB;
 
-    private GraphDatabaseAPI api;
     public static final RelationshipType FRIEND = RelationshipType.withName("FRIEND");
     public static final RelationshipType COLLEAGUE = RelationshipType.withName("COLLEAGUE");
     public static final RelationshipType FOLLOWS = RelationshipType.withName("FOLLOWS");
 
-    @Before
+    @BeforeEach
     public void setup() {
-        api = DB.getGraphDatabaseAPI();
+        DB = TestDatabaseCreator.createTestDatabase();
     }
 
     @Test
-    public void excludeDirectRelationships() throws Throwable {
-        try (Transaction tx = api.beginTx()) {
-            Node node1 = api.createNode();
-            Node node2 = api.createNode();
+    public void excludeDirectRelationships() {
+        try (Transaction tx = DB.beginTx()) {
+            Node node1 = DB.createNode();
+            Node node2 = DB.createNode();
             node1.createRelationshipTo(node2, FRIEND);
             tx.success();
         }
 
-        NeighborsFinder neighborsFinder = new NeighborsFinder(api);
+        NeighborsFinder neighborsFinder = new NeighborsFinder(DB);
 
-        try (Transaction tx = api.beginTx()) {
-            Node node1 = api.getNodeById(0);
-            Node node2 = api.getNodeById(1);
+        try (Transaction tx = DB.beginTx()) {
+            Node node1 = DB.getNodeById(0);
+            Node node2 = DB.getNodeById(1);
             Set<Node> neighbors = neighborsFinder.findCommonNeighbors(node1, node2, null, Direction.BOTH);
 
             assertEquals(0, neighbors.size());
@@ -73,18 +69,18 @@ public class NeighborsFinderTest {
     }
 
     @Test
-    public void sameNodeHasNoCommonNeighbors() throws Throwable {
-        try (Transaction tx = api.beginTx()) {
-            Node node1 = api.createNode();
-            Node node2 = api.createNode();
+    public void sameNodeHasNoCommonNeighbors() {
+        try (Transaction tx = DB.beginTx()) {
+            Node node1 = DB.createNode();
+            Node node2 = DB.createNode();
             node1.createRelationshipTo(node2, FRIEND);
             tx.success();
         }
 
-        NeighborsFinder neighborsFinder = new NeighborsFinder(api);
+        NeighborsFinder neighborsFinder = new NeighborsFinder(DB);
 
-        try (Transaction tx = api.beginTx()) {
-            Node node1 = api.getNodeById(0);
+        try (Transaction tx = DB.beginTx()) {
+            Node node1 = DB.getNodeById(0);
             Set<Node> neighbors = neighborsFinder.findCommonNeighbors(node1, node1, null, Direction.BOTH);
 
             assertEquals(0, neighbors.size());
@@ -92,13 +88,13 @@ public class NeighborsFinderTest {
     }
 
     @Test
-    public void findNeighborsExcludingDirection() throws Throwable {
+    public void findNeighborsExcludingDirection() {
 
-        try (Transaction tx = api.beginTx()) {
-            Node node1 = api.createNode();
-            Node node2 = api.createNode();
-            Node node3 = api.createNode();
-            Node node4 = api.createNode();
+        try (Transaction tx = DB.beginTx()) {
+            Node node1 = DB.createNode();
+            Node node2 = DB.createNode();
+            Node node3 = DB.createNode();
+            Node node4 = DB.createNode();
 
             node1.createRelationshipTo(node3, FRIEND);
             node2.createRelationshipTo(node3, FRIEND);
@@ -108,11 +104,11 @@ public class NeighborsFinderTest {
             tx.success();
         }
 
-        NeighborsFinder neighborsFinder = new NeighborsFinder(api);
+        NeighborsFinder neighborsFinder = new NeighborsFinder(DB);
 
-        try (Transaction tx = api.beginTx()) {
-            Node node1 = api.getNodeById(0);
-            Node node2 = api.getNodeById(1);
+        try (Transaction tx = DB.beginTx()) {
+            Node node1 = DB.getNodeById(0);
+            Node node2 = DB.getNodeById(1);
             Set<Node> neighbors = neighborsFinder.findCommonNeighbors(node1, node2, null, Direction.BOTH);
 
             assertEquals(2, neighbors.size());
@@ -120,12 +116,12 @@ public class NeighborsFinderTest {
     }
 
     @Test
-    public void findOutgoingNeighbors() throws Throwable {
+    public void findOutgoingNeighbors() {
 
-        try (Transaction tx = api.beginTx()) {
-            Node node1 = api.createNode();
-            Node node2 = api.createNode();
-            Node node3 = api.createNode();
+        try (Transaction tx = DB.beginTx()) {
+            Node node1 = DB.createNode();
+            Node node2 = DB.createNode();
+            Node node3 = DB.createNode();
 
             node1.createRelationshipTo(node3, FOLLOWS);
             node2.createRelationshipTo(node3, FOLLOWS);
@@ -133,11 +129,11 @@ public class NeighborsFinderTest {
             tx.success();
         }
 
-        NeighborsFinder neighborsFinder = new NeighborsFinder(api);
+        NeighborsFinder neighborsFinder = new NeighborsFinder(DB);
 
-        try (Transaction tx = api.beginTx()) {
-            Node node1 = api.getNodeById(0);
-            Node node2 = api.getNodeById(1);
+        try (Transaction tx = DB.beginTx()) {
+            Node node1 = DB.getNodeById(0);
+            Node node2 = DB.getNodeById(1);
             Set<Node> neighbors = neighborsFinder.findCommonNeighbors(node1, node2, FOLLOWS, Direction.OUTGOING);
 
             assertEquals(1, neighbors.size());
@@ -145,12 +141,12 @@ public class NeighborsFinderTest {
     }
 
     @Test
-    public void findIncomingNeighbors() throws Throwable {
+    public void findIncomingNeighbors() {
 
-        try (Transaction tx = api.beginTx()) {
-            Node node1 = api.createNode();
-            Node node2 = api.createNode();
-            Node node3 = api.createNode();
+        try (Transaction tx = DB.beginTx()) {
+            Node node1 = DB.createNode();
+            Node node2 = DB.createNode();
+            Node node3 = DB.createNode();
 
             node3.createRelationshipTo(node1, FOLLOWS);
             node3.createRelationshipTo(node2, FOLLOWS);
@@ -158,11 +154,11 @@ public class NeighborsFinderTest {
             tx.success();
         }
 
-        NeighborsFinder neighborsFinder = new NeighborsFinder(api);
+        NeighborsFinder neighborsFinder = new NeighborsFinder(DB);
 
-        try (Transaction tx = api.beginTx()) {
-            Node node1 = api.getNodeById(0);
-            Node node2 = api.getNodeById(1);
+        try (Transaction tx = DB.beginTx()) {
+            Node node1 = DB.getNodeById(0);
+            Node node2 = DB.getNodeById(1);
             Set<Node> neighbors = neighborsFinder.findCommonNeighbors(node1, node2, FOLLOWS, Direction.INCOMING);
 
             assertEquals(1, neighbors.size());
@@ -170,13 +166,13 @@ public class NeighborsFinderTest {
     }
 
     @Test
-    public void findNeighborsOfSpecificRelationshipType() throws Throwable {
+    public void findNeighborsOfSpecificRelationshipType() {
 
-        try (Transaction tx = api.beginTx()) {
-            Node node1 = api.createNode();
-            Node node2 = api.createNode();
-            Node node3 = api.createNode();
-            Node node4 = api.createNode();
+        try (Transaction tx = DB.beginTx()) {
+            Node node1 = DB.createNode();
+            Node node2 = DB.createNode();
+            Node node3 = DB.createNode();
+            Node node4 = DB.createNode();
 
             node1.createRelationshipTo(node3, FRIEND);
             node2.createRelationshipTo(node3, FRIEND);
@@ -186,11 +182,11 @@ public class NeighborsFinderTest {
             tx.success();
         }
 
-        NeighborsFinder neighborsFinder = new NeighborsFinder(api);
+        NeighborsFinder neighborsFinder = new NeighborsFinder(DB);
 
-        try (Transaction tx = api.beginTx()) {
-            Node node1 = api.getNodeById(0);
-            Node node2 = api.getNodeById(1);
+        try (Transaction tx = DB.beginTx()) {
+            Node node1 = DB.getNodeById(0);
+            Node node2 = DB.getNodeById(1);
             Set<Node> neighbors = neighborsFinder.findCommonNeighbors(node1, node2, COLLEAGUE, Direction.BOTH);
 
             assertEquals(1, neighbors.size());
@@ -198,17 +194,17 @@ public class NeighborsFinderTest {
     }
 
     @Test
-    public void dontCountDuplicates() throws Throwable {
+    public void dontCountDuplicates() {
 
         Node node1;
         Node node2;
         Node node3;
         Node node4;
-        try (Transaction tx = api.beginTx()) {
-            node1 = api.createNode();
-            node2 = api.createNode();
-            node3 = api.createNode();
-            node4 = api.createNode();
+        try (Transaction tx = DB.beginTx()) {
+            node1 = DB.createNode();
+            node2 = DB.createNode();
+            node3 = DB.createNode();
+            node4 = DB.createNode();
 
             node1.createRelationshipTo(node3, FRIEND);
             node2.createRelationshipTo(node3, FRIEND);
@@ -218,9 +214,9 @@ public class NeighborsFinderTest {
             tx.success();
         }
 
-        NeighborsFinder neighborsFinder = new NeighborsFinder(api);
+        NeighborsFinder neighborsFinder = new NeighborsFinder(DB);
 
-        try (Transaction tx = api.beginTx()) {
+        try (Transaction tx = DB.beginTx()) {
             Set<Node> neighbors = neighborsFinder.findNeighbors(node1, node2, null, Direction.BOTH);
 
             assertEquals(2, neighbors.size());
@@ -229,21 +225,21 @@ public class NeighborsFinderTest {
     }
 
     @Test
-    public void otherNodeCountsAsNeighbor() throws Throwable {
+    public void otherNodeCountsAsNeighbor() {
 
         Node node1;
         Node node2;
-        try (Transaction tx = api.beginTx()) {
-            node1 = api.createNode();
-            node2 = api.createNode();
+        try (Transaction tx = DB.beginTx()) {
+            node1 = DB.createNode();
+            node2 = DB.createNode();
             node1.createRelationshipTo(node2, FRIEND);
 
             tx.success();
         }
 
-        NeighborsFinder neighborsFinder = new NeighborsFinder(api);
+        NeighborsFinder neighborsFinder = new NeighborsFinder(DB);
 
-        try (Transaction tx = api.beginTx()) {
+        try (Transaction tx = DB.beginTx()) {
             Set<Node> neighbors = neighborsFinder.findNeighbors(node1, node2, null, Direction.BOTH);
 
             assertEquals(2, neighbors.size());
@@ -252,20 +248,20 @@ public class NeighborsFinderTest {
     }
 
     @Test
-    public void otherNodeCountsAsOutgoingNeighbor() throws Throwable {
+    public void otherNodeCountsAsOutgoingNeighbor() {
         Node node1;
         Node node2;
-        try (Transaction tx = api.beginTx()) {
-            node1 = api.createNode();
-            node2 = api.createNode();
+        try (Transaction tx = DB.beginTx()) {
+            node1 = DB.createNode();
+            node2 = DB.createNode();
             node1.createRelationshipTo(node2, FRIEND);
 
             tx.success();
         }
 
-        NeighborsFinder neighborsFinder = new NeighborsFinder(api);
+        NeighborsFinder neighborsFinder = new NeighborsFinder(DB);
 
-        try (Transaction tx = api.beginTx()) {
+        try (Transaction tx = DB.beginTx()) {
             Set<Node> neighbors = neighborsFinder.findNeighbors(node1, node2, null, Direction.OUTGOING);
 
             assertEquals(1, neighbors.size());

@@ -20,9 +20,9 @@
 package org.neo4j.graphalgo.algo;
 
 import com.carrotsearch.hppc.LongScatterSet;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.StronglyConnectedComponentsProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
@@ -34,7 +34,7 @@ import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author mknblch
@@ -45,33 +45,33 @@ public class ForwardBackwardSccProcTest {
 
     private static Graph graph;
 
-    @BeforeClass
-    public static void setup() throws KernelException {
-        final String cypher =
+    @BeforeAll
+    static void setup() throws KernelException {
+        String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
-                        "CREATE (b:Node {name:'b'})\n" +
-                        "CREATE (c:Node {name:'c'})\n" +
-                        "CREATE (d:Node {name:'d'})\n" +
-                        "CREATE (e:Node {name:'e'})\n" +
-                        "CREATE (f:Node {name:'f'})\n" +
-                        "CREATE (g:Node {name:'g'})\n" +
-                        "CREATE (h:Node {name:'h'})\n" +
-                        "CREATE (i:Node {name:'i'})\n" +
-                        "CREATE (x:Node {name:'x'})\n" +
-                        "CREATE" +
-                        " (a)-[:TYPE {cost:5}]->(b),\n" +
-                        " (b)-[:TYPE {cost:5}]->(c),\n" +
-                        " (c)-[:TYPE {cost:5}]->(a),\n" +
+                "CREATE (b:Node {name:'b'})\n" +
+                "CREATE (c:Node {name:'c'})\n" +
+                "CREATE (d:Node {name:'d'})\n" +
+                "CREATE (e:Node {name:'e'})\n" +
+                "CREATE (f:Node {name:'f'})\n" +
+                "CREATE (g:Node {name:'g'})\n" +
+                "CREATE (h:Node {name:'h'})\n" +
+                "CREATE (i:Node {name:'i'})\n" +
+                "CREATE (x:Node {name:'x'})\n" +
+                "CREATE" +
+                " (a)-[:TYPE {cost:5}]->(b),\n" +
+                " (b)-[:TYPE {cost:5}]->(c),\n" +
+                " (c)-[:TYPE {cost:5}]->(a),\n" +
 
-                        " (d)-[:TYPE {cost:2}]->(e),\n" +
-                        " (e)-[:TYPE {cost:2}]->(f),\n" +
-                        " (f)-[:TYPE {cost:2}]->(d),\n" +
+                " (d)-[:TYPE {cost:2}]->(e),\n" +
+                " (e)-[:TYPE {cost:2}]->(f),\n" +
+                " (f)-[:TYPE {cost:2}]->(d),\n" +
 
-                        " (a)-[:TYPE {cost:2}]->(d),\n" +
+                " (a)-[:TYPE {cost:2}]->(d),\n" +
 
-                        " (g)-[:TYPE {cost:3}]->(h),\n" +
-                        " (h)-[:TYPE {cost:3}]->(i),\n" +
-                        " (i)-[:TYPE {cost:3}]->(g)";
+                " (g)-[:TYPE {cost:3}]->(h),\n" +
+                " (h)-[:TYPE {cost:3}]->(i),\n" +
+                " (i)-[:TYPE {cost:3}]->(g)";
 
         api = TestDatabaseCreator.createTestDatabase();
         try (Transaction tx = api.beginTx()) {
@@ -90,8 +90,8 @@ public class ForwardBackwardSccProcTest {
                 .load(HugeGraphFactory.class);
     }
 
-    @AfterClass
-    public static void shutdownGraph() throws Exception {
+    @AfterAll
+    static void shutdownGraph() {
         api.shutdown();
     }
 
@@ -105,21 +105,21 @@ public class ForwardBackwardSccProcTest {
     }
 
     @Test
-    public void testClusterA() throws Exception {
+    void testClusterA() {
         assertEquals(3, call(getNodeId("a")).size());
     }
 
     @Test
-    public void testClusterB() throws Exception {
+    void testClusterB() {
         assertEquals(3, call(getNodeId("d")).size());
     }
 
     @Test
-    public void testClusterC() throws Exception {
+    void testClusterC() {
         assertEquals(3, call(getNodeId("g")).size());
     }
 
-    public LongScatterSet call(long nodeId) throws Exception {
+    public LongScatterSet call(long nodeId) {
         String cypher = String.format("CALL algo.scc.forwardBackward.stream(%d, 'Node', 'TYPE', {concurrency:4}) YIELD nodeId RETURN nodeId", nodeId);
         final LongScatterSet set = new LongScatterSet();
         api.execute(cypher).accept(row -> {

@@ -39,11 +39,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class CypherGraphFactoryTest {
+class CypherGraphFactoryTest {
 
     private static final int COUNT = 10000;
     private static final String QUERY = "UNWIND range(1, " + COUNT + ") AS id CREATE (n {id: id})-[:REL {prop: id % 10}]->(n)";
-    public static final String SKIP_LIMIT = "WITH * SKIP $skip LIMIT $limit";
+    private static final String SKIP_LIMIT = "WITH * SKIP $skip LIMIT $limit";
 
     private GraphDatabaseAPI db;
 
@@ -52,19 +52,19 @@ public class CypherGraphFactoryTest {
     private static int id3;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         db = TestDatabaseCreator.createTestDatabase();
         db.execute(QUERY);
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         db.shutdown();
     }
 
 
     @Test
-    public void testLoadCypher() {
+    void testLoadCypher() {
         db = TestDatabaseCreator.createTestDatabase();
 
         db.execute(
@@ -126,7 +126,7 @@ public class CypherGraphFactoryTest {
 
     @ParameterizedTest(name = "parallel={0}")
     @ValueSource(booleans = {true, false})
-    public void testLoadNoneParallelCypher(boolean parallel) {
+    void testLoadNoneParallelCypher(boolean parallel) {
         String nodeStatement = "MATCH (n) RETURN id(n) AS id";
         String relStatement = "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop AS weight";
 
@@ -135,7 +135,7 @@ public class CypherGraphFactoryTest {
 
     @ParameterizedTest(name = "parallel={0}")
     @ValueSource(booleans = {true, false})
-    public void testLoadNodesParallelCypher(boolean parallel) {
+    void testLoadNodesParallelCypher(boolean parallel) {
         String pagingQuery = "MATCH (n) %s RETURN id(n) AS id";
         String nodeStatement = String.format(pagingQuery, parallel ? SKIP_LIMIT : "");
         String relStatement = "MATCH (n)-[r:REL]->(m) RETURN id(n) AS source, id(m) AS target, r.prop AS weight";
@@ -145,7 +145,7 @@ public class CypherGraphFactoryTest {
 
     @ParameterizedTest(name = "parallel={0}")
     @ValueSource(booleans = {true, false})
-    public void testLoadRelationshipsParallelCypher(boolean parallel) {
+    void testLoadRelationshipsParallelCypher(boolean parallel) {
         String nodeStatement = "MATCH (n) RETURN id(n) AS id";
         String pagingQuery = "MATCH (n)-[r:REL]->(m) %s RETURN id(n) AS source, id(m) AS target, r.prop AS weight";
         String relStatement = String.format(pagingQuery, parallel ? SKIP_LIMIT : "");
@@ -155,7 +155,7 @@ public class CypherGraphFactoryTest {
 
     @ParameterizedTest(name = "parallel={0}")
     @ValueSource(booleans = {true, false})
-    public void testLoadRelationshipsParallelAccumulateWeightCypher(boolean parallel) {
+    void testLoadRelationshipsParallelAccumulateWeightCypher(boolean parallel) {
         String nodeStatement = "MATCH (n) RETURN id(n) AS id";
         String pagingQuery =
                 "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight " +
@@ -168,7 +168,7 @@ public class CypherGraphFactoryTest {
 
     @ParameterizedTest(name = "parallel={0}")
     @ValueSource(booleans = {true, false})
-    public void testLoadCypherBothParallel(boolean parallel) {
+    void testLoadCypherBothParallel(boolean parallel) {
         String pagingNodeQuery = "MATCH (n) %s RETURN id(n) AS id";
         String nodeStatement = String.format(pagingNodeQuery, parallel ? SKIP_LIMIT : "");
         String pagingRelQuery = "MATCH (n)-[r:REL]->(m) %s RETURN id(n) AS source, id(m) AS target, r.prop AS weight";
@@ -179,7 +179,7 @@ public class CypherGraphFactoryTest {
 
     @ParameterizedTest(name = "parallel={0}")
     @ValueSource(booleans = {true, false})
-    public void uniqueRelationships(boolean parallel) {
+    void uniqueRelationships(boolean parallel) {
         String nodeStatement = "MATCH (n) RETURN id(n) AS id";
         String pagingQuery = "MATCH (n)-[r:REL]->(m) %s RETURN id(n) AS source, id(m) AS target, r.prop AS weight";
         String relStatement = String.format(pagingQuery, parallel ? SKIP_LIMIT : "");
@@ -189,7 +189,7 @@ public class CypherGraphFactoryTest {
 
     @ParameterizedTest(name = "parallel={0}")
     @ValueSource(booleans = {true, false})
-    public void accumulateWeightCypher(boolean parallel) {
+    void accumulateWeightCypher(boolean parallel) {
         String nodeStatement = "MATCH (n) RETURN id(n) AS id";
         String pagingQuery =
                 "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop/2.0 AS weight " +
@@ -202,7 +202,7 @@ public class CypherGraphFactoryTest {
 
     @ParameterizedTest(name = "parallel={0}")
     @ValueSource(booleans = {true, false})
-    public void countEachRelationshipOnce(boolean parallel) {
+    void countEachRelationshipOnce(boolean parallel) {
         String nodeStatement = "MATCH (n) RETURN id(n) AS id";
         String pagingQuery =
                 "MATCH (n)-[r:REL]->(m) %1$s RETURN id(n) AS source, id(m) AS target, r.prop AS weight " +

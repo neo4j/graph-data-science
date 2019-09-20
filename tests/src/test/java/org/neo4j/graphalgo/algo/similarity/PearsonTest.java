@@ -19,11 +19,11 @@
  */
 package org.neo4j.graphalgo.algo.similarity;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.IsFiniteFunc;
 import org.neo4j.graphalgo.PearsonProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
@@ -37,16 +37,17 @@ import java.util.Collections;
 import java.util.Map;
 
 import static java.util.Collections.singletonMap;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
-public class PearsonTest {
+class PearsonTest {
 
     private static GraphDatabaseAPI db;
     private Transaction tx;
-    public static final String STATEMENT_STREAM = "MATCH (i:Item) WITH i ORDER BY i MATCH (p:Person) OPTIONAL MATCH (p)-[r:LIKES]->(i)\n" +
+    private static final String STATEMENT_STREAM =
+            "MATCH (i:Item) WITH i ORDER BY i MATCH (p:Person) OPTIONAL MATCH (p)-[r:LIKES]->(i)\n" +
             "WITH p, i, r " +
             "ORDER BY id(p), id(i) " +
             "WITH {item:id(p), weights: collect(coalesce(r.stars,$missingValue))} as userData\n" +
@@ -56,11 +57,13 @@ public class PearsonTest {
             "RETURN item1, item2, count1, count2, intersection, similarity " +
             "ORDER BY item1,item2";
 
-    public static final String STATEMENT_CYPHER_STREAM = "call algo.similarity.pearson.stream($query,$config) " +
+    private static final String STATEMENT_CYPHER_STREAM =
+            "call algo.similarity.pearson.stream($query,$config) " +
             "yield item1, item2, count1, count2, intersection, similarity " +
             "RETURN * ORDER BY item1,item2";
 
-    public static final String STATEMENT = "MATCH (i:Item) WITH i ORDER BY id(i) MATCH (p:Person) OPTIONAL MATCH (p)-[r:LIKES]->(i)\n" +
+    private static final String STATEMENT =
+            "MATCH (i:Item) WITH i ORDER BY id(i) MATCH (p:Person) OPTIONAL MATCH (p)-[r:LIKES]->(i)\n" +
             "WITH {item:id(p), weights: collect(coalesce(r.stars,0))} as userData\n" +
             "WITH collect(userData) as data\n" +
 
@@ -68,11 +71,13 @@ public class PearsonTest {
             "yield p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs, computations " +
             "RETURN *";
 
-    public static final String STORE_EMBEDDING_STATEMENT = "MATCH (i:Item) WITH i ORDER BY id(i) MATCH (p:Person) OPTIONAL MATCH (p)-[r:LIKES]->(i)\n" +
+    private static final String STORE_EMBEDDING_STATEMENT =
+            "MATCH (i:Item) WITH i ORDER BY id(i) MATCH (p:Person) OPTIONAL MATCH (p)-[r:LIKES]->(i)\n" +
             "WITH p, collect(coalesce(r.stars,0)) as userData\n" +
             "SET p.embedding = userData";
 
-    public static final String EMBEDDING_STATEMENT = "MATCH (p:Person)\n" +
+    private static final String EMBEDDING_STATEMENT =
+            "MATCH (p:Person)\n" +
             "WITH {item:id(p), weights: p.embedding} as userData\n" +
             "WITH collect(userData) as data\n" +
 
@@ -80,8 +85,8 @@ public class PearsonTest {
             "yield p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs " +
             "RETURN *";
 
-    @BeforeClass
-    public static void beforeClass() throws KernelException {
+    @BeforeAll
+    static void beforeClass() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase();
         Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class);
         procedures.registerProcedure(PearsonProc.class);
@@ -89,18 +94,18 @@ public class PearsonTest {
         db.execute(buildDatabaseQuery()).close();
     }
 
-    @AfterClass
-    public static void AfterClass() {
+    @AfterAll
+    static void AfterClass() {
         db.shutdown();
     }
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeEach
+    void setUp() {
         tx = db.beginTx();
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterEach
+    void tearDown() {
         tx.close();
     }
 
@@ -176,9 +181,8 @@ public class PearsonTest {
 
     }
 
-
     @Test
-    public void pearsonSingleMultiThreadComparision() {
+    void pearsonSingleMultiThreadComparision() {
         int size = 333;
         buildRandomDB(size);
 
@@ -201,9 +205,9 @@ public class PearsonTest {
         int count=0;
         while (result1.hasNext()) {
             Map<String, Object> row1 = result1.next();
-            assertEquals(row1.toString(), row1,result2.next());
-            assertEquals(row1.toString(), row1,result4.next());
-            assertEquals(row1.toString(), row1,result8.next());
+            assertEquals(row1, result2.next(), row1.toString());
+            assertEquals(row1, result4.next(), row1.toString());
+            assertEquals(row1, result8.next(), row1.toString());
             count++;
         }
         int people = size/10;
@@ -211,7 +215,7 @@ public class PearsonTest {
     }
 
     @Test
-    public void pearsonSingleMultiThreadComparisionTopK() {
+    void pearsonSingleMultiThreadComparisionTopK() {
         int size = 333;
         buildRandomDB(size);
 
@@ -222,9 +226,9 @@ public class PearsonTest {
         int count=0;
         while (result1.hasNext()) {
             Map<String, Object> row1 = result1.next();
-            assertEquals(row1.toString(), row1,result2.next());
-            assertEquals(row1.toString(), row1,result4.next());
-            assertEquals(row1.toString(), row1,result8.next());
+            assertEquals(row1, result2.next(), row1.toString());
+            assertEquals(row1, result4.next(), row1.toString());
+            assertEquals(row1, result8.next(), row1.toString());
             count++;
         }
         int people = size/10;
@@ -232,7 +236,7 @@ public class PearsonTest {
     }
 
     @Test
-    public void topNpearsonStreamTest() {
+    void topNpearsonStreamTest() {
         Map<String, Object> params = map("config", map("top", 2), "missingValue", 0);
 
         System.out.println(db.execute(STATEMENT_STREAM, params).resultAsString());
@@ -244,7 +248,7 @@ public class PearsonTest {
     }
 
     @Test
-    public void pearsonStreamTest() {
+    void pearsonStreamTest() {
         Map<String, Object> params = map("config", map("concurrency", 1), "missingValue", 0);
 
         System.out.println(db.execute(STATEMENT_STREAM, params).resultAsString());
@@ -261,7 +265,7 @@ public class PearsonTest {
     }
 
     @Test
-    public void pearsonStreamSourceTargetIdsTest() {
+    void pearsonStreamSourceTargetIdsTest() {
         Map<String, Object> config = map(
                 "concurrency", 1,
                 "sourceIds", Collections.singletonList(0L),
@@ -278,7 +282,7 @@ public class PearsonTest {
     }
 
     @Test
-    public void pearsonSkipStreamTest() {
+    void pearsonSkipStreamTest() {
         Map<String, Object> params = map("config", map("concurrency", 1, "skipValue", Double.NaN), "missingValue", Double.NaN);
 
         System.out.println(db.execute(STATEMENT_STREAM, params).resultAsString());
@@ -296,7 +300,7 @@ public class PearsonTest {
     }
 
     @Test
-    public void pearsonCypherLoadingStreamTest() {
+    void pearsonCypherLoadingStreamTest() {
         String query = "MATCH (p:Person)-[r:LIKES]->(i) RETURN id(p) AS item, id(i) AS category, r.stars AS weight";
         Map<String, Object> params = map("config", map("concurrency", 1, "graph", "cypher", "skipValue", 0.0), "query", query);
 
@@ -315,7 +319,7 @@ public class PearsonTest {
     }
 
     @Test
-    public void topKPearsonStreamTest() {
+    void topKPearsonStreamTest() {
         Map<String, Object> params = map("config", map( "concurrency", 1,"topK", 1), "missingValue", 0);
 
         System.out.println(db.execute(STATEMENT_STREAM, params).resultAsString());
@@ -330,7 +334,7 @@ public class PearsonTest {
     }
 
     @Test
-    public void topKPearsonSourceTargetIdStreamTest() {
+    void topKPearsonSourceTargetIdStreamTest() {
         Map<String, Object> config = map(
                 "concurrency", 1,
                 "topK", 1,
@@ -368,7 +372,7 @@ public class PearsonTest {
 
 
     @Test
-    public void topK4PearsonStreamTest() {
+    void topK4PearsonStreamTest() {
         Map<String, Object> params = map("config", map("topK", 4, "concurrency", 4, "similarityCutoff", -0.1), "missingValue", 0);
 
         Result results = db.execute(STATEMENT_STREAM,params);
@@ -380,7 +384,7 @@ public class PearsonTest {
     }
 
     @Test
-    public void topK3PearsonStreamTest() {
+    void topK3PearsonStreamTest() {
         Map<String, Object> params = map("config", map("concurrency", 3, "topK", 3), "missingValue", 0);
 
         System.out.println(db.execute(STATEMENT_STREAM, params).resultAsString());
@@ -394,7 +398,7 @@ public class PearsonTest {
     }
 
     @Test
-    public void simplePearsonTest() {
+    void simplePearsonTest() {
         Map<String, Object> params = map("config", map());
 
         System.out.println(db.execute(STATEMENT, params).resultAsString());
@@ -410,7 +414,7 @@ public class PearsonTest {
     }
 
     @Test
-    public void simplePearsonFromEmbeddingTest() {
+    void simplePearsonFromEmbeddingTest() {
         db.execute(STORE_EMBEDDING_STATEMENT);
 
         Map<String, Object> params = map("config", map());
@@ -426,7 +430,7 @@ public class PearsonTest {
     }
 
     @Test
-    public void simplePearsonWriteTest() {
+    void simplePearsonWriteTest() {
         Map<String, Object> params = map("config", map( "write",true, "similarityCutoff", 0.1));
 
         db.execute(STATEMENT,params).close();
@@ -478,7 +482,7 @@ public class PearsonTest {
     }
 
     @Test
-    public void dontComputeComputationsByDefault() {
+    void dontComputeComputationsByDefault() {
         Map<String, Object> params = map("config", map(
                 "write", true,
                 "similarityCutoff", 0.1));
@@ -489,7 +493,7 @@ public class PearsonTest {
     }
 
     @Test
-    public void numberOfComputations() {
+    void numberOfComputations() {
         Map<String, Object> params = map("config", map(
                 "write", true,
                 "showComputations", true,

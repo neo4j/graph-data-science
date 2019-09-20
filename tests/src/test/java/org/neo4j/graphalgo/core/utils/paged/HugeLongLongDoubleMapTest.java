@@ -20,21 +20,21 @@
 package org.neo4j.graphalgo.core.utils.paged;
 
 import com.carrotsearch.hppc.ObjectDoubleHashMap;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
-public final class HugeLongLongDoubleMapTest {
+final class HugeLongLongDoubleMapTest {
 
     @Test
-    public void canReadFromAddTo() {
+    void canReadFromAddTo() {
         HugeLongLongDoubleMap map = new HugeLongLongDoubleMap(AllocationTracker.EMPTY);
         map.addTo(1L, 1L, 1.0);
 
@@ -55,7 +55,7 @@ public final class HugeLongLongDoubleMapTest {
     }
 
     @Test
-    public void supportsTwoKeys() {
+    void supportsTwoKeys() {
         HugeLongLongDoubleMap map = new HugeLongLongDoubleMap(AllocationTracker.EMPTY);
         map.addTo(1L, 1L, 1.0);
         map.addTo(1L, 2L, 2.0);
@@ -76,7 +76,7 @@ public final class HugeLongLongDoubleMapTest {
     }
 
     @Test
-    public void supportsZeroKeys() {
+    void supportsZeroKeys() {
         HugeLongLongDoubleMap map = new HugeLongLongDoubleMap(AllocationTracker.EMPTY);
 
         map.addTo(0L, 0L, 1.0);
@@ -99,7 +99,7 @@ public final class HugeLongLongDoubleMapTest {
     }
 
     @Test
-    public void addToAddsValues() {
+    void addToAddsValues() {
         HugeLongLongDoubleMap map = new HugeLongLongDoubleMap(AllocationTracker.EMPTY);
         map.addTo(1L, 1L, 1.0);
         map.addTo(1L, 1L, 2.0);
@@ -111,7 +111,7 @@ public final class HugeLongLongDoubleMapTest {
     }
 
     @Test
-    public void acceptsInitialSize() {
+    void acceptsInitialSize() {
         // minimum buffer size is 4
         long minimumSize = sizeOfDoubleArray(4)
                 // double the buffer size for keys, as we have two keys
@@ -137,7 +137,7 @@ public final class HugeLongLongDoubleMapTest {
     }
 
     @Test
-    public void hasSize() {
+    void hasSize() {
         HugeLongLongDoubleMap map = new HugeLongLongDoubleMap(AllocationTracker.EMPTY);
         assertEquals(0L, map.size());
 
@@ -153,7 +153,7 @@ public final class HugeLongLongDoubleMapTest {
     }
 
     @Test
-    public void hasIsEmpty() {
+    void hasIsEmpty() {
         HugeLongLongDoubleMap map = new HugeLongLongDoubleMap(AllocationTracker.EMPTY);
         assertTrue(map.isEmpty());
         map.addTo(1L, 1L, 1.0);
@@ -161,7 +161,7 @@ public final class HugeLongLongDoubleMapTest {
     }
 
     @Test
-    public void resizeOnGrowthAndTrackMemoryUsage() {
+    void resizeOnGrowthAndTrackMemoryUsage() {
         long firstSize = 2L * sizeOfLongArray(8) + sizeOfDoubleArray(8);
         long secondSize = 2L * sizeOfLongArray(16) + sizeOfDoubleArray(16);
         long thirdSize = 2L * sizeOfLongArray(32) + sizeOfDoubleArray(32);
@@ -184,7 +184,7 @@ public final class HugeLongLongDoubleMapTest {
     }
 
     @Test
-    public void releaseMemory() {
+    void releaseMemory() {
         AllocationTracker tracker = AllocationTracker.create();
         HugeLongLongDoubleMap map = new HugeLongLongDoubleMap(tracker);
 
@@ -196,7 +196,7 @@ public final class HugeLongLongDoubleMapTest {
     }
 
     @Test
-    public void hasStringRepresentation() {
+    void hasStringRepresentation() {
         HugeLongLongDoubleMap map = new HugeLongLongDoubleMap(AllocationTracker.EMPTY);
         ObjectDoubleHashMap<Pr> compare = new ObjectDoubleHashMap<>();
 

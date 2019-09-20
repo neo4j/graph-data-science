@@ -19,21 +19,22 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.impl.Traverse.ExitPredicate.Result;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  *
@@ -47,33 +48,32 @@ import static org.junit.Assert.*;
  *
  * @author mknblch
  */
-public class BFSDFSTest {
+class BFSDFSTest {
 
-    @ClassRule
-    public static ImpermanentDatabaseRule db = new ImpermanentDatabaseRule();
+    private GraphDatabaseAPI db;
 
     private static Graph graph;
 
-    @BeforeClass
-    public static void setupGraph() throws KernelException {
-
-        final String cypher =
+    @BeforeEach
+    void setupGraph() {
+        db = TestDatabaseCreator.createTestDatabase();
+        String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
-                        "CREATE (b:Node {name:'b'})\n" +
-                        "CREATE (c:Node {name:'c'})\n" +
-                        "CREATE (d:Node {name:'d'})\n" +
-                        "CREATE (e:Node {name:'e'})\n" +
-                        "CREATE (f:Node {name:'f'})\n" +
-                        "CREATE (g:Node {name:'g'})\n" +
-                        "CREATE" +
-                        " (a)-[:TYPE {cost:2.0}]->(b),\n" +
-                        " (a)-[:TYPE {cost:1.0}]->(c),\n" +
-                        " (b)-[:TYPE {cost:1.0}]->(d),\n" +
-                        " (c)-[:TYPE {cost:2.0}]->(d),\n" +
-                        " (d)-[:TYPE {cost:1.0}]->(e),\n" +
-                        " (d)-[:TYPE {cost:2.0}]->(f),\n" +
-                        " (e)-[:TYPE {cost:2.0}]->(g),\n" +
-                        " (f)-[:TYPE {cost:1.0}]->(g)";
+                "CREATE (b:Node {name:'b'})\n" +
+                "CREATE (c:Node {name:'c'})\n" +
+                "CREATE (d:Node {name:'d'})\n" +
+                "CREATE (e:Node {name:'e'})\n" +
+                "CREATE (f:Node {name:'f'})\n" +
+                "CREATE (g:Node {name:'g'})\n" +
+                "CREATE" +
+                " (a)-[:TYPE {cost:2.0}]->(b),\n" +
+                " (a)-[:TYPE {cost:1.0}]->(c),\n" +
+                " (b)-[:TYPE {cost:1.0}]->(d),\n" +
+                " (c)-[:TYPE {cost:2.0}]->(d),\n" +
+                " (d)-[:TYPE {cost:1.0}]->(e),\n" +
+                " (d)-[:TYPE {cost:2.0}]->(f),\n" +
+                " (e)-[:TYPE {cost:2.0}]->(g),\n" +
+                " (f)-[:TYPE {cost:1.0}]->(g)";
 
         db.execute(cypher);
 
@@ -87,7 +87,12 @@ public class BFSDFSTest {
 
     }
 
-    private static long id(String name) {
+    @AfterEach
+    void teardownGraph() {
+        db.shutdown();
+    }
+
+    private long id(String name) {
         final Node[] node = new Node[1];
         db.execute("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n").accept(row -> {
             node[0] = row.getNode("n");
@@ -96,7 +101,7 @@ public class BFSDFSTest {
         return node[0].getId();
     }
 
-    private static String name(long id) {
+    private String name(long id) {
         final String[] node = new String[1];
         db.execute("MATCH (n:Node) WHERE id(n) = " + id + " RETURN n.name as name").accept(row -> {
             node[0] = row.getString("name");
@@ -110,7 +115,7 @@ public class BFSDFSTest {
      * bfs on outgoing rels. until target 'd' is reached
      */
     @Test
-    public void testBfsToTargetOut() throws Exception {
+    void testBfsToTargetOut() {
         final long source = id("a");
         final long target = id("d");
         final long[] nodes = new Traverse(graph)
@@ -127,7 +132,7 @@ public class BFSDFSTest {
      * immediately exits if target is reached
      */
     @Test
-    public void testDfsToTargetOut() throws Exception {
+    void testDfsToTargetOut() {
         final long source = id("a");
         final long target = id("g");
         final long[] nodes = new Traverse(graph)
@@ -144,7 +149,7 @@ public class BFSDFSTest {
      * immediately exits if target is reached
      */
     @Test
-    public void testExitConditionNeverTerminates() throws Exception {
+    void testExitConditionNeverTerminates() {
         final long source = id("a");
         final long[] nodes = new Traverse(graph)
                 .computeDfs(
@@ -160,7 +165,7 @@ public class BFSDFSTest {
      *
      */
     @Test
-    public void testDfsToTargetIn() throws Exception {
+    void testDfsToTargetIn() {
         final long source = id("g");
         final long target = id("a");
         final long[] nodes = new Traverse(graph)
@@ -178,7 +183,7 @@ public class BFSDFSTest {
      * on the ends of the graph
      */
     @Test
-    public void testBfsToTargetIn() throws Exception {
+    void testBfsToTargetIn() {
         final long source = id("g");
         final long target = id("a");
         final long[] nodes = new Traverse(graph)
@@ -197,7 +202,7 @@ public class BFSDFSTest {
      * lower depth
      */
     @Test
-    public void testBfsMaxDepthOut() throws Exception {
+    void testBfsMaxDepthOut() {
         final long source = id("a");
         final double maxHops = 3.;
         final long[] nodes = new Traverse(graph)
@@ -214,7 +219,7 @@ public class BFSDFSTest {
     }
 
     @Test
-    public void testBfsMaxCostOut() throws Exception {
+    void testBfsMaxCostOut() {
         final long source = id("a");
         final double maxCost = 3.;
         final long[] nodes = new Traverse(graph)
@@ -235,9 +240,9 @@ public class BFSDFSTest {
      * test if all both arrays contain the same nodes. not necessarily in
      * same order
      */
-    static void assertContains(String[] expected, long[] given) {
+    void assertContains(String[] expected, long[] given) {
         Arrays.sort(given);
-        assertEquals("expected " + Arrays.toString(expected) + " | given [" + toNameString(given) + "]", expected.length, given.length);
+        assertEquals(expected.length, given.length, "expected " + Arrays.toString(expected) + " | given [" + toNameString(given) + "]");
 
         for (String ex : expected) {
             final long id = id(ex);
@@ -247,7 +252,7 @@ public class BFSDFSTest {
         }
     }
 
-    static String toNameString(long[] nodes) {
+    String toNameString(long[] nodes) {
         final StringBuilder builder = new StringBuilder();
         for (long node : nodes) {
             if (builder.length() > 0) {

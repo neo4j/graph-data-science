@@ -19,19 +19,20 @@
  */
 package org.neo4j.graphalgo.algo;
 
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.InfoMapProc;
 import org.neo4j.graphalgo.PageRankProc;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Node;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.BitSet;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  *
@@ -43,14 +44,13 @@ import static org.junit.Assert.assertEquals;
  *
  * @author mknblch
  */
-public class InfoMapIntTest {
+class InfoMapIntTest {
 
-    @ClassRule
-    public static ImpermanentDatabaseRule db = new ImpermanentDatabaseRule();
+    private GraphDatabaseAPI db;
 
-    @BeforeClass
-    public static void setupGraph() throws KernelException {
-
+    @BeforeEach
+    void setupGraph() throws KernelException {
+        db = TestDatabaseCreator.createTestDatabase();
         final String cypher =
                 "CREATE (a:Node {name:'a'} )\n" +
                 "CREATE (b:Node {name:'b'} )\n" +
@@ -59,22 +59,27 @@ public class InfoMapIntTest {
                 "CREATE (e:Node {name:'e'} )\n" +
                 "CREATE (f:Node {name:'f'} )\n" +
                 "CREATE (x:Node {name:'x'} )\n" +
-                        "CREATE" +
-                        " (b)-[:TYPE {v:1.0}]->(a),\n" +
-                        " (a)-[:TYPE {v:1.0}]->(c),\n" +
-                        " (c)-[:TYPE {v:1.0}]->(a),\n" +
-                        " (d)-[:TYPE {v:2.0}]->(c),\n" +
-                        " (d)-[:TYPE {v:1.0}]->(e),\n" +
-                        " (d)-[:TYPE {v:1.0}]->(f),\n" +
-                        " (e)-[:TYPE {v:1.0}]->(f)";
+                "CREATE" +
+                " (b)-[:TYPE {v:1.0}]->(a),\n" +
+                " (a)-[:TYPE {v:1.0}]->(c),\n" +
+                " (c)-[:TYPE {v:1.0}]->(a),\n" +
+                " (d)-[:TYPE {v:2.0}]->(c),\n" +
+                " (d)-[:TYPE {v:1.0}]->(e),\n" +
+                " (d)-[:TYPE {v:1.0}]->(f),\n" +
+                " (e)-[:TYPE {v:1.0}]->(f)";
 
         db.execute(cypher);
-        db.resolveDependency(Procedures.class).registerProcedure(InfoMapProc.class);
-        db.resolveDependency(Procedures.class).registerProcedure(PageRankProc.class);
+        db.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(InfoMapProc.class);
+        db.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(PageRankProc.class);
+    }
+
+    @AfterEach
+    void teardownGraph() {
+        db.shutdown();
     }
 
     @Test
-    public void testUnweighted() throws Exception {
+    void testUnweighted() {
 
         final BitSet bitSet = new BitSet(8);
 
@@ -89,15 +94,14 @@ public class InfoMapIntTest {
         assertEquals(3, bitSet.cardinality());
     }
 
-
     @Test
-    public void testUnweightedStream() throws Exception {
+    void testUnweightedStream() {
 
         final BitSet bitSet = new BitSet(8);
 
         db.execute("CALL algo.infoMap.stream('Node', 'TYPE', {iterations:15}) YIELD nodeId, community")
                 .accept(row -> {
-                    bitSet.set((Integer) row.getNumber("community").intValue());
+                    bitSet.set(row.getNumber("community").intValue());
                     return true;
                 });
 
@@ -105,9 +109,8 @@ public class InfoMapIntTest {
 
     }
 
-
     @Test
-    public void testWeighted() throws Exception {
+    void testWeighted() {
 
         final BitSet bitSet = new BitSet(8);
 
@@ -123,15 +126,14 @@ public class InfoMapIntTest {
 
     }
 
-
     @Test
-    public void testWeightedStream() throws Exception {
+    void testWeightedStream() {
 
         final BitSet bitSet = new BitSet(8);
 
         db.execute("CALL algo.infoMap.stream('Node', 'TYPE', {iterations:15, weightProperty:'v'}) YIELD nodeId, community")
                 .accept(row -> {
-                    bitSet.set((Integer) row.getNumber("community").intValue());
+                    bitSet.set(row.getNumber("community").intValue());
                     return true;
                 });
 
@@ -140,7 +142,7 @@ public class InfoMapIntTest {
     }
 
     @Test
-    public void testPredefinedPageRankStream() throws Exception {
+    void testPredefinedPageRankStream() {
 
 
         db.execute("CALL algo.pageRank('Node', 'TYPE', {writeProperty:'p', iterations:1}) YIELD nodes").close();
@@ -149,12 +151,10 @@ public class InfoMapIntTest {
 
         db.execute("CALL algo.infoMap.stream('Node', 'TYPE', {pageRankProperty:'p'}) YIELD nodeId, community")
                 .accept(row -> {
-                    bitSet.set((Integer) row.getNumber("community").intValue());
+                    bitSet.set(row.getNumber("community").intValue());
                     return true;
                 });
 
         assertEquals(3, bitSet.cardinality());
-
     }
-
 }

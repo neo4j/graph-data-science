@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -32,8 +32,8 @@ import org.neo4j.graphalgo.impl.triangle.IntersectingTriangleCount;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  *
@@ -50,28 +50,27 @@ import static org.junit.Assert.assertEquals;
  *
  * @author mknblch
  */
-public class ClusteringCoefficientWikiTest {
+class ClusteringCoefficientWikiTest {
 
-    private static GraphDatabaseAPI db;
-    private static Graph graph;
+    private GraphDatabaseAPI db;
+    private Graph graph;
 
     private static final double[] EXPECTED = {0.33, 1.0, 0.0, 1.0};
 
-    @BeforeClass
-    public static void setup() throws Exception {
-
+    @BeforeEach
+    void setup() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
 
-        final String cypher =
+        String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
-                        "CREATE (b:Node {name:'b'})\n" +
-                        "CREATE (c:Node {name:'c'})\n" +
-                        "CREATE (d:Node {name:'d'})\n" +
-                        "CREATE" +
-                        " (a)-[:TYPE]->(b),\n" +
-                        " (a)-[:TYPE]->(c),\n" +
-                        " (a)-[:TYPE]->(d),\n" +
-                        " (b)-[:TYPE]->(d)";
+                "CREATE (b:Node {name:'b'})\n" +
+                "CREATE (c:Node {name:'c'})\n" +
+                "CREATE (d:Node {name:'d'})\n" +
+                "CREATE" +
+                " (a)-[:TYPE]->(b),\n" +
+                " (a)-[:TYPE]->(c),\n" +
+                " (a)-[:TYPE]->(d),\n" +
+                " (b)-[:TYPE]->(d)";
 
         try (Transaction tx = db.beginTx()) {
             db.execute(cypher);
@@ -87,15 +86,15 @@ public class ClusteringCoefficientWikiTest {
                 .load(HugeGraphFactory.class);
     }
 
-    @AfterClass
-    public static void tearDown() throws Exception {
-        if (db != null) db.shutdown();
+    @AfterEach
+    void tearDown() {
+        db.shutdown();
         graph = null;
     }
 
 
     @Test
-    public void test() throws Exception {
+    void test() {
         final IntersectingTriangleCount algo =
                 new IntersectingTriangleCount(graph, Pools.DEFAULT, 4, AllocationTracker.EMPTY)
                         .compute();

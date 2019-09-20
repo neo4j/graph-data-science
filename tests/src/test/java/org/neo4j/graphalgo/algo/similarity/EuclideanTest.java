@@ -19,11 +19,11 @@
  */
 package org.neo4j.graphalgo.algo.similarity;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.EuclideanProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Result;
@@ -37,16 +37,17 @@ import java.util.Map;
 
 import static java.lang.Math.sqrt;
 import static java.util.Collections.singletonMap;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
-public class EuclideanTest {
+class EuclideanTest {
 
     private static GraphDatabaseAPI db;
     private Transaction tx;
-    public static final String STATEMENT_STREAM = "MATCH (i:Item) WITH i ORDER BY id(i) MATCH (p:Person) OPTIONAL MATCH (p)-[r:LIKES]->(i)\n" +
+    private static final String STATEMENT_STREAM =
+            "MATCH (i:Item) WITH i ORDER BY id(i) MATCH (p:Person) OPTIONAL MATCH (p)-[r:LIKES]->(i)\n" +
             "WITH {item:id(p), weights: collect(coalesce(r.stars,$missingValue))} AS userData\n" +
             "WITH collect(userData) AS data\n" +
             "CALL algo.similarity.euclidean.stream(data,$config) " +
@@ -54,12 +55,14 @@ public class EuclideanTest {
             "RETURN item1, item2, count1, count2, intersection, similarity " +
             "ORDER BY item1,item2";
 
-    public static final String STATEMENT_CYPHER_STREAM = "CALL algo.similarity.euclidean.stream($query,$config) " +
+    private static final String STATEMENT_CYPHER_STREAM =
+            "CALL algo.similarity.euclidean.stream($query,$config) " +
             "YIELD item1, item2, count1, count2, intersection, similarity " +
             "RETURN * " +
             "ORDER BY item1,item2";
 
-    public static final String STATEMENT = "MATCH (i:Item) WITH i ORDER BY id(i) MATCH (p:Person) OPTIONAL MATCH (p)-[r:LIKES]->(i)\n" +
+    private static final String STATEMENT =
+            "MATCH (i:Item) WITH i ORDER BY id(i) MATCH (p:Person) OPTIONAL MATCH (p)-[r:LIKES]->(i)\n" +
             "WITH {item:id(p), weights: collect(coalesce(r.stars,0))} AS userData\n" +
             "WITH collect(userData) AS data\n" +
 
@@ -67,11 +70,13 @@ public class EuclideanTest {
             "YIELD p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs, computations " +
             "RETURN *";
 
-    public static final String STORE_EMBEDDING_STATEMENT = "MATCH (i:Item) WITH i ORDER BY id(i) MATCH (p:Person) OPTIONAL MATCH (p)-[r:LIKES]->(i)\n" +
+    private static final String STORE_EMBEDDING_STATEMENT =
+            "MATCH (i:Item) WITH i ORDER BY id(i) MATCH (p:Person) OPTIONAL MATCH (p)-[r:LIKES]->(i)\n" +
             "WITH p, collect(coalesce(r.stars,0)) AS userData\n" +
             "SET p.embedding = userData";
 
-    public static final String EMBEDDING_STATEMENT = "MATCH (p:Person)\n" +
+    private static final String EMBEDDING_STATEMENT =
+            "MATCH (p:Person)\n" +
             "WITH {item:id(p), weights: p.embedding} AS userData\n" +
             "WITH collect(userData) AS data\n" +
 
@@ -79,25 +84,25 @@ public class EuclideanTest {
             "YIELD p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs " +
             "RETURN *";
 
-    @BeforeClass
-    public static void beforeClass() throws KernelException {
+    @BeforeAll
+    static void beforeClass() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase();
         db.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(EuclideanProc.class);
         db.execute(buildDatabaseQuery()).close();
     }
 
-    @AfterClass
-    public static void AfterClass() {
+    @AfterAll
+    static void AfterClass() {
         db.shutdown();
     }
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeEach
+    void setUp() {
         tx = db.beginTx();
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterEach
+    void tearDown() {
         tx.close();
     }
 
@@ -141,7 +146,7 @@ public class EuclideanTest {
 
 
     @Test
-    public void euclideanSingleMultiThreadComparision() {
+    void euclideanSingleMultiThreadComparision() {
         int size = 333;
         buildRandomDB(size);
         Result result1 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "concurrency", 1), "missingValue", 0));
@@ -151,9 +156,9 @@ public class EuclideanTest {
         int count = 0;
         while (result1.hasNext()) {
             Map<String, Object> row1 = result1.next();
-            assertEquals(row1.toString(), row1, result2.next());
-            assertEquals(row1.toString(), row1, result4.next());
-            assertEquals(row1.toString(), row1, result8.next());
+            assertEquals(row1, result2.next(), row1.toString());
+            assertEquals(row1, result4.next(), row1.toString());
+            assertEquals(row1, result8.next(), row1.toString());
             count++;
         }
         int people = size / 10;
@@ -161,7 +166,7 @@ public class EuclideanTest {
     }
 
     @Test
-    public void euclideanSingleMultiThreadComparisionTopK() {
+    void euclideanSingleMultiThreadComparisionTopK() {
         int size = 333;
         buildRandomDB(size);
 
@@ -172,9 +177,9 @@ public class EuclideanTest {
         int count = 0;
         while (result1.hasNext()) {
             Map<String, Object> row1 = result1.next();
-            assertEquals(row1.toString(), row1, result2.next());
-            assertEquals(row1.toString(), row1, result4.next());
-            assertEquals(row1.toString(), row1, result8.next());
+            assertEquals(row1, result2.next(), row1.toString());
+            assertEquals(row1, result4.next(), row1.toString());
+            assertEquals(row1, result8.next(), row1.toString());
             count++;
         }
         int people = size / 10;
@@ -182,7 +187,7 @@ public class EuclideanTest {
     }
 
     @Test
-    public void topNeuclideanStreamTest() {
+    void topNeuclideanStreamTest() {
         Result results = db.execute(STATEMENT_STREAM, map("config", map("top", 2), "missingValue", 0));
         assert02(results.next());
         assert13(results.next());
@@ -190,7 +195,7 @@ public class EuclideanTest {
     }
 
     @Test
-    public void euclideanStreamTest() {
+    void euclideanStreamTest() {
         // System.out.println(db.execute("MATCH (i:Item) WITH i ORDER BY id(i) MATCH (p:Person) OPTIONAL MATCH (p)-[r:LIKES]->(i) RETURN p,r,i").resultAsString());
         // a: 1,2,5
         // b: 1,3,0
@@ -216,7 +221,7 @@ public class EuclideanTest {
     }
 
     @Test
-    public void euclideanSourceTargetIdsStreamTest() {
+    void euclideanSourceTargetIdsStreamTest() {
         Map<String, Object> config = map(
                 "concurrency", 1,
                 "sourceIds", Collections.singletonList(0L),
@@ -229,7 +234,7 @@ public class EuclideanTest {
     }
 
     @Test
-    public void euclideanCypherStreamTest() {
+    void euclideanCypherStreamTest() {
         // System.out.println(db.execute("MATCH (i:Item) WITH i ORDER BY id(i) MATCH (p:Person) OPTIONAL MATCH (p)-[r:LIKES]->(i) RETURN p,r,i").resultAsString());
         // a: 1,2,5
         // b: 1,3,0
@@ -259,7 +264,7 @@ public class EuclideanTest {
     }
 
     @Test
-    public void eucideanSkipStreamTest() {
+    void eucideanSkipStreamTest() {
         Result results = db.execute(STATEMENT_STREAM,
                 map("config", map("concurrency", 1, "skipValue", Double.NaN), "missingValue", Double.NaN));
 
@@ -271,7 +276,7 @@ public class EuclideanTest {
     }
 
     @Test
-    public void topKEuclideanStreamTest() {
+    void topKEuclideanStreamTest() {
         Map<String, Object> params = map("config", map("concurrency", 1, "topK", 1), "missingValue", 0);
 
         Result results = db.execute(STATEMENT_STREAM, params);
@@ -284,7 +289,7 @@ public class EuclideanTest {
     }
 
     @Test
-    public void topKEuclideanSourceTargetIdStreamTest() {
+    void topKEuclideanSourceTargetIdStreamTest() {
         Map<String, Object> config = map(
                 "concurrency", 1,
                 "topK", 1,
@@ -319,7 +324,7 @@ public class EuclideanTest {
     }
 
     @Test
-    public void topK4euclideanStreamTest() {
+    void topK4euclideanStreamTest() {
         Map<String, Object> params = map("config", map("topK", 4, "concurrency", 4, "similarityCutoff", -0.1), "missingValue", 0);
         System.out.println(db.execute(STATEMENT_STREAM, params).resultAsString());
 
@@ -332,7 +337,7 @@ public class EuclideanTest {
     }
 
     @Test
-    public void topK3euclideanStreamTest() {
+    void topK3euclideanStreamTest() {
         // a0 - b1: sqrt(26) = 5.1
         // a0 - c2: sqrt(6) = 2.5
         // a0 - d3: sqrt(1+4+25) = 5.5
@@ -352,7 +357,7 @@ public class EuclideanTest {
     }
 
     @Test
-    public void simpleEuclideanTest() {
+    void simpleEuclideanTest() {
         Map<String, Object> params = map("config", map(), "missingValue", 0);
 
         Map<String, Object> row = db.execute(STATEMENT, params).next();
@@ -365,7 +370,7 @@ public class EuclideanTest {
     }
 
     @Test
-    public void simpleEuclideanFromEmbeddingTest() {
+    void simpleEuclideanFromEmbeddingTest() {
         db.execute(STORE_EMBEDDING_STATEMENT);
 
         Map<String, Object> params = map("config", map());
@@ -380,7 +385,7 @@ public class EuclideanTest {
     }
 
     @Test
-    public void simpleEuclideanWriteTest() {
+    void simpleEuclideanWriteTest() {
         Map<String, Object> params = map("config", map("write", true, "similarityCutoff", 4.0), "missingValue", 0);
 
         db.execute(STATEMENT, params).close();
@@ -440,7 +445,7 @@ public class EuclideanTest {
     }
 
     @Test
-    public void dontComputeComputationsByDefault() {
+    void dontComputeComputationsByDefault() {
         Map<String, Object> params = map("config", map(
                 "write", true,
                 "similarityCutoff", 0.1));
@@ -451,7 +456,7 @@ public class EuclideanTest {
     }
 
     @Test
-    public void numberOfComputations() {
+    void numberOfComputations() {
         Map<String, Object> params = map("config", map(
                 "write", true,
                 "showComputations", true,

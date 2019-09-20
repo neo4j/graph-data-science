@@ -19,9 +19,8 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.Assume;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
@@ -34,8 +33,9 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
  *          1
@@ -46,31 +46,32 @@ import static org.junit.Assert.assertNotEquals;
  */
 class KSpanningTreeTest {
 
-    private static final String CYPHER = "CREATE " +
-                                         "  (a:Node {name: 'a'})" +
-                                         ", (b:Node {name: 'b'})" +
-                                         ", (c:Node {name: 'c'})" +
-                                         ", (d:Node {name: 'd'})" +
-                                         ", (x:Node {name: 'x'})" +
-                                         ", (a)-[:TYPE {w: 3.0}]->(b)" +
-                                         ", (a)-[:TYPE {w: 2.0}]->(c)" +
-                                         ", (a)-[:TYPE {w: 1.0}]->(d)" +
-                                         ", (b)-[:TYPE {w: 1.0}]->(c)" +
-                                         ", (d)-[:TYPE {w: 3.0}]->(c)";
+    private static final String DB_CYPHER =
+            "CREATE " +
+            "  (a:Node {name: 'a'})" +
+            ", (b:Node {name: 'b'})" +
+            ", (c:Node {name: 'c'})" +
+            ", (d:Node {name: 'd'})" +
+            ", (x:Node {name: 'x'})" +
+            ", (a)-[:TYPE {w: 3.0}]->(b)" +
+            ", (a)-[:TYPE {w: 2.0}]->(c)" +
+            ", (a)-[:TYPE {w: 1.0}]->(d)" +
+            ", (b)-[:TYPE {w: 1.0}]->(c)" +
+            ", (d)-[:TYPE {w: 3.0}]->(c)";
 
     private static final Label node = Label.label("Node");
 
-    private static GraphDatabaseAPI DB;
+    private GraphDatabaseAPI db;
 
-    @BeforeAll
-    static void setupGraph() {
-        DB = TestDatabaseCreator.createTestDatabase();
-        DB.execute(CYPHER);
+    @BeforeEach
+    void setupGraph() {
+        db = TestDatabaseCreator.createTestDatabase();
+        db.execute(DB_CYPHER);
     }
 
-    @AfterAll
-    static void shutdown() {
-        if (DB != null) DB.shutdown();
+    @AfterEach
+    void shutdown() {
+        if (db != null) db.shutdown();
     }
 
     private Graph graph;
@@ -78,7 +79,7 @@ class KSpanningTreeTest {
 
     @AllGraphTypesWithoutCypherTest
     void testMaximumKSpanningTree(Class<? extends GraphFactory> graphFactory) {
-        Assume.assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
+        assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
         setup(graphFactory);
         final SpanningTree spanningTree = new KSpanningTree(graph, graph, graph)
                 .compute(a, 2, true)
@@ -106,19 +107,19 @@ class KSpanningTreeTest {
     }
 
     private void setup(Class<? extends GraphFactory> graphImpl) {
-        graph = new GraphLoader(DB)
+        graph = new GraphLoader(db)
                 .withRelationshipWeightsFromProperty("w", 1.0)
                 .withAnyRelationshipType()
                 .withAnyLabel()
                 .undirected()
                 .load(graphImpl);
 
-        try (Transaction tx = DB.beginTx()) {
-            a = Math.toIntExact(graph.toMappedNodeId(DB.findNode(node, "name", "a").getId()));
-            b = Math.toIntExact(graph.toMappedNodeId(DB.findNode(node, "name", "b").getId()));
-            c = Math.toIntExact(graph.toMappedNodeId(DB.findNode(node, "name", "c").getId()));
-            d = Math.toIntExact(graph.toMappedNodeId(DB.findNode(node, "name", "d").getId()));
-            x = Math.toIntExact(graph.toMappedNodeId(DB.findNode(node, "name", "x").getId()));
+        try (Transaction tx = db.beginTx()) {
+            a = Math.toIntExact(graph.toMappedNodeId(db.findNode(node, "name", "a").getId()));
+            b = Math.toIntExact(graph.toMappedNodeId(db.findNode(node, "name", "b").getId()));
+            c = Math.toIntExact(graph.toMappedNodeId(db.findNode(node, "name", "c").getId()));
+            d = Math.toIntExact(graph.toMappedNodeId(db.findNode(node, "name", "d").getId()));
+            x = Math.toIntExact(graph.toMappedNodeId(db.findNode(node, "name", "x").getId()));
             tx.success();
         }
     }

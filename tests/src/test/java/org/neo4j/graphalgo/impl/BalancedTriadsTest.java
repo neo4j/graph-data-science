@@ -97,7 +97,7 @@ class BalancedTriadsTest {
     }
 
     @Test
-    void testStream() throws Exception {
+    void testStream() {
         new BalancedTriads(graph, Pools.DEFAULT, 4, AllocationTracker.EMPTY)
                 .compute()
                 .stream()

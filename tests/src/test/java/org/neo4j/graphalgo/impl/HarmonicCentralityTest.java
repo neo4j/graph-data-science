@@ -19,11 +19,10 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.AdditionalMatchers;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
@@ -64,32 +63,33 @@ import static org.mockito.Mockito.verify;
  */
 class HarmonicCentralityTest {
 
-    private static final String CYPHER = "CREATE " +
-                                         "  (a:Node {name:'a'})" +
-                                         ", (b:Node {name:'b'})" +
-                                         ", (c:Node {name:'c'})" +
-                                         ", (d:Node {name:'d'})" +
-                                         ", (e:Node {name:'e'})" +
-                                         ", (a)-[:TYPE]->(b)" +
-                                         ", (b)-[:TYPE]->(c)" +
-                                         ", (d)-[:TYPE]->(e)";
+    private static final String DB_CYPHER =
+            "CREATE " +
+            "  (a:Node {name:'a'})" +
+            ", (b:Node {name:'b'})" +
+            ", (c:Node {name:'c'})" +
+            ", (d:Node {name:'d'})" +
+            ", (e:Node {name:'e'})" +
+            ", (a)-[:TYPE]->(b)" +
+            ", (b)-[:TYPE]->(c)" +
+            ", (d)-[:TYPE]->(e)";
 
-    private static GraphDatabaseAPI DB;
+    private GraphDatabaseAPI db;
 
-    @BeforeAll
-    static void setupGraph() {
-        DB = TestDatabaseCreator.createTestDatabase();
-        DB.execute(CYPHER);
+    @BeforeEach
+    void setupGraph() {
+        db = TestDatabaseCreator.createTestDatabase();
+        db.execute(DB_CYPHER);
     }
 
-    @AfterAll
-    static void shutdown() {
-        if (DB != null) DB.shutdown();
+    @AfterEach
+    void shutdown() {
+        db.shutdown();
     }
 
     @AllGraphTypesWithoutCypherTest
     void testStream(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = new GraphLoader(DB)
+        Graph graph = new GraphLoader(db)
                 .withAnyRelationshipType()
                 .withAnyLabel()
                 .withoutNodeProperties()

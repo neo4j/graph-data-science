@@ -20,9 +20,9 @@
 
 package org.neo4j.graphalgo.core;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
@@ -36,14 +36,14 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public final class CypherExporterTest {
+final class CypherExporterTest {
 
     private static GraphDatabaseAPI db;
 
-    @BeforeClass
-    public static void setup() {
+    @BeforeAll
+    static void setup() {
         String createGraph =
                 "CREATE (nA:Label1 { foo: 'bar' })\n" +
                 "CREATE (nB:Label1 { property: 42.1337 })\n" +
@@ -63,13 +63,13 @@ public final class CypherExporterTest {
         }
     }
 
-    @AfterClass
-    public static void tearDown() {
+    @AfterAll
+    static void tearDown() {
         if (db != null) db.shutdown();
     }
 
     @Test
-    public void testDumpByGraphDbApi() {
+    void testDumpByGraphDbApi() {
         StringWriter output = new StringWriter();
         CypherExporter.export(new PrintWriter(output), db);
 
@@ -89,7 +89,7 @@ public final class CypherExporterTest {
     }
 
     @Test
-    public void testDumpByGraphForHuge() {
+    void testDumpByGraphForHuge() {
         //language=Cypher
         String expected =
                 "CREATE (n0 {property:42.0})\n" +
@@ -107,7 +107,7 @@ public final class CypherExporterTest {
     }
 
     @Test
-    public void testDumpByGraphForView() {
+    void testDumpByGraphForView() {
         //language=Cypher
         String expected =
                 "CREATE (n0)\n" +

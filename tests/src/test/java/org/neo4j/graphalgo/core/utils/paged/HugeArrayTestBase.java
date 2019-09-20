@@ -19,33 +19,31 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
-import com.carrotsearch.randomizedtesting.RandomizedTest;
-import com.carrotsearch.randomizedtesting.annotations.ThreadLeakScope;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.function.ObjIntConsumer;
 
+import static io.qala.datagen.RandomShortApi.bool;
+import static io.qala.datagen.RandomShortApi.integer;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SuppressWarnings("ImplicitNumericConversion")
-@ThreadLeakScope(ThreadLeakScope.Scope.NONE)
-public abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array, Box, Huge>> extends RandomizedTest {
+abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array, Box, Huge>> {
 
     private static final int PS = HugeArrays.PAGE_SIZE;
 
     @Test
-    public final void shouldSetAndGet() {
+    final void shouldSetAndGet() {
         testArray(10, array -> {
-            int index = between(2, 8);
-            int value = between(42, 1337);
+            int index = integer(2, 8);
+            int value = integer(42, 1337);
 
             array.boxedSet(index, box(value));
             assertEquals(value, get(array, index));
@@ -53,8 +51,8 @@ public abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array
     }
 
     @Test
-    public final void shouldSetAllValues() {
-        int size = between(10, 20);
+    final void shouldSetAllValues() {
+        int size = integer(10, 20);
         testArray(size, array -> {
             array.boxedSetAll(i -> box(1 << i));
             for (int index = 0; index < size; index++) {
@@ -64,9 +62,9 @@ public abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array
     }
 
     @Test
-    public final void shouldFillValues() {
-        int size = between(10, 20);
-        int value = between(42, 1337);
+    final void shouldFillValues() {
+        int size = integer(10, 20);
+        int value = integer(42, 1337);
         testArray(size, array -> {
             array.boxedFill(box(value));
             for (int index = 0; index < size; index++) {
@@ -76,8 +74,8 @@ public abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array
     }
 
     @Test
-    public final void shouldCopyValues() {
-        int size = between(10, 20);
+    final void shouldCopyValues() {
+        int size = integer(10, 20);
         testArray(size, array -> {
             testArray(size, target -> {
                 array.boxedSetAll(i1 -> box((int) i1 + 1));
@@ -90,7 +88,7 @@ public abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array
     }
 
     @Test
-    public final void shouldResetValuesNotCopied() {
+    final void shouldResetValuesNotCopied() {
         testArray(10, 20, (array, size) -> {
             testArray(30, 40, (target, sizeTarget) -> {
                 array.boxedFill(box(42));
@@ -109,7 +107,7 @@ public abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array
     }
 
     @Test
-    public final void shouldOnlyCopyValuesThatAreADefined() {
+    final void shouldOnlyCopyValuesThatAreADefined() {
         testArray(30, 40, (array, size) -> {
             testArray(10, 20, (target, sizeTarget) -> {
                 array.boxedFill(box(42));
@@ -123,7 +121,7 @@ public abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array
     }
 
     @Test
-    public final void shouldArrayCopy() {
+    final void shouldArrayCopy() {
         testArray(13, 42, (source, sizeSource) -> {
             testArray(13, 42, (target, sizeTarget) -> {
                 testArrayCopy(source, sizeSource, target, sizeTarget);
@@ -132,9 +130,9 @@ public abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array
     }
 
     @Test
-    public final void shouldArrayLargePages() {
-        int sizeSource = between(100_000, 200_000);
-        int sizeTarget = between(100_000, 200_000);
+    final void shouldArrayLargePages() {
+        int sizeSource = integer(100_000, 200_000);
+        int sizeTarget = integer(100_000, 200_000);
         Huge source = pagedArray(sizeSource);
         Huge target = pagedArray(sizeTarget);
 
@@ -163,16 +161,16 @@ public abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array
     }
 
     @Test
-    public final void shouldReportSize() {
-        int size = between(10, 20);
+    final void shouldReportSize() {
+        int size = integer(10, 20);
         testArray(size, array -> {
             assertEquals(size, array.size());
         });
     }
 
     @Test
-    public final void shouldFreeMemoryUsed() {
-        int size = between(10, 20);
+    final void shouldFreeMemoryUsed() {
+        int size = integer(10, 20);
         long expected = bufferSize(size);
         testArray(size, array -> {
             long freed = array.release();
@@ -181,8 +179,8 @@ public abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array
     }
 
     @Test
-    public final void shouldHaveSinglePageCursor() {
-        int size = between(100, 200);
+    final void shouldHaveSinglePageCursor() {
+        int size = integer(100, 200);
         Huge array = singleArray(size);
         array.boxedFill(box(42));
         HugeCursor<Array> cursor = array.initCursor(array.newCursor());
@@ -198,8 +196,8 @@ public abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array
     }
 
     @Test
-    public final void shouldHaveCursorForSinglePage() {
-        int size = between(100, 200);
+    final void shouldHaveCursorForSinglePage() {
+        int size = integer(100, 200);
         Huge array = pagedArray(size);
         array.boxedFill(box(42));
         HugeCursor<Array> cursor = array.initCursor(array.newCursor());
@@ -221,8 +219,8 @@ public abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array
     }
 
     @Test
-    public final void shouldHaveCursorForMultiplePages() {
-        int size = between(100_000, 200_000);
+    final void shouldHaveCursorForMultiplePages() {
+        int size = integer(100_000, 200_000);
         Huge array = pagedArray(size);
         array.boxedFill(box(42));
         HugeCursor<Array> cursor = array.initCursor(array.newCursor());
@@ -253,15 +251,15 @@ public abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array
     }
 
     @Test
-    public final void shouldHavePartialCursorForMultiplePages() {
-        int size = between(100_000, 200_000);
-        int start = between(10_000, 50_000);
-        int end = between(start + 2 * PS, size);
+    final void shouldHavePartialCursorForMultiplePages() {
+        int size = integer(100_000, 200_000);
+        int start = integer(10_000, 50_000);
+        int end = integer(start + 2 * PS, size);
         testPartialMultiCursor(size, start, end);
     }
 
     @Test
-    public final void shouldHavePartialCursorForMultiplePagesWithFullPageSized() {
+    final void shouldHavePartialCursorForMultiplePagesWithFullPageSized() {
         testPartialMultiCursor(PS, 0, 0);
         testPartialMultiCursor(PS, 0, PS);
         testPartialMultiCursor(PS, PS, PS);
@@ -304,8 +302,8 @@ public abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array
 
     @SuppressWarnings("unchecked")
     @Test
-    public final void shouldHaveCursor() {
-        int size = between(100_000, 200_000);
+    final void shouldHaveCursor() {
+        int size = integer(100_000, 200_000);
         testArray(size, array -> {
             array.boxedSetAll(i1 -> box((int) i1 + 1));
 
@@ -326,7 +324,7 @@ public abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array
     }
 
     @Test
-    public final void shouldHaveStringRepresentation() {
+    final void shouldHaveStringRepresentation() {
         testArray(10, 20, (array, size) -> {
             Object[] objects = new Object[size];
             Arrays.setAll(objects, i -> box(i + 2));
@@ -339,7 +337,7 @@ public abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array
     }
 
     @Test
-    public final void shouldHaveToArray() {
+    final void shouldHaveToArray() {
         testArray(10, 20, (array, size) -> {
             array.boxedSetAll(i -> box((int) i + 2));
 
@@ -350,7 +348,7 @@ public abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array
     }
 
     void testArray(int size, Consumer<Huge> block) {
-        if (randomBoolean()) {
+        if (bool()) {
             block.accept(singleArray(size));
             block.accept(pagedArray(size));
         } else {
@@ -361,15 +359,15 @@ public abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array
 
     private void testArray(int sizeMin, int sizeMax, ObjIntConsumer<Huge> block) {
         int size;
-        if (randomBoolean()) {
-            size = between(sizeMin, sizeMax);
+        if (bool()) {
+            size = integer(sizeMin, sizeMax);
             block.accept(singleArray(size), size);
-            size = between(sizeMin, sizeMax);
+            size = integer(sizeMin, sizeMax);
             block.accept(pagedArray(size), size);
         } else {
-            size = between(sizeMin, sizeMax);
+            size = integer(sizeMin, sizeMax);
             block.accept(pagedArray(size), size);
-            size = between(sizeMin, sizeMax);
+            size = integer(sizeMin, sizeMax);
             block.accept(singleArray(size), size);
         }
     }

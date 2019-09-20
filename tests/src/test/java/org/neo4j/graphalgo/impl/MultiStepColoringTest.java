@@ -21,99 +21,85 @@ package org.neo4j.graphalgo.impl;
 
 import com.carrotsearch.hppc.IntIntMap;
 import com.carrotsearch.hppc.IntIntScatterMap;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.internal.kernel.api.Write;
-import org.neo4j.internal.kernel.api.exceptions.EntityNotFoundException;
-import org.neo4j.internal.kernel.api.exceptions.InvalidTransactionTypeKernelException;
-import org.neo4j.internal.kernel.api.exceptions.schema.IllegalTokenNameException;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.graphdb.Transaction;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author mknblch
  */
-public class MultiStepColoringTest {
+class MultiStepColoringTest {
 
-    public static final int NUM_SETS = 20;
-    public static final int SET_SIZE = 1000;
+    private static final int NUM_SETS = 20;
+    private static final int SET_SIZE = 1000;
 
 
-    public static final RelationshipType RELATIONSHIP_TYPE = RelationshipType.withName("TYPE");
+    private static final RelationshipType RELATIONSHIP_TYPE = RelationshipType.withName("TYPE");
 
-    @ClassRule
-    public static final ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
+    private GraphDatabaseAPI db;
 
     private Graph graph;
 
-    @Before
-    public void setup() throws Exception {
+    @BeforeEach
+    void setup() {
+        db = TestDatabaseCreator.createTestDatabase();
         try (ProgressTimer timer = ProgressTimer.start(l -> System.out.println("creating test graph took " + l + " ms"))) {
             createTestGraph();
         }
-
-        graph = new GraphLoader(DB)
+        graph = new GraphLoader(db)
                 .withExecutorService(Pools.DEFAULT)
                 .withAnyLabel()
                 .withRelationshipType(RELATIONSHIP_TYPE)
                 .load(HugeGraphFactory.class);
     }
 
-    private static void createTestGraph() throws Exception {
-        final int rIdx = DB.executeAndCommit((GraphDatabaseService __) -> {
-            KernelTransaction transaction = DB.transaction();
-            try {
-                return transaction.tokenWrite().relationshipTypeGetOrCreateForName(RELATIONSHIP_TYPE.name());
-            } catch (IllegalTokenNameException e) {
-                throw new RuntimeException(e);
-            }
-        });
+    @AfterEach
+    void teardown() {
+        db.shutdown();
+    }
 
+    private void createTestGraph() {
         final ArrayList<Runnable> runnables = new ArrayList<>();
         for (int i = 0; i < NUM_SETS; i++) {
-            runnables.add(createRing(rIdx));
+            runnables.add(createRing(RELATIONSHIP_TYPE));
         }
         ParallelUtil.run(runnables, Pools.DEFAULT);
     }
 
-    private static Runnable createRing(int rIdx) {
+    private Runnable createRing(RelationshipType type) {
         return () -> {
-            DB.executeAndCommit((GraphDatabaseService __) -> {
-                try {
-                    KernelTransaction transaction = DB.transaction();
-                    final Write op = transaction.dataWrite();
-                    long node = op.nodeCreate();
-                    long start = node;
-                    for (int i = 1; i < SET_SIZE; i++) {
-                        final long temp = op.nodeCreate();
-                        op.relationshipCreate(node, rIdx, temp);
-                        node = temp;
-                    }
-                    op.relationshipCreate(node, rIdx, start);
-                } catch (EntityNotFoundException | InvalidTransactionTypeKernelException e) {
-                    throw new RuntimeException(e);
+            try (Transaction tx = db.beginTx()) {
+                Node node = db.createNode();
+                Node start = node;
+                for (int i = 1; i < SET_SIZE; i++) {
+                    Node temp = db.createNode();
+                    node.createRelationshipTo(temp, type);
+                    node = temp;
                 }
-            });
+                node.createRelationshipTo(start, type);
+                tx.success();
+            }
         };
     }
 
     @Test
-    public void testMsColoring() {
-
+    void testMsColoring() {
         try (ProgressTimer timer = ProgressTimer.start(l -> System.out.println("MSColoring took " + l + "ms"))) {
             final AtomicIntegerArray colors = new MSColoring(graph, Pools.DEFAULT, 8)
                     .compute()

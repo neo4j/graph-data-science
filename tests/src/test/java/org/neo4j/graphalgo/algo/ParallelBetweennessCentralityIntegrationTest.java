@@ -19,13 +19,13 @@
  */
 package org.neo4j.graphalgo.algo;
 
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.graphalgo.BetweennessCentralityProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
@@ -40,15 +40,20 @@ import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.mockito.Mockito.anyDouble;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
 /**
  * @author mknblch
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ParallelBetweennessCentralityIntegrationTest {
 
     public static final String TYPE = "TYPE";
@@ -61,8 +66,8 @@ public class ParallelBetweennessCentralityIntegrationTest {
     @Mock
     private BetweennessCentrality.ResultConsumer consumer;
 
-    @BeforeClass
-    public static void setupGraph() throws KernelException {
+    @BeforeAll
+    static void setupGraph() throws KernelException {
 
         db = TestDatabaseCreator.createTestDatabase();;
 
@@ -105,20 +110,20 @@ public class ParallelBetweennessCentralityIntegrationTest {
                 .registerProcedure(BetweennessCentralityProc.class);
     }
 
-    @Before
-    public void setupMocks() {
+    @BeforeEach
+    void setupMocks() {
         when(consumer.consume(anyLong(), anyDouble()))
                 .thenReturn(true);
     }
 
-    @AfterClass
-    public static void tearDown() throws Exception {
+    @AfterAll
+    static void tearDown() {
         if (db != null) db.shutdown();
         graph = null;
     }
 
     @Test
-    public void testParallelBC() throws Exception {
+    void testParallelBC() {
 
         String cypher = "CALL algo.betweenness('', '', {concurrency:4, write:true, writeProperty:'bc', stats:true}) YIELD " +
                 "loadMillis, computeMillis, writeMillis, nodes, minCentrality, maxCentrality, sumCentrality";
@@ -127,7 +132,7 @@ public class ParallelBetweennessCentralityIntegrationTest {
     }
 
     @Test
-    public void testBC() throws Exception {
+    void testBC() {
 
         String cypher = "CALL algo.betweenness('', '', {write:true, writeProperty:'bc', stats:true}) YIELD " +
                 "loadMillis, computeMillis, writeMillis, nodes, minCentrality, maxCentrality, sumCentrality";
@@ -135,7 +140,7 @@ public class ParallelBetweennessCentralityIntegrationTest {
         testBetweennessWrite(cypher);
     }
 
-    public void testBetweennessWrite(String cypher) {
+    void testBetweennessWrite(String cypher) {
         db.execute(cypher).accept(row -> {
             assertNotEquals(-1L, row.getNumber("writeMillis").longValue());
             assertEquals(6.0, row.getNumber("minCentrality"));

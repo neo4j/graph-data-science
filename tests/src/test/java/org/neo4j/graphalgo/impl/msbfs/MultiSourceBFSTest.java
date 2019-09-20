@@ -49,9 +49,9 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.LongUnaryOperator;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -180,7 +180,7 @@ final class MultiSourceBFSTest {
                                         i,
                                         d
                                 );
-                                assertTrue(message, seen.add(Pair.of(i, d)));
+                                assertTrue(seen.add(Pair.of(i, d)), message);
                             },
                             AllocationTracker.EMPTY
                     );

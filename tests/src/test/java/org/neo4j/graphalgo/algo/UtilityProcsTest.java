@@ -19,13 +19,10 @@
  */
 package org.neo4j.graphalgo.algo;
 
-import org.hamcrest.CoreMatchers;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.neo4j.graphalgo.KShortestPathsProc;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.UtilityProc;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -33,18 +30,15 @@ import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.matchers.JUnitMatchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Graph:
@@ -57,47 +51,46 @@ import static org.junit.matchers.JUnitMatchers.containsString;
  *
  * @author mknblch
  */
-public class UtilityProcsTest {
+class UtilityProcsTest {
 
-    @ClassRule
-    public static ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
+    private static GraphDatabaseAPI DB;
 
-    @BeforeClass
-    public static void setupGraph() throws KernelException {
-
-        final String cypher =
+    @BeforeAll
+    static void setupGraph() throws KernelException {
+        DB = TestDatabaseCreator.createTestDatabase();
+        String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
-                        "CREATE (b:Node {name:'b'})\n" +
-                        "CREATE (c:Node {name:'c'})\n" +
-                        "CREATE (d:Node {name:'d'})\n" +
-                        "CREATE (e:Node {name:'e'})\n" +
-                        "CREATE (f:Node {name:'f'})\n";
+                "CREATE (b:Node {name:'b'})\n" +
+                "CREATE (c:Node {name:'c'})\n" +
+                "CREATE (d:Node {name:'d'})\n" +
+                "CREATE (e:Node {name:'e'})\n" +
+                "CREATE (f:Node {name:'f'})\n";
 
         DB.execute(cypher);
-        DB.resolveDependency(Procedures.class).registerProcedure(UtilityProc.class);
+        DB.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(UtilityProc.class);
     }
 
+    @AfterAll
+    static void teardownGraph() {
+        DB.shutdown();
+    }
 
     @Test
-    public void shouldReturnPaths() throws Exception {
+    void shouldReturnPaths() {
         final String cypher = "CALL algo.asPath([0, 1,2])";
 
         List<Node> expectedNodes = getNodes("a", "b", "c");
 
-
         DB.execute(cypher).accept(row -> {
             Path path = (Path) row.get("path");
-
             List<Node> actualNodes = StreamSupport.stream(path.nodes().spliterator(), false).collect(toList());
-
             assertEquals(expectedNodes, actualNodes);
-
             return true;
         });
     }
 
     @Test
-    public void shouldReturnPathsWithCosts() throws Exception {
+    void shouldReturnPathsWithCosts() {
         final String cypher = "CALL algo.asPath([0,1,2], [0.1,0.2], {cumulativeWeights: false})";
 
         List<Node> expectedNodes = getNodes("a", "b", "c");
@@ -117,21 +110,15 @@ public class UtilityProcsTest {
         });
     }
 
-    @Rule public ExpectedException exception = ExpectedException.none();
-
     @Test
-    public void shouldThrowExceptionIfNotEnoughCostsProvided() throws Exception {
-        final String cypher = "CALL algo.asPath([0,1,2], [0.1], {cumulativeWeights: false})";
-
-        exception.expect(RuntimeException.class);
-        exception.expectMessage(CoreMatchers.containsString("'weights' contains 1 values, but 2 values were expected"));
-
-        DB.execute(cypher).close();
+    void shouldThrowExceptionIfNotEnoughCostsProvided() {
+        String cypher = "CALL algo.asPath([0,1,2], [0.1], {cumulativeWeights: false})";
+        assertThrows(RuntimeException.class, () -> DB.execute(cypher).close(), "'weights' contains 1 values, but 2 values were expected");
     }
 
     @Test
-    public void shouldPreprocessCumulativeWeights() throws Exception {
-        final String cypher = "CALL algo.asPath([0,1,2], [0, 40.0, 70.0])";
+    void shouldPreprocessCumulativeWeights() {
+        String cypher = "CALL algo.asPath([0,1,2], [0, 40.0, 70.0])";
 
         List<Node> expectedNodes = getNodes("a", "b", "c");
         List<Double> expectedCosts = Arrays.asList(40.0, 30.0);
@@ -151,13 +138,9 @@ public class UtilityProcsTest {
     }
 
     @Test
-    public void shouldThrowExceptionIfNotEnoughCumulativeWeightsProvided() throws Exception {
-        final String cypher = "CALL algo.asPath([0,1,2], [0, 40.0])";
-
-        exception.expect(RuntimeException.class);
-        exception.expectMessage(CoreMatchers.containsString("'weights' contains 2 values, but 3 values were expected"));
-
-        DB.execute(cypher).close();
+    void shouldThrowExceptionIfNotEnoughCumulativeWeightsProvided() {
+        String cypher = "CALL algo.asPath([0,1,2], [0, 40.0])";
+        assertThrows(RuntimeException.class, () -> DB.execute(cypher).close(), "'weights' contains 2 values, but 3 values were expected");
     }
 
     private List<Node> getNodes(String... nodes) {
@@ -168,7 +151,5 @@ public class UtilityProcsTest {
                     .collect(toList());
         }
         return nodeIds;
-
     }
-
 }

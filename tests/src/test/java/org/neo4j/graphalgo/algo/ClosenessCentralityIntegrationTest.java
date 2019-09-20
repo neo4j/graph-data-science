@@ -19,14 +19,14 @@
  */
 package org.neo4j.graphalgo.algo;
 
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.AdditionalMatchers;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.graphalgo.ClosenessCentralityProc;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.helper.graphbuilder.DefaultBuilder;
 import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Node;
@@ -34,9 +34,9 @@ import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Result;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
@@ -46,13 +46,12 @@ import static org.mockito.Mockito.verify;
 /**
  * @author mknblch
  */
-@RunWith(MockitoJUnitRunner.class)
-public class ClosenessCentralityIntegrationTest {
+@ExtendWith(MockitoExtension.class)
+class ClosenessCentralityIntegrationTest {
 
     public static final String TYPE = "TYPE";
 
-    @ClassRule
-    public static ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
+    private static GraphDatabaseAPI DB;
 
     private static long centerNodeId;
 
@@ -63,20 +62,21 @@ public class ClosenessCentralityIntegrationTest {
     @Mock
     private TestConsumer consumer;
 
-    @BeforeClass
-    public static void setupGraph() throws KernelException {
-        final DefaultBuilder builder = GraphBuilder.create(DB)
+    @BeforeAll
+    static void setupGraph() throws KernelException {
+        DB = TestDatabaseCreator.createTestDatabase();
+        DefaultBuilder builder = GraphBuilder.create(DB)
                 .setLabel("Node")
                 .setRelationship(TYPE);
 
-        final RelationshipType type = RelationshipType.withName(TYPE);
+        RelationshipType type = RelationshipType.withName(TYPE);
 
-        /**
+        /*
          * create two rings of nodes where each node of ring A
          * is connected to center while center is connected to
          * each node of ring B.
          */
-        final Node center = builder.newDefaultBuilder()
+        Node center = builder.newDefaultBuilder()
                 .setLabel("Node")
                 .createNode();
 
@@ -84,20 +84,16 @@ public class ClosenessCentralityIntegrationTest {
 
         builder.newRingBuilder()
                 .createRing(5)
-                .forEachNodeInTx(node -> {
-                    node.createRelationshipTo(center, type);
-                })
+                .forEachNodeInTx(node -> node.createRelationshipTo(center, type))
                 .newRingBuilder()
                 .createRing(5)
-                .forEachNodeInTx(node -> {
-                    center.createRelationshipTo(node, type);
-                });
+                .forEachNodeInTx(node -> center.createRelationshipTo(node, type));
 
-        DB.resolveDependency(Procedures.class).registerProcedure(ClosenessCentralityProc.class);
+        DB.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(ClosenessCentralityProc.class);
     }
 
     @Test
-    public void testClosenessStream() throws Exception {
+    void testClosenessStream() throws Exception {
         DB.execute("CALL algo.closeness.stream('Node', 'TYPE') YIELD nodeId, centrality")
                 .accept((Result.ResultVisitor<Exception>) row -> {
                     consumer.accept(
@@ -110,7 +106,7 @@ public class ClosenessCentralityIntegrationTest {
     }
 
     @Test
-    public void testClosenessWrite() throws Exception {
+    void testClosenessWrite() throws Exception {
         DB.execute("CALL algo.closeness('','', {write:true, stats:true, writeProperty:'centrality'}) YIELD " +
                 "nodes, loadMillis, computeMillis, writeMillis")
                 .accept((Result.ResultVisitor<Exception>) row -> {

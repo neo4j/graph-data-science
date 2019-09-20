@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.algo;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.LoadGraphProc;
 import org.neo4j.graphalgo.MemRecProc;
 import org.neo4j.graphalgo.PageRankProc;
@@ -35,15 +35,15 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class MemRecProcTest {
+class MemRecProcTest {
 
     private static GraphDatabaseAPI db;
 
-    @BeforeClass
-    public static void setUp() throws Exception {
+    @BeforeAll
+    static void setUp() throws Exception {
         db = LdbcDownloader.openDb("Yelp");
         Procedures procedures = db
                 .getDependencyResolver()
@@ -54,13 +54,13 @@ public class MemRecProcTest {
         procedures.registerProcedure(LoadGraphProc.class);
     }
 
-    @AfterClass
-    public static void tearDown() throws Exception {
+    @AfterAll
+    static void tearDown() {
         db.shutdown();
     }
 
     @Test
-    public void memrecProcedure() {
+    void memrecProcedure() {
         test(
                 "algo.memrec(null, null, null, {direction: 'BOTH', graph: 'huge'})",
                 "Missing procedure parameter, the available and supported procedures are {graph.load, pageRank, unionFind}.");

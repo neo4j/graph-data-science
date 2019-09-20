@@ -19,18 +19,21 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.impl.yens.WeightedPath;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author mknblch
  */
-public class WeightedPathTest {
+class WeightedPathTest {
 
     @Test
-    public void testConcat() throws Exception {
+    void testConcat() {
         final WeightedPath a = new WeightedPath(3);
         final WeightedPath b = new WeightedPath(1);
         a.append(0);
@@ -42,7 +45,7 @@ public class WeightedPathTest {
     }
 
     @Test
-    public void testConcatTailEmpty() throws Exception {
+    void testConcatTailEmpty() {
         final WeightedPath a = new WeightedPath(3);
         final WeightedPath b = new WeightedPath(1);
         a.append(0);
@@ -53,7 +56,7 @@ public class WeightedPathTest {
     }
 
     @Test
-    public void testConcatHeadEmpty() throws Exception {
+    void testConcatHeadEmpty() {
         final WeightedPath a = new WeightedPath(3);
         final WeightedPath b = new WeightedPath(1);
         a.append(0);
@@ -64,7 +67,7 @@ public class WeightedPathTest {
     }
 
     @Test
-    public void testEquality() throws Exception {
+    void testEquality() {
         final WeightedPath a = new WeightedPath(3);
         final WeightedPath b = new WeightedPath(3);
         a.append(0);
@@ -81,7 +84,7 @@ public class WeightedPathTest {
     }
 
     @Test
-    public void testGrow() throws Exception {
+    void testGrow() {
         final WeightedPath p = new WeightedPath(0);
         p.append(0);
         p.append(1);

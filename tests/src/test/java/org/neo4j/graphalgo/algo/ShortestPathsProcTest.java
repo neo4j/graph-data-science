@@ -33,7 +33,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.function.DoubleConsumer;
 
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.Mockito.anyDouble;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.eq;

@@ -19,9 +19,8 @@
  */
 package org.neo4j.graphalgo.core.utils.queue;
 
-import com.carrotsearch.randomizedtesting.RandomizedTest;
-import com.carrotsearch.randomizedtesting.annotations.ThreadLeakScope;
-import org.junit.Test;
+import io.qala.datagen.RandomShortApi;
+import org.junit.jupiter.api.Test;
 import org.neo4j.helpers.collection.Pair;
 
 import java.util.ArrayList;
@@ -30,28 +29,28 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static io.qala.datagen.RandomShortApi.integer;
 import static org.hamcrest.CoreMatchers.hasItem;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ThreadLeakScope(ThreadLeakScope.Scope.NONE)
-public final class IntMinPriorityQueueTest extends RandomizedTest {
+final class IntMinPriorityQueueTest {
 
     @Test
-    public void testIsEmpty() {
-        final int capacity = RandomizedTest.between(10, 20);
+    void testIsEmpty() {
+        final int capacity = integer(10, 20);
         final IntPriorityQueue queue = IntPriorityQueue.min(capacity);
         assertEquals(queue.size(), 0);
     }
 
     @Test
-    public void testClear() {
-        final int maxSize = RandomizedTest.between(3, 10);
+    void testClear() {
+        final int maxSize = integer(3, 10);
         final IntPriorityQueue queue = IntPriorityQueue.min(maxSize);
-        final int iterations = RandomizedTest.between(3, maxSize);
+        final int iterations = integer(3, maxSize);
         for (int i = 0; i < iterations; i++) {
-            queue.add(i, RandomizedTest.between(1, 5));
+            queue.add(i, integer(1, 5));
         }
         assertEquals(queue.size(), iterations);
         queue.clear();
@@ -59,18 +58,18 @@ public final class IntMinPriorityQueueTest extends RandomizedTest {
     }
 
     @Test
-    public void testGrowing() {
-        final int maxSize = RandomizedTest.between(10, 20);
+    void testGrowing() {
+        final int maxSize = integer(10, 20);
         final IntPriorityQueue queue = IntPriorityQueue.min(1);
         for (int i = 0; i < maxSize; i++) {
-            queue.add(i, RandomizedTest.randomIntBetween(1, 5));
+            queue.add(i, integer(1, 5));
         }
         assertEquals(queue.size(), maxSize);
     }
 
     @Test
-    public void testAdd() {
-        final int iterations = RandomizedTest.between(5, 50);
+    void testAdd() {
+        final int iterations = integer(5, 50);
         final IntPriorityQueue queue = IntPriorityQueue.min();
         int min = -1;
         double minWeight = Double.POSITIVE_INFINITY;
@@ -86,11 +85,11 @@ public final class IntMinPriorityQueueTest extends RandomizedTest {
     }
 
     @Test
-    public void testAddAndPop() {
+    void testAddAndPop() {
         final IntPriorityQueue queue = IntPriorityQueue.min();
         final List<Pair<Integer, Double>> elements = new ArrayList<>();
 
-        final int iterations = RandomizedTest.between(5, 50);
+        final int iterations = integer(5, 50);
         int min = -1;
         double minWeight = Double.POSITIVE_INFINITY;
         for (int i = 1; i <= iterations; i++) {
@@ -130,10 +129,10 @@ public final class IntMinPriorityQueueTest extends RandomizedTest {
     }
 
     @Test
-    public void testUpdateDecreasing() {
+    void testUpdateDecreasing() {
         final IntPriorityQueue queue = IntPriorityQueue.min();
 
-        final int iterations = RandomizedTest.between(5, 50);
+        final int iterations = integer(5, 50);
         double minWeight = Double.POSITIVE_INFINITY;
         for (int i = 1; i <= iterations; i++) {
             final double weight = exclusiveDouble(50D, 100D);
@@ -152,9 +151,9 @@ public final class IntMinPriorityQueueTest extends RandomizedTest {
     }
 
     @Test
-    public void testUpdateIncreasing() {
+    void testUpdateIncreasing() {
         final IntPriorityQueue queue = IntPriorityQueue.min();
-        final int iterations = RandomizedTest.between(5, 50);
+        final int iterations = integer(5, 50);
         for (int i = 1; i <= iterations; i++) {
             queue.add(i, exclusiveDouble(50D, 100D));
         }
@@ -168,10 +167,10 @@ public final class IntMinPriorityQueueTest extends RandomizedTest {
     }
 
     @Test
-    public void testUpdateNotExisting() {
+    void testUpdateNotExisting() {
         final IntPriorityQueue queue = IntPriorityQueue.min();
 
-        final int iterations = RandomizedTest.between(5, 50);
+        final int iterations = integer(5, 50);
         double maxWeight = Double.NEGATIVE_INFINITY;
         for (int i = 1; i <= iterations; i++) {
             final double weight = exclusiveDouble(50D, 100D);
@@ -196,8 +195,6 @@ public final class IntMinPriorityQueueTest extends RandomizedTest {
     private double exclusiveDouble(
             final double exclusiveMin,
             final double exclusiveMax) {
-        return RandomizedTest.biasedDoubleBetween(
-                Math.nextUp(exclusiveMin),
-                Math.nextDown(exclusiveMax));
+        return RandomShortApi.Double(Math.nextUp(exclusiveMin), exclusiveMax);
     }
 }

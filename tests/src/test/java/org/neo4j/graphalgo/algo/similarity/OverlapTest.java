@@ -19,11 +19,11 @@
  */
 package org.neo4j.graphalgo.algo.similarity;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.OverlapProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Result;
@@ -36,16 +36,17 @@ import java.util.Collections;
 import java.util.Map;
 
 import static java.util.Collections.singletonMap;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
-public class OverlapTest {
+class OverlapTest {
 
     private static GraphDatabaseAPI db;
     private Transaction tx;
-    public static final String STATEMENT_STREAM = "MATCH (p:Person)-[:LIKES]->(i:Item) \n" +
+    private static final String STATEMENT_STREAM =
+            "MATCH (p:Person)-[:LIKES]->(i:Item) \n" +
             "WITH {item:id(p), categories: collect(distinct id(i))} as userData\n" +
             "WITH collect(userData) as data\n" +
             "call algo.similarity.overlap.stream(data,$config) " +
@@ -53,43 +54,46 @@ public class OverlapTest {
             "RETURN item1, item2, count1, count2, intersection, similarity " +
             "ORDER BY item1,item2";
 
-    public static final String STATEMENT = "MATCH (p:Person)-[:LIKES]->(i:Item) \n" +
+    private static final String STATEMENT =
+            "MATCH (p:Person)-[:LIKES]->(i:Item) \n" +
             "WITH {item:id(p), categories: collect(distinct id(i))} as userData\n" +
             "WITH collect(userData) as data\n" +
             "CALL algo.similarity.overlap(data, $config) " +
             "yield p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs, computations " +
             "RETURN p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs, computations";
 
-    public static final String STORE_EMBEDDING_STATEMENT = "MATCH (p:Person)-[:LIKES]->(i:Item) \n" +
+    private static final String STORE_EMBEDDING_STATEMENT =
+            "MATCH (p:Person)-[:LIKES]->(i:Item) \n" +
             "WITH p, collect(distinct id(i)) as userData\n" +
             "SET p.embedding = userData";
 
-    public static final String EMBEDDING_STATEMENT = "MATCH (p:Person) \n" +
+    private static final String EMBEDDING_STATEMENT =
+            "MATCH (p:Person) \n" +
             "WITH {item:id(p), categories: p.embedding} as userData\n" +
             "WITH collect(userData) as data\n" +
             "CALL algo.similarity.overlap(data, $config) " +
             "yield p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs " +
             "RETURN p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs";
 
-    @BeforeClass
-    public static void beforeClass() throws KernelException {
+    @BeforeAll
+    static void beforeClass() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase();
         db.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(OverlapProc.class);
         db.execute(buildDatabaseQuery()).close();
     }
 
-    @AfterClass
-    public static void AfterClass() {
+    @AfterAll
+    static void AfterClass() {
         db.shutdown();
     }
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeEach
+    void setUp() {
         tx = db.beginTx();
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterEach
+    void tearDown() {
         tx.close();
     }
 
@@ -131,7 +135,7 @@ public class OverlapTest {
 
 
     @Test
-    public void overlapSingleMultiThreadComparision() {
+    void overlapSingleMultiThreadComparision() {
         int size = 333;
         buildRandomDB(size);
         Result result1 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"concurrency", 1)));
@@ -141,9 +145,9 @@ public class OverlapTest {
         int count=0;
         while (result1.hasNext()) {
             Map<String, Object> row1 = result1.next();
-            assertEquals(row1.toString(), row1,result2.next());
-            assertEquals(row1.toString(), row1,result4.next());
-            assertEquals(row1.toString(), row1,result8.next());
+            assertEquals(row1, result2.next(), row1.toString());
+            assertEquals(row1, result4.next(), row1.toString());
+            assertEquals(row1, result8.next(), row1.toString());
             count++;
         }
         int people = size/10;
@@ -151,7 +155,7 @@ public class OverlapTest {
     }
 
     @Test
-    public void overlapSingleMultiThreadComparisionTopK() {
+    void overlapSingleMultiThreadComparisionTopK() {
         int size = 333;
         buildRandomDB(size);
 
@@ -159,12 +163,12 @@ public class OverlapTest {
         Result result2 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 2)));
         Result result4 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 4)));
         Result result8 = db.execute(STATEMENT_STREAM, map("config", map("similarityCutoff",-0.1,"topK",1,"concurrency", 8)));
-        int count=0;
+        int count = 0;
         while (result1.hasNext()) {
             Map<String, Object> row1 = result1.next();
-            assertEquals(row1.toString(), row1,result2.next());
-            assertEquals(row1.toString(), row1,result4.next());
-            assertEquals(row1.toString(), row1,result8.next());
+            assertEquals(row1, result2.next(), row1.toString());
+            assertEquals(row1, result4.next(), row1.toString());
+            assertEquals(row1, result8.next(), row1.toString());
             count++;
         }
         assertFalse(result2.hasNext());
@@ -173,7 +177,7 @@ public class OverlapTest {
     }
 
     @Test
-    public void topNoverlapStreamTest() {
+    void topNoverlapStreamTest() {
         Result results = db.execute(STATEMENT_STREAM, map("config",map("top",2)));
         assert10(results.next());
         assert20(results.next());
@@ -181,7 +185,7 @@ public class OverlapTest {
     }
 
     @Test
-    public void overlapStreamTest() {
+    void overlapStreamTest() {
         Result results = db.execute(STATEMENT_STREAM, map("config",map("concurrency",1)));
 
         assertTrue(results.hasNext());
@@ -192,7 +196,7 @@ public class OverlapTest {
     }
 
     @Test
-    public void overlapStreamSourceTargetIdsTest() {
+    void overlapStreamSourceTargetIdsTest() {
 //        Map<String, Object> config = map(
 //                "concurrency", 1,
 //                "sourceIds", Collections.singletonList(1L),
@@ -216,7 +220,7 @@ public class OverlapTest {
     }
 
     @Test
-    public void topKoverlapStreamTest() {
+    void topKoverlapStreamTest() {
         Map<String, Object> params = map("config", map( "concurrency", 1,"topK", 1));
         System.out.println(db.execute(STATEMENT_STREAM, params).resultAsString());
 
@@ -228,7 +232,7 @@ public class OverlapTest {
     }
 
     @Test
-    public void topKoverlapSourceTargetIdsStreamTest() {
+    void topKoverlapSourceTargetIdsStreamTest() {
         Map<String, Object> config = map(
                 "concurrency", 1,
                 "topK", 1,
@@ -242,12 +246,6 @@ public class OverlapTest {
         assertTrue(results.hasNext());
         assert10(results.next());
         assertFalse(results.hasNext());
-    }
-
-    private Map<String, Object> flip(Map<String, Object> row) {
-        return map("similarity", row.get("similarity"),"intersection", row.get("intersection"),
-                "item1",row.get("item2"),"count1",row.get("count2"),
-                "item2",row.get("item1"),"count2",row.get("count1"));
     }
 
     private void assertSameSource(Result results, int count, long source) {
@@ -265,7 +263,7 @@ public class OverlapTest {
 
 
     @Test
-    public void topK4overlapStreamTest() {
+    void topK4overlapStreamTest() {
         Map<String, Object> params = map("config", map("topK", 4, "concurrency", 4, "similarityCutoff", -0.1));
         System.out.println(db.execute(STATEMENT_STREAM,params).resultAsString());
 
@@ -277,7 +275,7 @@ public class OverlapTest {
     }
 
     @Test
-    public void topK3overlapStreamTest() {
+    void topK3overlapStreamTest() {
         Map<String, Object> params = map("config", map("concurrency", 3, "topK", 3));
 
         System.out.println(db.execute(STATEMENT_STREAM, params).resultAsString());
@@ -290,7 +288,7 @@ public class OverlapTest {
     }
 
     @Test
-    public void simpleoverlapTest() {
+    void simpleoverlapTest() {
         Map<String, Object> params = map("config", map("similarityCutoff", 0.0));
 
         Map<String, Object> row = db.execute(STATEMENT,params).next();
@@ -303,7 +301,7 @@ public class OverlapTest {
     }
 
     @Test
-    public void simpleoverlapFromEmbeddingTest() {
+    void simpleoverlapFromEmbeddingTest() {
         db.execute(STORE_EMBEDDING_STATEMENT);
 
         Map<String, Object> params = map("config", map("similarityCutoff", 0.0));
@@ -326,7 +324,7 @@ public class OverlapTest {
      */
 
     @Test
-    public void simpleoverlapWriteTest() {
+    void simpleoverlapWriteTest() {
         Map<String, Object> params = map("config", map( "write",true, "similarityCutoff", 0.1));
 
         db.execute(STATEMENT,params).close();
@@ -354,7 +352,7 @@ public class OverlapTest {
     }
 
     @Test
-    public void dontComputeComputationsByDefault() {
+    void dontComputeComputationsByDefault() {
         Map<String, Object> params = map("config", map(
                 "write", true,
                 "similarityCutoff", 0.1));
@@ -365,7 +363,7 @@ public class OverlapTest {
     }
 
     @Test
-    public void numberOfComputations() {
+    void numberOfComputations() {
         Map<String, Object> params = map("config", map(
                 "write", true,
                 "showComputations", true,

@@ -19,10 +19,8 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.junit.Assume;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
@@ -32,7 +30,8 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 
 /**
@@ -46,40 +45,37 @@ import static org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
  */
 class DegreesTest {
 
-    private static final String UNI_DIRECTIONAL = "CREATE" +
-                                                  "  (a:Node {name:'a'})" +
-                                                  ", (b:Node {name:'b'})" +
-                                                  ", (c:Node {name:'c'})" + // shuffled
-                                                  ", (a)-[:TYPE]->(b)" +
-                                                  ", (a)-[:TYPE]->(c)" +
-                                                  ", (b)-[:TYPE]->(c)";
+    private static final String UNI_DIRECTIONAL =
+            "CREATE" +
+            "  (a:Node {name:'a'})" +
+            ", (b:Node {name:'b'})" +
+            ", (c:Node {name:'c'})" + // shuffled
+            ", (a)-[:TYPE]->(b)" +
+            ", (a)-[:TYPE]->(c)" +
+            ", (b)-[:TYPE]->(c)";
 
-    private static final String BI_DIRECTIONAL = "CREATE" +
-                                                 "  (a:Node {name:'a'})" +
-                                                 ", (b:Node {name:'b'})" +
-                                                 ", (c:Node {name:'c'})" + // shuffled
-                                                 ", (a)-[:TYPE]->(b)" +
-                                                 ", (b)-[:TYPE]->(a)" +
-                                                 ", (a)-[:TYPE]->(c)" +
-                                                 ", (c)-[:TYPE]->(a)" +
-                                                 ", (b)-[:TYPE]->(c)" +
-                                                 ", (c)-[:TYPE]->(b)";
+    private static final String BI_DIRECTIONAL =
+            "CREATE" +
+            "  (a:Node {name:'a'})" +
+            ", (b:Node {name:'b'})" +
+            ", (c:Node {name:'c'})" + // shuffled
+            ", (a)-[:TYPE]->(b)" +
+            ", (b)-[:TYPE]->(a)" +
+            ", (a)-[:TYPE]->(c)" +
+            ", (c)-[:TYPE]->(a)" +
+            ", (b)-[:TYPE]->(c)" +
+            ", (c)-[:TYPE]->(b)";
 
-    private static GraphDatabaseAPI DB;
+    private GraphDatabaseAPI db;
 
-    @BeforeAll
-    static void setupGraphDb() {
-        DB = TestDatabaseCreator.createTestDatabase();
+    @BeforeEach
+    void setupGraphDb() {
+        db = TestDatabaseCreator.createTestDatabase();
     }
 
     @AfterEach
     void clearDb() {
-        DB.execute("MATCH (n) DETACH DELETE n");
-    }
-
-    @AfterAll
-    static void shutdownGraphDb() {
-        if (DB != null) DB.shutdown();
+        db.shutdown();
     }
 
     private Graph graph;
@@ -127,7 +123,7 @@ class DegreesTest {
 
     @AllGraphTypesWithoutCypherTest
     void testBidirectionalBoth(Class<? extends GraphFactory> graphFactory) {
-        Assume.assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
+        assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
         setup(BI_DIRECTIONAL, Direction.BOTH, graphFactory);
         assertEquals(4, graph.degree(nodeId("a"), Direction.BOTH));
         assertEquals(4, graph.degree(nodeId("b"), Direction.BOTH));
@@ -146,8 +142,8 @@ class DegreesTest {
             String cypher,
             Direction direction,
             Class<? extends GraphFactory> graphFactory) {
-        DB.execute(cypher);
-        GraphLoader graphLoader = new GraphLoader(DB)
+        db.execute(cypher);
+        GraphLoader graphLoader = new GraphLoader(db)
                 .withAnyRelationshipType()
                 .withAnyLabel()
                 .withoutNodeProperties()
@@ -159,8 +155,8 @@ class DegreesTest {
     }
 
     private long nodeId(String name) {
-        try (Transaction ignored = DB.beginTx()) {
-            return graph.toMappedNodeId(DB.findNodes(Label.label("Node"), "name", name).next().getId());
+        try (Transaction ignored = db.beginTx()) {
+            return graph.toMappedNodeId(db.findNodes(Label.label("Node"), "name", name).next().getId());
         }
     }
 }

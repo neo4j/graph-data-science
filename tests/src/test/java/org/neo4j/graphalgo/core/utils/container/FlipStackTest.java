@@ -19,17 +19,17 @@
  */
 package org.neo4j.graphalgo.core.utils.container;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author mknblch
  */
-public class FlipStackTest {
+class FlipStackTest {
 
     @Test
-    public void testSimpleFlip() throws Exception {
+    void testSimpleFlip() {
 
         final FlipStack stack = new FlipStack(3);
 
@@ -45,7 +45,7 @@ public class FlipStackTest {
     }
 
     @Test
-    public void testMultiFlip() throws Exception {
+    void testMultiFlip() {
 
         final FlipStack stack = new FlipStack(1);
 
@@ -59,7 +59,7 @@ public class FlipStackTest {
     }
 
     @Test
-    public void testForEach() throws Exception {
+    void testForEach() {
 
         final FlipStack stack = new FlipStack(3);
 
@@ -88,7 +88,7 @@ public class FlipStackTest {
     }
 
     @Test
-    public void testFillBoth() throws Exception {
+    void testFillBoth() {
 
         final FlipStack stack = new FlipStack(3);
 

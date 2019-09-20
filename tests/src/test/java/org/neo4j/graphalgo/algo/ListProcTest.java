@@ -19,15 +19,16 @@
  */
 package org.neo4j.graphalgo.algo;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.ListProc;
 import org.neo4j.graphalgo.PageRankProc;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
+import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -39,46 +40,50 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author mh
  * @since 20.10.17
  */
-public class ListProcTest {
-    @ClassRule
-    public static ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
-    public static final List<String> PROCEDURES = asList(
+class ListProcTest {
+
+    private static GraphDatabaseAPI DB;
+
+    private static final List<String> PROCEDURES = asList(
             "algo.pageRank",
             "algo.pageRank.memrec",
             "algo.pageRank.stream");
-    public static final List<String> FUNCTIONS = Arrays.asList(
+
+    private static final List<String> FUNCTIONS = Arrays.asList(
             "algo.linkprediction.adamicAdar",
             "algo.linkprediction.commonNeighbors",
             "algo.linkprediction.preferentialAttachment",
             "algo.linkprediction.resourceAllocation",
             "algo.linkprediction.sameCommunity",
             "algo.linkprediction.totalNeighbors");
-    public static final List<String> ALL = Stream
+
+    private static final List<String> ALL = Stream
             .of(PROCEDURES, FUNCTIONS)
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
 
-    @BeforeClass
-    public static void setUp() throws Exception {
+    @BeforeAll
+    static void setUp() throws KernelException {
+        DB = TestDatabaseCreator.createTestDatabase();
         Procedures procedures = DB.getDependencyResolver().resolveDependency(Procedures.class);
         procedures.registerProcedure(ListProc.class);
         procedures.registerProcedure(PageRankProc.class);
         procedures.registerFunction(LinkPredictionFunc.class);
     }
 
-    @AfterClass
-    public static void tearDown() {
+    @AfterAll
+    static void tearDown() {
         DB.shutdown();
     }
 
     @Test
-    public void listProcedures() throws Exception {
+    void listProcedures() {
         assertEquals(ALL, listProcs(null));
         assertEquals(PROCEDURES, listProcs("page"));
         assertEquals(singletonList("algo.pageRank.stream"), listProcs("stream"));
@@ -86,12 +91,12 @@ public class ListProcTest {
     }
 
     @Test
-    public void listFunctions() throws Exception {
+    void listFunctions() {
         assertEquals(FUNCTIONS, listProcs("linkprediction"));
     }
 
     @Test
-    public void listEmpty() throws Exception {
+    void listEmpty() {
         assertEquals(ALL,
                 DB.execute("CALL algo.list()").<String>columnAs("name").stream().collect(Collectors.toList()));
     }

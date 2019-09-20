@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.Assume;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.neo4j.graphalgo.TestDatabaseCreator;
@@ -37,6 +36,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -77,7 +77,7 @@ class TriangleStreamTest {
 
     @AllGraphTypesWithoutCypherTest
     void testSequential(Class<? extends GraphFactory> graphFactory) {
-        Assume.assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
+        assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
         setup(graphFactory);
         final TripleConsumer mock = mock(TripleConsumer.class);
 
@@ -90,7 +90,7 @@ class TriangleStreamTest {
 
     @AllGraphTypesWithoutCypherTest
     void testParallel(Class<? extends GraphFactory> graphFactory) {
-        Assume.assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
+        assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
         setup(graphFactory);
         final TripleConsumer mock = mock(TripleConsumer.class);
 

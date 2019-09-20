@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.algo.similarity;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.similarity.SimilaritiesFunc;
 import org.neo4j.graphalgo.similarity.SimilarityVectorAggregator;
 import org.neo4j.graphdb.Node;
@@ -30,14 +30,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class PearsonSimilarityTest {
+class PearsonSimilarityTest {
 
     @Test
-    public void identicalVectors() {
+    void identicalVectors() {
         SimilaritiesFunc similarities = new SimilaritiesFunc();
 
         List<Number> user1Ratings = Arrays.asList(5, 6, 7, 8, 9);
@@ -47,7 +47,7 @@ public class PearsonSimilarityTest {
     }
 
     @Test
-    public void oppositeVectors() {
+    void oppositeVectors() {
         SimilaritiesFunc similarities = new SimilaritiesFunc();
 
         List<Number> user1Ratings = Arrays.asList(9, 8, 7, 6, 5);
@@ -57,7 +57,7 @@ public class PearsonSimilarityTest {
     }
 
     @Test
-    public void identicalMaps() {
+    void identicalMaps() {
         SimilaritiesFunc similarities = new SimilaritiesFunc();
 
         SimilarityVectorAggregator aggregator = new SimilarityVectorAggregator();
@@ -75,7 +75,7 @@ public class PearsonSimilarityTest {
     }
 
     @Test
-    public void oppositeMaps() {
+    void oppositeMaps() {
         SimilaritiesFunc similarities = new SimilaritiesFunc();
 
         SimilarityVectorAggregator aggregator1 = new SimilarityVectorAggregator();
@@ -99,7 +99,7 @@ public class PearsonSimilarityTest {
     }
 
     @Test
-    public void someItemsDifferentMap() {
+    void someItemsDifferentMap() {
         SimilaritiesFunc similarities = new SimilaritiesFunc();
 
         SimilarityVectorAggregator aggregator1 = new SimilarityVectorAggregator();
@@ -126,7 +126,7 @@ public class PearsonSimilarityTest {
     }
 
     @Test
-    public void noOverlapMap() {
+    void noOverlapMap() {
         SimilaritiesFunc similarities = new SimilaritiesFunc();
 
         SimilarityVectorAggregator aggregator1 = new SimilarityVectorAggregator();

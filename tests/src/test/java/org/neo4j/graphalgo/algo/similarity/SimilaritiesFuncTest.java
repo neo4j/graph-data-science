@@ -18,37 +18,37 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.neo4j.graphalgo.algo.similarity;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.neo4j.graphalgo.similarity.SimilaritiesFunc;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.similarity.SimilaritiesFunc;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SimilaritiesFuncTest {
-    private static final String SETUP = "create (java:Skill{name:'Java'})\n" +
-            "create (neo4j:Skill{name:'Neo4j'})\n" +
-            "create (nodejs:Skill{name:'NodeJS'})\n" +
-            "create (scala:Skill{name:'Scala'})\n" +
-            "create (jim:Employee{name:'Jim'})\n" +
-            "create (bob:Employee{name:'Bob'})\n" +
-            "create (role:Role {name:'Role 1-Analytics Manager'})\n" +
+    private static final String DB_CYPHER =
+            "CREATE (java:Skill{name:'Java'})\n" +
+            "CREATE (neo4j:Skill{name:'Neo4j'})\n" +
+            "CREATE (nodejs:Skill{name:'NodeJS'})\n" +
+            "CREATE (scala:Skill{name:'Scala'})\n" +
+            "CREATE (jim:Employee{name:'Jim'})\n" +
+            "CREATE (bob:Employee{name:'Bob'})\n" +
+            "CREATE (role:Role {name:'Role 1-Analytics Manager'})\n" +
             "\n" +
-            "create (role)-[:REQUIRES_SKILL{proficiency:8.54}]->(java)\n" +
-            "create (role)-[:REQUIRES_SKILL{proficiency:4.3}]->(scala)\n" +
-            "create (role)-[:REQUIRES_SKILL{proficiency:9.75}]->(neo4j)\n" +
+            "CREATE (role)-[:REQUIRES_SKILL{proficiency:8.54}]->(java)\n" +
+            "CREATE (role)-[:REQUIRES_SKILL{proficiency:4.3}]->(scala)\n" +
+            "CREATE (role)-[:REQUIRES_SKILL{proficiency:9.75}]->(neo4j)\n" +
             "\n" +
-            "create (bob)-[:HAS_SKILL{proficiency:10}]->(java)\n" +
-            "create (bob)-[:HAS_SKILL{proficiency:7.5}]->(neo4j)\n" +
-            "create (bob)-[:HAS_SKILL]->(scala)\n" +
-            "create (jim)-[:HAS_SKILL{proficiency:8.25}]->(java)\n" +
-            "create (jim)-[:HAS_SKILL{proficiency:7.1}]->(scala)";
+            "CREATE (bob)-[:HAS_SKILL{proficiency:10}]->(java)\n" +
+            "CREATE (bob)-[:HAS_SKILL{proficiency:7.5}]->(neo4j)\n" +
+            "CREATE (bob)-[:HAS_SKILL]->(scala)\n" +
+            "CREATE (jim)-[:HAS_SKILL{proficiency:8.25}]->(java)\n" +
+            "CREATE (jim)-[:HAS_SKILL{proficiency:7.1}]->(scala)";
 
     // cosine similarity taken from here: https://neo4j.com/graphgist/a7c915c8-a3d6-43b9-8127-1836fecc6e2f
     // euclid distance taken from here: https://neo4j.com/blog/real-time-recommendation-engine-data-science/
@@ -57,7 +57,7 @@ public class SimilaritiesFuncTest {
 
     private static GraphDatabaseAPI db;
 
-    @BeforeClass
+    @BeforeAll
     public static void setUp() throws Exception {
         db = TestDatabaseCreator.createTestDatabase();
 
@@ -65,10 +65,10 @@ public class SimilaritiesFuncTest {
                 .resolveDependency(Procedures.class)
                 .registerFunction(SimilaritiesFunc.class);
 
-        db.execute(SETUP).close();
+        db.execute(DB_CYPHER).close();
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() {
         db.shutdown();
     }

@@ -19,12 +19,12 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -33,12 +33,11 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.impl.betweenness.BetweennessCentralitySuccessorBrandes;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -54,8 +53,8 @@ import static org.mockito.Mockito.verify;
  *  (b)                (g)
  *   .0                 .0
  */
-@RunWith(MockitoJUnitRunner.class)
-public class BetweennessCentralityTest2 {
+@ExtendWith(MockitoExtension.class)
+class BetweennessCentralityTest2 {
 
     private static GraphDatabaseAPI db;
     private static Graph graph;
@@ -67,27 +66,27 @@ public class BetweennessCentralityTest2 {
     @Mock
     private TestConsumer testConsumer;
 
-    @BeforeClass
-    public static void setupGraph() throws KernelException {
+    @BeforeAll
+    static void setupGraph() {
 
         final String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
-                        "CREATE (b:Node {name:'b'})\n" +
-                        "CREATE (c:Node {name:'c'})\n" +
-                        "CREATE (d:Node {name:'d'})\n" +
-                        "CREATE (e:Node {name:'e'})\n" +
-                        "CREATE (f:Node {name:'f'})\n" +
-                        "CREATE (g:Node {name:'g'})\n" +
+                "CREATE (b:Node {name:'b'})\n" +
+                "CREATE (c:Node {name:'c'})\n" +
+                "CREATE (d:Node {name:'d'})\n" +
+                "CREATE (e:Node {name:'e'})\n" +
+                "CREATE (f:Node {name:'f'})\n" +
+                "CREATE (g:Node {name:'g'})\n" +
 
-                        "CREATE" +
-                        " (a)-[:TYPE]->(b),\n" +
-                        " (a)-[:TYPE]->(c),\n" +
-                        " (b)-[:TYPE]->(c),\n" +
-                        " (c)-[:TYPE]->(d),\n" +
-                        " (d)-[:TYPE]->(e),\n" +
-                        " (e)-[:TYPE]->(f),\n" +
-                        " (e)-[:TYPE]->(g),\n" +
-                        " (f)-[:TYPE]->(g)";
+                "CREATE" +
+                " (a)-[:TYPE]->(b),\n" +
+                " (a)-[:TYPE]->(c),\n" +
+                " (b)-[:TYPE]->(c),\n" +
+                " (c)-[:TYPE]->(d),\n" +
+                " (d)-[:TYPE]->(e),\n" +
+                " (e)-[:TYPE]->(f),\n" +
+                " (e)-[:TYPE]->(g),\n" +
+                " (f)-[:TYPE]->(g)";
 
         db = TestDatabaseCreator.createTestDatabase();
 
@@ -103,9 +102,9 @@ public class BetweennessCentralityTest2 {
                 .load(HugeGraphFactory.class);
     }
 
-    @AfterClass
-    public static void tearDown() throws Exception {
-        if (db != null) db.shutdown();
+    @AfterAll
+    static void tearDown() {
+        db.shutdown();
         graph = null;
     }
 
@@ -120,7 +119,7 @@ public class BetweennessCentralityTest2 {
     }
 
     @Test
-    public void testSuccessorBrandes() throws Exception {
+    void testSuccessorBrandes() {
 
         new BetweennessCentralitySuccessorBrandes(graph, Pools.DEFAULT)
                 .compute()
@@ -130,7 +129,7 @@ public class BetweennessCentralityTest2 {
         verifyMock(testConsumer);
     }
 
-    public void verifyMock(TestConsumer mock) {
+    void verifyMock(TestConsumer mock) {
         verify(mock, times(1)).accept(eq("a"), eq(0.0));
         verify(mock, times(1)).accept(eq("b"), eq(0.0));
         verify(mock, times(1)).accept(eq("c"), eq(8.0));
@@ -142,13 +141,11 @@ public class BetweennessCentralityTest2 {
 
 
     @Test
-    public void testIterateParallel() throws Exception {
+    void testIterateParallel() {
 
         final AtomicIntegerArray ai = new AtomicIntegerArray(1001);
 
-        ParallelUtil.iterateParallel(Pools.DEFAULT, 1001, 8, i -> {
-            ai.set(i, i);
-        });
+        ParallelUtil.iterateParallel(Pools.DEFAULT, 1001, 8, i -> ai.set(i, i));
 
         for (int i = 0; i < 1001; i++) {
             assertEquals(i, ai.get(i));

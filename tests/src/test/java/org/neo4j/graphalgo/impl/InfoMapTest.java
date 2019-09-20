@@ -19,9 +19,8 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.TestDatabaseCreator;
@@ -36,7 +35,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * --------- Graph 3x2 ---------
@@ -53,79 +52,74 @@ import static org.junit.Assert.assertEquals;
  */
 class InfoMapTest {
 
-    private static final String CYPHER_2x4 = "CREATE" +
-                                             "  (a:Node {name: 'a'})" +
-                                             ", (c:Node {name: 'c'})" +
-                                             ", (b:Node {name: 'b'})" +
-                                             ", (d:Node {name: 'd'})" +
-                                             ", (e:Node {name: 'e'})" +
-                                             ", (g:Node {name: 'g'})" +
-                                             ", (f:Node {name: 'f'})" +
-                                             ", (h:Node {name: 'h'})" +
-                                             ", (z:Node {name: 'z'})" +
+    private static final String CYPHER_2x4 =
+            "CREATE" +
+            "  (a:Node {name: 'a'})" +
+            ", (c:Node {name: 'c'})" +
+            ", (b:Node {name: 'b'})" +
+            ", (d:Node {name: 'd'})" +
+            ", (e:Node {name: 'e'})" +
+            ", (g:Node {name: 'g'})" +
+            ", (f:Node {name: 'f'})" +
+            ", (h:Node {name: 'h'})" +
+            ", (z:Node {name: 'z'})" +
 
-                                             ", (a)-[:TYPE]->(b)" +
-                                             ", (a)-[:TYPE]->(c)" +
-                                             ", (a)-[:TYPE]->(d)" +
-                                             ", (b)-[:TYPE]->(c)" +
-                                             ", (c)-[:TYPE]->(d)" +
-                                             ", (b)-[:TYPE]->(d)" +
+            ", (a)-[:TYPE]->(b)" +
+            ", (a)-[:TYPE]->(c)" +
+            ", (a)-[:TYPE]->(d)" +
+            ", (b)-[:TYPE]->(c)" +
+            ", (c)-[:TYPE]->(d)" +
+            ", (b)-[:TYPE]->(d)" +
 
-                                             ", (f)-[:TYPE]->(e)" +
-                                             ", (e)-[:TYPE]->(h)" +
-                                             ", (e)-[:TYPE]->(g)" +
-                                             ", (f)-[:TYPE]->(g)" +
-                                             ", (f)-[:TYPE]->(h)" +
-                                             ", (g)-[:TYPE]->(h)" +
-                                             ", (b)-[:TYPE]->(e)";
+            ", (f)-[:TYPE]->(e)" +
+            ", (e)-[:TYPE]->(h)" +
+            ", (e)-[:TYPE]->(g)" +
+            ", (f)-[:TYPE]->(g)" +
+            ", (f)-[:TYPE]->(h)" +
+            ", (g)-[:TYPE]->(h)" +
+            ", (b)-[:TYPE]->(e)";
 
-    private static final String CYPHER_2x3 = "CREATE" +
-                                             "  (a:Node {name: 'a'})" +
-                                             ", (b:Node {name: 'b'})" +
-                                             ", (c:Node {name: 'c'})" +
-                                             ", (d:Node {name: 'd'})" +
-                                             ", (e:Node {name: 'e'})" +
-                                             ", (f:Node {name: 'f'})" +
-                                             ", (x:Node {name: 'x'})" +
+    private static final String CYPHER_2x3 =
+            "CREATE" +
+            "  (a:Node {name: 'a'})" +
+            ", (b:Node {name: 'b'})" +
+            ", (c:Node {name: 'c'})" +
+            ", (d:Node {name: 'd'})" +
+            ", (e:Node {name: 'e'})" +
+            ", (f:Node {name: 'f'})" +
+            ", (x:Node {name: 'x'})" +
 
-                                             ", (b)-[:TYPE]->(a)" +
-                                             ", (a)-[:TYPE]->(c)" +
-                                             ", (c)-[:TYPE]->(a)" +
+            ", (b)-[:TYPE]->(a)" +
+            ", (a)-[:TYPE]->(c)" +
+            ", (c)-[:TYPE]->(a)" +
 
-                                             ", (d)-[:TYPE]->(c)" +
+            ", (d)-[:TYPE]->(c)" +
 
-                                             ", (d)-[:TYPE]->(e)" +
-                                             ", (d)-[:TYPE]->(f)" +
-                                             ", (e)-[:TYPE]->(f)";
+            ", (d)-[:TYPE]->(e)" +
+            ", (d)-[:TYPE]->(f)" +
+            ", (e)-[:TYPE]->(f)";
 
     static Stream<String> cypherQueries() {
         return Stream.of(CYPHER_2x4, CYPHER_2x3);
     }
 
-    private static GraphDatabaseAPI DB;
+    private GraphDatabaseAPI db;
 
-    @BeforeAll
-    static void setupDb() {
-        DB = TestDatabaseCreator.createTestDatabase();
+    @BeforeEach
+    void setupDb() {
+        db = TestDatabaseCreator.createTestDatabase();
     }
 
     @AfterEach
     void clearDb() {
-        DB.execute("MATCH (n) detach delete n");
-    }
-
-    @AfterAll
-    static void shutdown() {
-        if (DB != null) {
-            DB.shutdown();
-        }
+        db.shutdown();
     }
 
     @ParameterizedTest
     @MethodSource("cypherQueries")
     void testClustering(String cypher) {
-        DB.execute(cypher);
-        Graph graph = new GraphLoader(DB)
+        db.execute(cypher);
+        Graph graph = new GraphLoader(db)
                 .withAnyRelationshipType()
                 .withAnyLabel()
                 .withoutNodeProperties()

@@ -19,29 +19,29 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.Assume;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
+import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
-import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.FormattedLog;
 import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 class ProgressLoggingTest {
 
@@ -74,7 +74,7 @@ class ProgressLoggingTest {
 
     @AllGraphTypesWithoutCypherTest
     void testLoad(Class<? extends GraphFactory> graphFactory) {
-        Assume.assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
+        assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
         setup(graphFactory);
         final StringWriter buffer = new StringWriter();
 

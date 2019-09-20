@@ -19,12 +19,10 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.Timeout;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
@@ -40,8 +38,6 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -57,60 +53,47 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.core.utils.RawValues.combineIntInt;
 
-@RunWith(Parameterized.class)
-public class ParallelGraphLoadingTest extends RandomGraphTestCase {
+class ParallelGraphLoadingTest extends RandomGraphTestCase {
 
-    @Rule
-    public Timeout timeout = new Timeout(5, TimeUnit.SECONDS);
-
-    private final int batchSize;
-    private final Class<? extends GraphFactory> graphImpl;
-
-    @Parameters(name = "{2}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(
-                new Object[]{30, HugeGraphFactory.class, "Huge, parallel"},
-                new Object[]{100000, HugeGraphFactory.class, "Huge, sequential"}
+    private static Stream<Arguments> parameters() {
+        return Stream.of(
+                arguments(HugeGraphFactory.class, 30),
+                arguments(HugeGraphFactory.class, 100000)
         );
     }
 
-    private Graph graph;
-
-    public ParallelGraphLoadingTest(
-            int batchSize,
-            Class<? extends GraphFactory> graphImpl,
-            String ignoredNameForNiceTestDisplay) {
-        this.batchSize = batchSize;
-        this.graphImpl = graphImpl;
-        graph = load();
-    }
-
-    @Test
-    public void shouldLoadAllNodes() throws Exception {
+    @ParameterizedTest
+    @MethodSource("parameters")
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
+    void shouldLoadAllNodes(Class<? extends GraphFactory> graphImpl, int batchSize) {
+        Graph graph = load(graphImpl, batchSize);
         assertEquals(NODE_COUNT, graph.nodeCount());
     }
 
-    @Test
-    public void shouldLoadSparseNodes() throws Exception {
+    @ParameterizedTest
+    @MethodSource("parameters")
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
+    void shouldLoadSparseNodes(Class<? extends GraphFactory> graphImpl, int batchSize) {
         GraphDatabaseAPI largerGraph = buildGraph(PageUtil.pageSizeFor(Long.BYTES) << 1);
         try {
-            Graph sparseGraph = load(largerGraph, l -> l.withLabel("Label2"));
+            Graph sparseGraph = load(largerGraph, l -> l.withLabel("Label2"), graphImpl, batchSize);
             try (Transaction tx = largerGraph.beginTx();
                  Stream<Node> nodes = largerGraph
                          .findNodes(Label.label("Label2"))
                          .stream()) {
                 nodes.forEach(n -> {
                     long graphId = sparseGraph.toMappedNodeId(n.getId());
-                    assertNotEquals(n + " not mapped", -1, graphId);
+                    assertNotEquals(-1, graphId, n + " not mapped");
                     long neoId = sparseGraph.toOriginalNodeId(graphId);
-                    assertEquals(n + " mapped wrongly", n.getId(), neoId);
+                    assertEquals(n.getId(), neoId, n + " mapped wrongly");
                 });
                 tx.success();
             }
@@ -119,8 +102,11 @@ public class ParallelGraphLoadingTest extends RandomGraphTestCase {
         }
     }
 
-    @Test
-    public void shouldLoadNodesInOrder() throws Exception {
+    @ParameterizedTest
+    @MethodSource("parameters")
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
+    void shouldLoadNodesInOrder(Class<? extends GraphFactory> graphImpl, int batchSize) {
+        Graph graph = load(graphImpl, batchSize);
         if (batchSize < NODE_COUNT) {
             graph.forEachNode(nodeId -> {
                 assertEquals(
@@ -138,9 +124,7 @@ public class ParallelGraphLoadingTest extends RandomGraphTestCase {
             }
 
             graph.forEachNode(nodeId -> {
-                assertEquals(
-                        true,
-                        nodeIds.remove(graph.toOriginalNodeId(nodeId)));
+                assertTrue(nodeIds.remove(graph.toOriginalNodeId(nodeId)));
                 assertEquals(
                         nodeId,
                         graph.toMappedNodeId(graph.toOriginalNodeId(nodeId)));
@@ -149,16 +133,21 @@ public class ParallelGraphLoadingTest extends RandomGraphTestCase {
         }
     }
 
-    @Test
-    public void shouldLoadAllRelationships() throws Exception {
+    @ParameterizedTest
+    @MethodSource("parameters")
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
+    void shouldLoadAllRelationships(Class<? extends GraphFactory> graphImpl, int batchSize) {
+        Graph graph = load(graphImpl, batchSize);
         try (Transaction tx = db.beginTx()) {
-            graph.forEachNode(this::testRelationships);
+            graph.forEachNode(id -> testRelationships(graph, id));
             tx.success();
         }
     }
 
-    @Test
-    public void shouldCollectErrors() throws Exception {
+    @ParameterizedTest
+    @MethodSource("parameters")
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
+    void shouldCollectErrors(Class<? extends GraphFactory> graphImpl, int batchSize) {
         if (batchSize < NODE_COUNT) {
             String message = "oh noes";
             ThrowingThreadPool pool = new ThrowingThreadPool(3, message);
@@ -179,13 +168,13 @@ public class ParallelGraphLoadingTest extends RandomGraphTestCase {
         }
     }
 
-    private boolean testRelationships(long nodeId) {
-        testRelationships(nodeId, Direction.OUTGOING);
-        testRelationships(nodeId, Direction.INCOMING);
+    private boolean testRelationships(Graph graph, long nodeId) {
+        testRelationships(graph, nodeId, Direction.OUTGOING);
+        testRelationships(graph, nodeId, Direction.INCOMING);
         return true;
     }
 
-    private void testRelationships(long nodeId, final Direction direction) {
+    private void testRelationships(Graph graph, long nodeId, final Direction direction) {
         final Node node = db.getNodeById(graph.toOriginalNodeId(nodeId));
         final Map<Long, Relationship> relationships = Iterables
                 .stream(node.getRelationships(direction))
@@ -208,12 +197,12 @@ public class ParallelGraphLoadingTest extends RandomGraphTestCase {
                     }
                     final Relationship relationship = relationships.remove(relId);
                     assertNotNull(
+                            relationship,
                             String.format(
                                     "Relationship (%d)-[%d]->(%d) that does not exist in the graph",
                                     sourceId,
                                     relId,
-                                    targetId),
-                            relationship);
+                                    targetId));
 
                     if (direction == Direction.OUTGOING) {
                         assertEquals(
@@ -234,15 +223,15 @@ public class ParallelGraphLoadingTest extends RandomGraphTestCase {
                 });
 
         assertTrue(
-                "Relationships that were not traversed " + relationships,
-                relationships.isEmpty());
+                relationships.isEmpty(),
+                "Relationships that were not traversed " + relationships);
     }
 
-    private Graph load() {
-        return load(db, l -> {});
+    private Graph load(Class<? extends GraphFactory> graphImpl, int batchSize) {
+        return load(db, l -> {}, graphImpl, batchSize);
     }
 
-    private Graph load(GraphDatabaseAPI db, Consumer<GraphLoader> block) {
+    private Graph load(GraphDatabaseAPI db, Consumer<GraphLoader> block, Class<? extends GraphFactory> graphImpl, int batchSize) {
         final ExecutorService pool = Executors.newFixedThreadPool(3);
         GraphLoader loader = new GraphLoader(db, pool).withBatchSize(batchSize);
         block.accept(loader);
@@ -256,7 +245,7 @@ public class ParallelGraphLoadingTest extends RandomGraphTestCase {
         }
     }
 
-    private static class ThrowingThreadPool extends ThreadPoolExecutor {
+    private static final class ThrowingThreadPool extends ThreadPoolExecutor {
         private static final MethodHandle setException = PrivateLookup.method(
                 FutureTask.class,
                 "setException",

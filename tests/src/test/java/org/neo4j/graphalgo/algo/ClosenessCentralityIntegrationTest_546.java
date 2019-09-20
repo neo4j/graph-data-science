@@ -19,8 +19,10 @@
  */
 package org.neo4j.graphalgo.algo;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
@@ -28,16 +30,15 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.DangalchevClosenessCentrality;
 import org.neo4j.graphalgo.impl.closeness.MSClosenessCentrality;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 /**
  *
  * @author mknblch
  */
-public class ClosenessCentralityIntegrationTest_546 {
+class ClosenessCentralityIntegrationTest_546 {
 
-    @Rule
-    public ImpermanentDatabaseRule db = new ImpermanentDatabaseRule();
+    private GraphDatabaseAPI db;
 
     private String name(long id) {
         String[] name = {""};
@@ -52,24 +53,34 @@ public class ClosenessCentralityIntegrationTest_546 {
         return name[0];
     }
 
+    @BeforeEach
+    void setup() {
+        db = TestDatabaseCreator.createTestDatabase();
+    }
+
+    @AfterEach
+    void teardown() {
+        db.shutdown();
+    }
+
     @Test
-    public void test547() {
+    void test547() {
 
         String importQuery =
                 "CREATE (alice:Person{id:\"Alice\"}),\n" +
-                        "       (michael:Person{id:\"Michael\"}),\n" +
-                        "       (karin:Person{id:\"Karin\"}),\n" +
-                        "       (chris:Person{id:\"Chris\"}),\n" +
-                        "       (will:Person{id:\"Will\"}),\n" +
-                        "       (mark:Person{id:\"Mark\"})\n" +
-                        "CREATE (michael)<-[:KNOWS]-(karin),\n" +
-                        "       (michael)-[:KNOWS]->(chris),\n" +
-                        "       (will)-[:KNOWS]->(michael),\n" +
-                        "       (mark)<-[:KNOWS]-(michael),\n" +
-                        "       (mark)-[:KNOWS]->(will),\n" +
-                        "       (alice)-[:KNOWS]->(michael),\n" +
-                        "       (will)-[:KNOWS]->(chris),\n" +
-                        "       (chris)-[:KNOWS]->(karin);";
+                "       (michael:Person{id:\"Michael\"}),\n" +
+                "       (karin:Person{id:\"Karin\"}),\n" +
+                "       (chris:Person{id:\"Chris\"}),\n" +
+                "       (will:Person{id:\"Will\"}),\n" +
+                "       (mark:Person{id:\"Mark\"})\n" +
+                "CREATE (michael)<-[:KNOWS]-(karin),\n" +
+                "       (michael)-[:KNOWS]->(chris),\n" +
+                "       (will)-[:KNOWS]->(michael),\n" +
+                "       (mark)<-[:KNOWS]-(michael),\n" +
+                "       (mark)-[:KNOWS]->(will),\n" +
+                "       (alice)-[:KNOWS]->(michael),\n" +
+                "       (will)-[:KNOWS]->(chris),\n" +
+                "       (chris)-[:KNOWS]->(karin);";
 
         db.execute(importQuery);
 
@@ -88,7 +99,7 @@ public class ClosenessCentralityIntegrationTest_546 {
     }
 
     @Test
-    public void test547_residual() {
+    void test547_residual() {
 
         String importQuery =
                 "CREATE (alice:Person{id:\"Alice\"}),\n" +
@@ -123,7 +134,7 @@ public class ClosenessCentralityIntegrationTest_546 {
     }
 
     @Test
-    public void test546() {
+    void test546() {
 
         String importQuery =
                 "CREATE (nAlice:User {id:'Alice'})\n" +
@@ -155,7 +166,7 @@ public class ClosenessCentralityIntegrationTest_546 {
     }
 
     @Test
-    public void test546_residual() {
+    void test546_residual() {
 
         String importQuery =
                 "CREATE (nAlice:User {id:'Alice'})\n" +

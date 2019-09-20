@@ -19,19 +19,20 @@
  */
 package org.neo4j.graphalgo.algo;
 
-import org.junit.*;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TraverseProc;
 import org.neo4j.graphdb.Node;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static junit.framework.TestCase.assertNull;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Graph:
@@ -44,44 +45,38 @@ import static org.junit.Assert.*;
  *
  * @author mknblch
  */
-public class BFSDFSIntegrationTest {
+class BFSDFSIntegrationTest {
 
+    private static GraphDatabaseAPI DB;
 
-    @ClassRule
-    public static ImpermanentDatabaseRule db = new ImpermanentDatabaseRule();
-
-    @BeforeClass
-    public static void setupGraph() throws KernelException {
-
-
-        final String cypher =
+    @BeforeAll
+    static void setupGraph() throws KernelException {
+        DB = TestDatabaseCreator.createTestDatabase();
+        String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
-                        "CREATE (b:Node {name:'b'})\n" +
-                        "CREATE (c:Node {name:'c'})\n" +
-                        "CREATE (d:Node {name:'d'})\n" +
-                        "CREATE (e:Node {name:'e'})\n" +
-                        "CREATE (f:Node {name:'f'})\n" +
-                        "CREATE (g:Node {name:'g'})\n" +
-                        "CREATE" +
-                        " (a)-[:TYPE {cost:2.0}]->(b),\n" +
-                        " (a)-[:TYPE {cost:1.0}]->(c),\n" +
-                        " (b)-[:TYPE {cost:1.0}]->(d),\n" +
-                        " (c)-[:TYPE {cost:2.0}]->(d),\n" +
-                        " (d)-[:TYPE {cost:1.0}]->(e),\n" +
-                        " (d)-[:TYPE {cost:2.0}]->(f),\n" +
-                        " (e)-[:TYPE {cost:2.0}]->(g),\n" +
-                        " (f)-[:TYPE {cost:1.0}]->(g)";
+                "CREATE (b:Node {name:'b'})\n" +
+                "CREATE (c:Node {name:'c'})\n" +
+                "CREATE (d:Node {name:'d'})\n" +
+                "CREATE (e:Node {name:'e'})\n" +
+                "CREATE (f:Node {name:'f'})\n" +
+                "CREATE (g:Node {name:'g'})\n" +
+                "CREATE" +
+                " (a)-[:TYPE {cost:2.0}]->(b),\n" +
+                " (a)-[:TYPE {cost:1.0}]->(c),\n" +
+                " (b)-[:TYPE {cost:1.0}]->(d),\n" +
+                " (c)-[:TYPE {cost:2.0}]->(d),\n" +
+                " (d)-[:TYPE {cost:1.0}]->(e),\n" +
+                " (d)-[:TYPE {cost:2.0}]->(f),\n" +
+                " (e)-[:TYPE {cost:2.0}]->(g),\n" +
+                " (f)-[:TYPE {cost:1.0}]->(g)";
 
-        db.resolveDependency(Procedures.class).registerProcedure(TraverseProc.class);
-        db.execute(cypher);
+        DB.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(TraverseProc.class);
+        DB.execute(cypher);
     }
-
-    @Rule
-    public ExpectedException exceptions = ExpectedException.none();
 
     private static long id(String name) {
         final Node[] node = new Node[1];
-        db.execute("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n").accept(row -> {
+        DB.execute("MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n").accept(row -> {
             node[0] = row.getNode("n");
             return false;
         });
@@ -90,7 +85,7 @@ public class BFSDFSIntegrationTest {
 
     private static String name(long id) {
         final String[] node = new String[1];
-        db.execute("MATCH (n:Node) WHERE id(n) = " + id + " RETURN n.name as name").accept(row -> {
+        DB.execute("MATCH (n:Node) WHERE id(n) = " + id + " RETURN n.name as name").accept(row -> {
             node[0] = row.getString("name");
             return false;
         });
@@ -102,7 +97,7 @@ public class BFSDFSIntegrationTest {
      * same order
      */
     static void assertContains(String[] expected, List<Long> nodeIds) {
-        assertEquals("expected " + Arrays.toString(expected) + " | given [" + nodeIds+ "]", expected.length, nodeIds.size());
+        assertEquals(expected.length, nodeIds.size(), "expected " + Arrays.toString(expected) + " | given [" + nodeIds+ "]");
         for (String ex : expected) {
             final long id = id(ex);
             if (!nodeIds.contains(id)) {
@@ -112,9 +107,9 @@ public class BFSDFSIntegrationTest {
     }
 
     @Test
-    public void testFindAnyOf() {
+    void testFindAnyOf() {
         final String cypher = "MATCH (n:Node {name:'a'}) WITH id(n) as s CALL algo.dfs.stream('Node', 'TYPE', '>', s, {targetNodes:[4,5]}) YIELD nodeIds RETURN nodeIds";
-        db.execute(cypher).accept(row -> {
+        DB.execute(cypher).accept(row -> {
             List<Long> nodeIds = (List<Long>) row.get("nodeIds");
             assertEquals(4, nodeIds.size());
             return true;
@@ -122,9 +117,9 @@ public class BFSDFSIntegrationTest {
     }
 
     @Test
-    public void testMaxDepthOut() {
+    void testMaxDepthOut() {
         final String cypher = "MATCH (n:Node {name:'a'}) WITH id(n) as s CALL algo.dfs.stream('Node', 'TYPE', '>', s, {maxDepth:2}) YIELD nodeIds RETURN nodeIds";
-        db.execute(cypher).accept(row -> {
+        DB.execute(cypher).accept(row -> {
             List<Long> nodeIds = (List<Long>) row.get("nodeIds");
             assertContains(new String[]{"a", "b", "c", "d"}, nodeIds);
             return true;
@@ -132,9 +127,9 @@ public class BFSDFSIntegrationTest {
     }
 
     @Test
-    public void testMaxDepthIn() {
+    void testMaxDepthIn() {
         final String cypher = "MATCH (n:Node {name:'g'}) WITH id(n) as s CALL algo.dfs.stream('Node', 'TYPE', '<', s, {maxDepth:2}) YIELD nodeIds RETURN nodeIds";
-        db.execute(cypher).accept(row -> {
+        DB.execute(cypher).accept(row -> {
             List<Long> nodeIds = (List<Long>) row.get("nodeIds");
             assertContains(new String[]{"g", "e", "f", "d"}, nodeIds);
             return true;
