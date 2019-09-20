@@ -66,17 +66,17 @@ class LoadGraphProcTest extends ProcTestBase {
             "  (a:A {id: 0, partition: 42})" +
             ", (b:B {id: 1, partition: 42})" +
 
-            ", (a)-[:X { weight: 1.0 }]->(:A {id: 2,  weight: 1.0, partition: 1})" +
-            ", (a)-[:X { weight: 1.0 }]->(:A {id: 3,  weight: 2.0, partition: 1})" +
-            ", (a)-[:X { weight: 1.0 }]->(:A {id: 4,  weight: 1.0, partition: 1})" +
-            ", (a)-[:Y { weight: 1.0 }]->(:A {id: 5,  weight: 1.0, partition: 1})" +
-            ", (a)-[:Z { weight: 1.0 }]->(:A {id: 6,  weight: 8.0, partition: 2})" +
+            ", (a)-[:X { weight: 1.0, weight2: 42.0 }]->(:A {id: 2,  weight: 1.0, partition: 1})" +
+            ", (a)-[:X { weight: 1.0, weight2: 42.0 }]->(:A {id: 3,  weight: 2.0, partition: 1})" +
+            ", (a)-[:X { weight: 1.0, weight2: 42.0 }]->(:A {id: 4,  weight: 1.0, partition: 1})" +
+            ", (a)-[:Y { weight: 1.0, weight2: 42.0 }]->(:A {id: 5,  weight: 1.0, partition: 1})" +
+            ", (a)-[:Z { weight: 1.0, weight2: 42.0 }]->(:A {id: 6,  weight: 8.0, partition: 2})" +
 
-            ", (b)-[:X { weight: 42.0 }]->(:B {id: 7,  weight: 1.0, partition: 1})" +
-            ", (b)-[:X { weight: 42.0 }]->(:B {id: 8,  weight: 2.0, partition: 1})" +
-            ", (b)-[:X { weight: 42.0 }]->(:B {id: 9,  weight: 1.0, partition: 1})" +
-            ", (b)-[:Y { weight: 42.0 }]->(:B {id: 10, weight: 1.0, partition: 1})" +
-            ", (b)-[:Z { weight: 42.0 }]->(:B {id: 11, weight: 8.0, partition: 2})";
+            ", (b)-[:X { weight: 42.0, weight2: 13.37 }]->(:B {id: 7,  weight: 1.0, partition: 1})" +
+            ", (b)-[:X { weight: 42.0, weight2: 13.37 }]->(:B {id: 8,  weight: 2.0, partition: 1})" +
+            ", (b)-[:X { weight: 42.0, weight2: 13.37 }]->(:B {id: 9,  weight: 1.0, partition: 1})" +
+            ", (b)-[:Y { weight: 42.0, weight2: 13.37 }]->(:B {id: 10, weight: 1.0, partition: 1})" +
+            ", (b)-[:Z { weight: 42.0, weight2: 13.37 }]->(:B {id: 11, weight: 8.0, partition: 2})";
 
     private GraphDatabaseAPI db;
 
@@ -182,6 +182,39 @@ class LoadGraphProcTest extends ProcTestBase {
 
         assertThrows(QueryExecutionException.class, () -> runQuery(query, db));
     }
+
+    @Test
+    void shouldLoadGraphWithMultipleRelationshipProperties() throws KernelException {
+        String loadQuery = "CALL algo.graph.load(" +
+                           "    'foo', '', '', {" +
+                           "        relationshipProperties: {" +
+                           "            foo: {" +
+                           "                property: 'weight'," +
+                           "                aggregate: 'SUM'" +
+                           "            }," +
+                           "            bar: {" +
+                           "                property: 'weight2'," +
+                           "                aggregate: 'MAX'" +
+                           "            }" +
+                           "        }" +
+                           "    }" +
+                           ")";
+
+        runQuery(loadQuery, db, row -> {
+            Map<String, Object> relProperties = (Map<String, Object>) row.get("relationshipProperties");
+            assertEquals(2, relProperties.size());
+
+            Map<String, Object> foo = (Map<String, Object>) relProperties.get("foo");
+            Map<String, Object> bar = (Map<String, Object>) relProperties.get("bar");
+
+            assertEquals("weight", foo.get("property").toString());
+            assertEquals("SUM", foo.get("aggregate").toString());
+
+            assertEquals("weight2", bar.get("property").toString());
+            assertEquals("MAX", bar.get("aggregate").toString());
+        });
+    }
+
 
     @Test
     void shouldComputeMemoryEstimationForHuge() {

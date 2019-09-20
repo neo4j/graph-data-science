@@ -55,8 +55,8 @@ public final class LoadGraphProc extends BaseProc {
     @Procedure(name = "algo.graph.load", mode = Mode.WRITE)
     @Description("CALL algo.graph.load(" +
                  "name:String, label:String, relationship:String" +
-                 "{direction:'OUT/IN/BOTH', undirected:true/false, sorted:true/false, nodeProperty:'value', nodeWeight:'weight', relationshipWeight: 'weight', graph:'huge/cypher'}) " +
-                 "YIELD nodes, relationships, loadMillis, computeMillis, writeMillis, write, nodeProperty, nodeWeight, relationshipWeight - " +
+                 "{direction:'OUT/IN/BOTH', undirected:true/false, sorted:true/false, nodeProperty:'value', nodeWeight:'weight', relationshipWeight: 'weight', relationshipProperties: {}, graph:'huge/cypher'}) " +
+                 "YIELD nodes, relationships, loadMillis, computeMillis, writeMillis, write, nodeProperty, nodeWeight, relationshipWeight, relationshipProperties - " +
                  "load named graph")
     public Stream<LoadGraphStats> load(
             @Name(value = "name", defaultValue = "") String name,
@@ -114,7 +114,7 @@ public final class LoadGraphProc extends BaseProc {
     @Procedure(name = "algo.graph.load.memrec")
     @Description("CALL algo.graph.load.memrec(" +
                  "label:String, relationship:String" +
-                 "{direction:'OUT/IN/BOTH', undirected:true/false, sorted:true/false, nodeProperty:'value', nodeWeight:'weight', relationshipWeight: 'weight', graph:'cypher/huge'}) " +
+                 "{direction:'OUT/IN/BOTH', undirected:true/false, sorted:true/false, nodeProperty:'value', nodeWeight:'weight', relationshipWeight: 'weight', relationshipProperties: {}, graph:'cypher/huge'}) " +
                  "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for the graph")
     public Stream<MemRecResult> loadMemRec(
             @Name(value = "label", defaultValue = "") String label,
@@ -167,6 +167,7 @@ public final class LoadGraphProc extends BaseProc {
         public long nodes, relationships, loadMillis;
         public boolean alreadyLoaded;
         public String nodeWeight, relationshipWeight, nodeProperty, loadNodes, loadRelationships;
+        public Object relationshipProperties;
 
         LoadGraphStats(String graphName, ProcedureConfiguration configuration) {
             name = graphName;
@@ -179,6 +180,7 @@ public final class LoadGraphProc extends BaseProc {
             nodeWeight = configuration.getString(ProcedureConstants.NODE_WEIGHT, null);
             nodeProperty = configuration.getString(ProcedureConstants.NODE_PROPERTY, null);
             relationshipWeight = configuration.getString(ProcedureConstants.RELATIONSHIP_WEIGHT, null);
+            relationshipProperties = configuration.get(ProcedureConstants.RELATIONSHIP_PROPERTIES, null);
         }
     }
 
