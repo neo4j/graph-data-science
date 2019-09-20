@@ -26,13 +26,13 @@ import java.util.Queue;
 
 public class WCCComputation extends Computation {
 
-@Override
-protected Direction getMessageDirection() {
-    return Direction.BOTH;
-}
+    @Override
+    protected Direction getMessageDirection() {
+        return Direction.BOTH;
+    }
 
-@Override
-protected boolean supportsAsynchronousParallel() {
+    @Override
+    protected boolean supportsAsynchronousParallel() {
         return true;
     }
 
