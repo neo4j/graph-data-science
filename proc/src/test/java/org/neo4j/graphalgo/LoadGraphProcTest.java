@@ -39,6 +39,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -88,9 +89,8 @@ class LoadGraphProcTest extends ProcTestBase {
     }
 
     @AfterEach
-    void tearDown() {
-        LoadGraphFactory.remove("foo");
-        LoadGraphFactory.remove("foo2");
+    public void tearDown() {
+        LoadGraphFactory.removeAllLoadedGraphs();
     }
 
     @ParameterizedTest
@@ -342,25 +342,35 @@ class LoadGraphProcTest extends ProcTestBase {
     @ParameterizedTest
     @MethodSource("graphDirectionCombinations")
     public void consistentLoadDirection(String graphImpl, String loadDirection) {
-        String queryTemplate = "CALL algo.graph.load(" +
-                               "    'foo', %s, %s, {" +
+        String query = "CALL algo.graph.load(" +
+                               "    'foo', null, null, {" +
                                "        graph: $graph, direction: $direction" +
                                "    }" +
-                               ") YIELD alreadyLoaded AS loaded " +
-                               "RETURN loaded";
+                               ")";
 
-        String query = graphImpl.equals("cypher")
-                ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSIHPS_QUERY)
-                : String.format(queryTemplate, "null", "null");
+        db.execute(query, MapUtil.map("graph", graphImpl, "direction", loadDirection));
 
+        runQuery("CALL algo.graph.info('foo')", db, Collections.emptyMap(), resultRow -> {
+            assertEquals(resultRow.getString("type"), graphImpl.toLowerCase());
+            assertEquals(resultRow.getString("direction"), loadDirection);
+        });
+    }
 
-        Map<String, Object> params = MapUtil.map("graph", graphImpl, "direction", loadDirection);
-        db.execute(query, params);
+    @ParameterizedTest
+    @MethodSource("graphDirectionCombinations")
+    public void shouldComputeDegreeDistributionAndReturnLoadDirection(String graphImpl, String loadDirection) {
+        String query = "CALL algo.graph.load(" +
+                       "    'foo', null, null, {" +
+                       "        graph: $graph, direction: $direction" +
+                       "    }" +
+                       ")";
 
-        runQuery("CALL algo.graph.list()", db, (resultRow -> {
-            assertEquals(graphImpl.toLowerCase(), resultRow.getString("type").toLowerCase());
-            assertEquals(loadDirection, resultRow.getString("direction"));
-        }));
+        db.execute(query, MapUtil.map("graph", graphImpl, "direction", loadDirection));
+
+        runQuery("CALL algo.graph.info('foo', true)", db, Collections.emptyMap(), resultRow -> {
+            assertEquals(resultRow.getString("type"), graphImpl.toLowerCase());
+            assertEquals(resultRow.getString("direction"), loadDirection);
+        });
     }
 
     @ParameterizedTest

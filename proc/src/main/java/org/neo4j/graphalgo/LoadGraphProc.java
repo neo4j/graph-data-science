@@ -197,7 +197,7 @@ public final class LoadGraphProc extends BaseProc {
     @Procedure(name = "algo.graph.info")
     @Description("CALL algo.graph.info(name:String, " +
                  "degreeDistribution:bool | { direction:'OUT/IN/BOTH', concurrency:int }) " +
-                 "YIELD name, type, exists, nodes, relationships")
+                 "YIELD name, type, direction, exists, nodes, relationships")
     public Stream<GraphInfoWithHistogram> info(
             @Name("name") String name,
             @Name(value = "degreeDistribution", defaultValue = "null") Object degreeDistribution) {
@@ -232,6 +232,7 @@ public final class LoadGraphProc extends BaseProc {
             info.nodes = graph.nodeCount();
             info.relationships = graph.relationshipCount();
             info.exists = true;
+            info.direction = graph.getLoadDirection().toString();
         }
         return Stream.of(info);
     }
@@ -311,6 +312,7 @@ public final class LoadGraphProc extends BaseProc {
         public String type;
         public boolean exists;
         public long nodes, relationships;
+        public String direction;
 
         public long max, min;
         public double mean;
