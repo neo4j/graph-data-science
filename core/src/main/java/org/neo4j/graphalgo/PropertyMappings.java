@@ -49,7 +49,7 @@ public final class PropertyMappings implements Iterable<PropertyMapping> {
     public static PropertyMappings fromObject(Object relPropertyMapping) {
         if (relPropertyMapping instanceof String) {
             String propertyMapping = (String) relPropertyMapping;
-            fromObject(Collections.singletonMap(propertyMapping, propertyMapping));
+            return fromObject(Collections.singletonMap(propertyMapping, propertyMapping));
         } else if (relPropertyMapping instanceof Map) {
             PropertyMapping[] propertyMappings = ((Map<String, Object>) relPropertyMapping).entrySet()
                     .stream()
@@ -63,8 +63,6 @@ public final class PropertyMappings implements Iterable<PropertyMapping> {
                     "Expected String or Map for property mappings. Got %s.",
                     relPropertyMapping.getClass().getSimpleName()));
         }
-
-        return null;
     }
 
     private PropertyMappings(PropertyMapping... mappings) {

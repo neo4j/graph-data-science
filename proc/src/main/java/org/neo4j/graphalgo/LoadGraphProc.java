@@ -137,15 +137,19 @@ public final class LoadGraphProc extends BaseProc {
         loader
                 .withNodeStatement(config.getNodeLabelOrQuery())
                 .withRelationshipStatement(config.getRelationshipOrQuery())
+                // TODO: remove and make explicit in the procedure
                 .withOptionalNodeProperties(
                         PropertyMapping.of(LabelPropagation.SEED_TYPE, nodeProperty, 0.0D),
                         PropertyMapping.of(LabelPropagation.WEIGHT_TYPE, nodeWeight, 1.0D)
                 )
-                // TODO: this is to be backwardscompatible with the `relationshipWeight` parameter. Will be removed during API redesign.
-                .withRelationshipProperties(PropertyMapping.of(
-                        config.getWeightProperty(),
-                        config.getWeightPropertyDefaultValue(1.0)))
                 .withDirection(direction);
+
+        // TODO: required to be backwards-compatible with the `relationshipWeight` parameter.
+        if (config.getWeightProperty() != null) {
+            loader.withRelationshipProperties(PropertyMapping.of(
+                    config.getWeightProperty(),
+                    config.getWeightPropertyDefaultValue(1.0)));
+        }
 
         if (config.get("sorted", false)) {
             loader.sorted();

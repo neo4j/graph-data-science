@@ -93,6 +93,7 @@ class LoadGraphProcTest extends ProcTestBase {
 
     @AfterEach
     public void tearDown() {
+        db.shutdown();
         LoadGraphFactory.removeAllLoadedGraphs();
     }
 

@@ -413,7 +413,7 @@ class LouvainClusteringProcTest extends ProcTestBase {
         // load graph first to isolate failing behavior to the actual algorithm execution.
         String loadQuery = "CALL algo.graph.load(" +
                            "    'louvainGraph', '', '', {" +
-                           "        graph: $graph" +
+                           "        graph: $graph, weightProperty: 'weight'" +
                            "    }" +
                            ")";
         runQuery(loadQuery, MapUtil.map("graph", graphImpl));
