@@ -323,7 +323,7 @@ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, 
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                   | Type    | Default        | Optional | Description
-| `data`                   | list or string    | null           | no       | A list of maps of the following structure: `{item: nodeId, categories: [nodeId, nodeId, nodeId]}` or a Cypher query.
+| `data`                   | list or string    | null           | no       | A list of maps of the following structure: `{item: nodeId, weights: [double, double, double]}` or a Cypher query.
 | `top`                    | int     | 0              | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
 | `topK`                   | int     | 0              | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
 | `similarityCutoff`       | int     | -1             | yes      | The threshold for Euclidean distance. Values above this will not be returned.
@@ -367,7 +367,7 @@ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, 
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name             | Type   | Default        | Optional | Description
-| `data`                   | list or string    | null           | no       | A list of maps of the following structure: `{item: nodeId, categories: [nodeId, nodeId, nodeId]}` or a Cypher query.
+| `data`                   | list or string    | null           | no       | A list of maps of the following structure: `{item: nodeId, weights: [double, double, double]}` or a Cypher query.
 | `top`              | int    | 0              | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
 | `topK`             | int    | 0              | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
 | `similarityCutoff` | int    | -1             | yes      | The threshold for euclidean distance. Values above this will not be returned.

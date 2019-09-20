@@ -432,6 +432,20 @@ public class ProcedureConfiguration {
         return (V) value;
     }
 
+    public Double getSkipValue(Double defaultValue) {
+        String key = ProcedureConstants.SKIP_VALUE;
+        if (!config.containsKey(key)) {
+            return defaultValue;
+        }
+        Object value = config.get(key);
+
+        if(value == null) {
+            return null;
+        }
+
+        return typedValue(key, Number.class, value).doubleValue();
+    }
+
     /**
      * Get and convert the value under the given key to the given type.
      *
@@ -462,6 +476,10 @@ public class ProcedureConfiguration {
         if (null == value) {
             return defaultValue;
         }
+        return typedValue(key, expectedType, value);
+    }
+
+    private <V> V typedValue(String key, Class<V> expectedType, Object value) {
         if (!expectedType.isInstance(value)) {
             String template = "The value of %s must be a %s.";
             String message = String.format(template, key, expectedType.getSimpleName());

@@ -17,29 +17,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.huge.loader;
+package org.neo4j.graphalgo.impl.results;
 
-import org.neo4j.graphalgo.api.WeightMapping;
+import org.junit.Test;
 
-import java.util.Map;
+import static org.junit.Assert.*;
 
-public class IdsAndProperties {
+public class ApproxSimilaritySummaryResultTest {
+    @Test
+    public void computeScanRate() {
+        ApproxSimilaritySummaryResult result = new ApproxSimilaritySummaryResult(
+                100,
+                0,
+                495,
+                false,
+                "",
+                "",
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1);
 
-    final IdMap hugeIdMap;
-    final Map<String, WeightMapping> properties;
-
-    public IdsAndProperties(
-            final IdMap hugeIdMap,
-            final Map<String, WeightMapping> properties) {
-        this.hugeIdMap = hugeIdMap;
-        this.properties = properties;
-    }
-
-    public IdMap idMap() {
-        return hugeIdMap;
-    }
-
-    public Map<String, WeightMapping> properties() {
-        return properties;
+        assertEquals(0.1, result.scanRate, 0.0001);
     }
 }

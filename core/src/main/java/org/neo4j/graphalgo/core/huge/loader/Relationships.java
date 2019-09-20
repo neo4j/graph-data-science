@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.huge.loader;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 
-class Relationships {
+public class Relationships {
     private final long rows;
     private final long relationshipCount;
     private final AdjacencyList inAdjacency;
@@ -35,7 +35,7 @@ class Relationships {
     private final AdjacencyOffsets inWeightOffsets;
     private final AdjacencyOffsets outWeightOffsets;
 
-    Relationships(
+    public Relationships(
             long rows,
             long relationshipCount,
             AdjacencyList inAdjacency,
@@ -64,23 +64,24 @@ class Relationships {
         return rows;
     }
 
-    long relationshipCount() { return relationshipCount; }
+    public long relationshipCount() { return relationshipCount; }
 
-    AdjacencyList inAdjacency() { return inAdjacency; }
+    public AdjacencyList inAdjacency() { return inAdjacency; }
 
-    AdjacencyList outAdjacency() { return outAdjacency; }
+    public AdjacencyList outAdjacency() { return outAdjacency; }
 
-    AdjacencyOffsets inOffsets() { return inOffsets; }
+    public AdjacencyOffsets inOffsets() { return inOffsets; }
 
-    AdjacencyOffsets outOffsets() { return outOffsets; }
+    public AdjacencyOffsets outOffsets() { return outOffsets; }
 
-    double defaultWeight() { return defaultWeight; }
 
-    AdjacencyList inWeights() { return inWeights; }
+    public double defaultWeight() { return defaultWeight; }
 
-    AdjacencyList outWeights() { return outWeights; }
+    public AdjacencyList inWeights() { return inWeights; }
 
-    AdjacencyOffsets inWeightOffsets() { return inWeightOffsets; }
+    public AdjacencyList outWeights() { return outWeights; }
 
-    AdjacencyOffsets outWeightOffsets() { return outWeightOffsets; }
+    public AdjacencyOffsets inWeightOffsets() { return inWeightOffsets; }
+
+    public AdjacencyOffsets outWeightOffsets() { return outWeightOffsets; }
 }

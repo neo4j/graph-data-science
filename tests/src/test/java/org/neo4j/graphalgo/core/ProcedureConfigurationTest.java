@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class ProcedureConfigurationTest {
 
@@ -104,4 +105,26 @@ public class ProcedureConfigurationTest {
         assertEquals(2L, procedureConfiguration.getReadConcurrency(1));
         assertEquals(2L, procedureConfiguration.getWriteConcurrency(1));
     }
+
+    @Test
+    public void skipValueDefault() {
+        Map<String, Object> map = Collections.emptyMap();
+        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
+        assertEquals(Double.NaN, procedureConfiguration.getSkipValue(Double.NaN), 0.01);
+    }
+
+    @Test
+    public void skipValueAllowNull() {
+        Map<String, Object> map = MapUtil.map("skipValue", null);
+        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
+        assertNull(procedureConfiguration.getSkipValue(Double.NaN));
+    }
+
+    @Test
+    public void skipValueAllowIntegers() {
+        Map<String, Object> map = MapUtil.map("skipValue", 0);
+        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
+        assertEquals(0.0, procedureConfiguration.getSkipValue(Double.NaN), 0.0);
+    }
+
 }

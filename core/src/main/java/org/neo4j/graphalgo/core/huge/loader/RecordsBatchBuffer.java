@@ -47,11 +47,11 @@ abstract class RecordsBatchBuffer<Record extends AbstractBaseRecord> implements 
         return buffer.length;
     }
 
-    boolean isFull() {
+    public boolean isFull() {
         return length >= buffer.length;
     }
 
-    void reset() {
+    public void reset() {
         this.length = 0;
     }
 

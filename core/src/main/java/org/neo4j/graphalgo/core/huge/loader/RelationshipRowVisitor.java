@@ -44,7 +44,6 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
             IdMap idMap,
             boolean hasRelationshipWeights,
             double defaultWeight,
-            RelationshipImporter importer,
             Imports imports
     ) {
         this.buffer = buffer;
@@ -52,7 +51,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         this.hasRelationshipWeights = hasRelationshipWeights;
         this.defaultWeight = defaultWeight;
         this.imports = imports;
-        this.weightReader = importer.cypherResultsBackedWeightReader();
+        this.weightReader = RelationshipImporter.preLoadedWeightReader();
     }
 
     @Override

@@ -20,19 +20,28 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
+import org.neo4j.graphalgo.impl.nn.ApproxNearestNeighbors;
+import org.neo4j.graphalgo.impl.results.ApproxSimilaritySummaryResult;
 import org.neo4j.graphalgo.impl.results.SimilarityResult;
 import org.neo4j.graphalgo.impl.results.SimilaritySummaryResult;
 import org.neo4j.graphalgo.impl.similarity.CategoricalInput;
+import org.neo4j.graphalgo.impl.similarity.NonRecordingSimilarityRecorder;
+import org.neo4j.graphalgo.impl.similarity.RecordingSimilarityRecorder;
+import org.neo4j.graphalgo.impl.similarity.RleDecoder;
 import org.neo4j.graphalgo.impl.similarity.SimilarityComputer;
 import org.neo4j.graphalgo.impl.similarity.SimilarityInput;
 import org.neo4j.graphalgo.impl.similarity.SimilarityRecorder;
+import org.neo4j.graphalgo.impl.similarity.TopKConsumer;
+import org.neo4j.graphalgo.impl.similarity.WeightedInput;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class JaccardProc extends SimilarityProc {
@@ -92,9 +101,10 @@ public class JaccardProc extends SimilarityProc {
     }
 
     private SimilarityComputer<CategoricalInput> similarityComputer(int[] sourceIndexIds, int[] targetIndexIds) {
-        if(sourceIndexIds.length > 0 || targetIndexIds.length > 0 ) {
-            return (decoder, s, t, cutoff) -> s.jaccard(cutoff, t, false);
-        }
-        return (decoder, s, t, cutoff) -> s.jaccard(cutoff, t, true);
+        return similarityComputer(!(sourceIndexIds.length > 0 || targetIndexIds.length > 0));
+    }
+
+    public static SimilarityComputer<CategoricalInput> similarityComputer(final boolean bidirectional) {
+        return (decoder, s, t, cutoff) -> s.jaccard(cutoff, t, bidirectional);
     }
 }

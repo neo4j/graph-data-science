@@ -19,20 +19,17 @@
  */
 package org.neo4j.graphalgo.impl.similarity;
 
-import org.hamcrest.Matchers;
 import org.junit.Assume;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class TopKConsumerTest {
 
@@ -43,6 +40,7 @@ public class TopKConsumerTest {
     private static final Item ITEM5 = new Item(null, 5);
     private static final Item ITEM6 = new Item(null, 6);
     private static final Item ITEM7 = new Item(null, 7);
+
 
     static class Item implements Comparable<Item> {
         String name;
@@ -114,14 +112,6 @@ public class TopKConsumerTest {
             System.out.println(topItem);
         }
     }
-    @Test
-    public void testFindTopKHeapDuplicates() throws Exception {
-        Collection<Item> topItems = TopKConsumer.topK(asList(ITEM2, ITEM3, ITEM3, ITEM4), 3, Item::compareTo);
-        assertEquals(asList(ITEM4,ITEM3,ITEM3),topItems);
-        for (Item topItem : topItems) {
-            System.out.println(topItem);
-        }
-    }
 
     @Test
     public void testFindTopKHeap2() throws Exception {
@@ -157,11 +147,11 @@ public class TopKConsumerTest {
         TopKConsumer<Item> comparator1 = new TopKConsumer<>(3, Item::compareTo);
         TopKConsumer<Item> comparator2 = new TopKConsumer<>(3, Item::compareTo);
 
-        asList(ITEM4, ITEM5, ITEM7).forEach(comparator1);
-        asList(ITEM1, ITEM2, ITEM3).forEach(comparator2);
+        asList(ITEM4, ITEM5, ITEM7).forEach(comparator1::apply);
+        asList(ITEM1, ITEM2, ITEM3).forEach(comparator2::apply);
 
-        rootConsumer.accept(comparator1);
-        rootConsumer.accept(comparator2);
+        rootConsumer.apply(comparator1);
+        rootConsumer.apply(comparator2);
 
         assertThat(rootConsumer.list(), contains(ITEM7, ITEM5, ITEM4));
     }
@@ -172,11 +162,11 @@ public class TopKConsumerTest {
         TopKConsumer<Item> comparator1 = new TopKConsumer<>(3, Item::compareTo);
         TopKConsumer<Item> comparator2 = new TopKConsumer<>(3, Item::compareTo);
 
-        asList(ITEM3, ITEM4, ITEM5).forEach(comparator1);
-        asList(ITEM1, ITEM6, ITEM7).forEach(comparator2);
+        asList(ITEM3, ITEM4, ITEM5).forEach(comparator1::apply);
+        asList(ITEM1, ITEM6, ITEM7).forEach(comparator2::apply);
 
-        rootConsumer.accept(comparator1);
-        rootConsumer.accept(comparator2);
+        rootConsumer.apply(comparator1);
+        rootConsumer.apply(comparator2);
 
         assertThat(rootConsumer.list(), contains(ITEM7, ITEM6, ITEM5));
     }
@@ -187,13 +177,20 @@ public class TopKConsumerTest {
         TopKConsumer<Item> comparator1 = new TopKConsumer<>(3, Item::compareTo);
         TopKConsumer<Item> comparator2 = new TopKConsumer<>(3, Item::compareTo);
 
-        asList(ITEM6).forEach(comparator1);
-        asList(ITEM3, ITEM4, ITEM5).forEach(comparator2);
+        asList(ITEM6).forEach(comparator1::apply);
+        asList(ITEM3, ITEM4, ITEM5).forEach(comparator2::apply);
 
-        rootConsumer.accept(comparator1);
-        rootConsumer.accept(comparator2);
+        rootConsumer.apply(comparator1);
+        rootConsumer.apply(comparator2);
 
         assertThat(rootConsumer.list(), contains(ITEM6, ITEM5, ITEM4));
+    }
+
+    @Test
+    public void addingDuplicateItems() {
+        TopKConsumer<Item> consumer = new TopKConsumer<>(3, Item::compareTo);
+        asList(ITEM3, ITEM3, ITEM3).forEach(consumer::apply);
+        assertThat(consumer.list(), contains(ITEM3));
     }
 
     private List<Item> createItems(int count) {

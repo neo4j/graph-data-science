@@ -32,13 +32,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
-class RelationshipImporter {
+public class RelationshipImporter {
 
     private final AllocationTracker tracker;
     private final AdjacencyBuilder outAdjacency;
     private final AdjacencyBuilder inAdjacency;
 
-    RelationshipImporter(
+    public RelationshipImporter(
             AllocationTracker tracker,
             AdjacencyBuilder outAdjacency,
             AdjacencyBuilder inAdjacency) {
@@ -53,7 +53,7 @@ class RelationshipImporter {
                 WeightReader weightReader);
     }
 
-    Imports imports(
+    public Imports imports(
             boolean loadAsUndirected,
             boolean loadOutgoing,
             boolean loadIncoming,
@@ -147,7 +147,7 @@ class RelationshipImporter {
         long[][] readWeight(long[] batch, int batchLength, int[] weightProperty, double[] defaultWeight);
     }
 
-    Collection<Runnable> flushTasks() {
+    public Collection<Runnable> flushTasks() {
         if (outAdjacency != null) {
             if (inAdjacency == null || inAdjacency == outAdjacency) {
                 return outAdjacency.flushTasks();
@@ -185,7 +185,8 @@ class RelationshipImporter {
         };
     }
 
-    WeightReader cypherResultsBackedWeightReader() {
+
+    public static WeightReader preLoadedWeightReader() {
         return (batch, batchLength, weightProperty, defaultWeight) -> {
             long[] weights = new long[batchLength / BATCH_ENTRY_SIZE];
             for (int i = 0; i < batchLength; i += BATCH_ENTRY_SIZE) {

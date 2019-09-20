@@ -91,7 +91,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
                 idMap,
                 hasRelationshipWeights,
                 relationDefaultWeight,
-                importer,
                 imports
         );
         runLoadingQuery(offset, batchSize, visitor);

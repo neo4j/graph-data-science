@@ -32,7 +32,6 @@ public class NonRecordingSimilarityRecorder<T> implements SimilarityRecorder<T> 
         return -1;
     }
 
-
     @Override
     public SimilarityResult similarity(RleDecoder decoder, T source, T target, double cutoff) {
         return computer.similarity(decoder, source, target, cutoff);

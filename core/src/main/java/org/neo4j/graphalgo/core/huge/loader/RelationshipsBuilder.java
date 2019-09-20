@@ -19,13 +19,15 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
+
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.util.Arrays;
 
-class RelationshipsBuilder {
+public class RelationshipsBuilder {
 
     private static final AdjacencyListBuilder[] EMPTY_WEIGHTS = new AdjacencyListBuilder[0];
 
@@ -36,7 +38,7 @@ class RelationshipsBuilder {
     AdjacencyOffsets globalAdjacencyOffsets;
     AdjacencyOffsets[] globalWeightOffsets;
 
-    RelationshipsBuilder(
+    public RelationshipsBuilder(
             DeduplicationStrategy[] deduplicationStrategies,
             AllocationTracker tracker,
             int numberOfRelationshipWeights) {
@@ -77,5 +79,21 @@ class RelationshipsBuilder {
 
     final void setGlobalWeightOffsets(AdjacencyOffsets[] globalWeightOffsets) {
         this.globalWeightOffsets = globalWeightOffsets;
+    }
+
+    public AdjacencyList adjacency() {
+        return adjacency.build();
+    }
+
+    public AdjacencyList weights() {
+        return weights.length > 0 ? weights[0].build() : null;
+    }
+
+    public AdjacencyOffsets globalAdjacencyOffsets() {
+        return globalAdjacencyOffsets;
+    }
+
+    public AdjacencyOffsets globalWeightOffsets() {
+        return globalWeightOffsets[0];
     }
 }

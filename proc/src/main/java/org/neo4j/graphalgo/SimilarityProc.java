@@ -27,6 +27,7 @@ import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.impl.results.ApproxSimilaritySummaryResult;
 import org.neo4j.graphalgo.impl.results.SimilarityExporter;
 import org.neo4j.graphalgo.impl.results.SimilarityResult;
 import org.neo4j.graphalgo.impl.results.SimilaritySummaryResult;
@@ -69,6 +70,7 @@ public class SimilarityProc {
         return showComputations ? new RecordingSimilarityRecorder<>(computer) : new NonRecordingSimilarityRecorder<>(computer);
     }
 
+
     protected static SimilarityRecorder<CategoricalInput> categoricalSimilarityRecorder(
             SimilarityComputer<CategoricalInput> computer,
             ProcedureConfiguration configuration) {
@@ -83,7 +85,8 @@ public class SimilarityProc {
     Long getWriteBatchSize(ProcedureConfiguration configuration) {
         return configuration.get("writeBatchSize", 10000L);
     }
-    protected Stream<SimilaritySummaryResult> writeAndAggregateResults(Stream<SimilarityResult> stream, int length, int sourceIdsLength, int targetIdsLength, ProcedureConfiguration configuration, boolean write, String writeRelationshipType, String writeProperty, Computations computations) {
+
+    Stream<SimilaritySummaryResult> writeAndAggregateResults(Stream<SimilarityResult> stream, int length, int sourceIdsLength, int targetIdsLength, ProcedureConfiguration configuration, boolean write, String writeRelationshipType, String writeProperty, Computations computations) {
         long writeBatchSize = getWriteBatchSize(configuration);
         AtomicLong similarityPairs = new AtomicLong();
         DoubleHistogram histogram = new DoubleHistogram(5);
@@ -102,12 +105,46 @@ public class SimilarityProc {
         return Stream.of(SimilaritySummaryResult.from(length, sourceIdsLength, targetIdsLength, similarityPairs, computations.count(), writeRelationshipType, writeProperty, write, histogram));
     }
 
+    Stream<ApproxSimilaritySummaryResult> writeAndAggregateApproxResults(
+            Stream<SimilarityResult> stream,
+            int length,
+            ProcedureConfiguration configuration,
+            boolean write,
+            String writeRelationshipType,
+            String writeProperty,
+            long iterations,
+            Computations computations) {
+        long writeBatchSize = getWriteBatchSize(configuration);
+        AtomicLong similarityPairs = new AtomicLong();
+        DoubleHistogram histogram = new DoubleHistogram(5);
+        Consumer<SimilarityResult> recorder = result -> {
+            result.record(histogram);
+            similarityPairs.getAndIncrement();
+        };
+
+        if (write) {
+            SimilarityExporter similarityExporter = new SimilarityExporter(api, writeRelationshipType, writeProperty);
+            similarityExporter.export(stream.peek(recorder), writeBatchSize);
+        } else {
+            stream.forEach(recorder);
+        }
+
+        return Stream.of(ApproxSimilaritySummaryResult.from(length,
+                similarityPairs, computations.count(), writeRelationshipType, writeProperty, write, iterations, histogram));
+    }
+
     protected Stream<SimilaritySummaryResult> emptyStream(String writeRelationshipType, String writeProperty) {
         return Stream.of(SimilaritySummaryResult.from(0, 0,0, new AtomicLong(0), -1, writeRelationshipType,
                 writeProperty, false, new DoubleHistogram(5)));
     }
 
-    protected Double getSimilarityCutoff(ProcedureConfiguration configuration) {
+    protected Stream<ApproxSimilaritySummaryResult> emptyApproxStream(String writeRelationshipType, String writeProperty) {
+        return Stream.of(ApproxSimilaritySummaryResult.from(0, new AtomicLong(0), -1,
+                writeRelationshipType,
+                writeProperty, false, -1, new DoubleHistogram(5)));
+    }
+
+    protected static Double getSimilarityCutoff(ProcedureConfiguration configuration) {
         return configuration.getNumber("similarityCutoff", -1D).doubleValue();
     }
 

@@ -88,6 +88,8 @@
                 </d:tocentry>
                 <d:tocentry linkend="experimental-algorithms-similarity-overlap"><?dbhtml filename="experimental-algorithms/overlap/index.html"?>
                 </d:tocentry>
+                <d:tocentry linkend="experimental-algorithms-approximate-nearest-neighbors"><?dbhtml filename="experimental-algorithms/approximate-nearest-neighbors/index.html"?>
+                </d:tocentry>
             </d:tocentry>
 
             <d:tocentry linkend="experimental-algorithms-linkprediction"><?dbhtml filename="experimental-algorithms/linkprediction/index.html"?>

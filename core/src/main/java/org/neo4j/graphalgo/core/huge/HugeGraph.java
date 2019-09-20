@@ -488,6 +488,7 @@ public class HugeGraph implements Graph {
             WeightedRelationshipConsumer consumer) {
         while (adjacencyCursor.hasNextVLong()) {
             long targetNodeId = adjacencyCursor.nextVLong();
+
             double weight;
             if (weightCursor.hasNextLong()) {
                 long weightBits = weightCursor.nextLong();

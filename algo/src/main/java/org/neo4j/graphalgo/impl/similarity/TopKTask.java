@@ -62,17 +62,17 @@ class TopKTask<T> implements Runnable {
 
     void mergeInto(TopKConsumer<SimilarityResult>[] target) {
         for (int i = 0; i < target.length; i++) {
-            target[i].accept(topKConsumers[i]);
+            target[i].apply(topKConsumers[i]);
         }
     }
 
     public static SimilarityConsumer assignSimilarityPairs(TopKConsumer<SimilarityResult>[] topKConsumers) {
         return (s, t, result) -> {
-            topKConsumers[result.reversed ? t : s].accept(result);
+            topKConsumers[result.reversed ? t : s].apply(result);
 
             if (result.bidirectional) {
                 SimilarityResult reverse = result.reverse();
-                topKConsumers[reverse.reversed ? t : s].accept(reverse);
+                topKConsumers[reverse.reversed ? t : s].apply(reverse);
             }
         };
     }

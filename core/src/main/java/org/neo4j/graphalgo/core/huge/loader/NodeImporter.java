@@ -34,7 +34,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-class NodeImporter {
+public class NodeImporter {
 
     interface WeightReader {
         int readWeight(long nodeReference, long propertiesReference, long internalId);
@@ -64,7 +64,7 @@ class NodeImporter {
                 readCypherWeight(propertiesReference, internalId, cypherNodeProperties));
     }
 
-    private long importNodes(NodesBatchBuffer buffer, WeightReader reader) {
+    public long importNodes(NodesBatchBuffer buffer, WeightReader reader) {
         int batchLength = buffer.length();
         if (batchLength == 0) {
             return 0;

@@ -74,6 +74,11 @@ public class SimilarityResult implements Comparable<SimilarityResult> {
                reversed == that.reversed;
     }
 
+
+    public boolean sameItems(SimilarityResult that) {
+        return item1 == that.item1 &&  item2 == that.item2;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(item1, item2, count1, count2, intersection, similarity, bidirectional, reversed);
@@ -84,7 +89,7 @@ public class SimilarityResult implements Comparable<SimilarityResult> {
      */
     @Override
     public int compareTo(SimilarityResult o) {
-        return Double.compare(o.similarity, this.similarity);
+        return Double.compare(o.similarity,this.similarity);
     }
 
     public SimilarityResult reverse() {

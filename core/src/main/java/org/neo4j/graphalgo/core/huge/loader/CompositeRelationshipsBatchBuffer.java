@@ -45,7 +45,7 @@ public final class CompositeRelationshipsBatchBuffer extends RecordsBatchBuffer<
     }
 
     @Override
-    void reset() {
+    public void reset() {
         for (RelationshipsBatchBuffer buffer : buffers) {
             buffer.reset();
         }

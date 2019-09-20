@@ -64,8 +64,6 @@ public class CosineProc extends SimilarityProc {
         return generateWeightedStream(configuration, inputs, sourceIndexIds, targetIndexIds,  similarityCutoff, topN, topK, computer);
     }
 
-
-
     @Procedure(name = "algo.similarity.cosine", mode = Mode.WRITE)
     @Description("CALL algo.similarity.cosine([{item:id, weights:[weights]}], {similarityCutoff:-1,degreeCutoff:0}) " +
             "YIELD p50, p75, p90, p99, p999, p100 - computes cosine similarities")
@@ -102,9 +100,9 @@ public class CosineProc extends SimilarityProc {
         return writeAndAggregateResults(stream, inputs.length, sourceIndexIds.length, targetIndexIds.length, configuration, write, writeRelationshipType, writeProperty, recorder);
     }
 
+
     private SimilarityComputer<WeightedInput> similarityComputer(Double skipValue, int[] sourceIndexIds, int[] targetIndexIds) {
         boolean bidirectional = sourceIndexIds.length == 0 && targetIndexIds.length == 0;
-
         return skipValue == null ?
                 (decoder, s, t, cutoff) -> s.cosineSquares(decoder, cutoff, t, bidirectional) :
                 (decoder, s, t, cutoff) -> s.cosineSquaresSkip(decoder, cutoff, t, skipValue, bidirectional);
@@ -118,7 +116,7 @@ public class CosineProc extends SimilarityProc {
                 .map(SimilarityResult::squareRooted);
     }
 
-    private double similarityCutoff(ProcedureConfiguration configuration) {
+    public static double similarityCutoff(ProcedureConfiguration configuration) {
         double similarityCutoff = getSimilarityCutoff(configuration);
         // as we don't compute the sqrt until the end
         if (similarityCutoff > 0D) similarityCutoff *= similarityCutoff;

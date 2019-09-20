@@ -17,29 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.neo4j.graphalgo.core.huge.loader;
 
-import org.neo4j.graphalgo.api.WeightMapping;
+import org.junit.Test;
 
-import java.util.Map;
+import static org.junit.Assert.*;
 
-public class IdsAndProperties {
-
-    final IdMap hugeIdMap;
-    final Map<String, WeightMapping> properties;
-
-    public IdsAndProperties(
-            final IdMap hugeIdMap,
-            final Map<String, WeightMapping> properties) {
-        this.hugeIdMap = hugeIdMap;
-        this.properties = properties;
-    }
-
-    public IdMap idMap() {
-        return hugeIdMap;
-    }
-
-    public Map<String, WeightMapping> properties() {
-        return properties;
+public class RelationshipsBatchBufferTest {
+    @Test
+    public void flushBufferWhenFull() {
+        RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(null, -1, 1);
+        buffer.add(0, 1, -1, -1);
+        assertTrue(buffer.isFull());
     }
 }

@@ -73,7 +73,7 @@ class SourceTargetTopKTask<T> implements Runnable {
 
     void mergeInto(TopKConsumer<SimilarityResult>[] target) {
         for (int i = 0; i < target.length; i++) {
-            target[i].accept(topKConsumers[i]);
+            target[i].apply(topKConsumers[i]);
         }
     }
 }

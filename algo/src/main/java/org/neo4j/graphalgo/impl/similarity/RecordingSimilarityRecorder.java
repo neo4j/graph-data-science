@@ -21,12 +21,18 @@ package org.neo4j.graphalgo.impl.similarity;
 
 import org.neo4j.graphalgo.impl.results.SimilarityResult;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 
-public class RecordingSimilarityRecorder<T> implements SimilarityRecorder<T> {
+public class RecordingSimilarityRecorder<T extends SimilarityInput> implements SimilarityRecorder<T> {
 
     private final SimilarityComputer<T> computer;
+
     private final LongAdder computations = new LongAdder();
+    private final Map<Set<Long>, AtomicLong> comparisons = new ConcurrentHashMap<>();
 
     public RecordingSimilarityRecorder(SimilarityComputer<T> computer) {
         this.computer = computer;
@@ -36,9 +42,13 @@ public class RecordingSimilarityRecorder<T> implements SimilarityRecorder<T> {
         return computations.longValue();
     }
 
+    public Map<Set<Long>, AtomicLong> comparisons() {
+        return comparisons;
+    }
 
     @Override
     public SimilarityResult similarity(RleDecoder decoder, T source, T target, double cutoff) {
+
         computations.increment();
         return computer.similarity(decoder, source, target, cutoff);
     }
