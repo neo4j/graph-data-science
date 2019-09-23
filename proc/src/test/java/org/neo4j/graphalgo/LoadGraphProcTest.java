@@ -26,6 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -56,6 +57,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.TestSupport.allGraphNamesAndDirections;
+import static org.neo4j.graphalgo.GraphHelper.assertOutRelationships;
+import static org.neo4j.graphalgo.GraphHelper.assertOutWeightsWithDelta;
 
 class LoadGraphProcTest extends ProcTestBase {
 
@@ -66,17 +69,17 @@ class LoadGraphProcTest extends ProcTestBase {
             "  (a:A {id: 0, partition: 42})" +
             ", (b:B {id: 1, partition: 42})" +
 
-            ", (a)-[:X { weight: 1.0, weight2: 42.0 }]->(:A {id: 2,  weight: 1.0, partition: 1})" +
-            ", (a)-[:X { weight: 1.0, weight2: 42.0 }]->(:A {id: 3,  weight: 2.0, partition: 1})" +
-            ", (a)-[:X { weight: 1.0, weight2: 42.0 }]->(:A {id: 4,  weight: 1.0, partition: 1})" +
-            ", (a)-[:Y { weight: 1.0, weight2: 42.0 }]->(:A {id: 5,  weight: 1.0, partition: 1})" +
-            ", (a)-[:Z { weight: 1.0, weight2: 42.0 }]->(:A {id: 6,  weight: 8.0, partition: 2})" +
+            ", (a)-[:X { weight: 1.0 }]->(:A {id: 2,  weight: 1.0, partition: 1})" +
+            ", (a)-[:X { weight: 1.0 }]->(:A {id: 3,  weight: 2.0, partition: 1})" +
+            ", (a)-[:X { weight: 1.0 }]->(:A {id: 4,  weight: 1.0, partition: 1})" +
+            ", (a)-[:Y { weight: 1.0 }]->(:A {id: 5,  weight: 1.0, partition: 1})" +
+            ", (a)-[:Z { weight: 1.0 }]->(:A {id: 6,  weight: 8.0, partition: 2})" +
 
-            ", (b)-[:X { weight: 42.0, weight2: 13.37 }]->(:B {id: 7,  weight: 1.0, partition: 1})" +
-            ", (b)-[:X { weight: 42.0, weight2: 13.37 }]->(:B {id: 8,  weight: 2.0, partition: 1})" +
-            ", (b)-[:X { weight: 42.0, weight2: 13.37 }]->(:B {id: 9,  weight: 1.0, partition: 1})" +
-            ", (b)-[:Y { weight: 42.0, weight2: 13.37 }]->(:B {id: 10, weight: 1.0, partition: 1})" +
-            ", (b)-[:Z { weight: 42.0, weight2: 13.37 }]->(:B {id: 11, weight: 8.0, partition: 2})";
+            ", (b)-[:X { weight: 42.0 }]->(:B {id: 7,  weight: 1.0, partition: 1})" +
+            ", (b)-[:X { weight: 42.0 }]->(:B {id: 8,  weight: 2.0, partition: 1})" +
+            ", (b)-[:X { weight: 42.0 }]->(:B {id: 9,  weight: 1.0, partition: 1})" +
+            ", (b)-[:Y { weight: 42.0 }]->(:B {id: 10, weight: 1.0, partition: 1})" +
+            ", (b)-[:Z { weight: 42.0 }]->(:B {id: 11, weight: 8.0, partition: 2})";
 
     private GraphDatabaseAPI db;
 
@@ -92,7 +95,7 @@ class LoadGraphProcTest extends ProcTestBase {
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         db.shutdown();
         LoadGraphFactory.removeAllLoadedGraphs();
     }
@@ -185,36 +188,60 @@ class LoadGraphProcTest extends ProcTestBase {
 
     @Test
     void shouldLoadGraphWithMultipleRelationshipProperties() throws KernelException {
+        GraphDatabaseAPI testLocalDb = TestDatabaseCreator.createTestDatabase();
+        testLocalDb.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(LoadGraphProc.class);
+
+        String testGraph =
+                "CREATE" +
+                "  (a: Node)" +
+                ", (b: Node)" +
+                ", (a)-[:TYPE_1 { weight: 42.1, cost: 1 }]->(b)" +
+                ", (a)-[:TYPE_1 { weight: 43.2, cost: 2 }]->(b)" +
+                ", (a)-[:TYPE_2 { weight: 44.3, cost: 3 }]->(b)" +
+                ", (a)-[:TYPE_2 { weight: 45.4, cost: 4 }]->(b)";
+
+        testLocalDb.execute(testGraph);
+
         String loadQuery = "CALL algo.graph.load(" +
-                           "    'foo', '', '', {" +
+                           "    'aggGraph', 'Node', 'TYPE_1', {" +
                            "        relationshipProperties: {" +
-                           "            foo: {" +
+                           "            sumWeight: {" +
                            "                property: 'weight'," +
                            "                aggregate: 'SUM'" +
                            "            }," +
-                           "            bar: {" +
-                           "                property: 'weight2'," +
+                           "            maxCost: {" +
+                           "                property: 'cost'," +
                            "                aggregate: 'MAX'" +
                            "            }" +
                            "        }" +
                            "    }" +
                            ")";
 
-        runQuery(loadQuery, db, row -> {
+        runQuery(loadQuery, testLocalDb, row -> {
             Map<String, Object> relProperties = (Map<String, Object>) row.get("relationshipProperties");
             assertEquals(2, relProperties.size());
 
-            Map<String, Object> foo = (Map<String, Object>) relProperties.get("foo");
-            Map<String, Object> bar = (Map<String, Object>) relProperties.get("bar");
+            Map<String, Object> foo = (Map<String, Object>) relProperties.get("sumWeight");
+            Map<String, Object> bar = (Map<String, Object>) relProperties.get("maxCost");
 
             assertEquals("weight", foo.get("property").toString());
             assertEquals("SUM", foo.get("aggregate").toString());
 
-            assertEquals("weight2", bar.get("property").toString());
+            assertEquals("cost", bar.get("property").toString());
             assertEquals("MAX", bar.get("aggregate").toString());
         });
-    }
 
+        Graph g = LoadGraphFactory.getAll("aggGraph");
+
+        assertEquals(2, g.nodeCount());
+        assertEquals(2, g.relationshipCount());
+
+        assertOutRelationships(g, 0, 1, 1);
+        assertOutWeightsWithDelta(g, 1E-3, 0, 85.3, 2.0);
+
+        LoadGraphFactory.remove("aggGraph");
+        testLocalDb.shutdown();
+    }
 
     @Test
     void shouldComputeMemoryEstimationForHuge() {
@@ -553,9 +580,9 @@ class LoadGraphProcTest extends ProcTestBase {
                                ")";
         String loadQuery = graph.equals("cypher")
                 ? String.format(
-                        queryTemplate,
-                        ALL_NODES_QUERY,
-                        "'MATCH (s)<--(t) RETURN id(s) AS source, id(t) AS target'")
+                queryTemplate,
+                ALL_NODES_QUERY,
+                "'MATCH (s)<--(t) RETURN id(s) AS source, id(t) AS target'")
                 : String.format(queryTemplate, "null", "null");
         runQuery(loadQuery, db, singletonMap("graph", graph));
 

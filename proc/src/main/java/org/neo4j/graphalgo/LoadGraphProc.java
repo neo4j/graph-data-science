@@ -142,6 +142,7 @@ public final class LoadGraphProc extends BaseProc {
                         PropertyMapping.of(LabelPropagation.SEED_TYPE, nodeProperty, 0.0D),
                         PropertyMapping.of(LabelPropagation.WEIGHT_TYPE, nodeWeight, 1.0D)
                 )
+                .withRelationshipProperties(config.getRelationshipProperties())
                 .withDirection(direction);
 
         // TODO: required to be backwards-compatible with the `relationshipWeight` parameter.

@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core;
 
+import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraph;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
@@ -44,6 +45,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static java.util.Arrays.asList;
+import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES;
 
 /**
  * Wrapper around configuration options map
@@ -235,6 +237,14 @@ public class ProcedureConfiguration {
 
     public String getWeightProperty() {
         return getString(ProcedureConstants.PROPERTY_PARAM, null);
+    }
+
+    public PropertyMappings getRelationshipProperties() {
+        Object relationShipProperties = get(RELATIONSHIP_PROPERTIES, null);
+        if (relationShipProperties != null) {
+            return PropertyMappings.fromObject(relationShipProperties);
+        }
+        return PropertyMappings.EMPTY;
     }
 
     public double getWeightPropertyDefaultValue(double defaultValue) {

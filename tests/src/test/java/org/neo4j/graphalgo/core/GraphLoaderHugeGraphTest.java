@@ -19,9 +19,6 @@
  */
 package org.neo4j.graphalgo.core;
 
-import com.carrotsearch.hppc.DoubleArrayList;
-import com.carrotsearch.hppc.LongArrayList;
-import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,12 +33,10 @@ import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.loading.GraphByType;
 import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
-import org.neo4j.graphalgo.core.utils.AscendingLongComparator;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Arrays;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -50,6 +45,9 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.neo4j.graphalgo.GraphHelper.assertInRelationships;
+import static org.neo4j.graphalgo.GraphHelper.assertOutRelationships;
+import static org.neo4j.graphalgo.GraphHelper.assertOutWeights;
 
 class GraphLoaderHugeGraphTest {
 
@@ -90,10 +88,10 @@ class GraphLoaderHugeGraphTest {
                 .load(graphImpl);
 
         assertEquals(4L, graph.nodeCount());
-        checkOutRelationships(graph, 0, 0, 1);
-        checkOutRelationships(graph, 1, 1, 2, 3);
-        checkOutRelationships(graph, 2);
-        checkOutRelationships(graph, 3);
+        assertOutRelationships(graph, 0, 0, 1);
+        assertOutRelationships(graph, 1, 1, 2, 3);
+        assertOutRelationships(graph, 2);
+        assertOutRelationships(graph, 3);
     }
 
     @AllGraphTypesTest
@@ -122,10 +120,10 @@ class GraphLoaderHugeGraphTest {
                 .load(graphImpl);
 
         assertEquals(4L, graph.nodeCount());
-        checkOutRelationships(graph, 0, 0, 1);
-        checkOutRelationships(graph, 1, 1, 2, 3);
-        checkOutRelationships(graph, 2);
-        checkOutRelationships(graph, 3);
+        assertOutRelationships(graph, 0, 0, 1);
+        assertOutRelationships(graph, 1, 1, 2, 3);
+        assertOutRelationships(graph, 2);
+        assertOutRelationships(graph, 3);
     }
 
     @AllGraphTypesTest
@@ -154,15 +152,15 @@ class GraphLoaderHugeGraphTest {
 
         assertEquals(4L, graph.nodeCount());
         if (graphImpl == CypherGraphFactory.class) {
-            checkOutRelationships(graph, 0, 0);
-            checkOutRelationships(graph, 1, 0, 1);
-            checkOutRelationships(graph, 2, 1);
-            checkOutRelationships(graph, 3, 1);
+            assertOutRelationships(graph, 0, 0);
+            assertOutRelationships(graph, 1, 0, 1);
+            assertOutRelationships(graph, 2, 1);
+            assertOutRelationships(graph, 3, 1);
         } else {
-            checkInRelationships(graph, 0, 0);
-            checkInRelationships(graph, 1, 0, 1);
-            checkInRelationships(graph, 2, 1);
-            checkInRelationships(graph, 3, 1);
+            assertInRelationships(graph, 0, 0);
+            assertInRelationships(graph, 1, 0, 1);
+            assertInRelationships(graph, 2, 1);
+            assertInRelationships(graph, 3, 1);
         }
     }
 
@@ -193,27 +191,27 @@ class GraphLoaderHugeGraphTest {
         assertEquals(4L, graph.nodeCount());
 
         if (graphImpl == CypherGraphFactory.class) {
-            checkOutRelationships(graph, 0, 0, 1);
-            checkOutRelationships(graph, 1, 0, 1, 2, 3);
-            checkOutRelationships(graph, 2, 1);
-            checkOutRelationships(graph, 3, 1);
+            assertOutRelationships(graph, 0, 0, 1);
+            assertOutRelationships(graph, 1, 0, 1, 2, 3);
+            assertOutRelationships(graph, 2, 1);
+            assertOutRelationships(graph, 3, 1);
         } else {
-            checkOutRelationships(graph, 0, 0, 1);
-            checkInRelationships(graph, 0, 0);
+            assertOutRelationships(graph, 0, 0, 1);
+            assertInRelationships(graph, 0, 0);
 
-            checkOutRelationships(graph, 1, 1, 2, 3);
-            checkInRelationships(graph, 1, 0, 1);
+            assertOutRelationships(graph, 1, 1, 2, 3);
+            assertInRelationships(graph, 1, 0, 1);
 
-            checkOutRelationships(graph, 2);
-            checkInRelationships(graph, 2, 1);
+            assertOutRelationships(graph, 2);
+            assertInRelationships(graph, 2, 1);
 
-            checkOutRelationships(graph, 3);
-            checkInRelationships(graph, 3, 1);
+            assertOutRelationships(graph, 3);
+            assertInRelationships(graph, 3, 1);
         }
     }
 
     @AllGraphTypesTest
-    void undirectedWithDeduplicatoin(Class<? extends GraphFactory> graphImpl) {
+    void undirectedWithDeduplication(Class<? extends GraphFactory> graphImpl) {
         assumeTrue(graphImpl != GraphViewFactory.class);
         db.execute("" +
                    "CREATE (a:Node),(b:Node),(c:Node),(d:Node) " +
@@ -240,10 +238,10 @@ class GraphLoaderHugeGraphTest {
                 .load(graphImpl);
 
         assertEquals(4L, graph.nodeCount());
-        checkOutRelationships(graph, 0, 0, 1);
-        checkOutRelationships(graph, 1, 0, 1, 2, 3);
-        checkOutRelationships(graph, 2, 1);
-        checkOutRelationships(graph, 3, 1);
+        assertOutRelationships(graph, 0, 0, 1);
+        assertOutRelationships(graph, 1, 0, 1, 2, 3);
+        assertOutRelationships(graph, 2, 1);
+        assertOutRelationships(graph, 3, 1);
     }
 
     @AllGraphTypesTest
@@ -275,10 +273,10 @@ class GraphLoaderHugeGraphTest {
                 .load(graphImpl);
 
         assertEquals(4L, graph.nodeCount());
-        checkOutRelationships(graph, 0, 0, 0, 1);
-        checkOutRelationships(graph, 1, 0, 1, 1, 2, 3);
-        checkOutRelationships(graph, 2, 1);
-        checkOutRelationships(graph, 3, 1);
+        assertOutRelationships(graph, 0, 0, 0, 1);
+        assertOutRelationships(graph, 1, 0, 1, 1, 2, 3);
+        assertOutRelationships(graph, 2, 1);
+        assertOutRelationships(graph, 3, 1);
     }
 
     @AllGraphTypesTest
@@ -339,8 +337,8 @@ class GraphLoaderHugeGraphTest {
                 .load(graphImpl);
 
         assertEquals(2L, graph.nodeCount());
-        checkOutRelationships(graph, 0, 0, 1);
-        checkOutRelationships(graph, 1, 0);
+        assertOutRelationships(graph, 0, 0, 1);
+        assertOutRelationships(graph, 1, 0);
     }
 
     @AllGraphTypesTest
@@ -390,10 +388,10 @@ class GraphLoaderHugeGraphTest {
                 .load(graphImpl);
 
         assertEquals(4L, graph.nodeCount());
-        checkOutRelationships(graph, 0, 0, 1);
-        checkOutRelationships(graph, 1, 0, 1, 2, 3);
-        checkOutRelationships(graph, 2, 1);
-        checkOutRelationships(graph, 3, 1);
+        assertOutRelationships(graph, 0, 0, 1);
+        assertOutRelationships(graph, 1, 0, 1, 2, 3);
+        assertOutRelationships(graph, 2, 1);
+        assertOutRelationships(graph, 3, 1);
     }
 
     @Test
@@ -419,17 +417,17 @@ class GraphLoaderHugeGraphTest {
 
         Graph p1 = graph.loadGraph("", Optional.of("p1"));
         assertEquals(4L, p1.nodeCount());
-        checkOutWeights(p1, 0, 42, 43, 44);
-        checkOutWeights(p1, 1, 45, 46);
-        checkOutWeights(p1, 2);
-        checkOutWeights(p1, 3);
+        assertOutWeights(p1, 0, 42, 43, 44);
+        assertOutWeights(p1, 1, 45, 46);
+        assertOutWeights(p1, 2);
+        assertOutWeights(p1, 3);
 
         Graph p2 = graph.loadGraph("", Optional.of("p2"));
         assertEquals(4L, p2.nodeCount());
-        checkOutWeights(p2, 0, 1337, 1338, 1339);
-        checkOutWeights(p2, 1, 1340, 1341);
-        checkOutWeights(p2, 2);
-        checkOutWeights(p2, 3);
+        assertOutWeights(p2, 0, 1337, 1338, 1339);
+        assertOutWeights(p2, 1, 1340, 1341);
+        assertOutWeights(p2, 2);
+        assertOutWeights(p2, 3);
     }
 
     @Test
@@ -455,7 +453,8 @@ class GraphLoaderHugeGraphTest {
                         .build(HugeGraphFactory.class)
                         .loadGraphs());
 
-        assertThat(ex.getMessage(),
+        assertThat(
+                ex.getMessage(),
                 containsString(
                         "Conflicting relationship property deduplication strategies, it is not allowed to mix `NONE` with aggregations."));
     }
@@ -500,13 +499,13 @@ class GraphLoaderHugeGraphTest {
 
         Graph p1 = graph.loadGraph("", Optional.of("p1"));
         assertEquals(4L, p1.nodeCount());
-        checkOutWeights(p1, 0, expectedNodeAP1);
-        checkOutWeights(p1, 1, expectedNodeBP1);
+        assertOutWeights(p1, 0, expectedNodeAP1);
+        assertOutWeights(p1, 1, expectedNodeBP1);
 
         Graph p2 = graph.loadGraph("", Optional.of("p2"));
         assertEquals(4L, p2.nodeCount());
-        checkOutWeights(p2, 0, expectedNodeAP2);
-        checkOutWeights(p2, 1, expectedNodeBP2);
+        assertOutWeights(p2, 0, expectedNodeAP2);
+        assertOutWeights(p2, 1, expectedNodeBP2);
     }
 
     @ParameterizedTest
@@ -543,54 +542,12 @@ class GraphLoaderHugeGraphTest {
 
         Graph p1 = graph.loadGraph("", Optional.of("p1"));
         assertEquals(2L, p1.nodeCount());
-        checkOutWeights(p1, 0, expectedNodeAP1);
-        checkOutWeights(p1, 1, expectedNodeBP1);
+        assertOutWeights(p1, 0, expectedNodeAP1);
+        assertOutWeights(p1, 1, expectedNodeBP1);
 
         Graph p2 = graph.loadGraph("", Optional.of("p2"));
         assertEquals(2L, p2.nodeCount());
-        checkOutWeights(p2, 0, expectedNodeAP2);
-        checkOutWeights(p2, 1, expectedNodeBP2);
-    }
-
-    private void checkOutRelationships(Graph graph, long node, long... expected) {
-        LongArrayList idList = new LongArrayList();
-        graph.forEachOutgoing(node, (s, t) -> {
-            idList.add(t);
-            return true;
-        });
-        final long[] ids = idList.toArray();
-        Arrays.sort(ids);
-        Arrays.sort(expected);
-        assertArrayEquals(expected, ids);
-    }
-
-    private void checkOutWeights(Graph graph, long node, double... expected) {
-        LongArrayList idList = new LongArrayList(expected.length);
-        DoubleArrayList weightList = new DoubleArrayList(expected.length);
-        graph.forEachRelationship(node, Direction.OUTGOING, (s, t, w) -> {
-            idList.add(t);
-            weightList.add(w);
-            return true;
-        });
-        long[] ids = idList.toArray();
-        int[] order = IndirectSort.mergesort(0, ids.length, new AscendingLongComparator(ids));
-        DoubleArrayList sortedWeights = new DoubleArrayList(ids.length);
-        for (int index : order) {
-            sortedWeights.add(weightList.get(index));
-        }
-        double[] weights = sortedWeights.toArray();
-        assertArrayEquals(expected, weights);
-    }
-
-    private void checkInRelationships(Graph graph, long node, long... expected) {
-        LongArrayList idList = new LongArrayList();
-        graph.forEachIncoming(node, (s, t) -> {
-            idList.add(t);
-            return true;
-        });
-        long[] ids = idList.toArray();
-        Arrays.sort(ids);
-        Arrays.sort(expected);
-        assertArrayEquals(expected, ids);
+        assertOutWeights(p2, 0, expectedNodeAP2);
+        assertOutWeights(p2, 1, expectedNodeBP2);
     }
 }

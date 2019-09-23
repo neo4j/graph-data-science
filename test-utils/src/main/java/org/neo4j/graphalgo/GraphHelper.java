@@ -20,11 +20,18 @@
 
 package org.neo4j.graphalgo;
 
+import com.carrotsearch.hppc.DoubleArrayList;
+import com.carrotsearch.hppc.LongArrayList;
+import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.AscendingLongComparator;
 import org.neo4j.graphdb.Direction;
 
+import java.util.Arrays;
 import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public final class GraphHelper {
 
@@ -46,6 +53,60 @@ public final class GraphHelper {
                     return true;
                 });
         return outWeights.build().toArray();
+    }
+
+    public static void assertOutWeights(Graph graph, long node, double... expected) {
+        assertOutWeightsWithDelta(graph, 0, node, expected);
+    }
+
+    public static void assertInWeights(Graph graph, long node, double... expected) {
+        assertInWeightsWithDelta(graph, 0, node, expected);
+    }
+
+    public static void assertOutWeightsWithDelta(Graph graph, double delta, long node, double... expected) {
+        assertWeights(graph, Direction.OUTGOING, delta, node, expected);
+    }
+
+    public static void assertInWeightsWithDelta(Graph graph, double delta, long node, double... expected) {
+        assertWeights(graph, Direction.INCOMING, delta, node, expected);
+    }
+
+    private static void assertWeights(Graph graph, Direction direction, double delta, long node, double... expected) {
+        LongArrayList idList = new LongArrayList(expected.length);
+        DoubleArrayList weightList = new DoubleArrayList(expected.length);
+        graph.forEachRelationship(node, direction, (s, t, w) -> {
+            idList.add(t);
+            weightList.add(w);
+            return true;
+        });
+        long[] ids = idList.toArray();
+        int[] order = IndirectSort.mergesort(0, ids.length, new AscendingLongComparator(ids));
+        DoubleArrayList sortedWeights = new DoubleArrayList(ids.length);
+        for (int index : order) {
+            sortedWeights.add(weightList.get(index));
+        }
+        double[] weights = sortedWeights.toArray();
+        assertArrayEquals(expected, weights, delta);
+    }
+
+    public static void assertOutRelationships(Graph graph, long node, long... expected) {
+        assertRelationships(graph, Direction.OUTGOING, node, expected);
+    }
+
+    public static void assertInRelationships(Graph graph, long node, long... expected) {
+        assertRelationships(graph, Direction.INCOMING, node, expected);
+    }
+
+    private static void assertRelationships(Graph graph, Direction direction, long node, long... expected) {
+        LongArrayList idList = new LongArrayList();
+        graph.forEachRelationship(node, direction, (s, t) -> {
+            idList.add(t);
+            return true;
+        });
+        long[] ids = idList.toArray();
+        Arrays.sort(ids);
+        Arrays.sort(expected);
+        assertArrayEquals(expected, ids);
     }
 
     private GraphHelper() {

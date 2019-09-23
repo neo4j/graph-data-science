@@ -39,6 +39,8 @@ public final class PropertyMappings implements Iterable<PropertyMapping> {
 
     private final PropertyMapping[] mappings;
 
+    public static final PropertyMappings EMPTY = new PropertyMappings();
+
     public static PropertyMappings of(PropertyMapping... mappings) {
         if (mappings == null) {
             mappings = new PropertyMapping[0];
