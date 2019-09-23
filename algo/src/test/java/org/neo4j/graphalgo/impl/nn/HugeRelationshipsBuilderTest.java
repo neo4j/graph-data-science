@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.impl.nn;
 
 import com.carrotsearch.hppc.LongArrayList;
 import org.apache.commons.lang3.ArrayUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.loader.IdMap;
 import org.neo4j.graphalgo.core.huge.loader.IdMapBuilder;
@@ -35,17 +35,17 @@ import org.neo4j.graphalgo.impl.results.SimilarityResult;
 import org.neo4j.graphalgo.impl.similarity.AnnTopKConsumer;
 import org.neo4j.graphalgo.impl.similarity.WeightedInput;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsArrayContainingInAnyOrder.arrayContainingInAnyOrder;
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.collection.ArrayMatching.arrayContainingInAnyOrder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class HugeRelationshipsBuilderTest {
+class HugeRelationshipsBuilderTest {
+
     @Test
-    public void findOutgoing() {
+    void findOutgoing() {
         int numberOfNodes = 100;
         IdsAndProperties nodes = createNodes(numberOfNodes);
 
@@ -71,7 +71,7 @@ public class HugeRelationshipsBuilderTest {
     }
 
     @Test
-    public void findIncoming() {
+    void findIncoming() {
         int numberOfNodes = 100;
         IdsAndProperties nodes = createNodes(numberOfNodes);
 
@@ -97,7 +97,7 @@ public class HugeRelationshipsBuilderTest {
     }
 
     @Test
-    public void ignoreUnmappedNodes() {
+    void ignoreUnmappedNodes() {
         IdsAndProperties nodes = buildNodes(new WeightedInput[] {
                 new WeightedInput(0, new double[] { 1.0, 0.9, 0.8}),
                 new WeightedInput(1, new double[] { 1.0, 0.9, 0.8}),

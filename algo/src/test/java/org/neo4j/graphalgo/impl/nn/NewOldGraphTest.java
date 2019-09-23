@@ -21,7 +21,7 @@
 package org.neo4j.graphalgo.impl.nn;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.huge.loader.IdMap;
 import org.neo4j.graphalgo.core.huge.loader.IdMapBuilder;
 import org.neo4j.graphalgo.core.huge.loader.IdsAndProperties;
@@ -34,14 +34,15 @@ import org.roaringbitmap.RoaringBitmap;
 import java.util.Collections;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsArrayContainingInAnyOrder.arrayContainingInAnyOrder;
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.collection.ArrayMatching.arrayContainingInAnyOrder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.impl.nn.ANNUtils.hugeGraph;
 import static org.neo4j.graphalgo.impl.nn.ANNUtils.initializeRoaringBitmaps;
 
-public class NewOldGraphTest {
+class NewOldGraphTest {
+
     @Test
-    public void allRelationshipsNewByDefault() {
+    void allRelationshipsNewByDefault() {
 
         int numberOfNodes = 5;
         HugeLongArrayBuilder idMapBuilder = HugeLongArrayBuilder.of(numberOfNodes, AllocationTracker.EMPTY);
@@ -72,7 +73,7 @@ public class NewOldGraphTest {
     }
 
     @Test
-    public void newShouldFilterVisitedRelationships() {
+    void newShouldFilterVisitedRelationships() {
 
         int numberOfNodes = 5;
         HugeLongArrayBuilder idMapBuilder = HugeLongArrayBuilder.of(numberOfNodes, AllocationTracker.EMPTY);
@@ -105,7 +106,7 @@ public class NewOldGraphTest {
     }
 
     @Test
-    public void oldShouldReturnVisitedRelationships() {
+    void oldShouldReturnVisitedRelationships() {
 
         int numberOfNodes = 5;
         HugeLongArrayBuilder idMapBuilder = HugeLongArrayBuilder.of(numberOfNodes, AllocationTracker.EMPTY);

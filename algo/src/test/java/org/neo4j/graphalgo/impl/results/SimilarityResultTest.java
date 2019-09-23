@@ -19,14 +19,15 @@
  */
 package org.neo4j.graphalgo.impl.results;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.impl.similarity.TopKConsumer;
 
 import java.util.Arrays;
 
-public class SimilarityResultTest {
+class SimilarityResultTest {
+
     @Test
-    public void equality() {
+    void equality() {
         SimilarityResult one = new SimilarityResult(
             5,10,100,100,0,0.014577465637590655,false,false
         );
@@ -38,7 +39,7 @@ public class SimilarityResultTest {
     }
 
     @Test
-    public void topK() {
+    void topK() {
 
         TopKConsumer<SimilarityResult> consumer = new TopKConsumer<>(3, SimilarityResult.DESCENDING);
 
@@ -57,7 +58,7 @@ public class SimilarityResultTest {
     }
 
     @Test
-    public void binarySearch() {
+    void binarySearch() {
         SimilarityResult one = new SimilarityResult(
                 5,10,100,100,0,0.014577465637590655,false,false
         );

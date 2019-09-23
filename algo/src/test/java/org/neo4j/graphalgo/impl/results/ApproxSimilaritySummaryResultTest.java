@@ -19,13 +19,14 @@
  */
 package org.neo4j.graphalgo.impl.results;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ApproxSimilaritySummaryResultTest {
+class ApproxSimilaritySummaryResultTest {
+
     @Test
-    public void computeScanRate() {
+    void computeScanRate() {
         ApproxSimilaritySummaryResult result = new ApproxSimilaritySummaryResult(
                 100,
                 0,

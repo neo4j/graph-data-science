@@ -77,10 +77,10 @@ class TopKConsumerTest {
     
     private static final int RUNS = 10000;
     private static final int COUNT = 50000;
-    public static final int WINDOW_SIZE = 20;
+    private static final int WINDOW_SIZE = 20;
 
     @Test
-    public void testFindTopKHeap4() {
+    void testFindTopKHeap4() {
         Collection<Item> topItems = TopKConsumer.topK(asList(ITEM1, ITEM3, ITEM2, ITEM4), 4, Item::compareTo);
         assertEquals(asList(ITEM4,ITEM3,ITEM2,ITEM1),topItems);
         for (Item topItem : topItems) {
@@ -89,7 +89,7 @@ class TopKConsumerTest {
     }
 
     @Test
-    public void testFindTopKHeap2of4() {
+    void testFindTopKHeap2of4() {
         Collection<Item> topItems = TopKConsumer.topK(asList(ITEM2, ITEM4), 4, Item::compareTo);
         assertEquals(asList(ITEM4,ITEM2),topItems);
         for (Item topItem : topItems) {
@@ -97,8 +97,7 @@ class TopKConsumerTest {
         }
     }
     @Test
-
-    public void testFindTopKHeap4of3() {
+    void testFindTopKHeap4of3() {
         Collection<Item> topItems = TopKConsumer.topK(asList(ITEM2, ITEM1, ITEM4, ITEM3), 3, Item::compareTo);
         assertEquals(asList(ITEM4,ITEM3,ITEM2),topItems);
         for (Item topItem : topItems) {
@@ -107,7 +106,7 @@ class TopKConsumerTest {
     }
 
     @Test
-    public void testFindTopKHeap() {
+    void testFindTopKHeap() {
         Collection<Item> topItems = TopKConsumer.topK(asList(ITEM1, ITEM3, ITEM2, ITEM4), 2, Item::compareTo);
         assertEquals(asList(ITEM4,ITEM3),topItems);
         for (Item topItem : topItems) {
@@ -116,7 +115,7 @@ class TopKConsumerTest {
     }
 
     @Test
-    public void testFindTopKHeap2() {
+    void testFindTopKHeap2() {
         List<Item> topItems = TopKConsumer.topK(asList(ITEM1, ITEM3, ITEM2, ITEM4), 2, Item::compareTo);
         assertEquals(asList(ITEM4,ITEM3),topItems);
         for (Item topItem : topItems) {
@@ -125,7 +124,7 @@ class TopKConsumerTest {
     }
 
     @Test
-    public void testFindTopKHeapPerf() {
+    void testFindTopKHeapPerf() {
         assumeTrue(System.getProperty("neo4j.graphalgo.benchmark")!=null, "benchmark disabled");
         List<Item> items = createItems(COUNT);
         List<Item> topItems = null;
@@ -144,7 +143,7 @@ class TopKConsumerTest {
     }
 
     @Test
-    public void mergeNoOverlapConsumers() {
+    void mergeNoOverlapConsumers() {
         TopKConsumer<Item> rootConsumer = new TopKConsumer<>(3, Item::compareTo);
         TopKConsumer<Item> comparator1 = new TopKConsumer<>(3, Item::compareTo);
         TopKConsumer<Item> comparator2 = new TopKConsumer<>(3, Item::compareTo);
@@ -174,7 +173,7 @@ class TopKConsumerTest {
     }
 
     @Test
-    public void mergeNotFullConsumer() {
+    void mergeNotFullConsumer() {
         TopKConsumer<Item> rootConsumer = new TopKConsumer<>(3, Item::compareTo);
         TopKConsumer<Item> comparator1 = new TopKConsumer<>(3, Item::compareTo);
         TopKConsumer<Item> comparator2 = new TopKConsumer<>(3, Item::compareTo);
@@ -189,7 +188,7 @@ class TopKConsumerTest {
     }
 
     @Test
-    public void addingDuplicateItems() {
+    void addingDuplicateItems() {
         TopKConsumer<Item> consumer = new TopKConsumer<>(3, Item::compareTo);
         asList(ITEM3, ITEM3, ITEM3).forEach(consumer::apply);
         assertThat(consumer.list(), contains(ITEM3));

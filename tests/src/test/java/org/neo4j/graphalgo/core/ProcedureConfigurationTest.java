@@ -107,21 +107,21 @@ class ProcedureConfigurationTest {
     }
 
     @Test
-    public void skipValueDefault() {
+    void skipValueDefault() {
         Map<String, Object> map = Collections.emptyMap();
         ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
         assertEquals(Double.NaN, procedureConfiguration.getSkipValue(Double.NaN), 0.01);
     }
 
     @Test
-    public void skipValueAllowNull() {
+    void skipValueAllowNull() {
         Map<String, Object> map = MapUtil.map("skipValue", null);
         ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
         assertNull(procedureConfiguration.getSkipValue(Double.NaN));
     }
 
     @Test
-    public void skipValueAllowIntegers() {
+    void skipValueAllowIntegers() {
         Map<String, Object> map = MapUtil.map("skipValue", 0);
         ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
         assertEquals(0.0, procedureConfiguration.getSkipValue(Double.NaN), 0.0);

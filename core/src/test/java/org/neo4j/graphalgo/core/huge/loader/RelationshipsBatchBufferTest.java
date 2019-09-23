@@ -20,13 +20,14 @@
 
 package org.neo4j.graphalgo.core.huge.loader;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class RelationshipsBatchBufferTest {
+class RelationshipsBatchBufferTest {
+
     @Test
-    public void flushBufferWhenFull() {
+    void flushBufferWhenFull() {
         RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(null, -1, 1);
         buffer.add(0, 1, -1, -1);
         assertTrue(buffer.isFull());

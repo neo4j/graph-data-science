@@ -20,14 +20,14 @@
 
 package org.neo4j.graphalgo.impl.nn;
 
-import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Random;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ANNUtilsTest {
 
@@ -40,22 +40,22 @@ public class ANNUtilsTest {
     @Test
     public void kLessThanInputs() {
         Set<Integer> integers = ANNUtils.selectRandomNeighbors(3, 5, 1, new Random());
-        MatcherAssert.assertThat(integers, Matchers.not(Matchers.hasItem(1)));
-        MatcherAssert.assertThat(integers, Matchers.hasSize(3));
+        assertThat(integers, Matchers.not(Matchers.hasItem(1)));
+        assertThat(integers, Matchers.hasSize(3));
     }
 
     @Test
     public void kGreaterThanInputs() {
         Set<Integer> integers = ANNUtils.selectRandomNeighbors(7, 5, 1, new Random());
-        MatcherAssert.assertThat(integers, Matchers.not(Matchers.hasItem(1)));
-        MatcherAssert.assertThat(integers, Matchers.hasSize(4));
+        assertThat(integers, Matchers.not(Matchers.hasItem(1)));
+        assertThat(integers, Matchers.hasSize(4));
     }
 
     @Test
     public void kEqualToInputs() {
         Set<Integer> integers = ANNUtils.selectRandomNeighbors(5, 5, 3, new Random());
-        MatcherAssert.assertThat(integers, Matchers.not(Matchers.hasItem(3)));
-        MatcherAssert.assertThat(integers, Matchers.hasSize(4));
+        assertThat(integers, Matchers.not(Matchers.hasItem(3)));
+        assertThat(integers, Matchers.hasSize(4));
     }
 
 }
