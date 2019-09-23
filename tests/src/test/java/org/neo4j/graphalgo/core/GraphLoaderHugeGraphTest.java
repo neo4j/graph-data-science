@@ -400,34 +400,81 @@ class GraphLoaderHugeGraphTest {
                    "CREATE (a:Node),(b:Node),(c:Node),(d:Node) " +
                    "CREATE" +
                    " (a)-[:REL {p1: 42, p2: 1337}]->(a)," +
-                   " (a)-[:REL {p1: 43, p2: 1338}]->(a)," +
-                   " (a)-[:REL {p1: 44, p2: 1339}]->(b)," +
-                   " (b)-[:REL {p1: 45, p2: 1340}]->(c)," +
-                   " (b)-[:REL {p1: 46, p2: 1341}]->(d)");
+                   " (a)-[:REL {p1: 43, p2: 1338, p3: 10}]->(a)," +
+                   " (a)-[:REL {p1: 44, p2: 1339, p3: 10}]->(b)," +
+                   " (b)-[:REL {p1: 45, p2: 1340, p3: 10}]->(c)," +
+                   " (b)-[:REL {p1: 46, p2: 1341, p3: 10}]->(d)");
         GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT);
         GraphByType graph = graphLoader.withAnyLabel()
                 .withAnyRelationshipType()
                 .withRelationshipProperties(
-                        PropertyMapping.of("p1", "p1", 1.0, DeduplicationStrategy.NONE),
-                        PropertyMapping.of("p2", "p2", 2.0, DeduplicationStrategy.NONE)
+                        PropertyMapping.of("agg1", "p1", 1.0, DeduplicationStrategy.NONE),
+                        PropertyMapping.of("agg2", "p2", 2.0, DeduplicationStrategy.NONE),
+                        PropertyMapping.of("agg3", "p3", 2.0, DeduplicationStrategy.NONE)
                 )
                 .withDirection(Direction.OUTGOING)
                 .build(HugeGraphFactory.class)
                 .loadGraphs();
 
-        Graph p1 = graph.loadGraph("", Optional.of("p1"));
+        Graph p1 = graph.loadGraph("", Optional.of("agg1"));
         assertEquals(4L, p1.nodeCount());
         assertOutWeights(p1, 0, 42, 43, 44);
         assertOutWeights(p1, 1, 45, 46);
         assertOutWeights(p1, 2);
         assertOutWeights(p1, 3);
 
-        Graph p2 = graph.loadGraph("", Optional.of("p2"));
+        Graph p2 = graph.loadGraph("", Optional.of("agg2"));
         assertEquals(4L, p2.nodeCount());
         assertOutWeights(p2, 0, 1337, 1338, 1339);
         assertOutWeights(p2, 1, 1340, 1341);
         assertOutWeights(p2, 2);
         assertOutWeights(p2, 3);
+
+        Graph p3 = graph.loadGraph("", Optional.of("agg3"));
+        assertEquals(4L, p3.nodeCount());
+        assertOutWeights(p3, 0, 2, 10, 10);
+        assertOutWeights(p3, 1, 10, 10);
+        assertOutWeights(p3, 2);
+        assertOutWeights(p3, 3);
+    }
+
+    @Test
+    void multipleRelPropertiesWithDefaultValues() {
+        db.execute(
+                "CREATE" +
+                "  (a:Node)" +
+                ", (b:Node)" +
+                ", (a)-[:REL]->(a)" +
+                ", (a)-[:REL {p1: 39}]->(a)" +
+                ", (a)-[:REL {p1: 51}]->(a)" +
+                ", (b)-[:REL {p1: 45}]->(b)" +
+                ", (b)-[:REL]->(b)");
+        GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT);
+        GraphByType graph = graphLoader.withAnyLabel()
+                .withAnyRelationshipType()
+                .withRelationshipProperties(
+                        PropertyMapping.of("agg1", "p1", 1.0, DeduplicationStrategy.MIN),
+                        PropertyMapping.of("agg2", "p1", 50.0, DeduplicationStrategy.MAX),
+                        PropertyMapping.of("agg3", "p1", 3.0, DeduplicationStrategy.SUM)
+                )
+                .withDirection(Direction.OUTGOING)
+                .build(HugeGraphFactory.class)
+                .loadGraphs();
+
+        Graph p1 = graph.loadGraph("", Optional.of("agg1"));
+        assertEquals(2L, p1.nodeCount());
+        assertOutWeights(p1, 0, 1);
+        assertOutWeights(p1, 1, 1);
+
+        Graph p2 = graph.loadGraph("", Optional.of("agg2"));
+        assertEquals(2L, p2.nodeCount());
+        assertOutWeights(p2, 0, 51);
+        assertOutWeights(p2, 1, 50);
+
+        Graph p3 = graph.loadGraph("", Optional.of("agg3"));
+        assertEquals(2L, p3.nodeCount());
+        assertOutWeights(p3, 0, 93);
+        assertOutWeights(p3, 1, 48);
     }
 
     @Test
