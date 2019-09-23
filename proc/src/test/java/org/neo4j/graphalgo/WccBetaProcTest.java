@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class WccProcTest extends ProcTestBase {
+class WccBetaProcTest extends ProcTestBase {
 
     @BeforeAll
     static void setup() throws KernelException {
@@ -84,7 +84,7 @@ class WccProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testWCC(String graphImpl) {
-        String query = "CALL algo.wcc(" +
+        String query = "CALL algo.beta.wcc(" +
                        "    '', '', {" +
                        "        graph: $graph" +
                        "    }" +
@@ -99,7 +99,7 @@ class WccProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testWCCWithLabel(String graphImpl) {
-        String query = "CALL algo.wcc(" +
+        String query = "CALL algo.beta.wcc(" +
                        "    'Label', '', {" +
                        "        graph: $graph" +
                        "    }" +
@@ -116,7 +116,7 @@ class WccProcTest extends ProcTestBase {
     void testWCCWithSeed(String graphImpl) {
         Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
 
-        String query = "CALL algo.wcc(" +
+        String query = "CALL algo.beta.wcc(" +
                        "    '', '', {" +
                        "        graph: $graph, seedProperty: 'seedId'" +
                        "    }" +
@@ -149,7 +149,7 @@ class WccProcTest extends ProcTestBase {
     void testWCCReadAndWriteSeed(String graphImpl) {
         Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
 
-        String query = "CALL algo.wcc(" +
+        String query = "CALL algo.beta.wcc(" +
                        "    '', '', {" +
                        "        graph: $graph, seedProperty: 'seedId', writeProperty: 'seedId'" +
                        "    }" +
@@ -182,7 +182,7 @@ class WccProcTest extends ProcTestBase {
     void testWCCWithSeedAndConsecutive(String graphImpl) {
         Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
 
-        String query = "CALL algo.wcc(" +
+        String query = "CALL algo.beta.wcc(" +
                        "    '', '', {" +
                        "        graph: $graph, seedProperty: 'seedId', consecutiveIds: true" +
                        "    }" +
@@ -214,7 +214,7 @@ class WccProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testWCCWithConsecutiveIds(String graphImpl) {
-        String query = "CALL algo.wcc(" +
+        String query = "CALL algo.beta.wcc(" +
                        "    '', '', {" +
                        "        graph: $graph, consecutiveIds: true" +
                        "    }" +
@@ -234,7 +234,7 @@ class WccProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testWCCWriteBack(String graphImpl) {
-        String query = "CALL algo.wcc(" +
+        String query = "CALL algo.beta.wcc(" +
                        "    '', 'TYPE', {" +
                        "        write: true, graph: $graph" +
                        "    }" +
@@ -254,7 +254,7 @@ class WccProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testWCCWriteBackExplicitWriteProperty(String graphImpl) {
-        String query = "CALL algo.wcc(" +
+        String query = "CALL algo.beta.wcc(" +
                        "    '', 'TYPE', {" +
                        "        write: true, graph: $graph, writeProperty: 'unionFind'" +
                        "    }" +
@@ -274,7 +274,7 @@ class WccProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testWCCStream(String graphImpl) {
-        String query = "CALL algo.wcc.stream(" +
+        String query = "CALL algo.beta.wcc.stream(" +
                        "    '', 'TYPE', {" +
                        "        graph: $graph" +
                        "    }" +
@@ -288,7 +288,7 @@ class WccProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testThresholdWCCStream(String graphImpl) {
-        String query = "CALL algo.wcc.stream(" +
+        String query = "CALL algo.beta.wcc.stream(" +
                        "    '', 'TYPE', {" +
                        "        weightProperty: 'cost', defaultValue: 10.0, threshold: 5.0, concurrency: 1, graph: $graph" +
                        "    }" +
@@ -303,7 +303,7 @@ class WccProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testThresholdWCCLowThreshold(String graphImpl) {
-        String query = "CALL algo.wcc.stream(" +
+        String query = "CALL algo.beta.wcc.stream(" +
                        "    '', 'TYPE', {" +
                        "        weightProperty: 'cost', defaultValue: 10.0, concurrency: 1, threshold: 3.14, graph: $graph" +
                        "    }" +
