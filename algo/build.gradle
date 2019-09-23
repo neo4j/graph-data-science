@@ -1,27 +1,15 @@
 description = 'Neo4j Graph Algorithms :: Algorithms'
 
-configurations {
-    testCompile {
-        exclude(group: 'com.carrotsearch.randomizedtesting', module: 'randomizedtesting-runner')
-        exclude(group: 'junit', module: 'junit')
-    }
-}
-
 dependencies {
     compile project(':core')
 
     compile group: 'io.dropwizard.metrics',     name: 'metrics-core',       version: ver.'metrics-core'
     compile group: 'org.hdrhistogram',          name: 'HdrHistogram',       version: ver.'HdrHistogram'
     compile group: 'org.roaringbitmap',         name: 'RoaringBitmap',      version: ver.'RoaringBitmap'
+    
+    compileOnly group: 'org.neo4j',             name: 'neo4j',              version: ver.'neo4j'
 
     testCompile project(':test-utils')
-
-    compileOnly group: 'org.neo4j',             name: 'neo4j',              version: ver.'neo4j'
-    testCompile group: 'org.neo4j.community',   name: 'it-test-support',    version: ver.'neo4j'
-
-    testCompile     platform(dep.junit5bom)
-    testCompile     dep.junit5jupiter
-    testRuntimeOnly dep.junit5platform
 }
 
 task javadocJar(type: Jar) {

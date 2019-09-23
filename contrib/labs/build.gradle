@@ -1,12 +1,5 @@
 description = 'Neo4j Labs :: Graph Algorithms'
 
-configurations {
-    testCompile {
-        exclude(group: 'com.carrotsearch.randomizedtesting', module: 'randomizedtesting-runner')
-        exclude(group: 'junit', module: 'junit')
-    }
-}
-
 dependencies {
     compile project(':algo')
 
@@ -17,15 +10,8 @@ dependencies {
 
     compileOnly group: 'org.neo4j',             name: 'neo4j',                  version: ver.'neo4j'
     compileOnly group: 'org.neo4j',             name: 'neo4j-slf4j',            version: ver.'neo4j'
-    
-    // TODO: enable and fix annotation processor
-//    annotationProcessor group: 'net.biville.florent',   name: 'neo4j-sproc-compiler',   version: ver.'neo4j-sproc-compiler'
 
     testCompile project(':test-utils')
-    testCompile group: 'org.neo4j',     name: 'neo4j',                          version: ver.'neo4j'
-    testCompile group: 'org.neo4j',     name: 'neo4j-kernel',                   version: ver.'neo4j'
-    testCompile group: 'org.neo4j',     name: 'neo4j-kernel-api',               version: ver.'neo4j'
-    testCompile group: 'org.neo4j',     name: 'neo4j-io',                       version: ver.'neo4j'
     testCompile group: 'net.jqwik',     name: 'jqwik',                          version: ver.'jqwik'
 }
 

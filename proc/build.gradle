@@ -2,22 +2,12 @@ description = 'Neo4j Graph Algorithms :: Procedures'
 
 apply plugin: 'com.github.johnrengelman.shadow'
 
-configurations {
-    testCompile {
-        exclude(group: 'com.carrotsearch.randomizedtesting', module: 'randomizedtesting-runner')
-        exclude(group: 'junit', module: 'junit')
-    }
-}
-
 dependencies {
     compile project(':labs')
 
-    compileOnly group: 'org.neo4j',                   name: 'neo4j',                version: ver.'neo4j'
+    compileOnly group: 'org.neo4j', name: 'neo4j', version: ver.'neo4j'
 
     testCompile project(':test-utils')
-
-    testCompile group: 'org.neo4j.community',         name: 'it-test-support',      version: ver.'neo4j'
-    testCompile group: 'org.hamcrest',                name: 'hamcrest-library',     version: ver.'hamcrest'
 }
 
 task javadocJar(type: Jar) {

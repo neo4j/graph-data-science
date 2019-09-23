@@ -6,13 +6,7 @@ dependencies {
 
     compileOnly group: 'org.neo4j',              name: 'neo4j',              version: ver.'neo4j'
 
-    testCompile group: 'org.neo4j',              name: 'neo4j',              version: ver.'neo4j'
-    testCompile group: 'org.neo4j.community',    name: 'it-test-support',    version: ver.'neo4j'
-    testCompile group: 'org.hamcrest',           name: 'hamcrest-library',   version: ver.'hamcrest2'
-
-    testCompile     platform(dep.junit5bom)
-    testCompile     dep.junit5jupiter
-    testRuntimeOnly dep.junit5platform
+    testCompile project(':test-utils')
 }
 
 task javadocJar(type: Jar) {
