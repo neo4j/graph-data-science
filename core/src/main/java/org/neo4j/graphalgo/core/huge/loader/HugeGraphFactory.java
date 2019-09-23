@@ -82,36 +82,22 @@ public final class HugeGraphFactory extends GraphFactory {
         }
 
         // Relationship weight properties
-        if (dimensions.relProperties().weightId() != StatementConstants.NO_SUCH_PROPERTY_KEY) {
-            // Adjacency lists and Adjacency offsets
-            MemoryEstimation adjacencyListSize = AdjacencyList.uncompressedMemoryEstimation(setup.loadAsUndirected);
-            MemoryEstimation adjacencyOffsetsSetup = AdjacencyOffsets.memoryEstimation();
-            if (setup.loadOutgoing || setup.loadAsUndirected) {
-                builder.add("outgoing weights", adjacencyListSize);
-                builder.add("outgoing weight offsets", adjacencyOffsetsSetup);
+        for (PropertyMapping mapping : dimensions.relProperties()) {
+            if (mapping.exists()) {
+                // Adjacency lists and Adjacency offsets
+                MemoryEstimation adjacencyListSize = AdjacencyList.uncompressedMemoryEstimation(setup.loadAsUndirected);
+                MemoryEstimation adjacencyOffsetsSetup = AdjacencyOffsets.memoryEstimation();
+                if (setup.loadOutgoing || setup.loadAsUndirected) {
+                    builder.add("outgoing weights for " + mapping.neoPropertyKey(), adjacencyListSize);
+                    builder.add("outgoing weight offsets for " + mapping.neoPropertyKey(), adjacencyOffsetsSetup);
 
-            }
-            if (setup.loadIncoming && !setup.loadAsUndirected) {
-                builder.add("incoming weights", adjacencyListSize);
-                builder.add("incoming weight offsets", adjacencyOffsetsSetup);
+                }
+                if (setup.loadIncoming && !setup.loadAsUndirected) {
+                    builder.add("incoming weights for " + mapping.neoPropertyKey(), adjacencyListSize);
+                    builder.add("incoming weight offsets for " + mapping.neoPropertyKey(), adjacencyOffsetsSetup);
+                }
             }
         }
-//        for (PropertyMapping mapping : dimensions.relProperties()) {
-//            if (mapping.exists()) {
-//                // Adjacency lists and Adjacency offsets
-//                MemoryEstimation adjacencyListSize = HugeAdjacencyList.uncompressedMemoryEstimation(setup.loadAsUndirected);
-//                MemoryEstimation adjacencyOffsetsSetup = HugeAdjacencyOffsets.memoryEstimation();
-//                if (setup.loadOutgoing || setup.loadAsUndirected) {
-//                    builder.add("outgoing weights for " + mapping.propertyIdentifier(), adjacencyListSize);
-//                    builder.add("outgoing weight offsets for " + mapping.propertyIdentifier(), adjacencyOffsetsSetup);
-//
-//                }
-//                if (setup.loadIncoming && !setup.loadAsUndirected) {
-//                    builder.add("incoming weights for " + mapping.propertyIdentifier(), adjacencyListSize);
-//                    builder.add("incoming weight offsets for " + mapping.propertyIdentifier(), adjacencyOffsetsSetup);
-//                }
-//            }
-//        }
 
         // Adjacency lists and Adjacency offsets
         MemoryEstimation adjacencyListSize = AdjacencyList.compressedMemoryEstimation(setup.loadAsUndirected);
