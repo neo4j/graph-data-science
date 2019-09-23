@@ -188,7 +188,6 @@ We load this graph under the name `'wcc-graph'`, as below:
 CALL algo.graph.load('wcc-graph', 'User', 'LINK')
 YIELD name AS Name, nodes AS Nodes, relationships AS Relationships
 ----
-// TODO: verify these results now that Heavy is removed:
 
 .Results
 [opts="header",cols="1m,1m,1m"]
