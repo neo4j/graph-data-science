@@ -28,6 +28,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
+import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
@@ -49,6 +50,8 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonMap;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -207,7 +210,8 @@ class LoadGraphProcTest extends ProcTestBase {
                            "        relationshipProperties: {" +
                            "            sumWeight: {" +
                            "                property: 'weight'," +
-                           "                aggregate: 'SUM'" +
+                           "                aggregate: 'SUM'," +
+                           "                defaultWeight: 1.0" +
                            "            }," +
                            "            minWeight: {" +
                            "                property: 'weight'," +
@@ -231,6 +235,7 @@ class LoadGraphProcTest extends ProcTestBase {
 
             assertEquals("weight", sumWeightParams.get("property").toString());
             assertEquals("SUM", sumWeightParams.get("aggregate").toString());
+            assertEquals(1.0, sumWeightParams.get("defaultWeight"));
 
             assertEquals("weight", minWeightParams.get("property").toString());
             assertEquals("MIN", minWeightParams.get("aggregate").toString());
@@ -249,6 +254,46 @@ class LoadGraphProcTest extends ProcTestBase {
 
         LoadGraphFactory.remove("aggGraph");
         testLocalDb.shutdown();
+    }
+
+    @Test
+    void shouldFailOnMissingRelationshipProperty() {
+        QueryExecutionException exMissingProperty = assertThrows(QueryExecutionException.class, () -> {
+            String loadQuery = "CALL algo.graph.load(" +
+                               "    'aggGraph', '', '', {" +
+                               "        relationshipProperties: {" +
+                               "            maxCost: {" +
+                               "                property: 'cost'," +
+                               "                aggregate: 'MAX'" +
+                               "            }" +
+                               "        }" +
+                               "    }" +
+                               ")";
+            db.execute(loadQuery);
+        });
+        Throwable rootCause = ExceptionUtil.rootCause(exMissingProperty);
+        assertEquals(IllegalArgumentException.class, rootCause.getClass());
+        assertThat(rootCause.getMessage(), containsString("Relationship properties not found: 'cost'"));
+    }
+
+    @Test
+    void shouldFailOnInvalidAggregationFunction() {
+        QueryExecutionException exMissingProperty = assertThrows(QueryExecutionException.class, () -> {
+            String loadQuery = "CALL algo.graph.load(" +
+                               "    'aggGraph', '', '', {" +
+                               "        relationshipProperties: {" +
+                               "            maxCost: {" +
+                               "                property: 'weight'," +
+                               "                aggregate: 'FOOBAR'" +
+                               "            }" +
+                               "        }" +
+                               "    }" +
+                               ")";
+            db.execute(loadQuery);
+        });
+        Throwable rootCause = ExceptionUtil.rootCause(exMissingProperty);
+        assertEquals(IllegalArgumentException.class, rootCause.getClass());
+        assertThat(rootCause.getMessage(), containsString("Deduplication strategy `FOOBAR` is not supported."));
     }
 
     @Test

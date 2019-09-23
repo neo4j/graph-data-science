@@ -41,7 +41,6 @@ import org.neo4j.logging.NullLog;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -116,7 +115,7 @@ public class GraphLoader {
                 .withOptionalRelationshipType(relationship)
                 .withConcurrency(config.getReadConcurrency())
                 .withBatchSize(config.getBatchSize())
-                .withDeduplicateRelationshipsStrategy(config.getDuplicateRelationshipsStrategy())
+                .withDeduplicationStrategy(config.getDeduplicationStrategy())
                 .withParams(config.getParams())
                 .withLoadedGraph(config.getGraphImpl() == LoadGraphFactory.class);
     }
@@ -419,7 +418,7 @@ public class GraphLoader {
      *
      * @param deduplicationStrategy strategy for handling duplicate relationships unless not explicitly specified in the property mappings
      */
-    public GraphLoader withDeduplicateRelationshipsStrategy(DeduplicationStrategy deduplicationStrategy) {
+    public GraphLoader withDeduplicationStrategy(DeduplicationStrategy deduplicationStrategy) {
         this.deduplicationStrategy = deduplicationStrategy;
         return this;
     }

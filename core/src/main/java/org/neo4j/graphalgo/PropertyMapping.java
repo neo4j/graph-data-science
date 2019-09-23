@@ -80,7 +80,7 @@ public abstract class PropertyMapping {
             if (aggregationValue == null) {
                 deduplicationStrategy = DeduplicationStrategy.DEFAULT;
             } else if (aggregationValue instanceof String) {
-                deduplicationStrategy = DeduplicationStrategy.valueOf(((String) aggregationValue).toUpperCase());
+                deduplicationStrategy = DeduplicationStrategy.lookup(((String) aggregationValue).toUpperCase());
             } else {
                 throw new IllegalStateException(String.format(
                         "Expected the aggregation to be of type String, but was %s",

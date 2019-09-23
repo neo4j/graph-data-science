@@ -211,7 +211,7 @@ class HugeGraphFactoryTest {
         final Graph graph = new GraphLoader(DB)
                 .withAnyRelationshipType()
                 .withoutRelationshipWeights()
-                .withDeduplicateRelationshipsStrategy(DeduplicationStrategy.NONE)
+                .withDeduplicationStrategy(DeduplicationStrategy.NONE)
                 .load(HugeGraphFactory.class);
 
         long[] out2 = collectTargetIds(graph, id2);
@@ -223,7 +223,7 @@ class HugeGraphFactoryTest {
         final Graph graph = new GraphLoader(DB)
                 .withAnyRelationshipType()
                 .withRelationshipWeightsFromProperty("weight", 1.0)
-                .withDeduplicateRelationshipsStrategy(DeduplicationStrategy.NONE)
+                .withDeduplicationStrategy(DeduplicationStrategy.NONE)
                 .load(HugeGraphFactory.class);
 
         double[] out1 = collectTargetWeights(graph, id2);
@@ -238,7 +238,7 @@ class HugeGraphFactoryTest {
         final Graph graph = new GraphLoader(DB)
                 .withAnyRelationshipType()
                 .withRelationshipWeightsFromProperty("weight", 1.0)
-                .withDeduplicateRelationshipsStrategy(deduplicationStrategy)
+                .withDeduplicationStrategy(deduplicationStrategy)
                 .load(HugeGraphFactory.class);
 
         double[] out1 = collectTargetWeights(graph, id2);

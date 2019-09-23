@@ -118,7 +118,7 @@ class ShortestPathTest_152 {
         final Graph graph = new GraphLoader(db, Pools.DEFAULT)
                 .withOptionalLabel("Loc")
                 .withAnyRelationshipType()
-                .withDeduplicateRelationshipsStrategy(DeduplicationStrategy.NONE)
+                .withDeduplicationStrategy(DeduplicationStrategy.NONE)
                 .withRelationshipProperties(PropertyMapping.of("d", 0))
                 .load(HugeGraphFactory.class);
 

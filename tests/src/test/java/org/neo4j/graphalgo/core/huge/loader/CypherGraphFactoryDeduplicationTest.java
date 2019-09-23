@@ -73,7 +73,7 @@ class CypherGraphFactoryDeduplicationTest {
         Graph graph = new GraphLoader((GraphDatabaseAPI) db)
                 .withLabel(nodes)
                 .withRelationshipType(rels)
-                .withDeduplicateRelationshipsStrategy(DeduplicationStrategy.SKIP)
+                .withDeduplicationStrategy(DeduplicationStrategy.SKIP)
                 .load(CypherGraphFactory.class);
 
         assertEquals(2, graph.nodeCount());
@@ -90,7 +90,7 @@ class CypherGraphFactoryDeduplicationTest {
                 .withLabel(nodes)
                 .withRelationshipType(rels)
                 .withRelationshipWeightsFromProperty("weight", 1.0)
-                .withDeduplicateRelationshipsStrategy(DeduplicationStrategy.SKIP)
+                .withDeduplicationStrategy(DeduplicationStrategy.SKIP)
                 .load(CypherGraphFactory.class);
 
         double[] weights = collectTargetWeights(graph, graph.toMappedNodeId(id1));
@@ -110,7 +110,7 @@ class CypherGraphFactoryDeduplicationTest {
                 .withLabel(nodes)
                 .withRelationshipType(rels)
                 .withRelationshipWeightsFromProperty("weight", 1.0)
-                .withDeduplicateRelationshipsStrategy(deduplicationStrategy)
+                .withDeduplicationStrategy(deduplicationStrategy)
                 .load(CypherGraphFactory.class);
 
         double[] weights = collectTargetWeights(graph, graph.toMappedNodeId(id1));

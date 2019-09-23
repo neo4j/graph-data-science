@@ -19,6 +19,9 @@
  */
 package org.neo4j.graphalgo.core;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 public enum DeduplicationStrategy {
     DEFAULT {
         public double merge(double runningTotal, double weight) {
@@ -56,5 +59,22 @@ public enum DeduplicationStrategy {
     };
 
     public abstract double merge(double runningTotal, double weight);
+
+    public static DeduplicationStrategy lookup(String name) {
+        DeduplicationStrategy deduplicationStrategy = null;
+        try {
+            deduplicationStrategy = DeduplicationStrategy.valueOf(name);
+        } catch (IllegalArgumentException e) {
+            String availableStrategies = Arrays
+                    .stream(DeduplicationStrategy.values())
+                    .map(DeduplicationStrategy::name)
+                    .collect(Collectors.joining(", "));
+            throw new IllegalArgumentException(String.format(
+                    "Deduplication strategy `%s` is not supported. Must be one of: %s.",
+                    name,
+                    availableStrategies));
+        }
+        return deduplicationStrategy;
+    }
 
 }

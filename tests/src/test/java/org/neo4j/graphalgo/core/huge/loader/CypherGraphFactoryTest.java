@@ -216,7 +216,7 @@ class CypherGraphFactoryTest {
     private void loadAndTestGraph(String nodeStatement, String relStatement, DeduplicationStrategy strategy, boolean parallel) {
         GraphLoader loader = new GraphLoader(db)
                 .withBatchSize(1000)
-                .withDeduplicateRelationshipsStrategy(strategy)
+                .withDeduplicationStrategy(strategy)
                 .withRelationshipWeightsFromProperty("prop", 0D)
                 .withLabel(nodeStatement)
                 .withRelationshipType(relStatement);

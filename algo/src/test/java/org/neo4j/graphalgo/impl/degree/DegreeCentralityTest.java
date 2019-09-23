@@ -425,7 +425,7 @@ final class DegreeCentralityTest {
             graph = new GraphLoader(DB)
                     .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
                     .withRelationshipType("MATCH (n:Label1)-[:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target")
-                    .withDeduplicateRelationshipsStrategy(DeduplicationStrategy.SKIP)
+                    .withDeduplicationStrategy(DeduplicationStrategy.SKIP)
                     .load(graphFactory);
         } else {
             graph = new GraphLoader(DB)
