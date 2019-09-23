@@ -202,35 +202,35 @@ class WCCTest extends WCCBaseTest {
         GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
 
         assertEquals(
-                MemoryRange.of(176),
+                MemoryRange.of(168),
                 WCCType.FJ_MERGE.memoryEstimation().estimate(dimensions0, 1).memoryUsage());
         assertEquals(
-                MemoryRange.of(624),
+                MemoryRange.of(616),
                 WCCType.FJ_MERGE.memoryEstimation().estimate(dimensions0, 8).memoryUsage());
         assertEquals(
-                MemoryRange.of(4208),
+                MemoryRange.of(4200),
                 WCCType.FJ_MERGE.memoryEstimation().estimate(dimensions0, 64).memoryUsage());
 
         GraphDimensions dimensions100 = new GraphDimensions.Builder().setNodeCount(100).build();
         assertEquals(
-                MemoryRange.of(976),
+                MemoryRange.of(968),
                 WCCType.FJ_MERGE.memoryEstimation().estimate(dimensions100, 1).memoryUsage());
         assertEquals(
-                MemoryRange.of(7024),
+                MemoryRange.of(7016),
                 WCCType.FJ_MERGE.memoryEstimation().estimate(dimensions100, 8).memoryUsage());
         assertEquals(
-                MemoryRange.of(55408).min,
+                MemoryRange.of(55400).min,
                 WCCType.FJ_MERGE.memoryEstimation().estimate(dimensions100, 64).memoryUsage().min);
 
         GraphDimensions dimensions100B = new GraphDimensions.Builder().setNodeCount(100_000_000_000L).build();
         assertEquals(
-                MemoryRange.of(800_122_070_504L).min,
+                MemoryRange.of(800_122_070_496L).min,
                 WCCType.FJ_MERGE.memoryEstimation().estimate(dimensions100B, 1).memoryUsage().min);
         assertEquals(
-                MemoryRange.of(6_400_976_563_248L).min,
+                MemoryRange.of(6_400_976_563_240L).min,
                 WCCType.FJ_MERGE.memoryEstimation().estimate(dimensions100B, 8).memoryUsage().min);
         assertEquals(
-                MemoryRange.of(51_207_812_505_200L).min,
+                MemoryRange.of(51_207_812_505_192L).min,
                 WCCType.FJ_MERGE.memoryEstimation().estimate(dimensions100B, 64).memoryUsage().min);
     }
 
