@@ -209,6 +209,10 @@ class LoadGraphProcTest extends ProcTestBase {
                            "                property: 'weight'," +
                            "                aggregate: 'SUM'" +
                            "            }," +
+                           "            minWeight: {" +
+                           "                property: 'weight'," +
+                           "                aggregate: 'MIN'" +
+                           "            }," +
                            "            maxCost: {" +
                            "                property: 'cost'," +
                            "                aggregate: 'MAX'" +
@@ -219,25 +223,29 @@ class LoadGraphProcTest extends ProcTestBase {
 
         runQuery(loadQuery, testLocalDb, row -> {
             Map<String, Object> relProperties = (Map<String, Object>) row.get("relationshipProperties");
-            assertEquals(2, relProperties.size());
+            assertEquals(3, relProperties.size());
 
-            Map<String, Object> foo = (Map<String, Object>) relProperties.get("sumWeight");
-            Map<String, Object> bar = (Map<String, Object>) relProperties.get("maxCost");
+            Map<String, Object> sumWeightParams = (Map<String, Object>) relProperties.get("sumWeight");
+            Map<String, Object> minWeightParams = (Map<String, Object>) relProperties.get("minWeight");
+            Map<String, Object> maxCostParams = (Map<String, Object>) relProperties.get("maxCost");
 
-            assertEquals("weight", foo.get("property").toString());
-            assertEquals("SUM", foo.get("aggregate").toString());
+            assertEquals("weight", sumWeightParams.get("property").toString());
+            assertEquals("SUM", sumWeightParams.get("aggregate").toString());
 
-            assertEquals("cost", bar.get("property").toString());
-            assertEquals("MAX", bar.get("aggregate").toString());
+            assertEquals("weight", minWeightParams.get("property").toString());
+            assertEquals("MIN", minWeightParams.get("aggregate").toString());
+
+            assertEquals("cost", maxCostParams.get("property").toString());
+            assertEquals("MAX", maxCostParams.get("aggregate").toString());
         });
 
         Graph g = LoadGraphFactory.getAll("aggGraph");
 
         assertEquals(2, g.nodeCount());
-        assertEquals(2, g.relationshipCount());
+        assertEquals(3, g.relationshipCount());
 
-        assertOutRelationships(g, 0, 1, 1);
-        assertOutWeightsWithDelta(g, 1E-3, 0, 85.3, 2.0);
+        assertOutRelationships(g, 0, 1, 1, 1);
+        assertOutWeightsWithDelta(g, 1E-3, 0, 85.3, 42.1, 2.0);
 
         LoadGraphFactory.remove("aggGraph");
         testLocalDb.shutdown();

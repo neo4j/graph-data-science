@@ -550,4 +550,36 @@ class GraphLoaderHugeGraphTest {
         assertOutWeights(p2, 0, expectedNodeAP2);
         assertOutWeights(p2, 1, expectedNodeBP2);
     }
+
+    @Test
+    void multipleAggregationsFromSameProperty() {
+        db.execute("" +
+                   "CREATE (a:Node),(b:Node) " +
+                   "CREATE" +
+                   " (a)-[:REL {p1: 43}]->(a)," +
+                   " (a)-[:REL {p1: 42}]->(a)," +
+                   " (a)-[:REL {p1: 44}]->(a)," +
+                   " (b)-[:REL {p1: 45}]->(b)," +
+                   " (b)-[:REL {p1: 46}]->(b)");
+        GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT);
+        GraphByType graph = graphLoader.withAnyLabel()
+                .withAnyRelationshipType()
+                .withRelationshipProperties(
+                        PropertyMapping.of("agg1", "p1", 1.0, DeduplicationStrategy.MAX),
+                        PropertyMapping.of("agg2", "p1", 2.0, DeduplicationStrategy.MIN)
+                )
+                .withDirection(Direction.OUTGOING)
+                .build(HugeGraphFactory.class)
+                .loadGraphs();
+
+        Graph p1 = graph.loadGraph("", Optional.of("agg1"));
+        assertEquals(2L, p1.nodeCount());
+        assertOutWeights(p1, 0, 44);
+        assertOutWeights(p1, 1, 46);
+
+        Graph p2 = graph.loadGraph("", Optional.of("agg2"));
+        assertEquals(2L, p2.nodeCount());
+        assertOutWeights(p2, 0, 42);
+        assertOutWeights(p2, 1, 45);
+    }
 }

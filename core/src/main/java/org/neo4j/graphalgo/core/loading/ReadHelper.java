@@ -52,12 +52,15 @@ public final class ReadHelper {
         double[] weights = new double[propertyIds.length];
         Arrays.setAll(weights, i -> defaultValues[i]);
         while (pc.next()) {
-            int indexOfPropertyId = ArrayUtil.linearSearchIndex(propertyIds, propertyIds.length, pc.propertyKey());
-            if (indexOfPropertyId >= 0) {
-                Value value = pc.propertyValue();
-                double defaultValue = defaultValues[indexOfPropertyId];
-                double weight = extractValue(value, defaultValue);
-                weights[indexOfPropertyId] = weight;
+            // TODO: We used ArrayUtil#linearSearchIndex before which looks at four array positions in one loop iteration.
+            //       We could do the same here and benchmark if it affects performance.
+            for (int indexOfPropertyId = 0; indexOfPropertyId < propertyIds.length; indexOfPropertyId++) {
+                if (propertyIds[indexOfPropertyId] == pc.propertyKey()) {
+                    Value value = pc.propertyValue();
+                    double defaultValue = defaultValues[indexOfPropertyId];
+                    double weight = extractValue(value, defaultValue);
+                    weights[indexOfPropertyId] = weight;
+                }
             }
         }
         return weights;
