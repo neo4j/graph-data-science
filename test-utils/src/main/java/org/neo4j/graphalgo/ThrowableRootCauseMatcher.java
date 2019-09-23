@@ -20,15 +20,13 @@
 package org.neo4j.graphalgo;
 
 import org.hamcrest.Description;
-import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 
 import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.internal.matchers.ThrowableMessageMatcher.hasMessage;
+import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.exceptionMessage;
 
 /**
  * A matcher that applies a delegate matcher to the root cause of the current Throwable, returning the result of that
@@ -69,7 +67,6 @@ public class ThrowableRootCauseMatcher<T extends Throwable> extends TypeSafeMatc
      * @param matcher to apply to the root cause of the outer exception
      * @param <T> type of the outer exception
      */
-    @Factory
     public static <T extends Throwable> Matcher<T> rootCause(final Matcher<? extends Throwable> matcher) {
         return new ThrowableRootCauseMatcher<>(matcher);
     }
@@ -80,7 +77,6 @@ public class ThrowableRootCauseMatcher<T extends Throwable> extends TypeSafeMatc
      * @param type the type/class to match the root cause against
      * @param <T> type of the outer exception
      */
-    @Factory
     public static <T extends Throwable> Matcher<T> rootCause(final Class<? extends Throwable> type) {
         return rootCause(instanceOf(type));
     }
@@ -93,10 +89,10 @@ public class ThrowableRootCauseMatcher<T extends Throwable> extends TypeSafeMatc
      * @param message the expected message of the root cause, verified with an equals comparison
      * @param <T> type of the outer exception
      */
-    @Factory
     public static <T extends Throwable> Matcher<T> rootCause(
             final Class<? extends Throwable> type,
             final String message) {
-        return rootCause(allOf(instanceOf(type), hasMessage(equalTo(message))));
+        return rootCause(allOf(instanceOf(type), exceptionMessage(message)));
     }
+
 }

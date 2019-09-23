@@ -19,11 +19,11 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.rules.TestWatcher;
-import org.junit.runner.Description;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.TestWatcher;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -33,28 +33,32 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 
+@ExtendWith(RandomGraphTestCase.TestWatcherExtension.class)
 public abstract class RandomGraphTestCase {
+
     private static boolean hasFailures = false;
 
     protected static GraphDatabaseAPI db;
 
     static final int NODE_COUNT = 100;
 
-    @Rule
-    public TestWatcher watcher = new TestWatcher() {
+    static class TestWatcherExtension implements TestWatcher {
+
+        TestWatcherExtension() {}
+
         @Override
-        protected void failed(
-                final Throwable e,
-                final Description description) {
+        public void testFailed(
+                ExtensionContext context,
+                final Throwable e) {
             hasFailures = true;
         }
-    };
+    }
 
     private static final String RANDOM_GRAPH_TPL =
             "FOREACH (x IN range(1, %d) | CREATE (:Label)) " +
-                    "WITH 0.1 AS p " +
-                    "MATCH (n1),(n2) WITH n1,n2,p LIMIT 1000 WHERE rand() < p " +
-                    "CREATE (n1)-[:TYPE {weight:ceil(10*rand())/10}]->(n2)";
+            "WITH 0.1 AS p " +
+            "MATCH (n1),(n2) WITH n1,n2,p LIMIT 1000 WHERE rand() < p " +
+            "CREATE (n1)-[:TYPE {weight:ceil(10*rand())/10}]->(n2)";
 
     private static final String RANDOM_LABELS =
             "MATCH (n) WHERE rand() < 0.5 SET n:Label2";
@@ -66,7 +70,7 @@ public abstract class RandomGraphTestCase {
     }
 
     @AfterEach
-    public static void shutdownGraph() {
+    void shutdownGraph() {
         if (hasFailures) {
             try {
                 PrintWriter pw = new PrintWriter(System.out);

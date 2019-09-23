@@ -10,12 +10,10 @@ dependencies {
     compile group: 'org.neo4j',                             name: 'neo4j-io',                 version: ver.'neo4j'
     compile group: 'org.mockito',                           name: 'mockito-core',             version: ver.'mockito'
     compile group: 'org.mockito',                           name: 'mockito-junit-jupiter',    version: ver.'mockito'
-    compile group: 'org.hamcrest',                          name: 'hamcrest-library',         version: ver.'hamcrest'
+    compile group: 'org.hamcrest',                          name: 'hamcrest-library',         version: ver.'hamcrest2'
     compile group: 'org.neo4j',                             name: 'neo4j-kernel-api',         version: ver.'neo4j', classifier: 'tests'
     compile group: 'org.neo4j',                             name: 'neo4j-kernel',             version: ver.'neo4j'
     compile group: 'org.neo4j',                             name: 'procedure-compiler',       version: ver.'neo4j'
-    compile group: 'junit',                                 name: 'junit',                    version: ver.'junit4'
-    compile group: 'com.carrotsearch.randomizedtesting',    name: 'randomizedtesting-runner', version: ver.'randomizedtesting-runner'
 
     compile platform(dep.junit5bom)
     compile dep.junit5jupiter

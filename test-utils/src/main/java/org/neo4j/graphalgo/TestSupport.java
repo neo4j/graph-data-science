@@ -34,7 +34,6 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-
 public class TestSupport {
 
     @Retention(RetentionPolicy.RUNTIME)
