@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.IntIntScatterMap;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
@@ -406,6 +407,7 @@ class LouvainClusteringProcTest extends ProcTestBase {
         assertEquals("Relationship properties not found: 'does_not_exist'", rootCause.getMessage());
     }
 
+    @Disabled
     @AllGraphNamesTest
     void shouldRunWithSaturatedThreadPool(String graphImpl) {
         // ensure that we don't drop task that can't be scheduled while executing the algorithm.
