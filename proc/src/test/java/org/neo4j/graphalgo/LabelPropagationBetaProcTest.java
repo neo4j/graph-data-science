@@ -117,7 +117,7 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
 
         String query = "CALL algo.beta.labelPropagation(" +
                        "    null, null, {" +
-                       "        graph: 'myGraph', direction: $runDirection, write: false" +
+                       "        graph: 'myGraph', iterations: 1, direction: $runDirection, write: false" +
                        "    }" +
                        ")";
         runQuery(query, DB, map("runDirection", runDirection),
@@ -179,7 +179,7 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
     void shouldTakeDifferentSeedProperties(boolean parallel, String graphName) {
         String query = "CALL algo.beta.labelPropagation(" +
                        "    null, null, {" +
-                       "        direction: 'OUTGOING', seedProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: 'lpa'" +
+                       "        direction: 'OUTGOING', iterations: 1, seedProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: 'lpa'" +
                        "    }" +
                        ")";
 
@@ -195,7 +195,7 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
 
         query = "CALL algo.beta.labelPropagation(" +
                 "   null, null, {" +
-                "       direction: 'OUTGOING', partitionProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: 'lpa'" +
+                "       direction: 'OUTGOING', iterations: 1, partitionProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: 'lpa'" +
                 "   }" +
                 ")";
 
@@ -214,7 +214,7 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
     void explicitWriteProperty(boolean parallel, String graphName) {
         String query = "CALL algo.beta.labelPropagation(" +
                        "    null, null, {" +
-                       "        direction: 'OUTGOING', seedProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: 'lpa'" +
+                       "        direction: 'OUTGOING', iterations: 1, seedProperty: $seedProperty, weightProperty: $weightProperty, writeProperty: 'lpa'" +
                        "    }" +
                        ")";
 

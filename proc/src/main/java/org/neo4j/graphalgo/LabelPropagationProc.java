@@ -63,6 +63,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
     private static final String CONFIG_SEED_KEY = "seedProperty";
     private static final String CONFIG_OLD_SEED_KEY = "partitionProperty";
     private static final Boolean DEFAULT_WRITE = Boolean.TRUE;
+    private static final int DEFAULT_ITERATIONS = 10;
 
     @SuppressWarnings("WeakerAccess")
     @Context
@@ -77,7 +78,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
     @Procedure(name = "algo.beta.labelPropagation", mode = Mode.WRITE)
     @Description("CALL algo.beta.labelPropagation(" +
                  "label:String, relationship:String, " +
-                 "{iterations: 1, direction: 'OUTGOING', weightProperty: 'weight', seedProperty: 'seed', write: true, concurrency: 4}) " +
+                 "{iterations: 10, direction: 'OUTGOING', weightProperty: 'weight', seedProperty: 'seed', write: true, concurrency: 4}) " +
                  "YIELD nodes, iterations, didConverge, loadMillis, computeMillis, writeMillis, write, weightProperty, seedProperty")
     public Stream<LabelPropagationStats> betaLabelPropagation(
             @Name(value = "label", defaultValue = "") String label,
@@ -89,7 +90,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
 
     @Procedure(value = "algo.beta.labelPropagation.stream")
     @Description("CALL algo.beta.labelPropagation.stream(label:String, relationship:String, " +
-                 "{iterations: 1, direction: 'OUTGOING', weightProperty: 'weight', seedProperty: 'seed', concurrency: 4}) " +
+                 "{iterations: 10, direction: 'OUTGOING', weightProperty: 'weight', seedProperty: 'seed', concurrency: 4}) " +
                  "YIELD nodeId, community")
     public Stream<BetaStreamResult> betaLabelPropagationStream(
             @Name(value = "label", defaultValue = "") String label,
@@ -102,7 +103,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
     @Procedure(name = "algo.labelPropagation", mode = Mode.WRITE)
     @Description("CALL algo.labelPropagation(" +
                  "label:String, relationship:String, direction:String, " +
-                 "{iterations: 1, weightProperty: 'weight', seedProperty: 'seed', write: true, concurrency: 4}) " +
+                 "{iterations: 10, weightProperty: 'weight', seedProperty: 'seed', write: true, concurrency: 4}) " +
                  "YIELD nodes, iterations, didConverge, loadMillis, computeMillis, writeMillis, write, weightProperty, seedProperty - " +
                  "simple label propagation kernel")
     public Stream<LabelPropagationStats> labelPropagation(
@@ -126,7 +127,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
 
     @Procedure(value = "algo.labelPropagation.stream")
     @Description("CALL algo.labelPropagation.stream(label:String, relationship:String, " +
-                 "{iterations: 1, direction: 'OUTGOING', weightProperty: 'weight', seedProperty: 'seed', concurrency: 4}) " +
+                 "{iterations: 10, direction: 'OUTGOING', weightProperty: 'weight', seedProperty: 'seed', concurrency: 4}) " +
                  "YIELD nodeId, label")
     public Stream<StreamResult> labelPropagationStream(
             @Name(value = "label", defaultValue = "") String label,
@@ -266,7 +267,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
                 "LabelPropagation failed",
                 () -> setup.statsBuilder.timeEval(() -> algo.compute(
                         computeDirection.get(),
-                        setup.procedureConfig.getIterations(1)))).labels();
+                        setup.procedureConfig.getIterations(DEFAULT_ITERATIONS)))).labels();
 
         setup.statsBuilder
                 .iterations(algo.ranIterations())
