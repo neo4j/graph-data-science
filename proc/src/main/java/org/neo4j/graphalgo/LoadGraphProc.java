@@ -82,17 +82,20 @@ public final class LoadGraphProc extends BaseProc {
 
         try (ProgressTimer ignored = ProgressTimer.start(time -> stats.loadMillis = time)) {
             Class<? extends GraphFactory> graphImpl = config.getGraphImpl();
-            Set<String> types = graphImpl == CypherGraphFactory.class
+            Set<String> relationshipTypes = graphImpl == CypherGraphFactory.class
                     ? Collections.emptySet()
                     : RelationshipTypes.parse(config.getRelationshipOrQuery());
-            if (types.size() > 1 && graphImpl != HugeGraphFactory.class) {
+            PropertyMappings propertyMappings = graphImpl == CypherGraphFactory.class
+                    ? PropertyMappings.EMPTY
+                    : config.getRelationshipProperties();
+            if (relationshipTypes.size() > 1 && graphImpl != HugeGraphFactory.class) {
                 throw new IllegalArgumentException(
                         "Only the huge graph supports multiple relationships, please specify {graph:'huge'}.");
             }
 
             GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
             GraphByType graphFromType;
-            if (types.size() > 1) {
+            if (relationshipTypes.size() > 1 || propertyMappings.hasMappings()) {
                 HugeGraphFactory graphFactory = loader.build(HugeGraphFactory.class);
                 GraphByType byType = graphFactory.loadGraphs();
                 stats.nodes = byType.nodeCount();

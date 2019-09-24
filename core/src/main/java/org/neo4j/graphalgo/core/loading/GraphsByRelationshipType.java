@@ -53,23 +53,23 @@ public final class GraphsByRelationshipType implements GraphByType {
     }
 
     @Override
-    public Graph loadGraph(String relationshipType, Optional<String> relationshipWeight) {
+    public Graph loadGraph(String relationshipType, Optional<String> maybeRelationshipProperty) {
         Set<String> types = RelationshipTypes.parse(relationshipType);
 
-        if (types.isEmpty() && !relationshipWeight.isPresent()) {
+        if (types.isEmpty() && !maybeRelationshipProperty.isPresent()) {
             return loadAllTypes();
         }
 
         Collection<Graph> graphParts = new ArrayList<>();
         if (types.isEmpty()) {
-            String weightProperty = relationshipWeight.get();
+            String weightProperty = maybeRelationshipProperty.get();
             for (Map<String, ? extends Graph> graphsByProperty : graphs.values()) {
                 Graph graph = getExistingByProperty(weightProperty, graphsByProperty);
                 graphParts.add(graph);
             }
         } else {
-            if (relationshipWeight.isPresent()) {
-                String weightProperty = relationshipWeight.get();
+            if (maybeRelationshipProperty.isPresent()) {
+                String weightProperty = maybeRelationshipProperty.get();
                 for (String type : types) {
                     Map<String, ? extends Graph> graphsByProperty = getExistingByType(type);
                     Graph graph = getExistingByProperty(weightProperty, graphsByProperty);

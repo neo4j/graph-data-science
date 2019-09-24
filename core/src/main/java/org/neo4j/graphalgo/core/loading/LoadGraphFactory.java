@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
@@ -43,7 +44,8 @@ public final class LoadGraphFactory extends GraphFactory {
 
     @Override
     protected Graph importGraph() {
-        return get(setup.name, setup.relationshipType);
+        assert setup.relationshipPropertyMappings.numberOfMappings() <= 1;
+        return get(setup.name, setup.relationshipType, setup.relationshipPropertyMappings.head().map(PropertyMapping::propertyKey));
     }
 
     @Override
@@ -52,7 +54,7 @@ public final class LoadGraphFactory extends GraphFactory {
     }
 
     public MemoryEstimation memoryEstimation() {
-        Graph graph = get(setup.name, setup.relationshipType);
+        Graph graph = get(setup.name, setup.relationshipType, setup.relationshipPropertyMappings.head().map(PropertyMapping::propertyKey));
         dimensions.nodeCount(graph.nodeCount());
         dimensions.maxRelCount(graph.relationshipCount());
 
@@ -69,11 +71,11 @@ public final class LoadGraphFactory extends GraphFactory {
         graph.canRelease(false);
     }
 
-    public static Graph get(String name, String relationshipType) {
+    public static Graph get(String name, String relationshipType, Optional<String> maybeRelationshipProperty) {
         if (!exists(name)) {
             throw new IllegalArgumentException(String.format("Graph with name '%s' does not exist.", name));
         }
-        return graphs.get(name).loadGraph(relationshipType, Optional.empty());
+        return graphs.get(name).loadGraph(relationshipType, maybeRelationshipProperty);
     }
 
     public static Graph getAll(String name) {

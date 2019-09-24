@@ -28,7 +28,7 @@ import java.util.Set;
 
 public interface GraphByType {
 
-    Graph loadGraph(String relationshipType, Optional<String> relationshipWeight);
+    Graph loadGraph(String relationshipType, Optional<String> maybeRelationshipProperty);
 
     default Graph loadGraph(String relationshipType) {
         return loadGraph(relationshipType, Optional.empty());
@@ -56,7 +56,7 @@ public interface GraphByType {
         }
 
         @Override
-        public Graph loadGraph(String relationshipType, Optional<String> relationshipWeight) {
+        public Graph loadGraph(String relationshipType, Optional<String> maybeRelationshipProperty) {
             return graph;
         }
 

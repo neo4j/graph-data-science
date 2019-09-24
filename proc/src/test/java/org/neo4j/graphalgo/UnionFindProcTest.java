@@ -23,7 +23,12 @@ import com.carrotsearch.hppc.IntIntScatterMap;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
+import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphdb.QueryExecutionException;
@@ -33,6 +38,8 @@ import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 
 import java.util.List;
+import java.util.Random;
+import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -57,6 +64,7 @@ public class UnionFindProcTest extends ProcTestBase {
                 ",(nG {nodeId: 6})" +
                 ",(nH {nodeId: 7})" +
                 ",(nI {nodeId: 8})" +
+                // {J}
                 ",(nJ {nodeId: 9})" +
                 // {A, B, C, D}
                 ",(nA)-[:TYPE]->(nB)" +
@@ -67,7 +75,9 @@ public class UnionFindProcTest extends ProcTestBase {
                 ",(nE)-[:TYPE]->(nF)" +
                 ",(nF)-[:TYPE]->(nG)" +
                 // {H, I}
-                ",(nH)-[:TYPE]->(nI)";
+                ",(nH)-[:TYPE]->(nI)" +
+                // {H, I, J} if TYPE_1 is considered
+                ",(nI)-[:TYPE_1]->(nJ)";
 
         DB = TestDatabaseCreator.createTestDatabase();
 
@@ -76,9 +86,9 @@ public class UnionFindProcTest extends ProcTestBase {
             tx.success();
         }
 
-        DB.getDependencyResolver()
-                .resolveDependency(Procedures.class)
-                .registerProcedure(UnionFindProc.class);
+        Procedures procedures = DB.getDependencyResolver().resolveDependency(Procedures.class);
+        procedures.registerProcedure(UnionFindProc.class);
+        procedures.registerProcedure(LoadGraphProc.class);
     }
 
     @AfterAll
@@ -89,7 +99,7 @@ public class UnionFindProcTest extends ProcTestBase {
     @AllGraphNamesTest
     void testUnionFind(String graphImpl) {
         String query = "CALL algo.unionFind(" +
-                       "    '', '', {" +
+                       "    '', 'TYPE', {" +
                        "        graph: $graph" +
                        "    }" +
                        ") YIELD setCount, communityCount";
@@ -122,7 +132,7 @@ public class UnionFindProcTest extends ProcTestBase {
     @AllGraphNamesTest
     void testUnionFindWithLabel(String graphImpl) {
         String query = "CALL algo.unionFind(" +
-                       "    'Label', '', {" +
+                       "    'Label', 'TYPE', {" +
                        "        graph: $graph" +
                        "    }" +
                        ") YIELD setCount, communityCount";
@@ -139,7 +149,7 @@ public class UnionFindProcTest extends ProcTestBase {
         Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
 
         String query = "CALL algo.unionFind(" +
-                       "    '', '', {" +
+                       "    '', 'TYPE', {" +
                        "        graph: $graph, seedProperty: 'seed'" +
                        "    }" +
                        ") YIELD setCount, communityCount";
@@ -174,7 +184,7 @@ public class UnionFindProcTest extends ProcTestBase {
         Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
 
         String query = "CALL algo.unionFind(" +
-                       "    '', '', {" +
+                       "    '', 'TYPE', {" +
                        "        graph: $graph, seedProperty: 'does_not_exist'" +
                        "    }" +
                        ") YIELD setCount, communityCount";
@@ -191,7 +201,7 @@ public class UnionFindProcTest extends ProcTestBase {
         Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
 
         String query = "CALL algo.unionFind(" +
-                       "    '', '', {" +
+                       "    '', 'TYPE', {" +
                        "        graph: $graph, seedProperty: 'seed', writeProperty: 'seed'" +
                        "    }" +
                        ") YIELD setCount, communityCount";
@@ -226,7 +236,7 @@ public class UnionFindProcTest extends ProcTestBase {
         Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
 
         String query = "CALL algo.unionFind(" +
-                       "    '', '', {" +
+                       "    '', 'TYPE', {" +
                        "        graph: $graph, seedProperty: 'seed', consecutiveIds: true" +
                        "    }" +
                        ") YIELD setCount, communityCount";
@@ -260,7 +270,7 @@ public class UnionFindProcTest extends ProcTestBase {
     @AllGraphNamesTest
     void testUnionFindWithConsecutiveIds(String graphImpl) {
         String query = "CALL algo.unionFind(" +
-                       "    '', '', {" +
+                       "    '', 'TYPE', {" +
                        "        graph: $graph, consecutiveIds: true" +
                        "    }" +
                        ")";
@@ -333,7 +343,7 @@ public class UnionFindProcTest extends ProcTestBase {
     }
 
     @AllGraphNamesTest
-    void testThresholdUnionFindStream(String graphImpl) {
+    void testUnionFindStreamThreshold(String graphImpl) {
         String query = "CALL algo.unionFind.stream(" +
                        "    '', 'TYPE', {" +
                        "        weightProperty: 'cost', defaultValue: 10.0, threshold: 5.0, concurrency: 1, graph: $graph" +
@@ -368,7 +378,7 @@ public class UnionFindProcTest extends ProcTestBase {
         Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
 
         String query = "CALL algo.unionFind(" +
-                       "    '', '', {" +
+                       "    '', 'TYPE', {" +
                        "        graph: $graph, weightProperty: 'does_not_exist', threshold: 3.14" +
                        "    }" +
                        ") YIELD setCount, communityCount";
@@ -378,6 +388,75 @@ public class UnionFindProcTest extends ProcTestBase {
         });
         Throwable rootCause = ExceptionUtil.rootCause(exception);
         assertEquals("Relationship properties not found: 'does_not_exist'", rootCause.getMessage());
+    }
+
+    static Stream<Arguments> multipleReltypesAndPropertiesArguments() {
+        return Stream.of(
+                Arguments.of("",                "",                 "maxCost", new int[]{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}),
+                Arguments.of("",                "",                 "minCost", new int[]{4, 3, 3}),
+                Arguments.of("TYPE",            "",                 "maxCost", new int[]{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}),
+                Arguments.of("TYPE",            "",                 "minCost", new int[]{4, 3, 2, 1}),
+                Arguments.of("TYPE | TYPE_1",   "",                 "maxCost", new int[]{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}),
+                Arguments.of("TYPE | TYPE_1",   "",                 "minCost", new int[]{4, 3, 3}),
+
+                Arguments.of("TYPE | TYPE_1",   "TYPE | TYPE_1",    "maxCost", new int[]{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}),
+                Arguments.of("TYPE | TYPE_1",   "TYPE | TYPE_1",    "minCost", new int[]{4, 3, 3}),
+
+                Arguments.of("TYPE",            "TYPE",             "minCost", new int[]{4, 3, 2, 1}),
+                Arguments.of("TYPE",            "TYPE",             "maxCost", new int[]{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}),
+                Arguments.of("TYPE | TYPE_1",   "TYPE",             "minCost", new int[]{4, 3, 2, 1}),
+                Arguments.of("TYPE | TYPE_1",   "TYPE",             "maxCost", new int[]{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}),
+
+                Arguments.of("TYPE_1",          "TYPE_1",           "minCost", new int[]{1, 1, 1, 1, 1, 1, 1, 1, 2}),
+                Arguments.of("TYPE_1",          "TYPE_1",           "maxCost", new int[]{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}),
+                Arguments.of("TYPE | TYPE_1",   "TYPE_1",           "minCost", new int[]{1, 1, 1, 1, 1, 1, 1, 1, 2}),
+                Arguments.of("TYPE | TYPE_1",   "TYPE_1",           "maxCost", new int[]{1, 1, 1, 1, 1, 1, 1, 1, 1, 1})
+        );
+    }
+
+    @ParameterizedTest(name = "loadRelType = {0}, algoRelType = {1}, weightProperty = {2}, expectedSizes = {3}")
+    @MethodSource("multipleReltypesAndPropertiesArguments")
+    void testUnionFindStreamFromLoadedGraph(
+            String loadRelType,
+            String algoRelType,
+            String weightProperty,
+            int[] expectedSizes) {
+        String graphName = "aggGraph";
+        LoadGraphFactory.remove(graphName);
+
+        String loadQuery = "CALL algo.graph.load(" +
+                           "    '" + graphName + "', '', '" + loadRelType + "', {" +
+                           "        graph: 'huge'," +
+                           "        relationshipProperties: {" +
+                           "            minCost: {" +
+                           "                property: 'cost'," +
+                           "                aggregate: 'MIN'," +
+                           "                defaultWeight: 10.0" +
+                           "            }," +
+                           "            maxCost: {" +
+                           "                property: 'cost'," +
+                           "                aggregate: 'MAX'," +
+                           "                defaultWeight: 1.0" +
+                           "            }" +
+                           "        }" +
+                           "    }" +
+                           ")";
+
+        DB.execute(loadQuery);
+
+        assertComponentSizes(graphName, algoRelType, weightProperty, expectedSizes);
+    }
+
+    private void assertComponentSizes(String graphName, String relType, String weightProperty, int[] expectedSizes) {
+        String query = "CALL algo.unionFind.stream(" +
+                       "    '', '" + relType +"', {" +
+                       "        weightProperty: '"+ weightProperty +"', threshold: 5.0, concurrency: 1, graph: '"+ graphName +"'" +
+                       "    }" +
+                       ") YIELD setId";
+
+        IntIntScatterMap map1 = new IntIntScatterMap(11);
+        runQuery(query, row -> map1.addTo(row.getNumber("setId").intValue(), 1));
+        assertMapContains(map1, expectedSizes);
     }
 
 }

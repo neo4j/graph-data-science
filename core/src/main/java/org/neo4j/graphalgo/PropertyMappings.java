@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -75,9 +76,12 @@ public final class PropertyMappings implements Iterable<PropertyMapping> {
         return Arrays.stream(mappings);
     }
 
+    public Optional<PropertyMapping> head() {
+        return stream().findFirst();
+    }
+
     public Stream<Pair<Integer, PropertyMapping>> enumerate() {
-        return IntStream.range(0, mappings.length)
-                .mapToObj(idx -> Pair.of(idx, mappings[idx]));
+        return IntStream.range(0, mappings.length).mapToObj(idx -> Pair.of(idx, mappings[idx]));
     }
 
     @Override
