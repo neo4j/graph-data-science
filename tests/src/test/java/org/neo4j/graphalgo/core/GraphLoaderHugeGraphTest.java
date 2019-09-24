@@ -600,14 +600,15 @@ class GraphLoaderHugeGraphTest {
 
     @Test
     void multipleAggregationsFromSameProperty() {
-        db.execute("" +
-                   "CREATE (a:Node),(b:Node) " +
+        db.execute(
                    "CREATE" +
-                   " (a)-[:REL {p1: 43}]->(a)," +
-                   " (a)-[:REL {p1: 42}]->(a)," +
-                   " (a)-[:REL {p1: 44}]->(a)," +
-                   " (b)-[:REL {p1: 45}]->(b)," +
-                   " (b)-[:REL {p1: 46}]->(b)");
+                   "  (a:Node)" +
+                   ", (b:Node)" +
+                   ", (a)-[:REL {p1: 43}]->(a)" +
+                   ", (a)-[:REL {p1: 42}]->(a)" +
+                   ", (a)-[:REL {p1: 44}]->(a)" +
+                   ", (b)-[:REL {p1: 45}]->(b)" +
+                   ", (b)-[:REL {p1: 46}]->(b)");
         GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT);
         GraphByType graph = graphLoader.withAnyLabel()
                 .withAnyRelationshipType()
@@ -628,5 +629,32 @@ class GraphLoaderHugeGraphTest {
         assertEquals(2L, p2.nodeCount());
         assertOutWeights(p2, 0, 42);
         assertOutWeights(p2, 1, 45);
+    }
+
+    @Test
+    void multipleRelTypesWithSameProperty() {
+        db.execute(
+                "CREATE" +
+                "  (a:Node)" +
+                ", (a)-[:REL_1 {p1: 43}]->(a)" +
+                ", (a)-[:REL_1 {p1: 84}]->(a)" +
+                ", (a)-[:REL_2 {p1: 42}]->(a)" +
+                ", (a)-[:REL_3 {p1: 44}]->(a)");
+
+        GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT);
+        GraphByType graph = graphLoader.withAnyLabel()
+                .withRelationshipStatement("REL_1 | REL_2 | REL_3")
+                .withDeduplicationStrategy(DeduplicationStrategy.MAX)
+                .withRelationshipProperties(
+                        PropertyMapping.of("agg", "p1", 1.0, DeduplicationStrategy.MAX)
+                )
+                .withDirection(Direction.OUTGOING)
+                .build(HugeGraphFactory.class)
+                .loadGraphs();
+
+        Graph g = graph.loadGraph("", Optional.of("agg"));
+        assertEquals(1L, g.nodeCount());
+        assertEquals(3L, g.relationshipCount());
+        assertOutWeights(g, 0, 42, 44, 84);
     }
 }
