@@ -70,7 +70,7 @@ final class GraphLoaderNegativeTest extends RandomGraphTestCase {
         assertThrows(
                 IllegalArgumentException.class,
                 () -> new GraphLoader(RandomGraphTestCase.db)
-                        .withOptionalNodeProperties(new PropertyMapping("foo", "foo", 0.0))
+                        .withOptionalNodeProperties(PropertyMapping.of("foo", "foo", 0.0))
                         .load(graphImpl),
                 "Node properties not found: 'foo'"
         );
