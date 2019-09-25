@@ -431,12 +431,12 @@ public class UnionFindProcTest extends ProcTestBase {
                            "            minCost: {" +
                            "                property: 'cost'," +
                            "                aggregate: 'MIN'," +
-                           "                defaultWeight: 10.0" +
+                           "                defaultValue: 10.0" +
                            "            }," +
                            "            maxCost: {" +
                            "                property: 'cost'," +
                            "                aggregate: 'MAX'," +
-                           "                defaultWeight: 1.0" +
+                           "                defaultValue: 1.0" +
                            "            }" +
                            "        }" +
                            "    }" +

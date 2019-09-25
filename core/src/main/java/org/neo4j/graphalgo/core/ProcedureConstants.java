@@ -36,6 +36,10 @@ public final class ProcedureConstants {
     public static final String RELATIONSHIP_WEIGHT_PARAM = "relationshipWeight";
     public static final String RELATIONSHIP_PROPERTIES = "relationshipProperties";
 
+    public static final String RELATIONSHIP_PROPERTIES_PROPERTY_PARAM = "property";
+    public static final String RELATIONSHIP_PROPERTIES_AGGREGATION_PARAM = "aggregation";
+    public static final String RELATIONSHIP_PROPERTIES_DEFAULT_VALUE_PARAM = "defaultValue";
+
     // algos specific
 
     // graph type params

@@ -22,12 +22,14 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
+import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.helpers.collection.MapUtil;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES_PROPERTY_PARAM;
 
 class PropertyMappingTest {
 
@@ -43,8 +45,8 @@ class PropertyMappingTest {
     void testFromObjectWithMap() {
         final PropertyMapping propertyMapping = PropertyMapping.fromObject("transaction_count", MapUtil.map(
                 "property", "usd",
-                "aggregate", "MIN",
-                "defaultWeight", 42.0
+                "aggregation", "MIN",
+                "defaultValue", 42.0
         ));
         assertEquals(propertyMapping.propertyKey(), "transaction_count");
         assertEquals(propertyMapping.neoPropertyKey(), "usd");
@@ -69,7 +71,10 @@ class PropertyMappingTest {
                 )));
 
         assertThat(
-                ex.getMessage(), containsString(String.format("Property was not set. Missing entry with key %s", PropertyMapping.PROPERTY_KEY)));
+                ex.getMessage(),
+                containsString(String.format(
+                        "Property was not set. Missing entry with key %s",
+                        RELATIONSHIP_PROPERTIES_PROPERTY_PARAM)));
 
     }
 }

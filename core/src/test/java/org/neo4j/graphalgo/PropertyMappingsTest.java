@@ -50,11 +50,11 @@ class PropertyMappingsTest {
         PropertyMappings mappings = PropertyMappings.fromObject(MapUtil.map(
                 "total_usd", MapUtil.map(
                         "property", "usd",
-                        "aggregate", "MIN",
-                        "defaultWeight", 42.0),
+                        "aggregation", "MIN",
+                        "defaultValue", 42.0),
                 "transaction_count", MapUtil.map(
                         "property", "usd",
-                        "aggregate", "SUM"
+                        "aggregation", "SUM"
                 )
         ));
         assertEquals(mappings.numberOfMappings(), 2);

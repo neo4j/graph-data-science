@@ -238,16 +238,16 @@ class LoadGraphProcTest extends ProcTestBase {
                            "        relationshipProperties: {" +
                            "            sumWeight: {" +
                            "                property: 'weight'," +
-                           "                aggregate: 'SUM'," +
-                           "                defaultWeight: 1.0" +
+                           "                aggregation: 'SUM'," +
+                           "                defaultValue: 1.0" +
                            "            }," +
                            "            minWeight: {" +
                            "                property: 'weight'," +
-                           "                aggregate: 'MIN'" +
+                           "                aggregation: 'MIN'" +
                            "            }," +
                            "            maxCost: {" +
                            "                property: 'cost'," +
-                           "                aggregate: 'MAX'" +
+                           "                aggregation: 'MAX'" +
                            "            }" +
                            "        }" +
                            "    }" +
@@ -262,14 +262,14 @@ class LoadGraphProcTest extends ProcTestBase {
             Map<String, Object> maxCostParams = (Map<String, Object>) relProperties.get("maxCost");
 
             assertEquals("weight", sumWeightParams.get("property").toString());
-            assertEquals("SUM", sumWeightParams.get("aggregate").toString());
-            assertEquals(1.0, sumWeightParams.get("defaultWeight"));
+            assertEquals("SUM", sumWeightParams.get("aggregation").toString());
+            assertEquals(1.0, sumWeightParams.get("defaultValue"));
 
             assertEquals("weight", minWeightParams.get("property").toString());
-            assertEquals("MIN", minWeightParams.get("aggregate").toString());
+            assertEquals("MIN", minWeightParams.get("aggregation").toString());
 
             assertEquals("cost", maxCostParams.get("property").toString());
-            assertEquals("MAX", maxCostParams.get("aggregate").toString());
+            assertEquals("MAX", maxCostParams.get("aggregation").toString());
         });
 
         Graph g = LoadGraphFactory.getUnion("aggGraph");
@@ -292,7 +292,7 @@ class LoadGraphProcTest extends ProcTestBase {
                                "        relationshipProperties: {" +
                                "            maxCost: {" +
                                "                property: 'cost'," +
-                               "                aggregate: 'MAX'" +
+                               "                aggregation: 'MAX'" +
                                "            }" +
                                "        }" +
                                "    }" +
@@ -312,7 +312,7 @@ class LoadGraphProcTest extends ProcTestBase {
                                "        relationshipProperties: {" +
                                "            maxCost: {" +
                                "                property: 'weight'," +
-                               "                aggregate: 'FOOBAR'" +
+                               "                aggregation: 'FOOBAR'" +
                                "            }" +
                                "        }" +
                                "    }" +
