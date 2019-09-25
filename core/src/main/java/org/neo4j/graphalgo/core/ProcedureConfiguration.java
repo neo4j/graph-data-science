@@ -49,8 +49,6 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIE
 
 /**
  * Wrapper around configuration options map
- *
- * @author mknblch
  */
 public class ProcedureConfiguration {
 
@@ -184,15 +182,6 @@ public class ProcedureConfiguration {
     }
 
     /**
-     * TODO
-     *
-     * @return
-     */
-    public boolean isCypherFlag() {
-        return isCypherFlag(false);
-    }
-
-    /**
      * flag for requesting additional result stats
      *
      * @return true if stat flag is activated, false otherwise
@@ -209,10 +198,6 @@ public class ProcedureConfiguration {
      */
     public boolean isWriteFlag(boolean defaultValue) {
         return get(ProcedureConstants.WRITE_FLAG_PARAM, defaultValue);
-    }
-
-    public boolean isCypherFlag(boolean defaultValue) {
-        return (boolean) config.getOrDefault(ProcedureConstants.CYPHER_QUERY_PARAM, defaultValue);
     }
 
     public boolean isStatsFlag(boolean defaultValue) {
@@ -264,14 +249,6 @@ public class ProcedureConfiguration {
      */
     public int getBatchSize() {
         return getNumber(ProcedureConstants.BATCH_SIZE_PARAM, ParallelUtil.DEFAULT_BATCH_SIZE).intValue();
-    }
-
-    public int getBatchSize(int defaultValue) {
-        return getNumber(ProcedureConstants.BATCH_SIZE_PARAM, defaultValue).intValue();
-    }
-
-    public boolean isSingleThreaded() {
-        return getConcurrency() <= 1;
     }
 
     public int getConcurrency() {
@@ -502,19 +479,6 @@ public class ProcedureConfiguration {
         return new ProcedureConfiguration(Collections.emptyMap());
     }
 
-    private static String reverseGraphLookup(Class<? extends GraphFactory> cls) {
-        if (CypherGraphFactory.class.isAssignableFrom(cls)) {
-            return "cypher";
-        }
-        if (GraphViewFactory.class.isAssignableFrom(cls)) {
-            return "kernel";
-        }
-        if (HugeGraphFactory.class.isAssignableFrom(cls)) {
-            return "huge";
-        }
-        throw new IllegalArgumentException("Unknown impl: " + cls);
-    }
-
     public Map<String, Object> getParams() {
         return (Map<String, Object>) config.getOrDefault("params", Collections.emptyMap());
     }
@@ -523,6 +487,4 @@ public class ProcedureConfiguration {
         String strategy = get("duplicateRelationships", null);
         return strategy != null ? DeduplicationStrategy.lookup(strategy.toUpperCase()) : DeduplicationStrategy.DEFAULT;
     }
-
-
 }
