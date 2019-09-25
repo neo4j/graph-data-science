@@ -20,16 +20,15 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
-import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.kernel.api.StatementConstants;
 
 import java.util.Collections;
 import java.util.Map;
 
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES_AGGREGATION_PARAM;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES_DEFAULT_VALUE_PARAM;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES_PROPERTY_PARAM;
+import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES_AGGREGATION_KEY;
+import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES_DEFAULT_VALUE_KEY;
+import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES_PROPERTY_KEY;
 
 public abstract class PropertyMapping {
 
@@ -59,15 +58,15 @@ public abstract class PropertyMapping {
     public static PropertyMapping fromObject(String propertyKey, Object stringOrMap) {
         if (stringOrMap instanceof String) {
             String neoPropertyKey = (String) stringOrMap;
-            return fromObject(propertyKey, Collections.singletonMap(RELATIONSHIP_PROPERTIES_PROPERTY_PARAM, neoPropertyKey));
+            return fromObject(propertyKey, Collections.singletonMap(RELATIONSHIP_PROPERTIES_PROPERTY_KEY, neoPropertyKey));
         } else if (stringOrMap instanceof Map) {
             Map relPropertyMap = (Map) stringOrMap;
 
-            final Object propertyNameValue = relPropertyMap.get(RELATIONSHIP_PROPERTIES_PROPERTY_PARAM);
+            final Object propertyNameValue = relPropertyMap.get(RELATIONSHIP_PROPERTIES_PROPERTY_KEY);
             if (propertyNameValue == null) {
                 throw new IllegalArgumentException(String.format(
                         "Property was not set. Missing entry with key %s.",
-                        RELATIONSHIP_PROPERTIES_PROPERTY_PARAM));
+                        RELATIONSHIP_PROPERTIES_PROPERTY_KEY));
             }
             if (!(propertyNameValue instanceof String)) {
                 throw new IllegalArgumentException(String.format(
@@ -76,7 +75,7 @@ public abstract class PropertyMapping {
             }
             String neoPropertyKey = (String) propertyNameValue;
 
-            final Object aggregationValue = relPropertyMap.get(RELATIONSHIP_PROPERTIES_AGGREGATION_PARAM);
+            final Object aggregationValue = relPropertyMap.get(RELATIONSHIP_PROPERTIES_AGGREGATION_KEY);
             DeduplicationStrategy deduplicationStrategy;
             if (aggregationValue == null) {
                 deduplicationStrategy = DeduplicationStrategy.DEFAULT;
@@ -88,7 +87,7 @@ public abstract class PropertyMapping {
                         aggregationValue.getClass().getSimpleName()));
             }
 
-            final Object defaultWeightValue = relPropertyMap.get(RELATIONSHIP_PROPERTIES_DEFAULT_VALUE_PARAM);
+            final Object defaultWeightValue = relPropertyMap.get(RELATIONSHIP_PROPERTIES_DEFAULT_VALUE_KEY);
             double defaultWeight;
             if (defaultWeightValue == null) {
                 defaultWeight = HugeGraph.NO_WEIGHT;

@@ -159,10 +159,10 @@ public final class LoadGraphProc extends BaseProc {
                     config.getWeightPropertyDefaultValue(ProcedureConstants.DEFAULT_VALUE_DEFAULT)));
         }
 
-        if (config.get(ProcedureConstants.SORTED_PARAM, false)) {
+        if (config.get(ProcedureConstants.SORTED_KEY, false)) {
             loader.sorted();
         }
-        if (config.get(ProcedureConstants.UNDIRECTED_PARAM, false)) {
+        if (config.get(ProcedureConstants.UNDIRECTED_KEY, false)) {
             loader.undirected();
         }
         return loader;
@@ -179,16 +179,16 @@ public final class LoadGraphProc extends BaseProc {
 
         LoadGraphStats(String graphName, ProcedureConfiguration configuration) {
             name = graphName;
-            graph = configuration.getString(ProcedureConstants.GRAPH_IMPL_PARAM, "huge");
-            undirected = configuration.get(ProcedureConstants.UNDIRECTED_PARAM, false);
-            sorted = configuration.get(ProcedureConstants.SORTED_PARAM, false);
+            graph = configuration.getString(ProcedureConstants.GRAPH_IMPL_KEY, "huge");
+            undirected = configuration.get(ProcedureConstants.UNDIRECTED_KEY, false);
+            sorted = configuration.get(ProcedureConstants.SORTED_KEY, false);
             loadNodes = configuration.getNodeLabelOrQuery();
             loadRelationships = configuration.getRelationshipOrQuery();
             direction = configuration.getDirection(Direction.OUTGOING).name();
-            nodeWeight = configuration.getString(ProcedureConstants.NODE_WEIGHT_PARAM, null);
-            nodeProperty = configuration.getString(ProcedureConstants.NODE_PROPERTY_PARAM, null);
-            relationshipWeight = configuration.getString(ProcedureConstants.RELATIONSHIP_WEIGHT_PARAM, null);
-            relationshipProperties = configuration.get(ProcedureConstants.RELATIONSHIP_PROPERTIES, null);
+            nodeWeight = configuration.getString(ProcedureConstants.NODE_WEIGHT_KEY, null);
+            nodeProperty = configuration.getString(ProcedureConstants.NODE_PROPERTY_KEY, null);
+            relationshipWeight = configuration.getString(ProcedureConstants.RELATIONSHIP_WEIGHT_KEY, null);
+            relationshipProperties = configuration.get(ProcedureConstants.RELATIONSHIP_PROPERTIES_KEY, null);
         }
     }
 

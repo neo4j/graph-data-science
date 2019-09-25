@@ -22,14 +22,13 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
-import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.helpers.collection.MapUtil;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES_PROPERTY_PARAM;
+import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES_PROPERTY_KEY;
 
 class PropertyMappingTest {
 
@@ -74,7 +73,7 @@ class PropertyMappingTest {
                 ex.getMessage(),
                 containsString(String.format(
                         "Property was not set. Missing entry with key %s",
-                        RELATIONSHIP_PROPERTIES_PROPERTY_PARAM)));
+                        RELATIONSHIP_PROPERTIES_PROPERTY_KEY)));
 
     }
 }

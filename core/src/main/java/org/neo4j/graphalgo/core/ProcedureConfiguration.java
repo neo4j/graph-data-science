@@ -45,7 +45,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static java.util.Arrays.asList;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES;
+import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES_KEY;
 
 /**
  * Wrapper around configuration options map
@@ -77,7 +77,7 @@ public class ProcedureConfiguration {
      * @return this configuration
      */
     public ProcedureConfiguration setNodeLabelOrQuery(String nodeLabelOrQuery) {
-        config.put(ProcedureConstants.NODE_LABEL_QUERY_PARAM, nodeLabelOrQuery);
+        config.put(ProcedureConstants.NODE_LABEL_QUERY_KEY, nodeLabelOrQuery);
         return this;
     }
 
@@ -90,7 +90,7 @@ public class ProcedureConfiguration {
      * @return this configuration
      */
     public ProcedureConfiguration setRelationshipTypeOrQuery(String relationshipTypeOrQuery) {
-        config.put(ProcedureConstants.RELATIONSHIP_QUERY_PARAM, relationshipTypeOrQuery);
+        config.put(ProcedureConstants.RELATIONSHIP_QUERY_KEY, relationshipTypeOrQuery);
         return this;
     }
 
@@ -102,7 +102,7 @@ public class ProcedureConfiguration {
      * @return this configuration
      */
     public ProcedureConfiguration setDirection(String direction) {
-        config.put(ProcedureConstants.DIRECTION_PARAM, direction);
+        config.put(ProcedureConstants.DIRECTION_KEY, direction);
         return this;
     }
 
@@ -114,7 +114,7 @@ public class ProcedureConfiguration {
      * @return this configuration
      */
     public ProcedureConfiguration setDirection(Direction direction) {
-        config.put(ProcedureConstants.DIRECTION_PARAM, direction.name());
+        config.put(ProcedureConstants.DIRECTION_KEY, direction.name());
         return this;
     }
 
@@ -124,22 +124,22 @@ public class ProcedureConfiguration {
      * @return the label or query
      */
     public String getNodeLabelOrQuery() {
-        return getString(ProcedureConstants.NODE_LABEL_QUERY_PARAM, null);
+        return getString(ProcedureConstants.NODE_LABEL_QUERY_KEY, null);
     }
 
     /**
      * return either the Label or the cypher query for node request
      *
-     * @param defaultValue default value if {@link ProcedureConstants#NODE_LABEL_QUERY_PARAM}
+     * @param defaultValue default value if {@link ProcedureConstants#NODE_LABEL_QUERY_KEY}
      *                     is not set
      * @return the label or query
      */
     public String getNodeLabelOrQuery(String defaultValue) {
-        return getString(ProcedureConstants.NODE_LABEL_QUERY_PARAM, defaultValue);
+        return getString(ProcedureConstants.NODE_LABEL_QUERY_KEY, defaultValue);
     }
 
     public String getRelationshipOrQuery() {
-        return getString(ProcedureConstants.RELATIONSHIP_QUERY_PARAM, null);
+        return getString(ProcedureConstants.RELATIONSHIP_QUERY_KEY, null);
     }
 
     /**
@@ -158,7 +158,7 @@ public class ProcedureConfiguration {
      * @return the property name
      */
     public String getWriteProperty(String defaultValue) {
-        return getString(ProcedureConstants.WRITE_PROPERTY_PARAM, defaultValue);
+        return getString(ProcedureConstants.WRITE_PROPERTY_KEY, defaultValue);
     }
 
     /**
@@ -169,7 +169,7 @@ public class ProcedureConfiguration {
      * @return the relationship name or query
      */
     public String getRelationshipOrQuery(String defaultValue) {
-        return getString(ProcedureConstants.RELATIONSHIP_QUERY_PARAM, defaultValue);
+        return getString(ProcedureConstants.RELATIONSHIP_QUERY_KEY, defaultValue);
     }
 
     /**
@@ -197,31 +197,31 @@ public class ProcedureConfiguration {
      * @return true if write is activated, false otherwise
      */
     public boolean isWriteFlag(boolean defaultValue) {
-        return get(ProcedureConstants.WRITE_FLAG_PARAM, defaultValue);
+        return get(ProcedureConstants.WRITE_FLAG_KEY, defaultValue);
     }
 
     public boolean isStatsFlag(boolean defaultValue) {
-        return get(ProcedureConstants.STATS_FLAG_PARAM, defaultValue);
+        return get(ProcedureConstants.STATS_FLAG_KEY, defaultValue);
     }
 
     public boolean hasRelationshipWeight() {
-        return containsKey(ProcedureConstants.RELATIONSHIP_WEIGHT_PARAM);
+        return containsKey(ProcedureConstants.RELATIONSHIP_WEIGHT_KEY);
     }
 
     public String getRelationshipWeight() {
-        return getString(ProcedureConstants.RELATIONSHIP_WEIGHT_PARAM, null);
+        return getString(ProcedureConstants.RELATIONSHIP_WEIGHT_KEY, null);
     }
 
     public boolean hasWeightProperty() {
-        return containsKey(ProcedureConstants.WEIGHT_PROPERTY_PARAM);
+        return containsKey(ProcedureConstants.WEIGHT_PROPERTY_KEY);
     }
 
     public String getWeightProperty() {
-        return getString(ProcedureConstants.WEIGHT_PROPERTY_PARAM, null);
+        return getString(ProcedureConstants.WEIGHT_PROPERTY_KEY, null);
     }
 
     public PropertyMappings getRelationshipProperties() {
-        Object relationShipProperties = get(RELATIONSHIP_PROPERTIES, null);
+        Object relationShipProperties = get(RELATIONSHIP_PROPERTIES_KEY, null);
         if (relationShipProperties != null) {
             return PropertyMappings.fromObject(relationShipProperties);
         }
@@ -229,7 +229,7 @@ public class ProcedureConfiguration {
     }
 
     public double getWeightPropertyDefaultValue(double defaultValue) {
-        return getNumber(ProcedureConstants.DEFAULT_VALUE_PARAM, defaultValue).doubleValue();
+        return getNumber(ProcedureConstants.DEFAULT_VALUE_KEY, defaultValue).doubleValue();
     }
 
     /**
@@ -239,7 +239,7 @@ public class ProcedureConfiguration {
      * @return
      */
     public int getIterations(int defaultValue) {
-        return getNumber(ProcedureConstants.ITERATIONS_PARAM, defaultValue).intValue();
+        return getNumber(ProcedureConstants.ITERATIONS_KEY, defaultValue).intValue();
     }
 
     /**
@@ -248,7 +248,7 @@ public class ProcedureConfiguration {
      * @return batch size
      */
     public int getBatchSize() {
-        return getNumber(ProcedureConstants.BATCH_SIZE_PARAM, ParallelUtil.DEFAULT_BATCH_SIZE).intValue();
+        return getNumber(ProcedureConstants.BATCH_SIZE_KEY, ParallelUtil.DEFAULT_BATCH_SIZE).intValue();
     }
 
     public int getConcurrency() {
@@ -256,7 +256,7 @@ public class ProcedureConfiguration {
     }
 
     public int getConcurrency(int defaultValue) {
-        int requestedConcurrency = getNumber(ProcedureConstants.CONCURRENCY_PARAM, defaultValue).intValue();
+        int requestedConcurrency = getNumber(ProcedureConstants.CONCURRENCY_KEY, defaultValue).intValue();
         return Pools.allowedConcurrency(requestedConcurrency);
     }
 
@@ -266,8 +266,8 @@ public class ProcedureConfiguration {
 
     public int getReadConcurrency(int defaultValue) {
         Number readConcurrency = getNumber(
-                ProcedureConstants.READ_CONCURRENCY_PARAM,
-                ProcedureConstants.CONCURRENCY_PARAM,
+                ProcedureConstants.READ_CONCURRENCY_KEY,
+                ProcedureConstants.CONCURRENCY_KEY,
                 defaultValue);
         int requestedConcurrency = readConcurrency.intValue();
         return Pools.allowedConcurrency(requestedConcurrency);
@@ -279,15 +279,15 @@ public class ProcedureConfiguration {
 
     public int getWriteConcurrency(int defaultValue) {
         Number writeConcurrency = getNumber(
-                ProcedureConstants.WRITE_CONCURRENCY_PARAM,
-                ProcedureConstants.CONCURRENCY_PARAM,
+                ProcedureConstants.WRITE_CONCURRENCY_KEY,
+                ProcedureConstants.CONCURRENCY_KEY,
                 defaultValue);
         int requestedConcurrency = writeConcurrency.intValue();
         return Pools.allowedConcurrency(requestedConcurrency);
     }
 
     public String getDirectionName(String defaultDirection) {
-        return get(ProcedureConstants.DIRECTION_PARAM, defaultDirection);
+        return get(ProcedureConstants.DIRECTION_KEY, defaultDirection);
     }
 
     public Direction getDirection(Direction defaultDirection) {
@@ -299,7 +299,7 @@ public class ProcedureConfiguration {
     }
 
     public String getGraphName(String defaultValue) {
-        return getString(ProcedureConstants.GRAPH_IMPL_PARAM, defaultValue);
+        return getString(ProcedureConstants.GRAPH_IMPL_KEY, defaultValue);
     }
 
     public Class<? extends GraphFactory> getGraphImpl() {
@@ -416,7 +416,7 @@ public class ProcedureConfiguration {
     }
 
     public Double getSkipValue(Double defaultValue) {
-        String key = ProcedureConstants.SKIP_VALUE_PARAM;
+        String key = ProcedureConstants.SKIP_VALUE_KEY;
         if (!config.containsKey(key)) {
             return defaultValue;
         }

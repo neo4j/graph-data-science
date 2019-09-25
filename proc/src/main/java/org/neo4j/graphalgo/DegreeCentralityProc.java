@@ -46,7 +46,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.core.ProcedureConstants.CYPHER_QUERY_PARAM;
+import static org.neo4j.graphalgo.core.ProcedureConstants.CYPHER_QUERY_KEY;
 
 public final class DegreeCentralityProc {
 
@@ -121,7 +121,7 @@ public final class DegreeCentralityProc {
     private Direction getDirection(ProcedureConfiguration configuration) {
         String graphName = configuration.getGraphName(ProcedureConstants.GRAPH_IMPL_DEFAULT);
         Direction direction = configuration.getDirection(Direction.INCOMING);
-        return CYPHER_QUERY_PARAM.equals(graphName) ? Direction.OUTGOING : direction;
+        return CYPHER_QUERY_KEY.equals(graphName) ? Direction.OUTGOING : direction;
     }
 
     @Procedure(value = "algo.degree.stream", mode = Mode.READ)

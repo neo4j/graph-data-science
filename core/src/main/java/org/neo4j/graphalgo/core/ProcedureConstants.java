@@ -23,55 +23,54 @@ public final class ProcedureConstants {
 
     // used in graph.load and algos
 
-    public static final String NODE_LABEL_QUERY_PARAM = "nodeQuery";
-    public static final String RELATIONSHIP_QUERY_PARAM = "relationshipQuery";
-    public static final String NODE_PROPERTY_PARAM = "nodeProperty";
-    public static final String DEFAULT_VALUE_PARAM = "defaultValue";
+    public static final String NODE_LABEL_QUERY_KEY = "nodeQuery";
+    public static final String RELATIONSHIP_QUERY_KEY = "relationshipQuery";
+    public static final String NODE_PROPERTY_KEY = "nodeProperty";
+    public static final String DEFAULT_VALUE_KEY = "defaultValue";
     public static final double DEFAULT_VALUE_DEFAULT = 1.0;
-
 
     // graph.load specific
 
-    public static final String NODE_WEIGHT_PARAM = "nodeWeight";
-    public static final String RELATIONSHIP_WEIGHT_PARAM = "relationshipWeight";
-    public static final String RELATIONSHIP_PROPERTIES = "relationshipProperties";
+    public static final String NODE_WEIGHT_KEY = "nodeWeight";
+    public static final String RELATIONSHIP_WEIGHT_KEY = "relationshipWeight";
+    public static final String RELATIONSHIP_PROPERTIES_KEY = "relationshipProperties";
 
-    public static final String RELATIONSHIP_PROPERTIES_PROPERTY_PARAM = "property";
-    public static final String RELATIONSHIP_PROPERTIES_AGGREGATION_PARAM = "aggregation";
-    public static final String RELATIONSHIP_PROPERTIES_DEFAULT_VALUE_PARAM = "defaultValue";
+    public static final String RELATIONSHIP_PROPERTIES_PROPERTY_KEY = "property";
+    public static final String RELATIONSHIP_PROPERTIES_AGGREGATION_KEY = "aggregation";
+    public static final String RELATIONSHIP_PROPERTIES_DEFAULT_VALUE_KEY = "defaultValue";
 
     // algos specific
 
     // graph type params
-    public static final String GRAPH_IMPL_PARAM = "graph";
+    public static final String GRAPH_IMPL_KEY = "graph";
     public static final String GRAPH_IMPL_DEFAULT = "huge";
-    public static final String DIRECTION_PARAM = "direction";
-    public static final String UNDIRECTED_PARAM = "undirected";
-    public static final String SORTED_PARAM = "sorted";
-    public static final String CYPHER_QUERY_PARAM = "cypher";
+    public static final String DIRECTION_KEY = "direction";
+    public static final String UNDIRECTED_KEY = "undirected";
+    public static final String SORTED_KEY = "sorted";
+    public static final String CYPHER_QUERY_KEY = "cypher";
 
     // write specific params
-    public static final String WRITE_FLAG_PARAM = "write";
-    public static final String WRITE_PROPERTY_PARAM = "writeProperty";
+    public static final String WRITE_FLAG_KEY = "write";
+    public static final String WRITE_PROPERTY_KEY = "writeProperty";
     public static final String WRITE_PROPERTY_DEFAULT = "writeValue";
 
     // concurrency related params
-    public static final String BATCH_SIZE_PARAM = "batchSize";
-    public static final String CONCURRENCY_PARAM = "concurrency";
-    public static final String READ_CONCURRENCY_PARAM = "readConcurrency";
-    public static final String WRITE_CONCURRENCY_PARAM = "writeConcurrency";
+    public static final String BATCH_SIZE_KEY = "batchSize";
+    public static final String CONCURRENCY_KEY = "concurrency";
+    public static final String READ_CONCURRENCY_KEY = "readConcurrency";
+    public static final String WRITE_CONCURRENCY_KEY = "writeConcurrency";
 
     // computation specific params
-    public static final String ITERATIONS_PARAM = "iterations";
+    public static final String ITERATIONS_KEY = "iterations";
 
     // refers to the relationship weight to be used in weighted algorithms
     // that property is also considered in graph.load, despite being documented
-    public static final String WEIGHT_PROPERTY_PARAM = "weightProperty";
+    public static final String WEIGHT_PROPERTY_KEY = "weightProperty";
 
     // BetweenessCentrality specific
-    public static final String STATS_FLAG_PARAM = "stats";
+    public static final String STATS_FLAG_KEY = "stats";
     // ANN specific
-    public static final String SKIP_VALUE_PARAM = "skipValue";
+    public static final String SKIP_VALUE_KEY = "skipValue";
 
     private ProcedureConstants() {}
 }
