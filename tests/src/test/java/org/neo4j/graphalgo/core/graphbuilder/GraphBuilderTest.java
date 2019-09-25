@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.graphbuilder;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.Neo4jTestCase;
-import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
+import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

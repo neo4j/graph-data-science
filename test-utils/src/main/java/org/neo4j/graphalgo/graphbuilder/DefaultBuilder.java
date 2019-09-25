@@ -17,53 +17,52 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.helper.graphbuilder;
+package org.neo4j.graphalgo.graphbuilder;
 
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Random;
 
 /**
- * RingBuilder creates a ring of nodes where each node is
- * connected to its successor while the last element of the
- * chain connects back to its head.
+ * default builder makes methods
+ * from abstract graphBuilder accessible
  *
  * @author mknblch
  */
-public class RingBuilder extends GraphBuilder<RingBuilder> {
+public class DefaultBuilder extends GraphBuilder<DefaultBuilder> {
 
-    RingBuilder(GraphDatabaseAPI api, Label label, RelationshipType relationship, Random random) {
+    protected DefaultBuilder(GraphDatabaseAPI api, Label label, RelationshipType relationship, Random random) {
         super(api, label, relationship, random);
     }
 
     /**
-     * create a ring
+     * create a relationship within a transaction
      *
-     * @param size number of elements (&gt;= 2)
-     * @return itself for method chaining
+     * @param p the source node
+     * @param q the target node
+     * @return the relationship object
      */
-    public RingBuilder createRing(int size) {
-        if (size < 2) {
-            throw new IllegalArgumentException("size must be >= 2");
-        }
-        withinTransaction(() -> {
-            final Node head = createNode();
-            Node temp = head;
-            for (int i = 1; i < size; i++) {
-                Node node = createNode();
-                createRelationship(temp, node);
-                temp = node;
-            }
-            createRelationship(temp, head);
-        });
-        return this;
+    @Override
+    public Relationship createRelationship(Node p, Node q) {
+        return withinTransaction(() -> super.createRelationship(p, q));
+    }
+
+    /**
+     * create a node within a transaction
+     *
+     * @return the node
+     */
+    @Override
+    public Node createNode() {
+        return withinTransaction(super::createNode);
     }
 
     @Override
-    protected RingBuilder me() {
+    protected DefaultBuilder me() {
         return this;
     }
 }

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.helper.graphbuilder;
+package org.neo4j.graphalgo.graphbuilder;
 
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
