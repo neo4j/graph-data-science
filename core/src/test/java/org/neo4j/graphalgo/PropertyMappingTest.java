@@ -59,7 +59,7 @@ class PropertyMappingTest {
                 IllegalArgumentException.class, () -> PropertyMapping.fromObject("transaction_count", MapUtil.map(
                         "property", 42
                 )));
-        assertThat(ex.getMessage(), containsString("Expected the property name to be of type String, but was Integer"));
+        assertThat(ex.getMessage(), containsString("Expected the value of 'property' to be of type String, but was 'Integer'."));
     }
 
     @Test
@@ -72,7 +72,7 @@ class PropertyMappingTest {
         assertThat(
                 ex.getMessage(),
                 containsString(String.format(
-                        "Property was not set. Missing entry with key %s",
+                        "Expected a 'property', but no such entry found for 'property'.",
                         RELATIONSHIP_PROPERTIES_PROPERTY_KEY)));
 
     }

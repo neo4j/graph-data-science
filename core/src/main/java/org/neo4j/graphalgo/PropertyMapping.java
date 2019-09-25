@@ -65,13 +65,13 @@ public abstract class PropertyMapping {
             final Object propertyNameValue = relPropertyMap.get(RELATIONSHIP_PROPERTIES_PROPERTY_KEY);
             if (propertyNameValue == null) {
                 throw new IllegalArgumentException(String.format(
-                        "Property was not set. Missing entry with key %s.",
-                        RELATIONSHIP_PROPERTIES_PROPERTY_KEY));
+                        "Expected a '%s', but no such entry found for '%s'.",
+                        RELATIONSHIP_PROPERTIES_PROPERTY_KEY, RELATIONSHIP_PROPERTIES_PROPERTY_KEY));
             }
             if (!(propertyNameValue instanceof String)) {
                 throw new IllegalArgumentException(String.format(
-                        "Expected the property name to be of type String, but was %s.",
-                        propertyNameValue.getClass().getSimpleName()));
+                        "Expected the value of '%s' to be of type String, but was '%s'.",
+                        RELATIONSHIP_PROPERTIES_PROPERTY_KEY, propertyNameValue.getClass().getSimpleName()));
             }
             String neoPropertyKey = (String) propertyNameValue;
 
@@ -83,8 +83,8 @@ public abstract class PropertyMapping {
                 deduplicationStrategy = DeduplicationStrategy.lookup(((String) aggregationValue).toUpperCase());
             } else {
                 throw new IllegalStateException(String.format(
-                        "Expected the aggregation to be of type String, but was %s",
-                        aggregationValue.getClass().getSimpleName()));
+                        "Expected the value of '%s' to be of type String, but was '%s'",
+                        RELATIONSHIP_PROPERTIES_AGGREGATION_KEY, aggregationValue.getClass().getSimpleName()));
             }
 
             final Object defaultWeightValue = relPropertyMap.get(RELATIONSHIP_PROPERTIES_DEFAULT_VALUE_KEY);
@@ -95,8 +95,8 @@ public abstract class PropertyMapping {
                 defaultWeight = ((Number) defaultWeightValue).doubleValue();
             } else {
                 throw new IllegalStateException(String.format(
-                        "Expected the default defaultWeightValue to be of type double, but was %s",
-                        defaultWeightValue.getClass().getSimpleName()));
+                        "Expected the value of '%s' to be of type double, but was '%s'",
+                        RELATIONSHIP_PROPERTIES_DEFAULT_VALUE_KEY, defaultWeightValue.getClass().getSimpleName()));
             }
 
             return PropertyMapping.of(
