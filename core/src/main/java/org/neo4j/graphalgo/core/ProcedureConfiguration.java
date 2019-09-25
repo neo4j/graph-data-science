@@ -104,7 +104,7 @@ public class ProcedureConfiguration {
      * @return this configuration
      */
     public ProcedureConfiguration setDirection(String direction) {
-        config.put(ProcedureConstants.DIRECTION, direction);
+        config.put(ProcedureConstants.DIRECTION_PARAM, direction);
         return this;
     }
 
@@ -116,7 +116,7 @@ public class ProcedureConfiguration {
      * @return this configuration
      */
     public ProcedureConfiguration setDirection(Direction direction) {
-        config.put(ProcedureConstants.DIRECTION, direction.name());
+        config.put(ProcedureConstants.DIRECTION_PARAM, direction.name());
         return this;
     }
 
@@ -128,7 +128,7 @@ public class ProcedureConfiguration {
      * @return this configuration
      */
     public ProcedureConfiguration setWeightProperty(String weightProperty) {
-        config.put(ProcedureConstants.PROPERTY_PARAM, weightProperty);
+        config.put(ProcedureConstants.WEIGHT_PROPERTY_PARAM, weightProperty);
         return this;
     }
 
@@ -172,7 +172,7 @@ public class ProcedureConfiguration {
      * @return the property name
      */
     public String getWriteProperty(String defaultValue) {
-        return getString(ProcedureConstants.WRITE_PROPERTY, defaultValue);
+        return getString(ProcedureConstants.WRITE_PROPERTY_PARAM, defaultValue);
     }
 
     /**
@@ -220,23 +220,23 @@ public class ProcedureConfiguration {
      * @return true if write is activated, false otherwise
      */
     public boolean isWriteFlag(boolean defaultValue) {
-        return get(ProcedureConstants.WRITE_FLAG, defaultValue);
+        return get(ProcedureConstants.WRITE_FLAG_PARAM, defaultValue);
     }
 
     public boolean isCypherFlag(boolean defaultValue) {
-        return (boolean) config.getOrDefault(ProcedureConstants.CYPHER_QUERY, defaultValue);
+        return (boolean) config.getOrDefault(ProcedureConstants.CYPHER_QUERY_PARAM, defaultValue);
     }
 
     public boolean isStatsFlag(boolean defaultValue) {
-        return get(ProcedureConstants.STATS_FLAG, defaultValue);
+        return get(ProcedureConstants.STATS_FLAG_PARAM, defaultValue);
     }
 
     public boolean hasWeightProperty() {
-        return containsKey(ProcedureConstants.PROPERTY_PARAM);
+        return containsKey(ProcedureConstants.WEIGHT_PROPERTY_PARAM);
     }
 
     public String getWeightProperty() {
-        return getString(ProcedureConstants.PROPERTY_PARAM, null);
+        return getString(ProcedureConstants.WEIGHT_PROPERTY_PARAM, null);
     }
 
     public PropertyMappings getRelationshipProperties() {
@@ -248,7 +248,7 @@ public class ProcedureConfiguration {
     }
 
     public double getWeightPropertyDefaultValue(double defaultValue) {
-        return getNumber(ProcedureConstants.DEFAULT_PROPERTY_VALUE_PARAM, defaultValue).doubleValue();
+        return getNumber(ProcedureConstants.DEFAULT_VALUE_PARAM, defaultValue).doubleValue();
     }
 
     /**
@@ -283,7 +283,7 @@ public class ProcedureConfiguration {
     }
 
     public int getConcurrency(int defaultValue) {
-        int requestedConcurrency = getNumber(ProcedureConstants.CONCURRENCY, defaultValue).intValue();
+        int requestedConcurrency = getNumber(ProcedureConstants.CONCURRENCY_PARAM, defaultValue).intValue();
         return Pools.allowedConcurrency(requestedConcurrency);
     }
 
@@ -293,8 +293,8 @@ public class ProcedureConfiguration {
 
     public int getReadConcurrency(int defaultValue) {
         Number readConcurrency = getNumber(
-                ProcedureConstants.READ_CONCURRENCY,
-                ProcedureConstants.CONCURRENCY,
+                ProcedureConstants.READ_CONCURRENCY_PARAM,
+                ProcedureConstants.CONCURRENCY_PARAM,
                 defaultValue);
         int requestedConcurrency = readConcurrency.intValue();
         return Pools.allowedConcurrency(requestedConcurrency);
@@ -306,15 +306,15 @@ public class ProcedureConfiguration {
 
     public int getWriteConcurrency(int defaultValue) {
         Number writeConcurrency = getNumber(
-                ProcedureConstants.WRITE_CONCURRENCY,
-                ProcedureConstants.CONCURRENCY,
+                ProcedureConstants.WRITE_CONCURRENCY_PARAM,
+                ProcedureConstants.CONCURRENCY_PARAM,
                 defaultValue);
         int requestedConcurrency = writeConcurrency.intValue();
         return Pools.allowedConcurrency(requestedConcurrency);
     }
 
     public String getDirectionName(String defaultDirection) {
-        return get(ProcedureConstants.DIRECTION, defaultDirection);
+        return get(ProcedureConstants.DIRECTION_PARAM, defaultDirection);
     }
 
     public Direction getDirection(Direction defaultDirection) {
@@ -330,7 +330,7 @@ public class ProcedureConfiguration {
     }
 
     public Class<? extends GraphFactory> getGraphImpl() {
-        return getGraphImpl(ProcedureConstants.DEFAULT_GRAPH_IMPL);
+        return getGraphImpl(ProcedureConstants.GRAPH_IMPL_DEFAULT);
     }
 
     /**
@@ -443,7 +443,7 @@ public class ProcedureConfiguration {
     }
 
     public Double getSkipValue(Double defaultValue) {
-        String key = ProcedureConstants.SKIP_VALUE;
+        String key = ProcedureConstants.SKIP_VALUE_PARAM;
         if (!config.containsKey(key)) {
             return defaultValue;
         }

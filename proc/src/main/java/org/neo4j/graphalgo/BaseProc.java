@@ -82,14 +82,6 @@ public abstract class BaseProc {
         return configureLoader(loader, config);
     }
 
-    final GraphLoader newLoader(
-            final String label,
-            final String relationship,
-            final Map<String, Object> config,
-            final AllocationTracker tracker) {
-        return newLoader(newConfig(label, relationship, config), tracker);
-    }
-
     void runWithExceptionLogging(String message, Runnable runnable) {
         try {
             runnable.run();

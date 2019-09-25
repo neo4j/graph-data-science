@@ -19,36 +19,53 @@
  */
 package org.neo4j.graphalgo.core;
 
-/**
- * @author mknblch
- */
-public class ProcedureConstants {
+public final class ProcedureConstants {
 
-    public static final String CYPHER_QUERY = "cypher";
+    // used in graph.load and algos
+
     public static final String NODE_LABEL_QUERY_PARAM = "nodeQuery";
     public static final String RELATIONSHIP_QUERY_PARAM = "relationshipQuery";
-    public static final String PROPERTY_PARAM = "weightProperty";
-    public static final String PROPERTY_PARAM_DEFAULT = "weight";
-    public static final String DEFAULT_PROPERTY_VALUE_PARAM = "defaultValue";
-    public static final String WRITE_FLAG = "write";
-    public static final String WRITE_PROPERTY = "writeProperty";
-    public static final String WRITE_PROPERTY_DEFAULT = "writeValue";
-    public static final String STATS_FLAG = "stats";
-    public static final double DEFAULT_PROPERTY_VALUE_DEFAULT = 1.0;
-    public static final String ITERATIONS_PARAM = "iterations";
-    public static final String TOLERANCE_PARAM = "tolerance";
-    public static final String BATCH_SIZE_PARAM = "batchSize";
-    public static final String DIRECTION = "direction";
-    public static final String GRAPH_IMPL_PARAM = "graph";
-    public static final String DEFAULT_GRAPH_IMPL = "huge";
-    public static final String CONCURRENCY = "concurrency";
-    public static final String READ_CONCURRENCY = "readConcurrency";
-    public static final String WRITE_CONCURRENCY = "writeConcurrency";
-    public static final String UNDIRECTED = "undirected";
-    public static final String SORTED = "sorted";
-    public static final String NODE_WEIGHT = "nodeWeight";
-    public static final String NODE_PROPERTY = "nodeProperty";
-    public static final String RELATIONSHIP_WEIGHT = "relationshipWeight";
+    public static final String NODE_PROPERTY_PARAM = "nodeProperty";
+    public static final String DEFAULT_VALUE_PARAM = "defaultValue";
+
+    // graph.load specific
+
+    public static final String NODE_WEIGHT_PARAM = "nodeWeight";
+    public static final String RELATIONSHIP_WEIGHT_PARAM = "relationshipWeight";
     public static final String RELATIONSHIP_PROPERTIES = "relationshipProperties";
-    public static final String SKIP_VALUE = "skipValue";
+
+    // algos specific
+
+    // graph type params
+    public static final String GRAPH_IMPL_PARAM = "graph";
+    public static final String GRAPH_IMPL_DEFAULT = "huge";
+    public static final String DIRECTION_PARAM = "direction";
+    public static final String UNDIRECTED_PARAM = "undirected";
+    public static final String SORTED_PARAM = "sorted";
+    public static final String CYPHER_QUERY_PARAM = "cypher";
+
+    // write specific params
+    public static final String WRITE_FLAG_PARAM = "write";
+    public static final String WRITE_PROPERTY_PARAM = "writeProperty";
+    public static final String WRITE_PROPERTY_DEFAULT = "writeValue";
+
+    // concurrency related params
+    public static final String BATCH_SIZE_PARAM = "batchSize";
+    public static final String CONCURRENCY_PARAM = "concurrency";
+    public static final String READ_CONCURRENCY_PARAM = "readConcurrency";
+    public static final String WRITE_CONCURRENCY_PARAM = "writeConcurrency";
+
+    // computation specific params
+    public static final String ITERATIONS_PARAM = "iterations";
+
+    // refers to the relationship weight to be used in weighted algorithms
+    // that property is also considered in graph.load, despite being documented
+    public static final String WEIGHT_PROPERTY_PARAM = "weightProperty";
+
+    // BetweenessCentrality specific
+    public static final String STATS_FLAG_PARAM = "stats";
+    // ANN specific
+    public static final String SKIP_VALUE_PARAM = "skipValue";
+
+    private ProcedureConstants() {}
 }

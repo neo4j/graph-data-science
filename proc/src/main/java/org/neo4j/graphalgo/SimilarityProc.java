@@ -181,7 +181,7 @@ public class SimilarityProc {
     }
 
     protected WeightedInput[] prepareWeights(Object rawData, ProcedureConfiguration configuration, Double skipValue) throws Exception {
-        if (ProcedureConstants.CYPHER_QUERY.equals(configuration.getGraphName("dense"))) {
+        if (ProcedureConstants.CYPHER_QUERY_PARAM.equals(configuration.getGraphName("dense"))) {
             return prepareSparseWeights(api, (String) rawData,  skipValue, configuration);
         } else {
             List<Map<String, Object>> data = (List<Map<String, Object>>) rawData;
@@ -250,7 +250,7 @@ public class SimilarityProc {
     }
 
     private Supplier<RleDecoder> createDecoderFactory(String graphType, int size) {
-        if(ProcedureConstants.CYPHER_QUERY.equals(graphType)) {
+        if(ProcedureConstants.CYPHER_QUERY_PARAM.equals(graphType)) {
             return () -> new RleDecoder(size);
         }
 
