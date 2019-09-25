@@ -24,10 +24,10 @@ In order to control the deduplication behavior we can pass the `duplicateRelatio
 
 Note that setting an explict deduplication strategy, other then `none` or `skip` will increase the relationship loading time.
 
-.The following query loads a graph of roads between locations keeping all the `ROAD` relationships between two `LOC` nodes.
+.The following query loads a graph of roads between locations keeping all the `ROAD` relationships between two `Loc` nodes.
 [source,cypher]
 ----
-CALL algo.graph.load('allRoads', 'LOC', 'ROAD', {
+CALL algo.graph.load('allRoads', 'Loc', 'ROAD', {
   graph: 'huge',
   relationshipWeight: 'cost',
   duplicateRelationships: 'none'})
@@ -36,7 +36,7 @@ CALL algo.graph.load('allRoads', 'LOC', 'ROAD', {
 .The following query loads a graph of roads between locations keeping only those `ROAD` relationships with the minimal cost.
 [source,cypher]
 ----
-CALL algo.graph.load('cheapestRoads', 'LOC', 'ROAD', {
+CALL algo.graph.load('cheapestRoads', 'Loc', 'ROAD', {
   graph: 'huge',
   relationshipWeight: 'cost',
   duplicateRelationships: 'sum'})
@@ -62,19 +62,19 @@ RETURN writeMillis, loadMillis, nodeCount, totalCost
 In some scenarios, it is useful to load more than one relationship property.
 For the `load.graph` procedure, this can be configured via the `relationshipProperties` parameter.
 
-The parameter is configured using a map in which each key refers to a custom property key.
-We can refer to that custom property key in all our algorithm procedures that support relationship weights.
+The parameter is configured using a map in which each key refers to a user-defined property key.
+We can refer to that property key in all algorithm procedures that support relationship weights.
 
-The value of that key defines a configuration that is applied during loading.
+The value of that key declares a configuration that is applied when we load relationship properties.
 Within the configuration of each key, we need to specify the Neo4j relationship `property` key we want to load.
-Optionally, we can define an `aggregation` function to control the deduplication behavior and a `defaultWeight` (see <<relationship-deduplication>>).
+Optionally, we can define an `aggregation` function to set the deduplication behavior and a `defaultWeight` which is used for absent property values (see <<relationship-deduplication>>).
 
-For the following example, let's assume that the `ROAD` relationship stores two properties, the `cost` (distance) and the road `quality` (between 1 and 10).
+For the following example, let's assume that each `ROAD` relationship stores two properties, the `cost` (distance) and the road `quality` (between 1 and 10).
 
 .The following query loads all roads, deduplicates parallel relationships and aggregates them by their distance and also by their quality.
 [source,cypher]
 ----
-CALL algo.graph.load('allRoads', 'LOC', 'ROAD', {
+CALL algo.graph.load('allRoads', 'Loc', 'ROAD', {
   graph: 'huge',
   relationshipProperties: {
     minDistance: {
@@ -90,7 +90,7 @@ CALL algo.graph.load('allRoads', 'LOC', 'ROAD', {
   }})
 ----
 
-When executed, our `allRoads` graph stores two relationship properties: `minDistance` and `maxQuality`.
+When executed, our `allRoads` in-memory graph stores two relationship properties: `minDistance` and `maxQuality`.
 We can access the loaded properties by specifying them in an algorithm configuration.
 Let's use `algo.shortestPath` again as an example weighted algorithm.
 
@@ -113,12 +113,12 @@ RETURN writeMillis, loadMillis, nodeCount, totalCost
 ----
 
 We provide a short-hand syntax for specifying property mappings that allows us to skip the `aggregation` and `defaultWeight`.
-If those are omitted, the sytem uses `SKIP` as default aggregation function and `Double.NaN` as default weight.
+If those are omitted, the procedure uses `SKIP` as default aggregation function and `Double.NaN` as default weight.
 
 .The following query loads the graph and allows us to refer to the `cost` property via `distance`:
 [source,cypher]
 ----
-CALL algo.graph.load('allRoads', 'LOC', 'ROAD', {
+CALL algo.graph.load('allRoads', 'Loc', 'ROAD', {
   graph: 'huge',
   relationshipProperties: { distance: 'cost' }
 })
