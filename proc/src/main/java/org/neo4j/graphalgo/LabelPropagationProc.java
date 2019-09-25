@@ -166,14 +166,14 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
 
     @Override
     protected GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
-        String seedProperty = config.getString(CONFIG_SEED_KEY, CONFIG_OLD_SEED_KEY, null);
-        String weightProperty = config.getString(CONFIG_WEIGHT_KEY, null);
-        Direction direction = config.getDirection(Direction.OUTGOING);
-
         return loader
-                .withReducedRelationshipLoading(direction)
-                .withRelationshipProperties(PropertyMapping.of(weightProperty, 1.0D))
-                .withOptionalNodeProperties(createPropertyMappings(seedProperty, weightProperty));
+                .withReducedRelationshipLoading(config.getDirection(Direction.OUTGOING))
+                .withRelationshipProperties(PropertyMapping.of(
+                        config.getWeightProperty(),
+                        config.getWeightPropertyDefaultValue(1.0D)))
+                .withOptionalNodeProperties(createPropertyMappings(
+                        config.getString(CONFIG_SEED_KEY, CONFIG_OLD_SEED_KEY, null),
+                        config.getString(CONFIG_WEIGHT_KEY, null)));
     }
 
     private Stream<LabelPropagationStats> run(
