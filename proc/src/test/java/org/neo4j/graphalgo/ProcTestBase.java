@@ -22,7 +22,6 @@ package org.neo4j.graphalgo;
 import com.carrotsearch.hppc.IntIntMap;
 import com.carrotsearch.hppc.cursors.IntIntCursor;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
@@ -34,28 +33,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 public class ProcTestBase {
 
     static GraphDatabaseAPI DB;
-
-    static Stream<String> graphImplementations() {
-        return Stream.of("Huge", "Kernel");
-    }
-
-    static Stream<String> loadDirections() {
-        return Stream.of("BOTH", "INCOMING", "OUTGOING");
-    }
-
-    static Stream<Arguments> graphDirectionCombinations() {
-        return graphImplementations().flatMap(impl -> loadDirections().map(direction -> arguments(impl, direction)));
-    }
 
     @AfterAll
     static void clearLoadedGraphs() {

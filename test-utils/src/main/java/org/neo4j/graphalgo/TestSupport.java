@@ -75,4 +75,12 @@ public class TestSupport {
         return Stream.of(true, false).flatMap(parallel -> allGraphNames().map(name -> arguments(parallel, name)));
     }
 
+    public static Stream<String> allDirections() {
+        return Stream.of("BOTH", "INCOMING", "OUTGOING");
+    }
+
+    public static Stream<Arguments> allGraphNamesAndDirections() {
+        return allGraphNames().flatMap(name -> allDirections().map(direction -> arguments(name, direction)));
+    }
+
 }

@@ -55,6 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.graphalgo.TestSupport.allGraphNamesAndDirections;
 
 class LoadGraphProcTest extends ProcTestBase {
 
@@ -342,13 +343,18 @@ class LoadGraphProcTest extends ProcTestBase {
     }
 
 
-    static Stream<Arguments> graphImplAndDirectionAndBoolCombinations() {
-        return Stream.of(true, false).flatMap(bool -> graphDirectionCombinations().map(comb -> arguments(comb.get()[0], comb.get()[1], bool)));
+    static Stream<Arguments> graphImplAndDirectionAndComputeDegreeDistribution() {
+        return Stream.of(true, false)
+                .flatMap(computeDegreeDistribution -> allGraphNamesAndDirections()
+                        .map(comb -> arguments(comb.get()[0], comb.get()[1], computeDegreeDistribution)));
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplAndDirectionAndBoolCombinations")
-    public void shouldComputeDegreeDistributionAndReturnLoadDirection(String graphImpl, String loadDirection, Boolean computeDegreeDistr) {
+    @ParameterizedTest(name = "graph = {0}, direction = {1}, computeDegreeDistribution = {2}")
+    @MethodSource("graphImplAndDirectionAndComputeDegreeDistribution")
+    void shouldReturnGraphInfoWithDegreeDistributionAndLoadDirection(
+            String graphImpl,
+            String loadDirection,
+            Boolean computeDegreeDistribution) {
         String query = "CALL algo.graph.load(" +
                        "    'foo', null, null, {" +
                        "        graph: $graph, direction: $direction" +
@@ -357,10 +363,14 @@ class LoadGraphProcTest extends ProcTestBase {
 
         db.execute(query, MapUtil.map("graph", graphImpl, "direction", loadDirection));
 
-        runQuery("CALL algo.graph.info('foo', $computeDegreeDistr)", db, Collections.singletonMap("computeDegreeDistr", computeDegreeDistr), resultRow -> {
-            assertEquals(resultRow.getString("type"), graphImpl.toLowerCase());
-            assertEquals(resultRow.getString("direction"), loadDirection);
-        });
+        runQuery(
+                "CALL algo.graph.info('foo', $computeDegreeDistr)",
+                db,
+                Collections.singletonMap("computeDegreeDistr", computeDegreeDistribution),
+                resultRow -> {
+                    assertEquals(resultRow.getString("type"), graphImpl.toLowerCase());
+                    assertEquals(resultRow.getString("direction"), loadDirection);
+                });
     }
 
     @ParameterizedTest
