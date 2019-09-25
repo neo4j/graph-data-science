@@ -23,12 +23,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.helpers.collection.MapUtil;
@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.LockSupport;
+import java.util.stream.Stream;
 
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -53,6 +54,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class LoadGraphProcTest extends ProcTestBase {
 
@@ -339,26 +341,14 @@ class LoadGraphProcTest extends ProcTestBase {
         assertTrue(db.execute(query, params).<Boolean>columnAs("loaded").next());
     }
 
-    @ParameterizedTest
-    @MethodSource("graphDirectionCombinations")
-    public void consistentLoadDirection(String graphImpl, String loadDirection) {
-        String query = "CALL algo.graph.load(" +
-                               "    'foo', null, null, {" +
-                               "        graph: $graph, direction: $direction" +
-                               "    }" +
-                               ")";
 
-        db.execute(query, MapUtil.map("graph", graphImpl, "direction", loadDirection));
-
-        runQuery("CALL algo.graph.info('foo')", db, Collections.emptyMap(), resultRow -> {
-            assertEquals(resultRow.getString("type"), graphImpl.toLowerCase());
-            assertEquals(resultRow.getString("direction"), loadDirection);
-        });
+    static Stream<Arguments> graphImplAndDirectionAndBoolCombinations() {
+        return Stream.of(true, false).flatMap(bool -> graphDirectionCombinations().map(comb -> arguments(comb.get()[0], comb.get()[1], bool)));
     }
 
     @ParameterizedTest
-    @MethodSource("graphDirectionCombinations")
-    public void shouldComputeDegreeDistributionAndReturnLoadDirection(String graphImpl, String loadDirection) {
+    @MethodSource("graphImplAndDirectionAndBoolCombinations")
+    public void shouldComputeDegreeDistributionAndReturnLoadDirection(String graphImpl, String loadDirection, Boolean computeDegreeDistr) {
         String query = "CALL algo.graph.load(" +
                        "    'foo', null, null, {" +
                        "        graph: $graph, direction: $direction" +
@@ -367,7 +357,7 @@ class LoadGraphProcTest extends ProcTestBase {
 
         db.execute(query, MapUtil.map("graph", graphImpl, "direction", loadDirection));
 
-        runQuery("CALL algo.graph.info('foo', true)", db, Collections.emptyMap(), resultRow -> {
+        runQuery("CALL algo.graph.info('foo', $computeDegreeDistr)", db, Collections.singletonMap("computeDegreeDistr", computeDegreeDistr), resultRow -> {
             assertEquals(resultRow.getString("type"), graphImpl.toLowerCase());
             assertEquals(resultRow.getString("direction"), loadDirection);
         });
