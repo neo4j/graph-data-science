@@ -21,8 +21,6 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -30,6 +28,8 @@ import org.neo4j.kernel.impl.proc.Procedures;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 
 class DegreeProcIssue848Test extends ProcTestBase {
 
@@ -55,8 +55,7 @@ class DegreeProcIssue848Test extends ProcTestBase {
                 .registerProcedure(DegreeCentralityProc.class);
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
+    @AllGraphNamesTest
     void multipleBatches(String graphImpl) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.degree.stream('Node', '', {graph: $graph, direction: 'incoming'}) " +

@@ -21,8 +21,6 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
@@ -39,6 +37,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.TestSupport.*;
 
 class EigenvectorCentralityProcTest extends ProcTestBase {
 
@@ -100,9 +99,8 @@ class EigenvectorCentralityProcTest extends ProcTestBase {
         if (DB != null) DB.shutdown();
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    void testStream(String graphImpl) {
+    @AllGraphNamesTest
+    public void testStream(String graphImpl) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.eigenvector.stream(" +
                        "    'Character', 'INTERACTS_SEASON1', {" +
@@ -120,9 +118,8 @@ class EigenvectorCentralityProcTest extends ProcTestBase {
         assertMapEquals(expected, actual);
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    void testWriteBack(String graphImpl) {
+    @AllGraphNamesTest
+    public void testWriteBack(String graphImpl) {
         String query = "CALL algo.eigenvector(" +
                        "    'Character', 'INTERACTS_SEASON1', {" +
                        "        graph: $graph, direction: 'BOTH'" +
@@ -137,9 +134,8 @@ class EigenvectorCentralityProcTest extends ProcTestBase {
         assertResult("eigenvector", expected);
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    void testWriteBackUnderDifferentProperty(String graphImpl) {
+    @AllGraphNamesTest
+    public void testWriteBackUnderDifferentProperty(String graphImpl) {
         String query = "CALL algo.eigenvector(" +
                        "    'Character', 'INTERACTS_SEASON1', {" +
                        "        writeProperty: 'foobar', graph: $graph, direction: 'BOTH'" +
@@ -154,9 +150,8 @@ class EigenvectorCentralityProcTest extends ProcTestBase {
         assertResult("foobar", expected);
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    void testParallelWriteBack(String graphImpl) {
+    @AllGraphNamesTest
+    public void testParallelWriteBack(String graphImpl) {
         String query = "CALL algo.eigenvector(" +
                        "    'Character', 'INTERACTS_SEASON1', {" +
                        "        batchSize: 3, concurrency: 2, write: true, graph: $graph, direction: 'BOTH'" +
@@ -168,9 +163,8 @@ class EigenvectorCentralityProcTest extends ProcTestBase {
         assertResult("eigenvector", expected);
     }
 
-    @ParameterizedTest
-    @MethodSource("graphImplementations")
-    void testParallelExecution(String graphImpl) {
+    @AllGraphNamesTest
+    public void testParallelExecution(String graphImpl) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.eigenvector.stream(" +
                        "    'Character', 'INTERACTS_SEASON1', {" +
