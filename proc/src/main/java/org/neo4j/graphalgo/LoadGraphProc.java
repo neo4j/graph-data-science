@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.loading.GraphByType;
-import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -232,7 +231,7 @@ public final class LoadGraphProc extends BaseProc {
             info.nodes = graph.nodeCount();
             info.relationships = graph.relationshipCount();
             info.exists = true;
-            info.direction = graph.getLoadDirection().toString();
+            info.direction = graph.getLoadDirection().name();
         }
         return Stream.of(info);
     }

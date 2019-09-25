@@ -27,9 +27,11 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
+import org.neo4j.graphdb.Direction;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -75,12 +77,12 @@ public class TestSupport {
         return Stream.of(true, false).flatMap(parallel -> allGraphNames().map(name -> arguments(parallel, name)));
     }
 
-    public static Stream<String> allDirections() {
-        return Stream.of("BOTH", "INCOMING", "OUTGOING");
+    public static Stream<String> allDirectionsNames() {
+        return Arrays.stream(Direction.values()).map(Direction::name);
     }
 
     public static Stream<Arguments> allGraphNamesAndDirections() {
-        return allGraphNames().flatMap(name -> allDirections().map(direction -> arguments(name, direction)));
+        return allGraphNames().flatMap(name -> allDirectionsNames().map(direction -> arguments(name, direction)));
     }
 
 }

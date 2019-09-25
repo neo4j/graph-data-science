@@ -368,8 +368,8 @@ class LoadGraphProcTest extends ProcTestBase {
                 db,
                 Collections.singletonMap("computeDegreeDistr", computeDegreeDistribution),
                 resultRow -> {
-                    assertEquals(resultRow.getString("type"), graphImpl.toLowerCase());
-                    assertEquals(resultRow.getString("direction"), loadDirection);
+                    assertEquals(graphImpl.toLowerCase(), resultRow.getString("type"));
+                    assertEquals(loadDirection, resultRow.getString("direction"));
                 });
     }
 
