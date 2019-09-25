@@ -3,16 +3,22 @@
     <d:tocentry linkend="graph-algorithms"><?dbhtml filename="index.html"?>
         <d:tocentry linkend="introduction"><?dbhtml filename="introduction/index.html"?>
         </d:tocentry>
+
         <d:tocentry linkend="projected-graph-model"><?dbhtml filename="projected-graph-model/index.html"?>
+            <d:tocentry linkend="label-relationship-type-projection"><?dbhtml filename="projected-graph-model/label-relationship-type-projection/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="named-graph"><?dbhtml filename="projected-graph-model/named-graph/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="cypher-projection"><?dbhtml filename="projected-graph-model/cypher-projection/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="relationship-deduplication"><?dbhtml filename="projected-graph-model/relationship-deduplication/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="memory-requirements"><?dbhtml filename="projected-graph-model/memory-requirements/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="transaction-handling"><?dbhtml filename="projected-graph-model/transaction-handling/index.html"?>
+            </d:tocentry>
         </d:tocentry>
-        <d:tocentry linkend="label-relationship-type-projection"><?dbhtml filename="projected-graph-model/label-relationship-type-projection/index.html"?>
-        </d:tocentry>
-        <d:tocentry linkend="cypher-projection"><?dbhtml filename="projected-graph-model/cypher-projection/index.html"?>
-        </d:tocentry>
-        <d:tocentry linkend="named-graph"><?dbhtml filename="projected-graph-model/named-graph/index.html"?>
-        </d:tocentry>
-        <d:tocentry linkend="memory-requirements"><?dbhtml filename="projected-graph-model/memory-requirements/index.html"?>
-        </d:tocentry>
+
         <d:tocentry linkend="yelp-example"><?dbhtml filename="yelp-example/index.html"?>
         </d:tocentry>
         <d:tocentry linkend="procedures"><?dbhtml filename="procedures/index.html"?>
