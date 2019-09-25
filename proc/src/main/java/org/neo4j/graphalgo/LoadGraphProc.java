@@ -148,11 +148,15 @@ public final class LoadGraphProc extends BaseProc {
                 .withRelationshipProperties(config.getRelationshipProperties())
                 .withDirection(direction);
 
-        // TODO: required to be backwards-compatible with the `weightProperty` parameter.
-        if (config.hasWeightProperty()) {
+        if (config.hasRelationshipWeight()) { // required to be backwards compatible with `relationshipWeight`
+            loader.withRelationshipProperties(PropertyMapping.of(
+                    config.getRelationshipWeight(),
+                    config.getWeightPropertyDefaultValue(ProcedureConstants.DEFAULT_VALUE_DEFAULT)
+            ));
+        } else if (config.hasWeightProperty()) { // required to be backwards compatible with `weightProperty` (not documented but was possible)
             loader.withRelationshipProperties(PropertyMapping.of(
                     config.getWeightProperty(),
-                    config.getWeightPropertyDefaultValue(1.0)));
+                    config.getWeightPropertyDefaultValue(ProcedureConstants.DEFAULT_VALUE_DEFAULT)));
         }
 
         if (config.get(ProcedureConstants.SORTED_PARAM, false)) {
@@ -215,7 +219,7 @@ public final class LoadGraphProc extends BaseProc {
         if (!LoadGraphFactory.exists(name)) {
             info = new GraphInfoWithHistogram(name);
         } else {
-            Graph graph = LoadGraphFactory.getAll(name);
+            Graph graph = LoadGraphFactory.getUnion(name);
             final boolean calculateDegreeDistribution;
             final ProcedureConfiguration configuration;
             if (Boolean.TRUE.equals(degreeDistribution)) {

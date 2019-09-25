@@ -54,14 +54,17 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.graphalgo.TestSupport.allGraphNamesAndDirections;
 import static org.neo4j.graphalgo.GraphHelper.assertOutRelationships;
+import static org.neo4j.graphalgo.GraphHelper.assertOutWeights;
 import static org.neo4j.graphalgo.GraphHelper.assertOutWeightsWithDelta;
+import static org.neo4j.graphalgo.TestSupport.allGraphNames;
+import static org.neo4j.graphalgo.TestSupport.allGraphNamesAndDirections;
 
 class LoadGraphProcTest extends ProcTestBase {
 
@@ -123,6 +126,32 @@ class LoadGraphProcTest extends ProcTestBase {
                     assertFalse(row.getBoolean("alreadyLoaded"));
                 }
         );
+    }
+
+    static Stream<Arguments> relationshipWeightParameters() {
+        return allGraphNames()
+                .flatMap(graphName -> Stream.of("relationshipWeight", "weightProperty")
+                        .map(propertyParam -> arguments(graphName, propertyParam)));
+    }
+
+    @ParameterizedTest(name = "graphImpl = {0}, relationshipWeightParameter = {1}")
+    @MethodSource("relationshipWeightParameters")
+    void shouldLoadGraphWithRelationshipWeight(String graphImpl, String relationshipWeightParam) {
+        String query = "CALL algo.graph.load(" +
+                       "    'foo', '', '', {" +
+                       "        graph: $graph, " + relationshipWeightParam + ": 'weight'" +
+                       "    }" +
+                       ")";
+
+        runQuery(query, db, singletonMap("graph", graphImpl));
+
+        Graph fooGraph = LoadGraphFactory.getUnion("foo");
+        assertNotNull(fooGraph);
+        assertEquals(12, fooGraph.nodeCount());
+        assertEquals(10, fooGraph.relationshipCount());
+
+        assertOutWeights(fooGraph, 0, 1.0, 1.0, 1.0, 1.0, 1.0);
+        assertOutWeights(fooGraph, 1, 42.0, 42.0, 42.0, 42.0, 42.0);
     }
 
     @ParameterizedTest
@@ -243,7 +272,7 @@ class LoadGraphProcTest extends ProcTestBase {
             assertEquals("MAX", maxCostParams.get("aggregate").toString());
         });
 
-        Graph g = LoadGraphFactory.getAll("aggGraph");
+        Graph g = LoadGraphFactory.getUnion("aggGraph");
 
         assertEquals(2, g.nodeCount());
         assertEquals(3, g.relationshipCount());

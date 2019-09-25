@@ -27,6 +27,8 @@ public final class ProcedureConstants {
     public static final String RELATIONSHIP_QUERY_PARAM = "relationshipQuery";
     public static final String NODE_PROPERTY_PARAM = "nodeProperty";
     public static final String DEFAULT_VALUE_PARAM = "defaultValue";
+    public static final double DEFAULT_VALUE_DEFAULT = 1.0;
+
 
     // graph.load specific
 

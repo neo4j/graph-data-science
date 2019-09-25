@@ -121,18 +121,6 @@ public class ProcedureConfiguration {
     }
 
     /**
-     * Sets the weight parameter.
-     *
-     * If the parameters is already set, it's overriden.
-     *
-     * @return this configuration
-     */
-    public ProcedureConfiguration setWeightProperty(String weightProperty) {
-        config.put(ProcedureConstants.WEIGHT_PROPERTY_PARAM, weightProperty);
-        return this;
-    }
-
-    /**
      * return either the Label or the cypher query for node request
      *
      * @return the label or query
@@ -229,6 +217,14 @@ public class ProcedureConfiguration {
 
     public boolean isStatsFlag(boolean defaultValue) {
         return get(ProcedureConstants.STATS_FLAG_PARAM, defaultValue);
+    }
+
+    public boolean hasRelationshipWeight() {
+        return containsKey(ProcedureConstants.RELATIONSHIP_WEIGHT_PARAM);
+    }
+
+    public String getRelationshipWeight() {
+        return getString(ProcedureConstants.RELATIONSHIP_WEIGHT_PARAM, null);
     }
 
     public boolean hasWeightProperty() {

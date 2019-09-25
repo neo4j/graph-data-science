@@ -78,7 +78,12 @@ public final class LoadGraphFactory extends GraphFactory {
         return graphs.get(name).loadGraph(relationshipType, maybeRelationshipProperty);
     }
 
-    public static Graph getAll(String name) {
+    /**
+     * A named graph is potentially split up into multiple sub-graphs.
+     * Each sub-graph has the same node set and represents a unique relationship type / weight property combination.
+     * This method returns the union of all subgraphs refered to by the given name.
+     */
+    public static Graph getUnion(String name) {
         if (!exists(name)) {
             // getAll is allowed to return null if the graph does not exist
             // as it's being used by algo.graph.info or algo.graph.remove,
