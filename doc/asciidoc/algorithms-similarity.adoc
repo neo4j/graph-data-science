@@ -1,0 +1,13 @@
+[[algorithms-similarity]]
+= Similarity algorithms
+
+[abstract]
+--
+This chapter provides explanations and examples for each of the similarity algorithms in the Neo4j Graph Algorithms library.
+--
+
+The following similarity algorithms can help calculate the similarity of nodes:
+
+* <<algorithms-jaccard, Jaccard>> (`algo.similarity.jaccard`)
+
+include::jaccard.adoc[leveloffset=+1]

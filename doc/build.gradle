@@ -206,6 +206,7 @@ html {
     ext.outputDir = "$buildDir/html/${versions.graphAlgoDocs}"
     ext.contentMap = "$projectDir/docbook/content-map.xml"
     inputs.file sourceFile
+    inputs.file ext.contentMap
     inputs.dir 'css'
     inputs.dir 'images'
     inputs.dir 'javascript'

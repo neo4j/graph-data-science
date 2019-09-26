@@ -40,6 +40,10 @@
             <d:tocentry linkend="algorithms-wcc"><?dbhtml filename="algorithms/wcc/index.html"?>
             </d:tocentry>
         </d:tocentry>
+        <d:tocentry linkend="algorithms-similarity"><?dbhtml filename="algorithms/similarity/index.html"?>
+            <d:tocentry linkend="algorithms-jaccard"><?dbhtml filename="algorithms/jaccard/index.html"?>
+            </d:tocentry>
+        </d:tocentry>
 
         <d:tocentry linkend="labs-algorithms"><?dbhtml filename="labs-algorithms/index.html"?>
             <d:tocentry linkend="labs-procedures"><?dbhtml filename="labs-procedures/index.html"?>
@@ -82,8 +86,6 @@
             </d:tocentry>
 
             <d:tocentry linkend="labs-algorithms-similarity"><?dbhtml filename="labs-algorithms/similarity/index.html"?>
-                <d:tocentry linkend="labs-algorithms-similarity-jaccard"><?dbhtml filename="labs-algorithms/jaccard/index.html"?>
-                </d:tocentry>
                 <d:tocentry linkend="labs-algorithms-similarity-cosine"><?dbhtml filename="labs-algorithms/cosine/index.html"?>
                 </d:tocentry>
                 <d:tocentry linkend="labs-algorithms-similarity-pearson"><?dbhtml filename="labs-algorithms/pearson/index.html"?>
