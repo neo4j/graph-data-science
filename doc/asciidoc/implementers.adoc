@@ -58,47 +58,6 @@ The Graph knows the `nodeCount` and `degree` of each node and can map nodeId to 
 
 |===
 
-[ditaa]
-----
-
-                                  +--------------+
-                                  |    Graph     |
-                                  +--------------+
-                                  | - degree( )  |
-                                  | - forEach( ) |
-                                  | - relation( )|
-                                  | - idMap( )   |
-                                  +--------------+
-                                    ^    ^     ^
-                        implements  |    |     | implements
-                      +-------------+    |     +----------+
-                      |                  |                |
-                      |                  |implements      |
-                 +----+-------+    +-----+------+     +---+-------+
-                 | HeavyGraph |    | LightGraph |     | GraphView |
-                 +------------+    +------------+     +-----------+
-
-----
-
-[NOTE]
-Currently we have 3 different implementations aiming for different goals like performance, memory consumption and accuracy.
-
-`HeavyGraph`
-
-This implementations utilizes an int-matrix for storing connections between vertices.
-It has a higher memory consumption but performs basic calculations on the graph around 3 times faster then the memory efficient implementation.
-Furthermore the number of edges per node is limited only to the maximum array size (2bn) of the JVM.
-Relationships can be added in arbitrary order.
-
-`LightGraph`
-
-This implementation takes 3 times less heap due to a more intelligent memory layout.
-The drawback is slightly higher evaluation time and that the data cannot be loaded in parallel (yet).
-
-`GraphView`
-
-The View is just a simple wrapper around the Neo4j Kernel API.
-It has been implemented for tests and benchmarks baselines.
 
 == Import
 
@@ -115,15 +74,15 @@ It is responsible for creating the Graph using the Neo4j Kernel API.
              +------------------+         builds        +--------------+
              |   GraphFactory   | - - - - - - - - - - > |    Graph     |
              +------+---+-------+                       +---+-----+----+
-                    ^   ^                                   ^     ^
-                    |   |                                   |     |
-                    |   |                                   |     |
-                    |   |                                   |     |
-                +---+   +--------+                   +------+     +--+
-                |                |                   |               |
-        +-------+------+  +------+-------+    +------+-----+  +------+-----+
-        | HeavyFactory |  | LightFactory |    | HeavyGraph |  | LightGraph |
-        +--------------+  +--------------+    +------------+  +------------+
+                    ^   ^
+                    |   |
+                    |   |
+                    |   |
+            +-------+   +------+
+            |                  |
+  +---------+--------+  +------+-------------+
+  | HugeGraphFactory |  | CypherGraphFactory |
+  +------------------+  +--------------------+
 
 ----
 

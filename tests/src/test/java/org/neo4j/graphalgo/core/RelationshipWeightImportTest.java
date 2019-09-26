@@ -98,7 +98,6 @@ class RelationshipWeightImportTest {
         //   (a)-[{w:1}]->(b)  |  (a)<-[{w:2}]-(b)  |  (b)-[{w:2}]->(a)  |  (b)<-[{w:1}]-(a)
         // therefore the final weight for in/outs of either a/b is 1,
         // the weight of 2 is discarded.
-        // This cannot be represented in the graph view
         checkWeight(0, Direction.OUTGOING, 1.0);
         checkWeight(1, Direction.OUTGOING, 2.0);
 
