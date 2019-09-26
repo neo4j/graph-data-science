@@ -1,16 +1,16 @@
 [[label-relationship-type-projection]]
 // tag::header[]
-= Label and relationship-type projection
+= Node-label and relationship-type projection
 // end::header[]
 
 ifdef::env-docs[]
 [abstract]
 --
-This chapter explains label and relationship-type projection in the Neo4j Graph Algorithms library.
+This chapter explains node-label and relationship-type projection in the Neo4j Graph Algorithms library.
 --
 endif::env-docs[]
 
-We can project the subgraph we want to run the algorithm on by using the label parameter to describe nodes, and relationship-type to describe relationships.
+We can project the subgraph we want to run the algorithm on by using the label parameter to describe nodes, and relationship type to describe relationships.
 
 The general call syntax is:
 
@@ -49,7 +49,7 @@ CALL algo.<name>(null, null)
 [[huge-projection]]
 == Huge graph projection
 
-The default label and relationship-type projection has a limitation of 2 billion nodes and 2 billion relationships, so if our project graph is bigger than this we need to use a huge graph projection.
+The default label and relationship type projection has a limitation of 2 billion nodes and 2 billion relationships, so if our project graph is bigger than this we need to use a huge graph projection.
 This can be enabled by setting `graph:'huge'` in the config.
 
 The general call syntax is:

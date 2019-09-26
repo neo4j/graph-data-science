@@ -3,7 +3,7 @@
 
 [abstract]
 --
-This section describes named graphs, which are stored in-memory and can be referenced by a user-defined name.
+This section describes named graphs, which are stored in memory and can be referenced by a user-defined name.
 When Neo4j is restarted, named graphs are lost and will need to be reloaded.
 --
 
@@ -12,7 +12,7 @@ After usage, they can be removed from memory to free resources used.
 
 == Loading a named graph
 
-We can load named graphs using either a <<label-relationship-type-projection, label and relationship-type>> or a <<cypher-projection, Cypher>> projection.
+We can load named graphs using either a <<label-relationship-type-projection, node-label and relationship-type>> or a <<cypher-projection, Cypher>> projection.
 
 .The following will load a graph with the name `my-graph`, for node label `Label` and relationship type `REL_TYPE`
 [source,cypher]
@@ -95,7 +95,7 @@ CALL algo.pageRank(null, 'REL_TYPE1 | REL_TYPE2', {graph: 'my-graph'})
 
 [NOTE]
 ====
-Using just a subset of the loaded relationships is currently only possible for a label and relationship-type projection.
+Using just a subset of the loaded relationships is currently only possible for a node-label and relationship-type projection.
 ====
 
 [NOTE]
@@ -115,7 +115,7 @@ It is best to only load as few types as needed.
 
 Named graphs offer different ways of handling multiple - so called "parallel" - relationships between a given pair of nodes.
 
-=== Label and relationship-type projection
+=== Node-label and relationship-type projection
 
 By default, the Huge graph assumes that the relationship projection only contains one relationship between a pair of nodes and will simply ignore all other relationships (see `skip` below).
 In order to control the deduplication behavior we can pass the `duplicateRelationships` key in the config to decide what should happen with duplicates.
@@ -236,7 +236,7 @@ Note that in this particular shortest path example, using the default property v
 
 [NOTE]
 ====
-Loading multiple relationship properties is currently only supported for label and relationship type projections.
+Loading multiple relationship properties is currently only supported for node-label and relationship-type projections.
 ====
 
 [CAUTION]
@@ -263,7 +263,6 @@ CALL algo.graph.list() YIELD name
 CALL algo.graph.remove(name) YIELD removed
 RETURN name, removed
 ----
-
 
 == Remove named graph
 
