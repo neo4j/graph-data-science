@@ -1,0 +1,28 @@
+[[labs-algorithms-similarity]]
+= Similarity algorithms
+
+[abstract]
+--
+This chapter provides explanations and examples for each of the experimental similarity algorithms in the Neo4j Graph Algorithms library.
+--
+
+These algorithms help calculate the similarity of nodes:
+
+* <<labs-algorithms-similarity-jaccard, Jaccard Similarity>> (`algo.similarity.jaccard`)
+* <<labs-algorithms-similarity-cosine, Cosine Similarity>> (`algo.similarity.cosine`)
+* <<labs-algorithms-similarity-pearson, Pearson Similarity>> (`algo.similarity.pearson`)
+* <<labs-algorithms-similarity-euclidean, Euclidean Distance>> (`algo.similarity.euclidean`)
+* <<labs-algorithms-similarity-overlap, Overlap Similarity>> (`algo.similarity.overlap`)
+* <<labs-algorithms-approximate-nearest-neighbors, Approximate Nearest Neighbors>> (`algo.ml.ann`)
+
+include::labs-similarity-jaccard.adoc[leveloffset=+1]
+
+include::labs-similarity-cosine.adoc[leveloffset=+1]
+
+include::labs-similarity-pearson.adoc[leveloffset=+1]
+
+include::labs-similarity-euclidean.adoc[leveloffset=+1]
+
+include::labs-similarity-overlap.adoc[leveloffset=+1]
+
+include::labs-similarity-ann.adoc[leveloffset=+1]

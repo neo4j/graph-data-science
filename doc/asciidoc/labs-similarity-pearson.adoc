@@ -1,0 +1,427 @@
+:procedure-name: Pearson Similarity
+[[labs-algorithms-similarity-pearson]]
+= The Pearson Similarity algorithm
+
+[abstract]
+--
+This section describes the Pearson Similarity algorithm in the Neo4j Graph Algorithms library.
+--
+
+link:https://en.wikipedia.org/wiki/Pearson_correlation_coefficient[Pearson similarity] is the covariance of the two _n_-dimensional vectors divided by the product of their standard deviations.
+
+[WARNING]
+--
+The Pearson Similarity algorithm is experimental and not officially supported.
+--
+
+This section includes:
+
+* <<algorithms-similarity-pearson-context, History and explanation>>
+* <<algorithms-similarity-pearson-usecase, Use-cases - when to use the Pearson Similarity algorithm>>
+* <<algorithms-similarity-pearson-function-sample, Pearson Similarity algorithm function sample>>
+* <<algorithms-similarity-pearson-procedure-sample, Pearson Similarity algorithm procedures sample>>
+* <<algorithms-similarity-pearson-source-target-ids, Specifying source and target ids>>
+* <<algorithms-similarity-pearson-skipping-values, Skipping values>>
+* <<algorithms-similarity-pearson-cypher-projection, Cypher projection>>
+* <<algorithms-similarity-pearson-syntax, Syntax>>
+
+
+[[algorithms-similarity-pearson-context]]
+== History and explanation
+
+// tag::explanation[]
+
+Pearson similarity is computed using the following formula:
+
+image::pearson-similarity.png[role="middle"]
+
+Values range between -1 and 1, where -1 is perfectly dissimilar and 1 is perfectly similar.
+
+The library contains both procedures and functions to calculate similarity between sets of data.
+The function is best used when calculating the similarity between small numbers of sets.
+The procedures parallelize the computation and are therefore more appropriate for computing similarities on bigger datasets.
+
+// end::explanation[]
+
+[[algorithms-similarity-pearson-usecase]]
+== Use-cases - when to use the Pearson Similarity algorithm
+
+// tag::use-case[]
+We can use the Pearson Similarity algorithm to work out the similarity between two things.
+We might then use the computed similarity as part of a recommendation query.
+For example, to get movie recommendations based on the preferences of users who have given similar ratings to other movies that you've seen.
+// end::use-case[]
+
+
+[[algorithms-similarity-pearson-function-sample]]
+== Pearson Similarity algorithm function sample
+
+The Pearson Similarity function computes the similarity of two lists of numbers.
+
+include::labs-similarity.adoc[tag=weighted-function-note]
+
+We can use it to compute the similarity of two hardcoded lists.
+
+.The following will return the Pearson similarity of two lists of numbers:
+[source, cypher]
+----
+include::scripts/similarity-pearson.cypher[tag=function]
+----
+
+// tag::function[]
+.Results
+[opts="header",cols="1"]
+|===
+| `similarity`
+| 0.28767798089123053
+|===
+// end::function[]
+
+We can also use it to compute the similarity of nodes based on lists computed by a Cypher query.
+
+.The following will create a sample graph:
+[source, cypher]
+----
+include::scripts/similarity-pearson.cypher[tag=create-sample-graph]
+----
+
+.The following will return the Pearson similarity of Arya and Karin:
+[source, cypher]
+----
+include::scripts/similarity-pearson.cypher[tag=function-cypher]
+----
+
+// tag::function-cypher[]
+.Results
+[opts="header"]
+|===
+| `from`       | `to`         | `similarity`
+|"Arya" |	"Karin"	 | 0.8194651785206903
+
+|===
+// end::function-cypher[]
+
+
+In this example, we pass in `vectorType: "maps"` as an extra parameter, as well as using the `algo.similarity.asVector` function to construct a vector of maps containing each movie and the corresponding rating.
+We do this because the Pearson Similarity algorithm needs to compute the average of *all* the movies that a user has reviewed, not just the ones that they have in common with the user we're comparing them to.
+We can't therefore just pass in collections of the ratings of movies that have been reviewed by both people.
+
+.The following will return the Pearson similarity of Arya and other people that have rated at least one movie:
+[source, cypher]
+----
+include::scripts/similarity-pearson.cypher[tag=function-cypher-all]
+----
+
+// tag::function-cypher--all[]
+.Results
+[opts="header"]
+|===
+| `from`       | `to`         | `similarity`
+| "Arya" | "Karin"    | 0.8194651785206903
+| "Arya" | "Zhen"     | 0.4839533792540704
+| "Arya" | "Praveena" | 0.09262336892949784
+| "Arya" | "Michael"  | -0.9551953674747637
+
+|===
+// end::function-cypher-all[]
+
+
+[[algorithms-similarity-pearson-procedure-sample]]
+== Pearson Similarity algorithm procedures sample
+
+include::labs-similarity.adoc[tag=computation]
+include::labs-similarity.adoc[tag=weighted-note]
+
+
+.The following will create a sample graph:
+[source, cypher]
+----
+include::scripts/similarity-pearson.cypher[tag=create-sample-graph]
+----
+
+
+.The following will return a stream of node pairs along with their Pearson similarities:
+[source, cypher]
+----
+include::scripts/similarity-pearson.cypher[tag=stream]
+----
+
+// tag::stream[]
+.Results
+[opts="header"]
+|===
+| `from`       | `to`         | `similarity`
+| "Zhen"     | "Praveena" | 0.8865926413116155
+| "Zhen"     | "Karin"    | 0.8320502943378437
+| "Arya"     | "Karin"    | 0.8194651785206903
+| "Zhen"     | "Arya"     | 0.4839533792540704
+| "Praveena" | "Karin"    | 0.4472135954999579
+| "Praveena" | "Arya"     | 0.09262336892949784
+| "Praveena" | "Michael"  | -0.788492846568306
+| "Zhen"     | "Michael"  | -0.9091365607973364
+| "Michael"  | "Arya"     | -0.9551953674747637
+| "Michael"  | "Karin"    | -0.9863939238321437
+
+|===
+// end::stream[]
+
+Zhen and Praveena are the most similar with a score of 0.88.
+The maximum score is 1.0
+We also have 4 pairs of users who are not similar at all.
+We'd probably want to filter those out, which we can do by passing in the `similarityCutoff` parameter.
+
+.The following will return a stream of node pairs that have a similarity of at least 0.1, along with their Pearson similarities:
+[source, cypher]
+----
+include::scripts/similarity-pearson.cypher[tag=stream-similarity-cutoff]
+----
+
+// tag::stream-similarity-cutoff[]
+.Results
+[opts="header"]
+|===
+| `from`       | `to`         | `similarity`
+| "Zhen"     | "Praveena" | 0.8865926413116155
+| "Zhen"     | "Karin"    | 0.8320502943378437
+| "Arya"     | "Karin"    | 0.8194651785206903
+| "Zhen"     | "Arya"     | 0.4839533792540704
+| "Praveena" | "Karin"    | 0.4472135954999579
+|===
+// end::stream-similarity-cutoff[]
+
+We can see that those users with no similarity have been filtered out.
+If we're implementing a k-Nearest Neighbors type query we might instead want to find the most similar `k` users for a given user.
+We can do that by passing in the `topK` parameter.
+
+.The following will return a stream of users along with the most similar user to them (i.e. `k=1`):
+[source, cypher]
+----
+include::scripts/similarity-pearson.cypher[tag=stream-topk]
+----
+
+// tag::stream-topk[]
+.Results
+[opts="header",cols="1,1,1"]
+|===
+| `from`     | `to`       | `similarity`
+| "Zhen"     | "Praveena" | 0.8865926413116155
+| "Praveena" | "Zhen"     | 0.8865926413116155
+| "Karin"    | "Zhen"     | 0.8320502943378437
+| "Arya"     | "Karin"    | 0.8194651785206903
+
+|===
+// end::stream-topk[]
+
+These results will not necessarily be symmetrical.
+For example, the person most similar to Arya is Karin, but the person most similar to Karin is Zhen.
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name               | Type | Default                | Optional | Description
+| `data`             | list | null                   | no       | A list of maps of the following structure: `{item: nodeId, weights: [weight, weight, weight]}`.
+| `top`              | int  | 0                      | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
+| `topK`             | int  | 0                      | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
+| `similarityCutoff` | int  | -1                     | yes      | The threshold for cosine similarity. Values below this will not be returned.
+| `degreeCutoff`     | int  | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
+| `concurrency`      | int  | available CPUs         | yes      | The number of concurrent threads.
+| `readConcurrency`  | int  | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| `writeConcurrency` | int  | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name         | Type | Description
+| `item1`      | int  | The ID of one node in the similarity pair.
+| `item2`      | int  | The ID of other node in the similarity pair.
+| `count1`       | int  | The size of the `targets` list of one node.
+| `count2`       | int  | The size of the `targets` list of other node.
+| `intersection` | int  | The number of intersecting values in the two nodes `targets` lists.
+| `similarity`   | int  | The cosine similarity of the two nodes.
+|===
+
+.The following will find the most similar user for each user, and store a relationship between those users:
+[source, cypher]
+----
+include::scripts/similarity-pearson.cypher[tag=write-back]
+----
+
+// tag::write-back[]
+.Results
+[opts="header",cols="1,1,1,1,1,1,1,1,1"]
+|===
+| `nodes` | `similarityPairs` | `write` | `writeRelationshipType` | `writeProperty` | `min`  | `max`  | `mean` | `p95`
+| 5     | 5               | TRUE  | "SIMILAR"             | "score"       | 0.5198593139648438 | 1.0000038146972656 | 0.8981185913085937 | 1.0000038146972656
+|===
+// end::write-back[]
+
+We then could write a query to find out which are the movies that other people similar to us liked.
+
+.The following will find the most similar user to Praveena, and return their favourite movies that Praveena didn't (yet!) rate:
+[source, cypher]
+----
+include::scripts/similarity-pearson.cypher[tag=query]
+----
+
+// tag::query[]
+.Results
+[opts="header",cols="1"]
+|===
+| `movie`
+| The Matrix
+|===
+// end::query[]
+
+[[algorithms-similarity-pearson-source-target-ids]]
+== Specifying source and target ids
+
+include::labs-similarity.adoc[tag=source-target-ids]
+
+We could use this technique to compute the similarity of a subset of items to all other items.
+
+.The following will find the most similar person (i.e. `k=1`) to Arya and Praveena:
+[source, cypher]
+----
+include::scripts/similarity-pearson.cypher[tag=source-target-ids]
+----
+
+// tag::source-target-ids[]
+.Results
+[opts="header",cols="1,1,1"]
+|===
+| `from`   | `to`     | `similarity`
+| Praveena | Zhen  | 0.8865926413116155 
+| Arya     | Karin | 0.8194651785206903 
+|===
+// end::source-target-ids[]
+
+[[algorithms-similarity-pearson-skipping-values]]
+== Skipping values
+
+By default the `skipValue` parameter is `algo.Nan()`.
+The algorithm checks every value against the `skipValue` to determine whether that value should be considered as part of the similarity result.
+For cases where no values should be skipped, skipping can be disabled by setting `skipValue` to `null`.
+
+.The following will create a sample graph:
+[source, cypher]
+----
+include::scripts/similarity-pearson.cypher[tag=create-sample-embedding-graph]
+----
+
+.The following will find the similarity between movies based on the `embedding` property:
+[source, cypher]
+----
+include::scripts/similarity-pearson.cypher[tag=embedding-graph-stream]
+----
+
+[[algorithms-similarity-pearson-cypher-projection]]
+== Cypher projection
+
+include::projected-graph-model/cypher-projection.adoc[tag=similarity-explanation]
+
+.Set `graph:'cypher'` in the config:
+
+[source,cypher]
+----
+include::scripts/similarity-pearson.cypher[tag=cypher-projection]
+----
+
+
+
+[[algorithms-similarity-pearson-syntax]]
+== Syntax
+
+.The following will run the algorithm and write back results:
+[source, cypher]
+----
+CALL algo.similarity.pearson(userData:List<Map>> or String, {
+    topK: 1, similarityCutoff: 0.1, write:true, writeProperty: "pearsonSimilarity"
+})
+YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name                    | Type           | Default                | Optional | Description
+| `data`                  | list or string | null                   | no       | A list of maps of the following structure: `{item: nodeId, weights: [double, double, double]}` or a Cypher query.
+| `top`                   | int            | 0                      | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
+| `topK`                  | int            | 0                      | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
+| `similarityCutoff`      | int            | -1                     | yes      | The threshold for similarity. Values below this will not be returned.
+| `degreeCutoff`          | int            | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
+| `skipValue`             | double         | algo.NaN()             | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
+| `concurrency`           | int            | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| `readConcurrency`       | int            | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| `writeConcurrency`      | int            | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
+| `graph`                 | string         | dense                  | yes      | The graph name ('dense' or 'cypher').
+| `write`                 | boolean        | false                  | yes      | Indicates whether results should be stored.
+| `writeBatchSize`        | int            | 10000                  | yes      | The batch size to use when storing results.
+| `writeRelationshipType` | string         | SIMILAR                | yes      | The relationship type to use when storing results.
+| `writeProperty`         | string         | score                  | yes      | The property to use when storing results.
+| `sourceIds`             | long[]         | null                   | yes      | The ids of items from which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
+| `targetIds`             | long[]         | null                   | yes      | The ids of items to which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type    | Description
+| `nodes`                 | int     | The number of nodes passed in.
+| `similarityPairs`       | int     | The number of pairs of similar nodes computed.
+| `write`                 | boolean | Indicates whether results were stored.
+| `writeRelationshipType` | string  | The relationship type used when storing results.
+| `writeProperty`         | string  | The property used when storing results.
+| `min`                   | double  | The minimum similarity score computed.
+| `max`                   | double  | The maximum similarity score computed.
+| `mean`                  | double  | The mean of similarities scores computed.
+| `stdDev`                | double  | The standard deviation of similarities scores computed.
+| `p25`                   | double  | The 25 percentile of similarities scores computed.
+| `p50`                   | double  | The 50 percentile of similarities scores computed.
+| `p75`                   | double  | The 75 percentile of similarities scores computed.
+| `p90`                   | double  | The 90 percentile of similarities scores computed.
+| `p95`                   | double  | The 95 percentile of similarities scores computed.
+| `p99`                   | double  | The 99 percentile of similarities scores computed.
+| `p999`                  | double  | The 99.9 percentile of similarities scores computed.
+| `p100`                  | double  | The 100 percentile of similarities scores computed.
+|===
+
+.The following will run the algorithm and stream results:
+[source,cypher]
+----
+CALL algo.similarity.pearson.stream(userData:List<Map>> or String, {
+    degreeCutoff: 10, similarityCutoff: 0.1, concurrency:4
+})
+YIELD item1, item2, count1, count2, intersection, similarity
+
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name               | Type           | Default                | Optional | Description
+| `data`             | list or string | null                   | no       | A list of maps of the following structure: `{item: nodeId, weights: [double, double, double]}` or a Cypher query.
+| `top`              | int            | 0                      | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
+| `topK`             | int            | 0                      | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
+| `similarityCutoff` | int            | -1                     | yes      | The threshold for similarity. Values below this will not be returned.
+| `degreeCutoff`     | int            | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
+| `skipValue`        | double         | algo.NaN()             | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
+| `concurrency`      | int            | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
+| `readConcurrency`  | int            | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| `writeConcurrency` | int            | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
+| `graph`            | string         | dense                  | yes      | The graph name ('dense' or 'cypher').
+| `sourceIds`        | long[]         | null                   | yes      | The ids of items from which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
+| `targetIds`        | long[]         | null                   | yes      | The ids of items to which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name         | Type | Description
+| `item1`      | int  | The ID of one node in the similarity pair.
+| `item2`      | int  | The ID of other node in the similarity pair.
+| `count1`       | int  | The size of the `targets` list of one node.
+| `count2`       | int  | The size of the `targets` list of other node.
+| `intersection` | int  | The number of intersecting values in the two nodes `targets` lists.
+| `similarity`   | int  | The cosine similarity of the two nodes.
+|===

@@ -1,0 +1,207 @@
+[[labs-algorithms-articlerank]]
+= The ArticleRank algorithm
+
+[abstract]
+--
+This section describes the ArticleRank algorithm in the Neo4j Graph Algorithms library.
+--
+
+ArticleRank is a variant of the <<algorithms-pagerank, PageRank algorithm>>, which measures the *transitive* influence or connectivity of nodes.
+
+[WARNING]
+--
+The ArticleRank algorithm is experimental and not officially supported.
+--
+
+This section includes:
+
+* <<algorithms-articlerank-context, History and explanation>>
+* <<algorithms-articlerank-sample, ArticleRank algorithm sample>>
+* <<algorithms-articlerank-hgp, Huge graph projection>>
+* <<algorithms-articlerank-cp, Cypher projection>>
+* <<algorithms-articlerank-syntax, Syntax>>
+* <<algorithms-articlerank-support, Graph type support>>
+
+
+[[algorithms-articlerank-context]]
+== History and explanation
+
+// tag::explanation[]
+
+Where ArticleRank differs to PageRank is that PageRank assumes that relationships from nodes that have a low out-degree are more important than relationships from nodes with a higher out-degree.
+ArticleRank weakens this assumption.
+// end::explanation[]
+
+// tag::formula[]
+ArticleRank is defined in https://www.emeraldinsight.com/doi/abs/10.1108/00012530911005544[ArticleRank: a PageRank‐based alternative to numbers of citations for analysing citation networks^] as follows:
+
+----
+AR(A) = (1-d) + d (AR(T1)/(C(T1) + C(AVG)) + ... + AR(Tn)/(C(Tn) + C(AVG))
+----
+
+where,
+
+* we assume that a page `A` has pages `T1` to `Tn` which point to it (i.e., are citations).
+* `d` is a damping factor which can be set between 0 and 1.
+  It is usually set to 0.85.
+* `C(A)` is defined as the number of links going out of page `A`.
+* `C(AVG)` is defined as the average number of links going out of all pages.
+// end::formula[]
+
+
+[[algorithms-articlerank-sample]]
+== ArticleRank algorithm sample
+
+This sample will explain the ArticleRank algorithm, using a simple graph:
+
+image::articlerank.svg[]
+
+.The following will create a sample graph:
+[source, cypher]
+----
+include::scripts/articlerank.cypher[tag=create-sample-graph]
+----
+
+.The following will run the algorithm and stream results:
+[source, cypher]
+----
+include::scripts/articlerank.cypher[tag=stream-sample-graph]
+----
+
+.The following will run the algorithm and write back results:
+[source, cypher]
+----
+include::scripts/articlerank.cypher[tag=write-sample-graph]
+----
+
+// tag::stream-sample-graph-result[]
+.Results
+[opts="header",cols="1,1"]
+|===
+| Name    | ArticleRank
+| Paper 0 | 0.34616300000000005
+| Paper 1 | 0.319422
+| Paper 4 | 0.213733
+| Paper 2 | 0.21089400000000003
+| Paper 3 | 0.18026850000000003
+| Paper 5 | 0.15000000000000002
+| Paper 6 | 0.15000000000000002
+|===
+// end::stream-sample-graph-result[]
+
+// tag::stream-sample-graph-explanation[]
+Paper 0 is the most important paper, but it's only the 2nd most cited paper - Paper 1 has more citations.
+However, Paper 1 cites Paper 0, which lets us see that it's not only the number of incoming links that is important, but also the importance of the papers behind those links.
+Papers 5 and 6 are not cited by any other papers, so their score doesn't increase above the initial score of `1 - dampingFactor`.
+// end::stream-sample-graph-explanation[]
+
+
+[[algorithms-articlerank-hgp]]
+== Huge graph projection
+
+include::huge-projection.adoc[tag=explanation]
+
+.Set `graph:'huge'` in the config:
+
+[source, cypher]
+----
+include::scripts/articlerank.cypher[tag=huge-projection]
+----
+
+
+[[algorithms-articlerank-cp]]
+== Cypher projection
+
+include::projected-graph-model/cypher-projection.adoc[tag=explanation]
+
+.Set `graph:'cypher'` in the config:
+
+[source, cypher]
+----
+include::scripts/articlerank.cypher[tag=cypher-loading]
+----
+
+
+[[algorithms-articlerank-syntax]]
+== Syntax
+
+.The following will run the algorithm and write back results:
+[source, cypher]
+----
+CALL algo.articleRank(label:String, relationship:String,
+    {iterations:20, dampingFactor:0.85, write: true, writeProperty:'pagerank', concurrency:4})
+YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, dampingFactor, write, writeProperty
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name             | Type    | Default                | Optional | Description
+| label            | string  | null                   | yes      | The label to load from the graph. If null, load all nodes.
+| relationship     | string  | null                   | yes      | The relationship type to load from the graph. If null, load all relationships.
+| iterations       | int     | 20                     | yes      | How many iterations of PageRank to run.
+| concurrency      | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| readConcurrency  | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
+| dampingFactor    | float   | 0.85                   | yes      | The damping factor of the PageRank calculation.
+| weightProperty   | string  | null                   | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
+| defaultValue     | float   | 0.0                    | yes      | The default value of the weight in case it is missing or invalid.
+| write            | boolean | true                   | yes      | Specify if the result should be written back as a node property.
+| graph            | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name          | Type    | Description
+| nodes         | int     | The number of nodes considered.
+| iterations    | int     | The number of iterations run.
+| dampingFactor | float   | The damping factor used.
+| writeProperty | string  | The property name written back to.
+| write         | boolean | Specifies if the result was written back as node property.
+| loadMillis    | int     | Milliseconds for loading data.
+| computeMillis | int     | Milliseconds for running the algorithm.
+| writeMillis   | int     | Milliseconds for writing result data back.
+|===
+
+.The following will run the algorithm and stream results:
+[source, cypher]
+----
+CALL algo.articleRank.stream(label:String, relationship:String,
+    {iterations:20, dampingFactor:0.85, concurrency:4})
+YIELD node, score
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name             | Type   | Default                | Optional | Description
+| label            | string | null                   | yes      | The label to load from the graph. If null, load all nodes.
+| relationship     | string | null                   | yes      | The relationship type to load from the graph. If null, load all nodes.
+| iterations       | int    | 20                     | yes      | Specify how many iterations of PageRank to run.
+| concurrency      | int    | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
+| readConcurrency  | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency | int    | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
+| dampingFactor    | float  | 0.85                   | yes      | The damping factor of the PageRank calculation.
+| weightProperty   | string | null                   | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
+| defaultValue     | float  | 0.0                    | yes      | The default value of the weight in case it is missing or invalid.
+| graph            | string | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
+|===
+
+.Results
+[opts="header"]
+|===
+| Name  | Type  | Description
+| node  | long  | Node ID
+| score | float | PageRank weight
+|===
+
+
+[[algorithms-articlerank-support]]
+== Graph type support
+
+The ArticleRank algorithm supports the following graph types:
+
+* [x] directed, unweighted
+
+* [x] undirected, unweighted

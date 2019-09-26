@@ -36,7 +36,7 @@ The guide covers the following areas:
 
 In addition to the above algorithms, there are a large number of experimental algorithm implementations developed as part of Neo4j Labs.
 These include experimental centrality and community algorithms, as well as experimental algorithms for link prediction, path finding and similarity.
-The Neo4j Labs algorithms are documented in <<experimental-algorithms>>.
+The Neo4j Labs algorithms are documented in <<labs-algorithms>>.
 
 ====
 image::download_book.png[Graph Algorithms,200]
@@ -58,7 +58,7 @@ include::algorithms-centrality.adoc[leveloffset=+1]
 
 include::algorithms-community-detection.adoc[leveloffset=+1]
 
-include::experimental-algorithms.adoc[leveloffset=+1]
+include::labs-algorithms.adoc[leveloffset=+1]
 
 ifndef::env-docs[]
 include::implementation-index.adoc[]

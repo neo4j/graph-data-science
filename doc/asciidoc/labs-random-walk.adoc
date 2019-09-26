@@ -1,0 +1,256 @@
+[[labs-algorithms-random-walk]]
+= The Random Walk algorithm
+
+[abstract]
+--
+This section describes the Random Walk algorithm in the Neo4j Graph Algorithms library.
+--
+
+Random Walk is an algorithm that provides random paths in a graph.
+
+A random walk means that we start at one node, choose a neighbor to navigate to at random or based on a provided probability distribution, and then do the same from that node, keeping the resulting path in a list.
+It’s similar to how a drunk person traverses a city.
+
+[WARNING]
+--
+The Random Walk algorithm is experimental and not officially supported.
+--
+
+This section includes:
+
+* <<algorithms-random-walk-context, History and explanation>>
+* <<algorithms-random-walk-usecase, Use-cases - when to use the Random Walk algorithm>>
+* <<algorithms-random-walk-limitations, Constraints - when not to use the Random Walk algorithm>>
+* <<algorithms-random-walk-sample, Random Walk algorithm sample>>
+* <<algorithms-random-walk-cp, Cypher projection>>
+* <<algorithms-random-walk-syntax, Syntax>>
+* <<algorithms-random-walk-support, Graph type support>>
+
+
+[[algorithms-random-walk-context]]
+== History and explanation
+
+// tag::explanation[]
+
+The term "random walk" was first mentioned by Karl Pearson in 1905 in a letter to Nature magazine titled https://www.nature.com/physics/looking-back/pearson/index.html[The Problem of the Random Walk^].
+Study of random walks date back even further to the https://en.wikipedia.org/wiki/Gambler%27s_ruin[Gambler's ruin^] problem, where it could be used to show that a gambler would eventually go bankrupt against an opponent with infinite wealth.
+
+It's only in the last couple of decades, however, that researchers have studied them with respect to networks.
+
+// end::explanation[]
+
+
+[[algorithms-random-walk-usecase]]
+== Use-cases - when to use the Random Walk algorithm
+
+// tag::use-case[]
+* It has be shown to relate to Brownian motion and also to the movement and dispersal of animals in the study of https://www.researchgate.net/publication/5425681_Random_walks_in_biology[Random walk models in biology].
+
+* It has been used to analyse ALSI index of the JSE stock exchange and show that the index followed the random walk hypothesis between years 2000 and 2011. This means the movement of stock prices was random and the ability of investors to perform relied more on luck than anything else. Find this study in https://www.researchgate.net/publication/297750180_The_Random_Walk_Theory_And_Stock_Prices_Evidence_From_Johannesburg_Stock_Exchange[The Random Walk Theory And Stock Prices: Evidence From Johannesburg Stock Exchange]
+
+Random Walk is often used as part of other algorithms:
+
+* It can be used as part of the *node2vec* and *graph2vec* algorithms, that create node embeddings.
+
+* It can be used as part of the *Walktrap* and *Infomap community detection* algorithms.
+  If a random walk returns a small set of nodes repeatedly, then it indicates that those set of nodes may have a community structure.
+
+* It can be used as part of the training process of machine learning model, as described in David Mack's article https://medium.com/octavian-ai/review-prediction-with-neo4j-and-tensorflow-1cd33996632a[Review prediction with Neo4j and TensorFlow^].
+
+You can read about more use cases in https://arxiv.org/pdf/1612.03281.pdf[Random walks and diffusion on networks^].
+
+Many of the use-cases of <<algorithms-pagerank-usecase,PageRank>> also apply to Random Walks.
+
+// end::use-case[]
+
+
+[[algorithms-random-walk-limitations]]
+== Constraints - when not to use the Random Walk algorithm
+
+// tag::constraint[]
+The constraints of <<algorithms-pagerank-limitations,PageRank>> also apply to Random Walks:
+
+* Dead-ends occur when pages have no out-links.
+  In this case, the random walk will abort and a path containing only the first first node will be returned.
+  This problem can be avoided by passing the `direction: BOTH` parameter, so that the random walk will traverse relationships in both directions
+
+* If there are no links from within a group of pages to outside of the group, then the group is considered a spider trap.
+  Random walks starting from any of the nodes in that group will only traverse to the others in the group - our implementation of the algorithm doesn't allow a random walk to jump to non-neighbouring nodes.
+
+* Sinks can occur when a network of links form an infinite cycle.
+
+// end::constraint[]
+
+
+[[algorithms-random-walk-sample]]
+== Random Walk algorithm sample
+
+This sample will explain the Random Walk algorithm, using a simple graph:
+
+image::pagerank.png[]
+
+.The following will create a sample graph:
+[source, cypher]
+----
+include::scripts/random-walk.cypher[tag=create-sample-graph]
+----
+
+.The following will run the algorithm starting from the Home page and returning a 1 random walk, of path length 3:
+[source, cypher]
+----
+include::scripts/random-walk.cypher[tag=stream-sample-graph]
+----
+
+// tag::stream-sample-graph-result[]
+.Results
+[opts="header",cols="1"]
+|===
+| page
+|"Home"
+|"Site C"
+|"Links"
+|"Site A"
+|===
+// end::stream-sample-graph-result[]
+
+// tag::stream-sample-graph-explanation[]
+
+// end::stream-sample-graph-explanation[]
+
+
+[[algorithms-random-walk-cp]]
+== Cypher projection
+
+include::projected-graph-model/cypher-projection.adoc[tag=explanation]
+
+[source, cypher]
+----
+include::scripts/random-walk.cypher[tag=cypher-loading]
+----
+
+
+[[algorithms-random-walk-syntax]]
+== Syntax
+
+.The following will run the algorithm and stream results:
+[source, cypher]
+----
+CALL algo.randomWalk.stream(start:Object, steps: 100, walks: 10000,
+    {graph:'huge', nodeQuery:'label or query', relationshipQuery:' type or query', direction:"IN/OUT/BOTH",
+     mode:"node2vec"/"random", inOut: 1.0, return: 1.0, path:false, concurrency:4})
+YIELD nodes, path
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type   | Default                 | Optional | Description
+| start             | object  | null                   | yes      | Starting points: null - whole graph, "Label" - nodes with that label, node-id - that node, list of node-ids - these nodes.
+| steps             | int     | 10                     | yes      | Length of paths returned, in case of error only path of lenght 1 is returned.
+| walks             | int     | 1                      | yes      | Number of paths returned.
+| graph             | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
+| nodeQuery         | string  | null                   | yes      | The label or node-query to load from the graph. If null, load all nodes.
+| relationshipQuery | string  | null                   | yes      | The relationship type or query to load from the graph. If null, load all relationships.
+| direction         | string  | 'BOTH'                 | yes      | Direction of relationships to follow.
+| mode              | string  | random                 | yes      | Strategy for choosing the next relationship, modes: random and node2vec.
+| inOut             | float   | 1.0                    | yes      | Parameter for node2vec.
+| return            | float   | 1.0                    | yes      | Parameter for node2vec.
+| path              | boolean | false                  | yes      | If the more expensive operation of creating a path from node-ids should be performed and returned in results.
+| concurrency       | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
+| readConcurrency   | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+|===
+
+.Results
+[opts="header"]
+|===
+| Name  | Type  | Description
+| startNodeId  | long  | Node ID starting the path.
+| nodeIds  | list of long  | List of Node ID forming a path.
+| path | Path | Optional Path (with virtual relationships).
+|===
+
+
+[[algorithms-random-walk-support]]
+== Graph type support
+
+The Random Walk algorithm supports the following graph types:
+
+* [x] directed, unweighted
+
+* [ ] undirected, unweighted
+
+
+ifndef::env-docs[]
+== References
+
+// tag::references[]
+
+* https://en.wikipedia.org/wiki/Random_walk
+
+// * TODO
+
+// end::references[]
+endif::env-docs[]
+
+
+ifdef::implementation[]
+
+// tag::implementation[]
+== Implementation details
+
+:leveloffset: +1
+
+For more information, see the https://en.wikipedia.org/wiki/Random_walk[Random Walk page on Wikipedia].
+
+## Progress
+
+- [x] single threaded implementation
+- [x] tests
+- [x] simple manual benchmark
+- [ ] simple benchmark
+- [x] implement procedure
+- [x] manual benchmark on bigger graphs
+- [ ] benchmark on bigger graphs
+- [x] parallelization
+- [ ] evaluation
+
+## Requirements
+
+- different start points
+- direction support: in, out, both
+- random and node2vec modes
+- streaming output
+
+## Data structured involved
+
+We use an QueueBasedSpliterator on a blocking queue to handle the parallel stream of results
+
+
+### Parallelization
+
+We parallelize batches of Random Walk as tasks, multiple of these tasks are run in parallel.
+
+### evaluation
+
+- Performance tests on different dataset sizes / level of concurrency
+
+## Future Improvements
+
+- Better handling input parallelization
+- Performance on larger results (> 10M)
+
+== Details
+
+. create a stream of ids based on start value
+. compute batch size based on concurrency and result count
+. determine strategy for random walk
+* "random" just uses ThreadLocalRandom
+* "node2vec" computes a probability distribution of the previous neighbours and selects the index above a certain random probability
+. create batches of tasks that all do `batchSize` random Walks
+. results are sent to a blocking queue
+. blocking queue via spliterator and tombstone into stream
+. depending on "path" parameter lookup nodes, *relationships are not computed for the path*
+
+
+// end::implementation[]
+endif::implementation[]

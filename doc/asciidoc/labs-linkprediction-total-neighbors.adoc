@@ -1,0 +1,106 @@
+[[labs-algorithms-linkprediction-total-neighbors]]
+= The Total Neighbors algorithm
+
+[abstract]
+--
+This section describes the Total Neighbors algorithm in the Neo4j Graph Algorithms library.
+--
+
+Total Neighbors computes the closeness of nodes, based on the number of unique neighbors that they have.
+It is based on the idea that the more connected a node is, the more likely it is to receive new links.
+
+[WARNING]
+--
+The Total Neighbors algorithm is experimental and not officially supported.
+--
+
+This section includes:
+
+* <<algorithms-linkprediction-total-neighbors-context, History and explanation>>
+* <<algorithms-linkprediction-total-neighbors-sample, Total Neighbors algorithm sample>>
+* <<algorithms-linkprediction-total-neighbors-syntax, Syntax>>
+
+
+[[algorithms-linkprediction-total-neighbors-context]]
+== History and explanation
+
+// tag::explanation[]
+
+Total Neighbors is computed using the following formula:
+
+image::total-neighbors.svg[role="middle"]
+
+where `N(x)` is the set of nodes adjacent to `x`, and `N(y)` is the set of nodes adjacent to `y`.
+
+A value of 0 indicates that two nodes are not close, while higher values indicate nodes are closer.
+
+The library contains a function to calculate the closeness between two nodes.
+
+// end::explanation[]
+
+
+[[algorithms-linkprediction-total-neighbors-sample]]
+== Total Neighbors algorithm sample
+
+.The following will create a sample graph:
+[source, cypher]
+----
+include::scripts/linkprediction-total-neighbors.cypher[tag=create-sample-graph]
+----
+
+.The following will return the Total Neighbors score for Michael and Karin:
+[source, cypher]
+----
+include::scripts/linkprediction-total-neighbors.cypher[tag=all-rels]
+----
+
+// tag::function[]
+.Results
+[opts="header",cols="1"]
+|===
+| `score`
+| 4.0
+|===
+// end::function[]
+
+
+We can also compute the score of a pair of nodes, based on a specific relationship type.
+
+.The following will return the Total Neighbors score for Michael and Karin based only on the `FRIENDS` relationship:
+[source, cypher]
+----
+include::scripts/linkprediction-total-neighbors.cypher[tag=only-friends]
+----
+
+// tag::function[]
+.Results
+[opts="header",cols="1"]
+|===
+| `score`
+| 2.0
+|===
+// end::function[]
+
+
+[[algorithms-linkprediction-total-neighbors-syntax]]
+== Syntax
+
+.The following will run the algorithm and return the result:
+[source, cypher]
+----
+RETURN algo.linkprediction.totalNeighbors(node1:Node, node2:Node, {
+    relationshipQuery: null,
+    direction: "BOTH"
+})
+----
+
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name                   | Type    | Default        | Optional | Description
+| `node1`                   | Node    | null           | no       | A node
+| `node2`                   | Node    | null           | no       | Another node
+| `relationshipQuery`                   | String    | null           | yes       | The relationship type used to compute similarity between `node1` and `node2`
+| `direction`                   | String    | BOTH           | yes       | The direction of relationship type used to compute similarity between `node1` and `node2`
+|===

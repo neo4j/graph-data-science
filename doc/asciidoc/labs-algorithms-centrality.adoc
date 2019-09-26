@@ -1,0 +1,21 @@
+[[labs-algorithms-centrality]]
+= Centrality algorithms
+
+ifdef::env-docs[]
+[abstract]
+--
+This chapter provides explanations and examples for each of the experimental centrality algorithms in the Neo4j Graph Algorithms library.
+--
+endif::env-docs[]
+
+The following centrality algorithms determine the importance of distinct nodes in a network:
+
+* <<labs-algorithms-articlerank, ArticleRank>> (`algo.articleRank`)
+* <<labs-algorithms-harmonic-centrality, Harmonic Centrality>> (`algo.closeness.harmonic`)
+* <<labs-algorithms-eigenvector, Eigenvector Centrality>> (`algo.eigenvector`)
+
+include::labs-articlerank.adoc[leveloffset=+1]
+
+include::labs-harmonic-centrality.adoc[leveloffset=+1]
+
+include::labs-eigenvector-centrality.adoc[leveloffset=+1]

@@ -1,0 +1,30 @@
+[[labs-algorithms-linkprediction]]
+= Link Prediction algorithms
+
+[abstract]
+--
+This chapter provides explanations and examples for each of the experimental link prediction algorithms in the Neo4j Graph Algorithms library.
+--
+
+These algorithms help determine the closeness of a pair of nodes.
+We would then use the computed scores as part of a link prediction solution:
+
+* <<labs-algorithms-linkprediction-adamic-adar, Adamic Adar>> (`algo.linkprediction.adamicAdar`)
+* <<labs-algorithms-linkprediction-common-neighbors, Common Neighbors>> (`algo.linkprediction.commonNeighbors`)
+* <<labs-algorithms-linkprediction-preferential-attachment, Preferential Attachment>> (`algo.linkprediction.preferentialAttachment`)
+* <<labs-algorithms-linkprediction-resource-allocation, Resource Allocation>> (`algo.linkprediction.resourceAllocation`)
+* <<labs-algorithms-linkprediction-same-community, Same Community>> (`algo.linkprediction.sameCommunity`)
+* <<labs-algorithms-linkprediction-total-neighbors, Total Neighbors>> (`algo.linkprediction.totalNeighbors`)
+
+
+include::labs-linkprediction-adamic-adar.adoc[leveloffset=+1]
+
+include::labs-linkprediction-common-neighbors.adoc[leveloffset=+1]
+
+include::labs-linkprediction-preferential-attachment.adoc[leveloffset=+1]
+
+include::labs-linkprediction-resource-allocation.adoc[leveloffset=+1]
+
+include::labs-linkprediction-same-community.adoc[leveloffset=+1]
+
+include::labs-linkprediction-total-neighbors.adoc[leveloffset=+1]

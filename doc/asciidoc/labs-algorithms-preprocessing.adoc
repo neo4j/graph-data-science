@@ -1,0 +1,15 @@
+[[labs-algorithms-preprocessing]]
+= Preprocessing functions and procedures
+
+[abstract]
+--
+This chapter provides an explanation and example for experimental preprocessing functions and procedures in the Neo4j Graph Algorithms library.
+--
+
+//Edit this (and abstract above) when there is more than one sub-topic
+
+The following feature and procedure can be used as part of the data preparation process:
+
+* <<labs-algorithms-one-hot-encoding, One Hot Encoding>> (`algo.ml.oneHotEncoding`)
+
+include::labs-one-hot-encoding.adoc[leveloffset=+1]

@@ -1,0 +1,40 @@
+[[labs-algorithms]]
+= Experimental algorithms
+
+[abstract]
+--
+This chapter provides explanations and examples for each of the experimental algorithms in the Neo4j Graph Algorithms library.
+--
+
+The Neo4j Graph Algorithms library contain a number of experimental algorithms developed and maintained as part of Neo4j Labs.
+The experimental algorithms are accessed by via Cypher by calling procedures, just like the stable and supported algorithms.
+
+[WARNING]
+--
+The experimental algorithms are not officially supported.
+--
+
+The documentation for the experimental algorithms is divided into the following sections:
+
+* <<labs-procedures>>
+* <<labs-algorithms-centrality>>
+* <<labs-algorithms-community>>
+* <<labs-algorithms-path-finding>>
+* <<labs-algorithms-similarity>>
+* <<labs-algorithms-linkprediction>>
+* <<labs-algorithms-preprocessing>>
+
+include::labs-procedures.adoc[leveloffset=+1]
+
+include::labs-algorithms-centrality.adoc[leveloffset=+1]
+
+include::labs-algorithms-community.adoc[leveloffset=+1]
+
+include::labs-algorithms-path-finding.adoc[leveloffset=+1]
+
+include::labs-algorithms-similarity.adoc[leveloffset=+1]
+
+include::labs-algorithms-link-prediction.adoc[leveloffset=+1]
+
+include::labs-algorithms-preprocessing.adoc[leveloffset=+1]
+

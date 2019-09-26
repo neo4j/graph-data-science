@@ -1,0 +1,74 @@
+[[labs-algorithms-one-hot-encoding]]
+= One Hot Encoding
+
+[abstract]
+--
+This section describes the One Hot Encoding function in the Neo4j Graph Algorithms library.
+--
+
+The One Hot Encoding function is used to convert categorical data into a numerical format that can be used by Machine Learning libraries.
+
+[WARNING]
+--
+The One Hot Encoding function is experimental and not officially supported.
+--
+
+[[algorithms-one-hot-encoding-sample]]
+== One Hot Encoding sample
+
+One hot encoding will return a list equal to the length of the `available values`.
+In the list, `selected values` are represented by `1`, and `unselected values` are represented by `0`.
+
+.The following will run the algorithm on hardcoded lists:
+[source, cypher]
+----
+include::scripts/one-hot-encoding.cypher[tag=basic]
+----
+
+// tag::basic-result[]
+.Results
+[opts="header",cols="1"]
+|===
+| `vector`
+| [0,0,1]
+|===
+// end::basic-result[]
+
+.The following will create a sample graph:
+[source, cypher]
+----
+include::scripts/one-hot-encoding.cypher[tag=create-sample-graph]
+----
+
+.The following will return a one hot encoding for each user and the types of cuisine that they like:
+[source, cypher]
+----
+include::scripts/one-hot-encoding.cypher[tag=one-hot-encoding-query]
+----
+
+// tag::stream-sample-graph-result[]
+.Results
+[opts="header",cols="1,1"]
+|===
+| Name     | Embedding
+| Arya     | [0,0,0]
+| Michael  | [1,0,1]
+| Praveena | [0,1,0]
+| Zhen     | [1,0,0]
+|===
+// end::stream-sample-graph-result[]
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type    | Default        | Optional | Description
+| `availableValues`   | list    | null           | yes      | The available values. If null, the function will return an empty list.
+| `selectedValues`    | list    | null           | yes      | The selected values. If null, the function will return a list of all 0's.
+|===
+
+.Results
+[opts="header",cols="1,6"]
+|===
+| Type | Description
+| `list` | One hot encoding of the selected values.
+|===

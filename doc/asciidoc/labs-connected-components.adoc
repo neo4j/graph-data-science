@@ -1,0 +1,122 @@
+[[labs-algorithms-connected-components]]
+= The Connected Components algorithm
+
+[abstract]
+--
+This section describes the experimental variations of the Connected Components algorithm in the Neo4j Graph Algorithms library.
+--
+
+For general information about the union find algorithm see <<algorithms-connected-components, Connected Components>> (`algo.unionFind`).
+
+[WARNING]
+--
+The variants of the UnionFind algorithm is experimental and not officially supported.
+--
+
+[[labs-algorithms-connected-components-imp]]
+== Additional implementations
+
+The experimental implementations vary from the default in the following ways:
+
+`algo.unionFind.forkJoinMerge`
+
+* The resulting `DisjointSetStruct` of each node-partition is merged by the `ForkJoin` pool, while the calculation of the `DisjointSetStruct` is done by the `ExecutorService`.
+
+`algo.unionFind.forkJoin`
+
+* Calculation and merge using `forkJoinPool`
+
+
+ifndef::env-docs[]
+== References
+
+// tag::references[]
+
+* http://math.hws.edu/eck/cs327_s04/chapter9.pdf
+* https://en.wikipedia.org/wiki/Connected_component_(graph_theory)
+
+// end::references[]
+endif::env-docs[]
+
+ifdef::implementation[]
+// tag::implementation[]
+
+
+== Implementation details
+
+:leveloffset: +1
+// copied from: https://github.com/neo4j-contrib/neo4j-graph-algorithms/issues/79
+
+_Connected Components_ or _Union Find_ basically finds sets of connected nodes where each node is reachable from any other node in the same set. One implementation also evaluates a Predicate on each relation which allows partitioning of the graph based on Relationships and Properties.
+
+## Progress
+
+- [x] single threaded implementation
+- [x] tests
+- [x] simple benchmark
+- [x] implement procedure
+- [x] benchmark on bigger graphs
+- [x] parallelization
+- [x] evaluation
+
+## Requirements
+
+`AllRelationshipIterator` & `Weights`
+
+## Data structured involved
+
+We use a disjoint-set-structure which is based on a parent-array-tree. The DSS can be used to efficiently ask if two nodes are reachable by each other. [More](https://en.wikipedia.org/wiki/Disjoint-set_data_structure)
+
+## ToDo
+
+### benchmark
+
+Implement benchmark on big graph &
+
+- stream nodeId-setId pairs
+- calculate setSize-setCount
+
+
+### parallelization
+
+One approach to parallelize _Union Find_ might be _relationship partitioning_ where each thread performs the execution into it's own DSS instance on a subset of relationships. So each thread calculates a distinct set of unions. Later we can merge each DSS pairwise which can also be perfomed in parallel. Nonetheless the memory consumption might be high due to the preallocated array in DSS. We could also switch to a growing container if this is a problem.
+
+### evaluation
+
+- Performance tests on different dataset sizes / level of concurrency
+
+
+== Details
+
+- writes a cluster-id to each node representing the a connected component where each node
+is reachable from any other node
+
+
+=== algo.unionFind
+
+- if a threshold configuration parameter is supplied only relationships with a property value higher then the threshold
+are merged
+
+
+=== algo.unionFind.queue
+
+- parallel Union Find using ExecutorService only.
+- Algorithm based on the idea that DisjointSetStruct can be built using just a partition of the nodes
+which are then merged pairwise.
+- The implementation is based on a queue which acts as a buffer for each computed DSS. As long as there are
+more elements on the queue the algorithm takes two, merges them and adds its result to the queue until only
+1 element remains.
+
+
+=== algo.unionFind.forkJoinMerge
+
+-  Like in *exp1* the resulting DSS of each node-partition is merged by the ForkJoin pool while
+the calculation of the DSS is done by the ExecutorService.
+
+
+=== algo.unionFind.forkJoin
+
+- calculation and merge using forkJoinPool
+
+// end::implementation[]
+endif::implementation[]
