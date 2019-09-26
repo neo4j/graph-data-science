@@ -26,7 +26,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
-import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphdb.Direction;
 
 import java.lang.annotation.Retention;
@@ -43,9 +42,9 @@ public class TestSupport {
     @MethodSource("org.neo4j.graphalgo.TestSupport#allTypesWithoutCypher")
     public @interface AllGraphTypesWithoutCypherTest {}
 
+    // TODO: This isn't "parameterized" once kernel graph is gone
     public static Stream<Class<? extends GraphFactory>> allTypesWithoutCypher() {
         return Stream.of(
-                GraphViewFactory.class,
                 HugeGraphFactory.class
         );
     }
@@ -64,8 +63,9 @@ public class TestSupport {
     @MethodSource("org.neo4j.graphalgo.TestSupport#allGraphNames")
     public @interface AllGraphNamesTest {}
 
+    // TODO: This isn't "parameterized" once kernel graph is gone
     public static Stream<String> allGraphNames() {
-        return Stream.of("huge", "kernel");
+        return Stream.of("huge");
     }
 
     @Retention(RetentionPolicy.RUNTIME)

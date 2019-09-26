@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.core.write.Translators;
@@ -42,7 +41,6 @@ import java.io.StringWriter;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 class ProgressLoggingTest {
 
@@ -75,7 +73,6 @@ class ProgressLoggingTest {
 
     @AllGraphTypesWithoutCypherTest
     void testLoad(Class<? extends GraphFactory> graphFactory) {
-        assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
         setup(graphFactory);
         final StringWriter buffer = new StringWriter();
 

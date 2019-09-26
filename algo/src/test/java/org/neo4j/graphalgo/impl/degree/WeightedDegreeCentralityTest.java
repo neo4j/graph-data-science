@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
-import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
@@ -41,7 +40,6 @@ import java.util.Map;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 final class WeightedDegreeCentralityTest {
 
@@ -124,7 +122,6 @@ final class WeightedDegreeCentralityTest {
 
     @AllGraphTypesTest
     void buildWeightsArray(Class<? extends GraphFactory> graphFactory) {
-        assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
         final Label label = Label.label("Label1");
         final Map<Long, double[]> expected = new HashMap<>();
 

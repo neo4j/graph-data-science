@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.impl.spanningTrees.KSpanningTree;
 import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
 import org.neo4j.graphdb.Label;
@@ -36,7 +35,6 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
  *          1
@@ -80,7 +78,6 @@ class KSpanningTreeTest {
 
     @AllGraphTypesWithoutCypherTest
     void testMaximumKSpanningTree(Class<? extends GraphFactory> graphFactory) {
-        assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
         setup(graphFactory);
         final SpanningTree spanningTree = new KSpanningTree(graph, graph, graph)
                 .compute(a, 2, true)

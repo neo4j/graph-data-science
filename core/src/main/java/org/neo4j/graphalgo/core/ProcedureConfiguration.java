@@ -27,8 +27,6 @@ import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.lightweight.LightGraph;
 import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
-import org.neo4j.graphalgo.core.neo4jview.GraphView;
-import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.Directions;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -306,8 +304,6 @@ public class ProcedureConfiguration {
         switch (graphImpl.toLowerCase(Locale.ROOT)) {
             case CypherGraphFactory.TYPE:
                 return CypherGraphFactory.class;
-            case GraphView.TYPE:
-                return GraphViewFactory.class;
             case LightGraph.TYPE:
             case HeavyGraph.TYPE:
             case HugeGraph.TYPE:
@@ -323,7 +319,6 @@ public class ProcedureConfiguration {
     private static final Set<String> RESERVED = new HashSet<>(asList(
             CypherGraphFactory.TYPE,
             LightGraph.TYPE,
-            GraphView.TYPE,
             HugeGraph.TYPE,
             HeavyGraph.TYPE));
 

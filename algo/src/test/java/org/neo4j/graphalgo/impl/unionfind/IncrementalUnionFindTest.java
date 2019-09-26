@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.impl.unionfind;
 
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -28,7 +27,6 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -74,8 +72,6 @@ class IncrementalUnionFindTest extends UnionFindTestBase {
     @ParameterizedTest(name = "{0} -- {1}")
     @MethodSource("parameters")
     void shouldComputeComponentsFromSeedProperty(Class<? extends GraphFactory> graphFactory, UnionFindType unionFindType) {
-        // TODO: Why can't we run this test for kernel graph / graph view?
-        Assumptions.assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
         Graph graph = new GraphLoader(DB)
                 .withExecutorService(Pools.DEFAULT)
                 .withAnyLabel()

@@ -24,14 +24,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 
 /**
@@ -123,7 +121,6 @@ class DegreesTest {
 
     @AllGraphTypesWithoutCypherTest
     void testBidirectionalBoth(Class<? extends GraphFactory> graphFactory) {
-        assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
         setup(BI_DIRECTIONAL, Direction.BOTH, graphFactory);
         assertEquals(4, graph.degree(nodeId("a"), Direction.BOTH));
         assertEquals(4, graph.degree(nodeId("b"), Direction.BOTH));

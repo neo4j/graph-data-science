@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
-import org.neo4j.graphalgo.core.neo4jview.GraphView;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -39,7 +38,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 class RelationshipWeightImportTest {
 
@@ -101,8 +99,6 @@ class RelationshipWeightImportTest {
         // therefore the final weight for in/outs of either a/b is 1,
         // the weight of 2 is discarded.
         // This cannot be represented in the graph view
-        assumeFalse(graph instanceof GraphView, "GraphView is not able to represent the test case");
-
         checkWeight(0, Direction.OUTGOING, 1.0);
         checkWeight(1, Direction.OUTGOING, 2.0);
 

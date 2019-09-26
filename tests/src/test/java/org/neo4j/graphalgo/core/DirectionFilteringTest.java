@@ -22,26 +22,22 @@ package org.neo4j.graphalgo.core;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Arrays;
 import java.util.EnumSet;
 
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 final class DirectionFilteringTest extends RandomGraphTestCase {
 
     @AllGraphTypesWithoutCypherTest
     void shouldLoadOnlyOutgoingRelationships(Class<? extends GraphFactory> graphImpl) {
-        assumeFalse(graphImpl.isAssignableFrom(GraphViewFactory.class));
         testFilter(graphImpl, Direction.OUTGOING, Direction.INCOMING, Direction.BOTH);
     }
 
     @AllGraphTypesWithoutCypherTest
     void shouldLoadOnlyIncomingRelationships(Class<? extends GraphFactory> graphImpl) {
-        assumeFalse(graphImpl.isAssignableFrom(GraphViewFactory.class));
         testFilter(graphImpl, Direction.INCOMING, Direction.OUTGOING, Direction.BOTH);
     }
 

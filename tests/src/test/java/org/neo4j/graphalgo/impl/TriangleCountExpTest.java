@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -85,7 +84,6 @@ class TriangleCountExpTest {
 
     @AllGraphTypesWithoutCypherTest
     void testQueue(Class<? extends GraphFactory> graphFactory) {
-        assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
         setup(graphFactory);
         final IntersectingTriangleCount algo = new IntersectingTriangleCount(
                 graph,
@@ -103,7 +101,6 @@ class TriangleCountExpTest {
 
     @AllGraphTypesWithoutCypherTest
     void testQueueParallel(Class<? extends GraphFactory> graphFactory) {
-        assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
         setup(graphFactory);
         final IntersectingTriangleCount algo = new IntersectingTriangleCount(
                 graph,
@@ -121,7 +118,6 @@ class TriangleCountExpTest {
 
     @AllGraphTypesWithoutCypherTest
     void testForkJoin(Class<? extends GraphFactory> graphFactory) {
-        assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
         setup(graphFactory);
         final TriangleCountForkJoin algo = new TriangleCountForkJoin(graph, ForkJoinPool.commonPool(), 100_000);
         try (ProgressTimer start = ProgressTimer.start(l -> System.out.println("took " + l + "ms"))) {
@@ -135,7 +131,6 @@ class TriangleCountExpTest {
 
     @AllGraphTypesWithoutCypherTest
     void testForkJoinParallel(Class<? extends GraphFactory> graphFactory) {
-        assumeFalse(graphFactory.isAssignableFrom(GraphViewFactory.class));
         setup(graphFactory);
         final TriangleCountForkJoin algo = new TriangleCountForkJoin(graph, ForkJoinPool.commonPool(), 100);
         try (ProgressTimer start = ProgressTimer.start(l -> System.out.println("took " + l + "ms"))) {
