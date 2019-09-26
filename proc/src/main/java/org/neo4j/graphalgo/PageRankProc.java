@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
+import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -44,13 +45,12 @@ import java.util.stream.Stream;
 
 public final class PageRankProc extends BaseAlgoProc<PageRank> {
 
-    private static final String CONFIG_DAMPING = "dampingFactor";
-    private static final String CONFIG_TOLERANCE = "tolerance";
-    private static final String CONFIG_WEIGHT_PROPERTY = "weightProperty";
-    private static final String CONFIG_CACHE_WEIGHTS = "cacheWeights";
-    private static final Double DEFAULT_DAMPING = 0.85D;
-    private static final Integer DEFAULT_ITERATIONS = 20;
-    private static final String DEFAULT_SCORE_PROPERTY = "pagerank";
+    private static final String DAMPING_FACTOR_KEY = "dampingFactor";
+    private static final Double DAMPING_FACTOR_DEFAULT = 0.85D;
+    private static final String TOLERANCE_KEY = "tolerance";
+    private static final String CACHE_WEIGHTS_KEY = "cacheWeights";
+    private static final Integer ITERATIONS_DEFAULT = 20;
+    private static final String WRITE_PROPERTY_DEFAULT = "pagerank";
 
 
     @Procedure(value = "algo.pageRank", mode = Mode.WRITE)
@@ -82,7 +82,7 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
                 scores,
                 configuration,
                 statsBuilder,
-                DEFAULT_SCORE_PROPERTY);
+                WRITE_PROPERTY_DEFAULT);
 
         return Stream.of(statsBuilder.build());
     }
@@ -134,13 +134,13 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
 
     @Override
     protected PageRankFactory algorithmFactory(final ProcedureConfiguration config) {
-        double dampingFactor = config.get(CONFIG_DAMPING, DEFAULT_DAMPING);
-        int iterations = config.getIterations(DEFAULT_ITERATIONS);
-        double tolerance = config.get(CONFIG_TOLERANCE, PageRank.DEFAULT_TOLERANCE);
-        boolean cacheWeights = config.get(CONFIG_CACHE_WEIGHTS, false);
+        double dampingFactor = config.get(DAMPING_FACTOR_KEY, DAMPING_FACTOR_DEFAULT);
+        int iterations = config.getIterations(ITERATIONS_DEFAULT);
+        double tolerance = config.get(TOLERANCE_KEY, PageRank.DEFAULT_TOLERANCE);
+        boolean cacheWeights = config.get(CACHE_WEIGHTS_KEY, false);
         PageRank.Config algoConfig = new PageRank.Config(iterations, dampingFactor, tolerance, cacheWeights);
 
-        boolean weighted = config.getString(CONFIG_WEIGHT_PROPERTY, null) != null;
+        boolean weighted = config.getString(ProcedureConstants.WEIGHT_PROPERTY_KEY, null) != null;
 
         if (weighted) {
             return new PageRankFactory(PageRankAlgorithmType.WEIGHTED, algoConfig);
