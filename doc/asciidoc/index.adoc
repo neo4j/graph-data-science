@@ -34,9 +34,10 @@ The guide covers the following areas:
 * <<algorithms-community>> -- A detailed guide to each of the community detection algorithms, including use-cases and examples.
 
 
-In addition to the above algorithms, there are a large number of experimental algorithm implementations developed as part of Neo4j Labs.
-These include experimental centrality and community algorithms, as well as experimental algorithms for link prediction, path finding and similarity.
+In addition to the above algorithms, there are a large number of algorithm implementations developed as part of Neo4j Labs.
+These include algorithms in various categories, including categories in which there are officially supported algorithms.
 The Neo4j Labs algorithms are documented in <<labs-algorithms>>.
+Please note that Neo4j Labs algorithms are not supported for production purposes.
 
 ====
 image::download_book.png[Graph Algorithms,200]
