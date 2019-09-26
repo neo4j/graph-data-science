@@ -89,12 +89,6 @@ public final class PropertyMappings implements Iterable<PropertyMapping> {
         return stream().iterator();
     }
 
-    // TODO: remove when https://trello.com/c/YLfUkUZz is fixed
-    @Deprecated
-    public int weightId() {
-        return mappings.length == 0 ? NO_SUCH_PROPERTY_KEY : mappings[0].propertyKeyId();
-    }
-
     @Deprecated
     public double defaultWeight() {
         return mappings.length == 0 ? 0.0 : mappings[0].defaultValue();
