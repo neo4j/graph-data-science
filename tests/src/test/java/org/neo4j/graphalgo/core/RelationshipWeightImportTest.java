@@ -19,11 +19,10 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.function.Executable;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
@@ -139,9 +138,8 @@ class RelationshipWeightImportTest {
         graph = new GraphLoader(db)
                 .withAnyRelationshipType()
                 .withAnyLabel()
-                .withoutNodeProperties()
                 .withDirection(direction)
-                .withRelationshipWeightsFromProperty("w", 0.0)
+                .withRelationshipProperties(PropertyMapping.of("w", 0.0))
                 .sorted()
                 .load(graphFactory);
     }

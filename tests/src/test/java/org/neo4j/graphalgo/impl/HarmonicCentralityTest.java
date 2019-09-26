@@ -92,7 +92,6 @@ class HarmonicCentralityTest {
         Graph graph = new GraphLoader(db)
                 .withAnyRelationshipType()
                 .withAnyLabel()
-                .withoutNodeProperties()
                 .load(graphImpl);
 
         final Consumer mock = mock(Consumer.class);

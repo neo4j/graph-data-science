@@ -132,13 +132,13 @@ public final class PropertyMappings implements Iterable<PropertyMapping> {
         }
 
         public Builder addMapping(PropertyMapping mapping) {
-            Objects.requireNonNull(mapping, "mapping");
+            Objects.requireNonNull(mapping, "Given PropertyMapping must not be null.");
             mappings.add(mapping);
             return this;
         }
 
         public Builder addOptionalMapping(PropertyMapping mapping) {
-            Objects.requireNonNull(mapping, "mapping");
+            Objects.requireNonNull(mapping, "Given PropertyMapping must not be null.");
             if (mapping.hasValidName()) {
                 mappings.add(mapping);
             }
@@ -146,13 +146,11 @@ public final class PropertyMappings implements Iterable<PropertyMapping> {
         }
 
         public Builder addAllMappings(PropertyMapping... propertyMappings) {
-            addAllMappings(Arrays.stream(propertyMappings));
-            return this;
+            return addAllMappings(Arrays.stream(propertyMappings));
         }
 
         public Builder addAllOptionalMappings(PropertyMapping... propertyMappings) {
-            addAllOptionalMappings(Arrays.stream(propertyMappings));
-            return this;
+            return addAllOptionalMappings(Arrays.stream(propertyMappings));
         }
 
         public Builder addAllMappings(Stream<PropertyMapping> propertyMappings) {

@@ -34,10 +34,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 /**
- * DTO to ease the use of the GraphFactory-CTor. Should contain
- * setup options for loading the graph from neo4j.
- *
- * @author mknblch
+ * DTO to ease the use of the GraphFactory-CTor.
+ * Contains setup options for loading the graph from Neo4j.
  */
 public class GraphSetup {
 
@@ -72,9 +70,7 @@ public class GraphSetup {
     public final ExecutorService executor;
     // concurrency level
     public final int concurrency;
-    /**
-     * batchSize for parallel computation
-     */
+    // batchSize for parallel computation
     public final int batchSize;
 
     // tells whether the underlying array should be sorted during import
@@ -85,6 +81,41 @@ public class GraphSetup {
     public final PropertyMappings nodePropertyMappings;
     public final PropertyMappings relationshipPropertyMappings;
     public final DeduplicationStrategy deduplicationStrategy;
+
+    /**
+     * Setup Graph to load any label, any relationship, no property in single threaded mode
+     */
+    public GraphSetup() {
+        this(null, null, null, 1.0, null);
+    }
+
+    public GraphSetup(
+            String label,
+            String relation,
+            String weightProperty,
+            double defaultWeight,
+            ExecutorService executor) {
+        this(
+                label,
+                label,
+                relation,
+                Direction.BOTH,
+                Collections.emptyMap(),
+                executor,
+                Pools.DEFAULT_CONCURRENCY,
+                -1,
+                DeduplicationStrategy.NONE,
+                NullLog.getInstance(),
+                -1L,
+                false,
+                false,
+                AllocationTracker.EMPTY,
+                TerminationFlag.RUNNING_TRUE,
+                null,
+                PropertyMappings.of(),
+                PropertyMappings.of(PropertyMapping.of(weightProperty, weightProperty, defaultWeight))
+        );
+    }
 
     /**
      * main ctor
@@ -141,41 +172,6 @@ public class GraphSetup {
         this.relationshipPropertyMappings = relationshipPropertyMappings;
     }
 
-    /**
-     * Setup Graph to load any label, any relationship, no property in single threaded mode
-     */
-    public GraphSetup() {
-        this(null, null, null, 1.0, null);
-    }
-
-    public GraphSetup(
-            String label,
-            String relation,
-            String weightProperty,
-            double defaultWeight,
-            ExecutorService executor) {
-        this(
-                label,
-                label,
-                relation,
-                Direction.BOTH,
-                Collections.emptyMap(),
-                executor,
-                Pools.DEFAULT_CONCURRENCY,
-                -1,
-                DeduplicationStrategy.NONE,
-                NullLog.getInstance(),
-                -1L,
-                false,
-                false,
-                AllocationTracker.EMPTY,
-                TerminationFlag.RUNNING_TRUE,
-                null,
-                PropertyMappings.of(),
-                PropertyMappings.of(PropertyMapping.of(weightProperty, weightProperty, defaultWeight))
-        );
-    }
-
     public boolean loadConcurrent() {
         return executor != null;
     }
@@ -187,7 +183,7 @@ public class GraphSetup {
         return concurrency;
     }
 
-    public boolean shouldLoadRelationshipWeight() {
+    public boolean shouldLoadRelationshipProperties() {
         return relationshipPropertyMappings.hasMappings();
     }
 

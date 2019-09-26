@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.impl;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.neo4j.graphalgo.ConnectedComponentsTest;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.GraphFactory;
@@ -103,7 +104,7 @@ class SCCTest extends ConnectedComponentsTest {
         graph = new GraphLoader(DB)
                 .withLabel("Node")
                 .withRelationshipType("TYPE")
-                .withRelationshipWeightsFromProperty("cost", Double.MAX_VALUE)
+                .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
                 .load(graphImpl);
     }
 }

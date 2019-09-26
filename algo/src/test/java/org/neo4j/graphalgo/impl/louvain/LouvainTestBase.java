@@ -61,7 +61,6 @@ abstract class LouvainTestBase {
     Graph loadGraph(Class<? extends GraphFactory> graphImpl, String cypher) {
         db.execute(cypher);
         GraphLoader loader = new GraphLoader(db)
-                .withoutNodeProperties()
                 .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
                 .undirected();
         if (graphImpl == CypherGraphFactory.class) {

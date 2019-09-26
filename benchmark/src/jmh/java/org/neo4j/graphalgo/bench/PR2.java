@@ -53,8 +53,7 @@ public final class PR2 extends BaseMain {
                 .withAllocationTracker(AllocationTracker.create())
                 .withDirection(Direction.OUTGOING)
                 .sorted()
-                .undirected()
-                .withoutRelationshipWeights();
+                .undirected();
 
 
         System.gc();

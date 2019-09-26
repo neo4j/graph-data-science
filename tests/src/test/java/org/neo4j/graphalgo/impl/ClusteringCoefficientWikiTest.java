@@ -80,8 +80,6 @@ class ClusteringCoefficientWikiTest {
         graph = new GraphLoader(db)
                 .withAnyLabel()
                 .withAnyRelationshipType()
-                .withoutRelationshipWeights()
-                .withoutNodeWeights()
                 .undirected()
                 .load(HugeGraphFactory.class);
     }

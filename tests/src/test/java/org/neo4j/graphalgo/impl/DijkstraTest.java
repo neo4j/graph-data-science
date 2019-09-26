@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.impl;
 import com.carrotsearch.hppc.LongArrayList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -87,8 +88,7 @@ class DijkstraTest {
         graph = new GraphLoader(db)
                 .withAnyRelationshipType()
                 .withAnyLabel()
-                .withoutNodeProperties()
-                .withRelationshipWeightsFromProperty("cost", Double.MAX_VALUE)
+                .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
                 .undirected()
                 .load(HugeGraphFactory.class);
 

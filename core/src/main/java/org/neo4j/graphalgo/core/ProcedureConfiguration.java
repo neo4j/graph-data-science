@@ -204,14 +204,6 @@ public class ProcedureConfiguration {
         return get(ProcedureConstants.STATS_FLAG_KEY, defaultValue);
     }
 
-    public boolean hasRelationshipWeight() {
-        return containsKey(ProcedureConstants.RELATIONSHIP_WEIGHT_KEY);
-    }
-
-    public String getRelationshipWeight() {
-        return getString(ProcedureConstants.RELATIONSHIP_WEIGHT_KEY, null);
-    }
-
     public boolean hasWeightProperty() {
         return containsKey(ProcedureConstants.WEIGHT_PROPERTY_KEY);
     }

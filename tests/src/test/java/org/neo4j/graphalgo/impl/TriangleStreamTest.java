@@ -110,8 +110,6 @@ class TriangleStreamTest {
                 .withDirection(Direction.BOTH)
                 .withLabel(LABEL)
                 .withRelationshipType(RELATIONSHIP)
-                .withoutRelationshipWeights()
-                .withoutNodeWeights()
                 .undirected()
                 .load(graphFactory);
 

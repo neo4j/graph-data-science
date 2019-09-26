@@ -76,7 +76,6 @@ public class TraverseProc {
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .withOptionalLabel(label)
                 .withOptionalRelationshipType(relationship)
-                .withoutNodeWeights()
                 .withRelationshipProperties(PropertyMapping.of(configuration.getWeightProperty(), 1.))
                 .withDirection(configuration.getDirection(Direction.OUTGOING))
                 .withLog(log)
@@ -142,8 +141,7 @@ public class TraverseProc {
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .withOptionalLabel(label)
                 .withOptionalRelationshipType(relationship)
-                .withoutNodeWeights()
-                .withRelationshipProperties(PropertyMapping.of(configuration.getWeightProperty(), 1.))
+                .withRelationshipProperties(PropertyMapping.of(configuration.getWeightProperty(), 1.0))
                 .withDirection(configuration.getDirection(Direction.OUTGOING))
                 .withLog(log)
                 .load(configuration.getGraphImpl());

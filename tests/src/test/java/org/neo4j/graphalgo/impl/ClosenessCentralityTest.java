@@ -122,7 +122,6 @@ class ClosenessCentralityTest {
         graph = new GraphLoader(DB)
                 .withAnyRelationshipType()
                 .withAnyLabel()
-                .withoutNodeProperties()
                 .load(graphImpl);
     }
 }

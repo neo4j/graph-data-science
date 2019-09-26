@@ -125,7 +125,6 @@ class LouvainTest extends LouvainTestBase {
         }
         Graph graph = graphLoader
                 .withRelationshipProperties(PropertyMapping.of(null, 1.0))
-                .withoutNodeWeights()
                 .sorted()
                 .undirected()
                 .load(graphImpl);

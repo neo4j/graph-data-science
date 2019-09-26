@@ -74,7 +74,6 @@ public class PageRankBenchmarkLdbc {
         db = LdbcDownloader.openDb(graphId);
         grph = new GraphLoader(db, Pools.DEFAULT)
                 .withDirection(Direction.OUTGOING)
-                .withoutRelationshipWeights()
                 .load(HugeGraphFactory.class);
         batchSize = parallel ? 10_000 : 2_000_000_000;
     }

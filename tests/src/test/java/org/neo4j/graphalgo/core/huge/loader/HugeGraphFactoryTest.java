@@ -91,7 +91,6 @@ class HugeGraphFactoryTest {
     void testWithLabel() {
         final Graph graph = new GraphLoader(DB)
                 .withLabel("Node1")
-                .withoutRelationshipWeights()
                 .withAnyRelationshipType()
                 .load(HugeGraphFactory.class);
 
@@ -102,7 +101,6 @@ class HugeGraphFactoryTest {
     void testAnyRelation() {
         final Graph graph = new GraphLoader(DB)
                 .withAnyLabel()
-                .withoutRelationshipWeights()
                 .withAnyRelationshipType()
                 .load(HugeGraphFactory.class);
 
@@ -117,9 +115,8 @@ class HugeGraphFactoryTest {
     void testWithBothWeightedRelationship() {
         final Graph graph = new GraphLoader(DB)
                 .withAnyLabel()
-                .withoutRelationshipWeights()
                 .withRelationshipType("REL3")
-                .withRelationshipWeightsFromProperty("weight", 1.0)
+                .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
                 .withDirection(Direction.BOTH)
                 .load(HugeGraphFactory.class);
 
@@ -135,7 +132,6 @@ class HugeGraphFactoryTest {
     void testWithOutgoingRelationship() {
         final Graph graph = new GraphLoader(DB)
                 .withAnyLabel()
-                .withoutRelationshipWeights()
                 .withRelationshipType("REL3")
                 .withDirection(Direction.OUTGOING)
                 .load(HugeGraphFactory.class);
@@ -152,7 +148,7 @@ class HugeGraphFactoryTest {
         final Graph graph = new GraphLoader(DB)
                 .withAnyLabel()
                 .withAnyRelationshipType()
-                .withRelationshipWeightsFromProperty("prop1", 1337.42)
+                .withRelationshipProperties(PropertyMapping.of("prop1", 1337.42))
                 .load(HugeGraphFactory.class);
 
         double[] out1 = collectTargetWeights(graph, id1);
@@ -162,7 +158,6 @@ class HugeGraphFactoryTest {
     @Test
     void testWithNodeProperties() {
         final Graph graph = new GraphLoader(DB)
-                .withoutRelationshipWeights()
                 .withAnyRelationshipType()
                 .withOptionalNodeProperties(
                         PropertyMapping.of("prop1", "prop1", 0D),
@@ -179,7 +174,6 @@ class HugeGraphFactoryTest {
     @Test
     void testWithHugeNodeProperties() {
         final Graph graph = new GraphLoader(DB)
-                .withoutRelationshipWeights()
                 .withAnyRelationshipType()
                 .withOptionalNodeProperties(
                         PropertyMapping.of("prop1", "prop1", 0D),
@@ -210,7 +204,6 @@ class HugeGraphFactoryTest {
     void testLoadDuplicateRelationships() {
         final Graph graph = new GraphLoader(DB)
                 .withAnyRelationshipType()
-                .withoutRelationshipWeights()
                 .withDeduplicationStrategy(DeduplicationStrategy.NONE)
                 .load(HugeGraphFactory.class);
 
@@ -222,7 +215,7 @@ class HugeGraphFactoryTest {
     void testLoadDuplicateRelationshipsWithWeights() {
         final Graph graph = new GraphLoader(DB)
                 .withAnyRelationshipType()
-                .withRelationshipWeightsFromProperty("weight", 1.0)
+                .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
                 .withDeduplicationStrategy(DeduplicationStrategy.NONE)
                 .load(HugeGraphFactory.class);
 
@@ -237,7 +230,7 @@ class HugeGraphFactoryTest {
             double expectedWeight) {
         final Graph graph = new GraphLoader(DB)
                 .withAnyRelationshipType()
-                .withRelationshipWeightsFromProperty("weight", 1.0)
+                .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
                 .withDeduplicationStrategy(deduplicationStrategy)
                 .load(HugeGraphFactory.class);
 
@@ -249,7 +242,6 @@ class HugeGraphFactoryTest {
     void testLoadMultipleRelationships() {
         GraphByType graphs = new GraphLoader(DB)
                 .withAnyLabel()
-                .withoutRelationshipWeights()
                 .withRelationshipType("REL1 | REL2")
                 .build(HugeGraphFactory.class)
                 .loadGraphs();
@@ -271,7 +263,7 @@ class HugeGraphFactoryTest {
         GraphByType graphs = new GraphLoader(DB)
                 .withAnyLabel()
                 .withRelationshipType("REL1 | REL2")
-                .withRelationshipWeightsFromProperty("prop1", 42D)
+                .withRelationshipProperties(PropertyMapping.of("prop1", 42D))
                 .build(HugeGraphFactory.class)
                 .loadGraphs();
 

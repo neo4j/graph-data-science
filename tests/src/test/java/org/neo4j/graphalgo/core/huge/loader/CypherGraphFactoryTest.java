@@ -81,7 +81,7 @@ class CypherGraphFactoryTest {
 
         Graph graph = new GraphLoader(db)
                 .withParams(MapUtil.map("rel", "REL"))
-                .withRelationshipWeightsFromProperty("prop", 0)
+                .withRelationshipProperties(PropertyMapping.of("prop", 0))
                 .withLabel(nodes)
                 .withRelationshipType(rels)
                 .withOptionalNodeProperties(
@@ -217,7 +217,7 @@ class CypherGraphFactoryTest {
         GraphLoader loader = new GraphLoader(db)
                 .withBatchSize(1000)
                 .withDeduplicationStrategy(strategy)
-                .withRelationshipWeightsFromProperty("prop", 0D)
+                .withRelationshipProperties(PropertyMapping.of("prop", 0D))
                 .withLabel(nodeStatement)
                 .withRelationshipType(relStatement);
         if (parallel) {

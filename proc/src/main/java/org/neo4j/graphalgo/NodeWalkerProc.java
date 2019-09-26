@@ -159,11 +159,7 @@ public class NodeWalkerProc  {
         GraphLoader graphLoader = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, configuration)
                 .withAllocationTracker(tracker)
-                .withDirection(configuration.getDirection(Direction.BOTH))
-                .withoutNodeProperties()
-                .withoutNodeWeights()
-                .withoutRelationshipWeights();
-
+                .withDirection(configuration.getDirection(Direction.BOTH));
 
         try (ProgressTimer timer = ProgressTimer.start()) {
             Graph graph = graphLoader.load(graphFactory);

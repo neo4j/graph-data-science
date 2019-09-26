@@ -308,21 +308,6 @@ public class GraphLoader {
     }
 
     /**
-     * Instructs the loader to load relationship weights by reading the given property.
-     * If the property is not set, the given default value is used.
-     *
-     * @param property             Must not be null; to remove a weight property, use {@link #withoutRelationshipWeights()} instead.
-     * @param propertyDefaultValue default value to use if the property is not set
-     */
-    public GraphLoader withRelationshipWeightsFromProperty(String property, double propertyDefaultValue) {
-        return withRelationshipProperties(PropertyMapping.of(
-                property,
-                property,
-                propertyDefaultValue
-        ));
-    }
-
-    /**
      * If the given direction is {@link Direction#BOTH}, we instruct the loader to load the graph as undirected
      * and only outgoing relationships. This potentially reduces memory consumption for the loaded graph.
      * In any other case, we load the graph using the given direction.
@@ -337,43 +322,6 @@ public class GraphLoader {
         } else {
             return withDirection(direction);
         }
-    }
-
-    /**
-     * Instructs the loader to load relationship weights by reading the given property.
-     * If the property is not set at the relationship, the given default value is used.
-     *
-     * @param property             May be null
-     * @param propertyDefaultValue default value to use if the property is not set
-     */
-    public GraphLoader withOptionalRelationshipWeightsFromProperty(String property, double propertyDefaultValue) {
-        return withRelationshipProperties(PropertyMapping.of(
-                property,
-                property,
-                propertyDefaultValue
-        ));
-    }
-
-    /**
-     * Instructs the loader to not load any weights. The behavior of using weighted graph-functions
-     * on a graph without weights is not specified.
-     */
-    public GraphLoader withoutRelationshipWeights() {
-        return withRelationshipProperties();
-    }
-
-    /**
-     * Instructs the loader to not load any node weights.
-     */
-    public GraphLoader withoutNodeWeights() {
-        return withOptionalNodeProperties();
-    }
-
-    /**
-     * Instructs the loader to not load any node properties.
-     */
-    public GraphLoader withoutNodeProperties() {
-        return withOptionalNodeProperties();
     }
 
     public GraphLoader withParams(Map<String, Object> params) {

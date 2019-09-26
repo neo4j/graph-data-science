@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.impl;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
@@ -83,7 +84,7 @@ class ProgressLoggingTest {
                 .withExecutorService(Pools.DEFAULT)
                 .withLabel(LABEL)
                 .withRelationshipType(RELATIONSHIP)
-                .withRelationshipWeightsFromProperty(PROPERTY, 1.0)
+                .withRelationshipProperties(PropertyMapping.of(PROPERTY, 1.0))
                 .load(graphFactory);
 
         final String output = buffer.toString();
@@ -121,7 +122,7 @@ class ProgressLoggingTest {
                 .withExecutorService(Pools.DEFAULT)
                 .withLabel(LABEL)
                 .withRelationshipType(RELATIONSHIP)
-                .withRelationshipWeightsFromProperty(PROPERTY, 1.0)
+                .withRelationshipProperties(PropertyMapping.of(PROPERTY, 1.0))
                 .load(graphImpl);
     }
 

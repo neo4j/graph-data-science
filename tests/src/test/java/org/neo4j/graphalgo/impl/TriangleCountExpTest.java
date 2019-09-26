@@ -221,8 +221,6 @@ class TriangleCountExpTest {
         graph = new GraphLoader(DB)
                 .withLabel(LABEL)
                 .withRelationshipType(RELATIONSHIP)
-                .withoutRelationshipWeights()
-                .withoutNodeWeights()
                 .withDirection(Direction.BOTH)
                 .sorted()
                 .undirected()

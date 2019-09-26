@@ -23,6 +23,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.function.Executable;
 import org.neo4j.graphalgo.CostEvaluator;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
@@ -404,7 +405,7 @@ public class WeightedAllShortestPaths427Test {
         Graph graph = new GraphLoader(DB, Pools.DEFAULT)
                 .withLabel("Node")
                 .withRelationshipType("LINK")
-                .withRelationshipWeightsFromProperty("weight", 1.0)
+                .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
                 .withDirection(Direction.OUTGOING)
                 .withDefaultConcurrency()
                 .load(graphImpl);

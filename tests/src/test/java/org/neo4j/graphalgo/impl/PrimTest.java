@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.impl;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
@@ -147,8 +148,7 @@ class PrimTest {
         graph = new GraphLoader(DB)
                 .withLabel(label)
                 .withRelationshipType("TYPE")
-                .withRelationshipWeightsFromProperty("cost", Double.MAX_VALUE)
-                .withoutNodeWeights()
+                .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
                 .undirected()
                 .load(graphImpl);
 

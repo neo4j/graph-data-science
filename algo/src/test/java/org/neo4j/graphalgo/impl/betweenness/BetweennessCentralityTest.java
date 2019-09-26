@@ -143,7 +143,6 @@ class BetweennessCentralityTest {
         graph = new GraphLoader(DB)
                 .withAnyRelationshipType()
                 .withAnyLabel()
-                .withoutNodeProperties()
                 .load(graphFactory);
     }
 

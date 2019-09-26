@@ -92,7 +92,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         PropertyMappings.Builder builder = new PropertyMappings.Builder();
         for (PropertyMapping mapping : propertyMappings) {
             String propertyName = mapping.neoPropertyKey();
-            int key = propertyKey(tokenRead, propertyName != null, propertyName);
+            int key = propertyName != null ? tokenRead.propertyKey(propertyName) : TokenRead.NO_TOKEN;
             builder.addMapping(mapping.resolveWith(key));
         }
         return builder.build();
@@ -105,7 +105,4 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         );
     }
 
-    private int propertyKey(TokenRead tokenRead, boolean load, String propertyName) {
-        return load ? tokenRead.propertyKey(propertyName) : TokenRead.NO_TOKEN;
-    }
 }

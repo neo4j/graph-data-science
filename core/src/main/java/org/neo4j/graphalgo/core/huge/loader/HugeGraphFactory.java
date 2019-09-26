@@ -81,20 +81,20 @@ public final class HugeGraphFactory extends GraphFactory {
             }
         }
 
-        // Relationship weight properties
+        // Relationship properties
         for (PropertyMapping mapping : dimensions.relProperties()) {
             if (mapping.exists()) {
                 // Adjacency lists and Adjacency offsets
                 MemoryEstimation adjacencyListSize = AdjacencyList.uncompressedMemoryEstimation(setup.loadAsUndirected);
                 MemoryEstimation adjacencyOffsetsSetup = AdjacencyOffsets.memoryEstimation();
                 if (setup.loadOutgoing || setup.loadAsUndirected) {
-                    builder.add("outgoing weights for " + mapping.neoPropertyKey(), adjacencyListSize);
-                    builder.add("outgoing weight offsets for " + mapping.neoPropertyKey(), adjacencyOffsetsSetup);
+                    builder.add("outgoing properties for " + mapping.neoPropertyKey(), adjacencyListSize);
+                    builder.add("outgoing property offsets for " + mapping.neoPropertyKey(), adjacencyOffsetsSetup);
 
                 }
                 if (setup.loadIncoming && !setup.loadAsUndirected) {
-                    builder.add("incoming weights for " + mapping.neoPropertyKey(), adjacencyListSize);
-                    builder.add("incoming weight offsets for " + mapping.neoPropertyKey(), adjacencyOffsetsSetup);
+                    builder.add("incoming properties for " + mapping.neoPropertyKey(), adjacencyListSize);
+                    builder.add("incoming property offsets for " + mapping.neoPropertyKey(), adjacencyOffsetsSetup);
                 }
             }
         }

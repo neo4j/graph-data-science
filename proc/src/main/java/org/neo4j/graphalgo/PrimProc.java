@@ -128,8 +128,7 @@ public class PrimProc {
             graph = new GraphLoader(api, Pools.DEFAULT)
                     .withOptionalLabel(label)
                     .withOptionalRelationshipType(relationship)
-                    .withRelationshipWeightsFromProperty(weightProperty, configuration.getWeightPropertyDefaultValue(Double.MAX_VALUE))
-                    .withoutNodeWeights()
+                    .withRelationshipProperties(PropertyMapping.of(weightProperty, configuration.getWeightPropertyDefaultValue(Double.MAX_VALUE)))
                     .undirected()
                     .withLog(log)
                     .load(configuration.getGraphImpl(Graph.TYPE));

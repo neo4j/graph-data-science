@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
@@ -89,7 +90,7 @@ class CypherGraphFactoryDeduplicationTest {
         Graph graph = new GraphLoader((GraphDatabaseAPI) db)
                 .withLabel(nodes)
                 .withRelationshipType(rels)
-                .withRelationshipWeightsFromProperty("weight", 1.0)
+                .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
                 .withDeduplicationStrategy(DeduplicationStrategy.SKIP)
                 .load(CypherGraphFactory.class);
 
@@ -109,7 +110,7 @@ class CypherGraphFactoryDeduplicationTest {
         Graph graph = new GraphLoader((GraphDatabaseAPI) db)
                 .withLabel(nodes)
                 .withRelationshipType(rels)
-                .withRelationshipWeightsFromProperty("weight", 1.0)
+                .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
                 .withDeduplicationStrategy(deduplicationStrategy)
                 .load(CypherGraphFactory.class);
 

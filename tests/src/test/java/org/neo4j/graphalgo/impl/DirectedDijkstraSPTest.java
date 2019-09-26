@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.procedures.IntProcedure;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -81,7 +82,7 @@ public class DirectedDijkstraSPTest {
         graph = new GraphLoader(db)
                 .withNodeStatement("Node")
                 .withRelationshipType("REL")
-                .withRelationshipWeightsFromProperty("cost", Double.MAX_VALUE)
+                .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
                 .load(HugeGraphFactory.class);
     }
 

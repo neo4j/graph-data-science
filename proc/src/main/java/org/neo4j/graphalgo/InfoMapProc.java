@@ -98,9 +98,10 @@ public class InfoMapProc {
             case WEIGHTED:
 
                 log.info("initializing weighted InfoMap with internal PageRank computation");
+                String property1 = config.getWeightProperty();
                 graph = new GraphLoader(db, Pools.DEFAULT)
                         .init(log, config.getNodeLabelOrQuery(), config.getRelationshipOrQuery(), config)
-                        .withRelationshipWeightsFromProperty(config.getWeightProperty(), 1.0)
+                        .withRelationshipProperties(PropertyMapping.of(property1, 1.0))
                         .undirected()
                         .load(config.getGraphImpl());
                 infoMap = InfoMap.weighted(
@@ -119,9 +120,10 @@ public class InfoMapProc {
             case WEIGHTED_EXT_PR:
 
                 log.info("initializing weighted InfoMap with predefined PageRank");
+                String property = config.getWeightProperty();
                 graph = new GraphLoader(db, Pools.DEFAULT)
                         .init(log, config.getNodeLabelOrQuery(), config.getRelationshipOrQuery(), config)
-                        .withRelationshipWeightsFromProperty(config.getWeightProperty(), 1.0)
+                        .withRelationshipProperties(PropertyMapping.of(property, 1.0))
                         .withOptionalNodeProperties(PropertyMapping.of("_pr", pageRankPropertyName, 0.))
                         .undirected()
                         .load(config.getGraphImpl());
@@ -229,9 +231,10 @@ public class InfoMapProc {
                 log.info("initializing weighted InfoMap with internal PageRank computation");
                 try (ProgressTimer timer = builder.timeLoad()) {
 
+                    String property = config.getWeightProperty();
                     graph = new GraphLoader(db, Pools.DEFAULT)
                             .init(log, config.getNodeLabelOrQuery(), config.getRelationshipOrQuery(), config)
-                            .withRelationshipWeightsFromProperty(config.getWeightProperty(), 1.0)
+                            .withRelationshipProperties(PropertyMapping.of(property, 1.0))
                             .undirected()
                             .load(config.getGraphImpl());
 
@@ -253,9 +256,10 @@ public class InfoMapProc {
 
                 log.info("initializing weighted InfoMap with predefined PageRank");
                 try (ProgressTimer timer = builder.timeLoad()) {
+                    String property = config.getWeightProperty();
                     graph = new GraphLoader(db, Pools.DEFAULT)
                             .init(log, config.getNodeLabelOrQuery(), config.getRelationshipOrQuery(), config)
-                            .withRelationshipWeightsFromProperty(config.getWeightProperty(), 1.0)
+                            .withRelationshipProperties(PropertyMapping.of(property, 1.0))
                             .withOptionalNodeProperties(PropertyMapping.of("_pr", pageRankPropertyName, 0.))
                             .undirected()
                             .load(config.getGraphImpl());

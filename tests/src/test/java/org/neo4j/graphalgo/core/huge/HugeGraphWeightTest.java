@@ -23,6 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -119,7 +120,7 @@ final class HugeGraphWeightTest {
 
     private Graph loadGraph(final GraphDatabaseAPI db) {
         return new GraphLoader(db)
-                .withRelationshipWeightsFromProperty("weight", 0)
+                .withRelationshipProperties(PropertyMapping.of("weight", 0))
                 .withDirection(Direction.OUTGOING)
                 .withExecutorService(Pools.DEFAULT)
                 .withBatchSize(BATCH_SIZE)

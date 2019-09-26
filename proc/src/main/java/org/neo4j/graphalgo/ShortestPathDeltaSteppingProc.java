@@ -86,9 +86,10 @@ public class ShortestPathDeltaSteppingProc {
 
         GraphLoader graphLoader = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, configuration.getNodeLabelOrQuery(), configuration.getRelationshipOrQuery(), configuration)
-                .withRelationshipWeightsFromProperty(
+                .withRelationshipProperties(PropertyMapping.of(
                         propertyName,
-                        configuration.getWeightPropertyDefaultValue(Double.MAX_VALUE));
+                        configuration.getWeightPropertyDefaultValue(Double.MAX_VALUE)
+                ));
 
         if(direction == Direction.BOTH) {
             direction = Direction.OUTGOING;
@@ -133,10 +134,15 @@ public class ShortestPathDeltaSteppingProc {
         final Graph graph;
         try (ProgressTimer timer = builder.timeLoad()) {
             GraphLoader graphLoader = new GraphLoader(api, Pools.DEFAULT)
-                    .init(log, configuration.getNodeLabelOrQuery(), configuration.getRelationshipOrQuery(), configuration)
-                    .withRelationshipWeightsFromProperty(
+                    .init(
+                            log,
+                            configuration.getNodeLabelOrQuery(),
+                            configuration.getRelationshipOrQuery(),
+                            configuration)
+                    .withRelationshipProperties(PropertyMapping.of(
                             propertyName,
-                            configuration.getWeightPropertyDefaultValue(Double.MAX_VALUE));
+                            configuration.getWeightPropertyDefaultValue(Double.MAX_VALUE)
+                    ));
 
             if(direction == Direction.BOTH) {
                 direction = Direction.OUTGOING;

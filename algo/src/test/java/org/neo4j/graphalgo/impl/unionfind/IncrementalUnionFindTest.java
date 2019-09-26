@@ -79,9 +79,7 @@ class IncrementalUnionFindTest extends UnionFindTestBase {
         Graph graph = new GraphLoader(DB)
                 .withExecutorService(Pools.DEFAULT)
                 .withAnyLabel()
-                .withOptionalNodeProperties(
-                        PropertyMapping.of(SEED_PROPERTY, SEED_PROPERTY, -1L)
-                )
+                .withOptionalNodeProperties(PropertyMapping.of(SEED_PROPERTY, SEED_PROPERTY, -1L))
                 .withRelationshipType(RELATIONSHIP_TYPE)
                 .load(graphFactory);
 

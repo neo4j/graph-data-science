@@ -148,9 +148,9 @@ public final class LoadGraphProc extends BaseProc {
                 .withRelationshipProperties(config.getRelationshipProperties())
                 .withDirection(direction);
 
-        if (config.hasRelationshipWeight()) { // required to be backwards compatible with `relationshipWeight`
+        if (config.containsKey(ProcedureConstants.RELATIONSHIP_WEIGHT_KEY)) { // required to be backwards compatible with `relationshipWeight`
             loader.withRelationshipProperties(PropertyMapping.of(
-                    config.getRelationshipWeight(),
+                    config.getString(ProcedureConstants.RELATIONSHIP_WEIGHT_KEY, null),
                     config.getWeightPropertyDefaultValue(ProcedureConstants.DEFAULT_VALUE_DEFAULT)
             ));
         } else if (config.hasWeightProperty()) { // required to be backwards compatible with `weightProperty` (not documented but was possible)

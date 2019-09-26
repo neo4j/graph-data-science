@@ -102,8 +102,6 @@ class ClusteringCoefficientTest {
 
         graph = new GraphLoader(db)
                 .withLabel(LABEL)
-                .withoutRelationshipWeights()
-                .withoutNodeWeights()
                 .undirected()
                 .load(HugeGraphFactory.class);
     }

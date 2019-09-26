@@ -18,6 +18,7 @@
  */
 package org.neo4j.graphalgo.bench;
 
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
@@ -97,7 +98,7 @@ public class WeightedPageRankBenchmarkLdbc {
 
         grph = new GraphLoader(db, Pools.DEFAULT)
                 .withDirection(Direction.OUTGOING)
-                .withRelationshipWeightsFromProperty("weight", 1.0)
+                .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
                 .load(HugeGraphFactory.class);
 
         batchSize = parallel ? 10_000 : 2_000_000_000;
