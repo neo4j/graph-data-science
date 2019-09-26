@@ -250,22 +250,6 @@ class EigenvectorCentralityProcNormalizationIntegrationTest {
         }
     }
 
-    private void assertResult(final String scoreProperty, Map<Long, Double> expected) {
-        try (Transaction tx = db.beginTx()) {
-            for (Map.Entry<Long, Double> entry : expected.entrySet()) {
-                double score = ((Number) db
-                        .getNodeById(entry.getKey())
-                        .getProperty(scoreProperty)).doubleValue();
-                assertEquals(
-                        entry.getValue(),
-                        score,
-                        0.1,
-                        "score for " + entry.getKey());
-            }
-            tx.success();
-        }
-    }
-
     private static void assertMapEquals(
             Map<Long, Double> expected,
             Map<Long, Double> actual) {

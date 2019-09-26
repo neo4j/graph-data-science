@@ -62,10 +62,6 @@ final class NodePropertyMap implements WeightMapping {
         return properties.getOrDefault(source, defaultValue);
     }
 
-    public double defaultValue() {
-        return defaultValue;
-    }
-
     @Override
     public long getMaxValue() {
         return properties.getMaxValue();
@@ -79,9 +75,5 @@ final class NodePropertyMap implements WeightMapping {
             return freed;
         }
         return 0L;
-    }
-
-    public int propertyId() {
-        return propertyId;
     }
 }

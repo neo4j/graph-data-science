@@ -30,19 +30,7 @@ import java.util.OptionalLong;
 public final class InternalReadOps {
 
     public static long getHighestPossibleNodeCount(org.neo4j.internal.kernel.api.Read read, GraphDatabaseAPI api) {
-        return nodeCountByIdGenerator(read, api);
-    }
-
-    public static long getHighestPossibleRelationshipCount(org.neo4j.internal.kernel.api.Read read, GraphDatabaseAPI api) {
-        return relationshipCountByIdGenerator(read, api);
-    }
-
-    private static long nodeCountByIdGenerator(org.neo4j.internal.kernel.api.Read read, GraphDatabaseAPI api) {
         return countByIdGenerator(api, IdType.NODE).orElseGet(read::nodesGetCount);
-    }
-
-    private static long relationshipCountByIdGenerator(org.neo4j.internal.kernel.api.Read read, GraphDatabaseAPI api) {
-        return countByIdGenerator(api, IdType.RELATIONSHIP).orElseGet(read::relationshipsGetCount);
     }
 
     private static OptionalLong countByIdGenerator(GraphDatabaseAPI api, IdType idType) {

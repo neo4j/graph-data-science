@@ -19,12 +19,6 @@
  */
 package org.neo4j.graphalgo.core.utils.paged.dss;
 
-import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
-
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
-
 /**
  * Disjoint-set-struct is a data structure that keeps track of a set
  * of elements partitioned into a number of disjoint (non-overlapping) subsets.

@@ -34,8 +34,6 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
-
 public final class PropertyMappings implements Iterable<PropertyMapping> {
 
     private final PropertyMapping[] mappings;

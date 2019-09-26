@@ -25,12 +25,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StronglyConnectedComponentsProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
@@ -41,15 +37,10 @@ import java.util.function.Consumer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author mknblch
- */
 @Disabled
 class MultistepSCCProcTest {
 
     private static GraphDatabaseAPI api;
-
-    private static Graph graph;
 
     @BeforeAll
     static void setup() throws KernelException {
@@ -89,12 +80,6 @@ class MultistepSCCProcTest {
         api.getDependencyResolver()
                 .resolveDependency(Procedures.class)
                 .registerProcedure(StronglyConnectedComponentsProc.class);
-
-        graph = new GraphLoader(api)
-                .withLabel("Node")
-                .withRelationshipType("TYPE")
-                .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
-                .load(HugeGraphFactory.class);
     }
 
     @AfterAll

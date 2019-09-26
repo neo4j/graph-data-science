@@ -69,10 +69,6 @@ public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterab
 
     Direction getLoadDirection();
 
-    default Direction compatibleDirection(Direction procedureDirection) {
-        return getCompatibleDirection(procedureDirection).get();
-    }
-
     default Optional<Direction> getCompatibleDirection(Direction procedureDirection) {
         boolean isUndirected = this.isUndirected();
         Direction loadDirection = this.getLoadDirection();

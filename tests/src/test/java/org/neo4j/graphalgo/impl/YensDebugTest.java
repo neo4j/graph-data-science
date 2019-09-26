@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.impl.yens.WeightedPath;
 import org.neo4j.graphalgo.impl.yens.YensKShortestPaths;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.List;
@@ -51,14 +50,12 @@ import static org.mockito.Mockito.mock;
  */
 public class YensDebugTest {
 
-    public static final double DELTA = 0.001;
-
     private GraphDatabaseAPI db;
 
     private Graph graph;
 
     @BeforeEach
-    void setupGraph() throws KernelException {
+    void setupGraph() {
         db = TestDatabaseCreator.createTestDatabase();
         String cypher =
                 "CREATE (a:Node {name:'a'})\n" +

@@ -156,7 +156,6 @@ class PageRankProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testWeightedPageRankStreamThrowsIfWeightPropertyDoesNotExist(String graphImpl) {
-        final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.pageRank.stream(" +
                        "    'Label1', 'TYPE1', {" +
                        "        graph: $graph, weightProperty: 'does_not_exist'" +

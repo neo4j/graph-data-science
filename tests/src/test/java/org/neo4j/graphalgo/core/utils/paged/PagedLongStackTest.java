@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 

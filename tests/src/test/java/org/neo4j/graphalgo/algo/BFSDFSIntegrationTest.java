@@ -83,15 +83,6 @@ class BFSDFSIntegrationTest {
         return node[0].getId();
     }
 
-    private static String name(long id) {
-        final String[] node = new String[1];
-        DB.execute("MATCH (n:Node) WHERE id(n) = " + id + " RETURN n.name as name").accept(row -> {
-            node[0] = row.getString("name");
-            return false;
-        });
-        return node[0];
-    }
-
     /**
      * test if all both arrays contain the same nodes. not necessarily in
      * same order

@@ -61,8 +61,4 @@ public abstract class StatementApi {
             }
         });
     }
-
-    protected <T> T resolve(Class<T> dependency) {
-        return api.getDependencyResolver().resolveDependency(dependency);
-    }
 }

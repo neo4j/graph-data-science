@@ -29,14 +29,8 @@ import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-
-/**
- * @author mknblch
- */
 @ExtendWith(MockitoExtension.class)
 public class HarmonicCentralityIntegrationTest_477 {
-
-    public static final String TYPE = "TYPE";
 
     private static GraphDatabaseAPI db;
 

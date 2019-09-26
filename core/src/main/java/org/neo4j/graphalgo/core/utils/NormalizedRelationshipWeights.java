@@ -51,10 +51,4 @@ public class NormalizedRelationshipWeights implements RelationshipWeights {
     public double weightOf(long sourceNodeId, long targetNodeId) {
         return weights.weightOf(sourceNodeId, targetNodeId) / nodeWeightSum.getOrDefault(sourceNodeId, 1.);
     }
-
-    public void release() {
-        nodeWeightSum.clear();
-        nodeWeightSum = null;
-        weights = null;
-    }
 }

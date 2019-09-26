@@ -19,33 +19,17 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.core.utils.ArrayUtil;
-import org.neo4j.internal.kernel.api.CursorFactory;
-import org.neo4j.internal.kernel.api.NodeCursor;
-import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.PropertyCursor;
-import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.values.storable.NumberValue;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
 import java.util.Arrays;
-import java.util.function.LongConsumer;
 
 public final class ReadHelper {
 
     private ReadHelper() {
         throw new UnsupportedOperationException("No instances");
-    }
-
-    public static double readProperty(PropertyCursor pc, int propertyId, double defaultValue) {
-        while (pc.next()) {
-            if (pc.propertyKey() == propertyId) {
-                Value value = pc.propertyValue();
-                return extractValue(value, defaultValue);
-            }
-        }
-        return defaultValue;
     }
 
     public static double[] readProperties(PropertyCursor pc, int[] propertyIds, double[] defaultValues) {
@@ -64,24 +48,6 @@ public final class ReadHelper {
             }
         }
         return weights;
-    }
-
-    public static void readNodes(CursorFactory cursors, Read dataRead, int labelId, LongConsumer action) {
-        if (labelId == Read.ANY_LABEL) {
-            try (NodeCursor nodeCursor = cursors.allocateNodeCursor()) {
-                dataRead.allNodesScan(nodeCursor);
-                while (nodeCursor.next()) {
-                    action.accept(nodeCursor.nodeReference());
-                }
-            }
-        } else {
-            try (NodeLabelIndexCursor nodeCursor = cursors.allocateNodeLabelIndexCursor()) {
-                dataRead.nodeLabelScan(labelId, nodeCursor);
-                while (nodeCursor.next()) {
-                    action.accept(nodeCursor.nodeReference());
-                }
-            }
-        }
     }
 
     public static double extractValue(Value value, double defaultValue) {

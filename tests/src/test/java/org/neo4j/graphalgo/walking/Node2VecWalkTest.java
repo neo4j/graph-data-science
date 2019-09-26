@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Timeout;
 import org.neo4j.graphalgo.NodeWalkerProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.ResourceIterator;
@@ -145,14 +144,6 @@ class Node2VecWalkTest {
         results.next();
         results.next();
         assertTrue(!results.hasNext(), "There should be only two results.");
-    }
-
-    private Node getStartNode(Path path) {
-        return path.startNode();
-    }
-
-    private long getStartNodeId(Path path) {
-        return path.startNode().getId();
     }
 
     @Test

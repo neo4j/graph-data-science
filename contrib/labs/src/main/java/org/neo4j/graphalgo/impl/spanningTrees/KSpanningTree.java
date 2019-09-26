@@ -19,14 +19,13 @@
  */
 package org.neo4j.graphalgo.impl.spanningTrees;
 
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.container.UndirectedTree;
 import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
-import org.neo4j.graphalgo.Algorithm;
-import org.neo4j.graphalgo.results.AbstractResultBuilder;
 
 /**
  * The algorithm computes the MST by traversing all nodes from a given
@@ -111,40 +110,5 @@ public class KSpanningTree extends Algorithm<KSpanningTree> {
         relationshipIterator = null;
         weights = null;
         kSpanningTree = null;
-    }
-
-    public static class Result {
-
-        public final long loadMillis;
-        public final long computeMillis;
-        public final long writeMillis;
-        public final long effectiveNodeCount;
-
-        public Result(long loadMillis,
-                      long computeMillis,
-                      long writeMillis,
-                      int effectiveNodeCount) {
-            this.loadMillis = loadMillis;
-            this.computeMillis = computeMillis;
-            this.writeMillis = writeMillis;
-            this.effectiveNodeCount = effectiveNodeCount;
-        }
-    }
-
-    public static class Builder extends AbstractResultBuilder<Result> {
-
-        protected int effectiveNodeCount;
-
-        public Builder withEffectiveNodeCount(int effectiveNodeCount) {
-            this.effectiveNodeCount = effectiveNodeCount;
-            return this;
-        }
-
-        public Result build() {
-            return new Result(loadDuration,
-                    evalDuration,
-                    writeDuration,
-                    effectiveNodeCount);
-        }
     }
 }

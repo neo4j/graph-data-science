@@ -28,8 +28,6 @@ import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class DegreeCentrality extends Algorithm<DegreeCentrality> implements DegreeCentralityAlgorithm {
     private final int nodeCount;
@@ -143,34 +141,6 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> implements Deg
                 });
             }
 
-        }
-    }
-
-    public Stream<Result> resultStream() {
-        return IntStream.range(0, nodeCount)
-                .mapToObj(nodeId ->
-                        new Result(graph.toOriginalNodeId(nodeId), degrees[nodeId]));
-    }
-
-    /**
-     * Result class used for streaming
-     */
-    public static final class Result {
-
-        public final long nodeId;
-        public final double centrality;
-
-        public Result(long nodeId, double centrality) {
-            this.nodeId = nodeId;
-            this.centrality = centrality;
-        }
-
-        @Override
-        public String toString() {
-            return "Result{" +
-                    "nodeId=" + nodeId +
-                    ", centrality=" + centrality +
-                    '}';
         }
     }
 

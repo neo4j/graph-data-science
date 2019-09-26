@@ -115,8 +115,6 @@ class WeightedAllShortestPathsTest {
                     mock.test(r.sourceNodeId, r.targetNodeId, r.distance);
                 });
 
-        final int nodes = (width * height);
-
         verify(mock, times(45)).test(anyLong(), anyLong(), anyDouble());
 
         verify(mock, times(1)).test(0, 9, 5.0);

@@ -27,8 +27,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
-
 public final class RelationshipTypeMappings implements Iterable<RelationshipTypeMapping> {
 
     private static final RelationshipTypeMappings ALL = new RelationshipTypeMappings(RelationshipTypeMapping.all());
@@ -57,18 +55,6 @@ public final class RelationshipTypeMappings implements Iterable<RelationshipType
 
     public boolean isMultipleTypes() {
         return mappings.length > 1;
-    }
-
-    public int[] relationshipTypeIds() {
-        // type ids are only used for heavy importer, which will be removed soon-ish.
-        // Heavy loader expecteds only a valid single types entry (for loading that type)
-        // or an empty array for loading all types.
-        // We check for the typeId here instead of doesExist to catch both cases.
-        return Arrays.stream(mappings)
-                .filter(m -> m.typeId() != NO_SUCH_RELATIONSHIP_TYPE)
-                .mapToInt(RelationshipTypeMapping::typeId)
-                .limit(1)
-                .toArray();
     }
 
     public static final class Builder {

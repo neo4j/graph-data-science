@@ -20,11 +20,9 @@
 package org.neo4j.graphalgo.impl.betweenness;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeIterator;
 import org.neo4j.graphalgo.core.utils.traverse.SimpleBitSet;
 
 import java.security.SecureRandom;
-import java.util.function.IntConsumer;
 
 /**
  * Filters nodes randomly based on a given probability

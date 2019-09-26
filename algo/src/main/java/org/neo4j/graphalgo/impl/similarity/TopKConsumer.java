@@ -19,16 +19,12 @@
  */
 package org.neo4j.graphalgo.impl.similarity;
 
-import org.apache.lucene.search.similarities.Similarity;
 import org.neo4j.graphalgo.impl.results.SimilarityResult;
 
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TopKConsumer<T> implements Function<T, Integer> {

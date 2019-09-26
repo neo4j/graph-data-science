@@ -19,14 +19,13 @@
  */
 package org.neo4j.graphalgo.impl.triangle;
 
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IntersectionConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.Algorithm;
-import org.neo4j.graphdb.Direction;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -49,7 +48,6 @@ import java.util.stream.StreamSupport;
  */
 public class TriangleStream extends Algorithm<TriangleStream> {
 
-    public static final Direction D = Direction.OUTGOING;
     private Graph graph;
     private ExecutorService executorService;
     private final AtomicInteger queue;

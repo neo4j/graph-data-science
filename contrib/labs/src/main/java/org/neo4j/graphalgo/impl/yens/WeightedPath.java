@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.impl.yens;
 
 import org.apache.lucene.util.ArrayUtil;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.RawValues;
 
@@ -131,10 +130,6 @@ public class WeightedPath {
 
     public long edge(int i) {
         return RawValues.combineIntInt(nodes[i], nodes[i + 1]);
-    }
-
-    public void clear() {
-        offset = 0;
     }
 
     public WeightedPath reverse() {

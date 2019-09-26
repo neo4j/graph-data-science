@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.core.utils;
 
 import java.util.Spliterator;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -36,10 +35,6 @@ public class QueueBasedSpliterator<T> implements Spliterator<T> {
     private T entry;
     private TerminationFlag terminationGuard;
     private final int timeout;
-
-    public QueueBasedSpliterator(BlockingQueue<T> queue, T tombstone, TerminationFlag terminationGuard) {
-        this(queue, tombstone, terminationGuard, 10);
-    }
 
     public QueueBasedSpliterator(BlockingQueue<T> queue, T tombstone, TerminationFlag terminationGuard, int timeout) {
         this.queue = queue;
@@ -82,13 +77,5 @@ public class QueueBasedSpliterator<T> implements Spliterator<T> {
 
     public int characteristics() {
         return NONNULL;
-    }
-
-    public void offer(T items) {
-        try {
-            queue.offer(items, timeout, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

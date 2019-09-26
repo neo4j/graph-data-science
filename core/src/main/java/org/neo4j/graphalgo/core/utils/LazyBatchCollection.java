@@ -40,13 +40,6 @@ public final class LazyBatchCollection<T> extends AbstractCollection<T> {
         return new LazyBatchCollection<>(batchSize, nodeCount, false, supplier);
     }
 
-    public static <T> Collection<T> ofCached(
-            long nodeCount,
-            long batchSize,
-            BatchSupplier<T> supplier) {
-        return new LazyBatchCollection<>(batchSize, nodeCount, true, supplier);
-    }
-
     private final boolean saveResults;
     private final BatchSupplier<T> supplier;
     private final long nodeCount;
@@ -68,7 +61,7 @@ public final class LazyBatchCollection<T> extends AbstractCollection<T> {
     }
 
     @Override
-    public final Iterator<T> iterator() {
+    public Iterator<T> iterator() {
         if (batches != null) {
             return batches.iterator();
         }
@@ -98,7 +91,7 @@ public final class LazyBatchCollection<T> extends AbstractCollection<T> {
     }
 
     @Override
-    public final int size() {
+    public int size() {
         if (batches != null) {
             return batches.size();
         }

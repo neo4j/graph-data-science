@@ -69,10 +69,6 @@ public final class GraphDimensions {
         return highestNeoId;
     }
 
-    public int nodeCountAsInt() {
-        return Math.toIntExact(nodeCount);
-    }
-
     public long maxRelCount() {
         return maxRelCount;
     }

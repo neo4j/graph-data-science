@@ -24,10 +24,9 @@ import java.util.function.IntUnaryOperator;
 import java.util.function.LongUnaryOperator;
 import java.util.function.UnaryOperator;
 
-/**
- * @author mknblch
- */
-public class Pointer {
+public final class Pointer {
+
+    private Pointer() {}
 
     public static class BoolPointer {
         public boolean v;

@@ -34,8 +34,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality> implements DegreeCentralityAlgorithm {
     private final long nodeCount;
@@ -178,12 +176,6 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
     }
     public HugeObjectArray<HugeDoubleArray> weights() {
         return weights;
-    }
-
-    public Stream<DegreeCentrality.Result> resultStream() {
-        return LongStream.range(0, nodeCount)
-                .mapToObj(nodeId ->
-                        new DegreeCentrality.Result(graph.toOriginalNodeId(nodeId), degrees.get(nodeId)));
     }
 
 }

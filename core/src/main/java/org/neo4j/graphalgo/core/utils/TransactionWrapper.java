@@ -26,8 +26,6 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.ToDoubleFunction;
-import java.util.function.ToIntFunction;
 
 /**
  * Runs code blocks wrapped in {@link KernelTransaction}s.
@@ -68,24 +66,6 @@ public final class TransactionWrapper {
         try (final Transaction tx = db.beginTx()) {
             final KernelTransaction transaction = bridge.getKernelTransactionBoundToThisThread(true);
             T result = block.apply(transaction);
-            tx.success();
-            return result;
-        }
-    }
-
-    public int applyAsInt(ToIntFunction<KernelTransaction> block) {
-        try (final Transaction tx = db.beginTx()) {
-            final KernelTransaction transaction = bridge.getKernelTransactionBoundToThisThread(true);
-            int result = block.applyAsInt(transaction);
-            tx.success();
-            return result;
-        }
-    }
-
-    public double applyAsDouble(ToDoubleFunction<KernelTransaction> block) {
-        try (final Transaction tx = db.beginTx()) {
-            final KernelTransaction transaction = bridge.getKernelTransactionBoundToThisThread(true);
-            double result = block.applyAsDouble(transaction);
             tx.success();
             return result;
         }

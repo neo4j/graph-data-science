@@ -37,7 +37,7 @@ public class WalkPath implements Path {
     private List<Relationship> relationships;
     private final int size;
 
-    public WalkPath(int size) {
+    private WalkPath(int size) {
         nodes = new ArrayList<>(size);
         relationships = new ArrayList<>(Math.max(0, size - 1)); // for empty paths
         this.size = size;

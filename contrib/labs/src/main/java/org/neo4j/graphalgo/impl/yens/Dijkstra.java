@@ -38,8 +38,6 @@ import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
 
 /**
  * specialized dijkstra impl. for YensKShortestPath
- *
- * @author mknblch
  */
 public class Dijkstra {
 
@@ -83,15 +81,6 @@ public class Dijkstra {
      */
     public Dijkstra withTerminationFlag(TerminationFlag terminationFlag) {
         this.terminationFlag = terminationFlag;
-        return this;
-    }
-
-    /**
-     * unset filter
-     * @return this
-     */
-    public Dijkstra withoutFilter() {
-        this.filter = (sourceNodeId, targetNodeId) -> true;
         return this;
     }
 

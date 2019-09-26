@@ -43,7 +43,6 @@ import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
 
 public class NodeWalker {
 
-
     public Stream<long[]> randomWalk(Graph graph, @Name(value = "steps", defaultValue = "80") int steps, NodeWalker.NextNodeStrategy strategy, TerminationFlag terminationFlag, int concurrency, int limit, PrimitiveIterator.OfInt idStream) {
         int timeout = 100;
         int queueSize = 1000;

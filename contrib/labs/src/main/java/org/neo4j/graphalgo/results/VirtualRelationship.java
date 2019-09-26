@@ -50,14 +50,6 @@ public class VirtualRelationship implements Relationship {
         this.type = type;
     }
 
-    public VirtualRelationship(long id, Node startNode, Node endNode, RelationshipType type, Map<String, Object> props) {
-        this.id = id;
-        this.startNode = startNode;
-        this.endNode = endNode;
-        this.type = type;
-        this.props.putAll(props);
-    }
-
     @Override
     public long getId() {
         return id;
@@ -158,11 +150,6 @@ public class VirtualRelationship implements Relationship {
     @Override
     public int hashCode() {
         return (int) (id ^ (id >>> 32));
-    }
-
-    public Relationship withProperties(Map<String, Object> props) {
-        this.props.putAll(props);
-        return this;
     }
 
     @Override
