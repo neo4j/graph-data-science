@@ -3,7 +3,12 @@
 
 [abstract]
 --
-This section describes the Approximate Nearest Neighbors algorithm in the Neo4j Graph Algorithms library.
+This section describes the Approximate Nearest Neighbors algorithm in the Neo4j Labs Graph Algorithms library.
+--
+
+[WARNING]
+--
+The Approximate Nearest Neighbors algorithm is part of Neo4j Labs and not supported for production purposes.
 --
 
 // tag::introduction[]

@@ -1,20 +1,20 @@
 [[labs-algorithms]]
-= Experimental algorithms
+= Neo4j Labs Graph Algorithms
 
 [abstract]
 --
-This chapter provides explanations and examples for each of the experimental algorithms in the Neo4j Graph Algorithms library.
+This chapter provides explanations and examples for each of the algorithms in the Neo4j Labs Graph Algorithms library.
 --
 
-The Neo4j Graph Algorithms library contain a number of experimental algorithms developed and maintained as part of Neo4j Labs.
-The experimental algorithms are accessed by via Cypher by calling procedures, just like the stable and supported algorithms.
+The Neo4j Labs Graph Algorithms library contain a number of algorithms developed and maintained as part of Neo4j Labs.
+The algorithms are accessed via Cypher by calling procedures, just like the official product algorithms.
 
 [WARNING]
 --
-The experimental algorithms are not officially supported.
+The Neo4j Labs algorithms are not supported for production purposes.
 --
 
-The documentation for the experimental algorithms is divided into the following sections:
+The documentation for the Neo4j Labs algorithms is divided into the following sections:
 
 * <<labs-procedures>>
 * <<labs-algorithms-centrality>>

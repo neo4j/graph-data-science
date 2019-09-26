@@ -3,7 +3,7 @@
 
 [abstract]
 --
-This section describes the A* algorithm in the Neo4j Graph Algorithms library.
+This section describes the A* algorithm in the Neo4j Labs Graph Algorithms library.
 --
 
 The A* (pronounced “A-star”) algorithm improves on the classic Dijkstra algorithm.
@@ -11,7 +11,7 @@ It is based upon the observation that some searches are informed, and that by be
 
 [WARNING]
 --
-The A* algorithm is experimental and not officially supported.
+The A* algorithm is part of Neo4j Labs and not supported for production purposes.
 --
 
 This section includes:

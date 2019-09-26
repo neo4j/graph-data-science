@@ -3,14 +3,14 @@
 
 [abstract]
 --
-This section describes the Single Source Shortest Path algorithm in the Neo4j Graph Algorithms library.
+This section describes the Single Source Shortest Path algorithm in the Neo4j Labs Graph Algorithms library.
 --
 
 The Single Source Shortest Path (SSSP) algorithm calculates the shortest (weighted) path from a node to all other nodes in the graph.
 
 [WARNING]
 --
-The Single Source Shortest Path algorithm is experimental and not officially supported.
+The Single Source Shortest Path algorithm is part of Neo4j Labs and not supported for production purposes.
 --
 
 This section includes:

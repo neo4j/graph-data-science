@@ -3,7 +3,7 @@
 
 [abstract]
 --
-This section describes the Balanced Triads algorithm in the Neo4j Graph Algorithms library.
+This section describes the Balanced Triads algorithm in the Neo4j Labs Graph Algorithms library.
 --
 
 Balanced Triads algorithm is used to evaluate structural balance of the graph.
@@ -15,7 +15,7 @@ In general balanced structures are preferred over imbalanced ones.
 
 [WARNING]
 --
-The ArticleRank algorithm is experimental and not officially supported.
+The ArticleRank algorithm is part of Neo4j Labs and not supported for production purposes.
 --
 
 This section includes:

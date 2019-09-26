@@ -3,7 +3,7 @@
 
 [abstract]
 --
-This section describes the Strongly Connected Components algorithm in the Neo4j Graph Algorithms library.
+This section describes the Strongly Connected Components algorithm in the Neo4j Labs Graph Algorithms library.
 --
 
 The Strongly Connected Components (SCC) algorithm finds sets of connected nodes in a directed graph where each node is reachable in both directions from any other node in the same set.
@@ -11,7 +11,7 @@ It is often used early in a graph analysis process to help us get an idea of how
 
 [WARNING]
 --
-The Strongly Connected Components algorithms are experimental and not officially supported.
+The Strongly Connected Components algorithm is part of Neo4j Labs and not supported for production purposes.
 --
 
 This section includes:

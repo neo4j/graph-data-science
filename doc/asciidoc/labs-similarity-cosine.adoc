@@ -4,7 +4,7 @@
 
 [abstract]
 --
-This section describes the Cosine Similarity algorithm in the Neo4j Graph Algorithms library.
+This section describes the Cosine Similarity algorithm in the Neo4j Labs Graph Algorithms library.
 --
 
 link:http://en.wikipedia.org/wiki/Cosine_similarity[Cosine similarity] is the cosine of the angle between two _n_-dimensional vectors in an _n_-dimensional space.
@@ -12,7 +12,7 @@ It is the dot product of the two vectors divided by the product of the two vecto
 
 [WARNING]
 --
-The Cosine Similarity algorithm is experimental and not officially supported.
+The Cosine Similarity algorithm is part of Neo4j Labs and not supported for production purposes.
 --
 
 This section includes:

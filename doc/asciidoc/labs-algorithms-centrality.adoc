@@ -4,7 +4,7 @@
 ifdef::env-docs[]
 [abstract]
 --
-This chapter provides explanations and examples for each of the experimental centrality algorithms in the Neo4j Graph Algorithms library.
+This chapter provides explanations and examples for each of the centrality algorithms in the Neo4j Labs Graph Algorithms library.
 --
 endif::env-docs[]
 

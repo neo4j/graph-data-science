@@ -6,7 +6,7 @@
 ifdef::env-docs[]
 [abstract]
 --
-This chapter provides explanations and examples for each of the experimental community detection algorithms in the Neo4j Graph Algorithms library.
+This chapter provides explanations and examples for each of the community detection algorithms in the Neo4j Labs Graph Algorithms library.
 --
 endif::env-docs[]
 

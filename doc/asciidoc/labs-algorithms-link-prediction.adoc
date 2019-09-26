@@ -3,7 +3,7 @@
 
 [abstract]
 --
-This chapter provides explanations and examples for each of the experimental link prediction algorithms in the Neo4j Graph Algorithms library.
+This chapter provides explanations and examples for each of the link prediction algorithms in the Neo4j Labs Graph Algorithms library.
 --
 
 These algorithms help determine the closeness of a pair of nodes.

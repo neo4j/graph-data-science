@@ -3,7 +3,7 @@
 
 [abstract]
 --
-This chapter provides an explanation and example for experimental preprocessing functions and procedures in the Neo4j Graph Algorithms library.
+This chapter provides an explanation and example for preprocessing functions and procedures in the Neo4j Labs Graph Algorithms library.
 --
 
 //Edit this (and abstract above) when there is more than one sub-topic

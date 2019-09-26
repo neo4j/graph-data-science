@@ -3,7 +3,7 @@
 
 [abstract]
 --
-This chapter provides explanations and examples for each of the experimental similarity algorithms in the Neo4j Graph Algorithms library.
+This chapter provides explanations and examples for each of the similarity algorithms in the Neo4j Labs Graph Algorithms library.
 --
 
 These algorithms help calculate the similarity of nodes:

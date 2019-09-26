@@ -3,12 +3,12 @@
 
 [abstract]
 --
-This chapter contains a reference of procedures for using the experimental algorithms in the Neo4j Graph Algorithms library.
+This chapter contains a reference of procedures for using the algorithms in the Neo4j Labs Graph Algorithms library.
 --
 
-The following is a procedure reference for calling the experimental algorithms in the Neo4j Graph Algorithms library.
+The following is a procedure reference for calling the algorithms in the Neo4j Labs Graph Algorithms library.
 
-[[table-experimental]]
+[[table-labs]]
 [opts=header,cols="1m,5m"]
 |===
 | Name                                                                                                     | Description
@@ -30,7 +30,7 @@ The following is a procedure reference for calling the experimental algorithms i
 | <<algorithms-eigenvector-syntax, algo.eigenvector.stream>>                                               | CALL algo.eigenvector.stream(label:String, relationship:String, {weightProperty: null, concurrency:4}) YIELD node, score - calculates eigenvector centrality and streams results
 | algo.getNodeById                                                                                         | CALL algo.getNodeById(value) - return node for nodeId. null if none exists
 | algo.getNodesById                                                                                        | CALL algo.getNodesById(values) - return nodes for nodeIds. empty if none exists
-| algo.infoMap                                                                                             | TODO
+| algo.infoMap                                                                                             | CALL algo.infoMap.stream(label:String, relationship:String, {<properties>}) YIELD nodeId, community
 | algo.Infinity                                                                                            | CALL algo.Infinity() - returns Double.POSITIVE_INFINITY as a value.
 | algo.isFinite                                                                                            | CALL algo.isFinite(value) - return true iff the given argument is a finite value (not ±Infinity, NaN, or null), false otherwise.
 | algo.isInfinite                                                                                          | CALL algo.isInfinite(value) - return true iff the given argument is not a finite value (±Infinity, NaN, or null), false otherwise.
@@ -42,7 +42,7 @@ The following is a procedure reference for calling the experimental algorithms i
 | <<algorithms-linkprediction-resource-allocation-syntax, algo.linkprediction.resourceAllocation>>         | algo.linkprediction.resourceAllocation(node1:Node, node2:Node, {relationshipQuery:'relationshipName', direction:'BOTH'}) given two nodes, calculate Resource Allocation similarity
 | <<algorithms-linkprediction-same-community-syntax, algo.linkprediction.sameCommunity>>                   | algo.linkprediction.sameCommunity(node1:Node, node2:Node, communityProperty: String) given two nodes, indicates if they have the same community
 | <<algorithms-linkprediction-total-neighbors-syntax, algo.linkprediction.totalNeighbors>>                 | algo.linkprediction.totalNeighbors(node1:Node, node2:Node, {relationshipQuery:'relationshipName', direction:'BOTH'}) given two nodes, calculate Total Neighbors
-| <<labs-algorithms-one-hot-encoding, algo.ml.oneHotEncoding>>                                     | CALL algo.ml.oneHotEncoding(availableValues, selectedValues) - return a list of selected values in a one hot encoding format.
+| <<labs-algorithms-one-hot-encoding, algo.ml.oneHotEncoding>>                                             | CALL algo.ml.oneHotEncoding(availableValues, selectedValues) - return a list of selected values in a one hot encoding format.
 | algo.mst                                                                                                 | CALL algo.mst(label:String, relationshipType:String, weightProperty:String, startNodeId:long, {writeProperty:String}) YIELD loadMillis, computeMillis, writeMillis, effectiveNodeCount
 | algo.NaN                                                                                                 | CALL algo.NaN() - returns Double.NaN as a value.
 | <<algorithms-random-walk-syntax, algo.randomWalk.stream>>                                                | CALL algo.randomWalk.stream(start:null=all/[ids]/label, steps, walks, {graph: 'huge/cypher', nodeQuery:nodeLabel/query, relationshipQuery:relType/query, mode:random/node2vec, return:1.0, inOut:1.0, path:false/true concurrency:4, direction:'BOTH'}) YIELD nodes, path - computes random walks from given starting points
@@ -86,14 +86,14 @@ The following is a procedure reference for calling the experimental algorithms i
 | <<algorithms-triangle-count-clustering-coefficient-syntax, algo.triangleCount.stream>>                   | CALL algo.triangleCount.stream(label, relationship, {concurrency:8}) YIELD nodeId, triangles - yield nodeId, number of triangles
 | <<algorithms-triangle-count-clustering-coefficient-syntax, algo.triangleCount.forkJoin>>                 | CALL algo.triangleCount.forkJoin(label, relationship, {concurrency:4, write:true, writeProperty:'triangles', clusteringCoefficientProperty:'coefficient'}) YIELD loadMillis, computeMillis, writeMillis, nodeCount, triangleCount, averageClusteringCoefficient
 | <<algorithms-triangle-count-clustering-coefficient-syntax, algo.triangleCount.forkJoin.stream>>          | CALL algo.triangleCount.forkJoin.stream(label, relationship, {concurrency:8}) YIELD nodeId, triangles - yield nodeId, number of triangles
-| <<labs-algorithms-connected-components-imp, algo.unionFind.mscoloring>>                          | CALL algo.unionFind.mscoloring(label:String, relationship:String, {property:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition', concurrency:4}) YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
-| <<labs-algorithms-connected-components-imp, algo.unionFind.mscoloring.stream>>                   | CALL algo.unionFind.mscoloring.stream(label:String, relationship:String, {property:'propertyName', threshold:0.42, defaultValue:1.0, concurrency:4) YIELD nodeId, setId - yields a setId to each node id
-| <<labs-algorithms-connected-components-imp, algo.unionFind.forkJoin.stream>>                     | CALL algo.unionFind.stream(label:String, relationship:String, {property:'propertyName', threshold:0.42, defaultValue:1.0,concurrency:4}) YIELD nodeId, setId - yields a setId to each node id
-| <<labs-algorithms-connected-components-imp, algo.unionFind.forkJoin>>                            | CALL algo.unionFind(label:String, relationship:String, {property:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition',concurrency:4}) YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
-| <<labs-algorithms-connected-components-imp, algo.unionFind.forkJoinMerge>>                       | CALL algo.unionFind(label:String, relationship:String, {property:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition', concurrency:4}) YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
-| <<labs-algorithms-connected-components-imp, algo.unionFind.forkJoinMerge.stream>>                | CALL algo.unionFind.stream(label:String, relationship:String, {property:'propertyName', threshold:0.42, defaultValue:1.0, concurrency:4}) YIELD nodeId, setId - yields a setId to each node id
-| <<labs-algorithms-connected-components-imp, algo.unionFind.queue>>                               | CALL algo.unionFind(label:String, relationship:String, {property:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition',concurrency:4}) YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
-| <<labs-algorithms-connected-components-imp, algo.unionFind.queue.stream>>                        | CALL algo.unionFind.stream(label:String, relationship:String, {property:'propertyName', threshold:0.42, defaultValue:1.0, concurrency:4}) YIELD nodeId, setId - yields a setId to each node id
+| <<labs-algorithms-connected-components-imp, algo.unionFind.mscoloring>>                                  | CALL algo.unionFind.mscoloring(label:String, relationship:String, {property:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition', concurrency:4}) YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
+| <<labs-algorithms-connected-components-imp, algo.unionFind.mscoloring.stream>>                           | CALL algo.unionFind.mscoloring.stream(label:String, relationship:String, {property:'propertyName', threshold:0.42, defaultValue:1.0, concurrency:4) YIELD nodeId, setId - yields a setId to each node id
+| <<labs-algorithms-connected-components-imp, algo.unionFind.forkJoin.stream>>                             | CALL algo.unionFind.stream(label:String, relationship:String, {property:'propertyName', threshold:0.42, defaultValue:1.0,concurrency:4}) YIELD nodeId, setId - yields a setId to each node id
+| <<labs-algorithms-connected-components-imp, algo.unionFind.forkJoin>>                                    | CALL algo.unionFind(label:String, relationship:String, {property:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition',concurrency:4}) YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
+| <<labs-algorithms-connected-components-imp, algo.unionFind.forkJoinMerge>>                               | CALL algo.unionFind(label:String, relationship:String, {property:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition', concurrency:4}) YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
+| <<labs-algorithms-connected-components-imp, algo.unionFind.forkJoinMerge.stream>>                        | CALL algo.unionFind.stream(label:String, relationship:String, {property:'propertyName', threshold:0.42, defaultValue:1.0, concurrency:4}) YIELD nodeId, setId - yields a setId to each node id
+| <<labs-algorithms-connected-components-imp, algo.unionFind.queue>>                                       | CALL algo.unionFind(label:String, relationship:String, {property:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition',concurrency:4}) YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
+| <<labs-algorithms-connected-components-imp, algo.unionFind.queue.stream>>                                | CALL algo.unionFind.stream(label:String, relationship:String, {property:'propertyName', threshold:0.42, defaultValue:1.0, concurrency:4}) YIELD nodeId, setId - yields a setId to each node id
 | algo.version                                                                                             | RETURN algo.version() - return the current graph algorithms installed version
 |===
 
