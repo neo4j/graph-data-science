@@ -19,8 +19,8 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.neo4j.graphalgo.KernelPropertyMapping;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.RelationshipTypeMappings;
 import org.neo4j.graphalgo.api.GraphSetup;
@@ -32,7 +32,6 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.newapi.InternalReadOps;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Arrays;
 import java.util.Set;
 
 public final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
@@ -67,8 +66,8 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         }
         RelationshipTypeMappings relationshipTypeMappings = mappingsBuilder.build();
 
-        KernelPropertyMapping[] nodeProperties = loadPropertyMapping(tokenRead, setup.nodePropertyMappings);
-        KernelPropertyMapping[] relProperties = loadPropertyMapping(tokenRead, setup.relationshipPropertyMappings);
+        PropertyMappings nodeProperties = loadPropertyMapping(tokenRead, setup.nodePropertyMappings);
+        PropertyMappings relProperties = loadPropertyMapping(tokenRead, setup.relationshipPropertyMappings);
 
         final long nodeCount = dataRead.countsForNode(labelId);
         final long allNodesCount = InternalReadOps.getHighestPossibleNodeCount(dataRead, api);
@@ -89,15 +88,14 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
                 .build();
     }
 
-    private KernelPropertyMapping[] loadPropertyMapping(TokenRead tokenRead, PropertyMapping[] propertyMappings) {
-        return Arrays
-                .stream(propertyMappings)
-                .map(mapping -> {
-                    String propertyKey = mapping.neoPropertyKey;
-                    int key = propertyKey(tokenRead, propertyKey != null, propertyKey);
-                    return mapping.toKernelMapping(key);
-                })
-                .toArray(KernelPropertyMapping[]::new);
+    private PropertyMappings loadPropertyMapping(TokenRead tokenRead, PropertyMappings propertyMappings) {
+        PropertyMappings.Builder builder = new PropertyMappings.Builder();
+        for (PropertyMapping mapping : propertyMappings) {
+            String propertyName = mapping.neoPropertyKey();
+            int key = propertyName != null ? tokenRead.propertyKey(propertyName) : TokenRead.NO_TOKEN;
+            builder.addMapping(mapping.resolveWith(key));
+        }
+        return builder.build();
     }
 
     private static long maxRelCountForLabelAndType(Read dataRead, int labelId, int id) {
@@ -107,7 +105,4 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
         );
     }
 
-    private int propertyKey(TokenRead tokenRead, boolean load, String propertyName) {
-        return load ? tokenRead.propertyKey(propertyName) : TokenRead.NO_TOKEN;
-    }
 }

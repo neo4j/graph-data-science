@@ -19,15 +19,14 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
-import org.neo4j.graphalgo.KernelPropertyMapping;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.ImportProgress;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
-import org.neo4j.kernel.api.StatementConstants;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -42,9 +41,9 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     private final ImportProgress progress;
     private final AllocationTracker tracker;
     private final TerminationFlag terminationFlag;
-    private final PropertyMapping[] propertyMappings;
+    private final PropertyMappings propertyMappings;
 
-    private Map<String, HugeNodePropertiesBuilder> builders;
+    private Map<String, NodePropertiesBuilder> builders;
     private HugeLongArrayBuilder idMapBuilder;
 
     ScanningNodesImporter(
@@ -55,7 +54,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
             TerminationFlag terminationFlag,
             ExecutorService threadPool,
             int concurrency,
-            PropertyMapping[] propertyMappings) {
+            PropertyMappings propertyMappings) {
         super(NodeStoreScanner.NODE_ACCESS, "Node", api, dimensions, threadPool, concurrency);
         this.progress = progress;
         this.tracker = tracker;
@@ -89,25 +88,24 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
                 tracker);
         Map<String, WeightMapping> nodeProperties = new HashMap<>();
         for (PropertyMapping propertyMapping : propertyMappings) {
-            HugeNodePropertiesBuilder builder = builders.get(propertyMapping.propertyKey);
-            WeightMapping props = builder != null ? builder.build() : new NullWeightMap(propertyMapping.defaultValue);
-            nodeProperties.put(propertyMapping.propertyKey, props);
+            NodePropertiesBuilder builder = builders.get(propertyMapping.propertyKey());
+            WeightMapping props = builder != null ? builder.build() : new NullWeightMap(propertyMapping.defaultValue());
+            nodeProperties.put(propertyMapping.propertyKey(), props);
         }
         return new IdsAndProperties(hugeIdMap, Collections.unmodifiableMap(nodeProperties));
     }
 
-    private Map<String, HugeNodePropertiesBuilder> propertyBuilders(long nodeCount) {
-        Map<String, HugeNodePropertiesBuilder> builders = new HashMap<>();
-        for (KernelPropertyMapping propertyMapping : dimensions.nodeProperties()) {
-            int propertyId = propertyMapping.neoPropertyKeyId;
-            if (propertyId != StatementConstants.NO_SUCH_PROPERTY_KEY) {
-                HugeNodePropertiesBuilder builder = HugeNodePropertiesBuilder.of(
+    private Map<String, NodePropertiesBuilder> propertyBuilders(long nodeCount) {
+        Map<String, NodePropertiesBuilder> builders = new HashMap<>();
+        for (PropertyMapping propertyMapping : dimensions.nodeProperties()) {
+            if (propertyMapping.exists()) {
+                NodePropertiesBuilder builder = NodePropertiesBuilder.of(
                         nodeCount,
                         tracker,
-                        propertyMapping.defaultValue,
-                        propertyId,
-                        propertyMapping.propertyKey);
-                builders.put(propertyMapping.propertyKey, builder);
+                        propertyMapping.defaultValue(),
+                        propertyMapping.propertyKeyId(),
+                        propertyMapping.propertyKey());
+                builders.put(propertyMapping.propertyKey(), builder);
             }
         }
         return builders;

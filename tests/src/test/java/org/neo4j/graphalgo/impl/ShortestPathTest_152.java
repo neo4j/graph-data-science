@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.impl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.ShortestPathProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
@@ -96,7 +97,7 @@ class ShortestPathTest_152 {
         final Graph graph = new GraphLoader(db, Pools.DEFAULT)
                 .withOptionalLabel("Loc")
                 .withRelationshipType("ROAD")
-                .withOptionalRelationshipWeightsFromProperty("d", 0)
+                .withRelationshipProperties(PropertyMapping.of("d", 0))
                 .load(HugeGraphFactory.class);
 
         new ShortestPathDijkstra(graph)
@@ -118,8 +119,8 @@ class ShortestPathTest_152 {
         final Graph graph = new GraphLoader(db, Pools.DEFAULT)
                 .withOptionalLabel("Loc")
                 .withAnyRelationshipType()
-                .withDeduplicateRelationshipsStrategy(DeduplicationStrategy.NONE)
-                .withOptionalRelationshipWeightsFromProperty("d", 0)
+                .withDeduplicationStrategy(DeduplicationStrategy.NONE)
+                .withRelationshipProperties(PropertyMapping.of("d", 0))
                 .load(HugeGraphFactory.class);
 
         new ShortestPathDijkstra(graph)

@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
@@ -35,7 +36,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.GraphHelper.collectTargetWeights;
+import static org.neo4j.graphalgo.GraphHelper.collectTargetProperties;
 
 class CypherGraphFactoryDeduplicationTest {
 
@@ -73,7 +74,7 @@ class CypherGraphFactoryDeduplicationTest {
         Graph graph = new GraphLoader((GraphDatabaseAPI) db)
                 .withLabel(nodes)
                 .withRelationshipType(rels)
-                .withDeduplicateRelationshipsStrategy(DeduplicationStrategy.SKIP)
+                .withDeduplicationStrategy(DeduplicationStrategy.SKIP)
                 .load(CypherGraphFactory.class);
 
         assertEquals(2, graph.nodeCount());
@@ -89,11 +90,11 @@ class CypherGraphFactoryDeduplicationTest {
         Graph graph = new GraphLoader((GraphDatabaseAPI) db)
                 .withLabel(nodes)
                 .withRelationshipType(rels)
-                .withRelationshipWeightsFromProperty("weight", 1.0)
-                .withDeduplicateRelationshipsStrategy(DeduplicationStrategy.SKIP)
+                .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
+                .withDeduplicationStrategy(DeduplicationStrategy.SKIP)
                 .load(CypherGraphFactory.class);
 
-        double[] weights = collectTargetWeights(graph, graph.toMappedNodeId(id1));
+        double[] weights = collectTargetProperties(graph, graph.toMappedNodeId(id1));
         assertEquals(1, weights.length);
         assertTrue(weights[0] == 10.0 || weights[0] == 4.0);
     }
@@ -109,11 +110,11 @@ class CypherGraphFactoryDeduplicationTest {
         Graph graph = new GraphLoader((GraphDatabaseAPI) db)
                 .withLabel(nodes)
                 .withRelationshipType(rels)
-                .withRelationshipWeightsFromProperty("weight", 1.0)
-                .withDeduplicateRelationshipsStrategy(deduplicationStrategy)
+                .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
+                .withDeduplicationStrategy(deduplicationStrategy)
                 .load(CypherGraphFactory.class);
 
-        double[] weights = collectTargetWeights(graph, graph.toMappedNodeId(id1));
+        double[] weights = collectTargetProperties(graph, graph.toMappedNodeId(id1));
         assertArrayEquals(new double[]{expectedWeight}, weights);
     }
 }

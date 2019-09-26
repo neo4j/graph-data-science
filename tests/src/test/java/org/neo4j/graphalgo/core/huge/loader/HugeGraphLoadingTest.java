@@ -148,7 +148,7 @@ final class HugeGraphLoadingTest {
 
         final Graph graph = new GraphLoader(db)
                 .withDirection(Direction.OUTGOING)
-                .withOptionalRelationshipWeightsFromProperty("weight", 1.0)
+                .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
                 .load(HugeGraphFactory.class);
 
         assertEquals(2, graph.relationshipCount());

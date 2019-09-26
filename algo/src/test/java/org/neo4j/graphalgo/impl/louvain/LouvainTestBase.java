@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
@@ -60,8 +61,7 @@ abstract class LouvainTestBase {
     Graph loadGraph(Class<? extends GraphFactory> graphImpl, String cypher) {
         db.execute(cypher);
         GraphLoader loader = new GraphLoader(db)
-                .withoutNodeProperties()
-                .withOptionalRelationshipWeightsFromProperty("weight", 1.0)
+                .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
                 .undirected();
         if (graphImpl == CypherGraphFactory.class) {
             loader

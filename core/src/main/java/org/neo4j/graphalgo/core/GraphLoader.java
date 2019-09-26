@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core;
 
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
@@ -40,7 +41,6 @@ import org.neo4j.logging.NullLog;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -84,8 +84,8 @@ public class GraphLoader {
     private TerminationFlag terminationFlag = TerminationFlag.RUNNING_TRUE;
     private boolean sorted = false;
     private boolean undirected = false;
-    private PropertyMapping[] nodePropertyMappings = new PropertyMapping[0];
-    private PropertyMapping[] relPropertyMappings = new PropertyMapping[0];
+    private final PropertyMappings.Builder nodePropertyMappings = new PropertyMappings.Builder();
+    private final PropertyMappings.Builder relPropertyMappings = new PropertyMappings.Builder();
     private boolean isLoadedGraph = false;
 
     /**
@@ -115,7 +115,7 @@ public class GraphLoader {
                 .withOptionalRelationshipType(relationship)
                 .withConcurrency(config.getReadConcurrency())
                 .withBatchSize(config.getBatchSize())
-                .withDeduplicateRelationshipsStrategy(config.getDuplicateRelationshipsStrategy())
+                .withDeduplicationStrategy(config.getDeduplicationStrategy())
                 .withParams(config.getParams())
                 .withLoadedGraph(config.getGraphImpl() == LoadGraphFactory.class);
     }
@@ -293,31 +293,18 @@ public class GraphLoader {
     }
 
     public GraphLoader withOptionalNodeProperties(PropertyMapping... nodePropertyMappings) {
-        this.nodePropertyMappings = Arrays.stream(nodePropertyMappings)
-                .filter(propMapping -> !(propMapping.neoPropertyKey == null || propMapping.neoPropertyKey.isEmpty()))
-                .toArray(PropertyMapping[]::new);
+        this.nodePropertyMappings.addAllOptionalMappings(nodePropertyMappings);
         return this;
     }
 
-    public GraphLoader withOptionalRelationshipProperties(PropertyMapping... relPropertyMappings) {
-        this.relPropertyMappings = Arrays.stream(relPropertyMappings)
-                .toArray(PropertyMapping[]::new);
+    public GraphLoader withRelationshipProperties(PropertyMapping... relPropertyMappings) {
+        this.relPropertyMappings.addAllMappings(relPropertyMappings);
         return this;
     }
 
-    /**
-     * Instructs the loader to load relationship weights by reading the given property.
-     * If the property is not set, the given default value is used.
-     *
-     * @param property             Must not be null; to remove a weight property, use {@link #withoutRelationshipWeights()} instead.
-     * @param propertyDefaultValue default value to use if the property is not set
-     */
-    public GraphLoader withRelationshipWeightsFromProperty(String property, double propertyDefaultValue) {
-        return withOptionalRelationshipProperties(PropertyMapping.of(
-                property,
-                property,
-                propertyDefaultValue
-        ));
+    public GraphLoader withRelationshipProperties(PropertyMappings relPropertyMappings) {
+        this.relPropertyMappings.addAllMappings(relPropertyMappings.stream());
+        return this;
     }
 
     /**
@@ -335,43 +322,6 @@ public class GraphLoader {
         } else {
             return withDirection(direction);
         }
-    }
-
-    /**
-     * Instructs the loader to load relationship weights by reading the given property.
-     * If the property is not set at the relationship, the given default value is used.
-     *
-     * @param property             May be null
-     * @param propertyDefaultValue default value to use if the property is not set
-     */
-    public GraphLoader withOptionalRelationshipWeightsFromProperty(String property, double propertyDefaultValue) {
-        return withOptionalRelationshipProperties(PropertyMapping.of(
-                property,
-                property,
-                propertyDefaultValue
-        ));
-    }
-
-    /**
-     * Instructs the loader to not load any weights. The behavior of using weighted graph-functions
-     * on a graph without weights is not specified.
-     */
-    public GraphLoader withoutRelationshipWeights() {
-        return withOptionalRelationshipProperties();
-    }
-
-    /**
-     * Instructs the loader to not load any node weights.
-     */
-    public GraphLoader withoutNodeWeights() {
-        return withOptionalNodeProperties();
-    }
-
-    /**
-     * Instructs the loader to not load any node properties.
-     */
-    public GraphLoader withoutNodeProperties() {
-        return withOptionalNodeProperties();
     }
 
     public GraphLoader withParams(Map<String, Object> params) {
@@ -416,7 +366,7 @@ public class GraphLoader {
      *
      * @param deduplicationStrategy strategy for handling duplicate relationships unless not explicitly specified in the property mappings
      */
-    public GraphLoader withDeduplicateRelationshipsStrategy(DeduplicationStrategy deduplicationStrategy) {
+    public GraphLoader withDeduplicationStrategy(DeduplicationStrategy deduplicationStrategy) {
         this.deduplicationStrategy = deduplicationStrategy;
         return this;
     }
@@ -473,22 +423,12 @@ public class GraphLoader {
     }
 
     public GraphSetup toSetup() {
-        long noneStrategyCount = Arrays
-                .stream(this.relPropertyMappings)
-                .filter(d -> d.deduplicationStrategy == DeduplicationStrategy.NONE)
-                .count();
-
-        if (noneStrategyCount > 0 && noneStrategyCount < this.relPropertyMappings.length) {
-            throw new IllegalArgumentException(
-                    "Conflicting relationship property deduplication strategies, it is not allowed to mix `NONE` with aggregations.");
+        PropertyMappings relMappings = this.relPropertyMappings.build();
+        if (deduplicationStrategy != DeduplicationStrategy.DEFAULT) {
+            relMappings = new PropertyMappings.Builder()
+                    .addAllMappings(relMappings.stream().map(p -> p.withDeduplicationStrategy(deduplicationStrategy)))
+                    .build();
         }
-
-        PropertyMapping[] relPropertyMappings = deduplicationStrategy == DeduplicationStrategy.DEFAULT
-                ? this.relPropertyMappings
-                : Arrays
-                .stream(this.relPropertyMappings)
-                .map(p -> p.withDeduplicationStrategy(deduplicationStrategy))
-                .toArray(PropertyMapping[]::new);
 
         return new GraphSetup(
                 label,
@@ -507,7 +447,7 @@ public class GraphLoader {
                 tracker,
                 terminationFlag,
                 name,
-                nodePropertyMappings,
-                relPropertyMappings);
+                nodePropertyMappings.build(),
+                relMappings);
     }
 }

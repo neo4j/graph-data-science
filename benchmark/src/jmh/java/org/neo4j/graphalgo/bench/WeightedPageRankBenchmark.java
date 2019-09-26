@@ -18,6 +18,7 @@
  */
 package org.neo4j.graphalgo.bench;
 
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
@@ -112,7 +113,7 @@ public class WeightedPageRankBenchmark {
     public CentralityResult run() throws Exception {
         final Graph graph = new GraphLoader(db)
                 .withDirection(Direction.OUTGOING)
-                .withRelationshipWeightsFromProperty("weight", 0.0)
+                .withRelationshipProperties(PropertyMapping.of("weight", 0.0))
                 .load(HugeGraphFactory.class);
         try {
             final PageRank.Config algoConfig = new PageRank.Config(iterations, 0.85, PageRank.DEFAULT_TOLERANCE);

@@ -127,7 +127,7 @@ public class GraphView implements Graph {
                             read.singleRelationship(cursor.relationshipReference(), rc);
                             if (rc.next()) {
                                 rc.properties(pc);
-                                weight = ReadHelper.readProperty(pc, dimensions.relWeightId(), defaultWeight);
+                                weight = ReadHelper.readProperty(pc, dimensions.relProperties().weightId(), defaultWeight);
                             }
                         }
                         final long otherId = toMappedNodeId(cursor.otherNodeReference());
@@ -247,7 +247,7 @@ public class GraphView implements Graph {
                             read.singleRelationship(cursor.relationshipReference(), rc);
                             if (rc.next()) {
                                 rc.properties(pc);
-                                double weight = ReadHelper.readProperty(pc, dimensions.relWeightId(), defaultWeight);
+                                double weight = ReadHelper.readProperty(pc, dimensions.relProperties().weightId(), defaultWeight);
                                 if (weight != defaultWeight) {
                                     nodeWeight[0] = weight;
                                     breaker.run();

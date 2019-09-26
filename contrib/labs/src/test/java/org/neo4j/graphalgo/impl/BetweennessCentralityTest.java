@@ -92,7 +92,6 @@ class BetweennessCentralityTest {
         Graph graph = new GraphLoader(DB)
                 .withAnyRelationshipType()
                 .withAnyLabel()
-                .withoutNodeProperties()
                 .load(graphFactory);
 
         when(consumer.consume(anyLong(), anyDouble())).thenReturn(true);

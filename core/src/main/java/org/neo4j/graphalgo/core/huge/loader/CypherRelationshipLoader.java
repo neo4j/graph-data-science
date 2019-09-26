@@ -55,7 +55,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
         outgoingRelationshipsBuilder = new RelationshipsBuilder(
                 new DeduplicationStrategy[]{deduplicationStrategy},
                 setup.tracker,
-                setup.shouldLoadRelationshipWeight() ? SINGLE_RELATIONSHIP_WEIGHT : NO_RELATIONSHIP_WEIGHT);
+                setup.shouldLoadRelationshipProperties() ? SINGLE_RELATIONSHIP_WEIGHT : NO_RELATIONSHIP_WEIGHT);
 
         ImportSizing importSizing = ImportSizing.of(setup.concurrency, idMap.nodeCount());
         int pageSize = importSizing.pageSize();
@@ -73,7 +73,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
         );
 
         this.idMap = idMap;
-        hasRelationshipWeights = setup.shouldLoadRelationshipWeight();
+        hasRelationshipWeights = setup.shouldLoadRelationshipProperties();
         importer = new RelationshipImporter(setup.tracker, outBuilder, null);
         imports = importer.imports(false, true, false, hasRelationshipWeights);
         totalRecordsSeen = 0;
@@ -110,8 +110,8 @@ class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
 
         AdjacencyList outAdjacencyList = outgoingRelationshipsBuilder.adjacency.build();
         AdjacencyOffsets outAdjacencyOffsets = outgoingRelationshipsBuilder.globalAdjacencyOffsets;
-        AdjacencyList outWeightList = setup.shouldLoadRelationshipWeight() ? outgoingRelationshipsBuilder.weights[0].build() : null;
-        AdjacencyOffsets outWeightOffsets = setup.shouldLoadRelationshipWeight() ? outgoingRelationshipsBuilder.globalWeightOffsets[0] : null;
+        AdjacencyList outWeightList = setup.shouldLoadRelationshipProperties() ? outgoingRelationshipsBuilder.weights[0].build() : null;
+        AdjacencyOffsets outWeightOffsets = setup.shouldLoadRelationshipProperties() ? outgoingRelationshipsBuilder.globalWeightOffsets[0] : null;
 
         return new Relationships(
                 totalRecordsSeen, totalRelationshipsImported,

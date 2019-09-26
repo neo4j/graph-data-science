@@ -74,7 +74,6 @@ public class HarmonicCentralityProc {
 
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, configuration.getNodeLabelOrQuery(), configuration.getRelationshipOrQuery(), configuration)
-                .withoutNodeProperties()
                 .withDirection(Direction.BOTH)
                 .withAllocationTracker(tracker)
                 .load(configuration.getGraphImpl());
@@ -119,7 +118,6 @@ public class HarmonicCentralityProc {
                             configuration.getNodeLabelOrQuery(),
                             configuration.getRelationshipOrQuery(),
                             configuration)
-                    .withoutNodeProperties()
                     .withDirection(Direction.BOTH)
                     .withAllocationTracker(tracker)
                     .load(configuration.getGraphImpl());

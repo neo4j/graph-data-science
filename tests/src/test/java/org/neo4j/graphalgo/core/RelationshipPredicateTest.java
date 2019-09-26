@@ -308,9 +308,6 @@ class RelationshipPredicateTest {
     private GraphLoader loader() {
         return new GraphLoader(DB)
                 .withAnyLabel()
-                .withAnyRelationshipType()
-                .withoutRelationshipWeights()
-                .withoutNodeWeights()
-                .withoutNodeProperties();
+                .withAnyRelationshipType();
     }
 }

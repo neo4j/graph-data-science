@@ -92,8 +92,6 @@ public class TriangleCountBenchmark {
             g = new GraphLoader(api)
                     .withLabel(LABEL)
                     .withRelationshipType(RELATIONSHIP)
-                    .withoutRelationshipWeights()
-                    .withoutNodeWeights()
                     .sorted()
                     .undirected()
                     .load(HugeGraphFactory.class);

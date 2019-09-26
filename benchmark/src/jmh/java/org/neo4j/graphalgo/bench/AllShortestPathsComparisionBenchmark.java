@@ -18,6 +18,7 @@
  */
 package org.neo4j.graphalgo.bench;
 
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
@@ -83,7 +84,9 @@ public class AllShortestPathsComparisionBenchmark {
         params.put("head", lines.get(0).getId());
         params.put("delta", 2.5);
 
-        graph = new GraphLoader(db).withRelationshipWeightsFromProperty("cost", 1.0).load(HugeGraphFactory.class);
+        graph = new GraphLoader(db)
+                .withRelationshipProperties(PropertyMapping.of("cost", 1.0))
+                .load(HugeGraphFactory.class);
     }
 
     @TearDown

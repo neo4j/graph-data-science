@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.impl.pagerank;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
@@ -145,14 +146,14 @@ final class WeightedPageRankTest {
             graph = new GraphLoader(DB)
                     .withLabel("MATCH (n:Label1) RETURN id(n) as id")
                     .withRelationshipType("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
-                    .withRelationshipWeightsFromProperty("weight", 0)
+                    .withRelationshipProperties(PropertyMapping.of("weight", 0))
                     .load(graphFactory);
 
         } else {
             graph = new GraphLoader(DB)
                     .withLabel(label)
                     .withRelationshipType("TYPE1")
-                    .withRelationshipWeightsFromProperty("weight", 0)
+                    .withRelationshipProperties(PropertyMapping.of("weight", 0))
                     .withDirection(Direction.OUTGOING)
                     .load(graphFactory);
         }
@@ -197,14 +198,14 @@ final class WeightedPageRankTest {
             graph = new GraphLoader(DB)
                     .withLabel("MATCH (n:Label1) RETURN id(n) as id")
                     .withRelationshipType("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
-                    .withRelationshipWeightsFromProperty("weight", 1)
+                    .withRelationshipProperties(PropertyMapping.of("weight", 1))
                     .load(graphFactory);
 
         } else {
             graph = new GraphLoader(DB)
                     .withLabel(label)
                     .withRelationshipType("TYPE1")
-                    .withRelationshipWeightsFromProperty("weight", 1)
+                    .withRelationshipProperties(PropertyMapping.of("weight", 1))
                     .withDirection(Direction.OUTGOING)
                     .load(graphFactory);
         }
@@ -250,14 +251,14 @@ final class WeightedPageRankTest {
                     .withLabel("MATCH (n:Label1) RETURN id(n) as id")
                     .withRelationshipType(
                             "MATCH (n:Label1)-[r:TYPE2]->(m:Label1) RETURN id(n) as source,id(m) as target, r.weight AS weight")
-                    .withRelationshipWeightsFromProperty("weight", 0)
+                    .withRelationshipProperties(PropertyMapping.of("weight", 0))
                     .load(graphFactory);
 
         } else {
             graph = new GraphLoader(DB)
                     .withLabel(label)
                     .withRelationshipType("TYPE2")
-                    .withRelationshipWeightsFromProperty("weight", 0)
+                    .withRelationshipProperties(PropertyMapping.of("weight", 0))
                     .withDirection(Direction.OUTGOING)
                     .load(graphFactory);
         }
@@ -303,14 +304,14 @@ final class WeightedPageRankTest {
                     .withLabel("MATCH (n:Label1) RETURN id(n) as id")
                     .withRelationshipType(
                             "MATCH (n:Label1)-[r:TYPE3]->(m:Label1) RETURN id(n) as source,id(m) as target, r.weight AS weight")
-                    .withRelationshipWeightsFromProperty("weight", 0)
+                    .withRelationshipProperties(PropertyMapping.of("weight", 0))
                     .load(graphFactory);
 
         } else {
             graph = new GraphLoader(DB)
                     .withLabel(label)
                     .withRelationshipType("TYPE3")
-                    .withRelationshipWeightsFromProperty("weight", 0)
+                    .withRelationshipProperties(PropertyMapping.of("weight", 0))
                     .withDirection(Direction.OUTGOING)
                     .load(graphFactory);
         }
@@ -356,14 +357,14 @@ final class WeightedPageRankTest {
                     .withLabel("MATCH (n:Label1) RETURN id(n) as id")
                     .withRelationshipType(
                             "MATCH (n:Label1)-[r:TYPE4]->(m:Label1) RETURN id(n) as source,id(m) as target, r.weight AS weight")
-                    .withRelationshipWeightsFromProperty("weight", 0)
+                    .withRelationshipProperties(PropertyMapping.of("weight", 0))
                     .load(graphFactory);
 
         } else {
             graph = new GraphLoader(DB)
                     .withLabel(label)
                     .withRelationshipType("TYPE4")
-                    .withRelationshipWeightsFromProperty("weight", 0)
+                    .withRelationshipProperties(PropertyMapping.of("weight", 0))
                     .withDirection(Direction.OUTGOING)
                     .load(graphFactory);
         }

@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.impl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -106,7 +107,7 @@ final class ShortestPathDeltaSteppingTest {
         graph = new GraphLoader(api)
                 .withLabel("Node")
                 .withRelationshipType("TYPE")
-                .withRelationshipWeightsFromProperty("cost", Double.MAX_VALUE)
+                .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
                 .load(HugeGraphFactory.class);
     }
 

@@ -26,7 +26,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
+import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
@@ -48,13 +51,20 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonMap;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.graphalgo.GraphHelper.assertOutRelationships;
+import static org.neo4j.graphalgo.GraphHelper.assertOutProperties;
+import static org.neo4j.graphalgo.GraphHelper.assertOutPropertiesWithDelta;
+import static org.neo4j.graphalgo.TestSupport.allGraphNames;
 import static org.neo4j.graphalgo.TestSupport.allGraphNamesAndDirections;
 
 class LoadGraphProcTest extends ProcTestBase {
@@ -92,7 +102,8 @@ class LoadGraphProcTest extends ProcTestBase {
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
+        db.shutdown();
         LoadGraphFactory.removeAllLoadedGraphs();
     }
 
@@ -116,6 +127,32 @@ class LoadGraphProcTest extends ProcTestBase {
                     assertFalse(row.getBoolean("alreadyLoaded"));
                 }
         );
+    }
+
+    static Stream<Arguments> relationshipWeightParameters() {
+        return allGraphNames()
+                .flatMap(graphName -> Stream.of("relationshipWeight", "weightProperty")
+                        .map(propertyParam -> arguments(graphName, propertyParam)));
+    }
+
+    @ParameterizedTest(name = "graphImpl = {0}, relationshipWeightParameter = {1}")
+    @MethodSource("relationshipWeightParameters")
+    void shouldLoadGraphWithRelationshipWeight(String graphImpl, String relationshipWeightParam) {
+        String query = "CALL algo.graph.load(" +
+                       "    'foo', '', '', {" +
+                       "        graph: $graph, " + relationshipWeightParam + ": 'weight'" +
+                       "    }" +
+                       ")";
+
+        runQuery(query, db, singletonMap("graph", graphImpl));
+
+        Graph fooGraph = LoadGraphFactory.getUnion("foo");
+        assertNotNull(fooGraph);
+        assertEquals(12, fooGraph.nodeCount());
+        assertEquals(10, fooGraph.relationshipCount());
+
+        assertOutProperties(fooGraph, 0, 1.0, 1.0, 1.0, 1.0, 1.0);
+        assertOutProperties(fooGraph, 1, 42.0, 42.0, 42.0, 42.0, 42.0);
     }
 
     @ParameterizedTest
@@ -170,8 +207,7 @@ class LoadGraphProcTest extends ProcTestBase {
         );
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"kernel", "cypher"})
+    @AllGraphNamesTest
     void shouldFailToLoadGraphWithMultipleRelationships(String graphImpl) {
         String query = String.format("CALL algo.graph.load(" +
                                      "    'foo', 'null', 'X | Y', {" +
@@ -180,6 +216,113 @@ class LoadGraphProcTest extends ProcTestBase {
                                      ")", graphImpl);
 
         assertThrows(QueryExecutionException.class, () -> runQuery(query, db));
+    }
+
+    @Test
+    void shouldLoadGraphWithMultipleRelationshipProperties() throws KernelException {
+        GraphDatabaseAPI testLocalDb = TestDatabaseCreator.createTestDatabase();
+        testLocalDb.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(LoadGraphProc.class);
+
+        String testGraph =
+                "CREATE" +
+                "  (a: Node)" +
+                ", (b: Node)" +
+                ", (a)-[:TYPE_1 { weight: 42.1, cost: 1 }]->(b)" +
+                ", (a)-[:TYPE_1 { weight: 43.2, cost: 2 }]->(b)" +
+                ", (a)-[:TYPE_2 { weight: 44.3, cost: 3 }]->(b)" +
+                ", (a)-[:TYPE_2 { weight: 45.4, cost: 4 }]->(b)";
+
+        testLocalDb.execute(testGraph);
+
+        String loadQuery = "CALL algo.graph.load(" +
+                           "    'aggGraph', 'Node', 'TYPE_1', {" +
+                           "        relationshipProperties: {" +
+                           "            sumWeight: {" +
+                           "                property: 'weight'," +
+                           "                aggregation: 'SUM'," +
+                           "                defaultValue: 1.0" +
+                           "            }," +
+                           "            minWeight: {" +
+                           "                property: 'weight'," +
+                           "                aggregation: 'MIN'" +
+                           "            }," +
+                           "            maxCost: {" +
+                           "                property: 'cost'," +
+                           "                aggregation: 'MAX'" +
+                           "            }" +
+                           "        }" +
+                           "    }" +
+                           ")";
+
+        runQuery(loadQuery, testLocalDb, row -> {
+            Map<String, Object> relProperties = (Map<String, Object>) row.get("relationshipProperties");
+            assertEquals(3, relProperties.size());
+
+            Map<String, Object> sumWeightParams = (Map<String, Object>) relProperties.get("sumWeight");
+            Map<String, Object> minWeightParams = (Map<String, Object>) relProperties.get("minWeight");
+            Map<String, Object> maxCostParams = (Map<String, Object>) relProperties.get("maxCost");
+
+            assertEquals("weight", sumWeightParams.get("property").toString());
+            assertEquals("SUM", sumWeightParams.get("aggregation").toString());
+            assertEquals(1.0, sumWeightParams.get("defaultValue"));
+
+            assertEquals("weight", minWeightParams.get("property").toString());
+            assertEquals("MIN", minWeightParams.get("aggregation").toString());
+
+            assertEquals("cost", maxCostParams.get("property").toString());
+            assertEquals("MAX", maxCostParams.get("aggregation").toString());
+        });
+
+        Graph g = LoadGraphFactory.getUnion("aggGraph");
+
+        assertEquals(2, g.nodeCount());
+        assertEquals(3, g.relationshipCount());
+
+        assertOutRelationships(g, 0, 1, 1, 1);
+        assertOutPropertiesWithDelta(g, 1E-3, 0, 85.3, 42.1, 2.0);
+
+        LoadGraphFactory.remove("aggGraph");
+        testLocalDb.shutdown();
+    }
+
+    @Test
+    void shouldFailOnMissingRelationshipProperty() {
+        QueryExecutionException exMissingProperty = assertThrows(QueryExecutionException.class, () -> {
+            String loadQuery = "CALL algo.graph.load(" +
+                               "    'aggGraph', '', '', {" +
+                               "        relationshipProperties: {" +
+                               "            maxCost: {" +
+                               "                property: 'cost'," +
+                               "                aggregation: 'MAX'" +
+                               "            }" +
+                               "        }" +
+                               "    }" +
+                               ")";
+            db.execute(loadQuery);
+        });
+        Throwable rootCause = ExceptionUtil.rootCause(exMissingProperty);
+        assertEquals(IllegalArgumentException.class, rootCause.getClass());
+        assertThat(rootCause.getMessage(), containsString("Relationship properties not found: 'cost'"));
+    }
+
+    @Test
+    void shouldFailOnInvalidAggregationFunction() {
+        QueryExecutionException exMissingProperty = assertThrows(QueryExecutionException.class, () -> {
+            String loadQuery = "CALL algo.graph.load(" +
+                               "    'aggGraph', '', '', {" +
+                               "        relationshipProperties: {" +
+                               "            maxCost: {" +
+                               "                property: 'weight'," +
+                               "                aggregation: 'FOOBAR'" +
+                               "            }" +
+                               "        }" +
+                               "    }" +
+                               ")";
+            db.execute(loadQuery);
+        });
+        Throwable rootCause = ExceptionUtil.rootCause(exMissingProperty);
+        assertEquals(IllegalArgumentException.class, rootCause.getClass());
+        assertThat(rootCause.getMessage(), containsString("Deduplication strategy `FOOBAR` is not supported."));
     }
 
     @Test
@@ -519,9 +662,9 @@ class LoadGraphProcTest extends ProcTestBase {
                                ")";
         String loadQuery = graph.equals("cypher")
                 ? String.format(
-                        queryTemplate,
-                        ALL_NODES_QUERY,
-                        "'MATCH (s)<--(t) RETURN id(s) AS source, id(t) AS target'")
+                queryTemplate,
+                ALL_NODES_QUERY,
+                "'MATCH (s)<--(t) RETURN id(s) AS source, id(t) AS target'")
                 : String.format(queryTemplate, "null", "null");
         runQuery(loadQuery, db, singletonMap("graph", graph));
 

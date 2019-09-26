@@ -31,12 +31,12 @@ import java.util.Map;
 class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private long rows;
     private long maxNeoId = 0;
-    private Map<PropertyMapping, HugeNodePropertiesBuilder> nodeProperties;
+    private Map<PropertyMapping, NodePropertiesBuilder> nodeProperties;
     private NodesBatchBuffer buffer;
     private List<Map<String, Number>> cypherNodeProperties;
     private NodeImporter importer;
 
-    public NodeRowVisitor(Map<PropertyMapping, HugeNodePropertiesBuilder> nodeProperties, NodesBatchBuffer buffer, NodeImporter importer) {
+    public NodeRowVisitor(Map<PropertyMapping, NodePropertiesBuilder> nodeProperties, NodesBatchBuffer buffer, NodeImporter importer) {
         this.nodeProperties = nodeProperties;
         this.buffer = buffer;
         this.importer = importer;
@@ -52,13 +52,13 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
         rows++;
 
         HashMap<String, Number> weights = new HashMap<>();
-        for (Map.Entry<PropertyMapping, HugeNodePropertiesBuilder> entry : nodeProperties.entrySet()) {
+        for (Map.Entry<PropertyMapping, NodePropertiesBuilder> entry : nodeProperties.entrySet()) {
             PropertyMapping key = entry.getKey();
-            Object value = CypherLoadingUtils.getProperty(row, entry.getKey().neoPropertyKey);
+            Object value = CypherLoadingUtils.getProperty(row, entry.getKey().neoPropertyKey());
             if (value instanceof Number) {
-                weights.put(key.propertyKey, (Number) value);
+                weights.put(key.propertyKey(), (Number) value);
             } else if (null == value) {
-                weights.put(key.propertyKey, key.defaultValue);
+                weights.put(key.propertyKey(), key.defaultValue());
             } else {
                 throw new IllegalArgumentException(String.format(
                         "Unsupported type [%s] of value %s. Please use a numeric property.",

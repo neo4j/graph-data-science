@@ -70,7 +70,6 @@ public class MsBfsBenchmarkLdbc {
         db = LdbcDownloader.openDb(graphId);
         grph = new GraphLoader(db, Pools.DEFAULT)
                 .withDirection(Direction.OUTGOING)
-                .withoutRelationshipWeights()
                 .load(HugeGraphFactory.class);
     }
 

@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.api;
 
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -33,10 +34,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 /**
- * DTO to ease the use of the GraphFactory-CTor. Should contain
- * setup options for loading the graph from neo4j.
- *
- * @author mknblch
+ * DTO to ease the use of the GraphFactory-CTor.
+ * Contains setup options for loading the graph from Neo4j.
  */
 public class GraphSetup {
 
@@ -71,9 +70,7 @@ public class GraphSetup {
     public final ExecutorService executor;
     // concurrency level
     public final int concurrency;
-    /**
-     * batchSize for parallel computation
-     */
+    // batchSize for parallel computation
     public final int batchSize;
 
     // tells whether the underlying array should be sorted during import
@@ -81,64 +78,9 @@ public class GraphSetup {
     // in/out adjacencies are allowed to be merged into an undirected view of the graph
     public final boolean loadAsUndirected;
 
-    public final PropertyMapping[] nodePropertyMappings;
-    public final PropertyMapping[] relationshipPropertyMappings;
+    public final PropertyMappings nodePropertyMappings;
+    public final PropertyMappings relationshipPropertyMappings;
     public final DeduplicationStrategy deduplicationStrategy;
-
-    /**
-     * main ctor
-     *
-     * @param startLabel                 the start label. null means any label.
-     * @param endLabel                   not implemented yet
-     * @param relationshipType           the relation type identifier. null for any relationship
-     * @param executor                   the executor. null means single threaded evaluation
-     * @param batchSize                  batch size for parallel loading
-     * @param deduplicationStrategy      strategy for handling relationship duplicates
-     * @param sort                       true if relationships should stored in sorted ascending order
-     */
-    public GraphSetup(
-            String startLabel,
-            String endLabel,
-            String relationshipType,
-            Direction direction,
-            Map<String, Object> params,
-            ExecutorService executor,
-            int concurrency,
-            int batchSize,
-            DeduplicationStrategy deduplicationStrategy,
-            Log log,
-            long logMillis,
-            boolean sort,
-            boolean loadAsUndirected,
-            AllocationTracker tracker,
-            TerminationFlag terminationFlag,
-            String name,
-            PropertyMapping[] nodePropertyMappings,
-            PropertyMapping[] relationshipPropertyMappings) {
-
-        this.startLabel = startLabel;
-        this.endLabel = endLabel;
-        this.relationshipType = relationshipType;
-        this.loadOutgoing = direction == Direction.OUTGOING || direction == Direction.BOTH;
-        this.loadIncoming = direction == Direction.INCOMING || direction == Direction.BOTH;
-        this.loadBoth = loadOutgoing && loadIncoming;
-        this.direction = direction;
-        this.relationDefaultWeight = relationshipPropertyMappings == null || relationshipPropertyMappings.length == 0 ? 0.0 : relationshipPropertyMappings[0].defaultValue;
-        this.params = params == null ? Collections.emptyMap() : params;
-        this.executor = executor;
-        this.concurrency = concurrency;
-        this.batchSize = batchSize;
-        this.deduplicationStrategy = deduplicationStrategy;
-        this.log = log;
-        this.logMillis = logMillis;
-        this.sort = sort;
-        this.loadAsUndirected = loadAsUndirected;
-        this.tracker = tracker;
-        this.terminationFlag = terminationFlag;
-        this.name = name;
-        this.nodePropertyMappings = nodePropertyMappings;
-        this.relationshipPropertyMappings = relationshipPropertyMappings;
-    }
 
     /**
      * Setup Graph to load any label, any relationship, no property in single threaded mode
@@ -170,9 +112,64 @@ public class GraphSetup {
                 AllocationTracker.EMPTY,
                 TerminationFlag.RUNNING_TRUE,
                 null,
-                new PropertyMapping[0],
-                new PropertyMapping[]{PropertyMapping.of(weightProperty, weightProperty, defaultWeight)}
+                PropertyMappings.of(),
+                PropertyMappings.of(PropertyMapping.of(weightProperty, weightProperty, defaultWeight))
         );
+    }
+
+    /**
+     * main ctor
+     *
+     * @param startLabel                 the start label. null means any label.
+     * @param endLabel                   not implemented yet
+     * @param relationshipType           the relation type identifier. null for any relationship
+     * @param executor                   the executor. null means single threaded evaluation
+     * @param batchSize                  batch size for parallel loading
+     * @param deduplicationStrategy      strategy for handling relationship duplicates
+     * @param sort                       true if relationships should stored in sorted ascending order
+     */
+    public GraphSetup(
+            String startLabel,
+            String endLabel,
+            String relationshipType,
+            Direction direction,
+            Map<String, Object> params,
+            ExecutorService executor,
+            int concurrency,
+            int batchSize,
+            DeduplicationStrategy deduplicationStrategy,
+            Log log,
+            long logMillis,
+            boolean sort,
+            boolean loadAsUndirected,
+            AllocationTracker tracker,
+            TerminationFlag terminationFlag,
+            String name,
+            PropertyMappings nodePropertyMappings,
+            PropertyMappings relationshipPropertyMappings) {
+
+        this.startLabel = startLabel;
+        this.endLabel = endLabel;
+        this.relationshipType = relationshipType;
+        this.loadOutgoing = direction == Direction.OUTGOING || direction == Direction.BOTH;
+        this.loadIncoming = direction == Direction.INCOMING || direction == Direction.BOTH;
+        this.loadBoth = loadOutgoing && loadIncoming;
+        this.direction = direction;
+        this.relationDefaultWeight = relationshipPropertyMappings.defaultWeight();
+        this.params = params == null ? Collections.emptyMap() : params;
+        this.executor = executor;
+        this.concurrency = concurrency;
+        this.batchSize = batchSize;
+        this.deduplicationStrategy = deduplicationStrategy;
+        this.log = log;
+        this.logMillis = logMillis;
+        this.sort = sort;
+        this.loadAsUndirected = loadAsUndirected;
+        this.tracker = tracker;
+        this.terminationFlag = terminationFlag;
+        this.name = name;
+        this.nodePropertyMappings = nodePropertyMappings;
+        this.relationshipPropertyMappings = relationshipPropertyMappings;
     }
 
     public boolean loadConcurrent() {
@@ -186,8 +183,8 @@ public class GraphSetup {
         return concurrency;
     }
 
-    public boolean shouldLoadRelationshipWeight() {
-        return relationshipPropertyMappings.length > 0;
+    public boolean shouldLoadRelationshipProperties() {
+        return relationshipPropertyMappings.hasMappings();
     }
 
     public boolean loadAnyLabel() {

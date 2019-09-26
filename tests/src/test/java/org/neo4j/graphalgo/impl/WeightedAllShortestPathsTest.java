@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.impl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -88,7 +89,7 @@ class WeightedAllShortestPathsTest {
             graph = new GraphLoader(db)
                     .withLabel(LABEL)
                     .withRelationshipType(RELATIONSHIP)
-                    .withRelationshipWeightsFromProperty(PROPERTY, 1.0)
+                    .withRelationshipProperties(PropertyMapping.of(PROPERTY, 1.0))
                     .load(HugeGraphFactory.class);
         }
     }

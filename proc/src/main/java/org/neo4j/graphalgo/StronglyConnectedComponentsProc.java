@@ -112,7 +112,6 @@ public class StronglyConnectedComponentsProc {
                 .withAllocationTracker(tracker)
                 .withOptionalLabel(label)
                 .withOptionalRelationshipType(relationship)
-                .withoutRelationshipWeights()
                 .withDirection(Direction.OUTGOING)
                 .load(configuration.getGraphImpl());
         loadTimer.stop();
@@ -172,7 +171,6 @@ public class StronglyConnectedComponentsProc {
         Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, configuration)
                 .withAllocationTracker(tracker)
-                .withoutRelationshipWeights()
                 .withDirection(Direction.OUTGOING)
                 .load(configuration.getGraphImpl());
         loadTimer.stop();
@@ -224,7 +222,6 @@ public class StronglyConnectedComponentsProc {
 
         Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, configuration)
-                .withoutRelationshipWeights()
                 .withDirection(Direction.OUTGOING)
                 .load(configuration.getGraphImpl());
 
@@ -255,7 +252,6 @@ public class StronglyConnectedComponentsProc {
         final ProgressTimer loadTimer = builder.timeLoad();
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, configuration)
-                .withoutRelationshipWeights()
                 .withDirection(Direction.OUTGOING)
                 .load(configuration.getGraphImpl());
         loadTimer.stop();
@@ -309,7 +305,6 @@ public class StronglyConnectedComponentsProc {
 
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, configuration)
-                .withoutRelationshipWeights()
                 .withDirection(Direction.OUTGOING)
                 .load(configuration.getGraphImpl());
 
@@ -348,7 +343,6 @@ public class StronglyConnectedComponentsProc {
         Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, configuration)
                 .withAllocationTracker(tracker)
-                .withoutRelationshipWeights()
                 .load(configuration.getGraphImpl());
         loadTimer.stop();
 
@@ -406,7 +400,6 @@ public class StronglyConnectedComponentsProc {
         ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
         Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, configuration)
-                .withoutRelationshipWeights()
                 .load(configuration.getGraphImpl());
         if (graph.isEmpty()) {
             graph.release();
@@ -435,7 +428,6 @@ public class StronglyConnectedComponentsProc {
         ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
         Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, configuration)
-                .withoutRelationshipWeights()
                 .load(configuration.getGraphImpl());
         if (graph.isEmpty()) {
             graph.release();

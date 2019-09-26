@@ -77,7 +77,6 @@ public class BetweennessCentralityProc {
 
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, configuration)
-                .withoutNodeProperties()
                 .withDirection(configuration.getDirection(Direction.OUTGOING))
                 .load(configuration.getGraphImpl());
 
@@ -115,7 +114,6 @@ public class BetweennessCentralityProc {
 
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, configuration)
-                .withoutNodeProperties()
                 .withDirection(configuration.getDirection(DEFAULT_DIRECTION))
                 .load(configuration.getGraphImpl());
 
@@ -189,7 +187,6 @@ public class BetweennessCentralityProc {
                     .init(log, label, relationship, configuration)
                     .withOptionalLabel(label)
                     .withOptionalRelationshipType(relationship)
-                    .withoutNodeProperties()
                     .withDirection(configuration.getDirection(Direction.OUTGOING))
                     .load(configuration.getGraphImpl());
         }
@@ -240,7 +237,6 @@ public class BetweennessCentralityProc {
         try (ProgressTimer timer = builder.timeLoad()) {
             graph = new GraphLoader(api, Pools.DEFAULT)
                     .init(log, label, relationship, configuration)
-                    .withoutNodeProperties()
                     .withDirection(configuration.getDirection(Direction.OUTGOING))
                     .load(configuration.getGraphImpl());
         }
@@ -300,7 +296,6 @@ public class BetweennessCentralityProc {
                     .init(log, label, relationship, configuration)
                     .withOptionalLabel(label)
                     .withOptionalRelationshipType(relationship)
-                    .withoutNodeProperties()
                     .withDirection(configuration.getDirection(Direction.OUTGOING))
                     .load(configuration.getGraphImpl());
         }

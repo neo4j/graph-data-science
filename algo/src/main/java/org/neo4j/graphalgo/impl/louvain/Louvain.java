@@ -108,7 +108,7 @@ public final class Louvain extends Algorithm<Louvain> {
         rootNodeCount = graph.nodeCount();
         communities = HugeLongArray.newArray(rootNodeCount, tracker);
         nodeWeights = HugeDoubleArray.newArray(rootNodeCount, tracker);
-        this. communityMap = communityMap;
+        this.communityMap = communityMap;
         maxLevel = config.maxLevel;
         maxIterations = config.maxIterations;
         randomNeighborSelection = config.randomNeighborSelection;

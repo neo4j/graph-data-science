@@ -122,7 +122,6 @@ class InfoMapTest {
         Graph graph = new GraphLoader(db)
                 .withAnyRelationshipType()
                 .withAnyLabel()
-                .withoutNodeProperties()
                 .undirected()
                 .load(HugeGraphFactory.class);
 

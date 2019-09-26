@@ -19,9 +19,6 @@
  */
 package org.neo4j.graphalgo.core;
 
-import com.carrotsearch.hppc.DoubleArrayList;
-import com.carrotsearch.hppc.LongArrayList;
-import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,12 +33,10 @@ import org.neo4j.graphalgo.core.huge.loader.CypherGraphFactory;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
 import org.neo4j.graphalgo.core.loading.GraphByType;
 import org.neo4j.graphalgo.core.neo4jview.GraphViewFactory;
-import org.neo4j.graphalgo.core.utils.AscendingLongComparator;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Arrays;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -50,6 +45,9 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.neo4j.graphalgo.GraphHelper.assertInRelationships;
+import static org.neo4j.graphalgo.GraphHelper.assertOutRelationships;
+import static org.neo4j.graphalgo.GraphHelper.assertOutProperties;
 
 class GraphLoaderHugeGraphTest {
 
@@ -90,10 +88,10 @@ class GraphLoaderHugeGraphTest {
                 .load(graphImpl);
 
         assertEquals(4L, graph.nodeCount());
-        checkOutRelationships(graph, 0, 0, 1);
-        checkOutRelationships(graph, 1, 1, 2, 3);
-        checkOutRelationships(graph, 2);
-        checkOutRelationships(graph, 3);
+        assertOutRelationships(graph, 0, 0, 1);
+        assertOutRelationships(graph, 1, 1, 2, 3);
+        assertOutRelationships(graph, 2);
+        assertOutRelationships(graph, 3);
     }
 
     @AllGraphTypesTest
@@ -118,14 +116,14 @@ class GraphLoaderHugeGraphTest {
         }
         Graph graph = graphLoader
                 .withDirection(Direction.OUTGOING)
-                .withDeduplicateRelationshipsStrategy(DeduplicationStrategy.NONE)
+                .withDeduplicationStrategy(DeduplicationStrategy.NONE)
                 .load(graphImpl);
 
         assertEquals(4L, graph.nodeCount());
-        checkOutRelationships(graph, 0, 0, 1);
-        checkOutRelationships(graph, 1, 1, 2, 3);
-        checkOutRelationships(graph, 2);
-        checkOutRelationships(graph, 3);
+        assertOutRelationships(graph, 0, 0, 1);
+        assertOutRelationships(graph, 1, 1, 2, 3);
+        assertOutRelationships(graph, 2);
+        assertOutRelationships(graph, 3);
     }
 
     @AllGraphTypesTest
@@ -154,15 +152,15 @@ class GraphLoaderHugeGraphTest {
 
         assertEquals(4L, graph.nodeCount());
         if (graphImpl == CypherGraphFactory.class) {
-            checkOutRelationships(graph, 0, 0);
-            checkOutRelationships(graph, 1, 0, 1);
-            checkOutRelationships(graph, 2, 1);
-            checkOutRelationships(graph, 3, 1);
+            assertOutRelationships(graph, 0, 0);
+            assertOutRelationships(graph, 1, 0, 1);
+            assertOutRelationships(graph, 2, 1);
+            assertOutRelationships(graph, 3, 1);
         } else {
-            checkInRelationships(graph, 0, 0);
-            checkInRelationships(graph, 1, 0, 1);
-            checkInRelationships(graph, 2, 1);
-            checkInRelationships(graph, 3, 1);
+            assertInRelationships(graph, 0, 0);
+            assertInRelationships(graph, 1, 0, 1);
+            assertInRelationships(graph, 2, 1);
+            assertInRelationships(graph, 3, 1);
         }
     }
 
@@ -193,27 +191,27 @@ class GraphLoaderHugeGraphTest {
         assertEquals(4L, graph.nodeCount());
 
         if (graphImpl == CypherGraphFactory.class) {
-            checkOutRelationships(graph, 0, 0, 1);
-            checkOutRelationships(graph, 1, 0, 1, 2, 3);
-            checkOutRelationships(graph, 2, 1);
-            checkOutRelationships(graph, 3, 1);
+            assertOutRelationships(graph, 0, 0, 1);
+            assertOutRelationships(graph, 1, 0, 1, 2, 3);
+            assertOutRelationships(graph, 2, 1);
+            assertOutRelationships(graph, 3, 1);
         } else {
-            checkOutRelationships(graph, 0, 0, 1);
-            checkInRelationships(graph, 0, 0);
+            assertOutRelationships(graph, 0, 0, 1);
+            assertInRelationships(graph, 0, 0);
 
-            checkOutRelationships(graph, 1, 1, 2, 3);
-            checkInRelationships(graph, 1, 0, 1);
+            assertOutRelationships(graph, 1, 1, 2, 3);
+            assertInRelationships(graph, 1, 0, 1);
 
-            checkOutRelationships(graph, 2);
-            checkInRelationships(graph, 2, 1);
+            assertOutRelationships(graph, 2);
+            assertInRelationships(graph, 2, 1);
 
-            checkOutRelationships(graph, 3);
-            checkInRelationships(graph, 3, 1);
+            assertOutRelationships(graph, 3);
+            assertInRelationships(graph, 3, 1);
         }
     }
 
     @AllGraphTypesTest
-    void undirectedWithDeduplicatoin(Class<? extends GraphFactory> graphImpl) {
+    void undirectedWithDeduplication(Class<? extends GraphFactory> graphImpl) {
         assumeTrue(graphImpl != GraphViewFactory.class);
         db.execute("" +
                    "CREATE (a:Node),(b:Node),(c:Node),(d:Node) " +
@@ -236,14 +234,14 @@ class GraphLoaderHugeGraphTest {
         }
         Graph graph = graphLoader
                 .undirected()
-                .withDeduplicateRelationshipsStrategy(DeduplicationStrategy.SKIP)
+                .withDeduplicationStrategy(DeduplicationStrategy.SKIP)
                 .load(graphImpl);
 
         assertEquals(4L, graph.nodeCount());
-        checkOutRelationships(graph, 0, 0, 1);
-        checkOutRelationships(graph, 1, 0, 1, 2, 3);
-        checkOutRelationships(graph, 2, 1);
-        checkOutRelationships(graph, 3, 1);
+        assertOutRelationships(graph, 0, 0, 1);
+        assertOutRelationships(graph, 1, 0, 1, 2, 3);
+        assertOutRelationships(graph, 2, 1);
+        assertOutRelationships(graph, 3, 1);
     }
 
     @AllGraphTypesTest
@@ -271,14 +269,14 @@ class GraphLoaderHugeGraphTest {
 
         Graph graph = graphLoader
                 .undirected()
-                .withDeduplicateRelationshipsStrategy(DeduplicationStrategy.NONE)
+                .withDeduplicationStrategy(DeduplicationStrategy.NONE)
                 .load(graphImpl);
 
         assertEquals(4L, graph.nodeCount());
-        checkOutRelationships(graph, 0, 0, 0, 1);
-        checkOutRelationships(graph, 1, 0, 1, 1, 2, 3);
-        checkOutRelationships(graph, 2, 1);
-        checkOutRelationships(graph, 3, 1);
+        assertOutRelationships(graph, 0, 0, 0, 1);
+        assertOutRelationships(graph, 1, 0, 1, 1, 2, 3);
+        assertOutRelationships(graph, 2, 1);
+        assertOutRelationships(graph, 3, 1);
     }
 
     @AllGraphTypesTest
@@ -328,7 +326,7 @@ class GraphLoaderHugeGraphTest {
                     .withNodeStatement("MATCH (n) RETURN id(n) AS id")
                     .withRelationshipStatement(
                             "MATCH (n)-->(m) RETURN id(n) AS source, id(m) AS target UNION ALL MATCH (n)<--(m) RETURN id(n) AS source, id(m) AS target")
-                    .withDeduplicateRelationshipsStrategy(DeduplicationStrategy.SKIP);
+                    .withDeduplicationStrategy(DeduplicationStrategy.SKIP);
         } else {
             graphLoader
                     .withAnyLabel()
@@ -339,8 +337,8 @@ class GraphLoaderHugeGraphTest {
                 .load(graphImpl);
 
         assertEquals(2L, graph.nodeCount());
-        checkOutRelationships(graph, 0, 0, 1);
-        checkOutRelationships(graph, 1, 0);
+        assertOutRelationships(graph, 0, 0, 1);
+        assertOutRelationships(graph, 1, 0);
     }
 
     @AllGraphTypesTest
@@ -379,7 +377,7 @@ class GraphLoaderHugeGraphTest {
                     .withNodeStatement("MATCH (n) RETURN id(n) AS id")
                     .withRelationshipStatement(
                             "MATCH (n)-->(m) RETURN id(n) AS source, id(m) AS target UNION ALL MATCH (n)<--(m) RETURN id(n) AS source, id(m) AS target")
-                    .withDeduplicateRelationshipsStrategy(DeduplicationStrategy.SKIP);
+                    .withDeduplicationStrategy(DeduplicationStrategy.SKIP);
         } else {
             graphLoader
                     .withAnyLabel()
@@ -390,10 +388,10 @@ class GraphLoaderHugeGraphTest {
                 .load(graphImpl);
 
         assertEquals(4L, graph.nodeCount());
-        checkOutRelationships(graph, 0, 0, 1);
-        checkOutRelationships(graph, 1, 0, 1, 2, 3);
-        checkOutRelationships(graph, 2, 1);
-        checkOutRelationships(graph, 3, 1);
+        assertOutRelationships(graph, 0, 0, 1);
+        assertOutRelationships(graph, 1, 0, 1, 2, 3);
+        assertOutRelationships(graph, 2, 1);
+        assertOutRelationships(graph, 3, 1);
     }
 
     @Test
@@ -402,34 +400,81 @@ class GraphLoaderHugeGraphTest {
                    "CREATE (a:Node),(b:Node),(c:Node),(d:Node) " +
                    "CREATE" +
                    " (a)-[:REL {p1: 42, p2: 1337}]->(a)," +
-                   " (a)-[:REL {p1: 43, p2: 1338}]->(a)," +
-                   " (a)-[:REL {p1: 44, p2: 1339}]->(b)," +
-                   " (b)-[:REL {p1: 45, p2: 1340}]->(c)," +
-                   " (b)-[:REL {p1: 46, p2: 1341}]->(d)");
+                   " (a)-[:REL {p1: 43, p2: 1338, p3: 10}]->(a)," +
+                   " (a)-[:REL {p1: 44, p2: 1339, p3: 10}]->(b)," +
+                   " (b)-[:REL {p1: 45, p2: 1340, p3: 10}]->(c)," +
+                   " (b)-[:REL {p1: 46, p2: 1341, p3: 10}]->(d)");
         GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT);
         GraphByType graph = graphLoader.withAnyLabel()
                 .withAnyRelationshipType()
-                .withOptionalRelationshipProperties(
-                        PropertyMapping.of("p1", "p1", 1.0, DeduplicationStrategy.NONE),
-                        PropertyMapping.of("p2", "p2", 2.0, DeduplicationStrategy.NONE)
+                .withRelationshipProperties(
+                        PropertyMapping.of("agg1", "p1", 1.0, DeduplicationStrategy.NONE),
+                        PropertyMapping.of("agg2", "p2", 2.0, DeduplicationStrategy.NONE),
+                        PropertyMapping.of("agg3", "p3", 2.0, DeduplicationStrategy.NONE)
                 )
                 .withDirection(Direction.OUTGOING)
                 .build(HugeGraphFactory.class)
                 .loadGraphs();
 
-        Graph p1 = graph.loadGraph("", Optional.of("p1"));
+        Graph p1 = graph.loadGraph("", Optional.of("agg1"));
         assertEquals(4L, p1.nodeCount());
-        checkOutWeights(p1, 0, 42, 43, 44);
-        checkOutWeights(p1, 1, 45, 46);
-        checkOutWeights(p1, 2);
-        checkOutWeights(p1, 3);
+        assertOutProperties(p1, 0, 42, 43, 44);
+        assertOutProperties(p1, 1, 45, 46);
+        assertOutProperties(p1, 2);
+        assertOutProperties(p1, 3);
 
-        Graph p2 = graph.loadGraph("", Optional.of("p2"));
+        Graph p2 = graph.loadGraph("", Optional.of("agg2"));
         assertEquals(4L, p2.nodeCount());
-        checkOutWeights(p2, 0, 1337, 1338, 1339);
-        checkOutWeights(p2, 1, 1340, 1341);
-        checkOutWeights(p2, 2);
-        checkOutWeights(p2, 3);
+        assertOutProperties(p2, 0, 1337, 1338, 1339);
+        assertOutProperties(p2, 1, 1340, 1341);
+        assertOutProperties(p2, 2);
+        assertOutProperties(p2, 3);
+
+        Graph p3 = graph.loadGraph("", Optional.of("agg3"));
+        assertEquals(4L, p3.nodeCount());
+        assertOutProperties(p3, 0, 2, 10, 10);
+        assertOutProperties(p3, 1, 10, 10);
+        assertOutProperties(p3, 2);
+        assertOutProperties(p3, 3);
+    }
+
+    @Test
+    void multipleRelPropertiesWithDefaultValues() {
+        db.execute(
+                "CREATE" +
+                "  (a:Node)" +
+                ", (b:Node)" +
+                ", (a)-[:REL]->(a)" +
+                ", (a)-[:REL {p1: 39}]->(a)" +
+                ", (a)-[:REL {p1: 51}]->(a)" +
+                ", (b)-[:REL {p1: 45}]->(b)" +
+                ", (b)-[:REL]->(b)");
+        GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT);
+        GraphByType graph = graphLoader.withAnyLabel()
+                .withAnyRelationshipType()
+                .withRelationshipProperties(
+                        PropertyMapping.of("agg1", "p1", 1.0, DeduplicationStrategy.MIN),
+                        PropertyMapping.of("agg2", "p1", 50.0, DeduplicationStrategy.MAX),
+                        PropertyMapping.of("agg3", "p1", 3.0, DeduplicationStrategy.SUM)
+                )
+                .withDirection(Direction.OUTGOING)
+                .build(HugeGraphFactory.class)
+                .loadGraphs();
+
+        Graph p1 = graph.loadGraph("", Optional.of("agg1"));
+        assertEquals(2L, p1.nodeCount());
+        assertOutProperties(p1, 0, 1);
+        assertOutProperties(p1, 1, 1);
+
+        Graph p2 = graph.loadGraph("", Optional.of("agg2"));
+        assertEquals(2L, p2.nodeCount());
+        assertOutProperties(p2, 0, 51);
+        assertOutProperties(p2, 1, 50);
+
+        Graph p3 = graph.loadGraph("", Optional.of("agg3"));
+        assertEquals(2L, p3.nodeCount());
+        assertOutProperties(p3, 0, 93);
+        assertOutProperties(p3, 1, 48);
     }
 
     @Test
@@ -447,7 +492,7 @@ class GraphLoaderHugeGraphTest {
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
                 graphLoader.withAnyLabel()
                         .withAnyRelationshipType()
-                        .withOptionalRelationshipProperties(
+                        .withRelationshipProperties(
                                 PropertyMapping.of("p1", "p1", 1.0, DeduplicationStrategy.NONE),
                                 PropertyMapping.of("p2", "p2", 2.0, DeduplicationStrategy.SUM)
                         )
@@ -455,7 +500,8 @@ class GraphLoaderHugeGraphTest {
                         .build(HugeGraphFactory.class)
                         .loadGraphs());
 
-        assertThat(ex.getMessage(),
+        assertThat(
+                ex.getMessage(),
                 containsString(
                         "Conflicting relationship property deduplication strategies, it is not allowed to mix `NONE` with aggregations."));
     }
@@ -489,8 +535,8 @@ class GraphLoaderHugeGraphTest {
 
         final GraphByType graph = graphLoader.withAnyLabel()
                 .withAnyRelationshipType()
-                .withDeduplicateRelationshipsStrategy(globalDeduplicationStrategy)
-                .withOptionalRelationshipProperties(
+                .withDeduplicationStrategy(globalDeduplicationStrategy)
+                .withRelationshipProperties(
                         PropertyMapping.of("p1", "p1", 1.0, localDeduplicationStrategy1),
                         PropertyMapping.of("p2", "p2", 2.0, localDeduplicationStrategy2)
                 )
@@ -500,13 +546,13 @@ class GraphLoaderHugeGraphTest {
 
         Graph p1 = graph.loadGraph("", Optional.of("p1"));
         assertEquals(4L, p1.nodeCount());
-        checkOutWeights(p1, 0, expectedNodeAP1);
-        checkOutWeights(p1, 1, expectedNodeBP1);
+        assertOutProperties(p1, 0, expectedNodeAP1);
+        assertOutProperties(p1, 1, expectedNodeBP1);
 
         Graph p2 = graph.loadGraph("", Optional.of("p2"));
         assertEquals(4L, p2.nodeCount());
-        checkOutWeights(p2, 0, expectedNodeAP2);
-        checkOutWeights(p2, 1, expectedNodeBP2);
+        assertOutProperties(p2, 0, expectedNodeAP2);
+        assertOutProperties(p2, 1, expectedNodeBP2);
     }
 
     @ParameterizedTest
@@ -533,7 +579,7 @@ class GraphLoaderHugeGraphTest {
         GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT);
         GraphByType graph = graphLoader.withAnyLabel()
                 .withAnyRelationshipType()
-                .withOptionalRelationshipProperties(
+                .withRelationshipProperties(
                         PropertyMapping.of("p1", "p1", 1.0, deduplicationStrategy),
                         PropertyMapping.of("p2", "p2", 2.0, deduplicationStrategy)
                 )
@@ -543,54 +589,72 @@ class GraphLoaderHugeGraphTest {
 
         Graph p1 = graph.loadGraph("", Optional.of("p1"));
         assertEquals(2L, p1.nodeCount());
-        checkOutWeights(p1, 0, expectedNodeAP1);
-        checkOutWeights(p1, 1, expectedNodeBP1);
+        assertOutProperties(p1, 0, expectedNodeAP1);
+        assertOutProperties(p1, 1, expectedNodeBP1);
 
         Graph p2 = graph.loadGraph("", Optional.of("p2"));
         assertEquals(2L, p2.nodeCount());
-        checkOutWeights(p2, 0, expectedNodeAP2);
-        checkOutWeights(p2, 1, expectedNodeBP2);
+        assertOutProperties(p2, 0, expectedNodeAP2);
+        assertOutProperties(p2, 1, expectedNodeBP2);
     }
 
-    private void checkOutRelationships(Graph graph, long node, long... expected) {
-        LongArrayList idList = new LongArrayList();
-        graph.forEachOutgoing(node, (s, t) -> {
-            idList.add(t);
-            return true;
-        });
-        final long[] ids = idList.toArray();
-        Arrays.sort(ids);
-        Arrays.sort(expected);
-        assertArrayEquals(expected, ids);
+    @Test
+    void multipleAggregationsFromSameProperty() {
+        db.execute(
+                   "CREATE" +
+                   "  (a:Node)" +
+                   ", (b:Node)" +
+                   ", (a)-[:REL {p1: 43}]->(a)" +
+                   ", (a)-[:REL {p1: 42}]->(a)" +
+                   ", (a)-[:REL {p1: 44}]->(a)" +
+                   ", (b)-[:REL {p1: 45}]->(b)" +
+                   ", (b)-[:REL {p1: 46}]->(b)");
+        GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT);
+        GraphByType graph = graphLoader.withAnyLabel()
+                .withAnyRelationshipType()
+                .withRelationshipProperties(
+                        PropertyMapping.of("agg1", "p1", 1.0, DeduplicationStrategy.MAX),
+                        PropertyMapping.of("agg2", "p1", 2.0, DeduplicationStrategy.MIN)
+                )
+                .withDirection(Direction.OUTGOING)
+                .build(HugeGraphFactory.class)
+                .loadGraphs();
+
+        Graph p1 = graph.loadGraph("", Optional.of("agg1"));
+        assertEquals(2L, p1.nodeCount());
+        assertOutProperties(p1, 0, 44);
+        assertOutProperties(p1, 1, 46);
+
+        Graph p2 = graph.loadGraph("", Optional.of("agg2"));
+        assertEquals(2L, p2.nodeCount());
+        assertOutProperties(p2, 0, 42);
+        assertOutProperties(p2, 1, 45);
     }
 
-    private void checkOutWeights(Graph graph, long node, double... expected) {
-        LongArrayList idList = new LongArrayList(expected.length);
-        DoubleArrayList weightList = new DoubleArrayList(expected.length);
-        graph.forEachRelationship(node, Direction.OUTGOING, (s, t, w) -> {
-            idList.add(t);
-            weightList.add(w);
-            return true;
-        });
-        long[] ids = idList.toArray();
-        int[] order = IndirectSort.mergesort(0, ids.length, new AscendingLongComparator(ids));
-        DoubleArrayList sortedWeights = new DoubleArrayList(ids.length);
-        for (int index : order) {
-            sortedWeights.add(weightList.get(index));
-        }
-        double[] weights = sortedWeights.toArray();
-        assertArrayEquals(expected, weights);
-    }
+    @Test
+    void multipleRelTypesWithSameProperty() {
+        db.execute(
+                "CREATE" +
+                "  (a:Node)" +
+                ", (a)-[:REL_1 {p1: 43}]->(a)" +
+                ", (a)-[:REL_1 {p1: 84}]->(a)" +
+                ", (a)-[:REL_2 {p1: 42}]->(a)" +
+                ", (a)-[:REL_3 {p1: 44}]->(a)");
 
-    private void checkInRelationships(Graph graph, long node, long... expected) {
-        LongArrayList idList = new LongArrayList();
-        graph.forEachIncoming(node, (s, t) -> {
-            idList.add(t);
-            return true;
-        });
-        long[] ids = idList.toArray();
-        Arrays.sort(ids);
-        Arrays.sort(expected);
-        assertArrayEquals(expected, ids);
+        GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT);
+        GraphByType graph = graphLoader.withAnyLabel()
+                .withRelationshipStatement("REL_1 | REL_2 | REL_3")
+                .withDeduplicationStrategy(DeduplicationStrategy.MAX)
+                .withRelationshipProperties(
+                        PropertyMapping.of("agg", "p1", 1.0, DeduplicationStrategy.MAX)
+                )
+                .withDirection(Direction.OUTGOING)
+                .build(HugeGraphFactory.class)
+                .loadGraphs();
+
+        Graph g = graph.loadGraph("", Optional.of("agg"));
+        assertEquals(1L, g.nodeCount());
+        assertEquals(3L, g.relationshipCount());
+        assertOutProperties(g, 0, 42, 44, 84);
     }
 }

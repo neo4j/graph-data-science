@@ -105,8 +105,7 @@ public class KSpanningTreeProc {
             graph = new GraphLoader(api, Pools.DEFAULT)
                     .withOptionalLabel(label)
                     .withOptionalRelationshipType(relationship)
-                    .withRelationshipWeightsFromProperty(weightProperty, configuration.getWeightPropertyDefaultValue(1.0))
-                    .withoutNodeWeights()
+                    .withRelationshipProperties(PropertyMapping.of(weightProperty, configuration.getWeightPropertyDefaultValue(1.0)))
                     .withLog(log)
                     .undirected()
                     .load(configuration.getGraphImpl());

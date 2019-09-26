@@ -24,14 +24,14 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedLongDoubleMap;
 import org.neo4j.kernel.api.StatementConstants;
 
-public final class HugeNodePropertiesBuilder {
+public final class NodePropertiesBuilder {
 
     private final double defaultValue;
     private final int propertyId;
     private final PagedLongDoubleMap properties;
     private final String propertyKey;
 
-    public static HugeNodePropertiesBuilder of(
+    public static NodePropertiesBuilder of(
             long numberOfNodes,
             AllocationTracker tracker,
             double defaultValue,
@@ -39,10 +39,10 @@ public final class HugeNodePropertiesBuilder {
             String propertyKey) {
         assert propertyId != StatementConstants.NO_SUCH_PROPERTY_KEY;
         PagedLongDoubleMap properties = PagedLongDoubleMap.of(numberOfNodes, tracker);
-        return new HugeNodePropertiesBuilder(defaultValue, propertyId, properties, propertyKey);
+        return new NodePropertiesBuilder(defaultValue, propertyId, properties, propertyKey);
     }
 
-    private HugeNodePropertiesBuilder(
+    private NodePropertiesBuilder(
             final double defaultValue,
             final int propertyId,
             final PagedLongDoubleMap properties,

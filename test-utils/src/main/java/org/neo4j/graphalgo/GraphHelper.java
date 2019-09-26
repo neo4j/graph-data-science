@@ -20,11 +20,18 @@
 
 package org.neo4j.graphalgo;
 
+import com.carrotsearch.hppc.DoubleArrayList;
+import com.carrotsearch.hppc.LongArrayList;
+import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.AscendingLongComparator;
 import org.neo4j.graphdb.Direction;
 
+import java.util.Arrays;
 import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public final class GraphHelper {
 
@@ -38,7 +45,7 @@ public final class GraphHelper {
         return outIds.build().sorted().toArray();
     }
 
-    public static double[] collectTargetWeights(final Graph graph, long sourceId) {
+    public static double[] collectTargetProperties(final Graph graph, long sourceId) {
         DoubleStream.Builder outWeights = DoubleStream.builder();
         graph.forEachRelationship(graph.toMappedNodeId(sourceId), Direction.OUTGOING,
                 (sourceNodeId, targetNodeId, weight) -> {
@@ -46,6 +53,59 @@ public final class GraphHelper {
                     return true;
                 });
         return outWeights.build().toArray();
+    }
+
+    public static void assertOutProperties(Graph graph, long node, double... expected) {
+        assertOutPropertiesWithDelta(graph, 0, node, expected);
+    }
+
+    public static void assertInProperties(Graph graph, long node, double... expected) {
+        assertInPropertiesWithDelta(graph, 0, node, expected);
+    }
+
+    public static void assertOutPropertiesWithDelta(Graph graph, double delta, long node, double... expected) {
+        assertProperties(graph, Direction.OUTGOING, delta, node, expected);
+    }
+
+    public static void assertInPropertiesWithDelta(Graph graph, double delta, long node, double... expected) {
+        assertProperties(graph, Direction.INCOMING, delta, node, expected);
+    }
+
+    private static void assertProperties(Graph graph, Direction direction, double delta, long node, double... expected) {
+        LongArrayList idList = new LongArrayList(expected.length);
+        DoubleArrayList properties = new DoubleArrayList(expected.length);
+        graph.forEachRelationship(node, direction, (s, t, w) -> {
+            idList.add(t);
+            properties.add(w);
+            return true;
+        });
+        long[] ids = idList.toArray();
+        int[] order = IndirectSort.mergesort(0, ids.length, new AscendingLongComparator(ids));
+        DoubleArrayList sortedProperties = new DoubleArrayList(ids.length);
+        for (int index : order) {
+            sortedProperties.add(properties.get(index));
+        }
+        assertArrayEquals(expected, sortedProperties.toArray(), delta);
+    }
+
+    public static void assertOutRelationships(Graph graph, long node, long... expected) {
+        assertRelationships(graph, Direction.OUTGOING, node, expected);
+    }
+
+    public static void assertInRelationships(Graph graph, long node, long... expected) {
+        assertRelationships(graph, Direction.INCOMING, node, expected);
+    }
+
+    private static void assertRelationships(Graph graph, Direction direction, long node, long... expected) {
+        LongArrayList idList = new LongArrayList();
+        graph.forEachRelationship(node, direction, (s, t) -> {
+            idList.add(t);
+            return true;
+        });
+        long[] ids = idList.toArray();
+        Arrays.sort(ids);
+        Arrays.sort(expected);
+        assertArrayEquals(expected, ids);
     }
 
     private GraphHelper() {

@@ -170,7 +170,7 @@ final class AverageDegreeCentralityTest {
             graph = new GraphLoader(db)
                     .withLabel("MATCH (n:Label1) RETURN id(n) as id")
                     .withRelationshipType("MATCH (n:Label1)-[:TYPE1]-(m:Label1) RETURN id(n) as source,id(m) as target")
-                    .withDeduplicateRelationshipsStrategy(DeduplicationStrategy.SKIP)
+                    .withDeduplicationStrategy(DeduplicationStrategy.SKIP)
                     .load(graphFactory);
 
         } else {

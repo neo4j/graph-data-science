@@ -158,7 +158,6 @@ public final class EigenvectorCentralityProc {
         GraphLoader graphLoader = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, configuration)
                 .withAllocationTracker(tracker)
-                .withoutRelationshipWeights()
                 .withReducedRelationshipLoading(configuration.getDirection(Direction.OUTGOING));
 
         try (ProgressTimer timer = statsBuilder.timeLoad()) {

@@ -43,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.GraphHelper.collectTargetIds;
-import static org.neo4j.graphalgo.GraphHelper.collectTargetWeights;
+import static org.neo4j.graphalgo.GraphHelper.collectTargetProperties;
 import static org.neo4j.helpers.collection.Iterables.asSet;
 
 
@@ -91,7 +91,6 @@ class HugeGraphFactoryTest {
     void testWithLabel() {
         final Graph graph = new GraphLoader(DB)
                 .withLabel("Node1")
-                .withoutRelationshipWeights()
                 .withAnyRelationshipType()
                 .load(HugeGraphFactory.class);
 
@@ -102,7 +101,6 @@ class HugeGraphFactoryTest {
     void testAnyRelation() {
         final Graph graph = new GraphLoader(DB)
                 .withAnyLabel()
-                .withoutRelationshipWeights()
                 .withAnyRelationshipType()
                 .load(HugeGraphFactory.class);
 
@@ -117,9 +115,8 @@ class HugeGraphFactoryTest {
     void testWithBothWeightedRelationship() {
         final Graph graph = new GraphLoader(DB)
                 .withAnyLabel()
-                .withoutRelationshipWeights()
                 .withRelationshipType("REL3")
-                .withRelationshipWeightsFromProperty("weight", 1.0)
+                .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
                 .withDirection(Direction.BOTH)
                 .load(HugeGraphFactory.class);
 
@@ -127,7 +124,7 @@ class HugeGraphFactoryTest {
 
         long[] targets = collectTargetIds(graph, id2);
         assertArrayEquals(expectedIds(graph, id3), targets);
-        double[] weights = collectTargetWeights(graph, id2);
+        double[] weights = collectTargetProperties(graph, id2);
         assertArrayEquals(expectedWeights(1337), weights, 1e-4);
     }
 
@@ -135,7 +132,6 @@ class HugeGraphFactoryTest {
     void testWithOutgoingRelationship() {
         final Graph graph = new GraphLoader(DB)
                 .withAnyLabel()
-                .withoutRelationshipWeights()
                 .withRelationshipType("REL3")
                 .withDirection(Direction.OUTGOING)
                 .load(HugeGraphFactory.class);
@@ -152,17 +148,16 @@ class HugeGraphFactoryTest {
         final Graph graph = new GraphLoader(DB)
                 .withAnyLabel()
                 .withAnyRelationshipType()
-                .withRelationshipWeightsFromProperty("prop1", 1337.42)
+                .withRelationshipProperties(PropertyMapping.of("prop1", 1337.42))
                 .load(HugeGraphFactory.class);
 
-        double[] out1 = collectTargetWeights(graph, id1);
+        double[] out1 = collectTargetProperties(graph, id1);
         assertArrayEquals(expectedWeights(1.0, 1337.42), out1, 1e-4);
     }
 
     @Test
     void testWithNodeProperties() {
         final Graph graph = new GraphLoader(DB)
-                .withoutRelationshipWeights()
                 .withAnyRelationshipType()
                 .withOptionalNodeProperties(
                         PropertyMapping.of("prop1", "prop1", 0D),
@@ -179,7 +174,6 @@ class HugeGraphFactoryTest {
     @Test
     void testWithHugeNodeProperties() {
         final Graph graph = new GraphLoader(DB)
-                .withoutRelationshipWeights()
                 .withAnyRelationshipType()
                 .withOptionalNodeProperties(
                         PropertyMapping.of("prop1", "prop1", 0D),
@@ -210,8 +204,7 @@ class HugeGraphFactoryTest {
     void testLoadDuplicateRelationships() {
         final Graph graph = new GraphLoader(DB)
                 .withAnyRelationshipType()
-                .withoutRelationshipWeights()
-                .withDeduplicateRelationshipsStrategy(DeduplicationStrategy.NONE)
+                .withDeduplicationStrategy(DeduplicationStrategy.NONE)
                 .load(HugeGraphFactory.class);
 
         long[] out2 = collectTargetIds(graph, id2);
@@ -222,11 +215,11 @@ class HugeGraphFactoryTest {
     void testLoadDuplicateRelationshipsWithWeights() {
         final Graph graph = new GraphLoader(DB)
                 .withAnyRelationshipType()
-                .withRelationshipWeightsFromProperty("weight", 1.0)
-                .withDeduplicateRelationshipsStrategy(DeduplicationStrategy.NONE)
+                .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
+                .withDeduplicationStrategy(DeduplicationStrategy.NONE)
                 .load(HugeGraphFactory.class);
 
-        double[] out1 = collectTargetWeights(graph, id2);
+        double[] out1 = collectTargetProperties(graph, id2);
         assertArrayEquals(expectedWeights(42.0, 1337.0), out1, 1e-4);
     }
 
@@ -237,11 +230,11 @@ class HugeGraphFactoryTest {
             double expectedWeight) {
         final Graph graph = new GraphLoader(DB)
                 .withAnyRelationshipType()
-                .withRelationshipWeightsFromProperty("weight", 1.0)
-                .withDeduplicateRelationshipsStrategy(deduplicationStrategy)
+                .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
+                .withDeduplicationStrategy(deduplicationStrategy)
                 .load(HugeGraphFactory.class);
 
-        double[] out1 = collectTargetWeights(graph, id2);
+        double[] out1 = collectTargetProperties(graph, id2);
         assertArrayEquals(expectedWeights(expectedWeight), out1, 1e-4);
     }
 
@@ -249,7 +242,6 @@ class HugeGraphFactoryTest {
     void testLoadMultipleRelationships() {
         GraphByType graphs = new GraphLoader(DB)
                 .withAnyLabel()
-                .withoutRelationshipWeights()
                 .withRelationshipType("REL1 | REL2")
                 .build(HugeGraphFactory.class)
                 .loadGraphs();
@@ -271,7 +263,7 @@ class HugeGraphFactoryTest {
         GraphByType graphs = new GraphLoader(DB)
                 .withAnyLabel()
                 .withRelationshipType("REL1 | REL2")
-                .withRelationshipWeightsFromProperty("prop1", 42D)
+                .withRelationshipProperties(PropertyMapping.of("prop1", 42D))
                 .build(HugeGraphFactory.class)
                 .loadGraphs();
 
@@ -283,9 +275,9 @@ class HugeGraphFactoryTest {
         Graph unionGraph = graphs.loadGraph("REL1 | REL2");
 
 
-        assertArrayEquals(expectedWeights(1D), collectTargetWeights(rel1Graph, id1));
-        assertArrayEquals(expectedWeights(42D), collectTargetWeights(rel2Graph, id1));
-        assertArrayEquals(expectedWeights(1D, 42D), collectTargetWeights(unionGraph, id1));
+        assertArrayEquals(expectedWeights(1D), collectTargetProperties(rel1Graph, id1));
+        assertArrayEquals(expectedWeights(42D), collectTargetProperties(rel2Graph, id1));
+        assertArrayEquals(expectedWeights(1D, 42D), collectTargetProperties(unionGraph, id1));
     }
 
     private long[] expectedIds(final Graph graph, long... expected) {

@@ -55,8 +55,8 @@ public final class LoadGraphProc extends BaseProc {
     @Procedure(name = "algo.graph.load", mode = Mode.WRITE)
     @Description("CALL algo.graph.load(" +
                  "name:String, label:String, relationship:String" +
-                 "{direction:'OUT/IN/BOTH', undirected:true/false, sorted:true/false, nodeProperty:'value', nodeWeight:'weight', relationshipWeight: 'weight', graph:'huge/cypher'}) " +
-                 "YIELD nodes, relationships, loadMillis, computeMillis, writeMillis, write, nodeProperty, nodeWeight, relationshipWeight - " +
+                 "{direction:'OUT/IN/BOTH', undirected:true/false, sorted:true/false, nodeProperty:'value', nodeWeight:'weight', relationshipWeight: 'weight', relationshipProperties: {}, graph:'huge/cypher'}) " +
+                 "YIELD nodes, relationships, loadMillis, computeMillis, writeMillis, write, nodeProperty, nodeWeight, relationshipWeight, relationshipProperties - " +
                  "load named graph")
     public Stream<LoadGraphStats> load(
             @Name(value = "name", defaultValue = "") String name,
@@ -82,17 +82,20 @@ public final class LoadGraphProc extends BaseProc {
 
         try (ProgressTimer ignored = ProgressTimer.start(time -> stats.loadMillis = time)) {
             Class<? extends GraphFactory> graphImpl = config.getGraphImpl();
-            Set<String> types = graphImpl == CypherGraphFactory.class
+            Set<String> relationshipTypes = graphImpl == CypherGraphFactory.class
                     ? Collections.emptySet()
                     : RelationshipTypes.parse(config.getRelationshipOrQuery());
-            if (types.size() > 1 && graphImpl != HugeGraphFactory.class) {
+            PropertyMappings propertyMappings = graphImpl == CypherGraphFactory.class
+                    ? PropertyMappings.EMPTY
+                    : config.getRelationshipProperties();
+            if (relationshipTypes.size() > 1 && graphImpl != HugeGraphFactory.class) {
                 throw new IllegalArgumentException(
                         "Only the huge graph supports multiple relationships, please specify {graph:'huge'}.");
             }
 
             GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
             GraphByType graphFromType;
-            if (types.size() > 1) {
+            if (relationshipTypes.size() > 1 || propertyMappings.hasMappings()) {
                 HugeGraphFactory graphFactory = loader.build(HugeGraphFactory.class);
                 GraphByType byType = graphFactory.loadGraphs();
                 stats.nodes = byType.nodeCount();
@@ -114,7 +117,7 @@ public final class LoadGraphProc extends BaseProc {
     @Procedure(name = "algo.graph.load.memrec")
     @Description("CALL algo.graph.load.memrec(" +
                  "label:String, relationship:String" +
-                 "{direction:'OUT/IN/BOTH', undirected:true/false, sorted:true/false, nodeProperty:'value', nodeWeight:'weight', relationshipWeight: 'weight', graph:'cypher/huge'}) " +
+                 "{direction:'OUT/IN/BOTH', undirected:true/false, sorted:true/false, nodeProperty:'value', nodeWeight:'weight', relationshipWeight: 'weight', relationshipProperties: {}, graph:'cypher/huge'}) " +
                  "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for the graph")
     public Stream<MemRecResult> loadMemRec(
             @Name(value = "label", defaultValue = "") String label,
@@ -137,19 +140,29 @@ public final class LoadGraphProc extends BaseProc {
         loader
                 .withNodeStatement(config.getNodeLabelOrQuery())
                 .withRelationshipStatement(config.getRelationshipOrQuery())
-                .withOptionalRelationshipWeightsFromProperty(
-                        config.getWeightProperty(),
-                        config.getWeightPropertyDefaultValue(1.0))
+                // TODO: remove and make explicit in the procedure
                 .withOptionalNodeProperties(
                         PropertyMapping.of(LabelPropagation.SEED_TYPE, nodeProperty, 0.0D),
                         PropertyMapping.of(LabelPropagation.WEIGHT_TYPE, nodeWeight, 1.0D)
                 )
+                .withRelationshipProperties(config.getRelationshipProperties())
                 .withDirection(direction);
 
-        if (config.get("sorted", false)) {
+        if (config.containsKey(ProcedureConstants.RELATIONSHIP_WEIGHT_KEY)) { // required to be backwards compatible with `relationshipWeight`
+            loader.withRelationshipProperties(PropertyMapping.of(
+                    config.getString(ProcedureConstants.RELATIONSHIP_WEIGHT_KEY, null),
+                    config.getWeightPropertyDefaultValue(ProcedureConstants.DEFAULT_VALUE_DEFAULT)
+            ));
+        } else if (config.hasWeightProperty()) { // required to be backwards compatible with `weightProperty` (not documented but was possible)
+            loader.withRelationshipProperties(PropertyMapping.of(
+                    config.getWeightProperty(),
+                    config.getWeightPropertyDefaultValue(ProcedureConstants.DEFAULT_VALUE_DEFAULT)));
+        }
+
+        if (config.get(ProcedureConstants.SORTED_KEY, false)) {
             loader.sorted();
         }
-        if (config.get("undirected", false)) {
+        if (config.get(ProcedureConstants.UNDIRECTED_KEY, false)) {
             loader.undirected();
         }
         return loader;
@@ -162,18 +175,20 @@ public final class LoadGraphProc extends BaseProc {
         public long nodes, relationships, loadMillis;
         public boolean alreadyLoaded;
         public String nodeWeight, relationshipWeight, nodeProperty, loadNodes, loadRelationships;
+        public Object relationshipProperties;
 
         LoadGraphStats(String graphName, ProcedureConfiguration configuration) {
             name = graphName;
-            graph = configuration.getString(ProcedureConstants.GRAPH_IMPL_PARAM, "huge");
-            undirected = configuration.get(ProcedureConstants.UNDIRECTED, false);
-            sorted = configuration.get(ProcedureConstants.SORTED, false);
+            graph = configuration.getString(ProcedureConstants.GRAPH_IMPL_KEY, "huge");
+            undirected = configuration.get(ProcedureConstants.UNDIRECTED_KEY, false);
+            sorted = configuration.get(ProcedureConstants.SORTED_KEY, false);
             loadNodes = configuration.getNodeLabelOrQuery();
             loadRelationships = configuration.getRelationshipOrQuery();
             direction = configuration.getDirection(Direction.OUTGOING).name();
-            nodeWeight = configuration.getString(ProcedureConstants.NODE_WEIGHT, null);
-            nodeProperty = configuration.getString(ProcedureConstants.NODE_PROPERTY, null);
-            relationshipWeight = configuration.getString(ProcedureConstants.RELATIONSHIP_WEIGHT, null);
+            nodeWeight = configuration.getString(ProcedureConstants.NODE_WEIGHT_KEY, null);
+            nodeProperty = configuration.getString(ProcedureConstants.NODE_PROPERTY_KEY, null);
+            relationshipWeight = configuration.getString(ProcedureConstants.RELATIONSHIP_WEIGHT_KEY, null);
+            relationshipProperties = configuration.get(ProcedureConstants.RELATIONSHIP_PROPERTIES_KEY, null);
         }
     }
 
@@ -204,7 +219,7 @@ public final class LoadGraphProc extends BaseProc {
         if (!LoadGraphFactory.exists(name)) {
             info = new GraphInfoWithHistogram(name);
         } else {
-            Graph graph = LoadGraphFactory.getAll(name);
+            Graph graph = LoadGraphFactory.getUnion(name);
             final boolean calculateDegreeDistribution;
             final ProcedureConfiguration configuration;
             if (Boolean.TRUE.equals(degreeDistribution)) {

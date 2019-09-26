@@ -56,7 +56,7 @@ public abstract class WeightedAlgorithm implements SimilarityAlgorithm<WeightedI
     public WeightedInput[] prepareInputs(
             final Object rawData,
             final Double skipValue) throws Exception {
-        if (ProcedureConstants.CYPHER_QUERY.equals(configuration.getGraphName("dense"))) {
+        if (ProcedureConstants.CYPHER_QUERY_KEY.equals(configuration.getGraphName("dense"))) {
             return prepareSparseWeights(api, (String) rawData,  skipValue, configuration);
         } else {
             List<Map<String, Object>> data = (List<Map<String, Object>>) rawData;
@@ -131,7 +131,7 @@ public abstract class WeightedAlgorithm implements SimilarityAlgorithm<WeightedI
     }
 
     private Supplier<RleDecoder> createDecoderFactory(String graphType, int size) {
-        if(ProcedureConstants.CYPHER_QUERY.equals(graphType)) {
+        if(ProcedureConstants.CYPHER_QUERY_KEY.equals(graphType)) {
             return () -> new RleDecoder(size);
         }
 

@@ -81,7 +81,7 @@ import java.util.function.LongPredicate;
  */
 public class HugeGraph implements Graph {
 
-    private static final double NO_WEIGHT = Double.NaN;
+    public static final double NO_WEIGHT = Double.NaN;
 
     private final IdMap idMapping;
     private final AllocationTracker tracker;

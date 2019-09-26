@@ -146,7 +146,6 @@ class DegreesTest {
         GraphLoader graphLoader = new GraphLoader(db)
                 .withAnyRelationshipType()
                 .withAnyLabel()
-                .withoutNodeProperties()
                 .withDirection(direction == null ? Direction.BOTH : direction);
         if (direction == null) {
             graphLoader.undirected();

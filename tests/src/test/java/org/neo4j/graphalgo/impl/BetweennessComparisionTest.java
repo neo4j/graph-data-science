@@ -85,9 +85,6 @@ public class BetweennessComparisionTest {
         graph = new GraphLoader(DB)
                 .withAnyLabel()
                 .withAnyRelationshipType()
-                .withoutRelationshipWeights()
-                .withoutNodeProperties()
-                .withoutNodeWeights()
                 .withDirection(Direction.OUTGOING)
                 .load(HugeGraphFactory.class);
 

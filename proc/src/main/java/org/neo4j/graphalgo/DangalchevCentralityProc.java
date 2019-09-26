@@ -69,7 +69,6 @@ public class DangalchevCentralityProc {
 
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, configuration.getNodeLabelOrQuery(), configuration.getRelationshipOrQuery(), configuration)
-                .withoutNodeProperties()
                 .withAllocationTracker(tracker)
                 .undirected()
                 .load(configuration.getGraphImpl("huge"));
@@ -110,7 +109,6 @@ public class DangalchevCentralityProc {
         try (ProgressTimer timer = builder.timeLoad()) {
             graph = new GraphLoader(api, Pools.DEFAULT)
                     .init(log, configuration.getNodeLabelOrQuery(), configuration.getRelationshipOrQuery(), configuration)
-                    .withoutNodeProperties()
                     .withAllocationTracker(tracker)
                     .undirected()
                     .load(configuration.getGraphImpl("huge"));

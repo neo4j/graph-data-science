@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.impl;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
@@ -108,7 +109,7 @@ class KSpanningTreeTest {
 
     private void setup(Class<? extends GraphFactory> graphImpl) {
         graph = new GraphLoader(db)
-                .withRelationshipWeightsFromProperty("w", 1.0)
+                .withRelationshipProperties(PropertyMapping.of("w", 1.0))
                 .withAnyRelationshipType()
                 .withAnyLabel()
                 .undirected()

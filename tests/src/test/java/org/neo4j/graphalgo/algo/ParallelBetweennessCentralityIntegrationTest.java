@@ -102,7 +102,6 @@ public class ParallelBetweennessCentralityIntegrationTest {
         graph = new GraphLoader(db)
                 .withAnyRelationshipType()
                 .withAnyLabel()
-                .withoutNodeProperties()
                 .load(HugeGraphFactory.class);
 
         db.getDependencyResolver()

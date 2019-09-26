@@ -72,9 +72,9 @@ public class AllShortestPathsProc {
         GraphLoader graphLoader = new GraphLoader(api, Pools.DEFAULT)
                 .withOptionalLabel(configuration.getNodeLabelOrQuery())
                 .withOptionalRelationshipType(configuration.getRelationshipOrQuery())
-                .withOptionalRelationshipWeightsFromProperty(
+                .withRelationshipProperties(PropertyMapping.of(
                         propertyName,
-                        configuration.getWeightPropertyDefaultValue(1.0))
+                        configuration.getWeightPropertyDefaultValue(1.0)))
                 .withConcurrency(configuration.getReadConcurrency())
                 .withAllocationTracker(tracker);
 

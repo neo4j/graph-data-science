@@ -37,12 +37,16 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
-import org.neo4j.procedure.*;
+import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Mode;
+import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.core.ProcedureConstants.CYPHER_QUERY;
+import static org.neo4j.graphalgo.core.ProcedureConstants.CYPHER_QUERY_KEY;
 
 public final class DegreeCentralityProc {
 
@@ -60,9 +64,9 @@ public final class DegreeCentralityProc {
 
     @Procedure(value = "algo.degree", mode = Mode.WRITE)
     @Description("CALL algo.degree(label:String, relationship:String, " +
-            "{ weightProperty: null, write: true, writeProperty:'degree', concurrency:4}) " +
-            "YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, dampingFactor, write, writeProperty" +
-            " - calculates degree centrality and potentially writes back")
+                 "{ weightProperty: null, write: true, writeProperty:'degree', concurrency:4}) " +
+                 "YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, dampingFactor, write, writeProperty" +
+                 " - calculates degree centrality and potentially writes back")
     public Stream<CentralityScore.Stats> degree(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
@@ -115,15 +119,15 @@ public final class DegreeCentralityProc {
     }
 
     private Direction getDirection(ProcedureConfiguration configuration) {
-        String graphName = configuration.getGraphName(ProcedureConstants.DEFAULT_GRAPH_IMPL);
+        String graphName = configuration.getGraphName(ProcedureConstants.GRAPH_IMPL_DEFAULT);
         Direction direction = configuration.getDirection(Direction.INCOMING);
-        return CYPHER_QUERY.equals(graphName) ? Direction.OUTGOING : direction;
+        return CYPHER_QUERY_KEY.equals(graphName) ? Direction.OUTGOING : direction;
     }
 
     @Procedure(value = "algo.degree.stream", mode = Mode.READ)
     @Description("CALL algo.degree.stream(label:String, relationship:String, " +
-            "{weightProperty: null, concurrency:4}) " +
-            "YIELD node, score - calculates degree centrality and streams results")
+                 "{weightProperty: null, concurrency:4}) " +
+                 "YIELD node, score - calculates degree centrality and streams results")
     public Stream<CentralityScore> degreeStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
@@ -182,9 +186,9 @@ public final class DegreeCentralityProc {
         GraphLoader graphLoader = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, configuration)
                 .withAllocationTracker(tracker)
-                .withOptionalRelationshipWeightsFromProperty(
+                .withRelationshipProperties(PropertyMapping.of(
                         weightPropertyKey,
-                        configuration.getWeightPropertyDefaultValue(0.0))
+                        configuration.getWeightPropertyDefaultValue(0.0)))
                 .withReducedRelationshipLoading(direction);
 
         try (ProgressTimer timer = statsBuilder.timeLoad()) {
@@ -202,7 +206,9 @@ public final class DegreeCentralityProc {
             CentralityScore.Stats.Builder statsBuilder,
             String weightPropertyKey) {
 
-        Direction computeDirection = getDirection(configuration) == Direction.BOTH ? Direction.OUTGOING : getDirection(configuration);
+        Direction computeDirection = getDirection(configuration) == Direction.BOTH
+                ? Direction.OUTGOING
+                : getDirection(configuration);
 
         DegreeCentralityAlgorithm algo = new DegreeCentrality(
                 graph,

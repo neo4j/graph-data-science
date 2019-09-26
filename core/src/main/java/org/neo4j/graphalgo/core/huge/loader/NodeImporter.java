@@ -41,10 +41,10 @@ public class NodeImporter {
     }
 
     private final HugeLongArrayBuilder idMapBuilder;
-    private final IntObjectMap<HugeNodePropertiesBuilder> buildersByPropertyId;
-    private final Collection<HugeNodePropertiesBuilder> nodePropertyBuilders;
+    private final IntObjectMap<NodePropertiesBuilder> buildersByPropertyId;
+    private final Collection<NodePropertiesBuilder> nodePropertyBuilders;
 
-    public NodeImporter(HugeLongArrayBuilder idMapBuilder, Collection<HugeNodePropertiesBuilder> nodePropertyBuilders) {
+    public NodeImporter(HugeLongArrayBuilder idMapBuilder, Collection<NodePropertiesBuilder> nodePropertyBuilders) {
         this.idMapBuilder = idMapBuilder;
         this.buildersByPropertyId = mapBuildersByPropertyId(nodePropertyBuilders);
         this.nodePropertyBuilders = nodePropertyBuilders;
@@ -104,7 +104,7 @@ public class NodeImporter {
     private int readWeight(
             long nodeReference,
             long propertiesReference,
-            IntObjectMap<HugeNodePropertiesBuilder> nodeProperties,
+            IntObjectMap<NodePropertiesBuilder> nodeProperties,
             long internalId,
             CursorFactory cursors,
             Read read) {
@@ -112,7 +112,7 @@ public class NodeImporter {
             read.nodeProperties(nodeReference, propertiesReference, pc);
             int nodePropertiesRead = 0;
             while (pc.next()) {
-                HugeNodePropertiesBuilder props = nodeProperties.get(pc.propertyKey());
+                NodePropertiesBuilder props = nodeProperties.get(pc.propertyKey());
                 if (props != null) {
                     Value value = pc.propertyValue();
                     double defaultValue = props.defaultValue();
@@ -131,7 +131,7 @@ public class NodeImporter {
             List<Map<String, Number>> cypherNodeProperties) {
         Map<String, Number> weights = cypherNodeProperties.get((int) propertiesReference);
         int nodePropertiesRead = 0;
-        for (HugeNodePropertiesBuilder props : nodePropertyBuilders) {
+        for (NodePropertiesBuilder props : nodePropertyBuilders) {
             Number number = weights.get(props.propertyKey());
             if (number != null) {
                 props.set(internalId, number.doubleValue());
@@ -142,11 +142,11 @@ public class NodeImporter {
     }
 
 
-    private IntObjectMap<HugeNodePropertiesBuilder> mapBuildersByPropertyId(Collection<HugeNodePropertiesBuilder> builders) {
+    private IntObjectMap<NodePropertiesBuilder> mapBuildersByPropertyId(Collection<NodePropertiesBuilder> builders) {
         if (builders == null) {
             return null;
         }
-        IntObjectMap<HugeNodePropertiesBuilder> map = new IntObjectHashMap<>(builders.size());
+        IntObjectMap<NodePropertiesBuilder> map = new IntObjectHashMap<>(builders.size());
         builders.stream().filter(builder -> builder.propertyId() >= 0).forEach(builder -> map.put(builder.propertyId(), builder));
         return map.isEmpty() ? null : map;
     }

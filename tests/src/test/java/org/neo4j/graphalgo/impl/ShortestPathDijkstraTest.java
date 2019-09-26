@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.impl;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
@@ -137,7 +138,7 @@ final class ShortestPathDijkstraTest {
         final Graph graph = new GraphLoader(DB)
                 .withLabel(label)
                 .withRelationshipType(type)
-                .withRelationshipWeightsFromProperty("cost", Double.MAX_VALUE)
+                .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
                 .withDirection(Direction.OUTGOING)
                 .load(graphImpl);
 
@@ -166,7 +167,7 @@ final class ShortestPathDijkstraTest {
         final Graph graph = new GraphLoader(DB)
                 .withLabel(label)
                 .withRelationshipType(type)
-                .withRelationshipWeightsFromProperty("cost", Double.MAX_VALUE)
+                .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
                 .withDirection(Direction.OUTGOING)
                 .load(graphImpl);
 
@@ -196,7 +197,7 @@ final class ShortestPathDijkstraTest {
         Graph graph = new GraphLoader(DB)
                 .withLabel(label)
                 .withRelationshipType(type)
-                .withRelationshipWeightsFromProperty("cost", Double.MAX_VALUE)
+                .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
                 .withDirection(Direction.OUTGOING)
                 .load(graphImpl);
 
@@ -230,7 +231,7 @@ final class ShortestPathDijkstraTest {
         final Graph graph = new GraphLoader(DB)
                 .withLabel(label)
                 .withRelationshipType("TYPE1")
-                .withRelationshipWeightsFromProperty("cost", Double.MAX_VALUE)
+                .withRelationshipProperties(PropertyMapping.of("cost", Double.MAX_VALUE))
                 .withDirection(Direction.OUTGOING)
                 .load(graphImpl);
 

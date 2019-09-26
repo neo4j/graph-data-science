@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.core.huge.loader;
 
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.apache.commons.lang3.tuple.Pair;
-import org.neo4j.graphalgo.KernelPropertyMapping;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.RelationshipTypeMappings;
@@ -51,7 +50,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public final class HugeGraphFactory extends GraphFactory {
 
@@ -75,28 +73,29 @@ public final class HugeGraphFactory extends GraphFactory {
                 .add("nodeIdMap", IdMap.memoryEstimation());
 
         // Node properties
-        for (KernelPropertyMapping propertyMapping : dimensions.nodeProperties()) {
-            int propertyId = propertyMapping.neoPropertyKeyId;
-            if (propertyId == StatementConstants.NO_SUCH_PROPERTY_KEY) {
-                builder.add(propertyMapping.propertyKey, NullWeightMap.MEMORY_USAGE);
+        for (PropertyMapping propertyMapping : dimensions.nodeProperties()) {
+            if (propertyMapping.exists()) {
+                builder.add(propertyMapping.propertyKey(), NodePropertyMap.memoryEstimation());
             } else {
-                builder.add(propertyMapping.propertyKey, NodePropertyMap.memoryEstimation());
+                builder.add(propertyMapping.propertyKey(), NullWeightMap.MEMORY_USAGE);
             }
         }
 
-        // Relationship weight properties
-        if (dimensions.relWeightId() != StatementConstants.NO_SUCH_PROPERTY_KEY) {
-            // Adjacency lists and Adjacency offsets
-            MemoryEstimation adjacencyListSize = AdjacencyList.uncompressedMemoryEstimation(setup.loadAsUndirected);
-            MemoryEstimation adjacencyOffsetsSetup = AdjacencyOffsets.memoryEstimation();
-            if (setup.loadOutgoing || setup.loadAsUndirected) {
-                builder.add("outgoing weights", adjacencyListSize);
-                builder.add("outgoing weight offsets", adjacencyOffsetsSetup);
+        // Relationship properties
+        for (PropertyMapping mapping : dimensions.relProperties()) {
+            if (mapping.exists()) {
+                // Adjacency lists and Adjacency offsets
+                MemoryEstimation adjacencyListSize = AdjacencyList.uncompressedMemoryEstimation(setup.loadAsUndirected);
+                MemoryEstimation adjacencyOffsetsSetup = AdjacencyOffsets.memoryEstimation();
+                if (setup.loadOutgoing || setup.loadAsUndirected) {
+                    builder.add("outgoing properties for " + mapping.neoPropertyKey(), adjacencyListSize);
+                    builder.add("outgoing property offsets for " + mapping.neoPropertyKey(), adjacencyOffsetsSetup);
 
-            }
-            if (setup.loadIncoming && !setup.loadAsUndirected) {
-                builder.add("incoming weights", adjacencyListSize);
-                builder.add("incoming weight offsets", adjacencyOffsetsSetup);
+                }
+                if (setup.loadIncoming && !setup.loadAsUndirected) {
+                    builder.add("incoming properties for " + mapping.neoPropertyKey(), adjacencyListSize);
+                    builder.add("incoming property offsets for " + mapping.neoPropertyKey(), adjacencyOffsetsSetup);
+                }
             }
         }
 
@@ -234,7 +233,7 @@ public final class HugeGraphFactory extends GraphFactory {
                     AdjacencyOffsets inAdjacencyOffsets = incomingRelationshipsBuilder != null
                             ? incomingRelationshipsBuilder.globalAdjacencyOffsets : null;
 
-                    if (setup.relationshipPropertyMappings.length == 0) {
+                    if (!dimensions.relProperties().hasMappings()) {
                         HugeGraph graph = buildGraph(
                                 tracker,
                                 idsAndProperties.hugeIdMap,
@@ -246,34 +245,33 @@ public final class HugeGraphFactory extends GraphFactory {
                                 inAdjacencyList,
                                 inAdjacencyOffsets,
                                 0,
-                                KernelPropertyMapping.EMPTY_WEIGHT_PROPERTY,
+                                PropertyMapping.EMPTY_PROPERTY,
                                 relationshipCounts.getOrDefault(entry.getKey(), 0L),
                                 setup.loadAsUndirected
                         );
                         return Collections.singletonMap("", graph);
                     }
 
-                    return IntStream.range(0, setup.relationshipPropertyMappings.length)
-                            .mapToObj(weightIndex -> {
-                                HugeGraph graph = buildGraph(
-                                        tracker,
-                                        idsAndProperties.hugeIdMap,
-                                        idsAndProperties.properties,
-                                        incomingRelationshipsBuilder,
-                                        outgoingRelationshipsBuilder,
-                                        outAdjacencyList,
-                                        outAdjacencyOffsets,
-                                        inAdjacencyList,
-                                        inAdjacencyOffsets,
-                                        weightIndex,
-                                        dimensions.relProperties().get(weightIndex),
-                                        relationshipCounts.getOrDefault(entry.getKey(), 0L),
-                                        setup.loadAsUndirected
-                                );
-                                PropertyMapping property = setup.relationshipPropertyMappings[weightIndex];
-                                return Pair.of(property.propertyKey, graph);
-                            })
-                            .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+                    return dimensions.relProperties().enumerate().map(propertyEntry -> {
+                        int weightIndex = propertyEntry.getKey();
+                        PropertyMapping property = propertyEntry.getValue();
+                        HugeGraph graph = buildGraph(
+                                tracker,
+                                idsAndProperties.hugeIdMap,
+                                idsAndProperties.properties,
+                                incomingRelationshipsBuilder,
+                                outgoingRelationshipsBuilder,
+                                outAdjacencyList,
+                                outAdjacencyOffsets,
+                                inAdjacencyList,
+                                inAdjacencyOffsets,
+                                weightIndex,
+                                property,
+                                relationshipCounts.getOrDefault(entry.getKey(), 0L),
+                                setup.loadAsUndirected
+                        );
+                        return Pair.of(property.propertyKey(), graph);
+                    }).collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
                 }));
     }
 
@@ -284,9 +282,9 @@ public final class HugeGraphFactory extends GraphFactory {
         DeduplicationStrategy[] deduplicationStrategies = dimensions
                 .relProperties()
                 .stream()
-                .map(property -> property.deduplicationStrategy == DeduplicationStrategy.DEFAULT
+                .map(property -> property.deduplicationStrategy() == DeduplicationStrategy.DEFAULT
                         ? DeduplicationStrategy.SKIP
-                        : property.deduplicationStrategy
+                        : property.deduplicationStrategy()
                 )
                 .toArray(DeduplicationStrategy[]::new);
         // TODO: backwards compat code
@@ -302,19 +300,19 @@ public final class HugeGraphFactory extends GraphFactory {
             outgoingRelationshipsBuilder = new RelationshipsBuilder(
                     deduplicationStrategies,
                     tracker,
-                    setup.relationshipPropertyMappings.length);
+                    setup.relationshipPropertyMappings.numberOfMappings());
         } else {
             if (setup.loadOutgoing) {
                 outgoingRelationshipsBuilder = new RelationshipsBuilder(
                         deduplicationStrategies,
                         tracker,
-                        setup.relationshipPropertyMappings.length);
+                        setup.relationshipPropertyMappings.numberOfMappings());
             }
             if (setup.loadIncoming) {
                 incomingRelationshipsBuilder = new RelationshipsBuilder(
                         deduplicationStrategies,
                         tracker,
-                        setup.relationshipPropertyMappings.length);
+                        setup.relationshipPropertyMappings.numberOfMappings());
             }
         }
 
@@ -332,14 +330,14 @@ public final class HugeGraphFactory extends GraphFactory {
             AdjacencyList inAdjacencyList,
             AdjacencyOffsets inAdjacencyOffsets,
             int weightIndex,
-            KernelPropertyMapping weightProperty,
+            PropertyMapping weightProperty,
             long relationshipCount,
             boolean loadAsUndirected) {
 
         AdjacencyList outWeightList = null;
         AdjacencyOffsets outWeightOffsets = null;
         if (outRelationshipsBuilder != null) {
-            if (weightProperty.neoPropertyKeyId != StatementConstants.NO_SUCH_PROPERTY_KEY) {
+            if (weightProperty.propertyKeyId() != StatementConstants.NO_SUCH_PROPERTY_KEY) {
                 outWeightOffsets = outRelationshipsBuilder.globalWeightOffsets[weightIndex];
                 if (outWeightOffsets != null) {
                     outWeightList = outRelationshipsBuilder.weights[weightIndex].build();
@@ -350,7 +348,7 @@ public final class HugeGraphFactory extends GraphFactory {
         AdjacencyList inWeightList = null;
         AdjacencyOffsets inWeightOffsets = null;
         if (inRelationshipsBuilder != null) {
-            if (weightProperty.neoPropertyKeyId != StatementConstants.NO_SUCH_PROPERTY_KEY) {
+            if (weightProperty.propertyKeyId() != StatementConstants.NO_SUCH_PROPERTY_KEY) {
                 inWeightOffsets = inRelationshipsBuilder.globalWeightOffsets[weightIndex];
                 if (inWeightOffsets != null) {
                     inWeightList = inRelationshipsBuilder.weights[weightIndex].build();
@@ -367,7 +365,7 @@ public final class HugeGraphFactory extends GraphFactory {
                 outAdjacencyList,
                 inAdjacencyOffsets,
                 outAdjacencyOffsets,
-                weightProperty.defaultValue,
+                weightProperty.defaultValue(),
                 inWeightList,
                 outWeightList,
                 inWeightOffsets,

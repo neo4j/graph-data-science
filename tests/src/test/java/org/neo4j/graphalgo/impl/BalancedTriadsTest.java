@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -85,7 +86,7 @@ class BalancedTriadsTest {
         graph = new GraphLoader(DB, Pools.DEFAULT)
                 .withLabel("Node")
                 .withRelationshipStatement("TYPE")
-                .withRelationshipWeightsFromProperty("w", 0.0)
+                .withRelationshipProperties(PropertyMapping.of("w", 0.0))
                 .sorted()
                 .undirected()
                 .load(HugeGraphFactory.class);

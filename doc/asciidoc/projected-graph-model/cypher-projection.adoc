@@ -9,7 +9,7 @@ This chapter explains Cypher projection in the Neo4j Graph Algorithms library.
 --
 endif::env-docs[]
 
-If the label and relationship-type projection is not selective enough to describe our subgraph to run the algorithm on, we can use Cypher statements to project subsets of our graph.
+If the node-label and relationship-type projection is not selective enough to describe our subgraph to run the algorithm on, we can use Cypher statements to project subsets of our graph.
 Use a node-statement instead of the label parameter and a relationship-statement instead of the relationship-type, and use `graph:'cypher'` in the config.
 
 Relationships described in the relationship-statement will only be projected if both source and target nodes are described in the node-statement, otherwise they will be ignored.
@@ -34,7 +34,6 @@ The Cypher loader expects the query to return `source` and `target` fields.
 
 Note that in both queries we use the `id` function to return the node id.
 
-
 [[cypher-projection-weights]]
 == Weights
 
@@ -50,12 +49,10 @@ CALL algo.<name>(
   {graph: "cypher"})
 ----
 
-
 [[cypher-projection-basic-usage]]
 == Example Usage
 
 We could use Cypher projections to run the PageRank algorithm on *DBpedia*, as shown in the following examples.
-
 
 .The following will run the PageRank algorithm over a graph based on Cypher projections for nodes and relationships:
 [source,cypher]
@@ -78,7 +75,6 @@ CALL algo.louvain(
    RETURN id(p1) as source, id(p2) as target, count(*) as weight',
   {graph:'cypher', iterations:5, write: true});
 ----
-
 
 [[cypher-projection-parallel-loading]]
 == Parallel loading
@@ -122,10 +118,8 @@ CALL algo.pageRank(
 
 // end::overview[]
 
-
-
 // tag::explanation[]
-If label and relationship-type are not selective enough to describe your subgraph to run the algorithm on, you can use Cypher statements to load or project subsets of your graph.
+If node-label and relationship-type are not selective enough to describe your subgraph to run the algorithm on, you can use Cypher statements to load or project subsets of your graph.
 This can also be used to run algorithms on a virtual graph.
 You can learn more in the <<cypher-projection>> section of the manual.
 // end::explanation[]
