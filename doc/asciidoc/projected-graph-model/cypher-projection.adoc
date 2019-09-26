@@ -79,24 +79,6 @@ CALL algo.louvain(
   {graph:'cypher', iterations:5, write: true});
 ----
 
-[[cypher-projection-deduplcate-relationships]]
-== Deduplication of parallel relationships
-
-A Cypher projected graph will, by default, store all projected relationships without any deduplication (see `none` below).
-As for the Huge graph, we can specify a `deduplicateRelationships` strategy (see <<deduplication-of-parallel-relationships>>).
-
-.The following runs shortest path over a graph based on Cypher projections, picking the `ROAD` relationship with minimum cost:
-[source,cypher]
-----
-MATCH (start:Loc {name: 'A'}), (end:Loc {name: 'F'})
-CALL algo.shortestPath(start, end, 'cost', {
-  nodeQuery:'MATCH (n:Loc) RETURN id(n) as id',
-  relationshipQuery:'MATCH (n:Loc)-[r:ROAD]->(m:Loc) RETURN id(n) AS source, id(m) AS target, r.cost AS weight',
-  {graph: 'cypher', duplicateRelationships: 'min'})
-YIELD writeMillis, loadMillis, nodeCount, totalCost
-RETURN writeMillis, loadMillis, nodeCount, totalCost
-----
-
 [[cypher-projection-parallel-loading]]
 == Parallel loading
 

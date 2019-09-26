@@ -3,17 +3,16 @@
 
 [abstract]
 --
-This section describes named graphs, which are stored only in memory.
+This section describes named graphs, which are stored in-memory and can be referenced by a user-defined name.
 When Neo4j is restarted, named graphs are lost and will need to be reloaded.
 --
 
 As it can take some time to load large graphs into the algorithm data structures, you can pre-load graphs and then later refer to them by name when calling graph algorithm procedures.
 After usage, they can be removed from memory to free resources used.
 
-
 == Loading a named graph
 
-We can load named graphs using any of the approaches described in the <<projected-graph-model, projected graph model section>>.
+We can load named graphs using either a <<label-relationship-type-projection, label and relationship-type>> or a <<cypher-projection, Cypher>> projection.
 
 .The following will load a graph with the name `my-graph`, for node label `Label` and relationship type `REL_TYPE`
 [source,cypher]
@@ -140,6 +139,21 @@ CALL algo.graph.load('cheapestRoads', 'Loc', 'ROAD', {
   graph: 'huge',
   relationshipWeight: 'cost',
   duplicateRelationships: 'sum'})
+----
+
+A Cypher projected graph will, by default, store all projected relationships without any deduplication (see `none` below).
+As for the Huge graph, we can specify a `deduplicateRelationships` strategy (see <<deduplication-of-parallel-relationships>>).
+
+.The following runs shortest path over a graph based on Cypher projections, picking the `ROAD` relationship with minimum cost:
+[source,cypher]
+----
+MATCH (start:Loc {name: 'A'}), (end:Loc {name: 'F'})
+CALL algo.shortestPath(start, end, 'cost', {
+  nodeQuery:'MATCH (n:Loc) RETURN id(n) as id',
+  relationshipQuery:'MATCH (n:Loc)-[r:ROAD]->(m:Loc) RETURN id(n) AS source, id(m) AS target, r.cost AS weight',
+  {graph: 'cypher', duplicateRelationships: 'min'})
+YIELD writeMillis, loadMillis, nodeCount, totalCost
+RETURN writeMillis, loadMillis, nodeCount, totalCost
 ----
 
 == Loading multiple relationship properties
