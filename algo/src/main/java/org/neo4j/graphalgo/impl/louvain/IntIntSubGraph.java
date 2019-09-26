@@ -28,7 +28,8 @@ final class IntIntSubGraph extends SubGraph {
     private IntFloatHashMap[] graph;
     private final int communityCount;
 
-    IntIntSubGraph(final int communityCount) {
+    IntIntSubGraph(final int communityCount, boolean hasRelationshipProperty) {
+        super(hasRelationshipProperty);
         this.graph = new IntFloatHashMap[communityCount];
         this.communityCount = communityCount;
     }

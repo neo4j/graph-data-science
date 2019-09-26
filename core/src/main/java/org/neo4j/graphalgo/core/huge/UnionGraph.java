@@ -203,6 +203,11 @@ public final class UnionGraph implements Graph {
     }
 
     @Override
+    public boolean hasRelationshipProperty() {
+        return first.hasRelationshipProperty();
+    }
+
+    @Override
     public boolean isUndirected() {
         return first.isUndirected();
     }

@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.similarity.AnnTopKConsumer;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.LongAdder;
 
 class HugeRelationshipsBuilder {
@@ -142,7 +143,7 @@ class HugeRelationshipsBuilder {
                     outRelationshipsBuilder.adjacency(),
                     inRelationshipsBuilder.globalAdjacencyOffsets(),
                     outRelationshipsBuilder.globalAdjacencyOffsets(),
-                    -1,
+                    Optional.empty(),
                     inRelationshipsBuilder.weights(),
                     outRelationshipsBuilder.weights(),
                     inRelationshipsBuilder.globalWeightOffsets(),

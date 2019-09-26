@@ -58,6 +58,8 @@ import java.util.stream.Stream;
  */
 public final class Louvain extends Algorithm<Louvain> {
 
+    public static final double DEFAULT_WEIGHT = 1.0;
+
     private static final PropertyTranslator<HugeLongArray[]> HUGE_COMMUNITIES_TRANSLATOR =
             (propertyId, allCommunities, nodeId) -> {
                 // build int array
@@ -88,11 +90,11 @@ public final class Louvain extends Algorithm<Louvain> {
     private final boolean randomNeighborSelection;
 
     public Louvain(
-        final Graph graph,
-        final Config config,
-        final ExecutorService pool,
-        final int concurrency,
-        final AllocationTracker tracker) {this(graph, config, null, pool, concurrency, tracker);}
+            final Graph graph,
+            final Config config,
+            final ExecutorService pool,
+            final int concurrency,
+            final AllocationTracker tracker) {this(graph, config, null, pool, concurrency, tracker);}
 
     public Louvain(
             final Graph graph,
@@ -189,8 +191,8 @@ public final class Louvain extends Algorithm<Louvain> {
             communityCount = CommunityUtils.normalize(communityIds);
             progressLogger.log(
                     "level: " + (level + 1) +
-                            " communities: " + communityCount +
-                            " q: " + modularityOptimization.getModularity());
+                    " communities: " + communityCount +
+                    " q: " + modularityOptimization.getModularity());
             if (communityCount >= nodeCount) {
                 // release the old algo instance
                 modularityOptimization.release();

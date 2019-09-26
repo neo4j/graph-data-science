@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.roaringbitmap.RoaringBitmap;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 

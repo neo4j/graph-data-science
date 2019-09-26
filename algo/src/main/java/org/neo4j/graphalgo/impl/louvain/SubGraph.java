@@ -36,6 +36,10 @@ import java.util.function.LongPredicate;
 
 abstract class SubGraph implements Graph {
 
+    private final boolean hasRelationshipProperty;
+
+    protected SubGraph(boolean hasRelationshipProperty) {this.hasRelationshipProperty = hasRelationshipProperty;}
+
     abstract int degree(long nodeId);
 
     @Override

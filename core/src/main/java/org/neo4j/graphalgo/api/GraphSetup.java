@@ -31,6 +31,7 @@ import org.neo4j.logging.NullLog;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -57,7 +58,7 @@ public class GraphSetup {
     public final boolean loadBoth;
     // default property is used for weighted relationships if property is not set.
     @Deprecated
-    public final double relationDefaultWeight;
+    public final Optional<Double> relationDefaultWeight;
 
     public final Map<String, Object> params;
 

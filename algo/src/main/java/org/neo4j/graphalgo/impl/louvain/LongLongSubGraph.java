@@ -31,7 +31,8 @@ final class LongLongSubGraph extends SubGraph {
     private final long nodeCount;
     private final AllocationTracker tracker;
 
-    LongLongSubGraph(final long nodeCount, final AllocationTracker tracker) {
+    LongLongSubGraph(final long nodeCount, boolean hasRelationshipProperty, final AllocationTracker tracker) {
+        super(hasRelationshipProperty);
         this.nodeCount = nodeCount;
         this.tracker = tracker;
         graph = HugeObjectArray.newArray(LongFloatHashMap.class, nodeCount, tracker);

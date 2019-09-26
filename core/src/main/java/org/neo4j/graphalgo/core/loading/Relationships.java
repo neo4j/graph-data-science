@@ -22,6 +22,8 @@ package org.neo4j.graphalgo.core.loading;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 
+import java.util.Optional;
+
 public class Relationships {
     private final long rows;
     private final long relationshipCount;
@@ -29,7 +31,7 @@ public class Relationships {
     private final AdjacencyList outAdjacency;
     private final AdjacencyOffsets inOffsets;
     private final AdjacencyOffsets outOffsets;
-    private final double defaultWeight;
+    private final Optional<Double> defaultWeight;
     private final AdjacencyList inWeights;
     private final AdjacencyList outWeights;
     private final AdjacencyOffsets inWeightOffsets;
@@ -42,7 +44,7 @@ public class Relationships {
             AdjacencyList outAdjacency,
             AdjacencyOffsets inOffsets,
             AdjacencyOffsets outOffsets,
-            double defaultWeight,
+            Optional<Double> defaultWeight,
             AdjacencyList inWeights,
             AdjacencyList outWeights,
             AdjacencyOffsets inWeightOffsets,
@@ -74,8 +76,7 @@ public class Relationships {
 
     public AdjacencyOffsets outOffsets() { return outOffsets; }
 
-
-    public double defaultWeight() { return defaultWeight; }
+    public Optional<Double> defaultWeight() { return defaultWeight; }
 
     public AdjacencyList inWeights() { return inWeights; }
 

@@ -19,10 +19,13 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.core.loading.RelationshipImporter.Imports;
 import org.neo4j.graphalgo.core.loading.RelationshipImporter.WeightReader;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphdb.Result;
+
+import java.util.Optional;
 
 class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
 
@@ -42,14 +45,13 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     RelationshipRowVisitor(
             RelationshipsBatchBuffer buffer,
             IdMap idMap,
-            boolean hasRelationshipWeights,
-            double defaultWeight,
+            Optional<Double> maybeDefaultWeight,
             Imports imports
     ) {
         this.buffer = buffer;
         this.idMap = idMap;
-        this.hasRelationshipWeights = hasRelationshipWeights;
-        this.defaultWeight = defaultWeight;
+        this.hasRelationshipWeights = maybeDefaultWeight.isPresent();
+        this.defaultWeight = maybeDefaultWeight.orElseGet(PropertyMapping.EMPTY_PROPERTY::defaultValue);
         this.imports = imports;
         this.weightReader = RelationshipImporter.preLoadedWeightReader();
     }
