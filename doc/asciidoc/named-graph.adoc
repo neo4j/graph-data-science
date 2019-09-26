@@ -106,6 +106,117 @@ Loading a lot of multiple relationship types can have a negative impact on perfo
 It is best to only load as few types as needed.
 ====
 
+[[deduplication-of-parallel-relationships]]
+== Deduplication of parallel relationships
+
+The in-memory graph models offer different ways of handling multiple (parallel) relationships between a given pair of nodes.
+By default, the Huge graph assumes that the relationship projection only contains one relationship between a pair of nodes and will simply ignore all other relationships (see `skip` below).
+
+In order to control the deduplication behavior we can pass the `duplicateRelationships` key in the config to decide what should happen with duplicates.
+
+`duplicateRelationships` supports the following options:
+
+* `none` - keeps all relationships between a given pair of nodes / no deduplication.
+* `skip` - keeps the first encountered relationship (and associated weight).
+* `sum` - sums the associated weights of all encountered relationships.
+* `min` - keeps the minimum weight of all encountered relationships.
+* `max` - keeps the maximum weight of all encountered relationships.
+
+Note that setting an explict deduplication strategy, other then `none` or `skip` will increase the relationship loading time.
+
+.The following query loads a graph of roads between locations keeping all the `ROAD` relationships between two `Loc` nodes.
+[source,cypher]
+----
+CALL algo.graph.load('allRoads', 'Loc', 'ROAD', {
+  graph: 'huge',
+  relationshipWeight: 'cost',
+  duplicateRelationships: 'none'})
+----
+
+.The following query loads a graph of roads between locations keeping only those `ROAD` relationships with the minimal cost.
+[source,cypher]
+----
+CALL algo.graph.load('cheapestRoads', 'Loc', 'ROAD', {
+  graph: 'huge',
+  relationshipWeight: 'cost',
+  duplicateRelationships: 'sum'})
+----
+
+== Loading multiple relationship properties
+
+In some scenarios, it is useful to load more than one relationship property.
+For the `load.graph` procedure, this can be configured via the `relationshipProperties` parameter.
+
+The parameter is configured using a map in which each key refers to a user-defined property key.
+Any algorithm that supports relationship properties can make use of these.
+
+The value under each property key is a configuration, that is applied when loading relationship properties.
+In the configuration we specify the Neo4j relationship property to load.
+Optionally, we can define an aggregation function to set the deduplication behavior and a default property value which is used for absent property values (see <<deduplication-of-parallel-relationships>>).
+
+For the following example, let's assume that each `ROAD` relationship stores two properties: the `cost` (distance) and the road `quality` (between 1 and 10).
+
+.The following query loads all roads, deduplicates parallel relationships and aggregates them by their distance and also by their quality.
+[source,cypher]
+----
+CALL algo.graph.load('allRoads', 'Loc', 'ROAD', {
+  graph: 'huge',
+  relationshipProperties: {
+    minDistance: {
+        property: 'cost',
+        aggregation: 'MIN',
+        defaultValue: 1.0
+    },
+    maxQuality: {
+        property: 'quality',
+        aggregation: 'MAX',
+        defaultValue: 5.0
+    }
+  }})
+----
+
+When executed, our `allRoads` in-memory graph stores two relationship properties: `minDistance` and `maxQuality`.
+We can access the loaded properties by specifying them in an algorithm configuration.
+Let us use `algo.shortestPath` again as an example weighted algorithm.
+
+.We first compute the shortest path using the `minDistance` property as weight to compute the path with shortest distance:
+[source,cypher]
+----
+MATCH (start:Loc {name: 'A'}), (end:Loc {name: 'F'})
+CALL algo.shortestPath(start, end, 'minDistance', {graph: 'allRoads'})
+YIELD writeMillis, loadMillis, nodeCount, totalCost
+RETURN writeMillis, loadMillis, nodeCount, totalCost
+----
+
+.We use the same graph, but the `maxQuality` property if we are interested in the path with the best quality:
+[source,cypher]
+----
+MATCH (start:Loc {name: 'A'}), (end:Loc {name: 'F'})
+CALL algo.shortestPath(start, end, 'maxQuality', {graph: 'allRoads'})
+YIELD writeMillis, loadMillis, nodeCount, totalCost
+RETURN writeMillis, loadMillis, nodeCount, totalCost
+----
+
+With the short-hand syntax for specifying property mappings we can skip the `aggregation` and `defaultWeight` parameters.
+If those are omitted, the procedure uses `SKIP` as default aggregation function and `Double.NaN` as default property value.
+
+.The following query loads the graph and allows us to refer to the `cost` property via `distance`:
+[source,cypher]
+----
+CALL algo.graph.load('allRoads', 'Loc', 'ROAD', {
+  graph: 'huge',
+  relationshipProperties: { distance: 'cost' }
+})
+----
+
+Note that in this particular shortest path example, using the default property value is not recommended.
+
+[CAUTION]
+====
+As with relationship types, loading a lot of multiple relationship properties can have a negative impact on performace, both during load and execution time.
+It is best to only load as few properties as needed.
+====
+
 == List all named graphs
 
 We can get an overview over all loaded named graphs.

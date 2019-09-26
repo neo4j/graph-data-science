@@ -11,8 +11,6 @@
             </d:tocentry>
             <d:tocentry linkend="cypher-projection"><?dbhtml filename="projected-graph-model/cypher-projection/index.html"?>
             </d:tocentry>
-            <d:tocentry linkend="relationship-deduplication"><?dbhtml filename="projected-graph-model/relationship-deduplication/index.html"?>
-            </d:tocentry>
             <d:tocentry linkend="memory-requirements"><?dbhtml filename="projected-graph-model/memory-requirements/index.html"?>
             </d:tocentry>
             <d:tocentry linkend="transaction-handling"><?dbhtml filename="projected-graph-model/transaction-handling/index.html"?>
