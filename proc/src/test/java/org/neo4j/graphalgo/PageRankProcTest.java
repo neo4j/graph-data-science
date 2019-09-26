@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
+import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.QueryExecutionException;
@@ -64,23 +65,23 @@ class PageRankProcTest extends ProcTestBase {
             ", (r:Label2 {name: 'r'})" +
             ", (s:Label2 {name: 's'})" +
             ", (t:Label2 {name: 't'})" +
-            ", (b)-[:TYPE1 {foo: 1.0,  equalWeight: 1.0}]->(c)" +
-            ", (c)-[:TYPE1 {foo: 1.2,  equalWeight: 1.0}]->(b)" +
-            ", (d)-[:TYPE1 {foo: 1.3,  equalWeight: 1.0}]->(a)" +
-            ", (d)-[:TYPE1 {foo: 1.7,  equalWeight: 1.0}]->(b)" +
-            ", (e)-[:TYPE1 {foo: 6.1,  equalWeight: 1.0}]->(b)" +
-            ", (e)-[:TYPE1 {foo: 2.2,  equalWeight: 1.0}]->(d)" +
-            ", (e)-[:TYPE1 {foo: 1.5,  equalWeight: 1.0}]->(f)" +
-            ", (f)-[:TYPE1 {foo: 10.5, equalWeight: 1.0}]->(b)" +
-            ", (f)-[:TYPE1 {foo: 2.9,  equalWeight: 1.0}]->(e)" +
-            ", (g)-[:TYPE2 {foo: 3.2,  equalWeight: 1.0}]->(b)" +
-            ", (g)-[:TYPE2 {foo: 5.3,  equalWeight: 1.0}]->(e)" +
-            ", (h)-[:TYPE2 {foo: 9.5,  equalWeight: 1.0}]->(b)" +
-            ", (h)-[:TYPE2 {foo: 0.3,  equalWeight: 1.0}]->(e)" +
-            ", (i)-[:TYPE2 {foo: 5.4,  equalWeight: 1.0}]->(b)" +
-            ", (i)-[:TYPE2 {foo: 3.2,  equalWeight: 1.0}]->(e)" +
-            ", (j)-[:TYPE2 {foo: 9.5,  equalWeight: 1.0}]->(e)" +
-            ", (k)-[:TYPE2 {foo: 4.2,  equalWeight: 1.0}]->(e)";
+            ", (b)-[:TYPE1 {weight: 1.0,  equalWeight: 1.0}]->(c)" +
+            ", (c)-[:TYPE1 {weight: 1.2,  equalWeight: 1.0}]->(b)" +
+            ", (d)-[:TYPE1 {weight: 1.3,  equalWeight: 1.0}]->(a)" +
+            ", (d)-[:TYPE1 {weight: 1.7,  equalWeight: 1.0}]->(b)" +
+            ", (e)-[:TYPE1 {weight: 6.1,  equalWeight: 1.0}]->(b)" +
+            ", (e)-[:TYPE1 {weight: 2.2,  equalWeight: 1.0}]->(d)" +
+            ", (e)-[:TYPE1 {weight: 1.5,  equalWeight: 1.0}]->(f)" +
+            ", (f)-[:TYPE1 {weight: 10.5, equalWeight: 1.0}]->(b)" +
+            ", (f)-[:TYPE1 {weight: 2.9,  equalWeight: 1.0}]->(e)" +
+            ", (g)-[:TYPE2 {weight: 3.2,  equalWeight: 1.0}]->(b)" +
+            ", (g)-[:TYPE2 {weight: 5.3,  equalWeight: 1.0}]->(e)" +
+            ", (h)-[:TYPE2 {weight: 9.5,  equalWeight: 1.0}]->(b)" +
+            ", (h)-[:TYPE2 {weight: 0.3,  equalWeight: 1.0}]->(e)" +
+            ", (i)-[:TYPE2 {weight: 5.4,  equalWeight: 1.0}]->(b)" +
+            ", (i)-[:TYPE2 {weight: 3.2,  equalWeight: 1.0}]->(e)" +
+            ", (j)-[:TYPE2 {weight: 9.5,  equalWeight: 1.0}]->(e)" +
+            ", (k)-[:TYPE2 {weight: 4.2,  equalWeight: 1.0}]->(e)";
 
     @AfterAll
     static void tearDown() {
@@ -95,9 +96,9 @@ class PageRankProcTest extends ProcTestBase {
             tx.success();
         }
 
-        DB.getDependencyResolver()
-                .resolveDependency(Procedures.class)
-                .registerProcedure(PageRankProc.class);
+        Procedures procedures = DB.getDependencyResolver().resolveDependency(Procedures.class);
+        procedures.registerProcedure(LoadGraphProc.class);
+        procedures.registerProcedure(PageRankProc.class);
 
         try (Transaction tx = DB.beginTx()) {
             final Label label = Label.label("Label1");
@@ -141,14 +142,66 @@ class PageRankProcTest extends ProcTestBase {
     }
 
     @AllGraphNamesTest
+    void testPageRankStreamFromLoadedGraph(String graphImpl) {
+        String graphName = "aggGraph";
+        LoadGraphFactory.remove(graphName);
+
+        String loadQuery = String.format(
+                "CALL algo.graph.load(" +
+                "    '%s', 'Label1', 'TYPE1', {" +
+                "        graph: $graph" +
+                "    }" +
+                ")", graphName);
+
+        DB.execute(loadQuery, MapUtil.map("graph", graphImpl));
+
+        final Map<Long, Double> actual = new HashMap<>();
+        String query = "CALL algo.pageRank.stream(" +
+                       "    '', '', {" +
+                       "         graph: $graph" +
+                       "    }" +
+                       ") YIELD nodeId, score";
+        runQuery(query, MapUtil.map("graph", graphName),
+                row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
+        );
+        assertMapEquals(expected, actual);
+    }
+
+    @AllGraphNamesTest
     void testWeightedPageRankStream(String graphImpl) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.pageRank.stream(" +
                        "    'Label1', 'TYPE1', {" +
-                       "        graph: $graph, weightProperty: 'foo'" +
+                       "        graph: $graph, weightProperty: 'weight'" +
                        "    }" +
                        ") YIELD nodeId, score";
         runQuery(query, MapUtil.map("graph", graphImpl),
+                row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
+        );
+        assertMapEquals(weightedExpected, actual);
+    }
+
+    @AllGraphNamesTest
+    void testWeightedPageRankStreamFromLoadedGraph(String graphImpl) {
+        String graphName = "aggGraph";
+        LoadGraphFactory.remove(graphName);
+
+        String loadQuery = String.format(
+                "CALL algo.graph.load(" +
+                "    '%s', 'Label1', 'TYPE1', {" +
+                "        graph: $graph, relationshipWeight: 'weight'" +
+                "    }" +
+                ")", graphName);
+
+        DB.execute(loadQuery, MapUtil.map("graph", graphImpl));
+
+        final Map<Long, Double> actual = new HashMap<>();
+        String query = "CALL algo.pageRank.stream(" +
+                       "    '', '', {" +
+                       "        graph: $graph, weightProperty: 'weight'" +
+                       "    }" +
+                       ") YIELD nodeId, score";
+        runQuery(query, MapUtil.map("graph", graphName),
                 row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
         assertMapEquals(weightedExpected, actual);
@@ -174,7 +227,7 @@ class PageRankProcTest extends ProcTestBase {
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.pageRank.stream(" +
                        "    'Label1', 'TYPE1', {" +
-                       "        graph: $graph, weightProperty: 'foo', cacheWeights: true" +
+                       "        graph: $graph, weightProperty: 'weight', cacheWeights: true" +
                        "    }" +
                        ") YIELD nodeId, score";
         runQuery(query, MapUtil.map("graph", graphImpl),
@@ -219,7 +272,7 @@ class PageRankProcTest extends ProcTestBase {
     void testWeightedPageRankWriteBack(String graphImpl) {
         String query = "CALL algo.pageRank(" +
                        "    'Label1', 'TYPE1', {" +
-                       "        graph: $graph, weightProperty: 'foo'" +
+                       "        graph: $graph, weightProperty: 'weight'" +
                        "    }" +
                        ") YIELD writeMillis, write, writeProperty";
         runQuery(query, MapUtil.map("graph", graphImpl),
