@@ -26,6 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
@@ -61,8 +62,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.GraphHelper.assertOutRelationships;
-import static org.neo4j.graphalgo.GraphHelper.assertOutWeights;
-import static org.neo4j.graphalgo.GraphHelper.assertOutWeightsWithDelta;
+import static org.neo4j.graphalgo.GraphHelper.assertOutProperties;
+import static org.neo4j.graphalgo.GraphHelper.assertOutPropertiesWithDelta;
 import static org.neo4j.graphalgo.TestSupport.allGraphNames;
 import static org.neo4j.graphalgo.TestSupport.allGraphNamesAndDirections;
 
@@ -150,8 +151,8 @@ class LoadGraphProcTest extends ProcTestBase {
         assertEquals(12, fooGraph.nodeCount());
         assertEquals(10, fooGraph.relationshipCount());
 
-        assertOutWeights(fooGraph, 0, 1.0, 1.0, 1.0, 1.0, 1.0);
-        assertOutWeights(fooGraph, 1, 42.0, 42.0, 42.0, 42.0, 42.0);
+        assertOutProperties(fooGraph, 0, 1.0, 1.0, 1.0, 1.0, 1.0);
+        assertOutProperties(fooGraph, 1, 42.0, 42.0, 42.0, 42.0, 42.0);
     }
 
     @ParameterizedTest
@@ -206,7 +207,7 @@ class LoadGraphProcTest extends ProcTestBase {
         );
     }
 
-    @TestSupport.AllGraphNamesTest
+    @AllGraphNamesTest
     void shouldFailToLoadGraphWithMultipleRelationships(String graphImpl) {
         String query = String.format("CALL algo.graph.load(" +
                                      "    'foo', 'null', 'X | Y', {" +
@@ -278,7 +279,7 @@ class LoadGraphProcTest extends ProcTestBase {
         assertEquals(3, g.relationshipCount());
 
         assertOutRelationships(g, 0, 1, 1, 1);
-        assertOutWeightsWithDelta(g, 1E-3, 0, 85.3, 42.1, 2.0);
+        assertOutPropertiesWithDelta(g, 1E-3, 0, 85.3, 42.1, 2.0);
 
         LoadGraphFactory.remove("aggGraph");
         testLocalDb.shutdown();

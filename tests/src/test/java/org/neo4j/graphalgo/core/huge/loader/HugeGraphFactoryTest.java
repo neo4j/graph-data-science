@@ -43,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.GraphHelper.collectTargetIds;
-import static org.neo4j.graphalgo.GraphHelper.collectTargetWeights;
+import static org.neo4j.graphalgo.GraphHelper.collectTargetProperties;
 import static org.neo4j.helpers.collection.Iterables.asSet;
 
 
@@ -124,7 +124,7 @@ class HugeGraphFactoryTest {
 
         long[] targets = collectTargetIds(graph, id2);
         assertArrayEquals(expectedIds(graph, id3), targets);
-        double[] weights = collectTargetWeights(graph, id2);
+        double[] weights = collectTargetProperties(graph, id2);
         assertArrayEquals(expectedWeights(1337), weights, 1e-4);
     }
 
@@ -151,7 +151,7 @@ class HugeGraphFactoryTest {
                 .withRelationshipProperties(PropertyMapping.of("prop1", 1337.42))
                 .load(HugeGraphFactory.class);
 
-        double[] out1 = collectTargetWeights(graph, id1);
+        double[] out1 = collectTargetProperties(graph, id1);
         assertArrayEquals(expectedWeights(1.0, 1337.42), out1, 1e-4);
     }
 
@@ -219,7 +219,7 @@ class HugeGraphFactoryTest {
                 .withDeduplicationStrategy(DeduplicationStrategy.NONE)
                 .load(HugeGraphFactory.class);
 
-        double[] out1 = collectTargetWeights(graph, id2);
+        double[] out1 = collectTargetProperties(graph, id2);
         assertArrayEquals(expectedWeights(42.0, 1337.0), out1, 1e-4);
     }
 
@@ -234,7 +234,7 @@ class HugeGraphFactoryTest {
                 .withDeduplicationStrategy(deduplicationStrategy)
                 .load(HugeGraphFactory.class);
 
-        double[] out1 = collectTargetWeights(graph, id2);
+        double[] out1 = collectTargetProperties(graph, id2);
         assertArrayEquals(expectedWeights(expectedWeight), out1, 1e-4);
     }
 
@@ -275,9 +275,9 @@ class HugeGraphFactoryTest {
         Graph unionGraph = graphs.loadGraph("REL1 | REL2");
 
 
-        assertArrayEquals(expectedWeights(1D), collectTargetWeights(rel1Graph, id1));
-        assertArrayEquals(expectedWeights(42D), collectTargetWeights(rel2Graph, id1));
-        assertArrayEquals(expectedWeights(1D, 42D), collectTargetWeights(unionGraph, id1));
+        assertArrayEquals(expectedWeights(1D), collectTargetProperties(rel1Graph, id1));
+        assertArrayEquals(expectedWeights(42D), collectTargetProperties(rel2Graph, id1));
+        assertArrayEquals(expectedWeights(1D, 42D), collectTargetProperties(unionGraph, id1));
     }
 
     private long[] expectedIds(final Graph graph, long... expected) {

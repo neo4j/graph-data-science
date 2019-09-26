@@ -36,7 +36,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.GraphHelper.collectTargetWeights;
+import static org.neo4j.graphalgo.GraphHelper.collectTargetProperties;
 
 class CypherGraphFactoryDeduplicationTest {
 
@@ -94,7 +94,7 @@ class CypherGraphFactoryDeduplicationTest {
                 .withDeduplicationStrategy(DeduplicationStrategy.SKIP)
                 .load(CypherGraphFactory.class);
 
-        double[] weights = collectTargetWeights(graph, graph.toMappedNodeId(id1));
+        double[] weights = collectTargetProperties(graph, graph.toMappedNodeId(id1));
         assertEquals(1, weights.length);
         assertTrue(weights[0] == 10.0 || weights[0] == 4.0);
     }
@@ -114,7 +114,7 @@ class CypherGraphFactoryDeduplicationTest {
                 .withDeduplicationStrategy(deduplicationStrategy)
                 .load(CypherGraphFactory.class);
 
-        double[] weights = collectTargetWeights(graph, graph.toMappedNodeId(id1));
+        double[] weights = collectTargetProperties(graph, graph.toMappedNodeId(id1));
         assertArrayEquals(new double[]{expectedWeight}, weights);
     }
 }

@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.neo4j.graphalgo.GraphHelper.assertInRelationships;
 import static org.neo4j.graphalgo.GraphHelper.assertOutRelationships;
-import static org.neo4j.graphalgo.GraphHelper.assertOutWeights;
+import static org.neo4j.graphalgo.GraphHelper.assertOutProperties;
 
 class GraphLoaderHugeGraphTest {
 
@@ -418,24 +418,24 @@ class GraphLoaderHugeGraphTest {
 
         Graph p1 = graph.loadGraph("", Optional.of("agg1"));
         assertEquals(4L, p1.nodeCount());
-        assertOutWeights(p1, 0, 42, 43, 44);
-        assertOutWeights(p1, 1, 45, 46);
-        assertOutWeights(p1, 2);
-        assertOutWeights(p1, 3);
+        assertOutProperties(p1, 0, 42, 43, 44);
+        assertOutProperties(p1, 1, 45, 46);
+        assertOutProperties(p1, 2);
+        assertOutProperties(p1, 3);
 
         Graph p2 = graph.loadGraph("", Optional.of("agg2"));
         assertEquals(4L, p2.nodeCount());
-        assertOutWeights(p2, 0, 1337, 1338, 1339);
-        assertOutWeights(p2, 1, 1340, 1341);
-        assertOutWeights(p2, 2);
-        assertOutWeights(p2, 3);
+        assertOutProperties(p2, 0, 1337, 1338, 1339);
+        assertOutProperties(p2, 1, 1340, 1341);
+        assertOutProperties(p2, 2);
+        assertOutProperties(p2, 3);
 
         Graph p3 = graph.loadGraph("", Optional.of("agg3"));
         assertEquals(4L, p3.nodeCount());
-        assertOutWeights(p3, 0, 2, 10, 10);
-        assertOutWeights(p3, 1, 10, 10);
-        assertOutWeights(p3, 2);
-        assertOutWeights(p3, 3);
+        assertOutProperties(p3, 0, 2, 10, 10);
+        assertOutProperties(p3, 1, 10, 10);
+        assertOutProperties(p3, 2);
+        assertOutProperties(p3, 3);
     }
 
     @Test
@@ -463,18 +463,18 @@ class GraphLoaderHugeGraphTest {
 
         Graph p1 = graph.loadGraph("", Optional.of("agg1"));
         assertEquals(2L, p1.nodeCount());
-        assertOutWeights(p1, 0, 1);
-        assertOutWeights(p1, 1, 1);
+        assertOutProperties(p1, 0, 1);
+        assertOutProperties(p1, 1, 1);
 
         Graph p2 = graph.loadGraph("", Optional.of("agg2"));
         assertEquals(2L, p2.nodeCount());
-        assertOutWeights(p2, 0, 51);
-        assertOutWeights(p2, 1, 50);
+        assertOutProperties(p2, 0, 51);
+        assertOutProperties(p2, 1, 50);
 
         Graph p3 = graph.loadGraph("", Optional.of("agg3"));
         assertEquals(2L, p3.nodeCount());
-        assertOutWeights(p3, 0, 93);
-        assertOutWeights(p3, 1, 48);
+        assertOutProperties(p3, 0, 93);
+        assertOutProperties(p3, 1, 48);
     }
 
     @Test
@@ -546,13 +546,13 @@ class GraphLoaderHugeGraphTest {
 
         Graph p1 = graph.loadGraph("", Optional.of("p1"));
         assertEquals(4L, p1.nodeCount());
-        assertOutWeights(p1, 0, expectedNodeAP1);
-        assertOutWeights(p1, 1, expectedNodeBP1);
+        assertOutProperties(p1, 0, expectedNodeAP1);
+        assertOutProperties(p1, 1, expectedNodeBP1);
 
         Graph p2 = graph.loadGraph("", Optional.of("p2"));
         assertEquals(4L, p2.nodeCount());
-        assertOutWeights(p2, 0, expectedNodeAP2);
-        assertOutWeights(p2, 1, expectedNodeBP2);
+        assertOutProperties(p2, 0, expectedNodeAP2);
+        assertOutProperties(p2, 1, expectedNodeBP2);
     }
 
     @ParameterizedTest
@@ -589,13 +589,13 @@ class GraphLoaderHugeGraphTest {
 
         Graph p1 = graph.loadGraph("", Optional.of("p1"));
         assertEquals(2L, p1.nodeCount());
-        assertOutWeights(p1, 0, expectedNodeAP1);
-        assertOutWeights(p1, 1, expectedNodeBP1);
+        assertOutProperties(p1, 0, expectedNodeAP1);
+        assertOutProperties(p1, 1, expectedNodeBP1);
 
         Graph p2 = graph.loadGraph("", Optional.of("p2"));
         assertEquals(2L, p2.nodeCount());
-        assertOutWeights(p2, 0, expectedNodeAP2);
-        assertOutWeights(p2, 1, expectedNodeBP2);
+        assertOutProperties(p2, 0, expectedNodeAP2);
+        assertOutProperties(p2, 1, expectedNodeBP2);
     }
 
     @Test
@@ -622,13 +622,13 @@ class GraphLoaderHugeGraphTest {
 
         Graph p1 = graph.loadGraph("", Optional.of("agg1"));
         assertEquals(2L, p1.nodeCount());
-        assertOutWeights(p1, 0, 44);
-        assertOutWeights(p1, 1, 46);
+        assertOutProperties(p1, 0, 44);
+        assertOutProperties(p1, 1, 46);
 
         Graph p2 = graph.loadGraph("", Optional.of("agg2"));
         assertEquals(2L, p2.nodeCount());
-        assertOutWeights(p2, 0, 42);
-        assertOutWeights(p2, 1, 45);
+        assertOutProperties(p2, 0, 42);
+        assertOutProperties(p2, 1, 45);
     }
 
     @Test
@@ -655,6 +655,6 @@ class GraphLoaderHugeGraphTest {
         Graph g = graph.loadGraph("", Optional.of("agg"));
         assertEquals(1L, g.nodeCount());
         assertEquals(3L, g.relationshipCount());
-        assertOutWeights(g, 0, 42, 44, 84);
+        assertOutProperties(g, 0, 42, 44, 84);
     }
 }

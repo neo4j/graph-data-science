@@ -45,7 +45,7 @@ public final class GraphHelper {
         return outIds.build().sorted().toArray();
     }
 
-    public static double[] collectTargetWeights(final Graph graph, long sourceId) {
+    public static double[] collectTargetProperties(final Graph graph, long sourceId) {
         DoubleStream.Builder outWeights = DoubleStream.builder();
         graph.forEachRelationship(graph.toMappedNodeId(sourceId), Direction.OUTGOING,
                 (sourceNodeId, targetNodeId, weight) -> {
@@ -55,38 +55,37 @@ public final class GraphHelper {
         return outWeights.build().toArray();
     }
 
-    public static void assertOutWeights(Graph graph, long node, double... expected) {
-        assertOutWeightsWithDelta(graph, 0, node, expected);
+    public static void assertOutProperties(Graph graph, long node, double... expected) {
+        assertOutPropertiesWithDelta(graph, 0, node, expected);
     }
 
-    public static void assertInWeights(Graph graph, long node, double... expected) {
-        assertInWeightsWithDelta(graph, 0, node, expected);
+    public static void assertInProperties(Graph graph, long node, double... expected) {
+        assertInPropertiesWithDelta(graph, 0, node, expected);
     }
 
-    public static void assertOutWeightsWithDelta(Graph graph, double delta, long node, double... expected) {
-        assertWeights(graph, Direction.OUTGOING, delta, node, expected);
+    public static void assertOutPropertiesWithDelta(Graph graph, double delta, long node, double... expected) {
+        assertProperties(graph, Direction.OUTGOING, delta, node, expected);
     }
 
-    public static void assertInWeightsWithDelta(Graph graph, double delta, long node, double... expected) {
-        assertWeights(graph, Direction.INCOMING, delta, node, expected);
+    public static void assertInPropertiesWithDelta(Graph graph, double delta, long node, double... expected) {
+        assertProperties(graph, Direction.INCOMING, delta, node, expected);
     }
 
-    private static void assertWeights(Graph graph, Direction direction, double delta, long node, double... expected) {
+    private static void assertProperties(Graph graph, Direction direction, double delta, long node, double... expected) {
         LongArrayList idList = new LongArrayList(expected.length);
-        DoubleArrayList weightList = new DoubleArrayList(expected.length);
+        DoubleArrayList properties = new DoubleArrayList(expected.length);
         graph.forEachRelationship(node, direction, (s, t, w) -> {
             idList.add(t);
-            weightList.add(w);
+            properties.add(w);
             return true;
         });
         long[] ids = idList.toArray();
         int[] order = IndirectSort.mergesort(0, ids.length, new AscendingLongComparator(ids));
-        DoubleArrayList sortedWeights = new DoubleArrayList(ids.length);
+        DoubleArrayList sortedProperties = new DoubleArrayList(ids.length);
         for (int index : order) {
-            sortedWeights.add(weightList.get(index));
+            sortedProperties.add(properties.get(index));
         }
-        double[] weights = sortedWeights.toArray();
-        assertArrayEquals(expected, weights, delta);
+        assertArrayEquals(expected, sortedProperties.toArray(), delta);
     }
 
     public static void assertOutRelationships(Graph graph, long node, long... expected) {

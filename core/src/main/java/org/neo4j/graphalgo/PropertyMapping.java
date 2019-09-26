@@ -169,7 +169,7 @@ public abstract class PropertyMapping {
 
         @Override
         public int propertyKeyId() {
-            return StatementConstants.NO_SUCH_PROPERTY_KEY;
+            throw new UnsupportedOperationException("Unresolved mapping has no propertyKeyId.");
         }
 
         @Override
