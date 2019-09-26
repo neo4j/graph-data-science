@@ -95,6 +95,11 @@ CALL algo.pageRank(null, 'REL_TYPE1 | REL_TYPE2', {graph: 'my-graph'})
 
 [NOTE]
 ====
+Using just a subset of the loaded relationships is currently only possible for a label and relationship-type projection.
+====
+
+[NOTE]
+====
 Specifying a subset of relationship types in an algorithm call only works when the graph was explicitly loaded with multiple relationship types.
 If the graph was loaded with `null`, no relationship type information is retained in the graph.
 ====
@@ -108,9 +113,11 @@ It is best to only load as few types as needed.
 [[deduplication-of-parallel-relationships]]
 == Deduplication of parallel relationships
 
-The in-memory graph models offer different ways of handling multiple (parallel) relationships between a given pair of nodes.
-By default, the Huge graph assumes that the relationship projection only contains one relationship between a pair of nodes and will simply ignore all other relationships (see `skip` below).
+Named graphs offer different ways of handling multiple - so called "parallel" - relationships between a given pair of nodes.
 
+=== Label and relationship-type projection
+
+By default, the Huge graph assumes that the relationship projection only contains one relationship between a pair of nodes and will simply ignore all other relationships (see `skip` below).
 In order to control the deduplication behavior we can pass the `duplicateRelationships` key in the config to decide what should happen with duplicates.
 
 `duplicateRelationships` supports the following options:
@@ -141,8 +148,10 @@ CALL algo.graph.load('cheapestRoads', 'Loc', 'ROAD', {
   duplicateRelationships: 'sum'})
 ----
 
+=== Cypher projection
+
 A Cypher projected graph will, by default, store all projected relationships without any deduplication (see `none` below).
-As for the Huge graph, we can specify a `deduplicateRelationships` strategy (see <<deduplication-of-parallel-relationships>>).
+As for the Huge graph, we can specify a `deduplicateRelationships` strategy.
 
 .The following runs shortest path over a graph based on Cypher projections, picking the `ROAD` relationship with minimum cost:
 [source,cypher]
@@ -224,6 +233,11 @@ CALL algo.graph.load('allRoads', 'Loc', 'ROAD', {
 ----
 
 Note that in this particular shortest path example, using the default property value is not recommended.
+
+[NOTE]
+====
+Loading multiple relationship properties is currently only supported for label and relationship type projections.
+====
 
 [CAUTION]
 ====
