@@ -165,12 +165,9 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
     }
 
     @Override
-    protected GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
+    protected GraphLoader configureAlgoLoader(final GraphLoader loader, final ProcedureConfiguration config) {
         return loader
                 .withReducedRelationshipLoading(config.getDirection(Direction.OUTGOING))
-                .withRelationshipProperties(PropertyMapping.of(
-                        config.getWeightProperty(),
-                        config.getWeightPropertyDefaultValue(1.0D)))
                 .withOptionalNodeProperties(createPropertyMappings(
                         config.getString(CONFIG_SEED_KEY, CONFIG_OLD_SEED_KEY, null),
                         config.getString(CONFIG_WEIGHT_KEY, null)));

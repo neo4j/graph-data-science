@@ -156,7 +156,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
     }
 
     @Override
-    protected GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
+    protected GraphLoader configureAlgoLoader(final GraphLoader loader, final ProcedureConfiguration config) {
         loader.withRelationshipProperties(PropertyMapping.of(
                 config.getWeightProperty(),
                 config.getWeightPropertyDefaultValue(1.0)));
