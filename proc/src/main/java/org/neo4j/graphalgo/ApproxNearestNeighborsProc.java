@@ -45,8 +45,8 @@ import java.util.stream.Stream;
 
 public class ApproxNearestNeighborsProc extends SimilarityProc {
 
-    @Procedure(name = "algo.ml.ann.stream", mode = Mode.READ)
-    @Description("CALL algo.ml.ann.stream('jaccard|cosine|pearson|euclidean', [{item:id, weights:[weights]} or {item:id, categories:[ids]}], {similarityCutoff:-1,degreeCutoff:0}) " +
+    @Procedure(name = "algo.labs.ml.ann.stream", mode = Mode.READ)
+    @Description("CALL algo.labs.ml.ann.stream('jaccard|cosine|pearson|euclidean', [{item:id, weights:[weights]} or {item:id, categories:[ids]}], {similarityCutoff:-1,degreeCutoff:0}) " +
                  "YIELD item1, item2, count1, count2, intersection, similarity - computes nearest neighbors")
     public Stream<SimilarityResult> stream(
             @Name(value = "algorithm", defaultValue = "null") String algorithmName,
@@ -84,8 +84,8 @@ public class ApproxNearestNeighborsProc extends SimilarityProc {
         return topN(Arrays.stream(topKConsumers).flatMap(AnnTopKConsumer::stream), topN).map(algorithm::postProcess);
     }
 
-    @Procedure(name = "algo.ml.ann", mode = Mode.WRITE)
-    @Description("CALL algo.ml.ann('jaccard|cosine|pearson|euclidean', [{item:id, weights:[weights]} or {item:id, categories:[ids]}], {similarityCutoff:-1,degreeCutoff:0}) " +
+    @Procedure(name = "algo.labs.ml.ann", mode = Mode.WRITE)
+    @Description("CALL algo.labs.ml.ann('jaccard|cosine|pearson|euclidean', [{item:id, weights:[weights]} or {item:id, categories:[ids]}], {similarityCutoff:-1,degreeCutoff:0}) " +
                  "YIELD item1, item2, count1, count2, intersection, similarity - computes nearest neighbors")
     public Stream<ApproxSimilaritySummaryResult> write(
             @Name(value = "algorithm", defaultValue = "null") String algorithmName,

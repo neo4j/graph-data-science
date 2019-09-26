@@ -13,7 +13,7 @@ These algorithms help calculate the similarity of nodes:
 * <<experimental-algorithms-similarity-pearson, Pearson Similarity>> (`algo.similarity.pearson`)
 * <<experimental-algorithms-similarity-euclidean, Euclidean Distance>> (`algo.similarity.euclidean`)
 * <<experimental-algorithms-similarity-overlap, Overlap Similarity>> (`algo.similarity.overlap`)
-* <<experimental-algorithms-approximate-nearest-neighbors, Approximate Nearest Neighbors>> (`algo.ml.ann`)
+* <<experimental-algorithms-approximate-nearest-neighbors, Approximate Nearest Neighbors>> (`algo.labs.ml.ann`)
 
 include::experimental-similarity-jaccard.adoc[leveloffset=+1]
 

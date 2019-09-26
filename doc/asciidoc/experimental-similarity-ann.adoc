@@ -43,7 +43,7 @@ include::scripts/similarity-jaccard.cypher[tag=create-sample-graph-procedure]
 MATCH (p:Person)-[:LIKES]->(cuisine)
 WITH {item:id(p), categories: collect(id(cuisine))} as userData
 WITH collect(userData) as data
-CALL algo.ml.ann.stream("jaccard", data, {similarityCutoff: 0.1})
+CALL algo.labs.ml.ann.stream("jaccard", data, {similarityCutoff: 0.1})
 YIELD item1, item2, similarity
 return algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity
 ORDER BY from
@@ -81,7 +81,7 @@ We'd probably want to filter those out, which we can do by passing in the `simil
 MATCH (p:Person)-[:LIKES]->(cuisine)
 WITH {item:id(p), categories: collect(id(cuisine))} as userData
 WITH collect(userData) as data
-CALL algo.ml.ann("jaccard", data, {similarityCutoff: 0.1, showComputations: true, write: true})
+CALL algo.labs.ml.ann("jaccard", data, {similarityCutoff: 0.1, showComputations: true, write: true})
 YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, p95
 RETURN nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, p95
 ----
@@ -125,7 +125,7 @@ ORDER BY count DESC
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL algo.ml.ann(userData:List<Map>, {
+CALL algo.labs.ml.ann(userData:List<Map>, {
     topK: 1, similarityCutoff: 0.1, write:true, writeProperty: "score"
 })
 YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
@@ -176,7 +176,7 @@ Otherwise a list of maps of the following structure: `{item: nodeId, weights: [d
 .The following will run the algorithm and stream results:
 [source,cypher]
 ----
-CALL algo.ml.ann.stream(userData:List<Map>, {
+CALL algo.labs.ml.ann.stream(userData:List<Map>, {
     degreeCutoff: 10, similarityCutoff: 0.1, concurrency:4
 })
 YIELD item1, item2, count1, count2, intersection, similarity
