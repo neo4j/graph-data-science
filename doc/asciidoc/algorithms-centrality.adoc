@@ -9,15 +9,6 @@ This chapter provides explanations and examples for each of the centrality algor
 The following centrality algorithms determine the importance of distinct nodes in a network:
 
 * <<algorithms-pagerank, PageRank>> (`algo.pageRank`)
-* <<algorithms-betweenness-centrality, Betweenness Centrality>> (`algo.betweenness`)
-* <<algorithms-closeness-centrality, Closeness Centrality>> (`algo.closeness`)
-* <<algorithms-degree-centrality, Degree Centrality>> (`algo.degree`)
 
 include::pagerank.adoc[leveloffset=+1]
-
-include::betweenness-centrality.adoc[leveloffset=+1]
-
-include::closeness-centrality.adoc[leveloffset=+1]
-
-include::degree-centrality.adoc[leveloffset=+1]
 

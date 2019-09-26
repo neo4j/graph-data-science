@@ -1,4 +1,4 @@
-[[algorithms-betweenness-centrality-approx]]
+[[labs-algorithms-betweenness-centrality-approx]]
 = Approximation of Betweenness Centrality
 
 // tag::introduction[]
@@ -7,7 +7,7 @@ Therefore, you might choose to use an approximation algorithm that will run much
 // end::introduction[]
 
 
-[[algorithms-betweenness-centrality-ra_brandes]]
+[[labs-algorithms-betweenness-centrality-ra_brandes]]
 == RA-Brandes algorithm
 
 // tag::explanation[]
@@ -59,7 +59,7 @@ The others don’t have any influence, because all the shortest paths between pa
 // end::stream-rabrandes-graph-explanation[]
 
 
-[[algorithms-betweenness-centrality-syntax]]
+[[labs-algorithms-betweenness-centrality-syntax]]
 == Syntax
 
 .The following will run the Brandes algorithm and write back results:
