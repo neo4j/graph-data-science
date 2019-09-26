@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.algo;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,8 +28,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.graphalgo.HarmonicCentralityProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.helper.graphbuilder.DefaultBuilder;
-import org.neo4j.graphalgo.helper.graphbuilder.GraphBuilder;
+import org.neo4j.graphalgo.graphbuilder.DefaultBuilder;
+import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Result;

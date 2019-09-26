@@ -17,16 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.helper.graphbuilder;
+package org.neo4j.graphalgo.graphbuilder;
 
-import org.neo4j.graphalgo.core.utils.ExceptionUtil;
-import org.neo4j.graphalgo.core.utils.TransactionWrapper;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.internal.kernel.api.Write;
-import org.neo4j.internal.kernel.api.exceptions.InvalidTransactionTypeKernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashSet;
@@ -48,7 +44,7 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
     protected final HashSet<Relationship> relationships;
 
     private final GraphDatabaseAPI api;
-    private final TransactionWrapper tx;
+    private final TestTransactionWrapper tx;
     private final Random random;
 
     protected Label label;
@@ -58,7 +54,7 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
         this.api = api;
         this.label = label;
         this.relationship = relationship;
-        this.tx = new TransactionWrapper(api);
+        this.tx = new TestTransactionWrapper(api);
         nodes = new HashSet<>();
         relationships = new HashSet<>();
         this.self = me();
@@ -140,23 +136,6 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
     }
 
     /**
-     * runs the write consumer in a transaction
-     *
-     * @param consumer the write consumer
-     * @return child instance to make methods of the child class accessible.
-     */
-    public ME writeInTransaction(Consumer<Write> consumer) {
-        tx.accept(ktx -> {
-            try {
-                consumer.accept(ktx.dataWrite());
-            } catch (InvalidTransactionTypeKernelException e) {
-                ExceptionUtil.throwKernelException(e);
-            }
-        });
-        return self;
-    }
-
-    /**
      * run the runnable in a transaction
      *
      * @param runnable the runnable
@@ -206,16 +185,6 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> {
      */
     public GridBuilder newGridBuilder() {
         return new GridBuilder(api, label, relationship, random);
-    }
-
-    /**
-     * create lines of nodes where each node is connected to its successor
-     * inherits current label and relationship type.
-     *
-     * @return the LineBuilder
-     */
-    public LineBuilder newLineBuilder() {
-        return new LineBuilder(api, label, relationship, random);
     }
 
     /**

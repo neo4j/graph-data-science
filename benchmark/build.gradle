@@ -15,7 +15,6 @@ dependencies {
     jmh group: 'org.neo4j',            name: 'neo4j',              version: ver.'neo4j'
     jmh group: 'org.neo4j',            name: 'neo4j-kernel',       version: ver.'neo4j'
     jmh group: 'org.neo4j',            name: 'neo4j-io',           version: ver.'neo4j'
-    jmh group: 'org.neo4j.community',  name: 'it-test-support',    version: ver.'neo4j'
     jmh group: 'org.neo4j',            name: 'procedure-compiler', version: ver.'neo4j'
     jmh group: 'com.jprofiler',        name: 'jprofiler-agent',    version: ver.'jprofiler-agent'
     jmh("org.openjdk.jmh:jmh-core:${ver.jmh}") {
@@ -24,7 +23,8 @@ dependencies {
     jmh group: 'org.openjdk.jmh',      name: 'jmh-core',         version: ver.'jmh'
     jmh group: 'org.apache.commons',   name: 'commons-math3',    version: ver.'commons-math3'
     jmh group: 'org.apache.commons',   name: 'commons-compress', version: ver.'commons-compress'
-    jmh group: 'org.mockito',          name: 'mockito-core',     version: ver.'mockito'
+
+    jmh project(':test-utils')
 
     jmh group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: ver.'jmh'
 }
