@@ -44,16 +44,16 @@ Before running this algorithm, we recommend that you read <<memory-requirements>
 [[algorithms-wcc-syntax]]
 == Syntax
 
-.The following will load a graph, run the algorithm, and write back results:
+.The following will run the algorithm on a loaded graph with name `wcc-graph`, and write back results:
 [source, cypher]
 ----
 CALL algo.unionFind(label: String, relationship: String, {
+  graph: 'wcc-graph',
   threshold: 0.42,
-  defaultValue: 1.0,
   write: true,
   writeProperty: 'partition',
   weightProperty: 'weight',
-  concurrency: 4
+  defaultValue: 1.0
 })
 YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
 ----
@@ -109,14 +109,14 @@ YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
 |===
 
 
-.The following will run the algorithm and stream results:
+.The following will run the algorithm on a loaded graph with name `wcc-graph` and stream results:
 [source, cypher]
 ----
 CALL algo.unionFind.stream(label: String, relationship: String, {
-  weightProperty: 'weight',
+  graph: 'wcc-graph',
   threshold: 0.42,
-  defaultValue: 1.0,
-  concurrency: 4
+  weightProperty: 'weight',
+  defaultValue: 1.0
 })
 YIELD nodeId, setId
 ----
