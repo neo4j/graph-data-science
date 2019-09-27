@@ -36,8 +36,6 @@ import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.core.loading.GraphByType;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
-import org.neo4j.graphalgo.core.utils.ApproximatedImportProgress;
-import org.neo4j.graphalgo.core.utils.ImportProgress;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;

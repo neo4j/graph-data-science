@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.huge.loader;
 
-import org.neo4j.graphalgo.core.utils.ImportProgress;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.StatementAction;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
