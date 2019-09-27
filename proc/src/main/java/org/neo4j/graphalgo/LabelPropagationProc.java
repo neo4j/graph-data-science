@@ -254,7 +254,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
         LabelPropagation algo = newAlgorithm(setup.graph, setup.procedureConfig, setup.tracker);
 
         Direction procedureDirection = setup.procedureConfig.getDirection(Direction.OUTGOING);
-        Optional<Direction> computeDirection = setup.graph.getCompatibleDirection(procedureDirection);
+        Optional<Direction> computeDirection = setup.graph.compatibleDirection(procedureDirection);
 
         if (!computeDirection.isPresent()) {
             throw new IllegalArgumentException(String.format(
