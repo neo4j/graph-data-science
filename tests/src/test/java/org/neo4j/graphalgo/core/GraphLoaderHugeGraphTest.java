@@ -208,7 +208,7 @@ class GraphLoaderHugeGraphTest {
     }
 
     @AllGraphTypesTest
-    void undirectedWithDeduplicatoin(Class<? extends GraphFactory> graphImpl) {
+    void undirectedWithDeduplication(Class<? extends GraphFactory> graphImpl) {
         db.execute("" +
                    "CREATE (a:Node),(b:Node),(c:Node),(d:Node) " +
                    "CREATE" +
