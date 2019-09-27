@@ -19,10 +19,10 @@
  */
 package org.neo4j.graphalgo.pregel;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
@@ -33,11 +33,11 @@ import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.pregel.paths.SSSPComputation;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.neo4j.graphalgo.pregel.ComputationTestUtil.*;
+import static org.neo4j.graphalgo.pregel.ComputationTestUtil.assertLongValues;
 
-public class SSSPTest {
+class SSSPTest {
 
     private static final String ID_PROPERTY = "id";
 
@@ -67,31 +67,27 @@ public class SSSPTest {
             // {H, I}
             ", (nI)-[:TYPE]->(nH)";
 
-    @ClassRule
-    public static final ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
+    private GraphDatabaseAPI db;
+    private Graph graph;
 
-    @BeforeClass
-    public static void setup() {
-        DB.execute(TEST_GRAPH);
-    }
-
-    @AfterClass
-    public static void shutdown() {
-        DB.shutdown();
-    }
-
-    private final Graph graph;
-
-    public SSSPTest() {
-        graph = new GraphLoader(DB)
+    @BeforeEach
+    void setup() {
+        db = TestDatabaseCreator.createTestDatabase();
+        db.execute(TEST_GRAPH);
+        graph = new GraphLoader(db)
                 .withAnyRelationshipType()
                 .withAnyLabel()
                 .withDirection(Direction.BOTH)
                 .load(HugeGraphFactory.class);
     }
 
+    @AfterEach
+    void shutdown() {
+        db.shutdown();
+    }
+
     @Test
-    public void runSSSP() {
+    void runSSSP() {
         int batchSize = 10;
         int maxIterations = 10;
 
@@ -106,7 +102,7 @@ public class SSSPTest {
 
         HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
 
-        assertLongValues(DB, NODE_LABEL, ID_PROPERTY, graph, nodeValues,
+        assertLongValues(db, NODE_LABEL, ID_PROPERTY, graph, nodeValues,
                 0,
                 1,
                 1,

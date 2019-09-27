@@ -20,7 +20,6 @@
 
 package org.neo4j.graphalgo.pregel;
 
-import org.junit.Assert;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -30,7 +29,11 @@ import org.neo4j.graphdb.Transaction;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class ComputationTestUtil {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+final class ComputationTestUtil {
+
+    private ComputationTestUtil() {}
 
     static void assertLongValues(
             final GraphDatabaseService db,
@@ -49,10 +52,10 @@ public final class ComputationTestUtil {
         expectedValues.forEach((idProp, expectedValue) -> {
             long neoId = graph.toOriginalNodeId(idProp);
             long computedValue = (long) computedValues.get(neoId);
-            Assert.assertEquals(
-                    String.format("Node.id = %d should have value %d", idProp, expectedValue),
+            assertEquals(
                     (long) expectedValue,
-                    computedValue);
+                    computedValue,
+                    String.format("Node.id = %d should have value %d", idProp, expectedValue));
         });
     }
 
@@ -75,11 +78,11 @@ public final class ComputationTestUtil {
         expectedValues.forEach((idProp, expectedValue) -> {
             long neoId = graph.toOriginalNodeId(idProp);
             double computedValue = computedValues.get(neoId);
-            Assert.assertEquals(
-                    String.format("Node.id = %d should have value %f", idProp, expectedValue),
+            assertEquals(
                     expectedValue,
                     computedValue,
-                    delta);
+                    delta,
+                    String.format("Node.id = %d should have value %f", idProp, expectedValue));
         });
     }
 }

@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeWeights;
 import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.core.huge.loader.HugeNodePropertiesBuilder;
+import org.neo4j.graphalgo.core.huge.loader.NodePropertiesBuilder;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.LazyMappingCollection;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
@@ -75,7 +75,7 @@ public final class Pregel {
             final AllocationTracker tracker,
             final ProgressLogger progressLogger) {
 
-        final NodeWeights nodeValues = HugeNodePropertiesBuilder
+        final NodeWeights nodeValues = NodePropertiesBuilder
                 .of(graph.nodeCount(), tracker, computationFactory.get().getDefaultNodeValue(), 0, "key")
                 .build();
 

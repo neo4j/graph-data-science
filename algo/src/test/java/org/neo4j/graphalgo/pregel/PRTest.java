@@ -19,10 +19,10 @@
  */
 package org.neo4j.graphalgo.pregel;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
@@ -33,11 +33,11 @@ import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.pregel.pagerank.PRComputation;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
-import org.neo4j.test.rule.ImpermanentDatabaseRule;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.neo4j.graphalgo.pregel.ComputationTestUtil.*;
+import static org.neo4j.graphalgo.pregel.ComputationTestUtil.assertDoubleValues;
 
-public class PRTest {
+class PRTest {
 
     private static final String ID_PROPERTY = "id";
 
@@ -75,32 +75,27 @@ public class PRTest {
             ", (j)-[:REL]->(e)" +
             ", (k)-[:REL]->(e)";
 
-    @ClassRule
-    public static final ImpermanentDatabaseRule DB = new ImpermanentDatabaseRule();
-
-    @BeforeClass
-    public static void setup() {
-        DB.execute(TEST_GRAPH);
-    }
-
-    @AfterClass
-    public static void shutdown() {
-        DB.shutdown();
-    }
-
+    private GraphDatabaseAPI db;
     private Graph graph;
 
-    public PRTest() {
-        graph = new GraphLoader(DB)
+    @BeforeEach
+    void setup() {
+        db = TestDatabaseCreator.createTestDatabase();
+        db.execute(TEST_GRAPH);
+        graph = new GraphLoader(db)
                 .withAnyRelationshipType()
                 .withAnyLabel()
                 .withDirection(Direction.OUTGOING)
                 .load(HugeGraphFactory.class);
     }
 
-    @Test
-    public void runPR() {
+    @AfterEach
+    void shutdown() {
+        db.shutdown();
+    }
 
+    @Test
+    void runPR() {
         int batchSize = 10;
         int maxIterations = 10;
         float dampingFactor = 0.85f;
@@ -116,7 +111,7 @@ public class PRTest {
 
         final HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
 
-        assertDoubleValues(DB, NODE_LABEL, ID_PROPERTY, graph, nodeValues, 1e-3,
+        assertDoubleValues(db, NODE_LABEL, ID_PROPERTY, graph, nodeValues, 1e-3,
                 0.0276, // a
                 0.3483, // b
                 0.2650, // c
