@@ -42,7 +42,6 @@ public class TestSupport {
     @MethodSource("org.neo4j.graphalgo.TestSupport#allTypesWithoutCypher")
     public @interface AllGraphTypesWithoutCypherTest {}
 
-    // TODO: This isn't "parameterized" once kernel graph is gone
     public static Stream<Class<? extends GraphFactory>> allTypesWithoutCypher() {
         return Stream.of(
                 HugeGraphFactory.class
@@ -63,7 +62,6 @@ public class TestSupport {
     @MethodSource("org.neo4j.graphalgo.TestSupport#allGraphNames")
     public @interface AllGraphNamesTest {}
 
-    // TODO: This isn't "parameterized" once kernel graph is gone
     public static Stream<String> allGraphNames() {
         return Stream.of("huge");
     }
