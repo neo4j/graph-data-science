@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.utils;
+package org.neo4j.graphalgo.impl.infomap;
 
 import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.RelationshipWeights;
@@ -26,8 +26,6 @@ import org.neo4j.graphdb.Direction;
 /**
  * Normalized RelationshipWeights which always returns 1 / degree(source). Returns a
  * weight where - like in an probability matrix - all weights of a node add up to one.
- *
- * @author mknblch
  */
 public class DegreeNormalizedRelationshipWeights implements RelationshipWeights {
 

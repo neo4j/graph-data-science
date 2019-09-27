@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.utils;
+package org.neo4j.graphalgo.impl.infomap;
 
 import com.carrotsearch.hppc.LongDoubleMap;
 import com.carrotsearch.hppc.LongDoubleScatterMap;
@@ -25,9 +25,6 @@ import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphdb.Direction;
 
-/**
- * @author mknblch
- */
 public class NormalizedRelationshipWeights implements RelationshipWeights {
 
     private RelationshipWeights weights;

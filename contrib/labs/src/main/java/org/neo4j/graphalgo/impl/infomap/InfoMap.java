@@ -28,8 +28,6 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeWeights;
 import org.neo4j.graphalgo.api.RelationshipWeights;
-import org.neo4j.graphalgo.core.utils.DegreeNormalizedRelationshipWeights;
-import org.neo4j.graphalgo.core.utils.NormalizedRelationshipWeights;
 import org.neo4j.graphalgo.core.utils.Pointer;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
