@@ -83,7 +83,7 @@ YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
 | threshold         | float   | `null`                    | yes      | The value of the weight above which the relationship is not thrown away.
 | defaultValue      | float   | `null`                    | yes      | The default value of the weight in case it is missing or invalid.
 | consecutiveIds    | boolean | `false`                   | yes      | Community identifiers are mapped into a consecutive id space (requires additional memory).
-| graph             | string  | `'huge'`                  | yes      | Use `'huge'` when describing the subset of the graph with label and relationship type parameter. Use `'cypher'` for describing the subset using a Cypher query for nodes and relationships.
+| graph             | string  | `'huge'`                  | yes      | Use `'huge'` when describing the subset of the graph with node label and relationship type parameters. Use `'cypher'` for describing the subset using Cypher queries for nodes and relationships.
 |===
 
 .Results
@@ -146,7 +146,7 @@ YIELD nodeId, setId
 | threshold         | float   | `null`                    | yes      | The value of the weight above which the relationship is not thrown away.
 | defaultValue      | float   | `null`                    | yes      | The default value of the weight in case it is missing or invalid.
 | consecutiveIds    | boolean | `false`                   | yes      | Community identifiers are mapped into a consecutive id space (requires additional memory).
-| graph             | string  | `'huge'`                  | yes      | Use `'huge'` when describing the subset of the graph with label and relationship-type parameter. Use `'cypher'` for describing the subset using a Cypher query for nodes and relationships.
+| graph             | string  | `'huge'`                  | yes      | Use `'huge'` when describing the subset of the graph with node label and relationship type parameters. Use `'cypher'` for describing the subset using Cypher queries for nodes and relationships.
 |===
 
 .Results
@@ -179,7 +179,7 @@ CREATE (nMark)-[:LINK {weight: 2}]->(nMichael);
 ----
 
 This graph has two connected components, each with three nodes.
-The relationships that connect the nodes in each component has a property which determines the strength of the relationship.
+The relationships that connect the nodes in each component have a property which determines the strength of the relationship.
 
 We load this graph under the name `'wcc-graph'`, as below:
 
@@ -197,7 +197,7 @@ YIELD name AS Name, nodes AS Nodes, relationships AS Relationships
 |===
 
 
-The following examples demonstrate using the Connected Components algorithm.
+The following examples demonstrate using the Weakly Connected Components algorithm.
 
 
 [[algorithms-wcc-examples-unweighted]]
