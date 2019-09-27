@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.impl.betweenness;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.traverse.SimpleBitSet;
+import org.neo4j.graphalgo.core.utils.container.SimpleBitSet;
 
 import java.security.SecureRandom;
 
