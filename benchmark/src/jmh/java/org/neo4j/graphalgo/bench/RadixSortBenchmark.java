@@ -18,7 +18,7 @@
  */
 package org.neo4j.graphalgo.bench;
 
-import org.neo4j.graphalgo.core.huge.loader.RadixSort;
+import org.neo4j.graphalgo.core.loading.RadixSort;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;

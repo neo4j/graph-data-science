@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.utils;
 
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.api.BatchNodeIterable;
-import org.neo4j.graphalgo.core.huge.loader.HugeParallelGraphImporter;
+import org.neo4j.graphalgo.core.loading.HugeParallelGraphImporter;
 import org.neo4j.helpers.Exceptions;
 
 import java.util.ArrayList;

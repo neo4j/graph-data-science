@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.huge.loader;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.core.loading.SparseNodeMapping;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.PrivateLookup;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
