@@ -19,11 +19,14 @@
  */
 package org.neo4j.graphalgo.impl.multistepscc;
 
-import com.carrotsearch.hppc.*;
+import com.carrotsearch.hppc.IntHashSet;
+import com.carrotsearch.hppc.IntLookupContainer;
+import com.carrotsearch.hppc.IntScatterSet;
+import com.carrotsearch.hppc.IntSet;
 import com.carrotsearch.hppc.procedures.IntProcedure;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.traverse.ParallelLocalQueueBFS;
 import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.impl.traverse.ParallelLocalQueueBFS;
 import org.neo4j.graphalgo.results.SCCStreamResult;
 import org.neo4j.graphdb.Direction;
 
