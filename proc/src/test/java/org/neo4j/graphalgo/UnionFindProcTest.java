@@ -266,9 +266,9 @@ public class UnionFindProcTest extends ProcTestBase {
     }
 
     @AllGraphNamesTest
-    void testUnionFindPregel(String graphImpl) throws Exception {
+    void testUnionFindPregel(String graphImpl) {
         String query = "CALL algo.beta.unionFind.pregel(" +
-                       "    '', '', {" +
+                       "    '', 'TYPE', {" +
                        "        graph: $graph" +
                        "    }" +
                        ")";
