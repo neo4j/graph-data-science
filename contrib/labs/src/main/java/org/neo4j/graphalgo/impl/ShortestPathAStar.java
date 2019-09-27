@@ -37,7 +37,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
+import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
 
 public class ShortestPathAStar extends Algorithm<ShortestPathAStar> {
 

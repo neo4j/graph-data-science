@@ -27,8 +27,8 @@ import org.neo4j.graphdb.Direction;
 import java.util.Arrays;
 import java.util.BitSet;
 
-import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
-import static org.neo4j.graphalgo.core.utils.Converters.longToIntPredicate;
+import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
+import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntPredicate;
 
 /**
  * Sequential, recursive strongly connected components algorithm (Tarjan).

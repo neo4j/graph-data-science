@@ -36,8 +36,8 @@ import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
-import static org.neo4j.graphalgo.core.utils.Converters.longToIntPredicate;
+import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
+import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntPredicate;
 
 /**
  * Multistep: parallel strongly connected component algorithm

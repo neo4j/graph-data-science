@@ -33,7 +33,7 @@ import org.neo4j.graphdb.Direction;
 
 import java.util.Arrays;
 
-import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
+import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
 
 /**
  * Sequential Single-Source minimum weight spanning tree algorithm (PRIM).

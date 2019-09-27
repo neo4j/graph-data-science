@@ -28,8 +28,8 @@ import org.neo4j.graphdb.Direction;
 
 import java.util.concurrent.ExecutorService;
 
-import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
-import static org.neo4j.graphalgo.core.utils.Converters.longToIntPredicate;
+import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
+import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntPredicate;
 
 /**
  * Multistep ForwardBackward Coloring algorithm.
