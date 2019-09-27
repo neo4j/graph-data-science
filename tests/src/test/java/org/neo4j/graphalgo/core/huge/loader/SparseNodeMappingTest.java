@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.huge.loader;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.BitUtil;
-import org.neo4j.graphalgo.core.utils.PrivateLookup;
+import org.neo4j.graphalgo.PrivateLookup;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
