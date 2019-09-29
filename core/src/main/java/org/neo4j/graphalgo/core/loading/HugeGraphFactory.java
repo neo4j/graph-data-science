@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.RelationshipTypeMappings;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
+import org.neo4j.graphalgo.api.MultipleRelTypesSupport;
 import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphDimensions;
@@ -47,7 +48,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public final class HugeGraphFactory extends GraphFactory {
+public final class HugeGraphFactory extends GraphFactory implements MultipleRelTypesSupport {
 
     // TODO: make this configurable from somewhere
     private static final boolean LOAD_DEGREES = false;
@@ -154,7 +155,8 @@ public final class HugeGraphFactory extends GraphFactory {
         return UnionGraph.of(graphsByProperty.values());
     }
 
-    public GraphByType loadGraphs() {
+    @Override
+    public GraphByType loadGraphsByRelType() {
         validateTokens();
         return GraphsByRelationshipType.of(importAllGraphs());
     }

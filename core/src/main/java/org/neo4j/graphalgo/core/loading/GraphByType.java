@@ -28,15 +28,13 @@ import java.util.Set;
 
 public interface GraphByType {
 
-    Graph loadGraph(String relationshipType, Optional<String> maybeRelationshipProperty);
-
-    default Graph loadGraph(String relationshipType) {
-        return loadGraph(relationshipType, Optional.empty());
+    default Graph getGraph(String relationshipType) {
+        return getGraph(relationshipType, Optional.empty());
     }
 
-    Graph loadAllTypes();
+    Graph getGraph(String relationshipType, Optional<String> maybeRelationshipProperty);
 
-    void release();
+    Graph getUnion();
 
     String getGraphType();
 
@@ -56,23 +54,18 @@ public interface GraphByType {
         }
 
         @Override
-        public Graph loadGraph(String relationshipType, Optional<String> maybeRelationshipProperty) {
+        public Graph getGraph(String relationshipType, Optional<String> maybeRelationshipProperty) {
             return graph;
         }
 
         @Override
-        public Graph loadAllTypes() {
+        public Graph getUnion() {
             return graph;
         }
 
         @Override
         public void canRelease(boolean canRelease) {
             graph.canRelease(canRelease);
-        }
-
-        @Override
-        public void release() {
-            graph.release();
         }
 
         @Override

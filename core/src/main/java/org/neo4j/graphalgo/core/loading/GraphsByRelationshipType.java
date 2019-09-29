@@ -53,11 +53,11 @@ public final class GraphsByRelationshipType implements GraphByType {
     }
 
     @Override
-    public Graph loadGraph(String relationshipType, Optional<String> maybeRelationshipProperty) {
+    public Graph getGraph(String relationshipType, Optional<String> maybeRelationshipProperty) {
         Set<String> types = RelationshipTypes.parse(relationshipType);
 
         if (types.isEmpty() && !maybeRelationshipProperty.isPresent()) {
-            return loadAllTypes();
+            return getUnion();
         }
 
         Collection<Graph> graphParts = new ArrayList<>();
@@ -87,7 +87,7 @@ public final class GraphsByRelationshipType implements GraphByType {
     }
 
     @Override
-    public Graph loadAllTypes() {
+    public Graph getUnion() {
         Collection<Graph> graphParts = new ArrayList<>();
         forEach(graphParts::add);
         return UnionGraph.of(graphParts);
@@ -112,15 +112,6 @@ public final class GraphsByRelationshipType implements GraphByType {
     @Override
     public void canRelease(boolean canRelease) {
         forEach(g -> g.canRelease(canRelease));
-    }
-
-    @Override
-    public void release() {
-        forEach(graph -> {
-            graph.canRelease(true);
-            graph.release();
-        });
-        graphs.clear();
     }
 
     @Override

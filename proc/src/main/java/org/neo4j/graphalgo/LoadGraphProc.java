@@ -24,7 +24,7 @@ import org.HdrHistogram.Histogram;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.api.MultiRelTypeSupport;
+import org.neo4j.graphalgo.api.MultipleRelTypesSupport;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.ProcedureConstants;
@@ -87,7 +87,7 @@ public final class LoadGraphProc extends BaseProc {
                     ? PropertyMappings.EMPTY
                     : config.getRelationshipProperties();
 
-            if (relationshipTypes.size() > 1 && !MultiRelTypeSupport.class.isAssignableFrom(graphImpl)) {
+            if (relationshipTypes.size() > 1 && !MultipleRelTypesSupport.class.isAssignableFrom(graphImpl)) {
                 throw new IllegalArgumentException(
                         "Only the huge graph supports multiple relationships, please specify {graph:'huge'}.");
             }
@@ -95,11 +95,11 @@ public final class LoadGraphProc extends BaseProc {
             GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
             GraphByType graphFromType;
             if (relationshipTypes.size() > 1 || propertyMappings.hasMappings()) {
-                MultiRelTypeSupport graphFactory = (MultiRelTypeSupport) loader.build(graphImpl);
-                GraphByType byType = graphFactory.loadGraphsByRelType();
-                stats.nodes = byType.nodeCount();
-                stats.relationships = byType.relationshipCount();
-                graphFromType = byType;
+                MultipleRelTypesSupport graphFactory = (MultipleRelTypesSupport) loader.build(graphImpl);
+                GraphByType graphsByType = graphFactory.loadGraphsByRelType();
+                stats.nodes = graphsByType.nodeCount();
+                stats.relationships = graphsByType.relationshipCount();
+                graphFromType = graphsByType;
             } else {
                 Graph graph = loader.load(graphImpl);
                 stats.nodes = graph.nodeCount();

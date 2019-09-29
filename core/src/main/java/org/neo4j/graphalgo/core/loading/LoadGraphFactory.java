@@ -74,7 +74,7 @@ public final class LoadGraphFactory extends GraphFactory {
         if (!exists(name)) {
             throw new IllegalArgumentException(String.format("Graph with name '%s' does not exist.", name));
         }
-        return graphs.get(name).loadGraph(relationshipType, maybeRelationshipProperty);
+        return graphs.get(name).getGraph(relationshipType, maybeRelationshipProperty);
     }
 
     /**
@@ -89,7 +89,7 @@ public final class LoadGraphFactory extends GraphFactory {
             // that can deal with missing graphs
             return null;
         }
-        return graphs.get(name).loadAllTypes();
+        return graphs.get(name).getUnion();
     }
 
     public static boolean exists(String name) {
@@ -103,7 +103,7 @@ public final class LoadGraphFactory extends GraphFactory {
             // that can deal with missing graphs
             return null;
         }
-        Graph graph = graphs.remove(name).loadAllTypes();
+        Graph graph = graphs.remove(name).getUnion();
         graph.canRelease(true);
         graph.release();
         return graph;
@@ -118,7 +118,7 @@ public final class LoadGraphFactory extends GraphFactory {
     public static Map<String, Graph> getLoadedGraphs() {
         return graphs.entrySet().stream().collect(Collectors.toMap(
                 Map.Entry::getKey,
-                e -> e.getValue().loadAllTypes()
+                e -> e.getValue().getUnion()
         ));
     }
 

@@ -245,14 +245,14 @@ class HugeGraphFactoryTest {
                 .withAnyLabel()
                 .withRelationshipType("REL1 | REL2")
                 .build(HugeGraphFactory.class)
-                .loadGraphs();
+                .loadGraphsByRelType();
 
         assertEquals(2, graphs.availableRelationshipTypes().size());
         assertEquals(graphs.availableRelationshipTypes(), asSet(asList("REL1", "REL2")));
 
-        Graph rel1Graph = graphs.loadGraph("REL1");
-        Graph rel2Graph = graphs.loadGraph("REL2");
-        Graph unionGraph = graphs.loadGraph("REL1 | REL2");
+        Graph rel1Graph = graphs.getGraph("REL1");
+        Graph rel2Graph = graphs.getGraph("REL2");
+        Graph unionGraph = graphs.getGraph("REL1 | REL2");
 
         assertArrayEquals(expectedIds(rel1Graph, id2), collectTargetIds(rel1Graph, id1));
         assertArrayEquals(expectedIds(rel2Graph, id3), collectTargetIds(rel2Graph, id1));
@@ -266,14 +266,14 @@ class HugeGraphFactoryTest {
                 .withRelationshipType("REL1 | REL2")
                 .withRelationshipProperties(PropertyMapping.of("prop1", 42D))
                 .build(HugeGraphFactory.class)
-                .loadGraphs();
+                .loadGraphsByRelType();
 
         assertEquals(2, graphs.availableRelationshipTypes().size());
         assertEquals(graphs.availableRelationshipTypes(), asSet(asList("REL1", "REL2")));
 
-        Graph rel1Graph = graphs.loadGraph("REL1");
-        Graph rel2Graph = graphs.loadGraph("REL2");
-        Graph unionGraph = graphs.loadGraph("REL1 | REL2");
+        Graph rel1Graph = graphs.getGraph("REL1");
+        Graph rel2Graph = graphs.getGraph("REL2");
+        Graph unionGraph = graphs.getGraph("REL1 | REL2");
 
 
         assertArrayEquals(expectedWeights(1D), collectTargetProperties(rel1Graph, id1));
