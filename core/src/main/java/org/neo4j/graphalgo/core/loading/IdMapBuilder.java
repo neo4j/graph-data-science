@@ -34,7 +34,7 @@ public final class IdMapBuilder {
             int concurrency,
             AllocationTracker tracker) {
 
-        SparseNodeMapping.Builder nodeMappingBuilder = SparseNodeMapping.Builder.create(highestNodeId, tracker);
+        SparseNodeMapping.Builder nodeMappingBuilder = SparseNodeMapping.Builder.create(highestNodeId == 0 ? 1 : highestNodeId, tracker);
         ParallelUtil.readParallel(
                 concurrency,
                 graphIds.size(),
