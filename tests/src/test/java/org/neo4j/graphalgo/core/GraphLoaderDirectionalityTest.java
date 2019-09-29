@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.GraphHelper.assertInRelationships;
 import static org.neo4j.graphalgo.GraphHelper.assertOutRelationships;
 
-class GraphLoaderTest {
+class GraphLoaderDirectionalityTest {
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -255,7 +255,7 @@ class GraphLoaderTest {
             Class<? extends GraphFactory> graphImpl,
             DeduplicationStrategy deduplicationStrategy) {
         return loadGraph(DB_CYPHER, graphImpl,
-                GraphLoaderTest.RELATIONSHIP_QUERY_UNDIRECTED, Direction.BOTH, deduplicationStrategy, true);
+                GraphLoaderDirectionalityTest.RELATIONSHIP_QUERY_UNDIRECTED, Direction.BOTH, deduplicationStrategy, true);
     }
 
     private Graph loadGraph(
