@@ -30,10 +30,11 @@ import org.neo4j.graphdb.Direction;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
-
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 public class TestSupport {
 
@@ -72,7 +73,7 @@ public class TestSupport {
     public @interface SingleAndMultiThreadedAllGraphNames {}
 
     public static Stream<Arguments> singleAndMultiThreadedGraphNames() {
-        return Stream.of(true, false).flatMap(parallel -> allGraphNames().map(name -> arguments(parallel, name)));
+        return crossArguments(toArguments(() -> Stream.of(true, false)), toArguments(TestSupport::allGraphNames));
     }
 
     public static Stream<String> allDirectionsNames() {
@@ -80,7 +81,27 @@ public class TestSupport {
     }
 
     public static Stream<Arguments> allGraphNamesAndDirections() {
-        return allGraphNames().flatMap(name -> allDirectionsNames().map(direction -> arguments(name, direction)));
+        return crossArguments(toArguments(TestSupport::allGraphNames), toArguments(TestSupport::allDirectionsNames));
+    }
+
+    public static <T> Supplier<Stream<Arguments>> toArguments(Supplier<Stream<T>> fn) {
+        return () -> fn.get().map(Arguments::of);
+    }
+
+    public static Stream<Arguments> crossArguments(Supplier<Stream<Arguments>> firstFn, Supplier<Stream<Arguments>>... otherFns) {
+        return Arrays
+                .stream(otherFns)
+                .reduce(firstFn, (l, r) -> () -> crossArguments(l, r))
+                .get();
+    }
+
+    public static Stream<Arguments> crossArguments(Supplier<Stream<Arguments>> leftFn, Supplier<Stream<Arguments>> rightFn) {
+        return leftFn.get().flatMap(leftArgs ->
+                rightFn.get().map(rightArgs -> {
+                    Collection<Object> leftObjects = new ArrayList<>(Arrays.asList(leftArgs.get()));
+                    leftObjects.addAll(new ArrayList<>(Arrays.asList(rightArgs.get())));
+                    return Arguments.of(leftObjects.toArray());
+                }));
     }
 
 }
