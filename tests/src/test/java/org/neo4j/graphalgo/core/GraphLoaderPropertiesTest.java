@@ -20,50 +20,23 @@
 
 package org.neo4j.graphalgo.core;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestSupport;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
-import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithMultipleRelTypeSupportTest;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.api.MultipleRelTypesSupport;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
-import org.neo4j.graphalgo.core.loading.GraphByType;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Arrays;
-import java.util.stream.Stream;
-
-import static java.util.Arrays.asList;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.graphalgo.GraphHelper.assertOutProperties;
 import static org.neo4j.graphalgo.GraphHelper.assertOutPropertiesWithDelta;
 import static org.neo4j.graphalgo.GraphHelper.assertOutRelationships;
-import static org.neo4j.graphalgo.GraphHelper.collectTargetIds;
-import static org.neo4j.graphalgo.GraphHelper.collectTargetProperties;
-import static org.neo4j.graphalgo.TestSupport.toArguments;
-import static org.neo4j.graphalgo.core.DeduplicationStrategy.MAX;
-import static org.neo4j.graphalgo.core.DeduplicationStrategy.MIN;
-import static org.neo4j.graphalgo.core.DeduplicationStrategy.SKIP;
-import static org.neo4j.graphalgo.core.DeduplicationStrategy.SUM;
-import static org.neo4j.helpers.collection.Iterables.asSet;
 
 class GraphLoaderPropertiesTest {
 
@@ -208,94 +181,6 @@ class GraphLoaderPropertiesTest {
                             .load(graphFactory);
                 });
         assertEquals(Status.Transaction.Terminated, exception.status());
-    }
-
-    @AllGraphTypesWithMultipleRelTypeSupportTest
-    void testLoadDuplicateRelationships(Class<? extends GraphFactory> graphFactory) {
-        final Graph graph = new GraphLoader(db)
-                .withAnyRelationshipType()
-                .withDeduplicationStrategy(DeduplicationStrategy.NONE)
-                .load(graphFactory);
-
-        assertOutRelationships(graph, id2, id3, id3);
-    }
-
-    @AllGraphTypesWithMultipleRelTypeSupportTest
-    void testLoadDuplicateRelationshipsWithWeights(Class<? extends GraphFactory> graphFactory) {
-        final Graph graph = new GraphLoader(db)
-                .withAnyRelationshipType()
-                .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-                .withDeduplicationStrategy(DeduplicationStrategy.NONE)
-                .load(graphFactory);
-
-        assertOutPropertiesWithDelta(graph, 1e-4, id2, 42.0, 1337.0);
-    }
-
-    static Stream<Arguments> deduplicateWithWeightsParams() {
-        return TestSupport.crossArguments(toArguments(TestSupport::allTypesWithMultipleRelTypeSupport), () -> Stream.of(
-                Arguments.of(SKIP, 42.0),
-                Arguments.of(SUM, 1379.0),
-                Arguments.of(MAX, 1337.0),
-                Arguments.of(MIN, 42.0)
-        ));
-    }
-
-    @ParameterizedTest
-    @MethodSource("deduplicateWithWeightsParams")
-    void testLoadDuplicateRelationshipsWithWeightsAggregation(
-            Class<? extends GraphFactory> graphFactory,
-            DeduplicationStrategy deduplicationStrategy,
-            double expectedWeight) {
-        final Graph graph = new GraphLoader(db)
-                .withAnyRelationshipType()
-                .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-                .withDeduplicationStrategy(deduplicationStrategy)
-                .load(graphFactory);
-
-        assertOutPropertiesWithDelta(graph, 1e-4, id2, expectedWeight);
-    }
-
-    @AllGraphTypesWithMultipleRelTypeSupportTest
-    <T extends GraphFactory & MultipleRelTypesSupport>
-    void testLoadMultipleRelationships(Class<T> graphFactory) {
-        GraphByType graphs = new GraphLoader(db)
-                .withAnyLabel()
-                .withRelationshipType("REL1 | REL2")
-                .build(graphFactory)
-                .loadGraphsByRelType();
-
-        assertEquals(2, graphs.availableRelationshipTypes().size());
-        assertEquals(graphs.availableRelationshipTypes(), asSet(asList("REL1", "REL2")));
-
-        Graph rel1Graph = graphs.getGraph("REL1");
-        Graph rel2Graph = graphs.getGraph("REL2");
-        Graph unionGraph = graphs.getGraph("REL1 | REL2");
-
-        assertOutRelationships(rel1Graph, id1, id2);
-        assertOutRelationships(rel2Graph, id1, id3);
-        assertOutRelationships(unionGraph, id1, id2, id3);
-    }
-
-    @AllGraphTypesWithMultipleRelTypeSupportTest
-    <T extends GraphFactory & MultipleRelTypesSupport>
-    void testLoadMultipleRelationshipsWithWeights(Class<T> graphFactory) {
-        GraphByType graphs = new GraphLoader(db)
-                .withAnyLabel()
-                .withRelationshipType("REL1 | REL2")
-                .withRelationshipProperties(PropertyMapping.of("prop1", 42D))
-                .build(HugeGraphFactory.class)
-                .loadGraphsByRelType();
-
-        assertEquals(2, graphs.availableRelationshipTypes().size());
-        assertEquals(graphs.availableRelationshipTypes(), asSet(asList("REL1", "REL2")));
-
-        Graph rel1Graph = graphs.getGraph("REL1");
-        Graph rel2Graph = graphs.getGraph("REL2");
-        Graph unionGraph = graphs.getGraph("REL1 | REL2");
-
-        assertOutProperties(rel1Graph, id1, 1D);
-        assertOutProperties(rel2Graph, id1, 42D);
-        assertOutProperties(unionGraph, id1, 1D, 42D);
     }
 
 }
