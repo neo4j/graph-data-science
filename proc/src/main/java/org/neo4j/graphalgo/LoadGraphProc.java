@@ -24,11 +24,11 @@ import org.HdrHistogram.Histogram;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.api.MultiRelTypeSupport;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.loading.GraphByType;
 import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
@@ -86,7 +86,8 @@ public final class LoadGraphProc extends BaseProc {
             PropertyMappings propertyMappings = graphImpl == CypherGraphFactory.class
                     ? PropertyMappings.EMPTY
                     : config.getRelationshipProperties();
-            if (relationshipTypes.size() > 1 && graphImpl != HugeGraphFactory.class) {
+
+            if (relationshipTypes.size() > 1 && !MultiRelTypeSupport.class.isAssignableFrom(graphImpl)) {
                 throw new IllegalArgumentException(
                         "Only the huge graph supports multiple relationships, please specify {graph:'huge'}.");
             }
@@ -94,8 +95,8 @@ public final class LoadGraphProc extends BaseProc {
             GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
             GraphByType graphFromType;
             if (relationshipTypes.size() > 1 || propertyMappings.hasMappings()) {
-                HugeGraphFactory graphFactory = loader.build(HugeGraphFactory.class);
-                GraphByType byType = graphFactory.loadGraphs();
+                MultiRelTypeSupport graphFactory = (MultiRelTypeSupport) loader.build(graphImpl);
+                GraphByType byType = graphFactory.loadGraphsByRelType();
                 stats.nodes = byType.nodeCount();
                 stats.relationships = byType.relationshipCount();
                 graphFromType = byType;
