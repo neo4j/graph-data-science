@@ -24,6 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.api.MultipleRelTypesSupport;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphdb.Direction;
@@ -37,6 +38,15 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class TestSupport {
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @ParameterizedTest
+    @MethodSource("org.neo4j.graphalgo.TestSupport#allTypesWithMultipleRelTypeSupport")
+    public @interface AllGraphTypesWithMultipleRelTypeSupportTest {}
+
+    public static <T extends GraphFactory & MultipleRelTypesSupport> Stream<Class<T>> allTypesWithMultipleRelTypeSupport() {
+        return Stream.of((Class<T>) HugeGraphFactory.class);
+    }
 
     @Retention(RetentionPolicy.RUNTIME)
     @ParameterizedTest
