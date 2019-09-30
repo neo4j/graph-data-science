@@ -149,7 +149,7 @@ include::scripts/label-propagation.cypher[tag=cypher-loading]
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-CALL algo.labelPropagation(label:String, relationship:String, {iterations:1,
+CALL algo.labelPropagation(label:String, relationship:String, {iterations:10,
     weightProperty:'weight', writeProperty:'community', write:true, concurrency:4})
 YIELD nodes, iterations, didConverge, loadMillis, computeMillis, writeMillis, write, weightProperty, writeProperty
 ----
@@ -169,7 +169,7 @@ YIELD nodes, iterations, didConverge, loadMillis, computeMillis, writeMillis, wr
 |===
 | Name              | Type    | Default                | Optional | Description
 | direction         | string  | 'OUTGOING'             | yes      | The relationship-direction to use in the algorithm
-| iterations        | int     | 1                      | yes      | The maximum number of iterations to run
+| iterations        | int     | 10                     | yes      | The maximum number of iterations to run
 | concurrency       | int     | available CPUs         | yes      | The number of concurrent threads
 | readConcurrency   | int     | value of `concurrency` | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency  | int     | value of `concurrency` | yes      | The number of concurrent threads used for writing the result.
@@ -184,7 +184,7 @@ YIELD nodes, iterations, didConverge, loadMillis, computeMillis, writeMillis, wr
 .Or use the beta procedure:
 [source, cypher]
 ----
-CALL algo.beta.labelPropagation(label:String, relationship:String, {iterations:1,
+CALL algo.beta.labelPropagation(label:String, relationship:String, {iterations:10,
     weightProperty:'weight', writeProperty:'community', write:true, concurrency:4})
 YIELD nodes, iterations, didConverge, loadMillis, computeMillis, writeMillis, write, weightProperty, writeProperty
 ----
@@ -203,7 +203,7 @@ YIELD nodes, iterations, didConverge, loadMillis, computeMillis, writeMillis, wr
 |===
 | Name              | Type    | Default                | Optional | Description
 | direction         | string  | 'OUTGOING'             | yes      | The relationship-direction to use in the algorithm
-| iterations        | int     | 1                      | yes      | The maximum number of iterations to run
+| iterations        | int     | 10                     | yes      | The maximum number of iterations to run
 | concurrency       | int     | available CPUs         | yes      | The number of concurrent threads
 | readConcurrency   | int     | value of `concurrency` | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency  | int     | value of `concurrency` | yes      | The number of concurrent threads used for writing the result.
@@ -249,7 +249,7 @@ YIELD nodes, iterations, didConverge, loadMillis, computeMillis, writeMillis, wr
 .The following will run the algorithm and stream back results:
 [source,cypher]
 ----
-CALL algo.labelPropagation.stream(label:String, relationship:String, {iterations:1,
+CALL algo.labelPropagation.stream(label:String, relationship:String, {iterations:10,
     weightProperty:'weight', writeProperty:'partition', concurrency:4, direction:'OUTGOING'})
 YIELD nodeId, label
 ----
@@ -268,7 +268,7 @@ YIELD nodeId, label
 |===
 | Name              | Type   | Default                | Optional | Description
 | direction         | string | 'OUTGOING'             | yes      | The relationship-direction to use in the algorithm
-| iterations        | int    | 1                      | yes      | The maximum number of iterations to run
+| iterations        | int    | 10                     | yes      | The maximum number of iterations to run
 | concurrency       | int    | available CPUs         | yes      | The number of concurrent threads
 | readConcurrency   | int    | value of `concurrency` | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency  | int    | value of `concurrency` | yes      | The number of concurrent threads used for writing the result.
