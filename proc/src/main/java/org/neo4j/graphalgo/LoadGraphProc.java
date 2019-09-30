@@ -75,9 +75,7 @@ public final class LoadGraphProc extends BaseProc {
         LoadGraphStats stats = new LoadGraphStats(name, config);
 
         if (LoadGraphFactory.exists(name)) {
-            // return already loaded
-            stats.alreadyLoaded = true;
-            return stats;
+            throw new IllegalArgumentException(String.format("A graph with name '%s' is already loaded..", name));
         }
 
         try (ProgressTimer ignored = ProgressTimer.start(time -> stats.loadMillis = time)) {
@@ -173,7 +171,7 @@ public final class LoadGraphProc extends BaseProc {
         public boolean undirected;
         public boolean sorted;
         public long nodes, relationships, loadMillis;
-        public boolean alreadyLoaded;
+        public final boolean alreadyLoaded = false; // No longer used--we throw an exception instead.
         public String nodeWeight, relationshipWeight, nodeProperty, loadNodes, loadRelationships;
         public Object relationshipProperties;
 

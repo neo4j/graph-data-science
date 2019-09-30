@@ -469,7 +469,7 @@ class LoadGraphProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @ValueSource(strings = {"huge", "cypher"})
-    void dontDoubleLoad(String graph) {
+    void shouldThrowIfGraphAlreadyLoaded(String graph) {
         String queryTemplate = "CALL algo.graph.load(" +
                                "    'foo', %s, %s, {" +
                                "        graph: $graph" +
@@ -481,8 +481,13 @@ class LoadGraphProcTest extends ProcTestBase {
                 : String.format(queryTemplate, "null", "null");
 
         Map<String, Object> params = singletonMap("graph", graph);
+        // First load succeeds
         assertFalse(db.execute(query, params).<Boolean>columnAs("loaded").next());
-        assertTrue(db.execute(query, params).<Boolean>columnAs("loaded").next());
+        // Second load throws exception
+        QueryExecutionException exGraphAlreadyLoaded = assertThrows(QueryExecutionException.class, () -> db.execute(query, params).next());
+        Throwable rootCause = ExceptionUtil.rootCause(exGraphAlreadyLoaded);
+        assertEquals(IllegalArgumentException.class, rootCause.getClass());
+        assertThat(rootCause.getMessage(), containsString("A graph with name 'foo' is already loaded."));
     }
 
 
