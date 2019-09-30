@@ -53,7 +53,7 @@ public class ANNUtils {
     }
 
     static HugeGraph hugeGraph(IdsAndProperties nodes, Relationships hugeRels) {
-        return new HugeGraph(
+        return HugeGraph.create(
                 AllocationTracker.EMPTY,
                 nodes.idMap(),
                 nodes.properties(),
@@ -63,10 +63,10 @@ public class ANNUtils {
                 hugeRels.inOffsets(),
                 hugeRels.outOffsets(),
                 hugeRels.defaultWeight(),
-                hugeRels.inWeights(),
-                hugeRels.outWeights(),
-                hugeRels.inWeightOffsets(),
-                hugeRels.outWeightOffsets(),
+                Optional.ofNullable(hugeRels.inWeights()),
+                Optional.ofNullable(hugeRels.outWeights()),
+                Optional.ofNullable(hugeRels.inWeightOffsets()),
+                Optional.ofNullable(hugeRels.outWeightOffsets()),
                 false);
     }
 

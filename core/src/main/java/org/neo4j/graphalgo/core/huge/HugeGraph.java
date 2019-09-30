@@ -34,6 +34,7 @@ import org.neo4j.internal.kernel.api.NodeCursor;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.LongPredicate;
 
@@ -108,7 +109,9 @@ public class HugeGraph implements Graph {
     private final boolean hasRelationshipProperty;
     private final boolean isUndirected;
 
-    public HugeGraph(
+
+
+    public static HugeGraph create(
             final AllocationTracker tracker,
             final IdMap idMapping,
             final Map<String, WeightMapping> nodeProperties,
@@ -117,25 +120,29 @@ public class HugeGraph implements Graph {
             final AdjacencyList outAdjacency,
             final AdjacencyOffsets inOffsets,
             final AdjacencyOffsets outOffsets,
+            final Optional<Double> defaultWeight,
+            final Optional<AdjacencyList> inWeights,
+            final Optional<AdjacencyList> outWeights,
+            final Optional<AdjacencyOffsets> inWeightOffsets,
+            final Optional<AdjacencyOffsets> outWeightOffsets,
             final boolean isUndirected) {
-        this.idMapping = idMapping;
-        this.tracker = tracker;
-        this.nodeProperties = nodeProperties;
-        this.relationshipCount = relationshipCount;
-        this.inAdjacency = inAdjacency;
-        this.outAdjacency = outAdjacency;
-        this.inOffsets = inOffsets;
-        this.outOffsets = outOffsets;
-        this.defaultWeight = Double.NaN;
-        this.inWeights = null;
-        this.outWeights = null;
-        this.inWeightOffsets = null;
-        this.outWeightOffsets = null;
-        this.isUndirected = isUndirected;
-        this.hasRelationshipProperty = false;
-        inCache = newAdjacencyCursor(this.inAdjacency);
-        outCache = newAdjacencyCursor(this.outAdjacency);
-        emptyAdjacencyCursor = inCache == null ? newAdjacencyCursor(this.outAdjacency) : newAdjacencyCursor(this.inAdjacency);
+        return new HugeGraph(
+            tracker,
+            idMapping,
+            nodeProperties,
+            relationshipCount,
+            inAdjacency,
+            outAdjacency,
+            inOffsets,
+            outOffsets,
+            inWeights.isPresent() || outWeights.isPresent(),
+            defaultWeight.orElse(Double.NaN),
+            inWeights.orElse(null),
+            outWeights.orElse(null),
+            inWeightOffsets.orElse(null),
+            outWeightOffsets.orElse(null),
+            isUndirected
+        );
     }
 
 
@@ -148,6 +155,7 @@ public class HugeGraph implements Graph {
             final AdjacencyList outAdjacency,
             final AdjacencyOffsets inOffsets,
             final AdjacencyOffsets outOffsets,
+            final boolean hasRelationshipProperty,
             final double defaultWeight,
             final AdjacencyList inWeights,
             final AdjacencyList outWeights,
@@ -168,7 +176,7 @@ public class HugeGraph implements Graph {
         this.inWeightOffsets = inWeightOffsets;
         this.outWeightOffsets = outWeightOffsets;
         this.isUndirected = isUndirected;
-        this.hasRelationshipProperty = inWeights != null || outWeights != null;
+        this.hasRelationshipProperty = hasRelationshipProperty;
         inCache = newAdjacencyCursor(this.inAdjacency);
         outCache = newAdjacencyCursor(this.outAdjacency);
         emptyAdjacencyCursor = inCache == null ? newAdjacencyCursor(this.outAdjacency) : newAdjacencyCursor(this.inAdjacency);
@@ -361,6 +369,7 @@ public class HugeGraph implements Graph {
                 outAdjacency,
                 inOffsets,
                 outOffsets,
+                hasRelationshipProperty,
                 defaultWeight,
                 inWeights,
                 outWeights,

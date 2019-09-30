@@ -321,7 +321,7 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
             long relationshipCount,
             boolean loadAsUndirected) {
 
-        return new HugeGraph(
+        return HugeGraph.create(
                 tracker,
                 idMapping,
                 nodeProperties,
@@ -330,6 +330,11 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
                 outAdjacencyList,
                 inAdjacencyOffsets,
                 outAdjacencyOffsets,
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
                 loadAsUndirected);
     }
 
@@ -370,7 +375,11 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
             }
         }
 
-        return new HugeGraph(
+        Optional<Double> maybeDefaultWeight = weightProperty == PropertyMapping.EMPTY_PROPERTY
+                ? Optional.empty()
+                : Optional.of(weightProperty.defaultValue());
+
+        return HugeGraph.create(
                 tracker,
                 idMapping,
                 nodeProperties,
@@ -379,11 +388,11 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
                 outAdjacencyList,
                 inAdjacencyOffsets,
                 outAdjacencyOffsets,
-                weightProperty.defaultValue(),
-                inWeightList,
-                outWeightList,
-                inWeightOffsets,
-                outWeightOffsets,
+                maybeDefaultWeight,
+                Optional.ofNullable(inWeightList),
+                Optional.ofNullable(outWeightList),
+                Optional.ofNullable(inWeightOffsets),
+                Optional.ofNullable(outWeightOffsets),
                 loadAsUndirected);
     }
 
