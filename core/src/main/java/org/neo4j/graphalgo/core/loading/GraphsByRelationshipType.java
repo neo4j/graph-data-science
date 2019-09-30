@@ -28,124 +28,194 @@ import org.neo4j.helpers.collection.Iterables;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public final class GraphsByRelationshipType implements GraphByType {
+public interface GraphsByRelationshipType {
 
-    private final Map<String, ? extends Map<String, ? extends Graph>> graphs;
+    static GraphsByRelationshipType of(Graph graph) {
+        return new NoRelationshipType(graph);
+    }
 
-    public static GraphByType of(Map<String, ? extends Map<String, ? extends Graph>> graphs) {
+    static GraphsByRelationshipType of(Map<String, ? extends Map<String, ? extends Graph>> graphs) {
         if (graphs.size() == 1) {
             Map<String, ? extends Graph> byProperty = Iterables.single(graphs.values());
             if (byProperty.size() == 1) {
-                return new GraphByType.SingleGraph(Iterables.single(byProperty.values()));
+                return of(Iterables.single(byProperty.values()));
             }
         }
-        return new GraphsByRelationshipType(graphs);
+        return new MultipleRelationshipTypes(graphs);
     }
 
-    private GraphsByRelationshipType(Map<String, ? extends Map<String, ? extends Graph>> graphs) {
-        this.graphs = graphs;
-        forEach(g -> g.canRelease(false));
+    default Graph getGraph(String relationshipType) {
+        return getGraph(relationshipType, Optional.empty());
     }
 
-    @Override
-    public Graph getGraph(String relationshipType, Optional<String> maybeRelationshipProperty) {
-        Set<String> types = RelationshipTypes.parse(relationshipType);
+    Graph getGraph(String relationshipType, Optional<String> maybeRelationshipProperty);
 
-        if (types.isEmpty() && !maybeRelationshipProperty.isPresent()) {
-            return getUnion();
+    Graph getUnion();
+
+    String getGraphType();
+
+    void canRelease(boolean canRelease);
+
+    long nodeCount();
+
+    long relationshipCount();
+
+    Set<String> availableRelationshipTypes();
+
+    final class NoRelationshipType implements GraphsByRelationshipType {
+
+        private final Graph graph;
+
+        private NoRelationshipType(Graph graph) {
+            this.graph = graph;
         }
 
-        Collection<Graph> graphParts = new ArrayList<>();
-        if (types.isEmpty()) {
-            String weightProperty = maybeRelationshipProperty.get();
-            for (Map<String, ? extends Graph> graphsByProperty : graphs.values()) {
-                Graph graph = getExistingByProperty(weightProperty, graphsByProperty);
-                graphParts.add(graph);
+        @Override
+        public Graph getGraph(String relationshipType, Optional<String> maybeRelationshipProperty) {
+            return graph;
+        }
+
+        @Override
+        public Graph getUnion() {
+            return graph;
+        }
+
+        @Override
+        public void canRelease(boolean canRelease) {
+            graph.canRelease(canRelease);
+        }
+
+        @Override
+        public String getGraphType() {
+            return graph.getType();
+        }
+
+        @Override
+        public long nodeCount() {
+            return graph.nodeCount();
+        }
+
+        @Override
+        public long relationshipCount() {
+            return graph.relationshipCount();
+        }
+
+        @Override
+        public Set<String> availableRelationshipTypes() {
+            return Collections.emptySet();
+        }
+    }
+
+    final class MultipleRelationshipTypes implements GraphsByRelationshipType {
+
+        private final Map<String, ? extends Map<String, ? extends Graph>> graphs;
+
+        private MultipleRelationshipTypes(Map<String, ? extends Map<String, ? extends Graph>> graphs) {
+            this.graphs = graphs;
+            forEach(g -> g.canRelease(false));
+        }
+
+        @Override
+        public Graph getGraph(String relationshipType, Optional<String> maybeRelationshipProperty) {
+            Set<String> types = RelationshipTypes.parse(relationshipType);
+
+            if (types.isEmpty() && !maybeRelationshipProperty.isPresent()) {
+                return getUnion();
             }
-        } else {
-            if (maybeRelationshipProperty.isPresent()) {
+
+            Collection<Graph> graphParts = new ArrayList<>();
+            if (types.isEmpty()) {
                 String weightProperty = maybeRelationshipProperty.get();
-                for (String type : types) {
-                    Map<String, ? extends Graph> graphsByProperty = getExistingByType(type);
+                for (Map<String, ? extends Graph> graphsByProperty : graphs.values()) {
                     Graph graph = getExistingByProperty(weightProperty, graphsByProperty);
                     graphParts.add(graph);
                 }
             } else {
-                for (String type : types) {
-                    Map<String, ? extends Graph> graphsByProperty = getExistingByType(type);
-                    graphParts.addAll(graphsByProperty.values());
+                if (maybeRelationshipProperty.isPresent()) {
+                    String weightProperty = maybeRelationshipProperty.get();
+                    for (String type : types) {
+                        Map<String, ? extends Graph> graphsByProperty = getExistingByType(type);
+                        Graph graph = getExistingByProperty(weightProperty, graphsByProperty);
+                        graphParts.add(graph);
+                    }
+                } else {
+                    for (String type : types) {
+                        Map<String, ? extends Graph> graphsByProperty = getExistingByType(type);
+                        graphParts.addAll(graphsByProperty.values());
+                    }
                 }
             }
+
+            return UnionGraph.of(graphParts);
         }
 
-        return UnionGraph.of(graphParts);
-    }
-
-    @Override
-    public Graph getUnion() {
-        Collection<Graph> graphParts = new ArrayList<>();
-        forEach(graphParts::add);
-        return UnionGraph.of(graphParts);
-    }
-
-    private Map<String, ? extends Graph> getExistingByType(String singleType) {
-        return getExisting(singleType, "type", graphs);
-    }
-
-    private Graph getExistingByProperty(String property, Map<String, ? extends Graph> graphs) {
-        return getExisting(property, "property", graphs);
-    }
-
-    private <T> T getExisting(String key, String type, Map<String, ? extends T> graphs) {
-        T graph = graphs.get(key);
-        if (graph == null) {
-            throw new IllegalArgumentException(String.format("No graph was loaded for %s %s", type, key));
+        @Override
+        public Graph getUnion() {
+            Collection<Graph> graphParts = new ArrayList<>();
+            forEach(graphParts::add);
+            return UnionGraph.of(graphParts);
         }
-        return graph;
-    }
 
-    @Override
-    public void canRelease(boolean canRelease) {
-        forEach(g -> g.canRelease(canRelease));
-    }
+        private Map<String, ? extends Graph> getExistingByType(String singleType) {
+            return getExisting(singleType, "type", graphs);
+        }
 
-    @Override
-    public String getGraphType() {
-        return HugeGraph.TYPE;
-    }
+        private Graph getExistingByProperty(String property, Map<String, ? extends Graph> graphs) {
+            return getExisting(property, "property", graphs);
+        }
 
-    @Override
-    public long nodeCount() {
-        return graphs
-                .values().stream()
-                .flatMap(g -> g.values().stream())
-                .mapToLong(Graph::nodeCount)
-                .findFirst()
-                .orElse(0);
-    }
+        private <T> T getExisting(String key, String type, Map<String, ? extends T> graphs) {
+            T graph = graphs.get(key);
+            if (graph == null) {
+                throw new IllegalArgumentException(String.format("No graph was loaded for %s %s", type, key));
+            }
+            return graph;
+        }
 
-    @Override
-    public long relationshipCount() {
-        return graphs
-                .values().stream()
-                .mapToLong(g -> g.values().stream().mapToLong(Graph::relationshipCount).max().orElse(0L))
-                .sum();
-    }
+        @Override
+        public void canRelease(boolean canRelease) {
+            forEach(g -> g.canRelease(canRelease));
+        }
 
-    @Override
-    public Set<String> availableRelationshipTypes() {
-        return graphs.keySet();
-    }
+        @Override
+        public String getGraphType() {
+            return HugeGraph.TYPE;
+        }
 
-    private void forEach(Consumer<? super Graph> action) {
-        for (Map<String, ? extends Graph> graphsByProperty : graphs.values()) {
-            for (Graph graph : graphsByProperty.values()) {
-                action.accept(graph);
+        @Override
+        public long nodeCount() {
+            return graphs
+                    .values().stream()
+                    .flatMap(g -> g.values().stream())
+                    .mapToLong(Graph::nodeCount)
+                    .findFirst()
+                    .orElse(0);
+        }
+
+        @Override
+        public long relationshipCount() {
+            return graphs
+                    .values().stream()
+                    .mapToLong(g -> g.values().stream().mapToLong(Graph::relationshipCount).max().orElse(0L))
+                    .sum();
+        }
+
+        @Override
+        public Set<String> availableRelationshipTypes() {
+            return graphs.keySet();
+        }
+
+        private void forEach(Consumer<? super Graph> action) {
+            for (Map<String, ? extends Graph> graphsByProperty : graphs.values()) {
+                for (Graph graph : graphsByProperty.values()) {
+                    action.accept(graph);
+                }
             }
         }
     }

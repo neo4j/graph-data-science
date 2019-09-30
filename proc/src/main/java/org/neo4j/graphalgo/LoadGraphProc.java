@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
-import org.neo4j.graphalgo.core.loading.GraphByType;
+import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -93,19 +93,16 @@ public final class LoadGraphProc extends BaseProc {
             }
 
             GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
-            GraphByType graphFromType;
-            if (relationshipTypes.size() > 1 || propertyMappings.hasMappings()) {
-                MultipleRelTypesSupport graphFactory = (MultipleRelTypesSupport) loader.build(graphImpl);
-                GraphByType graphsByType = graphFactory.loadGraphsByRelType();
-                stats.nodes = graphsByType.nodeCount();
-                stats.relationships = graphsByType.relationshipCount();
-                graphFromType = graphsByType;
+
+            GraphsByRelationshipType graphFromType;
+            if (!relationshipTypes.isEmpty() || propertyMappings.hasMappings()) {
+                graphFromType = ((MultipleRelTypesSupport) loader.build(graphImpl)).importAllGraphs();
             } else {
-                Graph graph = loader.load(graphImpl);
-                stats.nodes = graph.nodeCount();
-                stats.relationships = graph.relationshipCount();
-                graphFromType = new GraphByType.SingleGraph(graph);
+                graphFromType = GraphsByRelationshipType.of(loader.load(graphImpl));
             }
+
+            stats.nodes = graphFromType.nodeCount();
+            stats.relationships = graphFromType.relationshipCount();
 
             LoadGraphFactory.set(name, graphFromType);
         }

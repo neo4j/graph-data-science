@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 
 public final class LoadGraphFactory extends GraphFactory {
 
-    private static final ConcurrentHashMap<String, GraphByType> graphs = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, GraphsByRelationshipType> graphs = new ConcurrentHashMap<>();
 
     public LoadGraphFactory(
             final GraphDatabaseAPI api,
@@ -60,7 +60,7 @@ public final class LoadGraphFactory extends GraphFactory {
         return HugeGraphFactory.getMemoryEstimation(setup, dimensions);
     }
 
-    public static void set(String name, GraphByType graph) {
+    public static void set(String name, GraphsByRelationshipType graph) {
         if (name == null || graph == null) {
             throw new IllegalArgumentException("Both name and graph must be not null");
         }
@@ -111,7 +111,7 @@ public final class LoadGraphFactory extends GraphFactory {
 
     public static String getType(String name) {
         if (name == null) return null;
-        GraphByType graph = graphs.get(name);
+        GraphsByRelationshipType graph = graphs.get(name);
         return graph == null ? null : graph.getGraphType();
     }
 

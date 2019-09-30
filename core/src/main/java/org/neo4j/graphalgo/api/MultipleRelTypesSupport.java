@@ -20,10 +20,10 @@
 
 package org.neo4j.graphalgo.api;
 
-import org.neo4j.graphalgo.core.loading.GraphByType;
+import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 
 public interface MultipleRelTypesSupport {
 
-    GraphByType loadGraphsByRelType();
+    GraphsByRelationshipType importAllGraphs();
 
 }

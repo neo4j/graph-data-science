@@ -39,7 +39,6 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.helpers.collection.Iterables;
 import org.neo4j.kernel.api.StatementConstants;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -150,18 +149,13 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
             throw new IllegalArgumentException(message);
         }
 
-        Map<String, Map<String, HugeGraph>> graphsByTypeAndProperty = importAllGraphs();
-        Map<String, HugeGraph> graphsByProperty = Iterables.single(graphsByTypeAndProperty.values());
-        return UnionGraph.of(graphsByProperty.values());
+        return importAllGraphs().getUnion();
     }
 
     @Override
-    public GraphByType loadGraphsByRelType() {
+    public GraphsByRelationshipType importAllGraphs() {
         validateTokens();
-        return GraphsByRelationshipType.of(importAllGraphs());
-    }
 
-    private Map<String, Map<String, HugeGraph>> importAllGraphs() {
         GraphDimensions dimensions = this.dimensions;
         int concurrency = setup.concurrency();
         AllocationTracker tracker = setup.tracker;
@@ -172,7 +166,8 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
                 mappingAndProperties,
                 concurrency);
         progressLogger.logDone(tracker);
-        return graphs;
+
+        return GraphsByRelationshipType.of(graphs);
     }
 
     private IdsAndProperties loadIdMap(AllocationTracker tracker, int concurrency) {
