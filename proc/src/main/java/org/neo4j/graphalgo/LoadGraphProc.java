@@ -187,7 +187,8 @@ public final class LoadGraphProc extends BaseProc {
             direction = configuration.getDirection(Direction.OUTGOING).name();
             nodeWeight = configuration.getString(ProcedureConstants.NODE_WEIGHT_KEY, null);
             nodeProperty = configuration.getString(ProcedureConstants.NODE_PROPERTY_KEY, null);
-            relationshipWeight = configuration.getString(ProcedureConstants.RELATIONSHIP_WEIGHT_KEY, null);
+            // default is required to be backwards compatible with `weightProperty` (not documented but was possible)
+            relationshipWeight = configuration.getString(ProcedureConstants.RELATIONSHIP_WEIGHT_KEY, configuration.getWeightProperty());
             relationshipProperties = configuration.get(ProcedureConstants.RELATIONSHIP_PROPERTIES_KEY, null);
         }
     }
