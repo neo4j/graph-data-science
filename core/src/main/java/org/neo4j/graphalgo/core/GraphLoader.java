@@ -297,6 +297,11 @@ public class GraphLoader {
         return this;
     }
 
+    public GraphLoader withOptionalNodeProperties(PropertyMappings nodePropertyMappings) {
+        this.nodePropertyMappings.addAllOptionalMappings(nodePropertyMappings.stream());
+        return this;
+    }
+
     public GraphLoader withRelationshipProperties(PropertyMapping... relPropertyMappings) {
         this.relPropertyMappings.addAllMappings(relPropertyMappings);
         return this;
