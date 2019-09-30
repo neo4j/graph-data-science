@@ -14,7 +14,6 @@ This topic includes:
 ** <<algorithms-wcc-examples-unweighted, Unweighted>>
 ** <<algorithms-wcc-examples-weighted, Weighted>>
 ** <<algorithms-wcc-examples-seeding, Seeded components>>
-//** <<algorithms-wcc-examples-threshold, Threshold>>
 //* <<algorithms-wcc-usage-details, Usage Details>>
 
 
@@ -44,16 +43,13 @@ Before running this algorithm, we recommend that you read <<memory-requirements>
 [[algorithms-wcc-syntax]]
 == Syntax
 
-.The following will run the algorithm on a loaded graph with name `wcc-graph`, and write back results:
+.The following describes the API for running the algorithm and writing results back to Neo4j:
 [source, cypher]
 ----
-CALL algo.unionFind(label: String, relationship: String, {
-  graph: 'wcc-graph',
-  threshold: 0.42,
-  write: true,
-  writeProperty: 'partition',
-  weightProperty: 'weight',
-  defaultValue: 1.0
+CALL algo.unionFind(label: STRING, relationship: STRING, {
+  write: BOOLEAN,
+  writeProperty: STRING
+  // additional configuration
 })
 YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
 ----
@@ -109,14 +105,11 @@ YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
 |===
 
 
-.The following will run the algorithm on a loaded graph with name `wcc-graph` and stream results:
+.The following describes the API for running the algorithm and stream results:
 [source, cypher]
 ----
-CALL algo.unionFind.stream(label: String, relationship: String, {
-  graph: 'wcc-graph',
-  threshold: 0.42,
-  weightProperty: 'weight',
-  defaultValue: 1.0
+CALL algo.unionFind.stream(label: STRING, relationship: STRING, {
+  // configuration
 })
 YIELD nodeId, setId
 ----
@@ -174,39 +167,20 @@ CREATE (nMark)-[:LINK {weight: 2}]->(nMichael);
 ----
 
 This graph has two connected components, each with three nodes.
-The relationships that connect the nodes in each component have a property which determines the strength of the relationship.
-
-We load this graph under the name `'wcc-graph'`, as below:
-
-[source, cypher]
-----
-CALL algo.graph.load('wcc-graph', 'User', 'LINK')
-YIELD name AS Name, nodes AS Nodes, relationships AS Relationships
-----
-
-.Results
-[opts="header",cols="1m,1m,1m"]
-|===
-| Name        | Nodes | Relationships
-| "wcc-graph" | 6     | 4
-|===
-
-
-The following examples demonstrate using the Weakly Connected Components algorithm.
+The relationships that connect the nodes in each component have a property `weight` which determines the strength of the relationship.
+In the following examples we will demonstrate using the Weakly Connected Components algorithm on this graph.
 
 
 [[algorithms-wcc-examples-unweighted]]
 === Unweighted
 
-.The following will run the algorithm and stream results:
+.The following will load the graph, run the algorithm, and stream results:
 [source, cypher]
 ----
-CALL algo.unionFind.stream('User', 'LINK', {
-  graph: 'wcc-graph'
-})
+CALL algo.unionFind.stream('User', 'LINK')
 YIELD nodeId, setId
 RETURN algo.asNode(nodeId).name AS Name, setId AS ComponentId
-ORDER BY ComponentId
+ORDER BY ComponentId, Name
 ----
 
 .Results
@@ -214,20 +188,19 @@ ORDER BY ComponentId
 |===
 | Name      | ComponentId
 | "Alice"   | 0
-| "Charles" | 0
 | "Bridget" | 0
-| "Michael" | 3
+| "Charles" | 0
 | "Doug"    | 3
 | "Mark"    | 3
+| "Michael" | 3
 |===
 
 To instead write the component ID to a node property in the Neo4j graph, use this query:
 
-.The following will run the algorithm and write back results:
+.The following will load the graph with weights, run the algorithm, and write back results:
 [source, cypher]
 ----
 CALL algo.unionFind('User', 'LINK', {
-  graph: 'wcc-graph',
   write: true,
   writeProperty: 'componentId'
 })
@@ -247,20 +220,22 @@ As we can see from the results, the nodes connected to one another are calculate
 [[algorithms-wcc-examples-weighted]]
 === Weighted
 
-By configuring the algorithm to use a weight (`weightProperty`) and a threshold, we can increase granularity in the way the algorithm calculates component assignment.
-Only relationships with a weight strictly greater than the threshold value will be considered as a valid connection.
+By configuring the algorithm to use a weight we can increase granularity in the way the algorithm calculates component assignment.
+We do this by specifying the property key with the `weightProperty` configuration parameter.
+Additionally, we can specify a threshold for the weight value in such a way that only weighs greater than the threshold value will be considered by the algorithm.
+We do this by specifying the threshold value with the `threshold` configuration parameter.
 
-.The following will run the algorithm and stream results:
+.The following will load the graph with weights, run the algorithm, and stream results:
 [source, cypher]
 ----
 CALL algo.unionFind.stream('User', 'LINK', {
-  graph: 'wcc-graph',
   weightProperty: 'weight',
   threshold: 1.0
 })
 YIELD nodeId,setId
 
 RETURN algo.asNode(nodeId).name AS Name, setId AS ComponentId
+ORDER BY ComponentId, Name
 ----
 
 .Results
@@ -276,11 +251,10 @@ RETURN algo.asNode(nodeId).name AS Name, setId AS ComponentId
 |===
 
 
-.The following will run the algorithm and write back results:
+.The following will load the graph with weights, run the algorithm, and write back results:
 [source, cypher]
 ----
 CALL algo.unionFind('User', 'LINK', {
-  graph: 'wcc-graph',
   write: true,
   writeProperty: "componentId",
   weightProperty: 'weight',
@@ -296,7 +270,7 @@ YIELD nodes AS Nodes, setCount AS NbrOfComponents, writeProperty AS PropertyName
 | 6     | 3               | "componentId"
 |===
 
-As we can see from the results, Bridget is now in their own component, due to the relationship weight not being above the configured threshold.
+As we can see from the results, the node named 'Bridget' is now in its own component, due to its relationship weight being less than the configured threshold and thus ignored.
 
 
 [[algorithms-wcc-examples-seeding]]
@@ -318,11 +292,3 @@ If the `seedProperty` configuration parameter has the same value as `writeProper
 If they differ, the algorithm writes properties for all nodes.
 
 //TODO: add some Cypher and show an actual example
-
-
-//[[algorithms-wcc-examples-threshold]]
-//=== Threshold
-
-//TODO: add example for threshold
-
-
