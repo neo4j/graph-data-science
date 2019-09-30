@@ -71,6 +71,9 @@ public final class ProcedureConstants {
     public static final String STATS_FLAG_KEY = "stats";
     // ANN specific
     public static final String SKIP_VALUE_KEY = "skipValue";
+    // PageRank specific
+    public static final String DAMPING_FACTOR_KEY = "dampingFactor";
+    public static final Double DAMPING_FACTOR_DEFAULT = 0.85D;
 
     private ProcedureConstants() {}
 }
