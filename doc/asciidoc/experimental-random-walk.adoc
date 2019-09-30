@@ -145,18 +145,20 @@ YIELD nodes, path
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name          | Type   | Default        | Optional | Description
-| start         | object | null           | yes      | starting points: null - whole graph, "Label" - nodes with that label, node-id - that node, list of node-ids - these nodes
-| steps         | int    | 10             | yes      | length of paths returned, in case of error only path of lenght 1 is returned
-| walks         | int    | 1              | yes      | number of paths returned
-| graph         | string | 'huge'         | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
-| nodeQuery         | string | null           | yes      | The label or node-query to load from the graph. If null, load all nodes
-| relationshipQuery  | string | null           | yes      | The relationship-type or query to load from the graph. If null, load all relationships.
-| direction     | string | 'BOTH'         | yes      | direction of relationships to follow
-| mode          | string | random         | yes      | strategy for choosing the next relationship, modes: random and node2vec
-| inOut         | float  | 1.0            | yes      | parameter for node2vec
-| return        | float  | 1.0            | yes      | parameter for node2vec
-| path          | boolean| false          | yes      | if the more expensive operation of creating a path from node-ids should be performed and returned in results
-| concurrency   | int    | available CPUs | yes      | The number of concurrent threads
+| start             | object  | null                   | yes | starting points: null - whole graph, "Label" - nodes with that label, node-id - that node, list of node-ids - these nodes
+| steps             | int     | 10                     | yes | length of paths returned, in case of error only path of lenght 1 is returned
+| walks             | int     | 1                      | yes | number of paths returned
+| graph             | string  | 'huge'                 | yes | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
+| nodeQuery         | string  | null                   | yes | The label or node-query to load from the graph. If null, load all nodes
+| relationshipQuery | string  | null                   | yes | The relationship-type or query to load from the graph. If null, load all relationships.
+| direction         | string  | 'BOTH'                 | yes | direction of relationships to follow
+| mode              | string  | random                 | yes | strategy for choosing the next relationship, modes: random and node2vec
+| inOut             | float   | 1.0                    | yes | parameter for node2vec
+| return            | float   | 1.0                    | yes | parameter for node2vec
+| path              | boolean | false                  | yes | if the more expensive operation of creating a path from node-ids should be performed and returned in results
+| concurrency       | int     | available CPUs         | yes | The number of concurrent threads.
+| readConcurrency   | int     | value of `concurrency` | yes | The number of concurrent threads used for reading the graph.
+| writeConcurrency  | int     | value of `concurrency` | yes | The number of concurrent threads used for writing the result.
 |===
 
 .Results

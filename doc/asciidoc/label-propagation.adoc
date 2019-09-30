@@ -167,16 +167,18 @@ YIELD nodes, iterations, didConverge, loadMillis, computeMillis, writeMillis, wr
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name              | Type    | Default        | Optional | Description
-| direction         | string  | 'OUTGOING'     | yes      | The relationship-direction to use in the algorithm
-| concurrency       | int     | available CPUs | yes      | The number of concurrent threads
-| iterations        | int     | 1              | yes      | The maximum number of iterations to run
-| weightProperty    | string  | 'weight'       | yes      | The property name of node and/or relationship that contain weight. Must be numeric.
-| seedProperty      | string  | n/a            | yes      | Used to define initial set of labels (must be a number)
-| partitionProperty | string  | n/a            | yes      | Deprecated. Replaced by `seedProperty`.
-| writeProperty     | string  | n/a            | yes      | The property name written back to the partition of the graph in which the node resides.
-| write             | boolean | true           | yes      | Specifies if the result should be written back as a node property
-| graph             | string  | 'huge'         | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
+| Name              | Type    | Default                | Optional | Description
+| direction         | string  | 'OUTGOING'             | yes      | The relationship-direction to use in the algorithm
+| iterations        | int     | 1                      | yes      | The maximum number of iterations to run
+| concurrency       | int     | available CPUs         | yes      | The number of concurrent threads
+| readConcurrency   | int     | value of `concurrency` | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency  | int     | value of `concurrency` | yes      | The number of concurrent threads used for writing the result.
+| weightProperty    | string  | 'weight'               | yes      | The property name of node and/or relationship that contain weight. Must be numeric.
+| seedProperty      | string  | n/a                    | yes      | Used to define initial set of labels (must be a number)
+| partitionProperty | string  | n/a                    | yes      | Deprecated. Replaced by `seedProperty`.
+| writeProperty     | string  | n/a                    | yes      | The property name written back to the partition of the graph in which the node resides.
+| write             | boolean | true                   | yes      | Specifies if the result should be written back as a node property
+| graph             | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
 |===
 
 .Or use the beta procedure:
@@ -199,16 +201,18 @@ YIELD nodes, iterations, didConverge, loadMillis, computeMillis, writeMillis, wr
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name              | Type    | Default        | Optional | Description
-| direction         | string  | 'OUTGOING'     | yes      | The relationship-direction to use in the algorithm
-| concurrency       | int     | available CPUs | yes      | The number of concurrent threads
-| iterations        | int     | 1              | yes      | The maximum number of iterations to run
-| weightProperty    | string  | 'weight'       | yes      | The property name of node and/or relationship that contain weight. Must be numeric.
-| seedProperty      | string  | n/a            | yes      | Used to define initial set of labels (must be a number)
-| partitionProperty | string  | n/a            | yes      | Deprecated. Replaced by `seedProperty`.
-| writeProperty     | string  | n/a            | yes      | The property name written back to the partition of the graph in which the node resides.
-| write             | boolean | true           | yes      | Specifies if the result should be written back as a node property
-| graph             | string  | 'huge'         | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
+| Name              | Type    | Default                | Optional | Description
+| direction         | string  | 'OUTGOING'             | yes      | The relationship-direction to use in the algorithm
+| iterations        | int     | 1                      | yes      | The maximum number of iterations to run
+| concurrency       | int     | available CPUs         | yes      | The number of concurrent threads
+| readConcurrency   | int     | value of `concurrency` | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency  | int     | value of `concurrency` | yes      | The number of concurrent threads used for writing the result.
+| weightProperty    | string  | 'weight'               | yes      | The property name of node and/or relationship that contain weight. Must be numeric.
+| seedProperty      | string  | n/a                    | yes      | Used to define initial set of labels (must be a number)
+| partitionProperty | string  | n/a                    | yes      | Deprecated. Replaced by `seedProperty`.
+| writeProperty     | string  | n/a                    | yes      | The property name written back to the partition of the graph in which the node resides.
+| write             | boolean | true                   | yes      | Specifies if the result should be written back as a node property
+| graph             | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
 |===
 
 .Results
@@ -262,14 +266,16 @@ YIELD nodeId, label
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name              | Type    | Default        | Optional | Description
-| direction         | string  | 'OUTGOING'     | yes      | The relationship-direction to use in the algorithm
-| concurrency       | int     | available CPUs | yes      | The number of concurrent threads
-| iterations        | int     | 1              | yes      | The maximum number of iterations to run
-| weightProperty    | string  | 'weight'       | yes      | The property name of node and/or relationship that contain weight. Must be numeric.
-| seedProperty      | string  | n/a            | yes      | Used to define initial set of labels (must be a number)
-| partitionProperty | string  | n/a            | yes      | Deprecated. Replaced by `seedProperty`.
-| graph             | string  | 'huge'         | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
+| Name              | Type   | Default                | Optional | Description
+| direction         | string | 'OUTGOING'             | yes      | The relationship-direction to use in the algorithm
+| iterations        | int    | 1                      | yes      | The maximum number of iterations to run
+| concurrency       | int    | available CPUs         | yes      | The number of concurrent threads
+| readConcurrency   | int    | value of `concurrency` | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency  | int    | value of `concurrency` | yes      | The number of concurrent threads used for writing the result.
+| weightProperty    | string | 'weight'               | yes      | The property name of node and/or relationship that contain weight. Must be numeric.
+| seedProperty      | string | n/a                    | yes      | Used to define initial set of labels (must be a number)
+| partitionProperty | string | n/a                    | yes      | Deprecated. Replaced by `seedProperty`.
+| graph             | string | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
 |===
 
 .Results

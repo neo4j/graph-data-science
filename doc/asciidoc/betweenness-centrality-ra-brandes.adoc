@@ -74,15 +74,17 @@ YIELD nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMil
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name | Type | Default | Optional | Description
-| label  | string | null | yes | The label to load from the graph. If null, load all nodes
-| relationship | string | null | yes | The relationship-type to load from the graph. If null, load all relationships
-| direction | string | outgoing | yes | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
-| write | boolean | true | yes | Specifies if the result should be written back as a node property
-| stats | boolean | true | yes | Specifies if stats about centrality should be returned
-| writeProperty | string | 'centrality' | yes | The property name written back to
-| graph | string | 'huge' | yes | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
-| concurrency | int | available CPUs | yes | The number of concurrent threads
+| Name             | Type    | Default                | Optional | Description
+| label            | string  | null                   | yes      | The label to load from the graph. If null, load all nodes
+| relationship     | string  | null                   | yes      | The relationship-type to load from the graph. If null, load all relationships
+| direction        | string  | outgoing               | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
+| write            | boolean | true                   | yes      | Specifies if the result should be written back as a node property
+| stats            | boolean | true                   | yes      | Specifies if stats about centrality should be returned
+| writeProperty    | string  | 'centrality'           | yes      | The property name written back to
+| graph            | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
+| concurrency      | int     | available CPUs         | yes      | The number of concurrent threads
+| readConcurrency  | int     | value of `concurrency` | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency | int     | value of `concurrency` | yes      | The number of concurrent threads used for writing the result.
 |===
 
 .Results
@@ -110,11 +112,13 @@ YIELD nodeId, centrality - yields centrality for each node
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name | Type | Default | Optional | Description
-| label  | string | null | yes | The label to load from the graph. If null, load all nodes
-| relationship | string | null | yes | The relationship-type to load from the graph. If null, load all relationships
-| concurrency | int | available CPUs | yes | The number of concurrent threads
-| direction | string | outgoing | yes | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
+| Name             | Type   | Default                | Optional | Description
+| label            | string | null                   | yes      | The label to load from the graph. If null, load all nodes
+| relationship     | string | null                   | yes      | The relationship-type to load from the graph. If null, load all relationships
+| concurrency      | int    | available CPUs         | yes      | The number of concurrent threads
+| readConcurrency  | int    | value of `concurrency` | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency | int    | value of `concurrency` | yes      | The number of concurrent threads used for writing the result.
+| direction        | string | outgoing               | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
 |===
 
 .Results
@@ -139,18 +143,20 @@ YIELD nodes, minCentrality, maxCentrality, sumCentrality, loadMillis, computeMil
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name | Type | Default | Optional | Description
-| label  | string | null | yes | The label to load from the graph. If null, load all nodes
-| relationship | string | null | yes | The relationship-type to load from the graph. If null, load all nodes
-| direction | string | outgoing | yes | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
-| write | boolean | true | yes | Specifies if the result should be written back as a node property
-| strategy | string | 'random' | yes | The node selection strategy
-| probability | float | log10(N) / e^2 | yes | The probability a node is selected. Values between 0 and 1.  If 1, selects all nodes and works like original Brandes algorithm
-| maxDepth | int | Integer.MAX | yes | The depth of the shortest paths traversal
-| stats | boolean | true | yes | Specifies if stats about centrality should be returned
-| writeProperty | string | 'centrality' | yes | The property name written back to
-| graph | string | 'huge' | yes | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
-| concurrency | int | available CPUs | yes | The number of concurrent threads
+| Name             | Type    | Default                | Optional | Description
+| label            | string  | null                   | yes      | The label to load from the graph. If null, load all nodes
+| relationship     | string  | null                   | yes      | The relationship-type to load from the graph. If null, load all nodes
+| direction        | string  | outgoing               | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
+| write            | boolean | true                   | yes      | Specifies if the result should be written back as a node property
+| strategy         | string  | 'random'               | yes      | The node selection strategy
+| probability      | float   | log10(N) / e^2         | yes      | The probability a node is selected. Values between 0 and 1.  If 1, selects all nodes and works like original Brandes algorithm
+| maxDepth         | int     | Integer.MAX            | yes      | The depth of the shortest paths traversal
+| stats            | boolean | true                   | yes      | Specifies if stats about centrality should be returned
+| writeProperty    | string  | 'centrality'           | yes      | The property name written back to
+| graph            | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
+| concurrency      | int     | available CPUs         | yes      | The number of concurrent threads
+| readConcurrency  | int     | value of `concurrency` | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency | int     | value of `concurrency` | yes      | The number of concurrent threads used for writing the result.
 |===
 
 .Results
@@ -178,14 +184,16 @@ YIELD nodeId, centrality - yields centrality for each node
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name | Type | Default | Optional | Description
-| label  | string | null | yes | The label to load from the graph. If null, load all nodes
-| relationship | string | null | yes | The relationship-type to load from the graph. If null, load all relationships
-| concurrency | int | available CPUs | yes | The number of concurrent threads
-| direction | string | outgoing | yes | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
-| strategy | string | 'random' | yes | The node selection strategy
-| probability | float | log10(N) / e^2 | yes | The probability a node is selected. Values between 0 and 1.  If 1, selects all nodes and works like original Brandes algorithm
-| maxDepth | int | Integer.MAX | yes | The depth of the shortest paths traversal
+| Name             | Type   | Default                | Optional | Description
+| label            | string | null                   | yes      | The label to load from the graph. If null, load all nodes
+| relationship     | string | null                   | yes      | The relationship-type to load from the graph. If null, load all relationships
+| concurrency      | int    | available CPUs         | yes      | The number of concurrent threads
+| readConcurrency  | int    | value of `concurrency` | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency | int    | value of `concurrency` | yes      | The number of concurrent threads used for writing the result.
+| direction        | string | outgoing               | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
+| strategy         | string | 'random'               | yes      | The node selection strategy
+| probability      | float  | log10(N) / e^2         | yes      | The probability a node is selected. Values between 0 and 1.  If 1, selects all nodes and works like original Brandes algorithm
+| maxDepth         | int    | Integer.MAX            | yes      | The depth of the shortest paths traversal
 |===
 
 .Results

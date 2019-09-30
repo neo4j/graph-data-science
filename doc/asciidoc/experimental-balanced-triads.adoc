@@ -113,11 +113,13 @@ YIELD nodeId, balanced, unbalanced
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name           | Type   | Default        | Optional | Description
-| label          | string | null           | yes      | The label to load from the graph. If null, load all nodes
-| relationship   | string | null           | yes      | The relationship-type to load from the graph. If null, load all relationships
-| weightProperty | string | null           | no       | The property name that contains weight. If weight is positive, algorithm treats the relationship as positive. With a negative weight, relationship is treated as negative. Must be numeric.
-| concurrency    | int    | available CPUs | yes      | The number of concurrent threads
+| Name             | Type   | Default                | Optional | Description
+| label            | string | null                   | yes      | The label to load from the graph. If null, load all nodes
+| relationship     | string | null                   | yes      | The relationship-type to load from the graph. If null, load all relationships
+| weightProperty   | string | null                   | no       | The property name that contains weight. If weight is positive, algorithm treats the relationship as positive. With a negative weight, relationship is treated as negative. Must be numeric.
+| concurrency      | int    | available CPUs         | yes      | The number of concurrent threads.
+| readConcurrency  | int    | value of `concurrency` | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency | int    | value of `concurrency` | yes      | The number of concurrent threads used for writing the result.
 |===
 
 .Results
@@ -140,15 +142,14 @@ YIELD loadMillis, computeMillis, writeMillis, nodeCount, balancedTriadCount, unb
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name                          | Type    | Default        | Optional | Description
-| label                         | string  | null           | yes      | The label to load from the graph. If null, load all nodes
-| relationship                  | string  | null           | yes      | The relationship-type to load from the graph. If null, load all relationships
-| concurrency                   | int     | available CPUs | yes      | The number of concurrent threads
-| weightProperty                | string  | null           | no       | The property name that contains weight. If weight is positive, algorithm treats the relationship as positive. With a negative weight, relationship is treated as negative. Must be numeric.
-| balancedProperty              | string  | 'balanced'     | yes      | The property name written back to the count of balanced triads a node is member of
-| unbalancedProperty            | string  | 'unbalanced'   | yes      | The property name written back to the count of unbalanced triads a node is member of
-| write                         | boolean | true           | yes      | Specifies if the result should be written back as a node property
-
+| Name               | Type    | Default                | Optional | Description
+| label              | string  | null                   | yes      | The label to load from the graph. If null, load all nodes
+| relationship       | string  | null                   | yes      | The relationship-type to load from the graph. If null, load all relationships
+| concurrency        | int     | available CPUs         | yes      | The number of concurrent threads.
+| readConcurrency    | int     | value of `concurrency` | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency   | int     | value of `concurrency` | yes      | The number of concurrent threads used for writing the result.
+| unbalancedProperty | string  | 'unbalanced'           | yes      | The property name written back to the count of unbalanced triads a node is member of
+| write              | boolean | true                   | yes      | Specifies if the result should be written back as a node property
 |===
 
 .Results
