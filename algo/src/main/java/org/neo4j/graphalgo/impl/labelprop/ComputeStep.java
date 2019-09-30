@@ -86,7 +86,7 @@ final class ComputeStep implements Step {
     final boolean compute(long nodeId, boolean didChange) {
         consumer.clearVotes();
         long label = existingLabels.get(nodeId);
-        localRelationshipIterator.forEachRelationship(nodeId, direction, 1.0D, consumer);
+        localRelationshipIterator.forEachRelationship(nodeId, direction, LabelPropagation.DEFAULT_WEIGHT, consumer);
         long newLabel = consumer.tallyVotes(label);
         if (newLabel != label) {
             existingLabels.set(nodeId, newLabel);

@@ -170,6 +170,11 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
     }
 
     @Override
+    double getDefaultWeightProperty() {
+        return Louvain.DEFAULT_WEIGHT;
+    }
+
+    @Override
     protected LouvainFactory algorithmFactory(final ProcedureConfiguration procedureConfig) {
         int maxLevel = procedureConfig.getIterations(DEFAULT_MAX_LEVEL);
         int maxIterations = procedureConfig.getNumber(INNER_ITERATIONS, DEFAULT_MAX_ITERATIONS).intValue();

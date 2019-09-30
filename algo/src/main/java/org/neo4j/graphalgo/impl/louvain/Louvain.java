@@ -228,7 +228,7 @@ public final class Louvain extends Algorithm<Louvain> {
         HugeDoubleArray nodeWeights = this.nodeWeights;
 
         // bag of nodeId->{nodeId, ..}
-        LongLongSubGraph subGraph = new LongLongSubGraph(communityCount, tracker);
+        LongLongSubGraph subGraph = new LongLongSubGraph(communityCount, graph.hasRelationshipProperty(), tracker);
 
         // for each node in the current graph
         HugeCursor<long[]> cursor = communityIds.initCursor(communityIds.newCursor());
@@ -243,7 +243,7 @@ public final class Louvain extends Algorithm<Louvain> {
                 final long sourceCommunity = communities[start];
 
                 // get transitions from current node
-                graph.forEachRelationship(base + start, Direction.OUTGOING, 1.0D, (s, t, w) -> {
+                graph.forEachRelationship(base + start, Direction.OUTGOING, Louvain.DEFAULT_WEIGHT, (s, t, w) -> {
                     // mapping
                     final long targetCommunity = communityIds.get(t);
                     if (sourceCommunity == targetCommunity) {
@@ -274,7 +274,7 @@ public final class Louvain extends Algorithm<Louvain> {
         HugeDoubleArray nodeWeights = this.nodeWeights;
 
         // bag of nodeId->{nodeId, ..}
-        final IntIntSubGraph subGraph = new IntIntSubGraph(communityCount);
+        final IntIntSubGraph subGraph = new IntIntSubGraph(communityCount, graph.hasRelationshipProperty());
 
         // for each node in the current graph
         HugeCursor<long[]> cursor = communityIds.initCursor(communityIds.newCursor());
@@ -289,7 +289,7 @@ public final class Louvain extends Algorithm<Louvain> {
                 final int sourceCommunity = (int) communities[start];
 
                 // get transitions from current node
-                graph.forEachRelationship(base + start, Direction.OUTGOING, 1.0D, (s, t, value) -> {
+                graph.forEachRelationship(base + start, Direction.OUTGOING, Louvain.DEFAULT_WEIGHT, (s, t, value) -> {
                     // mapping
                     final int targetCommunity = (int) communityIds.get(t);
                     if (sourceCommunity == targetCommunity) {

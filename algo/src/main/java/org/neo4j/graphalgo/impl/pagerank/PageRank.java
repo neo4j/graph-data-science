@@ -105,6 +105,7 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
  */
 public class PageRank extends Algorithm<PageRank> {
 
+    public static final double DEFAULT_WEIGHT = 1.0D;
     public static final Double DEFAULT_TOLERANCE = 0.0000001D;
 
     private final ExecutorService executor;

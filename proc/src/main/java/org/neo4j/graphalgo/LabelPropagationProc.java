@@ -173,6 +173,11 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
                         config.getString(CONFIG_WEIGHT_KEY, null)));
     }
 
+    @Override
+    double getDefaultWeightProperty() {
+        return LabelPropagation.DEFAULT_WEIGHT;
+    }
+
     private Stream<LabelPropagationStats> run(
             final String label,
             final String relationshipType,
