@@ -68,7 +68,7 @@ final class HugeGraphWeightTest {
 
         graph.forEachNode((long node) -> {
             graph.forEachOutgoing(node, (src, tgt) -> {
-                long weight = (long) graph.weightOf(src, tgt);
+                long weight = (long) graph.weightOf(src, tgt, Double.NaN);
                 int fakeId = ((int) src << 16) | (int) tgt & 0xFFFF;
                 assertEquals(
                         fakeId,

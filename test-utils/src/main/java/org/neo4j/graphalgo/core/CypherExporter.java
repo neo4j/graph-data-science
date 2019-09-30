@@ -360,7 +360,7 @@ public final class CypherExporter {
 
         @Override
         public Object property(String key, Pair<Long, Long> startAndEndNodeId, Graph graph) {
-            return graph.weightOf(startAndEndNodeId.first(), startAndEndNodeId.other());
+            return graph.weightOf(startAndEndNodeId.first(), startAndEndNodeId.other(), Double.NaN);
         }
     }
 

@@ -42,7 +42,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *       /  \       /  \     (x)
  *     (a)--(c)---(d)--(f)
  *
- * @author mknblch
  */
 class InfoMapIntTest {
 

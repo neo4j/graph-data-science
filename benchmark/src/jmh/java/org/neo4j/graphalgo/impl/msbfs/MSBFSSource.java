@@ -86,7 +86,7 @@ public enum MSBFSSource {
 
         // TODO: Not sure what to put here.
         @Override
-        public void forEachRelationship(long nodeId, Direction direction, WeightedRelationshipConsumer consumer) {
+        public void forEachRelationship(long nodeId, Direction direction, double fallbackWeight, WeightedRelationshipConsumer consumer) {
         }
 
         @Override
@@ -119,6 +119,7 @@ public enum MSBFSSource {
         public void forEachRelationship(
                 long nodeId,
                 Direction direction,
+                double fallbackWeight,
                 WeightedRelationshipConsumer consumer) {
             forEachRelationship(nodeId, direction, (s, t) -> consumer.accept(s, t, Double.NaN));
         }

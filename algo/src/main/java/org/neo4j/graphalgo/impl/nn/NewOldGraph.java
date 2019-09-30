@@ -38,7 +38,7 @@ public class NewOldGraph {
         LongHashSet neighbors = new LongHashSet();
         RoaringBitmap visited = visitedRelationships[(int) nodeId];
 
-        graph.forEachRelationship(nodeId, Direction.OUTGOING, (sourceNodeId, targetNodeId, weight) -> {
+        graph.forEachRelationship(nodeId, Direction.OUTGOING, (sourceNodeId, targetNodeId) -> {
             if (visited.contains((int) targetNodeId)) {
                 neighbors.add(targetNodeId);
             }
@@ -54,7 +54,7 @@ public class NewOldGraph {
 
         RoaringBitmap visited = visitedRelationships[(int) nodeId];
 
-        graph.forEachRelationship(nodeId, Direction.OUTGOING, (sourceNodeId, targetNodeId, weight) -> {
+        graph.forEachRelationship(nodeId, Direction.OUTGOING, (sourceNodeId, targetNodeId) -> {
             if (!visited.contains((int) targetNodeId)) {
                 neighbors.add(targetNodeId);
             }

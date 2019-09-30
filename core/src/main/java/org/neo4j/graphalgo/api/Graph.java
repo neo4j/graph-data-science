@@ -67,6 +67,8 @@ public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterab
 
     boolean isUndirected();
 
+    default boolean hasRelationshipProperty() { return true; }
+
     Direction getLoadDirection();
 
     default Optional<Direction> compatibleDirection(Direction procedureDirection) {

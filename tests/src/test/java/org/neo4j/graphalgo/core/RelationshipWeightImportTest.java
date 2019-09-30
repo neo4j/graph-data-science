@@ -141,13 +141,13 @@ class RelationshipWeightImportTest {
 
     private void checkWeight(int nodeId, Direction direction, double... expecteds) {
         List<Executable> assertions = new ArrayList<>();
-        graph.forEachRelationship(nodeId, direction, checks(direction, expecteds, expecteds, assertions));
+        graph.forEachRelationship(nodeId, direction, Double.NaN, checks(direction, expecteds, expecteds, assertions));
         assertAll(assertions);
     }
 
     private void checkWeight(int nodeId, Direction direction, double[] expectedFromGraph, double... expectedFromIterator) {
         List<Executable> assertions = new ArrayList<>();
-        graph.forEachRelationship(nodeId, direction, checks(direction, expectedFromIterator, expectedFromGraph, assertions));
+        graph.forEachRelationship(nodeId, direction, Double.NaN, checks(direction, expectedFromIterator, expectedFromGraph, assertions));
         assertAll(assertions);
     }
 
@@ -160,7 +160,7 @@ class RelationshipWeightImportTest {
                 assertions.add(() -> assertFalse(i.get() >= limit, String.format("Unexpected relationship: %s = %.1f", rel, w)));
                 return false;
             }
-            double actual = (direction == Direction.INCOMING) ? graph.weightOf(t, s) : graph.weightOf(s, t);
+            double actual = (direction == Direction.INCOMING) ? graph.weightOf(t, s, Double.NaN) : graph.weightOf(s, t, Double.NaN);
             final int index = i.getAndIncrement();
             double expectedIterator = expectedFromIterator[index];
             double expectedGraph = expectedFromGraph[index];

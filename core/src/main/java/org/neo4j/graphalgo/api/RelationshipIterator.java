@@ -34,7 +34,7 @@ public interface RelationshipIterator extends RelationshipPredicate {
     void forEachRelationship(
             long nodeId,
             Direction direction,
-            WeightedRelationshipConsumer consumer);
+            double fallbackWeight, WeightedRelationshipConsumer consumer);
 
     default void forEachIncoming(
             long nodeId,

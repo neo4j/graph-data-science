@@ -25,7 +25,9 @@ import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Arrays;
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -72,6 +74,10 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm<WeightedAllShort
     private volatile boolean outputStreamOpen;
 
     public WeightedAllShortestPaths(Graph graph, ExecutorService executorService, int concurrency, Direction direction) {
+        if (!graph.hasRelationshipProperty()) {
+            throw new UnsupportedOperationException("WeightedAllShortestPaths is not supported on unweighted graphs");
+        }
+
         this.graph = graph;
         this.nodeCount = Math.toIntExact(graph.nodeCount());
         this.executorService = executorService;
@@ -172,6 +178,7 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm<WeightedAllShort
                 graph.forEachRelationship(
                         node,
                         direction,
+                        Double.NaN,
                         longToIntConsumer((source, target, weight) -> {
                             // relax
                             final double targetDistance = weight + sourceDistance;

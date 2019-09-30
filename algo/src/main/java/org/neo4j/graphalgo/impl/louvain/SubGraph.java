@@ -22,9 +22,9 @@ package org.neo4j.graphalgo.impl.louvain;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
+import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
@@ -49,7 +49,7 @@ abstract class SubGraph implements Graph {
     public final void forEachRelationship(
             final long nodeId,
             final Direction direction,
-            final WeightedRelationshipConsumer consumer) {
+            double fallbackWeight, final WeightedRelationshipConsumer consumer) {
         forEach(nodeId, consumer);
     }
 
@@ -82,7 +82,7 @@ abstract class SubGraph implements Graph {
     }
 
     @Override
-    public final double weightOf(long sourceNodeId, long targetNodeId) {
+    public final double weightOf(long sourceNodeId, long targetNodeId, double fallbackValue) {
         throw new UnsupportedOperationException("weightOf is not supported.");
     }
 

@@ -191,7 +191,7 @@ final class UnionFindSafetyTest {
 
         @Override
         public void forEachRelationship(
-                final long nodeId, final Direction direction, final WeightedRelationshipConsumer consumer) {
+                final long nodeId, final Direction direction, double fallbackWeight, final WeightedRelationshipConsumer consumer) {
 
         }
 
@@ -202,7 +202,7 @@ final class UnionFindSafetyTest {
         }
 
         @Override
-        public double weightOf(final long sourceNodeId, final long targetNodeId) {
+        public double weightOf(final long sourceNodeId, final long targetNodeId, double fallbackValue) {
             throw new UnsupportedOperationException(
                     "org.neo4j.graphalgo.impl.unionfind.UnionFindSafetyTest.FlakyGraph.weightOf is not implemented.");
         }

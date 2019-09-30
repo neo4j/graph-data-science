@@ -52,6 +52,10 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
             int concurrency,
             AllocationTracker tracker
     ) {
+        if (!graph.hasRelationshipProperty()) {
+            throw new UnsupportedOperationException("WeightedDegreeCentrality is not supported on unweighted graphs");
+        }
+
         this.tracker = tracker;
         if (concurrency <= 0) {
             concurrency = Pools.DEFAULT_CONCURRENCY;
@@ -125,7 +129,7 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
                 }
 
                 double[] weightedDegree = new double[1];
-                graph.forEachRelationship(nodeId, loadDirection, (sourceNodeId, targetNodeId, weight) -> {
+                graph.forEachRelationship(nodeId, loadDirection, Double.NaN, (sourceNodeId, targetNodeId, weight) -> {
                     if(weight > 0) {
                         weightedDegree[0] += weight;
                     }
@@ -155,7 +159,7 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
 
                 int[] index = {0};
                 weightedDegree[0] = 0D;
-                graph.forEachRelationship(nodeId, loadDirection, (sourceNodeId, targetNodeId, weight) -> {
+                graph.forEachRelationship(nodeId, loadDirection, Double.NaN, (sourceNodeId, targetNodeId, weight) -> {
                     if(weight > 0) {
                         weightedDegree[0] += weight;
                     }

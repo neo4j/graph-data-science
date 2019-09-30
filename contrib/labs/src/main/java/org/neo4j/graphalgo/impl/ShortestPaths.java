@@ -19,7 +19,8 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import com.carrotsearch.hppc.*;
+import com.carrotsearch.hppc.IntDoubleMap;
+import com.carrotsearch.hppc.IntDoubleScatterMap;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -99,6 +100,7 @@ public class ShortestPaths extends Algorithm<ShortestPaths> {
             graph.forEachRelationship(
                     node,
                     Direction.OUTGOING,
+                    0.0D,
                     longToIntConsumer((source, target, weight) -> {
                         // relax
                         final double targetCosts = this.costs.getOrDefault(target, Double.POSITIVE_INFINITY);

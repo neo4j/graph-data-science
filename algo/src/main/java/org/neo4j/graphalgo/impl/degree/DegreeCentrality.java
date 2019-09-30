@@ -133,7 +133,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> implements Deg
         public void run() {
             for (long nodeId = startNodeId; nodeId < endNodeId && running(); nodeId++) {
                 int index = Math.toIntExact(nodeId - startNodeId);
-                graph.forEachRelationship(nodeId, direction, (sourceNodeId, targetNodeId, weight) -> {
+                graph.forEachRelationship(nodeId, direction, 0D, (sourceNodeId, targetNodeId, weight) -> {
                     if (weight > 0) {
                         partition[index] += weight;
                     }

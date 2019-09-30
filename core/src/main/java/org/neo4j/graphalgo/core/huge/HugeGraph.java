@@ -22,9 +22,9 @@ package org.neo4j.graphalgo.core.huge;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
+import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -102,9 +102,42 @@ public class HugeGraph implements Graph {
     private AdjacencyList.DecompressingCursor emptyAdjacencyCursor;
     private AdjacencyList.DecompressingCursor inCache;
     private AdjacencyList.DecompressingCursor outCache;
+
     private boolean canRelease = true;
 
+    private final boolean hasRelationshipProperty;
     private final boolean isUndirected;
+
+    public HugeGraph(
+            final AllocationTracker tracker,
+            final IdMap idMapping,
+            final Map<String, WeightMapping> nodeProperties,
+            final long relationshipCount,
+            final AdjacencyList inAdjacency,
+            final AdjacencyList outAdjacency,
+            final AdjacencyOffsets inOffsets,
+            final AdjacencyOffsets outOffsets,
+            final boolean isUndirected) {
+        this.idMapping = idMapping;
+        this.tracker = tracker;
+        this.nodeProperties = nodeProperties;
+        this.relationshipCount = relationshipCount;
+        this.inAdjacency = inAdjacency;
+        this.outAdjacency = outAdjacency;
+        this.inOffsets = inOffsets;
+        this.outOffsets = outOffsets;
+        this.defaultWeight = Double.NaN;
+        this.inWeights = null;
+        this.outWeights = null;
+        this.inWeightOffsets = null;
+        this.outWeightOffsets = null;
+        this.isUndirected = isUndirected;
+        this.hasRelationshipProperty = false;
+        inCache = newAdjacencyCursor(this.inAdjacency);
+        outCache = newAdjacencyCursor(this.outAdjacency);
+        emptyAdjacencyCursor = inCache == null ? newAdjacencyCursor(this.outAdjacency) : newAdjacencyCursor(this.inAdjacency);
+    }
+
 
     public HugeGraph(
             final AllocationTracker tracker,
@@ -135,6 +168,7 @@ public class HugeGraph implements Graph {
         this.inWeightOffsets = inWeightOffsets;
         this.outWeightOffsets = outWeightOffsets;
         this.isUndirected = isUndirected;
+        this.hasRelationshipProperty = inWeights != null || outWeights != null;
         inCache = newAdjacencyCursor(this.inAdjacency);
         outCache = newAdjacencyCursor(this.outAdjacency);
         emptyAdjacencyCursor = inCache == null ? newAdjacencyCursor(this.outAdjacency) : newAdjacencyCursor(this.inAdjacency);
@@ -166,11 +200,21 @@ public class HugeGraph implements Graph {
     }
 
     @Override
-    public double weightOf(final long sourceNodeId, final long targetNodeId) {
+    public double weightOf(final long sourceNodeId, final long targetNodeId, double fallbackValue) {
+        if (!hasRelationshipProperty) {
+            return fallbackValue;
+        }
+
         double maybeWeight;
 
         if (outWeights != null) {
-            maybeWeight = findWeight(sourceNodeId, targetNodeId, outWeights, outWeightOffsets, outAdjacency, outOffsets);
+            maybeWeight = findWeight(
+                    sourceNodeId,
+                    targetNodeId,
+                    outWeights,
+                    outWeightOffsets,
+                    outAdjacency,
+                    outOffsets);
             if (!Double.isNaN(maybeWeight)) {
                 return maybeWeight;
             }
@@ -224,23 +268,40 @@ public class HugeGraph implements Graph {
 
     @Override
     public void forEachRelationship(long nodeId, Direction direction, RelationshipConsumer consumer) {
-        runForEach(nodeId, direction, toWeightedConsumer(consumer), /* reuseCursor */ true);
-    }
-
-    @Override
-    public void forEachRelationship(long nodeId, Direction direction, WeightedRelationshipConsumer consumer) {
         switch (direction) {
             case INCOMING:
-                runForEach(nodeId, Direction.INCOMING, consumer, /* reuseCursor */ false);
+                runForEach(nodeId, Direction.INCOMING, consumer, /* reuseCursor */ true);
                 return;
 
             case OUTGOING:
-                runForEach(nodeId, Direction.OUTGOING, consumer, /* reuseCursor */ false);
+                runForEach(nodeId, Direction.OUTGOING, consumer, /* reuseCursor */ true);
                 return;
 
             default:
-                runForEach(nodeId, Direction.OUTGOING, consumer, /* reuseCursor */ false);
-                runForEach(nodeId, Direction.INCOMING, consumer, /* reuseCursor */ false);
+                runForEach(nodeId, Direction.OUTGOING, consumer, /* reuseCursor */ true);
+                runForEach(nodeId, Direction.INCOMING, consumer, /* reuseCursor */ true);
+        }
+    }
+
+    @Override
+    public void forEachRelationship(
+            long nodeId,
+            Direction direction,
+            double fallbackWeight,
+            WeightedRelationshipConsumer consumer) {
+
+        switch (direction) {
+            case INCOMING:
+                runForEachWithWeight(nodeId, Direction.INCOMING, consumer, /* reuseCursor */ fallbackWeight);
+                return;
+
+            case OUTGOING:
+                runForEachWithWeight(nodeId, Direction.OUTGOING, consumer, /* reuseCursor */ fallbackWeight);
+                return;
+
+            default:
+                runForEachWithWeight(nodeId, Direction.OUTGOING, consumer, /* reuseCursor */ fallbackWeight);
+                runForEachWithWeight(nodeId, Direction.INCOMING, consumer, /* reuseCursor */ fallbackWeight);
         }
     }
 
@@ -281,12 +342,12 @@ public class HugeGraph implements Graph {
 
     @Override
     public void forEachIncoming(long node, final RelationshipConsumer consumer) {
-        runForEach(node, Direction.INCOMING, toWeightedConsumer(consumer), /* reuseCursor */ true);
+        runForEach(node, Direction.INCOMING, consumer, /* reuseCursor */ true);
     }
 
     @Override
     public void forEachOutgoing(long node, final RelationshipConsumer consumer) {
-        runForEach(node, Direction.OUTGOING, toWeightedConsumer(consumer), /* reuseCursor */ true);
+        runForEach(node, Direction.OUTGOING, consumer, /* reuseCursor */ true);
     }
 
     @Override
@@ -340,16 +401,42 @@ public class HugeGraph implements Graph {
     private void runForEach(
             long sourceNodeId,
             Direction direction,
-            WeightedRelationshipConsumer consumer,
+            RelationshipConsumer consumer,
             boolean reuseCursor) {
+
+       if (direction == Direction.BOTH) {
+                runForEach(sourceNodeId, Direction.OUTGOING, consumer, reuseCursor);
+                runForEach(sourceNodeId, Direction.INCOMING, consumer, reuseCursor);
+                return;
+        }
+
+        AdjacencyList.DecompressingCursor adjacencyCursor = adjacencyCursorForIteration(
+                sourceNodeId,
+                direction,
+                reuseCursor);
+        consumeAdjacentNodes(sourceNodeId, adjacencyCursor, consumer);
+    }
+
+    private void runForEachWithWeight(
+            long sourceNodeId,
+            Direction direction,
+            WeightedRelationshipConsumer consumer,
+            double fallbackValue) {
+
         if (direction == Direction.BOTH) {
-            runForEach(sourceNodeId, Direction.OUTGOING, consumer, reuseCursor);
-            runForEach(sourceNodeId, Direction.INCOMING, consumer, reuseCursor);
+            runForEachWithWeight(sourceNodeId, Direction.OUTGOING, consumer, fallbackValue);
+            runForEachWithWeight(sourceNodeId, Direction.INCOMING, consumer, fallbackValue);
             return;
         }
-        AdjacencyList.DecompressingCursor adjacencyCursor = adjacencyCursorForIteration(sourceNodeId, direction, reuseCursor);
-        AdjacencyList.Cursor weightCursor = weightCursorForIteration(sourceNodeId, direction);
-        consumeAdjacentNodes(sourceNodeId, adjacencyCursor, weightCursor, consumer);
+
+        if (!hasRelationshipProperty()) {
+            runForEach(sourceNodeId, direction, (s, t) -> consumer.accept(s, t, fallbackValue), false);
+        } else {
+            AdjacencyList.DecompressingCursor adjacencyCursor = adjacencyCursorForIteration(sourceNodeId, direction,
+                    false);
+            AdjacencyList.Cursor weightCursor = weightCursorForIteration(sourceNodeId, direction);
+            consumeAdjacentNodesWithWeight(sourceNodeId, adjacencyCursor, weightCursor, consumer);
+        }
     }
 
     private AdjacencyList.DecompressingCursor adjacencyCursorForIteration(
@@ -429,6 +516,11 @@ public class HugeGraph implements Graph {
     }
 
     @Override
+    public boolean hasRelationshipProperty() {
+        return hasRelationshipProperty;
+    }
+
+    @Override
     public Direction getLoadDirection() {
         if (inOffsets != null && outOffsets != null) {
             return Direction.BOTH;
@@ -471,9 +563,11 @@ public class HugeGraph implements Graph {
             long node,
             AdjacencyOffsets offsets,
             AdjacencyList weights) {
-        if (weights == null || offsets == null) {
-            return AdjacencyList.Cursor.EMPTY;
+        if (!hasRelationshipProperty()) {
+            throw new UnsupportedOperationException(
+                    "Can not create weight cursor on a graph without relationship property");
         }
+
         final long offset = offsets.get(node);
         if (offset == 0L) {
             return AdjacencyList.Cursor.EMPTY;
@@ -484,29 +578,33 @@ public class HugeGraph implements Graph {
     private void consumeAdjacentNodes(
             long startNode,
             AdjacencyList.DecompressingCursor adjacencyCursor,
+            RelationshipConsumer consumer) {
+        while (adjacencyCursor.hasNextVLong()) {
+            if (!consumer.accept(startNode, adjacencyCursor.nextVLong())) {
+                break;
+            }
+        }
+    }
+
+    private void consumeAdjacentNodesWithWeight(
+            long startNode,
+            AdjacencyList.DecompressingCursor adjacencyCursor,
             AdjacencyList.Cursor weightCursor,
             WeightedRelationshipConsumer consumer) {
+
         while (adjacencyCursor.hasNextVLong()) {
             long targetNodeId = adjacencyCursor.nextVLong();
 
-            double weight;
-            if (weightCursor.hasNextLong()) {
-                long weightBits = weightCursor.nextLong();
-                weight = Double.longBitsToDouble(weightBits);
-            } else {
-                weight = defaultWeight;
-            }
+            long weightBits = weightCursor.nextLong();
+            double weight = Double.longBitsToDouble(weightBits);
+
             if (!consumer.accept(startNode, targetNodeId, weight)) {
                 break;
             }
         }
     }
 
-    private WeightedRelationshipConsumer toWeightedConsumer(RelationshipConsumer consumer) {
-        return (s, t, w) -> consumer.accept(s, t);
-    }
-
-    static class GetTargetConsumer implements WeightedRelationshipConsumer {
+    static class GetTargetConsumer implements RelationshipConsumer {
         static final long TARGET_NOT_FOUND = -1L;
 
         private long count;
@@ -517,7 +615,7 @@ public class HugeGraph implements Graph {
         }
 
         @Override
-        public boolean accept(long s, long t, double weight) {
+        public boolean accept(long s, long t) {
             if (count-- == 0) {
                 target = t;
                 return false;
@@ -526,7 +624,7 @@ public class HugeGraph implements Graph {
         }
     }
 
-    private static class ExistsConsumer implements WeightedRelationshipConsumer {
+    private static class ExistsConsumer implements RelationshipConsumer {
         private final long targetNodeId;
         private boolean found = false;
 
@@ -535,7 +633,7 @@ public class HugeGraph implements Graph {
         }
 
         @Override
-        public boolean accept(long s, long t, double weight) {
+        public boolean accept(long s, long t) {
             if (t == targetNodeId) {
                 found = true;
                 return false;

@@ -181,7 +181,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         m2 = .0;
         for (int node = 0; node < nodeCount; node++) {
             // since we use an undirected graph 2m is counted here
-            graph.forEachRelationship(node, D, (s, t, w) -> {
+            graph.forEachRelationship(node, D, 1.0D, (s, t, w) -> {
                 m2 += w;
                 ki.addTo(s, w / 2);
                 ki.addTo(t, w / 2);
@@ -371,7 +371,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             int degree = graph.degree(node, D);
             LongDoubleMap communityWeights = new LongDoubleHashMap(degree);
             Pointer.DoublePointer extraWeight = Pointer.wrap(0.0);
-            rels.forEachRelationship(node, D, (s, t, weight) -> {
+            rels.forEachRelationship(node, D, 1.0D, (s, t, weight) -> {
                 long localCommunity = localCommunities.get(t);
                 if (s != t) {
                     communityWeights.addTo(localCommunity, weight);
@@ -415,7 +415,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         private double calcModularity() {
             final Pointer.DoublePointer pointer = Pointer.wrap(.0);
             for (long node = 0L; node < nodeCount; node++) {
-                rels.forEachRelationship(node, Direction.OUTGOING, (s, t, w) -> {
+                rels.forEachRelationship(node, Direction.OUTGOING, 1.0D, (s, t, w) -> {
                     if (localCommunities.get(s) == localCommunities.get(t)) {
                         pointer.v += (w - (ki.get(s) * ki.get(t) / m2));
                     }

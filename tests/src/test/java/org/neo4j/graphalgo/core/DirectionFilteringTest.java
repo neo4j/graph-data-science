@@ -60,7 +60,7 @@ final class DirectionFilteringTest extends RandomGraphTestCase {
         graph.forEachNode(node -> {
             for (Direction direction : succeeding) {
                 graph.degree(node, direction);
-                graph.forEachRelationship(node, direction, (s, t, r) -> true);
+                graph.forEachRelationship(node, direction, Double.NaN, (s, t, r) -> true);
             }
             for (Direction direction : failing) {
                 try {
@@ -72,6 +72,7 @@ final class DirectionFilteringTest extends RandomGraphTestCase {
                     graph.forEachRelationship(
                             node,
                             direction,
+                            Double.NaN,
                             (s, t, r) -> true);
                     fail("should have failed to traverse nodes for " + direction);
                 } catch (NullPointerException ignored) {

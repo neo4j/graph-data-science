@@ -51,7 +51,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
  *         \  /  \ /
  *         (3)---(2)
  *
- * @author mknblch
  */
 class YensKShortestPathsStreamingTest {
 

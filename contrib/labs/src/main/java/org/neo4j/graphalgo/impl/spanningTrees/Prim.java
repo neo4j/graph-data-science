@@ -96,7 +96,7 @@ public class Prim extends Algorithm<Prim> {
             }
             effectiveNodeCount++;
             visited.put(node);
-            relationshipIterator.forEachRelationship(node, Direction.OUTGOING, longToIntConsumer((s, t, w) -> {
+            relationshipIterator.forEachRelationship(node, Direction.OUTGOING, 0.0D, longToIntConsumer((s, t, w) -> {
                 if (visited.contains(t)) {
                     return true;
                 }

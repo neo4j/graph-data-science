@@ -102,7 +102,7 @@ class CypherGraphFactoryTest {
         assertEquals(0, graph.degree(node3, Direction.OUTGOING));
         AtomicInteger total = new AtomicInteger();
         graph.forEachNode(n -> {
-            graph.forEachRelationship(n, Direction.OUTGOING, (s, t, w) -> {
+            graph.forEachRelationship(n, Direction.OUTGOING, Double.NaN, (s, t, w) -> {
                 String rel = "(" + s + ")-->(" + t + ")";
                 if (s == id1 && t == id2) {
                     assertEquals(1.0, w, "weight of " + rel);
@@ -235,7 +235,7 @@ class CypherGraphFactoryTest {
         assertEquals(COUNT, relCount.get());
         AtomicInteger total = new AtomicInteger();
         graph.forEachNode(n -> {
-            graph.forEachRelationship(n, Direction.OUTGOING, (s, t, w) -> {
+            graph.forEachRelationship(n, Direction.OUTGOING, Double.NaN, (s, t, w) -> {
                 total.addAndGet((int) w);
                 return true;
             });

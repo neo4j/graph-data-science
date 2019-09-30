@@ -22,7 +22,11 @@ package org.neo4j.graphalgo;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
-import org.neo4j.graphalgo.core.utils.*;
+import org.neo4j.graphalgo.core.utils.Pointer;
+import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.impl.walking.WalkPath;
 import org.neo4j.graphalgo.impl.yens.WeightedPathExporter;
 import org.neo4j.graphalgo.impl.yens.YensKShortestPaths;
@@ -33,7 +37,11 @@ import org.neo4j.graphdb.Path;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
-import org.neo4j.procedure.*;
+import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Mode;
+import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -190,7 +198,7 @@ public class KShortestPathsProc {
 
             double[] costs = new double[weightedPath.size()-1];
             weightedPath.forEachEdge((sourceNode, targetNode) -> {
-                double cost = graph.weightOf(sourceNode, targetNode);
+                double cost = graph.weightOf(sourceNode, targetNode, 1.0D);
                 costs[count.getAndIncrement()] = cost;
             });
 

@@ -25,7 +25,8 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.container.Buckets;
 import org.neo4j.graphdb.Direction;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicIntegerArray;
@@ -143,15 +144,19 @@ public class ShortestPathDeltaStepping extends Algorithm<ShortestPathDeltaSteppi
             // for each node in bucket
             buckets.forEachInBucket(phase, node -> {
                 // relax each outgoing light edge
-                graph.forEachRelationship(node, direction, longToIntConsumer((sourceNodeId, targetNodeId, cost) -> {
-                    final int iCost = (int) (cost * multiplier + distance.get(sourceNodeId));
-                    if (cost <= delta) { // determine if light or heavy edge
-                        light.add(() -> relax(targetNodeId, iCost));
-                    } else {
-                        heavy.add(() -> relax(targetNodeId, iCost));
-                    }
-                    return true;
-                }));
+                graph.forEachRelationship(
+                        node,
+                        direction,
+                        0.0D,
+                        longToIntConsumer((sourceNodeId, targetNodeId, cost) -> {
+                            final int iCost = (int) (cost * multiplier + distance.get(sourceNodeId));
+                            if (cost <= delta) { // determine if light or heavy edge
+                                light.add(() -> relax(targetNodeId, iCost));
+                            } else {
+                                heavy.add(() -> relax(targetNodeId, iCost));
+                            }
+                            return true;
+                        }));
                 return true;
             });
             ParallelUtil.run(light, executorService, futures);
@@ -271,9 +276,9 @@ public class ShortestPathDeltaStepping extends Algorithm<ShortestPathDeltaSteppi
         @Override
         public String toString() {
             return "DeltaSteppingResult{" +
-                    "nodeId=" + nodeId +
-                    ", distance=" + distance +
-                    '}';
+                   "nodeId=" + nodeId +
+                   ", distance=" + distance +
+                   '}';
         }
     }
 }

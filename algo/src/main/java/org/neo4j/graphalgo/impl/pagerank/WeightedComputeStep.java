@@ -71,7 +71,7 @@ public class WeightedComputeStep extends BaseComputeStep implements Relationship
 
     @Override
     public boolean accept(long sourceNodeId, long targetNodeId) {
-        double weight = relationshipWeights.weightOf(sourceNodeId, targetNodeId);
+        double weight = relationshipWeights.weightOf(sourceNodeId, targetNodeId, 1.0D);
 
         if (weight > 0) {
             double proportion = weight / sumOfWeights;
