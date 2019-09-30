@@ -131,6 +131,11 @@ final class UnionFindSafetyTest {
         }
 
         @Override
+        public boolean hasRelationshipProperty() {
+            return false;
+        }
+
+        @Override
         public RelationshipIntersect intersection() {
             throw new UnsupportedOperationException(
                     "org.neo4j.graphalgo.impl.unionfind.UnionFindSafetyTest.FlakyGraph.intersection is not implemented.");

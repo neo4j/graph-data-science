@@ -25,8 +25,6 @@ import java.util.Optional;
 
 /**
  * Composition of often used source interfaces
- *
- * @author mknblch
  */
 public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterable, RelationshipIterator, RelationshipWeights, RelationshipAccess, NodeProperties {
 
@@ -67,7 +65,7 @@ public interface Graph extends IdMapping, Degrees, NodeIterator, BatchNodeIterab
 
     boolean isUndirected();
 
-    default boolean hasRelationshipProperty() { return true; }
+    boolean hasRelationshipProperty();
 
     Direction getLoadDirection();
 

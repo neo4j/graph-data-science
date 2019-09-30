@@ -67,6 +67,11 @@ abstract class SubGraph implements Graph {
     }
 
     @Override
+    public boolean hasRelationshipProperty() {
+        return hasRelationshipProperty;
+    }
+
+    @Override
     public final void forEachRelationship(long nodeId, Direction direction, RelationshipConsumer consumer) {
         throw new UnsupportedOperationException("forEachRelationship is not supported.");
     }
