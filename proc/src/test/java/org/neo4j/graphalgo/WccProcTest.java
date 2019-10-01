@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.wcc.WccProc;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
@@ -66,12 +65,7 @@ class WccProcTest extends ProcTestBase {
                 ",(nH)-[:TYPE]->(nI)";
 
         DB = TestDatabaseCreator.createTestDatabase();
-
-        try (Transaction tx = DB.beginTx()) {
-            DB.execute(createGraph).close();
-            tx.success();
-        }
-
+        DB.execute(createGraph).close();
         DB.getDependencyResolver()
                 .resolveDependency(Procedures.class)
                 .registerProcedure(WccProc.class);
