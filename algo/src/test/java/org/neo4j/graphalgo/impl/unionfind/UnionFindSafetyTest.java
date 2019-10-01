@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
-import org.neo4j.graphalgo.core.huge.loader.NullWeightMap;
+import org.neo4j.graphalgo.core.loading.NullWeightMap;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;

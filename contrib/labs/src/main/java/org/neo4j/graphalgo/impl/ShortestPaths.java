@@ -29,8 +29,8 @@ import org.neo4j.graphdb.Direction;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
-import static org.neo4j.graphalgo.core.utils.Converters.longToIntPredicate;
+import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
+import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntPredicate;
 
 /**
  * sequential single source Dijkstra implementation.

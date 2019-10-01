@@ -24,7 +24,7 @@ import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.WeightMapping;
-import org.neo4j.graphalgo.core.huge.loader.NullWeightMap;
+import org.neo4j.graphalgo.core.loading.NullWeightMap;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;

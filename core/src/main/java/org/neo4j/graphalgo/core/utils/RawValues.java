@@ -21,13 +21,9 @@ package org.neo4j.graphalgo.core.utils;
 
 import org.neo4j.graphdb.Direction;
 
-/**
- * @author mknblch
- */
-public class RawValues {
+public final class RawValues {
 
-    public static final IdCombiner OUTGOING = RawValues::combineIntInt;
-    public static final IdCombiner INCOMING = (h, t) -> RawValues.combineIntInt(t, h);
+    private RawValues() {}
 
     /**
      * shifts head into the most significant 4 bytes of the long
@@ -46,10 +42,6 @@ public class RawValues {
             return combineIntInt(tail, head);
         }
         return combineIntInt(head, tail);
-    }
-
-    public static IdCombiner combiner(Direction direction) {
-        return (direction == Direction.INCOMING) ? INCOMING : OUTGOING;
     }
 
     /**

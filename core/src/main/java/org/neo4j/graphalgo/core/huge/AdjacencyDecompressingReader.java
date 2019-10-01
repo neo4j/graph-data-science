@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
-import org.neo4j.graphalgo.core.huge.loader.MutableIntValue;
+import org.neo4j.graphalgo.core.loading.MutableIntValue;
 
 import java.util.Arrays;
 

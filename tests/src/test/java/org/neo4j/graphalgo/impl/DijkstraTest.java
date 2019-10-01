@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.huge.loader.HugeGraphFactory;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.impl.yens.Dijkstra;
 import org.neo4j.graphalgo.impl.yens.WeightedPath;
@@ -38,7 +38,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
+import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
 
 /**
  * Test for specialized dijkstra implementation with filters & maxDepth

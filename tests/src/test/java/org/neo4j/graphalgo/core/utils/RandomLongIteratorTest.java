@@ -34,6 +34,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class RandomLongIteratorTest {
 
+    @FunctionalInterface
+    interface BiLongFunction<R> {
+        R apply(long start, long end);
+    }
+
     @Test
     void shouldRandomlyEmitNumbers() {
         testIterator(0L, 10L);

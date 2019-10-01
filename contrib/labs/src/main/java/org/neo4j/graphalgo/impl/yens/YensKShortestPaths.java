@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.PriorityQueue;
 
-import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
+import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
 
 /**
  * Yen's k-shortest-paths Algorithm.

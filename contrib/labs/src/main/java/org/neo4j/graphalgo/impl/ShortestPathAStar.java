@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
 import org.neo4j.graphalgo.core.utils.queue.SharedIntPriorityQueue;
-import org.neo4j.graphalgo.core.utils.traverse.SimpleBitSet;
+import org.neo4j.graphalgo.core.utils.container.SimpleBitSet;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -37,7 +37,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
+import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
 
 public class ShortestPathAStar extends Algorithm<ShortestPathAStar> {
 

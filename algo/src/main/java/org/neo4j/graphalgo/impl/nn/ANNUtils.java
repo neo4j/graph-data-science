@@ -21,8 +21,8 @@
 package org.neo4j.graphalgo.impl.nn;
 
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.huge.loader.IdsAndProperties;
-import org.neo4j.graphalgo.core.huge.loader.Relationships;
+import org.neo4j.graphalgo.core.loading.IdsAndProperties;
+import org.neo4j.graphalgo.core.loading.Relationships;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.roaringbitmap.RoaringBitmap;
 

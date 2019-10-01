@@ -21,8 +21,8 @@ package org.neo4j.graphalgo.api;
 
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphDimensionsReader;
-import org.neo4j.graphalgo.core.utils.ApproximatedImportProgress;
-import org.neo4j.graphalgo.core.utils.ImportProgress;
+import org.neo4j.graphalgo.core.loading.ApproximatedImportProgress;
+import org.neo4j.graphalgo.core.loading.ImportProgress;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.Assessable;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;

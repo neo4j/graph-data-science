@@ -22,11 +22,11 @@ package org.neo4j.graphalgo.impl.nn;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.huge.loader.IdMap;
-import org.neo4j.graphalgo.core.huge.loader.IdMapBuilder;
-import org.neo4j.graphalgo.core.huge.loader.IdsAndProperties;
-import org.neo4j.graphalgo.core.huge.loader.NodeImporter;
-import org.neo4j.graphalgo.core.huge.loader.NodesBatchBuffer;
+import org.neo4j.graphalgo.core.loading.IdMap;
+import org.neo4j.graphalgo.core.loading.IdMapBuilder;
+import org.neo4j.graphalgo.core.loading.IdsAndProperties;
+import org.neo4j.graphalgo.core.loading.NodeImporter;
+import org.neo4j.graphalgo.core.loading.NodesBatchBuffer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.roaringbitmap.RoaringBitmap;

@@ -30,7 +30,7 @@ import org.neo4j.graphdb.Direction;
 import java.util.function.ObjDoubleConsumer;
 import java.util.function.ObjLongConsumer;
 
-import static org.neo4j.graphalgo.core.utils.Converters.longToIntConsumer;
+import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
 
 /**
  * @author mknblch
