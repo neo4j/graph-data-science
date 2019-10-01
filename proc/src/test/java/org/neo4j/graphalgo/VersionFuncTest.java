@@ -29,6 +29,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,21 +54,28 @@ class VersionFuncTest extends ProcTestBase {
     void shouldReturnGradleVersion() throws IOException {
         // we find the current version in the gradle file
         File file = new File("../../build.gradle");
+        Optional<String> maybeVersion = findVersion(file);
+
+        if (!maybeVersion.isPresent()) {
+            fail("Could not find version in file: " + file.getAbsolutePath());
+        }
+        assertCypherResult(
+                "RETURN algo.version() AS v",
+                singletonList(map("v", maybeVersion.get())));
+    }
+
+    private Optional<String> findVersion(File file) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(file));
         Pattern pattern = Pattern.compile(".*version = '(\\d\\.\\d\\.\\d+\\.\\d+)'.*");
 
+        String version = null;
         while (reader.ready()) {
             String line = reader.readLine();
             Matcher matcher = pattern.matcher(line);
             if (matcher.matches()) {
-                String version = matcher.group(1);
-                assertCypherResult(
-                        "RETURN algo.version() AS v",
-                        singletonList(map("v", version)));
-                return; // no need to keep reading the file
+                version = matcher.group(1);
             }
         }
-
-        fail("Could not find version in file: " + file.getAbsolutePath());
+        return Optional.ofNullable(version);
     }
 }
