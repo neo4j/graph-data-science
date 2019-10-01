@@ -38,6 +38,7 @@ public class LPComputation extends Computation {
 
     @Override
     protected void compute(long nodeId, Queue<Double> messages) {
+        // TODO: boolean isInitialSuperstep()
         if (getSuperstep() == 0) {
             setNodeValue(nodeId, nodeId);
             sendMessages(nodeId, nodeId);
@@ -46,6 +47,7 @@ public class LPComputation extends Computation {
                 long oldValue = (long) getNodeValue(nodeId);
                 long newValue = oldValue;
 
+                // TODO: could be shared across compute functions per thread
                 // We receive at most |degree| messages
                 long[] buffer = new long[getDegree(nodeId)];
 

@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+// TODO: move to `beta` package namespace
 package org.neo4j.graphalgo.pregel;
 
 import com.carrotsearch.hppc.BitSet;
@@ -56,6 +57,7 @@ public final class Pregel {
     private final Graph graph;
 
     private final HugeDoubleArray nodeValues;
+    // TODO: Compare performance to pre-sized MpscArrayQueue
     private final HugeObjectArray<MpscLinkedQueue<Double>> messageQueues;
 
     private final int batchSize;
@@ -147,6 +149,7 @@ public final class Pregel {
         iterations = 0;
         boolean canHalt = false;
         // Tracks if a node received messages in the previous iteration
+        // TODO: try RoaringBitSet instead
         BitSet receiverBits = new BitSet(graph.nodeCount());
         // Tracks if a node voted to halt in the previous iteration
         BitSet voteBits = new BitSet(graph.nodeCount());
@@ -183,6 +186,8 @@ public final class Pregel {
             final int iteration,
             BitSet messageBits,
             BitSet voteToHaltBits) {
+        // TODO: maybe try degree partitioning or clustering (better locality)
+        // TODO: can be initialized outside of iteration
         Collection<PrimitiveLongIterable> nodeBatches = LazyBatchCollection.of(
                 graph.nodeCount(),
                 batchSize,

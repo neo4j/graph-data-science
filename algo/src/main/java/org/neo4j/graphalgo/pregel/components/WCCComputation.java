@@ -24,6 +24,8 @@ import org.neo4j.graphdb.Direction;
 
 import java.util.Queue;
 
+// TODO: Inheritance would be an anti pattern for other languages (e.g. use compute closure)
+// TODO: byte code javap (explore inlining)
 public class WCCComputation extends Computation {
 
     @Override
@@ -50,6 +52,7 @@ public class WCCComputation extends Computation {
             long newComponentId = (long) getNodeValue(nodeId);
             boolean hasChanged = false;
 
+            // TODO: foreach consumer?
             if (messages != null) {
                 Double message;
                 while ((message = messages.poll()) != null) {
