@@ -40,7 +40,7 @@ public interface GraphsByRelationshipType {
         return new NoRelationshipType(graph);
     }
 
-    static GraphsByRelationshipType of(Map<String, ? extends Map<String, ? extends Graph>> graphs) {
+    static GraphsByRelationshipType of(Map<String, Map<String, Graph>> graphs) {
         if (graphs.size() == 1) {
             Map<String, ? extends Graph> byProperty = Iterables.single(graphs.values());
             if (byProperty.size() == 1) {
@@ -114,9 +114,9 @@ public interface GraphsByRelationshipType {
 
     final class MultipleRelationshipTypes implements GraphsByRelationshipType {
 
-        private final Map<String, ? extends Map<String, ? extends Graph>> graphs;
+        private final Map<String, Map<String, Graph>> graphs;
 
-        private MultipleRelationshipTypes(Map<String, ? extends Map<String, ? extends Graph>> graphs) {
+        private MultipleRelationshipTypes(Map<String, Map<String, Graph>> graphs) {
             this.graphs = graphs;
             forEach(g -> g.canRelease(false));
         }

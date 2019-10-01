@@ -160,7 +160,7 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
         int concurrency = setup.concurrency();
         AllocationTracker tracker = setup.tracker;
         IdsAndProperties mappingAndProperties = loadIdMap(tracker, concurrency);
-        Map<String, Map<String, HugeGraph>> graphs = loadRelationships(
+        Map<String, Map<String, Graph>> graphs = loadRelationships(
                 dimensions,
                 tracker,
                 mappingAndProperties,
@@ -183,7 +183,7 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
                 .call(setup.log);
     }
 
-    private Map<String, Map<String, HugeGraph>> loadRelationships(
+    private Map<String, Map<String, Graph>> loadRelationships(
             GraphDimensions dimensions,
             AllocationTracker tracker,
             IdsAndProperties idsAndProperties,
