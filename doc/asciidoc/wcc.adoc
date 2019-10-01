@@ -225,6 +225,9 @@ We do this by specifying the property key with the `weightProperty` configuratio
 Additionally, we can specify a threshold for the weight value in such a way that only weighs greater than the threshold value will be considered by the algorithm.
 We do this by specifying the threshold value with the `threshold` configuration parameter.
 
+If a relationship does not have a weight property, a default weight is used.
+The default is zero, and can be configured to another value using the `defaultValue` configuration parameter.
+
 .The following will load the graph with weights, run the algorithm, and stream results:
 [source, cypher]
 ----
