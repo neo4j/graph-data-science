@@ -19,12 +19,15 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
+import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.LogProvider;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
 import java.io.File;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class TestDatabaseCreator {
 
@@ -32,6 +35,13 @@ public class TestDatabaseCreator {
         return (GraphDatabaseAPI)new TestGraphDatabaseFactory()
                 .newImpermanentDatabaseBuilder(new File(UUID.randomUUID().toString()))
                 .newGraphDatabase();
+    }
+
+    public static GraphDatabaseAPI createTestDatabase(Consumer<GraphDatabaseBuilder> configuration) {
+        GraphDatabaseBuilder builder = new TestGraphDatabaseFactory()
+                .newImpermanentDatabaseBuilder(new File(UUID.randomUUID().toString()));
+        configuration.accept(builder);
+        return (GraphDatabaseAPI) builder.newGraphDatabase();
     }
 
     public static GraphDatabaseAPI createTestDatabase(LogProvider logProvider) {

@@ -232,7 +232,7 @@ CALL algo.unionFind.stream('User', 'LINK', {
   weightProperty: 'weight',
   threshold: 1.0
 })
-YIELD nodeId,setId
+YIELD nodeId, setId
 
 RETURN algo.asNode(nodeId).name AS Name, setId AS ComponentId
 ORDER BY ComponentId, Name
@@ -287,8 +287,90 @@ Otherwise, a new unique component ID is assigned to the node.
 Once every node belongs to a component, the algorithm merges components of connected nodes.
 When components are merged, the resulting component is always the one with the lower component ID.
 
+To show this in practice, we will run the algorithm, then add another node to our graph, then run the algorithm again with the `seedProperty` configuration parameter.
+We will use the weighted variant of WCC.
+
+.The following will load the graph, run the algorithm, and write back results:
+[source, cypher]
+----
+CALL algo.unionFind('User', 'LINK', {
+  write: true,
+  writeProperty: 'componentId',
+  weightProperty: 'weight',
+  threshold: 1.0
+})
+YIELD nodes AS Nodes, setCount AS NbrOfComponents, writeProperty AS PropertyName;
+----
+
+.Results
+[opts="header",cols="1m,1m,1m"]
+|===
+| Nodes | NbrOfComponents | PropertyName
+| 6     | 3               | "componentId"
+|===
+
+.The following will create a new node in the Neo4j graph, with no component ID:
+[source, cypher]
+----
+MATCH (b:User {name: 'Bridget'})
+CREATE (b)-[:LINK {weight: 2.0}]->(new:User {name: 'Mats'})
+----
+
+.Results
+[cols="1"]
+|===
+|No data returned.
+|===
+
+.The following will load the graph, run the algorithm, and stream results:
+[source, cypher]
+----
+CALL algo.unionFind.stream('User', 'LINK', {
+  seedProperty: 'componentId',
+  weightProperty: 'weight',
+  threshold: 1.0
+})
+YIELD nodeId, setId
+
+RETURN algo.asNode(nodeId).name AS Name, setId AS ComponentId
+ORDER BY ComponentId, Name
+----
+
+.Results
+[opts="header",cols="1m,1m,1m"]
+|===
+| Name      | ComponentId |
+| "Alice"   | 0           |
+| "Charles" | 0           |
+| "Bridget" | 1           |
+| "Mats"    | 1           |
+| "Doug"    | 3           |
+| "Mark"    | 3           |
+| "Michael" | 3           |
+|===
+
+.The following will load the graph, run the algorithm, and write back results:
+[source, cypher]
+----
+CALL algo.unionFind('User', 'LINK', {
+  seedProperty: 'componentId',
+  weightProperty: 'weight',
+  threshold: 1.0,
+  write: true,
+  writeProperty: 'componentId'
+})
+YIELD nodes AS Nodes, setCount AS NbrOfComponents, writeProperty AS PropertyName;
+----
+
+.Results
+[opts="header",cols="1m,1m,1m"]
+|===
+| Nodes | NbrOfComponents | PropertyName
+| 7     | 3               | "componentId"
+|===
+
 [NOTE]
+====
 If the `seedProperty` configuration parameter has the same value as `writeProperty`, the algorithm only writes properties for nodes where the component ID has changed.
 If they differ, the algorithm writes properties for all nodes.
-
-//TODO: add some Cypher and show an actual example
+====
