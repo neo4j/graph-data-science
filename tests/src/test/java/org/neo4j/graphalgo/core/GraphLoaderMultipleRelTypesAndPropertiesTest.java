@@ -57,7 +57,7 @@ import static org.neo4j.graphalgo.core.DeduplicationStrategy.SKIP;
 import static org.neo4j.graphalgo.core.DeduplicationStrategy.SUM;
 import static org.neo4j.helpers.collection.Iterables.asSet;
 
-class GraphLoaderMultipleRelTypesTest {
+class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
     public static final String DB_CYPHER =
             "CREATE" +
@@ -377,7 +377,7 @@ class GraphLoaderMultipleRelTypesTest {
     static Stream<Arguments> graphImplWithGlobalAndLocalDeduplicationArguments() {
         return crossArguments(
                 toArguments(TestSupport::allTypesWithMultipleRelTypeSupport),
-                GraphLoaderMultipleRelTypesTest::globalAndLocalDeduplicationArguments);
+                GraphLoaderMultipleRelTypesAndPropertiesTest::globalAndLocalDeduplicationArguments);
     }
 
     @ParameterizedTest
@@ -437,7 +437,7 @@ class GraphLoaderMultipleRelTypesTest {
     static Stream<Arguments> graphImplWithLocalDeduplicationArguments() {
         return crossArguments(
                 toArguments(TestSupport::allTypesWithMultipleRelTypeSupport),
-                GraphLoaderMultipleRelTypesTest::localDeduplicationArguments);
+                GraphLoaderMultipleRelTypesAndPropertiesTest::localDeduplicationArguments);
     }
 
     @ParameterizedTest
