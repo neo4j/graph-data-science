@@ -53,6 +53,7 @@ import java.util.stream.Stream;
 import static java.util.Collections.singletonMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -61,9 +62,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.graphalgo.GraphHelper.assertOutRelationships;
 import static org.neo4j.graphalgo.GraphHelper.assertOutProperties;
 import static org.neo4j.graphalgo.GraphHelper.assertOutPropertiesWithDelta;
+import static org.neo4j.graphalgo.GraphHelper.assertOutRelationships;
 import static org.neo4j.graphalgo.TestSupport.allGraphNames;
 import static org.neo4j.graphalgo.TestSupport.allGraphNamesAndDirections;
 
@@ -487,7 +488,7 @@ class LoadGraphProcTest extends ProcTestBase {
         QueryExecutionException exGraphAlreadyLoaded = assertThrows(QueryExecutionException.class, () -> db.execute(query, params).next());
         Throwable rootCause = ExceptionUtil.rootCause(exGraphAlreadyLoaded);
         assertEquals(IllegalArgumentException.class, rootCause.getClass());
-        assertThat(rootCause.getMessage(), containsString("A graph with name 'foo' is already loaded."));
+        assertThat(rootCause.getMessage(), equalTo("A graph with name 'foo' is already loaded."));
     }
 
 
