@@ -238,25 +238,25 @@ YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
 |===
 | Name              | Type    | Default        | Optional | Description
 | node label        | string  | null           | yes      | The label to load from the graph. If null, load all nodes.
-| relationship type | string  | null           | yes      | The relationship-type to load from the graph. If null, load all relationships.
-| config            | map     | n/a            | yes      | Additional configurations
+| relationship type | string  | null           | yes      | The relationship type to load from the graph. If null, load all relationships.
+| config            | map     | n/a            | yes      | Additional configuration.
 |===
 
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name              | Type    | Default                   | Optional | Description
-| concurrency       | int     | available CPUs            | yes      | The number of concurrent threads.
-| readConcurrency   | int     | value of `concurrency`    | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency  | int     | value of `concurrency`    | yes      | The number of concurrent threads used for writing the result.
-| weightProperty    | string  | null                      | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| seedProperty      | string  | n/a                       | yes      | Used to set the initial community for a node. The property value needs to be a number.
-| write             | boolean | true                      | yes      | Specifies if the result should be written back as a node property.
-| writeProperty     | string  | 'partition'               | yes      | The property name written back the ID of the partition particular node belongs to.
-| threshold         | float   | null                      | yes      | The value of the weight above which the relationship is not thrown away.
-| defaultValue      | float   | null                      | yes      | The default value of the weight in case it is missing or invalid.
-| consecutiveIds    | boolean | false                     | yes      | Community identifiers are mapped into a consecutive id space (requires additional memory).
-| graph             | string  | 'huge'                    | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement.
+| Name             | Type    | Default                | Optional | Description
+| concurrency      | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| readConcurrency  | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
+| weightProperty   | string  | null                   | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
+| seedProperty     | string  | n/a                    | yes      | Used to set the initial community for a node. The property value needs to be a number.
+| write            | boolean | true                   | yes      | Specifies if the result should be written back as a node property.
+| writeProperty    | string  | 'partition'            | yes      | The property name written back the ID of the partition particular node belongs to.
+| threshold        | float   | null                   | yes      | The value of the weight above which the relationship is not thrown away.
+| defaultValue     | float   | null                   | yes      | The default value of the weight in case it is missing or invalid.
+| consecutiveIds   | boolean | false                  | yes      | Community identifiers are mapped into a consecutive id space (requires additional memory).
+| graph            | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
 |===
 
 .Results
@@ -300,23 +300,22 @@ YIELD nodeId, setId - yields a setId to each node id
 |===
 | Name              | Type    | Default        | Optional | Description
 | node label        | string  | null           | yes      | The label to load from the graph. If null, load all nodes.
-| relationship type | string  | null           | yes      | The relationship-type to load from the graph. If null, load all relationships.
-| config            | map     | n/a            | yes      | Additional configurations
+| relationship type | string  | null           | yes      | The relationship type to load from the graph. If null, load all relationships.
+| config            | map     | n/a            | yes      | Additional configuration.
 |===
 
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name              | Type    | Default                   | Optional | Description
-| concurrency       | int     | available CPUs            | yes      | The number of concurrent threads.
-| readConcurrency   | int     | value of `concurrency`    | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency  | int     | value of `concurrency`    | yes      | The number of concurrent threads used for writing the result.
-| weightProperty    | string  | null                      | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| seedProperty      | string  | n/a                       | yes      | Used to set the initial community for a node. The property value needs to be a number.
-| threshold         | float   | null                      | yes      | The value of the weight above which the relationship is not thrown away.
-| defaultValue      | float   | null                      | yes      | The default value of the weight in case it is missing or invalid.
-| consecutiveIds    | boolean | false                     | yes      | Community identifiers are mapped into a consecutive id space (requires additional memory).
-| graph             | string  | 'huge'                    | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement.
+| Name             | Type    | Default                | Optional | Description
+| concurrency      | int    | available CPUs          | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
+| readConcurrency  | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| weightProperty   | string  | null                   | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
+| seedProperty     | string  | n/a                    | yes      | Used to set the initial community for a node. The property value needs to be a number.
+| threshold        | float   | null                   | yes      | The value of the weight above which the relationship is not thrown away.
+| defaultValue     | float   | null                   | yes      | The default value of the weight in case it is missing or invalid.
+| consecutiveIds   | boolean | false                  | yes      | Community identifiers are mapped into a consecutive id space (requires additional memory).
+| graph            | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
 |===
 
 .Results

@@ -40,13 +40,13 @@ CALL algo.memrec(label, relationship, algorithm, config)
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name          | Type    | Default        | Optional | Description
-| label         | string  | null           | yes      | The label to load from the graph. If null, load all nodes
-| relationship  | string  | null           | yes      | The relationship-type to load from the graph. If null, load all relationships
+| label         | string  | null           | yes      | The label to load from the graph. If null, load all nodes.
+| relationship  | string  | null           | yes      | The relationship type to load from the graph. If null, load all relationships.
 | algorithm | string  | null     | yes      | The name of a graph algorithm or `graph.load` to return the memory requirements for the in memory graph only.
 h| Config ||||
-| direction     | string  | 'OUTGOING'     | yes      | The relationship-direction to use in the algorithm
-| graph         | string  | 'huge'         | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
-| concurrency   | int     | available CPUs | yes      | The number of concurrent threads
+| direction     | string  | 'OUTGOING'     | yes      | The relationship-direction to use in the algorithm.
+| graph         | string  | 'huge'         | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
+| concurrency   | int     | available CPUs | yes      | The number of concurrent threads.
 |===
 
 Algorithm specific parameters can also be provided as config.

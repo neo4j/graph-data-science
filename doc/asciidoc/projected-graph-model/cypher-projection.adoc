@@ -10,7 +10,7 @@ This chapter explains Cypher projection in the Neo4j Graph Algorithms library.
 endif::env-docs[]
 
 If the node-label and relationship-type projection is not selective enough to describe our subgraph to run the algorithm on, we can use Cypher statements to project subsets of our graph.
-Use a node-statement instead of the label parameter and a relationship-statement instead of the relationship-type, and use `graph:'cypher'` in the config.
+Use a node-statement instead of the label parameter and a relationship-statement instead of the relationship type, and use `graph:'cypher'` in the config.
 
 Relationships described in the relationship-statement will only be projected if both source and target nodes are described in the node-statement, otherwise they will be ignored.
 
@@ -119,7 +119,7 @@ CALL algo.pageRank(
 // end::overview[]
 
 // tag::explanation[]
-If node-label and relationship-type are not selective enough to describe your subgraph to run the algorithm on, you can use Cypher statements to load or project subsets of your graph.
+If node label and relationship type are not selective enough to describe your subgraph to run the algorithm on, you can use Cypher statements to load or project subsets of your graph.
 This can also be used to run algorithms on a virtual graph.
 You can learn more in the <<cypher-projection>> section of the manual.
 // end::explanation[]

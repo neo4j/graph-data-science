@@ -113,20 +113,21 @@ YIELD nodeId, balanced, unbalanced
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name           | Type   | Default        | Optional | Description
-| label          | string | null           | yes      | The label to load from the graph. If null, load all nodes
-| relationship   | string | null           | yes      | The relationship-type to load from the graph. If null, load all relationships
-| weightProperty | string | null           | no       | The property name that contains weight. If weight is positive, algorithm treats the relationship as positive. With a negative weight, relationship is treated as negative. Must be numeric.
-| concurrency    | int    | available CPUs | yes      | The number of concurrent threads
+| Name            | Type   | Default                | Optional | Description
+| label           | string | null                   | yes      | The label to load from the graph. If null, load all nodes.
+| relationship    | string | null                   | yes      | The relationship type to load from the graph. If null, load all relationships.
+| weightProperty  | string | null                   | no       | The property name that contains weight. If weight is positive, algorithm treats the relationship as positive. With a negative weight, relationship is treated as negative. Must be numeric.
+| concurrency     | int    | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
+| readConcurrency | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 |===
 
 .Results
 [opts="header",cols="1,1,6"]
 |===
 | Name       | Type | Description
-| nodeId     | int  | The ID of node
-| balanced   | int  | The number of balanced triads a node is member of
-| unbalanced | int  | The number of unbalanced a node is member of
+| nodeId     | int  | The ID of node.
+| balanced   | int  | The number of balanced triads a node is member of.
+| unbalanced | int  | The number of unbalanced a node is member of.
 |===
 
 .The following will count the number of balanced and unbalanced triads that a node is member of, and write it back. It will return the total balanced triads and unbalanced triads count of the given graph:
@@ -140,15 +141,14 @@ YIELD loadMillis, computeMillis, writeMillis, nodeCount, balancedTriadCount, unb
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name                          | Type    | Default        | Optional | Description
-| label                         | string  | null           | yes      | The label to load from the graph. If null, load all nodes
-| relationship                  | string  | null           | yes      | The relationship-type to load from the graph. If null, load all relationships
-| concurrency                   | int     | available CPUs | yes      | The number of concurrent threads
-| weightProperty                | string  | null           | no       | The property name that contains weight. If weight is positive, algorithm treats the relationship as positive. With a negative weight, relationship is treated as negative. Must be numeric.
-| balancedProperty              | string  | 'balanced'     | yes      | The property name written back to the count of balanced triads a node is member of
-| unbalancedProperty            | string  | 'unbalanced'   | yes      | The property name written back to the count of unbalanced triads a node is member of
-| write                         | boolean | true           | yes      | Specifies if the result should be written back as a node property
-
+| Name               | Type    | Default                | Optional | Description
+| label              | string  | null                   | yes      | The label to load from the graph. If null, load all nodes.
+| relationship       | string  | null                   | yes      | The relationship type to load from the graph. If null, load all relationships.
+| concurrency        | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| readConcurrency    | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency   | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
+| unbalancedProperty | string  | 'unbalanced'           | yes      | The property name written back to the count of unbalanced triads a node is member of.
+| write              | boolean | true                   | yes      | Specifies if the result should be written back as a node property.
 |===
 
 .Results

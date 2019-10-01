@@ -230,18 +230,20 @@ YIELD nodes, similarityPairs, write, writeRelationshipType, writeProperty, min, 
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name                     | Type    | Default        | Optional | Description
-| `data`                   | list    | null           | no       | A list of maps of the following structure: `{item: nodeId, categories: [nodeId, nodeId, nodeId]}`
-| `top`                    | int     | 0              | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
-| `topK`                   | int     | 0              | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
-| `similarityCutoff`       | int     | -1             | yes      | The threshold for Overlap similarity. Values below this will not be returned.
-| `degreeCutoff`           | int     | 0              | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
-| `concurrency`            | int     | available CPUs | yes      | The number of concurrent threads.
-| `write`                  | boolean | false          | yes      | Indicates whether results should be stored.
-| `writeRelationshipType`  | string  | NARROWER_THAN        | yes      | The relationship type to use when storing results.
-| `writeProperty`          | string  | score          | yes      | The property to use when storing results.
-| `sourceIds`          | long[] | null | yes | The ids of items from which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
-| `targetIds`          | long[] | null | yes | The ids of items to which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
+| Name                    | Type    | Default                | Optional | Description
+| `data`                  | list    | null                   | no       | A list of maps of the following structure: `{item: nodeId, categories: [nodeId, nodeId, nodeId]}`.
+| `top`                   | int     | 0                      | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
+| `topK`                  | int     | 0                      | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
+| `similarityCutoff`      | int     | -1                     | yes      | The threshold for Overlap similarity. Values below this will not be returned.
+| `degreeCutoff`          | int     | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
+| `concurrency`           | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| `readConcurrency`       | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| `writeConcurrency`      | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
+| `write`                 | boolean | false                  | yes      | Indicates whether results should be stored.
+| `writeRelationshipType` | string  | NARROWER_THAN          | yes      | The relationship type to use when storing results.
+| `writeProperty`         | string  | score                  | yes      | The property to use when storing results.
+| `sourceIds`             | long[]  | null                   | yes      | The ids of items from which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
+| `targetIds`             | long[]  | null                   | yes      | The ids of items to which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
 
 |===
 
@@ -281,15 +283,16 @@ YIELD item1, item2, count1, count2, similarity
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name               | Type   | Default        | Optional | Description
-| `data`             | list   | null           | no       | A list of maps of the following structure: `{item: nodeId, categories: [nodeId, nodeId, nodeId]}`
-| `top`              | int    | 0              | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
-| `topK`             | int    | 0              | yes      | The number of similar values to return per node. If `0`, it  will return as many as it finds.
-| `similarityCutoff` | int    | -1             | yes      | The threshold for Overlap similarity. Values below this will not be returned.
-| `degreeCutoff`     | int    | 0              | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
-| `concurrency`      | int    | available CPUs | yes      | The number of concurrent threads.
-| `sourceIds`          | long[] | null | yes | The ids of items from which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
-| `targetIds`          | long[] | null | yes | The ids of items to which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
+| Name               | Type   | Default                | Optional | Description
+| `data`             | list   | null                   | no       | A list of maps of the following structure: `{item: nodeId, categories: [nodeId, nodeId, nodeId]}`.
+| `top`              | int    | 0                      | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
+| `topK`             | int    | 0                      | yes      | The number of similar values to return per node. If `0`, it  will return as many as it finds.
+| `similarityCutoff` | int    | -1                     | yes      | The threshold for Overlap similarity. Values below this will not be returned.
+| `degreeCutoff`     | int    | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
+| `concurrency`      | int    | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
+| `readConcurrency`  | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| `sourceIds`        | long[] | null                   | yes      | The ids of items from which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
+| `targetIds`        | long[] | null                   | yes      | The ids of items to which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
 |===
 
 .Results
