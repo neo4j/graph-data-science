@@ -140,27 +140,27 @@ YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name             | Type    | Default                | Optional | Description
-| label            | string  | null                   | yes      | The label to load from the graph. If null, load all nodes
-| relationship     | string  | null                   | yes      | The relationship-type to load from the graph. If null, load all relationships
-| write            | boolean | true                   | yes      | Specifies if the result should be written back as a node property
-| writeProperty    | string  | 'partition'            | yes      | The property name written back to
-| concurrency      | int     | available CPUs         | yes      | The number of concurrent threads.
-| readConcurrency  | int     | value of `concurrency` | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency | int     | value of `concurrency` | yes      | The number of concurrent threads used for writing the result.
-| graph            | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
+| label            | string  | null                   | yes      | The label to load from the graph. If null, load all nodes.
+| relationship     | string  | null                   | yes      | The relationship type to load from the graph. If null, load all relationships.
+| write            | boolean | true                   | yes      | Specifies if the result should be written back as a node property.
+| writeProperty    | string  | 'partition'            | yes      | The property name written back to.
+| concurrency      | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| readConcurrency  | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
+| graph            | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
 |===
 
 .Results
 [opts="header",cols="1,1,6"]
 |===
 | Name          | Type | Description
-| loadMillis    | int  | Milliseconds for loading data
-| computeMillis | int  | Milliseconds for running the algorithm
-| writeMillis   | int  | Milliseconds for writing result data back
-| postProcessingMillis    | int  | Milliseconds for computing percentiles and community count
+| loadMillis    | int  | Milliseconds for loading data.
+| computeMillis | int  | Milliseconds for running the algorithm.
+| writeMillis   | int  | Milliseconds for writing result data back.
+| postProcessingMillis    | int  | Milliseconds for computing percentiles and community count.
 
-| nodes | int | The number of nodes considered
-| communityCount | int  | The number of communities found
+| nodes | int | The number of nodes considered.
+| communityCount | int  | The number of communities found.
 
 | p1                   | double  | The 1 percentile of community size.
 | p5                   | double  | The 5 percentile of community size.
@@ -173,8 +173,8 @@ YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize
 | p99                   | double  | The 99 percentile of community size.
 | p100                  | double  | The 100 percentile of community size.
 
-| write | boolean | Specifies if the result was written back as a node property
-| writeProperty | string | The property name written back to
+| write | boolean | Specifies if the result was written back as a node property.
+| writeProperty | string | The property name written back to.
 
 |===
 
@@ -189,20 +189,19 @@ YIELD nodeId, partition
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name             | Type   | Default                | Optional | Description
-| label            | string | null                   | yes      | The label to load from the graph. If null, load all nodes
-| relationship     | string | null                   | yes      | The relationship-type to load from the graph. If null, load all relationships
-| concurrency      | int    | available CPUs         | yes      | The number of concurrent threads.
-| readConcurrency  | int    | value of `concurrency` | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency | int    | value of `concurrency` | yes      | The number of concurrent threads used for writing the result.
-| graph            | string | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement
+| label            | string | null                   | yes      | The label to load from the graph. If null, load all nodes.
+| relationship     | string | null                   | yes      | The relationship type to load from the graph. If null, load all relationships.
+| concurrency      | int    | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
+| readConcurrency  | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| graph            | string | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
 |===
 
 .Results
 [opts="header"]
 |===
 | Name      | Type | Description
-| nodeId    | int  | Node ID
-| partition | int  | Partition ID
+| nodeId    | int  | Node ID.
+| partition | int  | Partition ID.
 |===
 
 

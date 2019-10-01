@@ -162,14 +162,14 @@ YIELD nodes, loadMillis, computeMillis, writeMillis, write, writeProperty
 |===
 | Name             | Type    | Default                | Optional | Description
 | label            | string  | null                   | yes      | The label to load from the graph. If null, load all nodes.
-| relationship     | string  | null                   | yes      | The relationship-type to load from the graph. If null, load all relationships.
-| concurrency      | int     | available CPUs         | yes      | The number of concurrent threads.
-| readConcurrency  | int     | value of `concurrency` | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency | int     | value of `concurrency` | yes      | The number of concurrent threads used for writing the result.
+| relationship     | string  | null                   | yes      | The relationship type to load from the graph. If null, load all relationships.
+| concurrency      | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| readConcurrency  | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
 | weightProperty   | string  | null                   | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
 | defaultValue     | float   | 0.0                    | yes      | The default value of the weight in case it is missing or invalid.
 | write            | boolean | true                   | yes      | Specify if the result should be written back as a node property.
-| graph            | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement.
+| graph            | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
 | normalization    | string  | null                   | yes      | The type of normalization to apply to the results. Valid values are `max`, `l1norm`, `l2norm`.
 |===
 
@@ -198,13 +198,12 @@ YIELD node, score
 |===
 | Name             | Type   | Default                | Optional | Description
 | label            | string | null                   | yes      | The label to load from the graph. If null, load all nodes.
-| relationship     | string | null                   | yes      | The relationship-type to load from the graph. If null, load all nodes.
-| concurrency      | int    | available CPUs         | yes      | The number of concurrent threads.
-| readConcurrency  | int    | value of `concurrency` | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency | int    | value of `concurrency` | yes      | The number of concurrent threads used for writing the result.
+| relationship     | string | null                   | yes      | The relationship type to load from the graph. If null, load all nodes.
+| concurrency      | int    | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
+| readConcurrency  | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | weightProperty   | string | null                   | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
 | defaultValue     | float  | 0.0                    | yes      | The default value of the weight in case it is missing or invalid.
-| graph            | string | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement.
+| graph            | string | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
 | normalization    | string | null                   | yes      | The type of normalization to apply to the results. Valid values are `max`, `l1norm`, `l2norm`.
 |===
 

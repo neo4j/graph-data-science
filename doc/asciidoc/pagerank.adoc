@@ -236,7 +236,7 @@ When <<yelp-import, importing the Yelp dataset>> we stored the social network as
 Relationships in Neo4j always have a direction, but in this domain the direction is irrelevant.
 If `Person A` is a `FRIEND` with `Person B`, we can say that `Person B` is also a `FRIEND` with `Person A`.
 
-The default label and relationship-type selection syntax won't work for us here, because it will project a directed social network.
+The default label and relationship type selection syntax won't work for us here, because it will project a directed social network.
 Instead, we can project our undirected social network using *Cypher loading*.
 We can also apply this approach to other algorithms that use *Cypher loading*.
 
@@ -296,24 +296,24 @@ YIELD nodes, iterations, loadMillis, computeMillis, writeMillis, dampingFactor, 
 |===
 | Name               | Type    | Default        | Optional | Description
 | node label         | string  | null           | yes      | The label to load from the graph. If null, load all nodes.
-| relationship type  | string  | null           | yes      | The relationship-type to load from the graph. If null, load all relationships.
+| relationship type  | string  | null           | yes      | The relationship type to load from the graph. If null, load all relationships.
 | config             | map     | n/a            | yes      | Additional configuration.
 |===
 
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| direction         | string  | 'OUTGOING'                | yes      | The relationship-direction to use in the algorithm.
-| iterations        | int     | 20                        | yes      | How many iterations of PageRank to run.
-| tolerance         | float   | 0.0000001                 | yes      | Minimum change in scores between iterations. If the score changes less than the tolerance value the result is considered stable and the algorithm returns.
-| concurrency       | int     | available CPUs            | yes      | The number of concurrent threads.
-| readConcurrency   | int     | value of `concurrency`    | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency  | int     | value of `concurrency`    | yes      | The number of concurrent threads used for writing the result.
-| dampingFactor     | float   | 0.85                      | yes      | The damping factor of the PageRank calculation.
-| weightProperty    | string  | null                      | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| defaultValue      | float   | 0.0                       | yes      | The default value of the weight in case it is missing or invalid.
-| write             | boolean | true                      | yes      | Specify if the result should be written back as a node property.
-| graph             | string  | 'huge'                    | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement.
+| direction         | string  | 'OUTGOING'             | yes | The relationship direction to use in the algorithm.
+| iterations        | int     | 20                     | yes | How many iterations of PageRank to run.
+| tolerance         | float   | 0.0000001              | yes | Minimum change in scores between iterations. If the score changes less than the tolerance value the result is considered stable and the algorithm returns.
+| concurrency       | int     | available CPUs         | yes | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| readConcurrency   | int     | value of 'concurrency' | yes | The number of concurrent threads used for reading the graph.
+| writeConcurrency  | int     | value of 'concurrency' | yes | The number of concurrent threads used for writing the result.
+| dampingFactor     | float   | 0.85                   | yes | The damping factor of the PageRank calculation.
+| weightProperty    | string  | null                   | yes | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
+| defaultValue      | float   | 0.0                    | yes | The default value of the weight in case it is missing or invalid.
+| write             | boolean | true                   | yes | Specify if the result should be written back as a node property.
+| graph             | string  | 'huge'                 | yes | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
 |===
 
 .Results
@@ -343,23 +343,23 @@ YIELD node, score
 |===
 | Name               | Type    | Default        | Optional | Description
 | node label         | string  | null           | yes      | The label to load from the graph. If null, load all nodes.
-| relationship type  | string  | null           | yes      | The relationship-type to load from the graph. If null, load all relationships.
+| relationship type  | string  | null           | yes      | The relationship type to load from the graph. If null, load all relationships.
 | config             | map     | n/a            | yes      | Additional configuration.
 |===
 
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| direction         | string | 'OUTGOING'                | yes      | The relationship-direction to use in the algorithm.
-| iterations        | int    | 20                        | yes      | Specify how many iterations of PageRank to run.
-| tolerance         | float  | 0.0000001                 | yes      | Minimum change in scores between iterations. If the score changes less than the tolerance value the result is considered stable and the algorithm returns.
-| concurrency       | int    | available CPUs            | yes      | The number of concurrent threads.
-| readConcurrency   | int    | value of `concurrency`    | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency  | int    | value of `concurrency`    | yes      | The number of concurrent threads used for writing the result.
-| dampingFactor     | float  | 0.85                      | yes      | The damping factor of the PageRank calculation.
-| weightProperty    | string | null                      | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| defaultValue      | float  | 0.0                       | yes      | The default value of the weight in case it is missing or invalid.
-| graph             | string | 'huge'                    | yes      | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node-statement and relationship-statement.
+| direction        | string | 'OUTGOING'             | yes | The relationship direction to use in the algorithm.
+| iterations       | int    | 20                     | yes | Specify how many iterations of PageRank to run.
+| tolerance        | float  | 0.0000001              | yes | Minimum change in scores between iterations. If the score changes less than the tolerance value the result is considered stable and the algorithm returns.
+| concurrency      | int    | available CPUs         | yes | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
+| readConcurrency  | int    | value of 'concurrency' | yes | The number of concurrent threads used for reading the graph.
+| writeConcurrency | int    | value of 'concurrency' | yes | The number of concurrent threads used for writing the result.
+| dampingFactor    | float  | 0.85                   | yes | The damping factor of the PageRank calculation.
+| weightProperty   | string | null                   | yes | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
+| defaultValue     | float  | 0.0                    | yes | The default value of the weight in case it is missing or invalid.
+| graph            | string | 'huge'                 | yes | Use 'huge' when describing the subset of the graph with label and relationship-type parameter. Use 'cypher' for describing the subset with cypher node statement and relationship statement.
 |===
 
 .Results

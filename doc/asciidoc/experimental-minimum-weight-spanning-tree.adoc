@@ -206,11 +206,11 @@ YIELD loadMillis, computeMillis, writeMillis, effectiveNodeCount
 |===
 | Name             | Type    | Default | Optional | Description
 | label            | String  | null    | no       | The label to load from the graph. If null, load all nodes
-| relationshipType | String  | null    | no       | The relationship-type to load from the graph. If null, load all nodes
+| relationshipType | String  | null    | no       | The relationship type to load from the graph. If null, load all nodes
 | weightProperty   | string  | null    | no       | The property name that contains weight. Must be numeric.
 | startNodeId      | long    | null    | no       | The start node ID
 | write            | boolean | true    | yes      | Specify if the result should be written back as relationships
-| writeProperty    | string  | 'mst'   | yes      | The relationship-type written back as result
+| writeProperty    | string  | 'mst'   | yes      | The relationship type written back as result
 |===
 
 .Results
@@ -240,7 +240,7 @@ YIELD loadMillis, computeMillis, writeMillis, effectiveNodeCount
 | startNodeId      | int     | null    | no       | The start node ID
 | k                | int     | null    | no       | The result is a tree with `k` nodes and `k − 1` relationships
 | write            | boolean | true    | yes      | Specifies if the result should be written back as a node property
-| writeProperty    | string  | 'mst'   | yes      | The relationship-type written back as result
+| writeProperty    | string  | 'mst'   | yes      | The relationship type written back as result
 |===
 
 .Results

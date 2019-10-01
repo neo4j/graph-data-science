@@ -151,7 +151,7 @@ YIELD resultCount, loadMillis, evalMillis, writeMillis
 | endNode             | node    | null        | no       | The end node
 | weightProperty      | string  | null        | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
 | nodeQuery           | string  | null        | yes      | The label to load from the graph. If null, load all nodes
-| relationshipQuery   | string  | null        | yes      | The relationship-type to load from the graph. If null, load all nodes
+| relationshipQuery   | string  | null        | yes      | The relationship type to load from the graph. If null, load all nodes
 | direction           | string  | both        | yes      | The relationship direction to load from the graph. If 'both', treats the relationships as undirected
 | defaultValue        | float   | null        | yes      | The default value of the weight in case it is missing or invalid
 | maxDepth            | int     | Integer.MAX | yes      | The depth of the shortest paths traversal
