@@ -35,11 +35,17 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
-import org.neo4j.procedure.*;
+import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Mode;
+import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.stream.Stream;
+
+import static org.neo4j.procedure.Mode.READ;
 
 /**
  * Delta-Stepping is a non-negative single source shortest paths (NSSSP) algorithm
@@ -53,8 +59,6 @@ import java.util.stream.Stream;
  * <a href="https://ae.cs.uni-frankfurt.de/pdf/diss_uli.pdf">https://ae.cs.uni-frankfurt.de/pdf/diss_uli.pdf</a><br>
  * <a href="http://www.cc.gatech.edu/~bader/papers/ShortestPaths-ALENEX2007.pdf">http://www.cc.gatech.edu/~bader/papers/ShortestPaths-ALENEX2007.pdf</a><br>
  * <a href="http://www.dis.uniroma1.it/challenge9/papers/madduri.pdf">http://www.dis.uniroma1.it/challenge9/papers/madduri.pdf</a>
- *
- * @author mknblch
  */
 public class ShortestPathDeltaSteppingProc {
 
@@ -70,7 +74,7 @@ public class ShortestPathDeltaSteppingProc {
     @Context
     public KernelTransaction transaction;
 
-    @Procedure("algo.shortestPath.deltaStepping.stream")
+    @Procedure(name = "algo.shortestPath.deltaStepping.stream", mode = READ)
     @Description("CALL algo.shortestPath.deltaStepping.stream(startNode:Node, weightProperty:String, delta:Double" +
             "{label:'labelName', relationship:'relationshipName', defaultValue:1.0, concurrency:4}) " +
             "YIELD nodeId, distance - yields a stream of {nodeId, distance} from start to end (inclusive)")

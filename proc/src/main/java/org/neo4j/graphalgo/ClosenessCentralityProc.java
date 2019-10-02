@@ -43,6 +43,8 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.procedure.Mode.READ;
+
 /**
  * @author mknblch
  */
@@ -61,7 +63,7 @@ public class ClosenessCentralityProc {
     @Context
     public KernelTransaction transaction;
 
-    @Procedure(value = "algo.closeness.stream")
+    @Procedure(name = "algo.closeness.stream", mode = READ)
     @Description("CALL algo.closeness.stream(label:String, relationship:String{concurrency:4}) YIELD nodeId, centrality - yields centrality for each node")
     public Stream<MSClosenessCentrality.Result> closenessStream(
             @Name(value = "label", defaultValue = "") String label,

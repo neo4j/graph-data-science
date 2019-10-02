@@ -50,6 +50,8 @@ import java.util.Map;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.procedure.Mode.READ;
+
 //TODO: Add acceptance tests ("integration tests")
 public final class ArticleRankProc {
 
@@ -113,7 +115,7 @@ public final class ArticleRankProc {
         return Stream.of(statsBuilder.build());
     }
 
-    @Procedure(value = "algo.articleRank.stream", mode = Mode.READ)
+    @Procedure(value = "algo.articleRank.stream", mode = READ)
     @Description("CALL algo.articleRank.stream(label:String, relationship:String, " +
             "{iterations:20, dampingFactor:0.85, weightProperty: null, concurrency:4}) " +
             "YIELD node, score - calculates page rank and streams results")

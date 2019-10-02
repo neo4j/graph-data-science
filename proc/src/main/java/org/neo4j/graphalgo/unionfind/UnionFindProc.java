@@ -33,6 +33,8 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.procedure.Mode.READ;
+
 public class UnionFindProc<T extends WCC<T>> extends WccBaseProc<T> {
 
     @Deprecated
@@ -49,7 +51,7 @@ public class UnionFindProc<T extends WCC<T>> extends WccBaseProc<T> {
     }
 
     @Deprecated
-    @Procedure(value = "algo.unionFind.stream", deprecatedBy = "algo.wcc.stream")
+    @Procedure(name = "algo.unionFind.stream", mode = READ, deprecatedBy = "algo.wcc.stream")
     @Description("CALL algo.unionFind.stream(label:String, relationship:String, " +
                  "{weightProperty: 'propertyName', threshold: 0.42, defaultValue: 1.0, seedProperty: 'seedCommunity', consecutiveId: false}}} " +
                  "YIELD nodeId, setId - yields a setId to each node id")
@@ -62,7 +64,7 @@ public class UnionFindProc<T extends WCC<T>> extends WccBaseProc<T> {
     }
 
     @Deprecated
-    @Procedure(value = "algo.unionFind.memrec", mode = Mode.READ, deprecatedBy = "algo.wcc.memrec")
+    @Procedure(value = "algo.unionFind.memrec", mode = READ, deprecatedBy = "algo.wcc.memrec")
     @Description("CALL algo.unionFind.memrec(label:String, relationship:String, {...properties}) " +
                  "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for UnionFind")
     public Stream<MemRecResult> unionFindMemRec(
@@ -89,7 +91,7 @@ public class UnionFindProc<T extends WCC<T>> extends WccBaseProc<T> {
     }
 
     @Deprecated
-    @Procedure(value = "algo.unionFind.queue.stream", deprecatedBy = "algo.wcc.stream")
+    @Procedure(value = "algo.unionFind.queue.stream", mode = READ, deprecatedBy = "algo.wcc.stream")
     @Description("CALL algo.unionFind.queue.stream(label:String, relationship:String, " +
                  "{property: 'propertyName', threshold: 0.42, defaultValue: 1.0, seedProperty: 'seedCommunity', concurrency: 4}) " +
                  "YIELD nodeId, setId - yields a setId to each node id")
@@ -115,7 +117,7 @@ public class UnionFindProc<T extends WCC<T>> extends WccBaseProc<T> {
     }
 
     @Deprecated
-    @Procedure(value = "algo.unionFind.forkJoinMerge.stream", deprecatedBy = "algo.wcc.stream")
+    @Procedure(value = "algo.unionFind.forkJoinMerge.stream", mode = READ, deprecatedBy = "algo.wcc.stream")
     @Description("CALL algo.unionFind.forkJoinMerge.stream(label:String, relationship:String, " +
                  "{property: 'propertyName', threshold: 0.42, defaultValue: 1.0, seedProperty: 'seedCommunity', concurrency: 4}) " +
                  "YIELD nodeId, setId - yields a setId to each node id")
@@ -141,7 +143,7 @@ public class UnionFindProc<T extends WCC<T>> extends WccBaseProc<T> {
     }
 
     @Deprecated
-    @Procedure(value = "algo.unionFind.forkJoin.stream", deprecatedBy = "algo.wcc.stream")
+    @Procedure(value = "algo.unionFind.forkJoin.stream", mode = READ, deprecatedBy = "algo.wcc.stream")
     @Description("CALL algo.unionFind.forkJoin.stream(label:String, relationship:String, " +
                  "{property: 'propertyName', threshold: 0.42, defaultValue: 1.0, seedProperty: 'seedCommunity', concurrency: 4}) " +
                  "YIELD nodeId, setId - yields a setId to each node id")

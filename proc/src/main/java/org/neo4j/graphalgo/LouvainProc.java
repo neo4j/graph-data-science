@@ -51,6 +51,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.impl.louvain.LouvainFactory.CLUSTERING_IDENTIFIER;
 import static org.neo4j.graphalgo.impl.louvain.LouvainFactory.DEFAULT_CLUSTER_PROPERTY;
+import static org.neo4j.procedure.Mode.READ;
 
 /**
  * modularity based community detection algorithm
@@ -118,7 +119,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
                 .onClose(louvain::release);
     }
 
-    @Procedure(value = "algo.louvain.stream")
+    @Procedure(value = "algo.louvain.stream", mode = READ)
     @Description("CALL algo.louvain.stream(label:String, relationship:String, " +
                  "{weightProperty:'propertyName', defaultValue:1.0, concurrency:4, communityProperty:'propertyOfPredefinedCommunity', innerIterations:10, communitySelection:'classic') " +
                  "YIELD nodeId, community - yields a setId to each node id")
@@ -142,7 +143,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
         return louvain.dendrogramStream(configuration.get(INCLUDE_INTERMEDIATE_COMMUNITIES, false));
     }
 
-    @Procedure(value = "algo.louvain.memrec", mode = Mode.READ)
+    @Procedure(value = "algo.louvain.memrec", mode = READ)
     @Description("CALL algo.louvain.memrec(label:String, relationship:String, {...properties}) " +
                  "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for Louvain")
     public Stream<MemRecResult> louvainMemrec(

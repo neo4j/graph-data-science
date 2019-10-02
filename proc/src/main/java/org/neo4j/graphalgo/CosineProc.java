@@ -22,7 +22,11 @@ package org.neo4j.graphalgo;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.impl.results.SimilarityResult;
 import org.neo4j.graphalgo.impl.results.SimilaritySummaryResult;
-import org.neo4j.graphalgo.impl.similarity.*;
+import org.neo4j.graphalgo.impl.similarity.RleDecoder;
+import org.neo4j.graphalgo.impl.similarity.SimilarityComputer;
+import org.neo4j.graphalgo.impl.similarity.SimilarityInput;
+import org.neo4j.graphalgo.impl.similarity.SimilarityRecorder;
+import org.neo4j.graphalgo.impl.similarity.WeightedInput;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -33,10 +37,11 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.impl.similarity.SimilarityInput.indexesFor;
+import static org.neo4j.procedure.Mode.READ;
 
 public class CosineProc extends SimilarityProc {
 
-    @Procedure(name = "algo.similarity.cosine.stream", mode = Mode.READ)
+    @Procedure(name = "algo.similarity.cosine.stream", mode = READ)
     @Description("CALL algo.similarity.cosine.stream([{item:id, weights:[weights]}], {similarityCutoff:-1,degreeCutoff:0}) " +
             "YIELD item1, item2, count1, count2, intersection, similarity - computes cosine distance")
     // todo count1,count2 = could be the non-null values, intersection the values where both are non-null?

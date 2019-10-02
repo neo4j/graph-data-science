@@ -44,9 +44,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.stream.Stream;
 
-/**
- * @author mknblch
- */
+import static org.neo4j.procedure.Mode.READ;
+
 public class MSColoringProc {
 
     public static final String CONFIG_CLUSTER_PROPERTY = "partitionProperty";
@@ -103,7 +102,7 @@ public class MSColoringProc {
         return Stream.of(builder.build(tracker, graph.nodeCount(), n -> (long) struct.get((int) n)));
     }
 
-    @Procedure(value = "algo.unionFind.mscoloring.stream")
+    @Procedure(name = "algo.unionFind.mscoloring.stream", mode = READ)
     @Description("CALL algo.unionFind.mscoloring.stream(label:String, relationship:String, " +
                  "{property:'propertyName', threshold:0.42, defaultValue:1.0, concurrency:4) " +
                  "YIELD nodeId, setId - yields a setId to each node id")

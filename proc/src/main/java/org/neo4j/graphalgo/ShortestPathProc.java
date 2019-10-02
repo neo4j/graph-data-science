@@ -38,14 +38,17 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
-import org.neo4j.procedure.*;
+import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Mode;
+import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-/**
- * @author mknblch
- */
+import static org.neo4j.procedure.Mode.READ;
+
 public class ShortestPathProc {
 
     public static final String DEFAULT_TARGET_PROPERTY = "sssp";
@@ -72,7 +75,7 @@ public class ShortestPathProc {
      * @param config
      * @return
      */
-    @Procedure("algo.shortestPath.stream")
+    @Procedure(name = "algo.shortestPath.stream", mode = READ)
     @Description("CALL algo.shortestPath.stream(startNode:Node, endNode:Node, weightProperty:String" +
             "{nodeQuery:'labelName', relationshipQuery:'relationshipName', direction:'BOTH', defaultValue:1.0}) " +
             "YIELD nodeId, cost - yields a stream of {nodeId, cost} from start to end (inclusive)")
@@ -188,7 +191,7 @@ public class ShortestPathProc {
         return Stream.of(builder.build());
     }
 
-    @Procedure("algo.shortestPath.astar.stream")
+    @Procedure(name = "algo.shortestPath.astar.stream", mode = READ)
     @Description("CALL algo.shortestPath.astar.stream(startNode:Node, endNode:Node, weightProperty:String, propertyKeyLat:String," +
     		"propertyKeyLon:String, {nodeQuery:'labelName', relationshipQuery:'relationshipName', direction:'BOTH', defaultValue:1.0}) " +
     		"YIELD nodeId, cost - yields a stream of {nodeId, cost} from start to end (inclusive)")

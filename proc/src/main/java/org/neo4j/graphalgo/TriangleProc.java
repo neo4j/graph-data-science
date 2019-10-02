@@ -53,9 +53,8 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.stream.Stream;
 
-/**
- * @author mknblch
- */
+import static org.neo4j.procedure.Mode.READ;
+
 public class TriangleProc {
 
     public static final String DEFAULT_WRITE_PROPERTY_VALUE = "triangles";
@@ -70,7 +69,7 @@ public class TriangleProc {
     @Context
     public KernelTransaction transaction;
 
-    @Procedure("algo.triangle.stream")
+    @Procedure(name = "algo.triangle.stream", mode = READ)
     @Description("CALL algo.triangle.stream(label, relationship, {concurrency:4}) " +
             "YIELD nodeA, nodeB, nodeC - yield nodeA, nodeB and nodeC which form a triangle")
     public Stream<TriangleStream.Result> triangleStream(
@@ -103,7 +102,7 @@ public class TriangleProc {
         return triangleStream.resultStream();
     }
 
-    @Procedure("algo.triangleCount.stream")
+    @Procedure(name = "algo.triangleCount.stream", mode = READ)
     @Description("CALL algo.triangleCount.stream(label, relationship, {concurrency:8}) " +
             "YIELD nodeId, triangles - yield nodeId, number of triangles")
     public Stream<IntersectingTriangleCount.Result> triangleCountQueueStream(
@@ -141,7 +140,7 @@ public class TriangleProc {
     }
 
 
-    @Procedure("algo.triangleCount.forkJoin.stream")
+    @Procedure(name = "algo.triangleCount.forkJoin.stream", mode = READ)
     @Description("CALL algo.triangleCount.forkJoin.stream(label, relationship, {concurrency:8}) " +
             "YIELD nodeId, triangles - yield nodeId, number of triangles")
     public Stream<TriangleCountBase.Result> triangleCountForkJoinStream(

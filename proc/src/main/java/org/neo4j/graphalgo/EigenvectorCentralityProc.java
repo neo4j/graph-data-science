@@ -51,6 +51,8 @@ import java.util.Map;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.procedure.Mode.READ;
+
 public final class EigenvectorCentralityProc {
     public static final Integer DEFAULT_ITERATIONS = 20;
     public static final String DEFAULT_SCORE_PROPERTY = "eigenvector";
@@ -109,7 +111,7 @@ public final class EigenvectorCentralityProc {
         return Stream.of(statsBuilder.build());
     }
 
-    @Procedure(value = "algo.eigenvector.stream", mode = Mode.READ)
+    @Procedure(name = "algo.eigenvector.stream", mode = READ)
     @Description("CALL algo.eigenvector.stream(label:String, relationship:String, " +
             "{weightProperty: null, concurrency:4}) " +
             "YIELD node, score - calculates eigenvector centrality and streams results")

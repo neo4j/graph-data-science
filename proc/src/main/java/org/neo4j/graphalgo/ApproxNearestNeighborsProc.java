@@ -43,9 +43,11 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static org.neo4j.procedure.Mode.READ;
+
 public class ApproxNearestNeighborsProc extends SimilarityProc {
 
-    @Procedure(name = "algo.labs.ml.ann.stream", mode = Mode.READ)
+    @Procedure(name = "algo.labs.ml.ann.stream", mode = READ)
     @Description("CALL algo.labs.ml.ann.stream('jaccard|cosine|pearson|euclidean', [{item:id, weights:[weights]} or {item:id, categories:[ids]}], {similarityCutoff:-1,degreeCutoff:0}) " +
                  "YIELD item1, item2, count1, count2, intersection, similarity - computes nearest neighbors")
     public Stream<SimilarityResult> stream(

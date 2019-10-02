@@ -33,14 +33,17 @@ import org.neo4j.graphalgo.results.CentralityProcResult;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
-import org.neo4j.procedure.*;
+import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Mode;
+import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-/**
- * @author mknblch
- */
+import static org.neo4j.procedure.Mode.READ;
+
 public class DangalchevCentralityProc {
 
     public static final String DEFAULT_TARGET_PROPERTY = "centrality";
@@ -54,7 +57,7 @@ public class DangalchevCentralityProc {
     @Context
     public KernelTransaction transaction;
 
-    @Procedure(value = "algo.closeness.dangalchev.stream")
+    @Procedure(name = "algo.closeness.dangalchev.stream", mode = READ)
     @Description("CALL algo.closeness.dangalchev.stream(label:String, relationship:String{concurrency:4}) YIELD nodeId, centrality - yields centrality for each node")
     public Stream<DangalchevClosenessCentrality.Result> dangalchevStream(
             @Name(value = "label", defaultValue = "") String label,

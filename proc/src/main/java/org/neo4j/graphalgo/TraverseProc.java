@@ -43,9 +43,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * @author mknblch
- */
+import static org.neo4j.procedure.Mode.READ;
+
 public class TraverseProc {
 
     @Context
@@ -57,7 +56,7 @@ public class TraverseProc {
     @Context
     public KernelTransaction transaction;
 
-    @Procedure(value = "algo.bfs.stream")
+    @Procedure(name = "algo.bfs.stream", mode = READ)
     @Description("CALL algo.bfs.stream(label:String, relationshipType:String, startNodeId:long, direction:Direction, " +
             "{writeProperty:String, target:long, maxDepth:long, weightProperty:String, maxCost:double}) YIELD nodeId")
     public Stream<WalkResult> bfs(
@@ -122,7 +121,7 @@ public class TraverseProc {
         return Stream.of(new WalkResult(nodes, WalkPath.toPath(api, nodes)));
     }
 
-    @Procedure(value = "algo.dfs.stream")
+    @Procedure(name = "algo.dfs.stream", mode = READ)
     @Description("CALL algo.dfs.stream(label:String, relationshipType:String, startNodeId:long, direction:Direction, " +
             "{writeProperty:String, target:long, maxDepth:long, weightProperty:String, maxCost:double}) YIELD nodeId")
     public Stream<WalkResult> dfs(

@@ -55,6 +55,8 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.procedure.Mode.READ;
+
 @SuppressWarnings("unused")
 public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
 
@@ -88,7 +90,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
         return run(label, relationshipType, config);
     }
 
-    @Procedure(value = "algo.beta.labelPropagation.stream")
+    @Procedure(name = "algo.beta.labelPropagation.stream", mode = READ)
     @Description("CALL algo.beta.labelPropagation.stream(label:String, relationship:String, " +
                  "{iterations: 10, direction: 'OUTGOING', weightProperty: 'weight', seedProperty: 'seed', concurrency: 4}) " +
                  "YIELD nodeId, community")
@@ -127,7 +129,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
     }
 
     @Deprecated
-    @Procedure(value = "algo.labelPropagation.stream", deprecatedBy = "algo.beta.labelPropagation.stream")
+    @Procedure(value = "algo.labelPropagation.stream", deprecatedBy = "algo.beta.labelPropagation.stream", mode = READ)
     @Description("CALL algo.labelPropagation.stream(label:String, relationship:String, " +
                  "{iterations: 10, direction: 'OUTGOING', weightProperty: 'weight', seedProperty: 'seed', concurrency: 4}) " +
                  "YIELD nodeId, label")

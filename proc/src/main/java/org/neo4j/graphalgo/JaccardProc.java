@@ -35,9 +35,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.procedure.Mode.READ;
+
 public class JaccardProc extends SimilarityProc {
 
-    @Procedure(name = "algo.similarity.jaccard.stream", mode = Mode.READ)
+    @Procedure(name = "algo.similarity.jaccard.stream", mode = READ)
     @Description("CALL algo.similarity.jaccard.stream([{item:id, categories:[ids]}], {similarityCutoff:-1,degreeCutoff:0}) " +
             "YIELD item1, item2, count1, count2, intersection, similarity - computes jaccard similarities")
     public Stream<SimilarityResult> similarityStream(

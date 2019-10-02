@@ -36,10 +36,11 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.impl.similarity.SimilarityInput.indexesFor;
+import static org.neo4j.procedure.Mode.READ;
 
 public class OverlapProc extends SimilarityProc {
 
-    @Procedure(name = "algo.similarity.overlap.stream", mode = Mode.READ)
+    @Procedure(name = "algo.similarity.overlap.stream", mode = READ)
     @Description("CALL algo.similarity.overlap.stream([{item:id, targets:[ids]}], {similarityCutoff:-1,degreeCutoff:0}) " +
             "YIELD item1, item2, count1, count2, intersection, similarity - computes overlap similarities")
     public Stream<SimilarityResult> similarityStream(

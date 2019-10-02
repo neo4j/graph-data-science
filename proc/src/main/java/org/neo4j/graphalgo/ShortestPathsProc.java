@@ -36,14 +36,17 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
-import org.neo4j.procedure.*;
+import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Mode;
+import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-/**
- * @author mknblch
- */
+import static org.neo4j.procedure.Mode.READ;
+
 public class ShortestPathsProc {
 
     public static final String WRITE_PROPERTY = "writeProperty";
@@ -58,7 +61,7 @@ public class ShortestPathsProc {
     @Context
     public KernelTransaction transaction;
 
-    @Procedure("algo.shortestPaths.stream")
+    @Procedure(name = "algo.shortestPaths.stream", mode = READ)
     @Description("CALL algo.shortestPaths.stream(startNode:Node, weightProperty:String" +
             "{nodeQuery:'labelName', relationshipQuery:'relationshipName', defaultValue:1.0}) " +
             "YIELD nodeId, distance - yields a stream of {nodeId, cost} from start to end (inclusive)")

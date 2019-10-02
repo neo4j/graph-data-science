@@ -50,9 +50,8 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-/**
- * @author mknblch
- */
+import static org.neo4j.procedure.Mode.READ;
+
 public class StronglyConnectedComponentsProc {
 
     public static final String CONFIG_WRITE_PROPERTY = "writeProperty";
@@ -81,7 +80,7 @@ public class StronglyConnectedComponentsProc {
     }
 
     // default algo.scc -> iter tarjan
-    @Procedure(value = "algo.scc.stream")
+    @Procedure(value = "algo.scc.stream", mode = READ)
     @Description("CALL algo.scc.stream(label:String, relationship:String, config:Map<String, Object>) YIELD " +
             "loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize")
     public Stream<SCCAlgorithm.StreamResult> sccDefaultMethodStream(
@@ -210,7 +209,7 @@ public class StronglyConnectedComponentsProc {
     }
 
     // algo.scc.tunedTarjan.stream
-    @Procedure(value = "algo.scc.recursive.tunedTarjan.stream", mode = Mode.WRITE)
+    @Procedure(name = "algo.scc.recursive.tunedTarjan.stream", mode = READ)
     @Description("CALL algo.scc.recursive.tunedTarjan.stream(label:String, relationship:String, config:Map<String, Object>) YIELD " +
             "nodeId, partition")
     public Stream<SCCAlgorithm.StreamResult> sccTunedTarjanStream(
@@ -293,7 +292,7 @@ public class StronglyConnectedComponentsProc {
     }
 
     // algo.scc.iterative.stream
-    @Procedure(value = "algo.scc.iterative.stream", mode = Mode.WRITE)
+    @Procedure(name = "algo.scc.iterative.stream", mode = READ)
     @Description("CALL algo.scc.iterative.stream(label:String, relationship:String, config:Map<String, Object>) YIELD " +
             "nodeId, partition")
     public Stream<SCCAlgorithm.StreamResult> sccIterativeTarjanStream(
@@ -389,7 +388,7 @@ public class StronglyConnectedComponentsProc {
     }
 
     // algo.scc.multistep.stream
-    @Procedure(value = "algo.scc.multistep.stream")
+    @Procedure(name = "algo.scc.multistep.stream", mode = READ)
     @Description("CALL algo.scc.multistep.stream(label:String, relationship:String, {write:true, concurrency:4, cutoff:100000}) YIELD " +
             "nodeId, partition")
     public Stream<SCCStreamResult> multistepStream(
@@ -416,7 +415,7 @@ public class StronglyConnectedComponentsProc {
     }
 
     // algo.scc.forwardBackward.stream
-    @Procedure(value = "algo.scc.forwardBackward.stream")
+    @Procedure(name = "algo.scc.forwardBackward.stream", mode = READ)
     @Description("CALL algo.scc.forwardBackward.stream(long startNodeId, label:String, relationship:String, {write:true, concurrency:4}) YIELD " +
             "nodeId, partition")
     public Stream<ForwardBackwardScc.Result> fwbwStream(

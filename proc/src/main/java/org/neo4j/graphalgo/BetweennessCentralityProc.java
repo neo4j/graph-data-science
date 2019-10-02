@@ -36,12 +36,12 @@ import org.neo4j.procedure.*;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.procedure.Mode.READ;
+
 /**
  * Betweenness Centrality Algorithms
  *
  * all procedures accept {in, incoming, <, out, outgoing, >, both, <>} as direction
- *
- * @author mknblch
  */
 public class BetweennessCentralityProc {
 
@@ -66,7 +66,7 @@ public class BetweennessCentralityProc {
      *  strategy:'random'   Randomized selection. Takes optional argument probability:double[0-1]
      *                      or use log10(nodeCount) / e^2 as default
      */
-    @Procedure(value = "algo.betweenness.sampled.stream")
+    @Procedure(name = "algo.betweenness.sampled.stream", mode = READ)
     @Description("CALL algo.betweenness.sampled.stream(label:String, relationship:String, {strategy:{'random', 'degree'}, probability:double, maxDepth:int, direction:String, concurrency:int}) YIELD nodeId, centrality - yields centrality for each node")
     public Stream<BetweennessCentrality.Result> betweennessRABrandes(
             @Name(value = "label", defaultValue = "") String label,
@@ -102,7 +102,7 @@ public class BetweennessCentralityProc {
      * Brandes Betweenness Centrality Algorithm
      *
      */
-    @Procedure(value = "algo.betweenness.stream")
+    @Procedure(name = "algo.betweenness.stream", mode = READ)
     @Description("CALL algo.betweenness.stream(label:String, relationship:String, {direction:'out', concurrency :4})" +
                  "YIELD nodeId, centrality - yields centrality for each node")
     public Stream<BetweennessCentrality.Result> betweennessStream(

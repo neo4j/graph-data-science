@@ -38,7 +38,6 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -51,6 +50,7 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.core.utils.ParallelUtil.parallelStream;
+import static org.neo4j.procedure.Mode.READ;
 
 public class NodeWalkerProc  {
 
@@ -64,7 +64,7 @@ public class NodeWalkerProc  {
     public KernelTransaction transaction;
 
 
-    @Procedure(name = "algo.randomWalk.stream", mode = Mode.READ)
+    @Procedure(name = "algo.randomWalk.stream", mode = READ)
     @Description("CALL algo.randomWalk.stream(start:null=all/[ids]/label, steps, walks, {graph: 'huge/cypher', nodeQuery:nodeLabel/query, relationshipQuery:relType/query, mode:random/node2vec, return:1.0, inOut:1.0, path:false/true concurrency:4, direction:'BOTH'}) " +
             "YIELD nodes, path - computes random walks from given starting points")
     public Stream<WalkResult> randomWalk(

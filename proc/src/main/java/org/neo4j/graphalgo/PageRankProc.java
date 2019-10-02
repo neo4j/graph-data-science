@@ -45,6 +45,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.core.ProcedureConstants.DAMPING_FACTOR_DEFAULT;
 import static org.neo4j.graphalgo.core.ProcedureConstants.DAMPING_FACTOR_KEY;
+import static org.neo4j.procedure.Mode.READ;
 
 public final class PageRankProc extends BaseAlgoProc<PageRank> {
 
@@ -88,7 +89,7 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
         return Stream.of(statsBuilder.build());
     }
 
-    @Procedure(value = "algo.pageRank.stream", mode = Mode.READ)
+    @Procedure(value = "algo.pageRank.stream", mode = READ)
     @Description("CALL algo.pageRank.stream(label:String, relationship:String, " +
                  "{iterations: 20, tolerance: 0.0000001, dampingFactor: 0.85, weightProperty: null, concurrency: 4}) " +
                  "YIELD node, score - calculates page rank and streams results")
@@ -111,7 +112,7 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
         return CentralityUtils.streamResults(graph, scores);
     }
 
-    @Procedure(value = "algo.pageRank.memrec", mode = Mode.READ)
+    @Procedure(value = "algo.pageRank.memrec", mode = READ)
     @Description("CALL algo.pageRank.memrec(label:String, relationship:String, {...properties}) " +
                  "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for PageRank")
     public Stream<MemRecResult> pageRankMemrec(

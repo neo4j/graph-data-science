@@ -41,9 +41,8 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-/**
- * @author mknblch
- */
+import static org.neo4j.procedure.Mode.READ;
+
 public class AllShortestPathsProc {
 
     @Context
@@ -55,7 +54,7 @@ public class AllShortestPathsProc {
     @Context
     public KernelTransaction transaction;
 
-    @Procedure("algo.allShortestPaths.stream")
+    @Procedure(name = "algo.allShortestPaths.stream", mode = READ)
     @Description("CALL algo.allShortestPaths.stream(weightProperty:String" +
             "{nodeQuery:'labelName', relationshipQuery:'relationshipName', defaultValue:1.0, concurrency:4}) " +
             "YIELD sourceNodeId, targetNodeId, distance - yields a stream of {sourceNodeId, targetNodeId, distance}")

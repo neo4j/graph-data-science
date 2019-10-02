@@ -43,9 +43,8 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-/**
- * @author mknblch
- */
+import static org.neo4j.procedure.Mode.READ;
+
 public class HarmonicCentralityProc {
 
     public static final String DEFAULT_TARGET_PROPERTY = "centrality";
@@ -59,7 +58,7 @@ public class HarmonicCentralityProc {
     @Context
     public KernelTransaction transaction;
 
-    @Procedure(value = "algo.closeness.harmonic.stream")
+    @Procedure(name = "algo.closeness.harmonic.stream", mode = READ)
     @Description("CALL algo.closeness.harmonic.stream(label:String, relationship:String{concurrency:4}) YIELD nodeId, centrality - yields centrality for each node")
     public Stream<HarmonicCentrality.Result> harmonicStream(
             @Name(value = "label", defaultValue = "") String label,

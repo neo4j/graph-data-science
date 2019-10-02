@@ -47,6 +47,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.core.ProcedureConstants.CYPHER_QUERY_KEY;
+import static org.neo4j.procedure.Mode.READ;
 
 public final class DegreeCentralityProc {
 
@@ -124,7 +125,7 @@ public final class DegreeCentralityProc {
         return CYPHER_QUERY_KEY.equals(graphName) ? Direction.OUTGOING : direction;
     }
 
-    @Procedure(value = "algo.degree.stream", mode = Mode.READ)
+    @Procedure(name = "algo.degree.stream", mode = READ)
     @Description("CALL algo.degree.stream(label:String, relationship:String, " +
                  "{weightProperty: null, concurrency:4}) " +
                  "YIELD node, score - calculates degree centrality and streams results")

@@ -36,9 +36,11 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static org.neo4j.procedure.Mode.READ;
+
 public class PearsonProc extends SimilarityProc {
 
-    @Procedure(name = "algo.similarity.pearson.stream", mode = Mode.READ)
+    @Procedure(name = "algo.similarity.pearson.stream", mode = READ)
     @Description("CALL algo.similarity.pearson.stream([{item:id, weights:[weights]}], {similarityCutoff:-1,degreeCutoff:0}) " +
             "YIELD item1, item2, count1, count2, intersection, similarity - computes cosine distance")
     // todo count1,count2 = could be the non-null values, intersection the values where both are non-null?

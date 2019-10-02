@@ -24,23 +24,29 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.utils.*;
+import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.graphalgo.core.write.Exporter;
-import org.neo4j.graphalgo.impl.triangle.*;
+import org.neo4j.graphalgo.impl.triangle.BalancedTriads;
 import org.neo4j.graphalgo.results.AbstractCommunityResultBuilder;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
-import org.neo4j.procedure.*;
+import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Mode;
+import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-/**
- * @author mknblch
- */
+import static org.neo4j.procedure.Mode.READ;
+
 public class BalancedTriadsProc {
 
     public static final String DEFAULT_BALANCED_PROPERTY = "balanced";
@@ -55,7 +61,7 @@ public class BalancedTriadsProc {
     @Context
     public KernelTransaction transaction;
 
-    @Procedure("algo.balancedTriads.stream")
+    @Procedure(name = "algo.balancedTriads.stream", mode = READ)
     @Description("CALL algo.balancedTriads.stream(label, relationship, {concurrency:8}) " +
             "YIELD nodeId, balanced, unbalanced")
     public Stream<BalancedTriads.Result> balancedTriadsStream(

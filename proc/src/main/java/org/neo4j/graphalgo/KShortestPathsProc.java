@@ -49,13 +49,13 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
+import static org.neo4j.procedure.Mode.READ;
+
 /**
  * Yen's K shortest paths algorithm. Computes multiple shortest
  * paths from a given start to a goal node in the desired direction.
  * The paths are written to the graph using new relationships named
  * by prefix + index.
- *
- * @author mknblch
  */
 public class KShortestPathsProc {
 
@@ -136,7 +136,7 @@ public class KShortestPathsProc {
         return Stream.of(builder.build());
     }
 
-    @Procedure(value = "algo.kShortestPaths.stream", mode = Mode.READ)
+    @Procedure(name = "algo.kShortestPaths.stream", mode = READ)
     @Description("CALL algo.kShortestPaths.stream(startNode:Node, endNode:Node, k:int, weightProperty:String" +
             "{nodeQuery:'labelName', relationshipQuery:'relationshipName', direction:'OUT', defaultValue:1.0, maxDepth:42}) " +
             "YIELD sourceNodeId, targetNodeId, nodeIds, costs")

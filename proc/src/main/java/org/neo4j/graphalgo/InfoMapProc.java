@@ -34,15 +34,18 @@ import org.neo4j.graphalgo.results.AbstractResultBuilder;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
-import org.neo4j.procedure.*;
+import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Mode;
+import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-/**
- * @author mknblch
- */
+import static org.neo4j.procedure.Mode.READ;
+
 public class InfoMapProc {
 
     private static final String PAGE_RANK_PROPERTY = "pageRankProperty";
@@ -61,7 +64,7 @@ public class InfoMapProc {
         WEIGHTED, WEIGHTED_EXT_PR, UNWEIGHTED, UNWEIGHTED_EXT_PR
     }
 
-    @Procedure("algo.infoMap.stream")
+    @Procedure(name = "algo.infoMap.stream", mode = READ)
     @Description("CALL algo.infoMap.stream('Label', 'REL', {<properties>}) YIELD nodeId, community")
     public Stream<Result> stream(
             @Name(value = "label", defaultValue = "") String label,
