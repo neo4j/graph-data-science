@@ -88,8 +88,8 @@ public final class PropertyMappings implements Iterable<PropertyMapping> {
     }
 
     @Deprecated
-    public double defaultWeight() {
-        return mappings.length == 0 ? 0.0 : mappings[0].defaultValue();
+    public Optional<Double> defaultWeight() {
+        return mappings.length == 0 ? Optional.empty() : Optional.of(mappings[0].defaultValue());
     }
 
     public boolean hasMappings() {

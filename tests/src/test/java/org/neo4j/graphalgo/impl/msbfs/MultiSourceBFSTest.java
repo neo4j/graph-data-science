@@ -277,7 +277,7 @@ final class MultiSourceBFSTest {
             }
 
             @Override
-            public void forEachRelationship(long nodeId, Direction direction, WeightedRelationshipConsumer consumer) {
+            public void forEachRelationship(long nodeId, Direction direction, double fallbackValue, WeightedRelationshipConsumer consumer) {
 
             }
 

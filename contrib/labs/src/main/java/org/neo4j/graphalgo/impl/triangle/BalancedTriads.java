@@ -19,13 +19,13 @@
  */
 package org.neo4j.graphalgo.impl.triangle;
 
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IntersectionConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
-import org.neo4j.graphalgo.Algorithm;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
@@ -210,7 +210,7 @@ public class BalancedTriads extends Algorithm<BalancedTriads> {
 
         @Override
         public void accept(final long a, final long b, final long c) {
-            if (balancedPredicate.isBalanced(graph.weightOf(a, b), graph.weightOf(a, c), graph.weightOf(b, c))) {
+            if (balancedPredicate.isBalanced(graph.weightOf(a, b, 1.0D), graph.weightOf(a, c, 1.0D), graph.weightOf(b, c, 1.0D))) {
                 balancedTriangles.add(a, 1);
                 balancedTriangles.add(b, 1);
                 balancedTriangles.add(c, 1);

@@ -47,7 +47,7 @@ public final class GraphHelper {
 
     public static double[] collectTargetProperties(final Graph graph, long sourceId) {
         DoubleStream.Builder outWeights = DoubleStream.builder();
-        graph.forEachRelationship(graph.toMappedNodeId(sourceId), Direction.OUTGOING,
+        graph.forEachRelationship(graph.toMappedNodeId(sourceId), Direction.OUTGOING, 0D,
                 (sourceNodeId, targetNodeId, weight) -> {
                     outWeights.add(weight);
                     return true;
@@ -74,7 +74,7 @@ public final class GraphHelper {
     private static void assertProperties(Graph graph, Direction direction, double delta, long node, double... expected) {
         LongArrayList idList = new LongArrayList(expected.length);
         DoubleArrayList properties = new DoubleArrayList(expected.length);
-        graph.forEachRelationship(node, direction, (s, t, w) -> {
+        graph.forEachRelationship(node, direction, 0D, (s, t, w) -> {
             idList.add(t);
             properties.add(w);
             return true;

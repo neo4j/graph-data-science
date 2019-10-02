@@ -31,7 +31,8 @@ public interface RelationshipWeights {
      *
      * @param sourceNodeId source node
      * @param targetNodeId target node
+     * @param fallbackValue value to use if graph is unweighted
      * @return the weight
      */
-    double weightOf(long sourceNodeId, long targetNodeId);
+    double weightOf(long sourceNodeId, long targetNodeId, double fallbackValue);
 }

@@ -19,9 +19,15 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import com.carrotsearch.hppc.*;
+import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.DoubleArrayDeque;
+import com.carrotsearch.hppc.IntArrayDeque;
+import com.carrotsearch.hppc.IntDoubleMap;
+import com.carrotsearch.hppc.IntDoubleScatterMap;
+import com.carrotsearch.hppc.IntIntMap;
+import com.carrotsearch.hppc.IntIntScatterMap;
 import org.neo4j.graphalgo.Algorithm;
-import org.neo4j.graphalgo.api.*;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
 import org.neo4j.graphalgo.core.utils.queue.SharedIntPriorityQueue;
@@ -160,7 +166,9 @@ public class ShortestPathDijkstra extends Algorithm<ShortestPathDijkstra> {
             double costs = this.costs.getOrDefault(node, Double.MAX_VALUE);
             graph.forEachRelationship(
                     node,
-                    direction, longToIntConsumer((source, target, weight) -> {
+                    direction,
+                    1.0D,
+                    longToIntConsumer((source, target, weight) -> {
                         updateCosts(source, target, weight + costs);
                         return true;
                     }));

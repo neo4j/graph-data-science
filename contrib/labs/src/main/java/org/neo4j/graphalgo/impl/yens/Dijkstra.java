@@ -66,7 +66,8 @@ public class Dijkstra {
         this.graph = graph;
         nodeCount = Math.toIntExact(graph.nodeCount());
         costs = new IntDoubleScatterMap(nodeCount);
-        queue = SharedIntPriorityQueue.min(nodeCount,
+        queue = SharedIntPriorityQueue.min(
+                nodeCount,
                 costs,
                 Double.MAX_VALUE);
         path = new IntIntScatterMap(nodeCount);
@@ -76,6 +77,7 @@ public class Dijkstra {
 
     /**
      * set termination flag
+     *
      * @param terminationFlag the flag
      * @return this
      */
@@ -86,6 +88,7 @@ public class Dijkstra {
 
     /**
      * set relationship / node - filter
+     *
      * @param filter filter
      * @return this
      */
@@ -94,8 +97,9 @@ public class Dijkstra {
         return this;
     }
 
-    /**#
+    /**
      * set traverse direction
+     *
      * @param direction the direction
      * @return this
      */
@@ -106,6 +110,7 @@ public class Dijkstra {
 
     /**
      * compute shortest path from sourceNode to targetNode
+     *
      * @param sourceNode mapped source node id
      * @param targetNode mapped target node id
      * @return an optional path
@@ -116,9 +121,10 @@ public class Dijkstra {
 
     /**
      * compute shortest path from sourceNode to targetNode
+     *
      * @param sourceNodeId mapped source node id
      * @param targetNodeId mapped target node id
-     * @param maxDepth maximum traversal depth
+     * @param maxDepth     maximum traversal depth
      * @return an optional path
      */
     public Optional<WeightedPath> compute(long sourceNodeId, long targetNodeId, int maxDepth) {
@@ -140,6 +146,7 @@ public class Dijkstra {
 
     /**
      * calc path
+     *
      * @return true if a path has been found, false otherwise
      */
     private boolean dijkstra(int source, int target, Direction direction, int maxDepth) {
@@ -164,7 +171,9 @@ public class Dijkstra {
             double costs = this.costs.getOrDefault(node, Double.MAX_VALUE);
             graph.forEachRelationship(
                     node,
-                    direction, longToIntConsumer((s, t, w) -> {
+                    direction,
+                    0.0D,
+                    longToIntConsumer((s, t, w) -> {
                         if (!filter.accept(s, t)) {
                             return true;
                         }

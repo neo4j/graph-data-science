@@ -195,7 +195,8 @@ public class UnionFindForkJoinMerge extends UnionFind<UnionFindForkJoinMerge> {
                         (sourceNodeId, targetNodeId) -> {
                             double weight = graph.weightOf(
                                     sourceNodeId,
-                                    targetNodeId);
+                                    targetNodeId,
+                                    UnionFind.defaultWeight(threshold));
                             if (weight > threshold) {
                                 struct.union(sourceNodeId, targetNodeId);
                             }

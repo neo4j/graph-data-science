@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
@@ -27,6 +28,7 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.kernel.api.StatementConstants;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.LongAdder;
 
 class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
@@ -39,8 +41,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
     private final RelationshipsBuilder outgoingRelationshipsBuilder;
     private final RelationshipImporter importer;
     private final RelationshipImporter.Imports imports;
-    private final boolean hasRelationshipWeights;
-    private final double relationDefaultWeight;
+    private final Optional<Double> maybeDefaultRelProperty;
 
     private long totalRecordsSeen;
     private long totalRelationshipsImported;
@@ -61,7 +62,9 @@ class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
         int pageSize = importSizing.pageSize();
         int numberOfPages = importSizing.numberOfPages();
 
-        relationDefaultWeight = setup.relationDefaultWeight;
+        this.maybeDefaultRelProperty = setup.relationDefaultWeight;
+        Double defaultRelationshipProperty = maybeDefaultRelProperty.orElseGet(PropertyMapping.EMPTY_PROPERTY::defaultValue);
+
         AdjacencyBuilder outBuilder = AdjacencyBuilder.compressing(
                 outgoingRelationshipsBuilder,
                 numberOfPages,
@@ -69,13 +72,12 @@ class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
                 setup.tracker,
                 new LongAdder(),
                 new int[]{DEFAULT_WEIGHT_PROPERTY_ID},
-                new double[]{relationDefaultWeight}
+                new double[]{defaultRelationshipProperty}
         );
 
         this.idMap = idMap;
-        hasRelationshipWeights = setup.shouldLoadRelationshipProperties();
         importer = new RelationshipImporter(setup.tracker, outBuilder, null);
-        imports = importer.imports(false, true, false, hasRelationshipWeights);
+        imports = importer.imports(false, true, false, maybeDefaultRelProperty.isPresent());
         totalRecordsSeen = 0;
         totalRelationshipsImported = 0;
     }
@@ -89,8 +91,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
         RelationshipRowVisitor visitor = new RelationshipRowVisitor(
                 buffer,
                 idMap,
-                hasRelationshipWeights,
-                relationDefaultWeight,
+                maybeDefaultRelProperty,
                 imports
         );
         runLoadingQuery(offset, batchSize, visitor);

@@ -32,11 +32,15 @@ import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.impl.spanningTrees.Prim;
 import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
 import org.neo4j.internal.kernel.api.Write;
-import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
+import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
-import org.neo4j.procedure.*;
+import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Mode;
+import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
 import org.neo4j.values.storable.Values;
 
 import java.util.Map;
@@ -176,7 +180,7 @@ public class PrimProc {
                         relType,
                         graph.toOriginalNodeId(target)
                 );
-                ops.relationshipSetProperty(relId, propertyType, Values.doubleValue(graph.weightOf(source, target)));
+                ops.relationshipSetProperty(relId, propertyType, Values.doubleValue(graph.weightOf(source, target, Double.NaN)));
             } catch (KernelException e) {
                 ExceptionUtil.throwKernelException(e);
             }

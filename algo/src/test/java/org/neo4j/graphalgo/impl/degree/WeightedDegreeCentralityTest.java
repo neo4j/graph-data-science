@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.impl.degree;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
@@ -28,6 +29,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
@@ -40,6 +42,8 @@ import java.util.Map;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class WeightedDegreeCentralityTest {
 
@@ -176,4 +180,23 @@ final class WeightedDegreeCentralityTest {
         });
     }
 
+    @Test
+    void shouldThrowIfGraphHasNoRelationshipProperty() {
+
+        Graph graph = new GraphLoader(DB)
+                .withLabel(Label.label("Label1"))
+                .withRelationshipType("TYPE1")
+                .withDirection(Direction.OUTGOING)
+                .load(HugeGraphFactory.class);
+
+        UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class, () -> {
+            new WeightedDegreeCentrality(
+                    graph,
+                    Pools.DEFAULT,
+                    1,
+                    AllocationTracker.EMPTY);
+        });
+
+        assertTrue(exception.getMessage().contains("not supported"));
+    }
 }

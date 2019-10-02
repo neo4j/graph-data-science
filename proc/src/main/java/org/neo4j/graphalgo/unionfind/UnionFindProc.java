@@ -181,19 +181,12 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
     }
 
     @Override
-    protected GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
-
+    protected GraphLoader configureAlgoLoader(final GraphLoader loader, final ProcedureConfiguration config) {
         final String seedProperty = config.getString(CONFIG_SEED_PROPERTY, null);
-
         if (seedProperty != null) {
             loader.withOptionalNodeProperties(createPropertyMappings(seedProperty));
         }
-
-        return loader
-                .withRelationshipProperties(PropertyMapping.of(
-                        config.getWeightProperty(),
-                        config.getWeightPropertyDefaultValue(1.0)))
-                .withDirection(Direction.OUTGOING);
+        return loader.withDirection(Direction.OUTGOING);
     }
 
     @Override
@@ -203,6 +196,12 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
         UnionFindType algoType = config.getChecked(CONFIG_ALGO_TYPE, defaultAlgoType, UnionFindType.class);
         return new UnionFindFactory<>(algoType, incremental);
     }
+
+    @Override
+    protected double getDefaultWeightProperty(ProcedureConfiguration config) {
+        return UnionFind.defaultWeight(config.get(UnionFindFactory.CONFIG_THRESHOLD, 0D));
+    }
+
 
     private Stream<StreamResult> stream(
             String label,

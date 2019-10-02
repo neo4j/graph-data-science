@@ -44,6 +44,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -226,45 +227,43 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
                     AdjacencyOffsets inAdjacencyOffsets = incomingRelationshipsBuilder != null
                             ? incomingRelationshipsBuilder.globalAdjacencyOffsets : null;
 
+                    long relationshipCount = relationshipCounts.getOrDefault(entry.getKey(), 0L);
+
                     if (!dimensions.relProperties().hasMappings()) {
                         HugeGraph graph = buildGraph(
                                 tracker,
                                 idsAndProperties.hugeIdMap,
                                 idsAndProperties.properties,
-                                incomingRelationshipsBuilder,
-                                outgoingRelationshipsBuilder,
                                 outAdjacencyList,
                                 outAdjacencyOffsets,
                                 inAdjacencyList,
                                 inAdjacencyOffsets,
-                                0,
-                                PropertyMapping.EMPTY_PROPERTY,
-                                relationshipCounts.getOrDefault(entry.getKey(), 0L),
+                                relationshipCount,
                                 setup.loadAsUndirected
                         );
                         return Collections.singletonMap("", graph);
+                    } else {
+                        return dimensions.relProperties().enumerate().map(propertyEntry -> {
+                            int weightIndex = propertyEntry.getKey();
+                            PropertyMapping property = propertyEntry.getValue();
+                            HugeGraph graph = buildGraphWithRelationshipProperty(
+                                    tracker,
+                                    idsAndProperties.hugeIdMap,
+                                    idsAndProperties.properties,
+                                    incomingRelationshipsBuilder,
+                                    outgoingRelationshipsBuilder,
+                                    outAdjacencyList,
+                                    outAdjacencyOffsets,
+                                    inAdjacencyList,
+                                    inAdjacencyOffsets,
+                                    weightIndex,
+                                    property,
+                                    relationshipCount,
+                                    setup.loadAsUndirected
+                            );
+                            return Pair.of(property.propertyKey(), graph);
+                        }).collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
                     }
-
-                    return dimensions.relProperties().enumerate().map(propertyEntry -> {
-                        int weightIndex = propertyEntry.getKey();
-                        PropertyMapping property = propertyEntry.getValue();
-                        HugeGraph graph = buildGraph(
-                                tracker,
-                                idsAndProperties.hugeIdMap,
-                                idsAndProperties.properties,
-                                incomingRelationshipsBuilder,
-                                outgoingRelationshipsBuilder,
-                                outAdjacencyList,
-                                outAdjacencyOffsets,
-                                inAdjacencyList,
-                                inAdjacencyOffsets,
-                                weightIndex,
-                                property,
-                                relationshipCounts.getOrDefault(entry.getKey(), 0L),
-                                setup.loadAsUndirected
-                        );
-                        return Pair.of(property.propertyKey(), graph);
-                    }).collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
                 }));
     }
 
@@ -316,6 +315,34 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
             AllocationTracker tracker,
             IdMap idMapping,
             Map<String, WeightMapping> nodeProperties,
+            AdjacencyList outAdjacencyList,
+            AdjacencyOffsets outAdjacencyOffsets,
+            AdjacencyList inAdjacencyList,
+            AdjacencyOffsets inAdjacencyOffsets,
+            long relationshipCount,
+            boolean loadAsUndirected) {
+
+        return HugeGraph.create(
+                tracker,
+                idMapping,
+                nodeProperties,
+                relationshipCount,
+                inAdjacencyList,
+                outAdjacencyList,
+                inAdjacencyOffsets,
+                outAdjacencyOffsets,
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                loadAsUndirected);
+    }
+
+    private HugeGraph buildGraphWithRelationshipProperty(
+            AllocationTracker tracker,
+            IdMap idMapping,
+            Map<String, WeightMapping> nodeProperties,
             RelationshipsBuilder inRelationshipsBuilder,
             RelationshipsBuilder outRelationshipsBuilder,
             AdjacencyList outAdjacencyList,
@@ -349,7 +376,11 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
             }
         }
 
-        return new HugeGraph(
+        Optional<Double> maybeDefaultWeight = weightProperty == PropertyMapping.EMPTY_PROPERTY
+                ? Optional.empty()
+                : Optional.of(weightProperty.defaultValue());
+
+        return HugeGraph.create(
                 tracker,
                 idMapping,
                 nodeProperties,
@@ -358,11 +389,11 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
                 outAdjacencyList,
                 inAdjacencyOffsets,
                 outAdjacencyOffsets,
-                weightProperty.defaultValue(),
-                inWeightList,
-                outWeightList,
-                inWeightOffsets,
-                outWeightOffsets,
+                maybeDefaultWeight,
+                Optional.ofNullable(inWeightList),
+                Optional.ofNullable(outWeightList),
+                Optional.ofNullable(inWeightOffsets),
+                Optional.ofNullable(outWeightOffsets),
                 loadAsUndirected);
     }
 

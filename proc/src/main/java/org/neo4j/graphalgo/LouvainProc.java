@@ -156,17 +156,18 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
     }
 
     @Override
-    protected GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
-        loader.withRelationshipProperties(PropertyMapping.of(
-                config.getWeightProperty(),
-                config.getWeightPropertyDefaultValue(1.0)));
-
+    protected GraphLoader configureAlgoLoader(final GraphLoader loader, final ProcedureConfiguration config) {
         config.getString(DEFAULT_CLUSTER_PROPERTY).ifPresent(propertyIdentifier -> {
             // configure predefined clustering if set
             loader.withOptionalNodeProperties(PropertyMapping.of(CLUSTERING_IDENTIFIER, propertyIdentifier, -1));
         });
 
         return loader.undirected().withDirection(Direction.OUTGOING);
+    }
+
+    @Override
+    protected double getDefaultWeightProperty(ProcedureConfiguration config) {
+        return Louvain.DEFAULT_WEIGHT;
     }
 
     @Override

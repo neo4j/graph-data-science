@@ -22,9 +22,9 @@ package org.neo4j.graphalgo.core.huge;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
+import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.collection.Iterables;
@@ -105,8 +105,8 @@ public final class UnionGraph implements Graph {
     }
 
     @Override
-    public double weightOf(final long sourceNodeId, final long targetNodeId) {
-        return first.weightOf(sourceNodeId, targetNodeId);
+    public double weightOf(final long sourceNodeId, final long targetNodeId, double fallbackValue) {
+        return first.weightOf(sourceNodeId, targetNodeId, fallbackValue);
     }
 
     @Override
@@ -117,9 +117,13 @@ public final class UnionGraph implements Graph {
     }
 
     @Override
-    public void forEachRelationship(long nodeId, Direction direction, WeightedRelationshipConsumer consumer) {
+    public void forEachRelationship(
+            long nodeId,
+            Direction direction,
+            double fallbackValue,
+            WeightedRelationshipConsumer consumer) {
         for (Graph graph : graphs) {
-            graph.forEachRelationship(nodeId, direction, consumer);
+            graph.forEachRelationship(nodeId, direction, fallbackValue, consumer);
         }
     }
 
@@ -196,6 +200,11 @@ public final class UnionGraph implements Graph {
     @Override
     public Direction getLoadDirection() {
         return first.getLoadDirection();
+    }
+
+    @Override
+    public boolean hasRelationshipProperty() {
+        return first.hasRelationshipProperty();
     }
 
     @Override

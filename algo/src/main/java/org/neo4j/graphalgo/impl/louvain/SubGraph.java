@@ -22,9 +22,9 @@ package org.neo4j.graphalgo.impl.louvain;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
+import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
@@ -35,6 +35,10 @@ import java.util.Set;
 import java.util.function.LongPredicate;
 
 abstract class SubGraph implements Graph {
+
+    private final boolean hasRelationshipProperty;
+
+    protected SubGraph(boolean hasRelationshipProperty) {this.hasRelationshipProperty = hasRelationshipProperty;}
 
     abstract int degree(long nodeId);
 
@@ -49,6 +53,7 @@ abstract class SubGraph implements Graph {
     public final void forEachRelationship(
             final long nodeId,
             final Direction direction,
+            double fallbackValue,
             final WeightedRelationshipConsumer consumer) {
         forEach(nodeId, consumer);
     }
@@ -67,6 +72,11 @@ abstract class SubGraph implements Graph {
     }
 
     @Override
+    public boolean hasRelationshipProperty() {
+        return hasRelationshipProperty;
+    }
+
+    @Override
     public final void forEachRelationship(long nodeId, Direction direction, RelationshipConsumer consumer) {
         throw new UnsupportedOperationException("forEachRelationship is not supported.");
     }
@@ -82,7 +92,7 @@ abstract class SubGraph implements Graph {
     }
 
     @Override
-    public final double weightOf(long sourceNodeId, long targetNodeId) {
+    public final double weightOf(long sourceNodeId, long targetNodeId, double fallbackValue) {
         throw new UnsupportedOperationException("weightOf is not supported.");
     }
 

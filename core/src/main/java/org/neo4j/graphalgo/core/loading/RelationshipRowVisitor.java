@@ -19,10 +19,13 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.core.loading.RelationshipImporter.Imports;
 import org.neo4j.graphalgo.core.loading.RelationshipImporter.WeightReader;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphdb.Result;
+
+import java.util.Optional;
 
 class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
 
@@ -33,25 +36,24 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private long rows = 0;
     private final RelationshipsBatchBuffer buffer;
     private final IdMap idMap;
-    private final boolean hasRelationshipWeights;
-    private final double defaultWeight;
+    private final boolean hasRelationshipProperty;
+    private final double defaultRelProperty;
     private long relationshipCount;
     private final Imports imports;
-    private final WeightReader weightReader;
+    private final WeightReader relPropertyReader;
 
     RelationshipRowVisitor(
             RelationshipsBatchBuffer buffer,
             IdMap idMap,
-            boolean hasRelationshipWeights,
-            double defaultWeight,
+            Optional<Double> maybeDefaultRelProperty,
             Imports imports
     ) {
         this.buffer = buffer;
         this.idMap = idMap;
-        this.hasRelationshipWeights = hasRelationshipWeights;
-        this.defaultWeight = defaultWeight;
+        this.hasRelationshipProperty = maybeDefaultRelProperty.isPresent();
+        this.defaultRelProperty = maybeDefaultRelProperty.orElseGet(PropertyMapping.EMPTY_PROPERTY::defaultValue);
         this.imports = imports;
-        this.weightReader = RelationshipImporter.preLoadedWeightReader();
+        this.relPropertyReader = RelationshipImporter.preLoadedWeightReader();
     }
 
     @Override
@@ -73,7 +75,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         if (target == -1) {
             return true;
         }
-        long longWeight = hasRelationshipWeights ? Double.doubleToLongBits(extractWeight(row)) : -1L;
+        long longWeight = hasRelationshipProperty ? Double.doubleToLongBits(extractWeight(row)) : -1L;
         buffer.add(
                 source,
                 target,
@@ -88,7 +90,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     }
 
     void flush() {
-        long imported = imports.importRels(buffer, weightReader);
+        long imported = imports.importRels(buffer, relPropertyReader);
         relationshipCount += RawValues.getHead(imported);
     }
 
@@ -98,7 +100,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
 
     private double extractWeight(Result.ResultRow row) {
         Object weight = CypherLoadingUtils.getProperty(row, "weight");
-        return weight instanceof Number ? ((Number) weight).doubleValue() : defaultWeight;
+        return weight instanceof Number ? ((Number) weight).doubleValue() : defaultRelProperty;
     }
 
     public long rows() {

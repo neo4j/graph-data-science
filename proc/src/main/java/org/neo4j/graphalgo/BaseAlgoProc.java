@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
+import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -43,6 +44,8 @@ public abstract class BaseAlgoProc<A extends Algorithm<A>> extends BaseProc {
                 .withTerminationFlag(terminationFlag);
     }
 
+    protected abstract GraphLoader configureAlgoLoader(GraphLoader loader, ProcedureConfiguration config);
+
     protected abstract AlgorithmFactory<A> algorithmFactory(ProcedureConfiguration config);
 
     protected MemoryTreeWithDimensions memoryEstimation(final ProcedureConfiguration config) {
@@ -55,5 +58,20 @@ public abstract class BaseAlgoProc<A extends Algorithm<A>> extends BaseProc {
                 .build();
         MemoryTree memoryTree = estimation.estimate(graphFactory.dimensions(), config.getConcurrency());
         return new MemoryTreeWithDimensions(memoryTree, graphFactory.dimensions());
+    }
+
+    protected double getDefaultWeightProperty(ProcedureConfiguration config) {
+        return ProcedureConstants.DEFAULT_VALUE_DEFAULT;
+    }
+
+    @Override
+    protected GraphLoader configureLoader(GraphLoader loader, ProcedureConfiguration config) {
+        if (config.hasWeightProperty()) {
+            loader.withRelationshipProperties(PropertyMapping.of(
+                    config.getWeightProperty(),
+                    config.getWeightPropertyDefaultValue(getDefaultWeightProperty(config))
+            ));
+        }
+        return configureAlgoLoader(loader, config);
     }
 }

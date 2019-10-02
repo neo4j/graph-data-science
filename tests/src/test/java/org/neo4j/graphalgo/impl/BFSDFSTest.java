@@ -228,7 +228,7 @@ class BFSDFSTest {
                         Direction.OUTGOING,
                         (s, t, w) -> w > maxCost ? Result.CONTINUE : Result.FOLLOW,
                         (s, t, w) -> {
-                            final double v = graph.weightOf(s, t);
+                            final double v = graph.weightOf(s, t, Double.NaN);
                             System.out.println(s + " -> " + t + " : " + (w + v));
                             return w + v;
                         });

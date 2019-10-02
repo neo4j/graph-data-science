@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.roaringbitmap.RoaringBitmap;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 
@@ -53,7 +54,7 @@ public class ANNUtils {
     }
 
     static HugeGraph hugeGraph(IdsAndProperties nodes, Relationships hugeRels) {
-        return new HugeGraph(
+        return HugeGraph.create(
                 AllocationTracker.EMPTY,
                 nodes.idMap(),
                 nodes.properties(),
@@ -62,11 +63,11 @@ public class ANNUtils {
                 hugeRels.outAdjacency(),
                 hugeRels.inOffsets(),
                 hugeRels.outOffsets(),
-                hugeRels.defaultWeight(),
-                hugeRels.inWeights(),
-                hugeRels.outWeights(),
-                hugeRels.inWeightOffsets(),
-                hugeRels.outWeightOffsets(),
+                hugeRels.maybeDefaultRelProperty(),
+                Optional.ofNullable(hugeRels.inRelProperties()),
+                Optional.ofNullable(hugeRels.outRelProperties()),
+                Optional.ofNullable(hugeRels.inRelPropertyOffsets()),
+                Optional.ofNullable(hugeRels.outRelPropertyOffsets()),
                 false);
     }
 

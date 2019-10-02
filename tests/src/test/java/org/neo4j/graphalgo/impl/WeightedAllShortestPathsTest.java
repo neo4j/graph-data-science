@@ -31,10 +31,13 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.Label;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Matchers.anyDouble;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.mock;
@@ -120,6 +123,22 @@ class WeightedAllShortestPathsTest {
         verify(mock, times(1)).test(0, 9, 5.0);
         verify(mock, times(1)).test(0, 0, 0.0);
 
+    }
+
+    @Test
+    void shouldThrowIfGraphHasNoRelationshipProperty() {
+
+        Graph graph = new GraphLoader(db)
+                .withLabel(Label.label(LABEL))
+                .withRelationshipType(RELATIONSHIP)
+                .withDirection(Direction.OUTGOING)
+                .load(HugeGraphFactory.class);
+
+        UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class, () -> {
+            new WeightedAllShortestPaths(graph, Pools.DEFAULT, 4, Direction.OUTGOING);
+        });
+
+        assertTrue(exception.getMessage().contains("not supported"));
     }
 
     interface ResultConsumer {

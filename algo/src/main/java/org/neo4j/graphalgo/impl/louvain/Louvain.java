@@ -58,6 +58,8 @@ import java.util.stream.Stream;
  */
 public final class Louvain extends Algorithm<Louvain> {
 
+    public static final double DEFAULT_WEIGHT = 1.0;
+
     private static final PropertyTranslator<HugeLongArray[]> HUGE_COMMUNITIES_TRANSLATOR =
             (propertyId, allCommunities, nodeId) -> {
                 // build int array
@@ -88,11 +90,11 @@ public final class Louvain extends Algorithm<Louvain> {
     private final boolean randomNeighborSelection;
 
     public Louvain(
-        final Graph graph,
-        final Config config,
-        final ExecutorService pool,
-        final int concurrency,
-        final AllocationTracker tracker) {this(graph, config, null, pool, concurrency, tracker);}
+            final Graph graph,
+            final Config config,
+            final ExecutorService pool,
+            final int concurrency,
+            final AllocationTracker tracker) {this(graph, config, null, pool, concurrency, tracker);}
 
     public Louvain(
             final Graph graph,
@@ -189,8 +191,8 @@ public final class Louvain extends Algorithm<Louvain> {
             communityCount = CommunityUtils.normalize(communityIds);
             progressLogger.log(
                     "level: " + (level + 1) +
-                            " communities: " + communityCount +
-                            " q: " + modularityOptimization.getModularity());
+                    " communities: " + communityCount +
+                    " q: " + modularityOptimization.getModularity());
             if (communityCount >= nodeCount) {
                 // release the old algo instance
                 modularityOptimization.release();
@@ -228,7 +230,7 @@ public final class Louvain extends Algorithm<Louvain> {
         HugeDoubleArray nodeWeights = this.nodeWeights;
 
         // bag of nodeId->{nodeId, ..}
-        LongLongSubGraph subGraph = new LongLongSubGraph(communityCount, tracker);
+        LongLongSubGraph subGraph = new LongLongSubGraph(communityCount, graph.hasRelationshipProperty(), tracker);
 
         // for each node in the current graph
         HugeCursor<long[]> cursor = communityIds.initCursor(communityIds.newCursor());
@@ -243,7 +245,7 @@ public final class Louvain extends Algorithm<Louvain> {
                 final long sourceCommunity = communities[start];
 
                 // get transitions from current node
-                graph.forEachRelationship(base + start, Direction.OUTGOING, (s, t, w) -> {
+                graph.forEachRelationship(base + start, Direction.OUTGOING, DEFAULT_WEIGHT, (s, t, w) -> {
                     // mapping
                     final long targetCommunity = communityIds.get(t);
                     if (sourceCommunity == targetCommunity) {
@@ -274,7 +276,7 @@ public final class Louvain extends Algorithm<Louvain> {
         HugeDoubleArray nodeWeights = this.nodeWeights;
 
         // bag of nodeId->{nodeId, ..}
-        final IntIntSubGraph subGraph = new IntIntSubGraph(communityCount);
+        final IntIntSubGraph subGraph = new IntIntSubGraph(communityCount, graph.hasRelationshipProperty());
 
         // for each node in the current graph
         HugeCursor<long[]> cursor = communityIds.initCursor(communityIds.newCursor());
@@ -289,7 +291,7 @@ public final class Louvain extends Algorithm<Louvain> {
                 final int sourceCommunity = (int) communities[start];
 
                 // get transitions from current node
-                graph.forEachRelationship(base + start, Direction.OUTGOING, (s, t, value) -> {
+                graph.forEachRelationship(base + start, Direction.OUTGOING, DEFAULT_WEIGHT, (s, t, value) -> {
                     // mapping
                     final int targetCommunity = (int) communityIds.get(t);
                     if (sourceCommunity == targetCommunity) {

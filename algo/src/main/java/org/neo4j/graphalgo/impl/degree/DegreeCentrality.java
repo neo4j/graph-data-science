@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 
 public class DegreeCentrality extends Algorithm<DegreeCentrality> implements DegreeCentralityAlgorithm {
+    public static final double DEFAULT_WEIGHT = 0D;
     private final int nodeCount;
     private boolean weighted;
     private Direction direction;
@@ -133,7 +134,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> implements Deg
         public void run() {
             for (long nodeId = startNodeId; nodeId < endNodeId && running(); nodeId++) {
                 int index = Math.toIntExact(nodeId - startNodeId);
-                graph.forEachRelationship(nodeId, direction, (sourceNodeId, targetNodeId, weight) -> {
+                graph.forEachRelationship(nodeId, direction, DEFAULT_WEIGHT, (sourceNodeId, targetNodeId, weight) -> {
                     if (weight > 0) {
                         partition[index] += weight;
                     }

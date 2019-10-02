@@ -119,6 +119,7 @@ public class ShortestPathAStar extends Algorithm<ShortestPathAStar> {
             graph.forEachRelationship(
                     currentNodeId,
                     direction,
+                    0.0D,
                     longToIntConsumer((source, target, weight) -> {
                         double neighbourLat = getNodeCoordinate(target, propertyKeyLat);
                         double neighbourLon = getNodeCoordinate(target, propertyKeyLon);

@@ -26,6 +26,8 @@ import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Optional;
+
 public class CypherGraphFactory extends GraphFactory {
 
     public static final String TYPE = "cypher";
@@ -61,7 +63,8 @@ public class CypherGraphFactory extends GraphFactory {
         IdsAndProperties nodes = new CypherNodeLoader(nodeCount.rows(), api, setup).load();
         Relationships relationships = new CypherRelationshipLoader(nodes.idMap(), api, setup).load();
 
-        return new HugeGraph(
+
+        return HugeGraph.create(
                 setup.tracker,
                 nodes.idMap(),
                 nodes.properties(),
@@ -70,11 +73,11 @@ public class CypherGraphFactory extends GraphFactory {
                 relationships.outAdjacency(),
                 relationships.inOffsets(),
                 relationships.outOffsets(),
-                relationships.defaultWeight(),
-                relationships.inWeights(),
-                relationships.outWeights(),
-                relationships.inWeightOffsets(),
-                relationships.outWeightOffsets(),
+                relationships.maybeDefaultRelProperty(),
+                Optional.ofNullable(relationships.inRelProperties()),
+                Optional.ofNullable(relationships.outRelProperties()),
+                Optional.ofNullable(relationships.inRelPropertyOffsets()),
+                Optional.ofNullable(relationships.outRelPropertyOffsets()),
                 setup.loadAsUndirected);
     }
 }

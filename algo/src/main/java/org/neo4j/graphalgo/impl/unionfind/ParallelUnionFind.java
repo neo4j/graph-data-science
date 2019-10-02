@@ -20,9 +20,9 @@
 package org.neo4j.graphalgo.impl.unionfind;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -160,7 +160,7 @@ public class ParallelUnionFind extends UnionFind<ParallelUnionFind> {
 
         @Override
         void compute(final long node) {
-            rels.forEachRelationship(node, Direction.OUTGOING, (WeightedRelationshipConsumer) this);
+            rels.forEachRelationship(node, Direction.OUTGOING, UnionFind.defaultWeight(threshold), this);
         }
 
         @Override

@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.binaryLookup;
+import static org.neo4j.graphalgo.impl.pagerank.PageRank.DEFAULT_WEIGHT;
 
 public class WeightedComputeStep extends BaseComputeStep implements RelationshipConsumer {
     private final RelationshipWeights relationshipWeights;
@@ -71,7 +72,7 @@ public class WeightedComputeStep extends BaseComputeStep implements Relationship
 
     @Override
     public boolean accept(long sourceNodeId, long targetNodeId) {
-        double weight = relationshipWeights.weightOf(sourceNodeId, targetNodeId);
+        double weight = relationshipWeights.weightOf(sourceNodeId, targetNodeId, DEFAULT_WEIGHT);
 
         if (weight > 0) {
             double proportion = weight / sumOfWeights;

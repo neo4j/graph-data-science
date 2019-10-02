@@ -131,6 +131,11 @@ final class UnionFindSafetyTest {
         }
 
         @Override
+        public boolean hasRelationshipProperty() {
+            return false;
+        }
+
+        @Override
         public RelationshipIntersect intersection() {
             throw new UnsupportedOperationException(
                     "org.neo4j.graphalgo.impl.unionfind.UnionFindSafetyTest.FlakyGraph.intersection is not implemented.");
@@ -191,8 +196,12 @@ final class UnionFindSafetyTest {
 
         @Override
         public void forEachRelationship(
-                final long nodeId, final Direction direction, final WeightedRelationshipConsumer consumer) {
-
+                final long nodeId,
+                final Direction direction,
+                double fallbackValue,
+                final WeightedRelationshipConsumer consumer) {
+            throw new UnsupportedOperationException(
+                    "org.neo4j.graphalgo.impl.unionfind.UnionFindSafetyTest.FlakyGraph.forEachRelationship is not implemented.");
         }
 
         @Override
@@ -202,7 +211,7 @@ final class UnionFindSafetyTest {
         }
 
         @Override
-        public double weightOf(final long sourceNodeId, final long targetNodeId) {
+        public double weightOf(final long sourceNodeId, final long targetNodeId, double fallbackValue) {
             throw new UnsupportedOperationException(
                     "org.neo4j.graphalgo.impl.unionfind.UnionFindSafetyTest.FlakyGraph.weightOf is not implemented.");
         }
