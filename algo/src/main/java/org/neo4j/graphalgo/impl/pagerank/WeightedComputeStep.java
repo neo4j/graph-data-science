@@ -20,17 +20,15 @@
 package org.neo4j.graphalgo.impl.pagerank;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.api.RelationshipWeights;
+import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.binaryLookup;
 import static org.neo4j.graphalgo.impl.pagerank.PageRank.DEFAULT_WEIGHT;
 
-public class WeightedComputeStep extends BaseComputeStep implements RelationshipConsumer {
-    private final RelationshipWeights relationshipWeights;
+public class WeightedComputeStep extends BaseComputeStep implements WeightedRelationshipConsumer {
     private final HugeDoubleArray aggregatedDegrees;
     private double sumOfWeights;
     private double delta;
@@ -39,7 +37,6 @@ public class WeightedComputeStep extends BaseComputeStep implements Relationship
             double dampingFactor,
             long[] sourceNodeIds,
             Graph graph,
-            RelationshipWeights relationshipWeights,
             AllocationTracker tracker,
             int partitionSize,
             long startNode,
@@ -52,7 +49,6 @@ public class WeightedComputeStep extends BaseComputeStep implements Relationship
                 partitionSize,
                 startNode
         );
-        this.relationshipWeights = relationshipWeights;
         this.aggregatedDegrees = degreeCache.aggregatedDegrees();
     }
 
@@ -66,15 +62,14 @@ public class WeightedComputeStep extends BaseComputeStep implements Relationship
                 int degree = degrees.degree(nodeId, direction);
                 if (degree > 0) {
                     sumOfWeights = aggregatedDegrees.get(nodeId);
-                    rels.forEachRelationship(nodeId, direction, this);
+                    rels.forEachRelationship(nodeId, direction, DEFAULT_WEIGHT, this);
                 }
             }
         }
     }
 
     @Override
-    public boolean accept(long sourceNodeId, long targetNodeId) {
-        double weight = relationshipWeights.weightOf(sourceNodeId, targetNodeId, DEFAULT_WEIGHT);
+    public boolean accept(long sourceNodeId, long targetNodeId, double weight) {
 
         if (weight > 0) {
             double proportion = weight / sumOfWeights;

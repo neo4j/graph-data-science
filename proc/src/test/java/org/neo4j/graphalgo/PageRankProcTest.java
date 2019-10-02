@@ -208,6 +208,30 @@ class PageRankProcTest extends ProcTestBase {
     }
 
     @AllGraphNamesTest
+    void testWeightedPageRankStreamFromLoadedGraphWithDirectionBoth(String graphImpl) {
+        String graphName = "fooGraph";
+        String loadQuery = String.format(
+                "CALL algo.graph.load(" +
+                "    '%s', 'Label1', 'TYPE1', {" +
+                "        graph: $graph, relationshipWeight: 'weight', direction: 'BOTH'" +
+                "    }" +
+                ")", graphName);
+
+        DB.execute(loadQuery, MapUtil.map("graph", graphImpl));
+
+        String query = "CALL algo.pageRank.stream(" +
+                       "    null, null, {" +
+                       "        graph: $graph, " +
+                       "        weightProperty: 'weight', " +
+                       "        direction: 'OUTGOING'" +
+                       "    }" +
+                       ") YIELD nodeId, score";
+
+        runQuery(query, MapUtil.map("graph", graphName),
+                row -> System.out.println(row));
+    }
+
+    @AllGraphNamesTest
     void testWeightedPageRankStreamThrowsIfWeightPropertyDoesNotExist(String graphImpl) {
         String query = "CALL algo.pageRank.stream(" +
                        "    'Label1', 'TYPE1', {" +

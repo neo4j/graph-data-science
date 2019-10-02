@@ -47,7 +47,6 @@ public class WeightedPageRankVariant implements PageRankVariant {
                 dampingFactor,
                 sourceNodeIds,
                 graph,
-                relationshipWeights,
                 tracker,
                 partitionCount,
                 start,
