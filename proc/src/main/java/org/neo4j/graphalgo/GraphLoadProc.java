@@ -52,7 +52,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 public final class GraphLoadProc extends BaseProc {
-    @Procedure(name = "algo.graph.load", mode = Mode.WRITE)
+    @Procedure(name = "algo.graph.load", mode = Mode.READ)
     @Description("CALL algo.graph.load(" +
                  "name:String, label:String, relationship:String" +
                  "{direction:'OUT/IN/BOTH', undirected:true/false, sorted:true/false, nodeProperty:'value', nodeWeight:'weight', relationshipWeight: 'weight', relationshipProperties: {}, graph:'huge/cypher'}) " +

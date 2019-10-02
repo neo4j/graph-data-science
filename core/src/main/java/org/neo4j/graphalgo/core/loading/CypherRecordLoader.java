@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphdb.Result;
+import org.neo4j.graphdb.security.AuthorizationViolationException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayDeque;
@@ -48,12 +49,16 @@ abstract class CypherRecordLoader<R> {
     }
 
     final R load() {
-        if (loadsInParallel()) {
-            parallelLoad();
-        } else {
-            nonParallelLoad();
+        try {
+            if (loadsInParallel()) {
+                parallelLoad();
+            } else {
+                nonParallelLoad();
+            }
+            return result();
+        } catch (AuthorizationViolationException ex) {
+            throw new IllegalArgumentException(String.format("Query must be read only. Query: [%s]", loadQuery));
         }
-        return result();
     }
 
     abstract BatchLoadResult loadOneBatch(

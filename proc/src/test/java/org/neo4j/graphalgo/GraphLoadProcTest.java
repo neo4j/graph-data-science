@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
@@ -728,5 +729,25 @@ class GraphLoadProcTest extends ProcTestBase {
         });
 
         assertEquals(parameters.get(0), actual.get(0));
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+            "'CREATE (n) RETURN id(n) AS id', 'RETURN 0 AS source, 1 AS target'",
+            "'RETURN 0 AS id', 'CREATE (n)-[:REL]->(m) RETURN id(n) AS source, id(m) AS target'"
+    })
+    void shouldFailToWriteInCypherLoaderQueries(String nodeQuery, String relQuery) {
+        String query = String.format(
+                "CALL algo.graph.load('dragons'," +
+                "  '%s'," +
+                "  '%s'," +
+                "  {" +
+                "    graph: 'cypher'" +
+                "  })",
+                nodeQuery, relQuery);
+        QueryExecutionException ex = assertThrows(QueryExecutionException.class, () -> db.execute(query).hasNext());
+        Throwable root = ExceptionUtil.rootCause(ex);
+        assertTrue(root instanceof IllegalArgumentException);
+        assertThat(root.getMessage(), containsString("Query must be read only. Query: "));
     }
 }
