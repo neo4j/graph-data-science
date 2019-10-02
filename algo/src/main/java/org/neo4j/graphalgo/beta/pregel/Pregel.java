@@ -149,10 +149,16 @@ public final class Pregel {
         // Tracks if a node voted to halt in the previous iteration
         BitSet voteBits = new BitSet(graph.nodeCount());
 
+        // TODO: maybe try degree partitioning or clustering (better locality)
+        Collection<PrimitiveLongIterable> nodeBatches = LazyBatchCollection.of(
+                graph.nodeCount(),
+                batchSize,
+                (start, length) -> () -> PrimitiveLongCollections.range(start, start + length - 1L));
+
         while (iterations < maxIterations && !canHalt) {
             int iteration = iterations++;
 
-            final List<ComputeStep> computeSteps = runComputeSteps(iteration, receiverBits, voteBits);
+            final List<ComputeStep> computeSteps = runComputeSteps(nodeBatches, iteration, receiverBits, voteBits);
 
             receiverBits = unionBitSets(computeSteps, ComputeStep::getSenders);
             voteBits = unionBitSets(computeSteps, ComputeStep::getVotes);
@@ -178,19 +184,12 @@ public final class Pregel {
     }
 
     private List<ComputeStep> runComputeSteps(
+            Collection<PrimitiveLongIterable> nodeBatches,
             final int iteration,
             BitSet messageBits,
             BitSet voteToHaltBits) {
-        // TODO: maybe try degree partitioning or clustering (better locality)
-        // TODO: can be initialized outside of iteration
-        Collection<PrimitiveLongIterable> nodeBatches = LazyBatchCollection.of(
-                graph.nodeCount(),
-                batchSize,
-                (start, length) -> () -> PrimitiveLongCollections.range(start, start + length - 1L));
 
-        int threadCount = nodeBatches.size();
-
-        final List<ComputeStep> tasks = new ArrayList<>(threadCount);
+        final List<ComputeStep> tasks = new ArrayList<>(nodeBatches.size());
 
         if (!computationFactory.get().supportsAsynchronousParallel()) {
             // Synchronization barrier:
@@ -230,7 +229,10 @@ public final class Pregel {
     }
 
     @SuppressWarnings({"unchecked", "InstantiatingObjectToGetClassObject"})
-    private HugeObjectArray<MpscArrayQueue<Double>> initArrayQueues(Graph graph, Supplier<Computation> computationFactory, AllocationTracker tracker) {
+    private HugeObjectArray<MpscArrayQueue<Double>> initArrayQueues(
+            Graph graph,
+            Supplier<Computation> computationFactory,
+            AllocationTracker tracker) {
         Computation computation = computationFactory.get();
         Direction receiveDirection = computation.getMessageDirection().reverse();
         // In sync mode, we need to reserve space for the termination symbol.
