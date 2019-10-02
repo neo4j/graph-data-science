@@ -17,54 +17,52 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.pregel;
+package org.neo4j.graphalgo.beta.pregel.examples;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.beta.pregel.components.WCCComputation;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.neo4j.graphalgo.beta.pregel.ComputationTestUtil.assertLongValues;
+import static org.neo4j.graphalgo.beta.pregel.examples.ComputationTestUtil.assertLongValues;
 
-class WCCTest {
+class LPTest {
 
     private static final String ID_PROPERTY = "id";
 
-    private static final Label NODE_LABEL = Label.label("Node");
+    private static final Label NODE_LABEL = Label.label("User");
 
+    // https://neo4j.com/blog/graph-algorithms-neo4j-label-propagation/
+    //
     private static final String TEST_GRAPH =
             "CREATE" +
-            "  (nA:Node { id: 0 })" +
-            ", (nB:Node { id: 1 })" +
-            ", (nC:Node { id: 2 })" +
-            ", (nD:Node { id: 3 })" +
-            ", (nE:Node { id: 4 })" +
-            ", (nF:Node { id: 5 })" +
-            ", (nG:Node { id: 6 })" +
-            ", (nH:Node { id: 7 })" +
-            ", (nI:Node { id: 8 })" +
-            // {J}
-            ", (nJ:Node { id: 9 })" +
-            // {A, B, C, D}
-            ", (nA)-[:TYPE]->(nB)" +
-            ", (nB)-[:TYPE]->(nC)" +
-            ", (nC)-[:TYPE]->(nD)" +
-            // {E, F, G}
-            ", (nE)-[:TYPE]->(nF)" +
-            ", (nF)-[:TYPE]->(nG)" +
-            // {H, I}
-            ", (nI)-[:TYPE]->(nH)";
+            "  (nAlice:User   { id: 0 })" +
+            ", (nBridget:User { id: 1 })" +
+            ", (nCharles:User { id: 2 })" +
+            ", (nDoug:User    { id: 3 })" +
+            ", (nMark:User    { id: 4 })" +
+            ", (nMichael:User { id: 5 })" +
+            ", (nAlice)-[:FOLLOW]->(nBridget)" +
+            ", (nAlice)-[:FOLLOW]->(nCharles)" +
+            ", (nMark)-[:FOLLOW]->(nDoug)" +
+            ", (nBridget)-[:FOLLOW]->(nMichael)" +
+            ", (nDoug)-[:FOLLOW]->(nMark)" +
+            ", (nMichael)-[:FOLLOW]->(nAlice)" +
+            ", (nAlice)-[:FOLLOW]->(nMichael)" +
+            ", (nBridget)-[:FOLLOW]->(nAlice)" +
+            ", (nMichael)-[:FOLLOW]->(nBridget)" +
+            ", (nCharles)-[:FOLLOW]->(nDoug)";
 
     private GraphDatabaseAPI db;
     private Graph graph;
@@ -86,13 +84,13 @@ class WCCTest {
     }
 
     @Test
-    void runWCC() {
+    void runLP() {
         int batchSize = 10;
         int maxIterations = 10;
 
         Pregel pregelJob = Pregel.withDefaultNodeValues(
                 graph,
-                WCCComputation::new,
+                LPComputation::new,
                 batchSize,
                 Pools.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT,
@@ -101,6 +99,6 @@ class WCCTest {
 
         HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
 
-        assertLongValues(db, NODE_LABEL, ID_PROPERTY, graph, nodeValues, 0, 0, 0, 0, 4, 4, 4, 7, 7, 9);
+        assertLongValues(db, NODE_LABEL, ID_PROPERTY, graph, nodeValues, 0, 0, 0, 4, 3, 0);
     }
 }
