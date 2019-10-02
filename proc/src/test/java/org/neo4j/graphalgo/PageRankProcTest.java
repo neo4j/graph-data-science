@@ -22,7 +22,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
-import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
+import org.neo4j.graphalgo.core.loading.GraphLoadFactory;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.QueryExecutionException;
@@ -97,7 +97,7 @@ class PageRankProcTest extends ProcTestBase {
         }
 
         Procedures procedures = DB.getDependencyResolver().resolveDependency(Procedures.class);
-        procedures.registerProcedure(LoadGraphProc.class);
+        procedures.registerProcedure(GraphLoadProc.class);
         procedures.registerProcedure(PageRankProc.class);
 
         try (Transaction tx = DB.beginTx()) {
@@ -144,7 +144,7 @@ class PageRankProcTest extends ProcTestBase {
     @AllGraphNamesTest
     void testPageRankStreamFromLoadedGraph(String graphImpl) {
         String graphName = "aggGraph";
-        LoadGraphFactory.remove(graphName);
+        GraphLoadFactory.remove(graphName);
 
         String loadQuery = String.format(
                 "CALL algo.graph.load(" +
@@ -184,7 +184,7 @@ class PageRankProcTest extends ProcTestBase {
     @AllGraphNamesTest
     void testWeightedPageRankStreamFromLoadedGraph(String graphImpl) {
         String graphName = "aggGraph";
-        LoadGraphFactory.remove(graphName);
+        GraphLoadFactory.remove(graphName);
 
         String loadQuery = String.format(
                 "CALL algo.graph.load(" +

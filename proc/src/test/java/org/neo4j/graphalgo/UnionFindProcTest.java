@@ -27,7 +27,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
-import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
+import org.neo4j.graphalgo.core.loading.GraphLoadFactory;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphdb.QueryExecutionException;
@@ -86,7 +86,7 @@ public class UnionFindProcTest extends ProcTestBase {
 
         Procedures procedures = DB.getDependencyResolver().resolveDependency(Procedures.class);
         procedures.registerProcedure(UnionFindProc.class);
-        procedures.registerProcedure(LoadGraphProc.class);
+        procedures.registerProcedure(GraphLoadProc.class);
     }
 
     @AfterAll
@@ -420,7 +420,7 @@ public class UnionFindProcTest extends ProcTestBase {
             String weightProperty,
             int[] expectedSizes) {
         String graphName = "aggGraph";
-        LoadGraphFactory.remove(graphName);
+        GraphLoadFactory.remove(graphName);
 
         String loadQuery = "CALL algo.graph.load(" +
                            "    '" + graphName + "', '', '" + loadRelType + "', {" +

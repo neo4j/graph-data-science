@@ -31,11 +31,11 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-public final class LoadGraphFactory extends GraphFactory {
+public final class GraphLoadFactory extends GraphFactory {
 
     private static final ConcurrentHashMap<String, GraphsByRelationshipType> graphs = new ConcurrentHashMap<>();
 
-    public LoadGraphFactory(
+    public GraphLoadFactory(
             final GraphDatabaseAPI api,
             final GraphSetup setup) {
         super(api, setup);

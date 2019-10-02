@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.algo;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.LoadGraphProc;
+import org.neo4j.graphalgo.GraphLoadProc;
 import org.neo4j.graphalgo.MemRecProc;
 import org.neo4j.graphalgo.PageRankProc;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
@@ -51,7 +51,7 @@ class MemRecProcTest {
         procedures.registerProcedure(MemRecProc.class);
         procedures.registerProcedure(PageRankProc.class);
         procedures.registerProcedure(UnionFindProc.class);
-        procedures.registerProcedure(LoadGraphProc.class);
+        procedures.registerProcedure(GraphLoadProc.class);
     }
 
     @AfterAll

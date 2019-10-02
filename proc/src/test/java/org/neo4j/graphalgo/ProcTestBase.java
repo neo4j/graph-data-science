@@ -22,7 +22,7 @@ package org.neo4j.graphalgo;
 import com.carrotsearch.hppc.IntIntMap;
 import com.carrotsearch.hppc.cursors.IntIntCursor;
 import org.junit.jupiter.api.AfterAll;
-import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
+import org.neo4j.graphalgo.core.loading.GraphLoadFactory;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -44,7 +44,7 @@ public class ProcTestBase {
 
     @AfterAll
     static void clearLoadedGraphs() {
-        LoadGraphFactory.removeAllLoadedGraphs();
+        GraphLoadFactory.removeAllLoadedGraphs();
     }
 
     protected void runQuery(String query) {

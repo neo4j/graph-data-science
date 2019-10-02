@@ -96,7 +96,7 @@ class LouvainClusteringProcTest extends ProcTestBase {
 
         Procedures procedures = DB.getDependencyResolver().resolveDependency(Procedures.class);
         procedures.registerProcedure(LouvainProc.class);
-        procedures.registerProcedure(LoadGraphProc.class);
+        procedures.registerProcedure(GraphLoadProc.class);
         DB.execute(cypher);
     }
 

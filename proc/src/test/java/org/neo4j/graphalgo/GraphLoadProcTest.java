@@ -28,7 +28,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
+import org.neo4j.graphalgo.core.loading.GraphLoadFactory;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -68,7 +68,7 @@ import static org.neo4j.graphalgo.GraphHelper.assertOutRelationships;
 import static org.neo4j.graphalgo.TestSupport.allGraphNames;
 import static org.neo4j.graphalgo.TestSupport.allGraphNamesAndDirections;
 
-class LoadGraphProcTest extends ProcTestBase {
+class GraphLoadProcTest extends ProcTestBase {
 
     private static final String ALL_NODES_QUERY = "'MATCH (n) RETURN id(n) AS id'";
     private static final String ALL_RELATIONSIHPS_QUERY = "'MATCH (s)-->(t) RETURN id(s) AS source, id(t) AS target'";
@@ -95,7 +95,7 @@ class LoadGraphProcTest extends ProcTestBase {
     void setup() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase();
         Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class);
-        procedures.registerProcedure(LoadGraphProc.class);
+        procedures.registerProcedure(GraphLoadProc.class);
         procedures.registerProcedure(PageRankProc.class);
         procedures.registerProcedure(UnionFindProc.class);
         procedures.registerProcedure(LabelPropagationProc.class);
@@ -105,7 +105,7 @@ class LoadGraphProcTest extends ProcTestBase {
     @AfterEach
     void tearDown() {
         db.shutdown();
-        LoadGraphFactory.removeAllLoadedGraphs();
+        GraphLoadFactory.removeAllLoadedGraphs();
     }
 
     @ParameterizedTest
@@ -147,7 +147,7 @@ class LoadGraphProcTest extends ProcTestBase {
 
         runQuery(query, db, singletonMap("graph", graphImpl));
 
-        Graph fooGraph = LoadGraphFactory.getUnion("foo");
+        Graph fooGraph = GraphLoadFactory.getUnion("foo");
         assertNotNull(fooGraph);
         assertEquals(12, fooGraph.nodeCount());
         assertEquals(10, fooGraph.relationshipCount());
@@ -222,7 +222,7 @@ class LoadGraphProcTest extends ProcTestBase {
     @Test
     void shouldLoadGraphWithMultipleRelationshipProperties() throws KernelException {
         GraphDatabaseAPI testLocalDb = TestDatabaseCreator.createTestDatabase();
-        testLocalDb.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(LoadGraphProc.class);
+        testLocalDb.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(GraphLoadProc.class);
 
         String testGraph =
                 "CREATE" +
@@ -274,7 +274,7 @@ class LoadGraphProcTest extends ProcTestBase {
             assertEquals("MAX", maxCostParams.get("aggregation").toString());
         });
 
-        Graph g = LoadGraphFactory.getUnion("aggGraph");
+        Graph g = GraphLoadFactory.getUnion("aggGraph");
 
         assertEquals(2, g.nodeCount());
         assertEquals(3, g.relationshipCount());
@@ -282,7 +282,7 @@ class LoadGraphProcTest extends ProcTestBase {
         assertOutRelationships(g, 0, 1, 1, 1);
         assertOutPropertiesWithDelta(g, 1E-3, 0, 85.3, 42.1, 2.0);
 
-        LoadGraphFactory.remove("aggGraph");
+        GraphLoadFactory.remove("aggGraph");
         testLocalDb.shutdown();
     }
 

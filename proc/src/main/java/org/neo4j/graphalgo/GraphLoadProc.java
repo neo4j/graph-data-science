@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
-import org.neo4j.graphalgo.core.loading.LoadGraphFactory;
+import org.neo4j.graphalgo.core.loading.GraphLoadFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -51,30 +51,30 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public final class LoadGraphProc extends BaseProc {
+public final class GraphLoadProc extends BaseProc {
     @Procedure(name = "algo.graph.load", mode = Mode.WRITE)
     @Description("CALL algo.graph.load(" +
                  "name:String, label:String, relationship:String" +
                  "{direction:'OUT/IN/BOTH', undirected:true/false, sorted:true/false, nodeProperty:'value', nodeWeight:'weight', relationshipWeight: 'weight', relationshipProperties: {}, graph:'huge/cypher'}) " +
                  "YIELD nodes, relationships, loadMillis, computeMillis, writeMillis, write, nodeProperty, nodeWeight, relationshipWeight, relationshipProperties - " +
                  "load named graph")
-    public Stream<LoadGraphStats> load(
+    public Stream<GraphLoadStats> load(
             @Name(value = "name", defaultValue = "") String name,
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationshipType,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         final ProcedureConfiguration configuration = newConfig(label, relationshipType, config);
-        LoadGraphStats stats = runWithExceptionLogging(
+        GraphLoadStats stats = runWithExceptionLogging(
                 "Graph loading failed",
                 () -> loadGraph(configuration, name));
         return Stream.of(stats);
     }
 
-    private LoadGraphStats loadGraph(ProcedureConfiguration config, String name) {
-        LoadGraphStats stats = new LoadGraphStats(name, config);
+    private GraphLoadStats loadGraph(ProcedureConfiguration config, String name) {
+        GraphLoadStats stats = new GraphLoadStats(name, config);
 
-        if (LoadGraphFactory.exists(name)) {
+        if (GraphLoadFactory.exists(name)) {
             throw new IllegalArgumentException(String.format("A graph with name '%s' is already loaded.", name));
         }
 
@@ -104,7 +104,7 @@ public final class LoadGraphProc extends BaseProc {
             stats.nodes = graphFromType.nodeCount();
             stats.relationships = graphFromType.relationshipCount();
 
-            LoadGraphFactory.set(name, graphFromType);
+            GraphLoadFactory.set(name, graphFromType);
         }
 
         return stats;
@@ -164,7 +164,7 @@ public final class LoadGraphProc extends BaseProc {
         return loader;
     }
 
-    public static class LoadGraphStats {
+    public static class GraphLoadStats {
         public String name, graph, direction;
         public boolean undirected;
         public boolean sorted;
@@ -173,7 +173,7 @@ public final class LoadGraphProc extends BaseProc {
         public String nodeWeight, relationshipWeight, nodeProperty, loadNodes, loadRelationships;
         public Object relationshipProperties;
 
-        LoadGraphStats(String graphName, ProcedureConfiguration configuration) {
+        GraphLoadStats(String graphName, ProcedureConfiguration configuration) {
             name = graphName;
             graph = configuration.getString(ProcedureConstants.GRAPH_IMPL_KEY, "huge");
             undirected = configuration.get(ProcedureConstants.UNDIRECTED_KEY, false);
@@ -194,7 +194,7 @@ public final class LoadGraphProc extends BaseProc {
     public Stream<GraphInfo> remove(@Name("name") String name) {
         GraphInfo info = new GraphInfo(name);
 
-        Graph graph = LoadGraphFactory.remove(name);
+        Graph graph = GraphLoadFactory.remove(name);
         if (graph != null) {
             info.type = graph.getType();
             info.nodes = graph.nodeCount();
@@ -213,10 +213,10 @@ public final class LoadGraphProc extends BaseProc {
             @Name("name") String name,
             @Name(value = "degreeDistribution", defaultValue = "null") Object degreeDistribution) {
         final GraphInfoWithHistogram info;
-        if (!LoadGraphFactory.exists(name)) {
+        if (!GraphLoadFactory.exists(name)) {
             info = new GraphInfoWithHistogram(name);
         } else {
-            Graph graph = LoadGraphFactory.getUnion(name);
+            Graph graph = GraphLoadFactory.getUnion(name);
             final boolean calculateDegreeDistribution;
             final ProcedureConfiguration configuration;
             if (Boolean.TRUE.equals(degreeDistribution)) {
@@ -253,7 +253,7 @@ public final class LoadGraphProc extends BaseProc {
                  "YIELD name, type, nodes, relationships, direction" +
                  "list all loaded graphs")
     public Stream<GraphInfo> list() {
-        Map<String, Graph> loadedGraphs = LoadGraphFactory.getLoadedGraphs();
+        Map<String, Graph> loadedGraphs = GraphLoadFactory.getLoadedGraphs();
 
         return loadedGraphs.entrySet().stream().map(entry -> {
             Graph graph = entry.getValue();

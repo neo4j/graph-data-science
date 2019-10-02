@@ -75,7 +75,7 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
 
         Procedures procedures = DB.getDependencyResolver().resolveDependency(Procedures.class);
         procedures.registerProcedure(LabelPropagationProc.class);
-        procedures.registerProcedure(LoadGraphProc.class);
+        procedures.registerProcedure(GraphLoadProc.class);
 
         DB.execute(DB_CYPHER);
     }
