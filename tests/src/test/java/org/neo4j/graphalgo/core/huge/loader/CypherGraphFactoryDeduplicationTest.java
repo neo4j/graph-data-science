@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -72,11 +73,14 @@ class CypherGraphFactoryDeduplicationTest {
         String nodes = "MATCH (n) RETURN id(n) AS id";
         String rels = "MATCH (n)-[r]-(m) RETURN id(n) AS source, id(m) AS target, r.weight AS weight";
 
-        Graph graph = new GraphLoader((GraphDatabaseAPI) db)
-                .withLabel(nodes)
-                .withRelationshipType(rels)
-                .withDeduplicationStrategy(DeduplicationStrategy.SKIP)
-                .load(CypherGraphFactory.class);
+        Graph graph;
+        try (Transaction tx = db.beginTx()) {
+            graph = new GraphLoader((GraphDatabaseAPI) db)
+                    .withLabel(nodes)
+                    .withRelationshipType(rels)
+                    .withDeduplicationStrategy(DeduplicationStrategy.SKIP)
+                    .load(CypherGraphFactory.class);
+        }
 
         assertEquals(2, graph.nodeCount());
         assertEquals(1, graph.degree(graph.toMappedNodeId(id1), Direction.OUTGOING));
@@ -88,12 +92,15 @@ class CypherGraphFactoryDeduplicationTest {
         String nodes = "MATCH (n) RETURN id(n) AS id";
         String rels = "MATCH (n)-[r]-(m) RETURN id(n) AS source, id(m) AS target, r.weight AS weight";
 
-        Graph graph = new GraphLoader((GraphDatabaseAPI) db)
-                .withLabel(nodes)
-                .withRelationshipType(rels)
-                .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-                .withDeduplicationStrategy(DeduplicationStrategy.SKIP)
-                .load(CypherGraphFactory.class);
+        Graph graph;
+        try (Transaction tx = db.beginTx()) {
+            graph = new GraphLoader((GraphDatabaseAPI) db)
+                    .withLabel(nodes)
+                    .withRelationshipType(rels)
+                    .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
+                    .withDeduplicationStrategy(DeduplicationStrategy.SKIP)
+                    .load(CypherGraphFactory.class);
+        }
 
         double[] weights = collectTargetProperties(graph, graph.toMappedNodeId(id1));
         assertEquals(1, weights.length);
@@ -108,12 +115,15 @@ class CypherGraphFactoryDeduplicationTest {
         String nodes = "MATCH (n) RETURN id(n) AS id";
         String rels = "MATCH (n)-[r]-(m) RETURN id(n) AS source, id(m) AS target, r.weight AS weight";
 
-        Graph graph = new GraphLoader((GraphDatabaseAPI) db)
-                .withLabel(nodes)
-                .withRelationshipType(rels)
-                .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-                .withDeduplicationStrategy(deduplicationStrategy)
-                .load(CypherGraphFactory.class);
+        Graph graph;
+        try (Transaction tx = db.beginTx()) {
+            graph = new GraphLoader((GraphDatabaseAPI) db)
+                    .withLabel(nodes)
+                    .withRelationshipType(rels)
+                    .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
+                    .withDeduplicationStrategy(deduplicationStrategy)
+                    .load(CypherGraphFactory.class);
+        }
 
         double[] weights = collectTargetProperties(graph, graph.toMappedNodeId(id1));
         assertArrayEquals(new double[]{expectedWeight}, weights);

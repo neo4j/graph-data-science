@@ -123,11 +123,14 @@ class LouvainTest extends LouvainTestBase {
                     .withLabel("Node")
                     .withRelationshipType("REL");
         }
-        Graph graph = graphLoader
-                .withRelationshipProperties(PropertyMapping.of(null, 1.0))
-                .sorted()
-                .undirected()
-                .load(graphImpl);
+        Graph graph;
+        try (Transaction tx = db.beginTx()) {
+            graph = graphLoader
+                    .withRelationshipProperties(PropertyMapping.of(null, 1.0))
+                    .sorted()
+                    .undirected()
+                    .load(graphImpl);
+        }
 
         Louvain.Config config = new Louvain.Config(99, 99999);
         Louvain algorithm = new Louvain(graph, config, Pools.DEFAULT, 4, AllocationTracker.EMPTY)

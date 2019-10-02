@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -117,11 +118,13 @@ final class AverageDegreeCentralityTest {
 
         final Graph graph;
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
-            graph = new GraphLoader(db)
-                    .withLabel("MATCH (n:Label1) RETURN id(n) as id")
-                    .withRelationshipType("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
-                    .load(graphFactory);
-
+            try (Transaction tx = db.beginTx()) {
+                graph = new GraphLoader(db)
+                        .withLabel("MATCH (n:Label1) RETURN id(n) as id")
+                        .withRelationshipType(
+                                "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
+                        .load(graphFactory);
+            }
         } else {
             graph = new GraphLoader(db)
                     .withLabel(label)
@@ -142,11 +145,13 @@ final class AverageDegreeCentralityTest {
 
         final Graph graph;
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
-            graph = new GraphLoader(db)
-                    .withLabel("MATCH (n:Label1) RETURN id(n) as id")
-                    .withRelationshipType("MATCH (n:Label1)<-[:TYPE1]-(m:Label1) RETURN id(n) as source,id(m) as target")
-                    .load(graphFactory);
-
+            try (Transaction tx = db.beginTx()) {
+                graph = new GraphLoader(db)
+                        .withLabel("MATCH (n:Label1) RETURN id(n) as id")
+                        .withRelationshipType(
+                                "MATCH (n:Label1)<-[:TYPE1]-(m:Label1) RETURN id(n) as source,id(m) as target")
+                        .load(graphFactory);
+            }
         } else {
             graph = new GraphLoader(db)
                     .withLabel(label)
@@ -167,12 +172,14 @@ final class AverageDegreeCentralityTest {
 
         final Graph graph;
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
-            graph = new GraphLoader(db)
-                    .withLabel("MATCH (n:Label1) RETURN id(n) as id")
-                    .withRelationshipType("MATCH (n:Label1)-[:TYPE1]-(m:Label1) RETURN id(n) as source,id(m) as target")
-                    .withDeduplicationStrategy(DeduplicationStrategy.SKIP)
-                    .load(graphFactory);
-
+            try (Transaction tx = db.beginTx()) {
+                graph = new GraphLoader(db)
+                        .withLabel("MATCH (n:Label1) RETURN id(n) as id")
+                        .withRelationshipType(
+                                "MATCH (n:Label1)-[:TYPE1]-(m:Label1) RETURN id(n) as source,id(m) as target")
+                        .withDeduplicationStrategy(DeduplicationStrategy.SKIP)
+                        .load(graphFactory);
+            }
         } else {
             graph = new GraphLoader(db)
                     .withLabel(label)

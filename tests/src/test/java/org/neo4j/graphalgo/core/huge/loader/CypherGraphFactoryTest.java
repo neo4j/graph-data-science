@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -80,17 +81,21 @@ class CypherGraphFactoryTest {
         String nodes = "MATCH (n) RETURN id(n) AS id, n.partition AS partition, n.foo AS foo";
         String rels = "MATCH (n)-[r]->(m) WHERE type(r) = $rel RETURN id(n) AS source, id(m) AS target, r.prop AS weight ORDER BY id(r) DESC ";
 
-        Graph graph = new GraphLoader(db)
-                .withParams(MapUtil.map("rel", "REL"))
-                .withRelationshipProperties(PropertyMapping.of("prop", 0))
-                .withLabel(nodes)
-                .withRelationshipType(rels)
-                .withOptionalNodeProperties(
-                        PropertyMapping.of("partition", "partition", 0.0),
-                        PropertyMapping.of("foo", "foo", 5.0)
-                )
-                .sorted()
-                .load(CypherGraphFactory.class);
+
+        Graph graph;
+        try (Transaction tx = db.beginTx()) {
+            graph = new GraphLoader(db)
+                    .withParams(MapUtil.map("rel", "REL"))
+                    .withRelationshipProperties(PropertyMapping.of("prop", 0))
+                    .withLabel(nodes)
+                    .withRelationshipType(rels)
+                    .withOptionalNodeProperties(
+                            PropertyMapping.of("partition", "partition", 0.0),
+                            PropertyMapping.of("foo", "foo", 5.0)
+                    )
+                    .sorted()
+                    .load(CypherGraphFactory.class);
+        }
 
         long node1 = graph.toMappedNodeId(id1);
         long node2 = graph.toMappedNodeId(id2);
@@ -224,7 +229,10 @@ class CypherGraphFactoryTest {
         if (parallel) {
             loader.withExecutorService(Pools.DEFAULT);
         }
-        Graph graph = loader.load(CypherGraphFactory.class);
+        Graph graph;
+        try (Transaction tx = db.beginTx()) {
+            graph = loader.load(CypherGraphFactory.class);
+        }
 
         assertEquals(COUNT, graph.nodeCount());
         AtomicInteger relCount = new AtomicInteger();

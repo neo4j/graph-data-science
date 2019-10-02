@@ -139,12 +139,13 @@ final class DegreeCentralityTest {
 
         final Graph graph;
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
-            graph = new GraphLoader(DB)
-                    .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
-                    .withRelationshipType(
-                            "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) AS source, id(m) AS target")
-                    .load(graphFactory);
-
+            try (Transaction tx = DB.beginTx()) {
+                graph = new GraphLoader(DB)
+                        .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
+                        .withRelationshipType(
+                                "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) AS source, id(m) AS target")
+                        .load(graphFactory);
+            }
         } else {
             graph = new GraphLoader(DB)
                     .withLabel(label)
@@ -193,13 +194,15 @@ final class DegreeCentralityTest {
 
         final Graph graph;
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
-            graph = new GraphLoader(DB)
-                    .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
-                    .withRelationshipType(
-                            "MATCH (n:Label1)-[type:TYPE1]->(m:Label1) RETURN id(n) AS source, id(m) AS target, type.weight AS weight")
-                    .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-                    .withDirection(Direction.OUTGOING)
-                    .load(graphFactory);
+            try (Transaction tx = DB.beginTx()) {
+                graph = new GraphLoader(DB)
+                        .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
+                        .withRelationshipType(
+                                "MATCH (n:Label1)-[type:TYPE1]->(m:Label1) RETURN id(n) AS source, id(m) AS target, type.weight AS weight")
+                        .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
+                        .withDirection(Direction.OUTGOING)
+                        .load(graphFactory);
+            }
         } else {
             graph = new GraphLoader(DB)
                     .withLabel(label)
@@ -247,20 +250,23 @@ final class DegreeCentralityTest {
         }
 
         final Graph graph;
-        if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
-            graph = new GraphLoader(DB)
-                    .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
-                    .withRelationshipType(
-                            "MATCH (n:Label1)-[type:TYPE3]->(m:Label1) RETURN id(n) AS source, id(m) AS target, type.weight AS weight")
-                    .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-                    .load(graphFactory);
-        } else {
-            graph = new GraphLoader(DB)
-                    .withLabel(label)
-                    .withRelationshipType("TYPE3")
-                    .withDirection(Direction.OUTGOING)
-                    .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-                    .load(graphFactory);
+
+        try (Transaction tx = DB.beginTx()) {
+            if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
+                graph = new GraphLoader(DB)
+                        .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
+                        .withRelationshipType(
+                                "MATCH (n:Label1)-[type:TYPE3]->(m:Label1) RETURN id(n) AS source, id(m) AS target, type.weight AS weight")
+                        .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
+                        .load(graphFactory);
+            } else {
+                graph = new GraphLoader(DB)
+                        .withLabel(label)
+                        .withRelationshipType("TYPE3")
+                        .withDirection(Direction.OUTGOING)
+                        .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
+                        .load(graphFactory);
+            }
         }
 
         WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(
@@ -303,17 +309,20 @@ final class DegreeCentralityTest {
         Direction direction = Direction.INCOMING;
 
         final Graph graph;
+
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
             // For Cypher we always treat the graph as outgoing, and let the user
             // handle the direction in the Cypher query
             direction = Direction.OUTGOING;
 
-            graph = new GraphLoader(DB)
-                    .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
-                    .withRelationshipType(
-                            "MATCH (n:Label1)<-[:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target")
-                    .withDirection(direction)
-                    .load(graphFactory);
+            try (Transaction tx = DB.beginTx()) {
+                graph = new GraphLoader(DB)
+                        .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
+                        .withRelationshipType(
+                                "MATCH (n:Label1)<-[:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target")
+                        .withDirection(direction)
+                        .load(graphFactory);
+            }
         } else {
             graph = new GraphLoader(DB)
                     .withLabel(label)
@@ -363,15 +372,15 @@ final class DegreeCentralityTest {
             // handle the direction in the Cypher query
             direction = Direction.OUTGOING;
 
-
-            graph = new GraphLoader(DB)
-                    .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
-                    .withRelationshipType(
-                            "MATCH (n:Label1)<-[t:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target, t.weight AS weight")
-                    .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-                    .withDirection(direction)
-                    .load(graphFactory);
-
+            try (Transaction tx = DB.beginTx()) {
+                graph = new GraphLoader(DB)
+                        .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
+                        .withRelationshipType(
+                                "MATCH (n:Label1)<-[t:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target, t.weight AS weight")
+                        .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
+                        .withDirection(direction)
+                        .load(graphFactory);
+            }
         } else {
             graph = new GraphLoader(DB)
                     .withLabel(label)
@@ -422,11 +431,13 @@ final class DegreeCentralityTest {
 
         final Graph graph;
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
-            graph = new GraphLoader(DB)
-                    .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
-                    .withRelationshipType("MATCH (n:Label1)-[:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target")
-                    .withDeduplicationStrategy(DeduplicationStrategy.SKIP)
-                    .load(graphFactory);
+            try (Transaction tx = DB.beginTx()) {
+                graph = new GraphLoader(DB)
+                        .withLabel("MATCH (n:Label1) RETURN id(n) AS id")
+                        .withRelationshipType("MATCH (n:Label1)-[:TYPE1]-(m:Label1) RETURN id(n) AS source, id(m) AS target")
+                        .withDeduplicationStrategy(DeduplicationStrategy.SKIP)
+                        .load(graphFactory);
+            }
         } else {
             graph = new GraphLoader(DB)
                     .withLabel(label)

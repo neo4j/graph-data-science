@@ -39,6 +39,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
@@ -99,7 +100,9 @@ final class LabelPropagationTest {
                     .withRelationshipType("FOLLOW")
                     .withName(graphImpl.getSimpleName());
         }
-        return graphLoader.load(graphImpl);
+        try (Transaction tx = db.beginTx()) {
+            return graphLoader.load(graphImpl);
+        }
     }
 
     @AllGraphTypesTest

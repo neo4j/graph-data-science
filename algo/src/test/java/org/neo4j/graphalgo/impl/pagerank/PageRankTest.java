@@ -123,11 +123,13 @@ final class PageRankTest {
 
         final Graph graph;
         if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
-            graph = new GraphLoader(DB)
-                    .withLabel("MATCH (n:Label1) RETURN id(n) as id")
-                    .withRelationshipType("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
-                    .load(graphImpl);
-
+            try (Transaction tx = DB.beginTx()) {
+                graph = new GraphLoader(DB)
+                        .withLabel("MATCH (n:Label1) RETURN id(n) as id")
+                        .withRelationshipType(
+                                "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
+                        .load(graphImpl);
+            }
         } else {
             graph = new GraphLoader(DB)
                     .withLabel(label)
@@ -174,11 +176,13 @@ final class PageRankTest {
         final Graph graph;
         final CentralityResult rankResult;
         if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
-            graph = new GraphLoader(DB)
-                    .withLabel("MATCH (n:Label1) RETURN id(n) as id")
-                    .withRelationshipType("MATCH (n:Label1)<-[:TYPE1]-(m:Label1) RETURN id(n) AS source,id(m) AS target")
-                    .load(graphImpl);
-
+            try (Transaction tx = DB.beginTx()) {
+                graph = new GraphLoader(DB)
+                        .withLabel("MATCH (n:Label1) RETURN id(n) as id")
+                        .withRelationshipType(
+                                "MATCH (n:Label1)<-[:TYPE1]-(m:Label1) RETURN id(n) AS source,id(m) AS target")
+                        .load(graphImpl);
+            }
             rankResult = PageRankAlgorithmType.NON_WEIGHTED
                     .create(graph, DEFAULT_CONFIG, LongStream.empty())
                     .compute()
@@ -212,11 +216,13 @@ final class PageRankTest {
         final Label label = Label.label("Label1");
         final Graph graph;
         if (graphImpl.isAssignableFrom(CypherGraphFactory.class)) {
-            graph = new GraphLoader(DB)
-                    .withLabel("MATCH (n:Label1) RETURN id(n) as id")
-                    .withRelationshipType("MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
-                    .load(graphImpl);
-
+            try (Transaction tx = DB.beginTx()) {
+                graph = new GraphLoader(DB)
+                        .withLabel("MATCH (n:Label1) RETURN id(n) as id")
+                        .withRelationshipType(
+                                "MATCH (n:Label1)-[:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target")
+                        .load(graphImpl);
+            }
         } else {
             graph = new GraphLoader(DB)
                     .withLabel(label)

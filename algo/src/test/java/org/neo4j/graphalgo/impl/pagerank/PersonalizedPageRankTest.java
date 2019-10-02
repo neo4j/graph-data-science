@@ -107,11 +107,12 @@ final class PersonalizedPageRankTest {
 
         final Graph graph;
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
-            graph = new GraphLoader(DB)
-                    .withLabel("MATCH (n) RETURN id(n) as id")
-                    .withRelationshipType("MATCH (n)-[:PURCHASED]-(m) RETURN id(n) as source,id(m) as target")
-                    .load(graphFactory);
-
+            try (Transaction tx = DB.beginTx()) {
+                graph = new GraphLoader(DB)
+                        .withLabel("MATCH (n) RETURN id(n) as id")
+                        .withRelationshipType("MATCH (n)-[:PURCHASED]-(m) RETURN id(n) as source,id(m) as target")
+                        .load(graphFactory);
+            }
         } else {
             graph = new GraphLoader(DB)
                     .withDirection(Direction.BOTH)

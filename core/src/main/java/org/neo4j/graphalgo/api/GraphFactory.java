@@ -33,8 +33,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * The Abstract Factory defines the construction of the graph
- *
- * @author mknblch
  */
 public abstract class GraphFactory implements Assessable {
 

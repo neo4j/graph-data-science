@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -78,21 +79,22 @@ public class GraphLoaderTest {
 
     @AllGraphTypesTest
     void testAnyLabel(Class<? extends GraphFactory> graphFactory) {
-        Graph graph = initLoader(graphFactory).load(graphFactory);
+        Graph graph = initLoader(graphFactory);
         assertEquals(3L, graph.nodeCount());
     }
 
     @AllGraphTypesTest
     void testWithLabel(Class<? extends GraphFactory> graphFactory) {
-        Graph graph = initLoader(graphFactory, "Node1", null).load(graphFactory);
+        Graph graph;
+        try (Transaction tx = db.beginTx()) {
+            graph = initLoader(graphFactory, "Node1", null).load(graphFactory);
+        }
         assertEquals(1L, graph.nodeCount());
     }
 
     @AllGraphTypesTest
     void testAnyRelation(Class<? extends GraphFactory> graphFactory) {
-        GraphLoader graphLoader = initLoader(graphFactory);
-
-        final Graph graph = graphLoader.load(graphFactory);
+        Graph graph = initLoader(graphFactory);
         assertOutRelationships(graph, id1, id2, id3);
         assertOutRelationships(graph, id2, id3);
     }
@@ -100,14 +102,18 @@ public class GraphLoaderTest {
     @AllGraphTypesTest
     void testWithBothWeightedRelationship(Class<? extends GraphFactory> graphFactory) {
         PropertyMappings relPropertyMappings = PropertyMappings.of(PropertyMapping.of("weight", 1.0));
-        Graph graph = initLoader(
-                graphFactory,
-                Optional.empty(),
-                Optional.of("REL3"),
-                PropertyMappings.EMPTY,
-                relPropertyMappings)
-                .withDirection(Direction.OUTGOING)
-                .load(graphFactory);
+
+        Graph graph;
+        try (Transaction tx = db.beginTx()) {
+            graph = initLoader(
+                    graphFactory,
+                    Optional.empty(),
+                    Optional.of("REL3"),
+                    PropertyMappings.EMPTY,
+                    relPropertyMappings)
+                    .withDirection(Direction.OUTGOING)
+                    .load(graphFactory);
+        }
 
         assertEquals(1, graph.relationshipCount());
         assertOutRelationships(graph, id2, id3);
@@ -116,9 +122,12 @@ public class GraphLoaderTest {
 
     @AllGraphTypesTest
     void testWithOutgoingRelationship(Class<? extends GraphFactory> graphFactory) {
-        Graph graph = initLoader(graphFactory, null, "REL3")
-                .withDirection(Direction.OUTGOING)
-                .load(graphFactory);
+        Graph graph;
+        try (Transaction tx = db.beginTx()) {
+            graph = initLoader(graphFactory, null, "REL3")
+                    .withDirection(Direction.OUTGOING)
+                    .load(graphFactory);
+        }
 
         assertEquals(1, graph.relationshipCount());
         assertOutRelationships(graph, id2, id3);
@@ -131,13 +140,16 @@ public class GraphLoaderTest {
                 PropertyMapping.of("prop2", "prop2", 0D),
                 PropertyMapping.of("prop3", "prop3", 0D));
 
-        Graph graph = initLoader(
-                graphFactory,
-                Optional.empty(),
-                Optional.empty(),
-                nodePropertyMappings,
-                PropertyMappings.EMPTY)
-                .load(graphFactory);
+        Graph graph;
+        try (Transaction tx = db.beginTx()) {
+            graph = initLoader(
+                    graphFactory,
+                    Optional.empty(),
+                    Optional.empty(),
+                    nodePropertyMappings,
+                    PropertyMappings.EMPTY)
+                    .load(graphFactory);
+        }
 
         assertEquals(1.0, graph.nodeProperties("prop1").nodeWeight(graph.toMappedNodeId(0L)), 0.01);
         assertEquals(2.0, graph.nodeProperties("prop2").nodeWeight(graph.toMappedNodeId(1L)), 0.01);
@@ -147,12 +159,15 @@ public class GraphLoaderTest {
     @AllGraphTypesTest
     void testWithRelationshipProperty(Class<? extends GraphFactory> graphFactory) {
         PropertyMappings relPropertyMappings = PropertyMappings.of(PropertyMapping.of("prop1", 1337.42));
-        Graph graph = initLoader(
-                graphFactory,
-                Optional.empty(),
-                Optional.empty(),
-                PropertyMappings.EMPTY,
-                relPropertyMappings).load(graphFactory);
+        Graph graph;
+        try (Transaction tx = db.beginTx()) {
+            graph = initLoader(
+                    graphFactory,
+                    Optional.empty(),
+                    Optional.empty(),
+                    PropertyMappings.EMPTY,
+                    relPropertyMappings).load(graphFactory);
+        }
 
         assertOutPropertiesWithDelta(graph, 1e-4, id1, 1.0, 1337.42);
     }
@@ -170,9 +185,10 @@ public class GraphLoaderTest {
         assertEquals(Status.Transaction.Terminated, exception.status());
     }
 
-
-    private GraphLoader initLoader(Class<? extends GraphFactory> graphFactory) {
-        return initLoader(graphFactory, null, null);
+    private Graph initLoader(Class<? extends GraphFactory> graphFactory) {
+        try (Transaction tx = db.beginTx()) {
+            return initLoader(graphFactory, null, null).load(graphFactory);
+        }
     }
 
     private GraphLoader initLoader(Class<? extends GraphFactory> graphFactory, String label, String relType) {

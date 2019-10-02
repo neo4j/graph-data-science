@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -282,9 +283,11 @@ class GraphLoaderDirectionalityTest {
             graphLoader.undirected();
         }
 
+        try (Transaction tx = db.beginTx()) {
         return graphLoader
                 .withDirection(direction)
                 .withDeduplicationStrategy(deduplicationStrategy)
                 .load(graphImpl);
+        }
     }
 }

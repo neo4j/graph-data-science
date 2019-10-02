@@ -145,13 +145,14 @@ final class WeightedDegreeCentralityTest {
 
         final Graph graph;
         if (graphFactory.isAssignableFrom(CypherGraphFactory.class)) {
-            graph = new GraphLoader(DB)
-                    .withLabel("MATCH (n:Label1) RETURN id(n) as id")
-                    .withRelationshipType(
-                            "MATCH (n:Label1)-[type:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target, type.weight AS weight")
-                    .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-                    .load(graphFactory);
-
+            try (Transaction tx = DB.beginTx()) {
+                graph = new GraphLoader(DB)
+                        .withLabel("MATCH (n:Label1) RETURN id(n) as id")
+                        .withRelationshipType(
+                                "MATCH (n:Label1)-[type:TYPE1]->(m:Label1) RETURN id(n) as source,id(m) as target, type.weight AS weight")
+                        .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
+                        .load(graphFactory);
+            }
         } else {
             graph = new GraphLoader(DB)
                     .withLabel(label)

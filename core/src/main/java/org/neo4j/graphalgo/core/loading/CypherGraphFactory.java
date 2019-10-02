@@ -24,9 +24,17 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphdb.NotInTransactionException;
+import org.neo4j.internal.kernel.api.security.AuthSubject;
+import org.neo4j.internal.kernel.api.security.SecurityContext;
+import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.api.KernelTransaction.Revertable;
+import org.neo4j.kernel.impl.core.ThreadToStatementContextBridge;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Optional;
+
+import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 
 public class CypherGraphFactory extends GraphFactory {
 
@@ -59,25 +67,42 @@ public class CypherGraphFactory extends GraphFactory {
 
     @Override
     public Graph importGraph() {
-        BatchLoadResult nodeCount = new CountingCypherRecordLoader(setup.startLabel, api, setup).load();
-        IdsAndProperties nodes = new CypherNodeLoader(nodeCount.rows(), api, setup).load();
-        Relationships relationships = new CypherRelationshipLoader(nodes.idMap(), api, setup).load();
+        // Temporarily override the security context to enforce read-only access during load
+        try (Revertable revertable = setReadOnlySecurityContext()) {
+            BatchLoadResult nodeCount = new CountingCypherRecordLoader(setup.startLabel, api, setup).load();
+            IdsAndProperties nodes = new CypherNodeLoader(nodeCount.rows(), api, setup).load();
+            Relationships relationships = new CypherRelationshipLoader(nodes.idMap(), api, setup).load();
 
+            return HugeGraph.create(
+                    setup.tracker,
+                    nodes.idMap(),
+                    nodes.properties(),
+                    relationships.relationshipCount(),
+                    relationships.inAdjacency(),
+                    relationships.outAdjacency(),
+                    relationships.inOffsets(),
+                    relationships.outOffsets(),
+                    relationships.maybeDefaultRelProperty(),
+                    Optional.ofNullable(relationships.inRelProperties()),
+                    Optional.ofNullable(relationships.outRelProperties()),
+                    Optional.ofNullable(relationships.inRelPropertyOffsets()),
+                    Optional.ofNullable(relationships.outRelPropertyOffsets()),
+                    setup.loadAsUndirected);
+        }
+    }
 
-        return HugeGraph.create(
-                setup.tracker,
-                nodes.idMap(),
-                nodes.properties(),
-                relationships.relationshipCount(),
-                relationships.inAdjacency(),
-                relationships.outAdjacency(),
-                relationships.inOffsets(),
-                relationships.outOffsets(),
-                relationships.maybeDefaultRelProperty(),
-                Optional.ofNullable(relationships.inRelProperties()),
-                Optional.ofNullable(relationships.outRelProperties()),
-                Optional.ofNullable(relationships.inRelPropertyOffsets()),
-                Optional.ofNullable(relationships.outRelPropertyOffsets()),
-                setup.loadAsUndirected);
+    private Revertable setReadOnlySecurityContext() {
+        try {
+            KernelTransaction kernelTransaction = api
+                    .getDependencyResolver()
+                    .resolveDependency(ThreadToStatementContextBridge.class)
+                    .getKernelTransactionBoundToThisThread(true);
+            AuthSubject subject = kernelTransaction.securityContext().subject();
+            SecurityContext securityContext = new SecurityContext(subject, READ);
+            return kernelTransaction.overrideWith(securityContext);
+        } catch (NotInTransactionException ex) {
+            // happens only in tests
+            throw new IllegalStateException("Must run in a transaction.", ex);
+        }
     }
 }

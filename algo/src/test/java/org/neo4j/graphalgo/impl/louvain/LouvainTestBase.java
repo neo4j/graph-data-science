@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashMap;
@@ -73,9 +74,11 @@ abstract class LouvainTestBase {
                     .withAnyRelationshipType()
                     .withAnyLabel();
         }
-        Graph graph = loader.load(graphImpl);
-        setupGraphDb(graph);
-        return graph;
+        try (Transaction tx = db.beginTx()) {
+            Graph graph = loader.load(graphImpl);
+            setupGraphDb(graph);
+            return graph;
+        }
     }
 
     void assertUnion(String[] nodeNames, HugeLongArray values) {
