@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-// TODO: move to `beta` package namespace
 package org.neo4j.graphalgo.beta.pregel;
 
 import com.carrotsearch.hppc.BitSet;
