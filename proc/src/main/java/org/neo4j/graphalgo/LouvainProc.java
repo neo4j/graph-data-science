@@ -166,7 +166,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
     }
 
     @Override
-    double getDefaultWeightProperty() {
+    protected double getDefaultWeightProperty(ProcedureConfiguration config) {
         return Louvain.DEFAULT_WEIGHT;
     }
 

@@ -36,6 +36,10 @@ public abstract class UnionFind<ME extends UnionFind<ME>> extends Algorithm<ME> 
 
     protected final UnionFind.Config algoConfig;
 
+    public static double defaultWeight(double threshold) {
+        return threshold + 1;
+    }
+
     static MemoryEstimation memoryEstimation(
             final boolean incremental,
             Class<? extends UnionFind<?>> unionFindClass,

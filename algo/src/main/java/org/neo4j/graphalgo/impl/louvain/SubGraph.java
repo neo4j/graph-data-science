@@ -53,7 +53,8 @@ abstract class SubGraph implements Graph {
     public final void forEachRelationship(
             final long nodeId,
             final Direction direction,
-            double fallbackWeight, final WeightedRelationshipConsumer consumer) {
+            double fallbackValue,
+            final WeightedRelationshipConsumer consumer) {
         forEach(nodeId, consumer);
     }
 

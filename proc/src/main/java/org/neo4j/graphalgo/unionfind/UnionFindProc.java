@@ -197,6 +197,12 @@ public class UnionFindProc<T extends UnionFind<T>> extends BaseAlgoProc<T> {
         return new UnionFindFactory<>(algoType, incremental);
     }
 
+    @Override
+    protected double getDefaultWeightProperty(ProcedureConfiguration config) {
+        return UnionFind.defaultWeight(config.get(UnionFindFactory.CONFIG_THRESHOLD, 0D));
+    }
+
+
     private Stream<StreamResult> stream(
             String label,
             String relationship,

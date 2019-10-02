@@ -125,7 +125,7 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
     }
 
     @Override
-    double getDefaultWeightProperty() {
+    protected double getDefaultWeightProperty(ProcedureConfiguration config) {
         return PageRank.DEFAULT_WEIGHT;
     }
 

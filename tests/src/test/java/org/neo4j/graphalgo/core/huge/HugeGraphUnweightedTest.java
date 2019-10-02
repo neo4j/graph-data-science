@@ -39,37 +39,39 @@ final class HugeGraphUnweightedTest {
     private static final int BATCH_SIZE = 100;
     public static final RelationshipType TYPE = RelationshipType.withName("TYPE");
 
-    private GraphDatabaseAPI db;
+    private GraphDatabaseAPI DB;
+
+    private static final String DB_CYPHER =
+            "CREATE " +
+            "  (a:Node {name:'a'})" +
+            ", (b:Node {name:'b'})" +
+            ", (c:Node {name:'c'})" +
+            ", (d:Node2 {name:'d'})" +
+            ", (e:Node2 {name:'e'})" +
+            ", (a)-[:TYPE {prop:1}]->(b)" +
+            ", (e)-[:TYPE {prop:2}]->(d)" +
+            ", (d)-[:TYPE {prop:3}]->(c)" +
+            ", (a)-[:TYPE {prop:4}]->(c)" +
+            ", (a)-[:TYPE {prop:5}]->(d)" +
+            ", (a)-[:TYPE2 {prop:6}]->(d)" +
+            ", (b)-[:TYPE2 {prop:7}]->(e)" +
+            ", (a)-[:TYPE2 {prop:8}]->(e)";
 
     @BeforeEach
     void setup() {
-        db = TestDatabaseCreator.createTestDatabase();
-        db.execute("CREATE (a:Node {name:'a'})\n" +
-                   "CREATE (b:Node {name:'b'})\n" +
-                   "CREATE (c:Node {name:'c'})\n" +
-                   "CREATE (d:Node2 {name:'d'})\n" +
-                   "CREATE (e:Node2 {name:'e'})\n" +
-
-                   "CREATE" +
-                   " (a)-[:TYPE {prop:1}]->(b),\n" +
-                   " (e)-[:TYPE {prop:2}]->(d),\n" +
-                   " (d)-[:TYPE {prop:3}]->(c),\n" +
-                   " (a)-[:TYPE {prop:4}]->(c),\n" +
-                   " (a)-[:TYPE {prop:5}]->(d),\n" +
-                   " (a)-[:TYPE2 {prop:6}]->(d),\n" +
-                   " (b)-[:TYPE2 {prop:7}]->(e),\n" +
-                   " (a)-[:TYPE2 {prop:8}]->(e)");
+        DB = TestDatabaseCreator.createTestDatabase();
+        DB.execute(DB_CYPHER);
     }
 
     @AfterEach
     void teardown() {
-        db.shutdown();
+        DB.shutdown();
     }
 
     @ParameterizedTest
     @EnumSource(Direction.class)
     void relationshipIteratorShouldReturnFallbackWeight(Direction direction) {
-        Graph graph = loadGraph(db, direction);
+        Graph graph = loadGraph(DB, direction);
 
         double fallbackWeight = 42D;
         graph.forEachNode((nodeId) -> {
@@ -84,7 +86,7 @@ final class HugeGraphUnweightedTest {
     @ParameterizedTest
     @EnumSource(Direction.class)
     void weightOfShouldReturnFallbackWeight(Direction direction) {
-        Graph graph = loadGraph(db, direction);
+        Graph graph = loadGraph(DB, direction);
 
         double fallbackWeight = 42D;
         graph.forEachNode((nodeId) -> {

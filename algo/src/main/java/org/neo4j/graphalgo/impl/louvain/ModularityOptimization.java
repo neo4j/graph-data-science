@@ -46,6 +46,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.LongPredicate;
 
+import static org.neo4j.graphalgo.impl.louvain.Louvain.DEFAULT_WEIGHT;
+
 /**
  * parallel weighted undirected modularity based community detection
  * (first phase of louvain algo). The algorithm assigns community ids to each
@@ -76,7 +78,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     /**
      * only outgoing directions are visited since the graph itself must be loaded using {@code .asUndirected(true) } !
      */
-    private static final Direction D = Direction.OUTGOING;
+    private static final Direction DIRECTION = Direction.OUTGOING;
     private static final int NONE = -1;
     private final long nodeCount;
     private final int concurrency;
@@ -181,7 +183,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         m2 = .0;
         for (int node = 0; node < nodeCount; node++) {
             // since we use an undirected graph 2m is counted here
-            graph.forEachRelationship(node, D, Louvain.DEFAULT_WEIGHT, (s, t, w) -> {
+            graph.forEachRelationship(node, DIRECTION, DEFAULT_WEIGHT, (s, t, w) -> {
                 m2 += w;
                 ki.addTo(s, w / 2);
                 ki.addTo(t, w / 2);
@@ -368,10 +370,10 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             double nodeKI = ki.get(node);
             sTot.addTo(currentCommunity, -nodeKI);
 
-            int degree = graph.degree(node, D);
+            int degree = graph.degree(node, DIRECTION);
             LongDoubleMap communityWeights = new LongDoubleHashMap(degree);
             Pointer.DoublePointer extraWeight = Pointer.wrap(0.0);
-            rels.forEachRelationship(node, D, Louvain.DEFAULT_WEIGHT, (s, t, weight) -> {
+            rels.forEachRelationship(node, DIRECTION, DEFAULT_WEIGHT, (s, t, weight) -> {
                 long localCommunity = localCommunities.get(t);
                 if (s != t) {
                     communityWeights.addTo(localCommunity, weight);
@@ -415,7 +417,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         private double calcModularity() {
             final Pointer.DoublePointer pointer = Pointer.wrap(.0);
             for (long node = 0L; node < nodeCount; node++) {
-                rels.forEachRelationship(node, Direction.OUTGOING, Louvain.DEFAULT_WEIGHT, (s, t, w) -> {
+                rels.forEachRelationship(node, Direction.OUTGOING, DEFAULT_WEIGHT, (s, t, w) -> {
                     if (localCommunities.get(s) == localCommunities.get(t)) {
                         pointer.v += (w - (ki.get(s) * ki.get(t) / m2));
                     }

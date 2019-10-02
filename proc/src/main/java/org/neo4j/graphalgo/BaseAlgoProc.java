@@ -60,7 +60,7 @@ public abstract class BaseAlgoProc<A extends Algorithm<A>> extends BaseProc {
         return new MemoryTreeWithDimensions(memoryTree, graphFactory.dimensions());
     }
 
-    double getDefaultWeightProperty() {
+    protected double getDefaultWeightProperty(ProcedureConfiguration config) {
         return ProcedureConstants.DEFAULT_VALUE_DEFAULT;
     }
 
@@ -69,7 +69,7 @@ public abstract class BaseAlgoProc<A extends Algorithm<A>> extends BaseProc {
         if (config.hasWeightProperty()) {
             loader.withRelationshipProperties(PropertyMapping.of(
                     config.getWeightProperty(),
-                    config.getWeightPropertyDefaultValue(getDefaultWeightProperty())
+                    config.getWeightPropertyDefaultValue(getDefaultWeightProperty(config))
             ));
         }
         return configureAlgoLoader(loader, config);

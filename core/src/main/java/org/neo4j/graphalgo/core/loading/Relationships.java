@@ -31,11 +31,11 @@ public class Relationships {
     private final AdjacencyList outAdjacency;
     private final AdjacencyOffsets inOffsets;
     private final AdjacencyOffsets outOffsets;
-    private final Optional<Double> defaultWeight;
-    private final AdjacencyList inWeights;
-    private final AdjacencyList outWeights;
-    private final AdjacencyOffsets inWeightOffsets;
-    private final AdjacencyOffsets outWeightOffsets;
+    private final Optional<Double> maybeDefaultRelProperty;
+    private final AdjacencyList inRelProperties;
+    private final AdjacencyList outRelProperties;
+    private final AdjacencyOffsets inRelPropertyOffsets;
+    private final AdjacencyOffsets outRelPropertyOffsets;
 
     public Relationships(
             long rows,
@@ -44,22 +44,22 @@ public class Relationships {
             AdjacencyList outAdjacency,
             AdjacencyOffsets inOffsets,
             AdjacencyOffsets outOffsets,
-            Optional<Double> defaultWeight,
-            AdjacencyList inWeights,
-            AdjacencyList outWeights,
-            AdjacencyOffsets inWeightOffsets,
-            AdjacencyOffsets outWeightOffsets) {
+            Optional<Double> maybeDefaultRelProperty,
+            AdjacencyList inRelProperties,
+            AdjacencyList outRelProperties,
+            AdjacencyOffsets inRelPropertyOffsets,
+            AdjacencyOffsets outRelPropertyOffsets) {
         this.rows = rows;
         this.relationshipCount = relationshipCount;
         this.inAdjacency = inAdjacency;
         this.outAdjacency = outAdjacency;
         this.inOffsets = inOffsets;
         this.outOffsets = outOffsets;
-        this.defaultWeight = defaultWeight;
-        this.inWeights = inWeights;
-        this.outWeights = outWeights;
-        this.inWeightOffsets = inWeightOffsets;
-        this.outWeightOffsets = outWeightOffsets;
+        this.maybeDefaultRelProperty = maybeDefaultRelProperty;
+        this.inRelProperties = inRelProperties;
+        this.outRelProperties = outRelProperties;
+        this.inRelPropertyOffsets = inRelPropertyOffsets;
+        this.outRelPropertyOffsets = outRelPropertyOffsets;
     }
 
     public long rows() {
@@ -76,13 +76,13 @@ public class Relationships {
 
     public AdjacencyOffsets outOffsets() { return outOffsets; }
 
-    public Optional<Double> defaultWeight() { return defaultWeight; }
+    public Optional<Double> maybeDefaultRelProperty() { return maybeDefaultRelProperty; }
 
-    public AdjacencyList inWeights() { return inWeights; }
+    public AdjacencyList inRelProperties() { return inRelProperties; }
 
-    public AdjacencyList outWeights() { return outWeights; }
+    public AdjacencyList outRelProperties() { return outRelProperties; }
 
-    public AdjacencyOffsets inWeightOffsets() { return inWeightOffsets; }
+    public AdjacencyOffsets inRelPropertyOffsets() { return inRelPropertyOffsets; }
 
-    public AdjacencyOffsets outWeightOffsets() { return outWeightOffsets; }
+    public AdjacencyOffsets outRelPropertyOffsets() { return outRelPropertyOffsets; }
 }

@@ -40,7 +40,7 @@ import static java.util.concurrent.TimeUnit.MICROSECONDS;
 
 public class LabelPropagation extends Algorithm<LabelPropagation> {
 
-    public static final double DEFAULT_WEIGHT = 1.0D;
+    public static final double DEFAULT_WEIGHT = 1.0;
 
     public static final String SEED_TYPE = "seed";
     public static final String WEIGHT_TYPE = "weight";

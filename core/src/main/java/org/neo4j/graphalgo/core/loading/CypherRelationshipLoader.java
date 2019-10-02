@@ -41,7 +41,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
     private final RelationshipsBuilder outgoingRelationshipsBuilder;
     private final RelationshipImporter importer;
     private final RelationshipImporter.Imports imports;
-    private final Optional<Double> maybeDefaultWeight;
+    private final Optional<Double> maybeDefaultRelProperty;
 
     private long totalRecordsSeen;
     private long totalRelationshipsImported;
@@ -62,7 +62,8 @@ class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
         int pageSize = importSizing.pageSize();
         int numberOfPages = importSizing.numberOfPages();
 
-        this.maybeDefaultWeight = setup.relationDefaultWeight;
+        this.maybeDefaultRelProperty = setup.relationDefaultWeight;
+        Double defaultRelationshipProperty = maybeDefaultRelProperty.orElseGet(PropertyMapping.EMPTY_PROPERTY::defaultValue);
 
         AdjacencyBuilder outBuilder = AdjacencyBuilder.compressing(
                 outgoingRelationshipsBuilder,
@@ -71,12 +72,12 @@ class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
                 setup.tracker,
                 new LongAdder(),
                 new int[]{DEFAULT_WEIGHT_PROPERTY_ID},
-                new double[]{maybeDefaultWeight.orElseGet(PropertyMapping.EMPTY_PROPERTY::defaultValue)}
+                new double[]{defaultRelationshipProperty}
         );
 
         this.idMap = idMap;
         importer = new RelationshipImporter(setup.tracker, outBuilder, null);
-        imports = importer.imports(false, true, false, maybeDefaultWeight.isPresent());
+        imports = importer.imports(false, true, false, maybeDefaultRelProperty.isPresent());
         totalRecordsSeen = 0;
         totalRelationshipsImported = 0;
     }
@@ -90,7 +91,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
         RelationshipRowVisitor visitor = new RelationshipRowVisitor(
                 buffer,
                 idMap,
-                maybeDefaultWeight,
+                maybeDefaultRelProperty,
                 imports
         );
         runLoadingQuery(offset, batchSize, visitor);

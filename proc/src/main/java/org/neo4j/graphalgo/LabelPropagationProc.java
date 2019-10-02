@@ -174,7 +174,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
     }
 
     @Override
-    double getDefaultWeightProperty() {
+    protected double getDefaultWeightProperty(ProcedureConfiguration config) {
         return LabelPropagation.DEFAULT_WEIGHT;
     }
 

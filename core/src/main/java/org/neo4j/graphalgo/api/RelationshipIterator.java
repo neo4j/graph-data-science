@@ -26,15 +26,34 @@ import org.neo4j.graphdb.Direction;
  */
 public interface RelationshipIterator extends RelationshipPredicate {
 
+
+    /**
+     * Calls the given consumer function for every relationship of a given node, respection the direction.
+     *
+     * @param nodeId id of the node for wich to iterate relationships
+     * @param direction direction of the relationships
+     * @param consumer relationship consumer function
+     */
     void forEachRelationship(
             long nodeId,
             Direction direction,
             RelationshipConsumer consumer);
 
+    /**
+     * Calls the given consumer function for every relationship of a given node, respection the direction.
+     * If the graph was loaded with a relationship property, the property value of the relationship will be passed into
+     * the consumer. Otherwise the fallback value will be used.
+     *
+     * @param nodeId id of the node for wich to iterate relationships
+     * @param direction direction of the relationships
+     * @param fallbackValue value used as relationship proeprty if no properties were loaded
+     * @param consumer relationship consumer function
+     */
     void forEachRelationship(
             long nodeId,
             Direction direction,
-            double fallbackWeight, WeightedRelationshipConsumer consumer);
+            double fallbackValue,
+            WeightedRelationshipConsumer consumer);
 
     default void forEachIncoming(
             long nodeId,

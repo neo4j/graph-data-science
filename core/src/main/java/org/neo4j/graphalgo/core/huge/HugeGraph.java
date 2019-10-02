@@ -110,7 +110,6 @@ public class HugeGraph implements Graph {
     private final boolean isUndirected;
 
 
-
     public static HugeGraph create(
             final AllocationTracker tracker,
             final IdMap idMapping,
@@ -127,21 +126,21 @@ public class HugeGraph implements Graph {
             final Optional<AdjacencyOffsets> outWeightOffsets,
             final boolean isUndirected) {
         return new HugeGraph(
-            tracker,
-            idMapping,
-            nodeProperties,
-            relationshipCount,
-            inAdjacency,
-            outAdjacency,
-            inOffsets,
-            outOffsets,
-            inWeights.isPresent() || outWeights.isPresent(),
-            defaultWeight.orElse(Double.NaN),
-            inWeights.orElse(null),
-            outWeights.orElse(null),
-            inWeightOffsets.orElse(null),
-            outWeightOffsets.orElse(null),
-            isUndirected
+                tracker,
+                idMapping,
+                nodeProperties,
+                relationshipCount,
+                inAdjacency,
+                outAdjacency,
+                inOffsets,
+                outOffsets,
+                inWeights.isPresent() || outWeights.isPresent(),
+                defaultWeight.orElse(Double.NaN),
+                inWeights.orElse(null),
+                outWeights.orElse(null),
+                inWeightOffsets.orElse(null),
+                outWeightOffsets.orElse(null),
+                isUndirected
         );
     }
 
@@ -295,21 +294,21 @@ public class HugeGraph implements Graph {
     public void forEachRelationship(
             long nodeId,
             Direction direction,
-            double fallbackWeight,
+            double fallbackValue,
             WeightedRelationshipConsumer consumer) {
 
         switch (direction) {
             case INCOMING:
-                runForEachWithWeight(nodeId, Direction.INCOMING, consumer, /* reuseCursor */ fallbackWeight);
+                runForEachWithWeight(nodeId, Direction.INCOMING, fallbackValue, consumer);
                 return;
 
             case OUTGOING:
-                runForEachWithWeight(nodeId, Direction.OUTGOING, consumer, /* reuseCursor */ fallbackWeight);
+                runForEachWithWeight(nodeId, Direction.OUTGOING, fallbackValue, consumer);
                 return;
 
             default:
-                runForEachWithWeight(nodeId, Direction.OUTGOING, consumer, /* reuseCursor */ fallbackWeight);
-                runForEachWithWeight(nodeId, Direction.INCOMING, consumer, /* reuseCursor */ fallbackWeight);
+                runForEachWithWeight(nodeId, Direction.OUTGOING, fallbackValue, consumer);
+                runForEachWithWeight(nodeId, Direction.INCOMING, fallbackValue, consumer);
         }
     }
 
@@ -413,10 +412,10 @@ public class HugeGraph implements Graph {
             RelationshipConsumer consumer,
             boolean reuseCursor) {
 
-       if (direction == Direction.BOTH) {
-                runForEach(sourceNodeId, Direction.OUTGOING, consumer, reuseCursor);
-                runForEach(sourceNodeId, Direction.INCOMING, consumer, reuseCursor);
-                return;
+        if (direction == Direction.BOTH) {
+            runForEach(sourceNodeId, Direction.OUTGOING, consumer, reuseCursor);
+            runForEach(sourceNodeId, Direction.INCOMING, consumer, reuseCursor);
+            return;
         }
 
         AdjacencyList.DecompressingCursor adjacencyCursor = adjacencyCursorForIteration(
@@ -429,20 +428,24 @@ public class HugeGraph implements Graph {
     private void runForEachWithWeight(
             long sourceNodeId,
             Direction direction,
-            WeightedRelationshipConsumer consumer,
-            double fallbackValue) {
+            double fallbackValue,
+            WeightedRelationshipConsumer consumer) {
 
         if (direction == Direction.BOTH) {
-            runForEachWithWeight(sourceNodeId, Direction.OUTGOING, consumer, fallbackValue);
-            runForEachWithWeight(sourceNodeId, Direction.INCOMING, consumer, fallbackValue);
+            runForEachWithWeight(sourceNodeId, Direction.OUTGOING, fallbackValue, consumer);
+            runForEachWithWeight(sourceNodeId, Direction.INCOMING, fallbackValue, consumer);
             return;
         }
 
         if (!hasRelationshipProperty()) {
             runForEach(sourceNodeId, direction, (s, t) -> consumer.accept(s, t, fallbackValue), false);
         } else {
-            AdjacencyList.DecompressingCursor adjacencyCursor = adjacencyCursorForIteration(sourceNodeId, direction,
-                    false);
+            AdjacencyList.DecompressingCursor adjacencyCursor = adjacencyCursorForIteration(
+                    sourceNodeId,
+                    direction,
+                    false
+            );
+
             AdjacencyList.Cursor weightCursor = weightCursorForIteration(sourceNodeId, direction);
             consumeAdjacentNodesWithWeight(sourceNodeId, adjacencyCursor, weightCursor, consumer);
         }

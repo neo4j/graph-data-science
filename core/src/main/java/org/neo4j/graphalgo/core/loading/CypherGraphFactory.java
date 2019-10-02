@@ -73,11 +73,11 @@ public class CypherGraphFactory extends GraphFactory {
                 relationships.outAdjacency(),
                 relationships.inOffsets(),
                 relationships.outOffsets(),
-                relationships.defaultWeight(),
-                Optional.ofNullable(relationships.inWeights()),
-                Optional.ofNullable(relationships.outWeights()),
-                Optional.ofNullable(relationships.inWeightOffsets()),
-                Optional.ofNullable(relationships.outWeightOffsets()),
+                relationships.maybeDefaultRelProperty(),
+                Optional.ofNullable(relationships.inRelProperties()),
+                Optional.ofNullable(relationships.outRelProperties()),
+                Optional.ofNullable(relationships.inRelPropertyOffsets()),
+                Optional.ofNullable(relationships.outRelPropertyOffsets()),
                 setup.loadAsUndirected);
     }
 }

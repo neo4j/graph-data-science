@@ -113,7 +113,7 @@ final class AdjacencyCompression {
 
     /**
      * Applies delta encoding to the given {@code values}.
-     * Weights are not encoded, {@code outWeights} contains weights according to {@code order}.
+     * Weights are not encoded, {@code outRelProperties} contains weights according to {@code order}.
      *
      * @param noDeduplication Is true iff all deduplication strategies are none
      */

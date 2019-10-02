@@ -160,7 +160,7 @@ public class ParallelUnionFind extends UnionFind<ParallelUnionFind> {
 
         @Override
         void compute(final long node) {
-            rels.forEachRelationship(node, Direction.OUTGOING, threshold + 1, this);
+            rels.forEachRelationship(node, Direction.OUTGOING, UnionFind.defaultWeight(threshold), this);
         }
 
         @Override

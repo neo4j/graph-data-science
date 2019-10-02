@@ -245,7 +245,7 @@ public final class Louvain extends Algorithm<Louvain> {
                 final long sourceCommunity = communities[start];
 
                 // get transitions from current node
-                graph.forEachRelationship(base + start, Direction.OUTGOING, Louvain.DEFAULT_WEIGHT, (s, t, w) -> {
+                graph.forEachRelationship(base + start, Direction.OUTGOING, DEFAULT_WEIGHT, (s, t, w) -> {
                     // mapping
                     final long targetCommunity = communityIds.get(t);
                     if (sourceCommunity == targetCommunity) {
@@ -291,7 +291,7 @@ public final class Louvain extends Algorithm<Louvain> {
                 final int sourceCommunity = (int) communities[start];
 
                 // get transitions from current node
-                graph.forEachRelationship(base + start, Direction.OUTGOING, Louvain.DEFAULT_WEIGHT, (s, t, value) -> {
+                graph.forEachRelationship(base + start, Direction.OUTGOING, DEFAULT_WEIGHT, (s, t, value) -> {
                     // mapping
                     final int targetCommunity = (int) communityIds.get(t);
                     if (sourceCommunity == targetCommunity) {

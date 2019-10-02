@@ -196,8 +196,12 @@ final class UnionFindSafetyTest {
 
         @Override
         public void forEachRelationship(
-                final long nodeId, final Direction direction, double fallbackWeight, final WeightedRelationshipConsumer consumer) {
-
+                final long nodeId,
+                final Direction direction,
+                double fallbackValue,
+                final WeightedRelationshipConsumer consumer) {
+            throw new UnsupportedOperationException(
+                    "org.neo4j.graphalgo.impl.unionfind.UnionFindSafetyTest.FlakyGraph.forEachRelationship is not implemented.");
         }
 
         @Override

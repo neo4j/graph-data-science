@@ -63,11 +63,11 @@ public class ANNUtils {
                 hugeRels.outAdjacency(),
                 hugeRels.inOffsets(),
                 hugeRels.outOffsets(),
-                hugeRels.defaultWeight(),
-                Optional.ofNullable(hugeRels.inWeights()),
-                Optional.ofNullable(hugeRels.outWeights()),
-                Optional.ofNullable(hugeRels.inWeightOffsets()),
-                Optional.ofNullable(hugeRels.outWeightOffsets()),
+                hugeRels.maybeDefaultRelProperty(),
+                Optional.ofNullable(hugeRels.inRelProperties()),
+                Optional.ofNullable(hugeRels.outRelProperties()),
+                Optional.ofNullable(hugeRels.inRelPropertyOffsets()),
+                Optional.ofNullable(hugeRels.outRelPropertyOffsets()),
                 false);
     }
 

@@ -28,6 +28,8 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Direction;
 
+import static org.neo4j.graphalgo.impl.labelprop.LabelPropagation.DEFAULT_WEIGHT;
+
 final class ComputeStep implements Step {
 
     private final RelationshipIterator localRelationshipIterator;
@@ -86,7 +88,7 @@ final class ComputeStep implements Step {
     final boolean compute(long nodeId, boolean didChange) {
         consumer.clearVotes();
         long label = existingLabels.get(nodeId);
-        localRelationshipIterator.forEachRelationship(nodeId, direction, LabelPropagation.DEFAULT_WEIGHT, consumer);
+        localRelationshipIterator.forEachRelationship(nodeId, direction, DEFAULT_WEIGHT, consumer);
         long newLabel = consumer.tallyVotes(label);
         if (newLabel != label) {
             existingLabels.set(nodeId, newLabel);

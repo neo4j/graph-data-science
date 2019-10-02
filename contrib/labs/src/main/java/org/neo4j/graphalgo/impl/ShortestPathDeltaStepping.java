@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.impl;
 
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.container.Buckets;
 import org.neo4j.graphdb.Direction;
@@ -144,19 +145,17 @@ public class ShortestPathDeltaStepping extends Algorithm<ShortestPathDeltaSteppi
             // for each node in bucket
             buckets.forEachInBucket(phase, node -> {
                 // relax each outgoing light edge
-                graph.forEachRelationship(
-                        node,
-                        direction,
-                        0.0D,
-                        longToIntConsumer((sourceNodeId, targetNodeId, cost) -> {
-                            final int iCost = (int) (cost * multiplier + distance.get(sourceNodeId));
-                            if (cost <= delta) { // determine if light or heavy edge
-                                light.add(() -> relax(targetNodeId, iCost));
-                            } else {
-                                heavy.add(() -> relax(targetNodeId, iCost));
-                            }
-                            return true;
-                        }));
+                WeightedRelationshipConsumer relationshipConsumer = longToIntConsumer((sourceNodeId, targetNodeId, cost) -> {
+                    final int iCost = (int) (cost * multiplier + distance.get(sourceNodeId));
+                    if (cost <= delta) { // determine if light or heavy edge
+                        light.add(() -> relax(targetNodeId, iCost));
+                    } else {
+                        heavy.add(() -> relax(targetNodeId, iCost));
+                    }
+                    return true;
+                });
+
+                graph.forEachRelationship(node, direction, 0.0D, relationshipConsumer);
                 return true;
             });
             ParallelUtil.run(light, executorService, futures);

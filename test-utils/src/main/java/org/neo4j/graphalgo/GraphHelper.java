@@ -47,8 +47,8 @@ public final class GraphHelper {
 
     public static double[] collectTargetProperties(final Graph graph, long sourceId) {
         DoubleStream.Builder outWeights = DoubleStream.builder();
-        graph.forEachRelationship(graph.toMappedNodeId(sourceId), Direction.OUTGOING,
-                0D, (sourceNodeId, targetNodeId, weight) -> {
+        graph.forEachRelationship(graph.toMappedNodeId(sourceId), Direction.OUTGOING, 0D,
+                (sourceNodeId, targetNodeId, weight) -> {
                     outWeights.add(weight);
                     return true;
                 });

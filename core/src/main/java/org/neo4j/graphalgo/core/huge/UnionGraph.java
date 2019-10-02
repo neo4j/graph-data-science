@@ -120,10 +120,10 @@ public final class UnionGraph implements Graph {
     public void forEachRelationship(
             long nodeId,
             Direction direction,
-            double fallbackWeight,
+            double fallbackValue,
             WeightedRelationshipConsumer consumer) {
         for (Graph graph : graphs) {
-            graph.forEachRelationship(nodeId, direction, fallbackWeight, consumer);
+            graph.forEachRelationship(nodeId, direction, fallbackValue, consumer);
         }
     }
 
