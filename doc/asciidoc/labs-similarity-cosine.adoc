@@ -12,7 +12,7 @@ It is the dot product of the two vectors divided by the product of the two vecto
 
 [WARNING]
 --
-The Cosine Similarity algorithm is part of Neo4j Labs and not supported for production purposes.
+The Cosine Similarity algorithm was developed by the Neo4j Labs team and is not officially supported.
 --
 
 This section includes:

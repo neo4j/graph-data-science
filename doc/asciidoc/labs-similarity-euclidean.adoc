@@ -12,7 +12,7 @@ Euclidean distance measures the straight line distance between two points in n-d
 
 [WARNING]
 --
-The Euclidean Distance algorithm is part of Neo4j Labs and not supported for production purposes.
+The Euclidean Distance algorithm was developed by the Neo4j Labs team and is not officially supported.
 --
 
 This section includes:

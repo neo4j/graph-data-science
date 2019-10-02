@@ -14,7 +14,7 @@ The Degree Centrality algorithm can help us find popular nodes in a graph.
 
 [WARNING]
 --
-The Degree Centrality algorithm is part of Neo4j Labs and not supported for production purposes.
+The Degree Centrality algorithm was developed by the Neo4j Labs team and is not officially supported.
 --
 
 This section includes:

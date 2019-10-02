@@ -15,7 +15,7 @@ Nodes with a high closeness score have the shortest distances to all other nodes
 
 [WARNING]
 --
-The Closeness Centrality algorithm is part of Neo4j Labs and not supported for production purposes.
+The Closeness Centrality algorithm was developed by the Neo4j Labs team and is not officially supported.
 --
 
 This section includes:

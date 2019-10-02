@@ -11,7 +11,7 @@ It is based upon the observation that some searches are informed, and that by be
 
 [WARNING]
 --
-The A* algorithm is part of Neo4j Labs and not supported for production purposes.
+The A* algorithm was developed by the Neo4j Labs team and is not officially supported.
 --
 
 This section includes:

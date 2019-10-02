@@ -11,7 +11,7 @@ These communities could be computed by using one of the <<algorithms-community>>
 
 [WARNING]
 --
-The Same Community algorithm is part of Neo4j Labs and not supported for production purposes.
+The Same Community algorithm was developed by the Neo4j Labs team and is not officially supported.
 --
 
 This section includes:

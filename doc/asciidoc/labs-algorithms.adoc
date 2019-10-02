@@ -11,7 +11,7 @@ The algorithms are accessed via Cypher by calling procedures, just like the offi
 
 [WARNING]
 --
-The Neo4j Labs algorithms are not supported for production purposes.
+The Neo4j Labs algorithms were developed by the Neo4j labs team and are not officially supported.
 --
 
 The documentation for the Neo4j Labs algorithms is divided into the following sections:

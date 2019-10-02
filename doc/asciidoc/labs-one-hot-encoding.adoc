@@ -10,7 +10,7 @@ The One Hot Encoding function is used to convert categorical data into a numeric
 
 [WARNING]
 --
-The One Hot Encoding function is part of Neo4j Labs and not supported for production purposes.
+The One Hot Encoding function was developed by the Neo4j Labs team and is not officially supported.
 --
 
 [[algorithms-one-hot-encoding-sample]]

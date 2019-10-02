@@ -11,7 +11,7 @@ As with many of the centrality algorithms, it originates from the field of socia
 
 [WARNING]
 --
-The Harmonic Centrality algorithm is part of Neo4j Labs and not supported for production purposes.
+The Harmonic Centrality algorithm was developed by the Neo4j Labs team and is not officially supported.
 --
 
 This section includes:

@@ -10,7 +10,7 @@ For general information about the union find algorithm see <<algorithms-connecte
 
 [WARNING]
 --
-The variants of the UnionFind algorithm is part of Neo4j Labs and not supported for production purposes.
+The variants of the UnionFind algorithm was developed by the Neo4j Labs team and is not officially supported.
 --
 
 [[labs-algorithms-connected-components-imp]]

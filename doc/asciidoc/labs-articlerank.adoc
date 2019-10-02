@@ -10,7 +10,7 @@ ArticleRank is a variant of the <<algorithms-pagerank, PageRank algorithm>>, whi
 
 [WARNING]
 --
-The ArticleRank algorithm is part of Neo4j Labs and not supported for production purposes.
+The ArticleRank algorithm was developed by the Neo4j Labs team and is not officially supported.
 --
 
 This section includes:

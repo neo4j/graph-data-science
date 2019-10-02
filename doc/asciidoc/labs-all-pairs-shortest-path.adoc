@@ -11,7 +11,7 @@ This algorithm has optimisations that make it quicker than calling the Single So
 
 [WARNING]
 --
-The All Pairs Shortest Path algorithm is part of Neo4j Labs and not supported for production purposes.
+The All Pairs Shortest Path algorithm was developed by the Neo4j Labs team and is not officially supported.
 --
 
 This section includes:

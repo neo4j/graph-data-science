@@ -10,7 +10,7 @@ Common neighbors captures the idea that two strangers who have a friend in commo
 
 [WARNING]
 --
-The Common Neighbors algorithm is part of Neo4j Labs and not supported for production purposes.
+The Common Neighbors algorithm was developed by the Neo4j Labs team and is not officially supported.
 --
 
 This section includes:

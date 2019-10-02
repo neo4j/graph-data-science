@@ -11,7 +11,7 @@ It is often used early in a graph analysis process to help us get an idea of how
 
 [WARNING]
 --
-The Strongly Connected Components algorithm is part of Neo4j Labs and not supported for production purposes.
+The Strongly Connected Components algorithm was developed by the Neo4j Labs team and is not officially supported.
 --
 
 This section includes:

@@ -11,7 +11,7 @@ It is based on the idea that the more connected a node is, the more likely it is
 
 [WARNING]
 --
-The Total Neighbors algorithm is part of Neo4j Labs and not supported for production purposes.
+The Total Neighbors algorithm was developed by the Neo4j Labs team and is not officially supported.
 --
 
 This section includes:

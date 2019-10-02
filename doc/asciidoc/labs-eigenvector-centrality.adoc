@@ -13,7 +13,7 @@ A high score means that a node is connected to other nodes that have high scores
 
 [WARNING]
 --
-The Eigenvector Centrality algorithm is part of Neo4j Labs and not supported for production purposes.
+The Eigenvector Centrality algorithm was developed by the Neo4j Labs team and is not officially supported.
 --
 
 This section includes:

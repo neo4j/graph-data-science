@@ -15,7 +15,7 @@ In general balanced structures are preferred over imbalanced ones.
 
 [WARNING]
 --
-The Balanced Triads algorithm is part of Neo4j Labs and not supported for production purposes.
+The Balanced Triads algorithm was developed by the Neo4j Labs team and is not officially supported.
 --
 
 This section includes:
