@@ -33,7 +33,6 @@ import org.neo4j.graphalgo.core.loading.NodePropertiesBuilder;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.LazyMappingCollection;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
@@ -50,7 +49,7 @@ import java.util.stream.LongStream;
 
 public final class Pregel {
 
-    // Marks the end of messages from the previous iteration
+    // Marks the end of messages from the previous iteration in synchronous mode.
     private static final Double TERMINATION_SYMBOL = Double.NaN;
 
     private final Supplier<Computation> computationFactory;
@@ -64,8 +63,6 @@ public final class Pregel {
     private final int batchSize;
     private final int concurrency;
     private final ExecutorService executor;
-    private final AllocationTracker tracker;
-    private final ProgressLogger progressLogger;
 
     private int iterations;
 
@@ -75,8 +72,7 @@ public final class Pregel {
             final int batchSize,
             final int concurrency,
             final ExecutorService executor,
-            final AllocationTracker tracker,
-            final ProgressLogger progressLogger) {
+            final AllocationTracker tracker) {
 
         final NodeWeights nodeValues = NodePropertiesBuilder
                 .of(graph.nodeCount(), tracker, computationFactory.get().getDefaultNodeValue(), 0, "key")
@@ -89,8 +85,8 @@ public final class Pregel {
                 batchSize,
                 concurrency,
                 executor,
-                tracker,
-                progressLogger);
+                tracker
+        );
     }
 
     public static Pregel withInitialNodeValues(
@@ -100,8 +96,7 @@ public final class Pregel {
             final int batchSize,
             final int concurrency,
             final ExecutorService executor,
-            final AllocationTracker tracker,
-            final ProgressLogger progressLogger) {
+            final AllocationTracker tracker) {
 
         return new Pregel(
                 graph,
@@ -110,8 +105,8 @@ public final class Pregel {
                 batchSize,
                 concurrency,
                 executor,
-                tracker,
-                progressLogger);
+                tracker
+        );
     }
 
     private Pregel(
@@ -121,15 +116,12 @@ public final class Pregel {
             final int batchSize,
             final int concurrency,
             final ExecutorService executor,
-            final AllocationTracker tracker,
-            final ProgressLogger progressLogger) {
+            final AllocationTracker tracker) {
         this.graph = graph;
         this.computationFactory = computationFactory;
-        this.tracker = tracker;
         this.batchSize = batchSize;
         this.concurrency = concurrency;
         this.executor = executor;
-        this.progressLogger = progressLogger;
 
         // HugeDoubleArray is faster for set operations compared to HugeNodePropertyMap
         this.nodeValues = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
@@ -147,48 +139,6 @@ public final class Pregel {
                 ? initArrayQueues(graph, computationFactory, tracker)
                 : initLinkedQueues(graph, tracker);
     }
-
-    private HugeObjectArray<MpscArrayQueue<Double>> initArrayQueues(Graph graph, Supplier<Computation> computationFactory, AllocationTracker tracker) {
-        Computation computation = computationFactory.get();
-        Direction receiveDirection = computation.getMessageDirection().reverse();
-        // In sync mode, we need to reserve space for the termination symbol.
-        int minSize = computation.supportsAsynchronousParallel() ? 0 : 1;
-
-        Class<MpscArrayQueue<Double>> queueClass = (Class<MpscArrayQueue<Double>>) new MpscArrayQueue<>(0).getClass();
-
-        HugeObjectArray<MpscArrayQueue<Double>> messageQueues = HugeObjectArray.newArray(
-                queueClass,
-                graph.nodeCount(),
-                tracker);
-
-        ParallelUtil.parallelStreamConsume(
-                LongStream.range(0, graph.nodeCount()),
-                nodeIds -> nodeIds.forEach(nodeId ->
-                        messageQueues.set(
-                                nodeId,
-                                // We init 2 * degree since we store at most messages from two iterations.
-                                new MpscArrayQueue<Double>(minSize + 2 * graph.degree(nodeId, receiveDirection)))));
-
-        return messageQueues;
-    }
-
-    private HugeObjectArray<MpscLinkedQueue<Double>> initLinkedQueues(Graph graph, AllocationTracker tracker) {
-        Class<MpscLinkedQueue<Double>> queueClass = (Class<MpscLinkedQueue<Double>>) MpscLinkedQueue
-                .newMpscLinkedQueue()
-                .getClass();
-
-        HugeObjectArray<MpscLinkedQueue<Double>> messageQueues = HugeObjectArray.newArray(
-                queueClass,
-                graph.nodeCount(),
-                tracker);
-
-        ParallelUtil.parallelStreamConsume(
-                LongStream.range(0, graph.nodeCount()),
-                nodeIds -> nodeIds.forEach(nodeId -> messageQueues.set(nodeId, MpscLinkedQueue.newMpscLinkedQueue())));
-
-        return messageQueues;
-    }
-
 
     public HugeDoubleArray run(final int maxIterations) {
         iterations = 0;
@@ -277,6 +227,49 @@ public final class Pregel {
 
         ParallelUtil.runWithConcurrency(concurrency, computeSteps, executor);
         return tasks;
+    }
+
+    @SuppressWarnings({"unchecked", "InstantiatingObjectToGetClassObject"})
+    private HugeObjectArray<MpscArrayQueue<Double>> initArrayQueues(Graph graph, Supplier<Computation> computationFactory, AllocationTracker tracker) {
+        Computation computation = computationFactory.get();
+        Direction receiveDirection = computation.getMessageDirection().reverse();
+        // In sync mode, we need to reserve space for the termination symbol.
+        int minSize = computation.supportsAsynchronousParallel() ? 0 : 1;
+
+        Class<MpscArrayQueue<Double>> queueClass = (Class<MpscArrayQueue<Double>>) new MpscArrayQueue<>(0).getClass();
+
+        HugeObjectArray<MpscArrayQueue<Double>> messageQueues = HugeObjectArray.newArray(
+                queueClass,
+                graph.nodeCount(),
+                tracker);
+
+        ParallelUtil.parallelStreamConsume(
+                LongStream.range(0, graph.nodeCount()),
+                nodeIds -> nodeIds.forEach(nodeId ->
+                        messageQueues.set(
+                                nodeId,
+                                // We init 2 * degree since we store at most messages from two iterations.
+                                new MpscArrayQueue<Double>(minSize + 2 * graph.degree(nodeId, receiveDirection)))));
+
+        return messageQueues;
+    }
+
+    @SuppressWarnings({"unchecked"})
+    private HugeObjectArray<MpscLinkedQueue<Double>> initLinkedQueues(Graph graph, AllocationTracker tracker) {
+        Class<MpscLinkedQueue<Double>> queueClass = (Class<MpscLinkedQueue<Double>>) MpscLinkedQueue
+                .newMpscLinkedQueue()
+                .getClass();
+
+        HugeObjectArray<MpscLinkedQueue<Double>> messageQueues = HugeObjectArray.newArray(
+                queueClass,
+                graph.nodeCount(),
+                tracker);
+
+        ParallelUtil.parallelStreamConsume(
+                LongStream.range(0, graph.nodeCount()),
+                nodeIds -> nodeIds.forEach(nodeId -> messageQueues.set(nodeId, MpscLinkedQueue.newMpscLinkedQueue())));
+
+        return messageQueues;
     }
 
     public static final class ComputeStep implements Runnable {

@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphdb.Direction;
@@ -99,8 +98,8 @@ class SCCTest {
                 batchSize,
                 Pools.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT,
-                AllocationTracker.EMPTY,
-                ProgressLogger.NULL_LOGGER);
+                AllocationTracker.EMPTY
+        );
 
         HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
 

@@ -24,7 +24,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.WeightMapping;
 import org.neo4j.graphalgo.core.loading.NullWeightMap;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -81,8 +80,8 @@ public class UnionFindPregel extends UnionFind<UnionFindPregel> {
                     (int) batchSize,
                     (int) threadSize,
                     executor,
-                    tracker,
-                    ProgressLogger.NULL_LOGGER);
+                    tracker
+            );
         } else {
             this.pregel = Pregel.withInitialNodeValues(
                     graph,
@@ -91,8 +90,8 @@ public class UnionFindPregel extends UnionFind<UnionFindPregel> {
                     (int) batchSize,
                     (int) threadSize,
                     executor,
-                    tracker,
-                    ProgressLogger.NULL_LOGGER);
+                    tracker
+            );
         }
     }
 
