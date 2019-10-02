@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.beta.pregel;
 
 import com.carrotsearch.hppc.BitSet;
 import org.jctools.queues.MpscArrayQueue;
+import org.jctools.queues.MpscLinkedQueue;
 import org.neo4j.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
@@ -41,6 +42,7 @@ import org.neo4j.graphdb.Direction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -56,8 +58,8 @@ public final class Pregel {
     private final Graph graph;
 
     private final HugeDoubleArray nodeValues;
-    // Using bounded queues improves performance by ~20%
-    private final HugeObjectArray<MpscArrayQueue<Double>> messageQueues;
+
+    private final HugeObjectArray<? extends Queue<Double>> messageQueues;
 
     private final int batchSize;
     private final int concurrency;
@@ -136,20 +138,57 @@ public final class Pregel {
                 nodeIds -> nodeIds.forEach(nodeId -> nodeValues.set(nodeId, initialNodeValues.nodeWeight(nodeId)))
         );
 
+        Direction loadDirection = graph.getLoadDirection();
+
+        // If the graph can compute degrees in both directions,
+        // we can compute the maximum number of received messages
+        // which allows us to use ArrayQueues instead of LinkedQueues.
+        this.messageQueues = (loadDirection == Direction.BOTH)
+                ? initArrayQueues(graph, computationFactory, tracker)
+                : initLinkedQueues(graph, tracker);
+    }
+
+    private HugeObjectArray<MpscArrayQueue<Double>> initArrayQueues(Graph graph, Supplier<Computation> computationFactory, AllocationTracker tracker) {
         Computation computation = computationFactory.get();
-        Direction messageDirection = computation.getMessageDirection();
-        // In async mode we read at most 2 * degree messages per iteration.
-        int factor = computation.supportsAsynchronousParallel() ? 2 : 1;
+        Direction receiveDirection = computation.getMessageDirection().reverse();
+        // In sync mode, we need to reserve space for the termination symbol.
+        int minSize = computation.supportsAsynchronousParallel() ? 0 : 1;
 
         Class<MpscArrayQueue<Double>> queueClass = (Class<MpscArrayQueue<Double>>) new MpscArrayQueue<>(0).getClass();
-        this.messageQueues = HugeObjectArray.newArray(queueClass, graph.nodeCount(), tracker);
+
+        HugeObjectArray<MpscArrayQueue<Double>> messageQueues = HugeObjectArray.newArray(
+                queueClass,
+                graph.nodeCount(),
+                tracker);
+
         ParallelUtil.parallelStreamConsume(
                 LongStream.range(0, graph.nodeCount()),
                 nodeIds -> nodeIds.forEach(nodeId ->
                         messageQueues.set(
                                 nodeId,
-                                new MpscArrayQueue<Double>(factor * graph.degree(nodeId, messageDirection)))));
+                                // We init 2 * degree since we store at most messages from two iterations.
+                                new MpscArrayQueue<Double>(minSize + 2 * graph.degree(nodeId, receiveDirection)))));
+
+        return messageQueues;
     }
+
+    private HugeObjectArray<MpscLinkedQueue<Double>> initLinkedQueues(Graph graph, AllocationTracker tracker) {
+        Class<MpscLinkedQueue<Double>> queueClass = (Class<MpscLinkedQueue<Double>>) MpscLinkedQueue
+                .newMpscLinkedQueue()
+                .getClass();
+
+        HugeObjectArray<MpscLinkedQueue<Double>> messageQueues = HugeObjectArray.newArray(
+                queueClass,
+                graph.nodeCount(),
+                tracker);
+
+        ParallelUtil.parallelStreamConsume(
+                LongStream.range(0, graph.nodeCount()),
+                nodeIds -> nodeIds.forEach(nodeId -> messageQueues.set(nodeId, MpscLinkedQueue.newMpscLinkedQueue())));
+
+        return messageQueues;
+    }
+
 
     public HugeDoubleArray run(final int maxIterations) {
         iterations = 0;
@@ -250,7 +289,7 @@ public final class Pregel {
         private final PrimitiveLongIterable nodeBatch;
         private final Degrees degrees;
         private final HugeDoubleArray nodeValues;
-        private final HugeObjectArray<MpscArrayQueue<Double>> messageQueues;
+        private final HugeObjectArray<? extends Queue<Double>> messageQueues;
         private final RelationshipIterator relationshipIterator;
 
         private ComputeStep(
@@ -262,7 +301,7 @@ public final class Pregel {
                 final HugeDoubleArray nodeValues,
                 final BitSet receiverBits,
                 final BitSet voteBits,
-                final HugeObjectArray<MpscArrayQueue<Double>> messageQueues,
+                final HugeObjectArray<? extends Queue<Double>> messageQueues,
                 final RelationshipIterator relationshipIterator) {
             this.iteration = iteration;
             this.computation = computation;
@@ -328,7 +367,7 @@ public final class Pregel {
             });
         }
 
-        private MpscArrayQueue<Double> receiveMessages(final long nodeId) {
+        private Queue<Double> receiveMessages(final long nodeId) {
             return receiverBits.get(nodeId) ? messageQueues.get(nodeId) : null;
         }
     }
