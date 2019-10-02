@@ -34,8 +34,8 @@ import static org.neo4j.graphalgo.core.utils.paged.PageUtil.pageIndex;
 public final class AdjacencyList {
 
     public static final int PAGE_SHIFT = 18;
-    public static final int PAGE_SIZE = 262144; // 1 << PAGE_SHIFT
-    public static final long PAGE_MASK = 262143L; // PAGE_SIZE - 1
+    public static final int PAGE_SIZE = 1 << PAGE_SHIFT;
+    public static final long PAGE_MASK = PAGE_SIZE - 1;
 
     private final long allocatedMemory;
     private byte[][] pages;

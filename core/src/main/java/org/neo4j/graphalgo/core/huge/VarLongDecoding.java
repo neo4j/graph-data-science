@@ -23,14 +23,14 @@ final class VarLongDecoding {
 
     static int decodeDeltaVLongs(
             long startValue,
-            byte[] array,
+            byte[] adjacencyPage,
             int offset,
             int limit,
             long[] out) {
         long input, value = 0L;
         int into = 0, shift = 0;
         while (into < limit) {
-            input = (long) array[offset++];
+            input = (long) adjacencyPage[offset++];
             value += (input & 127L) << shift;
             if ((input & 128L) == 128L) {
                 startValue += value;
