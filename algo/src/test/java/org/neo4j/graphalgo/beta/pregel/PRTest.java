@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.pregel;
+package org.neo4j.graphalgo.beta.pregel;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,42 +30,50 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.pregel.paths.SSSPComputation;
+import org.neo4j.graphalgo.beta.pregel.pagerank.PRComputation;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.neo4j.graphalgo.pregel.ComputationTestUtil.assertLongValues;
+import static org.neo4j.graphalgo.beta.pregel.ComputationTestUtil.assertDoubleValues;
 
-class SSSPTest {
+class PRTest {
 
     private static final String ID_PROPERTY = "id";
 
     private static final Label NODE_LABEL = Label.label("Node");
 
+    // https://en.wikipedia.org/wiki/PageRank#/media/File:PageRanks-Example.jpg
     private static final String TEST_GRAPH =
             "CREATE" +
-            "  (nA:Node { id: 0 })" +
-            ", (nB:Node { id: 1 })" +
-            ", (nC:Node { id: 2 })" +
-            ", (nD:Node { id: 3 })" +
-            ", (nE:Node { id: 4 })" +
-            ", (nF:Node { id: 5 })" +
-            ", (nG:Node { id: 6 })" +
-            ", (nH:Node { id: 7 })" +
-            ", (nI:Node { id: 8 })" +
-            // {J}
-            ", (nJ:Node { id: 9 })" +
-            // {A, B, C, D}
-            ", (nA)-[:TYPE]->(nB)" +
-            ", (nB)-[:TYPE]->(nC)" +
-            ", (nC)-[:TYPE]->(nD)" +
-            ", (nA)-[:TYPE]->(nC)" +
-            // {E, F, G}
-            ", (nE)-[:TYPE]->(nF)" +
-            ", (nF)-[:TYPE]->(nG)" +
-            // {H, I}
-            ", (nI)-[:TYPE]->(nH)";
+            "  (a:Node { id: 0, name: 'a' })" +
+            ", (b:Node { id: 1, name: 'b' })" +
+            ", (c:Node { id: 2, name: 'c' })" +
+            ", (d:Node { id: 3, name: 'd' })" +
+            ", (e:Node { id: 4, name: 'e' })" +
+            ", (f:Node { id: 5, name: 'f' })" +
+            ", (g:Node { id: 6, name: 'g' })" +
+            ", (h:Node { id: 7, name: 'h' })" +
+            ", (i:Node { id: 8, name: 'i' })" +
+            ", (j:Node { id: 9, name: 'j' })" +
+            ", (k:Node { id: 10, name: 'k' })" +
+            ", (b)-[:REL]->(c)" +
+            ", (c)-[:REL]->(b)" +
+            ", (d)-[:REL]->(a)" +
+            ", (d)-[:REL]->(b)" +
+            ", (e)-[:REL]->(b)" +
+            ", (e)-[:REL]->(d)" +
+            ", (e)-[:REL]->(f)" +
+            ", (f)-[:REL]->(b)" +
+            ", (f)-[:REL]->(e)" +
+            ", (g)-[:REL]->(b)" +
+            ", (g)-[:REL]->(e)" +
+            ", (h)-[:REL]->(b)" +
+            ", (h)-[:REL]->(e)" +
+            ", (i)-[:REL]->(b)" +
+            ", (i)-[:REL]->(e)" +
+            ", (j)-[:REL]->(e)" +
+            ", (k)-[:REL]->(e)";
 
     private GraphDatabaseAPI db;
     private Graph graph;
@@ -77,7 +85,7 @@ class SSSPTest {
         graph = new GraphLoader(db)
                 .withAnyRelationshipType()
                 .withAnyLabel()
-                .withDirection(Direction.BOTH)
+                .withDirection(Direction.OUTGOING)
                 .load(HugeGraphFactory.class);
     }
 
@@ -87,31 +95,34 @@ class SSSPTest {
     }
 
     @Test
-    void runSSSP() {
+    void runPR() {
         int batchSize = 10;
         int maxIterations = 10;
+        float dampingFactor = 0.85f;
 
         Pregel pregelJob = Pregel.withDefaultNodeValues(
                 graph,
-                () -> new SSSPComputation(0),
+                () -> new PRComputation(graph.nodeCount(), dampingFactor),
                 batchSize,
                 Pools.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT,
                 AllocationTracker.EMPTY,
                 ProgressLogger.NULL_LOGGER);
 
-        HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
+        final HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
 
-        assertLongValues(db, NODE_LABEL, ID_PROPERTY, graph, nodeValues,
-                0,
-                1,
-                1,
-                2,
-                Long.MAX_VALUE,
-                Long.MAX_VALUE,
-                Long.MAX_VALUE,
-                Long.MAX_VALUE,
-                Long.MAX_VALUE,
-                Long.MAX_VALUE);
+        assertDoubleValues(db, NODE_LABEL, ID_PROPERTY, graph, nodeValues, 1e-3,
+                0.0276, // a
+                0.3483, // b
+                0.2650, // c
+                0.0330, // d
+                0.0682, // e
+                0.0330, // f
+                0.0136, // g
+                0.0136, // h
+                0.0136, // i
+                0.0136, // j
+                0.0136 // k
+        );
     }
 }

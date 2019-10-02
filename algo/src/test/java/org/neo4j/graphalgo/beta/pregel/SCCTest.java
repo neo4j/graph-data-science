@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.pregel;
+package org.neo4j.graphalgo.beta.pregel;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,14 +30,14 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.pregel.components.WCCComputation;
+import org.neo4j.graphalgo.beta.pregel.components.SCCComputation;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.neo4j.graphalgo.pregel.ComputationTestUtil.assertLongValues;
+import static org.neo4j.graphalgo.beta.pregel.ComputationTestUtil.assertLongValues;
 
-class WCCTest {
+class SCCTest {
 
     private static final String ID_PROPERTY = "id";
 
@@ -60,11 +60,14 @@ class WCCTest {
             ", (nA)-[:TYPE]->(nB)" +
             ", (nB)-[:TYPE]->(nC)" +
             ", (nC)-[:TYPE]->(nD)" +
+            ", (nD)-[:TYPE]->(nA)" +
             // {E, F, G}
             ", (nE)-[:TYPE]->(nF)" +
             ", (nF)-[:TYPE]->(nG)" +
+            ", (nG)-[:TYPE]->(nE)" +
             // {H, I}
-            ", (nI)-[:TYPE]->(nH)";
+            ", (nI)-[:TYPE]->(nH)" +
+            ", (nH)-[:TYPE]->(nI)";
 
     private GraphDatabaseAPI db;
     private Graph graph;
@@ -76,7 +79,7 @@ class WCCTest {
         graph = new GraphLoader(db)
                 .withAnyRelationshipType()
                 .withAnyLabel()
-                .withDirection(Direction.BOTH)
+                .withDirection(Direction.OUTGOING)
                 .load(HugeGraphFactory.class);
     }
 
@@ -86,13 +89,13 @@ class WCCTest {
     }
 
     @Test
-    void runWCC() {
+    void runSCC() {
         int batchSize = 10;
         int maxIterations = 10;
 
         Pregel pregelJob = Pregel.withDefaultNodeValues(
                 graph,
-                WCCComputation::new,
+                SCCComputation::new,
                 batchSize,
                 Pools.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT,

@@ -17,9 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.pregel.pagerank;
+package org.neo4j.graphalgo.beta.pregel.pagerank;
 
-import org.neo4j.graphalgo.pregel.Computation;
+import org.neo4j.graphalgo.beta.pregel.Computation;
 
 import java.util.Queue;
 

@@ -17,19 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.neo4j.graphalgo.beta.pregel.components;
 
-package org.neo4j.graphalgo.pregel.paths;
-
-import org.neo4j.graphalgo.pregel.Computation;
+import org.neo4j.graphalgo.beta.pregel.Computation;
+import org.neo4j.graphdb.Direction;
 
 import java.util.Queue;
 
-public class SSSPComputation extends Computation {
+// TODO: Inheritance would be an anti pattern for other languages (e.g. use compute closure)
+// TODO: byte code javap (explore inlining)
+public class WCCComputation extends Computation {
 
-    private final long startNode;
-
-    public SSSPComputation(long startNode) {
-        this.startNode = startNode;
+    @Override
+    protected Direction getMessageDirection() {
+        return Direction.BOTH;
     }
 
     @Override
@@ -38,36 +39,36 @@ public class SSSPComputation extends Computation {
     }
 
     @Override
-    protected void compute(long nodeId, Queue<Double> messages) {
+    protected void compute(final long nodeId, Queue<Double> messages) {
         if (getSuperstep() == 0) {
-            if (nodeId == startNode) {
-                setNodeValue(nodeId, 0);
-                sendMessages(nodeId, 1);
+            double currentValue = getNodeValue(nodeId);
+            if (currentValue == getDefaultNodeValue()) {
+                sendMessages(nodeId, nodeId);
+                setNodeValue(nodeId, nodeId);
             } else {
-                setNodeValue(nodeId, Long.MAX_VALUE);
+                sendMessages(nodeId, currentValue);
             }
         } else {
-            // This is basically the same message passing as WCC (except the new message)
-            long newDistance = (long) getNodeValue(nodeId);
+            long newComponentId = (long) getNodeValue(nodeId);
             boolean hasChanged = false;
 
+            // TODO: foreach consumer?
             if (messages != null) {
                 Double message;
                 while ((message = messages.poll()) != null) {
-                    if (message < newDistance) {
-                        newDistance = message.longValue();
+                    if (message < newComponentId) {
+                        newComponentId = message.longValue();
                         hasChanged = true;
                     }
                 }
             }
 
             if (hasChanged) {
-                setNodeValue(nodeId, newDistance);
-                sendMessages(nodeId, newDistance + 1);
+                setNodeValue(nodeId, newComponentId);
+                sendMessages(nodeId, newComponentId);
             }
 
             voteToHalt(nodeId);
         }
-
     }
 }
