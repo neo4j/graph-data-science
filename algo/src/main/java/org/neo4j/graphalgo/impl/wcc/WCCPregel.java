@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.neo4j.graphalgo.impl.unionfind;
+package org.neo4j.graphalgo.impl.wcc;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.WeightMapping;
@@ -35,7 +35,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.concurrent.ExecutorService;
 
-public class UnionFindPregel extends UnionFind<UnionFindPregel> {
+public class WCCPregel extends WCC<WCCPregel> {
 
     private final Pregel pregel;
     private final long nodeCount;
@@ -43,17 +43,17 @@ public class UnionFindPregel extends UnionFind<UnionFindPregel> {
 
     public static MemoryEstimation memoryEstimation(boolean incremental) {
         return MemoryEstimations
-                .builder(UnionFindPregel.class)
+                .builder(WCCPregel.class)
                 // TODO
                 .build();
     }
 
-    UnionFindPregel(
+    WCCPregel(
             Graph graph,
             ExecutorService executor,
             int minBatchSize,
             int concurrency,
-            UnionFind.Config algoConfig,
+            WCC.Config algoConfig,
             AllocationTracker tracker) {
         super(graph, algoConfig);
         this.nodeCount = graph.nodeCount();

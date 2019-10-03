@@ -52,7 +52,6 @@ public class WCCComputation extends Computation {
             long newComponentId = (long) getNodeValue(nodeId);
             boolean hasChanged = false;
 
-            // TODO: foreach consumer?
             if (messages != null) {
                 Double message;
                 while ((message = messages.poll()) != null) {

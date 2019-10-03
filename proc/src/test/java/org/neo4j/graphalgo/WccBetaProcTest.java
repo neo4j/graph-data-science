@@ -316,4 +316,19 @@ class WccBetaProcTest extends ProcTestBase {
         );
         assertMapContains(map, 1, 2, 7);
     }
+
+    @AllGraphNamesTest
+    void testUnionFindPregel(String graphImpl) {
+        String query = "CALL algo.beta.wcc.pregel(" +
+                       "    '', 'TYPE', {" +
+                       "        graph: $graph" +
+                       "    }" +
+                       ")";
+
+        runQuery(query, MapUtil.map("graph", graphImpl),
+                row -> {
+                    assertEquals(3L, row.getNumber("communityCount"));
+                    assertEquals(3L, row.getNumber("setCount"));
+                });
+    }
 }

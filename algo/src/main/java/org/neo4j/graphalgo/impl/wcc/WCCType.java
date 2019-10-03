@@ -97,19 +97,19 @@ public enum WCCType {
     },
     PREGEL {
         @Override
-        public UnionFind<? extends UnionFind> create(
+        public WCC<? extends WCC> create(
                 final Graph graph,
                 final ExecutorService executor,
                 final int minBatchSize,
                 final int concurrency,
-                final UnionFind.Config config,
+                final WCC.Config config,
                 final AllocationTracker tracker) {
-            return new UnionFindPregel(graph, executor, minBatchSize, concurrency, config, tracker);
+            return new WCCPregel(graph, executor, minBatchSize, concurrency, config, tracker);
         }
 
         @Override
         MemoryEstimation memoryEstimation(final boolean incremental) {
-            return UnionFindPregel.memoryEstimation(incremental);
+            return WCCPregel.memoryEstimation(incremental);
         }
     };
 

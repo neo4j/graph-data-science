@@ -77,18 +77,6 @@ public class UnionFindProc<T extends WCC<T>> extends WccBaseProc<T> {
         return Stream.of(new MemRecResult(memoryEstimation));
     }
 
-    @Procedure(value = "algo.beta.unionFind.pregel", mode = Mode.WRITE)
-    @Description("CALL algo.unionFind(label:String, relationship:String, " +
-                 "{weightProperty: 'weight', threshold: 0.42, defaultValue: 1.0, write: true, writeProperty: 'community', seedProperty: 'seedCommunity', consecutiveId: false}) " +
-                 "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
-    public Stream<WriteResult> unionFindPregel(
-            @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationship,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
-
-        return run(label, relationship, config, UnionFindType.PREGEL);
-    }
-
     @Deprecated
     @Procedure(value = "algo.unionFind.queue", mode = Mode.WRITE, deprecatedBy = "algo.wcc")
     @Description("CALL algo.unionFind.queue(label:String, relationship:String, " +
@@ -159,7 +147,7 @@ public class UnionFindProc<T extends WCC<T>> extends WccBaseProc<T> {
     @Description("CALL algo.unionFind.forkJoin.stream(label:String, relationship:String, " +
                  "{property: 'propertyName', threshold: 0.42, defaultValue: 1.0, seedProperty: 'seedCommunity', concurrency: 4}) " +
                  "YIELD nodeId, setId - yields a setId to each node id")
-    public Stream<StreamResult> unionFindForJoinStream(
+    public Stream<StreamResult> unionFindForkJoinStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
