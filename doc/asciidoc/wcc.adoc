@@ -127,7 +127,7 @@ YIELD nodeId, setId
 [opts="header",cols="1m,1,1,1,4"]
 |===
 | Name              | Type    | Default                   | Optional | Description
-| concurrency       | int     | available CPUs            | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
+| concurrency       | int     | available CPUs            | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
 | readConcurrency   | int     | value of 'concurrency'    | yes      | The number of concurrent threads used for reading the graph.
 | weightProperty    | string  | `null`                    | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
 | seedProperty      | string  | n/a                       | yes      | Used to set the initial community for a node. The property value needs to be a number.
