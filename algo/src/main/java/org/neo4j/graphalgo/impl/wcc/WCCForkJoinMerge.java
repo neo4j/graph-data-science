@@ -196,7 +196,7 @@ public class WCCForkJoinMerge extends WCC<WCCForkJoinMerge> {
                             double weight = graph.weightOf(
                                     sourceNodeId,
                                     targetNodeId,
-                                    UnionFind.defaultWeight(threshold));
+                                    WCC.defaultWeight(threshold));
                             if (weight > threshold) {
                                 struct.union(sourceNodeId, targetNodeId);
                             }

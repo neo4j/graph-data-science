@@ -160,7 +160,7 @@ public class ParallelWCC extends WCC<ParallelWCC> {
 
         @Override
         void compute(final long node) {
-            rels.forEachRelationship(node, Direction.OUTGOING, UnionFind.defaultWeight(threshold), this);
+            rels.forEachRelationship(node, Direction.OUTGOING, WCC.defaultWeight(threshold), this);
         }
 
         @Override
