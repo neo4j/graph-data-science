@@ -25,15 +25,21 @@ import org.junit.jupiter.api.AfterAll;
 import org.neo4j.graphalgo.core.loading.GraphLoadFactory;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.internal.kernel.api.exceptions.KernelException;
+import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import static java.lang.String.format;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -45,6 +51,13 @@ public class ProcTestBase {
     @AfterAll
     static void clearLoadedGraphs() {
         GraphLoadFactory.removeAllLoadedGraphs();
+    }
+
+    void registerFunc(Class<?>... procClasses) throws KernelException {
+        final Procedures procedures = DB.getDependencyResolver().resolveDependency(Procedures.class);
+        for (Class<?> clazz : procClasses) {
+            procedures.registerFunction(clazz);
+        }
     }
 
     protected void runQuery(String query) {
@@ -160,6 +173,31 @@ public class ProcTestBase {
                         "score for " + entry.getKey());
             }
             tx.success();
+        }
+    }
+
+    void assertCypherResult(String query, List<Map<String, Object>> expected) {
+        try (Transaction tx = DB.beginTx()) {
+            final List<Map<String, Object>> actual = new ArrayList<>();
+            final Result result = DB.execute(query);
+            result.accept(row -> {
+                final Map<String, Object> _row = new HashMap<>();
+                for (String column : result.columns()) {
+                    _row.put(column, row.get(column));
+                }
+                actual.add(_row);
+                return true;
+            });
+            String reason = format(
+                    "Different amount of rows returned for actual result (%d) than expected (%d)",
+                    actual.size(),
+                    expected.size());
+            assertThat(reason, actual.size(), equalTo(expected.size()));
+            for (int i = 0; i < expected.size(); ++i) {
+                final Map<String, Object> expectedRow = expected.get(i);
+                final Map<String, Object> actualRow = actual.get(i);
+                assertThat(actualRow, equalTo(expectedRow));
+            }
         }
     }
 }
