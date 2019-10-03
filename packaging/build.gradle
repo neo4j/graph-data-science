@@ -3,9 +3,8 @@ description = 'Neo4j Graph Algorithms :: Packaging'
 apply plugin: 'com.github.johnrengelman.shadow'
 
 dependencies {
-    compile project(':labs')
-    compile project(':proc')
-    compileOnly group: 'org.neo4j', name: 'neo4j', version: ver.'neo4j'
+    compile project(path: ':labs', configuration: 'shadow')
+    compile project(path: ':proc', configuration: 'shadow')
 }
 
 publishing {
@@ -19,7 +18,6 @@ publishing {
 shadowJar {
     baseName = "neo4j-graph-algorithms"
     classifier = "standalone"
-    minimize()
     exclude 'META-INF/versions/**/*'
     from licenseFile
     from generateLicensesFiles

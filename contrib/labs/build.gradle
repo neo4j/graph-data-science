@@ -1,5 +1,7 @@
 description = 'Neo4j Labs :: Graph Algorithms'
 
+apply plugin: 'com.github.johnrengelman.shadow'
+
 dependencies {
     compile project(':algo')
 
@@ -36,4 +38,13 @@ tasks.withType(JavaCompile) {
         '-ADocumentation.QuotedFields=false' <<
         '-ADocumentation.DelimitedFirstField=true' <<
         '-ADocumentation.ExportGrouping=SINGLE'
+}
+
+shadowJar {
+    baseName = "neo4j-graph-algorithms-labs"
+    classifier = "standalone"
+    minimize()
+    exclude 'META-INF/versions/**/*'
+    from licenseFile
+    from generateLicensesFiles
 }
