@@ -128,7 +128,7 @@ We can see that Alice is the main broker in this network, and Charles is a minor
 The others don't have any influence, because all the shortest paths between pairs of people go via Alice or Charles.
 // end::stream-sample-graph-explanation[]
 
-include::labs-betweenness-centrality-ra-brandes.adoc[leveloffset=3]
+include::labs-betweenness-centrality-ra-brandes.adoc[leveloffset=+1]
 
 
 [[labs-algorithms-betweenness-centrality-cp]]
