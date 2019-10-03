@@ -39,7 +39,7 @@ task shadowCopy(type: Copy) {
 
 task versionsJson {
     ext.outFile = file("$distributionDir/versions.json")
-    def bucketUrl = "http://s3-eu-west-1.amazonaws.com/com.neo4j.graphalgorithms.dist"
+    def bucketUrl = "https://s3-eu-west-1.amazonaws.com/com.neo4j.graphalgorithms.dist"
     def versionsJsonUrl = new URL("https://raw.githubusercontent.com/neo4j-contrib/neo4j-graph-algorithms/master/versions.json")
     outputs.file(outFile)
     doLast {
