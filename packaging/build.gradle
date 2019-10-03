@@ -1,0 +1,62 @@
+description = 'Neo4j Graph Algorithms :: Packaging'
+
+apply plugin: 'com.github.johnrengelman.shadow'
+
+dependencies {
+    compile project(':labs')
+    compile project(':proc')
+    compileOnly group: 'org.neo4j', name: 'neo4j', version: ver.'neo4j'
+}
+
+publishing {
+    publications {
+        algo(MavenPublication) {
+            project.shadow.component(it)
+        }
+    }
+}
+
+shadowJar {
+    baseName = "neo4j-graph-algorithms"
+    classifier = "standalone"
+    minimize()
+    exclude 'META-INF/versions/**/*'
+    from licenseFile
+    from generateLicensesFiles
+}
+
+task shadowCopy(type: Copy) {
+    from(shadowJar)
+    into distributionDir
+}
+
+task versionsJson {
+    ext.outFile = file("$distributionDir/versions.json")
+    def bucketUrl = "https://s3-eu-west-1.amazonaws.com/com.neo4j.graphalgorithms.dist"
+    def versionsJsonUrl = new URL("https://raw.githubusercontent.com/neo4j-contrib/neo4j-graph-algorithms/master/versions.json")
+    outputs.file(outFile)
+    doLast {
+        def versionsJson = new groovy.json.JsonSlurper().parse(versionsJsonUrl)
+        def indexedVersionsJson = versionsJson.collectEntries {
+            [(it.neo4j): it]
+        }
+        indexedVersionsJson[ver.neo4j] = [
+                'neo4j': ver.neo4j,
+                'version': project.version,
+                'url': "",
+                'jar': "$bucketUrl/${shadowJar.archiveName}",
+        ]
+        outFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(indexedVersionsJson.values()))
+    }
+}
+
+task distZip(type: Zip) {
+    description 'Create a ZIP archive of the main distribution JAR.'
+    baseName = shadowJar.baseName
+    classifier = shadowJar.classifier
+    from shadowJar
+    destinationDir file(distributionDir)
+}
+
+ci.finalizedBy shadowCopy, versionsJson, distZip
+cipr.finalizedBy shadowCopy, versionsJson, distZip

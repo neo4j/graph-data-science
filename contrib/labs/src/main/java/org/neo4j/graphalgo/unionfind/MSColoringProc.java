@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.unionfind;
 
+import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -29,7 +30,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.impl.MSColoring;
-import org.neo4j.graphalgo.wcc.WccBaseProc;
+import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -41,6 +42,9 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalLong;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.stream.Stream;
 
@@ -64,7 +68,7 @@ public class MSColoringProc {
     @Description("CALL algo.unionFind.mscoloring(label:String, relationship:String, " +
                  "{property:'weight', threshold:0.42, defaultValue:1.0, write: true, partitionProperty:'partition', concurrency:4}) " +
                  "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
-    public Stream<WccBaseProc.WriteResult> mscoloring(
+    public Stream<WriteResult> mscoloring(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
@@ -73,7 +77,7 @@ public class MSColoringProc {
                 .setNodeLabelOrQuery(label)
                 .setRelationshipTypeOrQuery(relationship);
 
-        final WccBaseProc.WriteResultBuilder builder = new WccBaseProc.WriteResultBuilder(callContext.outputFields());
+        final WriteResultBuilder builder = new WriteResultBuilder(callContext.outputFields());
 
         // loading
         AllocationTracker tracker = AllocationTracker.create();
@@ -84,7 +88,7 @@ public class MSColoringProc {
 
         if (graph.isEmpty()) {
             graph.release();
-            return Stream.of(WccBaseProc.WriteResult.EMPTY);
+            return Stream.of(WriteResult.EMPTY);
         }
 
         // evaluation
@@ -161,5 +165,145 @@ public class MSColoringProc {
                         struct,
                         Translators.ATOMIC_INTEGER_ARRAY_TRANSLATOR
                 );
+    }
+
+    public static class WriteResult {
+
+        public static final WriteResult EMPTY = new WriteResult(
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                false, null, null);
+
+        public final long loadMillis;
+        public final long computeMillis;
+        public final long writeMillis;
+        public final long postProcessingMillis;
+        public final long nodes;
+        public final long communityCount;
+        public final long setCount;
+        public final long p1;
+        public final long p5;
+        public final long p10;
+        public final long p25;
+        public final long p50;
+        public final long p75;
+        public final long p90;
+        public final long p95;
+        public final long p99;
+        public final long p100;
+        public final boolean write;
+        public final String partitionProperty;
+        public final String writeProperty;
+
+        WriteResult(
+                long loadMillis,
+                long computeMillis,
+                long postProcessingMillis,
+                long writeMillis,
+                long nodes,
+                long communityCount,
+                long p100,
+                long p99,
+                long p95,
+                long p90,
+                long p75,
+                long p50,
+                long p25,
+                long p10,
+                long p5,
+                long p1,
+                boolean write,
+                String partitionProperty,
+                String writeProperty) {
+            this.loadMillis = loadMillis;
+            this.computeMillis = computeMillis;
+            this.writeMillis = writeMillis;
+            this.postProcessingMillis = postProcessingMillis;
+            this.nodes = nodes;
+            this.communityCount = this.setCount = communityCount;
+            this.p100 = p100;
+            this.p99 = p99;
+            this.p95 = p95;
+            this.p90 = p90;
+            this.p75 = p75;
+            this.p50 = p50;
+            this.p25 = p25;
+            this.p10 = p10;
+            this.p5 = p5;
+            this.p1 = p1;
+            this.write = write;
+            this.partitionProperty = partitionProperty;
+            this.writeProperty = writeProperty;
+        }
+    }
+
+    public static class WriteResultBuilder extends AbstractCommunityResultBuilder<WriteResult> {
+        private String partitionProperty;
+        private String writeProperty;
+
+        WriteResultBuilder(Set<String> returnFields) {
+            super(returnFields);
+        }
+
+        public WriteResultBuilder(Stream<String> returnFields) {
+            super(returnFields);
+        }
+
+        @Override
+        protected WriteResult build(
+                long loadMillis,
+                long computeMillis,
+                long writeMillis,
+                long postProcessingMillis,
+                long nodeCount,
+                OptionalLong maybeCommunityCount,
+                Optional<Histogram> maybeCommunityHistogram,
+                boolean write) {
+            return new WriteResult(
+                    loadMillis,
+                    computeMillis,
+                    postProcessingMillis,
+                    writeMillis,
+                    nodeCount,
+                    maybeCommunityCount.orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(100)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(99)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(95)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(90)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(75)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(50)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(25)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(10)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(5)).orElse(-1L),
+                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(1)).orElse(-1L),
+                    write,
+                    partitionProperty,
+                    writeProperty
+            );
+        }
+
+        WriteResultBuilder withPartitionProperty(String partitionProperty) {
+            this.partitionProperty = partitionProperty;
+            return this;
+        }
+
+        WriteResultBuilder withWriteProperty(String writeProperty) {
+            this.writeProperty = writeProperty;
+            return this;
+        }
     }
 }
