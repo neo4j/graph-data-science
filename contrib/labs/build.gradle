@@ -41,7 +41,7 @@ tasks.withType(JavaCompile) {
 }
 
 shadowJar {
-    baseName = "neo4j-graph-algorithms-labs"
+    baseName = "neo4j-labs-graph-algorithms"
     classifier = "standalone"
     minimize()
     exclude 'META-INF/versions/**/*'
