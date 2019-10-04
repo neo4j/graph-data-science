@@ -65,6 +65,9 @@ class PageRankProcTest extends ProcTestBase {
             ", (r:Label2 {name: 'r'})" +
             ", (s:Label2 {name: 's'})" +
             ", (t:Label2 {name: 't'})" +
+            ", (u:Label3 {name: 'u'})" +
+            ", (v:Label3 {name: 'v'})" +
+            ", (w:Label3 {name: 'w'})" +
             ", (b)-[:TYPE1 {weight: 1.0,  equalWeight: 1.0}]->(c)" +
             ", (c)-[:TYPE1 {weight: 1.2,  equalWeight: 1.0}]->(b)" +
             ", (d)-[:TYPE1 {weight: 1.3,  equalWeight: 1.0}]->(a)" +
@@ -81,7 +84,10 @@ class PageRankProcTest extends ProcTestBase {
             ", (i)-[:TYPE2 {weight: 5.4,  equalWeight: 1.0}]->(b)" +
             ", (i)-[:TYPE2 {weight: 3.2,  equalWeight: 1.0}]->(e)" +
             ", (j)-[:TYPE2 {weight: 9.5,  equalWeight: 1.0}]->(e)" +
-            ", (k)-[:TYPE2 {weight: 4.2,  equalWeight: 1.0}]->(e)";
+            ", (k)-[:TYPE2 {weight: 4.2,  equalWeight: 1.0}]->(e)" +
+            ", (u)-[:TYPE3 {weight: 1.0}]->(v)" +
+            ", (u)-[:TYPE3 {weight: 1.0}]->(w)" +
+            ", (v)-[:TYPE3 {weight: 1.0}]->(w)";
 
     @AfterAll
     static void tearDown() {
@@ -212,7 +218,7 @@ class PageRankProcTest extends ProcTestBase {
         String graphName = "fooGraph";
         String loadQuery = String.format(
                 "CALL algo.graph.load(" +
-                "    '%s', 'Label1', 'TYPE1', {" +
+                "    '%s', 'Label3', 'TYPE3', {" +
                 "        graph: $graph, relationshipWeight: 'weight', direction: 'BOTH'" +
                 "    }" +
                 ")", graphName);
@@ -220,15 +226,20 @@ class PageRankProcTest extends ProcTestBase {
         DB.execute(loadQuery, MapUtil.map("graph", graphImpl));
 
         String query = "CALL algo.pageRank.stream(" +
-                       "    null, null, {" +
+                       "    '', '', {" +
                        "        graph: $graph, " +
-                       "        weightProperty: 'weight', " +
-                       "        direction: 'OUTGOING'" +
+                       "        weightProperty: 'equalWeight', " +
+                       "        direction: 'BOTH'," +
+                       "        iterations: 1" +
                        "    }" +
                        ") YIELD nodeId, score";
 
+        final Map<Long, Double> actual = new HashMap<>();
         runQuery(query, MapUtil.map("graph", graphName),
-                row -> System.out.println(row));
+                row -> actual.put(row.getNumber("nodeId").longValue(), row.getNumber("score").doubleValue()));
+
+        long distinctValues = actual.values().stream().distinct().count();
+        assertEquals(1, distinctValues);
     }
 
     @AllGraphNamesTest

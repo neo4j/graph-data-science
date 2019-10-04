@@ -70,7 +70,6 @@ public class WeightedComputeStep extends BaseComputeStep implements WeightedRela
 
     @Override
     public boolean accept(long sourceNodeId, long targetNodeId, double weight) {
-
         if (weight > 0) {
             double proportion = weight / sumOfWeights;
             float srcRankDelta = (float) (delta * proportion);
