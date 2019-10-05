@@ -14,6 +14,7 @@ dependencies {
     compile group: 'org.mockito',                           name: 'mockito-core',             version: ver.'mockito'
     compile group: 'org.mockito',                           name: 'mockito-junit-jupiter',    version: ver.'mockito'
     compile group: 'org.hamcrest',                          name: 'hamcrest-library',         version: ver.'hamcrest'
+    compile group: 'com.github.s1ck',                       name: 'gdl',                      version: ver.'gdl'
 
     compile platform(dep.junit5bom)
     compile dep.junit5jupiter
