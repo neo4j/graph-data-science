@@ -24,7 +24,9 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestGraph;
 import org.neo4j.graphalgo.api.Graph;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.equality.Equality.equal;
 
 class EqualityTest {
 
@@ -32,41 +34,41 @@ class EqualityTest {
     void testTopologyEquals() {
         Graph g1 = TestGraph.Builder.fromGdl("(a), (b), (a)-->(b)");
         Graph g2 = TestGraph.Builder.fromGdl("(a), (b), (a)-->(b)");
-        assertTrue(Equality.equals(g1, g2));
+        assertTrue(equal(g1, g2));
     }
 
     @Test
     void testTopologyNotEquals() {
         Graph g1 = TestGraph.Builder.fromGdl("(a), (b), (a)-->(b)");
         Graph g2 = TestGraph.Builder.fromGdl("(a), (a)-->(a)");
-        assertFalse(Equality.equals(g1, g2));
+        assertFalse(equal(g1, g2));
     }
 
     @Test
     void testTopologyAndDataEquals() {
         Graph g1 = TestGraph.Builder.fromGdl("(a {a:2, w:1}), (b {w:2, a:3}), (a)-->(b)");
         Graph g2 = TestGraph.Builder.fromGdl("(a {a:2, w:1}), (b {w:2, a:3}), (a)-->(b)");
-        assertTrue(Equality.equals(g1, g2));
+        assertTrue(equal(g1, g2));
     }
 
     @Test
     void testParallelEdges() {
         Graph g1 = TestGraph.Builder.fromGdl("(a), (b), (a)-[{w:1}]->(b), (a)-[{w:2}]->(b)");
         Graph g2 = TestGraph.Builder.fromGdl("(a), (b), (a)-[{w:2}]->(b), (a)-[{w:1}]->(b)");
-        assertTrue(Equality.equals(g1, g2));
+        assertTrue(equal(g1, g2));
     }
 
     @Test
     void testLoop() {
         Graph g1 = TestGraph.Builder.fromGdl("(a), (b), (a)-[{w:1}]->(a), (a)-[{w:2}]->(b)");
         Graph g2 = TestGraph.Builder.fromGdl("(a), (b), (a)-[{w:2}]->(b), (a)-[{w:1}]->(a)");
-        assertTrue(Equality.equals(g1, g2));
+        assertTrue(equal(g1, g2));
     }
 
     @Test
     void testCycle() {
         Graph g1 = TestGraph.Builder.fromGdl("(a {v:1}), (b {v:2}), (c {v:3}), (a)-->(b)-->(c)-->(a)");
         Graph g2 = TestGraph.Builder.fromGdl("(a {v:2}), (b {v:3}), (c {v:1}), (a)-->(b)-->(c)-->(a)");
-        assertTrue(Equality.equals(g1, g2));
+        assertTrue(equal(g1, g2));
     }
 }

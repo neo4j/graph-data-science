@@ -33,7 +33,7 @@ public final class Equality {
 
     private Equality() {}
 
-    public static boolean equals(Graph g1, Graph g2) {
+    public static boolean equal(Graph g1, Graph g2) {
         return canonicalize(g1).equals(canonicalize(g2));
     }
 

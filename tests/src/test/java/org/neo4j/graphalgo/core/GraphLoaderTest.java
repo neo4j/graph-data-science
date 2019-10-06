@@ -42,8 +42,11 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.GraphHelper.assertOutPropertiesWithDelta;
 import static org.neo4j.graphalgo.GraphHelper.assertOutRelationships;
+import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
+import static org.neo4j.graphalgo.equality.Equality.equal;
 
 public class GraphLoaderTest {
 
@@ -80,6 +83,9 @@ public class GraphLoaderTest {
     @AllGraphTypesTest
     void testAnyLabel(Class<? extends GraphFactory> graphFactory) {
         Graph graph = initLoader(graphFactory);
+        // new test
+        assertTrue(equal(graph, fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)")));
+        // previous test
         assertEquals(3L, graph.nodeCount());
     }
 
@@ -89,12 +95,18 @@ public class GraphLoaderTest {
         try (Transaction tx = db.beginTx()) {
             graph = initLoader(graphFactory, "Node1", null).load(graphFactory);
         }
+        // new test
+        assertTrue(equal(graph, fromGdl("()")));
+        // previous test
         assertEquals(1L, graph.nodeCount());
     }
 
     @AllGraphTypesTest
     void testAnyRelation(Class<? extends GraphFactory> graphFactory) {
         Graph graph = initLoader(graphFactory);
+        // new test
+        assertTrue(equal(graph, fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)")));
+        // previous test
         assertOutRelationships(graph, id1, id2, id3);
         assertOutRelationships(graph, id2, id3);
     }
@@ -115,6 +127,9 @@ public class GraphLoaderTest {
                     .load(graphFactory);
         }
 
+        // new test
+        assertTrue(equal(graph, fromGdl("(), ()-[{w:1337}]->()")));
+        // previous test
         assertEquals(1, graph.relationshipCount());
         assertOutRelationships(graph, id2, id3);
         assertOutPropertiesWithDelta(graph, 1e-4, id2, 1337);
@@ -128,7 +143,8 @@ public class GraphLoaderTest {
                     .withDirection(Direction.OUTGOING)
                     .load(graphFactory);
         }
-
+        assertTrue(equal(graph, fromGdl("(), ()-->()")));
+        // previous test
         assertEquals(1, graph.relationshipCount());
         assertOutRelationships(graph, id2, id3);
     }
@@ -150,7 +166,13 @@ public class GraphLoaderTest {
                     PropertyMappings.EMPTY)
                     .load(graphFactory);
         }
+        // new test
+        assertTrue(equal(graph, fromGdl("(a {prop1: 1, prop2: 0, prop3: 0})" +
+                                        "(b {prop1: 0, prop2: 2, prop3: 0})" +
+                                        "(c {prop1: 0, prop2: 0, prop3: 3})" +
+                                        "(a)-->(b), (a)-->(c), (b)-->(c)")));
 
+        // previous test
         assertEquals(1.0, graph.nodeProperties("prop1").nodeWeight(graph.toMappedNodeId(0L)), 0.01);
         assertEquals(2.0, graph.nodeProperties("prop2").nodeWeight(graph.toMappedNodeId(1L)), 0.01);
         assertEquals(3.0, graph.nodeProperties("prop3").nodeWeight(graph.toMappedNodeId(2L)), 0.01);
@@ -168,7 +190,9 @@ public class GraphLoaderTest {
                     PropertyMappings.EMPTY,
                     relPropertyMappings).load(graphFactory);
         }
-
+        // new test (note the 'd' suffix for the property value)
+        assertTrue(equal(graph, fromGdl("(a)-[{w: 1}]->(b), (a)-[{w: 1337.42d}]->(c), (b)-[{w: 1337.42d}]->(c)")));
+        // previous test
         assertOutPropertiesWithDelta(graph, 1e-4, id1, 1.0, 1337.42);
     }
 
