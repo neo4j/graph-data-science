@@ -168,8 +168,8 @@ public final class TestGraph implements Graph {
         }
     }
 
-    private void forEach(List<Edge> edges, RelationshipConsumer consumer) {
-        edges.forEach(e -> consumer.accept(e.getSourceVertexId(), e.getTargetVertexId()));
+    private void forEach(List<Relationship> rels, RelationshipConsumer consumer) {
+        rels.forEach(r -> consumer.accept(r.sourceId, r.targetId));
     }
 
     @Override
@@ -189,14 +189,14 @@ public final class TestGraph implements Graph {
         }
     }
 
-    private void forEachWeighted(List<Edge> edges, double fallbackValue, WeightedRelationshipConsumer consumer) {
+    private void forEachWeighted(List<Relationship> rels, double fallbackValue, WeightedRelationshipConsumer consumer) {
         if (!hasRelationshipProperty()) {
-            forEach(edges, (s, t) -> consumer.accept(s, t, fallbackValue));
+            forEach(rels, (s, t) -> consumer.accept(s, t, fallbackValue));
         } else {
-            edges.forEach(e -> consumer.accept(
-                    e.getSourceVertexId(),
-                    e.getTargetVertexId(),
-                    relationshipProperty.weight(e.getId())));
+            rels.forEach(r -> consumer.accept(
+                    r.sourceId,
+                    r.targetId,
+                    relationshipProperty.weight(r.id)));
         }
     }
 
@@ -223,13 +223,23 @@ public final class TestGraph implements Graph {
         throw new UnsupportedOperationException();
     }
 
-    private static class Adjacency {
-        private final Vertex vertex;
-        private final List<Edge> outEdges;
-        private final List<Edge> inEdges;
+    private static class Relationship {
+        private final long id;
+        private final long sourceId;
+        private final long targetId;
 
-        Adjacency(Vertex vertex, List<Edge> outEdges, List<Edge> inEdges) {
-            this.vertex = vertex;
+        Relationship(long id, long sourceId, long targetId) {
+            this.id = id;
+            this.sourceId = sourceId;
+            this.targetId = targetId;
+        }
+    }
+
+    private static class Adjacency {
+        private final List<Relationship> outEdges;
+        private final List<Relationship> inEdges;
+
+        Adjacency(List<Relationship> outEdges, List<Relationship> inEdges) {
             this.outEdges = outEdges;
             this.inEdges = inEdges;
         }
@@ -305,26 +315,21 @@ public final class TestGraph implements Graph {
             return (maxVertexId == elements.size() - 1);
         }
 
-        private static Map<Long, Adjacency> buildAdjacencyList(
-                Collection<Vertex> vertices,
-                Collection<Edge> edges) {
+        private static Map<Long, Adjacency> buildAdjacencyList(Collection<Vertex> vertices, Collection<Edge> edges) {
             Map<Long, Adjacency> adjacencyList = new HashMap<>();
 
             for (Vertex vertex : vertices) {
-                List<Edge> outEdges = edges.stream()
+                List<Relationship> outRels = edges.stream()
                         .filter(e -> e.getSourceVertexId() == vertex.getId())
+                        .map(e -> new Relationship(e.getId(), e.getSourceVertexId(), e.getTargetVertexId()))
                         .collect(toList());
 
-                List<Edge> inEdges = edges.stream()
+                List<Relationship> inRels = edges.stream()
                         .filter(e -> e.getTargetVertexId() == vertex.getId())
-                        .peek(e -> {
-                            long tmp = e.getSourceVertexId();
-                            e.setSourceVertexId(e.getTargetVertexId());
-                            e.setTargetVertexId(tmp);
-                        })
+                        .map(e -> new Relationship(e.getId(), e.getTargetVertexId(), e.getSourceVertexId()))
                         .collect(toList());
 
-                adjacencyList.put(vertex.getId(), new Adjacency(vertex, outEdges, inEdges));
+                adjacencyList.put(vertex.getId(), new Adjacency(outRels, inRels));
             }
             return adjacencyList;
 
@@ -376,7 +381,8 @@ public final class TestGraph implements Graph {
                         if (value instanceof Number) {
                             edgePropertiesBuilder.set(edge.getId(), ((Number) value).doubleValue());
                         } else {
-                            throw new IllegalArgumentException("Relationship property value must be of type Number, but was " + value.getClass());
+                            throw new IllegalArgumentException(
+                                    "Relationship property value must be of type Number, but was " + value.getClass());
                         }
                     }
                 });
