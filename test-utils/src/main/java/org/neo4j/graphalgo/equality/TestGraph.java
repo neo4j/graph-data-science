@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
@@ -287,9 +288,19 @@ public final class TestGraph implements Graph {
             validateInput(vertices, edges);
 
             Map<Long, Adjacency> adjacencyList = buildAdjacencyList(vertices, edges);
-            Map<String, WeightMapping> nodeProperties = buildNodeProperties(vertices);
-            WeightMapping relationshipProperty = buildRelationshipProperty(edges);
-            boolean hasRelationshipProperty = !(relationshipProperty instanceof NullWeightMap);
+            Map<String, WeightMapping> nodeProperties = buildWeightMappings(vertices);
+            Map<String, WeightMapping> relationshipProperties = buildWeightMappings(edges);
+
+            // required because of single rel property limitation
+            if (relationshipProperties.size() > 1) {
+                throw new IllegalArgumentException("Graph supports at most one relationship property.");
+            }
+            boolean hasRelationshipProperty = !relationshipProperties.isEmpty();
+            WeightMapping relationshipProperty = relationshipProperties
+                    .values()
+                    .stream()
+                    .findFirst()
+                    .orElseGet(() -> new NullWeightMap(1.0));
 
             return new TestGraph(adjacencyList, nodeProperties, relationshipProperty, hasRelationshipProperty);
         }
@@ -298,17 +309,36 @@ public final class TestGraph implements Graph {
             if (vertices.isEmpty()) {
                 throw new IllegalArgumentException("Graph cannot be empty");
             }
+            // TODO: vertex and edge checks could be done using a composite predicate
             if (!hasConsecutiveIdSpace(vertices)) {
-                throw new IllegalArgumentException("GdlGraph requires a consecutive node id space.");
+                throw new IllegalArgumentException("Node id space must be consecutive.");
             }
             if (!hasConsecutiveIdSpace(edges)) {
-                throw new IllegalArgumentException("GdlGraph requires a consecutive edge id space.");
+                throw new IllegalArgumentException("Relationship id space must be consecutive.");
+            }
+            if (!sameProperties(vertices)) {
+                throw new IllegalArgumentException("Vertices must have the same set of property keys.");
+            }
+            if (!sameProperties(edges)) {
+                throw new IllegalArgumentException("Relationships must have the same set of property keys.");
             }
         }
 
         private static boolean hasConsecutiveIdSpace(Collection<? extends Element> elements) {
             long maxVertexId = elements.parallelStream().mapToLong(Element::getId).max().orElse(-1);
             return (maxVertexId == elements.size() - 1);
+        }
+
+        private static boolean sameProperties(Collection<? extends Element> elements) {
+            if (elements.isEmpty()) {
+                return true;
+            }
+            Set<String> head = elements.stream().findFirst().get().getProperties().keySet();
+            return elements
+                    .parallelStream()
+                    .map(Element::getProperties)
+                    .map(Map::keySet)
+                    .allMatch(keys -> keys.equals(head));
         }
 
         private static Map<Long, Adjacency> buildAdjacencyList(Collection<Vertex> vertices, Collection<Edge> edges) {
@@ -327,38 +357,32 @@ public final class TestGraph implements Graph {
 
                 adjacencyList.put(vertex.getId(), new Adjacency(outRels, inRels));
             }
-            return adjacencyList;
 
+            return adjacencyList;
         }
 
-        private static Map<String, WeightMapping> buildNodeProperties(Collection<Vertex> vertices) {
-            if (!sameProperties(vertices)) {
-                throw new IllegalArgumentException("Vertices must have the same set of property keys.");
+        private static <T extends Element> Map<String, WeightMapping> buildWeightMappings(Collection<T> elements) {
+            Map<String, WeightMapping> emptyMap = new HashMap<>(0);
+
+            if (elements.isEmpty()) {
+                return emptyMap;
             }
 
-            Map<String, Object> properties = vertices.stream().findFirst().get().getProperties();
+            Map<String, Object> properties = elements.stream().findFirst().get().getProperties();
 
             if (properties.isEmpty()) {
-                return new HashMap<>(0);
+                return emptyMap;
             }
 
             Map<String, NodePropertiesBuilder> nodePropertiesBuilders = properties
                     .keySet()
-                    .stream()
+                    .parallelStream()
                     .collect(Collectors.toMap(
                             Function.identity(),
-                            key -> NodePropertiesBuilder.of(vertices.size(), AllocationTracker.EMPTY, 1.0, -2, key)));
+                            key -> NodePropertiesBuilder.of(elements.size(), AllocationTracker.EMPTY, 1.0, -2, key)));
 
-            vertices.forEach(vertex -> vertex.getProperties().forEach((key, value) -> {
-                if (value instanceof Number) {
-                    nodePropertiesBuilders.computeIfPresent(key, (unused, map) -> {
-                        map.set(vertex.getId(), ((Number) value).doubleValue());
-                        return map;
-                    });
-                } else {
-                    throw new IllegalArgumentException("Node property value must be of type Number, but was " + value.getClass());
-                }
-            }));
+            elements.forEach(element -> element.getProperties().forEach((propertyKey, value) ->
+                    nodePropertiesBuilders.compute(propertyKey, storeValue(element, value))));
 
             return nodePropertiesBuilders
                     .entrySet()
@@ -366,62 +390,22 @@ public final class TestGraph implements Graph {
                     .collect(toMap(Map.Entry::getKey, entry -> entry.getValue().build()));
         }
 
-        private static WeightMapping buildRelationshipProperty(Collection<Edge> edges) {
-            WeightMapping relationshipProperty = new NullWeightMap(1.0);
-
-            if (edges.isEmpty()) {
-                return relationshipProperty;
-            }
-
-            if (!sameProperties(edges)) {
-                throw new IllegalArgumentException("Relationships must have the same set of property keys.");
-            }
-
-            Map<String, Object> properties = edges.stream().findFirst().get().getProperties();
-
-            if (properties.isEmpty()) {
-                return relationshipProperty;
-            }
-
-            if (properties.size() > 1) {
-                throw new IllegalArgumentException("Relationships must have at most one property.");
-            }
-
-            String propertyKey = properties.keySet().stream().findFirst().get();
-
-            NodePropertiesBuilder edgePropertiesBuilder = NodePropertiesBuilder.of(
-                    edges.size(),
-                    AllocationTracker.EMPTY,
-                    1.0,
-                    -2,
-                    propertyKey);
-
-            edges.forEach(edge -> {
-                Object value = edge.getProperties().get(propertyKey);
+        private static BiFunction<String, NodePropertiesBuilder, NodePropertiesBuilder> storeValue(
+                final Element element,
+                final Object value) {
+            return (propertyKey, builder) -> {
                 if (value instanceof Number) {
-                    edgePropertiesBuilder.set(edge.getId(), ((Number) value).doubleValue());
+                    builder.set(element.getId(), ((Number) value).doubleValue());
+                    return builder;
                 } else {
                     throw new IllegalArgumentException(String.format(
-                            "Relationship property '%s' of must be of type Number, but was %s for %s.",
+                            "%s property '%s' of must be of type Number, but was %s for %s.",
+                            element.getClass().getSimpleName(),
                             propertyKey,
                             value.getClass(),
-                            edge));
+                            element));
                 }
-            });
-
-            return edgePropertiesBuilder.build();
-        }
-
-        private static boolean sameProperties(Collection<? extends Element> elements) {
-            if (elements.isEmpty()) {
-                return true;
-            }
-            Set<String> head = elements.stream().findFirst().get().getProperties().keySet();
-            return elements
-                    .parallelStream()
-                    .map(Element::getProperties)
-                    .map(Map::keySet)
-                    .allMatch(keys -> keys.equals(head));
+            };
         }
     }
 }
