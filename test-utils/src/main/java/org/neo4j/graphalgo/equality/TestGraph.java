@@ -55,6 +55,8 @@ import static java.util.stream.Collectors.toMap;
 
 public final class TestGraph implements Graph {
 
+    public static final String TYPE = "test";
+
     private final Map<Long, Adjacency> adjacencyList;
     private final Map<String, WeightMapping> nodeProperties;
     private final WeightMapping relationshipProperty;
@@ -69,6 +71,11 @@ public final class TestGraph implements Graph {
         this.nodeProperties = nodeProperties;
         this.relationshipProperty = relationshipProperty;
         this.hasRelationshipProperty = hasRelationshipProperty;
+    }
+
+    @Override
+    public String getType() {
+        return TYPE;
     }
 
     @Override
@@ -281,6 +288,10 @@ public final class TestGraph implements Graph {
 
         public static Graph fromGdl(String gdl) {
             Objects.requireNonNull(gdl);
+            if (gdl.isEmpty()) {
+                throw new IllegalArgumentException("GDL string must not be empty.");
+            }
+
             GDLHandler gdlHandler = new GDLHandler.Builder().buildFromString(gdl);
             Collection<Vertex> vertices = gdlHandler.getVertices();
             Collection<Edge> edges = gdlHandler.getEdges();
