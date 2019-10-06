@@ -44,7 +44,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.LongPredicate;
@@ -196,7 +195,7 @@ public final class TestGraph implements Graph {
             rels.forEach(r -> consumer.accept(
                     r.sourceId,
                     r.targetId,
-                    relationshipProperty.weight(r.id)));
+                    relationshipProperty.nodeWeight(r.id)));
         }
     }
 
@@ -280,10 +279,6 @@ public final class TestGraph implements Graph {
         private Builder() {}
 
         public static Graph fromGdl(String gdl) {
-            return fromGdl(gdl, Optional.empty());
-        }
-
-        public static Graph fromGdl(String gdl, Optional<String> weightProperty) {
             Objects.requireNonNull(gdl);
             GDLHandler gdlHandler = new GDLHandler.Builder().buildFromString(gdl);
             Collection<Vertex> vertices = gdlHandler.getVertices();
@@ -293,9 +288,10 @@ public final class TestGraph implements Graph {
 
             Map<Long, Adjacency> adjacencyList = buildAdjacencyList(vertices, edges);
             Map<String, WeightMapping> nodeProperties = buildNodeProperties(vertices);
-            WeightMapping relationshipProperty = buildRelationshipProperty(weightProperty, edges);
+            WeightMapping relationshipProperty = buildRelationshipProperty(edges);
+            boolean hasRelationshipProperty = !(relationshipProperty instanceof NullWeightMap);
 
-            return new TestGraph(adjacencyList, nodeProperties, relationshipProperty, weightProperty.isPresent());
+            return new TestGraph(adjacencyList, nodeProperties, relationshipProperty, hasRelationshipProperty);
         }
 
         private static void validateInput(Collection<Vertex> vertices, Collection<Edge> edges) {
@@ -336,8 +332,17 @@ public final class TestGraph implements Graph {
         }
 
         private static Map<String, WeightMapping> buildNodeProperties(Collection<Vertex> vertices) {
-            Vertex v = vertices.stream().findFirst().get();
-            Map<String, NodePropertiesBuilder> nodePropertiesBuilders = v.getProperties()
+            if (!sameProperties(vertices)) {
+                throw new IllegalArgumentException("Vertices must have the same set of property keys.");
+            }
+
+            Map<String, Object> properties = vertices.stream().findFirst().get().getProperties();
+
+            if (properties.isEmpty()) {
+                return new HashMap<>(0);
+            }
+
+            Map<String, NodePropertiesBuilder> nodePropertiesBuilders = properties
                     .keySet()
                     .stream()
                     .collect(Collectors.toMap(
@@ -361,34 +366,62 @@ public final class TestGraph implements Graph {
                     .collect(toMap(Map.Entry::getKey, entry -> entry.getValue().build()));
         }
 
-        private static WeightMapping buildRelationshipProperty(
-                Optional<String> weightProperty,
-                Collection<Edge> edges) {
+        private static WeightMapping buildRelationshipProperty(Collection<Edge> edges) {
             WeightMapping relationshipProperty = new NullWeightMap(1.0);
-            if (weightProperty.isPresent()) {
-                String propertyKey = weightProperty.get();
-                NodePropertiesBuilder edgePropertiesBuilder = NodePropertiesBuilder.of(
-                        edges.size(),
-                        AllocationTracker.EMPTY,
-                        1.0,
-                        -2,
-                        propertyKey);
-                edges.forEach(edge -> {
-                    if (!edge.getProperties().containsKey(propertyKey)) {
-                        throw new IllegalArgumentException("Missing weight property for edge: " + edge);
-                    } else {
-                        Object value = edge.getProperties().get(propertyKey);
-                        if (value instanceof Number) {
-                            edgePropertiesBuilder.set(edge.getId(), ((Number) value).doubleValue());
-                        } else {
-                            throw new IllegalArgumentException(
-                                    "Relationship property value must be of type Number, but was " + value.getClass());
-                        }
-                    }
-                });
-                relationshipProperty = edgePropertiesBuilder.build();
+
+            if (edges.isEmpty()) {
+                return relationshipProperty;
             }
-            return relationshipProperty;
+
+            if (!sameProperties(edges)) {
+                throw new IllegalArgumentException("Relationships must have the same set of property keys.");
+            }
+
+            Map<String, Object> properties = edges.stream().findFirst().get().getProperties();
+
+            if (properties.isEmpty()) {
+                return relationshipProperty;
+            }
+
+            if (properties.size() > 1) {
+                throw new IllegalArgumentException("Relationships must have at most one property.");
+            }
+
+            String propertyKey = properties.keySet().stream().findFirst().get();
+
+            NodePropertiesBuilder edgePropertiesBuilder = NodePropertiesBuilder.of(
+                    edges.size(),
+                    AllocationTracker.EMPTY,
+                    1.0,
+                    -2,
+                    propertyKey);
+
+            edges.forEach(edge -> {
+                Object value = edge.getProperties().get(propertyKey);
+                if (value instanceof Number) {
+                    edgePropertiesBuilder.set(edge.getId(), ((Number) value).doubleValue());
+                } else {
+                    throw new IllegalArgumentException(String.format(
+                            "Relationship property '%s' of must be of type Number, but was %s for %s.",
+                            propertyKey,
+                            value.getClass(),
+                            edge));
+                }
+            });
+
+            return edgePropertiesBuilder.build();
+        }
+
+        private static boolean sameProperties(Collection<? extends Element> elements) {
+            if (elements.isEmpty()) {
+                return true;
+            }
+            Set<String> head = elements.stream().findFirst().get().getProperties().keySet();
+            return elements
+                    .parallelStream()
+                    .map(Element::getProperties)
+                    .map(Map::keySet)
+                    .allMatch(keys -> keys.equals(head));
         }
     }
 }

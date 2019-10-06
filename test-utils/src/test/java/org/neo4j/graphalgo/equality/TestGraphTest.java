@@ -24,7 +24,8 @@ import org.apache.commons.compress.utils.Sets;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.Graph;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TestGraphTest {
 
@@ -37,6 +38,7 @@ class TestGraphTest {
         assertEquals(2, graph.nodeCount());
         assertEquals(1, graph.relationshipCount());
         assertEquals(Sets.newHashSet("foo"), graph.availableNodeProperties());
+        assertTrue(graph.hasRelationshipProperty());
     }
 
 }
