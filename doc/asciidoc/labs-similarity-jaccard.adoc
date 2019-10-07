@@ -1,24 +1,29 @@
-[[algorithms-jaccard]]
+[[labs-algorithms-similarity-jaccard]]
 = The Jaccard Similarity algorithm
 
 [abstract]
 --
-This section describes the Jaccard Similarity algorithm in the Neo4j Graph Algorithms library.
+This section describes the Jaccard Similarity algorithm in the Neo4j Labs Graph Algorithms library.
 --
 
 Jaccard Similarity (coefficient), a term coined by https://en.wikipedia.org/wiki/Paul_Jaccard[Paul Jaccard^], measures similarities between sets.
 It is defined as the size of the intersection divided by the size of the union of two sets.
 
+[WARNING]
+--
+The Jaccard Similarity algorithm was developed by the Neo4j Labs team and is not officially supported.
+--
+
 This section includes:
 
-* <<algorithms-similarity-jaccard-context, History and explanation>>
-* <<algorithms-similarity-jaccard-usecase, Use-cases - when to use the Jaccard Similarity algorithm>>
-* <<algorithms-similarity-jaccard-function-sample, Jaccard Similarity algorithm function sample>>
-* <<algorithms-similarity-jaccard-procedure-sample, Jaccard Similarity algorithm procedures sample>>
-* <<algorithms-similarity-jaccard-source-target-ids, Specifying source and target ids>>
-* <<algorithms-similarity-jaccard-syntax, Syntax>>
+* <<labs-algorithms-similarity-jaccard-context, History and explanation>>
+* <<labs-algorithms-similarity-jaccard-usecase, Use-cases - when to use the Jaccard Similarity algorithm>>
+* <<labs-algorithms-similarity-jaccard-function-sample, Jaccard Similarity algorithm function sample>>
+* <<labs-algorithms-similarity-jaccard-procedure-sample, Jaccard Similarity algorithm procedures sample>>
+* <<labs-algorithms-similarity-jaccard-source-target-ids, Specifying source and target ids>>
+* <<labs-algorithms-similarity-jaccard-syntax, Syntax>>
 
-[[algorithms-similarity-jaccard-context]]
+[[labs-algorithms-similarity-jaccard-context]]
 == History and explanation
 
 // tag::explanation[]
@@ -39,7 +44,7 @@ The procedures parallelize the computation, and are therefore more appropriate f
 
 // end::explanation[]
 
-[[algorithms-similarity-jaccard-usecase]]
+[[labs-algorithms-similarity-jaccard-usecase]]
 == Use-cases - when to use the Jaccard Similarity algorithm
 
 // tag::use-case[]
@@ -49,7 +54,7 @@ For example, you can use the Jaccard Similarity algorithm to show the products t
 // end::use-case[]
 
 
-[[algorithms-similarity-jaccard-function-sample]]
+[[labs-algorithms-similarity-jaccard-function-sample]]
 == Jaccard Similarity algorithm function sample
 
 The Jaccard similarity function computes the similarity of two lists of numbers.
@@ -126,7 +131,7 @@ include::scripts/similarity-jaccard.cypher[tag=function-cypher-all]
 |===
 // end::function-cypher-all[]
 
-[[algorithms-similarity-jaccard-procedure-sample]]
+[[labs-algorithms-similarity-jaccard-procedure-sample]]
 == Jaccard Similarity algorithm procedures sample
 
 :procedure-name: Jaccard Similarity
@@ -247,7 +252,7 @@ include::scripts/similarity-jaccard.cypher[tag=query]
 |===
 // end::query[]
 
-[[algorithms-similarity-jaccard-source-target-ids]]
+[[labs-algorithms-similarity-jaccard-source-target-ids]]
 == Specifying source and target ids
 
 include::labs-similarity.adoc[tag=source-target-ids]
@@ -300,7 +305,7 @@ include::scripts/similarity-jaccard.cypher[tag=source-target-ids-2]
 |===
 // end::source-target-ids-2[]
 
-[[algorithms-similarity-jaccard-syntax]]
+[[labs-algorithms-similarity-jaccard-syntax]]
 == Syntax
 
 .The following will run the algorithm and write back results:

@@ -10,4 +10,4 @@ The following similarity algorithms can help calculate the similarity of nodes:
 
 * <<algorithms-jaccard, Jaccard>> (`algo.similarity.jaccard`)
 
-include::jaccard.adoc[leveloffset=+1]
+include::labs-similarity-jaccard.adoc[leveloffset=+1]
