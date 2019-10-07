@@ -41,22 +41,6 @@ The following community detection algorithms evaluate how a group is clustered o
 * <<algorithms-label-propagation, Label Propagation>> (`algo.labelPropagation`)
 * <<algorithms-wcc, Weakly Connected Components>> (`algo.unionFind`)
 
-// include::algorithms-path-finding.adoc[tags=header,leveloffset=3]
-// 
-// include::algorithms-path-finding.adoc[tags=summary,leveloffset=3]
-// 
-// include::algorithms-similarity.adoc[tags=header,leveloffset=3]
-// 
-// include::algorithms-similarity.adoc[tags=summary,leveloffset=3]
-// 
-// include::algorithms-link-prediction.adoc[tags=header,leveloffset=3]
-// 
-// include::algorithms-link-prediction.adoc[tags=summary,leveloffset=3]
-// 
-// include::algorithms-preprocessing.adoc[tags=header,leveloffset=3]
-// 
-// include::algorithms-preprocessing.adoc[tags=summary,leveloffset=3]
-
 
 == Installation
 
