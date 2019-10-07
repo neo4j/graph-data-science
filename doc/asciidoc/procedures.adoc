@@ -11,14 +11,6 @@ This chapter contains a reference of all the procedures in the Neo4j Graph Algor
 [opts=header,cols="1m,5a"]
 |===
 | Name                                                                          | Description
-| <<algorithms-betweenness-centrality-syntax, algo.betweenness>>                | Betweenness centrality algorithm writing results back to the graph.
-| <<algorithms-betweenness-centrality-syntax, algo.betweenness.stream>>         | Betweenness centrality algorithm streaming results back to the user.
-| <<algorithms-betweenness-centrality-syntax, algo.betweenness.sampled>>        | Approximate betweenness centrality algorithm writing results back to the graph.
-| <<algorithms-betweenness-centrality-syntax, algo.betweenness.sampled.stream>> | Approximate betweenness centrality algorithm streaming results to the user.
-| <<algorithms-closeness-centrality-syntax, algo.closeness>>                    | Closeness centrality algorithm writing results back to the graph.
-| <<algorithms-closeness-centrality-syntax, algo.closeness.stream>>             | Closeness centrality algorithm streaming results back to the user.
-| <<algorithms-degree-syntax, algo.degree>>                                     | Degree centrality algorithm writing results back to the graph.
-| <<algorithms-degree-syntax, algo.degree.stream>>                              | Degree centrality algorithm streaming results back to the user.
 | <<named-graph, algo.graph.load>>                                              | Procedure for pre-loading a graph and giving it a name.
 | <<named-graph, algo.graph.list>>                                              | Procedure to list all pre-loaded graph.
 | <<named-graph, algo.graph.remove>>                                            | Procedure for unloading a pre-loaded graph.
@@ -30,6 +22,6 @@ This chapter contains a reference of all the procedures in the Neo4j Graph Algor
 | <<algorithms-pagerank-syntax, algo.pageRank>>                                 | Page rank algorithm writing results back to the graph.
 | <<algorithms-pagerank-syntax, algo.pageRank.stream>>                          | Page rank algorithm streaming results back to the user.
 | <<algorithms-wcc-syntax, algo.unionfind>>                    | Union find algorithm writing results back to the graph.
-| <<algorithms-wcc-syntax, algo.unionfind.stream>>             | Union find algorithm streaming results back to the user.
+| <<algorithms-wcc-syntax-stream, algo.unionfind.stream>>             | Union find algorithm streaming results back to the user.
 |===
 

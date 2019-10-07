@@ -104,7 +104,7 @@ YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
 | writeProperty        | string  | The property name written back to.
 |===
 
-
+[[algorithms-wcc-syntax-stream]]
 .The following describes the API for running the algorithm and stream results:
 [source, cypher]
 ----

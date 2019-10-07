@@ -6,7 +6,7 @@
 This section describes the variations of the Connected Components algorithm in the Neo4j Labs Graph Algorithms library.
 --
 
-For general information about the union find algorithm see <<algorithms-connected-components, Connected Components>> (`algo.unionFind`).
+For general information about the union find algorithm see <<algorithms-wcc, Weakly Connected Components>> (`algo.unionFind`).
 
 [WARNING]
 --
