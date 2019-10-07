@@ -19,7 +19,7 @@ dependencies {
 
 test {
     useJUnitPlatform {
-        includeEngines "jqwik"
+        includeEngines 'jqwik', 'junit-jupiter'
     }
     include '**/*Test.class'
 }
