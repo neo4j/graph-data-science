@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.impl.pagerank;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.degree.WeightedDegreeCentrality;
 
 import java.util.concurrent.ExecutorService;
 

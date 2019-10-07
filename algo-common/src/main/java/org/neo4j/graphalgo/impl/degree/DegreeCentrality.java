@@ -29,7 +29,7 @@ import org.neo4j.graphdb.Direction;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 
-public class DegreeCentrality extends Algorithm<DegreeCentrality> implements DegreeCentralityAlgorithm {
+public class DegreeCentrality extends Algorithm<DegreeCentrality> {
     public static final double DEFAULT_WEIGHT = 0D;
     private final int nodeCount;
     private boolean weighted;
@@ -80,7 +80,6 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> implements Deg
         ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
     }
 
-    @Override
     public Algorithm<?> algorithm() {
         return this;
     }
@@ -95,7 +94,6 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> implements Deg
         graph = null;
     }
 
-    @Override
     public CentralityResult result() {
         return new PartitionedDoubleArrayResult(partitions, starts);
     }

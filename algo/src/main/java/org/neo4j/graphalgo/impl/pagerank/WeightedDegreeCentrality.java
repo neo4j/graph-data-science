@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.degree;
+package org.neo4j.graphalgo.impl.pagerank;
 
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality> implements DegreeCentralityAlgorithm {
+public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality> {
     private final long nodeCount;
     private Graph graph;
     private final ExecutorService executor;
@@ -103,17 +103,14 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
         graph = null;
     }
 
-    @Override
     public CentralityResult result() {
         return new HugeDoubleArrayResult(degrees);
     }
 
-    @Override
     public void compute() {
         compute(false);
     }
 
-    @Override
     public Algorithm<?> algorithm() {
         return this;
     }
