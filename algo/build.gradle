@@ -1,12 +1,8 @@
 description = 'Neo4j Graph Algorithms :: Algorithms'
 
 dependencies {
-    compile project(':core')
+    compile project(':algo-common')
 
-    compile group: 'io.dropwizard.metrics',     name: 'metrics-core',       version: ver.'metrics-core'
-    compile group: 'org.hdrhistogram',          name: 'HdrHistogram',       version: ver.'HdrHistogram'
-    compile group: 'org.roaringbitmap',         name: 'RoaringBitmap',      version: ver.'RoaringBitmap'
-    
     compileOnly group: 'org.neo4j',             name: 'neo4j',              version: ver.'neo4j'
 
     testCompile project(':test-utils')

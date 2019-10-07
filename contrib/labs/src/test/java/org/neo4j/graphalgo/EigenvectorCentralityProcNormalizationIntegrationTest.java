@@ -66,7 +66,6 @@ class EigenvectorCentralityProcNormalizationIntegrationTest {
                 .setConfig(GraphDatabaseSettings.procedure_unrestricted,"algo.*")
                 .newGraphDatabase();
 
-
         try (Transaction tx = db.beginTx()) {
             db.execute("CREATE CONSTRAINT ON (c:Character)\n" +
                     "ASSERT c.id IS UNIQUE;").close();
@@ -88,8 +87,6 @@ class EigenvectorCentralityProcNormalizationIntegrationTest {
 
         Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class);
         procedures.registerProcedure(EigenvectorCentralityProc.class);
-        procedures.registerProcedure(PageRankProc.class);
-        procedures.registerFunction(GetNodeFunc.class);
 
         try (Transaction tx = db.beginTx()) {
             final Label label = Label.label("Character");
@@ -154,7 +151,7 @@ class EigenvectorCentralityProcNormalizationIntegrationTest {
         runQuery(
                 "CALL algo.eigenvector.stream('Character', 'INTERACTS_SEASON1', {direction: 'BOTH'}) " +
                         "YIELD nodeId, score " +
-                        "RETURN nodeId, score, algo.asNode(nodeId).name AS name " +
+                        "RETURN nodeId, score " +
                         "ORDER BY score DESC " +
                         "LIMIT 10",
                 row -> actual.put(
@@ -187,7 +184,7 @@ class EigenvectorCentralityProcNormalizationIntegrationTest {
                 "CALL algo.eigenvector.stream('Character', 'INTERACTS_SEASON1', {direction: 'BOTH', normalization: 'l2Norm'}) " +
                         "YIELD nodeId, score " +
 
-                        "RETURN nodeId, score, algo.asNode(nodeId).name AS name " +
+                        "RETURN nodeId, score " +
                         "ORDER BY score DESC " +
                         "LIMIT 10",
                 row -> actual.put(
