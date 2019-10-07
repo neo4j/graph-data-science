@@ -275,6 +275,8 @@ html {
             into outputDir
         }
     }
+
+    attachFailOnOutputString(it, 'Error:')
 }
 
 task packageHtml(type: Tar, dependsOn: [html, sitemap]) {
