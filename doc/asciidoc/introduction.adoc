@@ -22,17 +22,16 @@ Due to the exponential growth of possible paths with increasing distance, many o
 Fortunately, optimized algorithms exist that utilize certain structures of the graph, memoize already explored parts, and parallelize operations.
 Whenever possible, we've applied these optimizations.
 
+The Neo4j Graph Algorithms library contains the following algorithms, grouped by category:
 
-=== Centrality algorithms
-
-The following centrality algorithms determine the importance of distinct nodes in a network:
+.Centrality algorithms:
+Determines the importance of distinct nodes in a network.
 
 * <<algorithms-pagerank, PageRank>> (`algo.pageRank`)
 
+.Community detection algorithms:
 
-=== Community detection algorithms
-
-The following community detection algorithms evaluate how a group is clustered or partitioned, as well as its tendency to strengthen or break apart:
+Evaluate how a group is clustered or partitioned, as well as its tendency to strengthen or break apart.
 
 * <<algorithms-louvain, Louvain>> (`algo.louvain`)
 * <<algorithms-label-propagation, Label Propagation>> (`algo.labelPropagation`)
