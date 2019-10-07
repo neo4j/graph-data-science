@@ -32,13 +32,11 @@ import java.util.concurrent.ExecutorService;
 public class DegreeCentrality extends Algorithm<DegreeCentrality> {
     public static final double DEFAULT_WEIGHT = 0D;
     private final int nodeCount;
-    private boolean weighted;
-    private Direction direction;
+    private final boolean weighted;
+    private final Direction direction;
     private Graph graph;
     private final ExecutorService executor;
     private final int concurrency;
-
-    private double[] degrees;
 
     private long[] starts;
     private double[][] partitions;
@@ -49,14 +47,12 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> {
             int concurrency,
             Direction direction,
             boolean weighted) {
-
         this.graph = graph;
         this.executor = executor;
         this.concurrency = concurrency;
         this.direction = direction;
         nodeCount = Math.toIntExact(graph.nodeCount());
         this.weighted = weighted;
-        degrees = new double[nodeCount];
     }
 
     public void compute() {

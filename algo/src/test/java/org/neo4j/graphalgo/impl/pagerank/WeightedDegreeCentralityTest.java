@@ -211,8 +211,8 @@ final class WeightedDegreeCentralityTest {
             expected.put(DB.findNode(label, "name", "a").getId(), 0.0);
             expected.put(DB.findNode(label, "name", "b").getId(), 2.0);
             expected.put(DB.findNode(label, "name", "c").getId(), 2.0);
-            expected.put(DB.findNode(label, "name", "d").getId(), 4.0);
-            expected.put(DB.findNode(label, "name", "e").getId(), 6.0);
+            expected.put(DB.findNode(label, "name", "d").getId(), 7.0);
+            expected.put(DB.findNode(label, "name", "e").getId(), 10.0);
             expected.put(DB.findNode(label, "name", "f").getId(), 4.0);
             expected.put(DB.findNode(label, "name", "g").getId(), 0.0);
             expected.put(DB.findNode(label, "name", "h").getId(), 0.0);
@@ -322,12 +322,12 @@ final class WeightedDegreeCentralityTest {
         final Map<Long, Double> expected = new HashMap<>();
 
         try (Transaction tx = DB.beginTx()) {
-            expected.put(DB.findNode(label, "name", "a").getId(), 2.0);
+            expected.put(DB.findNode(label, "name", "a").getId(), 5.0);
             expected.put(DB.findNode(label, "name", "b").getId(), 8.0);
             expected.put(DB.findNode(label, "name", "c").getId(), 2.0);
-            expected.put(DB.findNode(label, "name", "d").getId(), 2.0);
+            expected.put(DB.findNode(label, "name", "d").getId(), 7.0);
             expected.put(DB.findNode(label, "name", "e").getId(), 2.0);
-            expected.put(DB.findNode(label, "name", "f").getId(), 2.0);
+            expected.put(DB.findNode(label, "name", "f").getId(), 1.0);
             expected.put(DB.findNode(label, "name", "g").getId(), 0.0);
             expected.put(DB.findNode(label, "name", "h").getId(), 0.0);
             expected.put(DB.findNode(label, "name", "i").getId(), 0.0);
