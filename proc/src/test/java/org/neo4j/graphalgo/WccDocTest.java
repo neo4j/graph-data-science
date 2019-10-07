@@ -50,6 +50,7 @@ class WccDocTest extends ProcTestBase {
         final Procedures procedures = DB.getDependencyResolver()
                 .resolveDependency(Procedures.class);
         procedures.registerProcedure(UnionFindProc.class);
+        procedures.registerProcedure(GraphLoadProc.class);
         procedures.registerFunction(GetNodeFunc.class);
     }
 
@@ -103,5 +104,30 @@ class WccDocTest extends ProcTestBase {
 
         // graph end-state
         System.out.println(DB.execute("MATCH (n) RETURN n").resultAsString());
+    }
+
+    // Queries from the named graph and Cypher projection example in wcc.adoc
+    // used to test that the results are correct in the docs
+    @Test
+    void namedGraphAndCypherProjection() {
+        String q1 = "CALL algo.graph.load('myGraph', 'User', 'LINK');";
+        DB.execute(q1).resultAsString();
+
+        String q2 = "CALL algo.unionFind.stream(null, null, {graph: 'myGraph'}) " +
+                    "YIELD nodeId, setId " +
+                    "RETURN algo.asNode(nodeId).name AS Name, setId AS ComponentId " +
+                    "ORDER BY ComponentId, Name;";
+//        System.out.println(DB.execute(q2).resultAsString());
+
+        String q3 = "CALL algo.unionFind.stream( " +
+                    "  'MATCH (u:User) RETURN id(u) AS id',  " +
+                    "  'MATCH (u1:User)-[:LINK]->(u2:User)  " +
+                    "   RETURN id(u1) AS source, id(u2) AS target',  " +
+                    "   {graph:'cypher'} " +
+                    ") " +
+                    "YIELD nodeId, setId " +
+                    "RETURN algo.asNode(nodeId).name AS Name, setId AS ComponentId " +
+                    "ORDER BY ComponentId, Name";
+//        System.out.println(DB.execute(q3).resultAsString());
     }
 }

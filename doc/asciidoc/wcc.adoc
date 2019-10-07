@@ -377,3 +377,65 @@ YIELD nodes AS Nodes, setCount AS NbrOfComponents, writeProperty AS PropertyName
 If the `seedProperty` configuration parameter has the same value as `writeProperty`, the algorithm only writes properties for nodes where the component ID has changed.
 If they differ, the algorithm writes properties for all nodes.
 ====
+
+
+[[algorithms-wcc-examples-projection]]
+=== Named graphs and Cypher projections
+
+In the examples above, we have relied on the _implicit_ loading of graphs for the algorithm computation.
+However, like other algorithms WCC also accepts _named graphs_ and _Cypher projections_ as inputs.
+See <<projected-graph-model, Projected Graph Model>> for more details.
+
+.Using a named graph:
+[source, cypher]
+----
+CALL algo.graph.load('myGraph', 'User', 'LINK');
+
+CALL algo.unionFind.stream(null, null, {graph: 'myGraph'})
+YIELD nodeId, setId
+RETURN algo.asNode(nodeId).name AS Name, setId AS ComponentId
+ORDER BY ComponentId, Name;
+----
+
+.Results
+[opts="header",cols="1m,1m"]
+|===
+| Name      | ComponentId
+| "Alice"   | 0
+| "Bridget" | 0
+| "Charles" | 0
+| "Doug"    | 3
+| "Mark"    | 3
+| "Michael" | 3
+|===
+
+As we can see, the results are identical to the results in the <<algorithms-wcc-examples-unweighted>> example.
+
+.Using a Cypher projection:
+[source, cypher]
+----
+CALL algo.unionFind.stream(
+  'MATCH (u:User) RETURN id(u) AS id',
+  'MATCH (u1:User)-[:LINK]->(u2:User)
+   RETURN id(u1) AS source, id(u2) AS target',
+   {graph:'cypher'}
+)
+YIELD nodeId, setId
+RETURN algo.asNode(nodeId).name AS Name, setId AS ComponentId
+ORDER BY ComponentId, Name
+----
+
+.Results
+[opts="header",cols="1m,1m"]
+|===
+| Name      | ComponentId
+| "Alice"   | 0
+| "Bridget" | 0
+| "Charles" | 0
+| "Doug"    | 3
+| "Mark"    | 3
+| "Michael" | 3
+|===
+
+Again, results are identical, as the Cypher projection we use mimics the behaviour of the default loading configuration.
+Of course, the Cypher projection feature enables more advanced control over which exact parts of the graph to compute over; please see <<cypher-projection>> for more details.
