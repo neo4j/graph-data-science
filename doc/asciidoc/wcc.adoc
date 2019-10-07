@@ -23,7 +23,7 @@ This topic includes:
 The WCC algorithm finds sets of connected nodes in an undirected graph, where all nodes in the same set form a connected component.
 WCC is often used early in an analysis to understand the structure of a graph.
 
-WCC was previously known as Union Find.
+WCC has previously been known as Union Find or Connected Components in this User Guide.
 Currently, the WCC algorithm still uses the syntax of `algo.unionFind`.
 
 // TODO: something about use cases
