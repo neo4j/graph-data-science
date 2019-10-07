@@ -51,7 +51,6 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
-
 /**
  * Partition based parallel PageRank based on
  * "An Efficient Partition-Based Parallel PageRank Algorithm" [1]
@@ -590,5 +589,4 @@ public class PageRank extends Algorithm<PageRank> {
             scores = null;
         }
     }
-
 }

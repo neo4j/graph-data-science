@@ -27,8 +27,8 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.impl.pagerank.LabsPageRankAlgorithmType;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
-import org.neo4j.graphalgo.impl.pagerank.PageRankAlgorithmType;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphalgo.impl.results.CentralityScore;
 import org.neo4j.graphalgo.impl.results.PageRankScore;
@@ -185,7 +185,7 @@ public final class EigenvectorCentralityProc {
         List<Node> sourceNodes = configuration.get("sourceNodes", new ArrayList<>());
         LongStream sourceNodeIds = sourceNodes.stream().mapToLong(Node::getId);
 
-        PageRank prAlgo = PageRankAlgorithmType.EIGENVECTOR_CENTRALITY
+        PageRank prAlgo = LabsPageRankAlgorithmType.EIGENVECTOR_CENTRALITY
                 .create(
                         graph,
                         Pools.DEFAULT,

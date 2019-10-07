@@ -19,17 +19,29 @@
  */
 package org.neo4j.graphalgo.impl.pagerank;
 
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+public enum PageRankAlgorithmType implements PageRankAlgorithm {
 
-import java.util.concurrent.ExecutorService;
+    WEIGHTED {
+        @Override
+        public PageRankVariant variant(final PageRank.Config config) {
+            return new WeightedPageRankVariant(config.cacheWeights);
+        }
 
-public class NoOpDegreeComputer implements DegreeComputer {
+        @Override
+        public Class<WeightedComputeStep> computeStepClass() {
+            return WeightedComputeStep.class;
+        }
+    },
 
-    @Override
-    public DegreeCache degree(
-            ExecutorService executor,
-            int concurrency,
-            AllocationTracker tracker) {
-        return DegreeCache.EMPTY;
+    NON_WEIGHTED {
+        @Override
+        public PageRankVariant variant(final PageRank.Config config) {
+            return new NonWeightedPageRankVariant();
+        }
+
+        @Override
+        public Class<NonWeightedComputeStep> computeStepClass() {
+            return NonWeightedComputeStep.class;
+        }
     }
 }

@@ -23,6 +23,8 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
+import java.util.concurrent.ExecutorService;
+
 public class NonWeightedPageRankVariant implements PageRankVariant {
 
     @Override
@@ -51,5 +53,15 @@ public class NonWeightedPageRankVariant implements PageRankVariant {
     @Override
     public DegreeComputer degreeComputer(Graph graph) {
         return new NoOpDegreeComputer();
+    }
+
+    class NoOpDegreeComputer implements DegreeComputer {
+        @Override
+        public DegreeCache degree(
+                ExecutorService executor,
+                int concurrency,
+                AllocationTracker tracker) {
+            return DegreeCache.EMPTY;
+        }
     }
 }
