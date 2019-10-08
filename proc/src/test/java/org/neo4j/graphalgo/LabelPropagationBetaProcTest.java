@@ -122,7 +122,7 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
                        ")";
         runQuery(query, DB, map("runDirection", runDirection),
                 row -> {
-                    assertEquals(1, row.getNumber("iterations").intValue());
+                    assertEquals(1, row.getNumber("ranIterations").intValue());
                     assertFalse(row.getBoolean("write"));
                     assertEquals(expectedComponents, row.getNumber("communityCount").longValue());
                 }
@@ -185,7 +185,7 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
 
         runQuery(query, DB, parParams(parallel, graphName),
                 row -> {
-                    assertEquals(1, row.getNumber("iterations").intValue());
+                    assertEquals(1, row.getNumber("ranIterations").intValue());
                     assertEquals("weight", row.getString("weightProperty"));
                     assertEquals("seed", row.getString("seedProperty"));
                     assertEquals("lpa", row.getString("writeProperty"));
@@ -201,7 +201,7 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
 
         runQuery(query, DB, parParams(parallel, graphName),
                 row -> {
-                    assertEquals(1, row.getNumber("iterations").intValue());
+                    assertEquals(1, row.getNumber("ranIterations").intValue());
                     assertEquals("weight", row.getString("weightProperty"));
                     assertEquals("seed", row.getString("seedProperty"));
                     assertEquals("lpa", row.getString("writeProperty"));
@@ -220,7 +220,7 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
 
         runQuery(query, DB, parParams(parallel, graphName),
                 row -> {
-                    assertEquals(1, row.getNumber("iterations").intValue());
+                    assertEquals(1, row.getNumber("ranIterations").intValue());
                     assertEquals("weight", row.getString("weightProperty"));
                     assertEquals("seed", row.getString("seedProperty"));
                     assertEquals("lpa", row.getString("writeProperty"));
@@ -239,7 +239,7 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
 
         runQuery(query, DB, parParams(parallel, graphName),
                 row -> {
-                    assertTrue(5 >= row.getNumber("iterations").intValue());
+                    assertTrue(5 >= row.getNumber("ranIterations").intValue());
                     assertTrue(row.getBoolean("didConverge"));
                     assertFalse(row.getBoolean("write"));
                     assertEquals("score", row.getString("weightProperty"));
