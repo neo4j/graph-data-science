@@ -71,4 +71,11 @@ class EqualityTest {
         Graph g2 = TestGraph.Builder.fromGdl("(a {v:2}), (b {v:3}), (c {v:1}), (a)-->(b)-->(c)-->(a)");
         assertTrue(equal(g1, g2));
     }
+
+    @Test
+    void testCompleteGraph() {
+        Graph g1 = TestGraph.Builder.fromGdl("(a {v:1}), (b {v:2}), (c {v:3}), (b)<--(a)-->(c), (a)<--(b)-->(c), (a)<--(c)-->(b)");
+        Graph g2 = TestGraph.Builder.fromGdl("(a {v:1}), (b {v:2}), (c {v:3}), (b)<--(a)-->(b), (a)<--(b)-->(c), (a)<--(c)-->(b)");
+        assertFalse(equal(g1, g2));
+    }
 }

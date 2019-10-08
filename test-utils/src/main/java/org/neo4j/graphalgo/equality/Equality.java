@@ -39,16 +39,16 @@ public final class Equality {
 
     public static String canonicalize(Graph g) {
         // nodes
-        Map<Long, String> canonicalNodeProperties = new HashMap<>();
+        Map<Long, String> canonicalNodeLabels = new HashMap<>();
         g.forEachNode(nodeId -> {
-            String nodeProperties = g.availableNodeProperties().stream()
+            String canonicalNodeLabel = g.availableNodeProperties().stream()
                     .map(propertyKey -> String.format(
                             "%s: %f",
                             propertyKey,
                             g.nodeProperties(propertyKey).nodeWeight(nodeId)))
                     .sorted()
-                    .collect(Collectors.joining(", ", "{", "}"));
-            canonicalNodeProperties.put(nodeId, nodeProperties);
+                    .collect(Collectors.joining(", ", "({", "})"));
+            canonicalNodeLabels.put(nodeId, canonicalNodeLabel);
             return true;
         });
 
@@ -57,16 +57,17 @@ public final class Equality {
                 ? Direction.OUTGOING
                 : Direction.INCOMING;
 
-        Map<Long, List<String>> outEdges = new HashMap<>();
+        Map<Long, List<String>> outAdjacencies = new HashMap<>();
         g.forEachNode(nodeId -> {
             g.forEachRelationship(nodeId, direction, 1.0, (source, target, weight) -> {
-                String relString = String.format("()-[w: %f]->()", weight);
-                long idx = (direction == Direction.OUTGOING) ? source : target;
-                outEdges.compute(idx, (unused, list) -> {
+                long sourceId = (direction == Direction.OUTGOING) ? source : target;
+                long targetId = (direction == Direction.OUTGOING) ? target : source;
+                String canonicalRelLabel = String.format("()-[w: %f]->%s", weight, canonicalNodeLabels.get(targetId));
+                outAdjacencies.compute(sourceId, (unused, list) -> {
                     if (list == null) {
                         list = Lists.newArrayList();
                     }
-                    list.add(relString);
+                    list.add(canonicalRelLabel);
                     return list;
                 });
                 return true;
@@ -74,18 +75,18 @@ public final class Equality {
             return true;
         });
 
-        Map<Long, String> canonicalOutEdges = outEdges
+        Map<Long, String> canonicalOutAdjacencies = outAdjacencies
                 .entrySet()
                 .stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         entry -> entry.getValue().stream().sorted().collect(Collectors.joining(", "))));
 
-        return canonicalNodeProperties.entrySet().stream()
+        return canonicalNodeLabels.entrySet().stream()
                 .map(entry -> String.format(
                         "%s => %s",
                         entry.getValue(),
-                        canonicalOutEdges.getOrDefault(entry.getKey(), "")))
+                        canonicalOutAdjacencies.getOrDefault(entry.getKey(), "")))
                 .sorted()
                 .collect(Collectors.joining(System.lineSeparator()));
     }
