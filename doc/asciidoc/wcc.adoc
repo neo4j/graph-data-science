@@ -340,16 +340,16 @@ ORDER BY ComponentId, Name
 ----
 
 .Results
-[opts="header",cols="1m,1m,1m"]
+[opts="header",cols="1m,1m"]
 |===
-| Name      | ComponentId |
-| "Alice"   | 0           |
-| "Charles" | 0           |
-| "Bridget" | 1           |
-| "Mats"    | 1           |
-| "Doug"    | 3           |
-| "Mark"    | 3           |
-| "Michael" | 3           |
+| Name      | ComponentId
+| "Alice"   | 0
+| "Charles" | 0
+| "Bridget" | 1
+| "Mats"    | 1
+| "Doug"    | 3
+| "Mark"    | 3
+| "Michael" | 3
 |===
 
 .The following will load the graph, run the algorithm, and write back results:
