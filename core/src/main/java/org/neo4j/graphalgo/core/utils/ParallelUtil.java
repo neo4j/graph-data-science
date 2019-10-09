@@ -830,7 +830,7 @@ public final class ParallelUtil {
         } finally {
             if (!done) {
                 for (final Future<?> future : futures) {
-                    future.cancel(true);
+                    future.cancel(false);
                 }
             }
         }
@@ -857,7 +857,7 @@ public final class ParallelUtil {
         } finally {
             if (!done) {
                 for (final Future<?> future : futures) {
-                    future.cancel(true);
+                    future.cancel(false);
                 }
             }
         }
@@ -975,7 +975,7 @@ public final class ParallelUtil {
 
         private void stopFutures(final Collection<Future<Void>> futures) {
             for (Future<Void> future : futures) {
-                future.cancel(true);
+                future.cancel(false);
             }
             futures.clear();
         }
@@ -989,7 +989,7 @@ public final class ParallelUtil {
                 if (future instanceof Runnable) {
                     pool.remove((Runnable) future);
                 }
-                future.cancel(true);
+                future.cancel(false);
             }
             futures.clear();
             pool.purge();

@@ -317,7 +317,7 @@ public class MultiStepColoring {
         } finally {
             if (!done) {
                 for (final Future<?> future : futures) {
-                    future.cancel(true);
+                    future.cancel(false);
                 }
             }
         }
