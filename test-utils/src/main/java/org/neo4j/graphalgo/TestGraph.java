@@ -252,15 +252,13 @@ public final class TestGraph implements Graph {
         }
 
         int degree(Direction direction) {
-            int degree;
             if (direction == Direction.BOTH) {
-                degree = outEdges.size() + inEdges.size();
+                return outEdges.size() + inEdges.size();
             } else if (direction == Direction.OUTGOING) {
-                degree = outEdges.size();
+                return outEdges.size();
             } else {
-                degree = inEdges.size();
+                return inEdges.size();
             }
-            return degree;
         }
     }
 
@@ -288,9 +286,6 @@ public final class TestGraph implements Graph {
 
         public static Graph fromGdl(String gdl) {
             Objects.requireNonNull(gdl);
-            if (gdl.isEmpty()) {
-                throw new IllegalArgumentException("GDL string must not be empty.");
-            }
 
             GDLHandler gdlHandler = new GDLHandler.Builder().buildFromString(gdl);
             Collection<Vertex> vertices = gdlHandler.getVertices();
@@ -317,30 +312,26 @@ public final class TestGraph implements Graph {
         }
 
         private static void validateInput(Collection<Vertex> vertices, Collection<Edge> edges) {
-            if (vertices.isEmpty()) {
-                throw new IllegalArgumentException("Graph cannot be empty");
-            }
-            // TODO: vertex and edge checks could be done using a composite predicate
-            if (!hasConsecutiveIdSpace(vertices)) {
+            if (!haveConsecutiveIdSpace(vertices)) {
                 throw new IllegalArgumentException("Node id space must be consecutive.");
             }
-            if (!hasConsecutiveIdSpace(edges)) {
+            if (!haveConsecutiveIdSpace(edges)) {
                 throw new IllegalArgumentException("Relationship id space must be consecutive.");
             }
-            if (!sameProperties(vertices)) {
+            if (!haveSameProperties(vertices)) {
                 throw new IllegalArgumentException("Vertices must have the same set of property keys.");
             }
-            if (!sameProperties(edges)) {
+            if (!haveSameProperties(edges)) {
                 throw new IllegalArgumentException("Relationships must have the same set of property keys.");
             }
         }
 
-        private static boolean hasConsecutiveIdSpace(Collection<? extends Element> elements) {
+        private static boolean haveConsecutiveIdSpace(Collection<? extends Element> elements) {
             long maxVertexId = elements.parallelStream().mapToLong(Element::getId).max().orElse(-1);
             return (maxVertexId == elements.size() - 1);
         }
 
-        private static boolean sameProperties(Collection<? extends Element> elements) {
+        private static boolean haveSameProperties(Collection<? extends Element> elements) {
             if (elements.isEmpty()) {
                 return true;
             }
@@ -373,16 +364,15 @@ public final class TestGraph implements Graph {
         }
 
         private static <T extends Element> Map<String, WeightMapping> buildWeightMappings(Collection<T> elements) {
-            Map<String, WeightMapping> emptyMap = new HashMap<>(0);
 
             if (elements.isEmpty()) {
-                return emptyMap;
+                return new HashMap<>(0);
             }
 
             Map<String, Object> properties = elements.stream().findFirst().get().getProperties();
 
             if (properties.isEmpty()) {
-                return emptyMap;
+                return new HashMap<>(0);
             }
 
             Map<String, NodePropertiesBuilder> nodePropertiesBuilders = properties
@@ -392,8 +382,9 @@ public final class TestGraph implements Graph {
                             Function.identity(),
                             key -> NodePropertiesBuilder.of(elements.size(), AllocationTracker.EMPTY, 1.0, -2, key)));
 
-            elements.forEach(element -> element.getProperties().forEach((propertyKey, value) ->
-                    nodePropertiesBuilders.compute(propertyKey, storeValue(element, value))));
+            elements.forEach(element ->
+                    element.getProperties().forEach((propertyKey, value) ->
+                            nodePropertiesBuilders.compute(propertyKey, storeValue(element, value))));
 
             return nodePropertiesBuilders
                     .entrySet()
