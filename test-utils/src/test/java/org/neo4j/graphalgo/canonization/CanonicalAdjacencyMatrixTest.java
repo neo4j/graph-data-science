@@ -78,4 +78,11 @@ class CanonicalAdjacencyMatrixTest {
         Graph g2 = TestGraph.Builder.fromGdl("(a {v:1}), (b {v:2}), (c {v:3}), (b)<--(a)-->(b), (a)<--(b)-->(c), (a)<--(c)-->(b)");
         assertNotEquals(canonicalize(g1), canonicalize(g2));
     }
+
+    @Test
+    void testCompleteHomogenicGraph() {
+        Graph g1 = TestGraph.Builder.fromGdl("(a {v:1}), (b {v:1}), (c {v:1}), (b)<--(a)-->(c), (a)<--(b)-->(c), (a)<--(c)-->(b)");
+        Graph g2 = TestGraph.Builder.fromGdl("(a {v:1}), (b {v:1}), (c {v:1}), (b)<--(a)-->(b), (a)<--(b)-->(c), (a)<--(c)-->(b)");
+        assertNotEquals(canonicalize(g1), canonicalize(g2));
+    }
 }

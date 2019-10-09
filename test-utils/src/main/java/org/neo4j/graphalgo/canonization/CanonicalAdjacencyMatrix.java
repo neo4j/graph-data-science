@@ -27,6 +27,7 @@ import org.neo4j.graphdb.Direction;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 public final class CanonicalAdjacencyMatrix {
@@ -34,7 +35,7 @@ public final class CanonicalAdjacencyMatrix {
     private CanonicalAdjacencyMatrix() {}
 
     public static String canonicalize(Graph g) {
-        // nodes
+        // canonical nodes
         Map<Long, String> canonicalNodeLabels = new HashMap<>();
         g.forEachNode(nodeId -> {
             String canonicalNodeLabel = g.availableNodeProperties().stream()
@@ -48,42 +49,60 @@ public final class CanonicalAdjacencyMatrix {
             return true;
         });
 
-        // relationships
+        // canonical relationships
         Direction direction = (g.getLoadDirection() == Direction.BOTH || g.getLoadDirection() == Direction.OUTGOING)
                 ? Direction.OUTGOING
                 : Direction.INCOMING;
 
         Map<Long, List<String>> outAdjacencies = new HashMap<>();
+        Map<Long, List<String>> inAdjacencies = new HashMap<>();
         g.forEachNode(nodeId -> {
-            g.forEachRelationship(nodeId, direction, 1.0, (source, target, weight) -> {
+            g.forEachRelationship(nodeId, direction, 1.0, (source, target, propertyValue) -> {
                 long sourceId = (direction == Direction.OUTGOING) ? source : target;
                 long targetId = (direction == Direction.OUTGOING) ? target : source;
-                String canonicalRelLabel = String.format("()-[w: %f]->%s", weight, canonicalNodeLabels.get(targetId));
-                outAdjacencies.compute(sourceId, (unused, list) -> {
-                    if (list == null) {
-                        list = Lists.newArrayList();
-                    }
-                    list.add(canonicalRelLabel);
-                    return list;
-                });
+                outAdjacencies.compute(
+                        sourceId,
+                        canonicalRelationship(canonicalNodeLabels.get(targetId), propertyValue, "()-[w: %f]->%s"));
+                inAdjacencies.compute(
+                        targetId,
+                        canonicalRelationship(canonicalNodeLabels.get(sourceId), propertyValue, "()<-[w: %f]-%s"));
                 return true;
             });
             return true;
         });
+        Map<Long, String> canonicalOutAdjacencies = canonicalAdjacencies(outAdjacencies);
+        Map<Long, String> canonicalInAdjacencies = canonicalAdjacencies(inAdjacencies);
 
-        Map<Long, String> canonicalOutAdjacencies = outAdjacencies
+        // canonical matrix
+        return canonicalNodeLabels.entrySet().stream()
+                .map(entry -> String.format(
+                        "%s => out: %s in: %s",
+                        entry.getValue(),
+                        canonicalOutAdjacencies.getOrDefault(entry.getKey(), ""),
+                        canonicalInAdjacencies.getOrDefault(entry.getKey(), "")))
+                .sorted()
+                .collect(Collectors.joining(System.lineSeparator()));
+    }
+
+    private static Map<Long, String> canonicalAdjacencies(Map<Long, List<String>> outAdjacencies) {
+        return outAdjacencies
                 .entrySet()
                 .stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         entry -> entry.getValue().stream().sorted().collect(Collectors.joining(", "))));
+    }
 
-        return canonicalNodeLabels.entrySet().stream()
-                .map(entry -> String.format(
-                        "%s => %s",
-                        entry.getValue(),
-                        canonicalOutAdjacencies.getOrDefault(entry.getKey(), "")))
-                .sorted()
-                .collect(Collectors.joining(System.lineSeparator()));
+    private static BiFunction<Long, List<String>, List<String>> canonicalRelationship(
+            String canonicalNodeLabel,
+            double relationshipProperty,
+            String pattern) {
+        return (unused, list) -> {
+            if (list == null) {
+                list = Lists.newArrayList();
+            }
+            list.add(String.format(pattern, relationshipProperty, canonicalNodeLabel));
+            return list;
+        };
     }
 }
