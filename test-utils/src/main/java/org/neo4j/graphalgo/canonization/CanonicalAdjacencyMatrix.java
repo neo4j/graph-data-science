@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.neo4j.graphalgo.equality;
+package org.neo4j.graphalgo.canonization;
 
 import org.apache.commons.compress.utils.Lists;
 import org.neo4j.graphalgo.api.Graph;
@@ -29,13 +29,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public final class Equality {
+public final class CanonicalAdjacencyMatrix {
 
-    private Equality() {}
-
-    public static boolean equal(Graph g1, Graph g2) {
-        return canonicalize(g1).equals(canonicalize(g2));
-    }
+    private CanonicalAdjacencyMatrix() {}
 
     public static String canonicalize(Graph g) {
         // nodes

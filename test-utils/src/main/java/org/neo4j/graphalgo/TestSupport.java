@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.MultipleRelTypesSupport;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
-import org.neo4j.graphalgo.equality.Equality;
+import org.neo4j.graphalgo.canonization.CanonicalAdjacencyMatrix;
 import org.neo4j.graphdb.Direction;
 
 import java.lang.annotation.Retention;
@@ -120,8 +120,9 @@ public final class TestSupport {
     }
 
     public static void assertGraphEquals(Graph g1, Graph g2) {
-        Assertions.assertEquals(Equality.canonicalize(g1), Equality.canonicalize(g2));
-
+        Assertions.assertEquals(g1.nodeCount(), g2.nodeCount(), "Node counts do not match.");
+        Assertions.assertEquals(g1.relationshipCount(), g2.relationshipCount(), "Relationship counts to not match.");
+        Assertions.assertEquals(CanonicalAdjacencyMatrix.canonicalize(g1), CanonicalAdjacencyMatrix.canonicalize(g2));
     }
 
 }
