@@ -33,7 +33,6 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
-import org.neo4j.graphalgo.impl.results.HugeDoubleArrayResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
 
@@ -514,7 +513,7 @@ public class PageRank extends Algorithm<PageRank> {
             for (ComputeStep step : steps) {
                 step.pageRank();
             }
-            return new HugeDoubleArrayResult(result);
+            return new CentralityResult(result);
         }
 
         private void run(int iterations) {

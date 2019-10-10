@@ -19,17 +19,57 @@
  */
 package org.neo4j.graphalgo.impl.results;
 
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.write.Exporter;
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
 import java.util.function.DoubleUnaryOperator;
 
-public interface CentralityResult {
+public class CentralityResult {
 
-    double score(int nodeId);
+    private final HugeDoubleArray result;
 
-    double score(long nodeId);
+    public CentralityResult(HugeDoubleArray result) {
+        this.result = result;
+    }
 
-    void export(String propertyName, Exporter exporter);
+    public HugeDoubleArray array() {
+        return this.result;
+    }
 
-    void export(String propertyName, Exporter exporter, DoubleUnaryOperator normalizationFunction);
+    public void export(
+            final String propertyName, final Exporter exporter) {
+        exporter.write(
+                propertyName,
+                result,
+                HugeDoubleArray.Translator.INSTANCE);
+    }
+
+    public void export(String propertyName, Exporter exporter, DoubleUnaryOperator normalizationFunction) {
+        exporter.write(
+                propertyName,
+                result,
+                new MapTranslator(normalizationFunction));
+    }
+
+    public static class MapTranslator implements PropertyTranslator.OfDouble<HugeDoubleArray> {
+
+        private DoubleUnaryOperator fn;
+
+        public MapTranslator(DoubleUnaryOperator fn) {
+            this.fn = fn;
+        }
+
+        public double toDouble(final HugeDoubleArray data, final long nodeId) {
+            return fn.applyAsDouble(data.get(nodeId));
+        }
+    }
+
+    public double score(final long nodeId) {
+        return result.get(nodeId);
+    }
+
+    public double score(final int nodeId) {
+        return result.get(nodeId);
+    }
 }

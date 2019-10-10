@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
-import org.neo4j.graphalgo.impl.results.HugeDoubleArrayResult;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
@@ -97,7 +96,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> {
     }
 
     public CentralityResult result() {
-        return new HugeDoubleArrayResult(result);
+        return new CentralityResult(result);
     }
 
     private class DegreeTask implements Runnable {

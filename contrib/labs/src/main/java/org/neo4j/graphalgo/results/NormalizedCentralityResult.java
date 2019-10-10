@@ -24,31 +24,28 @@ import org.neo4j.graphalgo.impl.results.CentralityResult;
 
 import java.util.function.DoubleUnaryOperator;
 
-public class NormalizedCentralityResult implements CentralityResult {
+public class NormalizedCentralityResult extends CentralityResult {
     private CentralityResult result;
     private DoubleUnaryOperator normalizationFunction;
 
     public NormalizedCentralityResult(CentralityResult result, DoubleUnaryOperator normalizationFunction) {
+        super(result.array());
         this.result = result;
         this.normalizationFunction = normalizationFunction;
     }
 
-    @Override
     public void export(String propertyName, Exporter exporter, DoubleUnaryOperator normalizationFunction) {
         result.export(propertyName, exporter, normalizationFunction);
     }
 
-    @Override
     public double score(int nodeId) {
         return normalizationFunction.applyAsDouble(result.score(nodeId));
     }
 
-    @Override
     public double score(long nodeId) {
         return normalizationFunction.applyAsDouble(result.score(nodeId));
     }
 
-    @Override
     public void export(String propertyName, Exporter exporter) {
         export(propertyName, exporter, normalizationFunction);
     }

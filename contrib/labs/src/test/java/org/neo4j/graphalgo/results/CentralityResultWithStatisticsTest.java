@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.results;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.impl.results.HugeDoubleArrayResult;
+import org.neo4j.graphalgo.impl.results.CentralityResult;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -30,7 +30,7 @@ class CentralityResultWithStatisticsTest {
     @Test
     void doubleArrayResult() {
         CentralityResultWithStatistics result = CentralityResultWithStatistics.Builder
-                .of(new HugeDoubleArrayResult(HugeDoubleArray.of(1, 2, 3, 4)));
+                .of(new CentralityResult(HugeDoubleArray.of(1, 2, 3, 4)));
 
         assertEquals(4.0, result.computeMax(), 0.01);
         assertEquals(10.0, result.computeL1Norm(), 0.01);

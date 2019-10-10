@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
-import org.neo4j.graphalgo.impl.results.HugeDoubleArrayResult;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
@@ -104,7 +103,7 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
     }
 
     public CentralityResult result() {
-        return new HugeDoubleArrayResult(degrees);
+        return new CentralityResult(degrees);
     }
 
     public void compute() {

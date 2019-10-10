@@ -22,15 +22,15 @@ package org.neo4j.graphalgo.results;
 
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
-import org.neo4j.graphalgo.impl.results.HugeDoubleArrayResult;
 
 import java.util.function.DoubleUnaryOperator;
 
-public abstract class CentralityResultWithStatistics<T extends CentralityResult> implements CentralityResult {
+public abstract class CentralityResultWithStatistics extends CentralityResult {
 
-    protected T result;
+    protected CentralityResult result;
 
-    CentralityResultWithStatistics(T result) {
+    CentralityResultWithStatistics(CentralityResult result) {
+        super(result.array());
         this.result = result;
     }
 
@@ -40,22 +40,18 @@ public abstract class CentralityResultWithStatistics<T extends CentralityResult>
 
     public abstract double computeL1Norm();
 
-    @Override
     public double score(int nodeId) {
         return result.score(nodeId);
     }
 
-    @Override
     public double score(long nodeId) {
         return result.score(nodeId);
     }
 
-    @Override
     public void export(String propertyName, Exporter exporter) {
         result.export(propertyName, exporter);
     }
 
-    @Override
     public void export(String propertyName, Exporter exporter, DoubleUnaryOperator normalizationFunction) {
         result.export(propertyName, exporter, normalizationFunction);
     }
@@ -64,13 +60,13 @@ public abstract class CentralityResultWithStatistics<T extends CentralityResult>
         private Builder() {}
 
         public static CentralityResultWithStatistics of(CentralityResult result) {
-            return new HugeDoubleArrayResultWithStatistics((HugeDoubleArrayResult) result);
+            return new HugeDoubleArrayResultWithStatistics(result);
         }
     }
 
-    static final class HugeDoubleArrayResultWithStatistics extends CentralityResultWithStatistics<HugeDoubleArrayResult> {
+    static final class HugeDoubleArrayResultWithStatistics extends CentralityResultWithStatistics {
 
-        HugeDoubleArrayResultWithStatistics(HugeDoubleArrayResult result) {
+        HugeDoubleArrayResultWithStatistics(CentralityResult result) {
             super(result);
         }
 
