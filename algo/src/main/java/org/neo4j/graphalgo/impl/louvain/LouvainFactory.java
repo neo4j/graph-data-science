@@ -39,8 +39,6 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
 public class LouvainFactory extends AlgorithmFactory<Louvain> {
 
-    public static final String DEFAULT_CLUSTER_PROPERTY = "communityProperty";
-    public static final String CLUSTERING_IDENTIFIER = "clustering";
     public static final String CONFIG_SEED_KEY = "seedProperty";
     public static final String SEED_TYPE = "seed";
 

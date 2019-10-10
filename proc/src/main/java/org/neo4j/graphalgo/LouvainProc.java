@@ -49,8 +49,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.impl.louvain.LouvainFactory.CLUSTERING_IDENTIFIER;
-import static org.neo4j.graphalgo.impl.louvain.LouvainFactory.DEFAULT_CLUSTER_PROPERTY;
+import static org.neo4j.graphalgo.impl.louvain.LouvainFactory.CONFIG_SEED_KEY;
 import static org.neo4j.procedure.Mode.READ;
 
 /**
@@ -157,9 +156,9 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
 
     @Override
     protected GraphLoader configureAlgoLoader(final GraphLoader loader, final ProcedureConfiguration config) {
-        config.getString(DEFAULT_CLUSTER_PROPERTY).ifPresent(propertyIdentifier -> {
+        config.getString(CONFIG_SEED_KEY).ifPresent(propertyIdentifier -> {
             // configure predefined clustering if set
-            loader.withOptionalNodeProperties(PropertyMapping.of(CLUSTERING_IDENTIFIER, propertyIdentifier, -1));
+            loader.withOptionalNodeProperties(PropertyMapping.of(Louvain.SEED_TYPE, propertyIdentifier, -1));
         });
 
         return loader.undirected().withDirection(Direction.OUTGOING);
