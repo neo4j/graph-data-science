@@ -80,14 +80,6 @@ class TestGraphTest {
     }
 
     @Test
-    void invalidEmptyGraph() {
-        IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> TestGraph.Builder.fromGdl(""));
-        assertThat(ex.getMessage(), containsString("GDL string must not be empty."));
-    }
-
-    @Test
     void invalidNodeProperties() {
         IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
