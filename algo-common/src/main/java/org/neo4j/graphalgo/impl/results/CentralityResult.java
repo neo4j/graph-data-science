@@ -32,10 +32,4 @@ public interface CentralityResult {
     void export(String propertyName, Exporter exporter);
 
     void export(String propertyName, Exporter exporter, DoubleUnaryOperator normalizationFunction);
-
-    double computeMax();
-
-    double computeL2Norm();
-
-    double computeL1Norm();
 }

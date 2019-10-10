@@ -20,36 +20,37 @@
 package org.neo4j.graphalgo.impl.utils;
 
 import org.neo4j.graphalgo.impl.results.CentralityResult;
-import org.neo4j.graphalgo.impl.results.NormalizedCentralityResult;
+import org.neo4j.graphalgo.results.CentralityResultWithStatistics;
+import org.neo4j.graphalgo.results.NormalizedCentralityResult;
 
-public enum Normalization {
+public enum NormalizationFunction {
     NONE {
         @Override
-        public CentralityResult apply(CentralityResult scores) {
+        public CentralityResult apply(CentralityResultWithStatistics scores) {
             return scores;
         }
     },
     MAX {
         @Override
-        public CentralityResult apply(CentralityResult scores) {
+        public CentralityResult apply(CentralityResultWithStatistics scores) {
             double norm = scores.computeMax();
             return new NormalizedCentralityResult(scores, (score) -> score / norm);
         }
     },
     L1NORM {
         @Override
-        public CentralityResult apply(CentralityResult scores) {
+        public CentralityResult apply(CentralityResultWithStatistics scores) {
             double norm = scores.computeL1Norm();
             return new NormalizedCentralityResult(scores, (score) -> score / norm);
         }
     },
     L2NORM {
         @Override
-        public CentralityResult apply(CentralityResult scores) {
+        public CentralityResult apply(CentralityResultWithStatistics scores) {
             double norm = scores.computeL2Norm();
             return new NormalizedCentralityResult(scores, (score) -> score / norm);
         }
     };
 
-    public abstract CentralityResult apply(CentralityResult scores);
+    public abstract CentralityResult apply(CentralityResultWithStatistics scores);
 }

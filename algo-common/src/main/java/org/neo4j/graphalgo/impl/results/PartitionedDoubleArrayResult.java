@@ -38,6 +38,10 @@ public final class PartitionedDoubleArrayResult implements CentralityResult, Pro
         this.starts = starts;
     }
 
+    public double[][] partitions() {
+        return this.partitions;
+    }
+
     @Override
     public void export(final String propertyName, final Exporter exporter) {
         exporter.write(propertyName, partitions, this);
@@ -47,21 +51,6 @@ public final class PartitionedDoubleArrayResult implements CentralityResult, Pro
     public void export(String propertyName, Exporter exporter, DoubleUnaryOperator normalizationFunction) {
         CentralityUtils.normalizeArray(partitions, normalizationFunction);
         export(propertyName, exporter);
-    }
-
-    @Override
-    public double computeMax() {
-        return NormalizationComputations.max(partitions);
-    }
-
-    @Override
-    public double computeL2Norm() {
-        return NormalizationComputations.l2Norm(partitions);
-    }
-
-    @Override
-    public double computeL1Norm() {
-        return NormalizationComputations.l1Norm(partitions);
     }
 
     @Override

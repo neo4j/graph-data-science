@@ -32,6 +32,10 @@ public final class HugeDoubleArrayResult implements CentralityResult {
         this.result = result;
     }
 
+    public HugeDoubleArray array() {
+        return this.result;
+    }
+
     @Override
     public void export(
             final String propertyName, final Exporter exporter) {
@@ -61,21 +65,6 @@ public final class HugeDoubleArrayResult implements CentralityResult {
         public double toDouble(final HugeDoubleArray data, final long nodeId) {
             return fn.applyAsDouble(data.get(nodeId));
         }
-    }
-
-    @Override
-    public double computeMax() {
-        return HugeNormalizationComputations.max(result, 1.0);
-    }
-
-    @Override
-    public double computeL2Norm() {
-        return Math.sqrt(HugeNormalizationComputations.squaredSum(result));
-    }
-
-    @Override
-    public double computeL1Norm() {
-        return HugeNormalizationComputations.l1Norm(result);
     }
 
     @Override

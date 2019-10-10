@@ -33,7 +33,8 @@ import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphalgo.impl.results.CentralityScore;
 import org.neo4j.graphalgo.impl.results.PageRankScore;
 import org.neo4j.graphalgo.impl.utils.CentralityUtils;
-import org.neo4j.graphalgo.impl.utils.Normalization;
+import org.neo4j.graphalgo.impl.utils.NormalizationFunction;
+import org.neo4j.graphalgo.results.CentralityResultWithStatistics;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -145,9 +146,9 @@ public final class EigenvectorCentralityProc {
         return CentralityUtils.streamResults(graph, scores);
     }
 
-    public Normalization normalization(ProcedureConfiguration configuration) {
+    public NormalizationFunction normalization(ProcedureConfiguration configuration) {
         String normalization = configuration.getString("normalization", null);
-        return normalization != null ? Normalization.valueOf(normalization.toUpperCase()) : Normalization.NONE;
+        return normalization != null ? NormalizationFunction.valueOf(normalization.toUpperCase()) : NormalizationFunction.NONE;
     }
 
     private Graph load(
@@ -202,10 +203,10 @@ public final class EigenvectorCentralityProc {
         statsBuilder.timeEval(prAlgo::compute);
         statsBuilder.withIterations(prAlgo.iterations()).withDampingFactor(prAlgo.dampingFactor());
 
-        final CentralityResult results = prAlgo.result();
+        CentralityResultWithStatistics result = CentralityResultWithStatistics.Builder.of(prAlgo.result());
         algo.release();
         graph.release();
-        return normalization(configuration).apply(results);
+        return normalization(configuration).apply(result);
     }
 
 }

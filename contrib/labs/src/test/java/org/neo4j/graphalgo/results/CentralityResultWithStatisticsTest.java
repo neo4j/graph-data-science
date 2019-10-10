@@ -17,18 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.results;
+package org.neo4j.graphalgo.results;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.impl.results.HugeDoubleArrayResult;
+import org.neo4j.graphalgo.impl.results.PartitionedDoubleArrayResult;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class CentralityResultTest {
+class CentralityResultWithStatisticsTest {
 
     @Test
     void doubleArrayResult() {
-        HugeDoubleArrayResult result = new HugeDoubleArrayResult(HugeDoubleArray.of(1, 2, 3, 4));
+        CentralityResultWithStatistics result = CentralityResultWithStatistics.Builder
+                .of(new HugeDoubleArrayResult(HugeDoubleArray.of(1, 2, 3, 4)));
 
         assertEquals(4.0, result.computeMax(), 0.01);
         assertEquals(10.0, result.computeL1Norm(), 0.01);
@@ -39,7 +42,8 @@ class CentralityResultTest {
     void partitionedPrimitiveDoubleArrayResult() {
         double[][] partitions = new double[][]{{1.0, 2.0}, {3.0, 4.0}};
         long[] starts = new long[]{0, 2};
-        PartitionedDoubleArrayResult result = new PartitionedDoubleArrayResult(partitions, starts);
+        CentralityResultWithStatistics result = CentralityResultWithStatistics.Builder
+                .of(new PartitionedDoubleArrayResult(partitions, starts));
 
         assertEquals(4.0, result.computeMax(), 0.01);
         assertEquals(10.0, result.computeL1Norm(), 0.01);
@@ -50,7 +54,8 @@ class CentralityResultTest {
     void partitionedDoubleArrayResult() {
         double[][] partitions = new double[][]{{1.0, 2.0}, {3.0, 4.0}};
         long[] starts = new long[]{0, 2};
-        PartitionedDoubleArrayResult result = new PartitionedDoubleArrayResult(partitions, starts);
+        CentralityResultWithStatistics result = CentralityResultWithStatistics.Builder
+                .of(new PartitionedDoubleArrayResult(partitions, starts));
 
         assertEquals(4.0, result.computeMax(), 0.01);
         assertEquals(10.0, result.computeL1Norm(), 0.01);
