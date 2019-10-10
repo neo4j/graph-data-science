@@ -26,30 +26,9 @@ import java.util.OptionalLong;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public class LabelPropagationStats {
+public class BetaLabelPropagationStats {
 
-    public static class BetaStreamResult {
-        public final long nodeId;
-        public final long community;
-
-        public BetaStreamResult(long nodeId, long community) {
-            this.nodeId = nodeId;
-            this.community = community;
-        }
-    }
-
-    @Deprecated
-    public static class StreamResult {
-        public final long nodeId;
-        public final long label;
-
-        public StreamResult(BetaStreamResult betaStreamResult) {
-            this.nodeId = betaStreamResult.nodeId;
-            this.label = betaStreamResult.community;
-        }
-    }
-
-    public static final LabelPropagationStats EMPTY = new LabelPropagationStats(
+    public static final BetaLabelPropagationStats EMPTY = new BetaLabelPropagationStats(
             0,
             0,
             0,
@@ -79,7 +58,7 @@ public class LabelPropagationStats {
 
     public final long nodes;
     public final long communityCount;
-    public final long iterations;
+    public final long ranIterations;
     public final boolean didConverge;
 
     public final long p1;
@@ -98,7 +77,7 @@ public class LabelPropagationStats {
     public final String seedProperty;
     public final String writeProperty;
 
-    public LabelPropagationStats(
+    public BetaLabelPropagationStats(
             long loadMillis,
             long computeMillis,
             long postProcessingMillis,
@@ -115,7 +94,7 @@ public class LabelPropagationStats {
             long p10,
             long p5,
             long p1,
-            long iterations,
+            long ranIterations,
             boolean write,
             boolean didConverge,
             String weightProperty,
@@ -137,7 +116,7 @@ public class LabelPropagationStats {
         this.p10 = p10;
         this.p5 = p5;
         this.p1 = p1;
-        this.iterations = iterations;
+        this.ranIterations = ranIterations;
         this.write = write;
         this.didConverge = didConverge;
         this.weightProperty = weightProperty;
@@ -146,9 +125,9 @@ public class LabelPropagationStats {
     }
 
 
-    public static class Builder extends AbstractCommunityResultBuilder<LabelPropagationStats> {
+    public static class Builder extends AbstractCommunityResultBuilder<BetaLabelPropagationStats> {
 
-        private long iterations = 0;
+        private long ranIterations = 0;
         private boolean didConverge = false;
         private String weightProperty;
         private String seedProperty;
@@ -162,8 +141,8 @@ public class LabelPropagationStats {
             super(returnFields);
         }
 
-        public Builder iterations(final long iterations) {
-            this.iterations = iterations;
+        public Builder ranIterations(final long ranIterations) {
+            this.ranIterations = ranIterations;
             return this;
         }
 
@@ -189,7 +168,7 @@ public class LabelPropagationStats {
 
 
         @Override
-        protected LabelPropagationStats build(
+        protected BetaLabelPropagationStats build(
                 long loadMillis,
                 long computeMillis,
                 long writeMillis,
@@ -198,7 +177,7 @@ public class LabelPropagationStats {
                 OptionalLong maybeCommunityCount,
                 Optional<Histogram> maybeCommunityHistogram,
                 boolean write) {
-            return new LabelPropagationStats(
+            return new BetaLabelPropagationStats(
                     loadMillis,
                     computeMillis,
                     writeMillis,
@@ -215,7 +194,7 @@ public class LabelPropagationStats {
                     maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(10)).orElse(-1L),
                     maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(5)).orElse(-1L),
                     maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(1)).orElse(-1L),
-                    iterations,
+                    ranIterations,
                     write,
                     didConverge,
                     weightProperty,
@@ -223,6 +202,80 @@ public class LabelPropagationStats {
                     writeProperty
             );
         }
+    }
 
+    public static class BetaStreamResult {
+        public final long nodeId;
+        public final long community;
+
+        public BetaStreamResult(long nodeId, long community) {
+            this.nodeId = nodeId;
+            this.community = community;
+        }
+    }
+
+    @Deprecated
+    public static class StreamResult {
+        public final long nodeId;
+        public final long label;
+
+        public StreamResult(BetaStreamResult betaStreamResult) {
+            this.nodeId = betaStreamResult.nodeId;
+            this.label = betaStreamResult.community;
+        }
+    }
+
+    @Deprecated
+    public static class LabelPropagationStats {
+        public final long loadMillis;
+        public final long computeMillis;
+        public final long writeMillis;
+        public final long postProcessingMillis;
+
+        public final long nodes;
+        public final long communityCount;
+        public final long iterations;
+        public final boolean didConverge;
+
+        public final long p1;
+        public final long p5;
+        public final long p10;
+        public final long p25;
+        public final long p50;
+        public final long p75;
+        public final long p90;
+        public final long p95;
+        public final long p99;
+        public final long p100;
+
+        public final String weightProperty;
+        public final boolean write;
+        public final String seedProperty;
+        public final String writeProperty;
+
+        public LabelPropagationStats(BetaLabelPropagationStats betaLabelPropagationStats) {
+            this.loadMillis = betaLabelPropagationStats.loadMillis;
+            this.computeMillis = betaLabelPropagationStats.computeMillis;
+            this.postProcessingMillis = betaLabelPropagationStats.postProcessingMillis;
+            this.writeMillis = betaLabelPropagationStats.writeMillis;
+            this.nodes = betaLabelPropagationStats.nodes;
+            this.communityCount = betaLabelPropagationStats.nodes;
+            this.p100 = betaLabelPropagationStats.p100;
+            this.p99 = betaLabelPropagationStats.p99;
+            this.p95 = betaLabelPropagationStats.p95;
+            this.p90 = betaLabelPropagationStats.p90;
+            this.p75 = betaLabelPropagationStats.p75;
+            this.p50 = betaLabelPropagationStats.p50;
+            this.p25 = betaLabelPropagationStats.p25;
+            this.p10 = betaLabelPropagationStats.p10;
+            this.p5 = betaLabelPropagationStats.p5;
+            this.p1 = betaLabelPropagationStats.p1;
+            this.iterations = betaLabelPropagationStats.ranIterations;
+            this.write = betaLabelPropagationStats.write;
+            this.didConverge = betaLabelPropagationStats.didConverge;
+            this.weightProperty = betaLabelPropagationStats.weightProperty;
+            this.seedProperty = betaLabelPropagationStats.seedProperty;
+            this.writeProperty = betaLabelPropagationStats.writeProperty;
+        }
     }
 }
