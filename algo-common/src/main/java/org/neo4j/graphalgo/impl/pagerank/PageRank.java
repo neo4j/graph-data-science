@@ -30,9 +30,7 @@ import org.neo4j.graphalgo.api.NodeIterator;
 import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
-import org.neo4j.graphalgo.impl.results.HugeDoubleArrayResult;
 import org.neo4j.graphalgo.impl.results.PartitionedDoubleArrayResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
@@ -136,7 +134,11 @@ public class PageRank extends Algorithm<PageRank> {
             this(iterations, dampingFactor, toleranceValue, false);
         }
 
-        public Config(final int iterations, final double dampingFactor, final double toleranceValue, boolean cacheWeights) {
+        public Config(
+                final int iterations,
+                final double dampingFactor,
+                final double toleranceValue,
+                boolean cacheWeights) {
             this.iterations = iterations;
             this.dampingFactor = dampingFactor;
             this.toleranceValue = toleranceValue;
@@ -231,11 +233,13 @@ public class PageRank extends Algorithm<PageRank> {
     }
 
     private int adjustBatchSize(int batchSize) {
+        if (batchSize == 0) {
+            return Partition.MAX_NODE_COUNT;
+        }
         // multiply batchsize by 8 as a very rough estimate of an average
         // degree of 8 for nodes, so that every partition has approx
-        // batchSize nodes.
-        batchSize <<= 3;
-        return batchSize > 0 ? batchSize : Integer.MAX_VALUE;
+        // batchSize relationships.
+        return Math.toIntExact(batchSize * 8L);
     }
 
     private List<Partition> partitionGraph(
@@ -288,8 +292,8 @@ public class PageRank extends Algorithm<PageRank> {
             long start = partition.startNode;
             int i = 1;
             while (parts.hasNext()
-                    && i < partitionsPerThread
-                    && partition.fits(partitionSize)) {
+                   && i < partitionsPerThread
+                   && partition.fits(partitionSize)) {
                 partition = parts.next();
                 partitionSize += partition.nodeCount;
                 ++i;
@@ -410,8 +414,8 @@ public class PageRank extends Algorithm<PageRank> {
             int partitionCount = partition.nodeCount;
             int i = 1;
             while (parts.hasNext()
-                    && i < partitionsPerThread
-                    && partition.fits(partitionCount)) {
+                   && i < partitionsPerThread
+                   && partition.fits(partitionCount)) {
                 partition = parts.next();
                 partitionCount += partition.nodeCount;
                 ++i;
@@ -497,16 +501,12 @@ public class PageRank extends Algorithm<PageRank> {
 
         CentralityResult getPageRank() {
             ComputeStep firstStep = steps.get(0);
-            if (steps.size() > 1) {
-                double[][] results = new double[steps.size()][];
-                int i = 0;
-                for (ComputeStep step : steps) {
-                    results[i++] = step.pageRank();
-                }
-                return new PartitionedDoubleArrayResult(results, firstStep.starts());
-            } else {
-                return new HugeDoubleArrayResult(HugeDoubleArray.of(firstStep.pageRank()));
+            double[][] results = new double[steps.size()][];
+            int i = 0;
+            for (ComputeStep step : steps) {
+                results[i++] = step.pageRank();
             }
+            return new PartitionedDoubleArrayResult(results, firstStep.starts());
         }
 
         private void run(int iterations) {
