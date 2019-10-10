@@ -42,6 +42,8 @@ public class LouvainFactory extends AlgorithmFactory<Louvain> {
     public static final String CONFIG_SEED_KEY = "seedProperty";
     public static final String SEED_TYPE = "seed";
 
+    public static final String DEPRECATED_CONFIG_SEED_KEY = "communityProperty";
+
     private final Louvain.Config config;
 
     public LouvainFactory(Louvain.Config config) {
@@ -54,15 +56,9 @@ public class LouvainFactory extends AlgorithmFactory<Louvain> {
             final ProcedureConfiguration configuration,
             final AllocationTracker tracker,
             final Log log) {
-<<<<<<< HEAD
-        Optional<String> clusterProperty = configuration.getString(DEFAULT_CLUSTER_PROPERTY);
+        Optional<String> clusterProperty = configuration.getStringWithFallback(CONFIG_SEED_KEY, DEPRECATED_CONFIG_SEED_KEY);
         NodeOrRelationshipProperties communityMap = clusterProperty
-                .map(name -> graph.nodeProperties(CLUSTERING_IDENTIFIER))
-=======
-        Optional<String> clusterProperty = configuration.getString(CONFIG_SEED_KEY);
-        WeightMapping communityMap = clusterProperty
                 .map(name -> graph.nodeProperties(SEED_TYPE))
->>>>>>> Improve custom community seeding behaviour
                 .orElse(null);
 
         return new Louvain(graph,

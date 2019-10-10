@@ -216,6 +216,24 @@ class LouvainClusteringProcTest extends ProcTestBase {
     }
 
     @AllGraphNamesTest
+    void testPredefinedCommunitiesWithOldKey(String graphImpl) {
+        String query = "CALL algo.louvain.stream(" +
+                       "    '', '', {" +
+                       "        concurrency: 1, communityProperty: 'c', graph: $graph" +
+                       "    }" +
+                       ") YIELD nodeId, community, communities";
+        IntIntScatterMap testMap = new IntIntScatterMap();
+        runQuery(query, MapUtil.map("graph", graphImpl),
+                row -> {
+                    long community = (long) row.get("community");
+                    assertEquals(0L, community);
+                    testMap.addTo((int) community, 1);
+                }
+        );
+        assertEquals(1, testMap.size());
+    }
+
+    @AllGraphNamesTest
     void throwsIfPredefinedCommunityPropertyDoesNotExist(String graphImpl) {
         String query = "CALL algo.louvain.stream(" +
                        "    '', '', {" +
