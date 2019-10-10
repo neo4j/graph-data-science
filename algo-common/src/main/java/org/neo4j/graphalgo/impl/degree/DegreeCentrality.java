@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.impl.results.PartitionedDoubleArrayResult;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 public class DegreeCentrality extends Algorithm<DegreeCentrality> {
@@ -58,7 +59,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> {
     public void compute() {
         int batchSize = ParallelUtil.adjustedBatchSize(nodeCount, concurrency);
         int taskCount = ParallelUtil.threadCount(batchSize, nodeCount);
-        final ArrayList<Runnable> tasks = new ArrayList<>(taskCount);
+        List<Runnable> tasks = new ArrayList<>(taskCount);
 
         this.starts = new long[taskCount];
         this.partitions = new double[taskCount][batchSize];

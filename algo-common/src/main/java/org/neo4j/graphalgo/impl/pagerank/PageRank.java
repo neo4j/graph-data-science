@@ -30,8 +30,10 @@ import org.neo4j.graphalgo.api.NodeIterator;
 import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
-import org.neo4j.graphalgo.impl.results.PartitionedDoubleArrayResult;
+import org.neo4j.graphalgo.impl.results.HugeDoubleArrayResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
 
@@ -124,6 +126,8 @@ public class PageRank extends Algorithm<PageRank> {
     private Log log;
     private ComputeSteps computeSteps;
 
+    private final HugeDoubleArray result;
+
     public static final class Config {
         public final int iterations;
         public final double dampingFactor;
@@ -176,6 +180,7 @@ public class PageRank extends Algorithm<PageRank> {
         this.toleranceValue = algoConfig.toleranceValue;
         this.sourceNodeIds = sourceNodeIds;
         this.pageRankVariant = pageRankVariant;
+        this.result = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
     }
 
     public int iterations() {
@@ -301,6 +306,7 @@ public class PageRank extends Algorithm<PageRank> {
 
             starts.add(start);
             lengths.add(partitionSize);
+            HugeCursor<double[]> cursor = result.initCursor(result.newCursor(), start, start + partitionSize);
 
             computeSteps.add(pageRankVariant.createComputeStep(
                     dampingFactor,
@@ -311,7 +317,10 @@ public class PageRank extends Algorithm<PageRank> {
                     tracker,
                     partitionSize,
                     start,
-                    degreeCache, nodeCount));
+                    degreeCache,
+                    nodeCount,
+                    cursor
+            ));
         }
 
         long[] startArray = starts.toArray();
@@ -500,13 +509,12 @@ public class PageRank extends Algorithm<PageRank> {
         }
 
         CentralityResult getPageRank() {
-            ComputeStep firstStep = steps.get(0);
-            double[][] results = new double[steps.size()][];
-            int i = 0;
+            // TODO: Here we call step.pageRank() for the side-effect of flushing results.
+            //       The step should take care of flushing itself once its computation is done.
             for (ComputeStep step : steps) {
-                results[i++] = step.pageRank();
+                step.pageRank();
             }
-            return new PartitionedDoubleArrayResult(results, firstStep.starts());
+            return new HugeDoubleArrayResult(result);
         }
 
         private void run(int iterations) {

@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.impl.pagerank;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 
 public class ArticleRankVariant implements PageRankVariant {
 
@@ -36,7 +37,9 @@ public class ArticleRankVariant implements PageRankVariant {
             int partitionCount,
             long start,
             DegreeCache degreeCache,
-            long nodeCount) {
+            long nodeCount,
+            HugeCursor<double[]> cursor
+    ) {
         return new ArticleRankComputeStep(
                 dampingFactor,
                 sourceNodeIds,
@@ -44,7 +47,8 @@ public class ArticleRankVariant implements PageRankVariant {
                 tracker,
                 partitionCount,
                 start,
-                degreeCache
+                degreeCache,
+                cursor
         );
     }
 

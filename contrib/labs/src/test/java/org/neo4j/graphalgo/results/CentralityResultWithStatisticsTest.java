@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.results;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.impl.results.HugeDoubleArrayResult;
-import org.neo4j.graphalgo.impl.results.PartitionedDoubleArrayResult;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -32,30 +31,6 @@ class CentralityResultWithStatisticsTest {
     void doubleArrayResult() {
         CentralityResultWithStatistics result = CentralityResultWithStatistics.Builder
                 .of(new HugeDoubleArrayResult(HugeDoubleArray.of(1, 2, 3, 4)));
-
-        assertEquals(4.0, result.computeMax(), 0.01);
-        assertEquals(10.0, result.computeL1Norm(), 0.01);
-        assertEquals(5.477225575051661, result.computeL2Norm(), 0.01);
-    }
-
-    @Test
-    void partitionedPrimitiveDoubleArrayResult() {
-        double[][] partitions = new double[][]{{1.0, 2.0}, {3.0, 4.0}};
-        long[] starts = new long[]{0, 2};
-        CentralityResultWithStatistics result = CentralityResultWithStatistics.Builder
-                .of(new PartitionedDoubleArrayResult(partitions, starts));
-
-        assertEquals(4.0, result.computeMax(), 0.01);
-        assertEquals(10.0, result.computeL1Norm(), 0.01);
-        assertEquals(5.477225575051661, result.computeL2Norm(), 0.01);
-    }
-
-    @Test
-    void partitionedDoubleArrayResult() {
-        double[][] partitions = new double[][]{{1.0, 2.0}, {3.0, 4.0}};
-        long[] starts = new long[]{0, 2};
-        CentralityResultWithStatistics result = CentralityResultWithStatistics.Builder
-                .of(new PartitionedDoubleArrayResult(partitions, starts));
 
         assertEquals(4.0, result.computeMax(), 0.01);
         assertEquals(10.0, result.computeL1Norm(), 0.01);

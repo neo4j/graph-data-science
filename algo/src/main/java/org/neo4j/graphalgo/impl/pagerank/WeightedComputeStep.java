@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.binaryLookup;
@@ -43,13 +44,17 @@ public class WeightedComputeStep extends BaseComputeStep implements Relationship
             AllocationTracker tracker,
             int partitionSize,
             long startNode,
-            DegreeCache degreeCache) {
+            DegreeCache degreeCache,
+            HugeCursor<double[]> cursor
+    ) {
         super(dampingFactor,
                 sourceNodeIds,
                 graph,
                 tracker,
                 partitionSize,
-                startNode);
+                startNode,
+                cursor
+        );
         this.relationshipWeights = relationshipWeights;
         this.aggregatedDegrees = degreeCache.aggregatedDegrees();
     }

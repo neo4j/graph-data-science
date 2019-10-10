@@ -274,7 +274,7 @@ final class PageRankTest {
         long partitionSize = BitUtil.ceilDiv(nodeCount, concurrency);
         final MemoryRange actual = pageRank.memoryEstimation().estimate(dimensions, concurrency).memoryUsage();
         final MemoryRange expected = MemoryRange.of(
-                96L /* PageRank.class */ +
+                104L /* PageRank.class */ +
                 32L /* ComputeSteps.class */ +
                 BitUtil.align(16 + concurrency * 4, 8) /* scores[] wrapper */ +
                 BitUtil.align(16 + concurrency * 8, 8) /* starts[] */ +
@@ -282,7 +282,7 @@ final class PageRankTest {
                 BitUtil.align(16 + concurrency * 4, 8) /* list of computeSteps */ +
                         /* ComputeStep */
                 concurrency * (
-                        120L /* NonWeightedComputeStep.class */ +
+                        128L /* NonWeightedComputeStep.class */ +
                         BitUtil.align(16 + concurrency * 4, 8) /* nextScores[] wrapper */ +
                         concurrency * BitUtil.align(16 + partitionSize * 4, 8) /* inner nextScores[][] */ +
                         BitUtil.align(16 + partitionSize * 8, 8) /* pageRank[] */ +

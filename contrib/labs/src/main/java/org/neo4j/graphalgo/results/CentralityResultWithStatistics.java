@@ -23,7 +23,6 @@ package org.neo4j.graphalgo.results;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphalgo.impl.results.HugeDoubleArrayResult;
-import org.neo4j.graphalgo.impl.results.PartitionedDoubleArrayResult;
 
 import java.util.function.DoubleUnaryOperator;
 
@@ -65,37 +64,7 @@ public abstract class CentralityResultWithStatistics<T extends CentralityResult>
         private Builder() {}
 
         public static CentralityResultWithStatistics of(CentralityResult result) {
-            if (result instanceof PartitionedDoubleArrayResult) {
-                return new PartitionedCentralityResultsWithStatistics((PartitionedDoubleArrayResult) result);
-            } else if (result instanceof HugeDoubleArrayResult) {
-                return new HugeDoubleArrayResultWithStatistics((HugeDoubleArrayResult) result);
-            } else {
-                throw new IllegalArgumentException(String.format(
-                        "Unsupported CentralityResult %s.",
-                        result.getClass().getSimpleName()));
-            }
-        }
-    }
-
-    static final class PartitionedCentralityResultsWithStatistics extends CentralityResultWithStatistics<PartitionedDoubleArrayResult> {
-
-        PartitionedCentralityResultsWithStatistics(PartitionedDoubleArrayResult result) {
-            super(result);
-        }
-
-        @Override
-        public double computeMax() {
-            return NormalizationComputations.max(result.partitions());
-        }
-
-        @Override
-        public double computeL2Norm() {
-            return NormalizationComputations.l2Norm(result.partitions());
-        }
-
-        @Override
-        public double computeL1Norm() {
-            return NormalizationComputations.l1Norm(result.partitions());
+            return new HugeDoubleArrayResultWithStatistics((HugeDoubleArrayResult) result);
         }
     }
 

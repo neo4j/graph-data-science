@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Arrays;
@@ -55,6 +56,7 @@ public abstract class BaseComputeStep implements ComputeStep {
 
     final Direction direction;
 
+    private final HugeCursor<double[]> cursor;
     double[] pageRank;
     double[] deltas;
     float[][] nextScores;
@@ -73,7 +75,9 @@ public abstract class BaseComputeStep implements ComputeStep {
             Graph graph,
             AllocationTracker tracker,
             int partitionSize,
-            long startNode) {
+            long startNode,
+            HugeCursor<double[]> cursor
+    ) {
         this(
                 dampingFactor,
                 PageRank.DEFAULT_TOLERANCE,
@@ -81,7 +85,8 @@ public abstract class BaseComputeStep implements ComputeStep {
                 graph,
                 tracker,
                 partitionSize,
-                startNode
+                startNode,
+                cursor
         );
     }
 
@@ -92,7 +97,9 @@ public abstract class BaseComputeStep implements ComputeStep {
             Graph graph,
             AllocationTracker tracker,
             int partitionSize,
-            long startNode) {
+            long startNode,
+            HugeCursor<double[]> cursor
+    ) {
         this.dampingFactor = dampingFactor;
         this.alpha = 1.0 - dampingFactor;
         this.tolerance = tolerance;
@@ -104,6 +111,7 @@ public abstract class BaseComputeStep implements ComputeStep {
         this.partitionSize = partitionSize;
         this.startNode = startNode;
         this.endNode = startNode + (long) partitionSize;
+        this.cursor = cursor;
         state = S_INIT;
     }
 
@@ -220,6 +228,16 @@ public abstract class BaseComputeStep implements ComputeStep {
     }
 
     public double[] pageRank() {
+        while (cursor.next()) {
+            int prIndex = 0;
+            double[] array = cursor.array;
+            int offset = cursor.offset;
+            int limit = cursor.limit;
+            for (int j = offset; j < limit; prIndex++, j++) {
+                array[j] = pageRank[prIndex];
+            }
+            // TODO: should the cursor release after flushing?
+        }
         return pageRank;
     }
 
