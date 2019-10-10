@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeWeights;
 import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.core.loading.NodePropertiesBuilder;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.LazyMappingCollection;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
@@ -74,14 +73,18 @@ public final class Pregel {
             final ExecutorService executor,
             final AllocationTracker tracker) {
 
-        final NodeWeights nodeValues = NodePropertiesBuilder
-                .of(graph.nodeCount(), tracker, computationFactory.get().getDefaultNodeValue(), 0, "key")
-                .build();
+        // HugeDoubleArray is faster for set operations compared to HugeNodePropertyMap
+        double defaultNodeValue = computationFactory.get().getDefaultNodeValue();
+        HugeDoubleArray hugeDoubleArray = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
+        ParallelUtil.parallelStreamConsume(
+                LongStream.range(0, graph.nodeCount()),
+                nodeIds -> nodeIds.forEach(nodeId -> hugeDoubleArray.set(nodeId, defaultNodeValue))
+        );
 
         return new Pregel(
                 graph,
                 computationFactory,
-                nodeValues,
+                hugeDoubleArray,
                 batchSize,
                 concurrency,
                 executor,
@@ -98,10 +101,17 @@ public final class Pregel {
             final ExecutorService executor,
             final AllocationTracker tracker) {
 
+        // HugeDoubleArray is faster for set operations compared to HugeNodePropertyMap
+        HugeDoubleArray hugeDoubleArray = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
+        ParallelUtil.parallelStreamConsume(
+                LongStream.range(0, graph.nodeCount()),
+                nodeIds -> nodeIds.forEach(nodeId -> hugeDoubleArray.set(nodeId, initialNodeValues.nodeWeight(nodeId)))
+        );
+
         return new Pregel(
                 graph,
                 computationFactory,
-                initialNodeValues,
+                hugeDoubleArray,
                 batchSize,
                 concurrency,
                 executor,
@@ -112,23 +122,17 @@ public final class Pregel {
     private Pregel(
             final Graph graph,
             final Supplier<Computation> computationFactory,
-            final NodeWeights initialNodeValues,
+            final HugeDoubleArray initialNodeValues,
             final int batchSize,
             final int concurrency,
             final ExecutorService executor,
             final AllocationTracker tracker) {
         this.graph = graph;
         this.computationFactory = computationFactory;
+        this.nodeValues = initialNodeValues;
         this.batchSize = batchSize;
         this.concurrency = concurrency;
         this.executor = executor;
-
-        // HugeDoubleArray is faster for set operations compared to HugeNodePropertyMap
-        this.nodeValues = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
-        ParallelUtil.parallelStreamConsume(
-                LongStream.range(0, graph.nodeCount()),
-                nodeIds -> nodeIds.forEach(nodeId -> nodeValues.set(nodeId, initialNodeValues.nodeWeight(nodeId)))
-        );
 
         Direction loadDirection = graph.getLoadDirection();
 
@@ -176,11 +180,10 @@ public final class Pregel {
     }
 
     private BitSet unionBitSets(List<ComputeStep> computeSteps, Function<ComputeStep, BitSet> fn) {
-        BitSet target = fn.apply(computeSteps.get(0));
-        for (int i = 1; i < computeSteps.size(); i++) {
-            target.union(fn.apply(computeSteps.get(i)));
-        }
-        return target;
+        return computeSteps.parallelStream().map(fn).reduce((bitSet1, bitSet2) -> {
+            bitSet1.union(bitSet2);
+            return bitSet1;
+        }).orElseGet(BitSet::new);
     }
 
     private List<ComputeStep> runComputeSteps(
