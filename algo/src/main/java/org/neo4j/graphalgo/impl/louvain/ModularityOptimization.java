@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.impl.louvain;
 import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.LongDoubleMap;
 import com.carrotsearch.hppc.cursors.LongDoubleCursor;
+import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.Algorithm;
@@ -87,9 +88,9 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private Graph graph;
     private ExecutorService pool;
     private final NodeIterator nodeIterator;
-    private double m2, m22;
+    private double sumOfAllWeights, sumOfAllWeightsSquared;
     private HugeLongArray communities;
-    private HugeDoubleArray ki;
+    private HugeDoubleArray summedAdjacencyWeights;
     private int iterations;
     private double q = MINIMUM_MODULARITY;
     private final AtomicInteger counter = new AtomicInteger(0);
@@ -113,7 +114,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         this.tracker = tracker;
         this.nodeIterator = createNodeIterator(concurrency);
 
-        ki = HugeDoubleArray.newArray(nodeCount, tracker);
+        summedAdjacencyWeights = HugeDoubleArray.newArray(nodeCount, tracker);
         communities = HugeLongArray.newArray(nodeCount, tracker);
     }
 
@@ -180,17 +181,17 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
      * init ki (sum of weights of node) & m
      */
     private void init() {
-        m2 = .0;
+        sumOfAllWeights = .0;
         for (int node = 0; node < nodeCount; node++) {
             // since we use an undirected graph 2m is counted here
             graph.forEachRelationship(node, DIRECTION, DEFAULT_WEIGHT, (s, t, w) -> {
-                m2 += w;
-                ki.addTo(s, w / 2);
-                ki.addTo(t, w / 2);
+                sumOfAllWeights += w;
+                summedAdjacencyWeights.addTo(s, w / 2);
+                summedAdjacencyWeights.addTo(t, w / 2);
                 return true;
             });
         }
-        m22 = Math.pow(m2, 2.0);
+        sumOfAllWeightsSquared = Math.pow(sumOfAllWeights, 2.0);
         communities.setAll(i -> i);
     }
 
@@ -279,8 +280,8 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
      */
     @Override
     public void release() {
-        tracker.remove(ki.release());
-        this.ki = null;
+        tracker.remove(summedAdjacencyWeights.release());
+        this.summedAdjacencyWeights = null;
         tracker.remove(communities.release());
         this.communities = null;
         this.graph = null;
@@ -292,7 +293,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
      */
     private final class Task implements Runnable {
 
-        final HugeDoubleArray sTot, sIn;
+        final HugeDoubleArray communityTotalWeights, communityInternalWeights;
         final HugeLongArray localCommunities;
         final RelationshipIterator rels;
         private final TerminationFlag terminationFlag;
@@ -305,11 +306,11 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
          */
         Task() {
             terminationFlag = getTerminationFlag();
-            sTot = HugeDoubleArray.newArray(nodeCount, tracker);
-            sIn = HugeDoubleArray.newArray(nodeCount, tracker);
+            communityTotalWeights = HugeDoubleArray.newArray(nodeCount, tracker);
+            communityInternalWeights = HugeDoubleArray.newArray(nodeCount, tracker);
             localCommunities = HugeLongArray.newArray(nodeCount, tracker);
             rels = graph.concurrentCopy();
-            ki.copyTo(sTot, nodeCount);
+            summedAdjacencyWeights.copyTo(communityTotalWeights, nodeCount);
             communities.copyTo(localCommunities, nodeCount);
         }
 
@@ -323,8 +324,8 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
          */
         void sync(final Task parent) {
             parent.localCommunities.copyTo(localCommunities, nodeCount);
-            parent.sTot.copyTo(sTot, nodeCount);
-            parent.sIn.copyTo(sIn, nodeCount);
+            parent.communityTotalWeights.copyTo(communityTotalWeights, nodeCount);
+            parent.communityInternalWeights.copyTo(communityInternalWeights, nodeCount);
             this.q = parent.q;
         }
 
@@ -367,28 +368,32 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                 final HugeLongArray localCommunities) {
             final long currentCommunity = localCommunities.get(node);
 
-            double nodeKI = ki.get(node);
-            sTot.addTo(currentCommunity, -nodeKI);
+            double summedAdjacencyWeight = summedAdjacencyWeights.get(node);
+
+            // remove the current nodes influence from its community
+            communityTotalWeights.addTo(currentCommunity, -summedAdjacencyWeight);
 
             int degree = graph.degree(node, DIRECTION);
             LongDoubleMap communityWeights = new LongDoubleHashMap(degree);
-            Pointer.DoublePointer extraWeight = Pointer.wrap(0.0);
+            MutableDouble selfRelationshipWeight = new MutableDouble(0.0);
             rels.forEachRelationship(node, DIRECTION, DEFAULT_WEIGHT, (s, t, weight) -> {
-                long localCommunity = localCommunities.get(t);
+                long targetCommunity = localCommunities.get(t);
                 if (s != t) {
-                    communityWeights.addTo(localCommunity, weight);
-                } else if (localCommunity == currentCommunity) {
-                    extraWeight.v += weight;
+                    communityWeights.addTo(targetCommunity, weight);
+                } else {
+                    selfRelationshipWeight.add(weight);
                 }
                 return true;
             });
 
-            final double w = communityWeights.get(currentCommunity) + extraWeight.v;
-            sIn.addTo(currentCommunity, -2.0 * (w + nodeProperties.nodeProperty(node)));
+            final double initialWeight = communityWeights.get(currentCommunity) + selfRelationshipWeight.doubleValue();
+
+            // remove current node from community internal weights
+            communityInternalWeights.addTo(currentCommunity, -2.0 * (initialWeight + nodeProperties.nodeProperty(node)));
 
             localCommunities.set(node, NONE);
             double bestGain = .0;
-            double bestWeight = w;
+            double bestWeight = initialWeight;
             long bestCommunity = currentCommunity;
 
             if (!communityWeights.isEmpty()) {
@@ -397,19 +402,22 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                 } else {
                     for (LongDoubleCursor cursor : communityWeights) {
                         long community = cursor.key;
-                        double wic = cursor.value;
-                        final double g = wic / m2 - sTot.get(community) * nodeKI / m22;
-                        if (g > bestGain) {
-                            bestGain = g;
+                        double summedWeight = cursor.value;
+                        final double gain = summedWeight / sumOfAllWeights - communityTotalWeights.get(community) * summedAdjacencyWeight / sumOfAllWeightsSquared;
+                        if (gain > bestGain) {
+                            bestGain = gain;
                             bestCommunity = community;
-                            bestWeight = wic;
+                            bestWeight = summedWeight;
                         }
                     }
                 }
             }
 
-            sTot.addTo(bestCommunity, nodeKI);
-            sIn.addTo(bestCommunity, 2.0 * (bestWeight + nodeProperties.nodeProperty(node)));
+            // add back the current nodes adjacent weights to its possibly new community
+            communityTotalWeights.addTo(bestCommunity, summedAdjacencyWeight);
+
+            // add weight of possibly better community for current node
+            communityInternalWeights.addTo(bestCommunity, 2.0 * (bestWeight + nodeProperties.nodeProperty(node)));
             localCommunities.set(node, bestCommunity);
             return bestCommunity != currentCommunity;
         }
@@ -419,12 +427,12 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             for (long node = 0L; node < nodeCount; node++) {
                 rels.forEachRelationship(node, Direction.OUTGOING, DEFAULT_WEIGHT, (s, t, w) -> {
                     if (localCommunities.get(s) == localCommunities.get(t)) {
-                        pointer.v += (w - (ki.get(s) * ki.get(t) / m2));
+                        pointer.v += (w - (summedAdjacencyWeights.get(s) * summedAdjacencyWeights.get(t) / sumOfAllWeights));
                     }
                     return true;
                 });
             }
-            return pointer.v / m2;
+            return pointer.v / sumOfAllWeights;
         }
     }
 }
