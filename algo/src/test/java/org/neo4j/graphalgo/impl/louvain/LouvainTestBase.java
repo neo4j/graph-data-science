@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 abstract class LouvainTestBase {
 
-    static final Louvain.Config DEFAULT_CONFIG = new Louvain.Config(10, 10, false);
+    static final Louvain.Config DEFAULT_CONFIG = new Louvain.Config(10, 10);
 
     GraphDatabaseAPI db;
 

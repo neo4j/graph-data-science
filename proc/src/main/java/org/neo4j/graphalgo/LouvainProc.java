@@ -63,7 +63,6 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
     public static final String INTERMEDIATE_COMMUNITIES_WRITE_PROPERTY = "intermediateCommunitiesWriteProperty";
     public static final String INCLUDE_INTERMEDIATE_COMMUNITIES = "includeIntermediateCommunities";
     public static final String INNER_ITERATIONS = "innerIterations";
-    public static final String COMMUNITY_SELECTION = "communitySelection";
     public static final int DEFAULT_CONCURRENCY = 1;
     public static final int DEFAULT_MAX_LEVEL = 10;
     public static final long DEFAULT_MAX_ITERATIONS = 10L;
@@ -175,9 +174,8 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
     protected LouvainFactory algorithmFactory(final ProcedureConfiguration procedureConfig) {
         int maxLevel = procedureConfig.getIterations(DEFAULT_MAX_LEVEL);
         int maxIterations = procedureConfig.getNumber(INNER_ITERATIONS, DEFAULT_MAX_ITERATIONS).intValue();
-        boolean randomNeighbor = procedureConfig.get(COMMUNITY_SELECTION, "classic").equalsIgnoreCase("random");
 
-        return new LouvainFactory(new Louvain.Config(maxLevel, maxIterations, randomNeighbor));
+        return new LouvainFactory(new Louvain.Config(maxLevel, maxIterations));
     }
 
     private Louvain compute(

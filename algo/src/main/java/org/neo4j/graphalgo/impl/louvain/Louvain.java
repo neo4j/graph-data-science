@@ -25,6 +25,7 @@ import com.carrotsearch.hppc.ObjectArrayList;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
+import org.neo4j.graphalgo.core.loading.NullWeightMap;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -60,6 +61,8 @@ public final class Louvain extends Algorithm<Louvain> {
 
     public static final double DEFAULT_WEIGHT = 1.0;
 
+    public static final String SEED_TYPE = "seed";
+
     private static final PropertyTranslator<HugeLongArray[]> HUGE_COMMUNITIES_TRANSLATOR =
             (propertyId, allCommunities, nodeId) -> {
                 // build int array
@@ -81,10 +84,9 @@ public final class Louvain extends Algorithm<Louvain> {
     private double[] modularities;
     private HugeLongArray[] dendrogram;
     private final HugeDoubleArray nodeWeights;
-    private final Graph root;
+    private final Graph rootGraph;
     private long communityCount;
-
-    private final NodeOrRelationshipProperties communityMap;
+    private final NodeOrRelationshipProperties seedingValues;
     private final int maxLevel;
     private final int maxIterations;
 
@@ -93,57 +95,60 @@ public final class Louvain extends Algorithm<Louvain> {
             final Config config,
             final ExecutorService pool,
             final int concurrency,
-            final AllocationTracker tracker) {this(graph, config, null, pool, concurrency, tracker);}
+            final AllocationTracker tracker
+    ) {
+        this(graph, config, null, pool, concurrency, tracker);
+    }
 
     public Louvain(
             final Graph graph,
             final Config config,
-            final NodeOrRelationshipProperties communityMap,
+            final NodeOrRelationshipProperties seedingValues,
             final ExecutorService pool,
             final int concurrency,
             final AllocationTracker tracker) {
-        this.root = graph;
+        this.rootGraph = graph;
         this.pool = pool;
         this.concurrency = concurrency;
         this.tracker = tracker;
-        rootNodeCount = graph.nodeCount();
-        communities = HugeLongArray.newArray(rootNodeCount, tracker);
-        nodeWeights = HugeDoubleArray.newArray(rootNodeCount, tracker);
-        this.communityMap = communityMap;
+        this.rootNodeCount = graph.nodeCount();
+        this.communities = HugeLongArray.newArray(rootNodeCount, tracker);
+        this.nodeWeights = HugeDoubleArray.newArray(rootNodeCount, tracker);
+        this.seedingValues = seedingValues;
         maxLevel = config.maxLevel;
         maxIterations = config.maxIterations;
         communityCount = rootNodeCount;
-        communities.setAll(i -> i);
     }
 
     public Louvain compute() {
-        if (communityMap != null) {
-            return compute(communityMap, maxLevel, maxIterations);
+        return compute(this.maxLevel, this.maxIterations);
+    }
+
+    public Louvain compute(int maxLevel, int maxIterations) {
+        Graph workingGraph = this.rootGraph;
+        long nodeCount = this.rootNodeCount;
+
+        if (seedingValues != null) {
+            BitSet comCount = new BitSet();
+            long maxSeedingCommunityId = seedingValues.getMaxValue();
+            communities.setAll(nodeId -> {
+                double existingCommunityValue = seedingValues.nodeWeight(nodeId, Double.NaN);
+                long community = Double.isNaN(existingCommunityValue)
+                        ? maxSeedingCommunityId + this.rootGraph.toOriginalNodeId(nodeId) + 1L
+                        : (long) existingCommunityValue;
+
+                comCount.set(community);
+                return community;
+            });
+            // temporary graph
+            nodeCount = comCount.cardinality();
+            CommunityUtils.normalize(communities);
+            workingGraph = rebuildGraph(this.rootGraph, communities, nodeCount);
         } else {
-            return compute(maxLevel, maxIterations);
+            communities.setAll(nodeId -> this.rootGraph.toOriginalNodeId(nodeId));
         }
-    }
 
-    public Louvain compute(final int maxLevel, final int maxIterations) {
-        return computeOf(root, rootNodeCount, maxLevel, maxIterations);
-    }
-
-    public Louvain compute(
-            final NodeOrRelationshipProperties communityMap,
-            final int maxLevel,
-            final int maxIterations) {
-        BitSet comCount = new BitSet();
-        communities.setAll(i -> {
-            final long c = (long) communityMap.nodeProperty(i, i);
-            comCount.set(c);
-            return c;
-        });
-        // temporary graph
-        long nodeCount = comCount.cardinality();
-        CommunityUtils.normalize(communities);
-        Graph graph = rebuildGraph(this.root, communities, nodeCount);
-
-        return computeOf(graph, nodeCount, maxLevel, maxIterations);
+        return computeOf(workingGraph, nodeCount, maxLevel, maxIterations);
     }
 
     private Louvain computeOf(
@@ -157,14 +162,14 @@ public final class Louvain extends Algorithm<Louvain> {
         DoubleArrayList modularities = new DoubleArrayList(0);
         long communityCount = this.communityCount;
         long nodeCount = rootNodeCount;
-        Graph graph = rootGraph;
+        Graph louvainGraph = rootGraph;
 
         for (int level = 0; level < maxLevel; level++) {
             assertRunning();
             // start modularity optimization
             final ModularityOptimization modularityOptimization =
                     new ModularityOptimization(
-                            graph,
+                            louvainGraph,
                             nodeWeights::get,
                             pool,
                             concurrency,
@@ -188,7 +193,7 @@ public final class Louvain extends Algorithm<Louvain> {
             nodeCount = communityCount;
             dendrogram.add(rebuildCommunityStructure(communityIds));
             modularities.add(modularityOptimization.getModularity());
-            graph = rebuildGraph(graph, communityIds, communityCount);
+            louvainGraph = rebuildGraph(louvainGraph, communityIds, communityCount);
             // release the old algo instance
             modularityOptimization.release();
         }
@@ -205,19 +210,19 @@ public final class Louvain extends Algorithm<Louvain> {
      * create a virtual graph based on the community structure of the
      * previous louvain round
      *
-     * @param graph        previous graph
+     * @param louvainGraph previous graph
      * @param communityIds community structure
      * @return a new graph built from a community structure
      */
-    private Graph rebuildGraph(final Graph graph, final HugeLongArray communityIds, final long communityCount) {
+    private Graph rebuildGraph(final Graph louvainGraph, final HugeLongArray communityIds, final long communityCount) {
         if (communityCount < MAX_MAP_ENTRIES) {
-            return rebuildSmallerGraph(graph, communityIds, (int) communityCount);
+            return rebuildSmallerGraph(louvainGraph, communityIds, (int) communityCount);
         }
 
         HugeDoubleArray nodeWeights = this.nodeWeights;
 
         // bag of nodeId->{nodeId, ..}
-        LongLongSubGraph subGraph = new LongLongSubGraph(communityCount, graph.hasRelationshipProperty(), tracker);
+        LongLongSubGraph subGraph = new LongLongSubGraph(communityCount, louvainGraph.hasRelationshipProperty(), tracker);
 
         // for each node in the current graph
         HugeCursor<long[]> cursor = communityIds.initCursor(communityIds.newCursor());
@@ -232,7 +237,7 @@ public final class Louvain extends Algorithm<Louvain> {
                 final long sourceCommunity = communities[start];
 
                 // get transitions from current node
-                graph.forEachRelationship(base + start, Direction.OUTGOING, DEFAULT_WEIGHT, (s, t, w) -> {
+                louvainGraph.forEachRelationship(base + start, Direction.OUTGOING, DEFAULT_WEIGHT, (s, t, w) -> {
                     // mapping
                     final long targetCommunity = communityIds.get(t);
                     if (sourceCommunity == targetCommunity) {
@@ -248,8 +253,8 @@ public final class Louvain extends Algorithm<Louvain> {
             }
         }
 
-        if (graph instanceof SubGraph) {
-            graph.release();
+        if (louvainGraph instanceof SubGraph) {
+            louvainGraph.release();
         }
 
         // create temporary graph
@@ -257,13 +262,13 @@ public final class Louvain extends Algorithm<Louvain> {
     }
 
     private Graph rebuildSmallerGraph(
-            final Graph graph,
+            final Graph louvainGraph,
             final HugeLongArray communityIds,
             final int communityCount) {
         HugeDoubleArray nodeWeights = this.nodeWeights;
 
         // bag of nodeId->{nodeId, ..}
-        final IntIntSubGraph subGraph = new IntIntSubGraph(communityCount, graph.hasRelationshipProperty());
+        final IntIntSubGraph subGraph = new IntIntSubGraph(communityCount, louvainGraph.hasRelationshipProperty());
 
         // for each node in the current graph
         HugeCursor<long[]> cursor = communityIds.initCursor(communityIds.newCursor());
@@ -278,7 +283,7 @@ public final class Louvain extends Algorithm<Louvain> {
                 final int sourceCommunity = (int) communities[start];
 
                 // get transitions from current node
-                graph.forEachRelationship(base + start, Direction.OUTGOING, DEFAULT_WEIGHT, (s, t, value) -> {
+                louvainGraph.forEachRelationship(base + start, Direction.OUTGOING, DEFAULT_WEIGHT, (s, t, value) -> {
                     // mapping
                     final int targetCommunity = (int) communityIds.get(t);
                     if (sourceCommunity == targetCommunity) {
@@ -294,8 +299,8 @@ public final class Louvain extends Algorithm<Louvain> {
             }
         }
 
-        if (graph instanceof SubGraph) {
-            graph.release();
+        if (louvainGraph instanceof SubGraph) {
+            louvainGraph.release();
         }
 
         // create temporary graph
@@ -378,7 +383,7 @@ public final class Louvain extends Algorithm<Louvain> {
                         }
                     }
 
-                    return new StreamingResult(root.toOriginalNodeId(i), communitiesList, communities.get(i));
+                    return new StreamingResult(rootGraph.toOriginalNodeId(i), communitiesList, communities.get(i));
                 });
     }
 
@@ -464,7 +469,6 @@ public final class Louvain extends Algorithm<Louvain> {
         public final NodeOrRelationshipProperties communityMap;
         public final int maxLevel;
         public final int maxIterations;
-        public final boolean randomNeighborSelection;
 
         public Config(final int maxLevel) {
             this(maxLevel, maxLevel);
@@ -473,25 +477,17 @@ public final class Louvain extends Algorithm<Louvain> {
         public Config(
                 final int maxLevel,
                 final int maxIterations) {
-            this(null, maxLevel, maxIterations, false);
-        }
-
-        public Config(
-                final int maxLevel,
-                final int maxIterations,
-                final boolean randomNeighborSelection) {
-            this(null, maxLevel, maxIterations, randomNeighborSelection);
+            this(null, maxLevel, maxIterations);
         }
 
         public Config(
                 final NodeOrRelationshipProperties communityMap,
                 final int maxLevel,
-                final int maxIterations,
-                final boolean randomNeighborSelection) {
+                final int maxIterations
+        ) {
             this.communityMap = communityMap;
             this.maxLevel = maxLevel;
             this.maxIterations = maxIterations;
-            this.randomNeighborSelection = randomNeighborSelection;
         }
     }
 }
