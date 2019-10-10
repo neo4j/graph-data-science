@@ -179,11 +179,12 @@ public final class Pregel {
         return iterations;
     }
 
-    private BitSet unionBitSets(List<ComputeStep> computeSteps, Function<ComputeStep, BitSet> fn) {
-        return computeSteps.parallelStream().map(fn).reduce((bitSet1, bitSet2) -> {
-            bitSet1.union(bitSet2);
-            return bitSet1;
-        }).orElseGet(BitSet::new);
+    private BitSet unionBitSets(Collection<ComputeStep> computeSteps, Function<ComputeStep, BitSet> fn) {
+        return ParallelUtil.parallelStream(computeSteps.stream(), stream ->
+                stream.map(fn).reduce((bitSet1, bitSet2) -> {
+                    bitSet1.union(bitSet2);
+                    return bitSet1;
+                }).orElseGet(BitSet::new));
     }
 
     private List<ComputeStep> runComputeSteps(
