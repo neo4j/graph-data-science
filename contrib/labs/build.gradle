@@ -6,15 +6,14 @@ dependencies {
     compile project(':algo-common')
 
     compile group: 'com.carrotsearch',      name: 'hppc',           version: ver.'hppc'
-    compile group: 'io.dropwizard.metrics', name: 'metrics-core',   version: ver.'metrics-core'
     compile group: 'org.hdrhistogram',      name: 'HdrHistogram',   version: ver.'HdrHistogram'
     compile group: 'org.roaringbitmap',     name: 'RoaringBitmap',  version: ver.'RoaringBitmap'
 
-    compileOnly group: 'org.neo4j',             name: 'neo4j',                  version: ver.'neo4j'
-    compileOnly group: 'org.neo4j',             name: 'neo4j-slf4j',            version: ver.'neo4j'
+    compileOnly group: 'org.neo4j',         name: 'neo4j',          version: ver.'neo4j'
+    compileOnly group: 'org.neo4j',         name: 'neo4j-slf4j',    version: ver.'neo4j'
 
     testCompile project(':test-utils')
-    testCompile group: 'net.jqwik',     name: 'jqwik',                          version: ver.'jqwik'
+    testCompile group: 'net.jqwik',         name: 'jqwik',          version: ver.'jqwik'
 }
 
 test {
