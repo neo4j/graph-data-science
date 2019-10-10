@@ -36,7 +36,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.neo4j.graphalgo.beta.pregel.examples.ComputationTestUtil.assertLongValues;
 
-class SCCTest {
+class WeaklyConnectedComponentsTest {
 
     private static final String ID_PROPERTY = "id";
 
@@ -59,14 +59,11 @@ class SCCTest {
             ", (nA)-[:TYPE]->(nB)" +
             ", (nB)-[:TYPE]->(nC)" +
             ", (nC)-[:TYPE]->(nD)" +
-            ", (nD)-[:TYPE]->(nA)" +
             // {E, F, G}
             ", (nE)-[:TYPE]->(nF)" +
             ", (nF)-[:TYPE]->(nG)" +
-            ", (nG)-[:TYPE]->(nE)" +
             // {H, I}
-            ", (nI)-[:TYPE]->(nH)" +
-            ", (nH)-[:TYPE]->(nI)";
+            ", (nI)-[:TYPE]->(nH)";
 
     private GraphDatabaseAPI db;
     private Graph graph;
@@ -78,7 +75,7 @@ class SCCTest {
         graph = new GraphLoader(db)
                 .withAnyRelationshipType()
                 .withAnyLabel()
-                .withDirection(Direction.OUTGOING)
+                .withDirection(Direction.BOTH)
                 .load(HugeGraphFactory.class);
     }
 
@@ -88,13 +85,13 @@ class SCCTest {
     }
 
     @Test
-    void runSCC() {
+    void runWCC() {
         int batchSize = 10;
         int maxIterations = 10;
 
         Pregel pregelJob = Pregel.withDefaultNodeValues(
                 graph,
-                SCCComputation::new,
+                WCCComputation::new,
                 batchSize,
                 Pools.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT,

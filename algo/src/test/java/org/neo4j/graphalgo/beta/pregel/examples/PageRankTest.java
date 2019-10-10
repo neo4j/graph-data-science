@@ -36,7 +36,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.neo4j.graphalgo.beta.pregel.examples.ComputationTestUtil.assertDoubleValues;
 
-class PRTest {
+class PageRankTest {
 
     private static final String ID_PROPERTY = "id";
 

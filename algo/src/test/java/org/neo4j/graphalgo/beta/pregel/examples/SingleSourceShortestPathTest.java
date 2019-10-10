@@ -36,7 +36,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.neo4j.graphalgo.beta.pregel.examples.ComputationTestUtil.assertLongValues;
 
-class WCCTest {
+class SingleSourceShortestPathTest {
 
     private static final String ID_PROPERTY = "id";
 
@@ -59,6 +59,7 @@ class WCCTest {
             ", (nA)-[:TYPE]->(nB)" +
             ", (nB)-[:TYPE]->(nC)" +
             ", (nC)-[:TYPE]->(nD)" +
+            ", (nA)-[:TYPE]->(nC)" +
             // {E, F, G}
             ", (nE)-[:TYPE]->(nF)" +
             ", (nF)-[:TYPE]->(nG)" +
@@ -85,13 +86,13 @@ class WCCTest {
     }
 
     @Test
-    void runWCC() {
+    void runSSSP() {
         int batchSize = 10;
         int maxIterations = 10;
 
         Pregel pregelJob = Pregel.withDefaultNodeValues(
                 graph,
-                WCCComputation::new,
+                () -> new SSSPComputation(0),
                 batchSize,
                 Pools.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT,
@@ -100,6 +101,16 @@ class WCCTest {
 
         HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
 
-        assertLongValues(db, NODE_LABEL, ID_PROPERTY, graph, nodeValues, 0, 0, 0, 0, 4, 4, 4, 7, 7, 9);
+        assertLongValues(db, NODE_LABEL, ID_PROPERTY, graph, nodeValues,
+                0,
+                1,
+                1,
+                2,
+                Long.MAX_VALUE,
+                Long.MAX_VALUE,
+                Long.MAX_VALUE,
+                Long.MAX_VALUE,
+                Long.MAX_VALUE,
+                Long.MAX_VALUE);
     }
 }
