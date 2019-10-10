@@ -63,10 +63,14 @@ abstract class LouvainTestBase {
         db.execute(cypher);
         GraphLoader loader = new GraphLoader(db)
                 .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
+                .withOptionalNodeProperties(
+                        PropertyMapping.of("seed1", -1),
+                        PropertyMapping.of("seed2", -1)
+                )
                 .undirected();
         if (graphImpl == CypherGraphFactory.class) {
             loader
-                    .withNodeStatement("MATCH (u) RETURN id(u) as id")
+                    .withNodeStatement("MATCH (u) RETURN id(u) as id, u.seed1 as seed1, u.seed2 as seed2")
                     .withRelationshipStatement("MATCH (u1)-[rel]-(u2) \n" +
                                                "RETURN id(u1) AS source, id(u2) AS target, rel.weight as weight");
         } else {
