@@ -131,12 +131,12 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
     }
 
     @Override
-    protected GraphLoader configureAlgoLoader(final GraphLoader loader, final ProcedureConfiguration config) {
+    protected GraphLoader configureAlgoLoader(GraphLoader loader, ProcedureConfiguration config) {
         return loader.withReducedRelationshipLoading(config.getDirection(Direction.OUTGOING));
     }
 
     @Override
-    protected PageRankFactory algorithmFactory(final ProcedureConfiguration config) {
+    protected PageRankFactory algorithmFactory(ProcedureConfiguration config) {
         double dampingFactor = config.get(DAMPING_FACTOR_KEY, DAMPING_FACTOR_DEFAULT);
         int iterations = config.getIterations(ITERATIONS_DEFAULT);
         double tolerance = config.get(TOLERANCE_KEY, PageRank.DEFAULT_TOLERANCE);
@@ -153,16 +153,16 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
     }
 
     private CentralityResult compute(
-            final PageRankScore.Stats.Builder statsBuilder,
-            final AllocationTracker tracker,
-            final ProcedureConfiguration configuration,
-            final Graph graph) {
+            PageRankScore.Stats.Builder statsBuilder,
+            AllocationTracker tracker,
+            ProcedureConfiguration configuration,
+            Graph graph) {
         PageRank algo = newAlgorithm(graph, configuration, tracker);
 
         runWithExceptionLogging("PageRank failed", () -> statsBuilder.timeEval(algo::compute));
         statsBuilder.withIterations(algo.iterations()).withDampingFactor(algo.dampingFactor());
 
-        final CentralityResult scores = algo.result();
+        CentralityResult scores = algo.result();
         algo.release();
         graph.release();
 

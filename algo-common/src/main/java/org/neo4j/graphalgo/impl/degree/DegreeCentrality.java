@@ -22,8 +22,11 @@ package org.neo4j.graphalgo.impl.degree;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
-import org.neo4j.graphalgo.impl.results.PartitionedDoubleArrayResult;
+import org.neo4j.graphalgo.impl.results.HugeDoubleArrayResult;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
@@ -38,6 +41,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> {
     private Graph graph;
     private final ExecutorService executor;
     private final int concurrency;
+    private HugeDoubleArray result;
 
     private long[] starts;
     private double[][] partitions;
@@ -52,8 +56,9 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> {
         this.executor = executor;
         this.concurrency = concurrency;
         this.direction = direction;
-        nodeCount = Math.toIntExact(graph.nodeCount());
+        this.nodeCount = Math.toIntExact(graph.nodeCount());
         this.weighted = weighted;
+        this.result = HugeDoubleArray.newArray(nodeCount, AllocationTracker.EMPTY);
     }
 
     public void compute() {
@@ -92,24 +97,36 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> {
     }
 
     public CentralityResult result() {
-        return new PartitionedDoubleArrayResult(partitions, starts);
+        return new HugeDoubleArrayResult(result);
     }
 
     private class DegreeTask implements Runnable {
         private final long startNodeId;
         private final double[] partition;
         private final long endNodeId;
+        private final HugeCursor<double[]> cursor;
 
         DegreeTask(long start, double[] partition) {
             this.startNodeId = start;
             this.partition = partition;
             this.endNodeId = Math.min(start + partition.length, nodeCount);
+            this.cursor = result.initCursor(result.newCursor(), start, endNodeId);
         }
 
         @Override
         public void run() {
             for (long nodeId = startNodeId; nodeId < endNodeId && running(); nodeId++) {
                 partition[Math.toIntExact(nodeId - startNodeId)] = graph.degree(nodeId, direction);
+            }
+            while (cursor.next()) {
+                int i = 0;
+                double[] array = cursor.array;
+                int offset = cursor.offset;
+                int limit = cursor.limit;
+                for (int j = offset; j < limit; i++, j++) {
+                    array[j] = partition[i];
+                }
+                // TODO: should the cursor release after flushing?
             }
         }
     }
@@ -118,11 +135,13 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> {
         private final long startNodeId;
         private final double[] partition;
         private final long endNodeId;
+        private final HugeCursor<double[]> cursor;
 
         WeightedDegreeTask(long start, double[] partition) {
             this.startNodeId = start;
             this.partition = partition;
             this.endNodeId = Math.min(start + partition.length, nodeCount);
+            this.cursor = result.initCursor(result.newCursor(), start, endNodeId);
         }
 
         @Override
@@ -135,6 +154,16 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> {
                     }
                     return true;
                 });
+            }
+            while (cursor.next()) {
+                int i = 0;
+                double[] array = cursor.array;
+                int offset = cursor.offset;
+                int limit = cursor.limit;
+                for (int j = offset; j < limit; i++, j++) {
+                    array[j] = partition[i];
+                }
+                // TODO: should the cursor release after flushing?
             }
 
         }

@@ -577,10 +577,7 @@ public class PageRank extends Algorithm<PageRank> {
             }
         }
 
-        private void synchronizeScores(
-                ComputeStep step,
-                int idx,
-                float[][][] scores) {
+        private void synchronizeScores(ComputeStep step, int idx, float[][][] scores) {
             step.prepareNextIteration(scores[idx]);
             float[][] nextScores = step.nextScores();
             for (int j = 0, len = nextScores.length; j < len; j++) {
