@@ -1,0 +1,2 @@
+# Allow mocking final classes
+mock-maker-inline

@@ -189,7 +189,7 @@ class TopKConsumerTest {
 
     @Test
     void addingDuplicateItems() {
-        TopKConsumer<Item> consumer = new TopKConsumer<>(3, Item::compareTo);
+        TopKConsumer<Item> consumer = new TopKConsumer<>(1, Item::compareTo);
         asList(ITEM3, ITEM3, ITEM3).forEach(consumer::apply);
         assertThat(consumer.list(), contains(ITEM3));
     }

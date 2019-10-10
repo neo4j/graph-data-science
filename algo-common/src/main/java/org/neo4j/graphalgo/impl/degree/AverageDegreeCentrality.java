@@ -19,8 +19,8 @@
  */
 package org.neo4j.graphalgo.impl.degree;
 
-import com.codahale.metrics.Histogram;
-import com.codahale.metrics.MetricRegistry;
+import org.HdrHistogram.AtomicHistogram;
+import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
@@ -52,8 +52,7 @@ public class AverageDegreeCentrality extends Algorithm<AverageDegreeCentrality> 
         this.executor = executor;
         this.concurrency = concurrency;
         nodeCount = graph.nodeCount();
-        MetricRegistry doubleRecorder = new MetricRegistry();
-        this.histogram = doubleRecorder.histogram("stats");
+        this.histogram = new AtomicHistogram(nodeCount, 3);
     }
 
     public AverageDegreeCentrality compute() {
@@ -88,12 +87,12 @@ public class AverageDegreeCentrality extends Algorithm<AverageDegreeCentrality> 
                 }
 
                 int degree = graph.degree(nodeId, graph.getLoadDirection());
-                histogram.update(degree);
+                histogram.recordValue(degree);
             }
         }
     }
 
     public double average() {
-        return histogram.getSnapshot().getMean();
+        return histogram.getMean();
     }
 }

@@ -36,9 +36,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * @author mknblch
- */
 public abstract class AbstractCommunityResultBuilder<T> {
 
     public static final Pattern PERCENTILE_FIELD_REGEXP = Pattern.compile("^p\\d{1,3}$");

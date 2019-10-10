@@ -37,7 +37,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.TestSupport.*;
+import static org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 
 class EigenvectorCentralityProcTest extends ProcTestBase {
 
@@ -75,8 +75,6 @@ class EigenvectorCentralityProcTest extends ProcTestBase {
 
         Procedures procedures = DB.getDependencyResolver().resolveDependency(Procedures.class);
         procedures.registerProcedure(EigenvectorCentralityProc.class);
-        procedures.registerProcedure(PageRankProc.class);
-
 
         try (Transaction tx = DB.beginTx()) {
             final Label label = Label.label("Character");
