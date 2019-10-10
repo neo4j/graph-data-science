@@ -94,7 +94,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private int iterations;
     private double q = MINIMUM_MODULARITY;
     private final AtomicInteger counter = new AtomicInteger(0);
-    private boolean randomNeighborSelection = false;
 
     public static MemoryEstimation memoryEstimation() {
         return MEMORY_ESTIMATION;
@@ -116,11 +115,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
         summedAdjacencyWeights = HugeDoubleArray.newArray(nodeCount, tracker);
         communities = HugeLongArray.newArray(nodeCount, tracker);
-    }
-
-    ModularityOptimization withRandomNeighborSelection(final boolean randomNeighborSelection) {
-        this.randomNeighborSelection = randomNeighborSelection;
-        return this;
     }
 
     /**
@@ -177,9 +171,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         return best;
     }
 
-    /**
-     * init ki (sum of weights of node) & m
-     */
     private void init() {
         sumOfAllWeights = .0;
         for (int node = 0; node < nodeCount; node++) {
@@ -397,15 +388,16 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             long bestCommunity = currentCommunity;
 
             if (!communityWeights.isEmpty()) {
-                if (randomNeighborSelection) {
-                    bestCommunity = communityWeights.iterator().next().key;
-                } else {
-                    for (LongDoubleCursor cursor : communityWeights) {
-                        long community = cursor.key;
-                        double summedWeight = cursor.value;
-                        final double gain = summedWeight / sumOfAllWeights - communityTotalWeights.get(community) * summedAdjacencyWeight / sumOfAllWeightsSquared;
-                        if (gain > bestGain) {
-                            bestGain = gain;
+                for (LongDoubleCursor cursor : communityWeights) {
+                    long community = cursor.key;
+                    double summedWeight = cursor.value;
+                    final double gain = summedWeight / sumOfAllWeights - communityTotalWeights.get(community) * summedAdjacencyWeight / sumOfAllWeightsSquared;
+                    if (gain > bestGain) {
+                        bestGain = gain;
+                        bestCommunity = community;
+                        bestWeight = summedWeight;
+                    } else if (gain == bestGain) {
+                        if (community < bestCommunity) {
                             bestCommunity = community;
                             bestWeight = summedWeight;
                         }

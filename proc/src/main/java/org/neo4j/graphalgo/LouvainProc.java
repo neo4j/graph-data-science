@@ -192,8 +192,6 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
                 "Louvain failed",
                 () -> statsBuilder.timeEval((Supplier<Louvain>) algo::compute));
 
-        statsBuilder.randomNeighbor(algo.randomNeighborSelection());
-
         graph.release();
 
         log.info("Louvain: overall memory usage: %s", tracker.getUsageString());
@@ -240,8 +238,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
                 false,
                 null,
                 false,
-                null,
-                false);
+                null);
 
         public final long loadMillis;
         public final long computeMillis;
@@ -266,7 +263,6 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
         public final String writeProperty;
         public final boolean includeIntermediateCommunities;
         public final String intermediateCommunitiesWriteProperty;
-        public final boolean randomNeighbor;
 
         public LouvainResult(
                 long loadMillis,
@@ -291,8 +287,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
                 boolean write,
                 String writeProperty,
                 boolean includeIntermediateCommunities,
-                String intermediateCommunitiesWriteProperty,
-                boolean randomNeighbor) {
+                String intermediateCommunitiesWriteProperty) {
             this.loadMillis = loadMillis;
             this.computeMillis = computeMillis;
             this.postProcessingMillis = postProcessingMillis;
@@ -317,7 +312,6 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
             this.modularity = finalModularity;
             this.writeProperty = writeProperty;
             this.intermediateCommunitiesWriteProperty = intermediateCommunitiesWriteProperty;
-            this.randomNeighbor = randomNeighbor;
         }
     }
 
@@ -329,7 +323,6 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
         private String writeProperty;
         private String intermediateCommunitiesWriteProperty;
         private boolean includeIntermediateCommunities;
-        private boolean randomNeighbor = false;
 
         protected Builder(Set<String> returnFields) {
             super(returnFields);
@@ -346,11 +339,6 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
 
         public Builder withIterations(long iterations) {
             this.iterations = iterations;
-            return this;
-        }
-
-        public Builder randomNeighbor(boolean randomNeighbor) {
-            this.randomNeighbor = randomNeighbor;
             return this;
         }
 
@@ -387,8 +375,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
                     write,
                     writeProperty,
                     includeIntermediateCommunities,
-                    intermediateCommunitiesWriteProperty,
-                    randomNeighbor);
+                    intermediateCommunitiesWriteProperty);
         }
 
         public Builder withModularities(double[] modularities) {

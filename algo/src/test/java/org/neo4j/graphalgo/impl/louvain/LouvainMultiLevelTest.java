@@ -100,7 +100,7 @@ class LouvainMultiLevelTest extends LouvainTestBase {
         final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
-                .compute(10, 10, true);
+                .compute(10, 10);
         final HugeLongArray[] dendogram = algorithm.getDendrogram();
         for (int i = 1; i <= dendogram.length; i++) {
             if (null == dendogram[i - 1]) {
