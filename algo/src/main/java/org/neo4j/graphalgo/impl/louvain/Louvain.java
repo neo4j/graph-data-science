@@ -115,6 +115,7 @@ public final class Louvain extends Algorithm<Louvain> {
         maxLevel = config.maxLevel;
         maxIterations = config.maxIterations;
         communityCount = rootNodeCount;
+        communities.setAll(i -> i);
     }
 
     public Louvain compute() {
