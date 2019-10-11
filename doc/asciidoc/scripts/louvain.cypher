@@ -31,7 +31,7 @@ ORDER BY community;
 
 CALL algo.louvain('User', 'FRIEND',
   {write:true, writeProperty:'community'})
-YIELD nodes, communityCount, iterations, loadMillis, computeMillis, writeMillis; 
+YIELD nodes, communityCount, iterations, loadMillis, computeMillis, writeMillis;
 
 // end::write-sample-graph[]
 
@@ -39,7 +39,7 @@ YIELD nodes, communityCount, iterations, loadMillis, computeMillis, writeMillis;
 
 CALL algo.louvain('Business', 'CO_OCCURENT_REVIEWS',
   {write:true, writeProperty:'community'})
-YIELD nodes, communityCount, iterations, loadMillis, computeMillis, writeMillis; 
+YIELD nodes, communityCount, iterations, loadMillis, computeMillis, writeMillis;
 
 // tag::end-yelp[]
 
@@ -52,13 +52,6 @@ CALL algo.louvain(
   {graph:'cypher',write:true});
 
 // end::cypher-loading[]
-
-// tag::huge-projection[]
-
-CALL algo.louvain('User', 'FRIEND',{graph:'huge'})
-YIELD nodes, communityCount, iterations, loadMillis, computeMillis, writeMillis; 
-
-// end::huge-projection[]
 
 
 // tag::create-hierarchical-sample-graph[]
@@ -102,7 +95,7 @@ CALL algo.louvain('User', 'FRIEND', {
   includeIntermediateCommunities: true,
   intermediateCommunitiesWriteProperty: 'communities'
 })
-YIELD nodes, communityCount, iterations, loadMillis, computeMillis, writeMillis; 
+YIELD nodes, communityCount, iterations, loadMillis, computeMillis, writeMillis;
 
 // end::write-hierarchical-sample-graph[]
 
@@ -132,7 +125,7 @@ MERGE (nAmy)-[:FRIEND]->(nDoug);
 
 
 // tag::stream-pre-defined-sample-graph[]
-CALL algo.louvain.stream('User', 'FRIEND', {communityProperty: 'community'})
+CALL algo.louvain.stream('User', 'FRIEND', {seedProperty: 'community'})
 YIELD nodeId, communities
 
 RETURN algo.asNode(nodeId).id AS user, communities
@@ -143,7 +136,7 @@ ORDER BY communities;
 
 CALL algo.louvain('User', 'FRIEND', {
   write:true,
-  communityProperty: "community",
+  seedProperty: "community",
   writeProperty: "newCommunity"
 })
 YIELD nodes, communityCount, iterations, loadMillis, computeMillis, writeMillis;
