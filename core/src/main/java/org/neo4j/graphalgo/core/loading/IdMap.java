@@ -57,7 +57,7 @@ public final class IdMap implements IdMapping, NodeIterator, BatchNodeIterable {
     /**
      * initialize the map with pre-built sub arrays
      */
-    IdMap(HugeLongArray graphIds, SparseNodeMapping nodeToGraphIds, long nodeCount) {
+    public IdMap(HugeLongArray graphIds, SparseNodeMapping nodeToGraphIds, long nodeCount) {
         this.nodeCount = nodeCount;
         this.graphIds = graphIds;
         this.nodeToGraphIds = nodeToGraphIds;
