@@ -219,7 +219,7 @@ class PageRankProcTest extends ProcTestBase {
         String loadQuery = String.format(
                 "CALL algo.graph.load(" +
                 "    '%s', 'Label3', 'TYPE3', {" +
-                "        graph: $graph, relationshipWeight: 'weight', direction: 'BOTH'" +
+                "        graph: $graph, relationshipWeight: 'equalWeight', direction: 'BOTH'" +
                 "    }" +
                 ")", graphName);
 

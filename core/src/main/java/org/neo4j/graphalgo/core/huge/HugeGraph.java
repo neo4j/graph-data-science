@@ -83,7 +83,7 @@ import java.util.function.LongPredicate;
 public class HugeGraph implements Graph {
 
     public static final double NO_WEIGHT = Double.NaN;
-    public static final int NO_ADJACENCIES = 0;
+    public static final int NO_SUCH_NODE = 0;
 
     private final IdMap idMapping;
     private final AllocationTracker tracker;
@@ -215,9 +215,6 @@ public class HugeGraph implements Graph {
 
         double maybeWeight;
 
-        // TODO: this was called inside a `forEachRelationship` on a graph loaded with both. This means that the code below
-        //       computes `findWeight` for every relationship in both directions which is not intended as loading into
-        //       in and out adjacency lists is enough.
         if (outWeights != null) {
             maybeWeight = findWeight(
                     sourceNodeId,
@@ -250,7 +247,7 @@ public class HugeGraph implements Graph {
             final AdjacencyList adjacencies,
             final AdjacencyOffsets adjacencyOffsets) {
         long relOffset = adjacencyOffsets.get(fromId);
-        if (relOffset == NO_ADJACENCIES) {
+        if (relOffset == NO_SUCH_NODE) {
             return NO_WEIGHT;
         }
         long weightOffset = weightOffsets.get(fromId);
