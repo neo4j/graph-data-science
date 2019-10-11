@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,13 +60,14 @@ abstract class LouvainTestBase {
 
     abstract void setupGraphDb(Graph graph);
 
-    Graph loadGraph(Class<? extends GraphFactory> graphImpl, String cypher) {
+    Graph loadGraph(Class<? extends GraphFactory> graphImpl, String cypher, String... nodeProperties) {
         db.execute(cypher);
         GraphLoader loader = new GraphLoader(db)
                 .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
                 .withOptionalNodeProperties(
-                        PropertyMapping.of("seed1", -1),
-                        PropertyMapping.of("seed2", -1)
+                        Arrays.stream(nodeProperties)
+                                .map(p -> PropertyMapping.of(p, -1))
+                                .toArray(PropertyMapping[]::new)
                 )
                 .undirected();
         if (graphImpl == CypherGraphFactory.class) {

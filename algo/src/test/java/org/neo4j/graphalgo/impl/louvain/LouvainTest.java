@@ -112,7 +112,7 @@ class LouvainTest extends LouvainTestBase {
             String seedProperty,
             String[] expectedUnion,
             String[] expectedDisjoint) {
-        Graph graph = loadGraph(graphImpl, DB_CYPHER);
+        Graph graph = loadGraph(graphImpl, DB_CYPHER, "seed1", "seed2");
         WeightMapping communityMap = graph.nodeProperties(seedProperty);
         final Louvain algorithm = new Louvain(
                 graph,
