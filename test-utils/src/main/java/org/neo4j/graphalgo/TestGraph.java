@@ -312,23 +312,12 @@ public final class TestGraph implements Graph {
         }
 
         private static void validateInput(Collection<Vertex> vertices, Collection<Edge> edges) {
-            if (!haveConsecutiveIdSpace(vertices)) {
-                throw new IllegalArgumentException("Node id space must be consecutive.");
-            }
-            if (!haveConsecutiveIdSpace(edges)) {
-                throw new IllegalArgumentException("Relationship id space must be consecutive.");
-            }
             if (!haveSameProperties(vertices)) {
                 throw new IllegalArgumentException("Vertices must have the same set of property keys.");
             }
             if (!haveSameProperties(edges)) {
                 throw new IllegalArgumentException("Relationships must have the same set of property keys.");
             }
-        }
-
-        private static boolean haveConsecutiveIdSpace(Collection<? extends Element> elements) {
-            long maxVertexId = elements.parallelStream().mapToLong(Element::getId).max().orElse(-1);
-            return (maxVertexId == elements.size() - 1);
         }
 
         private static boolean haveSameProperties(Collection<? extends Element> elements) {

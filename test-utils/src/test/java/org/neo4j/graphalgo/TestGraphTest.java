@@ -27,8 +27,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphdb.Direction;
+import org.s1ck.gdl.GDLHandler;
+import org.s1ck.gdl.model.Element;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -40,6 +43,22 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TestGraphTest {
+
+    @Test
+    void testConsecutiveIdSpaceForGDLGraph() {
+        GDLHandler gdlHandler = new GDLHandler.Builder()
+                .buildFromString("(a)-->(b),(b)-->(c),(c)-->(a)," +
+                                 "(),(),()" +
+                                 "()-->(),()-->()");
+
+        assertTrue(haveConsecutiveIdSpace(gdlHandler.getVertices()));
+        assertTrue(haveConsecutiveIdSpace(gdlHandler.getEdges()));
+    }
+
+    private static boolean haveConsecutiveIdSpace(Collection<? extends Element> elements) {
+        long maxVertexId = elements.parallelStream().mapToLong(Element::getId).max().orElse(-1);
+        return (maxVertexId == elements.size() - 1);
+    }
 
     @Test
     void testInvariants() {
