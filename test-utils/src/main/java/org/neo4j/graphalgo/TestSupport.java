@@ -20,13 +20,16 @@
 
 package org.neo4j.graphalgo;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.MultipleRelTypesSupport;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.canonization.CanonicalAdjacencyMatrix;
 import org.neo4j.graphdb.Direction;
 
 import java.lang.annotation.Retention;
@@ -37,7 +40,9 @@ import java.util.Collection;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public class TestSupport {
+public final class TestSupport {
+
+    private TestSupport() {}
 
     @Retention(RetentionPolicy.RUNTIME)
     @ParameterizedTest
@@ -112,6 +117,13 @@ public class TestSupport {
                     leftObjects.addAll(new ArrayList<>(Arrays.asList(rightArgs.get())));
                     return Arguments.of(leftObjects.toArray());
                 }));
+    }
+
+    public static void assertGraphEquals(Graph g1, Graph g2) {
+        Assertions.assertEquals(g1.nodeCount(), g2.nodeCount(), "Node counts do not match.");
+        // TODO: we cannot check this right now, because the relationshhip counts depends on how the graph has been loaded for HugeGraph
+//        Assertions.assertEquals(g1.relationshipCount(), g2.relationshipCount(), "Relationship counts to not match.");
+        Assertions.assertEquals(CanonicalAdjacencyMatrix.canonicalize(g1), CanonicalAdjacencyMatrix.canonicalize(g2));
     }
 
 }

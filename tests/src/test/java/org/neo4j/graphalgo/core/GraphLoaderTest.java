@@ -42,8 +42,8 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.graphalgo.GraphHelper.assertOutPropertiesWithDelta;
-import static org.neo4j.graphalgo.GraphHelper.assertOutRelationships;
+import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
+import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 public class GraphLoaderTest {
 
@@ -59,17 +59,10 @@ public class GraphLoaderTest {
 
     private GraphDatabaseAPI db;
 
-    private long id1;
-    private long id2;
-    private long id3;
-
     @BeforeEach
     void setup() {
         db = TestDatabaseCreator.createTestDatabase();
         db.execute(DB_CYPHER);
-        id1 = db.execute("MATCH (n:Node1) RETURN id(n) AS id").<Long>columnAs("id").next();
-        id2 = db.execute("MATCH (n:Node2) RETURN id(n) AS id").<Long>columnAs("id").next();
-        id3 = db.execute("MATCH (n:Node3) RETURN id(n) AS id").<Long>columnAs("id").next();
     }
 
     @AfterEach
@@ -80,7 +73,7 @@ public class GraphLoaderTest {
     @AllGraphTypesTest
     void testAnyLabel(Class<? extends GraphFactory> graphFactory) {
         Graph graph = initLoader(graphFactory);
-        assertEquals(3L, graph.nodeCount());
+        assertGraphEquals(graph, fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)"));
     }
 
     @AllGraphTypesTest
@@ -89,14 +82,13 @@ public class GraphLoaderTest {
         try (Transaction tx = db.beginTx()) {
             graph = initLoader(graphFactory, "Node1", null).load(graphFactory);
         }
-        assertEquals(1L, graph.nodeCount());
+        assertGraphEquals(graph, fromGdl("()"));
     }
 
     @AllGraphTypesTest
     void testAnyRelation(Class<? extends GraphFactory> graphFactory) {
         Graph graph = initLoader(graphFactory);
-        assertOutRelationships(graph, id1, id2, id3);
-        assertOutRelationships(graph, id2, id3);
+        assertGraphEquals(graph, fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)"));
     }
 
     @AllGraphTypesTest
@@ -114,10 +106,7 @@ public class GraphLoaderTest {
                     .withDirection(Direction.OUTGOING)
                     .load(graphFactory);
         }
-
-        assertEquals(1, graph.relationshipCount());
-        assertOutRelationships(graph, id2, id3);
-        assertOutPropertiesWithDelta(graph, 1e-4, id2, 1337);
+        assertGraphEquals(graph, fromGdl("(), ()-[{w:1337}]->()"));
     }
 
     @AllGraphTypesTest
@@ -128,9 +117,7 @@ public class GraphLoaderTest {
                     .withDirection(Direction.OUTGOING)
                     .load(graphFactory);
         }
-
-        assertEquals(1, graph.relationshipCount());
-        assertOutRelationships(graph, id2, id3);
+        assertGraphEquals(graph, fromGdl("(), ()-->()"));
     }
 
     @AllGraphTypesTest
@@ -150,10 +137,10 @@ public class GraphLoaderTest {
                     PropertyMappings.EMPTY)
                     .load(graphFactory);
         }
-
-        assertEquals(1.0, graph.nodeProperties("prop1").nodeWeight(graph.toMappedNodeId(0L)), 0.01);
-        assertEquals(2.0, graph.nodeProperties("prop2").nodeWeight(graph.toMappedNodeId(1L)), 0.01);
-        assertEquals(3.0, graph.nodeProperties("prop3").nodeWeight(graph.toMappedNodeId(2L)), 0.01);
+        assertGraphEquals(graph, fromGdl("(a {prop1: 1, prop2: 0, prop3: 0})" +
+                                         "(b {prop1: 0, prop2: 2, prop3: 0})" +
+                                         "(c {prop1: 0, prop2: 0, prop3: 3})" +
+                                         "(a)-->(b), (a)-->(c), (b)-->(c)"));
     }
 
     @AllGraphTypesTest
@@ -168,8 +155,7 @@ public class GraphLoaderTest {
                     PropertyMappings.EMPTY,
                     relPropertyMappings).load(graphFactory);
         }
-
-        assertOutPropertiesWithDelta(graph, 1e-4, id1, 1.0, 1337.42);
+        assertGraphEquals(graph, fromGdl("(a)-[{w: 1}]->(b), (a)-[{w: 1337.42D}]->(c), (b)-[{w: 1337.42D}]->(c)"));
     }
 
     @AllGraphTypesWithoutCypherTest
