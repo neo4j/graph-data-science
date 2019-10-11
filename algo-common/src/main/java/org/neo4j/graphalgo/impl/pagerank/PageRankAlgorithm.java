@@ -39,9 +39,10 @@ public interface PageRankAlgorithm extends Assessable {
      * {@link #create(Graph, ExecutorService, int, int, PageRank.Config, LongStream, AllocationTracker)} }
      */
     default PageRank create(
-            Graph graph,
-            PageRank.Config algoConfig,
-            LongStream sourceNodeIds) {
+        Graph graph,
+        PageRank.Config algoConfig,
+        LongStream sourceNodeIds
+    ) {
         return create(graph, algoConfig, sourceNodeIds, AllocationTracker.EMPTY);
     }
 
@@ -51,32 +52,43 @@ public interface PageRankAlgorithm extends Assessable {
      * * {@link #create(Graph, ExecutorService, int, int, PageRank.Config, LongStream, AllocationTracker)} }
      */
     default PageRank create(
-            Graph graph,
-            PageRank.Config algoConfig,
-            LongStream sourceNodeIds,
-            AllocationTracker tracker) {
+        Graph graph,
+        PageRank.Config algoConfig,
+        LongStream sourceNodeIds,
+        AllocationTracker tracker
+    ) {
         return create(graph, null, ParallelUtil.DEFAULT_BATCH_SIZE, -1, algoConfig, sourceNodeIds, tracker);
     }
 
     default PageRank create(
-            Graph graph,
-            ExecutorService executor,
-            int batchSize,
-            int concurrency,
-            PageRank.Config algoConfig,
-            LongStream sourceNodeIds) {
+        Graph graph,
+        ExecutorService executor,
+        int batchSize,
+        int concurrency,
+        PageRank.Config algoConfig,
+        LongStream sourceNodeIds
+    ) {
         return create(graph, executor, batchSize, concurrency, algoConfig, sourceNodeIds, AllocationTracker.EMPTY);
     }
 
     default PageRank create(
-            Graph graph,
-            ExecutorService executor,
-            int batchSize,
-            int concurrency,
-            PageRank.Config algoConfig,
-            LongStream sourceNodeIds,
-            AllocationTracker tracker) {
-        return new PageRank(executor, concurrency, batchSize, tracker, graph, algoConfig, sourceNodeIds, variant(algoConfig));
+        Graph graph,
+        ExecutorService executor,
+        int batchSize,
+        int concurrency,
+        PageRank.Config algoConfig,
+        LongStream sourceNodeIds,
+        AllocationTracker tracker
+    ) {
+        return new PageRank(
+            executor,
+            concurrency,
+            batchSize,
+            tracker,
+            graph,
+            algoConfig,
+            sourceNodeIds,
+            variant(algoConfig));
     }
 
     PageRankVariant variant(PageRank.Config config);
