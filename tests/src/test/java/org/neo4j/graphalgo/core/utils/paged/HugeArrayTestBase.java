@@ -22,7 +22,9 @@ package org.neo4j.graphalgo.core.utils.paged;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.IntFunction;
 import java.util.function.ObjIntConsumer;
 
 import static io.qala.datagen.RandomShortApi.bool;
@@ -33,6 +35,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array, Box, Huge>> {
@@ -347,6 +350,84 @@ abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array, Box, 
         });
     }
 
+    @Test
+    final void shouldCopyFromArrayOfSameSize() {
+        testArray(10, 20, (array, size) -> {
+            Array source = newUnderlyingArray(size);
+            setAll(source, i -> box(i + 2));
+
+            array.copyFromArrayIntoSlice(source, 0, size);
+
+            Box[] expected = newBoxedArray(size);
+            Arrays.setAll(expected, i -> box(i + 2));
+            compareAgainst(array.toArray(), expected);
+        });
+    }
+
+    @Test
+    final void shouldCopyFromSmallerArray() {
+        testArray(10, 20, (array, size) -> {
+            int sourceSize = size - 5;
+            Array source = newUnderlyingArray(sourceSize);
+            setAll(source, i -> box(i + 2));
+
+            array.copyFromArrayIntoSlice(source, 0, size);
+
+            // make sure that the items that weren't copied from are 0
+            // and not the default null that a boxed array would return
+            Box[] expected = newBoxedArray(size);
+            Arrays.setAll(expected, i -> i < sourceSize ? box(i + 2) : primitiveNull());
+            compareAgainst(array.toArray(), expected);
+        });
+    }
+
+    @Test
+    final void shouldCopyFromLargerArray() {
+        testArray(10, 20, (array, size) -> {
+            int sourceSize = size + 5;
+            Array source = newUnderlyingArray(sourceSize);
+            setAll(source, i -> box(i + 2));
+
+            array.copyFromArrayIntoSlice(source, 0, size);
+
+            Box[] expected = newBoxedArray(size);
+            Arrays.setAll(expected, i -> box(i + 2));
+            compareAgainst(array.toArray(), expected);
+        });
+    }
+
+    @Test
+    final void shouldCopyIntoSmallerSlice() {
+        testArray(10, 20, (array, size) -> {
+            Array source = newUnderlyingArray(size);
+            setAll(source, i -> box(i + 2));
+
+            int targetSize = size - 5;
+            array.copyFromArrayIntoSlice(source, 0, targetSize);
+
+            // make sure that the items that weren't copied from are 0
+            // and not the default null that a boxed array would return
+            Box[] expected = newBoxedArray(size);
+            Arrays.setAll(expected, i -> i < targetSize ? box(i + 2) : primitiveNull());
+            compareAgainst(array.toArray(), expected);
+        });
+    }
+
+    @Test
+    final void shouldNotCopyIntoLargerSlice() {
+        testArray(10, 20, (array, size) -> {
+            int targetSize = size + 5;
+            AssertionError assertionError = assertThrows(AssertionError.class, () -> {
+                Array source = newUnderlyingArray(size);
+                array.copyFromArrayIntoSlice(source, 0, targetSize);
+            });
+            assertEquals(
+                    String.format("end expected to be in [0 : %d] but got %d", size, targetSize),
+                    assertionError.getMessage()
+            );
+        });
+    }
+
     void testArray(int size, Consumer<Huge> block) {
         if (bool()) {
             block.accept(singleArray(size));
@@ -382,6 +463,8 @@ abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array, Box, 
 
     abstract int unbox(Box value);
 
+    abstract Box primitiveNull();
+
     private void compareAgainst(Array array, Box[] expected) {
         compareAgainst(array, 0, java.lang.reflect.Array.getLength(array), expected);
     }
@@ -406,7 +489,7 @@ abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array, Box, 
         }
 
         else if (array instanceof String[]) {
-            String[] e = Arrays.stream(expected).map(Object::toString).toArray(String[]::new);
+            String[] e = Arrays.stream(expected).map(s -> Objects.toString(s, null)).toArray(String[]::new);
             String[] actual = Arrays.copyOfRange((String[]) array, offset, length - offset);
             assertArrayEquals(e, actual);
         }
@@ -419,5 +502,34 @@ abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array, Box, 
     @SuppressWarnings("unchecked")
     private Box[] newBoxedArray(final int size) {
         return (Box[]) java.lang.reflect.Array.newInstance(box(42).getClass(), size);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Array newUnderlyingArray(final int size) {
+        Class<?> arrayType = box(42).getClass();
+        if (arrayType == Integer.class) {
+            arrayType = Integer.TYPE;
+        } else if (arrayType == Long.class) {
+            arrayType = Long.TYPE;
+        } else if (arrayType == Double.class) {
+            arrayType = Double.TYPE;
+        }
+        return (Array) java.lang.reflect.Array.newInstance(arrayType, size);
+    }
+
+    private void setAll(Array array, IntFunction<Box> gen) {
+        int size = java.lang.reflect.Array.getLength(array);
+        for (int i = 0; i < size; i++) {
+            Box value = gen.apply(i);
+            if (value instanceof Integer) {
+                java.lang.reflect.Array.setInt(array, i, (Integer) value);
+            } else if (value instanceof Long) {
+                java.lang.reflect.Array.setLong(array, i, (Long) value);
+            } else if (value instanceof Double) {
+                java.lang.reflect.Array.setDouble(array, i, (Double) value);
+            } else {
+                java.lang.reflect.Array.set(array, i, value);
+            }
+        }
     }
 }

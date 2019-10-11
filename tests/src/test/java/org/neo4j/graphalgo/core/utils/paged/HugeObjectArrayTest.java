@@ -47,4 +47,9 @@ final class HugeObjectArrayTest extends HugeArrayTestBase<String[], String, Huge
     int unbox(final String value) {
         return value == null ? 0 : Integer.parseInt(value);
     }
+
+    @Override
+    String primitiveNull() {
+        return null;
+    }
 }

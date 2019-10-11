@@ -87,4 +87,9 @@ final class HugeIntArrayTest extends HugeArrayTestBase<int[], Integer, HugeIntAr
     int unbox(final Integer value) {
         return value;
     }
+
+    @Override
+    Integer primitiveNull() {
+        return 0;
+    }
 }
