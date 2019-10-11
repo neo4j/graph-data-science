@@ -50,14 +50,15 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> {
             ExecutorService executor,
             int concurrency,
             Direction direction,
-            boolean weighted) {
+            boolean weighted,
+            AllocationTracker tracker) {
         this.graph = graph;
         this.executor = executor;
         this.concurrency = concurrency;
         this.direction = direction;
         this.nodeCount = Math.toIntExact(graph.nodeCount());
         this.weighted = weighted;
-        this.result = HugeDoubleArray.newArray(nodeCount, AllocationTracker.EMPTY);
+        this.result = HugeDoubleArray.newArray(nodeCount, tracker);
     }
 
     public void compute() {

@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
@@ -157,7 +158,8 @@ final class DegreeCentralityTest {
                 Pools.DEFAULT,
                 4,
                 Direction.OUTGOING,
-                false);
+                false,
+                AllocationTracker.EMPTY);
         degreeCentrality.compute();
 
         IntStream.range(0, expected.size()).forEach(i -> {
@@ -215,7 +217,7 @@ final class DegreeCentralityTest {
                     .load(graphFactory);
         }
 
-        DegreeCentrality degreeCentrality = new DegreeCentrality(graph, Pools.DEFAULT, 4, direction, false);
+        DegreeCentrality degreeCentrality = new DegreeCentrality(graph, Pools.DEFAULT, 4, direction, false, AllocationTracker.EMPTY);
         degreeCentrality.compute();
 
         IntStream.range(0, expected.size()).forEach(i -> {
@@ -273,7 +275,8 @@ final class DegreeCentralityTest {
                 Pools.DEFAULT,
                 4,
                 Direction.OUTGOING,
-                false);
+                false,
+                AllocationTracker.EMPTY);
         degreeCentrality.compute();
 
         IntStream.range(0, expected.size()).forEach(i -> {

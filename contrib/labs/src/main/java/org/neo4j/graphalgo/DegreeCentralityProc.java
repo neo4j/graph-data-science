@@ -215,7 +215,9 @@ public final class DegreeCentralityProc {
                 Pools.DEFAULT,
                 configuration.getConcurrency(),
                 computeDirection,
-                weightPropertyKey != null);
+                weightPropertyKey != null,
+                tracker
+        );
         statsBuilder.timeEval(algo::compute);
         Algorithm<?> algorithm = algo.algorithm();
         algorithm.withTerminationFlag(terminationFlag);
