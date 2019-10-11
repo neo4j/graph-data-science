@@ -241,10 +241,6 @@ public abstract class BaseComputeStep implements ComputeStep {
         return pageRank;
     }
 
-    public long[] starts() {
-        return starts;
-    }
-
     public double[] deltas() { return deltas;}
 
     @Override

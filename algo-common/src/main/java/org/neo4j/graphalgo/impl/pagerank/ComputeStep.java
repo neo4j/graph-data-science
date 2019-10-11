@@ -22,8 +22,6 @@ package org.neo4j.graphalgo.impl.pagerank;
 public interface ComputeStep extends Runnable {
     double[] pageRank();
 
-    long[] starts();
-
     void prepareNextIteration(float[][] score);
 
     float[][] nextScores();

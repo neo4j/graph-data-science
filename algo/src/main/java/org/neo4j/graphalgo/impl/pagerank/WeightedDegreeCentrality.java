@@ -102,18 +102,6 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
         graph = null;
     }
 
-    public CentralityResult result() {
-        return new CentralityResult(degrees);
-    }
-
-    public void compute() {
-        compute(false);
-    }
-
-    public Algorithm<?> algorithm() {
-        return this;
-    }
-
     private class DegreeTask implements Runnable {
         @Override
         public void run() {

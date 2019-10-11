@@ -186,10 +186,6 @@ public class PageRank extends Algorithm<PageRank> {
         return ranIterations;
     }
 
-    public int getMaxIterations() {
-        return this.maxIterations;
-    }
-
     public double dampingFactor() {
         return dampingFactor;
     }

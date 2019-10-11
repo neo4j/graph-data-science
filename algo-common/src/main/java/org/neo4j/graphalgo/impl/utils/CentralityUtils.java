@@ -76,12 +76,4 @@ public final class CentralityUtils {
                         );
                     });
     }
-
-    public static void normalizeArray(double[][] partitions, DoubleUnaryOperator normalizationFunction) {
-        for (double[] partition : partitions) {
-            for (int j = 0; j < partition.length; j++) {
-                partition[j] = normalizationFunction.applyAsDouble(partition[j]);
-            }
-        }
-    }
 }
