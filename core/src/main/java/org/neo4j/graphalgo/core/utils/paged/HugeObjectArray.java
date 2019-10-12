@@ -39,7 +39,7 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
  * A long-indexable version of a Object array ({@code T[]}) that can contain more than 2 bn. elements.
  * <p>
  * It is implemented by paging of smaller object-arrays ({@code T[][]}) to support approx. 32k bn. elements.
- * If the the provided size is small enough, an optimized view of a single {@code T[]} might be used.
+ * If the provided size is small enough, an optimized view of a single {@code T[]} might be used.
  * <p>
  * <ul>
  * <li>The array is of a fixed size and cannot grow or shrink dynamically.</li>
@@ -175,7 +175,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
     public abstract T[] toArray();
 
     /**
-     * Creates a new array if the given size, tracking the memory requirements into the given {@link AllocationTracker}.
+     * Creates a new array of the given size, tracking the memory requirements into the given {@link AllocationTracker}.
      * The tracker is no longer referenced, as the arrays do not dynamically change their size.
      */
     public static <T> HugeObjectArray<T> newArray(Class<T> componentClass, long size, AllocationTracker tracker) {
