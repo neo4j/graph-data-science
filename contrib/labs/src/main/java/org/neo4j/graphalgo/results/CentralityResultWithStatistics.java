@@ -40,18 +40,22 @@ public abstract class CentralityResultWithStatistics extends CentralityResult {
 
     public abstract double computeL1Norm();
 
+    @Override
     public double score(int nodeId) {
         return result.score(nodeId);
     }
 
+    @Override
     public double score(long nodeId) {
         return result.score(nodeId);
     }
 
+    @Override
     public void export(String propertyName, Exporter exporter) {
         result.export(propertyName, exporter);
     }
 
+    @Override
     public void export(String propertyName, Exporter exporter, DoubleUnaryOperator normalizationFunction) {
         result.export(propertyName, exporter, normalizationFunction);
     }
