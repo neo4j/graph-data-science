@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.binaryLookup;
 
@@ -38,16 +37,14 @@ final class EigenvectorCentralityComputeStep extends BaseComputeStep implements 
             AllocationTracker tracker,
             int partitionSize,
             long startNode,
-            long nodeCount,
-            HugeCursor<double[]> cursor
+            long nodeCount
     ) {
         super(dampingFactor,
                 sourceNodeIds,
                 graph,
                 tracker,
                 partitionSize,
-                startNode,
-                cursor
+                startNode
         );
         this.initialValue = 1.0 / nodeCount;
     }

@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Arrays;
@@ -56,7 +56,6 @@ public abstract class BaseComputeStep implements ComputeStep {
 
     final Direction direction;
 
-    private final HugeCursor<double[]> cursor;
     double[] pageRank;
     double[] deltas;
     float[][] nextScores;
@@ -75,8 +74,7 @@ public abstract class BaseComputeStep implements ComputeStep {
             Graph graph,
             AllocationTracker tracker,
             int partitionSize,
-            long startNode,
-            HugeCursor<double[]> cursor
+            long startNode
     ) {
         this(
                 dampingFactor,
@@ -85,8 +83,7 @@ public abstract class BaseComputeStep implements ComputeStep {
                 graph,
                 tracker,
                 partitionSize,
-                startNode,
-                cursor
+                startNode
         );
     }
 
@@ -97,8 +94,7 @@ public abstract class BaseComputeStep implements ComputeStep {
             Graph graph,
             AllocationTracker tracker,
             int partitionSize,
-            long startNode,
-            HugeCursor<double[]> cursor
+            long startNode
     ) {
         this.dampingFactor = dampingFactor;
         this.alpha = 1.0 - dampingFactor;
@@ -111,7 +107,6 @@ public abstract class BaseComputeStep implements ComputeStep {
         this.partitionSize = partitionSize;
         this.startNode = startNode;
         this.endNode = startNode + (long) partitionSize;
-        this.cursor = cursor;
         state = S_INIT;
     }
 
@@ -209,7 +204,7 @@ public abstract class BaseComputeStep implements ComputeStep {
             double sum = 0.0;
             for (int j = 0; j < scoreDim; j++) {
                 float[] scores = prevScores[j];
-                sum += (double) scores[i];
+                sum += scores[i];
                 scores[i] = 0F;
             }
             double delta = dampingFactor * sum;
@@ -227,18 +222,9 @@ public abstract class BaseComputeStep implements ComputeStep {
         return nextScores;
     }
 
-    public double[] pageRank() {
-        while (cursor.next()) {
-            int prIndex = 0;
-            double[] array = cursor.array;
-            int offset = cursor.offset;
-            int limit = cursor.limit;
-            for (int j = offset; j < limit; prIndex++, j++) {
-                array[j] = pageRank[prIndex];
-            }
-            // TODO: should the cursor release after flushing?
-        }
-        return pageRank;
+    @Override
+    public void getPageRankResult(HugeDoubleArray result) {
+        result.copyFromArrayIntoSlice(pageRank, startNode, endNode);
     }
 
     public double[] deltas() { return deltas;}

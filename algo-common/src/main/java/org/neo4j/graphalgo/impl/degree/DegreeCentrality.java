@@ -104,13 +104,11 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> {
         private final long startNodeId;
         private final double[] partition;
         private final long endNodeId;
-        private final HugeCursor<double[]> cursor;
 
         DegreeTask(long start, double[] partition) {
             this.startNodeId = start;
             this.partition = partition;
             this.endNodeId = Math.min(start + partition.length, nodeCount);
-            this.cursor = result.initCursor(result.newCursor(), start, endNodeId);
         }
 
         @Override
@@ -118,16 +116,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> {
             for (long nodeId = startNodeId; nodeId < endNodeId && running(); nodeId++) {
                 partition[Math.toIntExact(nodeId - startNodeId)] = graph.degree(nodeId, direction);
             }
-            while (cursor.next()) {
-                int i = 0;
-                double[] array = cursor.array;
-                int offset = cursor.offset;
-                int limit = cursor.limit;
-                for (int j = offset; j < limit; i++, j++) {
-                    array[j] = partition[i];
-                }
-                // TODO: should the cursor release after flushing?
-            }
+            result.copyFromArrayIntoSlice(partition, startNodeId, endNodeId);
         }
     }
 

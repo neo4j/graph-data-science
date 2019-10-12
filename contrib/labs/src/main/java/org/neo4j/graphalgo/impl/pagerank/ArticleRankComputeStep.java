@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.binaryLookup;
 
@@ -38,16 +37,14 @@ final class ArticleRankComputeStep extends BaseComputeStep implements Relationsh
             AllocationTracker tracker,
             int partitionSize,
             long startNode,
-            DegreeCache degreeCache,
-            HugeCursor<double[]> cursor
+            DegreeCache degreeCache
     ) {
         super(dampingFactor,
                 sourceNodeIds,
                 graph,
                 tracker,
                 partitionSize,
-                startNode,
-                cursor
+                startNode
         );
         this.averageDegree = degreeCache.average();
     }

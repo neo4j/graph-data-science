@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.api.NodeIterator;
 import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphdb.Direction;
@@ -301,7 +300,6 @@ public class PageRank extends Algorithm<PageRank> {
 
             starts.add(start);
             lengths.add(partitionSize);
-            HugeCursor<double[]> cursor = result.initCursor(result.newCursor(), start, start + partitionSize);
 
             computeSteps.add(pageRankVariant.createComputeStep(
                     dampingFactor,
@@ -313,8 +311,7 @@ public class PageRank extends Algorithm<PageRank> {
                     partitionSize,
                     start,
                     degreeCache,
-                    nodeCount,
-                    cursor
+                    nodeCount
             ));
         }
 
@@ -504,10 +501,8 @@ public class PageRank extends Algorithm<PageRank> {
         }
 
         CentralityResult getPageRank() {
-            // TODO: Here we call step.pageRank() for the side-effect of flushing results.
-            //       The step should take care of flushing itself once its computation is done.
             for (ComputeStep step : steps) {
-                step.pageRank();
+                step.getPageRankResult(result);
             }
             return new CentralityResult(result);
         }

@@ -282,7 +282,7 @@ final class PageRankTest {
                 BitUtil.align(16 + concurrency * 4, 8) /* list of computeSteps */ +
                         /* ComputeStep */
                 concurrency * (
-                        128L /* NonWeightedComputeStep.class */ +
+                        120L /* NonWeightedComputeStep.class */ +
                         BitUtil.align(16 + concurrency * 4, 8) /* nextScores[] wrapper */ +
                         concurrency * BitUtil.align(16 + partitionSize * 4, 8) /* inner nextScores[][] */ +
                         BitUtil.align(16 + partitionSize * 8, 8) /* pageRank[] */ +
