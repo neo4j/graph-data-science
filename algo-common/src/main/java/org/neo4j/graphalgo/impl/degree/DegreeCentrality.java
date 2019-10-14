@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphdb.Direction;
@@ -40,10 +39,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> {
     private Graph graph;
     private final ExecutorService executor;
     private final int concurrency;
-    private HugeDoubleArray result;
-
-    private long[] starts;
-    private double[][] partitions;
+    private final HugeDoubleArray result;
 
     public DegreeCentrality(
             Graph graph,
@@ -66,8 +62,8 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> {
         int taskCount = ParallelUtil.threadCount(batchSize, nodeCount);
         List<Runnable> tasks = new ArrayList<>(taskCount);
 
-        this.starts = new long[taskCount];
-        this.partitions = new double[taskCount][batchSize];
+        long[] starts = new long[taskCount];
+        double[][] partitions = new double[taskCount][batchSize];
 
         long startNode = 0L;
         for (int i = 0; i < taskCount; i++) {
@@ -124,13 +120,11 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> {
         private final long startNodeId;
         private final double[] partition;
         private final long endNodeId;
-        private final HugeCursor<double[]> cursor;
 
         WeightedDegreeTask(long start, double[] partition) {
             this.startNodeId = start;
             this.partition = partition;
             this.endNodeId = Math.min(start + partition.length, nodeCount);
-            this.cursor = result.initCursor(result.newCursor(), start, endNodeId);
         }
 
         @Override
@@ -144,18 +138,8 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> {
                     return true;
                 });
             }
-            while (cursor.next()) {
-                int i = 0;
-                double[] array = cursor.array;
-                int offset = cursor.offset;
-                int limit = cursor.limit;
-                for (int j = offset; j < limit; i++, j++) {
-                    array[j] = partition[i];
-                }
-                // TODO: should the cursor release after flushing?
-            }
 
+            result.copyFromArrayIntoSlice(partition, startNodeId, endNodeId);
         }
     }
-
 }

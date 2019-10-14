@@ -107,7 +107,7 @@ class NormalizedCentralityResultTest {
         String property = "eigenvector";
         final HugeDoubleArray given = HugeDoubleArray.of(1, 2, 3, 4);
         CentralityResultWithStatistics centralityResultWithStatistics =
-                CentralityResultWithStatistics.Builder.of(new CentralityResult(given));
+                CentralityResultWithStatistics.of(new CentralityResult(given));
 
         Exporter exporter = mock(Exporter.class);
         ArgumentCaptor<CentralityResult.MapTranslator> arg = ArgumentCaptor

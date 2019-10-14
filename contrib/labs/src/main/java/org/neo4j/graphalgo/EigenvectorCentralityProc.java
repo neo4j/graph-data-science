@@ -203,7 +203,7 @@ public final class EigenvectorCentralityProc {
         statsBuilder.timeEval(prAlgo::compute);
         statsBuilder.withIterations(prAlgo.iterations()).withDampingFactor(prAlgo.dampingFactor());
 
-        CentralityResultWithStatistics result = CentralityResultWithStatistics.Builder.of(prAlgo.result());
+        CentralityResultWithStatistics result = CentralityResultWithStatistics.of(prAlgo.result());
         algo.release();
         graph.release();
         return normalization(configuration).apply(result);

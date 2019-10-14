@@ -34,6 +34,10 @@ public abstract class CentralityResultWithStatistics extends CentralityResult {
         this.result = result;
     }
 
+    public static CentralityResultWithStatistics of(CentralityResult result) {
+        return new HugeDoubleArrayResultWithStatistics(result);
+    }
+
     public abstract double computeMax();
 
     public abstract double computeL2Norm();
@@ -58,14 +62,6 @@ public abstract class CentralityResultWithStatistics extends CentralityResult {
     @Override
     public void export(String propertyName, Exporter exporter, DoubleUnaryOperator normalizationFunction) {
         result.export(propertyName, exporter, normalizationFunction);
-    }
-
-    public static final class Builder {
-        private Builder() {}
-
-        public static CentralityResultWithStatistics of(CentralityResult result) {
-            return new HugeDoubleArrayResultWithStatistics(result);
-        }
     }
 
     static final class HugeDoubleArrayResultWithStatistics extends CentralityResultWithStatistics {
