@@ -36,7 +36,7 @@ public final class HugeLongLongDoubleMap {
     private HugeLongArray keys1;
     private HugeLongArray keys2;
     private HugeDoubleArray values;
-    private HugeCursor<long[]> keysCursor;
+    private ThreadLocal<HugeCursor<long[]>> keysCursor;
 
     private int keyMixer;
     private long assigned;
@@ -61,12 +61,39 @@ public final class HugeLongLongDoubleMap {
         initialBuffers(expectedElements);
     }
 
+    public synchronized void set(long key1, long key2, double value) {
+        set0(1L + key1, 1L + key2, value);
+    }
+
     public void addTo(long key1, long key2, double value) {
         addTo0(1L + key1, 1L + key2, value);
     }
 
     public double getOrDefault(long key1, long key2, double defaultValue) {
         return getOrDefault0(1L + key1, 1L + key2, defaultValue);
+    }
+
+    private void set0(long key1, long key2, double value) {
+        assert assigned < mask + 1L;
+        final long key = hashKey(key1, key2);
+
+        long slot = findSlot(key1, key2, key & mask);
+        assert slot != -1L;
+        if (slot >= 0L) {
+            values.set(slot, value);
+            return;
+        }
+
+        slot = ~(1L + slot);
+        if (assigned == resizeAt) {
+            allocateThenInsertThenRehash(slot, key1, key2, value);
+        } else {
+            keys1.set(slot, key1);
+            keys2.set(slot, key2);
+            values.set(slot, value);
+        }
+
+        assigned++;
     }
 
     private void addTo0(long key1, long key2, double value) {
@@ -109,7 +136,7 @@ public final class HugeLongLongDoubleMap {
             long start) {
         HugeLongArray keys1 = this.keys1;
         HugeLongArray keys2 = this.keys2;
-        HugeCursor<long[]> cursor = this.keysCursor;
+        HugeCursor<long[]> cursor = this.keysCursor.get();
         long slot = findSlot(key1, key2, start, keys1.size(), keys1, keys2, cursor);
         if (slot == -1L) {
             slot = findSlot(key1, key2, 0L, start, keys1, keys2, cursor);
@@ -243,7 +270,7 @@ public final class HugeLongLongDoubleMap {
             this.keys1 = HugeLongArray.newArray(arraySize, tracker);
             this.keys2 = HugeLongArray.newArray(arraySize, tracker);
             this.values = HugeDoubleArray.newArray(arraySize, tracker);
-            keysCursor = keys1.newCursor();
+            keysCursor = ThreadLocal.withInitial(keys1::newCursor);
         } catch (OutOfMemoryError e) {
             this.keys1 = prevKeys1;
             this.keys2 = prevKeys2;

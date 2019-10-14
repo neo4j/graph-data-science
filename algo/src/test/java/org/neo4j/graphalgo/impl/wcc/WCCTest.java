@@ -57,7 +57,7 @@ class WCCTest extends WCCBaseTest {
         return SET_SIZE;
     }
 
-    @ParameterizedTest(name = "{0} -- {2}")
+    @ParameterizedTest(name = "{0} -- {1}")
     @MethodSource("parameters")
     void shouldComputeComponents(Class<? extends GraphFactory> graphFactory, WCCType unionFindType) {
         Graph graph = new GraphLoader(DB)

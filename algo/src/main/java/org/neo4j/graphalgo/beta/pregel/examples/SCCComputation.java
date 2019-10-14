@@ -17,24 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.api;
+package org.neo4j.graphalgo.beta.pregel.examples;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import org.neo4j.graphdb.Direction;
 
-/**
- * Getter for weight property values at relationships
- *
- * @author mknblch
- */
-public interface RelationshipWeights {
+public class SCCComputation extends WCCComputation {
 
-    /**
-     * get weight between source and target node id
-     *
-     * @param sourceNodeId source node
-     * @param targetNodeId target node
-     * @param fallbackValue value to use if graph is unweighted
-     * @return the weight
-     */
-    double weightOf(long sourceNodeId, long targetNodeId, double fallbackValue);
+    @Override
+    protected Direction getMessageDirection() {
+        return Direction.OUTGOING;
+    }
 }

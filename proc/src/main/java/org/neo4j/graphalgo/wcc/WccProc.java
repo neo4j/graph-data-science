@@ -108,6 +108,43 @@ public class WccProc<T extends WCC<T>> extends WccBaseProc<T> {
         return Stream.of(new MemRecResult(memoryEstimation));
     }
 
+    @Procedure(value = "algo.beta.wcc.pregel", mode = Mode.WRITE)
+    @Description("CALL algo.beta.wcc.pregel(label:String, relationship:String, " +
+                 "{weightProperty: 'weight', threshold: 0.42, defaultValue: 1.0, write: true, writeProperty: 'community', seedProperty: 'seedCommunity', consecutiveId: false}) " +
+                 "YIELD nodes, setCount, loadMillis, computeMillis, writeMillis")
+    public Stream<WriteResult> betaWccPregel(
+            @Name(value = "label", defaultValue = "") String label,
+            @Name(value = "relationship", defaultValue = "") String relationship,
+            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+
+        return run(label, relationship, config, WCCType.PREGEL);
+    }
+
+    @Procedure(value = "algo.beta.wcc.pregel.stream")
+    @Description("CALL algo.beta.wcc.pregel.stream(label:String, relationship:String, " +
+                 "{weightProperty: 'propertyName', threshold: 0.42, defaultValue: 1.0, seedProperty: 'seedCommunity', consecutiveId: false}}} " +
+                 "YIELD nodeId, setId - yields a setId to each node id")
+    public Stream<StreamResult> betaWccPregelStream(
+            @Name(value = "label", defaultValue = "") String label,
+            @Name(value = "relationship", defaultValue = "") String relationship,
+            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+
+        return stream(label, relationship, config, WCCType.PREGEL);
+    }
+
+    @Procedure(value = "algo.beta.wcc.pregel.memrec", mode = Mode.READ)
+    @Description("CALL algo.beta.wcc.pregel.memrec(label:String, relationship:String, {...properties}) " +
+                 "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for WCC")
+    public Stream<MemRecResult> betaWccPregelMemRec(
+            @Name(value = "label", defaultValue = "") String label,
+            @Name(value = "relationship", defaultValue = "") String relationship,
+            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+
+        ProcedureConfiguration configuration = newConfig(label, relationship, config);
+        MemoryTreeWithDimensions memoryEstimation = this.memoryEstimation(configuration);
+        return Stream.of(new MemRecResult(memoryEstimation));
+    }
+
     @Override
     protected String name() {
         return "WCC";

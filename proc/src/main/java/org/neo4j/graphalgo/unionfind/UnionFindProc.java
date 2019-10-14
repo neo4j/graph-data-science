@@ -147,7 +147,7 @@ public class UnionFindProc<T extends WCC<T>> extends WccBaseProc<T> {
     @Description("CALL algo.unionFind.forkJoin.stream(label:String, relationship:String, " +
                  "{property: 'propertyName', threshold: 0.42, defaultValue: 1.0, seedProperty: 'seedCommunity', concurrency: 4}) " +
                  "YIELD nodeId, setId - yields a setId to each node id")
-    public Stream<StreamResult> unionFindForJoinStream(
+    public Stream<StreamResult> unionFindForkJoinStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {

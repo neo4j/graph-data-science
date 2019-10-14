@@ -65,7 +65,16 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
         if (seedProperty != null) {
             loader.withOptionalNodeProperties(createPropertyMappings(seedProperty));
         }
-        return loader.withDirection(Direction.OUTGOING);
+
+        WCCType algoType = config.getChecked(CONFIG_ALGO_TYPE, WCCType.PARALLEL, WCCType.class);
+
+        if (algoType == WCCType.PREGEL) {
+            loader.withDirection(Direction.BOTH);
+        } else {
+            loader.withDirection(Direction.OUTGOING);
+        }
+
+        return loader;
     }
 
     @Override
