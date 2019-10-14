@@ -26,25 +26,32 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.binaryLookup;
 
-final class ArticleRankComputeStep extends BaseComputeStep implements RelationshipConsumer {
-    private double averageDegree;
+final class EigenvectorCentralityComputeStep extends BaseComputeStep implements RelationshipConsumer {
     private float srcRankDelta;
+    private final double initialValue;
 
-    ArticleRankComputeStep(
+    EigenvectorCentralityComputeStep(
             double dampingFactor,
             long[] sourceNodeIds,
             Graph graph,
             AllocationTracker tracker,
             int partitionSize,
             long startNode,
-            DegreeCache degreeCache) {
+            long nodeCount
+    ) {
         super(dampingFactor,
                 sourceNodeIds,
                 graph,
                 tracker,
                 partitionSize,
-                startNode);
-        this.averageDegree = degreeCache.average();
+                startNode
+        );
+        this.initialValue = 1.0 / nodeCount;
+    }
+
+    @Override
+    protected double initialValue() {
+        return initialValue;
     }
 
     void singleIteration() {
@@ -53,16 +60,17 @@ final class ArticleRankComputeStep extends BaseComputeStep implements Relationsh
         RelationshipIterator rels = this.relationshipIterator;
         for (long nodeId = startNode; nodeId < endNode; ++nodeId) {
             double delta = deltas[(int) (nodeId - startNode)];
-            if (delta > 0) {
+            if (delta > 0.0) {
                 int degree = degrees.degree(nodeId, direction);
                 if (degree > 0) {
-                    srcRankDelta = (float) (delta / (degree + averageDegree));
+                    srcRankDelta = (float) delta;
                     rels.forEachRelationship(nodeId, direction, this);
                 }
             }
         }
     }
 
+    @Override
     public boolean accept(long sourceNodeId, long targetNodeId) {
         if (srcRankDelta != 0F) {
             int idx = binaryLookup(targetNodeId, starts);
@@ -70,4 +78,40 @@ final class ArticleRankComputeStep extends BaseComputeStep implements Relationsh
         }
         return true;
     }
+
+    @Override
+    boolean combineScores() {
+        assert prevScores != null;
+        assert prevScores.length >= 1;
+
+        double[] pageRank = this.pageRank;
+        double[] deltas = this.deltas;
+        float[][] prevScores = this.prevScores;
+        int length = prevScores[0].length;
+
+        boolean shouldBreak = true;
+
+        for (int i = 0; i < length; i++) {
+            double delta = 0.0;
+            for (float[] scores : prevScores) {
+                delta += (double) scores[i];
+                scores[i] = 0F;
+            }
+            if (delta > tolerance) {
+                shouldBreak = false;
+            }
+            pageRank[i] += delta;
+            deltas[i] = delta;
+        }
+
+        return shouldBreak;
+    }
+
+    @Override
+    void normalizeDeltas() {
+        for (int i = 0; i < deltas.length; i++) {
+            deltas[i] = deltas[i] / l2Norm;
+        }
+    }
+
 }

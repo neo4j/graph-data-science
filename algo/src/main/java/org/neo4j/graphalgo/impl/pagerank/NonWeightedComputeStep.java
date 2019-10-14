@@ -26,30 +26,27 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.binaryLookup;
 
-final class EigenvectorCentralityComputeStep extends BaseComputeStep implements RelationshipConsumer {
-    private float srcRankDelta;
-    private final double initialValue;
+public class NonWeightedComputeStep extends BaseComputeStep implements RelationshipConsumer {
 
-    EigenvectorCentralityComputeStep(
+    private float srcRankDelta;
+
+    NonWeightedComputeStep(
             double dampingFactor,
+            double toleranceValue,
             long[] sourceNodeIds,
             Graph graph,
             AllocationTracker tracker,
             int partitionSize,
-            long startNode,
-            long nodeCount) {
+            long startNode
+    ) {
         super(dampingFactor,
+                toleranceValue,
                 sourceNodeIds,
                 graph,
                 tracker,
                 partitionSize,
-                startNode);
-        this.initialValue = 1.0 / nodeCount;
-    }
-
-    @Override
-    protected double initialValue() {
-        return initialValue;
+                startNode
+        );
     }
 
     void singleIteration() {
@@ -61,7 +58,7 @@ final class EigenvectorCentralityComputeStep extends BaseComputeStep implements 
             if (delta > 0.0) {
                 int degree = degrees.degree(nodeId, direction);
                 if (degree > 0) {
-                    srcRankDelta = (float) delta;
+                    srcRankDelta = (float) (delta / degree);
                     rels.forEachRelationship(nodeId, direction, this);
                 }
             }
@@ -76,40 +73,4 @@ final class EigenvectorCentralityComputeStep extends BaseComputeStep implements 
         }
         return true;
     }
-
-    @Override
-    boolean combineScores() {
-        assert prevScores != null;
-        assert prevScores.length >= 1;
-
-        double[] pageRank = this.pageRank;
-        double[] deltas = this.deltas;
-        float[][] prevScores = this.prevScores;
-        int length = prevScores[0].length;
-
-        boolean shouldBreak = true;
-
-        for (int i = 0; i < length; i++) {
-            double delta = 0.0;
-            for (float[] scores : prevScores) {
-                delta += (double) scores[i];
-                scores[i] = 0F;
-            }
-            if (delta > tolerance) {
-                shouldBreak = false;
-            }
-            pageRank[i] += delta;
-            deltas[i] = delta;
-        }
-
-        return shouldBreak;
-    }
-
-    @Override
-    void normalizeDeltas() {
-        for (int i = 0; i < deltas.length; i++) {
-            deltas[i] = deltas[i] / l2Norm;
-        }
-    }
-
 }

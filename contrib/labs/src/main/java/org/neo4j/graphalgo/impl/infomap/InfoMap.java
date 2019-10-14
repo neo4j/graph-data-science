@@ -44,9 +44,7 @@ import java.util.function.Consumer;
 import java.util.stream.LongStream;
 
 /**
- * Java adaption of InfoMap from https://github.com/felixfung/InfoFlow
- *
- * @author mknblch, Mark Schaarschmidt
+ * Java adaptation of InfoMap from https://github.com/felixfung/InfoFlow
  */
 public class InfoMap extends Algorithm<InfoMap> {
 

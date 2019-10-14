@@ -100,4 +100,9 @@ final class HugeLongArrayTest extends HugeArrayTestBase<long[], Long, HugeLongAr
     int unbox(final Long value) {
         return value.intValue();
     }
+
+    @Override
+    Long primitiveNull() {
+        return 0L;
+    }
 }

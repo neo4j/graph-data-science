@@ -3,7 +3,7 @@ description = 'Neo4j Labs :: Graph Algorithms'
 apply plugin: 'com.github.johnrengelman.shadow'
 
 dependencies {
-    compile project(':algo-common')
+    compile project(':algo')
 
     compile group: 'com.carrotsearch',      name: 'hppc',           version: ver.'hppc'
     compile group: 'org.hdrhistogram',      name: 'HdrHistogram',   version: ver.'HdrHistogram'

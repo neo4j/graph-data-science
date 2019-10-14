@@ -40,7 +40,7 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
  * A long-indexable version of a primitive int array ({@code int[]}) that can contain more than 2 bn. elements.
  * <p>
  * It is implemented by paging of smaller int-arrays ({@code int[][]}) to support approx. 32k bn. elements.
- * If the the provided size is small enough, an optimized view of a single {@code int[]} might be used.
+ * If the provided size is small enough, an optimized view of a single {@code int[]} might be used.
  * <p>
  * <ul>
  * <li>The array is of a fixed size and cannot grow or shrink dynamically.</li>
@@ -197,7 +197,7 @@ public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArra
     }
 
     /**
-     * Creates a new array if the given size, tracking the memory requirements into the given {@link AllocationTracker}.
+     * Creates a new array of the given size, tracking the memory requirements into the given {@link AllocationTracker}.
      * The tracker is no longer referenced, as the arrays do not dynamically change their size.
      */
     public static HugeIntArray newArray(long size, AllocationTracker tracker) {

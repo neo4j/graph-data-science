@@ -17,9 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.neo4j.graphalgo.impl.pagerank;
 
-public enum PageRankAlgorithmType implements PageRankAlgorithm {
+public enum LabsPageRankAlgorithmType implements PageRankAlgorithm {
 
     EIGENVECTOR_CENTRALITY {
         @Override
@@ -33,18 +34,6 @@ public enum PageRankAlgorithmType implements PageRankAlgorithm {
         }
     },
 
-    WEIGHTED {
-        @Override
-        public PageRankVariant variant(final PageRank.Config config) {
-            return new WeightedPageRankVariant(config.cacheWeights);
-        }
-
-        @Override
-        public Class<WeightedComputeStep> computeStepClass() {
-            return WeightedComputeStep.class;
-        }
-    },
-
     ARTICLE_RANK {
         @Override
         public PageRankVariant variant(final PageRank.Config config) {
@@ -54,18 +43,6 @@ public enum PageRankAlgorithmType implements PageRankAlgorithm {
         @Override
         public Class<ArticleRankComputeStep> computeStepClass() {
             return ArticleRankComputeStep.class;
-        }
-    },
-
-    NON_WEIGHTED {
-        @Override
-        public PageRankVariant variant(final PageRank.Config config) {
-            return new NonWeightedPageRankVariant();
-        }
-
-        @Override
-        public Class<NonWeightedComputeStep> computeStepClass() {
-            return NonWeightedComputeStep.class;
         }
     }
 }

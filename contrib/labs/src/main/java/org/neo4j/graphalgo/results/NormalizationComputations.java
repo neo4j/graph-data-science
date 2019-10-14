@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.results;
+package org.neo4j.graphalgo.results;
 
 import java.util.Arrays;
 import java.util.stream.DoubleStream;
@@ -41,7 +41,7 @@ public class NormalizationComputations {
         return Math.sqrt(sum);
     }
 
-    static double l1Norm(double[][] partitions) {
+    public static double l1Norm(double[][] partitions) {
         double sum = 0.0;
         for (double[] partition : partitions) {
             sum += l1Norm(partition);

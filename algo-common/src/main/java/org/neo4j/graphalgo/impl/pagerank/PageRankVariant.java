@@ -35,7 +35,8 @@ public interface PageRankVariant {
             int partitionCount,
             long start,
             DegreeCache aggregatedDegrees,
-            long nodeCount);
+            long nodeCount
+    );
 
     DegreeComputer degreeComputer(Graph graph);
 }

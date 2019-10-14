@@ -17,53 +17,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.results;
+package org.neo4j.graphalgo.results;
 
 import org.neo4j.graphalgo.core.write.Exporter;
+import org.neo4j.graphalgo.impl.results.CentralityResult;
 
 import java.util.function.DoubleUnaryOperator;
 
-public class NormalizedCentralityResult implements CentralityResult {
+public class NormalizedCentralityResult extends CentralityResult {
     private CentralityResult result;
     private DoubleUnaryOperator normalizationFunction;
 
     public NormalizedCentralityResult(CentralityResult result, DoubleUnaryOperator normalizationFunction) {
+        super(result.array());
         this.result = result;
         this.normalizationFunction = normalizationFunction;
     }
 
-    @Override
     public void export(String propertyName, Exporter exporter, DoubleUnaryOperator normalizationFunction) {
         result.export(propertyName, exporter, normalizationFunction);
     }
 
-    @Override
     public double score(int nodeId) {
         return normalizationFunction.applyAsDouble(result.score(nodeId));
     }
 
-    @Override
     public double score(long nodeId) {
         return normalizationFunction.applyAsDouble(result.score(nodeId));
     }
 
-    @Override
     public void export(String propertyName, Exporter exporter) {
         export(propertyName, exporter, normalizationFunction);
-    }
-
-    @Override
-    public double computeMax() {
-        return result.computeMax();
-    }
-
-    @Override
-    public double computeL2Norm() {
-        return result.computeL2Norm();
-    }
-
-    @Override
-    public double computeL1Norm() {
-        return result.computeL1Norm();
     }
 }

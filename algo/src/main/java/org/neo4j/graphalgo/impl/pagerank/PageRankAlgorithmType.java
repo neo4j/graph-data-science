@@ -19,26 +19,29 @@
  */
 package org.neo4j.graphalgo.impl.pagerank;
 
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.degree.AverageDegreeCentrality;
+public enum PageRankAlgorithmType implements PageRankAlgorithm {
 
-import java.util.concurrent.ExecutorService;
+    WEIGHTED {
+        @Override
+        public PageRankVariant variant(final PageRank.Config config) {
+            return new WeightedPageRankVariant(config.cacheWeights);
+        }
 
-public class BasicDegreeComputer implements DegreeComputer {
-    private final Graph graph;
+        @Override
+        public Class<WeightedComputeStep> computeStepClass() {
+            return WeightedComputeStep.class;
+        }
+    },
 
-    BasicDegreeComputer(Graph graph) {
-        this.graph = graph;
-    }
+    NON_WEIGHTED {
+        @Override
+        public PageRankVariant variant(final PageRank.Config config) {
+            return new NonWeightedPageRankVariant();
+        }
 
-    @Override
-    public DegreeCache degree(
-            ExecutorService executor,
-            int concurrency,
-            AllocationTracker tracker) {
-        AverageDegreeCentrality degreeCentrality = new AverageDegreeCentrality(graph, executor, concurrency);
-        degreeCentrality.compute();
-        return DegreeCache.EMPTY.withAverage(degreeCentrality.average());
+        @Override
+        public Class<NonWeightedComputeStep> computeStepClass() {
+            return NonWeightedComputeStep.class;
+        }
     }
 }

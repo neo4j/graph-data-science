@@ -17,15 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.degree;
+package org.neo4j.graphalgo.results;
 
-import org.neo4j.graphalgo.Algorithm;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 
-public interface DegreeCentralityAlgorithm {
-    CentralityResult result();
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-    void compute();
+class CentralityResultWithStatisticsTest {
 
-    Algorithm<?> algorithm();
+    @Test
+    void doubleArrayResult() {
+        CentralityResultWithStatistics result = CentralityResultWithStatistics
+                .of(new CentralityResult(HugeDoubleArray.of(1, 2, 3, 4)));
+
+        assertEquals(4.0, result.computeMax(), 0.01);
+        assertEquals(10.0, result.computeL1Norm(), 0.01);
+        assertEquals(5.477225575051661, result.computeL2Norm(), 0.01);
+    }
 }

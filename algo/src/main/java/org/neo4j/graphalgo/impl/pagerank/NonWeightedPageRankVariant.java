@@ -23,33 +23,46 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
-public class EigenvectorCentralityVariant implements PageRankVariant {
+import java.util.concurrent.ExecutorService;
+
+public class NonWeightedPageRankVariant implements PageRankVariant {
 
     @Override
-    public ComputeStep createComputeStep(
+    public NonWeightedComputeStep createComputeStep(
             double dampingFactor,
             double toleranceValue,
             long[] sourceNodeIds,
             Graph graph,
             RelationshipWeights relationshipWeights,
             AllocationTracker tracker,
-            int partitionCount,
+            int partitionSize,
             long start,
-            DegreeCache degreeCache,
-            long nodeCount) {
-        return new EigenvectorCentralityComputeStep(
+            DegreeCache aggregatedDegrees,
+            long nodeCount
+    ) {
+        return new NonWeightedComputeStep(
                 dampingFactor,
+                toleranceValue,
                 sourceNodeIds,
                 graph,
                 tracker,
-                partitionCount,
-                start,
-                nodeCount
+                partitionSize,
+                start
         );
     }
 
     @Override
     public DegreeComputer degreeComputer(Graph graph) {
-        return new BasicDegreeComputer(graph);
+        return new NoOpDegreeComputer();
+    }
+
+    class NoOpDegreeComputer implements DegreeComputer {
+        @Override
+        public DegreeCache degree(
+                ExecutorService executor,
+                int concurrency,
+                AllocationTracker tracker) {
+            return DegreeCache.EMPTY;
+        }
     }
 }

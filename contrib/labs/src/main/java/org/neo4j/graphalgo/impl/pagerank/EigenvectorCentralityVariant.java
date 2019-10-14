@@ -20,28 +20,37 @@
 package org.neo4j.graphalgo.impl.pagerank;
 
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.degree.WeightedDegreeCentrality;
 
-import java.util.concurrent.ExecutorService;
+public class EigenvectorCentralityVariant implements PageRankVariant {
 
-public class WeightedDegreeComputer implements DegreeComputer {
-
-    private final Graph graph;
-    private final boolean cacheWeights;
-
-    WeightedDegreeComputer(Graph graph, boolean cacheWeights) {
-        this.graph = graph;
-        this.cacheWeights = cacheWeights;
+    @Override
+    public ComputeStep createComputeStep(
+            double dampingFactor,
+            double toleranceValue,
+            long[] sourceNodeIds,
+            Graph graph,
+            RelationshipWeights relationshipWeights,
+            AllocationTracker tracker,
+            int partitionCount,
+            long start,
+            DegreeCache degreeCache,
+            long nodeCount
+    ) {
+        return new EigenvectorCentralityComputeStep(
+                dampingFactor,
+                sourceNodeIds,
+                graph,
+                tracker,
+                partitionCount,
+                start,
+                nodeCount
+        );
     }
 
     @Override
-    public DegreeCache degree(
-            ExecutorService executor,
-            int concurrency,
-            AllocationTracker tracker) {
-        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph, executor, concurrency, tracker);
-        degreeCentrality.compute(cacheWeights);
-        return new DegreeCache(degreeCentrality.degrees(), degreeCentrality.weights(), -1D);
+    public DegreeComputer degreeComputer(Graph graph) {
+        return new BasicDegreeComputer(graph);
     }
 }

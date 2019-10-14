@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.results;
+package org.neo4j.graphalgo.results;
 
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
@@ -29,11 +29,11 @@ public final class HugeNormalizationComputations {
 
     private HugeNormalizationComputations() {}
 
-    static double squaredSum(HugeDoubleArray partition) {
+    public static double squaredSum(HugeDoubleArray partition) {
         return parallelStream(partition.stream(), stream -> stream.map(value -> value * value).sum());
     }
 
-    static double l1Norm(HugeDoubleArray partition) {
+    public static double l1Norm(HugeDoubleArray partition) {
         return parallelStream(partition.stream(), DoubleStream::sum);
     }
 

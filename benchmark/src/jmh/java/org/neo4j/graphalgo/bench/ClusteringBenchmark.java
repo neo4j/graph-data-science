@@ -50,9 +50,6 @@ import org.openjdk.jmh.annotations.Warmup;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.LongStream;
 
-/**
- * @author mknblch
- */
 @Threads(1)
 @Fork(value = 1, jvmArgs = {"-Xms2g", "-Xmx2g"})
 @Warmup(iterations = 3, time = 3)

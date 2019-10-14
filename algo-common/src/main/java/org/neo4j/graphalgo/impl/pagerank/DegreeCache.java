@@ -44,10 +44,6 @@ public class DegreeCache {
         return aggregatedDegrees;
     }
 
-    HugeObjectArray<HugeDoubleArray> weights() {
-        return weights;
-    }
-
     double average() {
         return averageDegree;
     }

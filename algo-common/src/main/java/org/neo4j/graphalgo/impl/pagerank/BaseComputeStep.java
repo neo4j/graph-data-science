@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Arrays;
@@ -73,7 +74,8 @@ public abstract class BaseComputeStep implements ComputeStep {
             Graph graph,
             AllocationTracker tracker,
             int partitionSize,
-            long startNode) {
+            long startNode
+    ) {
         this(
                 dampingFactor,
                 PageRank.DEFAULT_TOLERANCE,
@@ -92,7 +94,8 @@ public abstract class BaseComputeStep implements ComputeStep {
             Graph graph,
             AllocationTracker tracker,
             int partitionSize,
-            long startNode) {
+            long startNode
+    ) {
         this.dampingFactor = dampingFactor;
         this.alpha = 1.0 - dampingFactor;
         this.tolerance = tolerance;
@@ -201,7 +204,7 @@ public abstract class BaseComputeStep implements ComputeStep {
             double sum = 0.0;
             for (int j = 0; j < scoreDim; j++) {
                 float[] scores = prevScores[j];
-                sum += (double) scores[i];
+                sum += scores[i];
                 scores[i] = 0F;
             }
             double delta = dampingFactor * sum;
@@ -219,12 +222,9 @@ public abstract class BaseComputeStep implements ComputeStep {
         return nextScores;
     }
 
-    public double[] pageRank() {
-        return pageRank;
-    }
-
-    public long[] starts() {
-        return starts;
+    @Override
+    public void getPageRankResult(HugeDoubleArray result) {
+        result.copyFromArrayIntoSlice(pageRank, startNode, endNode);
     }
 
     public double[] deltas() { return deltas;}

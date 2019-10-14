@@ -22,36 +22,31 @@ package org.neo4j.graphalgo.impl.pagerank;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.binaryLookup;
-import static org.neo4j.graphalgo.impl.pagerank.PageRank.DEFAULT_WEIGHT;
 
-public class WeightedComputeStep extends BaseComputeStep implements RelationshipConsumer {
-    private final RelationshipWeights relationshipWeights;
-    private final HugeDoubleArray aggregatedDegrees;
-    private double sumOfWeights;
-    private double delta;
+final class ArticleRankComputeStep extends BaseComputeStep implements RelationshipConsumer {
+    private double averageDegree;
+    private float srcRankDelta;
 
-    WeightedComputeStep(
+    ArticleRankComputeStep(
             double dampingFactor,
             long[] sourceNodeIds,
             Graph graph,
-            RelationshipWeights relationshipWeights,
             AllocationTracker tracker,
             int partitionSize,
             long startNode,
-            DegreeCache degreeCache) {
+            DegreeCache degreeCache
+    ) {
         super(dampingFactor,
                 sourceNodeIds,
                 graph,
                 tracker,
                 partitionSize,
-                startNode);
-        this.relationshipWeights = relationshipWeights;
-        this.aggregatedDegrees = degreeCache.aggregatedDegrees();
+                startNode
+        );
+        this.averageDegree = degreeCache.average();
     }
 
     void singleIteration() {
@@ -59,30 +54,22 @@ public class WeightedComputeStep extends BaseComputeStep implements Relationship
         long endNode = this.endNode;
         RelationshipIterator rels = this.relationshipIterator;
         for (long nodeId = startNode; nodeId < endNode; ++nodeId) {
-            delta = deltas[(int) (nodeId - startNode)];
-            if (delta > 0.0) {
+            double delta = deltas[(int) (nodeId - startNode)];
+            if (delta > 0) {
                 int degree = degrees.degree(nodeId, direction);
                 if (degree > 0) {
-                    sumOfWeights = aggregatedDegrees.get(nodeId);
+                    srcRankDelta = (float) (delta / (degree + averageDegree));
                     rels.forEachRelationship(nodeId, direction, this);
                 }
             }
         }
     }
 
-    @Override
     public boolean accept(long sourceNodeId, long targetNodeId) {
-        double weight = relationshipWeights.weightOf(sourceNodeId, targetNodeId, DEFAULT_WEIGHT);
-
-        if (weight > 0) {
-            double proportion = weight / sumOfWeights;
-            float srcRankDelta = (float) (delta * proportion);
-            if (srcRankDelta != 0F) {
-                int idx = binaryLookup(targetNodeId, starts);
-                nextScores[idx][(int) (targetNodeId - starts[idx])] += srcRankDelta;
-            }
+        if (srcRankDelta != 0F) {
+            int idx = binaryLookup(targetNodeId, starts);
+            nextScores[idx][(int) (targetNodeId - starts[idx])] += srcRankDelta;
         }
-
         return true;
     }
 }

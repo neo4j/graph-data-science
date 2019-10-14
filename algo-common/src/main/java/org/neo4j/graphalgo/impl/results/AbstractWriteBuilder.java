@@ -19,10 +19,6 @@
  */
 package org.neo4j.graphalgo.impl.results;
 
-/**
- * @author mknblch
- */
-
 public abstract class AbstractWriteBuilder<R> extends AbstractResultBuilder<R> {
     public abstract AbstractWriteBuilder<R> withWrite(boolean write);
 

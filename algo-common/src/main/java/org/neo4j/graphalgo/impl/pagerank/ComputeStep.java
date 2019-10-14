@@ -19,10 +19,9 @@
  */
 package org.neo4j.graphalgo.impl.pagerank;
 
-public interface ComputeStep extends Runnable {
-    double[] pageRank();
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
-    long[] starts();
+public interface ComputeStep extends Runnable {
 
     void prepareNextIteration(float[][] score);
 
@@ -35,4 +34,6 @@ public interface ComputeStep extends Runnable {
     void prepareNormalizeDeltas(double l2Norm);
 
     boolean partitionIsStable();
+
+    void getPageRankResult(HugeDoubleArray result);
 }

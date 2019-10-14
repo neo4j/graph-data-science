@@ -19,17 +19,28 @@
  */
 package org.neo4j.graphalgo.impl.pagerank;
 
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.util.concurrent.ExecutorService;
 
-public class NoOpDegreeComputer implements DegreeComputer {
+public class WeightedDegreeComputer implements DegreeComputer {
+
+    private final Graph graph;
+    private final boolean cacheWeights;
+
+    WeightedDegreeComputer(Graph graph, boolean cacheWeights) {
+        this.graph = graph;
+        this.cacheWeights = cacheWeights;
+    }
 
     @Override
     public DegreeCache degree(
             ExecutorService executor,
             int concurrency,
             AllocationTracker tracker) {
-        return DegreeCache.EMPTY;
+        WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(graph, executor, concurrency, tracker);
+        degreeCentrality.compute(cacheWeights);
+        return new DegreeCache(degreeCentrality.degrees(), degreeCentrality.weights(), -1D);
     }
 }

@@ -22,50 +22,48 @@ package org.neo4j.graphalgo.impl.degree;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
-import org.neo4j.graphalgo.impl.results.PartitionedDoubleArrayResult;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
-public class DegreeCentrality extends Algorithm<DegreeCentrality> implements DegreeCentralityAlgorithm {
+public class DegreeCentrality extends Algorithm<DegreeCentrality> {
     public static final double DEFAULT_WEIGHT = 0D;
     private final int nodeCount;
-    private boolean weighted;
-    private Direction direction;
+    private final boolean weighted;
+    private final Direction direction;
     private Graph graph;
     private final ExecutorService executor;
     private final int concurrency;
-
-    private double[] degrees;
-
-    private long[] starts;
-    private double[][] partitions;
+    private final HugeDoubleArray result;
 
     public DegreeCentrality(
             Graph graph,
             ExecutorService executor,
             int concurrency,
             Direction direction,
-            boolean weighted) {
-
+            boolean weighted,
+            AllocationTracker tracker) {
         this.graph = graph;
         this.executor = executor;
         this.concurrency = concurrency;
         this.direction = direction;
-        nodeCount = Math.toIntExact(graph.nodeCount());
+        this.nodeCount = Math.toIntExact(graph.nodeCount());
         this.weighted = weighted;
-        degrees = new double[nodeCount];
+        this.result = HugeDoubleArray.newArray(nodeCount, tracker);
     }
 
     public void compute() {
         int batchSize = ParallelUtil.adjustedBatchSize(nodeCount, concurrency);
         int taskCount = ParallelUtil.threadCount(batchSize, nodeCount);
-        final ArrayList<Runnable> tasks = new ArrayList<>(taskCount);
+        List<Runnable> tasks = new ArrayList<>(taskCount);
 
-        this.starts = new long[taskCount];
-        this.partitions = new double[taskCount][batchSize];
+        long[] starts = new long[taskCount];
+        double[][] partitions = new double[taskCount][batchSize];
 
         long startNode = 0L;
         for (int i = 0; i < taskCount; i++) {
@@ -80,7 +78,6 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> implements Deg
         ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
     }
 
-    @Override
     public Algorithm<?> algorithm() {
         return this;
     }
@@ -95,9 +92,8 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> implements Deg
         graph = null;
     }
 
-    @Override
     public CentralityResult result() {
-        return new PartitionedDoubleArrayResult(partitions, starts);
+        return new CentralityResult(result);
     }
 
     private class DegreeTask implements Runnable {
@@ -116,6 +112,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> implements Deg
             for (long nodeId = startNodeId; nodeId < endNodeId && running(); nodeId++) {
                 partition[Math.toIntExact(nodeId - startNodeId)] = graph.degree(nodeId, direction);
             }
+            result.copyFromArrayIntoSlice(partition, startNodeId, endNodeId);
         }
     }
 
@@ -142,7 +139,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality> implements Deg
                 });
             }
 
+            result.copyFromArrayIntoSlice(partition, startNodeId, endNodeId);
         }
     }
-
 }

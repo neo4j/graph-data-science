@@ -20,36 +20,24 @@
 package org.neo4j.graphalgo.impl.pagerank;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
-public class ArticleRankVariant implements PageRankVariant {
+import java.util.concurrent.ExecutorService;
 
-    @Override
-    public ComputeStep createComputeStep(
-            double dampingFactor,
-            double toleranceValue,
-            long[] sourceNodeIds,
-            Graph graph,
-            RelationshipWeights relationshipWeights,
-            AllocationTracker tracker,
-            int partitionCount,
-            long start,
-            DegreeCache degreeCache,
-            long nodeCount) {
-        return new ArticleRankComputeStep(
-                dampingFactor,
-                sourceNodeIds,
-                graph,
-                tracker,
-                partitionCount,
-                start,
-                degreeCache
-        );
+public class BasicDegreeComputer implements DegreeComputer {
+    private final Graph graph;
+
+    BasicDegreeComputer(Graph graph) {
+        this.graph = graph;
     }
 
     @Override
-    public DegreeComputer degreeComputer(Graph graph) {
-        return new BasicDegreeComputer(graph);
+    public DegreeCache degree(
+            ExecutorService executor,
+            int concurrency,
+            AllocationTracker tracker) {
+        AverageDegreeCentrality degreeCentrality = new AverageDegreeCentrality(graph, executor, concurrency);
+        degreeCentrality.compute();
+        return DegreeCache.EMPTY.withAverage(degreeCentrality.average());
     }
 }

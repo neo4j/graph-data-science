@@ -32,9 +32,6 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-/**
- * @author mknobloch
- */
 @Threads(1)
 @Fork(value = 1, jvmArgs = {"-Xms4g", "-Xmx8g", "-XX:+UseG1GC"})
 @Warmup(iterations = 5)

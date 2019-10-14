@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.degree.DegreeCentrality;
-import org.neo4j.graphalgo.impl.degree.DegreeCentralityAlgorithm;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphalgo.impl.results.CentralityScore;
 import org.neo4j.graphalgo.impl.utils.CentralityUtils;
@@ -211,12 +210,14 @@ public final class DegreeCentralityProc {
                 ? Direction.OUTGOING
                 : getDirection(configuration);
 
-        DegreeCentralityAlgorithm algo = new DegreeCentrality(
+        DegreeCentrality algo = new DegreeCentrality(
                 graph,
                 Pools.DEFAULT,
                 configuration.getConcurrency(),
                 computeDirection,
-                weightPropertyKey != null);
+                weightPropertyKey != null,
+                tracker
+        );
         statsBuilder.timeEval(algo::compute);
         Algorithm<?> algorithm = algo.algorithm();
         algorithm.withTerminationFlag(terminationFlag);

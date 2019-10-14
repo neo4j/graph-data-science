@@ -29,12 +29,12 @@ abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, Self>> {
      * <p>
      * The behavior is identical to {@link System#arraycopy(Object, int, Object, int, int)}.
      */
-    abstract public void copyTo(final Self dest, long length);
+    public abstract void copyTo(final Self dest, long length);
 
     /**
      * Creates a copy of the given array. The behavior is identical to {@link Arrays#copyOf(int[], int)}.
      */
-    abstract public Self copyOf(long newLength, AllocationTracker tracker);
+    public abstract Self copyOf(long newLength, AllocationTracker tracker);
 
     /**
      * Returns the length of this array.
@@ -43,13 +43,13 @@ abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, Self>> {
      * <p>
      * The behavior is identical to calling {@code array.length} on primitive arrays.
      */
-    abstract public long size();
+    public abstract long size();
 
     /**
      * @return the amount of memory used by the instance of this array, in bytes.
      * This should be the same as returned from {@link #release()} without actually releasing the array.
      */
-    abstract public long sizeOf();
+    public abstract long sizeOf();
 
     /**
      * Destroys the data, allowing the underlying storage arrays to be collected as garbage.
@@ -62,7 +62,7 @@ abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, Self>> {
      *
      * @return the amount of memory freed, in bytes.
      */
-    abstract public long release();
+    public abstract long release();
 
     /**
      * Returns a new {@link HugeCursor} for this array. The cursor is not positioned and in an invalid state.
@@ -73,7 +73,7 @@ abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, Self>> {
      * Obtaining a {@link HugeCursor} for an empty array (where {@link #size()} returns {@code 0}) is undefined and
      * might result in a {@link NullPointerException} or another {@link RuntimeException}.
      */
-    abstract public HugeCursor<Array> newCursor();
+    public abstract HugeCursor<Array> newCursor();
 
     /**
      * Resets the {@link HugeCursor} to range from index 0 until {@link #size()}.
@@ -86,7 +86,7 @@ abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, Self>> {
      * Resetting the {@link HugeCursor} of an empty array (where {@link #size()} returns {@code 0}) is undefined and
      * might result in a {@link NullPointerException} or another {@link RuntimeException}.
      */
-    final public HugeCursor<Array> initCursor(HugeCursor<Array> cursor) {
+    public final HugeCursor<Array> initCursor(HugeCursor<Array> cursor) {
         cursor.setRange();
         return cursor;
     }
@@ -105,7 +105,7 @@ abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, Self>> {
      *
      * @see HugeIntArray#initCursor(HugeCursor)
      */
-    final public HugeCursor<Array> initCursor(HugeCursor<Array> cursor, long start, long end) {
+    public final HugeCursor<Array> initCursor(HugeCursor<Array> cursor, long start, long end) {
         assert start >= 0L && start <= size() : "start expected to be in [0 : " + size() + "] but got " + start;
         assert end >= start && end <= size() : "end expected to be in [" + start + " : " + size() + "] but got " + end;
         cursor.setRange(start, end);
@@ -145,7 +145,27 @@ abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, Self>> {
      *         be reflected and visible in this array.
      * @throws IllegalStateException if the array is too large
      */
-    abstract public Array toArray();
+    public abstract Array toArray();
+
+    /**
+     * Copies data from {@code source} into this array, starting from {@code sliceStart} up until {@code sliceEnd}.
+     * @return the number of entries copied
+     */
+    public final int copyFromArrayIntoSlice(Array source, long sliceStart, long sliceEnd) {
+        int sourceIndex = 0;
+        try (HugeCursor<Array> cursor = initCursor(newCursor(), sliceStart, sliceEnd)) {
+            int sourceLength = java.lang.reflect.Array.getLength(source);
+            while (cursor.next() && sourceIndex < sourceLength) {
+                int copyLength = Math.min(
+                        cursor.limit - cursor.offset, // number of slots available in the cursor buffer
+                        sourceLength - sourceIndex // number of slots left to copy from
+                );
+                System.arraycopy(source, sourceIndex, cursor.array, cursor.offset, copyLength);
+                sourceIndex += copyLength;
+            }
+        }
+        return sourceIndex;
+    }
 
     @Override
     public String toString() {

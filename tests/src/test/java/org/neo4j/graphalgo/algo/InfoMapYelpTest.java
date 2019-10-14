@@ -19,8 +19,8 @@
  */
 package org.neo4j.graphalgo.algo;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.InfoMapProc;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
@@ -31,22 +31,19 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.io.IOException;
 
-/**
- * @author mknblch
- */
 class InfoMapYelpTest {
 
-    private static GraphDatabaseService db;
+    private GraphDatabaseService db;
 
-    @BeforeAll
-    static void setUp() throws KernelException, IOException {
+    @BeforeEach
+    void setUp() throws KernelException, IOException {
         db = LdbcDownloader.openDb("Yelp");
         Procedures proceduresService = ((GraphDatabaseAPI) db).getDependencyResolver().resolveDependency(Procedures.class);
         proceduresService.registerProcedure(InfoMapProc.class, true);
     }
 
-    @AfterAll
-    static void tearDown() {
+    @AfterEach
+    void tearDown() {
         db.shutdown();
     }
 

@@ -32,8 +32,6 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
-import org.neo4j.graphalgo.impl.results.HugeDoubleArrayResult;
-import org.neo4j.graphalgo.impl.results.PartitionedDoubleArrayResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
 
@@ -50,7 +48,6 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
-
 
 /**
  * Partition based parallel PageRank based on
@@ -127,6 +124,8 @@ public class PageRank extends Algorithm<PageRank> {
     private Log log;
     private ComputeSteps computeSteps;
 
+    private final HugeDoubleArray result;
+
     public static final class Config {
         public final int iterations;
         public final double dampingFactor;
@@ -137,7 +136,11 @@ public class PageRank extends Algorithm<PageRank> {
             this(iterations, dampingFactor, toleranceValue, false);
         }
 
-        public Config(final int iterations, final double dampingFactor, final double toleranceValue, boolean cacheWeights) {
+        public Config(
+                final int iterations,
+                final double dampingFactor,
+                final double toleranceValue,
+                boolean cacheWeights) {
             this.iterations = iterations;
             this.dampingFactor = dampingFactor;
             this.toleranceValue = toleranceValue;
@@ -175,14 +178,11 @@ public class PageRank extends Algorithm<PageRank> {
         this.toleranceValue = algoConfig.toleranceValue;
         this.sourceNodeIds = sourceNodeIds;
         this.pageRankVariant = pageRankVariant;
+        this.result = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
     }
 
     public int iterations() {
         return ranIterations;
-    }
-
-    public int getMaxIterations() {
-        return this.maxIterations;
     }
 
     public double dampingFactor() {
@@ -232,11 +232,13 @@ public class PageRank extends Algorithm<PageRank> {
     }
 
     private int adjustBatchSize(int batchSize) {
+        if (batchSize == 0) {
+            return Partition.MAX_NODE_COUNT;
+        }
         // multiply batchsize by 8 as a very rough estimate of an average
         // degree of 8 for nodes, so that every partition has approx
-        // batchSize nodes.
-        batchSize <<= 3;
-        return batchSize > 0 ? batchSize : Integer.MAX_VALUE;
+        // batchSize relationships.
+        return Math.toIntExact(batchSize * 8L);
     }
 
     private List<Partition> partitionGraph(
@@ -289,8 +291,8 @@ public class PageRank extends Algorithm<PageRank> {
             long start = partition.startNode;
             int i = 1;
             while (parts.hasNext()
-                    && i < partitionsPerThread
-                    && partition.fits(partitionSize)) {
+                   && i < partitionsPerThread
+                   && partition.fits(partitionSize)) {
                 partition = parts.next();
                 partitionSize += partition.nodeCount;
                 ++i;
@@ -308,7 +310,9 @@ public class PageRank extends Algorithm<PageRank> {
                     tracker,
                     partitionSize,
                     start,
-                    degreeCache, nodeCount));
+                    degreeCache,
+                    nodeCount
+            ));
         }
 
         long[] startArray = starts.toArray();
@@ -411,8 +415,8 @@ public class PageRank extends Algorithm<PageRank> {
             int partitionCount = partition.nodeCount;
             int i = 1;
             while (parts.hasNext()
-                    && i < partitionsPerThread
-                    && partition.fits(partitionCount)) {
+                   && i < partitionsPerThread
+                   && partition.fits(partitionCount)) {
                 partition = parts.next();
                 partitionCount += partition.nodeCount;
                 ++i;
@@ -497,17 +501,10 @@ public class PageRank extends Algorithm<PageRank> {
         }
 
         CentralityResult getPageRank() {
-            ComputeStep firstStep = steps.get(0);
-            if (steps.size() > 1) {
-                double[][] results = new double[steps.size()][];
-                int i = 0;
-                for (ComputeStep step : steps) {
-                    results[i++] = step.pageRank();
-                }
-                return new PartitionedDoubleArrayResult(results, firstStep.starts());
-            } else {
-                return new HugeDoubleArrayResult(HugeDoubleArray.of(firstStep.pageRank()));
+            for (ComputeStep step : steps) {
+                step.getPageRankResult(result);
             }
+            return new CentralityResult(result);
         }
 
         private void run(int iterations) {
@@ -570,10 +567,7 @@ public class PageRank extends Algorithm<PageRank> {
             }
         }
 
-        private void synchronizeScores(
-                ComputeStep step,
-                int idx,
-                float[][][] scores) {
+        private void synchronizeScores(ComputeStep step, int idx, float[][][] scores) {
             step.prepareNextIteration(scores[idx]);
             float[][] nextScores = step.nextScores();
             for (int j = 0, len = nextScores.length; j < len; j++) {
@@ -590,5 +584,4 @@ public class PageRank extends Algorithm<PageRank> {
             scores = null;
         }
     }
-
 }

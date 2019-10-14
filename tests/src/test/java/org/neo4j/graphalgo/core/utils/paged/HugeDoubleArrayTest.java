@@ -63,4 +63,9 @@ final class HugeDoubleArrayTest extends HugeArrayTestBase<double[], Double, Huge
     int unbox(final Double value) {
         return value.intValue();
     }
+
+    @Override
+    Double primitiveNull() {
+        return 0D;
+    }
 }
