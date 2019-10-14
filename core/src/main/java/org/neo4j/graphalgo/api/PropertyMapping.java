@@ -19,47 +19,30 @@
  */
 package org.neo4j.graphalgo.api;
 
-import static org.neo4j.graphalgo.core.utils.RawValues.getHead;
-import static org.neo4j.graphalgo.core.utils.RawValues.getTail;
-
-public interface WeightMapping extends NodeWeights {
+public interface PropertyMapping extends NodeProperties {
     /**
-     * Returns the weight for the relationship defined by their start and end nodes.
+     * Returns the proeprty value for the relationship defined by their start and end nodes.
      */
-    double weight(long source, long target);
+    double relationshipValue(long source, long target);
 
     /**
-     * Returns the weight for the relationship defined by their start and end nodes
-     * or the given default weight if no weight has been defined.
-     * The default weight has precedence over the default weight defined by the loader.
+     * Returns the property value for the relationship defined by their start and end nodes
+     * or the given default value if no property had been defined.
+     * The default value has precedence over the default value defined by the loader.
      */
-    double weight(long source, long target, double defaultValue);
+    double relationshipValue(long source, long target, double defaultValue);
 
     @Override
-    default double nodeWeight(long nodeId) {
-        return weight(nodeId, -1L);
+    default double nodeValue(long nodeId) {
+        return relationshipValue(nodeId, -1L);
     }
 
     /**
-     * Returns the weight for a node or the given default weight if no weight has been defined.
-     * The default weight has precedence over the default weight defined by the loader.
+     * Returns the property value for a node or the given default value if no property had been defined.
+     * The default value has precedence over the default value defined by the loader.
      */
-    default double nodeWeight(long nodeId, double defaultValue) {
-        return weight(nodeId, -1L, defaultValue);
-    }
-
-    /**
-     * Returns the weight for ID if set or the load-time specified default weight otherwise.
-     */
-    default double weight(long id) {
-        return weight((long) getHead(id), (long) getTail(id));
-    }
-
-    /**
-     * Returns the weight for ID if set or the given default weight otherwise.
-     */
-    default double weight(long id, final double defaultValue) {
-        return weight(getHead(id), getTail(id), defaultValue);
+    default double nodeValue(long nodeId, double defaultValue) {
+        return relationshipValue(nodeId, -1L, defaultValue);
     }
 
     /**
@@ -87,7 +70,7 @@ public interface WeightMapping extends NodeWeights {
     long release();
 
     /**
-     * Returns the number of keys stored in that mapping.
+     * Returns the number of values stored in that mapping.
      */
     long size();
 }

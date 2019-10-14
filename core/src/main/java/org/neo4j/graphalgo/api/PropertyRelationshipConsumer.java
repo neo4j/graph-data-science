@@ -19,22 +19,18 @@
  */
 package org.neo4j.graphalgo.api;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
-/**
- * Getter for weight property values at relationships
- *
- * @author mknblch
- */
-public interface RelationshipWeights {
-
+public interface PropertyRelationshipConsumer {
     /**
-     * get weight between source and target node id
+     * Called for every relationship that matches a given relation-constraint
      *
-     * @param sourceNodeId source node
-     * @param targetNodeId target node
-     * @param fallbackValue value to use if graph is unweighted
-     * @return the weight
+     * @param sourceNodeId mapped source node id
+     * @param targetNodeId mapped target node id
+     * @param property     relationship property
+     * @return {@code true} if the iteration shall continue, otherwise {@code false}.
      */
-    double weightOf(long sourceNodeId, long targetNodeId, double fallbackValue);
+    boolean accept(
+        long sourceNodeId,
+        long targetNodeId,
+        double property
+    );
 }

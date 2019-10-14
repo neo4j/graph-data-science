@@ -270,8 +270,8 @@ public class Intersections {
         return Double.isNaN(result) ? 0 : result;
     }
 
-    public static boolean shouldSkip(double weight, double skipValue, boolean skipNan) {
-        return weight == skipValue || (skipNan && Double.isNaN(weight));
+    public static boolean shouldSkip(double propertyValue, double skipValue, boolean skipNan) {
+        return propertyValue == skipValue || (skipNan && Double.isNaN(propertyValue));
     }
 
     public static double cosine(double[] vector1, double[] vector2, int len) {

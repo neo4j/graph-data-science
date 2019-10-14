@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.bench;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
-import org.neo4j.graphalgo.core.loading.NullWeightMap;
+import org.neo4j.graphalgo.core.loading.NullPropertyMap;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -87,7 +87,7 @@ public class WeaklyConnectedComponentsLdbc {
                         Pools.DEFAULT,
                         ParallelUtil.DEFAULT_BATCH_SIZE,
                         Pools.DEFAULT_CONCURRENCY,
-                        new WCC.Config(new NullWeightMap(1.0), 0),
+                        new WCC.Config(new NullPropertyMap(1.0), 0),
                         AllocationTracker.EMPTY)
                 .compute();
     }
@@ -100,7 +100,7 @@ public class WeaklyConnectedComponentsLdbc {
                         Pools.DEFAULT,
                         ParallelUtil.DEFAULT_BATCH_SIZE,
                         Pools.DEFAULT_CONCURRENCY,
-                        new WCC.Config(new NullWeightMap(1.0), 0),
+                        new WCC.Config(new NullPropertyMap(1.0), 0),
                         AllocationTracker.EMPTY)
                 .compute();
 

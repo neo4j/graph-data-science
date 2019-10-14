@@ -35,8 +35,8 @@ import java.util.Map;
 
 public class NodeImporter {
 
-    interface WeightReader {
-        int readWeight(long nodeReference, long propertiesReference, long internalId);
+    interface PropertyReader {
+        int readProperty(long nodeReference, long propertiesReference, long internalId);
     }
 
     private final HugeLongArrayBuilder idMapBuilder;
@@ -55,15 +55,15 @@ public class NodeImporter {
 
     long importNodes(NodesBatchBuffer buffer, Read read, CursorFactory cursors) {
         return importNodes(buffer, (nodeReference, propertiesReference, internalId) ->
-                readWeight(nodeReference, propertiesReference, buildersByPropertyId, internalId, cursors, read));
+                readProperty(nodeReference, propertiesReference, buildersByPropertyId, internalId, cursors, read));
     }
 
     long importCypherNodes(NodesBatchBuffer buffer, List<Map<String, Number>> cypherNodeProperties) {
         return importNodes(buffer, (nodeReference, propertiesReference, internalId) ->
-                readCypherWeight(propertiesReference, internalId, cypherNodeProperties));
+                readCypherProperty(propertiesReference, internalId, cypherNodeProperties));
     }
 
-    public long importNodes(NodesBatchBuffer buffer, WeightReader reader) {
+    public long importNodes(NodesBatchBuffer buffer, PropertyReader reader) {
         int batchLength = buffer.length();
         if (batchLength == 0) {
             return 0;
@@ -88,7 +88,7 @@ public class NodeImporter {
                 for (int i = 0; i < length; i++) {
                     long localIndex = start + i;
                     int batchIndex = batchOffset + i;
-                    importedProperties += reader.readWeight(
+                    importedProperties += reader.readProperty(
                             batch[batchIndex],
                             properties[batchIndex],
                             localIndex
@@ -100,7 +100,7 @@ public class NodeImporter {
         return RawValues.combineIntInt(batchLength, importedProperties);
     }
 
-    private int readWeight(
+    private int readProperty(
             long nodeReference,
             long propertiesReference,
             IntObjectMap<NodePropertiesBuilder> nodeProperties,
@@ -115,8 +115,8 @@ public class NodeImporter {
                 if (props != null) {
                     Value value = pc.propertyValue();
                     double defaultValue = props.defaultValue();
-                    double weight = ReadHelper.extractValue(value, defaultValue);
-                    props.set(internalId, weight);
+                    double propertyValue = ReadHelper.extractValue(value, defaultValue);
+                    props.set(internalId, propertyValue);
                     nodePropertiesRead++;
                 }
             }
@@ -124,16 +124,16 @@ public class NodeImporter {
         }
     }
 
-    private int readCypherWeight(
+    private int readCypherProperty(
             long propertiesReference,
             long internalId,
             List<Map<String, Number>> cypherNodeProperties) {
-        Map<String, Number> weights = cypherNodeProperties.get((int) propertiesReference);
+        Map<String, Number> properties = cypherNodeProperties.get((int) propertiesReference);
         int nodePropertiesRead = 0;
         for (NodePropertiesBuilder props : nodePropertyBuilders) {
-            Number number = weights.get(props.propertyKey());
-            if (number != null) {
-                props.set(internalId, number.doubleValue());
+            Number propertyValue = properties.get(props.propertyKey());
+            if (propertyValue != null) {
+                props.set(internalId, propertyValue.doubleValue());
                 nodePropertiesRead++;
             }
         }

@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.impl.yens;
 
 import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.api.RelationshipWeights;
+import org.neo4j.graphalgo.api.RelationshipProperties;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pointer;
@@ -43,7 +43,7 @@ import java.util.stream.Stream;
 public class WeightedPathExporter extends StatementApi {
 
     private final IdMapping idMapping;
-    private final RelationshipWeights relationshipWeights;
+    private final RelationshipProperties relationshipProperties;
     private final String relPrefix;
     private final ExecutorService executorService;
     private final String propertyName;
@@ -51,13 +51,13 @@ public class WeightedPathExporter extends StatementApi {
     public WeightedPathExporter(GraphDatabaseAPI api,
                                 ExecutorService executorService,
                                 IdMapping idMapping,
-                                RelationshipWeights relationshipWeights,
+                                RelationshipProperties relationshipProperties,
                                 String relPrefix,
                                 String propertyName) {
         super(api);
         this.executorService = executorService;
         this.idMapping = idMapping;
-        this.relationshipWeights = relationshipWeights;
+        this.relationshipProperties = relationshipProperties;
         this.relPrefix = relPrefix;
         this.propertyName = propertyName;
     }
@@ -91,7 +91,7 @@ public class WeightedPathExporter extends StatementApi {
                     statement.dataWrite().relationshipSetProperty(
                             relationshipId,
                             getOrCreatePropertyId(propertyName),
-                            Values.doubleValue(relationshipWeights.weightOf(s, t, 1.0D)));
+                            Values.doubleValue(relationshipProperties.relationshipValue(s, t, 1.0D)));
                 } catch (KernelException e) {
                     ExceptionUtil.throwKernelException(e);
                 }

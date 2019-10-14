@@ -64,7 +64,14 @@ public final class ProcedureConstants {
 
     // refers to the relationship weight to be used in weighted algorithms
     // that property is also considered in graph.load, despite being documented
-    public static final String WEIGHT_PROPERTY_KEY = "weightProperty";
+    // Deprecated: use RELATIONSHIP_PROPERTY_KEY instead
+    @Deprecated
+    public static final String DEPRECATED_RELATIONSHIP_PROPERTY_KEY = "weightProperty";
+
+    // refers to the relationship property  to be used in algorithms that make use of a property
+    //  - most often interpreted as a weight of some sort.
+    //  That property is also considered in graph.load, despite being documented
+    public static final String RELATIONSHIP_PROPERTY_KEY = "relationshipProperty";
 
     // BetweenessCentrality specific
     public static final String STATS_FLAG_KEY = "stats";

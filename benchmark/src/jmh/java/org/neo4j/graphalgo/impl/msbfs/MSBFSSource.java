@@ -20,7 +20,7 @@ package org.neo4j.graphalgo.impl.msbfs;
 
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
+import org.neo4j.graphalgo.api.PropertyRelationshipConsumer;
 import org.neo4j.graphalgo.core.huge.DirectIdMapping;
 import org.neo4j.graphdb.Direction;
 
@@ -85,8 +85,8 @@ public enum MSBFSSource {
         }
 
         @Override
-        public void forEachRelationship(long nodeId, Direction direction, double fallbackValue, WeightedRelationshipConsumer consumer) {
-            throw new UnsupportedOperationException("Weighted relationship iteration is not supported.");
+        public void forEachRelationship(long nodeId, Direction direction, double fallbackValue, PropertyRelationshipConsumer consumer) {
+            throw new UnsupportedOperationException("relationship iteration with properties is not supported.");
         }
 
         @Override
@@ -120,7 +120,7 @@ public enum MSBFSSource {
                 long nodeId,
                 Direction direction,
                 double fallbackValue,
-                WeightedRelationshipConsumer consumer) {
+                PropertyRelationshipConsumer consumer) {
             forEachRelationship(nodeId, direction, (s, t) -> consumer.accept(s, t, Double.NaN));
         }
 

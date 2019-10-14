@@ -19,9 +19,8 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.api.WeightMapping;
+import org.neo4j.graphalgo.api.PropertyMapping;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -85,10 +84,10 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
                 dimensions.highestNeoId(),
                 concurrency,
                 tracker);
-        Map<String, WeightMapping> nodeProperties = new HashMap<>();
-        for (PropertyMapping propertyMapping : propertyMappings) {
+        Map<String, PropertyMapping> nodeProperties = new HashMap<>();
+        for (org.neo4j.graphalgo.PropertyMapping propertyMapping : propertyMappings) {
             NodePropertiesBuilder builder = builders.get(propertyMapping.propertyKey());
-            WeightMapping props = builder != null ? builder.build() : new NullWeightMap(propertyMapping.defaultValue());
+            PropertyMapping props = builder != null ? builder.build() : new NullPropertyMap(propertyMapping.defaultValue());
             nodeProperties.put(propertyMapping.propertyKey(), props);
         }
         return new IdsAndProperties(hugeIdMap, Collections.unmodifiableMap(nodeProperties));
@@ -96,7 +95,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
 
     private Map<String, NodePropertiesBuilder> propertyBuilders(long nodeCount) {
         Map<String, NodePropertiesBuilder> builders = new HashMap<>();
-        for (PropertyMapping propertyMapping : dimensions.nodeProperties()) {
+        for (org.neo4j.graphalgo.PropertyMapping propertyMapping : dimensions.nodeProperties()) {
             if (propertyMapping.exists()) {
                 NodePropertiesBuilder builder = NodePropertiesBuilder.of(
                         nodeCount,

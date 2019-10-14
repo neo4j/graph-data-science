@@ -85,9 +85,9 @@ public abstract class AdjacencyBuilder {
         return compressingPagedAdjacency;
     }
 
-    abstract int[] getWeightProperties();
+    abstract int[] getPropertyKeyIds();
 
-    abstract double[] getDefaultWeights();
+    abstract double[] getDefaultValues();
 
     private static final class CompressingPagedAdjacency extends AdjacencyBuilder {
 
@@ -252,12 +252,12 @@ public abstract class AdjacencyBuilder {
         }
 
         @Override
-        int[] getWeightProperties() {
+        int[] getPropertyKeyIds() {
             return weightProperties;
         }
 
         @Override
-        double[] getDefaultWeights() {
+        double[] getDefaultValues() {
             return defaultWeight;
         }
     }
@@ -282,12 +282,12 @@ public abstract class AdjacencyBuilder {
         }
 
         @Override
-        int[] getWeightProperties() {
+        int[] getPropertyKeyIds() {
             return new int[0];
         }
 
         @Override
-        double[] getDefaultWeights() {
+        double[] getDefaultValues() {
             return new double[0];
         }
     }

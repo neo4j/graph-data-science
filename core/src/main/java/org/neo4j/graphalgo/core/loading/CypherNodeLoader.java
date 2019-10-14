@@ -19,9 +19,8 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.api.WeightMapping;
+import org.neo4j.graphalgo.api.PropertyMapping;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -34,7 +33,7 @@ class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
 
     private final HugeLongArrayBuilder builder;
     private final NodeImporter importer;
-    private final Map<PropertyMapping, NodePropertiesBuilder> nodePropertyBuilders;
+    private final Map<org.neo4j.graphalgo.PropertyMapping, NodePropertiesBuilder> nodePropertyBuilders;
     private long maxNodeId;
 
     CypherNodeLoader(long nodeCount, GraphDatabaseAPI api, GraphSetup setup) {
@@ -64,14 +63,14 @@ class CypherNodeLoader extends CypherRecordLoader<IdsAndProperties> {
     @Override
     IdsAndProperties result() {
         IdMap idMap = IdMapBuilder.build(builder, maxNodeId, setup.concurrency, setup.tracker);
-        Map<String, WeightMapping> nodeProperties = nodePropertyBuilders.entrySet().stream()
+        Map<String, PropertyMapping> nodeProperties = nodePropertyBuilders.entrySet().stream()
                 .collect(Collectors.toMap(e -> e.getKey().propertyKey(), e -> e.getValue().build()));
         return new IdsAndProperties(idMap, nodeProperties);
     }
 
-    private Map<PropertyMapping, NodePropertiesBuilder> nodeProperties(long capacity, GraphSetup setup) {
-        Map<PropertyMapping, NodePropertiesBuilder> nodeProperties = new HashMap<>();
-        for (PropertyMapping propertyMapping : setup.nodePropertyMappings) {
+    private Map<org.neo4j.graphalgo.PropertyMapping, NodePropertiesBuilder> nodeProperties(long capacity, GraphSetup setup) {
+        Map<org.neo4j.graphalgo.PropertyMapping, NodePropertiesBuilder> nodeProperties = new HashMap<>();
+        for (org.neo4j.graphalgo.PropertyMapping propertyMapping : setup.nodePropertyMappings) {
             nodeProperties.put(
                     propertyMapping,
                     NodePropertiesBuilder.of(

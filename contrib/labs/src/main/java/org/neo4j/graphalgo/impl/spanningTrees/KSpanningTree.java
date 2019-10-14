@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.impl.spanningTrees;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.api.RelationshipWeights;
+import org.neo4j.graphalgo.api.RelationshipProperties;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.container.UndirectedTree;
 import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
@@ -41,12 +41,12 @@ public class KSpanningTree extends Algorithm<KSpanningTree> {
 
     private IdMapping idMapping;
     private RelationshipIterator relationshipIterator;
-    private RelationshipWeights weights;
+    private RelationshipProperties weights;
     private final int nodeCount;
 
     private SpanningTree kSpanningTree;
 
-    public KSpanningTree(IdMapping idMapping, RelationshipIterator relationshipIterator, RelationshipWeights weights) {
+    public KSpanningTree(IdMapping idMapping, RelationshipIterator relationshipIterator, RelationshipProperties weights) {
         this.idMapping = idMapping;
         this.relationshipIterator = relationshipIterator;
         this.weights = weights;
@@ -83,7 +83,7 @@ public class KSpanningTree extends Algorithm<KSpanningTree> {
             if (p == -1) {
                 continue;
             }
-            priorityQueue.add(i, weights.weightOf(p, i, 0.0D));
+            priorityQueue.add(i, weights.relationshipValue(p, i, 0.0D));
             logger.logProgress(i, nodeCount, () -> "reorganization");
         }
         // remove k-1 relationships

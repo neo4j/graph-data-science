@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.impl.yens;
 
 import org.apache.lucene.util.ArrayUtil;
-import org.neo4j.graphalgo.api.RelationshipWeights;
+import org.neo4j.graphalgo.api.RelationshipProperties;
 import org.neo4j.graphalgo.core.utils.RawValues;
 
 import java.util.Arrays;
@@ -109,10 +109,10 @@ public class WeightedPath {
         }
     }
 
-    public WeightedPath evaluateAndSetCost(RelationshipWeights weights) {
+    public WeightedPath evaluateAndSetCost(RelationshipProperties weights) {
         this.weight = 0.;
         forEachEdge((a, b) -> {
-            this.weight += weights.weightOf(a, b, 1.0D);
+            this.weight += weights.relationshipValue(a, b, 1.0D);
         });
         return this;
     }

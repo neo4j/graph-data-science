@@ -24,8 +24,8 @@ import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
-import org.neo4j.graphalgo.api.WeightMapping;
-import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
+import org.neo4j.graphalgo.api.PropertyMapping;
+import org.neo4j.graphalgo.api.PropertyRelationshipConsumer;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphdb.Direction;
@@ -47,14 +47,14 @@ abstract class SubGraph implements Graph {
         return degree(nodeId);
     }
 
-    abstract void forEach(long nodeId, WeightedRelationshipConsumer consumer);
+    abstract void forEach(long nodeId, PropertyRelationshipConsumer consumer);
 
     @Override
     public final void forEachRelationship(
             final long nodeId,
             final Direction direction,
             double fallbackValue,
-            final WeightedRelationshipConsumer consumer) {
+            final PropertyRelationshipConsumer consumer) {
         forEach(nodeId, consumer);
     }
 
@@ -92,7 +92,7 @@ abstract class SubGraph implements Graph {
     }
 
     @Override
-    public final double weightOf(long sourceNodeId, long targetNodeId, double fallbackValue) {
+    public final double relationshipValue(long sourceNodeId, long targetNodeId, double fallbackValue) {
         throw new UnsupportedOperationException("weightOf is not supported.");
     }
 
@@ -127,7 +127,7 @@ abstract class SubGraph implements Graph {
     }
 
     @Override
-    public final WeightMapping nodeProperties(String type) {
+    public final PropertyMapping nodeProperties(String type) {
         throw new UnsupportedOperationException("hugeNodeProperties is not supported.");
     }
 

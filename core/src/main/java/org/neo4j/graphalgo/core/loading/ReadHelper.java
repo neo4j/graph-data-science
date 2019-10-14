@@ -33,8 +33,8 @@ public final class ReadHelper {
     }
 
     public static double[] readProperties(PropertyCursor pc, int[] propertyIds, double[] defaultValues) {
-        double[] weights = new double[propertyIds.length];
-        Arrays.setAll(weights, i -> defaultValues[i]);
+        double[] properties = new double[propertyIds.length];
+        Arrays.setAll(properties, i -> defaultValues[i]);
         while (pc.next()) {
             // TODO: We used ArrayUtil#linearSearchIndex before which looks at four array positions in one loop iteration.
             //       We could do the same here and benchmark if it affects performance.
@@ -42,17 +42,17 @@ public final class ReadHelper {
                 if (propertyIds[indexOfPropertyId] == pc.propertyKey()) {
                     Value value = pc.propertyValue();
                     double defaultValue = defaultValues[indexOfPropertyId];
-                    double weight = extractValue(value, defaultValue);
-                    weights[indexOfPropertyId] = weight;
+                    double propertyValue = extractValue(value, defaultValue);
+                    properties[indexOfPropertyId] = propertyValue;
                 }
             }
         }
-        return weights;
+        return properties;
     }
 
     public static double extractValue(Value value, double defaultValue) {
         // slightly different logic than org.neo4j.values.storable.Values#coerceToDouble
-        // b/c we want to fallback to the default weight if the value is empty
+        // b/c we want to fallback to the default value if the value is empty
         if (value instanceof NumberValue) {
             return ((NumberValue) value).doubleValue();
         }

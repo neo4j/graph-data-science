@@ -22,18 +22,18 @@ package org.neo4j.graphalgo.impl.infomap;
 import com.carrotsearch.hppc.LongDoubleMap;
 import com.carrotsearch.hppc.LongDoubleScatterMap;
 import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.api.RelationshipWeights;
+import org.neo4j.graphalgo.api.RelationshipProperties;
 import org.neo4j.graphdb.Direction;
 
-public class NormalizedRelationshipWeights implements RelationshipWeights {
+public class NormalizedRelationshipProperties implements RelationshipProperties {
 
-    private RelationshipWeights weights;
+    private RelationshipProperties weights;
     private LongDoubleMap nodeWeightSum;
 
-    public NormalizedRelationshipWeights(
+    public NormalizedRelationshipProperties(
             int nodeCount,
             RelationshipIterator relationshipIterator,
-            RelationshipWeights weights) {
+            RelationshipProperties weights) {
         this.weights = weights;
         this.nodeWeightSum = new LongDoubleScatterMap();
         for (int n = 0; n < nodeCount; n++) {
@@ -45,7 +45,7 @@ public class NormalizedRelationshipWeights implements RelationshipWeights {
     }
 
     @Override
-    public double weightOf(long sourceNodeId, long targetNodeId, double fallbackValue) {
-        return weights.weightOf(sourceNodeId, targetNodeId, 1.0D) / nodeWeightSum.getOrDefault(sourceNodeId, 1.);
+    public double relationshipValue(long sourceNodeId, long targetNodeId, double fallbackValue) {
+        return weights.relationshipValue(sourceNodeId, targetNodeId, 1.0D) / nodeWeightSum.getOrDefault(sourceNodeId, 1.);
     }
 }

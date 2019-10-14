@@ -24,9 +24,9 @@ The goal of the project is an API optimized for the development of graph algorit
                                  |
         +-------------+----------+------+--------+----
         |             |          |               |     ...
-    +---+------+ +----+---+ +----+----+ +--------+---+
-    | NodeIter | | Degree | | RelIter | | RelWeights |
-    +---+------+ +----+---+ +----+----+ +--------+---+
+    +---+------+ +----+---+ +----+----+ +--------+------+
+    | NodeIter | | Degree | | RelIter | | RelProperties |
+    +---+------+ +----+---+ +----+----+ +--------+------+
 
 ----
 
@@ -41,9 +41,9 @@ The goal of the project is an API optimized for the development of graph algorit
 [ditaa]
 ----
 
-    +---+------+ +----+---+ +----+----+ +--------+---+
-    | NodeIter | | Degree | | RelIter | | RelWeights | ...
-    +----------+ +--------+ +---------+ +------------+
+    +---+------+ +----+---+ +----+----+ +--------+------+
+    | NodeIter | | Degree | | RelIter | | RelProeprties | ...
+    +----------+ +--------+ +---------+ +---------------+
           ^           ^          ^             ^
           |           |          |             |
           |           +-------+ ++             |
@@ -63,7 +63,7 @@ The goal of the project is an API optimized for the development of graph algorit
   :                        Graph                                 |
   |                                                              |
   |  +---+------+ +----+---+ +----+----+ +--------+--------+     |
-  |  | NodeIter | | Degree | | RelIter | | WeightedRelIter | ... |
+  |  | NodeIter | | Degree | | RelIter | | PropertyRelIter | ... |
   |  +---+------+ +----+---+ +----+----+ +--------+--------+     |
   +--------------------------+-----------------------------------+
                              ^

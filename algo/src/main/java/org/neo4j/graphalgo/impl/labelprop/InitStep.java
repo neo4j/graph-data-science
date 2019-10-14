@@ -22,26 +22,26 @@ package org.neo4j.graphalgo.impl.labelprop;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.WeightMapping;
+import org.neo4j.graphalgo.api.PropertyMapping;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Direction;
 
 final class InitStep implements Step {
 
-    private final WeightMapping nodeProperties;
+    private final PropertyMapping nodeProperties;
     private final HugeLongArray existingLabels;
     private final PrimitiveLongIterable nodes;
     private final Graph graph;
-    private final WeightMapping nodeWeights;
+    private final PropertyMapping nodeWeights;
     private final ProgressLogger progressLogger;
     private final Direction direction;
     private final long maxLabelId;
 
     InitStep(
             Graph graph,
-            WeightMapping nodeProperties,
-            WeightMapping nodeWeights,
+            PropertyMapping nodeProperties,
+            PropertyMapping nodeWeights,
             PrimitiveLongIterable nodes,
             HugeLongArray existingLabels,
             ProgressLogger progressLogger,
@@ -62,7 +62,7 @@ final class InitStep implements Step {
         PrimitiveLongIterator iterator = nodes.iterator();
         while (iterator.hasNext()) {
             long nodeId = iterator.next();
-            double existingLabelValue = nodeProperties.nodeWeight(nodeId, Double.NaN);
+            double existingLabelValue = nodeProperties.nodeValue(nodeId, Double.NaN);
             // if there is no provided value for this node, we could start adding
             // to the max provided id and continue from there, but that might
             // clash with node IDs. If we have loaded a graph with a greater node ID

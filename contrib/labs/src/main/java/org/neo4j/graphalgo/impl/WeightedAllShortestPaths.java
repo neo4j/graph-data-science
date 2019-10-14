@@ -75,7 +75,7 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm<WeightedAllShort
 
     public WeightedAllShortestPaths(Graph graph, ExecutorService executorService, int concurrency, Direction direction) {
         if (!graph.hasRelationshipProperty()) {
-            throw new UnsupportedOperationException("WeightedAllShortestPaths is not supported on unweighted graphs");
+            throw new UnsupportedOperationException("WeightedAllShortestPaths is not supported on graphs without a weight property");
         }
 
         this.graph = graph;

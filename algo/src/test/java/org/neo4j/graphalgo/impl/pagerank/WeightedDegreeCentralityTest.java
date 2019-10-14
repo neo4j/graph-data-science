@@ -199,7 +199,10 @@ final class WeightedDegreeCentralityTest {
                     AllocationTracker.EMPTY);
         });
 
-        assertTrue(exception.getMessage().contains("not supported"));
+        assertEquals(
+                "WeightedDegreeCentrality requires a weight property to be loaded.",
+                exception.getMessage()
+        );
     }
 
     @AllGraphTypesTest

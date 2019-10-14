@@ -19,21 +19,21 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.api.WeightMapping;
+import org.neo4j.graphalgo.api.PropertyMapping;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 
 /**
- * WeightMapping implementation which always returns
- * a given default weight upon invocation
+ * RelationshipPropertyMapping implementation which always returns
+ * a given default property value upon invocation
  */
-public class NullWeightMap implements WeightMapping {
+public class NullPropertyMap implements PropertyMapping {
 
-    static final MemoryEstimation MEMORY_USAGE = MemoryEstimations.of(NullWeightMap.class);
+    static final MemoryEstimation MEMORY_USAGE = MemoryEstimations.of(NullPropertyMap.class);
 
     private final double defaultValue;
 
-    public NullWeightMap(double defaultValue) {
+    public NullPropertyMap(double defaultValue) {
         this.defaultValue = defaultValue;
     }
 
@@ -43,32 +43,22 @@ public class NullWeightMap implements WeightMapping {
     }
 
     @Override
-    public double weight(final long source, final long target) {
+    public double relationshipValue(final long source, final long target) {
         return defaultValue;
     }
 
     @Override
-    public double weight(final long source, final long target, final double defaultValue) {
+    public double relationshipValue(final long source, final long target, final double defaultValue) {
         return defaultValue;
     }
 
     @Override
-    public double nodeWeight(final long nodeId) {
+    public double nodeValue(final long nodeId) {
         return defaultValue;
     }
 
     @Override
-    public double nodeWeight(final long nodeId, final double defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
-    public double weight(final long id) {
-        return defaultValue;
-    }
-
-    @Override
-    public double weight(final long id, final double defaultValue) {
+    public double nodeValue(final long nodeId, final double defaultValue) {
         return defaultValue;
     }
 

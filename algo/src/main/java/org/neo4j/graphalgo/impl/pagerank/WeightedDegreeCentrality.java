@@ -52,7 +52,7 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
             AllocationTracker tracker
     ) {
         if (!graph.hasRelationshipProperty()) {
-            throw new UnsupportedOperationException("WeightedDegreeCentrality is not supported on unweighted graphs.");
+            throw new UnsupportedOperationException("WeightedDegreeCentrality requires a weight property to be loaded.");
         }
 
         this.tracker = tracker;

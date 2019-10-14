@@ -21,8 +21,8 @@
 package org.neo4j.graphalgo.impl.wcc;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.WeightMapping;
-import org.neo4j.graphalgo.core.loading.NullWeightMap;
+import org.neo4j.graphalgo.api.PropertyMapping;
+import org.neo4j.graphalgo.core.loading.NullPropertyMap;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -71,9 +71,9 @@ public class WCCPregel extends WCC<WCCPregel> {
                     batchSize));
         }
 
-        WeightMapping communityMap = algoConfig.communityMap;
+        PropertyMapping communityMap = algoConfig.communityMap;
 
-        if (communityMap == null || communityMap instanceof NullWeightMap) {
+        if (communityMap == null || communityMap instanceof NullPropertyMap) {
             this.pregel = Pregel.withDefaultNodeValues(
                     graph,
                     WCCComputation::new,

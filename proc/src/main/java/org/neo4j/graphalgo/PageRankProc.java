@@ -143,7 +143,7 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
         boolean cacheWeights = config.get(CACHE_WEIGHTS_KEY, false);
         PageRank.Config algoConfig = new PageRank.Config(iterations, dampingFactor, tolerance, cacheWeights);
 
-        boolean weighted = config.getString(ProcedureConstants.WEIGHT_PROPERTY_KEY, null) != null;
+        boolean weighted = config.getString(ProcedureConstants.DEPRECATED_RELATIONSHIP_PROPERTY_KEY, null) != null;
 
         if (weighted) {
             return new PageRankFactory(PageRankAlgorithmType.WEIGHTED, algoConfig);

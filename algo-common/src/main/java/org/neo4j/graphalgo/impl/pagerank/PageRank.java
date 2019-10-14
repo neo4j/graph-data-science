@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeIterator;
-import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
@@ -117,7 +116,6 @@ public class PageRank extends Algorithm<PageRank> {
     private int ranIterations;
     private final double toleranceValue;
     private final Graph graph;
-    private final RelationshipWeights relationshipWeights;
     private final LongStream sourceNodeIds;
     private final PageRankVariant pageRankVariant;
 
@@ -171,7 +169,6 @@ public class PageRank extends Algorithm<PageRank> {
         this.nodeIterator = graph;
         this.degrees = graph;
         this.graph = graph;
-        this.relationshipWeights = graph;
         this.dampingFactor = algoConfig.dampingFactor;
         this.maxIterations = algoConfig.iterations;
         this.ranIterations = 0;
@@ -306,7 +303,6 @@ public class PageRank extends Algorithm<PageRank> {
                     toleranceValue,
                     sourceNodeIds,
                     graph,
-                    relationshipWeights,
                     tracker,
                     partitionSize,
                     start,

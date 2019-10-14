@@ -34,7 +34,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-final class HugeGraphUnweightedTest {
+final class HugeGraphNoPropertiesTest {
 
     private static final int BATCH_SIZE = 100;
     public static final RelationshipType TYPE = RelationshipType.withName("TYPE");
@@ -91,7 +91,7 @@ final class HugeGraphUnweightedTest {
         double fallbackWeight = 42D;
         graph.forEachNode((nodeId) -> {
             graph.forEachRelationship(nodeId, direction, (s, t) -> {
-                assertEquals(fallbackWeight, graph.weightOf(s, t, fallbackWeight));
+                assertEquals(fallbackWeight, graph.relationshipValue(s, t, fallbackWeight));
                 return true;
             });
             return true;

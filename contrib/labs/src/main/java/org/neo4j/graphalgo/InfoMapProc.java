@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.NodePropertyContainer;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -132,7 +132,7 @@ public class InfoMapProc {
                         .load(config.getGraphImpl());
                 infoMap = InfoMap.weighted(
                         graph,
-                        ((NodeProperties) graph).nodeProperties("_pr")::nodeWeight,
+                        ((NodePropertyContainer) graph).nodeProperties("_pr")::nodeValue,
                         graph,
                         config.getNumber("threshold", InfoMap.THRESHOLD).doubleValue(),
                         config.getNumber("tau", InfoMap.TAU).doubleValue(),
@@ -172,7 +172,7 @@ public class InfoMapProc {
                         .load(config.getGraphImpl());
                 infoMap = InfoMap.unweighted(
                         graph,
-                        ((NodeProperties) graph).nodeProperties("_pr")::nodeWeight,
+                        ((NodePropertyContainer) graph).nodeProperties("_pr")::nodeValue,
                         config.getNumber("threshold", InfoMap.THRESHOLD).doubleValue(),
                         config.getNumber("tau", InfoMap.TAU).doubleValue(),
                         Pools.FJ_POOL,
@@ -268,7 +268,7 @@ public class InfoMapProc {
                             .load(config.getGraphImpl());
                     infoMap = InfoMap.weighted(
                             graph,
-                            ((NodeProperties) graph).nodeProperties("_pr")::nodeWeight,
+                            ((NodePropertyContainer) graph).nodeProperties("_pr")::nodeValue,
                             graph,
                             config.getNumber("threshold", InfoMap.THRESHOLD).doubleValue(),
                             config.getNumber("tau", InfoMap.TAU).doubleValue(),
@@ -312,7 +312,7 @@ public class InfoMapProc {
                             .load(config.getGraphImpl());
                     infoMap = InfoMap.unweighted(
                             graph,
-                            ((NodeProperties) graph).nodeProperties("_pr")::nodeWeight,
+                            ((NodePropertyContainer) graph).nodeProperties("_pr")::nodeValue,
                             config.getNumber("threshold", InfoMap.THRESHOLD).doubleValue(),
                             config.getNumber("tau", InfoMap.TAU).doubleValue(),
                             Pools.FJ_POOL,

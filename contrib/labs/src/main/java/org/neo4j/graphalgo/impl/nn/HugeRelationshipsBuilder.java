@@ -167,8 +167,8 @@ class HugeRelationshipsBuilder {
                     0);
         }
 
-        static RelationshipImporter.WeightReader weightReader() {
-            return RelationshipImporter.preLoadedWeightReader();
+        static RelationshipImporter.PropertyReader weightReader() {
+            return RelationshipImporter.preLoadedPropertyReader();
         }
 
         void flushAll(RelationshipsBatchBuffer relBuffer ) {

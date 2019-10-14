@@ -20,29 +20,29 @@
 package org.neo4j.graphalgo.impl.infomap;
 
 import org.neo4j.graphalgo.api.Degrees;
-import org.neo4j.graphalgo.api.RelationshipWeights;
+import org.neo4j.graphalgo.api.RelationshipProperties;
 import org.neo4j.graphdb.Direction;
 
 /**
  * Normalized RelationshipWeights which always returns 1 / degree(source). Returns a
  * weight where - like in an probability matrix - all weights of a node add up to one.
  */
-public class DegreeNormalizedRelationshipWeights implements RelationshipWeights {
+public class DegreeNormalizedRelationshipProperties implements RelationshipProperties {
 
     private final Degrees degrees;
     private final Direction direction;
 
-    public DegreeNormalizedRelationshipWeights(Degrees degrees) {
+    public DegreeNormalizedRelationshipProperties(Degrees degrees) {
         this(degrees, Direction.OUTGOING);
     }
 
-    public DegreeNormalizedRelationshipWeights(Degrees degrees, Direction direction) {
+    public DegreeNormalizedRelationshipProperties(Degrees degrees, Direction direction) {
         this.degrees = degrees;
         this.direction = direction;
     }
 
     @Override
-    public double weightOf(long sourceNodeId, long targetNodeId, double fallbackValue) {
+    public double relationshipValue(long sourceNodeId, long targetNodeId, double fallbackValue) {
         return 1. / degrees.degree(sourceNodeId, direction);
     }
 }

@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.heavyweight;
 
 /**
- * Heavy weighted graph built of an adjacency matrix.
+ * Heavy graph built of an adjacency matrix.
  *
  * @author mknblch
  */

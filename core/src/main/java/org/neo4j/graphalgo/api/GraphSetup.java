@@ -56,9 +56,9 @@ public class GraphSetup {
     public final boolean loadOutgoing;
     // load outgoing and incoming relationships.
     public final boolean loadBoth;
-    // default property is used for weighted relationships if property is not set.
+    // default property is used for relationships if a property is not set.
     @Deprecated
-    public final Optional<Double> relationDefaultWeight;
+    public final Optional<Double> relationshipDefaultPropertyValue;
 
     public final Map<String, Object> params;
 
@@ -156,7 +156,7 @@ public class GraphSetup {
         this.loadIncoming = direction == Direction.INCOMING || direction == Direction.BOTH;
         this.loadBoth = loadOutgoing && loadIncoming;
         this.direction = direction;
-        this.relationDefaultWeight = relationshipPropertyMappings.defaultWeight();
+        this.relationshipDefaultPropertyValue = relationshipPropertyMappings.defaultWeight();
         this.params = params == null ? Collections.emptyMap() : params;
         this.executor = executor;
         this.concurrency = concurrency;

@@ -160,7 +160,7 @@ public class WCCForkJoin extends WCC<WCCForkJoin> {
                         node,
                         Direction.OUTGOING,
                         (source, target) -> {
-                            double weight = graph.weightOf(source, target, WCC.defaultWeight(threshold));
+                            double weight = graph.relationshipValue(source, target, WCC.defaultWeight(threshold));
                             if (weight >= threshold) {
                                 disjointSetStruct.union(source, target);
                             }

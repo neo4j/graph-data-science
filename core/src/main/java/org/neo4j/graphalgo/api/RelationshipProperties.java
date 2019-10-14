@@ -19,21 +19,19 @@
  */
 package org.neo4j.graphalgo.api;
 
-public interface WeightedRelationshipConsumer {
+/**
+ * Getter for property values at relationships
+ */
+@FunctionalInterface
+public interface RelationshipProperties {
+
     /**
-     * Called for every edge that matches a given relation-constraint
+     * get value of property on relationship between source and target node id
      *
-     * @param sourceNodeId mapped source node id
-     * @param targetNodeId mapped target node id
-     * @param weight       relationship weight
-     * @return {@code true} if the iteration shall continue, otherwise {@code false}.
+     * @param sourceNodeId source node
+     * @param targetNodeId target node
+     * @param fallbackValue value to use if relationship has no property value
+     * @return the property value
      */
-    boolean accept(
-        long sourceNodeId,
-        long targetNodeId,
-        double weight
-    );
+    double relationshipValue(long sourceNodeId, long targetNodeId, double fallbackValue);
 }
-
-
-

@@ -19,7 +19,7 @@
 package org.neo4j.graphalgo.bench;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeWeights;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
@@ -50,7 +50,7 @@ public class InfoMapGraph {
     private GraphDatabaseAPI db;
     Graph graph;
     ProgressLogger progressLogger;
-    NodeWeights pageRanks;
+    NodeProperties pageRanks;
 
     final int concurrency = 2;
     final double tau = 0.3;

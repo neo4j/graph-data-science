@@ -22,8 +22,8 @@ package org.neo4j.graphalgo.impl.wcc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.api.WeightMapping;
-import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
+import org.neo4j.graphalgo.api.PropertyMapping;
+import org.neo4j.graphalgo.api.PropertyRelationshipConsumer;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -92,7 +92,7 @@ public class ParallelWCC extends WCC<ParallelWCC> {
     @Override
     public DisjointSetStruct compute(double threshold) {
         long nodeCount = graph.nodeCount();
-        WeightMapping communityMap = algoConfig.communityMap;
+        PropertyMapping communityMap = algoConfig.communityMap;
         DisjointSetStruct dss = communityMap == null
                 ? new HugeAtomicDisjointSetStruct(nodeCount, tracker)
                 : new HugeAtomicDisjointSetStruct(nodeCount, communityMap, tracker);
@@ -146,7 +146,7 @@ public class ParallelWCC extends WCC<ParallelWCC> {
         }
     }
 
-    private class WCCWithThresholdTask extends WCCTask implements WeightedRelationshipConsumer {
+    private class WCCWithThresholdTask extends WCCTask implements PropertyRelationshipConsumer {
 
         private final double threshold;
 
@@ -164,8 +164,8 @@ public class ParallelWCC extends WCC<ParallelWCC> {
         }
 
         @Override
-        public boolean accept(final long sourceNodeId, final long targetNodeId, final double weight) {
-            if (weight > threshold) {
+        public boolean accept(final long sourceNodeId, final long targetNodeId, final double property) {
+            if (property > threshold) {
                 struct.union(sourceNodeId, targetNodeId);
             }
             return true;

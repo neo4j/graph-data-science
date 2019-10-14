@@ -204,11 +204,11 @@ public class ProcedureConfiguration {
     }
 
     public boolean hasWeightProperty() {
-        return containsKey(ProcedureConstants.WEIGHT_PROPERTY_KEY);
+        return containsKey(ProcedureConstants.DEPRECATED_RELATIONSHIP_PROPERTY_KEY);
     }
 
     public String getWeightProperty() {
-        return getString(ProcedureConstants.WEIGHT_PROPERTY_KEY, null);
+        return getString(ProcedureConstants.DEPRECATED_RELATIONSHIP_PROPERTY_KEY, null);
     }
 
     public PropertyMappings getNodeProperties() {

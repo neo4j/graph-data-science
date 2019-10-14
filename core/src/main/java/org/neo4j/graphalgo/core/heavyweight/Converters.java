@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.heavyweight;
 
 import org.neo4j.graphalgo.api.IntBinaryPredicate;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
-import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
+import org.neo4j.graphalgo.api.PropertyRelationshipConsumer;
 
 import java.util.function.IntConsumer;
 import java.util.function.IntPredicate;
@@ -59,11 +59,11 @@ public interface Converters {
         };
     }
 
-    static WeightedRelationshipConsumer longToIntConsumer(IntIntDoublePredicate p) {
-        return ((sourceNodeId, targetNodeId, weight) -> {
+    static PropertyRelationshipConsumer longToIntConsumer(IntIntDoublePredicate p) {
+        return ((sourceNodeId, targetNodeId, property) -> {
             int s = Math.toIntExact(sourceNodeId);
             int t = Math.toIntExact(targetNodeId);
-            return p.test(s, t, weight);
+            return p.test(s, t, property);
         });
     }
 

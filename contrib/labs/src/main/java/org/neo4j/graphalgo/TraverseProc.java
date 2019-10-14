@@ -104,7 +104,7 @@ public class TraverseProc {
         } else if (configuration.hasWeightProperty() && configuration.containsKey("maxCost")) {
             final double maxCost = configuration.getNumber("maxCost", 1.).doubleValue();
             exitFunction = (s, t, w) -> w >= maxCost ? Traverse.ExitPredicate.Result.CONTINUE : Traverse.ExitPredicate.Result.FOLLOW;
-            aggregatorFunction = (s, t, w) -> w + graph.weightOf(s, t, 0.0D);
+            aggregatorFunction = (s, t, w) -> w + graph.relationshipValue(s, t, 0.0D);
 
         // do complete BFS until all nodes have been visited
         } else {
@@ -170,7 +170,7 @@ public class TraverseProc {
         } else if (configuration.hasWeightProperty() && configuration.containsKey("maxCost")) {
             final double maxCost = configuration.getNumber("maxCost", 1.).doubleValue();
             exitFunction = (s, t, w) -> w >= maxCost ? Traverse.ExitPredicate.Result.CONTINUE : Traverse.ExitPredicate.Result.FOLLOW;
-            aggregatorFunction = (s, t, w) -> w + graph.weightOf(s, t, 0.0D);
+            aggregatorFunction = (s, t, w) -> w + graph.relationshipValue(s, t, 0.0D);
 
         // do complete BFS until all nodes have been visited
         } else {

@@ -21,14 +21,14 @@ package org.neo4j.graphalgo.impl.pagerank;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.binaryLookup;
 import static org.neo4j.graphalgo.impl.pagerank.PageRank.DEFAULT_WEIGHT;
 
-public class WeightedComputeStep extends BaseComputeStep implements WeightedRelationshipConsumer {
+public class WeightedComputeStep extends BaseComputeStep implements RelationshipWithPropertyConsumer {
+
     private final HugeDoubleArray aggregatedDegrees;
     private double sumOfWeights;
     private double delta;

@@ -70,7 +70,7 @@ class PropertyMappingsTest {
         assertEquals(transactionCountMapping.propertyKey(), "transaction_count");
         assertEquals(transactionCountMapping.neoPropertyKey(), "usd");
         assertEquals(transactionCountMapping.deduplicationStrategy(), DeduplicationStrategy.SUM);
-        assertEquals(transactionCountMapping.defaultValue(), HugeGraph.NO_WEIGHT);
+        assertEquals(transactionCountMapping.defaultValue(), HugeGraph.NO_PROPERTY_VALUE);
     }
 
     @Test

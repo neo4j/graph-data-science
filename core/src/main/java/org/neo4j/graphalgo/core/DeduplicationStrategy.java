@@ -24,41 +24,41 @@ import java.util.stream.Collectors;
 
 public enum DeduplicationStrategy {
     DEFAULT {
-        public double merge(double runningTotal, double weight) {
+        public double merge(double runningTotal, double value) {
             throw new UnsupportedOperationException(
                     "This should never be used as a deduplication strategy, " +
                     "just as a placeholder for the default strategy of a given loader.");
         }
     },
     NONE {
-        public double merge(double runningTotal, double weight) {
+        public double merge(double runningTotal, double value) {
             throw new UnsupportedOperationException(
                     "Multiple relationships between the same pair of nodes are not expected. " +
                     "Try using SKIP or some other duplicate relationships strategy.");
         }
     },
     SKIP {
-        public double merge(double runningTotal, double weight) {
+        public double merge(double runningTotal, double value) {
             return runningTotal;
         }
     },
     SUM {
-        public double merge(double runningTotal, double weight) {
-            return runningTotal + weight;
+        public double merge(double runningTotal, double value) {
+            return runningTotal + value;
         }
     },
     MIN {
-        public double merge(double runningTotal, double weight) {
-            return Math.min(runningTotal, weight);
+        public double merge(double runningTotal, double value) {
+            return Math.min(runningTotal, value);
         }
     },
     MAX {
-        public double merge(double runningTotal, double weight) {
-            return Math.max(runningTotal, weight);
+        public double merge(double runningTotal, double value) {
+            return Math.max(runningTotal, value);
         }
     };
 
-    public abstract double merge(double runningTotal, double weight);
+    public abstract double merge(double runningTotal, double value);
 
     public static DeduplicationStrategy lookup(String name) {
         DeduplicationStrategy deduplicationStrategy = null;

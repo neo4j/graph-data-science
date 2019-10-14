@@ -26,8 +26,8 @@ import com.carrotsearch.hppc.IntDoubleScatterMap;
 import com.carrotsearch.hppc.cursors.IntDoubleCursor;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeWeights;
-import org.neo4j.graphalgo.api.RelationshipWeights;
+import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.RelationshipProperties;
 import org.neo4j.graphalgo.core.utils.Pointer;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -69,7 +69,7 @@ public class InfoMap extends Algorithm<InfoMap> {
     // minimum difference in deltaL for merging 2 modules together
     private final double threshold;
     // normalized relationship weights
-    private RelationshipWeights weights;
+    private RelationshipProperties weights;
     // helper vars
     private final double tau1, n1;
 
@@ -95,7 +95,7 @@ public class InfoMap extends Algorithm<InfoMap> {
     public static InfoMap weighted(
             Graph graph,
             int prIterations,
-            RelationshipWeights weights,
+            RelationshipProperties weights,
             double threshold,
             double tau,
             ForkJoinPool pool,
@@ -153,8 +153,8 @@ public class InfoMap extends Algorithm<InfoMap> {
      */
     public static InfoMap weighted(
             Graph graph,
-            NodeWeights pageRanks,
-            RelationshipWeights weights,
+            NodeProperties pageRanks,
+            RelationshipProperties weights,
             double threshold,
             double tau,
             ForkJoinPool pool,
@@ -164,7 +164,7 @@ public class InfoMap extends Algorithm<InfoMap> {
         return new InfoMap(
                 graph,
                 pageRanks,
-                new NormalizedRelationshipWeights(Math.toIntExact(graph.nodeCount()), graph, weights),
+                new NormalizedRelationshipProperties(Math.toIntExact(graph.nodeCount()), graph, weights),
                 threshold,
                 tau, pool, concurrency, logger, terminationFlag);
     }
@@ -214,7 +214,7 @@ public class InfoMap extends Algorithm<InfoMap> {
      */
     public static InfoMap unweighted(
             Graph graph,
-            NodeWeights pageRanks,
+            NodeProperties pageRanks,
             double threshold,
             double tau,
             ForkJoinPool pool,
@@ -224,7 +224,7 @@ public class InfoMap extends Algorithm<InfoMap> {
         return new InfoMap(
                 graph,
                 pageRanks,
-                new DegreeNormalizedRelationshipWeights(graph),
+                new DegreeNormalizedRelationshipProperties(graph),
                 threshold,
                 tau, pool, concurrency, logger, terminationFlag);
     }
@@ -242,8 +242,8 @@ public class InfoMap extends Algorithm<InfoMap> {
      */
     private InfoMap(
             Graph graph,
-            NodeWeights pageRank,
-            RelationshipWeights normalizedWeights,
+            NodeProperties pageRank,
+            RelationshipProperties normalizedWeights,
             double threshold,
             double tau,
             ForkJoinPool pool,
@@ -472,7 +472,7 @@ public class InfoMap extends Algorithm<InfoMap> {
         // precalculated weights into other communities
         private IntDoubleMap wi;
 
-        Module(int startNode, Graph graph, NodeWeights pageRank) {
+        Module(int startNode, Graph graph, NodeProperties pageRank) {
             this.index = startNode;
             this.wi = new IntDoubleScatterMap();
             graph.forEachRelationship(startNode, D, (source, target) -> {
@@ -480,13 +480,13 @@ public class InfoMap extends Algorithm<InfoMap> {
                 int s = (int) source;
                 int t = (int) target;
                 if (s != t) {
-                    final double v = weights.weightOf(s, t, 1.0D);
+                    final double v = weights.relationshipValue(s, t, 1.0D);
                     w += v;
-                    wi.put(t, v * pageRank.nodeWeight(s) + weights.weightOf(t, s, 1.0D) * pageRank.nodeWeight(t));
+                    wi.put(t, v * pageRank.nodeValue(s) + weights.relationshipValue(t, s, 1.0D) * pageRank.nodeValue(t));
                 }
                 return true;
             });
-            p = pageRank.nodeWeight(startNode);
+            p = pageRank.nodeValue(startNode);
             w *= p;
             q = tau * p + tau1 * w;
         }

@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.impl.pagerank;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 public class EigenvectorCentralityVariant implements PageRankVariant {
@@ -31,7 +30,6 @@ public class EigenvectorCentralityVariant implements PageRankVariant {
             double toleranceValue,
             long[] sourceNodeIds,
             Graph graph,
-            RelationshipWeights relationshipWeights,
             AllocationTracker tracker,
             int partitionCount,
             long start,

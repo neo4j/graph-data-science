@@ -34,7 +34,7 @@ class ThreadLocalRelationshipsBuilder {
     private final ReentrantLock lock;
     private final DeduplicationStrategy[] deduplicationStrategies;
     private final AdjacencyListBuilder.Allocator adjacencyAllocator;
-    private final AdjacencyListBuilder.Allocator[] weightsAllocators;
+    private final AdjacencyListBuilder.Allocator[] propertiesAllocators;
     private final long[] adjacencyOffsets;
     private final long[][] weightOffsets;
     private final boolean noDeduplication;
@@ -42,7 +42,7 @@ class ThreadLocalRelationshipsBuilder {
     ThreadLocalRelationshipsBuilder(
             DeduplicationStrategy[] deduplicationStrategies,
             AdjacencyListBuilder.Allocator adjacencyAllocator,
-            final AdjacencyListBuilder.Allocator[] weightsAllocators,
+            final AdjacencyListBuilder.Allocator[] propertiesAllocators,
             long[] adjacencyOffsets,
             final long[][] weightOffsets) {
         if (deduplicationStrategies.length == 0) {
@@ -51,7 +51,7 @@ class ThreadLocalRelationshipsBuilder {
         this.deduplicationStrategies = deduplicationStrategies;
         this.noDeduplication = Arrays.stream(deduplicationStrategies).allMatch(d -> d == DeduplicationStrategy.NONE);
         this.adjacencyAllocator = adjacencyAllocator;
-        this.weightsAllocators = weightsAllocators;
+        this.propertiesAllocators = propertiesAllocators;
         this.adjacencyOffsets = adjacencyOffsets;
         this.weightOffsets = weightOffsets;
         this.lock = new ReentrantLock();
@@ -60,7 +60,7 @@ class ThreadLocalRelationshipsBuilder {
     final void prepare() {
         adjacencyAllocator.prepare();
 
-        for (AdjacencyListBuilder.Allocator weightsAllocator : weightsAllocators) {
+        for (AdjacencyListBuilder.Allocator weightsAllocator : propertiesAllocators) {
             if (weightsAllocator != null) {
                 weightsAllocator.prepare();
             }
@@ -112,7 +112,7 @@ class ThreadLocalRelationshipsBuilder {
         int requiredBytes = AdjacencyCompression.compress(buffer, storage);
 
         adjacencyOffsets[localId] = copyIds(storage, requiredBytes, degree);
-        copyWeights(weights, degree, localId, weightOffsets);
+        copyProperties(weights, degree, localId, weightOffsets);
 
         array.release();
         return degree;
@@ -128,26 +128,26 @@ class ThreadLocalRelationshipsBuilder {
         return address;
     }
 
-    private void copyWeights(long[][] weights, int degree, int localId, long[][] offsets) {
-        for (int i = 0; i < weights.length; i++) {
-            long[] weight = weights[i];
-            AdjacencyListBuilder.Allocator weightsAllocator = weightsAllocators[i];
-            long address = copyWeights(weight, degree, weightsAllocator);
+    private void copyProperties(long[][] properties, int degree, int localId, long[][] offsets) {
+        for (int i = 0; i < properties.length; i++) {
+            long[] property = properties[i];
+            AdjacencyListBuilder.Allocator propertiesAllocator = propertiesAllocators[i];
+            long address = copyProperties(property, degree, propertiesAllocator);
             offsets[i][localId] = address;
         }
     }
 
-    private long copyWeights(long[] weights, int degree, AdjacencyListBuilder.Allocator weightsAllocator) {
+    private long copyProperties(long[] properties, int degree, AdjacencyListBuilder.Allocator propertiesAllocator) {
         int requiredBytes = degree * Long.BYTES;
-        long address = weightsAllocator.allocate(Integer.BYTES /* degree */ + requiredBytes);
-        int offset = weightsAllocator.offset;
-        offset = writeDegree(weightsAllocator.page, offset, degree);
+        long address = propertiesAllocator.allocate(Integer.BYTES /* degree */ + requiredBytes);
+        int offset = propertiesAllocator.offset;
+        offset = writeDegree(propertiesAllocator.page, offset, degree);
         ByteBuffer
-                .wrap(weightsAllocator.page, offset, requiredBytes)
+                .wrap(propertiesAllocator.page, offset, requiredBytes)
                 .order(ByteOrder.LITTLE_ENDIAN)
                 .asLongBuffer()
-                .put(weights, 0, degree);
-        weightsAllocator.offset = (offset + requiredBytes);
+                .put(properties, 0, degree);
+        propertiesAllocator.offset = (offset + requiredBytes);
         return address;
     }
 }

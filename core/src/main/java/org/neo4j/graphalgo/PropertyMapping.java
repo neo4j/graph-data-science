@@ -90,7 +90,7 @@ public abstract class PropertyMapping {
             final Object defaultWeightValue = relPropertyMap.get(RELATIONSHIP_PROPERTIES_DEFAULT_VALUE_KEY);
             double defaultWeight;
             if (defaultWeightValue == null) {
-                defaultWeight = HugeGraph.NO_WEIGHT;
+                defaultWeight = HugeGraph.NO_PROPERTY_VALUE;
             } else if (defaultWeightValue instanceof Number) {
                 defaultWeight = ((Number) defaultWeightValue).doubleValue();
             } else {

@@ -62,7 +62,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
         int pageSize = importSizing.pageSize();
         int numberOfPages = importSizing.numberOfPages();
 
-        this.maybeDefaultRelProperty = setup.relationDefaultWeight;
+        this.maybeDefaultRelProperty = setup.relationshipDefaultPropertyValue;
         Double defaultRelationshipProperty = maybeDefaultRelProperty.orElseGet(PropertyMapping.EMPTY_PROPERTY::defaultValue);
 
         AdjacencyBuilder outBuilder = AdjacencyBuilder.compressing(
@@ -120,7 +120,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<Relationships> {
                 outAdjacencyList,
                 null,
                 outAdjacencyOffsets,
-                setup.relationDefaultWeight,
+                setup.relationshipDefaultPropertyValue,
                 null,
                 outWeightList,
                 null,

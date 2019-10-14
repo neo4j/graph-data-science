@@ -27,7 +27,7 @@ import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeWeights;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.LazyMappingCollection;
@@ -95,7 +95,7 @@ public final class Pregel {
     public static Pregel withInitialNodeValues(
             final Graph graph,
             final Supplier<Computation> computationFactory,
-            final NodeWeights initialNodeValues,
+            final NodeProperties initialNodeValues,
             final int batchSize,
             final int concurrency,
             final ExecutorService executor,
@@ -105,7 +105,7 @@ public final class Pregel {
         HugeDoubleArray hugeDoubleArray = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
         ParallelUtil.parallelStreamConsume(
                 LongStream.range(0, graph.nodeCount()),
-                nodeIds -> nodeIds.forEach(nodeId -> hugeDoubleArray.set(nodeId, initialNodeValues.nodeWeight(nodeId)))
+                nodeIds -> nodeIds.forEach(nodeId -> hugeDoubleArray.set(nodeId, initialNodeValues.nodeValue(nodeId)))
         );
 
         return new Pregel(

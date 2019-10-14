@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.api.WeightMapping;
+import org.neo4j.graphalgo.api.PropertyMapping;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedLongDoubleMap;
 import org.neo4j.kernel.api.StatementConstants;
@@ -69,7 +69,7 @@ public final class NodePropertiesBuilder {
         properties.put(index, value);
     }
 
-    public WeightMapping build() {
-        return new NodePropertyMap(properties, defaultValue, propertyId);
+    public PropertyMapping build() {
+        return new NodePropertyMap(properties, defaultValue);
     }
 }

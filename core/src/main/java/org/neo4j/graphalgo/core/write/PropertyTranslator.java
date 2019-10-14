@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.write;
 
-import org.neo4j.graphalgo.api.WeightMapping;
+import org.neo4j.graphalgo.api.PropertyMapping;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -106,17 +106,17 @@ public interface PropertyTranslator<T> {
 
     final class OfLongIfChanged<T> implements PropertyTranslator<T> {
 
-        private final WeightMapping currentProperties;
+        private final PropertyMapping currentProperties;
         private final SeededDataAccessFunction newPropertiesFn;
 
-        public OfLongIfChanged(WeightMapping currentProperties, SeededDataAccessFunction<T> newPropertiesFn) {
+        public OfLongIfChanged(PropertyMapping currentProperties, SeededDataAccessFunction<T> newPropertiesFn) {
             this.currentProperties = currentProperties;
             this.newPropertiesFn = newPropertiesFn;
         }
 
         @Override
         public Value toProperty(int propertyId, T data, long nodeId) {
-            double seedValue = currentProperties.nodeWeight(nodeId, Double.NaN);
+            double seedValue = currentProperties.nodeValue(nodeId, Double.NaN);
             long computedValue = newPropertiesFn.getValue(data, nodeId);
             return Double.isNaN(seedValue) || ((long) seedValue != computedValue) ? Values.longValue(computedValue) : null;
         }

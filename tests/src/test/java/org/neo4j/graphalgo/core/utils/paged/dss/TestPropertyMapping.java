@@ -20,18 +20,18 @@
 package org.neo4j.graphalgo.core.utils.paged.dss;
 
 import com.carrotsearch.hppc.IntIntHashMap;
-import org.neo4j.graphalgo.api.WeightMapping;
+import org.neo4j.graphalgo.api.PropertyMapping;
 
 import java.util.Arrays;
 
-final class TestWeightMapping implements WeightMapping {
+final class TestPropertyMapping implements PropertyMapping {
     private final IntIntHashMap weights;
 
-    private TestWeightMapping(final IntIntHashMap weights) {
+    private TestPropertyMapping(final IntIntHashMap weights) {
         this.weights = weights;
     }
 
-    TestWeightMapping(int... values) {
+    TestPropertyMapping(int... values) {
         this(toMap(values));
     }
 
@@ -47,12 +47,12 @@ final class TestWeightMapping implements WeightMapping {
     }
 
     @Override
-    public double weight(final long source, final long target) {
-        return weight(source, target, 0.0);
+    public double relationshipValue(final long source, final long target) {
+        return relationshipValue(source, target, 0.0);
     }
 
     @Override
-    public double weight(final long source, final long target, final double defaultValue) {
+    public double relationshipValue(final long source, final long target, final double defaultValue) {
         assert target == -1L;
         int key = Math.toIntExact(source);
         int index = weights.indexOf(key);

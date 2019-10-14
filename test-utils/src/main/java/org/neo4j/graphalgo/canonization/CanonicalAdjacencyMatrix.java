@@ -42,7 +42,7 @@ public final class CanonicalAdjacencyMatrix {
                     .map(propertyKey -> String.format(
                             "%s: %f",
                             propertyKey,
-                            g.nodeProperties(propertyKey).nodeWeight(nodeId)))
+                            g.nodeProperties(propertyKey).nodeValue(nodeId)))
                     .sorted()
                     .collect(Collectors.joining(", ", "({", "})"));
             canonicalNodeLabels.put(nodeId, canonicalNodeLabel);

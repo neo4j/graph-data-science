@@ -27,9 +27,9 @@ import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
-import org.neo4j.graphalgo.api.WeightMapping;
-import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
-import org.neo4j.graphalgo.core.loading.NullWeightMap;
+import org.neo4j.graphalgo.api.PropertyMapping;
+import org.neo4j.graphalgo.api.PropertyRelationshipConsumer;
+import org.neo4j.graphalgo.core.loading.NullPropertyMap;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.Exceptions;
 
@@ -46,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 final class WCCSafetyTest {
 
     private static final WCC.Config ALGO_CONFIG = new WCC.Config(
-            new NullWeightMap(-1),
+            new NullPropertyMap(-1),
             Double.NaN
     );
 
@@ -180,7 +180,7 @@ final class WCCSafetyTest {
         }
 
         @Override
-        public WeightMapping nodeProperties(final String type) {
+        public PropertyMapping nodeProperties(final String type) {
             throw new UnsupportedOperationException(
                     "org.neo4j.graphalgo.impl.wcc.WCCSafetyTest.FlakyGraph.hugeNodeProperties is not implemented.");
         }
@@ -196,7 +196,7 @@ final class WCCSafetyTest {
                 final long nodeId,
                 final Direction direction,
                 double fallbackValue,
-                final WeightedRelationshipConsumer consumer) {
+                final PropertyRelationshipConsumer consumer) {
             throw new UnsupportedOperationException(
                     "org.neo4j.graphalgo.impl.unionfind.UnionFindSafetyTest.FlakyGraph.forEachRelationship is not implemented.");
         }
@@ -208,7 +208,7 @@ final class WCCSafetyTest {
         }
 
         @Override
-        public double weightOf(final long sourceNodeId, final long targetNodeId, double fallbackValue) {
+        public double relationshipValue(final long sourceNodeId, final long targetNodeId, double fallbackValue) {
             throw new UnsupportedOperationException(
                     "org.neo4j.graphalgo.impl.wcc.WCCSafetyTest.FlakyGraph.weightOf is not implemented.");
         }

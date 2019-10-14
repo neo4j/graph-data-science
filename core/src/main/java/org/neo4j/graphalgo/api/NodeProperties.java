@@ -19,21 +19,11 @@
  */
 package org.neo4j.graphalgo.api;
 
-import java.util.Set;
-
-/**
- * Getter interface for node properties for huge graphs.
- */
+@FunctionalInterface
 public interface NodeProperties {
 
     /**
-     * return the property mapping for a type
-     *
-     * @param type       the node property type
-     * @return the mapping associated with that type
+     * Returns the weight for a node or the loaded default weight if no weight has been defined.
      */
-    WeightMapping nodeProperties(String type);
-
-    Set<String> availableNodeProperties();
-
+    double nodeValue(long nodeId);
 }

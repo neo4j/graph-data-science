@@ -79,7 +79,7 @@ public final class GraphLoadFactory extends GraphFactory {
 
     /**
      * A named graph is potentially split up into multiple sub-graphs.
-     * Each sub-graph has the same node set and represents a unique relationship type / weight property combination.
+     * Each sub-graph has the same node set and represents a unique relationship type / property combination.
      * This method returns the union of all subgraphs refered to by the given name.
      */
     public static Graph getUnion(String name) {

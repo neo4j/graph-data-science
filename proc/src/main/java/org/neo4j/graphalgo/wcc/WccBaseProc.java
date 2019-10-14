@@ -21,12 +21,11 @@ package org.neo4j.graphalgo.wcc;
 
 import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.BaseAlgoProc;
-import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.WeightMapping;
+import org.neo4j.graphalgo.api.PropertyMapping;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
-import org.neo4j.graphalgo.core.loading.NullWeightMap;
+import org.neo4j.graphalgo.core.loading.NullPropertyMap;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -165,9 +164,9 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
         return new ProcedureSetup(builder, graph, tracker, configuration);
     }
 
-    private PropertyMapping[] createPropertyMappings(String seedProperty) {
-        return new PropertyMapping[]{
-                PropertyMapping.of(SEED_TYPE, seedProperty, -1),
+    private org.neo4j.graphalgo.PropertyMapping[] createPropertyMappings(String seedProperty) {
+        return new org.neo4j.graphalgo.PropertyMapping[]{
+                org.neo4j.graphalgo.PropertyMapping.of(SEED_TYPE, seedProperty, -1),
         };
     }
 
@@ -228,7 +227,7 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
 
     private WccResultProducer getResultProducer(
             final DisjointSetStruct dss,
-            final WeightMapping nodeProperties,
+            final PropertyMapping nodeProperties,
             final ProcedureConfiguration procedureConfiguration,
             final AllocationTracker tracker) {
         String writeProperty = procedureConfiguration.get(
@@ -240,7 +239,7 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
         boolean withConsecutiveIds = procedureConfiguration.get(CONFIG_CONSECUTIVE_IDS_PROPERTY, false);
         boolean withSeeding = seedProperty != null;
         boolean writePropertyEqualsSeedProperty = Objects.equals(seedProperty, writeProperty);
-        boolean hasNodeProperties = nodeProperties != null && !(nodeProperties instanceof NullWeightMap);
+        boolean hasNodeProperties = nodeProperties != null && !(nodeProperties instanceof NullPropertyMap);
 
         WccResultProducer resultProducer = new WccResultProducer.NonConsecutive(
                 WccResultProducer.NonSeedingTranslator.INSTANCE,

@@ -68,12 +68,12 @@ final class HugeGraphWeightTest {
 
         graph.forEachNode((long node) -> {
             graph.forEachOutgoing(node, (src, tgt) -> {
-                long weight = (long) graph.weightOf(src, tgt, Double.NaN);
+                long propertyValue = (long) graph.relationshipValue(src, tgt, Double.NaN);
                 int fakeId = ((int) src << 16) | (int) tgt & 0xFFFF;
                 assertEquals(
                         fakeId,
-                        weight,
-                        "Wrong weight for (" + src + ")->(" + tgt + ")"
+                        propertyValue,
+                        "Wrong propertyValue for (" + src + ")->(" + tgt + ")"
                 );
                 return true;
             });
@@ -106,11 +106,11 @@ final class HugeGraphWeightTest {
                             targetIndex = j - k;
                         }
                         long targetId = nodeIds[i + targetIndex];
-                        int weight = ((int) sourceId << 16) | (int) targetId & 0xFFFF;
+                        int propertyValue = ((int) sourceId << 16) | (int) targetId & 0xFFFF;
                         Relationship relationship = db
                                 .getNodeById(sourceId)
                                 .createRelationshipTo(db.getNodeById(targetId), TYPE);
-                        relationship.setProperty("weight", weight);
+                        relationship.setProperty("weight", propertyValue);
                     }
                 }
             }

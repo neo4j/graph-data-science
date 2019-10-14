@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
+import org.neo4j.graphalgo.api.PropertyRelationshipConsumer;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-class RelationshipWeightImportTest {
+class RelationshipPropertiesImportTest {
 
     private Graph graph;
 
@@ -56,73 +56,73 @@ class RelationshipWeightImportTest {
     }
 
     @AllGraphTypesWithoutCypherTest
-    void testWeightsOfInterconnectedNodesWithOutgoing(Class<? extends GraphFactory> graphFactory) {
+    void testPropertiesOfInterconnectedNodesWithOutgoing(Class<? extends GraphFactory> graphFactory) {
         setup("CREATE (a:N),(b:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(a)", Direction.OUTGOING, graphFactory);
 
-        checkWeight(0, Direction.OUTGOING, 1.0);
-        checkWeight(1, Direction.OUTGOING, 2.0);
+        checkProperties(0, Direction.OUTGOING, 1.0);
+        checkProperties(1, Direction.OUTGOING, 2.0);
     }
 
     @AllGraphTypesWithoutCypherTest
-    void testWeightsOfTriangledNodesWithOutgoing(Class<? extends GraphFactory> graphFactory) {
+    void testPropertiesOfTriangledNodesWithOutgoing(Class<? extends GraphFactory> graphFactory) {
         setup("CREATE (a:N),(b:N),(c:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(c),(c)-[:R{w:3}]->(a)", Direction.OUTGOING, graphFactory);
 
-        checkWeight(0, Direction.OUTGOING, 1.0);
-        checkWeight(1, Direction.OUTGOING, 2.0);
-        checkWeight(2, Direction.OUTGOING, 3.0);
+        checkProperties(0, Direction.OUTGOING, 1.0);
+        checkProperties(1, Direction.OUTGOING, 2.0);
+        checkProperties(2, Direction.OUTGOING, 3.0);
     }
 
     @AllGraphTypesWithoutCypherTest
-    void testWeightsOfInterconnectedNodesWithIncoming(Class<? extends GraphFactory> graphFactory) {
+    void testPropertiesOfInterconnectedNodesWithIncoming(Class<? extends GraphFactory> graphFactory) {
         setup("CREATE (a:N),(b:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(a)", Direction.INCOMING, graphFactory);
 
-        checkWeight(0, Direction.INCOMING, 2.0);
-        checkWeight(1, Direction.INCOMING, 1.0);
+        checkProperties(0, Direction.INCOMING, 2.0);
+        checkProperties(1, Direction.INCOMING, 1.0);
     }
 
     @AllGraphTypesWithoutCypherTest
-    void testWeightsOfTriangledNodesWithIncoming(Class<? extends GraphFactory> graphFactory) {
+    void testPropertiesOfTriangledNodesWithIncoming(Class<? extends GraphFactory> graphFactory) {
         setup("CREATE (a:N),(b:N),(c:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(c),(c)-[:R{w:3}]->(a)", Direction.INCOMING, graphFactory);
 
-        checkWeight(0, Direction.INCOMING, 3.0);
-        checkWeight(1, Direction.INCOMING, 1.0);
-        checkWeight(2, Direction.INCOMING, 2.0);
+        checkProperties(0, Direction.INCOMING, 3.0);
+        checkProperties(1, Direction.INCOMING, 1.0);
+        checkProperties(2, Direction.INCOMING, 2.0);
     }
 
     @AllGraphTypesWithoutCypherTest
-    void testWeightsOfInterconnectedNodesWithBoth(Class<? extends GraphFactory> graphFactory) {
+    void testPropertiesOfInterconnectedNodesWithBoth(Class<? extends GraphFactory> graphFactory) {
         setup("CREATE (a:N),(b:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(a)", Direction.BOTH, graphFactory);
 
         // loading both overwrites the weights in the following order,
         // which expects the GraphFactory to load OUTGOINGs before INCOMINGs
         //   (a)-[{w:1}]->(b)  |  (a)<-[{w:2}]-(b)  |  (b)-[{w:2}]->(a)  |  (b)<-[{w:1}]-(a)
-        // therefore the final weight for in/outs of either a/b is 1,
-        // the weight of 2 is discarded.
-        checkWeight(0, Direction.OUTGOING, 1.0);
-        checkWeight(1, Direction.OUTGOING, 2.0);
+        // therefore the final property value for in/outs of either a/b is 1,
+        // the property value of 2 is discarded.
+        checkProperties(0, Direction.OUTGOING, 1.0);
+        checkProperties(1, Direction.OUTGOING, 2.0);
 
-        checkWeight(0, Direction.INCOMING, 2.0);
-        checkWeight(1, Direction.INCOMING, 1.0);
+        checkProperties(0, Direction.INCOMING, 2.0);
+        checkProperties(1, Direction.INCOMING, 1.0);
 
-        checkWeight(0, Direction.BOTH, new double[]{1.0, 1.0}, 1.0, 2.0);
-        checkWeight(1, Direction.BOTH, new double[]{2.0, 2.0}, 2.0, 1.0);
+        checkProperties(0, Direction.BOTH, new double[]{1.0, 1.0}, 1.0, 2.0);
+        checkProperties(1, Direction.BOTH, new double[]{2.0, 2.0}, 2.0, 1.0);
     }
 
     @AllGraphTypesWithoutCypherTest
-    void testWeightsOfTriangledNodesWithBoth(Class<? extends GraphFactory> graphFactory) {
+    void testPropertiesOfTriangledNodesWithBoth(Class<? extends GraphFactory> graphFactory) {
         setup("CREATE (a:N),(b:N),(c:N) CREATE (a)-[:R{w:1}]->(b),(b)-[:R{w:2}]->(c),(c)-[:R{w:3}]->(a)", Direction.BOTH, graphFactory);
 
-        checkWeight(0, Direction.OUTGOING, 1.0);
-        checkWeight(1, Direction.OUTGOING, 2.0);
-        checkWeight(2, Direction.OUTGOING, 3.0);
+        checkProperties(0, Direction.OUTGOING, 1.0);
+        checkProperties(1, Direction.OUTGOING, 2.0);
+        checkProperties(2, Direction.OUTGOING, 3.0);
 
-        checkWeight(0, Direction.INCOMING, 3.0);
-        checkWeight(1, Direction.INCOMING, 1.0);
-        checkWeight(2, Direction.INCOMING, 2.0);
+        checkProperties(0, Direction.INCOMING, 3.0);
+        checkProperties(1, Direction.INCOMING, 1.0);
+        checkProperties(2, Direction.INCOMING, 2.0);
 
-        checkWeight(0, Direction.BOTH, new double[]{1.0, 0.0}, 1.0, 3.0);
-        checkWeight(1, Direction.BOTH, new double[]{2.0, 0.0}, 2.0, 1.0);
-        checkWeight(2, Direction.BOTH, new double[]{3.0, 0.0}, 3.0, 2.0);
+        checkProperties(0, Direction.BOTH, new double[]{1.0, 0.0}, 1.0, 3.0);
+        checkProperties(1, Direction.BOTH, new double[]{2.0, 0.0}, 2.0, 1.0);
+        checkProperties(2, Direction.BOTH, new double[]{3.0, 0.0}, 3.0, 2.0);
     }
 
     private void setup(
@@ -139,19 +139,19 @@ class RelationshipWeightImportTest {
                 .load(graphFactory);
     }
 
-    private void checkWeight(int nodeId, Direction direction, double... expecteds) {
+    private void checkProperties(int nodeId, Direction direction, double... expecteds) {
         List<Executable> assertions = new ArrayList<>();
         graph.forEachRelationship(nodeId, direction, Double.NaN, checks(direction, expecteds, expecteds, assertions));
         assertAll(assertions);
     }
 
-    private void checkWeight(int nodeId, Direction direction, double[] expectedFromGraph, double... expectedFromIterator) {
+    private void checkProperties(int nodeId, Direction direction, double[] expectedFromGraph, double... expectedFromIterator) {
         List<Executable> assertions = new ArrayList<>();
         graph.forEachRelationship(nodeId, direction, Double.NaN, checks(direction, expectedFromIterator, expectedFromGraph, assertions));
         assertAll(assertions);
     }
 
-    private WeightedRelationshipConsumer checks(Direction direction, double[] expectedFromIterator, double[] expectedFromGraph, List<Executable> assertions) {
+    private PropertyRelationshipConsumer checks(Direction direction, double[] expectedFromIterator, double[] expectedFromGraph, List<Executable> assertions) {
         AtomicInteger i = new AtomicInteger();
         int limit = Math.min(expectedFromIterator.length, expectedFromGraph.length);
         return (s, t, w) -> {
@@ -160,7 +160,7 @@ class RelationshipWeightImportTest {
                 assertions.add(() -> assertFalse(i.get() >= limit, String.format("Unexpected relationship: %s = %.1f", rel, w)));
                 return false;
             }
-            double actual = (direction == Direction.INCOMING) ? graph.weightOf(t, s, Double.NaN) : graph.weightOf(s, t, Double.NaN);
+            double actual = (direction == Direction.INCOMING) ? graph.relationshipValue(t, s, Double.NaN) : graph.relationshipValue(s, t, Double.NaN);
             final int index = i.getAndIncrement();
             double expectedIterator = expectedFromIterator[index];
             double expectedGraph = expectedFromGraph[index];

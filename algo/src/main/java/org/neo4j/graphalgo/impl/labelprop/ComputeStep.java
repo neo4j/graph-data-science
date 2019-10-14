@@ -23,7 +23,7 @@ import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.api.WeightMapping;
+import org.neo4j.graphalgo.api.PropertyMapping;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Direction;
@@ -42,7 +42,7 @@ final class ComputeStep implements Step {
 
     ComputeStep(
             Graph graph,
-            WeightMapping nodeWeights,
+            PropertyMapping nodeWeights,
             ProgressLogger progressLogger,
             Direction direction,
             HugeLongArray existingLabels,

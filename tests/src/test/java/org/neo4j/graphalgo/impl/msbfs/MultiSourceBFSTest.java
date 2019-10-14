@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
+import org.neo4j.graphalgo.api.PropertyRelationshipConsumer;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.DirectIdMapping;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -277,7 +277,7 @@ final class MultiSourceBFSTest {
             }
 
             @Override
-            public void forEachRelationship(long nodeId, Direction direction, double fallbackValue, WeightedRelationshipConsumer consumer) {
+            public void forEachRelationship(long nodeId, Direction direction, double fallbackValue, PropertyRelationshipConsumer consumer) {
 
             }
 

@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.impl.louvain;
 
 import com.carrotsearch.hppc.LongFloatHashMap;
 import com.carrotsearch.hppc.cursors.LongFloatCursor;
-import org.neo4j.graphalgo.api.WeightedRelationshipConsumer;
+import org.neo4j.graphalgo.api.PropertyRelationshipConsumer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
@@ -50,7 +50,7 @@ final class LongLongSubGraph extends SubGraph {
     }
 
     @Override
-    void forEach(final long nodeId, final WeightedRelationshipConsumer consumer) {
+    void forEach(final long nodeId, final PropertyRelationshipConsumer consumer) {
         LongFloatHashMap targets = graph.get(nodeId);
         if (targets != null) {
             for (LongFloatCursor cursor : targets) {

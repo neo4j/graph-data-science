@@ -31,15 +31,15 @@ import java.util.stream.Stream;
 final class SingleTypeRelationshipImporter {
 
     private final RelationshipImporter.Imports imports;
-    private final RelationshipImporter.WeightReader weightReader;
+    private final RelationshipImporter.PropertyReader propertyReader;
     private final RelationshipsBatchBuffer buffer;
 
     private SingleTypeRelationshipImporter(
             RelationshipImporter.Imports imports,
-            RelationshipImporter.WeightReader weightReader,
+            RelationshipImporter.PropertyReader propertyReader,
             RelationshipsBatchBuffer buffer) {
         this.imports = imports;
-        this.weightReader = weightReader;
+        this.propertyReader = propertyReader;
         this.buffer = buffer;
     }
 
@@ -48,7 +48,7 @@ final class SingleTypeRelationshipImporter {
     }
 
     long importRels() {
-        return imports.importRels(buffer, weightReader);
+        return imports.importRels(buffer, propertyReader);
     }
 
     static class Builder {
@@ -103,8 +103,8 @@ final class SingleTypeRelationshipImporter {
 
             SingleTypeRelationshipImporter withBuffer(IdMapping idMap, int bulkSize, Read read, CursorFactory cursors) {
                 RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(idMap, mapping.typeId(), bulkSize);
-                RelationshipImporter.WeightReader weightReader = importer.storeBackedWeightReader(cursors, read);
-                return new SingleTypeRelationshipImporter(imports, weightReader, buffer);
+                RelationshipImporter.PropertyReader propertyReader = importer.storeBackedPropertiesReader(cursors, read);
+                return new SingleTypeRelationshipImporter(imports, propertyReader, buffer);
             }
         }
     }

@@ -19,18 +19,18 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.api.WeightMapping;
+import org.neo4j.graphalgo.api.PropertyMapping;
 
 import java.util.Map;
 
 public class IdsAndProperties {
 
     final IdMap hugeIdMap;
-    final Map<String, WeightMapping> properties;
+    final Map<String, PropertyMapping> properties;
 
     public IdsAndProperties(
             final IdMap hugeIdMap,
-            final Map<String, WeightMapping> properties) {
+            final Map<String, PropertyMapping> properties) {
         this.hugeIdMap = hugeIdMap;
         this.properties = properties;
     }
@@ -39,7 +39,7 @@ public class IdsAndProperties {
         return hugeIdMap;
     }
 
-    public Map<String, WeightMapping> properties() {
+    public Map<String, PropertyMapping> properties() {
         return properties;
     }
 }

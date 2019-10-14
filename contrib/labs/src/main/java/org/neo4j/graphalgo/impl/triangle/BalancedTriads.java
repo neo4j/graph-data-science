@@ -210,7 +210,7 @@ public class BalancedTriads extends Algorithm<BalancedTriads> {
 
         @Override
         public void accept(final long a, final long b, final long c) {
-            if (balancedPredicate.isBalanced(graph.weightOf(a, b, 1.0D), graph.weightOf(a, c, 1.0D), graph.weightOf(b, c, 1.0D))) {
+            if (balancedPredicate.isBalanced(graph.relationshipValue(a, b, 1.0D), graph.relationshipValue(a, c, 1.0D), graph.relationshipValue(b, c, 1.0D))) {
                 balancedTriangles.add(a, 1);
                 balancedTriangles.add(b, 1);
                 balancedTriangles.add(c, 1);

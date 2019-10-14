@@ -42,7 +42,7 @@ It would also ease the implementation of new operations like a `ConcurrentNodeIt
         +-------------+----------+------+--------+--------- ...
         |             |          |               |
     +---+------+ +----+---+ +----+----+ +--------+--------+
-    | NodeIter | | Degree | | RelIter | | WeightedRelIter | ...
+    | NodeIter | | Degree | | RelIter | | PropertyRelIter | ...
     +---+------+ +----+---+ +----+----+ +--------+--------+
         ^             ^          ^               ^
         |             |          |               |
@@ -66,7 +66,7 @@ It would also ease the implementation of new operations like a `ConcurrentNodeIt
 The Diagram shows the basic idea.
 Each Algorithm needs a set of data sources.
 _PageRank_ for example relies only on nodeIds and their degrees.
-While the underlying structure for  _UnionFind_  can be built just by iterating over all relations (or weighted relationships. depends on use case).
+While the underlying structure for  _UnionFind_  can be built just by iterating over all relations (or relationships with a weight property. depends on use case).
 _kMeans_ on the other hand needs the result of a preceding algorithm to work.
 
 We can think of an algorithm as a component which needs several data sources as input and also is a

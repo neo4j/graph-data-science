@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.impl.pagerank;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipWeights;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.util.concurrent.ExecutorService;
@@ -33,7 +32,6 @@ public class NonWeightedPageRankVariant implements PageRankVariant {
             double toleranceValue,
             long[] sourceNodeIds,
             Graph graph,
-            RelationshipWeights relationshipWeights,
             AllocationTracker tracker,
             int partitionSize,
             long start,

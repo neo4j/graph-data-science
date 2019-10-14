@@ -21,7 +21,7 @@ This approach allows us to use primitive arrays as container for example.
 
 The `Graph` interface specifies methods for iterating over all nodes of the graph as well as iterating over relationships of a given node in the form of `forEach...(..)`-methods.
 The Graph knows the `nodeCount` and `degree` of each node and can map nodeId to internalId and vice versa.
-// An Iterator is implemented for (single-)weighted and unweighted edges.
+// An Iterator is implemented for (single-)weighted and unweighted relationships.
 
 
 [options=header,cols="m,"]
@@ -42,8 +42,8 @@ The Graph knows the `nodeCount` and `degree` of each node and can map nodeId to 
 | void forEachRelationship(int nodeId, Direction direction, RelationshipConsumer consumer);
 | Iterate over all relationships of a node
 
-| void forEachRelationship(int nodeId, Direction direction, WeightedRelationshipConsumer consumer);
-| Iterate over all weighted relationships of a node
+| void forEachRelationship(int nodeId, Direction direction, PropertyRelationshipConsumer consumer);
+| Iterate over all relationships and their property of a node
 
 | int nodeCount();
 | count of nodes

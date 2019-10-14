@@ -19,12 +19,12 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.api.WeightMapping;
+import org.neo4j.graphalgo.api.PropertyMapping;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.PagedLongDoubleMap;
 
-final class NodePropertyMap implements WeightMapping {
+final class NodePropertyMap implements PropertyMapping {
 
     private static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations
             .builder(NodePropertyMap.class)
@@ -33,16 +33,14 @@ final class NodePropertyMap implements WeightMapping {
 
     private PagedLongDoubleMap properties;
     private final double defaultValue;
-    private final int propertyId;
 
     static MemoryEstimation memoryEstimation() {
         return MEMORY_ESTIMATION;
     }
 
-    NodePropertyMap(PagedLongDoubleMap properties, double defaultValue, int propertyId) {
+    NodePropertyMap(PagedLongDoubleMap properties, double defaultValue) {
         this.properties = properties;
         this.defaultValue = defaultValue;
-        this.propertyId = propertyId;
     }
 
     @Override
@@ -51,13 +49,13 @@ final class NodePropertyMap implements WeightMapping {
     }
 
     @Override
-    public double weight(final long source, final long target) {
+    public double relationshipValue(final long source, final long target) {
         assert target == -1L;
         return properties.getOrDefault(source, defaultValue);
     }
 
     @Override
-    public double weight(final long source, final long target, final double defaultValue) {
+    public double relationshipValue(final long source, final long target, final double defaultValue) {
         assert target == -1L;
         return properties.getOrDefault(source, defaultValue);
     }
