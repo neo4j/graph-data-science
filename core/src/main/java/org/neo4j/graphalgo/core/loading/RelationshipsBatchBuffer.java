@@ -26,6 +26,12 @@ import org.neo4j.kernel.impl.store.record.RelationshipRecord;
 
 public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipRecord> {
 
+    public static final int SOURCE_ID_OFFSET = 0;
+    public static final int TARGET_ID_OFFSET = 1;
+    public static final int RELATIONSHIP_REFERENCE_OFFSET = 2;
+    public static final int PROPERTIES_REFERENCE_OFFSET = 3;
+    public static final int BATCH_ENTRY_SIZE = 4;
+
     private final IdMapping idMap;
     private final int type;
 

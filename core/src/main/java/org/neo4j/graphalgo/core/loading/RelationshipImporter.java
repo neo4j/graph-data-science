@@ -30,6 +30,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+import static org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer.BATCH_ENTRY_SIZE;
+import static org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer.PROPERTIES_REFERENCE_OFFSET;
+import static org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer.RELATIONSHIP_REFERENCE_OFFSET;
+
 public class RelationshipImporter {
 
     private final AllocationTracker tracker;
@@ -142,6 +146,16 @@ public class RelationshipImporter {
     }
 
     public interface PropertyReader {
+        /**
+         * Load the relationship properties for the given batch of relationships.
+         * Relationships are represented in the format produced by {@link RelationshipsBatchBuffer}.
+         *
+         * @param batch relationship data
+         * @param batchLength number of valid entries in the batch data
+         * @param propertyKeyIds property key ids to load
+         * @param defaultValues default weight for each property key
+         * @return list of property values per per relationship property id
+         */
         long[][] readProperty(long[] batch, int batchLength, int[] propertyKeyIds, double[] defaultValues);
     }
 
@@ -159,10 +173,6 @@ public class RelationshipImporter {
         }
         return Collections.emptyList();
     }
-
-    private static final int BATCH_ENTRY_SIZE = 4;
-    private static final int RELATIONSHIP_REFERENCE_OFFSET = 2;
-    private static final int PROPERTIES_REFERENCE_OFFSET = 3;
 
     PropertyReader storeBackedPropertiesReader(CursorFactory cursors, Read read) {
         return (batch, batchLength, relationshipProperties, defaultPropertyValues) -> {
