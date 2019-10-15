@@ -49,6 +49,25 @@ CALL algo.<name>(
   {graph: "cypher"})
 ----
 
+[[cypher-projection-parameters]]
+== Parameters
+
+We can pass through parameters into our Cypher projection queries via the `params` config option.
+
+.The following will run the algorithm over a graph based on Cypher projections that use the `$firstName` and `$lastName` parameters:
+[source,cypher]
+----
+CALL algo.<name>(
+  'MATCH (n)
+   WHERE n.name CONTAINS $firstName
+   RETURN id(n) AS id',
+  "MATCH (n)-->(m)
+   WHERE n.name CONTAINS $lastName OR m.name CONTAINS $lastName
+   RETURN id(n) AS source, id(m) AS target",
+  {graph: "cypher", params: {firstName: $firstName, lastName: $lastName} })
+----
+
+
 [[cypher-projection-basic-usage]]
 == Example Usage
 
