@@ -32,6 +32,7 @@ public final class ProcedureConstants {
     // graph.load specific
 
     public static final String NODE_WEIGHT_KEY = "nodeWeight";
+    public static final String NODE_PROPERTIES_KEY = "nodeProperties";
     public static final String RELATIONSHIP_WEIGHT_KEY = "relationshipWeight";
     public static final String RELATIONSHIP_PROPERTIES_KEY = "relationshipProperties";
 

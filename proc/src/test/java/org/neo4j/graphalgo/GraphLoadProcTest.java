@@ -232,10 +232,10 @@ class GraphLoadProcTest extends ProcTestBase {
         });
 
         Graph loadedGraph = GraphLoadFactory.getUnion("fooGraph");
-        Graph expected = TestGraph.Builder.fromGdl("({ foo: 42, bar: 13.37D })" +
-                                                   "({ foo: 43, bar: 13.38D })" +
-                                                   "({ foo: 44, bar: 13.39D })" +
-                                                   "({ foo: 45, bar: 19.84D })");
+        Graph expected = TestGraph.Builder.fromGdl("({ fooProp: 42, barProp: 13.37D })" +
+                                                   "({ fooProp: 43, barProp: 13.38D })" +
+                                                   "({ fooProp: 44, barProp: 13.39D })" +
+                                                   "({ fooProp: 45, barProp: 19.84D })");
         assertGraphEquals(expected, loadedGraph);
 
         GraphLoadFactory.remove("fooGraph");

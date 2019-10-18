@@ -43,6 +43,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static java.util.Arrays.asList;
+import static org.neo4j.graphalgo.core.ProcedureConstants.NODE_PROPERTIES_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES_KEY;
 
 /**
@@ -210,10 +211,18 @@ public class ProcedureConfiguration {
         return getString(ProcedureConstants.WEIGHT_PROPERTY_KEY, null);
     }
 
+    public PropertyMappings getNodeProperties() {
+        return getPropertyMappings(NODE_PROPERTIES_KEY);
+    }
+
     public PropertyMappings getRelationshipProperties() {
-        Object relationShipProperties = get(RELATIONSHIP_PROPERTIES_KEY, null);
-        if (relationShipProperties != null) {
-            return PropertyMappings.fromObject(relationShipProperties);
+        return getPropertyMappings(RELATIONSHIP_PROPERTIES_KEY);
+    }
+
+    private PropertyMappings getPropertyMappings(String paramKey) {
+        Object propertyMappings = get(paramKey, null);
+        if (propertyMappings != null) {
+            return PropertyMappings.fromObject(propertyMappings);
         }
         return PropertyMappings.EMPTY;
     }

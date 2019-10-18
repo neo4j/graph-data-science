@@ -141,6 +141,7 @@ public final class GraphLoadProc extends BaseProc {
                         PropertyMapping.of(LabelPropagation.SEED_TYPE, nodeProperty, 0.0D),
                         PropertyMapping.of(LabelPropagation.WEIGHT_TYPE, nodeWeight, 1.0D)
                 )
+                .withOptionalNodeProperties(config.getNodeProperties())
                 .withRelationshipProperties(config.getRelationshipProperties())
                 .withDirection(direction);
 
@@ -171,6 +172,7 @@ public final class GraphLoadProc extends BaseProc {
         public long nodes, relationships, loadMillis;
         public final boolean alreadyLoaded = false; // No longer used--we throw an exception instead.
         public String nodeWeight, relationshipWeight, nodeProperty, loadNodes, loadRelationships;
+        public Object nodeProperties;
         public Object relationshipProperties;
 
         GraphLoadStats(String graphName, ProcedureConfiguration configuration) {
@@ -183,6 +185,7 @@ public final class GraphLoadProc extends BaseProc {
             direction = configuration.getDirection(Direction.OUTGOING).name();
             nodeWeight = configuration.getString(ProcedureConstants.NODE_WEIGHT_KEY, null);
             nodeProperty = configuration.getString(ProcedureConstants.NODE_PROPERTY_KEY, null);
+            nodeProperties = configuration.get(ProcedureConstants.NODE_PROPERTIES_KEY, null);
             // default is required to be backwards compatible with `weightProperty` (not documented but was possible)
             relationshipWeight = configuration.getString(ProcedureConstants.RELATIONSHIP_WEIGHT_KEY, configuration.getWeightProperty());
             relationshipProperties = configuration.get(ProcedureConstants.RELATIONSHIP_PROPERTIES_KEY, null);
