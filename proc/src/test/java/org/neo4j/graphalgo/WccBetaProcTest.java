@@ -114,8 +114,6 @@ class WccBetaProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testWCCWithSeed(String graphImpl) {
-        Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
-
         String query = "CALL algo.beta.wcc(" +
                        "    '', '', {" +
                        "        graph: $graph, seedProperty: 'seedId'" +
@@ -147,8 +145,6 @@ class WccBetaProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testWCCReadAndWriteSeed(String graphImpl) {
-        Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
-
         String query = "CALL algo.beta.wcc(" +
                        "    '', '', {" +
                        "        graph: $graph, seedProperty: 'seedId', writeProperty: 'seedId'" +
@@ -180,8 +176,6 @@ class WccBetaProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testWCCWithSeedAndConsecutive(String graphImpl) {
-        Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
-
         String query = "CALL algo.beta.wcc(" +
                        "    '', '', {" +
                        "        graph: $graph, seedProperty: 'seedId', consecutiveIds: true" +

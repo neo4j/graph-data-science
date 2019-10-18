@@ -200,7 +200,6 @@ class LouvainClusteringProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testPredefinedCommunities(String graphImpl) {
-        Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
         String query = "CALL algo.louvain.stream(" +
                        "    '', '', {" +
                        "        concurrency: 1, communityProperty: 'c', graph: $graph" +
@@ -219,7 +218,6 @@ class LouvainClusteringProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void throwsIfPredefinedCommunityPropertyDoesNotExist(String graphImpl) {
-        Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
         String query = "CALL algo.louvain.stream(" +
                        "    '', '', {" +
                        "        concurrency: 1, communityProperty: 'does_not_exist', graph: $graph" +
@@ -392,7 +390,6 @@ class LouvainClusteringProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void throwsIfWeightPropertyDoesNotExist(String graphImpl) {
-        Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
         String query = "CALL algo.louvain.stream(" +
                        "    '', '', {" +
                        "        weightProperty: 'does_not_exist', graph: $graph" +
