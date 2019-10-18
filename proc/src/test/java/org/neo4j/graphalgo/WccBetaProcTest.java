@@ -21,7 +21,6 @@ package org.neo4j.graphalgo;
 
 import com.carrotsearch.hppc.IntIntScatterMap;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.wcc.WccProc;
@@ -114,8 +113,6 @@ class WccBetaProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testWCCWithSeed(String graphImpl) {
-        Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
-
         String query = "CALL algo.beta.wcc(" +
                        "    '', '', {" +
                        "        graph: $graph, seedProperty: 'seedId'" +
@@ -147,8 +144,6 @@ class WccBetaProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testWCCReadAndWriteSeed(String graphImpl) {
-        Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
-
         String query = "CALL algo.beta.wcc(" +
                        "    '', '', {" +
                        "        graph: $graph, seedProperty: 'seedId', writeProperty: 'seedId'" +
@@ -180,8 +175,6 @@ class WccBetaProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testWCCWithSeedAndConsecutive(String graphImpl) {
-        Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
-
         String query = "CALL algo.beta.wcc(" +
                        "    '', '', {" +
                        "        graph: $graph, seedProperty: 'seedId', consecutiveIds: true" +

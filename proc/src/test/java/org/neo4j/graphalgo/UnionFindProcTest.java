@@ -21,7 +21,6 @@ package org.neo4j.graphalgo;
 
 import com.carrotsearch.hppc.IntIntScatterMap;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -144,8 +143,6 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testUnionFindWithSeed(String graphImpl) {
-        Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
-
         String query = "CALL algo.unionFind(" +
                        "    '', 'TYPE', {" +
                        "        graph: $graph, seedProperty: 'seed'" +
@@ -179,8 +176,6 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testUnionFindThrowsExceptionWhenInitialSeedDoesNotExists(String graphImpl) {
-        Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
-
         String query = "CALL algo.unionFind(" +
                        "    '', 'TYPE', {" +
                        "        graph: $graph, seedProperty: 'does_not_exist'" +
@@ -196,8 +191,6 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testUnionFindReadAndWriteSeed(String graphImpl) {
-        Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
-
         String query = "CALL algo.unionFind(" +
                        "    '', 'TYPE', {" +
                        "        graph: $graph, seedProperty: 'seed', writeProperty: 'seed'" +
@@ -231,8 +224,6 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testUnionFindWithSeedAndConsecutive(String graphImpl) {
-        Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
-
         String query = "CALL algo.unionFind(" +
                        "    '', 'TYPE', {" +
                        "        graph: $graph, seedProperty: 'seed', consecutiveIds: true" +
@@ -373,8 +364,6 @@ public class UnionFindProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void testUnionFindThrowsExceptionWhenThresholdPropertyDoesNotExists(String graphImpl) {
-        Assumptions.assumeFalse(graphImpl.equalsIgnoreCase("kernel"));
-
         String query = "CALL algo.unionFind(" +
                        "    '', 'TYPE', {" +
                        "        graph: $graph, weightProperty: 'does_not_exist', threshold: 3.14" +
