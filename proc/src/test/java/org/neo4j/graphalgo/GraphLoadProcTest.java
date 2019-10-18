@@ -68,6 +68,7 @@ import static org.neo4j.graphalgo.GraphHelper.assertOutPropertiesWithDelta;
 import static org.neo4j.graphalgo.GraphHelper.assertOutRelationships;
 import static org.neo4j.graphalgo.TestSupport.allGraphNames;
 import static org.neo4j.graphalgo.TestSupport.allGraphNamesAndDirections;
+import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 class GraphLoadProcTest extends ProcTestBase {
 
@@ -187,6 +188,58 @@ class GraphLoadProcTest extends ProcTestBase {
         } finally {
             ParallelUtil.awaitTermination(futures);
         }
+    }
+
+    @Test
+    void shouldLoadGraphWithMultipleNodeProperties() throws KernelException {
+        GraphDatabaseAPI testLocalDb = TestDatabaseCreator.createTestDatabase();
+        testLocalDb.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(GraphLoadProc.class);
+
+        String testGraph =
+                "CREATE" +
+                "  (a: Node { foo: 42, bar: 13.37 })" +
+                ", (b: Node { foo: 43, bar: 13.38 })" +
+                ", (c: Node { foo: 44, bar: 13.39 })" +
+                ", (d: Node { foo: 45 })";
+
+        testLocalDb.execute(testGraph);
+
+        String loadQuery = "CALL algo.graph.load(" +
+                           "    'fooGraph', 'Node', '', {" +
+                           "        nodeProperties: {" +
+                           "            fooProp: {" +
+                           "                property: 'foo'" +
+                           "            }," +
+                           "            barProp: {" +
+                           "                property: 'bar', " +
+                           "                defaultValue: 19.84" +
+                           "            }" +
+                           "        }" +
+                           "    }" +
+                           ")";
+
+        runQuery(loadQuery, testLocalDb, row -> {
+            Map<String, Object> nodeProperties = (Map<String, Object>) row.get("nodeProperties");
+            assertEquals(2, nodeProperties.size());
+
+            Map<String, Object> fooPropParams = (Map<String, Object>) nodeProperties.get("fooProp");
+            Map<String, Object> barPropParams = (Map<String, Object>) nodeProperties.get("barProp");
+
+            assertEquals("foo", fooPropParams.get("property").toString());
+            assertEquals("bar", barPropParams.get("property").toString());
+            assertEquals(19.84, (Double) barPropParams.get("defaultValue"));
+
+        });
+
+        Graph loadedGraph = GraphLoadFactory.getUnion("fooGraph");
+        Graph expected = TestGraph.Builder.fromGdl("({ foo: 42, bar: 13.37D })" +
+                                                   "({ foo: 43, bar: 13.38D })" +
+                                                   "({ foo: 44, bar: 13.39D })" +
+                                                   "({ foo: 45, bar: 19.84D })");
+        assertGraphEquals(expected, loadedGraph);
+
+        GraphLoadFactory.remove("fooGraph");
+        testLocalDb.shutdown();
     }
 
     @Test
