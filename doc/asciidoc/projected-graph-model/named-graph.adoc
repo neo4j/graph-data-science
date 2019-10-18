@@ -165,17 +165,47 @@ YIELD writeMillis, loadMillis, nodeCount, totalCost
 RETURN writeMillis, loadMillis, nodeCount, totalCost
 ----
 
+== Loading multiple node properties
+
+It is often useful to load an in-memory graph with more than one node property.
+A typical scenario is running different weighted algorithms on the same graph, but with different node properties as weight.
+
+For the `load.graph` procedure, loading multiple node properties can be configured via the `nodeProperties` parameter.
+The parameter is configured using a map in which each key refers to a user-defined property key.
+Any algorithm that supports node properties, e.g. for node weights or seed values, can refer to these user-defined property keys.
+
+The value under each property key is a configuration, that is applied when loading node properties.
+In the configuration we specify the Neo4j node property to load.
+
+For the following example, let's assume that each `City` node stores two properties:
+the `population` of the city and an optional `stateId` that identifies the state, the city is located in.
+
+.The following query loads all cities, including the two properties, since not all cities have a `stateId`, we set the `defaultValue` to `0`
+[source,cypher]
+----
+CALL algo.graph.load('cities', 'City', '', {
+  graph: 'huge',
+  nodeProperties: {
+    population: {
+        property: 'population'
+    },
+    seedValue: {
+        property: 'stateId',
+        defaultValue: 0
+    }
+  }})
+----
+
+We can refer to the loaded properties in each algorithm that supports reading node properties.
+For a path search algorithm, one could use the `population` as node weight whereas a clustering algorithm could use the `stateId` as seed value.
+
 == Loading multiple relationship properties
 
-In some scenarios, it is useful to load more than one relationship property.
-For the `load.graph` procedure, this can be configured via the `relationshipProperties` parameter.
+Similar to node properties, the `load.graph` procedure also supports loading multiple relationship properties.
+Those can be configured via the `relationshipProperties` parameter.
 
-The parameter is configured using a map in which each key refers to a user-defined property key.
-Any algorithm that supports relationship properties can make use of these.
-
-The value under each property key is a configuration, that is applied when loading relationship properties.
-In the configuration we specify the Neo4j relationship property to load.
-Optionally, we can define an aggregation function to set the deduplication behavior and a default property value which is used for absent property values (see <<deduplication-of-parallel-relationships>>).
+As for nodes, the parameter is configured using a map in which each key refers to a user-defined property key.
+In addition to the Neo4j relationship property and an optional default value, we can define an aggregation function to set the deduplication behavior and a default property value which is used for absent property values (see <<deduplication-of-parallel-relationships>>).
 
 For the following example, let's assume that each `ROAD` relationship stores two properties: the `cost` (distance) and the road `quality` (between 1 and 10).
 
