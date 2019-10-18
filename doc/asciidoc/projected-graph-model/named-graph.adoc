@@ -19,7 +19,7 @@ We can load named graphs using either a <<label-relationship-type-projection, no
 ----
 CALL algo.graph.load('my-graph','Label','REL_TYPE',{graph:'huge' /*, ... other config */})
 YIELD name, graph, direction, undirected, sorted, nodes, loadMillis, alreadyLoaded,
-      nodeWeight, relationshipWeight, nodeProperty, loadNodes, loadRelationships;
+      nodeProperties, relationshipProperties, relationshipWeight, loadNodes, loadRelationships;
 ----
 
 If we want to load a graph based on a <<cypher-projection, Cypher projection>>, we should specify `graph:'cypher'` in the config.
@@ -32,7 +32,7 @@ CALL algo.graph.load('my-graph',
   'MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target',
   {graph:'cypher' /*, ... other config */})
 YIELD name, graph, direction, undirected, sorted, nodes, loadMillis, alreadyLoaded,
-      nodeWeight, relationshipWeight, nodeProperty, loadNodes, loadRelationships;
+      nodeProperties, relationshipProperties, relationshipWeight, loadNodes, loadRelationships;
 ----
 
 Once we've loaded a named graph we can return details about it.

@@ -38,7 +38,6 @@ import org.neo4j.graphalgo.core.utils.RelationshipTypes;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.procedure.Description;
@@ -131,16 +130,9 @@ public final class GraphLoadProc extends BaseProc {
     @Override
     protected GraphLoader configureLoader(final GraphLoader loader, final ProcedureConfiguration config) {
         final Direction direction = config.getDirection(Direction.OUTGOING);
-        final String nodeWeight = config.getString("nodeWeight", null);
-        final String nodeProperty = config.getString("nodeProperty", null);
         loader
                 .withNodeStatement(config.getNodeLabelOrQuery())
                 .withRelationshipStatement(config.getRelationshipOrQuery())
-                // TODO: remove and make explicit in the procedure
-                .withOptionalNodeProperties(
-                        PropertyMapping.of(LabelPropagation.SEED_TYPE, nodeProperty, 0.0D),
-                        PropertyMapping.of(LabelPropagation.WEIGHT_TYPE, nodeWeight, 1.0D)
-                )
                 .withOptionalNodeProperties(config.getNodeProperties())
                 .withRelationshipProperties(config.getRelationshipProperties())
                 .withDirection(direction);
@@ -171,9 +163,11 @@ public final class GraphLoadProc extends BaseProc {
         public boolean sorted;
         public long nodes, relationships, loadMillis;
         public final boolean alreadyLoaded = false; // No longer used--we throw an exception instead.
-        public String nodeWeight, relationshipWeight, nodeProperty, loadNodes, loadRelationships;
+        public String loadNodes;
+        public String loadRelationships;
         public Object nodeProperties;
         public Object relationshipProperties;
+        public String relationshipWeight;
 
         GraphLoadStats(String graphName, ProcedureConfiguration configuration) {
             name = graphName;
@@ -183,8 +177,6 @@ public final class GraphLoadProc extends BaseProc {
             loadNodes = configuration.getNodeLabelOrQuery();
             loadRelationships = configuration.getRelationshipOrQuery();
             direction = configuration.getDirection(Direction.OUTGOING).name();
-            nodeWeight = configuration.getString(ProcedureConstants.NODE_WEIGHT_KEY, null);
-            nodeProperty = configuration.getString(ProcedureConstants.NODE_PROPERTY_KEY, null);
             nodeProperties = configuration.get(ProcedureConstants.NODE_PROPERTIES_KEY, null);
             // default is required to be backwards compatible with `weightProperty` (not documented but was possible)
             relationshipWeight = configuration.getString(ProcedureConstants.RELATIONSHIP_WEIGHT_KEY, configuration.getWeightProperty());
