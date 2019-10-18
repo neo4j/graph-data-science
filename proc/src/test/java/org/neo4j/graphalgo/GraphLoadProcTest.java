@@ -207,9 +207,7 @@ class GraphLoadProcTest extends ProcTestBase {
         String loadQuery = "CALL algo.graph.load(" +
                            "    'fooGraph', 'Node', '', {" +
                            "        nodeProperties: {" +
-                           "            fooProp: {" +
-                           "                property: 'foo'" +
-                           "            }," +
+                           "            fooProp: 'foo'," +
                            "            barProp: {" +
                            "                property: 'bar', " +
                            "                defaultValue: 19.84" +
@@ -222,10 +220,10 @@ class GraphLoadProcTest extends ProcTestBase {
             Map<String, Object> nodeProperties = (Map<String, Object>) row.get("nodeProperties");
             assertEquals(2, nodeProperties.size());
 
-            Map<String, Object> fooPropParams = (Map<String, Object>) nodeProperties.get("fooProp");
+            String fooProp = nodeProperties.get("fooProp").toString();
             Map<String, Object> barPropParams = (Map<String, Object>) nodeProperties.get("barProp");
 
-            assertEquals("foo", fooPropParams.get("property").toString());
+            assertEquals("foo", fooProp);
             assertEquals("bar", barPropParams.get("property").toString());
             assertEquals(19.84, (Double) barPropParams.get("defaultValue"));
 

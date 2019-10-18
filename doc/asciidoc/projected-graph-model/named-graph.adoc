@@ -199,6 +199,26 @@ CALL algo.graph.load('cities', 'City', '', {
 We can refer to the loaded properties in each algorithm that supports reading node properties.
 For a path search algorithm, one could use the `population` as node weight whereas a clustering algorithm could use the `stateId` as seed value.
 
+.If we just want to refer to the Neo4j node property key, we can use the following shorthand syntax:
+[source,cypher]
+----
+CALL algo.graph.load('cities', 'City', '', {
+  graph: 'huge',
+  nodeProperties: {
+    population: 'population',
+    seedValue: 'stateId'
+  }})
+----
+
+.We can also use the `nodeProperties` parameter to load a single node property:
+[source,cypher]
+----
+CALL algo.graph.load('cities', 'City', '', {
+  graph: 'huge',
+  nodeProperties: 'population'
+  })
+----
+
 == Loading multiple relationship properties
 
 Similar to node properties, the `load.graph` procedure also supports loading multiple relationship properties.
