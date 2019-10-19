@@ -177,8 +177,7 @@ Any algorithm that supports node properties, for example for node weights or see
 The value under each property key is a configuration, that is applied when loading node properties.
 In the configuration we specify the Neo4j node property to load.
 
-For the following example, let's assume that each `City` node stores two properties:
-the `population` of the city and an optional `stateId` that identifies the state in which the city is located.
+For the following example, let's assume that each `City` node stores two properties: the `population` of the city and an optional `stateId` that identifies the state in which the city is located.
 
 .The following query loads all cities, including the two properties, since not all cities have a `stateId`, we set the `defaultValue` to `0`
 [source,cypher]
@@ -193,7 +192,8 @@ CALL algo.graph.load('cities', 'City', '', {
         property: 'stateId',
         defaultValue: 0
     }
-  }})
+  }
+})
 ----
 
 We can refer to the loaded properties in each algorithm that supports reading node properties.
@@ -207,7 +207,8 @@ CALL algo.graph.load('cities', 'City', '', {
   nodeProperties: {
     population: 'population',
     seedValue: 'stateId'
-  }})
+  }
+})
 ----
 
 .We can also use the `nodeProperties` parameter to load a single node property:
@@ -245,7 +246,8 @@ CALL algo.graph.load('allRoads', 'Loc', 'ROAD', {
         aggregation: 'MAX',
         defaultValue: 5.0
     }
-  }})
+  }
+})
 ----
 
 When executed, our `allRoads` in-memory graph stores two relationship properties: `minDistance` and `maxQuality`.
