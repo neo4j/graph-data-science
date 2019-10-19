@@ -172,13 +172,13 @@ A typical scenario is running different weighted algorithms on the same graph, b
 
 For the `load.graph` procedure, loading multiple node properties can be configured via the `nodeProperties` parameter.
 The parameter is configured using a map in which each key refers to a user-defined property key.
-Any algorithm that supports node properties, e.g. for node weights or seed values, can refer to these user-defined property keys.
+Any algorithm that supports node properties, for example for node weights or seed values, can refer to these user-defined property keys.
 
 The value under each property key is a configuration, that is applied when loading node properties.
 In the configuration we specify the Neo4j node property to load.
 
 For the following example, let's assume that each `City` node stores two properties:
-the `population` of the city and an optional `stateId` that identifies the state, the city is located in.
+the `population` of the city and an optional `stateId` that identifies the state in which the city is located.
 
 .The following query loads all cities, including the two properties, since not all cities have a `stateId`, we set the `defaultValue` to `0`
 [source,cypher]
@@ -216,7 +216,7 @@ CALL algo.graph.load('cities', 'City', '', {
 CALL algo.graph.load('cities', 'City', '', {
   graph: 'huge',
   nodeProperties: 'population'
-  })
+})
 ----
 
 == Loading multiple relationship properties
