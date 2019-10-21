@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -75,7 +76,8 @@ abstract class LouvainTestBase {
             loader
                     .withNodeStatement("MATCH (u) RETURN id(u) as id, u.seed1 as seed1, u.seed2 as seed2")
                     .withRelationshipStatement("MATCH (u1)-[rel]-(u2) \n" +
-                                               "RETURN id(u1) AS source, id(u2) AS target, rel.weight as weight");
+                                               "RETURN id(u1) AS source, id(u2) AS target, rel.weight as weight")
+                    .withDeduplicationStrategy(DeduplicationStrategy.SKIP);
         } else {
             loader
                     .withAnyRelationshipType()

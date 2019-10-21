@@ -48,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * (a)-(b)-(d)
+ * (a)-(b) (d)
  * | /            -> (abc)-(d)
  * (c)
  */
@@ -61,7 +61,7 @@ class LouvainTest extends LouvainTestBase {
             ", (c:Node {name:'c', seed1: 2, seed2: 1})" +
             ", (d:Node {name:'d', seed1: 2, seed2: 42})" +
             ", (a)-[:TYPE {weight: 1.0}]->(b)" +
-            ", (b)-[:TYPE {weight: 1.0}]->(c)" +
+            ", (b)-[:TYPE {weight: 5.0}]->(c)" +
             ", (c)-[:TYPE {weight: 1.0}]->(a)" +
             ", (a)-[:TYPE {weight: 1.0}]->(c)";
 
@@ -78,6 +78,19 @@ class LouvainTest extends LouvainTestBase {
             }
             transaction.success();
         }
+    }
+
+    @AllGraphTypesTest
+    void testWeightedLouvain(Class<? extends GraphFactory> graphImpl) {
+        Graph graph = loadGraph(graphImpl, DB_CYPHER);
+        final Louvain algorithm = new Louvain(graph, new Louvain.Config(1, 1), Pools.DEFAULT, 1, AllocationTracker.EMPTY)
+                .withProgressLogger(TestProgressLogger.INSTANCE)
+                .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
+                .compute();
+
+        final HugeLongArray communityIds = algorithm.getCommunityIds();
+        assertUnion(new String[]{"b", "c"}, communityIds);
+        assertDisjoint(new String[]{"a", "b", "d"}, communityIds);
     }
 
     @AllGraphTypesTest

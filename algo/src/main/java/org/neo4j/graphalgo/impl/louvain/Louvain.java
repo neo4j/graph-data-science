@@ -181,10 +181,6 @@ public final class Louvain extends Algorithm<Louvain> {
             // rebuild graph based on the community structure
             final HugeLongArray communityIds = modularityOptimization.getCommunityIds();
             communityCount = CommunityUtils.normalize(communityIds);
-            progressLogger.log(
-                    "level: " + (level + 1) +
-                    " communities: " + communityCount +
-                    " q: " + modularityOptimization.getModularity());
             if (communityCount >= nodeCount) {
                 // release the old algo instance
                 modularityOptimization.release();
