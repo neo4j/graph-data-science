@@ -25,13 +25,12 @@ public final class ProcedureConstants {
 
     public static final String NODE_LABEL_QUERY_KEY = "nodeQuery";
     public static final String RELATIONSHIP_QUERY_KEY = "relationshipQuery";
-    public static final String NODE_PROPERTY_KEY = "nodeProperty";
     public static final String DEFAULT_VALUE_KEY = "defaultValue";
     public static final double DEFAULT_VALUE_DEFAULT = 1.0;
 
     // graph.load specific
 
-    public static final String NODE_WEIGHT_KEY = "nodeWeight";
+    public static final String NODE_PROPERTIES_KEY = "nodeProperties";
     public static final String RELATIONSHIP_WEIGHT_KEY = "relationshipWeight";
     public static final String RELATIONSHIP_PROPERTIES_KEY = "relationshipProperties";
 

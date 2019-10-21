@@ -119,11 +119,11 @@ public final class TestSupport {
                 }));
     }
 
-    public static void assertGraphEquals(Graph g1, Graph g2) {
-        Assertions.assertEquals(g1.nodeCount(), g2.nodeCount(), "Node counts do not match.");
+    public static void assertGraphEquals(Graph expected, Graph actual) {
+        Assertions.assertEquals(expected.nodeCount(), actual.nodeCount(), "Node counts do not match.");
         // TODO: we cannot check this right now, because the relationshhip counts depends on how the graph has been loaded for HugeGraph
-//        Assertions.assertEquals(g1.relationshipCount(), g2.relationshipCount(), "Relationship counts to not match.");
-        Assertions.assertEquals(CanonicalAdjacencyMatrix.canonicalize(g1), CanonicalAdjacencyMatrix.canonicalize(g2));
+//        Assertions.assertEquals(expected.relationshipCount(), actual.relationshipCount(), "Relationship counts to not match.");
+        Assertions.assertEquals(CanonicalAdjacencyMatrix.canonicalize(expected), CanonicalAdjacencyMatrix.canonicalize(actual));
     }
 
 }
