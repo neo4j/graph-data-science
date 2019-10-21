@@ -43,7 +43,7 @@ public class NullPropertyMap implements NodeOrRelationshipProperties {
     }
 
     @Override
-    public double relationshipProperty(final long source, final long target) {
+    public double relationshipProperty(final long sourceNodeId, final long targetNodeId) {
         return defaultValue;
     }
 

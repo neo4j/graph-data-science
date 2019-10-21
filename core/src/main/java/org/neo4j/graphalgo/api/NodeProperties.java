@@ -44,4 +44,13 @@ public interface NodeProperties {
     default OptionalLong getMaxPropertyValue() {
         return OptionalLong.empty();
     }
+
+    /**
+     * Release internal data structures and return an estimate how many bytes were freed.
+     *
+     * Note that the mapping is not usable afterwards.
+     */
+    default long release() {
+        return 0;
+    }
 }

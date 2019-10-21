@@ -24,7 +24,7 @@ public interface NodeOrRelationshipProperties extends NodeProperties, Relationsh
     /**
      * Returns the proeprty value for the relationship defined by their start and end nodes.
      */
-    double relationshipProperty(long source, long target);
+    double relationshipProperty(long sourceNodeId, long targetNodeId);
 
     @Override
     default double nodeProperty(long nodeId) {

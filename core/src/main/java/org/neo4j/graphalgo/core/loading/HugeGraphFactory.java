@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.MultipleRelTypesSupport;
-import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
@@ -313,7 +313,7 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
     private HugeGraph buildGraph(
             AllocationTracker tracker,
             IdMap idMapping,
-            Map<String, NodeOrRelationshipProperties> nodeProperties,
+            Map<String, NodeProperties> nodeProperties,
             AdjacencyList outAdjacencyList,
             AdjacencyOffsets outAdjacencyOffsets,
             AdjacencyList inAdjacencyList,
@@ -341,7 +341,7 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
     private HugeGraph buildGraphWithRelationshipProperty(
             AllocationTracker tracker,
             IdMap idMapping,
-            Map<String, NodeOrRelationshipProperties> nodeProperties,
+            Map<String, NodeProperties> nodeProperties,
             RelationshipsBuilder inRelationshipsBuilder,
             RelationshipsBuilder outRelationshipsBuilder,
             AdjacencyList outAdjacencyList,

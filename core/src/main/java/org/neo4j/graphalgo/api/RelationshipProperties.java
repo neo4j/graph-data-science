@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.api;
 /**
  * Getter for property values at relationships
  */
-@FunctionalInterface
 public interface RelationshipProperties {
 
     /**
@@ -34,4 +33,9 @@ public interface RelationshipProperties {
      * @return the property value
      */
     double relationshipProperty(long sourceNodeId, long targetNodeId, double fallbackValue);
+
+    /**
+     * Returns the proeprty value for the relationship defined by their start and end nodes.
+     */
+    double relationshipProperty(long sourceNodeId, long targetNodeId);
 }

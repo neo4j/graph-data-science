@@ -24,9 +24,9 @@ import org.neo4j.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
-import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.NodePropertiesBuilder;
@@ -58,14 +58,14 @@ public final class TestGraph implements Graph {
     public static final String TYPE = "test";
 
     private final Map<Long, Adjacency> adjacencyList;
-    private final Map<String, NodeOrRelationshipProperties> nodeProperties;
-    private final NodeOrRelationshipProperties relationshipProperty;
+    private final Map<String, NodeProperties> nodeProperties;
+    private final NodeProperties relationshipProperty;
     private final boolean hasRelationshipProperty;
 
     private TestGraph(
             Map<Long, Adjacency> adjacencyList,
-            Map<String, NodeOrRelationshipProperties> nodeProperties,
-            NodeOrRelationshipProperties relationshipProperty,
+            Map<String, NodeProperties> nodeProperties,
+            NodeProperties relationshipProperty,
             boolean hasRelationshipProperty) {
         this.adjacencyList = adjacencyList;
         this.nodeProperties = nodeProperties;
@@ -153,7 +153,7 @@ public final class TestGraph implements Graph {
     }
 
     @Override
-    public NodeOrRelationshipProperties nodeProperties(String type) {
+    public NodeProperties nodeProperties(String type) {
         return nodeProperties.get(type);
     }
 
@@ -218,6 +218,11 @@ public final class TestGraph implements Graph {
     @Override
     public double relationshipProperty(long sourceNodeId, long targetNodeId, double fallbackValue) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public double relationshipProperty(long sourceNodeId, long targetNodeId) {
+        throw new UnsupportedOperationException("org.neo4j.graphalgo.TestGraph.relationshipProperty is not implemented.");
     }
 
     @Override
@@ -294,15 +299,15 @@ public final class TestGraph implements Graph {
             validateInput(vertices, edges);
 
             Map<Long, Adjacency> adjacencyList = buildAdjacencyList(vertices, edges);
-            Map<String, NodeOrRelationshipProperties> nodeProperties = buildWeightMappings(vertices);
-            Map<String, NodeOrRelationshipProperties> relationshipProperties = buildWeightMappings(edges);
+            Map<String, NodeProperties> nodeProperties = buildWeightMappings(vertices);
+            Map<String, NodeProperties> relationshipProperties = buildWeightMappings(edges);
 
             // required because of single rel property limitation
             if (relationshipProperties.size() > 1) {
                 throw new IllegalArgumentException("Graph supports at most one relationship property.");
             }
             boolean hasRelationshipProperty = !relationshipProperties.isEmpty();
-            NodeOrRelationshipProperties relationshipProperty = relationshipProperties
+            NodeProperties relationshipProperty = relationshipProperties
                     .values()
                     .stream()
                     .findFirst()
@@ -352,7 +357,7 @@ public final class TestGraph implements Graph {
             return adjacencyList;
         }
 
-        private static <T extends Element> Map<String, NodeOrRelationshipProperties> buildWeightMappings(Collection<T> elements) {
+        private static <T extends Element> Map<String, NodeProperties> buildWeightMappings(Collection<T> elements) {
 
             if (elements.isEmpty()) {
                 return new HashMap<>(0);

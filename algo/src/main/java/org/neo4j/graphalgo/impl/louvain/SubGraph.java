@@ -22,9 +22,9 @@ package org.neo4j.graphalgo.impl.louvain;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
-import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
@@ -97,6 +97,11 @@ abstract class SubGraph implements Graph {
     }
 
     @Override
+    public double relationshipProperty(long sourceNodeId, long targetNodeId) {
+        throw new UnsupportedOperationException("relationshipProperty is not implemented.");
+    }
+
+    @Override
     public final boolean contains(long nodeId) {
         throw new UnsupportedOperationException("contains is not supported.");
     }
@@ -127,7 +132,7 @@ abstract class SubGraph implements Graph {
     }
 
     @Override
-    public final NodeOrRelationshipProperties nodeProperties(String type) {
+    public final NodeProperties nodeProperties(String type) {
         throw new UnsupportedOperationException("nodeProperties is not supported.");
     }
 

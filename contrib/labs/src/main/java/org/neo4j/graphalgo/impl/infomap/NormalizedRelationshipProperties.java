@@ -48,4 +48,9 @@ public class NormalizedRelationshipProperties implements RelationshipProperties 
     public double relationshipProperty(long sourceNodeId, long targetNodeId, double fallbackValue) {
         return weights.relationshipProperty(sourceNodeId, targetNodeId, 1.0D) / nodeWeightSum.getOrDefault(sourceNodeId, 1.);
     }
+
+    @Override
+    public double relationshipProperty(long sourceNodeId, long targetNodeId) {
+        return relationshipProperty(sourceNodeId, targetNodeId, 1.0D);
+    }
 }

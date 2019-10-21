@@ -19,14 +19,14 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.PagedLongDoubleMap;
 
 import java.util.OptionalLong;
 
-final class NodePropertyMap implements NodeOrRelationshipProperties {
+final class NodePropertyMap implements NodeProperties {
 
     private static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations
             .builder(NodePropertyMap.class)
@@ -46,20 +46,13 @@ final class NodePropertyMap implements NodeOrRelationshipProperties {
     }
 
     @Override
-    public long size() {
-        return properties.size();
+    public double nodeProperty(long nodeId) {
+        return properties.getOrDefault(nodeId, defaultValue);
     }
 
     @Override
-    public double relationshipProperty(final long source, final long target) {
-        assert target == -1L;
-        return properties.getOrDefault(source, defaultValue);
-    }
-
-    @Override
-    public double relationshipProperty(final long source, final long target, final double defaultValue) {
-        assert target == -1L;
-        return properties.getOrDefault(source, defaultValue);
+    public double nodeProperty(long nodeId, double defaultValue) {
+        return properties.getOrDefault(nodeId, defaultValue);
     }
 
     @Override

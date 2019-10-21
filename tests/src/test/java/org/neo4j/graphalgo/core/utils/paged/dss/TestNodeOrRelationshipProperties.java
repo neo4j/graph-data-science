@@ -48,8 +48,8 @@ final class TestNodeOrRelationshipProperties implements NodeOrRelationshipProper
     }
 
     @Override
-    public double relationshipProperty(final long source, final long target) {
-        return relationshipProperty(source, target, 0.0);
+    public double relationshipProperty(final long sourceNodeId, final long targetNodeId) {
+        return relationshipProperty(sourceNodeId, targetNodeId, 0.0);
     }
 
     @Override

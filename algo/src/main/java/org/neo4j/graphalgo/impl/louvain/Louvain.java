@@ -24,7 +24,6 @@ import com.carrotsearch.hppc.DoubleArrayList;
 import com.carrotsearch.hppc.ObjectArrayList;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -464,7 +463,7 @@ public final class Louvain extends Algorithm<Louvain> {
 
     public static class Config {
 
-        public final NodeOrRelationshipProperties communityMap;
+        public final NodeProperties communityMap;
         public final int maxLevel;
         public final int maxIterations;
 
@@ -479,7 +478,7 @@ public final class Louvain extends Algorithm<Louvain> {
         }
 
         public Config(
-                final NodeOrRelationshipProperties communityMap,
+                final NodeProperties communityMap,
                 final int maxLevel,
                 final int maxIterations
         ) {

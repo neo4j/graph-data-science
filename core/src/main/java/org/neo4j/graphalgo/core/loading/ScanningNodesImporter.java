@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -85,10 +85,10 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
                 dimensions.highestNeoId(),
                 concurrency,
                 tracker);
-        Map<String, NodeOrRelationshipProperties> nodeProperties = new HashMap<>();
+        Map<String, NodeProperties> nodeProperties = new HashMap<>();
         for (PropertyMapping propertyMapping : propertyMappings) {
             NodePropertiesBuilder builder = builders.get(propertyMapping.propertyKey());
-            NodeOrRelationshipProperties props = builder != null ? builder.build() : new NullPropertyMap(propertyMapping.defaultValue());
+            NodeProperties props = builder != null ? builder.build() : new NullPropertyMap(propertyMapping.defaultValue());
             nodeProperties.put(propertyMapping.propertyKey(), props);
         }
         return new IdsAndProperties(hugeIdMap, Collections.unmodifiableMap(nodeProperties));

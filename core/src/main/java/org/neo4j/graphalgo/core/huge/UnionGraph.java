@@ -110,6 +110,11 @@ public final class UnionGraph implements Graph {
     }
 
     @Override
+    public double relationshipProperty(long sourceNodeId, long targetNodeId) {
+        return first.relationshipProperty(sourceNodeId, targetNodeId);
+    }
+
+    @Override
     public void forEachRelationship(long nodeId, Direction direction, RelationshipConsumer consumer) {
         for (Graph graph : graphs) {
             graph.forEachRelationship(nodeId, direction, consumer);
