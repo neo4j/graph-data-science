@@ -22,8 +22,8 @@ package org.neo4j.graphalgo.core.utils.paged.dss;
 import com.carrotsearch.hppc.IntIntHashMap;
 import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
 
-import java.util.Arrays;
 import java.util.OptionalLong;
+import java.util.stream.StreamSupport;
 
 final class TestNodeOrRelationshipProperties implements NodeOrRelationshipProperties {
     private final IntIntHashMap weights;
@@ -70,7 +70,10 @@ final class TestNodeOrRelationshipProperties implements NodeOrRelationshipProper
 
     @Override
     public OptionalLong getMaxPropertyValue() {
-        return Arrays.stream(weights.values).mapToLong(d -> (long) d).max();
+        return StreamSupport
+                .stream(weights.values().spliterator(), false)
+                .mapToLong(d -> d.value)
+                .max();
     }
 
     @Override
