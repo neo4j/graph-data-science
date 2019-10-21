@@ -24,6 +24,8 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.PagedLongDoubleMap;
 
+import java.util.OptionalLong;
+
 final class NodePropertyMap implements NodeOrRelationshipProperties {
 
     private static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations
@@ -61,7 +63,7 @@ final class NodePropertyMap implements NodeOrRelationshipProperties {
     }
 
     @Override
-    public long getMaxPropertyValue() {
+    public OptionalLong getMaxPropertyValue() {
         return properties.getMaxValue();
     }
 

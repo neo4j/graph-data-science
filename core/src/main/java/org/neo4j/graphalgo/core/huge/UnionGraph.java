@@ -22,9 +22,9 @@ package org.neo4j.graphalgo.core.huge;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
-import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.collection.Iterables;
@@ -80,7 +80,7 @@ public final class UnionGraph implements Graph {
     }
 
     @Override
-    public NodeOrRelationshipProperties nodeProperties(final String type) {
+    public NodeProperties nodeProperties(final String type) {
         return first.nodeProperties(type);
     }
 

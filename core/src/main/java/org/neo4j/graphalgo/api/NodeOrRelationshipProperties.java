@@ -46,14 +46,7 @@ public interface NodeOrRelationshipProperties extends NodeProperties, Relationsh
      * @return maximum value or given default value if mapping is empty
      */
     default long getMaxPropertyValue(long defaultValue) {
-        return size() == 0 ? defaultValue : getMaxPropertyValue();
-    }
-
-    /**
-     * Returns the maximum value contained in the mapping.
-     */
-    default long getMaxPropertyValue() {
-        return -1L;
+        return getMaxPropertyValue().orElse(defaultValue);
     }
 
     /**

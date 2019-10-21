@@ -20,9 +20,9 @@
 package org.neo4j.graphalgo.impl.wcc;
 
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -92,7 +92,7 @@ public class ParallelWCC extends WCC<ParallelWCC> {
     @Override
     public DisjointSetStruct compute(double threshold) {
         long nodeCount = graph.nodeCount();
-        NodeOrRelationshipProperties communityMap = algoConfig.communityMap;
+        NodeProperties communityMap = algoConfig.communityMap;
         DisjointSetStruct dss = communityMap == null
                 ? new HugeAtomicDisjointSetStruct(nodeCount, tracker)
                 : new HugeAtomicDisjointSetStruct(nodeCount, communityMap, tracker);

@@ -21,18 +21,18 @@ package org.neo4j.graphalgo.impl.labelprop;
 
 import com.carrotsearch.hppc.LongDoubleScatterMap;
 import com.carrotsearch.hppc.cursors.LongDoubleCursor;
-import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 final class ComputeStepConsumer implements RelationshipWithPropertyConsumer {
 
-    private final NodeOrRelationshipProperties nodeWeights;
+    private final NodeProperties nodeWeights;
     private final HugeLongArray existingLabels;
     private final LongDoubleScatterMap votes;
 
     ComputeStepConsumer(
-            NodeOrRelationshipProperties nodeWeights,
+            NodeProperties nodeWeights,
             HugeLongArray existingLabels) {
         this.existingLabels = existingLabels;
         this.nodeWeights = nodeWeights;
@@ -46,13 +46,13 @@ final class ComputeStepConsumer implements RelationshipWithPropertyConsumer {
         return true;
     }
 
-    void castVote(long candidate, double weight) {
+    private void castVote(long candidate, double weight) {
         weight = weightOf(candidate, weight);
         long label = existingLabels.get(candidate);
         votes.addTo(label, weight);
     }
 
-    double weightOf(final long candidate, final double relationshipWeight) {
+    private double weightOf(final long candidate, final double relationshipWeight) {
         double nodeWeight = nodeWeights.nodeProperty(candidate);
         return relationshipWeight * nodeWeight;
     }

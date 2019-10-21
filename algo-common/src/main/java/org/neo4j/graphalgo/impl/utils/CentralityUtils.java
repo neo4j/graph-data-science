@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.impl.results.CentralityScore;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 
-import java.util.function.DoubleUnaryOperator;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 

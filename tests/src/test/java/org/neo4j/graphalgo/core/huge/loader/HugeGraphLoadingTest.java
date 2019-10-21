@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphdb.Direction;
@@ -88,13 +89,17 @@ final class HugeGraphLoadingTest {
                 .withOptionalNodeProperties(PropertyMapping.of("bar", "bar", -1.0))
                 .load(HugeGraphFactory.class);
 
-        NodeOrRelationshipProperties nodeProperties = graph.nodeProperties("bar");
-        long propertyCountDiff = nodeCount - nodeProperties.size();
-        String errorMessage = String.format(
-                "Expected %d properties to be imported. Actually imported %d properties (missing %d properties).",
-                nodeCount, nodeProperties.size(), propertyCountDiff
-        );
-        assertEquals(0, propertyCountDiff, errorMessage);
+        // TODO: try to remove the NodeOrRelationshipProperties interface
+        NodeProperties nodeProperties = graph.nodeProperties("bar");
+        if (nodeProperties instanceof NodeOrRelationshipProperties) {
+            NodeOrRelationshipProperties properties = (NodeOrRelationshipProperties) nodeProperties;
+            long propertyCountDiff = nodeCount - properties.size();
+            String errorMessage = String.format(
+                    "Expected %d properties to be imported. Actually imported %d properties (missing %d properties).",
+                    nodeCount, properties.size(), propertyCountDiff
+            );
+            assertEquals(0, propertyCountDiff, errorMessage);
+        }
 
         for (int nodeId = 0; nodeId < nodeCount; nodeId++) {
             double propertyValue = nodeProperties.nodeProperty(nodeId);

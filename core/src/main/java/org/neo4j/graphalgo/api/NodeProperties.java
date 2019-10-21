@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.api;
 
+import java.util.OptionalLong;
+
 @FunctionalInterface
 public interface NodeProperties {
 
@@ -26,4 +28,20 @@ public interface NodeProperties {
      * Returns the property value for a node or the loaded default value if no property has been defined.
      */
     double nodeProperty(long nodeId);
+
+    /**
+     * Returns the property value for a node or the given default value if no property had been defined.
+     * The default value has precedence over the default value defined by the loader.
+     */
+    default double nodeProperty(long nodeId, double defaultValue) {
+        return nodeProperty(nodeId);
+    }
+
+    /**
+     * @return the maximum value contained in the mapping or an empty {@link OptionalLong} if the mapping is
+     *         empty or the feature is not supported.
+     */
+    default OptionalLong getMaxPropertyValue() {
+        return OptionalLong.empty();
+    }
 }

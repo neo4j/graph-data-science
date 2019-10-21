@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.impl.louvain;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -56,9 +56,9 @@ public class LouvainFactory extends AlgorithmFactory<Louvain> {
             final AllocationTracker tracker,
             final Log log) {
         Optional<String> clusterProperty = configuration.getStringWithFallback(CONFIG_SEED_KEY, DEPRECATED_CONFIG_SEED_KEY);
-        NodeOrRelationshipProperties communityMap = clusterProperty
-                .map(graph::nodeProperties)
-                .orElse(null);
+        NodeProperties communityMap = clusterProperty
+            .map(graph::nodeProperties)
+            .orElse(null);
 
         return new Louvain(graph,
                 config,

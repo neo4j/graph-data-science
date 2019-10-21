@@ -22,8 +22,8 @@ package org.neo4j.graphalgo.impl.labelprop;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Direction;
@@ -42,7 +42,7 @@ final class ComputeStep implements Step {
 
     ComputeStep(
             Graph graph,
-            NodeOrRelationshipProperties nodeWeights,
+            NodeProperties nodeWeights,
             ProgressLogger progressLogger,
             Direction direction,
             HugeLongArray existingLabels,
@@ -57,7 +57,7 @@ final class ComputeStep implements Step {
     }
 
     @Override
-    public final Step next() {
+    public Step next() {
         return this;
     }
 
@@ -65,7 +65,7 @@ final class ComputeStep implements Step {
     long iteration = 0L;
 
     @Override
-    public final void run() {
+    public void run() {
         if (this.didChange) {
             iteration++;
             this.didChange = iterateAll(nodes.iterator());
@@ -75,7 +75,7 @@ final class ComputeStep implements Step {
         }
     }
 
-    final boolean iterateAll(PrimitiveLongIterator nodeIds) {
+    private boolean iterateAll(PrimitiveLongIterator nodeIds) {
         boolean didChange = false;
         while (nodeIds.hasNext()) {
             long nodeId = nodeIds.next();
@@ -85,7 +85,7 @@ final class ComputeStep implements Step {
         return didChange;
     }
 
-    final boolean compute(long nodeId, boolean didChange) {
+    private boolean compute(long nodeId, boolean didChange) {
         consumer.clearVotes();
         long label = existingLabels.get(nodeId);
         localRelationshipIterator.forEachRelationship(nodeId, direction, DEFAULT_WEIGHT, consumer);
@@ -97,7 +97,7 @@ final class ComputeStep implements Step {
         return didChange;
     }
 
-    final void release() {
+    void release() {
         consumer.release();
     }
 }

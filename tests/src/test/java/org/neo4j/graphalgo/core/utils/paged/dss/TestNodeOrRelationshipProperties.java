@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.IntIntHashMap;
 import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
 
 import java.util.Arrays;
+import java.util.OptionalLong;
 
 final class TestNodeOrRelationshipProperties implements NodeOrRelationshipProperties {
     private final IntIntHashMap weights;
@@ -68,8 +69,8 @@ final class TestNodeOrRelationshipProperties implements NodeOrRelationshipProper
     }
 
     @Override
-    public long getMaxPropertyValue() {
-        return Arrays.stream(weights.values).max().orElse(-1);
+    public OptionalLong getMaxPropertyValue() {
+        return Arrays.stream(weights.values).mapToLong(d -> (long) d).max();
     }
 
     @Override

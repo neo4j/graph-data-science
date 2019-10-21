@@ -25,6 +25,7 @@ import com.carrotsearch.hppc.ObjectArrayList;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -83,27 +84,27 @@ public final class Louvain extends Algorithm<Louvain> {
     private final HugeDoubleArray nodeWeights;
     private final Graph rootGraph;
     private long communityCount;
-    private final NodeOrRelationshipProperties seedingValues;
+    private final NodeProperties seedingValues;
     private final int maxLevel;
     private final int maxIterations;
 
     public Louvain(
-            final Graph graph,
-            final Config config,
-            final ExecutorService pool,
-            final int concurrency,
-            final AllocationTracker tracker
+        Graph graph,
+        Config config,
+        ExecutorService pool,
+        int concurrency,
+        AllocationTracker tracker
     ) {
         this(graph, config, null, pool, concurrency, tracker);
     }
 
     public Louvain(
-            final Graph graph,
-            final Config config,
-            final NodeOrRelationshipProperties seedingValues,
-            final ExecutorService pool,
-            final int concurrency,
-            final AllocationTracker tracker) {
+        Graph graph,
+        Config config,
+        NodeProperties seedingValues,
+        ExecutorService pool,
+        int concurrency,
+        AllocationTracker tracker) {
         this.rootGraph = graph;
         this.pool = pool;
         this.concurrency = concurrency;
@@ -127,7 +128,7 @@ public final class Louvain extends Algorithm<Louvain> {
 
         if (seedingValues != null) {
             BitSet comCount = new BitSet();
-            long maxSeedingCommunityId = seedingValues.getMaxPropertyValue();
+            long maxSeedingCommunityId = seedingValues.getMaxPropertyValue().orElse(-1);
             communities.setAll(nodeId -> {
                 double existingCommunityValue = seedingValues.nodeProperty(nodeId, Double.NaN);
                 long community = Double.isNaN(existingCommunityValue)
@@ -431,7 +432,7 @@ public final class Louvain extends Algorithm<Louvain> {
     }
 
     @Override
-    public final Louvain me() {
+    public Louvain me() {
         return this;
     }
 

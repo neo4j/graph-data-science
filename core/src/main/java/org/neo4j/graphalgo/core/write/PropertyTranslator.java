@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.write;
 
-import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -106,10 +106,10 @@ public interface PropertyTranslator<T> {
 
     final class OfLongIfChanged<T> implements PropertyTranslator<T> {
 
-        private final NodeOrRelationshipProperties currentProperties;
-        private final SeededDataAccessFunction newPropertiesFn;
+        private final NodeProperties currentProperties;
+        private final SeededDataAccessFunction<T> newPropertiesFn;
 
-        public OfLongIfChanged(NodeOrRelationshipProperties currentProperties, SeededDataAccessFunction<T> newPropertiesFn) {
+        public OfLongIfChanged(NodeProperties currentProperties, SeededDataAccessFunction<T> newPropertiesFn) {
             this.currentProperties = currentProperties;
             this.newPropertiesFn = newPropertiesFn;
         }
