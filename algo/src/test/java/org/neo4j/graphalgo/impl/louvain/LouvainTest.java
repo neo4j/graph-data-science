@@ -96,8 +96,7 @@ class LouvainTest extends LouvainTestBase {
     @AllGraphTypesTest
     void testLouvainWithDendrogram(Class<? extends GraphFactory> graphImpl) {
         Graph graph = loadGraph(graphImpl, DB_CYPHER);
-        Louvain.Config config = new Louvain.Config(DEFAULT_CONFIG.maxLevel, DEFAULT_CONFIG.maxIterations, true);
-        final Louvain algorithm = new Louvain(graph, config, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
+        final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG_WITH_DENDROGRAM, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
                 .compute();

@@ -43,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 abstract class LouvainTestBase {
 
     static final Louvain.Config DEFAULT_CONFIG = new Louvain.Config(10, 10);
+    static final Louvain.Config DEFAULT_CONFIG_WITH_DENDROGRAM = new Louvain.Config(10, 10, true);
 
     GraphDatabaseAPI db;
 
