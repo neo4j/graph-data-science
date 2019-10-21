@@ -84,8 +84,8 @@ class GraphGenerateProcTest extends ProcTestBase {
                 row -> {
                     assertEquals(10, row.getNumber("nodes").intValue());
                     assertEquals(50, row.getNumber("relationships").intValue());
-                    assertEquals("foo", row.getString("name"));
-                    assertNull(row.get("relationshipProperties"));
+                    assertEquals("foo", row.getString(RELATIONSHIP_PROPERTY_NAME_KEY));
+                    assertNull(row.get(RELATIONSHIP_PROPERTY_KEY));
                 }
         );
     }
