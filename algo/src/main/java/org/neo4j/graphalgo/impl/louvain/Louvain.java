@@ -81,11 +81,10 @@ public final class Louvain extends Algorithm<Louvain> {
     private double[] modularities;
     private HugeLongArray[] dendrogram;
     private final HugeDoubleArray nodeWeights;
+    private final NodeProperties seedingValues;
     private final Graph rootGraph;
     private long communityCount;
-    private final NodeProperties seedingValues;
-    private final int maxLevel;
-    private final int maxIterations;
+    private final Config config;
 
     public Louvain(
         Graph graph,
@@ -103,7 +102,8 @@ public final class Louvain extends Algorithm<Louvain> {
         NodeProperties seedingValues,
         ExecutorService pool,
         int concurrency,
-        AllocationTracker tracker) {
+        AllocationTracker tracker
+    ) {
         this.rootGraph = graph;
         this.pool = pool;
         this.concurrency = concurrency;
@@ -112,17 +112,19 @@ public final class Louvain extends Algorithm<Louvain> {
         this.communities = HugeLongArray.newArray(rootNodeCount, tracker);
         this.nodeWeights = HugeDoubleArray.newArray(rootNodeCount, tracker);
         this.seedingValues = seedingValues;
-        maxLevel = config.maxLevel;
-        maxIterations = config.maxIterations;
-        communityCount = rootNodeCount;
-        communities.setAll(i -> i);
+        this.config = config;
+        this.communityCount = rootNodeCount;
     }
 
     public Louvain compute() {
-        return compute(this.maxLevel, this.maxIterations);
+        return compute(this.config);
     }
 
     public Louvain compute(int maxLevel, int maxIterations) {
+        return compute(new Config(maxLevel, maxIterations));
+    }
+
+    public Louvain compute(Config config) {
         Graph workingGraph = this.rootGraph;
         long nodeCount = this.rootNodeCount;
 
@@ -146,14 +148,13 @@ public final class Louvain extends Algorithm<Louvain> {
             communities.setAll(this.rootGraph::toOriginalNodeId);
         }
 
-        return computeOf(workingGraph, nodeCount, maxLevel, maxIterations);
+        return computeOf(workingGraph, nodeCount, config);
     }
 
     private Louvain computeOf(
             final Graph rootGraph,
             final long rootNodeCount,
-            final int maxLevel,
-            final int maxIterations) {
+            final Config config) {
 
         // result arrays, start with small buffers in case we don't require max iterations to converge
         ObjectArrayList<HugeLongArray> dendrogram = new ObjectArrayList<>(0);
@@ -162,7 +163,7 @@ public final class Louvain extends Algorithm<Louvain> {
         long nodeCount = rootNodeCount;
         Graph louvainGraph = rootGraph;
 
-        for (int level = 0; level < maxLevel; level++) {
+        for (int level = 0; level < config.maxLevel; level++) {
             assertRunning();
             // start modularity optimization
             final ModularityOptimization modularityOptimization =
@@ -175,7 +176,7 @@ public final class Louvain extends Algorithm<Louvain> {
                     )
                             .withProgressLogger(progressLogger)
                             .withTerminationFlag(terminationFlag)
-                            .compute(maxIterations);
+                            .compute(config.maxIterations);
             // rebuild graph based on the community structure
             final HugeLongArray communityIds = modularityOptimization.getCommunityIds();
             communityCount = CommunityUtils.normalize(communityIds);
@@ -189,7 +190,12 @@ public final class Louvain extends Algorithm<Louvain> {
                 break;
             }
             nodeCount = communityCount;
-            dendrogram.add(rebuildCommunityStructure(communityIds));
+            rebuildCommunityStructure(communityIds);
+            if (config.includeIntermediateCommunities) {
+                // the communities are stored in the dendrogram, one per level
+                // so we have to copy the current state and return it as a snapshot
+                dendrogram.add(communities.copyOf(rootNodeCount, tracker));
+            }
             modularities.add(modularityOptimization.getModularity());
             louvainGraph = rebuildGraph(louvainGraph, communityIds, communityCount);
             // release the old algo instance
@@ -305,7 +311,7 @@ public final class Louvain extends Algorithm<Louvain> {
         return subGraph;
     }
 
-    private HugeLongArray rebuildCommunityStructure(final HugeLongArray communityIds) {
+    private void rebuildCommunityStructure(final HugeLongArray communityIds) {
         // rebuild community array
         try (HugeCursor<long[]> cursor = communities.initCursor(communities.newCursor())) {
             while (cursor.next()) {
@@ -316,9 +322,6 @@ public final class Louvain extends Algorithm<Louvain> {
                 }
             }
         }
-        // the communities are stored in the dendrogram, one per level
-        // so we have to copy the current state and return it as a snapshot
-        return communities.copyOf(rootNodeCount, tracker);
     }
 
     /**
@@ -467,6 +470,7 @@ public final class Louvain extends Algorithm<Louvain> {
         public final NodeProperties communityMap;
         public final int maxLevel;
         public final int maxIterations;
+        public final boolean includeIntermediateCommunities;
 
         public Config(final int maxLevel) {
             this(maxLevel, maxLevel);
@@ -483,9 +487,19 @@ public final class Louvain extends Algorithm<Louvain> {
                 final int maxLevel,
                 final int maxIterations
         ) {
+            this(communityMap, maxLevel, maxIterations, false);
+        }
+
+        public Config(
+                final NodeOrRelationshipProperties communityMap,
+                final int maxLevel,
+                final int maxIterations,
+                final boolean includeIntermediateCommunities
+        ) {
             this.communityMap = communityMap;
             this.maxLevel = maxLevel;
             this.maxIterations = maxIterations;
+            this.includeIntermediateCommunities = includeIntermediateCommunities;
         }
     }
 }

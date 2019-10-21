@@ -43,6 +43,8 @@ public class LouvainFactory extends AlgorithmFactory<Louvain> {
 
     public static final String DEPRECATED_CONFIG_SEED_KEY = "communityProperty";
 
+    public static final String INCLUDE_INTERMEDIATE_COMMUNITIES = "includeIntermediateCommunities";
+
     private final Louvain.Config config;
 
     public LouvainFactory(Louvain.Config config) {
@@ -72,6 +74,7 @@ public class LouvainFactory extends AlgorithmFactory<Louvain> {
     public MemoryEstimation memoryEstimation() {
         int maxLevel = config.maxLevel;
         return MemoryEstimations.builder(Louvain.class)
+                .field("Config", Louvain.Config.class)
                 .perNode("communities", HugeLongArray::memoryEstimation)
                 .perNode("nodeWeights", HugeDoubleArray::memoryEstimation)
                 .rangePerNode("dendrogram", (nodeCount) -> {

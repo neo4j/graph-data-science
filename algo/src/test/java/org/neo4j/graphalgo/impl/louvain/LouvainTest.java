@@ -183,19 +183,19 @@ class LouvainTest extends LouvainTestBase {
         LouvainFactory factory = new LouvainFactory(DEFAULT_CONFIG);
 
         GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
-        assertEquals(MemoryRange.of(608, 1072), factory.memoryEstimation().estimate(dimensions0, 1).memoryUsage());
-        assertEquals(MemoryRange.of(1112, 1576), factory.memoryEstimation().estimate(dimensions0, 4).memoryUsage());
+        assertEquals(MemoryRange.of(632, 1096), factory.memoryEstimation().estimate(dimensions0, 1).memoryUsage());
+        assertEquals(MemoryRange.of(1136, 1600), factory.memoryEstimation().estimate(dimensions0, 4).memoryUsage());
 
         GraphDimensions dimensions100 = new GraphDimensions.Builder().setNodeCount(100).build();
-        assertEquals(MemoryRange.of(7008, 14672), factory.memoryEstimation().estimate(dimensions100, 1).memoryUsage());
-        assertEquals(MemoryRange.of(14712, 22376), factory.memoryEstimation().estimate(dimensions100, 4).memoryUsage());
+        assertEquals(MemoryRange.of(7032, 14696), factory.memoryEstimation().estimate(dimensions100, 1).memoryUsage());
+        assertEquals(MemoryRange.of(14736, 22400), factory.memoryEstimation().estimate(dimensions100, 4).memoryUsage());
 
         GraphDimensions dimensions100B = new GraphDimensions.Builder().setNodeCount(100_000_000_000L).build();
         assertEquals(
-                MemoryRange.of(6400976563232L, 13602075196648L),
+                MemoryRange.of(6400976563256L, 13602075196672L),
                 factory.memoryEstimation().estimate(dimensions100B, 1).memoryUsage());
         assertEquals(
-                MemoryRange.of(13602075196688L, 20803173830104L),
+                MemoryRange.of(13602075196712L, 20803173830128L),
                 factory.memoryEstimation().estimate(dimensions100B, 4).memoryUsage());
     }
 
