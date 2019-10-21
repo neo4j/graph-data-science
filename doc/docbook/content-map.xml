@@ -118,6 +118,9 @@
                 <d:tocentry linkend="labs-algorithms-one-hot-encoding"><?dbhtml filename="labs-algorithms/one-hot-encoding/index.html"?>
                 </d:tocentry>
             </d:tocentry>
+
+            <d:tocentry linkend="labs-graph-generation"><?dbhtml filename="labs-algorithms/graph-generation/index.html"?>
+            </d:tocentry>
         </d:tocentry>
     </d:tocentry>
 </d:toc>

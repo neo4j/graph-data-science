@@ -1,0 +1,94 @@
+[[labs-graph-generation]]
+= Graph Generation
+
+[abstract]
+--
+This section describes the graph generation algorithms in the Neo4j Graph Algorithms library.
+--
+
+In certain use cases it is usefull to generate random graphs, for example for testing or benchmarking purposes.
+For that reason the Neo4j Graph Algorithm library comes with a set of built in graph generators.
+The procedure generates in-memory graphs. It is currently not possible to persist these graphs into Neo4j.
+
+The graph generation is parameterized by three dimensions:
+
+ * node count - influences the number of nodes present in the generated graph
+ * average degree - describes the average out-degree of the generated nodes
+ * relationship distribution function - describes the algorithm used to create new relationships in the graph
+
+
+[[labs-graph-generation-syntax]]
+== Syntax
+
+.The following describes the API for running the algorithm
+[source, cypher]
+----
+CALL algo.beta.graph.generate(name: String, nodeCount: Integer, averageDegree: Integer, {
+  relationshipDistribution: String,
+  relationshipProperty: Map
+})
+YIELD name, nodes, relationships, generateMillis, averageDegree, relationshipDistribution, relationshipProperty
+----
+
+.Parameters
+[opts="header",cols="1m,1,1m,1,4"]
+|===
+| Name                  | Type    | Default | Optional | Description
+| name                  | string  | null    | no       | The name under which the generated graph is stored.
+| nodeCount             | integer | null    | no       | The number of generated nodes.
+| averageDistribution   | integer | null    | no       | The average out degree of generated nodes.
+| config                | map     | {}      | yes      | Additional configuration, see below.
+|===
+
+.Configuration
+[opts="header",cols="1m,1,1m,1,4"]
+|===
+| Name                      | Type      | Default  | Optional | Description
+| relationshipDistribution  | string    | UNIFORM  | yes      | Describes the algorithm used to generate new relationships. For more information see <<labs-graph-generation-distribution>>.
+| relationshipProperty      | map       | {}       | yes      | Describes the method used to generate a relationship property. By default no relationship property is generated. For more information see <<labs-graph-generation-relationship-property>>.
+|===
+
+.Results
+[opts="header",cols="1m,1,6"]
+|===
+| Name                      | Type       | Description
+| name                      | string     | The name under wich the stored graph was stored.
+| nodes                     | int        | The number of nodes in the graph.
+| relationships             | int        | The number of relationships in the graph.
+| generateMillis            | int        | Milliseconds for generating the graph.
+| averageDegree             | double     | The average out degree of the generated nodes.
+| relationshipDistribution  | string     | The algorithm used for generating the graphs relationships.
+| relationshipProperty      | string     | The configuration of the generated relationship property.
+|===
+
+[[labs-graph-generation-distribution]]
+== Relationship Distribution
+
+The `relationshipDistribution` parameter controlls the algorithm used for the generation of new relationships.
+Currently there are three supported methods:
+
+* `UNIFORM` - Distributes the outgoing relationships evenly, i.e. every node has exactly the same out degree (equal to the average degree). The target nodes are selected randomly.
+* `RANDOM` - Distributes the outgoing relationships using a normal distribution with an average of `averageDegree` and a standard derivation of `2 * averageDegree`. The target nodes are selected randomly.
+* `POWER_LAW` - Distributes the incomming relationships using a power law distribution. The out degree is based on a normal distribution
+
+[[labs-graph-generation-relationship-property]]
+== Relationship Property
+
+The graph generator is capable of generating a relationship property.
+This can be controlled using the `relationshipProperty` parameter which accepts the following parameters
+
+.Configuration
+[opts="header",cols="1m,1,1,1,4"]
+|===
+| Name                        | Type      | Default  | Optional | Description
+| name    | string    | null  | no      | The name under which the property values are stored.
+| type    | string    | null  | no      | The method used to generate property values.
+| min     | double    | 0.0   | yes     | Minimal value of the generated property (only supported by `RANDOM`).
+| max     | double    | 1.0   | yes     | Maximum value of the generated property (only supported by `RANDOM`).
+| value   | double    | null  | yes     | Fixed value assigned to every relationship (only supported by `FIXED`).
+|===
+
+Currently there are two supported methods to generate relationship properties
+
+* `FIXED` - Assignes a fixed value to every relationship. The `value` parameter must be set.
+* `RANDOM` - Assignes a random value between the lower (`min`) and upper (`max`) bound.

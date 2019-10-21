@@ -23,6 +23,7 @@ The documentation for the Neo4j Labs algorithms is divided into the following se
 * <<labs-algorithms-similarity>>
 * <<labs-algorithms-linkprediction>>
 * <<labs-algorithms-preprocessing>>
+* <<labs-graph-generation>>
 
 include::labs-procedures.adoc[leveloffset=+1]
 
@@ -37,4 +38,6 @@ include::labs-algorithms-similarity.adoc[leveloffset=+1]
 include::labs-algorithms-link-prediction.adoc[leveloffset=+1]
 
 include::labs-algorithms-preprocessing.adoc[leveloffset=+1]
+
+include::labs-graph-generation.adoc[leveloffset=+1]
 
