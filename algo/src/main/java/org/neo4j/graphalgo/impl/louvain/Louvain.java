@@ -311,10 +311,10 @@ public final class Louvain extends Algorithm<Louvain> {
         // rebuild community array
         try (HugeCursor<long[]> cursor = communities.initCursor(communities.newCursor())) {
             while (cursor.next()) {
-                long[] array = cursor.array;
-                int limit = Math.min(cursor.limit, array.length);
+                long[] arrayRef = cursor.array;
+                int limit = Math.min(cursor.limit, arrayRef.length);
                 for (int i = cursor.offset; i < limit; ++i) {
-                    array[i] = communityIds.get(array[i]);
+                    arrayRef[i] = communityIds.get(arrayRef[i]);
                 }
             }
         }

@@ -107,7 +107,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             final AllocationTracker tracker) {
         this.graph = graph;
         this.nodeProperties = nodeProperties;
-        nodeCount = graph.nodeCount();
+        this.nodeCount = graph.nodeCount();
         this.pool = pool;
         this.concurrency = concurrency;
         this.tracker = tracker;
