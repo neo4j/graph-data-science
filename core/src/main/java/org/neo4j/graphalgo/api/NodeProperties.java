@@ -23,7 +23,7 @@ package org.neo4j.graphalgo.api;
 public interface NodeProperties {
 
     /**
-     * Returns the property value for a node or the loaded default weight if no weight has been defined.
+     * Returns the property value for a node or the loaded default value if no property has been defined.
      */
     double nodeProperty(long nodeId);
 }
