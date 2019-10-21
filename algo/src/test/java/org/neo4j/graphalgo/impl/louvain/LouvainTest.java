@@ -45,6 +45,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * (a)-(b)-(d)
@@ -80,18 +81,29 @@ class LouvainTest extends LouvainTestBase {
     }
 
     @AllGraphTypesTest
-    void testRunner(Class<? extends GraphFactory> graphImpl) {
+    void testLouvain(Class<? extends GraphFactory> graphImpl) {
         Graph graph = loadGraph(graphImpl, DB_CYPHER);
         final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
                 .compute();
         final HugeLongArray[] dendogram = algorithm.getDendrogram();
-        for (int i = 1; i <= dendogram.length; i++) {
-            if (null == dendogram[i - 1]) {
-                break;
-            }
-        }
+        assertEquals(0, dendogram.length);
+        assertTrue(1 <= algorithm.getLevel());
+        assertCommunities(algorithm);
+    }
+
+    @AllGraphTypesTest
+    void testLouvainWithDendrogram(Class<? extends GraphFactory> graphImpl) {
+        Graph graph = loadGraph(graphImpl, DB_CYPHER);
+        Louvain.Config config = new Louvain.Config(DEFAULT_CONFIG.maxLevel, DEFAULT_CONFIG.maxIterations, true);
+        final Louvain algorithm = new Louvain(graph, config, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
+                .withProgressLogger(TestProgressLogger.INSTANCE)
+                .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
+                .compute();
+        final HugeLongArray[] dendogram = algorithm.getDendrogram();
+        assertEquals(algorithm.getLevel(), dendogram.length);
+        assertTrue(1 <= algorithm.getLevel());
         assertCommunities(algorithm);
     }
 
@@ -124,12 +136,6 @@ class LouvainTest extends LouvainTestBase {
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
                 .compute();
-        final HugeLongArray[] dendogram = algorithm.getDendrogram();
-        for (int i = 1; i <= dendogram.length; i++) {
-            if (null == dendogram[i - 1]) {
-                break;
-            }
-        }
         assertUnion(expectedUnion, algorithm.getCommunityIds());
         if (expectedDisjoint.length > 0) {
             assertDisjoint(expectedDisjoint, algorithm.getCommunityIds());

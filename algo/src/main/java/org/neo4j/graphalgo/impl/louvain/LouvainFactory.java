@@ -42,8 +42,7 @@ public class LouvainFactory extends AlgorithmFactory<Louvain> {
     public static final String CONFIG_SEED_KEY = "seedProperty";
 
     public static final String DEPRECATED_CONFIG_SEED_KEY = "communityProperty";
-
-    public static final String INCLUDE_INTERMEDIATE_COMMUNITIES = "includeIntermediateCommunities";
+    public static final boolean DEFAULT_INTERMEDIATE_COMMUNITIES_FLAG = false;
 
     private final Louvain.Config config;
 

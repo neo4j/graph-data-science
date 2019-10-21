@@ -487,7 +487,15 @@ public final class Louvain extends Algorithm<Louvain> {
                 final int maxLevel,
                 final int maxIterations
         ) {
-            this(communityMap, maxLevel, maxIterations, false);
+            this(communityMap, maxLevel, maxIterations, LouvainFactory.DEFAULT_INTERMEDIATE_COMMUNITIES_FLAG);
+        }
+
+        public Config(
+                final int maxLevel,
+                final int maxIterations,
+                final boolean includeIntermediateCommunities
+        ) {
+            this(null, maxLevel, maxIterations, includeIntermediateCommunities);
         }
 
         public Config(

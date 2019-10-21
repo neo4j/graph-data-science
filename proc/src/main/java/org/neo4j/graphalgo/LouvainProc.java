@@ -50,6 +50,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.impl.louvain.LouvainFactory.CONFIG_SEED_KEY;
+import static org.neo4j.graphalgo.impl.louvain.LouvainFactory.DEFAULT_INTERMEDIATE_COMMUNITIES_FLAG;
 import static org.neo4j.graphalgo.impl.louvain.LouvainFactory.DEPRECATED_CONFIG_SEED_KEY;
 import static org.neo4j.procedure.Mode.READ;
 
@@ -91,7 +92,8 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
         if (configuration.isWriteFlag()) {
             builder.timeWrite(() -> {
                 String writeProperty = configuration.getWriteProperty("community");
-                Boolean includeIntermediateCommunities = configuration.getBool(INCLUDE_INTERMEDIATE_COMMUNITIES, false);
+                Boolean includeIntermediateCommunities = configuration.getBool(INCLUDE_INTERMEDIATE_COMMUNITIES,
+                        DEFAULT_INTERMEDIATE_COMMUNITIES_FLAG);
                 String intermediateCommunitiesWriteProperty = configuration.get(
                         INTERMEDIATE_COMMUNITIES_WRITE_PROPERTY,
                         "communities");
