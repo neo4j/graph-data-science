@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.impl.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.impl.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.impl.generator.RelationshipPropertyProducer;
 import org.neo4j.graphalgo.utils.ConfigMapHelper;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -60,33 +59,33 @@ public final class GraphGenerateProc extends BaseProc {
     @Description("CALL algo.beta.graph.generate(" +
                  "name:String, nodeCount:Integer, averageDegree:Integer" +
                  "{distribution: 'UNIFORM,RANDOM,POWERLAW', relationshipProperty: {name: '[PROPERTY_NAME]' type: 'FIXED,RANDOM', min: 0.0, max: 1.0, value: 1.0}}) " +
-                 "YIELD graphName, nodes, relationships, computeMillis")
-    public Stream<GraphLoadProc.GraphLoadStats> load(
+                 "YIELD name, nodes, relationships, generateMillis, averageDegree, relationshipDistribution, relationshipProperty")
+    public Stream<GraphGenerationStats> load(
             @Name(value = "name") String name,
             @Name(value = "nodeCount") Long nodeCount,
             @Name(value = "averageDegree") Long averageDegree,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         final ProcedureConfiguration configuration = newConfig(null, null, config);
-        GraphLoadProc.GraphLoadStats stats = runWithExceptionLogging(
+        GraphGenerationStats stats = runWithExceptionLogging(
                 "Graph loading failed",
                 () -> generateGraph(configuration, name, nodeCount, averageDegree));
         return Stream.of(stats);
     }
 
 
-    private GraphLoadProc.GraphLoadStats generateGraph(
+    private GraphGenerationStats generateGraph(
             ProcedureConfiguration config,
             String name,
             long nodeCount,
             long averageDegree) {
-        GraphLoadProc.GraphLoadStats stats = new GraphLoadProc.GraphLoadStats(name, config);
+        GraphGenerationStats stats = new GraphGenerationStats(name, averageDegree, config);
 
         if (GraphLoadFactory.exists(name)) {
             throw new IllegalArgumentException(String.format("A graph with name '%s' is already loaded.", name));
         }
 
-        try (ProgressTimer ignored = ProgressTimer.start(time -> stats.loadMillis = time)) {
+        try (ProgressTimer ignored = ProgressTimer.start(time -> stats.generateMillis = time)) {
             RandomGraphGenerator generator = initializeGraphGenerator(nodeCount, averageDegree, config);
 
             HugeGraph graph = generator.generate();
@@ -106,11 +105,6 @@ public final class GraphGenerateProc extends BaseProc {
 
             stats.nodes = graphFromType.nodeCount();
             stats.relationships = graphFromType.relationshipCount();
-            stats.direction = Direction.BOTH.name();
-            stats.loadNodes = "true";
-            stats.loadRelationships = "true";
-            stats.relationshipProperties = config.get(RELATIONSHIP_PROPERTIES_KEY);
-
             GraphLoadFactory.set(name, graphFromType);
         }
 
@@ -177,5 +171,19 @@ public final class GraphGenerateProc extends BaseProc {
     @Override
     protected GraphLoader configureLoader(GraphLoader loader, ProcedureConfiguration config) {
         return null;
+    }
+
+    public static class GraphGenerationStats {
+        public String name;
+        public long nodes, relationships, generateMillis;
+        public double averageDegree;
+        public Object relationshipDistribution, relationshipProperty;
+
+        GraphGenerationStats(String graphName, double averageDegree, ProcedureConfiguration configuration) {
+            this.name = graphName;
+            this.averageDegree = averageDegree;
+            this.relationshipDistribution = configuration.getString(RELATIONSHIP_DISTRIBUTION_KEY, "UNIFORM");
+            this.relationshipProperty = configuration.get(RELATIONSHIP_PROPERTY_KEY, null);
+        }
     }
 }
