@@ -38,6 +38,16 @@ public final class ProcedureConstants {
     public static final String RELATIONSHIP_PROPERTIES_AGGREGATION_KEY = "aggregation";
     public static final String RELATIONSHIP_PROPERTIES_DEFAULT_VALUE_KEY = "defaultValue";
 
+    // graph.generate specific
+    public static final String RELATIONSHIP_PROPERTY_KEY = "relationshipProperty";
+
+    public static final String RELATIONSHIP_DISTRIBUTION_KEY = "relationshipDistribution";
+    public static final String RELATIONSHIP_PROPERTY_NAME_KEY = "name";
+    public static final String RELATIONSHIP_PROPERTY_TYPE_KEY = "type";
+    public static final String RELATIONSHIP_PROPERTY_MIN_KEY = "min";
+    public static final String RELATIONSHIP_PROPERTY_MAX_KEY = "max";
+    public static final String RELATIONSHIP_PROPERTY_VALUE_KEY = "value";
+
     // algos specific
 
     // graph type params
