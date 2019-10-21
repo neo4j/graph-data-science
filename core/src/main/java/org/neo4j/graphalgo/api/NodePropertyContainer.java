@@ -32,7 +32,7 @@ public interface NodePropertyContainer {
      * @param type       the node property type
      * @return the mapping associated with that type
      */
-    PropertyMapping nodeProperties(String type);
+    NodeOrRelationshipProperties nodeProperties(String type);
 
     Set<String> availableNodeProperties();
 

@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.api.PropertyRelationshipConsumer;
+import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -151,7 +151,7 @@ class RelationshipPropertiesImportTest {
         assertAll(assertions);
     }
 
-    private PropertyRelationshipConsumer checks(Direction direction, double[] expectedFromIterator, double[] expectedFromGraph, List<Executable> assertions) {
+    private RelationshipWithPropertyConsumer checks(Direction direction, double[] expectedFromIterator, double[] expectedFromGraph, List<Executable> assertions) {
         AtomicInteger i = new AtomicInteger();
         int limit = Math.min(expectedFromIterator.length, expectedFromGraph.length);
         return (s, t, w) -> {
@@ -160,7 +160,7 @@ class RelationshipPropertiesImportTest {
                 assertions.add(() -> assertFalse(i.get() >= limit, String.format("Unexpected relationship: %s = %.1f", rel, w)));
                 return false;
             }
-            double actual = (direction == Direction.INCOMING) ? graph.relationshipValue(t, s, Double.NaN) : graph.relationshipValue(s, t, Double.NaN);
+            double actual = (direction == Direction.INCOMING) ? graph.relationshipProperty(t, s, Double.NaN) : graph.relationshipProperty(s, t, Double.NaN);
             final int index = i.getAndIncrement();
             double expectedIterator = expectedFromIterator[index];
             double expectedGraph = expectedFromGraph[index];

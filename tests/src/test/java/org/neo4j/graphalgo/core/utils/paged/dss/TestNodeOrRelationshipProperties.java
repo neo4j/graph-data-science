@@ -20,18 +20,18 @@
 package org.neo4j.graphalgo.core.utils.paged.dss;
 
 import com.carrotsearch.hppc.IntIntHashMap;
-import org.neo4j.graphalgo.api.PropertyMapping;
+import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
 
 import java.util.Arrays;
 
-final class TestPropertyMapping implements PropertyMapping {
+final class TestNodeOrRelationshipProperties implements NodeOrRelationshipProperties {
     private final IntIntHashMap weights;
 
-    private TestPropertyMapping(final IntIntHashMap weights) {
+    private TestNodeOrRelationshipProperties(final IntIntHashMap weights) {
         this.weights = weights;
     }
 
-    TestPropertyMapping(int... values) {
+    TestNodeOrRelationshipProperties(int... values) {
         this(toMap(values));
     }
 
@@ -47,12 +47,12 @@ final class TestPropertyMapping implements PropertyMapping {
     }
 
     @Override
-    public double relationshipValue(final long source, final long target) {
-        return relationshipValue(source, target, 0.0);
+    public double relationshipProperty(final long source, final long target) {
+        return relationshipProperty(source, target, 0.0);
     }
 
     @Override
-    public double relationshipValue(final long source, final long target, final double defaultValue) {
+    public double relationshipProperty(final long source, final long target, final double defaultValue) {
         assert target == -1L;
         int key = Math.toIntExact(source);
         int index = weights.indexOf(key);
@@ -68,7 +68,7 @@ final class TestPropertyMapping implements PropertyMapping {
     }
 
     @Override
-    public long getMaxValue() {
+    public long getMaxPropertyValue() {
         return Arrays.stream(weights.values).max().orElse(-1);
     }
 

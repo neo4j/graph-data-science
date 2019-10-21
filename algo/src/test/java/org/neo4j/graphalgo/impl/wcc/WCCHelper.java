@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.impl.wcc;
 
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 
@@ -34,7 +35,7 @@ final class WCCHelper {
 
         WCC<? extends WCC> algo = algorithmType.create(
                 graph,
-                org.neo4j.graphalgo.core.utils.Pools.DEFAULT,
+                Pools.DEFAULT,
                 minBatchSize,
                 concurrency,
                 config,

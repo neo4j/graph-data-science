@@ -384,7 +384,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             });
 
             final double w = communityWeights.get(currentCommunity) + extraWeight.v;
-            sIn.addTo(currentCommunity, -2.0 * (w + nodeProperties.nodeValue(node)));
+            sIn.addTo(currentCommunity, -2.0 * (w + nodeProperties.nodeProperty(node)));
 
             localCommunities.set(node, NONE);
             double bestGain = .0;
@@ -409,7 +409,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             }
 
             sTot.addTo(bestCommunity, nodeKI);
-            sIn.addTo(bestCommunity, 2.0 * (bestWeight + nodeProperties.nodeValue(node)));
+            sIn.addTo(bestCommunity, 2.0 * (bestWeight + nodeProperties.nodeProperty(node)));
             localCommunities.set(node, bestCommunity);
             return bestCommunity != currentCommunity;
         }

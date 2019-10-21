@@ -22,9 +22,10 @@ package org.neo4j.graphalgo.core.huge.loader;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.PropertyMapping;
+import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphdb.Direction;
@@ -84,10 +85,10 @@ final class HugeGraphLoadingTest {
         Graph graph = new GraphLoader(db)
                 .withDirection(Direction.OUTGOING)
                 .withLabel(label)
-                .withOptionalNodeProperties(org.neo4j.graphalgo.PropertyMapping.of("bar", "bar", -1.0))
+                .withOptionalNodeProperties(PropertyMapping.of("bar", "bar", -1.0))
                 .load(HugeGraphFactory.class);
 
-        PropertyMapping nodeProperties = graph.nodeProperties("bar");
+        NodeOrRelationshipProperties nodeProperties = graph.nodeProperties("bar");
         long propertyCountDiff = nodeCount - nodeProperties.size();
         String errorMessage = String.format(
                 "Expected %d properties to be imported. Actually imported %d properties (missing %d properties).",
@@ -96,7 +97,7 @@ final class HugeGraphLoadingTest {
         assertEquals(0, propertyCountDiff, errorMessage);
 
         for (int nodeId = 0; nodeId < nodeCount; nodeId++) {
-            double propertyValue = nodeProperties.nodeValue(nodeId);
+            double propertyValue = nodeProperties.nodeProperty(nodeId);
             long neoId = graph.toOriginalNodeId(nodeId);
             assertEquals(neoId, (long) propertyValue, String.format("Property for node %d (neo = %d) was overwritten.", nodeId, neoId));
         }
@@ -148,7 +149,7 @@ final class HugeGraphLoadingTest {
 
         final Graph graph = new GraphLoader(db)
                 .withDirection(Direction.OUTGOING)
-                .withRelationshipProperties(org.neo4j.graphalgo.PropertyMapping.of("weight", 1.0))
+                .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
                 .load(HugeGraphFactory.class);
 
         assertEquals(2, graph.relationshipCount());

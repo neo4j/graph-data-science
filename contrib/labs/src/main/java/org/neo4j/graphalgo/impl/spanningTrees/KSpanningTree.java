@@ -83,7 +83,7 @@ public class KSpanningTree extends Algorithm<KSpanningTree> {
             if (p == -1) {
                 continue;
             }
-            priorityQueue.add(i, weights.relationshipValue(p, i, 0.0D));
+            priorityQueue.add(i, weights.relationshipProperty(p, i, 0.0D));
             logger.logProgress(i, nodeCount, () -> "reorganization");
         }
         // remove k-1 relationships

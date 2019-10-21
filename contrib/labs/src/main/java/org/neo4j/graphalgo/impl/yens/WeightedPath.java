@@ -112,7 +112,7 @@ public class WeightedPath {
     public WeightedPath evaluateAndSetCost(RelationshipProperties weights) {
         this.weight = 0.;
         forEachEdge((a, b) -> {
-            this.weight += weights.relationshipValue(a, b, 1.0D);
+            this.weight += weights.relationshipProperty(a, b, 1.0D);
         });
         return this;
     }

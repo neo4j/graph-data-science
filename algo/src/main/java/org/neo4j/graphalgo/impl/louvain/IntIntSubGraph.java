@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.impl.louvain;
 
 import com.carrotsearch.hppc.IntFloatHashMap;
 import com.carrotsearch.hppc.cursors.IntFloatCursor;
-import org.neo4j.graphalgo.api.PropertyRelationshipConsumer;
+import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 
 final class IntIntSubGraph extends SubGraph {
 
@@ -46,7 +46,7 @@ final class IntIntSubGraph extends SubGraph {
     }
 
     @Override
-    void forEach(final long nodeId, final PropertyRelationshipConsumer consumer) {
+    void forEach(final long nodeId, final RelationshipWithPropertyConsumer consumer) {
         assert nodeId < graph.length;
         IntFloatHashMap targets = graph[(int) nodeId];
         if (targets != null) {

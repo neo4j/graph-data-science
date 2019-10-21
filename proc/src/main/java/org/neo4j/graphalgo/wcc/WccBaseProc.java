@@ -21,8 +21,9 @@ package org.neo4j.graphalgo.wcc;
 
 import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.BaseAlgoProc;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.PropertyMapping;
+import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.loading.NullPropertyMap;
@@ -164,9 +165,9 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
         return new ProcedureSetup(builder, graph, tracker, configuration);
     }
 
-    private org.neo4j.graphalgo.PropertyMapping[] createPropertyMappings(String seedProperty) {
-        return new org.neo4j.graphalgo.PropertyMapping[]{
-                org.neo4j.graphalgo.PropertyMapping.of(SEED_TYPE, seedProperty, -1),
+    private PropertyMapping[] createPropertyMappings(String seedProperty) {
+        return new PropertyMapping[]{
+                PropertyMapping.of(SEED_TYPE, seedProperty, -1),
         };
     }
 
@@ -227,7 +228,7 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
 
     private WccResultProducer getResultProducer(
             final DisjointSetStruct dss,
-            final PropertyMapping nodeProperties,
+            final NodeOrRelationshipProperties nodeProperties,
             final ProcedureConfiguration procedureConfiguration,
             final AllocationTracker tracker) {
         String writeProperty = procedureConfiguration.get(

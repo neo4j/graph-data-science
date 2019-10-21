@@ -24,8 +24,8 @@ import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
-import org.neo4j.graphalgo.api.PropertyMapping;
-import org.neo4j.graphalgo.api.PropertyRelationshipConsumer;
+import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
+import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.collection.Iterables;
 
@@ -80,7 +80,7 @@ public final class UnionGraph implements Graph {
     }
 
     @Override
-    public PropertyMapping nodeProperties(final String type) {
+    public NodeOrRelationshipProperties nodeProperties(final String type) {
         return first.nodeProperties(type);
     }
 
@@ -105,8 +105,8 @@ public final class UnionGraph implements Graph {
     }
 
     @Override
-    public double relationshipValue(final long sourceNodeId, final long targetNodeId, double fallbackValue) {
-        return first.relationshipValue(sourceNodeId, targetNodeId, fallbackValue);
+    public double relationshipProperty(final long sourceNodeId, final long targetNodeId, double fallbackValue) {
+        return first.relationshipProperty(sourceNodeId, targetNodeId, fallbackValue);
     }
 
     @Override
@@ -121,7 +121,7 @@ public final class UnionGraph implements Graph {
             long nodeId,
             Direction direction,
             double fallbackValue,
-            PropertyRelationshipConsumer consumer) {
+            RelationshipWithPropertyConsumer consumer) {
         for (Graph graph : graphs) {
             graph.forEachRelationship(nodeId, direction, fallbackValue, consumer);
         }

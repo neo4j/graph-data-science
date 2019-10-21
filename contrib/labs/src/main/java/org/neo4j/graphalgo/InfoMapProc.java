@@ -132,7 +132,7 @@ public class InfoMapProc {
                         .load(config.getGraphImpl());
                 infoMap = InfoMap.weighted(
                         graph,
-                        ((NodePropertyContainer) graph).nodeProperties("_pr")::nodeValue,
+                        graph.nodeProperties("_pr"),
                         graph,
                         config.getNumber("threshold", InfoMap.THRESHOLD).doubleValue(),
                         config.getNumber("tau", InfoMap.TAU).doubleValue(),
@@ -172,7 +172,7 @@ public class InfoMapProc {
                         .load(config.getGraphImpl());
                 infoMap = InfoMap.unweighted(
                         graph,
-                        ((NodePropertyContainer) graph).nodeProperties("_pr")::nodeValue,
+                        ((NodePropertyContainer) graph).nodeProperties("_pr")::nodeProperty,
                         config.getNumber("threshold", InfoMap.THRESHOLD).doubleValue(),
                         config.getNumber("tau", InfoMap.TAU).doubleValue(),
                         Pools.FJ_POOL,
@@ -268,7 +268,7 @@ public class InfoMapProc {
                             .load(config.getGraphImpl());
                     infoMap = InfoMap.weighted(
                             graph,
-                            ((NodePropertyContainer) graph).nodeProperties("_pr")::nodeValue,
+                            graph.nodeProperties("_pr"),
                             graph,
                             config.getNumber("threshold", InfoMap.THRESHOLD).doubleValue(),
                             config.getNumber("tau", InfoMap.TAU).doubleValue(),
@@ -312,7 +312,7 @@ public class InfoMapProc {
                             .load(config.getGraphImpl());
                     infoMap = InfoMap.unweighted(
                             graph,
-                            ((NodePropertyContainer) graph).nodeProperties("_pr")::nodeValue,
+                            graph.nodeProperties("_pr"),
                             config.getNumber("threshold", InfoMap.THRESHOLD).doubleValue(),
                             config.getNumber("tau", InfoMap.TAU).doubleValue(),
                             Pools.FJ_POOL,

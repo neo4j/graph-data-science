@@ -125,9 +125,9 @@ class CypherGraphFactoryTest {
         });
         assertEquals(6, total.get());
 
-        assertEquals(6.0D, graph.nodeProperties("partition").nodeValue(node1), 0.01);
-        assertEquals(5.0D, graph.nodeProperties("foo").nodeValue(node1), 0.01);
-        assertEquals(4.0D, graph.nodeProperties("foo").nodeValue(node2), 0.01);
+        assertEquals(6.0D, graph.nodeProperties("partition").nodeProperty(node1), 0.01);
+        assertEquals(5.0D, graph.nodeProperties("foo").nodeProperty(node1), 0.01);
+        assertEquals(4.0D, graph.nodeProperties("foo").nodeProperty(node2), 0.01);
     }
 
     @ParameterizedTest(name = "parallel={0}")

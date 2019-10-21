@@ -42,7 +42,7 @@ public class DegreeNormalizedRelationshipProperties implements RelationshipPrope
     }
 
     @Override
-    public double relationshipValue(long sourceNodeId, long targetNodeId, double fallbackValue) {
+    public double relationshipProperty(long sourceNodeId, long targetNodeId, double fallbackValue) {
         return 1. / degrees.degree(sourceNodeId, direction);
     }
 }

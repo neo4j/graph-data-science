@@ -53,7 +53,7 @@ public interface RelationshipIterator extends RelationshipPredicate {
             long nodeId,
             Direction direction,
             double fallbackValue,
-            PropertyRelationshipConsumer consumer);
+            RelationshipWithPropertyConsumer consumer);
 
     default void forEachIncoming(
             long nodeId,

@@ -24,8 +24,8 @@ import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
-import org.neo4j.graphalgo.api.PropertyMapping;
-import org.neo4j.graphalgo.api.PropertyRelationshipConsumer;
+import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
+import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
@@ -88,7 +88,7 @@ public class HugeGraph implements Graph {
     private final IdMap idMapping;
     private final AllocationTracker tracker;
 
-    private final Map<String, PropertyMapping> nodeProperties;
+    private final Map<String, NodeOrRelationshipProperties> nodeProperties;
     private final long relationshipCount;
     private AdjacencyList inAdjacency;
     private AdjacencyList outAdjacency;
@@ -114,7 +114,7 @@ public class HugeGraph implements Graph {
     public static HugeGraph create(
         final AllocationTracker tracker,
         final IdMap idMapping,
-        final Map<String, PropertyMapping> nodeProperties,
+        final Map<String, NodeOrRelationshipProperties> nodeProperties,
         final long relationshipCount,
         final AdjacencyList inAdjacency,
         final AdjacencyList outAdjacency,
@@ -150,7 +150,7 @@ public class HugeGraph implements Graph {
     public HugeGraph(
         final AllocationTracker tracker,
         final IdMap idMapping,
-        final Map<String, PropertyMapping> nodeProperties,
+        final Map<String, NodeOrRelationshipProperties> nodeProperties,
         final long relationshipCount,
         final AdjacencyList inAdjacency,
         final AdjacencyList outAdjacency,
@@ -210,7 +210,7 @@ public class HugeGraph implements Graph {
     }
 
     @Override
-    public double relationshipValue(final long sourceNodeId, final long targetNodeId, double fallbackValue) {
+    public double relationshipProperty(final long sourceNodeId, final long targetNodeId, double fallbackValue) {
         if (!hasRelationshipProperty) {
             return fallbackValue;
         }
@@ -272,7 +272,7 @@ public class HugeGraph implements Graph {
     }
 
     @Override
-    public PropertyMapping nodeProperties(final String type) {
+    public NodeOrRelationshipProperties nodeProperties(final String type) {
         return nodeProperties.get(type);
     }
 
@@ -303,7 +303,7 @@ public class HugeGraph implements Graph {
         long nodeId,
         Direction direction,
         double fallbackValue,
-        PropertyRelationshipConsumer consumer
+        RelationshipWithPropertyConsumer consumer
     ) {
 
         switch (direction) {
@@ -440,7 +440,7 @@ public class HugeGraph implements Graph {
         long sourceNodeId,
         Direction direction,
         double fallbackValue,
-        PropertyRelationshipConsumer consumer
+        RelationshipWithPropertyConsumer consumer
     ) {
 
         if (direction == Direction.BOTH) {
@@ -529,7 +529,7 @@ public class HugeGraph implements Graph {
     @Override
     public void releaseProperties() {
         if (canRelease) {
-            for (final PropertyMapping nodeMapping : nodeProperties.values()) {
+            for (final NodeOrRelationshipProperties nodeMapping : nodeProperties.values()) {
                 tracker.remove(nodeMapping.release());
             }
         }
@@ -618,7 +618,7 @@ public class HugeGraph implements Graph {
         long startNode,
         AdjacencyList.DecompressingCursor adjacencyCursor,
         AdjacencyList.Cursor propertyCursor,
-        PropertyRelationshipConsumer consumer
+        RelationshipWithPropertyConsumer consumer
     ) {
 
         while (adjacencyCursor.hasNextVLong()) {

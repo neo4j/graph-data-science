@@ -24,8 +24,8 @@ import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
-import org.neo4j.graphalgo.api.PropertyMapping;
-import org.neo4j.graphalgo.api.PropertyRelationshipConsumer;
+import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
+import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphdb.Direction;
@@ -47,14 +47,14 @@ abstract class SubGraph implements Graph {
         return degree(nodeId);
     }
 
-    abstract void forEach(long nodeId, PropertyRelationshipConsumer consumer);
+    abstract void forEach(long nodeId, RelationshipWithPropertyConsumer consumer);
 
     @Override
     public final void forEachRelationship(
             final long nodeId,
             final Direction direction,
             double fallbackValue,
-            final PropertyRelationshipConsumer consumer) {
+            final RelationshipWithPropertyConsumer consumer) {
         forEach(nodeId, consumer);
     }
 
@@ -92,8 +92,8 @@ abstract class SubGraph implements Graph {
     }
 
     @Override
-    public final double relationshipValue(long sourceNodeId, long targetNodeId, double fallbackValue) {
-        throw new UnsupportedOperationException("weightOf is not supported.");
+    public final double relationshipProperty(long sourceNodeId, long targetNodeId, double fallbackValue) {
+        throw new UnsupportedOperationException("relationshipProperty is not supported.");
     }
 
     @Override
@@ -108,7 +108,7 @@ abstract class SubGraph implements Graph {
 
     @Override
     public final long toMappedNodeId(long nodeId) {
-        throw new UnsupportedOperationException("toHugeMappedNodeId is not supported.");
+        throw new UnsupportedOperationException("toMappedNodeId is not supported.");
     }
 
     @Override
@@ -123,12 +123,12 @@ abstract class SubGraph implements Graph {
 
     @Override
     public final PrimitiveLongIterator nodeIterator() {
-        throw new UnsupportedOperationException("hugeNodeIterator is not supported.");
+        throw new UnsupportedOperationException("nodeIterator is not supported.");
     }
 
     @Override
-    public final PropertyMapping nodeProperties(String type) {
-        throw new UnsupportedOperationException("hugeNodeProperties is not supported.");
+    public final NodeOrRelationshipProperties nodeProperties(String type) {
+        throw new UnsupportedOperationException("nodeProperties is not supported.");
     }
 
     @Override

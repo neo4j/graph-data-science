@@ -480,13 +480,13 @@ public class InfoMap extends Algorithm<InfoMap> {
                 int s = (int) source;
                 int t = (int) target;
                 if (s != t) {
-                    final double v = weights.relationshipValue(s, t, 1.0D);
+                    final double v = weights.relationshipProperty(s, t, 1.0D);
                     w += v;
-                    wi.put(t, v * pageRank.nodeValue(s) + weights.relationshipValue(t, s, 1.0D) * pageRank.nodeValue(t));
+                    wi.put(t, v * pageRank.nodeProperty(s) + weights.relationshipProperty(t, s, 1.0D) * pageRank.nodeProperty(t));
                 }
                 return true;
             });
-            p = pageRank.nodeValue(startNode);
+            p = pageRank.nodeProperty(startNode);
             w *= p;
             q = tau * p + tau1 * w;
         }

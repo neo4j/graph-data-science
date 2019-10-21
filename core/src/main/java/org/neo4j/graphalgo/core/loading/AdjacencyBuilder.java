@@ -37,7 +37,7 @@ public abstract class AdjacencyBuilder {
     abstract void addAll(
             long[] batch,
             long[] targets,
-            long[][] weights,
+            long[][] propertyValues,
             int[] offsets,
             int length,
             AllocationTracker tracker);
@@ -50,8 +50,8 @@ public abstract class AdjacencyBuilder {
             int pageSize,
             AllocationTracker tracker,
             LongAdder relationshipCounter,
-            int[] weightProperties,
-            double[] defaultWeights) {
+            int[] propertyKeyIds,
+            double[] defaultValues) {
         if (globalBuilder == null) {
             return NoAdjacency.INSTANCE;
         }
@@ -61,9 +61,9 @@ public abstract class AdjacencyBuilder {
         LongsRef[] buffers = new LongsRef[numPages];
         long[][] globalAdjacencyOffsets = new long[numPages][];
 
-        long[][][] globalWeightOffsets = new long[weightProperties.length][][];
+        long[][][] globalWeightOffsets = new long[propertyKeyIds.length][][];
         Arrays.setAll(globalWeightOffsets, i -> {
-            int weightProperty = weightProperties[i];
+            int weightProperty = propertyKeyIds[i];
             return weightProperty != StatementConstants.NO_SUCH_PROPERTY_KEY ? new long[numPages][] : null;
         });
 
@@ -76,8 +76,8 @@ public abstract class AdjacencyBuilder {
                 globalWeightOffsets,
                 pageSize,
                 relationshipCounter,
-                weightProperties,
-                defaultWeights);
+                propertyKeyIds,
+                defaultValues);
         for (int idx = 0; idx < numPages; idx++) {
             compressingPagedAdjacency.addAdjacencyImporter(tracker, idx);
         }
@@ -103,8 +103,8 @@ public abstract class AdjacencyBuilder {
         private final long sizeOfLongPage;
         private final long sizeOfObjectPage;
         private final LongAdder relationshipCounter;
-        private final int[] weightProperties;
-        private final double[] defaultWeight;
+        private final int[] propertyKeyIds;
+        private final double[] defaultValues;
 
         private CompressingPagedAdjacency(
                 RelationshipsBuilder globalBuilder,
@@ -115,8 +115,8 @@ public abstract class AdjacencyBuilder {
                 long[][][] globalWeightOffsets,
                 int pageSize,
                 LongAdder relationshipCounter,
-                int[] weightProperties,
-                double[] defaultWeight) {
+                int[] propertyKeyIds,
+                double[] defaultValues) {
             this.globalBuilder = globalBuilder;
             this.localBuilders = localBuilders;
             this.compressedAdjacencyLists = compressedAdjacencyLists;
@@ -129,8 +129,8 @@ public abstract class AdjacencyBuilder {
             sizeOfLongPage = sizeOfLongArray(pageSize);
             sizeOfObjectPage = sizeOfObjectArray(pageSize);
             this.relationshipCounter = relationshipCounter;
-            this.weightProperties = weightProperties;
-            this.defaultWeight = defaultWeight;
+            this.propertyKeyIds = propertyKeyIds;
+            this.defaultValues = defaultValues;
         }
 
         void addAdjacencyImporter(AllocationTracker tracker, int pageIndex) {
@@ -141,9 +141,9 @@ public abstract class AdjacencyBuilder {
             buffers[pageIndex] = new LongsRef();
             long[] localAdjacencyOffsets = globalAdjacencyOffsets[pageIndex] = new long[pageSize];
 
-            long[][] localWeightOffsets = new long[weightProperties.length][];
-            for (int i = 0; i < weightProperties.length; i++) {
-                int weightProperty = weightProperties[i];
+            long[][] localWeightOffsets = new long[propertyKeyIds.length][];
+            for (int i = 0; i < propertyKeyIds.length; i++) {
+                int weightProperty = propertyKeyIds[i];
                 if (weightProperty != StatementConstants.NO_SUCH_PROPERTY_KEY) {
                     localWeightOffsets[i] = globalWeightOffsets[i][pageIndex] = new long[pageSize];
                 }
@@ -172,7 +172,7 @@ public abstract class AdjacencyBuilder {
         void addAll(
                 long[] batch,
                 long[] targets,
-                long[][] weights,
+                long[][] propertyValues,
                 int[] offsets,
                 int length,
                 AllocationTracker tracker) {
@@ -208,14 +208,14 @@ public abstract class AdjacencyBuilder {
 
                     CompressedLongArray compressedTargets = this.compressedAdjacencyLists[pageIndex][localId];
                     if (compressedTargets == null) {
-                        compressedTargets = new CompressedLongArray(tracker, weights == null ? 0 : weights.length);
+                        compressedTargets = new CompressedLongArray(tracker, propertyValues == null ? 0 : propertyValues.length);
                         this.compressedAdjacencyLists[pageIndex][localId] = compressedTargets;
                     }
 
-                    if (weights == null) {
+                    if (propertyValues == null) {
                         compressedTargets.add(targets, startOffset, endOffset);
                     } else {
-                        compressedTargets.add(targets, weights, startOffset, endOffset);
+                        compressedTargets.add(targets, propertyValues, startOffset, endOffset);
                     }
 
                     startOffset = endOffset;
@@ -253,12 +253,12 @@ public abstract class AdjacencyBuilder {
 
         @Override
         int[] getPropertyKeyIds() {
-            return weightProperties;
+            return propertyKeyIds;
         }
 
         @Override
         double[] getDefaultValues() {
-            return defaultWeight;
+            return defaultValues;
         }
     }
 
@@ -270,7 +270,7 @@ public abstract class AdjacencyBuilder {
         void addAll(
                 long[] batch,
                 long[] targets,
-                long[][] weights,
+                long[][] propertyValues,
                 int[] offsets,
                 int length,
                 AllocationTracker tracker) {

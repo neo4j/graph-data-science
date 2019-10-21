@@ -198,7 +198,7 @@ public class KShortestPathsProc {
 
             double[] costs = new double[weightedPath.size()-1];
             weightedPath.forEachEdge((sourceNode, targetNode) -> {
-                double cost = graph.relationshipValue(sourceNode, targetNode, 1.0D);
+                double cost = graph.relationshipProperty(sourceNode, targetNode, 1.0D);
                 costs[count.getAndIncrement()] = cost;
             });
 

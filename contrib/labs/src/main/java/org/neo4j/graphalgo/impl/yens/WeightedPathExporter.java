@@ -91,7 +91,7 @@ public class WeightedPathExporter extends StatementApi {
                     statement.dataWrite().relationshipSetProperty(
                             relationshipId,
                             getOrCreatePropertyId(propertyName),
-                            Values.doubleValue(relationshipProperties.relationshipValue(s, t, 1.0D)));
+                            Values.doubleValue(relationshipProperties.relationshipProperty(s, t, 1.0D)));
                 } catch (KernelException e) {
                     ExceptionUtil.throwKernelException(e);
                 }

@@ -178,17 +178,17 @@ public class MultistepSCCBenchmark {
 
     @Benchmark
     public Object _01_multistepSCCsequential() {
-        return new MultistepSCC(graph, org.neo4j.graphalgo.core.utils.Pools.DEFAULT, 1, 0);
+        return new MultistepSCC(graph, Pools.DEFAULT, 1, 0);
     }
 
     @Benchmark
     public Object _02_multistepSCCparallel() {
-        return new MultistepSCC(graph, org.neo4j.graphalgo.core.utils.Pools.DEFAULT, 4, 0);
+        return new MultistepSCC(graph, Pools.DEFAULT, 4, 0);
     }
 
     @Benchmark
     public Object _03_multistepSCCtarjan() {
-        return new MultistepSCC(graph, org.neo4j.graphalgo.core.utils.Pools.DEFAULT, 4, 100_000_000);
+        return new MultistepSCC(graph, Pools.DEFAULT, 4, 100_000_000);
     }
 
 }

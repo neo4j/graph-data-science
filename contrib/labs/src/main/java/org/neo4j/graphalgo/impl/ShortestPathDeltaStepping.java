@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.impl;
 
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.PropertyRelationshipConsumer;
+import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.container.Buckets;
 import org.neo4j.graphdb.Direction;
@@ -145,7 +145,7 @@ public class ShortestPathDeltaStepping extends Algorithm<ShortestPathDeltaSteppi
             // for each node in bucket
             buckets.forEachInBucket(phase, node -> {
                 // relax each outgoing light edge
-                PropertyRelationshipConsumer relationshipConsumer = longToIntConsumer((sourceNodeId, targetNodeId, cost) -> {
+                RelationshipWithPropertyConsumer relationshipConsumer = longToIntConsumer((sourceNodeId, targetNodeId, cost) -> {
                     final int iCost = (int) (cost * multiplier + distance.get(sourceNodeId));
                     if (cost <= delta) { // determine if light or heavy edge
                         light.add(() -> relax(targetNodeId, iCost));

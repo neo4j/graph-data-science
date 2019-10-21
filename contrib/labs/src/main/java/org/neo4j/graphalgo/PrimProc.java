@@ -180,7 +180,7 @@ public class PrimProc {
                         relType,
                         graph.toOriginalNodeId(target)
                 );
-                ops.relationshipSetProperty(relId, propertyType, Values.doubleValue(graph.relationshipValue(source, target, Double.NaN)));
+                ops.relationshipSetProperty(relId, propertyType, Values.doubleValue(graph.relationshipProperty(source, target, Double.NaN)));
             } catch (KernelException e) {
                 ExceptionUtil.throwKernelException(e);
             }

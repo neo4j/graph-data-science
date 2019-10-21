@@ -33,5 +33,5 @@ public interface RelationshipProperties {
      * @param fallbackValue value to use if relationship has no property value
      * @return the property value
      */
-    double relationshipValue(long sourceNodeId, long targetNodeId, double fallbackValue);
+    double relationshipProperty(long sourceNodeId, long targetNodeId, double fallbackValue);
 }

@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.impl.pagerank;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
@@ -69,9 +70,9 @@ public class WeightedComputeStep extends BaseComputeStep implements Relationship
     }
 
     @Override
-    public boolean accept(long sourceNodeId, long targetNodeId, double weight) {
-        if (weight > 0) {
-            double proportion = weight / sumOfWeights;
+    public boolean accept(long sourceNodeId, long targetNodeId, double property) {
+        if (property > 0) {
+            double proportion = property / sumOfWeights;
             float srcRankDelta = (float) (delta * proportion);
             if (srcRankDelta != 0F) {
                 int idx = binaryLookup(targetNodeId, starts);

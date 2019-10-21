@@ -19,30 +19,24 @@
  */
 package org.neo4j.graphalgo.api;
 
-public interface PropertyMapping extends NodeProperties {
+public interface NodeOrRelationshipProperties extends NodeProperties, RelationshipProperties {
+
     /**
      * Returns the proeprty value for the relationship defined by their start and end nodes.
      */
-    double relationshipValue(long source, long target);
-
-    /**
-     * Returns the property value for the relationship defined by their start and end nodes
-     * or the given default value if no property had been defined.
-     * The default value has precedence over the default value defined by the loader.
-     */
-    double relationshipValue(long source, long target, double defaultValue);
+    double relationshipProperty(long source, long target);
 
     @Override
-    default double nodeValue(long nodeId) {
-        return relationshipValue(nodeId, -1L);
+    default double nodeProperty(long nodeId) {
+        return relationshipProperty(nodeId, -1L);
     }
 
     /**
      * Returns the property value for a node or the given default value if no property had been defined.
      * The default value has precedence over the default value defined by the loader.
      */
-    default double nodeValue(long nodeId, double defaultValue) {
-        return relationshipValue(nodeId, -1L, defaultValue);
+    default double nodeProperty(long nodeId, double defaultValue) {
+        return relationshipProperty(nodeId, -1L, defaultValue);
     }
 
     /**
@@ -51,14 +45,14 @@ public interface PropertyMapping extends NodeProperties {
      * @param defaultValue value being returned if the mapping is empty
      * @return maximum value or given default value if mapping is empty
      */
-    default long getMaxValue(long defaultValue) {
-        return size() == 0 ? defaultValue : getMaxValue();
+    default long getMaxPropertyValue(long defaultValue) {
+        return size() == 0 ? defaultValue : getMaxPropertyValue();
     }
 
     /**
      * Returns the maximum value contained in the mapping.
      */
-    default long getMaxValue() {
+    default long getMaxPropertyValue() {
         return -1L;
     }
 

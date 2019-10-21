@@ -105,7 +105,7 @@ public final class Pregel {
         HugeDoubleArray hugeDoubleArray = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
         ParallelUtil.parallelStreamConsume(
                 LongStream.range(0, graph.nodeCount()),
-                nodeIds -> nodeIds.forEach(nodeId -> hugeDoubleArray.set(nodeId, initialNodeValues.nodeValue(nodeId)))
+                nodeIds -> nodeIds.forEach(nodeId -> hugeDoubleArray.set(nodeId, initialNodeValues.nodeProperty(nodeId)))
         );
 
         return new Pregel(

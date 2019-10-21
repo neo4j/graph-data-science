@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.api.PropertyMapping;
+import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 
@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
  * RelationshipPropertyMapping implementation which always returns
  * a given default property value upon invocation
  */
-public class NullPropertyMap implements PropertyMapping {
+public class NullPropertyMap implements NodeOrRelationshipProperties {
 
     static final MemoryEstimation MEMORY_USAGE = MemoryEstimations.of(NullPropertyMap.class);
 
@@ -43,22 +43,22 @@ public class NullPropertyMap implements PropertyMapping {
     }
 
     @Override
-    public double relationshipValue(final long source, final long target) {
+    public double relationshipProperty(final long source, final long target) {
         return defaultValue;
     }
 
     @Override
-    public double relationshipValue(final long source, final long target, final double defaultValue) {
+    public double relationshipProperty(final long source, final long target, final double defaultValue) {
         return defaultValue;
     }
 
     @Override
-    public double nodeValue(final long nodeId) {
+    public double nodeProperty(final long nodeId) {
         return defaultValue;
     }
 
     @Override
-    public double nodeValue(final long nodeId, final double defaultValue) {
+    public double nodeProperty(final long nodeId, final double defaultValue) {
         return defaultValue;
     }
 

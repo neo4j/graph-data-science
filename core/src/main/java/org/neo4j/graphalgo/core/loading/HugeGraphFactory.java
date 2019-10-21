@@ -21,13 +21,14 @@ package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.apache.commons.lang3.tuple.Pair;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipTypeMapping;
 import org.neo4j.graphalgo.RelationshipTypeMappings;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.api.MultipleRelTypesSupport;
-import org.neo4j.graphalgo.api.PropertyMapping;
+import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
@@ -68,7 +69,7 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
                 .add("nodeIdMap", IdMap.memoryEstimation());
 
         // Node properties
-        for (org.neo4j.graphalgo.PropertyMapping propertyMapping : dimensions.nodeProperties()) {
+        for (PropertyMapping propertyMapping : dimensions.nodeProperties()) {
             if (propertyMapping.exists()) {
                 builder.add(propertyMapping.propertyKey(), NodePropertyMap.memoryEstimation());
             } else {
@@ -77,7 +78,7 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
         }
 
         // Relationship properties
-        for (org.neo4j.graphalgo.PropertyMapping mapping : dimensions.relProperties()) {
+        for (PropertyMapping mapping : dimensions.relProperties()) {
             if (mapping.exists()) {
                 // Adjacency lists and Adjacency offsets
                 MemoryEstimation adjacencyListSize = AdjacencyList.uncompressedMemoryEstimation(setup.loadAsUndirected);
@@ -243,7 +244,7 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
                     } else {
                         return dimensions.relProperties().enumerate().map(propertyEntry -> {
                             int weightIndex = propertyEntry.getKey();
-                            org.neo4j.graphalgo.PropertyMapping property = propertyEntry.getValue();
+                            PropertyMapping property = propertyEntry.getValue();
                             HugeGraph graph = buildGraphWithRelationshipProperty(
                                     tracker,
                                     idsAndProperties.hugeIdMap,
@@ -312,7 +313,7 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
     private HugeGraph buildGraph(
             AllocationTracker tracker,
             IdMap idMapping,
-            Map<String, PropertyMapping> nodeProperties,
+            Map<String, NodeOrRelationshipProperties> nodeProperties,
             AdjacencyList outAdjacencyList,
             AdjacencyOffsets outAdjacencyOffsets,
             AdjacencyList inAdjacencyList,
@@ -340,7 +341,7 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
     private HugeGraph buildGraphWithRelationshipProperty(
             AllocationTracker tracker,
             IdMap idMapping,
-            Map<String, PropertyMapping> nodeProperties,
+            Map<String, NodeOrRelationshipProperties> nodeProperties,
             RelationshipsBuilder inRelationshipsBuilder,
             RelationshipsBuilder outRelationshipsBuilder,
             AdjacencyList outAdjacencyList,
@@ -348,7 +349,7 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
             AdjacencyList inAdjacencyList,
             AdjacencyOffsets inAdjacencyOffsets,
             int weightIndex,
-            org.neo4j.graphalgo.PropertyMapping weightProperty,
+            PropertyMapping weightProperty,
             long relationshipCount,
             boolean loadAsUndirected) {
 
@@ -374,7 +375,7 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
             }
         }
 
-        Optional<Double> maybeDefaultWeight = weightProperty == org.neo4j.graphalgo.PropertyMapping.EMPTY_PROPERTY
+        Optional<Double> maybeDefaultWeight = weightProperty == PropertyMapping.EMPTY_PROPERTY
                 ? Optional.empty()
                 : Optional.of(weightProperty.defaultValue());
 

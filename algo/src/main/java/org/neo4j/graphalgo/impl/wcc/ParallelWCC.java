@@ -22,8 +22,8 @@ package org.neo4j.graphalgo.impl.wcc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.api.PropertyMapping;
-import org.neo4j.graphalgo.api.PropertyRelationshipConsumer;
+import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
+import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -92,7 +92,7 @@ public class ParallelWCC extends WCC<ParallelWCC> {
     @Override
     public DisjointSetStruct compute(double threshold) {
         long nodeCount = graph.nodeCount();
-        PropertyMapping communityMap = algoConfig.communityMap;
+        NodeOrRelationshipProperties communityMap = algoConfig.communityMap;
         DisjointSetStruct dss = communityMap == null
                 ? new HugeAtomicDisjointSetStruct(nodeCount, tracker)
                 : new HugeAtomicDisjointSetStruct(nodeCount, communityMap, tracker);
@@ -146,7 +146,7 @@ public class ParallelWCC extends WCC<ParallelWCC> {
         }
     }
 
-    private class WCCWithThresholdTask extends WCCTask implements PropertyRelationshipConsumer {
+    private class WCCWithThresholdTask extends WCCTask implements RelationshipWithPropertyConsumer {
 
         private final double threshold;
 

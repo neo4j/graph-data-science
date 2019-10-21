@@ -24,7 +24,7 @@ import com.carrotsearch.hppc.DoubleArrayList;
 import com.carrotsearch.hppc.ObjectArrayList;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.PropertyMapping;
+import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -84,7 +84,7 @@ public final class Louvain extends Algorithm<Louvain> {
     private final Graph root;
     private long communityCount;
 
-    private final PropertyMapping communityMap;
+    private final NodeOrRelationshipProperties communityMap;
     private final int maxLevel;
     private final int maxIterations;
     private final boolean randomNeighborSelection;
@@ -99,7 +99,7 @@ public final class Louvain extends Algorithm<Louvain> {
     public Louvain(
             final Graph graph,
             final Config config,
-            final PropertyMapping communityMap,
+            final NodeOrRelationshipProperties communityMap,
             final ExecutorService pool,
             final int concurrency,
             final AllocationTracker tracker) {
@@ -139,13 +139,13 @@ public final class Louvain extends Algorithm<Louvain> {
     }
 
     public Louvain compute(
-            final PropertyMapping communityMap,
+            final NodeOrRelationshipProperties communityMap,
             final int maxLevel,
             final int maxIterations,
             final boolean randomNeighborSelection) {
         BitSet comCount = new BitSet();
         communities.setAll(i -> {
-            final long c = (long) communityMap.nodeValue(i, i);
+            final long c = (long) communityMap.nodeProperty(i, i);
             comCount.set(c);
             return c;
         });
@@ -474,7 +474,7 @@ public final class Louvain extends Algorithm<Louvain> {
 
     public static class Config {
 
-        public final PropertyMapping communityMap;
+        public final NodeOrRelationshipProperties communityMap;
         public final int maxLevel;
         public final int maxIterations;
         public final boolean randomNeighborSelection;
@@ -497,7 +497,7 @@ public final class Louvain extends Algorithm<Louvain> {
         }
 
         public Config(
-                final PropertyMapping communityMap,
+                final NodeOrRelationshipProperties communityMap,
                 final int maxLevel,
                 final int maxIterations,
                 final boolean randomNeighborSelection) {

@@ -26,8 +26,8 @@ import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
-import org.neo4j.graphalgo.api.PropertyMapping;
-import org.neo4j.graphalgo.api.PropertyRelationshipConsumer;
+import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
+import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.NodePropertiesBuilder;
 import org.neo4j.graphalgo.core.loading.NullPropertyMap;
@@ -58,14 +58,14 @@ public final class TestGraph implements Graph {
     public static final String TYPE = "test";
 
     private final Map<Long, Adjacency> adjacencyList;
-    private final Map<String, PropertyMapping> nodeProperties;
-    private final PropertyMapping relationshipProperty;
+    private final Map<String, NodeOrRelationshipProperties> nodeProperties;
+    private final NodeOrRelationshipProperties relationshipProperty;
     private final boolean hasRelationshipProperty;
 
     private TestGraph(
             Map<Long, Adjacency> adjacencyList,
-            Map<String, PropertyMapping> nodeProperties,
-            PropertyMapping relationshipProperty,
+            Map<String, NodeOrRelationshipProperties> nodeProperties,
+            NodeOrRelationshipProperties relationshipProperty,
             boolean hasRelationshipProperty) {
         this.adjacencyList = adjacencyList;
         this.nodeProperties = nodeProperties;
@@ -153,7 +153,7 @@ public final class TestGraph implements Graph {
     }
 
     @Override
-    public PropertyMapping nodeProperties(String type) {
+    public NodeOrRelationshipProperties nodeProperties(String type) {
         return nodeProperties.get(type);
     }
 
@@ -184,7 +184,7 @@ public final class TestGraph implements Graph {
             long nodeId,
             Direction direction,
             double fallbackValue,
-            PropertyRelationshipConsumer consumer) {
+            RelationshipWithPropertyConsumer consumer) {
         Adjacency adjacency = adjacencyList.get(nodeId);
         if (direction == Direction.BOTH) {
             forEachWithProperty(adjacency.outEdges, fallbackValue, consumer);
@@ -196,14 +196,14 @@ public final class TestGraph implements Graph {
         }
     }
 
-    private void forEachWithProperty(List<Relationship> rels, double fallbackValue, PropertyRelationshipConsumer consumer) {
+    private void forEachWithProperty(List<Relationship> rels, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
         if (!hasRelationshipProperty()) {
             forEach(rels, (s, t) -> consumer.accept(s, t, fallbackValue));
         } else {
             rels.forEach(r -> consumer.accept(
                     r.sourceId,
                     r.targetId,
-                    relationshipProperty.nodeValue(r.id)));
+                    relationshipProperty.nodeProperty(r.id)));
         }
     }
 
@@ -216,7 +216,7 @@ public final class TestGraph implements Graph {
     }
 
     @Override
-    public double relationshipValue(long sourceNodeId, long targetNodeId, double fallbackValue) {
+    public double relationshipProperty(long sourceNodeId, long targetNodeId, double fallbackValue) {
         throw new UnsupportedOperationException();
     }
 
@@ -294,15 +294,15 @@ public final class TestGraph implements Graph {
             validateInput(vertices, edges);
 
             Map<Long, Adjacency> adjacencyList = buildAdjacencyList(vertices, edges);
-            Map<String, PropertyMapping> nodeProperties = buildWeightMappings(vertices);
-            Map<String, PropertyMapping> relationshipProperties = buildWeightMappings(edges);
+            Map<String, NodeOrRelationshipProperties> nodeProperties = buildWeightMappings(vertices);
+            Map<String, NodeOrRelationshipProperties> relationshipProperties = buildWeightMappings(edges);
 
             // required because of single rel property limitation
             if (relationshipProperties.size() > 1) {
                 throw new IllegalArgumentException("Graph supports at most one relationship property.");
             }
             boolean hasRelationshipProperty = !relationshipProperties.isEmpty();
-            PropertyMapping relationshipProperty = relationshipProperties
+            NodeOrRelationshipProperties relationshipProperty = relationshipProperties
                     .values()
                     .stream()
                     .findFirst()
@@ -352,7 +352,7 @@ public final class TestGraph implements Graph {
             return adjacencyList;
         }
 
-        private static <T extends Element> Map<String, PropertyMapping> buildWeightMappings(Collection<T> elements) {
+        private static <T extends Element> Map<String, NodeOrRelationshipProperties> buildWeightMappings(Collection<T> elements) {
 
             if (elements.isEmpty()) {
                 return new HashMap<>(0);

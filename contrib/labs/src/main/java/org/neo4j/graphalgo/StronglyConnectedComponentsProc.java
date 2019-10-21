@@ -351,7 +351,7 @@ public class StronglyConnectedComponentsProc {
         }
 
         final TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
-        final MultistepSCC multistep = new MultistepSCC(graph, org.neo4j.graphalgo.core.utils.Pools.DEFAULT,
+        final MultistepSCC multistep = new MultistepSCC(graph, Pools.DEFAULT,
                 configuration.getConcurrency(),
                 configuration.getNumber("cutoff", 100_000).intValue())
                 .withProgressLogger(ProgressLogger.wrap(log, "SCC(MultiStep)"))
@@ -404,7 +404,7 @@ public class StronglyConnectedComponentsProc {
             graph.release();
             return Stream.empty();
         }
-        final MultistepSCC multistep = new MultistepSCC(graph, org.neo4j.graphalgo.core.utils.Pools.DEFAULT,
+        final MultistepSCC multistep = new MultistepSCC(graph, Pools.DEFAULT,
                 configuration.getConcurrency(),
                 configuration.getNumber("cutoff", 100_000).intValue())
                 .withProgressLogger(ProgressLogger.wrap(log, "SCC(MultiStep)"))

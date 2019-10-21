@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.PropertyMapping;
+import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.loading.NullPropertyMap;
@@ -153,15 +153,15 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
         return Stream.of(new MemRecResult(memoryEstimation));
     }
 
-    private org.neo4j.graphalgo.PropertyMapping[] createPropertyMappings(String seedProperty, String weightProperty) {
-        ArrayList<org.neo4j.graphalgo.PropertyMapping> propertyMappings = new ArrayList<>();
+    private PropertyMapping[] createPropertyMappings(String seedProperty, String weightProperty) {
+        ArrayList<PropertyMapping> propertyMappings = new ArrayList<>();
         if (seedProperty != null) {
-            propertyMappings.add(org.neo4j.graphalgo.PropertyMapping.of(LabelPropagation.SEED_TYPE, seedProperty, 0D));
+            propertyMappings.add(PropertyMapping.of(LabelPropagation.SEED_TYPE, seedProperty, 0D));
         }
         if (weightProperty != null) {
-            propertyMappings.add(org.neo4j.graphalgo.PropertyMapping.of(LabelPropagation.WEIGHT_TYPE, weightProperty, 1D));
+            propertyMappings.add(PropertyMapping.of(LabelPropagation.WEIGHT_TYPE, weightProperty, 1D));
         }
-        return propertyMappings.toArray(new org.neo4j.graphalgo.PropertyMapping[0]);
+        return propertyMappings.toArray(new PropertyMapping[0]);
     }
 
     @Override
@@ -297,7 +297,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
 
         try (ProgressTimer ignored = stats.timeWrite()) {
             boolean writePropertyEqualsSeedProperty = Objects.equals(seedProperty, writeProperty);
-            PropertyMapping seedProperties = graph.nodeProperties(LabelPropagation.SEED_TYPE);
+            NodeOrRelationshipProperties seedProperties = graph.nodeProperties(LabelPropagation.SEED_TYPE);
             boolean hasSeedProperties = seedProperties != null && !(seedProperties instanceof NullPropertyMap);
 
             PropertyTranslator<HugeLongArray> translator = HugeLongArray.Translator.INSTANCE;

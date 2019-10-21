@@ -91,7 +91,7 @@ final class HugeGraphNoPropertiesTest {
         double fallbackWeight = 42D;
         graph.forEachNode((nodeId) -> {
             graph.forEachRelationship(nodeId, direction, (s, t) -> {
-                assertEquals(fallbackWeight, graph.relationshipValue(s, t, fallbackWeight));
+                assertEquals(fallbackWeight, graph.relationshipProperty(s, t, fallbackWeight));
                 return true;
             });
             return true;

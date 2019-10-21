@@ -31,11 +31,11 @@ class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
 
     @Override
     SequentialDisjointSetStruct newSet(final int capacity) {
-        TestPropertyMapping communities = new TestPropertyMapping();
+        TestNodeOrRelationshipProperties communities = new TestNodeOrRelationshipProperties();
         return newSet(capacity, communities);
     }
 
-    SequentialDisjointSetStruct newSet(final int capacity, final TestPropertyMapping weightMapping) {
+    SequentialDisjointSetStruct newSet(final int capacity, final TestNodeOrRelationshipProperties weightMapping) {
         return new IncrementalDisjointSetStruct(
                 capacity,
                 weightMapping,
@@ -44,7 +44,7 @@ class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
 
     @Test
     void shouldRunWithLessInitialCommunities() {
-        TestPropertyMapping communities = new TestPropertyMapping(0, 0, 1, 0);
+        TestNodeOrRelationshipProperties communities = new TestNodeOrRelationshipProperties(0, 0, 1, 0);
         SequentialDisjointSetStruct dss = newSet(4, communities);
 
         assertEquals(3, getSetCount(dss));
@@ -57,7 +57,7 @@ class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
 
     @Test
     void shouldRunWithLessInitialCommunitiesAndLargerIdSpace() {
-        TestPropertyMapping communities = new TestPropertyMapping(0, 10, 1, 10);
+        TestNodeOrRelationshipProperties communities = new TestNodeOrRelationshipProperties(0, 10, 1, 10);
         SequentialDisjointSetStruct dss = newSet(4, communities);
 
         assertEquals(3, getSetCount(dss));
@@ -70,7 +70,7 @@ class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
 
     @Test
     void shouldRunWithLessInitialCommunitiesAndOverlappingIdSpace() {
-        TestPropertyMapping communities = new TestPropertyMapping(0, 3, 1, 3);
+        TestNodeOrRelationshipProperties communities = new TestNodeOrRelationshipProperties(0, 3, 1, 3);
         SequentialDisjointSetStruct dss = newSet(4, communities);
 
         assertEquals(3, getSetCount(dss));

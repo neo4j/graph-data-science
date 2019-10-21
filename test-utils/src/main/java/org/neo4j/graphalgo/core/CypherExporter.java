@@ -331,7 +331,7 @@ public final class CypherExporter {
 
         @Override
         public Object property(String key, Long nodeId, Graph graph) {
-            return graph.nodeProperties(key).nodeValue(nodeId);
+            return graph.nodeProperties(key).nodeProperty(nodeId);
         }
     }
 
@@ -360,7 +360,7 @@ public final class CypherExporter {
 
         @Override
         public Object property(String key, Pair<Long, Long> startAndEndNodeId, Graph graph) {
-            return graph.relationshipValue(startAndEndNodeId.first(), startAndEndNodeId.other(), Double.NaN);
+            return graph.relationshipProperty(startAndEndNodeId.first(), startAndEndNodeId.other(), Double.NaN);
         }
     }
 

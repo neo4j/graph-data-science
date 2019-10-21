@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.impl.wcc;
 
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.PropertyMapping;
+import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -95,10 +95,10 @@ public abstract class WCC<ME extends WCC<ME>> extends Algorithm<ME> {
 
     public static class Config {
 
-        public final PropertyMapping communityMap;
+        public final NodeOrRelationshipProperties communityMap;
         public final double threshold;
 
-        public Config(final PropertyMapping communityMap, final double threshold) {
+        public Config(final NodeOrRelationshipProperties communityMap, final double threshold) {
             this.communityMap = communityMap;
             this.threshold = threshold;
         }

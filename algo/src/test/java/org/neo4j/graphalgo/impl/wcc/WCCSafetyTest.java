@@ -27,8 +27,8 @@ import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
-import org.neo4j.graphalgo.api.PropertyMapping;
-import org.neo4j.graphalgo.api.PropertyRelationshipConsumer;
+import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
+import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.loading.NullPropertyMap;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.Exceptions;
@@ -141,7 +141,7 @@ final class WCCSafetyTest {
         @Override
         public Collection<PrimitiveLongIterable> batchIterables(final int batchSize) {
             throw new UnsupportedOperationException(
-                    "org.neo4j.graphalgo.impl.wcc.WCCSafetyTest.FlakyGraph.hugeBatchIterables is not implemented.");
+                    "org.neo4j.graphalgo.impl.wcc.WCCSafetyTest.FlakyGraph.batchIterables is not implemented.");
         }
 
         @Override
@@ -153,7 +153,7 @@ final class WCCSafetyTest {
         @Override
         public long toMappedNodeId(final long nodeId) {
             throw new UnsupportedOperationException(
-                    "org.neo4j.graphalgo.impl.wcc.WCCSafetyTest.FlakyGraph.toHugeMappedNodeId is not implemented.");
+                    "org.neo4j.graphalgo.impl.wcc.WCCSafetyTest.FlakyGraph.toMappedNodeId is not implemented.");
         }
 
         @Override
@@ -176,13 +176,13 @@ final class WCCSafetyTest {
         @Override
         public PrimitiveLongIterator nodeIterator() {
             throw new UnsupportedOperationException(
-                    "org.neo4j.graphalgo.impl.wcc.WCCSafetyTest.FlakyGraph.hugeNodeIterator is not implemented.");
+                    "org.neo4j.graphalgo.impl.wcc.WCCSafetyTest.FlakyGraph.nodeIterator is not implemented.");
         }
 
         @Override
-        public PropertyMapping nodeProperties(final String type) {
+        public NodeOrRelationshipProperties nodeProperties(final String type) {
             throw new UnsupportedOperationException(
-                    "org.neo4j.graphalgo.impl.wcc.WCCSafetyTest.FlakyGraph.hugeNodeProperties is not implemented.");
+                    "org.neo4j.graphalgo.impl.wcc.WCCSafetyTest.FlakyGraph.nodeProperties is not implemented.");
         }
 
         @Override
@@ -196,7 +196,7 @@ final class WCCSafetyTest {
                 final long nodeId,
                 final Direction direction,
                 double fallbackValue,
-                final PropertyRelationshipConsumer consumer) {
+                final RelationshipWithPropertyConsumer consumer) {
             throw new UnsupportedOperationException(
                     "org.neo4j.graphalgo.impl.unionfind.UnionFindSafetyTest.FlakyGraph.forEachRelationship is not implemented.");
         }
@@ -208,9 +208,9 @@ final class WCCSafetyTest {
         }
 
         @Override
-        public double relationshipValue(final long sourceNodeId, final long targetNodeId, double fallbackValue) {
+        public double relationshipProperty(final long sourceNodeId, final long targetNodeId, double fallbackValue) {
             throw new UnsupportedOperationException(
-                    "org.neo4j.graphalgo.impl.wcc.WCCSafetyTest.FlakyGraph.weightOf is not implemented.");
+                    "org.neo4j.graphalgo.impl.wcc.WCCSafetyTest.FlakyGraph.relationshipProperty");
         }
 
         @Override

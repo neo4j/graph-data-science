@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.api;
 
-public interface PropertyRelationshipConsumer {
+public interface RelationshipWithPropertyConsumer {
     /**
      * Called for every relationship that matches a given relation-constraint
      *

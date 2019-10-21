@@ -193,7 +193,7 @@ public class WCCForkJoinMerge extends WCC<WCCForkJoinMerge> {
                         node,
                         Direction.OUTGOING,
                         (sourceNodeId, targetNodeId) -> {
-                            double weight = graph.relationshipValue(
+                            double weight = graph.relationshipProperty(
                                     sourceNodeId,
                                     targetNodeId,
                                     WCC.defaultWeight(threshold));
