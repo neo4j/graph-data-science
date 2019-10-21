@@ -83,14 +83,6 @@ class LouvainWeightedGraphTest extends LouvainTestBase {
         }
     }
 
-    void printCommunities(Louvain louvain) {
-        try (Transaction ignored = db.beginTx()) {
-            louvain
-                    .resultStream()
-                    .forEach(r -> System.out.println(db.getNodeById(r.nodeId).getProperty("name") + ":" + r.community));
-        }
-    }
-
     @AllGraphTypesTest
     void testWeightedLouvain(Class<? extends GraphFactory> graphImpl) {
         Graph graph = loadGraph(graphImpl, DB_CYPHER);
@@ -100,39 +92,8 @@ class LouvainWeightedGraphTest extends LouvainTestBase {
                         .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
                         .compute();
 
-        final HugeLongArray[] dendogram = louvain.getDendrogram();
-        for (int i = 0; i < dendogram.length; i++) {
-            if (null == dendogram[i]) {
-                break;
-            }
-            System.out.println("level " + i + ": " + dendogram[i]);
-        }
-        printCommunities(louvain);
-        System.out.println("louvain.getRuns() = " + louvain.getLevel());
-        System.out.println("louvain.communityCount() = " + louvain.communityCount());
         assertCommunities(louvain);
         assertTrue(louvain.getLevel() < MAX_ITERATIONS, "Maximum iterations > " + MAX_ITERATIONS);
-    }
-
-    @AllGraphTypesTest
-    void testWeightedRandomNeighborLouvain(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = loadGraph(graphImpl, DB_CYPHER);
-        final Louvain louvain =
-                new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
-                        .withProgressLogger(TestProgressLogger.INSTANCE)
-                        .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
-                        .compute();
-
-        final HugeLongArray[] dendogram = louvain.getDendrogram();
-        for (int i = 0; i < dendogram.length; i++) {
-            if (null == dendogram[i]) {
-                break;
-            }
-            System.out.println("level " + i + ": " + dendogram[i]);
-        }
-        printCommunities(louvain);
-        System.out.println("louvain.getRuns() = " + louvain.getLevel());
-        System.out.println("louvain.communityCount() = " + louvain.communityCount());
     }
 
     void assertCommunities(Louvain louvain) {

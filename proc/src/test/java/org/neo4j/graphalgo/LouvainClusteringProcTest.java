@@ -152,35 +152,10 @@ class LouvainClusteringProcTest extends ProcTestBase {
     }
 
     @AllGraphNamesTest
-    void testRandomNeighbor(String graphImpl) {
-        String query = "CALL algo.louvain(" +
-                       "    '', '', {" +
-                       "        concurrency: 1, randomNeighbor: true, graph: $graph" +
-                       "    }" +
-                       ") YIELD nodes, communityCount, loadMillis, computeMillis, writeMillis, postProcessingMillis, p99";
-
-        runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> {
-                    long nodes = row.getNumber("nodes").longValue();
-                    long communityCount = row.getNumber("communityCount").longValue();
-                    long loadMillis = row.getNumber("loadMillis").longValue();
-                    long computeMillis = row.getNumber("computeMillis").longValue();
-                    long writeMillis = row.getNumber("writeMillis").longValue();
-
-                    assertEquals(9, nodes, "invalid node count");
-                    assertEquals(3, communityCount, "wrong community count");
-                    assertTrue(loadMillis >= 0, "invalid loadTime");
-                    assertTrue(writeMillis >= 0, "invalid writeTime");
-                    assertTrue(computeMillis >= 0, "invalid computeTime");
-                }
-        );
-    }
-
-    @AllGraphNamesTest
     void testStream(String graphImpl) {
         String query = "CALL algo.louvain.stream(" +
                        "    '', '', {" +
-                       "        concurrency: 1, innerIterations: 10, randomNeighbor: false, graph: $graph" +
+                       "        concurrency: 1, innerIterations: 10, graph: $graph" +
                        "    }" +
                        ") YIELD nodeId, community, communities";
         IntIntScatterMap testMap = new IntIntScatterMap();
