@@ -26,6 +26,7 @@ import com.carrotsearch.hppc.LongSet;
 import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.ProcedureConstants;
+import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.impl.results.ApproxSimilaritySummaryResult;
 import org.neo4j.graphalgo.impl.results.SimilarityExporter;
@@ -96,7 +97,8 @@ public class SimilarityProc {
         };
 
         if (write) {
-            SimilarityExporter similarityExporter = new SimilarityExporter(api, writeRelationshipType, writeProperty);
+            TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
+            SimilarityExporter similarityExporter = new SimilarityExporter(api, writeRelationshipType, writeProperty, terminationFlag, Pools.DEFAULT);
             similarityExporter.export(stream.peek(recorder), writeBatchSize);
         } else {
             stream.forEach(recorder);
@@ -123,7 +125,8 @@ public class SimilarityProc {
         };
 
         if (write) {
-            SimilarityExporter similarityExporter = new SimilarityExporter(api, writeRelationshipType, writeProperty);
+            TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
+            SimilarityExporter similarityExporter = new SimilarityExporter(api, writeRelationshipType, writeProperty, terminationFlag, Pools.DEFAULT);
             similarityExporter.export(stream.peek(recorder), writeBatchSize);
         } else {
             stream.forEach(recorder);
