@@ -49,9 +49,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.impl.louvain.LouvainFactory.CONFIG_SEED_KEY;
-import static org.neo4j.graphalgo.impl.louvain.LouvainFactory.DEFAULT_INTERMEDIATE_COMMUNITIES_FLAG;
-import static org.neo4j.graphalgo.impl.louvain.LouvainFactory.DEPRECATED_CONFIG_SEED_KEY;
 import static org.neo4j.procedure.Mode.READ;
 
 /**
@@ -62,11 +59,16 @@ import static org.neo4j.procedure.Mode.READ;
 public class LouvainProc extends BaseAlgoProc<Louvain> {
 
     public static final String INTERMEDIATE_COMMUNITIES_WRITE_PROPERTY = "intermediateCommunitiesWriteProperty";
-    public static final String INCLUDE_INTERMEDIATE_COMMUNITIES = "includeIntermediateCommunities";
-    public static final String INNER_ITERATIONS = "innerIterations";
     public static final int DEFAULT_CONCURRENCY = 1;
+    public static final String CONFIG_SEED_KEY = "seedProperty";
+    public static final String SEED_TYPE = "seed";
+
+    public static final String DEPRECATED_CONFIG_SEED_KEY = "communityProperty";
+    public static final String INCLUDE_INTERMEDIATE_COMMUNITIES = "includeIntermediateCommunities";
     public static final int DEFAULT_MAX_LEVEL = 10;
     public static final long DEFAULT_MAX_ITERATIONS = 10L;
+
+    public static final String INNER_ITERATIONS = "innerIterations";
 
     @Procedure(value = "algo.louvain", mode = Mode.WRITE)
     @Description("CALL algo.louvain(label:String, relationship:String, " +
@@ -92,15 +94,13 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
         if (configuration.isWriteFlag()) {
             builder.timeWrite(() -> {
                 String writeProperty = configuration.getWriteProperty("community");
-                Boolean includeIntermediateCommunities = configuration.getBool(INCLUDE_INTERMEDIATE_COMMUNITIES,
-                        DEFAULT_INTERMEDIATE_COMMUNITIES_FLAG);
                 String intermediateCommunitiesWriteProperty = configuration.get(
                         INTERMEDIATE_COMMUNITIES_WRITE_PROPERTY,
                         "communities");
 
                 builder.withWrite(true);
                 builder.withWriteProperty(writeProperty);
-                builder.withIntermediateCommunities(includeIntermediateCommunities);
+                builder.withIntermediateCommunities(louvain.getConfig().includeIntermediateCommunities);
                 builder.withIntermediateCommunitiesWriteProperty(intermediateCommunitiesWriteProperty);
 
                 log.debug("Writing results");
@@ -108,7 +108,6 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
                 louvain.export(
                         exporter,
                         writeProperty,
-                        includeIntermediateCommunities,
                         intermediateCommunitiesWriteProperty);
             });
         }
@@ -141,7 +140,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
 
         // evaluation
         Louvain louvain = compute(builder, tracker, configuration, graph);
-        return louvain.dendrogramStream(configuration.get(INCLUDE_INTERMEDIATE_COMMUNITIES, false));
+        return louvain.dendrogramStream();
     }
 
     @Procedure(value = "algo.louvain.memrec", mode = READ)
@@ -175,8 +174,20 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
     protected LouvainFactory algorithmFactory(final ProcedureConfiguration procedureConfig) {
         int maxLevel = procedureConfig.getIterations(DEFAULT_MAX_LEVEL);
         int maxIterations = procedureConfig.getNumber(INNER_ITERATIONS, DEFAULT_MAX_ITERATIONS).intValue();
+        boolean includeIntermediateCommunities = procedureConfig.getBool(
+                INCLUDE_INTERMEDIATE_COMMUNITIES,
+                DEFAULT_INTERMEDIATE_COMMUNITIES_FLAG);
 
-        return new LouvainFactory(new Louvain.Config(maxLevel, maxIterations));
+        Optional<String> seedProperty = procedureConfig.getStringWithFallback(CONFIG_SEED_KEY, DEPRECATED_CONFIG_SEED_KEY);
+
+        Louvain.Config config = new Louvain.Config(
+                seedProperty,
+                maxLevel,
+                maxIterations,
+                includeIntermediateCommunities
+        );
+
+        return new LouvainFactory(config);
     }
 
     private Louvain compute(

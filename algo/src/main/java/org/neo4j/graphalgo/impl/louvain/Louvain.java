@@ -40,6 +40,7 @@ import org.neo4j.values.storable.Values;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -341,6 +342,8 @@ public final class Louvain extends Algorithm<Louvain> {
         return Arrays.copyOfRange(modularities, 0, level);
     }
 
+    public Config getConfig() { return config; }
+
     /**
      * number of outer iterations
      *
@@ -373,11 +376,11 @@ public final class Louvain extends Algorithm<Louvain> {
                 .mapToObj(i -> new Result(i, communities.get(i)));
     }
 
-    public Stream<StreamingResult> dendrogramStream(final boolean includeIntermediateCommunities) {
+    public Stream<StreamingResult> dendrogramStream() {
         return LongStream.range(0L, rootNodeCount)
                 .mapToObj(i -> {
                     List<Long> communitiesList = null;
-                    if (includeIntermediateCommunities) {
+                    if (config.includeIntermediateCommunities) {
                         communitiesList = new ArrayList<>(dendrogram.length);
                         for (HugeLongArray community : dendrogram) {
                             communitiesList.add(community.get(i));
@@ -391,9 +394,8 @@ public final class Louvain extends Algorithm<Louvain> {
     public void export(
             final Exporter exporter,
             final String propertyName,
-            final boolean includeIntermediateCommunities,
             final String intermediateCommunitiesPropertyName) {
-        if (includeIntermediateCommunities) {
+        if (config.includeIntermediateCommunities) {
             exporter.write(
                     propertyName,
                     communities,
@@ -467,7 +469,7 @@ public final class Louvain extends Algorithm<Louvain> {
 
     public static class Config {
 
-        public final NodeProperties communityMap;
+        public final Optional<String> seedPropertyKey;
         public final int maxLevel;
         public final int maxIterations;
         public final boolean includeIntermediateCommunities;
@@ -479,15 +481,15 @@ public final class Louvain extends Algorithm<Louvain> {
         public Config(
                 final int maxLevel,
                 final int maxIterations) {
-            this(null, maxLevel, maxIterations);
+            this(Optional.empty(), maxLevel, maxIterations);
         }
 
         public Config(
-                final NodeProperties communityMap,
+                final Optional<String> seedPropertyKey,
                 final int maxLevel,
                 final int maxIterations
         ) {
-            this(communityMap, maxLevel, maxIterations, LouvainFactory.DEFAULT_INTERMEDIATE_COMMUNITIES_FLAG);
+            this(seedPropertyKey, maxLevel, maxIterations, DEFAULT_INTERMEDIATE_COMMUNITIES_FLAG);
         }
 
         public Config(
@@ -495,16 +497,16 @@ public final class Louvain extends Algorithm<Louvain> {
                 final int maxIterations,
                 final boolean includeIntermediateCommunities
         ) {
-            this(null, maxLevel, maxIterations, includeIntermediateCommunities);
+            this(Optional.empty(), maxLevel, maxIterations, includeIntermediateCommunities);
         }
 
         public Config(
-                final NodeOrRelationshipProperties communityMap,
+                final Optional<String> seedPropertyKey,
                 final int maxLevel,
                 final int maxIterations,
                 final boolean includeIntermediateCommunities
         ) {
-            this.communityMap = communityMap;
+            this.seedPropertyKey = seedPropertyKey;
             this.maxLevel = maxLevel;
             this.maxIterations = maxIterations;
             this.includeIntermediateCommunities = includeIntermediateCommunities;
