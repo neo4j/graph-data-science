@@ -46,7 +46,8 @@ public class SimilarityExporter extends StatementApi {
             GraphDatabaseAPI api,
             String relationshipType,
             String propertyName,
-            TerminationFlag terminationFlag, ExecutorService executorService) {
+            TerminationFlag terminationFlag,
+            ExecutorService executorService) {
         super(api);
         propertyId = getOrCreatePropertyId(propertyName);
         relationshipTypeId = getOrCreateRelationshipId(relationshipType);
@@ -73,9 +74,14 @@ public class SimilarityExporter extends StatementApi {
     private void export(List<SimilarityResult> similarityResults) {
         applyInTransaction(statement -> {
             terminationFlag.assertRunning();
+            long progress = 0L;
             for (SimilarityResult similarityResult : similarityResults) {
                 try {
                     createRelationship(similarityResult, statement);
+                    ++progress;
+                    if (progress % Math.min(TerminationFlag.RUN_CHECK_NODE_COUNT, similarityResults.size() / 2)== 0) {
+                        terminationFlag.assertRunning();
+                    }
                 } catch (KernelException e) {
                     ExceptionUtil.throwKernelException(e);
                 }
