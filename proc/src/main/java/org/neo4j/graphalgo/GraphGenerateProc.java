@@ -60,7 +60,7 @@ public final class GraphGenerateProc extends BaseProc {
                  "name:String, nodeCount:Integer, averageDegree:Integer" +
                  "{distribution: 'UNIFORM,RANDOM,POWERLAW', relationshipProperty: {name: '[PROPERTY_NAME]' type: 'FIXED,RANDOM', min: 0.0, max: 1.0, value: 1.0}}) " +
                  "YIELD name, nodes, relationships, generateMillis, averageDegree, relationshipDistribution, relationshipProperty")
-    public Stream<GraphGenerationStats> load(
+    public Stream<GraphGenerationStats> generate(
             @Name(value = "name") String name,
             @Name(value = "nodeCount") Long nodeCount,
             @Name(value = "averageDegree") Long averageDegree,
@@ -68,11 +68,10 @@ public final class GraphGenerateProc extends BaseProc {
 
         final ProcedureConfiguration configuration = newConfig(null, null, config);
         GraphGenerationStats stats = runWithExceptionLogging(
-                "Graph loading failed",
+                "Graph generation failed",
                 () -> generateGraph(configuration, name, nodeCount, averageDegree));
         return Stream.of(stats);
     }
-
 
     private GraphGenerationStats generateGraph(
             ProcedureConfiguration config,

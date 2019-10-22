@@ -85,7 +85,6 @@ class RandomGraphGeneratorTest {
         int nbrNodes = 1000;
         long avgDeg = 5L;
 
-
         RandomGraphGenerator randomGraphGenerator = new RandomGraphGenerator(
                 nbrNodes,
                 avgDeg,

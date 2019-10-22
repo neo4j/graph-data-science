@@ -8,7 +8,8 @@ This section describes the graph generation algorithms in the Neo4j Graph Algori
 
 In certain use cases it is usefull to generate random graphs, for example for testing or benchmarking purposes.
 For that reason the Neo4j Graph Algorithm library comes with a set of built in graph generators.
-The procedure generates in-memory graphs. It is currently not possible to persist these graphs into Neo4j.
+The generator produces in-memory graphs. 
+It is currently not possible to persist these graphs into Neo4j.
 
 The graph generation is parameterized by three dimensions:
 

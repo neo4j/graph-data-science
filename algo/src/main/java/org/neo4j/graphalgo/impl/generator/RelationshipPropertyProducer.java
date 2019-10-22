@@ -91,7 +91,6 @@ public interface RelationshipPropertyProducer {
 
             if (max <= min) {
                 throw new IllegalArgumentException("Max value must be greater than min value");
-
             }
         }
 
