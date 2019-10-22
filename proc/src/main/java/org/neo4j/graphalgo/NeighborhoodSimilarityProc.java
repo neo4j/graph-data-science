@@ -24,8 +24,8 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.jaccard.Jaccard;
-import org.neo4j.graphalgo.impl.jaccard.JaccardFactory;
+import org.neo4j.graphalgo.impl.jaccard.NeighborhoodSimilarity;
+import org.neo4j.graphalgo.impl.jaccard.NeighborhoodSimilarityFactory;
 import org.neo4j.graphalgo.impl.jaccard.SimilarityResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -40,7 +40,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class JaccardProc extends BaseAlgoProc<Jaccard> {
+public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilarity> {
 
     private static final String SIMILARITY_CUTOFF_KEY = "similarityCutoff";
     private static final Double SIMILARITY_CUTOFF_DEFAULT = -1.0;
@@ -61,11 +61,11 @@ public class JaccardProc extends BaseAlgoProc<Jaccard> {
     @Description("CALL algo.jaccard.stream(" +
                  "labelPredicate, relationshipPredicate, " +
                  "{direction: 'OUTGOING', similarityCutoff: -1.0, degreeCutoff: 0, write: true, concurrency: 4, readConcurrency: 4, writeConcurrency: 4}) " +
-                 "YIELD node1, node2, similarity - computes neighborhood similarities based on the Jaccard index")
+                 "YIELD node1, node2, similarity - computes neighborhood similarities based on the NeighborhoodSimilarity index")
     public Stream<SimilarityResult> jaccardStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationshipType,
-            @Name(value = "config", defaultValue = "null") Map<String, Object> config) {
+            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         AllocationTracker tracker = AllocationTracker.create();
         ProcedureConfiguration configuration = newConfig(label, relationshipType, config);
@@ -76,9 +76,9 @@ public class JaccardProc extends BaseAlgoProc<Jaccard> {
             return Stream.empty();
         }
 
-        Jaccard jaccard = newAlgorithm(graph, configuration, tracker);
+        NeighborhoodSimilarity neighborhoodSimilarity = newAlgorithm(graph, configuration, tracker);
 
-        return jaccard.run(configuration.getDirection(Direction.OUTGOING));
+        return neighborhoodSimilarity.run(configuration.getDirection(Direction.OUTGOING));
     }
 
     @Override
@@ -87,8 +87,8 @@ public class JaccardProc extends BaseAlgoProc<Jaccard> {
     }
 
     @Override
-    protected AlgorithmFactory<Jaccard> algorithmFactory(ProcedureConfiguration config) {
-        return new JaccardFactory(new Jaccard.Config(
+    protected AlgorithmFactory<NeighborhoodSimilarity> algorithmFactory(ProcedureConfiguration config) {
+        return new NeighborhoodSimilarityFactory(new NeighborhoodSimilarity.Config(
                 config.get(SIMILARITY_CUTOFF_KEY, SIMILARITY_CUTOFF_DEFAULT),
                 config.get(DEGREE_CUTOFF_KEY, DEGREE_CUTOFF_DEFAULT),
                 config.getConcurrency(),

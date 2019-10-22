@@ -26,16 +26,16 @@ import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.logging.Log;
 
-public class JaccardFactory extends AlgorithmFactory<Jaccard> {
+public class NeighborhoodSimilarityFactory extends AlgorithmFactory<NeighborhoodSimilarity> {
 
-    private final Jaccard.Config jaccardConfig;
+    private final NeighborhoodSimilarity.Config jaccardConfig;
 
-    public JaccardFactory(Jaccard.Config jaccardConfig) {
+    public NeighborhoodSimilarityFactory(NeighborhoodSimilarity.Config jaccardConfig) {
         this.jaccardConfig = jaccardConfig;
     }
 
     @Override
-    public Jaccard build(Graph graph, ProcedureConfiguration configuration, AllocationTracker tracker, Log log) {
-        return new Jaccard(graph, jaccardConfig, tracker, log);
+    public NeighborhoodSimilarity build(Graph graph, ProcedureConfiguration configuration, AllocationTracker tracker, Log log) {
+        return new NeighborhoodSimilarity(graph, jaccardConfig, tracker, log);
     }
 }

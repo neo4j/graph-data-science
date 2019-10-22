@@ -49,7 +49,7 @@ import static org.neo4j.graphdb.Direction.BOTH;
 import static org.neo4j.graphdb.Direction.INCOMING;
 import static org.neo4j.graphdb.Direction.OUTGOING;
 
-final class JaccardTest {
+final class NeighborhoodSimilarityTest {
 
     // TODO: maybe create random graph similar to JaccardProcTest#buildRandomDB
     private static final String DB_CYPHER =
@@ -109,9 +109,9 @@ final class JaccardTest {
                 .withDirection(loadDirection)
                 .load(HugeGraphFactory.class);
 
-        Jaccard jaccard = new Jaccard(dbGraph, Jaccard.Config.DEFAULT, AllocationTracker.EMPTY, NullLog.getInstance());
-        Set<SimilarityResult> result = jaccard.run(algoDirection).collect(Collectors.toSet());
-        jaccard.release();
+        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(dbGraph, NeighborhoodSimilarity.Config.DEFAULT, AllocationTracker.EMPTY, NullLog.getInstance());
+        Set<SimilarityResult> result = neighborhoodSimilarity.run(algoDirection).collect(Collectors.toSet());
+        neighborhoodSimilarity.release();
 
 
         if (algoDirection == INCOMING) {
@@ -131,9 +131,9 @@ final class JaccardTest {
                 .undirected()
                 .load(HugeGraphFactory.class);
 
-        Jaccard jaccard = new Jaccard(graph, Jaccard.Config.DEFAULT, AllocationTracker.EMPTY, NullLog.getInstance());
-        Set<SimilarityResult> result = jaccard.run(OUTGOING).collect(Collectors.toSet());
-        jaccard.release();
+        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(graph, NeighborhoodSimilarity.Config.DEFAULT, AllocationTracker.EMPTY, NullLog.getInstance());
+        Set<SimilarityResult> result = neighborhoodSimilarity.run(OUTGOING).collect(Collectors.toSet());
+        neighborhoodSimilarity.release();
         assertNotEquals(Collections.emptySet(), result);
     }
 
@@ -147,7 +147,7 @@ final class JaccardTest {
 
         IllegalArgumentException ex = Assertions.assertThrows(
                 IllegalArgumentException.class,
-                () -> new Jaccard(graph, Jaccard.Config.DEFAULT, AllocationTracker.EMPTY, NullLog.getInstance()).run(BOTH)
+                () -> new NeighborhoodSimilarity(graph, NeighborhoodSimilarity.Config.DEFAULT, AllocationTracker.EMPTY, NullLog.getInstance()).run(BOTH)
         );
         assertThat(ex.getMessage(), containsString("Direction BOTH is not supported"));
     }

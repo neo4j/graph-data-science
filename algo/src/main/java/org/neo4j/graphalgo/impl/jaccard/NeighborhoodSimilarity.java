@@ -36,14 +36,14 @@ import org.neo4j.logging.Log;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public class Jaccard extends Algorithm<Jaccard> {
+public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
 
     private final Graph graph;
     private final Config config;
     private final AllocationTracker tracker;
     private final Log log;
 
-    public Jaccard(Graph graph, Config config, AllocationTracker tracker, Log log) {
+    public NeighborhoodSimilarity(Graph graph, Config config, AllocationTracker tracker, Log log) {
         this.graph = graph;
         this.config = config;
         this.tracker = tracker;
@@ -51,7 +51,7 @@ public class Jaccard extends Algorithm<Jaccard> {
     }
 
     @Override
-    public Jaccard me() {
+    public NeighborhoodSimilarity me() {
         return this;
     }
 
@@ -74,7 +74,7 @@ public class Jaccard extends Algorithm<Jaccard> {
      */
     public Stream<SimilarityResult> run(Direction direction) {
         if (direction == Direction.BOTH) {
-            throw new IllegalArgumentException("Direction BOTH is not supported by the Jaccard algorithm.");
+            throw new IllegalArgumentException("Direction BOTH is not supported by the NeighborhoodSimilarity algorithm.");
         }
 
         BitSet nodeFilter = new BitSet(graph.nodeCount());
@@ -126,7 +126,7 @@ public class Jaccard extends Algorithm<Jaccard> {
     }
 
     public static final class Config {
-        public static final Config DEFAULT = new Jaccard.Config(
+        public static final Config DEFAULT = new NeighborhoodSimilarity.Config(
                 0.0,
                 0.0,
                 Pools.DEFAULT_CONCURRENCY,

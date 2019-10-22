@@ -33,7 +33,7 @@ import java.util.HashSet;
 
 import static org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 
-class JaccardProcTest extends ProcTestBase {
+class NeighborhoodSimilarityProcTest extends ProcTestBase {
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -71,7 +71,7 @@ class JaccardProcTest extends ProcTestBase {
     void setup() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase();
         db.execute(DB_CYPHER);
-        registerProcedures(db, JaccardProc.class);
+        registerProcedures(db, NeighborhoodSimilarityProc.class);
     }
 
     @AfterEach
