@@ -60,8 +60,6 @@ public final class Louvain extends Algorithm<Louvain> {
 
     public static final double DEFAULT_WEIGHT = 1.0;
 
-    public static final String SEED_TYPE = "seed";
-
     private static final PropertyTranslator<HugeLongArray[]> HUGE_COMMUNITIES_TRANSLATOR =
             (propertyId, allCommunities, nodeId) -> {
                 // build int array

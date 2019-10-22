@@ -159,7 +159,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
     protected GraphLoader configureAlgoLoader(final GraphLoader loader, final ProcedureConfiguration config) {
         config.getStringWithFallback(CONFIG_SEED_KEY, DEPRECATED_CONFIG_SEED_KEY).ifPresent(propertyIdentifier -> {
             // configure predefined clustering if set
-            loader.withOptionalNodeProperties(PropertyMapping.of(Louvain.SEED_TYPE, propertyIdentifier, -1));
+            loader.withOptionalNodeProperties(PropertyMapping.of(propertyIdentifier, -1));
         });
         return loader.undirected().withDirection(Direction.OUTGOING);
     }
