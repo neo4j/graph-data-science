@@ -20,7 +20,9 @@
 
 package org.neo4j.graphalgo.impl.jaccard;
 
+import com.carrotsearch.hppc.ArraySizingStrategy;
 import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.Intersections;
@@ -50,6 +52,9 @@ public class Jaccard extends Algorithm<Jaccard> {
         graph.release();
     }
 
+
+    private static final ArraySizingStrategy ARRAY_SIZING_STRATEGY =
+            (currentBufferLength, elementsCount, expectedAdditions) -> expectedAdditions + elementsCount;
     /**
      * Requires:
      * - Input graph must be bipartite:
@@ -80,13 +85,13 @@ public class Jaccard extends Algorithm<Jaccard> {
 
         graph.forEachNode(node -> {
             if (nodeFilter.get(node)) {
-                long[] targetIds = new long[graph.degree(node, direction)];
-                final int[] counter = {0};
+                int degree = graph.degree(node, direction);
+                final LongArrayList targetIds = new LongArrayList(degree, ARRAY_SIZING_STRATEGY);
                 graph.forEachRelationship(node, direction, (source, target) -> {
-                    targetIds[counter[0]++] = target;
+                    targetIds.add(target);
                     return true;
                 });
-                vectors.set(node, targetIds);
+                vectors.set(node, targetIds.buffer);
             }
             return true;
         });
