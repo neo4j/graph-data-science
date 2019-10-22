@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.examples.WCCComputation;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.concurrent.ExecutorService;
 
@@ -107,7 +106,7 @@ public class WCCPregel extends WCC<WCCPregel> {
         return new DisjointSetStruct() {
             @Override
             public void union(final long p, final long q) {
-                throw new NotImplementedException();
+                throw new UnsupportedOperationException();
             }
 
             @Override

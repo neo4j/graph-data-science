@@ -66,6 +66,23 @@ public enum RelationshipDistribution {
         }
     };
 
+    /**
+     * Produces a unary function which accepts a node id parameter and returns the number of outgoing relationships
+     * that should be generated for this node.
+     *
+     * @param nodeCount Expected number of nodes in the generated graph
+     * @param averageDegree Expected average degree in the generated graph
+     * @return A unary function that accepts a node id and returns that nodes out degree
+     */
     abstract LongUnaryOperator degreeProducer(long nodeCount, long averageDegree);
+
+    /**
+     * Produces a unary function which accepts a node id parameter and returns another node id to wich the node will
+     * be connected.
+     *
+     * @param nodeCount Expected number of nodes in the generated graph
+     * @param averageDegree Expected average degree in the generated graph
+     * @return A unary function that accepts a node id and returns another node id to wich a relationship will be created.
+     */
     abstract LongUnaryOperator relationshipProducer(long nodeCount, long averageDegree);
 }

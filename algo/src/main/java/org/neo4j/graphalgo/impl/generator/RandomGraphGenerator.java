@@ -223,7 +223,7 @@ public final class RandomGraphGenerator {
         }
 
         private void flushBuffer() {
-            RelationshipImporter.WeightReader relationshipPropertyReader =
+            RelationshipImporter.PropertyReader relationshipPropertyReader =
                     shouldGenerateProperty ? this::generateRelationshipProperty : null;
 
             long newImportedInOut = imports.importRels(relationshipBuffer, relationshipPropertyReader);

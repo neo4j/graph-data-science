@@ -85,6 +85,7 @@ class GraphGenerateProcTest extends ProcTestBase {
                     assertEquals(10, row.getNumber("nodes").intValue());
                     assertEquals(50, row.getNumber("relationships").intValue());
                     assertEquals("foo", row.getString(RELATIONSHIP_PROPERTY_NAME_KEY));
+                    assertEquals("UNIFORM", row.get(RELATIONSHIP_DISTRIBUTION_KEY));
                     assertNull(row.get(RELATIONSHIP_PROPERTY_KEY));
                 }
         );
@@ -92,7 +93,7 @@ class GraphGenerateProcTest extends ProcTestBase {
 
     @ParameterizedTest
     @EnumSource(RelationshipDistribution.class)
-    void shouldGenerateGraphRelationshipDistribution(RelationshipDistribution relationshipDistribution) {
+    void shouldGenerateGraphWithRelationshipDistribution(RelationshipDistribution relationshipDistribution) {
 
         Map<String, Object> configMap = new HashMap<>();
         configMap.put(RELATIONSHIP_DISTRIBUTION_KEY, relationshipDistribution.name());

@@ -39,6 +39,10 @@ public final class ProcedureConstants {
     public static final String RELATIONSHIP_PROPERTIES_DEFAULT_VALUE_KEY = "defaultValue";
 
     // graph.generate specific
+
+    // also refers to the relationship property  to be used in algorithms that make use of a property
+    //  - most often interpreted as a weight of some sort.
+    //  That property is also considered in graph.load, despite being documented
     public static final String RELATIONSHIP_PROPERTY_KEY = "relationshipProperty";
 
     public static final String RELATIONSHIP_DISTRIBUTION_KEY = "relationshipDistribution";
@@ -77,11 +81,6 @@ public final class ProcedureConstants {
     // Deprecated: use RELATIONSHIP_PROPERTY_KEY instead
     @Deprecated
     public static final String DEPRECATED_RELATIONSHIP_PROPERTY_KEY = "weightProperty";
-
-    // refers to the relationship property  to be used in algorithms that make use of a property
-    //  - most often interpreted as a weight of some sort.
-    //  That property is also considered in graph.load, despite being documented
-    public static final String RELATIONSHIP_PROPERTY_KEY = "relationshipProperty";
 
     // BetweenessCentrality specific
     public static final String STATS_FLAG_KEY = "stats";
