@@ -25,7 +25,6 @@ import com.carrotsearch.hppc.ObjectArrayList;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
-import org.neo4j.graphalgo.core.loading.NullWeightMap;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -130,9 +129,9 @@ public final class Louvain extends Algorithm<Louvain> {
 
         if (seedingValues != null) {
             BitSet comCount = new BitSet();
-            long maxSeedingCommunityId = seedingValues.getMaxValue();
+            long maxSeedingCommunityId = seedingValues.getMaxPropertyValue();
             communities.setAll(nodeId -> {
-                double existingCommunityValue = seedingValues.nodeWeight(nodeId, Double.NaN);
+                double existingCommunityValue = seedingValues.nodeProperty(nodeId, Double.NaN);
                 long community = Double.isNaN(existingCommunityValue)
                         ? maxSeedingCommunityId + this.rootGraph.toOriginalNodeId(nodeId) + 1L
                         : (long) existingCommunityValue;
