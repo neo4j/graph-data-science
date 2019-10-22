@@ -23,11 +23,11 @@ package org.neo4j.graphalgo.impl.jaccard;
 import java.util.Objects;
 
 public class SimilarityResult {
-    long node1;
-    long node2;
-    double similarity;
+    public long node1;
+    public long node2;
+    public double similarity;
 
-    SimilarityResult(long node1, long node2, double similarity) {
+    public SimilarityResult(long node1, long node2, double similarity) {
         this.node1 = node1;
         this.node2 = node2;
         this.similarity = similarity;

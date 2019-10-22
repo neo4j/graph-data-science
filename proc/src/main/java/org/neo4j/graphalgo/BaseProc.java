@@ -116,7 +116,7 @@ public abstract class BaseProc {
         }
     }
 
-    private Graph loadGraph(
+    protected Graph loadGraph(
             final ProcedureConfiguration config,
             final AllocationTracker tracker) {
         return runWithExceptionLogging(

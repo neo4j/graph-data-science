@@ -130,6 +130,14 @@ class JaccardProcTest {
     }
 
     @Test
+    void foo() {
+        Map<String, Object> params = map("config", map( "concurrency", 1, "top", 5));
+        System.out.println(db.execute(STATEMENT_STREAM, params).resultAsString());
+        Result results = db.execute(STATEMENT_STREAM, params);
+        System.out.println(results.resultAsString());
+    }
+
+    @Test
     void jaccardSingleMultiThreadComparision() {
         int size = 333;
         buildRandomDB(size);

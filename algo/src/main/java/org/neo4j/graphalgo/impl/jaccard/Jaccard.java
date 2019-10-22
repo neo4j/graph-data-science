@@ -26,9 +26,12 @@ import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.Intersections;
+import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.logging.Log;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -36,10 +39,15 @@ import java.util.stream.Stream;
 public class Jaccard extends Algorithm<Jaccard> {
 
     private final Graph graph;
+    private final Config config;
+    private final AllocationTracker tracker;
+    private final Log log;
 
-    public Jaccard(Graph graph) {
-
+    public Jaccard(Graph graph, Config config, AllocationTracker tracker, Log log) {
         this.graph = graph;
+        this.config = config;
+        this.tracker = tracker;
+        this.log = log;
     }
 
     @Override
@@ -64,7 +72,7 @@ public class Jaccard extends Algorithm<Jaccard> {
      *
      * Number of results: (n^2 - n) / 2
      */
-    Stream<SimilarityResult> run(Direction direction) {
+    public Stream<SimilarityResult> run(Direction direction) {
         if (direction == Direction.BOTH) {
             throw new IllegalArgumentException("Direction BOTH is not supported by the Jaccard algorithm.");
         }
@@ -102,7 +110,6 @@ public class Jaccard extends Algorithm<Jaccard> {
                 .flatMap(n1 -> LongStream.range(n1 + 1, graph.nodeCount())
                         .filter(nodeFilter::get)
                         .mapToObj(n2 -> {
-                            System.out.println("n1 = " + n1 + " n2 = " + n2);
                                     long[] v1 = vectors.get(n1);
                                     long[] v2 = vectors.get(n2);
                                     // TODO: Assumes that the targets are sorted, need to check
@@ -116,6 +123,28 @@ public class Jaccard extends Algorithm<Jaccard> {
                                 }
                         )
                 );
+    }
+
+    public static final class Config {
+        public static final Config DEFAULT = new Jaccard.Config(
+                0.0,
+                0.0,
+                Pools.DEFAULT_CONCURRENCY,
+                ParallelUtil.DEFAULT_BATCH_SIZE
+        );
+
+        double similarityCutoff;
+        double degreeCutoff;
+
+        int concurrency;
+        int minBatchSize;
+
+        public Config(double similarityCutoff, double degreeCutoff, int concurrency, int minBatchSize) {
+            this.similarityCutoff = similarityCutoff;
+            this.degreeCutoff = degreeCutoff;
+            this.concurrency = concurrency;
+            this.minBatchSize = minBatchSize;
+        }
     }
 
 }

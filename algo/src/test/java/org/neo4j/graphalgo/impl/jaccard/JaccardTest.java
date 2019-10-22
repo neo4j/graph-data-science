@@ -30,8 +30,10 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.logging.NullLog;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -107,7 +109,7 @@ final class JaccardTest {
                 .withDirection(loadDirection)
                 .load(HugeGraphFactory.class);
 
-        Jaccard jaccard = new Jaccard(dbGraph);
+        Jaccard jaccard = new Jaccard(dbGraph, Jaccard.Config.DEFAULT, AllocationTracker.EMPTY, NullLog.getInstance());
         Set<SimilarityResult> result = jaccard.run(algoDirection).collect(Collectors.toSet());
         jaccard.release();
 
@@ -129,7 +131,7 @@ final class JaccardTest {
                 .undirected()
                 .load(HugeGraphFactory.class);
 
-        Jaccard jaccard = new Jaccard(graph);
+        Jaccard jaccard = new Jaccard(graph, Jaccard.Config.DEFAULT, AllocationTracker.EMPTY, NullLog.getInstance());
         Set<SimilarityResult> result = jaccard.run(OUTGOING).collect(Collectors.toSet());
         jaccard.release();
         assertNotEquals(Collections.emptySet(), result);
@@ -144,7 +146,9 @@ final class JaccardTest {
                 .load(HugeGraphFactory.class);
 
         IllegalArgumentException ex = Assertions.assertThrows(
-                IllegalArgumentException.class, () -> new Jaccard(graph).run(BOTH));
+                IllegalArgumentException.class,
+                () -> new Jaccard(graph, Jaccard.Config.DEFAULT, AllocationTracker.EMPTY, NullLog.getInstance()).run(BOTH)
+        );
         assertThat(ex.getMessage(), containsString("Direction BOTH is not supported"));
     }
 }
