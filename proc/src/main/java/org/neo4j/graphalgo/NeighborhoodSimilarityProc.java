@@ -43,10 +43,16 @@ import java.util.stream.Stream;
 public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilarity> {
 
     private static final String SIMILARITY_CUTOFF_KEY = "similarityCutoff";
-    private static final Double SIMILARITY_CUTOFF_DEFAULT = -1.0;
+    private static final double SIMILARITY_CUTOFF_DEFAULT = -1.0;
 
     private static final String DEGREE_CUTOFF_KEY = "degreeCutOff";
-    private static final Double DEGREE_CUTOFF_DEFAULT = 0.0;
+    private static final int DEGREE_CUTOFF_DEFAULT = 0;
+
+    private static final String TOP_KEY = "top";
+    private static final int TOP_DEFAULT = 0;
+
+    private static final String TOP_K_KEY = "topK";
+    private static final int TOP_K_DEFAULT = 0;
 
     @Context
     public GraphDatabaseAPI api;
@@ -59,9 +65,11 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
 
     @Procedure(name = "algo.jaccard.stream", mode = Mode.WRITE)
     @Description("CALL algo.jaccard.stream(" +
-                 "labelPredicate, relationshipPredicate, " +
-                 "{direction: 'OUTGOING', similarityCutoff: -1.0, degreeCutoff: 0, write: true, concurrency: 4, readConcurrency: 4, writeConcurrency: 4}) " +
-                 "YIELD node1, node2, similarity - computes neighborhood similarities based on the NeighborhoodSimilarity index")
+                 "labelPredicate, relationshipPredicate, {" +
+                 "  similarityCutoff: -1.0, degreeCutoff: 0, top: 0, topK: 0," +
+                 "  graph: 'graph', direction: 'OUTGOING', concurrency: 4, readConcurrency: 4" +
+                 "}) " +
+                 "YIELD node1, node2, similarity - computes neighborhood similarities based on the Jaccard index")
     public Stream<SimilarityResult> jaccardStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationshipType,
@@ -91,6 +99,8 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
         return new NeighborhoodSimilarityFactory(new NeighborhoodSimilarity.Config(
                 config.get(SIMILARITY_CUTOFF_KEY, SIMILARITY_CUTOFF_DEFAULT),
                 config.get(DEGREE_CUTOFF_KEY, DEGREE_CUTOFF_DEFAULT),
+                config.get(TOP_KEY, TOP_DEFAULT),
+                config.get(TOP_K_KEY, TOP_K_DEFAULT),
                 config.getConcurrency(),
                 config.getBatchSize()
         ));

@@ -63,18 +63,20 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
 
     private static final ArraySizingStrategy ARRAY_SIZING_STRATEGY =
             (currentBufferLength, elementsCount, expectedAdditions) -> expectedAdditions + elementsCount;
+
     /**
      * Requires:
      * - Input graph must be bipartite:
-     *       (:Person)-[:LIKES]->(:Thing)
-     *       We collect all targets and use them only in the vectors, not as the thing for which we compute similarity.
-     *       If (:Person)-[:LIKES]->(:Person) we would filter out the person nodes.
+     * (:Person)-[:LIKES]->(:Thing)
+     * We collect all targets and use them only in the vectors, not as the thing for which we compute similarity.
+     * If (:Person)-[:LIKES]->(:Person) we would filter out the person nodes.
      *
      * Number of results: (n^2 - n) / 2
      */
     public Stream<SimilarityResult> run(Direction direction) {
         if (direction == Direction.BOTH) {
-            throw new IllegalArgumentException("Direction BOTH is not supported by the NeighborhoodSimilarity algorithm.");
+            throw new IllegalArgumentException(
+                    "Direction BOTH is not supported by the NeighborhoodSimilarity algorithm.");
         }
 
         BitSet nodeFilter = new BitSet(graph.nodeCount());
@@ -128,20 +130,32 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     public static final class Config {
         public static final Config DEFAULT = new NeighborhoodSimilarity.Config(
                 0.0,
-                0.0,
+                0,
+                0,
+                0,
                 Pools.DEFAULT_CONCURRENCY,
-                ParallelUtil.DEFAULT_BATCH_SIZE
-        );
+                ParallelUtil.DEFAULT_BATCH_SIZE);
 
         double similarityCutoff;
         double degreeCutoff;
 
+        private int top;
+        private int topk;
+
         int concurrency;
         int minBatchSize;
 
-        public Config(double similarityCutoff, double degreeCutoff, int concurrency, int minBatchSize) {
+        public Config(
+                double similarityCutoff,
+                int degreeCutoff,
+                int top,
+                int topk,
+                int concurrency,
+                int minBatchSize) {
             this.similarityCutoff = similarityCutoff;
             this.degreeCutoff = degreeCutoff;
+            this.top = top;
+            this.topk = topk;
             this.concurrency = concurrency;
             this.minBatchSize = minBatchSize;
         }
