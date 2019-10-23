@@ -20,6 +20,8 @@
 
 package org.neo4j.graphalgo.core.utils.paged;
 
+import static org.neo4j.graphalgo.core.utils.paged.HugeMatrices.triangularIndex;
+
 public class HugeLongTriangularMatrix {
 
     private final HugeLongArray array;
@@ -32,20 +34,14 @@ public class HugeLongTriangularMatrix {
     }
 
     public void set(long x, long y, long v) {
-        assert x <= y;
-        assert x < order;
-        assert y < order;
         array.set(indexOf(x, y), v);
     }
 
     public long get(long x, long y) {
-        assert x <= y;
-        assert x < order;
-        assert y < order;
         return array.get(indexOf(x, y));
     }
 
     private long indexOf(long x, long y) {
-        return x * order + y - (x * (x + 1) / 2);
+        return triangularIndex(order, x, y);
     }
 }

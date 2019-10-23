@@ -20,28 +20,16 @@
 
 package org.neo4j.graphalgo.core.utils.paged;
 
-import static org.neo4j.graphalgo.core.utils.paged.HugeMatrices.triangularIndex;
+final class HugeMatrices {
 
-public class HugeDoubleTriangularMatrix {
-
-    private final HugeDoubleArray array;
-    private final long order;
-
-    public HugeDoubleTriangularMatrix(long order, AllocationTracker tracker) {
-        long size = Math.multiplyExact(order, order + 1) / 2;
-        this.order = order;
-        this.array = HugeDoubleArray.newArray(size, tracker);
+    static long triangularIndex(long order, long x, long y) {
+        assert x <= y;
+        assert x < order;
+        assert y < order;
+        return x * order + y - (x * (x + 1) / 2);
     }
 
-    public void set(long x, long y, double v) {
-        array.set(indexOf(x, y), v);
-    }
-
-    public double get(long x, long y) {
-        return array.get(indexOf(x, y));
-    }
-
-    private long indexOf(long x, long y) {
-        return triangularIndex(order, x, y);
+    private HugeMatrices() {
+        throw new UnsupportedOperationException("No instances");
     }
 }
