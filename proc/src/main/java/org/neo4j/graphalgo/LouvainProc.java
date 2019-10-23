@@ -49,6 +49,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.impl.louvain.Louvain.DEFAULT_INTERMEDIATE_COMMUNITIES_FLAG;
 import static org.neo4j.procedure.Mode.READ;
 
 /**
@@ -61,7 +62,6 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
     public static final String INTERMEDIATE_COMMUNITIES_WRITE_PROPERTY = "intermediateCommunitiesWriteProperty";
     public static final int DEFAULT_CONCURRENCY = 1;
     public static final String CONFIG_SEED_KEY = "seedProperty";
-    public static final String SEED_TYPE = "seed";
 
     public static final String DEPRECATED_CONFIG_SEED_KEY = "communityProperty";
     public static final String INCLUDE_INTERMEDIATE_COMMUNITIES = "includeIntermediateCommunities";
