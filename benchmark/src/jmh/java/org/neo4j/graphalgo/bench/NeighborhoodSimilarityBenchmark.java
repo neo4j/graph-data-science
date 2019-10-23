@@ -59,14 +59,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.SimilarityProc.prepareCategories;
 
 @Threads(1)
 @Fork(1)
-@Warmup(iterations = 2)
-@Measurement(iterations = 5)
+@Warmup(iterations = 10, time = 1)
+@Measurement(iterations = 10, time = 1)
 @State(Scope.Benchmark)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
@@ -116,7 +117,9 @@ public class NeighborhoodSimilarityBenchmark {
 
     @Benchmark
     public Object _neighborhoodSimilarity() {
-        return algo.run(Direction.OUTGOING);
+        return algo
+                .run(Direction.OUTGOING)
+                .collect(Collectors.toList());
     }
 
 
@@ -133,7 +136,7 @@ public class NeighborhoodSimilarityBenchmark {
 
         SimilarityComputer<CategoricalInput> computer = (decoder, s, t, cutoff) -> s.jaccard(cutoff, t, false);
 
-        return SimilarityProc.topN(similarityStream(
+        Stream<SimilarityResult> resultStream = SimilarityProc.topN(similarityStream(
                 inputs,
                 sourceIndexIds,
                 targetIndexIds,
@@ -142,6 +145,8 @@ public class NeighborhoodSimilarityBenchmark {
                 () -> null,
                 0.0,
                 0), 0);
+
+        return resultStream.collect(Collectors.toList());
     }
 
     protected <T> Stream<SimilarityResult> similarityStream(
