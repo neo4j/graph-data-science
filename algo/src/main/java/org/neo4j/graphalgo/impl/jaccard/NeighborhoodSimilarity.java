@@ -107,20 +107,23 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         });
 
         HugeDoubleTriangularMatrix matrix = new HugeDoubleTriangularMatrix(graph.nodeCount(), tracker);
-        LongStream.range(0, graph.nodeCount())
-                .filter(nodeFilter::get)
-                .forEach(n1 -> {
+        ParallelUtil.parallelStreamConsume(
+            LongStream.range(0, graph.nodeCount())
+                .filter(nodeFilter::get), (s) ->
+                s.forEach(n1 -> {
                     LongStream.range(n1 + 1, graph.nodeCount())
-                            .filter(nodeFilter::get)
-                            .forEach(n2 -> {
-                                    long[] v1 = vectors.get(n1);
-                                    long[] v2 = vectors.get(n2);
-                                    // TODO: Assumes that the targets are sorted, need to check
-                                    long intersection = Intersections.intersection3(v1, v2);
-                                    double union = v1.length + v2.length - intersection;
-                                    matrix.set(n1, n2, union == 0 ? 0 : intersection / union);
-                            });
-                });
+                        .filter(nodeFilter::get)
+                        .forEach(n2 -> {
+                            long[] v1 = vectors.get(n1);
+                            long[] v2 = vectors.get(n2);
+                            // TODO: Assumes that the targets are sorted, need to check
+                            long intersection = Intersections.intersection3(v1, v2);
+                            double union = v1.length + v2.length - intersection;
+                            matrix.set(n1, n2, union == 0 ? 0 : intersection / union);
+                        });
+                })
+        );
+
         return matrix;
     }
 
