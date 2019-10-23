@@ -20,25 +20,22 @@
 
 package org.neo4j.graphalgo.bench;
 
-import org.neo4j.graphalgo.SimilarityProc;
+import org.neo4j.graphalgo.JaccardProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.TransactionWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.jaccard.NeighborhoodSimilarity;
-import org.neo4j.graphalgo.impl.results.SimilarityResult;
-import org.neo4j.graphalgo.impl.similarity.CategoricalInput;
-import org.neo4j.graphalgo.impl.similarity.RleDecoder;
-import org.neo4j.graphalgo.impl.similarity.SimilarityComputer;
-import org.neo4j.graphalgo.impl.similarity.SimilarityStreamGenerator;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Label;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.NullLog;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -53,19 +50,15 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
+import org.openjdk.jmh.infra.Blackhole;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.neo4j.graphalgo.SimilarityProc.prepareCategories;
 
 @Threads(1)
-@Fork(1)
+@Fork(value = 1, jvmArgs = {"-Xms4g", "-Xmx4g"})
 @Warmup(iterations = 10, time = 1)
 @Measurement(iterations = 10, time = 1)
 @State(Scope.Benchmark)
@@ -77,13 +70,11 @@ public class NeighborhoodSimilarityBenchmark {
     private Graph graph;
     private NeighborhoodSimilarity algo;
 
-    private List<Map<String, Object>> jaccardInput;
-
     @Setup
-    public void setup() throws KernelException {
+    public void setup() {
         db = TestDatabaseCreator.createTestDatabase();
 
-        JaccardBenchmark.createGraph(db);
+        createGraph(db);
 
         this.graph = new GraphLoader(db)
                 .withAnyLabel()
@@ -96,17 +87,6 @@ public class NeighborhoodSimilarityBenchmark {
                 NeighborhoodSimilarity.Config.DEFAULT,
                 AllocationTracker.EMPTY,
                 NullLog.getInstance());
-
-        this.jaccardInput = new ArrayList<>();
-        graph.forEachNode(nodeId -> {
-            List<Number> targetIds = new ArrayList<>();
-            graph.forEachRelationship(nodeId, Direction.OUTGOING, (sourceNodeId, targetNodeId) -> {
-                targetIds.add(targetNodeId);
-                return true;
-            });
-            jaccardInput.add(MapUtil.map(String.valueOf(nodeId), targetIds));
-            return true;
-        });
     }
 
     @TearDown
@@ -116,59 +96,70 @@ public class NeighborhoodSimilarityBenchmark {
     }
 
     @Benchmark
-    public Object _neighborhoodSimilarity() {
-        return algo
+    public void neighborhoodSimilarity(Blackhole blackhole) {
+        algo
                 .run(Direction.OUTGOING)
-                .collect(Collectors.toList());
+                .forEach(blackhole::consume);
     }
-
 
     @Benchmark
-    public Object _jaccardSimilarity() {
-        CategoricalInput[] inputs = prepareCategories(jaccardInput, 0);
+    public void jaccardSimilarity(Blackhole blackhole) {
+        List<Map<String, Object>> jaccardInput = new ArrayList<>();
+        graph.forEachNode(nodeId -> {
+            List<Number> targetIds = new ArrayList<>();
+            graph.forEachRelationship(nodeId, Direction.OUTGOING, (sourceNodeId, targetNodeId) -> {
+                targetIds.add(targetNodeId);
+                return true;
+            });
+            if (!targetIds.isEmpty()) {
+                jaccardInput.add(MapUtil.map("item", nodeId, "categories", targetIds));
+            }
+            return true;
+        });
 
-        if (inputs.length == 0) {
-            return Stream.empty();
-        }
-
-        int[] sourceIndexIds = new int[0];
-        int[] targetIndexIds = new int[0];
-
-        SimilarityComputer<CategoricalInput> computer = (decoder, s, t, cutoff) -> s.jaccard(cutoff, t, false);
-
-        Stream<SimilarityResult> resultStream = SimilarityProc.topN(similarityStream(
-                inputs,
-                sourceIndexIds,
-                targetIndexIds,
-                computer,
-                ProcedureConfiguration.empty(),
-                () -> null,
-                0.0,
-                0), 0);
-
-        return resultStream.collect(Collectors.toList());
+        JaccardProc jaccardProc = new JaccardProc();
+        TransactionWrapper transactionWrapper = new TransactionWrapper(db);
+        transactionWrapper.accept(
+                (ktx) -> {
+                    jaccardProc.transaction = ktx;
+                    jaccardProc
+                            .similarityStream(jaccardInput, MapUtil.map("concurrency", 1))
+                            .forEach(blackhole::consume);
+                }
+        );
     }
 
-    protected <T> Stream<SimilarityResult> similarityStream(
-            T[] inputs,
-            int[] sourceIndexIds,
-            int[] targetIndexIds,
-            SimilarityComputer<T> computer,
-            ProcedureConfiguration configuration,
-            Supplier<RleDecoder> decoderFactory,
-            double cutoff,
-            int topK) {
-        TerminationFlag terminationFlag = TerminationFlag.wrap((KernelTransaction) db.beginTx());
+    static void createGraph(GraphDatabaseService db) {
+        int itemCount = 2_000;
+        Label itemLabel = Label.label("Item");
+        int personCount = 20_000;
+        Label personLabel = Label.label("Person");
+        RelationshipType likesType = RelationshipType.withName("LIKES");
 
-        SimilarityStreamGenerator<T> generator = new SimilarityStreamGenerator<>(
-                terminationFlag,
-                configuration,
-                decoderFactory,
-                computer);
-        if (sourceIndexIds.length == 0 && targetIndexIds.length == 0) {
-            return generator.stream(inputs, cutoff, topK);
-        } else {
-            return generator.stream(inputs, sourceIndexIds, targetIndexIds, cutoff, topK);
+        List<Node> itemNodes = new ArrayList<>();
+        try (Transaction tx = db.beginTx()) {
+            for (int i = 0; i < itemCount; i++) {
+                itemNodes.add(db.createNode(itemLabel));
+            }
+            for (int i = 0; i < personCount; i++) {
+                Node person = db.createNode(personLabel);
+                if (i % 6 == 0) {
+                    int itemIndex = Math.floorDiv(i, 15);
+                    person.createRelationshipTo(itemNodes.get(itemIndex), likesType);
+                    if (itemIndex > 0) person.createRelationshipTo(itemNodes.get(itemIndex - 1), likesType);
+                }
+                if (i % 5 == 0) {
+                    int itemIndex = Math.floorDiv(i, 10);
+                    person.createRelationshipTo(itemNodes.get(itemIndex), likesType);
+                    if (itemIndex + 1 < itemCount) person.createRelationshipTo(itemNodes.get(itemIndex + 1), likesType);
+                }
+                if (i % 4 == 0) {
+                    int itemIndex = Math.floorDiv(i, 20);
+                    person.createRelationshipTo(itemNodes.get(itemIndex), likesType);
+                    person.createRelationshipTo(itemNodes.get(itemIndex + 10), likesType);
+                }
+            }
+            tx.success();
         }
     }
 }

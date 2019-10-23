@@ -169,7 +169,7 @@ public class SimilarityProc extends LabsProc {
         }
     }
 
-    public static CategoricalInput[] prepareCategories(List<Map<String, Object>> data, long degreeCutoff) {
+    protected CategoricalInput[] prepareCategories(List<Map<String, Object>> data, long degreeCutoff) {
         CategoricalInput[] ids = new CategoricalInput[data.size()];
         int idx = 0;
         for (Map<String, Object> row : data) {

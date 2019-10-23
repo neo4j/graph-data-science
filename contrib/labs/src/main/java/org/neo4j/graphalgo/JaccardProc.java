@@ -85,7 +85,8 @@ public class JaccardProc extends SimilarityProc {
         SimilarityRecorder<CategoricalInput> recorder = SimilarityProc.categoricalSimilarityRecorder(computer, configuration);
 
         double similarityCutoff = getSimilarityCutoff(configuration);
-        Stream<SimilarityResult> stream = SimilarityProc.topN(similarityStream(inputs,sourceIndexIds, targetIndexIds, recorder, configuration, () -> null,
+        Stream<SimilarityResult> stream = SimilarityProc.topN(
+                similarityStream(inputs,sourceIndexIds, targetIndexIds, recorder, configuration, () -> null,
 
                 similarityCutoff, getTopK(configuration)), getTopN(configuration));
 
