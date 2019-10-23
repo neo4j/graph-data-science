@@ -60,7 +60,7 @@ import java.util.stream.Stream;
 
 public class SimilarityProc extends LabsProc {
 
-    protected static Stream<SimilarityResult> topN(Stream<SimilarityResult> stream, int topN) {
+    public static Stream<SimilarityResult> topN(Stream<SimilarityResult> stream, int topN) {
         if (topN == 0) {
             return stream;
         }
@@ -169,7 +169,7 @@ public class SimilarityProc extends LabsProc {
         }
     }
 
-    protected CategoricalInput[] prepareCategories(List<Map<String, Object>> data, long degreeCutoff) {
+    public static CategoricalInput[] prepareCategories(List<Map<String, Object>> data, long degreeCutoff) {
         CategoricalInput[] ids = new CategoricalInput[data.size()];
         int idx = 0;
         for (Map<String, Object> row : data) {

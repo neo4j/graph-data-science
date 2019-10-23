@@ -24,6 +24,8 @@ import org.neo4j.graphalgo.JaccardProc;
 import org.neo4j.graphalgo.NeighborhoodSimilarityProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.wcc.WccProc;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
@@ -50,7 +52,7 @@ import java.util.concurrent.TimeUnit;
 
 @Threads(1)
 @Fork(1)
-@Warmup(iterations = 5, time = 1)
+@Warmup(iterations = 2, time = 1)
 @Measurement(iterations = 5, time = 1)
 @State(Scope.Benchmark)
 @BenchmarkMode(Mode.AverageTime)
@@ -65,7 +67,8 @@ public class JaccardBenchmark {
         Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class);
         procedures.registerProcedure(NeighborhoodSimilarityProc.class);
         procedures.registerProcedure(JaccardProc.class);
-        createGraph();
+        procedures.registerProcedure(WccProc.class);
+        createGraph(db);
     }
 
     @TearDown
@@ -93,7 +96,28 @@ public class JaccardBenchmark {
         return db.execute(query).stream().count();
     }
 
-    private void createGraph() {
+    @Benchmark
+    public Object _03_benchmark() {
+        String query = " MATCH (person:Person)-[:LIKES]->(item:Item)" +
+                       " WITH {item: id(person), categories: collect(id(item))} AS userData " +
+                       " WITH collect(userData) AS data" +
+                       " CALL algo.similarity.jaccard.stream(data, {concurrency: 1, topk: 1})" +
+                       " YIELD item1, item2, similarity" +
+                       " RETURN COUNT(*) AS count";
+        return db.execute(query).stream().count();
+    }
+
+    @Benchmark
+    public Object _04_benchmark() {
+        String query = " CALL algo.wcc('', '', {concurrency: 1, write: true, writeProperty: 'setId'})" +
+                       " YIELD setCount";
+//                       " RETURN COUNT(*) AS count";
+        return db.execute(query).stream().count();
+    }
+
+
+
+    static void createGraph(GraphDatabaseService db) {
         int itemCount = 1_000;
         Label itemLabel = Label.label("Item");
         int personCount = 10_000;
