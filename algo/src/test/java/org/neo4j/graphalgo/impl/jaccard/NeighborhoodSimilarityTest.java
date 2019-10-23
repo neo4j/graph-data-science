@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleTriangularMatrix;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.NullLog;
@@ -40,6 +41,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -103,14 +106,14 @@ final class NeighborhoodSimilarityTest {
             "BOTH, INCOMING"
     })
     void shouldComputeForSupportedDirections(Direction loadDirection, Direction algoDirection) {
-        Graph dbGraph = new GraphLoader(db)
+        Graph graph = new GraphLoader(db)
                 .withAnyLabel()
                 .withAnyRelationshipType()
                 .withDirection(loadDirection)
                 .load(HugeGraphFactory.class);
 
-        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(dbGraph, NeighborhoodSimilarity.Config.DEFAULT, AllocationTracker.EMPTY, NullLog.getInstance());
-        Set<SimilarityResult> result = neighborhoodSimilarity.run(algoDirection).collect(Collectors.toSet());
+        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(graph, NeighborhoodSimilarity.Config.DEFAULT, AllocationTracker.EMPTY, NullLog.getInstance());
+        Set<SimilarityResult> result = resultStream(neighborhoodSimilarity.run(algoDirection), algoDirection, graph).collect(Collectors.toSet());
         neighborhoodSimilarity.release();
 
 
@@ -132,7 +135,7 @@ final class NeighborhoodSimilarityTest {
                 .load(HugeGraphFactory.class);
 
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(graph, NeighborhoodSimilarity.Config.DEFAULT, AllocationTracker.EMPTY, NullLog.getInstance());
-        Set<SimilarityResult> result = neighborhoodSimilarity.run(OUTGOING).collect(Collectors.toSet());
+        Set<SimilarityResult> result = resultStream(neighborhoodSimilarity.run(OUTGOING), OUTGOING, graph).collect(Collectors.toSet());
         neighborhoodSimilarity.release();
         assertNotEquals(Collections.emptySet(), result);
     }
@@ -150,5 +153,16 @@ final class NeighborhoodSimilarityTest {
                 () -> new NeighborhoodSimilarity(graph, NeighborhoodSimilarity.Config.DEFAULT, AllocationTracker.EMPTY, NullLog.getInstance()).run(BOTH)
         );
         assertThat(ex.getMessage(), containsString("Direction BOTH is not supported"));
+    }
+
+    private Stream<SimilarityResult> resultStream(HugeDoubleTriangularMatrix matrix, Direction direction, Graph graph) {
+        return LongStream
+            .range(0, matrix.order())
+            .filter(n1 -> graph.degree(n1, direction) > 0 )
+            .boxed()
+            .flatMap(n1 -> LongStream
+                .range(n1 + 1, matrix.order())
+                .filter(n2 -> graph.degree(n2, direction) > 0 )
+                .mapToObj(n2 -> new SimilarityResult(n1, n2, matrix.get(n1, n2))));
     }
 }

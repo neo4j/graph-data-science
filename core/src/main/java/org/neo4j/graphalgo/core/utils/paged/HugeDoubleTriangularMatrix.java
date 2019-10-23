@@ -41,7 +41,12 @@ public class HugeDoubleTriangularMatrix {
         return array.get(indexOf(x, y));
     }
 
+    public long order() {
+        return order;
+    }
+
     private long indexOf(long x, long y) {
         return triangularIndex(order, x, y);
     }
+
 }

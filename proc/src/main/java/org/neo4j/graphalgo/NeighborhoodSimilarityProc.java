@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleTriangularMatrix;
 import org.neo4j.graphalgo.impl.jaccard.NeighborhoodSimilarity;
 import org.neo4j.graphalgo.impl.jaccard.NeighborhoodSimilarityFactory;
 import org.neo4j.graphalgo.impl.jaccard.SimilarityResult;
@@ -38,7 +39,10 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
+
+import static org.neo4j.graphdb.Direction.OUTGOING;
 
 public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilarity> {
 
@@ -86,7 +90,9 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
 
         NeighborhoodSimilarity neighborhoodSimilarity = newAlgorithm(graph, configuration, tracker);
 
-        return neighborhoodSimilarity.run(configuration.getDirection(Direction.OUTGOING));
+        Direction direction = configuration.getDirection(OUTGOING);
+        HugeDoubleTriangularMatrix matrix = neighborhoodSimilarity.run(direction);
+        return resultStream(matrix, direction, graph);
     }
 
     @Override
@@ -104,6 +110,17 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
                 config.getConcurrency(),
                 config.getBatchSize()
         ));
+    }
+
+    private Stream<SimilarityResult> resultStream(HugeDoubleTriangularMatrix matrix, Direction direction, Graph graph) {
+        return LongStream
+            .range(0, matrix.order())
+            .filter(n1 -> graph.degree(n1, direction) > 0 )
+            .boxed()
+            .flatMap(n1 -> LongStream
+                .range(n1 + 1, matrix.order())
+                .filter(n2 -> graph.degree(n2, direction) > 0 )
+                .mapToObj(n2 -> new SimilarityResult(n1, n2, matrix.get(n1, n2))));
     }
 
 }
