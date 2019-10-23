@@ -318,7 +318,7 @@ public final class FlameGraph implements InternalProfiler, ExternalProfiler {
                     .append("-")
                     .append(benchmarkParams.getParam(key));
         }
-        sb.append(".svg");
+        sb.append(".jfr");
         return SLASH.matcher(sb).replaceAll("-");
     }
 
