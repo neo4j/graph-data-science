@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 abstract class LouvainTestBase {
 
-    static final Louvain.Config DEFAULT_CONFIG = new Louvain.Config(10, 10, false);
+    static final Louvain.Config DEFAULT_CONFIG = new Louvain.Config(10, 10);
 
     GraphDatabaseAPI db;
 
@@ -59,14 +60,19 @@ abstract class LouvainTestBase {
 
     abstract void setupGraphDb(Graph graph);
 
-    Graph loadGraph(Class<? extends GraphFactory> graphImpl, String cypher) {
+    Graph loadGraph(Class<? extends GraphFactory> graphImpl, String cypher, String... nodeProperties) {
         db.execute(cypher);
         GraphLoader loader = new GraphLoader(db)
                 .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
+                .withOptionalNodeProperties(
+                        Arrays.stream(nodeProperties)
+                                .map(p -> PropertyMapping.of(p, -1))
+                                .toArray(PropertyMapping[]::new)
+                )
                 .undirected();
         if (graphImpl == CypherGraphFactory.class) {
             loader
-                    .withNodeStatement("MATCH (u) RETURN id(u) as id")
+                    .withNodeStatement("MATCH (u) RETURN id(u) as id, u.seed1 as seed1, u.seed2 as seed2")
                     .withRelationshipStatement("MATCH (u1)-[rel]-(u2) \n" +
                                                "RETURN id(u1) AS source, id(u2) AS target, rel.weight as weight");
         } else {

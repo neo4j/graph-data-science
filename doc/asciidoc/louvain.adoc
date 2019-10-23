@@ -21,8 +21,7 @@ This section includes:
 * <<algorithms-louvain-limitations, Constraints - when not to use the Louvain algorithm>>
 * <<algorithms-louvain-sample, Louvain algorithm sample>>
 * <<algorithms-louvain-hierarchical, Hierarchical Louvain algorithm sample>>
-* <<algorithms-louvain-pre-defined, Pre-defined communities>>
-* <<algorithms-louvain-hgp, Huge graph projection>>
+* <<algorithms-louvain-pre-defined, Seed communities>>
 * <<algorithms-louvain-cp, Cypher projection>>
 * <<algorithms-louvain-syntax, Syntax>>
 * <<algorithms-louvain-support, Graph type support>>
@@ -195,12 +194,12 @@ On the second level it found two communities. Alice, Bridget and Michael stay in
 
 
 [[algorithms-louvain-pre-defined]]
-== Pre-defined communities
+=== Using seed communities
 
-This sample will explain the pre-defined communities option of the Louvain algorithm.
-Initial or pre-defined communities for nodes are specified using the `communityProperty` parameter.
+It is possible to define preliminary communities of nodes using the `seedProperty` parameter.
+That property needs to be a number.
 
-.The following will create a sample graph:
+.The following will create a sample graph and assign a seed community to the `community` property:
 [source, cypher]
 ----
 include::scripts/louvain.cypher[tag=create-pre-defined-sample-graph]
@@ -218,7 +217,7 @@ include::scripts/louvain.cypher[tag=stream-pre-defined-sample-graph]
 include::scripts/louvain.cypher[tag=write-pre-defined-sample-graph]
 ----
 
-In this example the pre-defined communities are read from the `community` property, and the communities computed by the algorithm are stored to the `newCommunity` property.
+In this example the seed communities are read from the `community` property, and the communities computed by the algorithm are stored to the `newCommunity` property.
 
 
 // tag::stream-pre-defined-sample-graph-result[]
@@ -236,19 +235,6 @@ In this example the pre-defined communities are read from the `community` proper
 | Amy     | 1
 |===
 // end::stream-pre-defined-sample-graph-result[]
-
-
-[[algorithms-louvain-hgp]]
-== Huge graph projection
-
-include::huge-projection.adoc[tag=explanation]
-
-.Set `graph:'huge'` in the config:
-
-[source, cypher]
-----
-include::scripts/louvain.cypher[tag=huge-projection]
-----
 
 
 [[algorithms-louvain-cp]]
@@ -285,7 +271,8 @@ YIELD nodes, communityCount, iterations, loadMillis, computeMillis, writeMillis
 | weightProperty                       | string  | null                   | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
 | write                                | boolean | true                   | yes      | Specifies if the result should be written back as a node property.
 | writeProperty                        | string  | 'community'            | yes      | The property name written back to the ID of the community that particular node belongs to.
-| communityProperty                    | string  | null                   | yes      | The property name that contains an initial or pre-defined community (must be a number).
+| seedProperty                         | string  | null                   | yes      | The property name that contains a preliminary seed community (must be a number).
+| communityProperty                    | string  | n/a                    | yes      | Deprecated. Replaced by 'seedProperty'.
 | defaultValue                         | float   | null                   | yes      | The default value of the weight in case it is missing or invalid.
 | includeIntermediateCommunities       | boolean | false                  | yes      | Specifies whether an array of intermediate communities should be returned.
 | intermediateCommunitiesWriteProperty | string  | 'communities'          | yes      | The property name written back to the ID of the intermediate communities that particular node belongs to.
@@ -335,7 +322,7 @@ YIELD nodes, communityCount, iterations, loadMillis, computeMillis, writeMillis
 ----
 CALL algo.louvain.stream(label:String, relationship:String,
     {weightProperty:'propertyName', defaultValue:1.0, concurrency:4})
-YIELD nodeId, community - yields a community to each node id
+YIELD nodeId, community // yields a community to each node id
 ----
 
 .Parameters

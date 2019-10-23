@@ -201,6 +201,44 @@ class LouvainClusteringProcTest extends ProcTestBase {
     void testPredefinedCommunities(String graphImpl) {
         String query = "CALL algo.louvain.stream(" +
                        "    '', '', {" +
+                       "        concurrency: 1, seedProperty: 'c', graph: $graph" +
+                       "    }" +
+                       ") YIELD nodeId, community, communities";
+        IntIntScatterMap testMap = new IntIntScatterMap();
+        runQuery(query, MapUtil.map("graph", graphImpl),
+                row -> {
+                    long community = (long) row.get("community");
+                    assertEquals(0L, community);
+                    testMap.addTo((int) community, 1);
+                }
+        );
+        assertEquals(1, testMap.size());
+    }
+
+    @AllGraphNamesTest
+    void testPredefinedCommunitiesFromLoadedGraph(String graphImpl) {
+        String loadQuery = "CALL algo.graph.load('foo', '', '', { nodeProperties: { c: { property: 'c', defaulValue: -1 } } })";
+        runQuery(loadQuery);
+        String query = "CALL algo.louvain.stream(" +
+                       "    '', '', {" +
+                       "        concurrency: 1, seedProperty: 'c', graph: 'foo'" +
+                       "    }" +
+                       ") YIELD nodeId, community, communities";
+        IntIntScatterMap testMap = new IntIntScatterMap();
+        runQuery(query, MapUtil.map("graph", graphImpl),
+                row -> {
+                    long community = (long) row.get("community");
+                    assertEquals(0L, community);
+                    testMap.addTo((int) community, 1);
+                }
+        );
+        assertEquals(1, testMap.size());
+    }
+
+    @AllGraphNamesTest
+    void testPredefinedCommunitiesWithOldKey(String graphImpl) {
+        String query = "CALL algo.louvain.stream(" +
+                       "    '', '', {" +
                        "        concurrency: 1, communityProperty: 'c', graph: $graph" +
                        "    }" +
                        ") YIELD nodeId, community, communities";
@@ -219,7 +257,7 @@ class LouvainClusteringProcTest extends ProcTestBase {
     void throwsIfPredefinedCommunityPropertyDoesNotExist(String graphImpl) {
         String query = "CALL algo.louvain.stream(" +
                        "    '', '', {" +
-                       "        concurrency: 1, communityProperty: 'does_not_exist', graph: $graph" +
+                       "        concurrency: 1, seedProperty: 'does_not_exist', graph: $graph" +
                        "    }" +
                        ") YIELD nodeId, community, communities";
         QueryExecutionException exception = assertThrows(QueryExecutionException.class, () -> {
@@ -235,7 +273,7 @@ class LouvainClusteringProcTest extends ProcTestBase {
     void testStreamNoIntermediateCommunitiesByDefault(String graphImpl) {
         String query = "CALL algo.louvain.stream(" +
                        "    '', '', {" +
-                       "        concurrency: 1, communityProperty: 'c', graph: $graph" +
+                       "        concurrency: 1, seedProperty: 'c', graph: $graph" +
                        "    }" +
                        ") YIELD nodeId, community, communities";
         runQuery(query, MapUtil.map("graph", graphImpl),

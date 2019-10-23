@@ -366,9 +366,21 @@ public class ProcedureConfiguration {
 
     public Optional<String> getString(String key) {
         if (config.containsKey(key)) {
-            return Optional.of((String) get(key));
+            // Optional.of will throw an NPE if key does not exist because of the default value
+            //  which we want have as a kind of sanity check - the default value *should* not be used
+            return Optional.of(getChecked(key, null, String.class));
         }
         return Optional.empty();
+    }
+
+    public Optional<String> getStringWithFallback(String key, String oldKey) {
+        Optional<String> value = getString(key);
+        // #migration-note: On Java9+ there is a #or method on Optional that we should use instead
+        //  https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Optional.html#or(java.util.function.Supplier)
+        if (!value.isPresent()) {
+            value = getString(oldKey);
+        }
+        return value;
     }
 
     public Object get(String key) {

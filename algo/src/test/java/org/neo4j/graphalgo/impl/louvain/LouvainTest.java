@@ -20,11 +20,15 @@
 package org.neo4j.graphalgo.impl.louvain;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestProgressLogger;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
@@ -36,6 +40,8 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
+
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,10 +55,10 @@ class LouvainTest extends LouvainTestBase {
 
     private static final String DB_CYPHER =
             "CREATE" +
-            "  (a:Node {name:'a'})" +
-            ", (b:Node {name:'b'})" +
-            ", (c:Node {name:'c'})" +
-            ", (d:Node {name:'d'})" +
+            "  (a:Node {name:'a', seed1: 0, seed2: 1})" +
+            ", (b:Node {name:'b', seed1: 0, seed2: 1})" +
+            ", (c:Node {name:'c', seed1: 2, seed2: 1})" +
+            ", (d:Node {name:'d', seed1: 2, seed2: 42})" +
             ", (a)-[:TYPE {weight: 1.0}]->(b)" +
             ", (b)-[:TYPE {weight: 1.0}]->(c)" +
             ", (c)-[:TYPE {weight: 1.0}]->(a)" +
@@ -89,10 +95,32 @@ class LouvainTest extends LouvainTestBase {
         assertCommunities(algorithm);
     }
 
+    static Stream<Arguments> seededLouvainParameter() {
+        Stream<Class<? extends GraphFactory>> graphTypes = Stream.concat(
+                TestSupport.allTypesWithoutCypher(),
+                TestSupport.cypherType());
+        return graphTypes.flatMap(graphType -> Stream.of(
+                Arguments.of(graphType, "seed1", new String[]{"a", "b", "c", "d"}, new String[]{}),
+                Arguments.of(graphType, "seed2", new String[]{"a", "b", "c"}, new String[]{"a", "d"})
+        ));
+    }
+
     @AllGraphTypesTest
-    void testRandomNeighborLouvain(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = loadGraph(graphImpl, DB_CYPHER);
-        final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
+    @MethodSource("seededLouvainParameter")
+    void testSeededLouvain(
+            Class<? extends GraphFactory> graphImpl,
+            String seedProperty,
+            String[] expectedUnion,
+            String[] expectedDisjoint) {
+        Graph graph = loadGraph(graphImpl, DB_CYPHER, "seed1", "seed2");
+        NodeOrRelationshipProperties communityMap = graph.nodeProperties(seedProperty);
+        final Louvain algorithm = new Louvain(
+                graph,
+                DEFAULT_CONFIG,
+                communityMap,
+                Pools.DEFAULT,
+                1,
+                AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
                 .compute();
@@ -102,7 +130,10 @@ class LouvainTest extends LouvainTestBase {
                 break;
             }
         }
-        assertCommunities(algorithm);
+        assertUnion(expectedUnion, algorithm.getCommunityIds());
+        if (expectedDisjoint.length > 0) {
+            assertDisjoint(expectedDisjoint, algorithm.getCommunityIds());
+        }
     }
 
     @AllGraphTypesTest
@@ -115,7 +146,7 @@ class LouvainTest extends LouvainTestBase {
         GraphLoader graphLoader = new GraphLoader(db);
         if (graphImpl == CypherGraphFactory.class) {
             graphLoader
-                    .withNodeStatement("MATCH (u:Node) RETURN id(u) as id")
+                    .withNodeStatement("MATCH (u:Node) RETURN id(u) AS id")
                     .withRelationshipStatement("MATCH (u1:Node)-[rel:REL]-(u2:Node) \n" +
                                                "RETURN id(u1) AS source, id(u2) AS target");
         } else {
@@ -160,8 +191,12 @@ class LouvainTest extends LouvainTestBase {
         assertEquals(MemoryRange.of(14712, 22376), factory.memoryEstimation().estimate(dimensions100, 4).memoryUsage());
 
         GraphDimensions dimensions100B = new GraphDimensions.Builder().setNodeCount(100_000_000_000L).build();
-        assertEquals(MemoryRange.of(6400976563232L, 13602075196648L), factory.memoryEstimation().estimate(dimensions100B, 1).memoryUsage());
-        assertEquals(MemoryRange.of(13602075196688L, 20803173830104L), factory.memoryEstimation().estimate(dimensions100B, 4).memoryUsage());
+        assertEquals(
+                MemoryRange.of(6400976563232L, 13602075196648L),
+                factory.memoryEstimation().estimate(dimensions100B, 1).memoryUsage());
+        assertEquals(
+                MemoryRange.of(13602075196688L, 20803173830104L),
+                factory.memoryEstimation().estimate(dimensions100B, 4).memoryUsage());
     }
 
     private void assertCommunities(Louvain louvain) {

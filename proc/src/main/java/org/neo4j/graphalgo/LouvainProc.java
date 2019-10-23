@@ -49,8 +49,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.impl.louvain.LouvainFactory.CLUSTERING_IDENTIFIER;
-import static org.neo4j.graphalgo.impl.louvain.LouvainFactory.DEFAULT_CLUSTER_PROPERTY;
+import static org.neo4j.graphalgo.impl.louvain.LouvainFactory.CONFIG_SEED_KEY;
+import static org.neo4j.graphalgo.impl.louvain.LouvainFactory.DEPRECATED_CONFIG_SEED_KEY;
 import static org.neo4j.procedure.Mode.READ;
 
 /**
@@ -63,7 +63,6 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
     public static final String INTERMEDIATE_COMMUNITIES_WRITE_PROPERTY = "intermediateCommunitiesWriteProperty";
     public static final String INCLUDE_INTERMEDIATE_COMMUNITIES = "includeIntermediateCommunities";
     public static final String INNER_ITERATIONS = "innerIterations";
-    public static final String COMMUNITY_SELECTION = "communitySelection";
     public static final int DEFAULT_CONCURRENCY = 1;
     public static final int DEFAULT_MAX_LEVEL = 10;
     public static final long DEFAULT_MAX_ITERATIONS = 10L;
@@ -158,11 +157,10 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
 
     @Override
     protected GraphLoader configureAlgoLoader(final GraphLoader loader, final ProcedureConfiguration config) {
-        config.getString(DEFAULT_CLUSTER_PROPERTY).ifPresent(propertyIdentifier -> {
+        config.getStringWithFallback(CONFIG_SEED_KEY, DEPRECATED_CONFIG_SEED_KEY).ifPresent(propertyIdentifier -> {
             // configure predefined clustering if set
-            loader.withOptionalNodeProperties(PropertyMapping.of(CLUSTERING_IDENTIFIER, propertyIdentifier, -1));
+            loader.withOptionalNodeProperties(PropertyMapping.of(propertyIdentifier, -1));
         });
-
         return loader.undirected().withDirection(Direction.OUTGOING);
     }
 
@@ -175,9 +173,8 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
     protected LouvainFactory algorithmFactory(final ProcedureConfiguration procedureConfig) {
         int maxLevel = procedureConfig.getIterations(DEFAULT_MAX_LEVEL);
         int maxIterations = procedureConfig.getNumber(INNER_ITERATIONS, DEFAULT_MAX_ITERATIONS).intValue();
-        boolean randomNeighbor = procedureConfig.get(COMMUNITY_SELECTION, "classic").equalsIgnoreCase("random");
 
-        return new LouvainFactory(new Louvain.Config(maxLevel, maxIterations, randomNeighbor));
+        return new LouvainFactory(new Louvain.Config(maxLevel, maxIterations));
     }
 
     private Louvain compute(
@@ -191,8 +188,6 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
         final Louvain louvain = runWithExceptionLogging(
                 "Louvain failed",
                 () -> statsBuilder.timeEval((Supplier<Louvain>) algo::compute));
-
-        statsBuilder.randomNeighbor(algo.randomNeighborSelection());
 
         graph.release();
 
@@ -240,8 +235,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
                 false,
                 null,
                 false,
-                null,
-                false);
+                null);
 
         public final long loadMillis;
         public final long computeMillis;
@@ -266,7 +260,6 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
         public final String writeProperty;
         public final boolean includeIntermediateCommunities;
         public final String intermediateCommunitiesWriteProperty;
-        public final boolean randomNeighbor;
 
         public LouvainResult(
                 long loadMillis,
@@ -291,8 +284,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
                 boolean write,
                 String writeProperty,
                 boolean includeIntermediateCommunities,
-                String intermediateCommunitiesWriteProperty,
-                boolean randomNeighbor) {
+                String intermediateCommunitiesWriteProperty) {
             this.loadMillis = loadMillis;
             this.computeMillis = computeMillis;
             this.postProcessingMillis = postProcessingMillis;
@@ -317,7 +309,6 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
             this.modularity = finalModularity;
             this.writeProperty = writeProperty;
             this.intermediateCommunitiesWriteProperty = intermediateCommunitiesWriteProperty;
-            this.randomNeighbor = randomNeighbor;
         }
     }
 
@@ -329,7 +320,6 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
         private String writeProperty;
         private String intermediateCommunitiesWriteProperty;
         private boolean includeIntermediateCommunities;
-        private boolean randomNeighbor = false;
 
         protected Builder(Set<String> returnFields) {
             super(returnFields);
@@ -346,11 +336,6 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
 
         public Builder withIterations(long iterations) {
             this.iterations = iterations;
-            return this;
-        }
-
-        public Builder randomNeighbor(boolean randomNeighbor) {
-            this.randomNeighbor = randomNeighbor;
             return this;
         }
 
@@ -387,8 +372,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
                     write,
                     writeProperty,
                     includeIntermediateCommunities,
-                    intermediateCommunitiesWriteProperty,
-                    randomNeighbor);
+                    intermediateCommunitiesWriteProperty);
         }
 
         public Builder withModularities(double[] modularities) {
