@@ -30,7 +30,7 @@ public class HugeLongMatrix {
     public HugeLongMatrix(long rows, long cols, AllocationTracker tracker) {
         this.rows = rows;
         this.cols = cols;
-        this.array = HugeLongArrayBuilder.of(rows * cols, tracker).build();
+        this.array = HugeLongArrayBuilder.of(Math.multiplyExact(rows, cols), tracker).build();
     }
 
     public void set(long x, long y, long v) {

@@ -26,7 +26,7 @@ public class HugeLongTriangularMatrix {
     private final long order;
 
     public HugeLongTriangularMatrix(long order, AllocationTracker tracker) {
-        long size = (order * (order + 1)) / 2;
+        long size = Math.multiplyExact(order, order + 1) / 2;
         this.order = order;
         this.array = HugeLongArrayBuilder.of(size, tracker).build();
     }
