@@ -154,7 +154,8 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
                 long[] v1 = vectors.get(n1);
                 return LongStream.range(n1 + 1, graph.nodeCount())
                     .filter(nodeFilter::get)
-                    .mapToObj(n2 -> jaccard(n1, n2, v1, vectors.get(n2)));
+                    .mapToObj(n2 -> jaccard(n1, n2, v1, vectors.get(n2)))
+                    .filter(similarityResult -> similarityResult.similarity >= config.similarityCutoff);
             });
     }
 
@@ -169,6 +170,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
                 LongStream.range(n1 + 1, graph.nodeCount())
                     .filter(nodeFilter::get)
                     .mapToObj(n2 -> jaccard(n1, n2, v1, vectors.get(n2)))
+                    .filter(similarityResult -> similarityResult.similarity >= config.similarityCutoff)
                     .forEach(similarity ->
                         result.compute(n1, (node, topkSims) -> {
                             if (topkSims == null) {
