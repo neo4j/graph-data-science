@@ -53,4 +53,11 @@ public interface NodeProperties {
     default long release() {
         return 0;
     }
+
+    /**
+     * @return the number of values stored.
+     */
+    default long size() {
+        return 0;
+    }
 }

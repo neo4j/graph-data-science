@@ -69,4 +69,9 @@ final class NodePropertyMap implements NodeProperties {
         }
         return 0L;
     }
+
+    @Override
+    public long size() {
+        return properties.size();
+    }
 }
