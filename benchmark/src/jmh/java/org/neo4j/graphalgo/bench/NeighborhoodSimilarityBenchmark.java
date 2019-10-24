@@ -118,7 +118,7 @@ public class NeighborhoodSimilarityBenchmark {
 
     @Benchmark
     public void neighborhoodSimilarity(Blackhole blackhole) {
-        blackhole.consume(algo.run(Direction.OUTGOING));
+        algo.run(Direction.OUTGOING).forEach(blackhole::consume);
     }
 
     @Benchmark

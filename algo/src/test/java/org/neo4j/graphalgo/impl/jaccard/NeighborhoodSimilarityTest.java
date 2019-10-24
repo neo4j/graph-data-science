@@ -30,9 +30,9 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleTriangularMatrix;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.NullLog;
@@ -42,8 +42,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -57,33 +55,49 @@ final class NeighborhoodSimilarityTest {
 
     // TODO: maybe create random graph similar to JaccardProcTest#buildRandomDB
     private static final String DB_CYPHER =
-            "CREATE" +
-            "  (a:Person {name: 'Alice'})" +
-            ", (b:Person {name: 'Bob'})" +
-            ", (c:Person {name: 'Charlie'})" +
-            ", (d:Person {name: 'Dave'})" +
-            ", (i1:Item {name: 'p1'})" +
-            ", (i2:Item {name: 'p2'})" +
-            ", (i3:Item {name: 'p3'})" +
-            ", (i4:Item {name: 'p4'})" +
-            ", (a)-[:LIKES]->(i1)" +
-            ", (a)-[:LIKES]->(i2)" +
-            ", (a)-[:LIKES]->(i3)" +
-            ", (b)-[:LIKES]->(i1)" +
-            ", (b)-[:LIKES]->(i2)" +
-            ", (c)-[:LIKES]->(i3)";
+        "CREATE" +
+        "  (a:Person {name: 'Alice'})" +
+        ", (b:Person {name: 'Bob'})" +
+        ", (c:Person {name: 'Charlie'})" +
+        ", (d:Person {name: 'Dave'})" +
+        ", (i1:Item {name: 'p1'})" +
+        ", (i2:Item {name: 'p2'})" +
+        ", (i3:Item {name: 'p3'})" +
+        ", (i4:Item {name: 'p4'})" +
+        ", (a)-[:LIKES]->(i1)" +
+        ", (a)-[:LIKES]->(i2)" +
+        ", (a)-[:LIKES]->(i3)" +
+        ", (b)-[:LIKES]->(i1)" +
+        ", (b)-[:LIKES]->(i2)" +
+        ", (c)-[:LIKES]->(i3)";
 
     private static final Collection<SimilarityResult> EXPECTED_OUTGOING = new HashSet<>();
     private static final Collection<SimilarityResult> EXPECTED_INCOMING = new HashSet<>();
+
+    private static final Collection<SimilarityResult> EXPECTED_OUTGOING_TOP_1 = new HashSet<>();
+    private static final Collection<SimilarityResult> EXPECTED_INCOMING_TOP_1 = new HashSet<>();
+
+    private static final Collection<SimilarityResult> EXPECTED_OUTGOING_TOPK_1 = new HashSet<>();
+    private static final Collection<SimilarityResult> EXPECTED_INCOMING_TOPK_1 = new HashSet<>();
 
     static {
         EXPECTED_OUTGOING.add(new SimilarityResult(0, 1, 2 / 3.0));
         EXPECTED_OUTGOING.add(new SimilarityResult(0, 2, 1 / 3.0));
         EXPECTED_OUTGOING.add(new SimilarityResult(1, 2, 0.0));
 
+        EXPECTED_OUTGOING_TOP_1.add(new SimilarityResult(0, 1, 2 / 3.0));
+
+        EXPECTED_OUTGOING_TOPK_1.add(new SimilarityResult(0, 1, 2 / 3.0));
+        EXPECTED_OUTGOING_TOPK_1.add(new SimilarityResult(1, 2, 0.0));
+
         EXPECTED_INCOMING.add(new SimilarityResult(4, 5, 3.0 / 3.0));
         EXPECTED_INCOMING.add(new SimilarityResult(4, 6, 1 / 3.0));
         EXPECTED_INCOMING.add(new SimilarityResult(5, 6, 1 / 3.0));
+
+        EXPECTED_INCOMING_TOP_1.add(new SimilarityResult(4, 5, 3.0 / 3.0));
+
+        EXPECTED_INCOMING_TOPK_1.add(new SimilarityResult(4, 5, 3.0 / 3.0));
+        EXPECTED_INCOMING_TOPK_1.add(new SimilarityResult(5, 6, 1 / 3.0));
     }
 
     private GraphDatabaseAPI db;
@@ -101,27 +115,27 @@ final class NeighborhoodSimilarityTest {
 
     @ParameterizedTest
     @CsvSource({
-            "OUTGOING, OUTGOING",
-            "BOTH, OUTGOING",
-            "INCOMING, INCOMING",
-            "BOTH, INCOMING"
+        "OUTGOING, OUTGOING",
+        "BOTH, OUTGOING",
+        "INCOMING, INCOMING",
+        "BOTH, INCOMING"
     })
     void shouldComputeForSupportedDirections(Direction loadDirection, Direction algoDirection) {
         Graph graph = new GraphLoader(db)
-                .withAnyLabel()
-                .withAnyRelationshipType()
-                .withDirection(loadDirection)
-                .load(HugeGraphFactory.class);
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .withDirection(loadDirection)
+            .load(HugeGraphFactory.class);
 
-        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(graph,
+        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
+            graph,
             NeighborhoodSimilarity.Config.DEFAULT,
             Pools.DEFAULT,
             AllocationTracker.EMPTY,
-            NullLog.getInstance());
-        Set<SimilarityResult> result = resultStream(
-            neighborhoodSimilarity.run(algoDirection),
-            algoDirection,
-            graph).collect(Collectors.toSet());
+            NullLog.getInstance()
+        );
+
+        Set<SimilarityResult> result = neighborhoodSimilarity.run(algoDirection).collect(Collectors.toSet());
         neighborhoodSimilarity.release();
 
         if (algoDirection == INCOMING) {
@@ -133,13 +147,79 @@ final class NeighborhoodSimilarityTest {
         }
     }
 
+    @ParameterizedTest
+    @CsvSource({
+        "OUTGOING, OUTGOING",
+        "BOTH, OUTGOING",
+        "INCOMING, INCOMING",
+        "BOTH, INCOMING"
+    })
+    void shouldComputeTopForSupportedDirections(Direction loadDirection, Direction algoDirection) {
+        Graph graph = new GraphLoader(db)
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .withDirection(loadDirection)
+            .load(HugeGraphFactory.class);
+
+        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
+            graph,
+            new NeighborhoodSimilarity.Config(0.0, 0, 1, 0, Pools.DEFAULT_CONCURRENCY, ParallelUtil.DEFAULT_BATCH_SIZE),
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY,
+            NullLog.getInstance());
+
+        Set<SimilarityResult> result = neighborhoodSimilarity.run(algoDirection).collect(Collectors.toSet());
+        neighborhoodSimilarity.release();
+
+        if (algoDirection == INCOMING) {
+            assertEquals(EXPECTED_INCOMING_TOP_1.size(), result.size());
+            assertEquals(EXPECTED_INCOMING_TOP_1, result);
+        } else {
+            assertEquals(EXPECTED_OUTGOING_TOP_1.size(), result.size());
+            assertEquals(EXPECTED_OUTGOING_TOP_1, result);
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "OUTGOING, OUTGOING",
+        "BOTH, OUTGOING",
+        "INCOMING, INCOMING",
+        "BOTH, INCOMING"
+    })
+    void shouldComputeTopKForSupportedDirections(Direction loadDirection, Direction algoDirection) {
+        Graph graph = new GraphLoader(db)
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .withDirection(loadDirection)
+            .load(HugeGraphFactory.class);
+
+        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
+            graph,
+            new NeighborhoodSimilarity.Config(0.0, 0, 0, 1, Pools.DEFAULT_CONCURRENCY, ParallelUtil.DEFAULT_BATCH_SIZE),
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY,
+            NullLog.getInstance());
+
+        Set<SimilarityResult> result = neighborhoodSimilarity.run(algoDirection).collect(Collectors.toSet());
+        neighborhoodSimilarity.release();
+
+        if (algoDirection == INCOMING) {
+            assertEquals(EXPECTED_INCOMING_TOPK_1.size(), result.size());
+            assertEquals(EXPECTED_INCOMING_TOPK_1, result);
+        } else {
+            assertEquals(EXPECTED_OUTGOING_TOPK_1.size(), result.size());
+            assertEquals(EXPECTED_OUTGOING_TOPK_1, result);
+        }
+    }
+
     @Test
     void shouldComputeForUndirectedGraphs() {
         Graph graph = new GraphLoader(db)
-                .withAnyLabel()
-                .withAnyRelationshipType()
-                .undirected()
-                .load(HugeGraphFactory.class);
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .undirected()
+            .load(HugeGraphFactory.class);
 
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
@@ -147,7 +227,7 @@ final class NeighborhoodSimilarityTest {
             Pools.DEFAULT,
             AllocationTracker.EMPTY,
             NullLog.getInstance());
-        Set<SimilarityResult> result = resultStream(neighborhoodSimilarity.run(OUTGOING), OUTGOING, graph).collect(Collectors.toSet());
+        Set<SimilarityResult> result = neighborhoodSimilarity.run(OUTGOING).collect(Collectors.toSet());
         neighborhoodSimilarity.release();
         assertNotEquals(Collections.emptySet(), result);
     }
@@ -155,10 +235,10 @@ final class NeighborhoodSimilarityTest {
     @Test
     void shouldThrowForDirectionBoth() {
         Graph graph = new GraphLoader(db)
-                .withAnyLabel()
-                .withAnyRelationshipType()
-                .undirected()
-                .load(HugeGraphFactory.class);
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .undirected()
+            .load(HugeGraphFactory.class);
 
         IllegalArgumentException ex = Assertions.assertThrows(
             IllegalArgumentException.class,
@@ -170,16 +250,5 @@ final class NeighborhoodSimilarityTest {
                 NullLog.getInstance()).run(BOTH)
         );
         assertThat(ex.getMessage(), containsString("Direction BOTH is not supported"));
-    }
-
-    private Stream<SimilarityResult> resultStream(HugeDoubleTriangularMatrix matrix, Direction direction, Graph graph) {
-        return LongStream
-            .range(0, matrix.order())
-            .filter(n1 -> graph.degree(n1, direction) > 0 )
-            .boxed()
-            .flatMap(n1 -> LongStream
-                .range(n1 + 1, matrix.order())
-                .filter(n2 -> graph.degree(n2, direction) > 0 )
-                .mapToObj(n2 -> new SimilarityResult(n1, n2, matrix.get(n1, n2))));
     }
 }

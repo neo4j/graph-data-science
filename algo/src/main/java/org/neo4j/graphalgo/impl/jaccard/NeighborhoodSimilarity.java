@@ -29,18 +29,27 @@ import org.neo4j.graphalgo.core.utils.Intersections;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleTriangularMatrix;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
 
     private final Graph graph;
     private final Config config;
+
+    private final ExecutorService executorService;
     private final AllocationTracker tracker;
     private final Log log;
 
@@ -52,6 +61,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
             Log log) {
         this.graph = graph;
         this.config = config;
+        this.executorService = executorService;
         this.tracker = tracker;
         this.log = log;
     }
@@ -79,13 +89,11 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
      *
      * Number of results: (n^2 - n) / 2
      */
-    public HugeDoubleTriangularMatrix run(Direction direction) {
+    public Stream<SimilarityResult> run(Direction direction) {
         if (direction == Direction.BOTH) {
             throw new IllegalArgumentException(
-                    "Direction BOTH is not supported by the NeighborhoodSimilarity algorithm.");
+                "Direction BOTH is not supported by the NeighborhoodSimilarity algorithm.");
         }
-
-
 
         BitSet nodeFilter = new BitSet(graph.nodeCount());
 
@@ -97,9 +105,9 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         });
 
         HugeObjectArray<long[]> vectors = HugeObjectArray.newArray(
-                long[].class,
-                graph.nodeCount(),
-                AllocationTracker.EMPTY);
+            long[].class,
+            graph.nodeCount(),
+            AllocationTracker.EMPTY);
 
         graph.forEachNode(node -> {
             if (nodeFilter.get(node)) {
@@ -114,25 +122,81 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
             return true;
         });
 
-        HugeDoubleTriangularMatrix matrix = new HugeDoubleTriangularMatrix(graph.nodeCount(), tracker);
-        ParallelUtil.parallelStreamConsume(
-            LongStream.range(0, graph.nodeCount())
-                .filter(nodeFilter::get), (s) ->
-                s.forEach(n1 -> {
-                    LongStream.range(n1 + 1, graph.nodeCount())
-                        .filter(nodeFilter::get)
-                        .forEach(n2 -> {
-                            long[] v1 = vectors.get(n1);
-                            long[] v2 = vectors.get(n2);
-                            // TODO: Assumes that the targets are sorted, need to check
-                            long intersection = Intersections.intersection3(v1, v2);
-                            double union = v1.length + v2.length - intersection;
-                            matrix.set(n1, n2, union == 0 ? 0 : intersection / union);
-                        });
-                })
-        );
+        Stream<SimilarityResult> similarityResultStream;
 
-        return matrix;
+        if (config.topk > 0) {
+            similarityResultStream = similarityTopKComputation(nodeFilter, vectors);
+        } else {
+            similarityResultStream = similarityComputation(nodeFilter, vectors);
+        }
+
+        if (config.top > 0) {
+            similarityResultStream = topN(similarityResultStream);
+        }
+
+        // TODO: step d (writing)
+
+        return similarityResultStream;
+    }
+
+    private SimilarityResult jaccard(long n1, long n2, long[] v1, long[] v2) {
+        long intersection = Intersections.intersection3(v1, v2);
+        double union = v1.length + v2.length - intersection;
+        double similarity = union == 0 ? 0 : intersection / union;
+        return new SimilarityResult(n1, n2, similarity);
+    }
+
+    private Stream<SimilarityResult> similarityComputation(BitSet nodeFilter, HugeObjectArray<long[]> vectors) {
+        return LongStream.range(0, graph.nodeCount())
+            .filter(nodeFilter::get)
+            .boxed()
+            .flatMap(n1 -> {
+                long[] v1 = vectors.get(n1);
+                return LongStream.range(n1 + 1, graph.nodeCount())
+                    .filter(nodeFilter::get)
+                    .mapToObj(n2 -> jaccard(n1, n2, v1, vectors.get(n2)));
+            });
+    }
+
+    private Stream<SimilarityResult> similarityTopKComputation(BitSet nodeFilter, HugeObjectArray<long[]> vectors) {
+        // TODO replace this with an efficient data structure
+        Map<Long, List<SimilarityResult>> result = new HashMap<>();
+
+        LongStream.range(0, graph.nodeCount())
+            .filter(nodeFilter::get)
+            .forEach(n1 -> {
+                long[] v1 = vectors.get(n1);
+                LongStream.range(n1 + 1, graph.nodeCount())
+                    .filter(nodeFilter::get)
+                    .mapToObj(n2 -> jaccard(n1, n2, v1, vectors.get(n2)))
+                    .forEach(similarity ->
+                        result.compute(n1, (node, topkSims) -> {
+                            if (topkSims == null) {
+                                topkSims = new ArrayList<>();
+                            }
+                            if (topkSims.size() < config.topk) {
+                                topkSims.add(similarity);
+                            } else {
+                                Optional<SimilarityResult> maybeSmallest = topkSims
+                                    .stream()
+                                    .filter(sim -> sim.similarity < similarity.similarity)
+                                    .min(Comparator.comparingDouble(o -> o.similarity));
+
+                                if (maybeSmallest.isPresent()) {
+                                    topkSims.remove(maybeSmallest.get());
+                                    topkSims.add(similarity);
+                                }
+                            }
+                            return topkSims;
+                        }));
+            });
+
+        return result.values().stream().flatMap(Collection::stream);
+    }
+
+    private Stream<SimilarityResult> topN(Stream<SimilarityResult> similarities) {
+        Comparator<SimilarityResult> comparator = config.top > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
+        return similarities.sorted(comparator).limit(config.top);
     }
 
     public static final class Config {

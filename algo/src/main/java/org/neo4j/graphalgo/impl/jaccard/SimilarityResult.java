@@ -20,9 +20,14 @@
 
 package org.neo4j.graphalgo.impl.jaccard;
 
+import java.util.Comparator;
 import java.util.Objects;
 
-public class SimilarityResult {
+public class SimilarityResult implements Comparable<SimilarityResult> {
+
+    static Comparator<SimilarityResult> ASCENDING = SimilarityResult::compareTo;
+    static Comparator<SimilarityResult> DESCENDING = (o1, o2) -> -o1.compareTo(o2);
+
     public long node1;
     public long node2;
     public double similarity;
@@ -55,5 +60,10 @@ public class SimilarityResult {
                ", node2=" + node2 +
                ", similarity=" + similarity +
                '}';
+    }
+
+    @Override
+    public int compareTo(SimilarityResult o) {
+        return Double.compare(this.similarity, o.similarity);
     }
 }
