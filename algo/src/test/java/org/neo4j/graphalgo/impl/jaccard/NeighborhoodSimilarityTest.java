@@ -80,8 +80,11 @@ final class NeighborhoodSimilarityTest {
     private static final Collection<SimilarityResult> EXPECTED_OUTGOING_TOPK_1 = new HashSet<>();
     private static final Collection<SimilarityResult> EXPECTED_INCOMING_TOPK_1 = new HashSet<>();
 
-    private static final Collection<SimilarityResult> EXPECTED_OUTGOING_CUTOFF = new HashSet<>();
-    private static final Collection<SimilarityResult> EXPECTED_INCOMING_CUTOFF = new HashSet<>();
+    private static final Collection<SimilarityResult> EXPECTED_OUTGOING_SIMILARITY_CUTOFF = new HashSet<>();
+    private static final Collection<SimilarityResult> EXPECTED_INCOMING_SIMILARITY_CUTOFF = new HashSet<>();
+
+    private static final Collection<SimilarityResult> EXPECTED_OUTGOING_DEGREE_CUTOFF = new HashSet<>();
+    private static final Collection<SimilarityResult> EXPECTED_INCOMING_DEGREE_CUTOFF = new HashSet<>();
 
     static {
         EXPECTED_OUTGOING.add(new SimilarityResult(0, 1, 2 / 3.0));
@@ -93,8 +96,12 @@ final class NeighborhoodSimilarityTest {
         EXPECTED_OUTGOING_TOPK_1.add(new SimilarityResult(0, 1, 2 / 3.0));
         EXPECTED_OUTGOING_TOPK_1.add(new SimilarityResult(1, 2, 0.0));
 
-        EXPECTED_OUTGOING_CUTOFF.add(new SimilarityResult(0, 1, 2 / 3.0));
-        EXPECTED_OUTGOING_CUTOFF.add(new SimilarityResult(0, 2, 1 / 3.0));
+        EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(new SimilarityResult(0, 1, 2 / 3.0));
+        EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(new SimilarityResult(0, 2, 1 / 3.0));
+
+        EXPECTED_OUTGOING_DEGREE_CUTOFF.add(new SimilarityResult(0, 1, 2 / 3.0));
+        EXPECTED_OUTGOING_DEGREE_CUTOFF.add(new SimilarityResult(0, 2, 1 / 3.0));
+        EXPECTED_OUTGOING_DEGREE_CUTOFF.add(new SimilarityResult(1, 2, 0.0));
 
         EXPECTED_INCOMING.add(new SimilarityResult(4, 5, 3.0 / 3.0));
         EXPECTED_INCOMING.add(new SimilarityResult(4, 6, 1 / 3.0));
@@ -105,9 +112,13 @@ final class NeighborhoodSimilarityTest {
         EXPECTED_INCOMING_TOPK_1.add(new SimilarityResult(4, 5, 3.0 / 3.0));
         EXPECTED_INCOMING_TOPK_1.add(new SimilarityResult(5, 6, 1 / 3.0));
 
-        EXPECTED_INCOMING_CUTOFF.add(new SimilarityResult(4, 5, 3.0 / 3.0));
-        EXPECTED_INCOMING_CUTOFF.add(new SimilarityResult(4, 6, 1 / 3.0));
-        EXPECTED_INCOMING_CUTOFF.add(new SimilarityResult(5, 6, 1 / 3.0));
+        EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(new SimilarityResult(4, 5, 3.0 / 3.0));
+        EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(new SimilarityResult(4, 6, 1 / 3.0));
+        EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(new SimilarityResult(5, 6, 1 / 3.0));
+
+        EXPECTED_INCOMING_DEGREE_CUTOFF.add(new SimilarityResult(4, 5, 3.0 / 3.0));
+        EXPECTED_INCOMING_DEGREE_CUTOFF.add(new SimilarityResult(4, 6, 1 / 3.0));
+        EXPECTED_INCOMING_DEGREE_CUTOFF.add(new SimilarityResult(5, 6, 1 / 3.0));
     }
 
     private GraphDatabaseAPI db;
@@ -212,7 +223,7 @@ final class NeighborhoodSimilarityTest {
         "INCOMING, INCOMING",
         "BOTH, INCOMING"
     })
-    void shouldComputeWithCutoffForSupportedDirections(Direction loadDirection, Direction algoDirection) {
+    void shouldComputeWithSimilarityCutoffForSupportedDirections(Direction loadDirection, Direction algoDirection) {
         Graph graph = new GraphLoader(db)
             .withAnyLabel()
             .withAnyRelationshipType()
@@ -229,7 +240,34 @@ final class NeighborhoodSimilarityTest {
         Set<SimilarityResult> result = neighborhoodSimilarity.run(algoDirection).collect(Collectors.toSet());
         neighborhoodSimilarity.release();
 
-        assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_CUTOFF : EXPECTED_OUTGOING_CUTOFF, result);
+        assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_SIMILARITY_CUTOFF : EXPECTED_OUTGOING_SIMILARITY_CUTOFF, result);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "OUTGOING, OUTGOING",
+        "BOTH, OUTGOING",
+        "INCOMING, INCOMING",
+        "BOTH, INCOMING"
+    })
+    void shouldComputeWithDegreeCutoffForSupportedDirections(Direction loadDirection, Direction algoDirection) {
+        Graph graph = new GraphLoader(db)
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .withDirection(loadDirection)
+            .load(HugeGraphFactory.class);
+
+        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
+            graph,
+            new NeighborhoodSimilarity.Config(0.0, 1, 0, 0, Pools.DEFAULT_CONCURRENCY, ParallelUtil.DEFAULT_BATCH_SIZE),
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY,
+            NullLog.getInstance());
+
+        Set<SimilarityResult> result = neighborhoodSimilarity.run(algoDirection).collect(Collectors.toSet());
+        neighborhoodSimilarity.release();
+
+        assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_DEGREE_CUTOFF : EXPECTED_OUTGOING_DEGREE_CUTOFF, result);
     }
 
     @Test

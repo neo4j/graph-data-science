@@ -103,7 +103,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         }
 
         graph.forEachNode(node -> {
-            if (graph.degree(node, direction) > 0L) {
+            if (graph.degree(node, direction) >= config.degreeCutoff) {
                 nodeFilter.set(node);
             }
             return true;
@@ -137,13 +137,6 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         // TODO: step d (writing)
 
         return similarityResultStream;
-    }
-
-    private SimilarityResult jaccard(long n1, long n2, long[] v1, long[] v2) {
-        long intersection = Intersections.intersection3(v1, v2);
-        double union = v1.length + v2.length - intersection;
-        double similarity = union == 0 ? 0 : intersection / union;
-        return new SimilarityResult(n1, n2, similarity);
     }
 
     private Stream<SimilarityResult> similarityComputation() {
@@ -196,6 +189,13 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         return result.values().stream().flatMap(Collection::stream);
     }
 
+    private SimilarityResult jaccard(long n1, long n2, long[] v1, long[] v2) {
+        long intersection = Intersections.intersection3(v1, v2);
+        double union = v1.length + v2.length - intersection;
+        double similarity = union == 0 ? 0 : intersection / union;
+        return new SimilarityResult(n1, n2, similarity);
+    }
+
     private Stream<SimilarityResult> topN(Stream<SimilarityResult> similarities) {
         Comparator<SimilarityResult> comparator = config.top > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
         return similarities.sorted(comparator).limit(config.top);
@@ -227,7 +227,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
                 int concurrency,
                 int minBatchSize) {
             this.similarityCutoff = similarityCutoff;
-            this.degreeCutoff = degreeCutoff;
+            this.degreeCutoff = Math.max(1, degreeCutoff);
             this.top = top;
             this.topk = topk;
             this.concurrency = concurrency;
