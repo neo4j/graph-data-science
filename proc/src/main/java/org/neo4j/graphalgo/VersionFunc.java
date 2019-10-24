@@ -27,6 +27,6 @@ public class VersionFunc {
     @UserFunction("algo.version")
     @Description("RETURN algo.version() | return the current graph algorithms installed version")
     public String version() {
-        return "3.5.11.1";
+        return "3.5.12.0";
     }
 }
