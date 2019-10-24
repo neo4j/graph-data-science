@@ -148,13 +148,7 @@ final class NeighborhoodSimilarityTest {
         Set<SimilarityResult> result = neighborhoodSimilarity.run(algoDirection).collect(Collectors.toSet());
         neighborhoodSimilarity.release();
 
-        if (algoDirection == INCOMING) {
-            assertEquals(EXPECTED_INCOMING.size(), result.size());
-            assertEquals(EXPECTED_INCOMING, result);
-        } else {
-            assertEquals(EXPECTED_OUTGOING.size(), result.size());
-            assertEquals(EXPECTED_OUTGOING, result);
-        }
+        assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING : EXPECTED_OUTGOING, result);
     }
 
     @ParameterizedTest
@@ -181,13 +175,7 @@ final class NeighborhoodSimilarityTest {
         Set<SimilarityResult> result = neighborhoodSimilarity.run(algoDirection).collect(Collectors.toSet());
         neighborhoodSimilarity.release();
 
-        if (algoDirection == INCOMING) {
-            assertEquals(EXPECTED_INCOMING_TOP_1.size(), result.size());
-            assertEquals(EXPECTED_INCOMING_TOP_1, result);
-        } else {
-            assertEquals(EXPECTED_OUTGOING_TOP_1.size(), result.size());
-            assertEquals(EXPECTED_OUTGOING_TOP_1, result);
-        }
+        assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_TOP_1 : EXPECTED_OUTGOING_TOP_1, result);
     }
 
     @ParameterizedTest
@@ -214,13 +202,7 @@ final class NeighborhoodSimilarityTest {
         Set<SimilarityResult> result = neighborhoodSimilarity.run(algoDirection).collect(Collectors.toSet());
         neighborhoodSimilarity.release();
 
-        if (algoDirection == INCOMING) {
-            assertEquals(EXPECTED_INCOMING_TOPK_1.size(), result.size());
-            assertEquals(EXPECTED_INCOMING_TOPK_1, result);
-        } else {
-            assertEquals(EXPECTED_OUTGOING_TOPK_1.size(), result.size());
-            assertEquals(EXPECTED_OUTGOING_TOPK_1, result);
-        }
+        assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_TOPK_1 : EXPECTED_OUTGOING_TOPK_1, result);
     }
 
     @ParameterizedTest
@@ -247,13 +229,7 @@ final class NeighborhoodSimilarityTest {
         Set<SimilarityResult> result = neighborhoodSimilarity.run(algoDirection).collect(Collectors.toSet());
         neighborhoodSimilarity.release();
 
-        if (algoDirection == INCOMING) {
-            assertEquals(EXPECTED_INCOMING_CUTOFF.size(), result.size());
-            assertEquals(EXPECTED_INCOMING_CUTOFF, result);
-        } else {
-            assertEquals(EXPECTED_OUTGOING_CUTOFF.size(), result.size());
-            assertEquals(EXPECTED_OUTGOING_CUTOFF, result);
-        }
+        assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_CUTOFF : EXPECTED_OUTGOING_CUTOFF, result);
     }
 
     @Test
