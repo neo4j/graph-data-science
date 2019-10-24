@@ -53,6 +53,10 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     private final AllocationTracker tracker;
     private final Log log;
 
+    private final BitSet nodeFilter;
+
+    private HugeObjectArray<long[]> vectors;
+
     public NeighborhoodSimilarity(
             Graph graph,
             Config config,
@@ -64,6 +68,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         this.executorService = executorService;
         this.tracker = tracker;
         this.log = log;
+        this.nodeFilter = new BitSet(graph.nodeCount());
     }
 
     @Override
@@ -76,9 +81,8 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         graph.release();
     }
 
-
     private static final ArraySizingStrategy ARRAY_SIZING_STRATEGY =
-            (currentBufferLength, elementsCount, expectedAdditions) -> expectedAdditions + elementsCount;
+        (currentBufferLength, elementsCount, expectedAdditions) -> expectedAdditions + elementsCount;
 
     /**
      * Requires:
@@ -90,12 +94,13 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
      * Number of results: (n^2 - n) / 2
      */
     public Stream<SimilarityResult> run(Direction direction) {
+
+        this.vectors = HugeObjectArray.newArray(long[].class, graph.nodeCount(), tracker);
+
         if (direction == Direction.BOTH) {
             throw new IllegalArgumentException(
                 "Direction BOTH is not supported by the NeighborhoodSimilarity algorithm.");
         }
-
-        BitSet nodeFilter = new BitSet(graph.nodeCount());
 
         graph.forEachNode(node -> {
             if (graph.degree(node, direction) > 0L) {
@@ -103,11 +108,6 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
             }
             return true;
         });
-
-        HugeObjectArray<long[]> vectors = HugeObjectArray.newArray(
-            long[].class,
-            graph.nodeCount(),
-            AllocationTracker.EMPTY);
 
         graph.forEachNode(node -> {
             if (nodeFilter.get(node)) {
@@ -125,9 +125,9 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         Stream<SimilarityResult> similarityResultStream;
 
         if (config.topk > 0) {
-            similarityResultStream = similarityTopKComputation(nodeFilter, vectors);
+            similarityResultStream = similarityTopKComputation();
         } else {
-            similarityResultStream = similarityComputation(nodeFilter, vectors);
+            similarityResultStream = similarityComputation();
         }
 
         if (config.top > 0) {
@@ -146,7 +146,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         return new SimilarityResult(n1, n2, similarity);
     }
 
-    private Stream<SimilarityResult> similarityComputation(BitSet nodeFilter, HugeObjectArray<long[]> vectors) {
+    private Stream<SimilarityResult> similarityComputation() {
         return LongStream.range(0, graph.nodeCount())
             .filter(nodeFilter::get)
             .boxed()
@@ -158,7 +158,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
             });
     }
 
-    private Stream<SimilarityResult> similarityTopKComputation(BitSet nodeFilter, HugeObjectArray<long[]> vectors) {
+    private Stream<SimilarityResult> similarityTopKComputation() {
         // TODO replace this with an efficient data structure
         Map<Long, List<SimilarityResult>> result = new HashMap<>();
 
@@ -208,14 +208,14 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
                 Pools.DEFAULT_CONCURRENCY,
                 ParallelUtil.DEFAULT_BATCH_SIZE);
 
-        double similarityCutoff;
-        double degreeCutoff;
+        private final double similarityCutoff;
+        private final double degreeCutoff;
 
-        private int top;
-        private int topk;
+        private final int top;
+        private final int topk;
 
-        int concurrency;
-        int minBatchSize;
+        private final int concurrency;
+        private final int minBatchSize;
 
         public Config(
                 double similarityCutoff,
