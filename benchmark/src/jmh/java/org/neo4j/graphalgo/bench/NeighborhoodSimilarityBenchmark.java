@@ -20,6 +20,7 @@
 
 package org.neo4j.graphalgo.bench;
 
+import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.JaccardProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
@@ -87,6 +88,25 @@ public class NeighborhoodSimilarityBenchmark {
                 NeighborhoodSimilarity.Config.DEFAULT,
                 AllocationTracker.EMPTY,
                 NullLog.getInstance());
+
+        Histogram histogram = new Histogram(5);
+        graph.forEachNode(node -> {
+            histogram.recordValue(graph.degree(node, Direction.OUTGOING));
+            return true;
+        });
+
+        System.out.println("Histogram");
+
+        System.out.println("100 " + histogram.getValueAtPercentile(100));
+        System.out.println(" 99 " + histogram.getValueAtPercentile(99));
+        System.out.println(" 95 " + histogram.getValueAtPercentile(95));
+        System.out.println(" 90 " + histogram.getValueAtPercentile(90));
+        System.out.println(" 75 " + histogram.getValueAtPercentile(75));
+        System.out.println(" 50 " + histogram.getValueAtPercentile(50));
+        System.out.println(" 25 " + histogram.getValueAtPercentile(25));
+        System.out.println(" 10 " + histogram.getValueAtPercentile(10));
+        System.out.println("  5 " + histogram.getValueAtPercentile(5));
+        System.out.println("  1 " + histogram.getValueAtPercentile(1));
     }
 
     @TearDown
