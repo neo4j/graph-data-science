@@ -130,7 +130,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
             similarityResultStream = similarityComputation();
         }
 
-        if (config.top > 0) {
+        if (config.top != 0) {
             similarityResultStream = topN(similarityResultStream);
         }
 
