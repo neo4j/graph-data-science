@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleTriangularMatrix;
 import org.neo4j.graphdb.Direction;
@@ -112,10 +113,16 @@ final class NeighborhoodSimilarityTest {
                 .withDirection(loadDirection)
                 .load(HugeGraphFactory.class);
 
-        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(graph, NeighborhoodSimilarity.Config.DEFAULT, AllocationTracker.EMPTY, NullLog.getInstance());
-        Set<SimilarityResult> result = resultStream(neighborhoodSimilarity.run(algoDirection), algoDirection, graph).collect(Collectors.toSet());
+        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(graph,
+            NeighborhoodSimilarity.Config.DEFAULT,
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY,
+            NullLog.getInstance());
+        Set<SimilarityResult> result = resultStream(
+            neighborhoodSimilarity.run(algoDirection),
+            algoDirection,
+            graph).collect(Collectors.toSet());
         neighborhoodSimilarity.release();
-
 
         if (algoDirection == INCOMING) {
             assertEquals(EXPECTED_INCOMING.size(), result.size());
@@ -134,7 +141,12 @@ final class NeighborhoodSimilarityTest {
                 .undirected()
                 .load(HugeGraphFactory.class);
 
-        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(graph, NeighborhoodSimilarity.Config.DEFAULT, AllocationTracker.EMPTY, NullLog.getInstance());
+        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
+            graph,
+            NeighborhoodSimilarity.Config.DEFAULT,
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY,
+            NullLog.getInstance());
         Set<SimilarityResult> result = resultStream(neighborhoodSimilarity.run(OUTGOING), OUTGOING, graph).collect(Collectors.toSet());
         neighborhoodSimilarity.release();
         assertNotEquals(Collections.emptySet(), result);
@@ -149,8 +161,13 @@ final class NeighborhoodSimilarityTest {
                 .load(HugeGraphFactory.class);
 
         IllegalArgumentException ex = Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> new NeighborhoodSimilarity(graph, NeighborhoodSimilarity.Config.DEFAULT, AllocationTracker.EMPTY, NullLog.getInstance()).run(BOTH)
+            IllegalArgumentException.class,
+            () -> new NeighborhoodSimilarity(
+                graph,
+                NeighborhoodSimilarity.Config.DEFAULT,
+                Pools.DEFAULT,
+                AllocationTracker.EMPTY,
+                NullLog.getInstance()).run(BOTH)
         );
         assertThat(ex.getMessage(), containsString("Direction BOTH is not supported"));
     }

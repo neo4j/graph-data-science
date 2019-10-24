@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
 
+import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 
 public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
@@ -43,7 +44,12 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     private final AllocationTracker tracker;
     private final Log log;
 
-    public NeighborhoodSimilarity(Graph graph, Config config, AllocationTracker tracker, Log log) {
+    public NeighborhoodSimilarity(
+            Graph graph,
+            Config config,
+            ExecutorService executorService,
+            AllocationTracker tracker,
+            Log log) {
         this.graph = graph;
         this.config = config;
         this.tracker = tracker;
@@ -78,6 +84,8 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
             throw new IllegalArgumentException(
                     "Direction BOTH is not supported by the NeighborhoodSimilarity algorithm.");
         }
+
+
 
         BitSet nodeFilter = new BitSet(graph.nodeCount());
 

@@ -86,6 +86,7 @@ public class NeighborhoodSimilarityBenchmark {
         this.algo = new NeighborhoodSimilarity(
                 graph,
                 NeighborhoodSimilarity.Config.DEFAULT,
+                Pools.DEFAULT,
                 AllocationTracker.EMPTY,
                 NullLog.getInstance());
 
