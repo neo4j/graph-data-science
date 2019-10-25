@@ -34,9 +34,7 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
 
 import java.util.Comparator;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -52,8 +50,6 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     private final BitSet nodeFilter;
 
     private HugeObjectArray<long[]> vectors;
-
-    private Graph similarityGraph;
 
     public NeighborhoodSimilarity(
             Graph graph,
@@ -77,7 +73,6 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     @Override
     public void release() {
         graph.release();
-        if (similarityGraph != null) similarityGraph.release();
     }
 
     private static final ArraySizingStrategy ARRAY_SIZING_STRATEGY =
@@ -92,7 +87,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
      *
      * Number of results: (n^2 - n) / 2
      */
-    public Stream<SimilarityResult> run(Direction direction) {
+    public Stream<SimilarityResult> computeToStream(Direction direction) {
 
         this.vectors = HugeObjectArray.newArray(long[].class, graph.nodeCount(), tracker);
 
@@ -134,15 +129,11 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
             stream = topN(stream);
         }
 
-        List<SimilarityResult> list = stream.collect(Collectors.toList());
-
-        this.similarityGraph = similarityGraph(list.stream());
-
-        return list.stream();
+        return stream;
     }
 
-    public Graph similarityGraph() {
-        return similarityGraph;
+    public Graph computeToGraph(Direction direction) {
+        return similarityGraph(computeToStream(direction));
     }
 
     private Stream<SimilarityResult> init() {

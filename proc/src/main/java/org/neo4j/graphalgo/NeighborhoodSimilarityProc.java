@@ -89,7 +89,7 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
         NeighborhoodSimilarity neighborhoodSimilarity = newAlgorithm(graph, configuration, tracker);
 
         Direction direction = configuration.getDirection(OUTGOING);
-        return neighborhoodSimilarity.run(direction);
+        return neighborhoodSimilarity.computeToStream(direction);
     }
 
     @Override

@@ -160,7 +160,7 @@ final class NeighborhoodSimilarityTest {
             NullLog.getInstance()
         );
 
-        Set<SimilarityResult> result = neighborhoodSimilarity.run(algoDirection).collect(Collectors.toSet());
+        Set<SimilarityResult> result = neighborhoodSimilarity.computeToStream(algoDirection).collect(Collectors.toSet());
         neighborhoodSimilarity.release();
 
         assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING : EXPECTED_OUTGOING, result);
@@ -187,7 +187,7 @@ final class NeighborhoodSimilarityTest {
             AllocationTracker.EMPTY,
             NullLog.getInstance());
 
-        Set<SimilarityResult> result = neighborhoodSimilarity.run(algoDirection).collect(Collectors.toSet());
+        Set<SimilarityResult> result = neighborhoodSimilarity.computeToStream(algoDirection).collect(Collectors.toSet());
         neighborhoodSimilarity.release();
 
         assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_TOP_1 : EXPECTED_OUTGOING_TOP_1, result);
@@ -214,7 +214,7 @@ final class NeighborhoodSimilarityTest {
             AllocationTracker.EMPTY,
             NullLog.getInstance());
 
-        Set<SimilarityResult> result = neighborhoodSimilarity.run(algoDirection).collect(Collectors.toSet());
+        Set<SimilarityResult> result = neighborhoodSimilarity.computeToStream(algoDirection).collect(Collectors.toSet());
         neighborhoodSimilarity.release();
 
         assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_TOPK_1 : EXPECTED_OUTGOING_TOPK_1, result);
@@ -241,7 +241,7 @@ final class NeighborhoodSimilarityTest {
             AllocationTracker.EMPTY,
             NullLog.getInstance());
 
-        Set<SimilarityResult> result = neighborhoodSimilarity.run(algoDirection).collect(Collectors.toSet());
+        Set<SimilarityResult> result = neighborhoodSimilarity.computeToStream(algoDirection).collect(Collectors.toSet());
         neighborhoodSimilarity.release();
 
         assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_SIMILARITY_CUTOFF : EXPECTED_OUTGOING_SIMILARITY_CUTOFF, result);
@@ -268,7 +268,7 @@ final class NeighborhoodSimilarityTest {
             AllocationTracker.EMPTY,
             NullLog.getInstance());
 
-        Set<SimilarityResult> result = neighborhoodSimilarity.run(algoDirection).collect(Collectors.toSet());
+        Set<SimilarityResult> result = neighborhoodSimilarity.computeToStream(algoDirection).collect(Collectors.toSet());
         neighborhoodSimilarity.release();
 
         assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_DEGREE_CUTOFF : EXPECTED_OUTGOING_DEGREE_CUTOFF, result);
@@ -288,7 +288,7 @@ final class NeighborhoodSimilarityTest {
             Pools.DEFAULT,
             AllocationTracker.EMPTY,
             NullLog.getInstance());
-        Set<SimilarityResult> result = neighborhoodSimilarity.run(OUTGOING).collect(Collectors.toSet());
+        Set<SimilarityResult> result = neighborhoodSimilarity.computeToStream(OUTGOING).collect(Collectors.toSet());
         neighborhoodSimilarity.release();
         assertNotEquals(Collections.emptySet(), result);
     }
@@ -313,8 +313,7 @@ final class NeighborhoodSimilarityTest {
             Pools.DEFAULT,
             AllocationTracker.EMPTY,
             NullLog.getInstance());
-        neighborhoodSimilarity.run(algoDirection);
-        Graph resultGraph = neighborhoodSimilarity.similarityGraph();
+        Graph resultGraph = neighborhoodSimilarity.computeToGraph(algoDirection);
 
         assertGraphEquals(
             resultGraph,
@@ -341,7 +340,7 @@ final class NeighborhoodSimilarityTest {
                 NeighborhoodSimilarity.Config.DEFAULT,
                 Pools.DEFAULT,
                 AllocationTracker.EMPTY,
-                NullLog.getInstance()).run(BOTH)
+                NullLog.getInstance()).computeToStream(BOTH)
         );
         assertThat(ex.getMessage(), containsString("Direction BOTH is not supported"));
     }
