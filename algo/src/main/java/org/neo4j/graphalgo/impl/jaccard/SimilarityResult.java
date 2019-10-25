@@ -38,6 +38,10 @@ public class SimilarityResult implements Comparable<SimilarityResult> {
         this.similarity = similarity;
     }
 
+    public SimilarityResult reverse() {
+        return new SimilarityResult(node2, node1, similarity);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

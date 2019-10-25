@@ -94,7 +94,8 @@ final class NeighborhoodSimilarityTest {
         EXPECTED_OUTGOING_TOP_1.add(new SimilarityResult(0, 1, 2 / 3.0));
 
         EXPECTED_OUTGOING_TOPK_1.add(new SimilarityResult(0, 1, 2 / 3.0));
-        EXPECTED_OUTGOING_TOPK_1.add(new SimilarityResult(1, 2, 0.0));
+        EXPECTED_OUTGOING_TOPK_1.add(new SimilarityResult(1, 0, 2 / 3.0));
+        EXPECTED_OUTGOING_TOPK_1.add(new SimilarityResult(2, 0, 1 / 3.0));
 
         EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(new SimilarityResult(0, 1, 2 / 3.0));
         EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(new SimilarityResult(0, 2, 1 / 3.0));
@@ -110,7 +111,8 @@ final class NeighborhoodSimilarityTest {
         EXPECTED_INCOMING_TOP_1.add(new SimilarityResult(4, 5, 3.0 / 3.0));
 
         EXPECTED_INCOMING_TOPK_1.add(new SimilarityResult(4, 5, 3.0 / 3.0));
-        EXPECTED_INCOMING_TOPK_1.add(new SimilarityResult(5, 6, 1 / 3.0));
+        EXPECTED_INCOMING_TOPK_1.add(new SimilarityResult(5, 4, 3.0 / 3.0));
+        EXPECTED_INCOMING_TOPK_1.add(new SimilarityResult(6, 4, 1 / 3.0));
 
         EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(new SimilarityResult(4, 5, 3.0 / 3.0));
         EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(new SimilarityResult(4, 6, 1 / 3.0));
