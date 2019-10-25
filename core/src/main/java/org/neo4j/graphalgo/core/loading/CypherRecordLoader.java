@@ -113,7 +113,7 @@ abstract class CypherRecordLoader<R> {
                 working = result.rows() > 0;
             }
         } while (working);
-        futures.forEach(f -> f.cancel(true));
+        futures.forEach(f -> f.cancel(false));
     }
 
     private void nonParallelLoad() {
