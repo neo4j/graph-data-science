@@ -20,10 +20,11 @@
 
 package org.neo4j.graphalgo.impl.jaccard;
 
+import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.core.utils.queue.LongPriorityQueue;
 
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.function.Consumer;
 import java.util.stream.LongStream;
@@ -35,7 +36,7 @@ public class TopKMap implements Consumer<SimilarityResult> {
 
     TopKMap(long items, int topK, Comparator<SimilarityResult> comparator, AllocationTracker tracker) {
         topKLists = HugeObjectArray.newArray(TopKList.class, items, tracker);
-        topKLists.setAll(i -> new TopKList(topK, comparator));
+        topKLists.setAll(node1 -> new TopKList(node1, topK, comparator));
     }
 
     @Override
@@ -51,39 +52,46 @@ public class TopKMap implements Consumer<SimilarityResult> {
 
     public static final class TopKList implements Consumer<SimilarityResult> {
 
-        private final SimilarityResult[] similarities;
+        private final long node1;
+        private final LongPriorityQueue similarityQueue;
         private final int topK;
-        private int count = 0;
-        private SimilarityResult minValue;
-        private SimilarityResult maxValue;
-        private final Comparator<SimilarityResult> comparator;
+        private double minValue;
+        private final PrimitiveDoubleComparator doubleComparator;
 
-        TopKList(int topK, Comparator<SimilarityResult> comparator) {
+        TopKList(long node1, int topK, Comparator<SimilarityResult> comparator) {
+            this.node1 = node1;
             this.topK = topK;
-            this.similarities = new SimilarityResult[topK];
-            this.comparator = comparator;
+
+            if (comparator.equals(SimilarityResult.ASCENDING)) {
+                this.doubleComparator = Double::compare;
+                this.similarityQueue = LongPriorityQueue.min(topK);
+            } else {
+                this.doubleComparator = (d1, d2) -> Double.compare(d2, d1);
+                this.similarityQueue = LongPriorityQueue.max(topK);
+            }
         }
 
         @Override
         public void accept(SimilarityResult similarity) {
-            if ((count < topK || minValue == null || comparator.compare(similarity, minValue) < 0)) {
-                int idx = Arrays.binarySearch(similarities, 0, count, similarity, comparator);
-                idx = (idx < 0) ? -idx : idx + 1;
-
-                int length = topK - idx;
-                if (length > 0 && idx < topK) System.arraycopy(similarities, idx - 1, similarities, idx, length);
-                similarities[idx - 1] = similarity;
-                if (count < topK) {
-                    count++;
-                }
-                minValue = similarities[count - 1];
-                maxValue = similarities[0];
+            if ((similarityQueue.size() < topK || doubleComparator.compare(similarity.similarity, minValue) < 0)) {
+                similarityQueue.add(similarity.node2, similarity.similarity);
+                minValue = similarityQueue.topCost();
             }
         }
 
         Stream<SimilarityResult> stream() {
-            return Arrays.stream(similarities, 0, count);
+            Stream.Builder<SimilarityResult> builder = Stream.builder();
+            PrimitiveLongIterator iterator = similarityQueue.iterator();
+            while (iterator.hasNext()) {
+                long node2 = iterator.next();
+                builder.add(new SimilarityResult(node1, node2, similarityQueue.getCost(node2)));
+            }
+            return builder.build();
         }
+    }
+
+    private interface PrimitiveDoubleComparator {
+        int compare(double d1, double d2);
     }
 
 }
