@@ -34,7 +34,9 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -50,6 +52,8 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     private final BitSet nodeFilter;
 
     private HugeObjectArray<long[]> vectors;
+
+    private Graph similarityGraph;
 
     public NeighborhoodSimilarity(
             Graph graph,
@@ -73,6 +77,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     @Override
     public void release() {
         graph.release();
+        if (similarityGraph != null) similarityGraph.release();
     }
 
     private static final ArraySizingStrategy ARRAY_SIZING_STRATEGY =
@@ -129,9 +134,15 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
             stream = topN(stream);
         }
 
-        // TODO: step d (writing)
+        List<SimilarityResult> list = stream.collect(Collectors.toList());
 
-        return stream;
+        this.similarityGraph = similarityGraph(list.stream());
+
+        return list.stream();
+    }
+
+    public Graph similarityGraph() {
+        return similarityGraph;
     }
 
     private Stream<SimilarityResult> init() {
@@ -160,7 +171,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
 
     private Stream<SimilarityResult> topN(Stream<SimilarityResult> similarities) {
         Comparator<SimilarityResult> comparator = config.top > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
-        return similarities.sorted(comparator).limit(config.top);
+        return similarities.sorted(comparator).limit(Math.abs(config.top));
     }
 
     private SimilarityResult jaccard(long n1, long n2, long[] v1, long[] v2) {
@@ -168,6 +179,11 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         double union = v1.length + v2.length - intersection;
         double similarity = union == 0 ? 0 : intersection / union;
         return new SimilarityResult(n1, n2, similarity);
+    }
+
+    private Graph similarityGraph(Stream<SimilarityResult> similarities) {
+        SimilarityGraphBuilder builder = new SimilarityGraphBuilder(graph, tracker);
+        return builder.build(similarities);
     }
 
     public static final class Config {

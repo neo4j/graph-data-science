@@ -47,6 +47,8 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
+import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphdb.Direction.BOTH;
 import static org.neo4j.graphdb.Direction.INCOMING;
 import static org.neo4j.graphdb.Direction.OUTGOING;
@@ -289,6 +291,39 @@ final class NeighborhoodSimilarityTest {
         Set<SimilarityResult> result = neighborhoodSimilarity.run(OUTGOING).collect(Collectors.toSet());
         neighborhoodSimilarity.release();
         assertNotEquals(Collections.emptySet(), result);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "OUTGOING, OUTGOING",
+        "BOTH, OUTGOING",
+        "INCOMING, INCOMING",
+        "BOTH, INCOMING"
+    })
+    void shouldComputeSimilarityGraphInAllSupportedDirections(Direction loadDirection, Direction algoDirection) {
+        Graph graph = new GraphLoader(db)
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .withDirection(loadDirection)
+            .load(HugeGraphFactory.class);
+
+        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
+            graph,
+            NeighborhoodSimilarity.Config.DEFAULT,
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY,
+            NullLog.getInstance());
+        neighborhoodSimilarity.run(algoDirection);
+        Graph resultGraph = neighborhoodSimilarity.similarityGraph();
+
+        assertGraphEquals(
+            resultGraph,
+            algoDirection == INCOMING
+                ? fromGdl("(a), (b), (c), (d), (e), (f)-[{property: 1.000000D}]->(g), (f)-[{property: 0.333333D}]->(h), (g)-[{property: 0.333333D}]->(h)")
+                : fromGdl("(a)-[{property: 0.666667D}]->(b), (a)-[{property: 0.333333D}]->(c), (b)-[{property: 0.00000D}]->(c), (d), (e), (f), (g), (h)")
+        );
+        neighborhoodSimilarity.release();
+        resultGraph.release();
     }
 
     @Test

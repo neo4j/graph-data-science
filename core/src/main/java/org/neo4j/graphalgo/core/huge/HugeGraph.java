@@ -392,6 +392,37 @@ public class HugeGraph implements Graph {
             isUndirected);
     }
 
+    public HugeGraph copyWithNewRelationships(
+        long newRelationshipCount,
+        AdjacencyList newInAdjacency,
+        AdjacencyList newOutAdjacency,
+        AdjacencyOffsets newInOffsets,
+        AdjacencyOffsets newOutOffsets,
+        boolean newHasRelationshipProperty,
+        AdjacencyList newInProperties,
+        AdjacencyList newOutProperties,
+        AdjacencyOffsets newInPropertyOffsets,
+        AdjacencyOffsets newOutPropertyOffsets
+    ) {
+        return new HugeGraph(
+            tracker,
+            idMapping,
+            nodeProperties,
+            newRelationshipCount,
+            newInAdjacency,
+            newOutAdjacency,
+            newInOffsets,
+            newOutOffsets,
+            newHasRelationshipProperty,
+            defaultPropertyValue,
+            newInProperties,
+            newOutProperties,
+            newInPropertyOffsets,
+            newOutPropertyOffsets,
+            isUndirected);
+    }
+
+
     @Override
     public RelationshipIntersect intersection() {
         return new HugeGraphIntersectImpl(outAdjacency, outOffsets);

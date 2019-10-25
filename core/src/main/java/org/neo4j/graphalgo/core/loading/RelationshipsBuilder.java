@@ -85,6 +85,7 @@ public class RelationshipsBuilder {
         return adjacency.build();
     }
 
+    // TODO: This returns only the first of possibly multiple properties
     public AdjacencyList weights() {
         return weights.length > 0 ? weights[0].build() : null;
     }
@@ -93,6 +94,7 @@ public class RelationshipsBuilder {
         return globalAdjacencyOffsets;
     }
 
+    // TODO: This returns only the first of possibly multiple properties
     public AdjacencyOffsets globalWeightOffsets() {
         return globalWeightOffsets[0];
     }
