@@ -20,14 +20,13 @@
 package org.neo4j.graphalgo;
 
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.SingleAndMultiThreadedAllGraphNames;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
@@ -53,23 +52,18 @@ class LabelPropagationProcLoadPredefinedLabelsTest extends ProcTestBase {
 
     @BeforeEach
     void setup() throws KernelException {
-        DB = (GraphDatabaseAPI) new TestGraphDatabaseFactory()
+        db = (GraphDatabaseAPI) new TestGraphDatabaseFactory()
                 .newImpermanentDatabaseBuilder()
                 .setConfig(GraphDatabaseSettings.procedure_unrestricted,"algo.*")
                 .newGraphDatabase();
-
-        Procedures proceduresService = DB.getDependencyResolver().resolveDependency(Procedures.class);
-
-        proceduresService.registerProcedure(Procedures.class, true);
-        proceduresService.registerProcedure(LabelPropagationProc.class, true);
-        proceduresService.registerFunction(GetNodeFunc.class, true);
-
-        DB.execute(DB_CYPHER);
+        registerProcedures(LabelPropagationProc.class);
+        registerFunctions(GetNodeFunc.class);
+        db.execute(DB_CYPHER);
     }
 
-    @AfterAll
-    static void tearDown() {
-        DB.shutdown();
+    @AfterEach
+    void tearDown() {
+        db.shutdown();
     }
 
     @SingleAndMultiThreadedAllGraphNames
@@ -84,7 +78,7 @@ class LabelPropagationProcLoadPredefinedLabelsTest extends ProcTestBase {
                        "RETURN algo.asNode(nodeId) AS id, label AS community " +
                        "ORDER BY id";
 
-        Result result = DB.execute(query, parParams(parallel, graphName));
+        Result result = db.execute(query, parParams(parallel, graphName));
 
         List<Integer> labels = result.columnAs("community").stream()
                 .mapToInt(value -> ((Long)value).intValue()).boxed().collect(Collectors.toList());

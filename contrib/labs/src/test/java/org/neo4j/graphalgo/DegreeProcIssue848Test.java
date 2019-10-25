@@ -19,8 +19,7 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -37,20 +36,20 @@ class DegreeProcIssue848Test extends ProcTestBase {
             "UNWIND range(1, 10001) AS s " +
             "CREATE (:Node {id: s})";
 
-    @AfterAll
-    static void tearDown() {
-        if (DB != null) DB.shutdown();
+    @BeforeEach
+    void tearDown() {
+        if (db != null) db.shutdown();
     }
 
-    @BeforeAll
-    static void setup() throws KernelException {
-        DB = TestDatabaseCreator.createTestDatabase();
-        try (Transaction tx = DB.beginTx()) {
-            DB.execute(DB_CYPHER).close();
+    @BeforeEach
+    void setup() throws KernelException {
+        db = TestDatabaseCreator.createTestDatabase();
+        try (Transaction tx = db.beginTx()) {
+            db.execute(DB_CYPHER).close();
             tx.success();
         }
 
-        DB.getDependencyResolver()
+        db.getDependencyResolver()
                 .resolveDependency(Procedures.class)
                 .registerProcedure(DegreeCentralityProc.class);
     }

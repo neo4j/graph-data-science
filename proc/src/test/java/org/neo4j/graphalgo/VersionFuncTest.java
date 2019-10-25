@@ -41,13 +41,13 @@ class VersionFuncTest extends ProcTestBase {
 
     @BeforeEach
     void setup() throws KernelException {
-        DB = TestDatabaseCreator.createTestDatabase();
-        registerFunc(VersionFunc.class);
+        db = TestDatabaseCreator.createTestDatabase();
+        registerFunctions(VersionFunc.class);
     }
 
     @AfterEach
     void tearDown() {
-        DB.shutdown();
+        db.shutdown();
     }
 
     @Test

@@ -20,14 +20,13 @@
 package org.neo4j.graphalgo;
 
 import com.carrotsearch.hppc.IntIntScatterMap;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.wcc.WccProc;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
 
 import java.util.List;
 
@@ -40,8 +39,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class WccBetaProcTest extends ProcTestBase {
 
-    @BeforeAll
-    static void setup() throws KernelException {
+    @BeforeEach
+    void setup() throws KernelException {
         String createGraph = "CREATE" +
                 " (nA:Label {nodeId: 0, seedId: 42})" +
                 ",(nB:Label {nodeId: 1, seedId: 42})" +
@@ -64,21 +63,19 @@ class WccBetaProcTest extends ProcTestBase {
                 // {H, I}
                 ",(nH)-[:TYPE]->(nI)";
 
-        DB = TestDatabaseCreator.createTestDatabase();
+        db = TestDatabaseCreator.createTestDatabase();
 
-        try (Transaction tx = DB.beginTx()) {
-            DB.execute(createGraph).close();
+        try (Transaction tx = db.beginTx()) {
+            db.execute(createGraph).close();
             tx.success();
         }
 
-        DB.getDependencyResolver()
-                .resolveDependency(Procedures.class)
-                .registerProcedure(WccProc.class);
+        registerProcedures(WccProc.class);
     }
 
-    @AfterAll
-    static void tearDown() {
-        if (DB != null) DB.shutdown();
+    @AfterEach
+    void tearDown() {
+        if (db != null) db.shutdown();
     }
 
     @AllGraphNamesTest
