@@ -20,12 +20,12 @@
 
 package org.neo4j.graphalgo.bench;
 
-import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.JaccardProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TransactionWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -69,7 +69,15 @@ public class NeighborhoodSimilarityBenchmark {
 
     private GraphDatabaseAPI db;
     private Graph graph;
-    private NeighborhoodSimilarity algo;
+
+    private static final NeighborhoodSimilarity.Config TOPK_CONFIG = new NeighborhoodSimilarity.Config(
+        0.0,
+        0,
+        0,
+        100,
+        Pools.DEFAULT_CONCURRENCY,
+        ParallelUtil.DEFAULT_BATCH_SIZE
+    );
 
     @Setup
     public void setup() {
@@ -78,36 +86,10 @@ public class NeighborhoodSimilarityBenchmark {
         createGraph(db);
 
         this.graph = new GraphLoader(db)
-                .withAnyLabel()
-                .withAnyRelationshipType()
-                .withDirection(Direction.OUTGOING)
-                .load(HugeGraphFactory.class);
-
-        this.algo = new NeighborhoodSimilarity(
-                graph,
-                NeighborhoodSimilarity.Config.DEFAULT,
-                Pools.DEFAULT,
-                AllocationTracker.EMPTY,
-                NullLog.getInstance());
-
-        Histogram histogram = new Histogram(5);
-        graph.forEachNode(node -> {
-            histogram.recordValue(graph.degree(node, Direction.OUTGOING));
-            return true;
-        });
-
-        System.out.println("Histogram");
-
-        System.out.println("100 " + histogram.getValueAtPercentile(100));
-        System.out.println(" 99 " + histogram.getValueAtPercentile(99));
-        System.out.println(" 95 " + histogram.getValueAtPercentile(95));
-        System.out.println(" 90 " + histogram.getValueAtPercentile(90));
-        System.out.println(" 75 " + histogram.getValueAtPercentile(75));
-        System.out.println(" 50 " + histogram.getValueAtPercentile(50));
-        System.out.println(" 25 " + histogram.getValueAtPercentile(25));
-        System.out.println(" 10 " + histogram.getValueAtPercentile(10));
-        System.out.println("  5 " + histogram.getValueAtPercentile(5));
-        System.out.println("  1 " + histogram.getValueAtPercentile(1));
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .withDirection(Direction.OUTGOING)
+            .load(HugeGraphFactory.class);
     }
 
     @TearDown
@@ -117,12 +99,70 @@ public class NeighborhoodSimilarityBenchmark {
     }
 
     @Benchmark
-    public void neighborhoodSimilarity(Blackhole blackhole) {
-        algo.computeToStream(Direction.OUTGOING).forEach(blackhole::consume);
+    public void neighborhoodSimilarityToStream(Blackhole blackhole) {
+        initAlgo().computeToStream(Direction.OUTGOING).forEach(blackhole::consume);
+    }
+
+    @Benchmark
+    public void neighborhoodSimilarityToStreamTopK(Blackhole blackhole) {
+        initAlgo(TOPK_CONFIG).computeToStream(Direction.OUTGOING).forEach(blackhole::consume);
+    }
+
+    @Benchmark
+    public void neighborhoodSimilarityToGraph(Blackhole blackhole) {
+        blackhole.consume(initAlgo().computeToGraph(Direction.OUTGOING));
+    }
+
+    @Benchmark
+    public void neighborhoodSimilarityToGraphTopK(Blackhole blackhole) {
+        blackhole.consume(initAlgo(TOPK_CONFIG).computeToGraph(Direction.OUTGOING));
     }
 
     @Benchmark
     public void jaccardSimilarity(Blackhole blackhole) {
+        List<Map<String, Object>> jaccardInput = prepareProcedureInput();
+        Map<String, Object> procedureConfig = MapUtil.map("concurrency", 1);
+        runJaccardProcedure(blackhole, jaccardInput, procedureConfig);
+    }
+
+    @Benchmark
+    public void jaccardSimilarityTopK(Blackhole blackhole) {
+        List<Map<String, Object>> jaccardInput = prepareProcedureInput();
+        Map<String, Object> procedureConfig = MapUtil.map("concurrency", 1, "topK", 100);
+        runJaccardProcedure(blackhole, jaccardInput, procedureConfig);
+    }
+
+    private NeighborhoodSimilarity initAlgo() {
+        return initAlgo(NeighborhoodSimilarity.Config.DEFAULT);
+    }
+
+    private NeighborhoodSimilarity initAlgo(NeighborhoodSimilarity.Config config) {
+        return new NeighborhoodSimilarity(
+            graph,
+            config,
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY,
+            NullLog.getInstance());
+    }
+
+    private void runJaccardProcedure(
+        Blackhole blackhole,
+        List<Map<String, Object>> jaccardInput,
+        Map<String, Object> procedureConfig
+    ) {
+        JaccardProc jaccardProc = new JaccardProc();
+        TransactionWrapper transactionWrapper = new TransactionWrapper(db);
+        transactionWrapper.accept(
+            (ktx) -> {
+                jaccardProc.transaction = ktx;
+                jaccardProc
+                    .similarityStream(jaccardInput, procedureConfig)
+                    .forEach(blackhole::consume);
+            }
+        );
+    }
+
+    private List<Map<String, Object>> prepareProcedureInput() {
         List<Map<String, Object>> jaccardInput = new ArrayList<>();
         graph.forEachNode(nodeId -> {
             List<Number> targetIds = new ArrayList<>();
@@ -135,17 +175,7 @@ public class NeighborhoodSimilarityBenchmark {
             }
             return true;
         });
-
-        JaccardProc jaccardProc = new JaccardProc();
-        TransactionWrapper transactionWrapper = new TransactionWrapper(db);
-        transactionWrapper.accept(
-                (ktx) -> {
-                    jaccardProc.transaction = ktx;
-                    jaccardProc
-                            .similarityStream(jaccardInput, MapUtil.map("concurrency", 1))
-                            .forEach(blackhole::consume);
-                }
-        );
+        return jaccardInput;
     }
 
     static void createGraph(GraphDatabaseService db) {
