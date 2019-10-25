@@ -79,7 +79,7 @@ public abstract class AdjacencyOffsets {
         private PagedOffsets(long[][] pages, int pageSize) {
             assert pageSize == 0 || BitUtil.isPowerOfTwo(pageSize);
             this.pageShift = Integer.numberOfTrailingZeros(pageSize);
-            this.pageMask = (long) (pageSize - 1);
+            this.pageMask = pageSize - 1;
             this.pages = pages;
         }
 

@@ -60,7 +60,7 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeRecord> {
             return true;
         }
         final long[] labels = NodeLabelsField.get(record, nodeStore);
-        long label = (long) this.label;
+        long label = this.label;
         for (long l : labels) {
             if (l == label) {
                 return true;

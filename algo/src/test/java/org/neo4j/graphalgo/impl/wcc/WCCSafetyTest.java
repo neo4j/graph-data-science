@@ -88,7 +88,7 @@ final class WCCSafetyTest {
 
         @Override
         public long nodeCount() {
-            return (long) nodes;
+            return nodes;
         }
 
         @Override
@@ -121,7 +121,7 @@ final class WCCSafetyTest {
                     .distinct()
                     .toArray();
             for (int target : targets) {
-                if (!consumer.accept(nodeId, (long) target)) {
+                if (!consumer.accept(nodeId, target)) {
                     break;
                 }
             }

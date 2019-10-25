@@ -154,7 +154,7 @@ final class LabelPropagationTest {
 
         assertTrue(lp.didConverge());
         assertTrue(2L <= lp.ranIterations(), "expected at least 2 iterations, got " + lp.ranIterations());
-        assertEquals(2L, (long) cluster.size());
+        assertEquals(2L, cluster.size());
         for (IntObjectCursor<IntArrayList> cursor : cluster) {
             int[] ids = cursor.value.toArray();
             Arrays.sort(ids);

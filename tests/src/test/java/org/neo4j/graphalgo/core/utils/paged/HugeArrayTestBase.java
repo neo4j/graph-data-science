@@ -496,7 +496,7 @@ abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array, Box, 
     }
 
     private int get(Huge array, int index) {
-        return unbox(array.boxedGet((long) index));
+        return unbox(array.boxedGet(index));
     }
 
     @SuppressWarnings("unchecked")

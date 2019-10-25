@@ -26,7 +26,7 @@ public final class OpenHashContainers {
     }
 
     public static int expectedBufferSize(final int elements) {
-        return HashContainers.minBufferSize(elements, (double) HashContainers.DEFAULT_LOAD_FACTOR) + 1;
+        return HashContainers.minBufferSize(elements, HashContainers.DEFAULT_LOAD_FACTOR) + 1;
     }
 
     private OpenHashContainers() {

@@ -29,7 +29,7 @@ final class ZigZagLongDecoding {
         long input, startValue = 0L, value = 0L;
         int into = 0, shift = 0, limit = offset + length;
         while (offset < limit) {
-            input = (long) array[offset++];
+            input = array[offset++];
             value += (input & 127L) << shift;
             if ((input & 128L) == 128L) {
                 startValue += ((value >>> 1L) ^ -(value & 1L));

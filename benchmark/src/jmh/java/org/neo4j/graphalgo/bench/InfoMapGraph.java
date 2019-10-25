@@ -91,7 +91,7 @@ public class InfoMapGraph {
 
         long[] allRels = new long[1];
         graph.forEachNode(node -> {
-            allRels[0] += (long) (graph.degree(node, Direction.OUTGOING));
+            allRels[0] += graph.degree(node, Direction.OUTGOING);
             return true;
         });
 

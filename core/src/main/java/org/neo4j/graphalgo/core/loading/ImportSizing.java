@@ -28,7 +28,7 @@ public final class ImportSizing {
     // 1B elements might even be too much as arrays need to be allocated with
     // a consecutive chunk of memory
     // possible idea: retry with lower batch sizes if alloc hits an OOM?
-    private static final long MAX_PAGE_SIZE = (long) previousPowerOfTwo(Integer.MAX_VALUE);
+    private static final long MAX_PAGE_SIZE = previousPowerOfTwo(Integer.MAX_VALUE);
 
     // don't attempt to page if the page size would be less than this value
     private static final long MIN_PAGE_SIZE = 1024L;
@@ -47,7 +47,7 @@ public final class ImportSizing {
     }
 
     public static ImportSizing of(int concurrency, long nodeCount) {
-        return determineBestThreadSize(nodeCount, (long) concurrency);
+        return determineBestThreadSize(nodeCount, concurrency);
     }
 
     private static ImportSizing determineBestThreadSize(long nodeCount, long targetThreads) {

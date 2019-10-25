@@ -43,7 +43,7 @@ public interface ProgressLogger {
         }
         ProgressLoggerAdapter logger = new ProgressLoggerAdapter(log, task);
         if (time > 0L) {
-            logger.withLogIntervalMillis((int) Math.min(unit.toMillis(time), (long) Integer.MAX_VALUE));
+            logger.withLogIntervalMillis((int) Math.min(unit.toMillis(time), Integer.MAX_VALUE));
         }
         return logger;
     }

@@ -94,7 +94,7 @@ final class EigenvectorCentralityComputeStep extends BaseComputeStep implements 
         for (int i = 0; i < length; i++) {
             double delta = 0.0;
             for (float[] scores : prevScores) {
-                delta += (double) scores[i];
+                delta += scores[i];
                 scores[i] = 0F;
             }
             if (delta > tolerance) {

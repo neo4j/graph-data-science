@@ -30,7 +30,7 @@ final class VarLongDecoding {
         long input, value = 0L;
         int into = 0, shift = 0;
         while (into < limit) {
-            input = (long) adjacencyPage[offset++];
+            input = adjacencyPage[offset++];
             value += (input & 127L) << shift;
             if ((input & 128L) == 128L) {
                 startValue += value;

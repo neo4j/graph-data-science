@@ -23,7 +23,7 @@ final class HugeArrays {
 
     static final int PAGE_SHIFT = 14;
     static final int PAGE_SIZE = 1 << PAGE_SHIFT;
-    private static final long PAGE_MASK = (long) (PAGE_SIZE - 1);
+    private static final long PAGE_MASK = PAGE_SIZE - 1;
 
     static int pageIndex(long index) {
         return (int) (index >>> PAGE_SHIFT);

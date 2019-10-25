@@ -105,7 +105,7 @@ final class PagedLongStackTest {
         }
         assertAll(
                 Stream.concat(
-                        Stream.of(() -> assertEquals((long) valuesToAdd, stack.size())),
+                        Stream.of(() -> assertEquals(valuesToAdd, stack.size())),
                         IntStream.iterate(values.length - 1, i -> i - 1)
                                 .limit(values.length - 1)
                                 .mapToObj(i -> {

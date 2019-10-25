@@ -69,7 +69,7 @@ public class NodeImporter {
             return 0;
         }
 
-        HugeLongArrayBuilder.BulkAdder<long[]> adder = idMapBuilder.allocate((long) (batchLength));
+        HugeLongArrayBuilder.BulkAdder<long[]> adder = idMapBuilder.allocate(batchLength);
         if (adder == null) {
             return 0;
         }

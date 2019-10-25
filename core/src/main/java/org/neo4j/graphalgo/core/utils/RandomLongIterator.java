@@ -75,7 +75,7 @@ public final class RandomLongIterator implements PrimitiveLongIterator {
         this.range = range;
         base = start;
         mask = modulus - 1L;
-        seed = (long) random.nextInt((int) Math.min(range, (long) Integer.MAX_VALUE));
+        seed = random.nextInt((int) Math.min(range, Integer.MAX_VALUE));
         next = seed;
         hasNext = true;
     }

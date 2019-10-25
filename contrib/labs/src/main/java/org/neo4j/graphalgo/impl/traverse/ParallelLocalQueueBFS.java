@@ -126,7 +126,7 @@ public class ParallelLocalQueueBFS implements BFS {
                     return true;
                 }
                 if (!addThread(() -> bfs(targetNodeId, direction, predicate, visitor))) {
-                    queue.add(targetNodeId, (double) graph.degree(targetNodeId, direction));
+                    queue.add(targetNodeId, graph.degree(targetNodeId, direction));
                 }
                 return true;
             });
