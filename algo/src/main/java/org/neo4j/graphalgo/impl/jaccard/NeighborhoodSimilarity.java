@@ -34,6 +34,7 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
 
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -145,7 +146,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
                 return LongStream.range(n1 + 1, graph.nodeCount())
                     .filter(nodeFilter::get)
                     .mapToObj(n2 -> jaccard(n1, n2, v1, vectors.get(n2)))
-                    .filter(similarityResult -> similarityResult.similarity >= config.similarityCutoff);
+                    .filter(Objects::nonNull);
             });
     }
 
@@ -169,7 +170,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         long intersection = Intersections.intersection3(v1, v2);
         double union = v1.length + v2.length - intersection;
         double similarity = union == 0 ? 0 : intersection / union;
-        return new SimilarityResult(n1, n2, similarity);
+        return similarity >= config.similarityCutoff ? new SimilarityResult(n1, n2, similarity) : null;
     }
 
     private Graph similarityGraph(Stream<SimilarityResult> similarities) {
