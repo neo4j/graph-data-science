@@ -32,7 +32,7 @@ class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
 
     @Override
     SequentialDisjointSetStruct newSet(final int capacity) {
-        NodeProperties communities = new TestNodeOrRelationshipProperties();
+        NodeProperties communities = new TestNodeProperties();
         return newSet(capacity, communities);
     }
 
@@ -45,7 +45,7 @@ class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
 
     @Test
     void shouldRunWithLessInitialCommunities() {
-        NodeProperties communities = new TestNodeOrRelationshipProperties(0, 0, 1, 0);
+        NodeProperties communities = new TestNodeProperties(0, 0, 1, 0);
         SequentialDisjointSetStruct dss = newSet(4, communities);
 
         assertEquals(3, getSetCount(dss));
@@ -58,7 +58,7 @@ class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
 
     @Test
     void shouldRunWithLessInitialCommunitiesAndLargerIdSpace() {
-        NodeProperties communities = new TestNodeOrRelationshipProperties(0, 10, 1, 10);
+        NodeProperties communities = new TestNodeProperties(0, 10, 1, 10);
         SequentialDisjointSetStruct dss = newSet(4, communities);
 
         assertEquals(3, getSetCount(dss));
@@ -71,7 +71,7 @@ class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
 
     @Test
     void shouldRunWithLessInitialCommunitiesAndOverlappingIdSpace() {
-        NodeProperties communities = new TestNodeOrRelationshipProperties(0, 3, 1, 3);
+        NodeProperties communities = new TestNodeProperties(0, 3, 1, 3);
         SequentialDisjointSetStruct dss = newSet(4, communities);
 
         assertEquals(3, getSetCount(dss));

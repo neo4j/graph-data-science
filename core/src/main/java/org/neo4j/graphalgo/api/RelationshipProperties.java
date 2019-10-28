@@ -35,7 +35,7 @@ public interface RelationshipProperties {
     double relationshipProperty(long sourceNodeId, long targetNodeId, double fallbackValue);
 
     /**
-     * Returns the proeprty value for the relationship defined by their start and end nodes.
+     * Returns the property value for a relationship defined by its source and target nodes.
      */
     double relationshipProperty(long sourceNodeId, long targetNodeId);
 }

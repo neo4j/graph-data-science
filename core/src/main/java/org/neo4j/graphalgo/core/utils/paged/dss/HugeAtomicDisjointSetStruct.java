@@ -63,6 +63,8 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
 
+    private static final int NO_SUCH_SEED_VALUE = 0;
+
     public static MemoryEstimation memoryEstimation(boolean incremental) {
         MemoryEstimations.Builder builder = MemoryEstimations
                 .builder(HugeAtomicDisjointSetStruct.class)
@@ -89,7 +91,7 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
             double communityIdValue = communityMapping.nodeProperty(nodeId, Double.NaN);
             return Double.isNaN(communityIdValue) ? -1L : (long) communityIdValue;
         }, tracker);
-        maxCommunityId = new AtomicLong(communityMapping.getMaxPropertyValue().orElse(0));
+        maxCommunityId = new AtomicLong(communityMapping.getMaxPropertyValue().orElse(NO_SUCH_SEED_VALUE));
     }
 
     private long parent(long id) {

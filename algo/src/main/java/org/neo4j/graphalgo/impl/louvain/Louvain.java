@@ -33,7 +33,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
-import org.neo4j.graphalgo.impl.utils.CommunityUtils;
+import org.neo4j.graphalgo.core.utils.CommunityUtils;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.values.storable.Values;
 
@@ -127,7 +127,7 @@ public final class Louvain extends Algorithm<Louvain> {
 
         if (seedingValues != null) {
             BitSet comCount = new BitSet();
-            long maxSeedingCommunityId = seedingValues.getMaxPropertyValue().orElse(-1);
+            long maxSeedingCommunityId = seedingValues.getMaxPropertyValue().orElse(CommunityUtils.NO_SUCH_SEED_PROPERTY);
             communities.setAll(nodeId -> {
                 double existingCommunityValue = seedingValues.nodeProperty(nodeId, Double.NaN);
                 long community = Double.isNaN(existingCommunityValue)
@@ -142,7 +142,7 @@ public final class Louvain extends Algorithm<Louvain> {
             CommunityUtils.normalize(communities);
             workingGraph = rebuildGraph(this.rootGraph, communities, nodeCount);
         } else {
-            communities.setAll(nodeId -> this.rootGraph.toOriginalNodeId(nodeId));
+            communities.setAll(this.rootGraph::toOriginalNodeId);
         }
 
         return computeOf(workingGraph, nodeCount, maxLevel, maxIterations);

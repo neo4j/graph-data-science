@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.kernel.api.StatementConstants;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -84,7 +85,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
             weightProperty = new NullPropertyMap(1.0);
         }
         this.nodeWeights = weightProperty;
-        maxLabelId = nodeProperties.getMaxPropertyValue().orElse(-1);
+        maxLabelId = nodeProperties.getMaxPropertyValue().orElse(StatementConstants.NO_SUCH_LABEL);
     }
 
     @Override

@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.utils.paged.dss;
 
 
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.core.utils.CommunityUtils;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -77,7 +78,7 @@ public final class IncrementalDisjointSetStruct extends SequentialDisjointSetStr
      * reset the container
      */
     private void init(AllocationTracker tracker) {
-        this.maxCommunity = communityMapping.getMaxPropertyValue().orElse(-1);
+        this.maxCommunity = communityMapping.getMaxPropertyValue().orElse(CommunityUtils.NO_SUCH_SEED_PROPERTY);
 
         final HugeLongLongMap internalMapping = new HugeLongLongMap(size, tracker);
 

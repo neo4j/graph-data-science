@@ -25,14 +25,14 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import java.util.OptionalLong;
 import java.util.stream.StreamSupport;
 
-final class TestNodeOrRelationshipProperties implements NodeProperties {
+final class TestNodeProperties implements NodeProperties {
     private final IntIntHashMap weights;
 
-    private TestNodeOrRelationshipProperties(final IntIntHashMap weights) {
+    private TestNodeProperties(final IntIntHashMap weights) {
         this.weights = weights;
     }
 
-    TestNodeOrRelationshipProperties(int... values) {
+    TestNodeProperties(int... values) {
         this(toMap(values));
     }
 
