@@ -23,11 +23,15 @@ import java.util.function.DoubleUnaryOperator;
 import java.util.function.LongToDoubleFunction;
 import java.util.function.LongUnaryOperator;
 
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
+
 public class HugeAtomicDoubleArray {
 
     private final HugeAtomicLongArray data;
 
-    public HugeAtomicDoubleArray(HugeAtomicLongArray data) {this.data = data;}
+    public HugeAtomicDoubleArray(HugeAtomicLongArray data) {
+        this.data = data;
+    }
 
     public double get(long index) {
         return Double.longBitsToDouble(data.get(index));
@@ -128,19 +132,13 @@ public class HugeAtomicDoubleArray {
         return (index) -> Double.doubleToLongBits(gen.applyAsDouble(index));
     }
 
-    //    public static long memoryEstimation(long size) {
-//        assert size >= 0;
-//        long instanceSize;
-//        long dataSize;
-//        if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
-//            instanceSize = sizeOfInstance(HugeAtomicLongArray.SingleHugeAtomicLongArray.class);
-//            dataSize = sizeOfLongArray((int) size);
-//        } else {
-//            instanceSize = sizeOfInstance(HugeAtomicLongArray.PagedHugeAtomicLongArray.class);
-//            dataSize = HugeAtomicLongArray.PagedHugeAtomicLongArray.memoryUsageOfData(size);
-//        }
-//        return instanceSize + dataSize;
-//    }
-//
+    public static long memoryEstimation(long size) {
+        assert size >= 0;
+
+        long hugeLongArraySize = HugeAtomicLongArray.memoryEstimation(size);
+        long instanceSize = sizeOfInstance(HugeAtomicDoubleArray.class);
+
+        return instanceSize + hugeLongArraySize;
+    }
 
 }

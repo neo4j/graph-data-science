@@ -267,9 +267,9 @@ final class HugeAtomicDoubleArrayTest {
 
     @Test
     void shouldComputeMemoryEstimation() {
-        assertEquals(40, HugeAtomicLongArray.memoryEstimation(0L));
-        assertEquals(840, HugeAtomicLongArray.memoryEstimation(100L));
-        assertEquals(800_122_070_368L, HugeAtomicLongArray.memoryEstimation(100_000_000_000L));
+        assertEquals(56, HugeAtomicDoubleArray.memoryEstimation(0L));
+        assertEquals(856, HugeAtomicDoubleArray.memoryEstimation(100L));
+        assertEquals(800_122_070_384L, HugeAtomicDoubleArray.memoryEstimation(100_000_000_000L));
     }
 
     @Test
