@@ -33,8 +33,6 @@ import org.neo4j.graphalgo.impl.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.impl.generator.RelationshipPropertyProducer;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,13 +57,10 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_
 
 class GraphGenerateProcTest extends ProcTestBase {
 
-    private GraphDatabaseAPI db;
-
     @BeforeEach
     void setup() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase();
-        Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class);
-        procedures.registerProcedure(GraphGenerateProc.class);
+        registerProcedures(GraphGenerateProc.class);
     }
 
     @AfterEach
@@ -80,7 +75,7 @@ class GraphGenerateProcTest extends ProcTestBase {
                        "    'foo', 10, 5 " +
                        ")";
 
-        runQuery(query, db,
+        runQuery(query,
                 row -> {
                     assertEquals(10, row.getNumber("nodes").intValue());
                     assertEquals(50, row.getNumber("relationships").intValue());

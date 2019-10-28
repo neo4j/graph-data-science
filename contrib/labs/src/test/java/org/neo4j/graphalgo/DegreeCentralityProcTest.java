@@ -19,13 +19,12 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -53,49 +52,46 @@ class DegreeCentralityProcTest extends ProcTestBase {
             ", (a)-[:TYPE1 {foo: 2.1}]->(c)" +
             ", (a)-[:TYPE2 {foo: 7.1}]->(c)";
 
-    @AfterAll
-    static void tearDown() {
-        if (DB != null) DB.shutdown();
+    @AfterEach
+    void tearDown() {
+        db.shutdown();
     }
 
-    @BeforeAll
-    static void setup() throws KernelException {
-        DB = TestDatabaseCreator.createTestDatabase();
-        try (Transaction tx = DB.beginTx()) {
-            DB.execute(DB_CYPHER).close();
+    @BeforeEach
+    void setup() throws KernelException {
+        db = TestDatabaseCreator.createTestDatabase();
+        try (Transaction tx = db.beginTx()) {
+            db.execute(DB_CYPHER).close();
             tx.success();
         }
 
-        DB.getDependencyResolver()
-                .resolveDependency(Procedures.class)
-                .registerProcedure(DegreeCentralityProc.class);
+        registerProcedures(DegreeCentralityProc.class);
 
-
-        try (Transaction tx = DB.beginTx()) {
+        try (Transaction tx = db.beginTx()) {
             final Label label = Label.label("Label1");
-            incomingExpected.put(DB.findNode(label, "name", "a").getId(), 0.0);
-            incomingExpected.put(DB.findNode(label, "name", "b").getId(), 1.0);
-            incomingExpected.put(DB.findNode(label, "name", "c").getId(), 2.0);
+            incomingExpected.put(db.findNode(label, "name", "a").getId(), 0.0);
+            incomingExpected.put(db.findNode(label, "name", "b").getId(), 1.0);
+            incomingExpected.put(db.findNode(label, "name", "c").getId(), 2.0);
 
-            incomingWeightedExpected.put(DB.findNode(label, "name", "a").getId(), 0.0);
-            incomingWeightedExpected.put(DB.findNode(label, "name", "b").getId(), 3.0);
-            incomingWeightedExpected.put(DB.findNode(label, "name", "c").getId(), 7.1);
+            incomingWeightedExpected.put(db.findNode(label, "name", "a").getId(), 0.0);
+            incomingWeightedExpected.put(db.findNode(label, "name", "b").getId(), 3.0);
+            incomingWeightedExpected.put(db.findNode(label, "name", "c").getId(), 7.1);
 
-            bothExpected.put(DB.findNode(label, "name", "a").getId(), 2.0);
-            bothExpected.put(DB.findNode(label, "name", "b").getId(), 2.0);
-            bothExpected.put(DB.findNode(label, "name", "c").getId(), 2.0);
+            bothExpected.put(db.findNode(label, "name", "a").getId(), 2.0);
+            bothExpected.put(db.findNode(label, "name", "b").getId(), 2.0);
+            bothExpected.put(db.findNode(label, "name", "c").getId(), 2.0);
 
-            bothWeightedExpected.put(DB.findNode(label, "name", "a").getId(), 5.1);
-            bothWeightedExpected.put(DB.findNode(label, "name", "b").getId(), 8.0);
-            bothWeightedExpected.put(DB.findNode(label, "name", "c").getId(), 7.1);
+            bothWeightedExpected.put(db.findNode(label, "name", "a").getId(), 5.1);
+            bothWeightedExpected.put(db.findNode(label, "name", "b").getId(), 8.0);
+            bothWeightedExpected.put(db.findNode(label, "name", "c").getId(), 7.1);
 
-            outgoingExpected.put(DB.findNode(label, "name", "a").getId(), 2.0);
-            outgoingExpected.put(DB.findNode(label, "name", "b").getId(), 1.0);
-            outgoingExpected.put(DB.findNode(label, "name", "c").getId(), 0.0);
+            outgoingExpected.put(db.findNode(label, "name", "a").getId(), 2.0);
+            outgoingExpected.put(db.findNode(label, "name", "b").getId(), 1.0);
+            outgoingExpected.put(db.findNode(label, "name", "c").getId(), 0.0);
 
-            outgoingWeightedExpected.put(DB.findNode(label, "name", "a").getId(), 5.1);
-            outgoingWeightedExpected.put(DB.findNode(label, "name", "b").getId(), 5.0);
-            outgoingWeightedExpected.put(DB.findNode(label, "name", "c").getId(), 0.0);
+            outgoingWeightedExpected.put(db.findNode(label, "name", "a").getId(), 5.1);
+            outgoingWeightedExpected.put(db.findNode(label, "name", "b").getId(), 5.0);
+            outgoingWeightedExpected.put(db.findNode(label, "name", "c").getId(), 0.0);
 
             tx.success();
         }

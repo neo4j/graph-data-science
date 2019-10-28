@@ -29,8 +29,6 @@ import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.stream.Stream;
 
@@ -42,16 +40,15 @@ import static org.neo4j.graphalgo.TestSupport.toArguments;
 
 public class StreamingProcTest extends ProcTestBase {
 
-    private GraphDatabaseAPI db;
-
     @BeforeEach
     void setup() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase();
-        Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class);
-        procedures.registerProcedure(LabelPropagationProc.class);
-        procedures.registerProcedure(LouvainProc.class);
-        procedures.registerProcedure(PageRankProc.class);
-        procedures.registerProcedure(UnionFindProc.class);
+        registerProcedures(
+            LabelPropagationProc.class,
+            LouvainProc.class,
+            PageRankProc.class,
+            UnionFindProc.class
+        );
     }
 
     @AfterEach

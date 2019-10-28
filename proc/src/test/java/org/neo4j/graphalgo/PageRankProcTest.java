@@ -19,8 +19,8 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.core.loading.GraphLoadFactory;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
@@ -29,7 +29,6 @@ import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -89,46 +88,44 @@ class PageRankProcTest extends ProcTestBase {
             ", (u)-[:TYPE3 {weight: 1.0}]->(w)" +
             ", (v)-[:TYPE3 {weight: 1.0}]->(w)";
 
-    @AfterAll
-    static void tearDown() {
-        if (DB != null) DB.shutdown();
+    @AfterEach
+    void tearDown() {
+        db.shutdown();
     }
 
-    @BeforeAll
-    static void setup() throws KernelException {
-        DB = TestDatabaseCreator.createTestDatabase();
-        try (Transaction tx = DB.beginTx()) {
-            DB.execute(DB_CYPHER).close();
+    @BeforeEach
+    void setup() throws KernelException {
+        db = TestDatabaseCreator.createTestDatabase();
+        try (Transaction tx = db.beginTx()) {
+            db.execute(DB_CYPHER).close();
             tx.success();
         }
 
-        Procedures procedures = DB.getDependencyResolver().resolveDependency(Procedures.class);
-        procedures.registerProcedure(GraphLoadProc.class);
-        procedures.registerProcedure(PageRankProc.class);
+        registerProcedures(GraphLoadProc.class, PageRankProc.class);
 
-        try (Transaction tx = DB.beginTx()) {
+        try (Transaction tx = db.beginTx()) {
             final Label label = Label.label("Label1");
-            expected.put(DB.findNode(label, "name", "a").getId(), 0.243);
-            expected.put(DB.findNode(label, "name", "b").getId(), 1.844);
-            expected.put(DB.findNode(label, "name", "c").getId(), 1.777);
-            expected.put(DB.findNode(label, "name", "d").getId(), 0.218);
-            expected.put(DB.findNode(label, "name", "e").getId(), 0.243);
-            expected.put(DB.findNode(label, "name", "f").getId(), 0.218);
-            expected.put(DB.findNode(label, "name", "g").getId(), 0.150);
-            expected.put(DB.findNode(label, "name", "h").getId(), 0.150);
-            expected.put(DB.findNode(label, "name", "i").getId(), 0.150);
-            expected.put(DB.findNode(label, "name", "j").getId(), 0.150);
+            expected.put(db.findNode(label, "name", "a").getId(), 0.243);
+            expected.put(db.findNode(label, "name", "b").getId(), 1.844);
+            expected.put(db.findNode(label, "name", "c").getId(), 1.777);
+            expected.put(db.findNode(label, "name", "d").getId(), 0.218);
+            expected.put(db.findNode(label, "name", "e").getId(), 0.243);
+            expected.put(db.findNode(label, "name", "f").getId(), 0.218);
+            expected.put(db.findNode(label, "name", "g").getId(), 0.150);
+            expected.put(db.findNode(label, "name", "h").getId(), 0.150);
+            expected.put(db.findNode(label, "name", "i").getId(), 0.150);
+            expected.put(db.findNode(label, "name", "j").getId(), 0.150);
 
-            weightedExpected.put(DB.findNode(label, "name", "a").getId(), 0.218);
-            weightedExpected.put(DB.findNode(label, "name", "b").getId(), 2.008);
-            weightedExpected.put(DB.findNode(label, "name", "c").getId(), 1.850);
-            weightedExpected.put(DB.findNode(label, "name", "d").getId(), 0.185);
-            weightedExpected.put(DB.findNode(label, "name", "e").getId(), 0.182);
-            weightedExpected.put(DB.findNode(label, "name", "f").getId(), 0.174);
-            weightedExpected.put(DB.findNode(label, "name", "g").getId(), 0.150);
-            weightedExpected.put(DB.findNode(label, "name", "h").getId(), 0.150);
-            weightedExpected.put(DB.findNode(label, "name", "i").getId(), 0.150);
-            weightedExpected.put(DB.findNode(label, "name", "j").getId(), 0.150);
+            weightedExpected.put(db.findNode(label, "name", "a").getId(), 0.218);
+            weightedExpected.put(db.findNode(label, "name", "b").getId(), 2.008);
+            weightedExpected.put(db.findNode(label, "name", "c").getId(), 1.850);
+            weightedExpected.put(db.findNode(label, "name", "d").getId(), 0.185);
+            weightedExpected.put(db.findNode(label, "name", "e").getId(), 0.182);
+            weightedExpected.put(db.findNode(label, "name", "f").getId(), 0.174);
+            weightedExpected.put(db.findNode(label, "name", "g").getId(), 0.150);
+            weightedExpected.put(db.findNode(label, "name", "h").getId(), 0.150);
+            weightedExpected.put(db.findNode(label, "name", "i").getId(), 0.150);
+            weightedExpected.put(db.findNode(label, "name", "j").getId(), 0.150);
             tx.success();
         }
     }
@@ -159,7 +156,7 @@ class PageRankProcTest extends ProcTestBase {
                 "    }" +
                 ")", graphName);
 
-        DB.execute(loadQuery, MapUtil.map("graph", graphImpl));
+        db.execute(loadQuery, MapUtil.map("graph", graphImpl));
 
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.pageRank.stream(" +
@@ -199,7 +196,7 @@ class PageRankProcTest extends ProcTestBase {
                 "    }" +
                 ")", graphName);
 
-        DB.execute(loadQuery, MapUtil.map("graph", graphImpl));
+        db.execute(loadQuery, MapUtil.map("graph", graphImpl));
 
         final Map<Long, Double> actual = new HashMap<>();
         String query = "CALL algo.pageRank.stream(" +
@@ -223,7 +220,7 @@ class PageRankProcTest extends ProcTestBase {
                 "    }" +
                 ")", graphName);
 
-        DB.execute(loadQuery, MapUtil.map("graph", graphImpl));
+        db.execute(loadQuery, MapUtil.map("graph", graphImpl));
 
         String query = "CALL algo.pageRank.stream(" +
                        "    '', '', {" +

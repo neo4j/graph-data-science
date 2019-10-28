@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo;
 
 import com.carrotsearch.hppc.IntIntScatterMap;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -58,10 +57,10 @@ class LouvainClusteringProcTest extends ProcTestBase {
     private static final String[] NODES = {"a", "b", "c", "d", "e", "f", "g", "h", "z"};
     private static final int[] NODE_CLUSTER_ID = {0, 0, 0, 0, 1, 1, 1, 1, 2};
 
-    @BeforeAll
-    static void setupGraph() throws KernelException {
+    @BeforeEach
+    void setupGraph() throws KernelException {
 
-        DB = TestDatabaseCreator.createTestDatabase();
+        db = TestDatabaseCreator.createTestDatabase();
 
         final String cypher =
                 "CREATE " +
@@ -93,16 +92,13 @@ class LouvainClusteringProcTest extends ProcTestBase {
 
                 ", (b)-[:TYPE {weight: 42}]->(e)";
 
-        Procedures procedures = DB.getDependencyResolver().resolveDependency(Procedures.class);
-        procedures.registerProcedure(LouvainProc.class);
-        procedures.registerProcedure(GraphLoadProc.class);
-        DB.execute(cypher);
+        registerProcedures(LouvainProc.class, GraphLoadProc.class);
+        db.execute(cypher);
     }
 
-    @BeforeEach
+    @AfterEach
     void clearCommunities() {
-        String cypher = "MATCH (n) REMOVE n.communities REMOVE n.community";
-        DB.execute(cypher);
+        db.shutdown();
     }
 
     @AllGraphNamesTest

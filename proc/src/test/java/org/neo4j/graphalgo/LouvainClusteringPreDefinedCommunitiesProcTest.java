@@ -20,19 +20,19 @@
 package org.neo4j.graphalgo;
 
 import com.carrotsearch.hppc.IntIntScatterMap;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class LouvainClusteringPreDefinedCommunitiesProcTest extends ProcTestBase {
 
-    @BeforeAll
-    static void setupGraph() throws KernelException {
-        DB = TestDatabaseCreator.createTestDatabase();
+    @BeforeEach
+    void setupGraph() throws KernelException {
+        db = TestDatabaseCreator.createTestDatabase();
 
         final String cypher =
                 "  MERGE (nRyan:User {id: 'Ryan'})" +
@@ -45,10 +45,13 @@ class LouvainClusteringPreDefinedCommunitiesProcTest extends ProcTestBase {
                 "    SET  nMark.community = 10" +
                 "  MERGE (nAlice)-[:FRIEND]->(nBridget)";
 
-        DB.getDependencyResolver()
-                .resolveDependency(Procedures.class)
-                .registerProcedure(LouvainProc.class);
-        DB.execute(cypher);
+        registerProcedures(LouvainProc.class);
+        db.execute(cypher);
+    }
+
+    @AfterEach
+    void tearDown() {
+        db.shutdown();
     }
 
     @AllGraphNamesTest

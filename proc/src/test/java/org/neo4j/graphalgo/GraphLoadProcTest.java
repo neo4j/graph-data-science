@@ -91,16 +91,15 @@ class GraphLoadProcTest extends ProcTestBase {
             ", (b)-[:Y { weight: 42.0 }]->(:B {id: 10, weight: 1.0, partition: 1})" +
             ", (b)-[:Z { weight: 42.0 }]->(:B {id: 11, weight: 8.0, partition: 2})";
 
-    private GraphDatabaseAPI db;
-
     @BeforeEach
     void setup() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase();
-        Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class);
-        procedures.registerProcedure(GraphLoadProc.class);
-        procedures.registerProcedure(PageRankProc.class);
-        procedures.registerProcedure(UnionFindProc.class);
-        procedures.registerProcedure(LabelPropagationProc.class);
+        registerProcedures(
+            GraphLoadProc.class,
+            PageRankProc.class,
+            UnionFindProc.class,
+            LabelPropagationProc.class
+        );
         db.execute(DB_CYPHER);
     }
 
@@ -122,7 +121,7 @@ class GraphLoadProcTest extends ProcTestBase {
                 ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSIHPS_QUERY)
                 : String.format(queryTemplate, "null", "null");
 
-        runQuery(query, db, singletonMap("graph", graphImpl),
+        runQuery(query, singletonMap("graph", graphImpl),
                 row -> {
                     assertEquals(12, row.getNumber("nodes").intValue());
                     assertEquals(10, row.getNumber("relationships").intValue());
@@ -147,7 +146,7 @@ class GraphLoadProcTest extends ProcTestBase {
                        "    }" +
                        ")";
 
-        runQuery(query, db, singletonMap("graph", graphImpl));
+        runQuery(query, singletonMap("graph", graphImpl));
 
         Graph fooGraph = GraphLoadFactory.getUnion("foo");
         assertNotNull(fooGraph);
@@ -177,7 +176,7 @@ class GraphLoadProcTest extends ProcTestBase {
         }
 
         try {
-            runQuery(query, db, singletonMap("graph", graphImpl),
+            runQuery(query, singletonMap("graph", graphImpl),
                     row -> {
                         assertEquals(12, row.getNumber("nodes").intValue());
                         assertEquals(10, row.getNumber("relationships").intValue());
@@ -250,7 +249,6 @@ class GraphLoadProcTest extends ProcTestBase {
 
         runQuery(
                 query,
-                db,
                 row -> {
                     assertEquals(12, row.getNumber("nodes").intValue());
                     assertEquals(8, row.getNumber("relationships").intValue());
@@ -268,7 +266,7 @@ class GraphLoadProcTest extends ProcTestBase {
                                      "    }" +
                                      ")", graphImpl);
 
-        assertThrows(QueryExecutionException.class, () -> runQuery(query, db));
+        assertThrows(QueryExecutionException.class, () -> runQuery(query));
     }
 
     @Test
@@ -385,7 +383,7 @@ class GraphLoadProcTest extends ProcTestBase {
                        "        graph: $graph" +
                        "    }" +
                        ") YIELD bytesMin, bytesMax";
-        runQuery(query, db, singletonMap("graph", "huge"),
+        runQuery(query, singletonMap("graph", "huge"),
                 row -> {
                     assertEquals(303520, row.getNumber("bytesMin").longValue());
                     assertEquals(303520, row.getNumber("bytesMax").longValue());
@@ -401,7 +399,7 @@ class GraphLoadProcTest extends ProcTestBase {
                        "    }" +
                        ") YIELD bytesMin, bytesMax";
 
-        runQuery(query, db, singletonMap("graph", "huge"),
+        runQuery(query, singletonMap("graph", "huge"),
                 row -> {
                     assertEquals(573952, row.getNumber("bytesMin").longValue());
                     assertEquals(573952, row.getNumber("bytesMax").longValue());
@@ -420,14 +418,14 @@ class GraphLoadProcTest extends ProcTestBase {
                 ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSIHPS_QUERY)
                 : String.format(queryTemplate, "null", "null");
 
-        runQuery(loadQuery, db, singletonMap("graph", graph));
+        runQuery(loadQuery, singletonMap("graph", graph));
 
         String algoQuery = "CALL algo.pageRank(" +
                            "    null, null, {" +
                            "        graph: $name, write: false" +
                            "    }" +
                            ")";
-        runQuery(algoQuery, db, singletonMap("name", "foo"),
+        runQuery(algoQuery, singletonMap("name", "foo"),
                 row -> assertEquals(12, row.getNumber("nodes").intValue()));
     }
 
@@ -443,16 +441,16 @@ class GraphLoadProcTest extends ProcTestBase {
                 ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSIHPS_QUERY)
                 : String.format(queryTemplate, "null", "null");
 
-        runQuery(loadQuery, db, singletonMap("graph", graph));
+        runQuery(loadQuery, singletonMap("graph", graph));
 
         String algoQuery = "CALL algo.pageRank(" +
                            "    null, null, {" +
                            "        graph: $name, write: false" +
                            "    }" +
                            ")";
-        runQuery(algoQuery, db, singletonMap("name", "foo"),
+        runQuery(algoQuery, singletonMap("name", "foo"),
                 row -> assertEquals(12, row.getNumber("nodes").intValue()));
-        runQuery(algoQuery, db, singletonMap("name", "foo"),
+        runQuery(algoQuery, singletonMap("name", "foo"),
                 row -> assertEquals(12, row.getNumber("nodes").intValue()));
     }
 
@@ -466,7 +464,6 @@ class GraphLoadProcTest extends ProcTestBase {
 
         runQuery(
                 query,
-                db,
                 row -> {
                     assertEquals(12, row.getNumber("nodes").intValue());
                     assertEquals(8, row.getNumber("relationships").intValue());
@@ -480,13 +477,13 @@ class GraphLoadProcTest extends ProcTestBase {
                            "        graph: 'foo', write: false" +
                            "    }" +
                            ")";
-        runQuery(algoQuery, db, singletonMap("relType", "X | Y"),
+        runQuery(algoQuery, singletonMap("relType", "X | Y"),
                 row -> assertEquals(4, row.getNumber("communityCount").intValue()));
 
-        runQuery(algoQuery, db, singletonMap("relType", "X"),
+        runQuery(algoQuery, singletonMap("relType", "X"),
                 row -> assertEquals(6, row.getNumber("communityCount").intValue()));
 
-        runQuery(algoQuery, db, singletonMap("relType", "Y"),
+        runQuery(algoQuery, singletonMap("relType", "Y"),
                 row -> assertEquals(10, row.getNumber("communityCount").intValue()));
     }
 
@@ -501,7 +498,7 @@ class GraphLoadProcTest extends ProcTestBase {
         String loadQuery = graph.equals("cypher")
                 ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSIHPS_QUERY)
                 : String.format(queryTemplate, "null", "null");
-        runQuery(loadQuery, db, singletonMap("graph", graph));
+        runQuery(loadQuery, singletonMap("graph", graph));
 
         String algoQuery = "CALL algo.labelPropagation(" +
                            "    null, null,{" +
@@ -511,7 +508,6 @@ class GraphLoadProcTest extends ProcTestBase {
         try {
             runQuery(
                     algoQuery,
-                    db,
                     singletonMap("name", "foo"),
                     row -> assertEquals(12, row.getNumber("nodes").intValue()));
         } catch (QueryExecutionException qee) {
@@ -566,7 +562,6 @@ class GraphLoadProcTest extends ProcTestBase {
 
         runQuery(
                 "CALL algo.graph.info('foo', $computeDegreeDistr)",
-                db,
                 Collections.singletonMap("computeDegreeDistr", computeDegreeDistribution),
                 resultRow -> {
                     assertEquals(graphImpl.toLowerCase(), resultRow.getString("type"));
@@ -585,23 +580,23 @@ class GraphLoadProcTest extends ProcTestBase {
         String query = graph.equals("cypher")
                 ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSIHPS_QUERY)
                 : String.format(queryTemplate, "null", "null");
-        runQuery(query, db, singletonMap("graph", graph));
+        runQuery(query, singletonMap("graph", graph));
 
-        runQuery("CALL algo.graph.info($name, true)", db, singletonMap("name", "foo"), row -> {
+        runQuery("CALL algo.graph.info($name, true)", singletonMap("name", "foo"), row -> {
             assertEquals(12, row.getNumber("nodes").intValue());
             assertEquals(10, row.getNumber("relationships").intValue());
             assertEquals(graph.equals("cypher") ? "huge" : graph, row.getString("type"));
             assertEquals("foo", row.getString("name"));
             assertTrue(row.getBoolean("exists"));
         });
-        runQuery("CALL algo.graph.remove($name)", db, singletonMap("name", "foo"), row -> {
+        runQuery("CALL algo.graph.remove($name)", singletonMap("name", "foo"), row -> {
             assertEquals(12, row.getNumber("nodes").intValue());
             assertEquals(10, row.getNumber("relationships").intValue());
             assertEquals(graph.equals("cypher") ? "huge" : graph, row.getString("type"));
             assertEquals("foo", row.getString("name"));
             assertTrue(row.getBoolean("removed"));
         });
-        runQuery("CALL algo.graph.info($name)", db, singletonMap("name", "foo"), row -> {
+        runQuery("CALL algo.graph.info($name)", singletonMap("name", "foo"), row -> {
             assertEquals("foo", row.getString("name"));
             assertFalse(row.getBoolean("exists"));
         });
@@ -614,23 +609,23 @@ class GraphLoadProcTest extends ProcTestBase {
                        "        graph: 'huge'" +
                        "    }" +
                        ")";
-        runQuery(query, db);
+        runQuery(query);
 
-        runQuery("CALL algo.graph.info($name, true)", db, singletonMap("name", "foo"), row -> {
+        runQuery("CALL algo.graph.info($name, true)", singletonMap("name", "foo"), row -> {
             assertEquals(12, row.getNumber("nodes").intValue());
             assertEquals(8, row.getNumber("relationships").intValue());
             assertEquals("huge", row.getString("type"));
             assertEquals("foo", row.getString("name"));
             assertTrue(row.getBoolean("exists"));
         });
-        runQuery("CALL algo.graph.remove($name)", db, singletonMap("name", "foo"), row -> {
+        runQuery("CALL algo.graph.remove($name)", singletonMap("name", "foo"), row -> {
             assertEquals(12, row.getNumber("nodes").intValue());
             assertEquals(8, row.getNumber("relationships").intValue());
             assertEquals("huge", row.getString("type"));
             assertEquals("foo", row.getString("name"));
             assertTrue(row.getBoolean("removed"));
         });
-        runQuery("CALL algo.graph.info($name)", db, singletonMap("name", "foo"), row -> {
+        runQuery("CALL algo.graph.info($name)", singletonMap("name", "foo"), row -> {
             assertEquals("foo", row.getString("name"));
             assertFalse(row.getBoolean("exists"));
         });
@@ -638,7 +633,7 @@ class GraphLoadProcTest extends ProcTestBase {
 
     @Test
     void removeMissingGraphIsNoOp() {
-        runQuery("CALL algo.graph.remove($name)", db, singletonMap("name", "foo"), row -> {
+        runQuery("CALL algo.graph.remove($name)", singletonMap("name", "foo"), row -> {
             assertEquals(0, row.getNumber("nodes").intValue());
             assertEquals(0, row.getNumber("relationships").intValue());
             assertNull(row.getString("type"));
@@ -659,9 +654,9 @@ class GraphLoadProcTest extends ProcTestBase {
         String query = graph.equals("cypher")
                 ? String.format(queryTemplate, ALL_NODES_QUERY, ALL_RELATIONSIHPS_QUERY)
                 : String.format(queryTemplate, "null", "null");
-        runQuery(query, db, singletonMap("graph", graph));
+        runQuery(query, singletonMap("graph", graph));
 
-        runQuery("CALL algo.graph.info($name, true)", db, singletonMap("name", "foo"), row -> {
+        runQuery("CALL algo.graph.info($name, true)", singletonMap("name", "foo"), row -> {
             assertEquals(5, row.getNumber("max").intValue());
             assertEquals(0, row.getNumber("min").intValue());
             assertEquals(0.8333333, row.getNumber("mean").doubleValue(), 1e-4);
@@ -673,7 +668,7 @@ class GraphLoadProcTest extends ProcTestBase {
             assertEquals(5, row.getNumber("p999").intValue());
         });
 
-        runQuery("CALL algo.graph.info($name, false)", db, singletonMap("name", "foo"), row -> {
+        runQuery("CALL algo.graph.info($name, false)", singletonMap("name", "foo"), row -> {
             assertEquals(0, row.getNumber("max").intValue());
             assertEquals(0, row.getNumber("min").intValue());
             assertEquals(0, row.getNumber("mean").intValue());
@@ -685,7 +680,7 @@ class GraphLoadProcTest extends ProcTestBase {
             assertEquals(0, row.getNumber("p999").intValue());
         });
 
-        runQuery("CALL algo.graph.info($name, {})", db, singletonMap("name", "foo"), row -> {
+        runQuery("CALL algo.graph.info($name, {})", singletonMap("name", "foo"), row -> {
             assertEquals(0, row.getNumber("max").intValue());
             assertEquals(0, row.getNumber("min").intValue());
             assertEquals(0, row.getNumber("mean").intValue());
@@ -697,7 +692,7 @@ class GraphLoadProcTest extends ProcTestBase {
             assertEquals(0, row.getNumber("p999").intValue());
         });
 
-        runQuery("CALL algo.graph.info($name, null)", db, singletonMap("name", "foo"), row -> {
+        runQuery("CALL algo.graph.info($name, null)", singletonMap("name", "foo"), row -> {
             assertEquals(0, row.getNumber("max").intValue());
             assertEquals(0, row.getNumber("min").intValue());
             assertEquals(0, row.getNumber("mean").intValue());
@@ -724,12 +719,12 @@ class GraphLoadProcTest extends ProcTestBase {
                 ALL_NODES_QUERY,
                 "'MATCH (s)<--(t) RETURN id(s) AS source, id(t) AS target'")
                 : String.format(queryTemplate, "null", "null");
-        runQuery(loadQuery, db, singletonMap("graph", graph));
+        runQuery(loadQuery, singletonMap("graph", graph));
 
         String infoQuery = graph.equals("cypher")
                 ? "CALL algo.graph.info($name, {direction:'OUT'})"
                 : "CALL algo.graph.info($name, {direction:'IN'})";
-        runQuery(infoQuery, db, singletonMap("name", "foo"), row -> {
+        runQuery(infoQuery, singletonMap("name", "foo"), row -> {
             assertEquals(1, row.getNumber("max").intValue());
             assertEquals(0, row.getNumber("min").intValue());
             assertEquals(0.8333333, row.getNumber("mean").doubleValue(), 1e-4);
@@ -744,7 +739,7 @@ class GraphLoadProcTest extends ProcTestBase {
 
     @Test
     public void shouldReturnEmptyList() {
-        assertEmptyResult("CALL algo.graph.list() YIELD name, nodes, relationships, type, direction", db);
+        assertEmptyResult("CALL algo.graph.list() YIELD name, nodes, relationships, type, direction");
     }
 
     @Test
@@ -760,7 +755,7 @@ class GraphLoadProcTest extends ProcTestBase {
                 MapUtil.map("name", "foo", "type", "huge", "direction", "OUTGOING")
         );
 
-        parameters.forEach((parameter) -> runQuery(loadQuery, db, parameter, resultRow -> {
+        parameters.forEach((parameter) -> runQuery(loadQuery, parameter, resultRow -> {
                     parameter.put("nodes", resultRow.getNumber("nodes"));
                     parameter.put("relationships", resultRow.getNumber("relationships"));
                 })
@@ -768,7 +763,7 @@ class GraphLoadProcTest extends ProcTestBase {
 
         List<Map<String, Object>> actual = new ArrayList<>();
 
-        runQuery("CALL algo.graph.list() YIELD name, nodes, relationships, type, direction", db, resultRow -> {
+        runQuery("CALL algo.graph.list() YIELD name, nodes, relationships, type, direction", resultRow -> {
             Map<String, Object> row = new HashMap<>();
             row.put("name", resultRow.getString("name"));
             row.put("type", resultRow.getString("type"));
