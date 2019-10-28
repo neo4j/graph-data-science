@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.loading.NullPropertyMap;
@@ -297,7 +297,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
 
         try (ProgressTimer ignored = stats.timeWrite()) {
             boolean writePropertyEqualsSeedProperty = Objects.equals(seedProperty, writeProperty);
-            NodeOrRelationshipProperties seedProperties = graph.nodeProperties(LabelPropagation.SEED_TYPE);
+            NodeProperties seedProperties = graph.nodeProperties(LabelPropagation.SEED_TYPE);
             boolean hasSeedProperties = seedProperties != null && !(seedProperties instanceof NullPropertyMap);
 
             PropertyTranslator<HugeLongArray> translator = HugeLongArray.Translator.INSTANCE;

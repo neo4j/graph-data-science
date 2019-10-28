@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.OptionalLong;
 
 import static org.neo4j.graphalgo.core.utils.ParallelUtil.parallelStream;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
@@ -126,12 +127,12 @@ public final class PagedLongDoubleMap {
         return subMap;
     }
 
-    public long getMaxValue() {
+    public OptionalLong getMaxValue() {
         return parallelStream(Arrays.stream(pages), stream -> stream
                 .filter(Objects::nonNull)
                 .flatMapToDouble(TrackingIntDoubleHashMap::getValuesAsStream)
-                .max()
-                .orElse(0d)).longValue();
+                .mapToLong(d -> (long) d)
+                .max());
     }
 
     public long release() {

@@ -24,7 +24,7 @@ import com.carrotsearch.hppc.DoubleArrayList;
 import com.carrotsearch.hppc.ObjectArrayList;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -33,7 +33,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
-import org.neo4j.graphalgo.impl.utils.CommunityUtils;
+import org.neo4j.graphalgo.core.utils.CommunityUtils;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.values.storable.Values;
 
@@ -83,27 +83,27 @@ public final class Louvain extends Algorithm<Louvain> {
     private final HugeDoubleArray nodeWeights;
     private final Graph rootGraph;
     private long communityCount;
-    private final NodeOrRelationshipProperties seedingValues;
+    private final NodeProperties seedingValues;
     private final int maxLevel;
     private final int maxIterations;
 
     public Louvain(
-            final Graph graph,
-            final Config config,
-            final ExecutorService pool,
-            final int concurrency,
-            final AllocationTracker tracker
+        Graph graph,
+        Config config,
+        ExecutorService pool,
+        int concurrency,
+        AllocationTracker tracker
     ) {
         this(graph, config, null, pool, concurrency, tracker);
     }
 
     public Louvain(
-            final Graph graph,
-            final Config config,
-            final NodeOrRelationshipProperties seedingValues,
-            final ExecutorService pool,
-            final int concurrency,
-            final AllocationTracker tracker) {
+        Graph graph,
+        Config config,
+        NodeProperties seedingValues,
+        ExecutorService pool,
+        int concurrency,
+        AllocationTracker tracker) {
         this.rootGraph = graph;
         this.pool = pool;
         this.concurrency = concurrency;
@@ -127,7 +127,7 @@ public final class Louvain extends Algorithm<Louvain> {
 
         if (seedingValues != null) {
             BitSet comCount = new BitSet();
-            long maxSeedingCommunityId = seedingValues.getMaxPropertyValue();
+            long maxSeedingCommunityId = seedingValues.getMaxPropertyValue().orElse(CommunityUtils.NO_SUCH_SEED_PROPERTY);
             communities.setAll(nodeId -> {
                 double existingCommunityValue = seedingValues.nodeProperty(nodeId, Double.NaN);
                 long community = Double.isNaN(existingCommunityValue)
@@ -142,7 +142,7 @@ public final class Louvain extends Algorithm<Louvain> {
             CommunityUtils.normalize(communities);
             workingGraph = rebuildGraph(this.rootGraph, communities, nodeCount);
         } else {
-            communities.setAll(nodeId -> this.rootGraph.toOriginalNodeId(nodeId));
+            communities.setAll(this.rootGraph::toOriginalNodeId);
         }
 
         return computeOf(workingGraph, nodeCount, maxLevel, maxIterations);
@@ -431,7 +431,7 @@ public final class Louvain extends Algorithm<Louvain> {
     }
 
     @Override
-    public final Louvain me() {
+    public Louvain me() {
         return this;
     }
 
@@ -463,7 +463,7 @@ public final class Louvain extends Algorithm<Louvain> {
 
     public static class Config {
 
-        public final NodeOrRelationshipProperties communityMap;
+        public final NodeProperties communityMap;
         public final int maxLevel;
         public final int maxIterations;
 
@@ -478,7 +478,7 @@ public final class Louvain extends Algorithm<Louvain> {
         }
 
         public Config(
-                final NodeOrRelationshipProperties communityMap,
+                final NodeProperties communityMap,
                 final int maxLevel,
                 final int maxIterations
         ) {

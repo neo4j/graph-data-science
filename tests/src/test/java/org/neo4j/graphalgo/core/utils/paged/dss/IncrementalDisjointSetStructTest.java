@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.utils.paged.dss;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
@@ -31,11 +32,11 @@ class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
 
     @Override
     SequentialDisjointSetStruct newSet(final int capacity) {
-        TestNodeOrRelationshipProperties communities = new TestNodeOrRelationshipProperties();
+        NodeProperties communities = new TestNodeProperties();
         return newSet(capacity, communities);
     }
 
-    SequentialDisjointSetStruct newSet(final int capacity, final TestNodeOrRelationshipProperties weightMapping) {
+    SequentialDisjointSetStruct newSet(final int capacity, final NodeProperties weightMapping) {
         return new IncrementalDisjointSetStruct(
                 capacity,
                 weightMapping,
@@ -44,7 +45,7 @@ class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
 
     @Test
     void shouldRunWithLessInitialCommunities() {
-        TestNodeOrRelationshipProperties communities = new TestNodeOrRelationshipProperties(0, 0, 1, 0);
+        NodeProperties communities = new TestNodeProperties(0, 0, 1, 0);
         SequentialDisjointSetStruct dss = newSet(4, communities);
 
         assertEquals(3, getSetCount(dss));
@@ -57,7 +58,7 @@ class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
 
     @Test
     void shouldRunWithLessInitialCommunitiesAndLargerIdSpace() {
-        TestNodeOrRelationshipProperties communities = new TestNodeOrRelationshipProperties(0, 10, 1, 10);
+        NodeProperties communities = new TestNodeProperties(0, 10, 1, 10);
         SequentialDisjointSetStruct dss = newSet(4, communities);
 
         assertEquals(3, getSetCount(dss));
@@ -70,7 +71,7 @@ class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
 
     @Test
     void shouldRunWithLessInitialCommunitiesAndOverlappingIdSpace() {
-        TestNodeOrRelationshipProperties communities = new TestNodeOrRelationshipProperties(0, 3, 1, 3);
+        NodeProperties communities = new TestNodeProperties(0, 3, 1, 3);
         SequentialDisjointSetStruct dss = newSet(4, communities);
 
         assertEquals(3, getSetCount(dss));

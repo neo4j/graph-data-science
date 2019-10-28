@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedLongDoubleMap;
 import org.neo4j.kernel.api.StatementConstants;
@@ -69,7 +69,7 @@ public final class NodePropertiesBuilder {
         properties.put(index, value);
     }
 
-    public NodeOrRelationshipProperties build() {
+    public NodeProperties build() {
         return new NodePropertyMap(properties, defaultValue);
     }
 }

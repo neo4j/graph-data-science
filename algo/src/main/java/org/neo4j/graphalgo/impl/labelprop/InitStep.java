@@ -22,26 +22,26 @@ package org.neo4j.graphalgo.impl.labelprop;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Direction;
 
 final class InitStep implements Step {
 
-    private final NodeOrRelationshipProperties nodeProperties;
+    private final NodeProperties nodeProperties;
     private final HugeLongArray existingLabels;
     private final PrimitiveLongIterable nodes;
     private final Graph graph;
-    private final NodeOrRelationshipProperties nodeWeights;
+    private final NodeProperties nodeWeights;
     private final ProgressLogger progressLogger;
     private final Direction direction;
     private final long maxLabelId;
 
     InitStep(
             Graph graph,
-            NodeOrRelationshipProperties nodeProperties,
-            NodeOrRelationshipProperties nodeWeights,
+            NodeProperties nodeProperties,
+            NodeProperties nodeWeights,
             PrimitiveLongIterable nodes,
             HugeLongArray existingLabels,
             ProgressLogger progressLogger,
@@ -81,7 +81,7 @@ final class InitStep implements Step {
     }
 
     @Override
-    public final Step next() {
+    public Step next() {
         return new ComputeStep(
                 graph,
                 nodeWeights,

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.utils;
+package org.neo4j.graphalgo.core.utils;
 
 import com.carrotsearch.hppc.IntIntMap;
 import com.carrotsearch.hppc.IntIntScatterMap;
@@ -27,6 +27,8 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedLongDoubleMap;
 
 public final class CommunityUtils {
+
+    public static final int NO_SUCH_SEED_PROPERTY = -1;
 
     private CommunityUtils() {}
 

@@ -20,18 +20,19 @@
 package org.neo4j.graphalgo.core.utils.paged.dss;
 
 import com.carrotsearch.hppc.IntIntHashMap;
-import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
+import org.neo4j.graphalgo.api.NodeProperties;
 
-import java.util.Arrays;
+import java.util.OptionalLong;
+import java.util.stream.StreamSupport;
 
-final class TestNodeOrRelationshipProperties implements NodeOrRelationshipProperties {
+final class TestNodeProperties implements NodeProperties {
     private final IntIntHashMap weights;
 
-    private TestNodeOrRelationshipProperties(final IntIntHashMap weights) {
+    private TestNodeProperties(final IntIntHashMap weights) {
         this.weights = weights;
     }
 
-    TestNodeOrRelationshipProperties(int... values) {
+    TestNodeProperties(int... values) {
         this(toMap(values));
     }
 
@@ -47,14 +48,13 @@ final class TestNodeOrRelationshipProperties implements NodeOrRelationshipProper
     }
 
     @Override
-    public double relationshipProperty(final long source, final long target) {
-        return relationshipProperty(source, target, 0.0);
+    public double nodeProperty(long nodeId) {
+        return nodeProperty(nodeId, 0.0);
     }
 
     @Override
-    public double relationshipProperty(final long source, final long target, final double defaultValue) {
-        assert target == -1L;
-        int key = Math.toIntExact(source);
+    public double nodeProperty(long nodeId, double defaultValue) {
+        int key = Math.toIntExact(nodeId);
         int index = weights.indexOf(key);
         if (weights.indexExists(index)) {
             return weights.indexGet(index);
@@ -63,13 +63,11 @@ final class TestNodeOrRelationshipProperties implements NodeOrRelationshipProper
     }
 
     @Override
-    public long release() {
-        return 0;
-    }
-
-    @Override
-    public long getMaxPropertyValue() {
-        return Arrays.stream(weights.values).max().orElse(-1);
+    public OptionalLong getMaxPropertyValue() {
+        return StreamSupport
+            .stream(weights.values().spliterator(), false)
+            .mapToLong(d -> d.value)
+            .max();
     }
 
     @Override

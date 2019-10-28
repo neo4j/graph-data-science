@@ -25,9 +25,9 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
-import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.loading.NullPropertyMap;
 import org.neo4j.graphdb.Direction;
@@ -180,7 +180,7 @@ final class WCCSafetyTest {
         }
 
         @Override
-        public NodeOrRelationshipProperties nodeProperties(final String type) {
+        public NodeProperties nodeProperties(final String type) {
             throw new UnsupportedOperationException(
                     "org.neo4j.graphalgo.impl.wcc.WCCSafetyTest.FlakyGraph.nodeProperties is not implemented.");
         }
@@ -211,6 +211,12 @@ final class WCCSafetyTest {
         public double relationshipProperty(final long sourceNodeId, final long targetNodeId, double fallbackValue) {
             throw new UnsupportedOperationException(
                     "org.neo4j.graphalgo.impl.wcc.WCCSafetyTest.FlakyGraph.relationshipProperty");
+        }
+
+        @Override
+        public double relationshipProperty(long sourceNodeId, long targetNodeId) {
+            throw new UnsupportedOperationException(
+                    "org.neo4j.graphalgo.impl.wcc.WCCSafetyTest.FlakyGraph.relationshipProperty is not implemented.");
         }
 
         @Override

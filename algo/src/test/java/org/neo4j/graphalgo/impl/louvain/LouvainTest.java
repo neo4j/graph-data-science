@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
@@ -113,7 +113,7 @@ class LouvainTest extends LouvainTestBase {
             String[] expectedUnion,
             String[] expectedDisjoint) {
         Graph graph = loadGraph(graphImpl, DB_CYPHER, "seed1", "seed2");
-        NodeOrRelationshipProperties communityMap = graph.nodeProperties(seedProperty);
+        NodeProperties communityMap = graph.nodeProperties(seedProperty);
         final Louvain algorithm = new Louvain(
                 graph,
                 DEFAULT_CONFIG,

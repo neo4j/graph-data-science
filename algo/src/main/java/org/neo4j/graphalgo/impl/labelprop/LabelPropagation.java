@@ -23,13 +23,14 @@ import org.neo4j.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeOrRelationshipProperties;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.loading.NullPropertyMap;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.kernel.api.StatementConstants;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -47,8 +48,8 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
 
     private final long nodeCount;
     private final AllocationTracker tracker;
-    private final NodeOrRelationshipProperties nodeProperties;
-    private final NodeOrRelationshipProperties nodeWeights;
+    private final NodeProperties nodeProperties;
+    private final NodeProperties nodeWeights;
     private final int batchSize;
     private final int concurrency;
     private final ExecutorService executor;
@@ -73,18 +74,18 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         this.executor = executor;
         this.tracker = tracker;
 
-        NodeOrRelationshipProperties seedProperty = graph.nodeProperties(SEED_TYPE);
+        NodeProperties seedProperty = graph.nodeProperties(SEED_TYPE);
         if (seedProperty == null) {
             seedProperty = new NullPropertyMap(0.0);
         }
         this.nodeProperties = seedProperty;
 
-        NodeOrRelationshipProperties weightProperty = graph.nodeProperties(WEIGHT_TYPE);
+        NodeProperties weightProperty = graph.nodeProperties(WEIGHT_TYPE);
         if (weightProperty == null) {
             weightProperty = new NullPropertyMap(1.0);
         }
         this.nodeWeights = weightProperty;
-        maxLabelId = nodeProperties.getMaxPropertyValue();
+        maxLabelId = nodeProperties.getMaxPropertyValue().orElse(StatementConstants.NO_SUCH_LABEL);
     }
 
     @Override
