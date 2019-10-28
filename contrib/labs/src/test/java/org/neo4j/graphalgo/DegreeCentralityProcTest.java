@@ -25,7 +25,6 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -55,7 +54,7 @@ class DegreeCentralityProcTest extends ProcTestBase {
 
     @AfterEach
     void tearDown() {
-        if (db != null) db.shutdown();
+        db.shutdown();
     }
 
     @BeforeEach
@@ -66,10 +65,7 @@ class DegreeCentralityProcTest extends ProcTestBase {
             tx.success();
         }
 
-        db.getDependencyResolver()
-                .resolveDependency(Procedures.class)
-                .registerProcedure(DegreeCentralityProc.class);
-
+        registerProcedures(DegreeCentralityProc.class);
 
         try (Transaction tx = db.beginTx()) {
             final Label label = Label.label("Label1");

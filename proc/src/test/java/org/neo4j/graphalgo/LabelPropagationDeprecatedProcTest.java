@@ -19,7 +19,9 @@
  */
 package org.neo4j.graphalgo;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.graphalgo.core.loading.GraphLoadFactory;
 import org.neo4j.graphdb.Result;
 import org.neo4j.helpers.collection.Iterators;
 import org.neo4j.helpers.collection.MapUtil;
@@ -62,6 +64,12 @@ class LabelPropagationDeprecatedProcTest extends ProcTestBase {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(LabelPropagationProc.class);
         db.execute(DB_CYPHER);
+    }
+
+    @AfterEach
+    void tearDown() {
+        db.shutdown();
+        GraphLoadFactory.removeAllLoadedGraphs();
     }
 
     @SingleAndMultiThreadedAllGraphNames

@@ -19,11 +19,11 @@
  */
 package org.neo4j.graphalgo;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,11 +37,6 @@ class DegreeProcIssue848Test extends ProcTestBase {
             "CREATE (:Node {id: s})";
 
     @BeforeEach
-    void tearDown() {
-        if (db != null) db.shutdown();
-    }
-
-    @BeforeEach
     void setup() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase();
         try (Transaction tx = db.beginTx()) {
@@ -49,9 +44,12 @@ class DegreeProcIssue848Test extends ProcTestBase {
             tx.success();
         }
 
-        db.getDependencyResolver()
-                .resolveDependency(Procedures.class)
-                .registerProcedure(DegreeCentralityProc.class);
+        registerProcedures(DegreeCentralityProc.class);
+    }
+
+    @AfterEach
+    void tearDown() {
+        db.shutdown();
     }
 
     @AllGraphNamesTest

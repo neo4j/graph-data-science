@@ -26,7 +26,6 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
@@ -73,8 +72,7 @@ class EigenvectorCentralityProcTest extends ProcTestBase {
             tx.success();
         }
 
-        Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class);
-        procedures.registerProcedure(EigenvectorCentralityProc.class);
+        registerProcedures(EigenvectorCentralityProc.class);
 
         try (Transaction tx = db.beginTx()) {
             final Label label = Label.label("Character");
@@ -94,7 +92,7 @@ class EigenvectorCentralityProcTest extends ProcTestBase {
 
     @AfterEach
     void tearDown() {
-        if (db != null) db.shutdown();
+        db.shutdown();
     }
 
     @AllGraphNamesTest

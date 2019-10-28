@@ -90,7 +90,7 @@ class PageRankProcTest extends ProcTestBase {
 
     @AfterEach
     void tearDown() {
-        if (db != null) db.shutdown();
+        db.shutdown();
     }
 
     @BeforeEach

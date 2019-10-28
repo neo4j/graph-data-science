@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo;
 
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -27,6 +28,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.TestSupport.SingleAndMultiThreadedAllGraphNames;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.core.loading.GraphLoadFactory;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.graphdb.Result;
@@ -75,6 +77,12 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(LabelPropagationProc.class, GraphLoadProc.class);
         db.execute(DB_CYPHER);
+    }
+
+    @AfterEach
+    void tearDown() {
+        db.shutdown();
+        GraphLoadFactory.removeAllLoadedGraphs();
     }
 
     static Stream<Arguments> successParameters() {
