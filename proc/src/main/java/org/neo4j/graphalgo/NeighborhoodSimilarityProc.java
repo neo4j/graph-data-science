@@ -21,14 +21,19 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
+import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.impl.jaccard.NeighborhoodSimilarity;
 import org.neo4j.graphalgo.impl.jaccard.NeighborhoodSimilarityFactory;
 import org.neo4j.graphalgo.impl.jaccard.SimilarityGraphResult;
 import org.neo4j.graphalgo.impl.jaccard.SimilarityResult;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.internal.kernel.api.Write;
+import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
@@ -37,6 +42,7 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
+import org.neo4j.values.storable.Values;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -141,10 +147,44 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
         writeResult.relationships = similarityGraph.relationshipCount();
 
         if (configuration.isWriteFlag() && similarityGraph.relationshipCount() > 0) {
-            // write
+            Exporter.of(api, similarityGraph)
+                .withLog(log)
+                .build()
+                .writeRelationshipAndProperty(writeRelationshipType, writeProperty,
+                    (ops, relType, propertyType) -> {
+                        similarityGraph.forEachNode(nodeId -> {
+                            similarityGraph.forEachRelationship(
+                                nodeId,
+                                direction,
+                                0.0,
+                                writeBack(relType, propertyType, similarityGraph, ops)
+                            );
+                            return true;
+                        });
+                    }
+                );
         }
-
         return Stream.of(writeResult);
+    }
+
+    private static RelationshipWithPropertyConsumer writeBack(int relType, int propertyType, Graph graph, Write ops) {
+        return (source, target, property) -> {
+            try {
+                final long relId = ops.relationshipCreate(
+                    graph.toOriginalNodeId(source),
+                    relType,
+                    graph.toOriginalNodeId(target)
+                );
+                ops.relationshipSetProperty(
+                    relId,
+                    propertyType,
+                    Values.doubleValue(property)
+                );
+            } catch (KernelException e) {
+                ExceptionUtil.throwKernelException(e);
+            }
+            return true;
+        };
     }
 
     @Override
@@ -164,7 +204,7 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
         ));
     }
 
-    private static class WriteResult {
+    public static class WriteResult {
         public long nodesCompared;
         public long relationships;
         public boolean write;

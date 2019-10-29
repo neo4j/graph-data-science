@@ -197,8 +197,8 @@ public final class Exporter extends StatementApi {
         });
     }
 
-    public void writeRelationshipAndProperty(String relationship, String property, PropertyWriteConsumer writer) {
-        final int relationshipId = getOrCreateRelationshipId(relationship);
+    public void writeRelationshipAndProperty(String relationshipType, String property, PropertyWriteConsumer writer) {
+        final int relationshipId = getOrCreateRelationshipId(relationshipType);
         final int propertyId = getOrCreatePropertyId(property);
         if (relationshipId == -1) {
             throw new IllegalStateException("no write property id is set");
