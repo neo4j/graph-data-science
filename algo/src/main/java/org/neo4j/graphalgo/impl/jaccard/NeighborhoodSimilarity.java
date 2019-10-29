@@ -133,8 +133,18 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         return stream;
     }
 
-    public Graph computeToGraph(Direction direction) {
-        return similarityGraph(computeToStream(direction));
+    public SimilarityGraphResult computeToGraph(Direction direction) {
+        Graph simGraph = similarityGraph(computeToStream(direction));
+        long comparedNodes = 0;
+
+        // TODO: optimize
+        for (int i = 0; i < nodeFilter.size(); i++) {
+            if (nodeFilter.get(i)) {
+                comparedNodes++;
+            }
+        }
+
+        return new SimilarityGraphResult(simGraph, comparedNodes);
     }
 
     private Stream<SimilarityResult> init() {
@@ -204,6 +214,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
                 int concurrency,
                 int minBatchSize) {
             this.similarityCutoff = similarityCutoff;
+            // TODO: make this constraint more prominent
             this.degreeCutoff = Math.max(1, degreeCutoff);
             this.top = top;
             this.topk = topk;

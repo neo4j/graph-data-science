@@ -21,8 +21,9 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.loading.GraphLoadFactory;
 import org.neo4j.graphalgo.impl.jaccard.SimilarityResult;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -31,7 +32,11 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.Collection;
 import java.util.HashSet;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
+import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 class NeighborhoodSimilarityProcTest extends ProcTestBase {
 
@@ -81,7 +86,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
 
     @AllGraphNamesTest
     void shouldStreamResults(String graphImpl) {
-        String query = "CALL algo.jaccard.stream(" +
+        String query = "CALL algo.neighborhoodSimilarity.stream(" +
                        "    '', 'LIKES', {" +
                        "        graph: $graph, direction: 'OUTGOING'" +
                        "    }" +
@@ -96,7 +101,38 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
                     result.add(new SimilarityResult(node1, node2, similarity));
                 });
 
-        Assertions.assertEquals(EXPECTED_OUTGOING, result);
+        assertEquals(EXPECTED_OUTGOING, result);
     }
 
+    @AllGraphNamesTest
+    void shouldWriteResults(String graphImpl) {
+        String query = "CALL algo.neighborhoodSimilarity(" +
+                       "    '', 'LIKES', {" +
+                       "        graph: $graph, direction: 'OUTGOING'," +
+                       "        write: true, writeRelationshipType: 'SIMILAR_TO', writeProperty: 'score'" +
+                       "    }" +
+                       ") YIELD node1, node2, similarity";
+
+        runQuery(query, db, MapUtil.map("graph", graphImpl),
+            row -> {
+                assertEquals(4, row.getNumber("nodes").longValue());
+                assertEquals(3, row.getNumber("relationships").longValue());
+                assertTrue(row.getBoolean("write"));
+                assertEquals("SIMILAR_TO", row.getString("writeRelationshipType"));
+                assertEquals("score", row.getString("writeProperty"));
+            });
+
+        String loadQuery = "CALL algo.graph.load('simGraph', 'Person', 'SIMILAR_TO', { nodeProperties: 'name' })";
+        runQuery(loadQuery, db, row -> {});
+        Graph simGraph = GraphLoadFactory.getUnion("simGraph");
+        assertGraphEquals(
+            fromGdl(String.format(
+                "  (a {name: 'Alice'})" +
+                ", (b {name: 'Bob'})" +
+                ", (b {name: 'Charlie'})" +
+                ", (a)-[{w: %f}]->(b)" +
+                ", (a)-[{w: %f}]->(c)" +
+                ", (b)-[{w: %f}]->(c)", 2 / 3.0, 1 / 3.0, 0.0)
+            ), simGraph);
+    }
 }

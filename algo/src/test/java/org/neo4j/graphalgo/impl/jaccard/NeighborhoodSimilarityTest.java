@@ -88,6 +88,9 @@ final class NeighborhoodSimilarityTest {
     private static final Collection<SimilarityResult> EXPECTED_OUTGOING_DEGREE_CUTOFF = new HashSet<>();
     private static final Collection<SimilarityResult> EXPECTED_INCOMING_DEGREE_CUTOFF = new HashSet<>();
 
+    private static final int COMPARED_ITEMS = 3;
+    private static final int COMPARED_PERSONS = 3;
+
     static {
         EXPECTED_OUTGOING.add(new SimilarityResult(0, 1, 2 / 3.0));
         EXPECTED_OUTGOING.add(new SimilarityResult(0, 2, 1 / 3.0));
@@ -313,13 +316,15 @@ final class NeighborhoodSimilarityTest {
             Pools.DEFAULT,
             AllocationTracker.EMPTY,
             NullLog.getInstance());
-        Graph resultGraph = neighborhoodSimilarity.computeToGraph(algoDirection);
 
+        SimilarityGraphResult similarityGraphResult = neighborhoodSimilarity.computeToGraph(algoDirection);
+        assertEquals(algoDirection == INCOMING ? COMPARED_ITEMS : COMPARED_PERSONS, similarityGraphResult.comparedNodes());
+        Graph resultGraph = similarityGraphResult.similarityGraph();
         assertGraphEquals(
-            resultGraph,
             algoDirection == INCOMING
                 ? fromGdl("(a), (b), (c), (d), (e), (f)-[{property: 1.000000D}]->(g), (f)-[{property: 0.333333D}]->(h), (g)-[{property: 0.333333D}]->(h)")
-                : fromGdl("(a)-[{property: 0.666667D}]->(b), (a)-[{property: 0.333333D}]->(c), (b)-[{property: 0.00000D}]->(c), (d), (e), (f), (g), (h)")
+                : fromGdl("(a)-[{property: 0.666667D}]->(b), (a)-[{property: 0.333333D}]->(c), (b)-[{property: 0.00000D}]->(c), (d), (e), (f), (g), (h)"),
+            resultGraph
         );
         neighborhoodSimilarity.release();
         resultGraph.release();
