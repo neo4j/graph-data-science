@@ -165,7 +165,7 @@ class LouvainTest extends LouvainTestBase {
             "CREATE" +
             "  (:Some)" +
             ", (:Other)" +
-            ", (:Labels)" +
+            ", (:Nodes)" +
             ", (:That)" +
             ", (:We)" +
             ", (:Will)" +

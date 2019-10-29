@@ -127,8 +127,8 @@ public final class Louvain extends Algorithm<Louvain> {
     }
 
     public Louvain compute(Config config) {
-        Graph workingGraph = this.rootGraph;
-        long nodeCount = this.rootNodeCount;
+        Graph workingGraph;
+        long nodeCount;
 
         if (seedingValues != null) {
             BitSet comCount = new BitSet();
@@ -150,6 +150,10 @@ public final class Louvain extends Algorithm<Louvain> {
             workingGraph = rebuildGraph(this.rootGraph, communities, nodeCount);
         } else {
             communities.setAll(this.rootGraph::toOriginalNodeId);
+            // temporary graph
+            nodeCount = communities.size();
+            CommunityUtils.normalize(communities);
+            workingGraph = rebuildGraph(this.rootGraph, communities, nodeCount);
         }
 
         return computeOf(workingGraph, nodeCount, config);
@@ -319,6 +323,15 @@ public final class Louvain extends Algorithm<Louvain> {
 
     private void rebuildCommunityStructure(final HugeLongArray communityIds) {
         // rebuild community array
+
+        // communities:               [                10, 11, 12] card max
+        //                                              |  |  |
+        //                                              v  v  v
+        // communityIds: MO result -> [0, 1, 1]         AIOOBE
+        //                             |  |  |
+        //                             v  v  v
+        // result                  -> [1, 1, 0] card min
+
         try (HugeCursor<long[]> cursor = communities.initCursor(communities.newCursor())) {
             while (cursor.next()) {
                 long[] arrayRef = cursor.array;
