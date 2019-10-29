@@ -47,7 +47,6 @@ import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.impl.wcc.WCCFactory.CONFIG_ALGO_TYPE;
 import static org.neo4j.graphalgo.impl.wcc.WCCFactory.CONFIG_SEED_PROPERTY;
-import static org.neo4j.graphalgo.impl.wcc.WCCFactory.SEED_TYPE;
 
 public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
 
@@ -88,10 +87,11 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
     }
 
     protected Stream<StreamResult> stream(
-            String label,
-            String relationship,
-            Map<String, Object> config,
-            WCCType algoType) {
+        String label,
+        String relationship,
+        Map<String, Object> config,
+        WCCType algoType
+    ) {
 
         ProcedureSetup setup = setup(label, relationship, config, algoType);
 
@@ -103,18 +103,21 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
         DisjointSetStruct dss = compute(setup);
 
         WccResultProducer producer = getResultProducer(
-                dss,
-                setup.graph.nodeProperties(SEED_TYPE),
-                setup.procedureConfig, setup.tracker);
+            dss,
+            getSeedProperties(setup.graph, setup.procedureConfig),
+            setup.procedureConfig,
+            setup.tracker
+        );
 
         return producer.resultStream(setup.graph);
     }
 
     protected Stream<WriteResult> run(
-            String label,
-            String relationship,
-            Map<String, Object> config,
-            WCCType algoType) {
+        String label,
+        String relationship,
+        Map<String, Object> config,
+        WCCType algoType
+    ) {
 
         ProcedureSetup setup = setup(label, relationship, config, algoType);
 
@@ -128,19 +131,21 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
 
         if (setup.procedureConfig.isWriteFlag()) {
             String writeProperty = setup.procedureConfig.get(
-                    CONFIG_WRITE_PROPERTY,
-                    CONFIG_OLD_WRITE_PROPERTY,
-                    DEFAULT_CLUSTER_PROPERTY);
+                CONFIG_WRITE_PROPERTY,
+                CONFIG_OLD_WRITE_PROPERTY,
+                DEFAULT_CLUSTER_PROPERTY
+            );
             setup.builder.withWrite(true);
             setup.builder.withPartitionProperty(writeProperty).withWriteProperty(writeProperty);
 
             write(
-                    setup.builder::timeWrite,
-                    setup.graph,
-                    communities,
-                    setup.procedureConfig,
-                    writeProperty,
-                    setup.tracker);
+                setup.builder::timeWrite,
+                setup.graph,
+                communities,
+                setup.procedureConfig,
+                writeProperty,
+                setup.tracker
+            );
 
             setup.graph.releaseProperties();
         }
@@ -149,12 +154,13 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
     }
 
     private ProcedureSetup setup(
-            String label,
-            String relationship,
-            Map<String, Object> config,
-            WCCType algoType) {
-        AllocationTracker tracker = AllocationTracker.create();
-        WriteResultBuilder builder = new WriteResultBuilder(callContext.outputFields(), tracker);
+        String label,
+        String relationship,
+        Map<String, Object> config,
+        WCCType algoType
+    ) {
+        final AllocationTracker tracker = AllocationTracker.create();
+        final WriteResultBuilder builder = new WriteResultBuilder(callContext.outputFields(), tracker);
 
         config.put(CONFIG_ALGO_TYPE, algoType);
         ProcedureConfiguration configuration = newConfig(label, relationship, config);
@@ -166,46 +172,56 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
 
     private PropertyMapping[] createPropertyMappings(String seedProperty) {
         return new PropertyMapping[]{
-                PropertyMapping.of(SEED_TYPE, seedProperty, -1),
+            PropertyMapping.of(seedProperty, -1),
         };
     }
 
+    private NodeProperties getSeedProperties(Graph graph, ProcedureConfiguration config) {
+        return graph.nodeProperties(config.getString(CONFIG_SEED_PROPERTY).orElse(null));
+    }
+
     private void write(
-            Supplier<ProgressTimer> timer,
-            Graph graph,
-            DisjointSetStruct struct,
-            ProcedureConfiguration configuration,
-            String writeProperty,
-            AllocationTracker tracker) {
+        Supplier<ProgressTimer> timer,
+        Graph graph,
+        DisjointSetStruct struct,
+        ProcedureConfiguration configuration,
+        String writeProperty,
+        AllocationTracker tracker
+    ) {
         try (ProgressTimer ignored = timer.get()) {
             write(graph, struct, configuration, writeProperty, tracker);
         }
     }
 
     private void write(
-            Graph graph,
-            DisjointSetStruct dss,
-            ProcedureConfiguration procedureConfiguration,
-            String writeProperty,
-            AllocationTracker tracker) {
+        Graph graph,
+        DisjointSetStruct dss,
+        ProcedureConfiguration procedureConfiguration,
+        String writeProperty,
+        AllocationTracker tracker
+    ) {
         log.debug("Writing results");
 
         WccResultProducer producer = getResultProducer(
-                dss,
-                graph.nodeProperties(SEED_TYPE),
-                procedureConfiguration, tracker);
+            dss,
+            getSeedProperties(graph, procedureConfiguration),
+            procedureConfiguration,
+            tracker
+        );
 
         Exporter exporter = Exporter.of(api, graph)
-                .withLog(log)
-                .parallel(
-                        Pools.DEFAULT,
-                        procedureConfiguration.getWriteConcurrency(),
-                        TerminationFlag.wrap(transaction))
-                .build();
+            .withLog(log)
+            .parallel(
+                Pools.DEFAULT,
+                procedureConfiguration.getWriteConcurrency(),
+                TerminationFlag.wrap(transaction)
+            )
+            .build();
         exporter.write(
-                writeProperty,
-                producer,
-                producer.getPropertyTranslator());
+            writeProperty,
+            producer,
+            producer.getPropertyTranslator()
+        );
     }
 
     protected abstract String name();
@@ -214,8 +230,9 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
 
         T algo = newAlgorithm(setup.graph, setup.procedureConfig, setup.tracker);
         DisjointSetStruct algoResult = runWithExceptionLogging(
-                name() + " failed",
-                () -> setup.builder.timeEval((Supplier<DisjointSetStruct>) algo::compute));
+            name() + " failed",
+            () -> setup.builder.timeEval((Supplier<DisjointSetStruct>) algo::compute)
+        );
 
         log.info(name() + ": overall memory usage: %s", setup.tracker.getUsageString());
 
@@ -226,34 +243,37 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
     }
 
     private WccResultProducer getResultProducer(
-            final DisjointSetStruct dss,
-            final NodeProperties nodeProperties,
-            final ProcedureConfiguration procedureConfiguration,
-            final AllocationTracker tracker) {
+        final DisjointSetStruct dss,
+        final NodeProperties seedProperties,
+        final ProcedureConfiguration procedureConfiguration,
+        final AllocationTracker tracker
+    ) {
         String writeProperty = procedureConfiguration.get(
-                CONFIG_WRITE_PROPERTY,
-                CONFIG_OLD_WRITE_PROPERTY,
-                DEFAULT_CLUSTER_PROPERTY);
-        String seedProperty = procedureConfiguration.getString(CONFIG_SEED_PROPERTY, null);
+            CONFIG_WRITE_PROPERTY,
+            CONFIG_OLD_WRITE_PROPERTY,
+            DEFAULT_CLUSTER_PROPERTY
+        );
 
         boolean withConsecutiveIds = procedureConfiguration.get(CONFIG_CONSECUTIVE_IDS_PROPERTY, false);
-        boolean withSeeding = seedProperty != null;
-        boolean writePropertyEqualsSeedProperty = Objects.equals(seedProperty, writeProperty);
-        boolean hasNodeProperties = nodeProperties != null && !(nodeProperties instanceof NullPropertyMap);
+        boolean writePropertyEqualsSeedProperty = Objects.equals(seedProperties, writeProperty);
+        boolean hasSeedProperties = seedProperties != null && !(seedProperties instanceof NullPropertyMap);
 
         WccResultProducer resultProducer = new WccResultProducer.NonConsecutive(
-                WccResultProducer.NonSeedingTranslator.INSTANCE,
-                dss);
+            WccResultProducer.NonSeedingTranslator.INSTANCE,
+            dss
+        );
 
-        if (withConsecutiveIds && !withSeeding) {
+        if (withConsecutiveIds && !hasSeedProperties) {
             resultProducer = new WccResultProducer.Consecutive(
-                    WccResultProducer.NonSeedingTranslator.INSTANCE,
-                    dss,
-                    tracker);
-        } else if (writePropertyEqualsSeedProperty && hasNodeProperties) {
+                WccResultProducer.NonSeedingTranslator.INSTANCE,
+                dss,
+                tracker
+            );
+        } else if (writePropertyEqualsSeedProperty && hasSeedProperties) {
             resultProducer = new WccResultProducer.NonConsecutive(
-                    new PropertyTranslator.OfLongIfChanged<>(nodeProperties, WccResultProducer::setIdOf),
-                    dss);
+                new PropertyTranslator.OfLongIfChanged<>(seedProperties, WccResultProducer::setIdOf),
+                dss
+            );
         }
 
         return resultProducer;
@@ -266,10 +286,11 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
         final ProcedureConfiguration procedureConfig;
 
         ProcedureSetup(
-                final WriteResultBuilder builder,
-                final Graph graph,
-                final AllocationTracker tracker,
-                final ProcedureConfiguration procedureConfig) {
+            final WriteResultBuilder builder,
+            final Graph graph,
+            final AllocationTracker tracker,
+            final ProcedureConfiguration procedureConfig
+        ) {
             this.builder = builder;
             this.graph = graph;
             this.tracker = tracker;
@@ -292,23 +313,24 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
     public static class WriteResult {
 
         public static final WriteResult EMPTY = new WriteResult(
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                -1,
-                -1,
-                -1,
-                -1,
-                -1,
-                -1,
-                -1,
-                -1,
-                -1,
-                -1,
-                false, null, null);
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            false, null, null
+        );
 
         public final long loadMillis;
         public final long computeMillis;
@@ -332,25 +354,26 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
         public final String writeProperty;
 
         WriteResult(
-                long loadMillis,
-                long computeMillis,
-                long postProcessingMillis,
-                long writeMillis,
-                long nodes,
-                long communityCount,
-                long p100,
-                long p99,
-                long p95,
-                long p90,
-                long p75,
-                long p50,
-                long p25,
-                long p10,
-                long p5,
-                long p1,
-                boolean write,
-                String partitionProperty,
-                String writeProperty) {
+            long loadMillis,
+            long computeMillis,
+            long postProcessingMillis,
+            long writeMillis,
+            long nodes,
+            long communityCount,
+            long p100,
+            long p99,
+            long p95,
+            long p90,
+            long p75,
+            long p50,
+            long p25,
+            long p10,
+            long p5,
+            long p1,
+            boolean write,
+            String partitionProperty,
+            String writeProperty
+        ) {
             this.loadMillis = loadMillis;
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;

@@ -42,26 +42,26 @@ class WccBetaProcTest extends ProcTestBase {
     @BeforeEach
     void setup() throws KernelException {
         String createGraph = "CREATE" +
-                " (nA:Label {nodeId: 0, seedId: 42})" +
-                ",(nB:Label {nodeId: 1, seedId: 42})" +
-                ",(nC:Label {nodeId: 2, seedId: 42})" +
-                ",(nD:Label {nodeId: 3, seedId: 42})" +
-                ",(nE {nodeId: 4})" +
-                ",(nF {nodeId: 5})" +
-                ",(nG {nodeId: 6})" +
-                ",(nH {nodeId: 7})" +
-                ",(nI {nodeId: 8})" +
-                ",(nJ {nodeId: 9})" +
-                // {A, B, C, D}
-                ",(nA)-[:TYPE]->(nB)" +
-                ",(nB)-[:TYPE]->(nC)" +
-                ",(nC)-[:TYPE]->(nD)" +
-                ",(nD)-[:TYPE {cost:4.2}]->(nE)" + // threshold UF should split here
-                // {E, F, G}
-                ",(nE)-[:TYPE]->(nF)" +
-                ",(nF)-[:TYPE]->(nG)" +
-                // {H, I}
-                ",(nH)-[:TYPE]->(nI)";
+                             " (nA:Label {nodeId: 0, seedId: 42})" +
+                             ",(nB:Label {nodeId: 1, seedId: 42})" +
+                             ",(nC:Label {nodeId: 2, seedId: 42})" +
+                             ",(nD:Label {nodeId: 3, seedId: 42})" +
+                             ",(nE {nodeId: 4})" +
+                             ",(nF {nodeId: 5})" +
+                             ",(nG {nodeId: 6})" +
+                             ",(nH {nodeId: 7})" +
+                             ",(nI {nodeId: 8})" +
+                             ",(nJ {nodeId: 9})" +
+                             // {A, B, C, D}
+                             ",(nA)-[:TYPE]->(nB)" +
+                             ",(nB)-[:TYPE]->(nC)" +
+                             ",(nC)-[:TYPE]->(nD)" +
+                             ",(nD)-[:TYPE {cost:4.2}]->(nE)" + // threshold UF should split here
+                             // {E, F, G}
+                             ",(nE)-[:TYPE]->(nF)" +
+                             ",(nF)-[:TYPE]->(nG)" +
+                             // {H, I}
+                             ",(nH)-[:TYPE]->(nI)";
 
         db = TestDatabaseCreator.createTestDatabase();
 
@@ -70,7 +70,7 @@ class WccBetaProcTest extends ProcTestBase {
             tx.success();
         }
 
-        registerProcedures(WccProc.class);
+        registerProcedures(WccProc.class, GraphLoadProc.class);
     }
 
     @AfterEach
@@ -86,10 +86,10 @@ class WccBetaProcTest extends ProcTestBase {
                        "    }" +
                        ") YIELD setCount, communityCount";
         runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> {
-                    assertEquals(3L, row.getNumber("communityCount"));
-                    assertEquals(3L, row.getNumber("setCount"));
-                }
+            row -> {
+                assertEquals(3L, row.getNumber("communityCount"));
+                assertEquals(3L, row.getNumber("setCount"));
+            }
         );
     }
 
@@ -101,10 +101,10 @@ class WccBetaProcTest extends ProcTestBase {
                        "    }" +
                        ") YIELD setCount, communityCount";
         runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> {
-                    assertEquals(1L, row.getNumber("communityCount"));
-                    assertEquals(1L, row.getNumber("setCount"));
-                }
+            row -> {
+                assertEquals(1L, row.getNumber("communityCount"));
+                assertEquals(1L, row.getNumber("setCount"));
+            }
         );
     }
 
@@ -116,26 +116,69 @@ class WccBetaProcTest extends ProcTestBase {
                        "    }" +
                        ") YIELD setCount, communityCount";
         runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> {
-                    assertEquals(3L, row.getNumber("communityCount"));
-                    assertEquals(3L, row.getNumber("setCount"));
-                }
+            row -> {
+                assertEquals(3L, row.getNumber("communityCount"));
+                assertEquals(3L, row.getNumber("setCount"));
+            }
         );
 
-        runQuery("MATCH (n) RETURN n.partition AS partition",
-                row -> assertTrue(row.getNumber("partition").longValue() >= 42)
+        runQuery(
+            "MATCH (n) RETURN n.partition AS partition",
+            row -> assertTrue(row.getNumber("partition").longValue() >= 42)
         );
 
-        runQuery("MATCH (n) RETURN n.nodeId AS nodeId, n.partition AS partition",
-                row -> {
-                    final long nodeId = row.getNumber("nodeId").longValue();
-                    final long partitionId = row.getNumber("partition").longValue();
-                    if (nodeId >= 0 && nodeId <= 6) {
-                        assertEquals(42, partitionId);
-                    } else {
-                        assertTrue(partitionId != 42);
-                    }
+        runQuery(
+            "MATCH (n) RETURN n.nodeId AS nodeId, n.partition AS partition",
+            row -> {
+                final long nodeId = row.getNumber("nodeId").longValue();
+                final long partitionId = row.getNumber("partition").longValue();
+                if (nodeId >= 0 && nodeId <= 6) {
+                    assertEquals(42, partitionId);
+                } else {
+                    assertTrue(partitionId != 42);
                 }
+            }
+        );
+    }
+
+    @AllGraphNamesTest
+    void testWCCWithSeedOnPreloadedGraph(String graphImpl) {
+        String loadQuery = "CALL algo.graph.load('seedGraph', '', '', {" +
+                           "    graph: $graph," +
+                           "    nodeProperties: {" +
+                           "        seedId: 'seedId'" +
+                           "    }" +
+                           "})";
+        runQuery(loadQuery, MapUtil.map("graph", graphImpl));
+        String query = "CALL algo.beta.wcc(" +
+                       "    '', '', {" +
+                       "        graph: 'seedGraph', seedProperty: 'seedId'" +
+                       "    }" +
+                       ") YIELD setCount, communityCount";
+        runQuery(
+            query,
+            row -> {
+                assertEquals(3L, row.getNumber("communityCount"));
+                assertEquals(3L, row.getNumber("setCount"));
+            }
+        );
+
+        runQuery(
+            "MATCH (n) RETURN n.partition AS partition",
+            row -> assertTrue(row.getNumber("partition").longValue() >= 42)
+        );
+
+        runQuery(
+            "MATCH (n) RETURN n.nodeId AS nodeId, n.partition AS partition",
+            row -> {
+                final long nodeId = row.getNumber("nodeId").longValue();
+                final long partitionId = row.getNumber("partition").longValue();
+                if (nodeId >= 0 && nodeId <= 6) {
+                    assertEquals(42, partitionId);
+                } else {
+                    assertTrue(partitionId != 42);
+                }
+            }
         );
     }
 
@@ -147,26 +190,28 @@ class WccBetaProcTest extends ProcTestBase {
                        "    }" +
                        ") YIELD setCount, communityCount";
         runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> {
-                    assertEquals(3L, row.getNumber("communityCount"));
-                    assertEquals(3L, row.getNumber("setCount"));
-                }
+            row -> {
+                assertEquals(3L, row.getNumber("communityCount"));
+                assertEquals(3L, row.getNumber("setCount"));
+            }
         );
 
-        runQuery("MATCH (n) RETURN n.seedId AS partition",
-                row -> assertTrue(row.getNumber("partition").longValue() >= 42)
+        runQuery(
+            "MATCH (n) RETURN n.seedId AS partition",
+            row -> assertTrue(row.getNumber("partition").longValue() >= 42)
         );
 
-        runQuery("MATCH (n) RETURN n.nodeId AS nodeId, n.seedId AS partition",
-                row -> {
-                    final long nodeId = row.getNumber("nodeId").longValue();
-                    final long partitionId = row.getNumber("partition").longValue();
-                    if (nodeId >= 0 && nodeId <= 6) {
-                        assertEquals(42, partitionId);
-                    } else {
-                        assertTrue(partitionId != 42);
-                    }
+        runQuery(
+            "MATCH (n) RETURN n.nodeId AS nodeId, n.seedId AS partition",
+            row -> {
+                final long nodeId = row.getNumber("nodeId").longValue();
+                final long partitionId = row.getNumber("partition").longValue();
+                if (nodeId >= 0 && nodeId <= 6) {
+                    assertEquals(42, partitionId);
+                } else {
+                    assertTrue(partitionId != 42);
                 }
+            }
         );
     }
 
@@ -179,26 +224,28 @@ class WccBetaProcTest extends ProcTestBase {
                        ") YIELD setCount, communityCount";
 
         runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> {
-                    assertEquals(3L, row.getNumber("communityCount"));
-                    assertEquals(3L, row.getNumber("setCount"));
-                }
+            row -> {
+                assertEquals(3L, row.getNumber("communityCount"));
+                assertEquals(3L, row.getNumber("setCount"));
+            }
         );
 
-        runQuery("MATCH (n) RETURN n.partition AS partition",
-                row -> assertThat(row.getNumber("partition").longValue(), greaterThanOrEqualTo(42L))
+        runQuery(
+            "MATCH (n) RETURN n.partition AS partition",
+            row -> assertThat(row.getNumber("partition").longValue(), greaterThanOrEqualTo(42L))
         );
 
-        runQuery("MATCH (n) RETURN n.nodeId AS nodeId, n.partition AS partition",
-                row -> {
-                    final long nodeId = row.getNumber("nodeId").longValue();
-                    final long partitionId = row.getNumber("partition").longValue();
-                    if (nodeId >= 0 && nodeId <= 6) {
-                        assertEquals(42, partitionId);
-                    } else {
-                        assertTrue(partitionId != 42);
-                    }
+        runQuery(
+            "MATCH (n) RETURN n.nodeId AS nodeId, n.partition AS partition",
+            row -> {
+                final long nodeId = row.getNumber("nodeId").longValue();
+                final long partitionId = row.getNumber("partition").longValue();
+                if (nodeId >= 0 && nodeId <= 6) {
+                    assertEquals(42, partitionId);
+                } else {
+                    assertTrue(partitionId != 42);
                 }
+            }
         );
     }
 
@@ -211,14 +258,15 @@ class WccBetaProcTest extends ProcTestBase {
                        ")";
 
         runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> {
-                    assertEquals(3L, row.getNumber("communityCount"));
-                    assertEquals(3L, row.getNumber("setCount"));
-                }
+            row -> {
+                assertEquals(3L, row.getNumber("communityCount"));
+                assertEquals(3L, row.getNumber("setCount"));
+            }
         );
 
-        runQuery("MATCH (n) RETURN collect(distinct n.partition) AS partitions ",
-                row -> assertThat((List<Long>) row.get("partitions"), containsInAnyOrder(0L, 1L, 2L))
+        runQuery(
+            "MATCH (n) RETURN collect(distinct n.partition) AS partitions ",
+            row -> assertThat((List<Long>) row.get("partitions"), containsInAnyOrder(0L, 1L, 2L))
         );
     }
 
@@ -231,14 +279,14 @@ class WccBetaProcTest extends ProcTestBase {
                        ") YIELD setCount, communityCount, writeMillis, nodes, partitionProperty, writeProperty";
 
         runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> {
-                    assertNotEquals(-1L, row.getNumber("writeMillis"));
-                    assertNotEquals(-1L, row.getNumber("nodes"));
-                    assertEquals(3L, row.getNumber("communityCount"));
-                    assertEquals(3L, row.getNumber("setCount"));
-                    assertEquals("partition", row.getString("partitionProperty"));
-                    assertEquals("partition", row.getString("writeProperty"));
-                }
+            row -> {
+                assertNotEquals(-1L, row.getNumber("writeMillis"));
+                assertNotEquals(-1L, row.getNumber("nodes"));
+                assertEquals(3L, row.getNumber("communityCount"));
+                assertEquals(3L, row.getNumber("setCount"));
+                assertEquals("partition", row.getString("partitionProperty"));
+                assertEquals("partition", row.getString("writeProperty"));
+            }
         );
     }
 
@@ -251,14 +299,14 @@ class WccBetaProcTest extends ProcTestBase {
                        ") YIELD setCount, communityCount, writeMillis, nodes, partitionProperty, writeProperty";
 
         runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> {
-                    assertNotEquals(-1L, row.getNumber("writeMillis"));
-                    assertNotEquals(-1L, row.getNumber("nodes"));
-                    assertEquals(3L, row.getNumber("communityCount"));
-                    assertEquals(3L, row.getNumber("setCount"));
-                    assertEquals("unionFind", row.getString("partitionProperty"));
-                    assertEquals("unionFind", row.getString("writeProperty"));
-                }
+            row -> {
+                assertNotEquals(-1L, row.getNumber("writeMillis"));
+                assertNotEquals(-1L, row.getNumber("nodes"));
+                assertEquals(3L, row.getNumber("communityCount"));
+                assertEquals(3L, row.getNumber("setCount"));
+                assertEquals("unionFind", row.getString("partitionProperty"));
+                assertEquals("unionFind", row.getString("writeProperty"));
+            }
         );
     }
 
@@ -272,7 +320,8 @@ class WccBetaProcTest extends ProcTestBase {
 
         IntIntScatterMap map = new IntIntScatterMap(11);
         runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> map.addTo(row.getNumber("setId").intValue(), 1));
+            row -> map.addTo(row.getNumber("setId").intValue(), 1)
+        );
         assertMapContains(map, 1, 2, 7);
     }
 
@@ -286,7 +335,7 @@ class WccBetaProcTest extends ProcTestBase {
 
         IntIntScatterMap map = new IntIntScatterMap(11);
         runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> map.addTo(row.getNumber("setId").intValue(), 1)
+            row -> map.addTo(row.getNumber("setId").intValue(), 1)
         );
         assertMapContains(map, 4, 3, 2, 1);
     }
@@ -300,9 +349,9 @@ class WccBetaProcTest extends ProcTestBase {
                        ") YIELD setId";
         IntIntScatterMap map = new IntIntScatterMap(11);
         runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> {
-                    map.addTo(row.getNumber("setId").intValue(), 1);
-                }
+            row -> {
+                map.addTo(row.getNumber("setId").intValue(), 1);
+            }
         );
         assertMapContains(map, 1, 2, 7);
     }
@@ -316,9 +365,10 @@ class WccBetaProcTest extends ProcTestBase {
                        ")";
 
         runQuery(query, MapUtil.map("graph", graphImpl),
-                row -> {
-                    assertEquals(3L, row.getNumber("communityCount"));
-                    assertEquals(3L, row.getNumber("setCount"));
-                });
+            row -> {
+                assertEquals(3L, row.getNumber("communityCount"));
+                assertEquals(3L, row.getNumber("setCount"));
+            }
+        );
     }
 }

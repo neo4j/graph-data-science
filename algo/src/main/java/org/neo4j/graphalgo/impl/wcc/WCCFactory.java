@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.impl.wcc;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -32,8 +33,6 @@ public class WCCFactory<A extends WCC<A>> extends AlgorithmFactory<A> {
     public static final String CONFIG_ALGO_TYPE = "algoType";
     public static final String CONFIG_THRESHOLD = "threshold";
     public static final String CONFIG_SEED_PROPERTY = "seedProperty";
-
-    public static final String SEED_TYPE = "seed";
 
     private final WCCType algorithmType;
 
@@ -54,8 +53,12 @@ public class WCCFactory<A extends WCC<A>> extends AlgorithmFactory<A> {
         int concurrency = configuration.getConcurrency();
         int minBatchSize = configuration.getBatchSize();
 
+        NodeProperties seedProperty = configuration.getString(CONFIG_SEED_PROPERTY)
+            .map(graph::nodeProperties)
+            .orElse(null);
+
         WCC.Config algoConfig = new WCC.Config(
-                graph.availableNodeProperties().contains(SEED_TYPE) ? graph.nodeProperties(SEED_TYPE) : null,
+                seedProperty,
                 configuration.get(CONFIG_THRESHOLD, Double.NaN)
         );
 
