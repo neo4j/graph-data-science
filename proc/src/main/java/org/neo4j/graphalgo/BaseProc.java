@@ -79,11 +79,9 @@ public abstract class BaseProc {
         }
 
         Set<String> returnItems = callContext.outputFields().collect(Collectors.toSet());
-        configuration
+        return configuration
             .setComputeCommunityCount(OutputFieldParser.computeCommunityCount(returnItems))
             .setComputeHistogram(OutputFieldParser.computeHistogram(returnItems));
-
-        return configuration;
     }
 
     final GraphLoader newLoader(
