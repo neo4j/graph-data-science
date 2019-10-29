@@ -64,6 +64,8 @@ public abstract class AbstractCommunityResultBuilder<R> extends AbstractResultBu
         this(returnFields.collect(Collectors.toSet()), tracker);
     }
 
+    protected abstract R buildResult();
+
     public AbstractCommunityResultBuilder<R> withExpectedNumberOfCommunities(long expectedNumberOfCommunities) {
         this.maybeExpectedCommunityCount = OptionalLong.of(expectedNumberOfCommunities);
         return this;
@@ -87,7 +89,11 @@ public abstract class AbstractCommunityResultBuilder<R> extends AbstractResultBu
             }
 
             if (buildHistogram) {
-                maybeCommunityHistogram = Optional.of(buildFrom(communitySizeMap));
+                final Histogram histogram = new Histogram(5);
+                for (LongLongCursor cursor : communitySizeMap) {
+                    histogram.recordValue(cursor.value);
+                }
+                maybeCommunityHistogram = Optional.of(histogram);
             }
 
             maybeCommunityCount = OptionalLong.of(communitySizeMap.size());
@@ -99,18 +105,6 @@ public abstract class AbstractCommunityResultBuilder<R> extends AbstractResultBu
         this.postProcessingDuration = timer.getDuration();
 
         return buildResult();
-    }
-
-    protected abstract R buildResult();
-
-    static Histogram buildFrom(HugeLongLongMap communitySizeMap) {
-        final Histogram histogram = new Histogram(5);
-
-        for (LongLongCursor cursor : communitySizeMap) {
-            histogram.recordValue(cursor.value);
-        }
-
-        return histogram;
     }
 
 }

@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.results;
 
+import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.HdrHistogram.Histogram;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -169,7 +170,7 @@ final class AbstractCommunityResultBuilderTest {
         HugeLongLongMap communitySizeMap = new HugeLongLongMap(AllocationTracker.EMPTY);
         communitySizeMap.addTo(1, 4);
 
-        Histogram histogram = AbstractCommunityResultBuilder.buildFrom(communitySizeMap);
+        Histogram histogram = buildFrom(communitySizeMap);
 
         assertEquals(4.0, histogram.getValueAtPercentile(100D), 0.01);
     }
@@ -183,11 +184,22 @@ final class AbstractCommunityResultBuilderTest {
         communitySizeMap.addTo(4, 8);
         communitySizeMap.addTo(5, 7);
 
-        Histogram histogram = AbstractCommunityResultBuilder.buildFrom(communitySizeMap);
+        Histogram histogram = buildFrom(communitySizeMap);
 
         assertEquals(10.0, histogram.getValueAtPercentile(100D), 0.01);
         assertEquals(8.0, histogram.getValueAtPercentile(50D), 0.01);
     }
+
+    private Histogram buildFrom(Iterable<LongLongCursor> communitySizeMap) {
+        final Histogram histogram = new Histogram(5);
+
+        for (LongLongCursor cursor : communitySizeMap) {
+            histogram.recordValue(cursor.value);
+        }
+
+        return histogram;
+    }
+
 
     private AbstractCommunityResultBuilder<Void> builder(
             BiConsumer<OptionalLong, Optional<Histogram>> check,
