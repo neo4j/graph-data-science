@@ -24,8 +24,8 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 
 /**
- * RelationshipPropertyMapping implementation which always returns
- * a given default property value upon invocation
+ * {@link NodeProperties} implementation which always returns
+ * a given default property value upon invocation.
  */
 public class NullPropertyMap implements NodeProperties {
 
