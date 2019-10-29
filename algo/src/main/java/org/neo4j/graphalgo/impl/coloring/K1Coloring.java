@@ -37,6 +37,7 @@ public class K1Coloring extends Algorithm<K1Coloring> {
     private final long batchSize;
     private final ExecutorService executor;
     private final int threadSize;
+    private final long nodeCount;
 
     private BitSet nodesToColor;
 
@@ -55,17 +56,19 @@ public class K1Coloring extends Algorithm<K1Coloring> {
         this.executor = executor;
         this.tracker = tracker;
 
-        this.nodesToColor = new BitSet(graph.nodeCount());
+        this.nodeCount = graph.nodeCount();
+
+        this.nodesToColor = new BitSet(nodeCount);
         this.batchSize = ParallelUtil.adjustedBatchSize(
-            graph.nodeCount(),
+            nodeCount,
             concurrency,
             minBatchSize,
             Integer.MAX_VALUE);
-        long threadSize = ParallelUtil.threadCount(minBatchSize, graph.nodeCount());
+        long threadSize = ParallelUtil.threadCount(minBatchSize, nodeCount);
         if (threadSize > Integer.MAX_VALUE) {
             throw new IllegalArgumentException(String.format(
-                "Too many nodes (%d) to run union find with the given concurrency (%d) and batchSize (%d)",
-                graph.nodeCount(),
+                "Too many nodes (%d) to run k1 coloring with the given concurrency (%d) and batchSize (%d)",
+                nodeCount,
                 concurrency,
                 minBatchSize));
         }
@@ -87,7 +90,6 @@ public class K1Coloring extends Algorithm<K1Coloring> {
         return ranIterations;
     }
 
-
     public HugeLongArray colors() {
         return colors;
     }
@@ -97,29 +99,30 @@ public class K1Coloring extends Algorithm<K1Coloring> {
             throw new IllegalArgumentException("Must iterate at least 1 time");
         }
 
-        colors = HugeLongArray.newArray(graph.nodeCount(), tracker);
+        colors = HugeLongArray.newArray(nodeCount, tracker);
         colors.setAll((nodeId) -> nodeId);
 
         ranIterations = 0L;
-        nodesToColor.set(0, graph.nodeCount());
+        nodesToColor.set(0, nodeCount);
 
         while (ranIterations < maxIterations && !nodesToColor.isEmpty()) {
-            runColoring();
-            runValidation();
+            runColoring(direction);
+            runValidation(direction);
             ++ranIterations;
         }
 
         return me();
     }
 
-    private void runColoring() {
+    private void runColoring(Direction direction) {
         Collection<ColoringStep> steps = new ArrayList<>(threadSize);
-        for (long i = 0L; i < graph.nodeCount(); i += batchSize) {
+        for (long i = 0L; i < nodeCount; i += batchSize) {
             ColoringStep step = new ColoringStep(
-                graph,
-                Direction.BOTH,
+                graph.concurrentCopy(),
+                direction,
                 colors,
                 nodesToColor,
+                nodeCount,
                 i,
                 batchSize
             );
@@ -130,16 +133,17 @@ public class K1Coloring extends Algorithm<K1Coloring> {
         ParallelUtil.run(steps, executor);
     }
 
-    private void runValidation() {
+    private void runValidation(Direction direction) {
         Collection<ValidationStep> steps = new ArrayList<>(threadSize);
-        BitSet nextNodesToColor = new BitSet(graph.nodeCount());
-        for (long i = 0L; i < graph.nodeCount(); i += batchSize) {
+        BitSet nextNodesToColor = new BitSet(nodeCount);
+        for (long i = 0L; i < nodeCount; i += batchSize) {
             ValidationStep step = new ValidationStep(
-                graph,
-                Direction.BOTH,
+                graph.concurrentCopy(),
+                direction,
                 colors,
                 nodesToColor,
                 nextNodesToColor,
+                nodeCount,
                 i,
                 batchSize
             );

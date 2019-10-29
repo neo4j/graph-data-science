@@ -20,26 +20,28 @@
 package org.neo4j.graphalgo.impl.coloring;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Direction;
 
 final class ColoringStep implements Runnable {
 
-    private final Graph graph;
+    private final RelationshipIterator graph;
     private final Direction direction;
     private final HugeLongArray colors;
     private final BitSet nodesToColor;
+    private final long nodeCount;
     private final long offset;
     private final long batchEnd;
 
     private final BitSet forbiddenColors;
 
     ColoringStep(
-        Graph graph,
+        RelationshipIterator graph,
         Direction direction,
         HugeLongArray colors,
         BitSet nodesToColor,
+        long nodeCount,
         long offset,
         long batchSize
     ) {
@@ -47,19 +49,24 @@ final class ColoringStep implements Runnable {
         this.direction = direction;
         this.colors = colors;
         this.nodesToColor = nodesToColor;
+        this.nodeCount = nodeCount;
         this.offset = offset;
-        this.batchEnd = Math.min(offset + batchSize, graph.nodeCount());
-        forbiddenColors = new BitSet(graph.nodeCount());
+        this.batchEnd = Math.min(offset + batchSize, nodeCount);
+        forbiddenColors = new BitSet(nodeCount);
     }
 
     @Override
     public void run() {
         for (long nodeId = offset; nodeId < batchEnd ; nodeId++) {
-            forbiddenColors.clear();
             if (nodesToColor.get(nodeId)) {
+                forbiddenColors.clear();
 
                 graph.forEachRelationship(nodeId, direction, (s, target) -> {
                     if( s != target) {
+                        if(target >= nodeCount) {
+                            System.out.println("target = " + target);
+                        }
+
                         forbiddenColors.set(colors.get(target));
                     }
                     return true;
