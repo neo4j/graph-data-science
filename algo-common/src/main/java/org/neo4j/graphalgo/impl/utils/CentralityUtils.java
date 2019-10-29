@@ -59,7 +59,7 @@ public final class CentralityUtils {
                         .build();
                 result.export(propertyName, exporter);
             }
-            statsBuilder.withWrite(true).withProperty(propertyName);
+            statsBuilder.withWrite(true).withWriteProperty(propertyName);
         } else {
             statsBuilder.withWrite(false);
         }

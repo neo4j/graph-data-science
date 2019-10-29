@@ -26,8 +26,8 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.AbstractResultBuilder;
+import org.neo4j.graphalgo.impl.results.AbstractWriteBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -111,8 +111,8 @@ public abstract class BaseProc {
     protected final <R> Graph loadGraph(
             final ProcedureConfiguration config,
             final AllocationTracker tracker,
-            final AbstractResultBuilder<R> result) {
-        try (ProgressTimer ignored = result.timeLoad()) {
+            final AbstractResultBuilder<R> resultBuilder) {
+        try (ProgressTimer ignored = resultBuilder.timeLoad()) {
             return loadGraph(config, tracker);
         }
     }
@@ -120,9 +120,11 @@ public abstract class BaseProc {
     protected final <R> Graph loadGraph(
             final ProcedureConfiguration config,
             final AllocationTracker tracker,
-            final AbstractCommunityResultBuilder<R> result) {
-        try (ProgressTimer ignored = result.timeLoad()) {
-            return loadGraph(config, tracker);
+            final AbstractWriteBuilder<R> resultBuilder) {
+        try (ProgressTimer ignored = resultBuilder.timeLoad()) {
+            Graph graph = loadGraph(config, tracker);
+            resultBuilder.withNodeCount(graph.nodeCount());
+            return graph;
         }
     }
 

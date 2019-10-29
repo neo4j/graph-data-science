@@ -193,7 +193,7 @@ public final class DegreeCentralityProc {
 
         try (ProgressTimer timer = statsBuilder.timeLoad()) {
             Graph graph = graphLoader.load(graphFactory);
-            statsBuilder.withNodes(graph.nodeCount());
+            statsBuilder.withNodeCount(graph.nodeCount());
             return graph;
         }
     }

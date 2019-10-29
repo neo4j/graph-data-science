@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.wcc;
 
-import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.BaseAlgoProc;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
@@ -42,8 +41,6 @@ import org.neo4j.graphdb.Direction;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.OptionalLong;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -127,6 +124,7 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
         }
 
         DisjointSetStruct communities = compute(setup);
+        setup.builder.withCommunityFunction(communities::setIdOf);
 
         if (setup.procedureConfig.isWriteFlag()) {
             String writeProperty = setup.procedureConfig.get(
@@ -147,7 +145,7 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
             setup.graph.releaseProperties();
         }
 
-        return Stream.of(setup.builder.build(setup.tracker, setup.graph.nodeCount(), communities::setIdOf));
+        return Stream.of(setup.builder.build());
     }
 
     private ProcedureSetup setup(
@@ -155,13 +153,14 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
             String relationship,
             Map<String, Object> config,
             WCCType algoType) {
-        final WriteResultBuilder builder = new WriteResultBuilder(callContext.outputFields());
+        AllocationTracker tracker = AllocationTracker.create();
+        WriteResultBuilder builder = new WriteResultBuilder(callContext.outputFields(), tracker);
 
         config.put(CONFIG_ALGO_TYPE, algoType);
         ProcedureConfiguration configuration = newConfig(label, relationship, config);
 
-        AllocationTracker tracker = AllocationTracker.create();
         Graph graph = loadGraph(configuration, tracker, builder);
+
         return new ProcedureSetup(builder, graph, tracker, configuration);
     }
 
@@ -376,47 +375,9 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
 
     public static class WriteResultBuilder extends AbstractCommunityResultBuilder<WriteResult> {
         private String partitionProperty;
-        private String writeProperty;
 
-        WriteResultBuilder(Set<String> returnFields) {
-            super(returnFields);
-        }
-
-        public WriteResultBuilder(Stream<String> returnFields) {
-            super(returnFields);
-        }
-
-        @Override
-        protected WriteResult build(
-                long loadMillis,
-                long computeMillis,
-                long writeMillis,
-                long postProcessingMillis,
-                long nodeCount,
-                OptionalLong maybeCommunityCount,
-                Optional<Histogram> maybeCommunityHistogram,
-                boolean write) {
-            return new WriteResult(
-                    loadMillis,
-                    computeMillis,
-                    postProcessingMillis,
-                    writeMillis,
-                    nodeCount,
-                    maybeCommunityCount.orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(100)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(99)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(95)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(90)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(75)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(50)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(25)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(10)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(5)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(1)).orElse(-1L),
-                    write,
-                    partitionProperty,
-                    writeProperty
-            );
+        WriteResultBuilder(Stream<String> returnFields, AllocationTracker tracker) {
+            super(returnFields, tracker);
         }
 
         WriteResultBuilder withPartitionProperty(String partitionProperty) {
@@ -424,9 +385,29 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
             return this;
         }
 
-        WriteResultBuilder withWriteProperty(String writeProperty) {
-            this.writeProperty = writeProperty;
-            return this;
+        @Override
+        protected WriteResult buildResult() {
+            return new WriteResult(
+                loadMillis,
+                computeMillis,
+                postProcessingDuration,
+                writeMillis,
+                nodeCount,
+                maybeCommunityCount.orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(100)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(99)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(95)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(90)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(75)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(50)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(25)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(10)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(5)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(1)).orElse(-1L),
+                write,
+                partitionProperty,
+                writeProperty
+            );
         }
     }
 }

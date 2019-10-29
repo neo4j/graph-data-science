@@ -69,7 +69,7 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
         AllocationTracker tracker = AllocationTracker.create();
         ProcedureConfiguration configuration = newConfig(label, relationship, config);
         Graph graph = this.loadGraph(configuration, tracker, statsBuilder);
-        statsBuilder.withNodes(graph.nodeCount());
+        statsBuilder.withNodeCount(graph.nodeCount());
         if (graph.isEmpty()) {
             graph.release();
             return Stream.of(statsBuilder.build());
@@ -102,7 +102,7 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
         AllocationTracker tracker = AllocationTracker.create();
         ProcedureConfiguration configuration = newConfig(label, relationshipType, config);
         Graph graph = this.loadGraph(configuration, tracker, statsBuilder);
-        statsBuilder.withNodes(graph.nodeCount());
+        statsBuilder.withNodeCount(graph.nodeCount());
         if (graph.isEmpty()) {
             graph.release();
             return Stream.empty();

@@ -59,20 +59,13 @@ public class PageRankScore {
         }
 
         public static final class Builder extends AbstractWriteBuilder<Stats> {
-            private long nodes;
+
             private long iterations;
             private double dampingFactor;
-            private boolean write;
-            private String writeProperty;
 
             public Builder withConfig(PageRank.Config config) {
                 this.dampingFactor = config.dampingFactor;
                 this.iterations = config.iterations;
-                return this;
-            }
-
-            public Builder withNodes(long nodes) {
-                this.nodes = nodes;
                 return this;
             }
 
@@ -86,28 +79,17 @@ public class PageRankScore {
                 return this;
             }
 
-            @Override
-            public Builder withWrite(boolean write) {
-                this.write = write;
-                return this;
-            }
-
-            @Override
-            public Builder withProperty(String writeProperty) {
-                this.writeProperty = writeProperty;
-                return this;
-            }
-
             public Stats build() {
                 return new Stats(
-                        nodes,
-                        iterations,
-                        loadDuration,
-                        evalDuration,
-                        writeDuration,
-                        dampingFactor,
-                        write,
-                        writeProperty);
+                    nodeCount,
+                    iterations,
+                    loadMillis,
+                    computeMillis,
+                    writeMillis,
+                    dampingFactor,
+                    write,
+                    writeProperty
+                );
             }
         }
     }

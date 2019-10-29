@@ -20,7 +20,24 @@
 package org.neo4j.graphalgo.impl.results;
 
 public abstract class AbstractWriteBuilder<R> extends AbstractResultBuilder<R> {
-    public abstract AbstractWriteBuilder<R> withWrite(boolean write);
 
-    public abstract AbstractWriteBuilder<R> withProperty(String writeProperty);
+    protected long nodeCount;
+    protected boolean write = false;
+    protected String writeProperty;
+
+
+    public AbstractWriteBuilder<R> withNodeCount(long nodeCount) {
+        this.nodeCount = nodeCount;
+        return this;
+    }
+
+    public AbstractWriteBuilder<R> withWrite(boolean write) {
+        this.write = write;
+        return this;
+    }
+
+    public AbstractWriteBuilder<R> withWriteProperty(String writeProperty) {
+        this.writeProperty = writeProperty;
+        return this;
+    }
 }

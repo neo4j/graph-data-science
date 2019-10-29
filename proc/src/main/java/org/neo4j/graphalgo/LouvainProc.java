@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo;
 
-import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
@@ -43,8 +42,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalLong;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -79,29 +76,32 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        final Builder builder = new Builder(callContext.outputFields());
         AllocationTracker tracker = AllocationTracker.create();
+        final WriteResultBuilder resultBuilder = new WriteResultBuilder(callContext.outputFields(), tracker);
         ProcedureConfiguration configuration = newConfig(label, relationship, config);
-        final Graph graph = this.loadGraph(configuration, tracker, builder);
+        final Graph graph = this.loadGraph(configuration, tracker, resultBuilder);
 
         if (graph.isEmpty()) {
             graph.release();
             return Stream.of(LouvainResult.EMPTY);
         }
 
-        Louvain louvain = compute(builder, tracker, configuration, graph);
+        Louvain louvain = compute(resultBuilder, tracker, configuration, graph);
+        resultBuilder
+            .withExpectedNumberOfCommunities(louvain.communityCount())
+            .withCommunityFunction(louvain::communityIdOf);
 
         if (configuration.isWriteFlag()) {
-            builder.timeWrite(() -> {
+            resultBuilder.timeWrite(() -> {
                 String writeProperty = configuration.getWriteProperty("community");
                 String intermediateCommunitiesWriteProperty = configuration.get(
                         INTERMEDIATE_COMMUNITIES_WRITE_PROPERTY,
                         "communities");
 
-                builder.withWrite(true);
-                builder.withWriteProperty(writeProperty);
-                builder.withIntermediateCommunities(louvain.getConfig().includeIntermediateCommunities);
-                builder.withIntermediateCommunitiesWriteProperty(intermediateCommunitiesWriteProperty);
+                resultBuilder.withWrite(true);
+                resultBuilder.withWriteProperty(writeProperty);
+                resultBuilder.withIntermediateCommunities(louvain.getConfig().includeIntermediateCommunities);
+                resultBuilder.withIntermediateCommunitiesWriteProperty(intermediateCommunitiesWriteProperty);
 
                 log.debug("Writing results");
                 Exporter exporter = exporter(graph, Pools.DEFAULT, configuration.getWriteConcurrency());
@@ -112,11 +112,10 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
             });
         }
 
-        builder.withIterations(louvain.getLevel());
-        builder.withModularities(louvain.getModularities());
-        builder.withFinalModularity(louvain.getFinalModularity());
-        return Stream.of(builder.build(louvain.communityCount(), tracker, graph.nodeCount(), louvain::communityIdOf))
-                .onClose(louvain::release);
+        resultBuilder.withIterations(louvain.getLevel());
+        resultBuilder.withModularities(louvain.getModularities());
+        resultBuilder.withFinalModularity(louvain.getFinalModularity());
+        return Stream.of(resultBuilder.build()).onClose(louvain::release);
     }
 
     @Procedure(value = "algo.louvain.stream", mode = READ)
@@ -128,8 +127,8 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        final Builder builder = new Builder(callContext.outputFields());
         AllocationTracker tracker = AllocationTracker.create();
+        WriteResultBuilder builder = new WriteResultBuilder(callContext.outputFields(), tracker);
         ProcedureConfiguration configuration = newConfig(label, relationship, config);
         final Graph graph = this.loadGraph(configuration, tracker, builder);
 
@@ -188,7 +187,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
     }
 
     private Louvain compute(
-            final Builder statsBuilder,
+            final WriteResultBuilder statsBuilder,
             final AllocationTracker tracker,
             final ProcedureConfiguration configuration,
             final Graph graph) {
@@ -322,89 +321,70 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
         }
     }
 
-    public static class Builder extends AbstractCommunityResultBuilder<LouvainResult> {
+    public static class WriteResultBuilder extends AbstractCommunityResultBuilder<LouvainResult> {
 
         private long iterations = -1;
         private double[] modularities = new double[]{};
         private double finalModularity = -1;
-        private String writeProperty;
+
         private String intermediateCommunitiesWriteProperty;
         private boolean includeIntermediateCommunities;
 
-        protected Builder(Set<String> returnFields) {
-            super(returnFields);
+        WriteResultBuilder(Stream<String> returnFields, AllocationTracker tracker) {
+            super(returnFields, tracker);
         }
 
-        protected Builder(Stream<String> returnFields) {
-            super(returnFields);
-        }
-
-        public Builder withWriteProperty(String writeProperty) {
-            this.writeProperty = writeProperty;
-            return this;
-        }
-
-        public Builder withIterations(long iterations) {
+        WriteResultBuilder withIterations(long iterations) {
             this.iterations = iterations;
             return this;
         }
 
-        @Override
-        protected LouvainResult build(
-                long loadMillis,
-                long computeMillis,
-                long writeMillis,
-                long postProcessingMillis,
-                long nodeCount,
-                OptionalLong maybeCommunityCount,
-                Optional<Histogram> maybeCommunityHistogram,
-                boolean write) {
-            return new LouvainResult(
-                    loadMillis,
-                    computeMillis,
-                    postProcessingMillis,
-                    writeMillis,
-                    nodeCount,
-                    maybeCommunityCount.orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(100)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(99)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(95)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(90)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(75)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(50)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(25)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(10)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(5)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(1)).orElse(-1L),
-                    iterations,
-                    modularities,
-                    finalModularity,
-                    write,
-                    writeProperty,
-                    includeIntermediateCommunities,
-                    intermediateCommunitiesWriteProperty);
-        }
-
-        public Builder withModularities(double[] modularities) {
+        WriteResultBuilder withModularities(double[] modularities) {
             this.modularities = modularities;
             return this;
         }
 
-        public Builder withFinalModularity(double finalModularity) {
+        WriteResultBuilder withFinalModularity(double finalModularity) {
             this.finalModularity = finalModularity;
             return null;
         }
 
-        public Builder withIntermediateCommunitiesWriteProperty(String intermediateCommunitiesWriteProperty) {
+        WriteResultBuilder withIntermediateCommunitiesWriteProperty(String intermediateCommunitiesWriteProperty) {
             this.intermediateCommunitiesWriteProperty = intermediateCommunitiesWriteProperty;
             return null;
         }
 
-        public Builder withIntermediateCommunities(boolean includeIntermediateCommunities) {
+        WriteResultBuilder withIntermediateCommunities(boolean includeIntermediateCommunities) {
             this.includeIntermediateCommunities = includeIntermediateCommunities;
             return this;
         }
+
+        @Override
+        protected LouvainResult buildResult() {
+            return new LouvainResult(
+                loadMillis,
+                computeMillis,
+                writeMillis,
+                postProcessingDuration,
+                nodeCount,
+                maybeCommunityCount.orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(100)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(99)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(95)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(90)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(75)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(50)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(25)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(10)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(5)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(1)).orElse(-1L),
+                iterations,
+                modularities,
+                finalModularity,
+                write,
+                writeProperty,
+                includeIntermediateCommunities,
+                intermediateCommunitiesWriteProperty);
+        }
     }
-
-
 }

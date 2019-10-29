@@ -199,6 +199,8 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
         }
 
         final HugeLongArray labels = compute(setup);
+        setup.statsBuilder.withCommunityFunction(labels::get);
+
 
         if (setup.procedureConfig.isWriteFlag()) {
             String seedProperty = setup.procedureConfig.getString(CONFIG_SEED_KEY, CONFIG_OLD_SEED_KEY, null);
@@ -214,7 +216,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
             setup.graph.releaseProperties();
         }
 
-        return Stream.of(setup.statsBuilder.build(setup.tracker, setup.graph.nodeCount(), labels::get));
+        return Stream.of(setup.statsBuilder.build());
     }
 
     private Stream<BetaStreamResult> stream(
@@ -241,19 +243,22 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
             String relationshipType,
             Map<String, Object> config) {
 
-        final BetaLabelPropagationStats.Builder statsBuilder = new BetaLabelPropagationStats.Builder(callContext.outputFields());
-
         AllocationTracker tracker = AllocationTracker.create();
+        BetaLabelPropagationStats.WriteResultBuilder resultBuilder = new BetaLabelPropagationStats.WriteResultBuilder(
+            callContext.outputFields(),
+            tracker
+        );
+
         ProcedureConfiguration configuration = newConfig(label, relationshipType, config);
 
-        statsBuilder
-                .seedProperty(configuration.getString(CONFIG_SEED_KEY, CONFIG_OLD_SEED_KEY, null))
-                .weightProperty(configuration.getString(CONFIG_WEIGHT_KEY, null))
-                .writeProperty(configuration.getString(CONFIG_WRITE_KEY, CONFIG_OLD_SEED_KEY, null));
+        Graph graph = this.loadGraph(configuration, tracker, resultBuilder);
 
-        Graph graph = this.loadGraph(configuration, tracker, statsBuilder);
+        resultBuilder
+            .seedProperty(configuration.getString(CONFIG_SEED_KEY, CONFIG_OLD_SEED_KEY, null))
+            .weightProperty(configuration.getString(CONFIG_WEIGHT_KEY, null))
+            .withWriteProperty(configuration.getString(CONFIG_WRITE_KEY, CONFIG_OLD_SEED_KEY, null));
 
-        return new ProcedureSetup(graph, tracker, configuration, statsBuilder);
+        return new ProcedureSetup(graph, tracker, configuration, resultBuilder);
     }
 
     private HugeLongArray compute(ProcedureSetup setup) {
@@ -292,7 +297,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
             String seedProperty,
             Graph graph,
             HugeLongArray labels,
-            BetaLabelPropagationStats.Builder stats) {
+            BetaLabelPropagationStats.WriteResultBuilder stats) {
         log.debug("Writing results");
 
         try (ProgressTimer ignored = stats.timeWrite()) {
@@ -320,13 +325,13 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
         final Graph graph;
         final AllocationTracker tracker;
         final ProcedureConfiguration procedureConfig;
-        final BetaLabelPropagationStats.Builder statsBuilder;
+        final BetaLabelPropagationStats.WriteResultBuilder statsBuilder;
 
         ProcedureSetup(
                 final Graph graph,
                 final AllocationTracker tracker,
                 final ProcedureConfiguration procedureConfig,
-                final BetaLabelPropagationStats.Builder statsBuilder) {
+                final BetaLabelPropagationStats.WriteResultBuilder statsBuilder) {
             this.graph = graph;
             this.tracker = tracker;
             this.procedureConfig = procedureConfig;

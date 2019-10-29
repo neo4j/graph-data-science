@@ -52,34 +52,16 @@ public class CentralityScore {
         }
 
         public static final class Builder extends AbstractWriteBuilder<Stats> {
-            private long nodes;
-            private boolean write;
-            private String writeProperty;
-
-            public Builder withNodes(long nodes) {
-                this.nodes = nodes;
-                return this;
-            }
-
-
-            public Builder withWrite(boolean write) {
-                this.write = write;
-                return this;
-            }
-
-            public Builder withProperty(String writeProperty) {
-                this.writeProperty = writeProperty;
-                return this;
-            }
 
             public CentralityScore.Stats build() {
                 return new CentralityScore.Stats(
-                        nodes,
-                        loadDuration,
-                        evalDuration,
-                        writeDuration,
-                        write,
-                        writeProperty);
+                    nodeCount,
+                    loadMillis,
+                    computeMillis,
+                    writeMillis,
+                    write,
+                    writeProperty
+                );
             }
         }
     }

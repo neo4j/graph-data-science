@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.unionfind;
 
-import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -42,9 +41,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
-import java.util.OptionalLong;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.stream.Stream;
 
@@ -77,14 +73,15 @@ public class MSColoringProc {
                 .setNodeLabelOrQuery(label)
                 .setRelationshipTypeOrQuery(relationship);
 
-        final WriteResultBuilder builder = new WriteResultBuilder(callContext.outputFields());
+        AllocationTracker tracker = AllocationTracker.create();
+        WriteResultBuilder builder = new WriteResultBuilder(callContext.outputFields(), tracker);
 
         // loading
-        AllocationTracker tracker = AllocationTracker.create();
         final Graph graph;
         try (ProgressTimer timer = builder.timeLoad()) {
             graph = load(configuration, tracker);
         }
+        builder.withNodeCount(graph.nodeCount());
 
         if (graph.isEmpty()) {
             graph.release();
@@ -96,6 +93,7 @@ public class MSColoringProc {
         try (ProgressTimer timer = builder.timeEval()) {
             struct = evaluate(graph, configuration);
         }
+        builder.withCommunityFunction(n -> (long) struct.get((int) n));
 
         if (configuration.isWriteFlag()) {
             // write back
@@ -103,7 +101,7 @@ public class MSColoringProc {
                     write(graph, struct, configuration));
         }
 
-        return Stream.of(builder.build(tracker, graph.nodeCount(), n -> (long) struct.get((int) n)));
+        return Stream.of(builder.build());
     }
 
     @Procedure(name = "algo.unionFind.mscoloring.stream", mode = READ)
@@ -253,47 +251,9 @@ public class MSColoringProc {
 
     public static class WriteResultBuilder extends AbstractCommunityResultBuilder<WriteResult> {
         private String partitionProperty;
-        private String writeProperty;
 
-        WriteResultBuilder(Set<String> returnFields) {
-            super(returnFields);
-        }
-
-        public WriteResultBuilder(Stream<String> returnFields) {
-            super(returnFields);
-        }
-
-        @Override
-        protected WriteResult build(
-                long loadMillis,
-                long computeMillis,
-                long writeMillis,
-                long postProcessingMillis,
-                long nodeCount,
-                OptionalLong maybeCommunityCount,
-                Optional<Histogram> maybeCommunityHistogram,
-                boolean write) {
-            return new WriteResult(
-                    loadMillis,
-                    computeMillis,
-                    postProcessingMillis,
-                    writeMillis,
-                    nodeCount,
-                    maybeCommunityCount.orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(100)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(99)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(95)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(90)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(75)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(50)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(25)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(10)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(5)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(1)).orElse(-1L),
-                    write,
-                    partitionProperty,
-                    writeProperty
-            );
+        WriteResultBuilder(Stream<String> returnFields, AllocationTracker tracker) {
+            super(returnFields, tracker);
         }
 
         WriteResultBuilder withPartitionProperty(String partitionProperty) {
@@ -301,9 +261,29 @@ public class MSColoringProc {
             return this;
         }
 
-        WriteResultBuilder withWriteProperty(String writeProperty) {
-            this.writeProperty = writeProperty;
-            return this;
+        @Override
+        protected WriteResult buildResult() {
+            return new WriteResult(
+                loadMillis,
+                computeMillis,
+                postProcessingDuration,
+                writeMillis,
+                nodeCount,
+                maybeCommunityCount.orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(100)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(99)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(95)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(90)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(75)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(50)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(25)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(10)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(5)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(1)).orElse(-1L),
+                write,
+                partitionProperty,
+                writeProperty
+            );
         }
     }
 }

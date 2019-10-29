@@ -19,37 +19,35 @@
  */
 package org.neo4j.graphalgo.impl.results;
 
-import org.HdrHistogram.Histogram;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
-import java.util.Optional;
-import java.util.OptionalLong;
-import java.util.Set;
 import java.util.stream.Stream;
 
 public class BetaLabelPropagationStats {
 
     public static final BetaLabelPropagationStats EMPTY = new BetaLabelPropagationStats(
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            -1,
-            -1,
-            -1,
-            -1,
-            -1,
-            -1,
-            -1,
-            -1,
-            -1,
-            -1,
-            0,
-            false,
-            false,
-            "<empty>",
-            "<empty>", "<empty>");
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        0,
+        false,
+        false,
+        "<empty>",
+        "<empty>", "<empty>"
+    );
 
     public final long loadMillis;
     public final long computeMillis;
@@ -78,28 +76,29 @@ public class BetaLabelPropagationStats {
     public final String writeProperty;
 
     public BetaLabelPropagationStats(
-            long loadMillis,
-            long computeMillis,
-            long postProcessingMillis,
-            long writeMillis,
-            long nodes,
-            long communityCount,
-            long p100,
-            long p99,
-            long p95,
-            long p90,
-            long p75,
-            long p50,
-            long p25,
-            long p10,
-            long p5,
-            long p1,
-            long ranIterations,
-            boolean write,
-            boolean didConverge,
-            String weightProperty,
-            String seedProperty,
-            String writeProperty) {
+        long loadMillis,
+        long computeMillis,
+        long postProcessingMillis,
+        long writeMillis,
+        long nodes,
+        long communityCount,
+        long p100,
+        long p99,
+        long p95,
+        long p90,
+        long p75,
+        long p50,
+        long p25,
+        long p10,
+        long p5,
+        long p1,
+        long ranIterations,
+        boolean write,
+        boolean didConverge,
+        String weightProperty,
+        String seedProperty,
+        String writeProperty
+    ) {
         this.loadMillis = loadMillis;
         this.computeMillis = computeMillis;
         this.postProcessingMillis = postProcessingMillis;
@@ -124,82 +123,62 @@ public class BetaLabelPropagationStats {
         this.writeProperty = writeProperty;
     }
 
-
-    public static class Builder extends AbstractCommunityResultBuilder<BetaLabelPropagationStats> {
+    public static class WriteResultBuilder extends AbstractCommunityResultBuilder<BetaLabelPropagationStats> {
 
         private long ranIterations = 0;
         private boolean didConverge = false;
         private String weightProperty;
         private String seedProperty;
-        private String writeProperty;
 
-        Builder(Set<String> returnFields) {
-            super(returnFields);
+        public WriteResultBuilder(Stream<String> returnFields, AllocationTracker tracker) {
+            super(returnFields, tracker);
         }
 
-        public Builder(Stream<String> returnFields) {
-            super(returnFields);
-        }
-
-        public Builder ranIterations(final long ranIterations) {
+        public WriteResultBuilder ranIterations(final long ranIterations) {
             this.ranIterations = ranIterations;
             return this;
         }
 
-        public Builder didConverge(final boolean didConverge) {
+        public WriteResultBuilder didConverge(final boolean didConverge) {
             this.didConverge = didConverge;
             return this;
         }
 
-        public Builder weightProperty(final String weightProperty) {
+        public WriteResultBuilder weightProperty(final String weightProperty) {
             this.weightProperty = weightProperty;
             return this;
         }
 
-        public Builder seedProperty(final String seedProperty) {
+        public WriteResultBuilder seedProperty(final String seedProperty) {
             this.seedProperty = seedProperty;
             return this;
         }
 
-        public Builder writeProperty(final String writeProperty) {
-            this.writeProperty = writeProperty;
-            return this;
-        }
-
-
         @Override
-        protected BetaLabelPropagationStats build(
-                long loadMillis,
-                long computeMillis,
-                long writeMillis,
-                long postProcessingMillis,
-                long nodeCount,
-                OptionalLong maybeCommunityCount,
-                Optional<Histogram> maybeCommunityHistogram,
-                boolean write) {
+        protected BetaLabelPropagationStats buildResult() {
             return new BetaLabelPropagationStats(
-                    loadMillis,
-                    computeMillis,
-                    writeMillis,
-                    postProcessingMillis,
-                    nodeCount,
-                    maybeCommunityCount.orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(100)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(99)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(95)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(90)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(75)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(50)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(25)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(10)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(5)).orElse(-1L),
-                    maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(1)).orElse(-1L),
-                    ranIterations,
-                    write,
-                    didConverge,
-                    weightProperty,
-                    seedProperty,
-                    writeProperty
+                loadMillis,
+                computeMillis,
+                writeMillis,
+                postProcessingDuration,
+                nodeCount,
+                maybeCommunityCount.orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(100)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(99)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(95)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(90)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(75)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(50)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(25)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(10)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(5)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(1)).orElse(-1L),
+                ranIterations,
+                write,
+                didConverge,
+                weightProperty,
+                seedProperty,
+                writeProperty
             );
         }
     }
