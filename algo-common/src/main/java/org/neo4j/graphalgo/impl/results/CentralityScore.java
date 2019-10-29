@@ -51,7 +51,7 @@ public class CentralityScore {
             this.writeProperty = writeProperty;
         }
 
-        public static final class Builder extends AbstractWriteBuilder<Stats> {
+        public static final class Builder extends AbstractResultBuilder<Stats> {
 
             public CentralityScore.Stats build() {
                 return new CentralityScore.Stats(

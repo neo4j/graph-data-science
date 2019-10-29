@@ -58,7 +58,7 @@ public class PageRankScore {
             this.writeProperty = writeProperty;
         }
 
-        public static final class Builder extends AbstractWriteBuilder<Stats> {
+        public static final class Builder extends AbstractResultBuilder<Stats> {
 
             private long iterations;
             private double dampingFactor;

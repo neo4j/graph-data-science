@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public abstract class AbstractCommunityResultBuilder<R> extends AbstractWriteBuilder<R> {
+public abstract class AbstractCommunityResultBuilder<R> extends AbstractResultBuilder<R> {
 
     private static final Pattern PERCENTILE_FIELD_REGEXP = Pattern.compile("^p\\d{1,3}$");
     private static final Pattern COMMUNITY_COUNT_REGEXP = Pattern.compile("^(community|set)Count$");

@@ -29,6 +29,10 @@ public abstract class AbstractResultBuilder<R> {
     protected long computeMillis = -1;
     protected long writeMillis = -1;
 
+    protected long nodeCount;
+    protected boolean write = false;
+    protected String writeProperty;
+
     public void setLoadMillis(long loadMillis) {
         this.loadMillis = loadMillis;
     }
@@ -75,6 +79,21 @@ public abstract class AbstractResultBuilder<R> {
         try (ProgressTimer ignored = timeWrite()) {
             runnable.run();
         }
+    }
+
+    public AbstractResultBuilder<R> withNodeCount(long nodeCount) {
+        this.nodeCount = nodeCount;
+        return this;
+    }
+
+    public AbstractResultBuilder<R> withWrite(boolean write) {
+        this.write = write;
+        return this;
+    }
+
+    public AbstractResultBuilder<R> withWriteProperty(String writeProperty) {
+        this.writeProperty = writeProperty;
+        return this;
     }
 
     public abstract R build();

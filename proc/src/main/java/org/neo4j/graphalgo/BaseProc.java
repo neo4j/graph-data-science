@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.results.AbstractResultBuilder;
-import org.neo4j.graphalgo.impl.results.AbstractWriteBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -112,15 +111,6 @@ public abstract class BaseProc {
             final ProcedureConfiguration config,
             final AllocationTracker tracker,
             final AbstractResultBuilder<R> resultBuilder) {
-        try (ProgressTimer ignored = resultBuilder.timeLoad()) {
-            return loadGraph(config, tracker);
-        }
-    }
-
-    protected final <R> Graph loadGraph(
-            final ProcedureConfiguration config,
-            final AllocationTracker tracker,
-            final AbstractWriteBuilder<R> resultBuilder) {
         try (ProgressTimer ignored = resultBuilder.timeLoad()) {
             Graph graph = loadGraph(config, tracker);
             resultBuilder.withNodeCount(graph.nodeCount());
