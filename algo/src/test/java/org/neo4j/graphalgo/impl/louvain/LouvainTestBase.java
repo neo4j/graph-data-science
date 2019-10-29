@@ -37,14 +37,15 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 abstract class LouvainTestBase {
 
-    static final Louvain.Config DEFAULT_CONFIG = new Louvain.Config(10, 10);
-    static final Louvain.Config DEFAULT_CONFIG_WITH_DENDROGRAM = new Louvain.Config(10, 10, true);
+    static final Louvain.Config DEFAULT_CONFIG = new Louvain.Config(10, 10, Optional.empty());
+    static final Louvain.Config DEFAULT_CONFIG_WITH_DENDROGRAM = new Louvain.Config(10, 10, Optional.empty(), true);
 
     GraphDatabaseAPI db;
 
@@ -65,23 +66,23 @@ abstract class LouvainTestBase {
     Graph loadGraph(Class<? extends GraphFactory> graphImpl, String cypher, String... nodeProperties) {
         db.execute(cypher);
         GraphLoader loader = new GraphLoader(db)
-                .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
-                .withOptionalNodeProperties(
-                        Arrays.stream(nodeProperties)
-                                .map(p -> PropertyMapping.of(p, -1))
-                                .toArray(PropertyMapping[]::new)
-                )
-                .undirected();
+            .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
+            .withOptionalNodeProperties(
+                Arrays.stream(nodeProperties)
+                    .map(p -> PropertyMapping.of(p, -1))
+                    .toArray(PropertyMapping[]::new)
+            )
+            .undirected();
         if (graphImpl == CypherGraphFactory.class) {
             loader
-                    .withNodeStatement("MATCH (u) RETURN id(u) as id, u.seed1 as seed1, u.seed2 as seed2")
-                    .withRelationshipStatement("MATCH (u1)-[rel]-(u2) \n" +
-                                               "RETURN id(u1) AS source, id(u2) AS target, rel.weight as weight")
-                    .withDeduplicationStrategy(DeduplicationStrategy.SKIP);
+                .withNodeStatement("MATCH (u) RETURN id(u) as id, u.seed1 as seed1, u.seed2 as seed2")
+                .withRelationshipStatement("MATCH (u1)-[rel]-(u2) \n" +
+                                           "RETURN id(u1) AS source, id(u2) AS target, rel.weight as weight")
+                .withDeduplicationStrategy(DeduplicationStrategy.SKIP);
         } else {
             loader
-                    .withAnyRelationshipType()
-                    .withAnyLabel();
+                .withAnyRelationshipType()
+                .withAnyLabel();
         }
         try (Transaction tx = db.beginTx()) {
             Graph graph = loader.load(graphImpl);
@@ -102,9 +103,10 @@ abstract class LouvainTestBase {
                 current = communityIds[id];
             } else {
                 assertEquals(
-                        current,
-                        communityIds[id],
-                        "Node " + name + " belongs to wrong community " + communityIds[id]);
+                    current,
+                    communityIds[id],
+                    "Node " + name + " belongs to wrong community " + communityIds[id]
+                );
             }
         }
     }

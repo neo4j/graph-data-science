@@ -50,7 +50,7 @@ public class LouvainFactory extends AlgorithmFactory<Louvain> {
             final AllocationTracker tracker,
             final Log log) {
 
-        NodeProperties communityMap = config.seedPropertyKey
+        NodeProperties communityMap = config.maybeSeedPropertyKey
             .map(graph::nodeProperties)
             .orElse(null);
 

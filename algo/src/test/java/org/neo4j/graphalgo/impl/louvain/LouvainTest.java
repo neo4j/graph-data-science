@@ -41,6 +41,7 @@ import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -83,7 +84,7 @@ class LouvainTest extends LouvainTestBase {
     @AllGraphTypesTest
     void testWeightedLouvain(Class<? extends GraphFactory> graphImpl) {
         Graph graph = loadGraph(graphImpl, DB_CYPHER);
-        final Louvain algorithm = new Louvain(graph, new Louvain.Config(1, 1), Pools.DEFAULT, 1, AllocationTracker.EMPTY)
+        final Louvain algorithm = new Louvain(graph, new Louvain.Config(1, 1, Optional.empty()), Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
                 .compute();
@@ -181,7 +182,7 @@ class LouvainTest extends LouvainTestBase {
                     .load(graphImpl);
         }
 
-        Louvain.Config config = new Louvain.Config(99, 99999);
+        Louvain.Config config = new Louvain.Config(99, 99999, Optional.empty());
         Louvain algorithm = new Louvain(graph, config, Pools.DEFAULT, 4, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
