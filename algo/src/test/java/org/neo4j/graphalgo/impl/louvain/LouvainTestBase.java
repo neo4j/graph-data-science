@@ -75,14 +75,14 @@ abstract class LouvainTestBase {
             .undirected();
         if (graphImpl == CypherGraphFactory.class) {
             loader
-                .withNodeStatement("MATCH (u) RETURN id(u) as id, u.seed1 as seed1, u.seed2 as seed2")
-                .withRelationshipStatement("MATCH (u1)-[rel]-(u2) \n" +
+                .withNodeStatement("MATCH (u:Node) RETURN id(u) as id, u.seed1 as seed1, u.seed2 as seed2")
+                .withRelationshipStatement("MATCH (u1:Node)-[rel]-(u2:Node) \n" +
                                            "RETURN id(u1) AS source, id(u2) AS target, rel.weight as weight")
                 .withDeduplicationStrategy(DeduplicationStrategy.SKIP);
         } else {
             loader
                 .withAnyRelationshipType()
-                .withAnyLabel();
+                .withLabel("Node");
         }
         try (Transaction tx = db.beginTx()) {
             Graph graph = loader.load(graphImpl);

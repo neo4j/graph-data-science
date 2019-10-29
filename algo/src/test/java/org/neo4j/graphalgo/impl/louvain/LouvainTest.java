@@ -39,6 +39,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Label;
+import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 
 import java.util.Optional;
@@ -74,8 +75,11 @@ class LouvainTest extends LouvainTestBase {
         try (Transaction transaction = db.beginTx()) {
             for (int i = 0; i < ABCD.length(); i++) {
                 final String value = String.valueOf(ABCD.charAt(i));
-                final long id = graph.toMappedNodeId(db.findNode(LABEL, "name", value).getId());
-                nameMap.put(value, (int) id);
+                Node namedNode = db.findNode(LABEL, "name", value);
+                if (namedNode != null) {
+                    long id = graph.toMappedNodeId(namedNode.getId());
+                    nameMap.put(value, (int) id);
+                }
             }
             transaction.success();
         }
@@ -153,6 +157,44 @@ class LouvainTest extends LouvainTestBase {
         if (expectedDisjoint.length > 0) {
             assertDisjoint(expectedDisjoint, algorithm.getCommunityIds());
         }
+    }
+
+    @AllGraphTypesTest
+    void testSeededLouvainWithoutSeedPropertyAndSparseNodeMapping(Class<? extends GraphFactory> graphImpl) {
+        String sparseGraph =
+            "CREATE" +
+            "  (:Some)" +
+            ", (:Other)" +
+            ", (:Labels)" +
+            ", (:That)" +
+            ", (:We)" +
+            ", (:Will)" +
+            ", (:Ignore)" +
+            ", (:In)" +
+            ", (:This)" +
+            ", (:Test)" +
+            ", (a:Node {name:'a'})" +
+            ", (b:Node {name:'b'})" +
+            ", (c:Node {name:'c'})" +
+            ", (a)-[:TYPE {weight: 1.0}]->(b)" +
+            ", (b)-[:TYPE {weight: 1.0}]->(c)" +
+            ", (c)-[:TYPE {weight: 1.0}]->(a)" +
+            ", (a)-[:TYPE {weight: 1.0}]->(c)";
+
+        Graph graph = loadGraph(graphImpl, sparseGraph);
+
+        Louvain algorithm = new Louvain(
+            graph,
+            DEFAULT_CONFIG,
+            null,
+            Pools.DEFAULT,
+            1,
+            AllocationTracker.EMPTY
+        )
+            .withProgressLogger(TestProgressLogger.INSTANCE)
+            .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
+            .compute();
+        assertUnion(new String[]{"a", "b", "c"}, algorithm.getCommunityIds());
     }
 
     @AllGraphTypesTest
