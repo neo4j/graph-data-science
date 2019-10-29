@@ -322,16 +322,6 @@ public final class Louvain extends Algorithm<Louvain> {
     }
 
     private void rebuildCommunityStructure(final HugeLongArray communityIds) {
-        // rebuild community array
-
-        // communities:               [                10, 11, 12] card max
-        //                                              |  |  |
-        //                                              v  v  v
-        // communityIds: MO result -> [0, 1, 1]         AIOOBE
-        //                             |  |  |
-        //                             v  v  v
-        // result                  -> [1, 1, 0] card min
-
         try (HugeCursor<long[]> cursor = communities.initCursor(communities.newCursor())) {
             while (cursor.next()) {
                 long[] arrayRef = cursor.array;
