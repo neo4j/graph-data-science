@@ -47,6 +47,7 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -208,10 +209,11 @@ public final class GraphLoadProc extends BaseProc {
             @Name("name") String name,
             @Name(value = "degreeDistribution", defaultValue = "null") Object degreeDistribution) {
         final GraphInfoWithHistogram info;
-        if (!GraphCatalog.exists(getUsername(), name)) {
+        Optional<Graph> maybeGraph = GraphCatalog.getUnion(getUsername(), name);
+        if (!maybeGraph.isPresent()) {
             info = new GraphInfoWithHistogram(name);
         } else {
-            Graph graph = GraphCatalog.getUnion(getUsername(), name);
+            Graph graph = maybeGraph.get();
             final boolean calculateDegreeDistribution;
             final ProcedureConfiguration configuration;
             if (Boolean.TRUE.equals(degreeDistribution)) {

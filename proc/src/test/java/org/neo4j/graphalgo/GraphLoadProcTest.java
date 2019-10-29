@@ -149,7 +149,7 @@ class GraphLoadProcTest extends ProcTestBase {
 
         runQuery(query, singletonMap("graph", graphImpl));
 
-        Graph fooGraph = GraphCatalog.getUnion(getUsername(), "foo");
+        Graph fooGraph = GraphCatalog.getUnion(getUsername(), "foo").orElse(null);
         assertNotNull(fooGraph);
         assertEquals(12, fooGraph.nodeCount());
         assertEquals(10, fooGraph.relationshipCount());
@@ -241,11 +241,12 @@ class GraphLoadProcTest extends ProcTestBase {
 
         });
 
-        Graph loadedGraph = GraphCatalog.getUnion(getUsername(), "fooGraph");
+        Graph loadedGraph = GraphCatalog.getUnion(getUsername(), "fooGraph").orElse(null);
         Graph expected = TestGraph.Builder.fromGdl("({ fooProp: 42, barProp: 13.37D })" +
                                                    "({ fooProp: 43, barProp: 13.38D })" +
                                                    "({ fooProp: 44, barProp: 13.39D })" +
                                                    "({ fooProp: 45, barProp: 19.84D })");
+        assertNotNull(loadedGraph);
         assertGraphEquals(expected, loadedGraph);
 
         GraphCatalog.remove(getUsername(), "fooGraph");
@@ -337,8 +338,9 @@ class GraphLoadProcTest extends ProcTestBase {
             assertEquals("MAX", maxCostParams.get("aggregation").toString());
         });
 
-        Graph g = GraphCatalog.getUnion(getUsername(), "aggGraph");
+        Graph g = GraphCatalog.getUnion(getUsername(), "aggGraph").orElse(null);
 
+        assertNotNull(g);
         assertEquals(2, g.nodeCount());
         assertEquals(3, g.relationshipCount());
 

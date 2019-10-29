@@ -74,7 +74,7 @@ public final class GraphCatalog extends GraphFactory {
         return getUserCatalog(username).get(graphName, relationshipType, maybeRelationshipProperty);
     }
 
-    public static Graph getUnion(String username, String graphName) {
+    public static Optional<Graph> getUnion(String username, String graphName) {
         return getUserCatalog(username).getUnion(graphName);
     }
 
@@ -130,14 +130,8 @@ public final class GraphCatalog extends GraphFactory {
          * Each sub-graph has the same node set and represents a unique relationship type / property combination.
          * This method returns the union of all subgraphs refered to by the given name.
          */
-        Graph getUnion(String graphName) {
-            if (!exists(graphName)) {
-                // getAll is allowed to return null if the graph does not exist
-                // as it's being used by algo.graph.info or algo.graph.remove,
-                // that can deal with missing graphs
-                return null;
-            }
-            return graphsByName.get(graphName).getUnion();
+        Optional<Graph> getUnion(String graphName) {
+            return !exists(graphName) ? Optional.empty() : Optional.of(graphsByName.get(graphName).getUnion());
         }
 
         boolean exists(String graphName) {
