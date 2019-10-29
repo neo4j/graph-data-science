@@ -47,6 +47,7 @@ import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.LongStream;
 
@@ -112,7 +113,7 @@ public class ClusteringBenchmark {
 
     @Benchmark
     public Object _01_louvain() {
-        Louvain.Config algoConfig = new Louvain.Config(99, 99999);
+        Louvain.Config algoConfig = new Louvain.Config(99, 99999, Optional.empty());
         return new Louvain(g, algoConfig, Pools.DEFAULT, concurrency, AllocationTracker.EMPTY)
                 .withProgressLogger(ProgressLogger.NULL_LOGGER)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)

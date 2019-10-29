@@ -41,13 +41,15 @@ import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * (a)-(b)-(d)
+ * (a)-(b) (d)
  * | /            -> (abc)-(d)
  * (c)
  */
@@ -60,7 +62,7 @@ class LouvainTest extends LouvainTestBase {
             ", (c:Node {name:'c', seed1: 2, seed2: 1})" +
             ", (d:Node {name:'d', seed1: 2, seed2: 42})" +
             ", (a)-[:TYPE {weight: 1.0}]->(b)" +
-            ", (b)-[:TYPE {weight: 1.0}]->(c)" +
+            ", (b)-[:TYPE {weight: 5.0}]->(c)" +
             ", (c)-[:TYPE {weight: 1.0}]->(a)" +
             ", (a)-[:TYPE {weight: 1.0}]->(c)";
 
@@ -80,18 +82,41 @@ class LouvainTest extends LouvainTestBase {
     }
 
     @AllGraphTypesTest
-    void testRunner(Class<? extends GraphFactory> graphImpl) {
+    void testWeightedLouvain(Class<? extends GraphFactory> graphImpl) {
+        Graph graph = loadGraph(graphImpl, DB_CYPHER);
+        final Louvain algorithm = new Louvain(graph, new Louvain.Config(1, 1, Optional.empty()), Pools.DEFAULT, 1, AllocationTracker.EMPTY)
+                .withProgressLogger(TestProgressLogger.INSTANCE)
+                .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
+                .compute();
+
+        final HugeLongArray communityIds = algorithm.getCommunityIds();
+        assertUnion(new String[]{"b", "c"}, communityIds);
+        assertDisjoint(new String[]{"a", "b", "d"}, communityIds);
+    }
+
+    @AllGraphTypesTest
+    void testLouvain(Class<? extends GraphFactory> graphImpl) {
         Graph graph = loadGraph(graphImpl, DB_CYPHER);
         final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
                 .compute();
         final HugeLongArray[] dendogram = algorithm.getDendrogram();
-        for (int i = 1; i <= dendogram.length; i++) {
-            if (null == dendogram[i - 1]) {
-                break;
-            }
-        }
+        assertEquals(0, dendogram.length);
+        assertTrue(1 <= algorithm.getLevel());
+        assertCommunities(algorithm);
+    }
+
+    @AllGraphTypesTest
+    void testLouvainWithDendrogram(Class<? extends GraphFactory> graphImpl) {
+        Graph graph = loadGraph(graphImpl, DB_CYPHER);
+        final Louvain algorithm = new Louvain(graph, DEFAULT_CONFIG_WITH_DENDROGRAM, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
+                .withProgressLogger(TestProgressLogger.INSTANCE)
+                .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
+                .compute();
+        final HugeLongArray[] dendogram = algorithm.getDendrogram();
+        assertEquals(algorithm.getLevel(), dendogram.length);
+        assertTrue(1 <= algorithm.getLevel());
         assertCommunities(algorithm);
     }
 
@@ -124,12 +149,6 @@ class LouvainTest extends LouvainTestBase {
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
                 .compute();
-        final HugeLongArray[] dendogram = algorithm.getDendrogram();
-        for (int i = 1; i <= dendogram.length; i++) {
-            if (null == dendogram[i - 1]) {
-                break;
-            }
-        }
         assertUnion(expectedUnion, algorithm.getCommunityIds());
         if (expectedDisjoint.length > 0) {
             assertDisjoint(expectedDisjoint, algorithm.getCommunityIds());
@@ -163,7 +182,7 @@ class LouvainTest extends LouvainTestBase {
                     .load(graphImpl);
         }
 
-        Louvain.Config config = new Louvain.Config(99, 99999);
+        Louvain.Config config = new Louvain.Config(99, 99999, Optional.empty());
         Louvain algorithm = new Louvain(graph, config, Pools.DEFAULT, 4, AllocationTracker.EMPTY)
                 .withProgressLogger(TestProgressLogger.INSTANCE)
                 .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
@@ -183,19 +202,19 @@ class LouvainTest extends LouvainTestBase {
         LouvainFactory factory = new LouvainFactory(DEFAULT_CONFIG);
 
         GraphDimensions dimensions0 = new GraphDimensions.Builder().setNodeCount(0).build();
-        assertEquals(MemoryRange.of(608, 1072), factory.memoryEstimation().estimate(dimensions0, 1).memoryUsage());
-        assertEquals(MemoryRange.of(1112, 1576), factory.memoryEstimation().estimate(dimensions0, 4).memoryUsage());
+        assertEquals(MemoryRange.of(632, 1096), factory.memoryEstimation().estimate(dimensions0, 1).memoryUsage());
+        assertEquals(MemoryRange.of(1136, 1600), factory.memoryEstimation().estimate(dimensions0, 4).memoryUsage());
 
         GraphDimensions dimensions100 = new GraphDimensions.Builder().setNodeCount(100).build();
-        assertEquals(MemoryRange.of(7008, 14672), factory.memoryEstimation().estimate(dimensions100, 1).memoryUsage());
-        assertEquals(MemoryRange.of(14712, 22376), factory.memoryEstimation().estimate(dimensions100, 4).memoryUsage());
+        assertEquals(MemoryRange.of(7032, 14696), factory.memoryEstimation().estimate(dimensions100, 1).memoryUsage());
+        assertEquals(MemoryRange.of(14736, 22400), factory.memoryEstimation().estimate(dimensions100, 4).memoryUsage());
 
         GraphDimensions dimensions100B = new GraphDimensions.Builder().setNodeCount(100_000_000_000L).build();
         assertEquals(
-                MemoryRange.of(6400976563232L, 13602075196648L),
+                MemoryRange.of(6400976563256L, 13602075196672L),
                 factory.memoryEstimation().estimate(dimensions100B, 1).memoryUsage());
         assertEquals(
-                MemoryRange.of(13602075196688L, 20803173830104L),
+                MemoryRange.of(13602075196712L, 20803173830128L),
                 factory.memoryEstimation().estimate(dimensions100B, 4).memoryUsage());
     }
 

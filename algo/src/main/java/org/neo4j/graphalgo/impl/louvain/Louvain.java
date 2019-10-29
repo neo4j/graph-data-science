@@ -25,6 +25,7 @@ import com.carrotsearch.hppc.ObjectArrayList;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.core.utils.CommunityUtils;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -33,13 +34,13 @@ import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
-import org.neo4j.graphalgo.core.utils.CommunityUtils;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.values.storable.Values;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -59,16 +60,17 @@ import java.util.stream.Stream;
 public final class Louvain extends Algorithm<Louvain> {
 
     public static final double DEFAULT_WEIGHT = 1.0;
+    public static final boolean DEFAULT_INTERMEDIATE_COMMUNITIES_FLAG = false;
 
     private static final PropertyTranslator<HugeLongArray[]> HUGE_COMMUNITIES_TRANSLATOR =
-            (propertyId, allCommunities, nodeId) -> {
-                // build int array
-                final long[] data = new long[allCommunities.length];
-                for (int i = 0; i < data.length; i++) {
-                    data[i] = allCommunities[i].get(nodeId);
-                }
-                return Values.longArray(data);
-            };
+        (propertyId, allCommunities, nodeId) -> {
+            // build int array
+            final long[] data = new long[allCommunities.length];
+            for (int i = 0; i < data.length; i++) {
+                data[i] = allCommunities[i].get(nodeId);
+            }
+            return Values.longArray(data);
+        };
 
     private final long rootNodeCount;
     private int level;
@@ -81,11 +83,10 @@ public final class Louvain extends Algorithm<Louvain> {
     private double[] modularities;
     private HugeLongArray[] dendrogram;
     private final HugeDoubleArray nodeWeights;
+    private final NodeProperties seedingValues;
     private final Graph rootGraph;
     private long communityCount;
-    private final NodeProperties seedingValues;
-    private final int maxLevel;
-    private final int maxIterations;
+    private final Config config;
 
     public Louvain(
         Graph graph,
@@ -103,7 +104,8 @@ public final class Louvain extends Algorithm<Louvain> {
         NodeProperties seedingValues,
         ExecutorService pool,
         int concurrency,
-        AllocationTracker tracker) {
+        AllocationTracker tracker
+    ) {
         this.rootGraph = graph;
         this.pool = pool;
         this.concurrency = concurrency;
@@ -112,27 +114,32 @@ public final class Louvain extends Algorithm<Louvain> {
         this.communities = HugeLongArray.newArray(rootNodeCount, tracker);
         this.nodeWeights = HugeDoubleArray.newArray(rootNodeCount, tracker);
         this.seedingValues = seedingValues;
-        maxLevel = config.maxLevel;
-        maxIterations = config.maxIterations;
-        communityCount = rootNodeCount;
+        this.config = config;
+        this.communityCount = rootNodeCount;
     }
 
     public Louvain compute() {
-        return compute(this.maxLevel, this.maxIterations);
+        return compute(this.config);
     }
 
     public Louvain compute(int maxLevel, int maxIterations) {
+        return compute(new Config(maxLevel, maxIterations, Optional.empty()));
+    }
+
+    public Louvain compute(Config config) {
         Graph workingGraph = this.rootGraph;
         long nodeCount = this.rootNodeCount;
 
         if (seedingValues != null) {
             BitSet comCount = new BitSet();
-            long maxSeedingCommunityId = seedingValues.getMaxPropertyValue().orElse(CommunityUtils.NO_SUCH_SEED_PROPERTY);
+            long maxSeedingCommunityId = seedingValues
+                .getMaxPropertyValue()
+                .orElse(CommunityUtils.NO_SUCH_SEED_PROPERTY);
             communities.setAll(nodeId -> {
                 double existingCommunityValue = seedingValues.nodeProperty(nodeId, Double.NaN);
                 long community = Double.isNaN(existingCommunityValue)
-                        ? maxSeedingCommunityId + this.rootGraph.toOriginalNodeId(nodeId) + 1L
-                        : (long) existingCommunityValue;
+                    ? maxSeedingCommunityId + this.rootGraph.toOriginalNodeId(nodeId) + 1L
+                    : (long) existingCommunityValue;
 
                 comCount.set(community);
                 return community;
@@ -145,14 +152,14 @@ public final class Louvain extends Algorithm<Louvain> {
             communities.setAll(this.rootGraph::toOriginalNodeId);
         }
 
-        return computeOf(workingGraph, nodeCount, maxLevel, maxIterations);
+        return computeOf(workingGraph, nodeCount, config);
     }
 
     private Louvain computeOf(
-            final Graph rootGraph,
-            final long rootNodeCount,
-            final int maxLevel,
-            final int maxIterations) {
+        final Graph rootGraph,
+        final long rootNodeCount,
+        final Config config
+    ) {
 
         // result arrays, start with small buffers in case we don't require max iterations to converge
         ObjectArrayList<HugeLongArray> dendrogram = new ObjectArrayList<>(0);
@@ -161,34 +168,35 @@ public final class Louvain extends Algorithm<Louvain> {
         long nodeCount = rootNodeCount;
         Graph louvainGraph = rootGraph;
 
-        for (int level = 0; level < maxLevel; level++) {
+        for (int level = 0; level < config.maxLevel; level++) {
             assertRunning();
             // start modularity optimization
             final ModularityOptimization modularityOptimization =
-                    new ModularityOptimization(
-                            louvainGraph,
-                            nodeWeights::get,
-                            pool,
-                            concurrency,
-                            tracker
-                    )
-                            .withProgressLogger(progressLogger)
-                            .withTerminationFlag(terminationFlag)
-                            .compute(maxIterations);
+                new ModularityOptimization(
+                    louvainGraph,
+                    nodeWeights::get,
+                    pool,
+                    concurrency,
+                    tracker
+                )
+                    .withProgressLogger(progressLogger)
+                    .withTerminationFlag(terminationFlag)
+                    .compute(config.maxIterations);
             // rebuild graph based on the community structure
             final HugeLongArray communityIds = modularityOptimization.getCommunityIds();
             communityCount = CommunityUtils.normalize(communityIds);
-            progressLogger.log(
-                    "level: " + (level + 1) +
-                    " communities: " + communityCount +
-                    " q: " + modularityOptimization.getModularity());
             if (communityCount >= nodeCount) {
                 // release the old algo instance
                 modularityOptimization.release();
                 break;
             }
             nodeCount = communityCount;
-            dendrogram.add(rebuildCommunityStructure(communityIds));
+            rebuildCommunityStructure(communityIds);
+            if (config.includeIntermediateCommunities) {
+                // the communities are stored in the dendrogram, one per level
+                // so we have to copy the current state and return it as a snapshot
+                dendrogram.add(communities.copyOf(rootNodeCount, tracker));
+            }
             modularities.add(modularityOptimization.getModularity());
             louvainGraph = rebuildGraph(louvainGraph, communityIds, communityCount);
             // release the old algo instance
@@ -219,7 +227,11 @@ public final class Louvain extends Algorithm<Louvain> {
         HugeDoubleArray nodeWeights = this.nodeWeights;
 
         // bag of nodeId->{nodeId, ..}
-        LongLongSubGraph subGraph = new LongLongSubGraph(communityCount, louvainGraph.hasRelationshipProperty(), tracker);
+        LongLongSubGraph subGraph = new LongLongSubGraph(
+            communityCount,
+            louvainGraph.hasRelationshipProperty(),
+            tracker
+        );
 
         // for each node in the current graph
         HugeCursor<long[]> cursor = communityIds.initCursor(communityIds.newCursor());
@@ -259,9 +271,10 @@ public final class Louvain extends Algorithm<Louvain> {
     }
 
     private Graph rebuildSmallerGraph(
-            final Graph louvainGraph,
-            final HugeLongArray communityIds,
-            final int communityCount) {
+        final Graph louvainGraph,
+        final HugeLongArray communityIds,
+        final int communityCount
+    ) {
         HugeDoubleArray nodeWeights = this.nodeWeights;
 
         // bag of nodeId->{nodeId, ..}
@@ -304,7 +317,7 @@ public final class Louvain extends Algorithm<Louvain> {
         return subGraph;
     }
 
-    private HugeLongArray rebuildCommunityStructure(final HugeLongArray communityIds) {
+    private void rebuildCommunityStructure(final HugeLongArray communityIds) {
         // rebuild community array
         try (HugeCursor<long[]> cursor = communities.initCursor(communities.newCursor())) {
             while (cursor.next()) {
@@ -315,9 +328,6 @@ public final class Louvain extends Algorithm<Louvain> {
                 }
             }
         }
-        // the communities are stored in the dendrogram, one per level
-        // so we have to copy the current state and return it as a snapshot
-        return communities.copyOf(rootNodeCount, tracker);
     }
 
     /**
@@ -336,6 +346,8 @@ public final class Louvain extends Algorithm<Louvain> {
     public double[] getModularities() {
         return Arrays.copyOfRange(modularities, 0, level);
     }
+
+    public Config getConfig() { return config; }
 
     /**
      * number of outer iterations
@@ -366,43 +378,43 @@ public final class Louvain extends Algorithm<Louvain> {
      */
     public Stream<Result> resultStream() {
         return LongStream.range(0L, rootNodeCount)
-                .mapToObj(i -> new Result(i, communities.get(i)));
+            .mapToObj(i -> new Result(i, communities.get(i)));
     }
 
-    public Stream<StreamingResult> dendrogramStream(final boolean includeIntermediateCommunities) {
+    public Stream<StreamingResult> dendrogramStream() {
         return LongStream.range(0L, rootNodeCount)
-                .mapToObj(i -> {
-                    List<Long> communitiesList = null;
-                    if (includeIntermediateCommunities) {
-                        communitiesList = new ArrayList<>(dendrogram.length);
-                        for (HugeLongArray community : dendrogram) {
-                            communitiesList.add(community.get(i));
-                        }
+            .mapToObj(i -> {
+                List<Long> communitiesList = null;
+                if (config.includeIntermediateCommunities) {
+                    communitiesList = new ArrayList<>(dendrogram.length);
+                    for (HugeLongArray community : dendrogram) {
+                        communitiesList.add(community.get(i));
                     }
+                }
 
-                    return new StreamingResult(rootGraph.toOriginalNodeId(i), communitiesList, communities.get(i));
-                });
+                return new StreamingResult(rootGraph.toOriginalNodeId(i), communitiesList, communities.get(i));
+            });
     }
 
     public void export(
-            final Exporter exporter,
-            final String propertyName,
-            final boolean includeIntermediateCommunities,
-            final String intermediateCommunitiesPropertyName) {
-        if (includeIntermediateCommunities) {
+        final Exporter exporter,
+        final String propertyName,
+        final String intermediateCommunitiesPropertyName
+    ) {
+        if (config.includeIntermediateCommunities) {
             exporter.write(
-                    propertyName,
-                    communities,
-                    HugeLongArray.Translator.INSTANCE,
-                    intermediateCommunitiesPropertyName,
-                    dendrogram,
-                    HUGE_COMMUNITIES_TRANSLATOR
+                propertyName,
+                communities,
+                HugeLongArray.Translator.INSTANCE,
+                intermediateCommunitiesPropertyName,
+                dendrogram,
+                HUGE_COMMUNITIES_TRANSLATOR
             );
         } else {
             exporter.write(
-                    propertyName,
-                    communities,
-                    HugeLongArray.Translator.INSTANCE
+                propertyName,
+                communities,
+                HugeLongArray.Translator.INSTANCE
             );
         }
     }
@@ -463,28 +475,33 @@ public final class Louvain extends Algorithm<Louvain> {
 
     public static class Config {
 
-        public final NodeProperties communityMap;
+        public final Optional<String> maybeSeedPropertyKey;
         public final int maxLevel;
         public final int maxIterations;
+        public final boolean includeIntermediateCommunities;
 
         public Config(final int maxLevel) {
-            this(maxLevel, maxLevel);
+            this(maxLevel, maxLevel, Optional.empty());
         }
 
         public Config(
-                final int maxLevel,
-                final int maxIterations) {
-            this(null, maxLevel, maxIterations);
-        }
-
-        public Config(
-                final NodeProperties communityMap,
-                final int maxLevel,
-                final int maxIterations
+            final int maxLevel,
+            final int maxIterations,
+            final Optional<String> maybeSeedPropertyKey
         ) {
-            this.communityMap = communityMap;
+            this(maxIterations, maxLevel, maybeSeedPropertyKey, DEFAULT_INTERMEDIATE_COMMUNITIES_FLAG);
+        }
+
+        public Config(
+            final int maxIterations,
+            final int maxLevel,
+            final Optional<String> maybeSeedPropertyKey,
+            final boolean includeIntermediateCommunities
+        ) {
+            this.maybeSeedPropertyKey = maybeSeedPropertyKey;
             this.maxLevel = maxLevel;
             this.maxIterations = maxIterations;
+            this.includeIntermediateCommunities = includeIntermediateCommunities;
         }
     }
 }
