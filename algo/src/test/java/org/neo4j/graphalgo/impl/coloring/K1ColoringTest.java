@@ -101,15 +101,18 @@ class K1ColoringTest {
             DEFAULT_BATCH_SIZE,
             1,
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.EMPTY,
+            Direction.OUTGOING,
+            1000
         );
 
-        k1Coloring.compute(Direction.OUTGOING, 1000);
+        k1Coloring.compute();
 
         HugeLongArray colors = k1Coloring.colors();
 
         assertNotEquals(colors.get(0), colors.get(1));
         assertNotEquals(colors.get(0), colors.get(2));
+        assertEquals(colors.get(1), colors.get(2));
     }
 
     @Test
@@ -129,10 +132,12 @@ class K1ColoringTest {
             DEFAULT_BATCH_SIZE,
             2,
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.EMPTY,
+            Direction.BOTH,
+            100
         );
 
-        k1Coloring.compute(Direction.BOTH, 100);
+        k1Coloring.compute();
         HugeLongArray colors = k1Coloring.colors();
 
         Set<Long> colorsUsed = new HashSet<>(100);

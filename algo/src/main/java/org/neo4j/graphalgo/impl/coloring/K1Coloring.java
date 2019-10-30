@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
@@ -41,22 +42,31 @@ public class K1Coloring extends Algorithm<K1Coloring> {
     private final ExecutorService executor;
     private final AllocationTracker tracker;
 
+    private final Direction direction;
+    private final long maxIterations;
+
     private BitSet nodesToColor;
     private HugeLongArray colors;
     private long ranIterations;
+    private boolean didConverge;
+
+    private HugeLongLongMap colorMap;
 
     public K1Coloring(
         Graph graph,
         int minBatchSize,
         int concurrency,
         ExecutorService executor,
-        AllocationTracker tracker
+        AllocationTracker tracker,
+        Direction direction, long maxIterations
     ) {
         this.graph = graph;
         this.executor = executor;
         this.tracker = tracker;
 
         this.nodeCount = graph.nodeCount();
+        this.direction = direction;
+        this.maxIterations = maxIterations;
 
         this.batchSize = ParallelUtil.adjustedBatchSize(
             nodeCount,
@@ -93,11 +103,25 @@ public class K1Coloring extends Algorithm<K1Coloring> {
         return ranIterations;
     }
 
+    public boolean didConverge() {
+        return didConverge;
+    }
+
+    public HugeLongLongMap getColorMap() {
+        if (colorMap == null) {
+            this.colorMap = new HugeLongLongMap(100, tracker);
+            for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
+                colorMap.addTo(colors.get(nodeId), 1L);
+            }
+        }
+        return colorMap;
+    }
+
     public HugeLongArray colors() {
         return colors;
     }
 
-    public K1Coloring compute(Direction direction, long maxIterations) {
+    public K1Coloring compute() {
         if (maxIterations <= 0L) {
             throw new IllegalArgumentException("Must iterate at least 1 time");
         }
@@ -114,6 +138,7 @@ public class K1Coloring extends Algorithm<K1Coloring> {
             ++ranIterations;
         }
 
+        this.didConverge = ranIterations < maxIterations;
         return me();
     }
 

@@ -41,7 +41,6 @@ import org.neo4j.graphdb.Direction;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
