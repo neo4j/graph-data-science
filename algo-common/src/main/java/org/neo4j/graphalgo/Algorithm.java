@@ -23,6 +23,8 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.logging.Log;
 
+import java.util.concurrent.TimeUnit;
+
 public abstract class Algorithm<ME extends Algorithm<ME>> implements TerminationFlag {
 
     protected ProgressLogger progressLogger = ProgressLogger.NULL_LOGGER;

@@ -26,7 +26,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
@@ -46,6 +48,7 @@ import java.util.stream.Collectors;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
@@ -349,4 +352,30 @@ final class NeighborhoodSimilarityTest {
         );
         assertThat(ex.getMessage(), containsString("Direction BOTH is not supported"));
     }
+
+    @ParameterizedTest(name = "topk = {0}")
+    @ValueSource(ints = {0, 100})
+    void shouldLogProgress(int topk) {
+        TestLog log = new TestLog();
+
+        Graph graph = new GraphLoader(db)
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .withDirection(OUTGOING)
+            .load(HugeGraphFactory.class);
+
+        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
+            graph,
+            new NeighborhoodSimilarity.Config(0.0, 0, 100, topk, Pools.DEFAULT_CONCURRENCY, ParallelUtil.DEFAULT_BATCH_SIZE),
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY,
+            log
+        ).withProgressLogger(log);
+
+        neighborhoodSimilarity.computeToGraph(OUTGOING);
+
+        assertFalse(log.getLogMessages().isEmpty());
+        assertThat(log.getLogMessages().get(0), containsString(NeighborhoodSimilarity.class.getSimpleName()));
+    }
 }
+

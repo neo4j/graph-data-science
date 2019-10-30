@@ -36,6 +36,7 @@ import org.neo4j.logging.Log;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -51,13 +52,16 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     private final BitSet nodeFilter;
 
     private HugeObjectArray<long[]> vectors;
+    private long nodesToCompare;
+    private long topkComparisons;
 
     public NeighborhoodSimilarity(
             Graph graph,
             Config config,
             ExecutorService executorService,
             AllocationTracker tracker,
-            Log log) {
+            Log log
+    ) {
         this.graph = graph;
         this.config = config;
         this.executorService = executorService;
@@ -99,6 +103,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
 
         graph.forEachNode(node -> {
             if (graph.degree(node, direction) >= config.degreeCutoff) {
+                nodesToCompare++;
                 nodeFilter.set(node);
             }
             return true;
@@ -118,36 +123,42 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         });
 
         // Generate initial similarities
-        Stream<SimilarityResult> stream = init();
+        Stream<SimilarityResult> stream = compute();
 
         // Compute topK if necessary
         if (config.topk != 0) {
             stream = topK(stream);
         }
 
+        // Log progress
+        long similarityResultCount = (config.topk > 0)
+            ? topkComparisons
+            : nodesToCompare * nodesToCompare / 2;
+
+        AtomicLong count = new AtomicLong();
+        stream = stream.peek(sim -> logProgress(count.incrementAndGet(), similarityResultCount));
+
         // Compute topN if necessary
         if (config.top != 0) {
             stream = topN(stream);
         }
-
         return stream;
+    }
+
+    // TODO: benchmark if inlining the if check in the call sites is faster. it's ugly to inline,
+    //  so unless its faster prefer to keep it here
+    private void logProgress(long currentNode, long nodeCount) {
+        if (currentNode % Math.max((nodeCount / 100), 1) == 0) {
+            progressLogger.logProgress(currentNode, nodeCount);
+        }
     }
 
     public SimilarityGraphResult computeToGraph(Direction direction) {
         Graph simGraph = similarityGraph(computeToStream(direction));
-        long comparedNodes = 0;
-
-        // TODO: optimize
-        for (int i = 0; i < nodeFilter.size(); i++) {
-            if (nodeFilter.get(i)) {
-                comparedNodes++;
-            }
-        }
-
-        return new SimilarityGraphResult(simGraph, comparedNodes);
+        return new SimilarityGraphResult(simGraph, nodesToCompare);
     }
 
-    private Stream<SimilarityResult> init() {
+    private Stream<SimilarityResult> compute() {
         return LongStream.range(0, graph.nodeCount())
             .filter(nodeFilter::get)
             .boxed()
@@ -163,11 +174,10 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     private Stream<SimilarityResult> topK(Stream<SimilarityResult> inputStream) {
         Comparator<SimilarityResult> comparator = config.topk > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
         TopKMap topKMap = new TopKMap(vectors.size(), Math.abs(config.topk), comparator, tracker);
-
         inputStream
             .flatMap(similarity -> Stream.of(similarity, similarity.reverse()))
             .forEach(topKMap);
-
+        topkComparisons = topKMap.size();
         return topKMap.stream();
     }
 
