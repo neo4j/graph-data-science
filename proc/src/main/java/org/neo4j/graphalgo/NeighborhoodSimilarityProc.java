@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
+import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.impl.jaccard.NeighborhoodSimilarity;
@@ -32,6 +33,7 @@ import org.neo4j.graphalgo.impl.jaccard.NeighborhoodSimilarityFactory;
 import org.neo4j.graphalgo.impl.jaccard.SimilarityGraphResult;
 import org.neo4j.graphalgo.impl.jaccard.SimilarityResult;
 import org.neo4j.graphalgo.impl.results.AbstractResultBuilder;
+import org.neo4j.graphalgo.impl.results.MemRecResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -156,6 +158,17 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
         return Stream.of(resultBuilder.build());
     }
 
+    @Procedure(value = "algo.neighborhoodSimilarity.memrec")
+    public Stream<MemRecResult> memrec(
+        @Name(value = "label", defaultValue = "") String label,
+        @Name(value = "relationship", defaultValue = "") String relationshipType,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+    ) {
+        ProcedureConfiguration configuration = newConfig(label, relationshipType, config);
+        MemoryTreeWithDimensions memoryEstimation = this.memoryEstimation(configuration);
+        return Stream.of(new MemRecResult(memoryEstimation));
+    }
+
     private static RelationshipWithPropertyConsumer writeBack(int relType, int propertyType, Graph graph, Write ops) {
         return (source, target, property) -> {
             try {
@@ -183,14 +196,18 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
 
     @Override
     protected AlgorithmFactory<NeighborhoodSimilarity> algorithmFactory(ProcedureConfiguration config) {
-        return new NeighborhoodSimilarityFactory(new NeighborhoodSimilarity.Config(
-            config.get(SIMILARITY_CUTOFF_KEY, SIMILARITY_CUTOFF_DEFAULT),
-            config.get(DEGREE_CUTOFF_KEY, DEGREE_CUTOFF_DEFAULT),
-            config.get(TOP_KEY, TOP_DEFAULT),
-            config.get(TOP_K_KEY, TOP_K_DEFAULT),
-            config.getConcurrency(),
-            config.getBatchSize()
-        ));
+//        boolean computesSimilarityGraph = transaction.securityContext().mode().allowsWrites();
+        boolean computesSimilarityGraph = true;
+        return new NeighborhoodSimilarityFactory(
+            new NeighborhoodSimilarity.Config(
+                config.get(SIMILARITY_CUTOFF_KEY, SIMILARITY_CUTOFF_DEFAULT),
+                config.get(DEGREE_CUTOFF_KEY, DEGREE_CUTOFF_DEFAULT),
+                config.get(TOP_KEY, TOP_DEFAULT),
+                config.get(TOP_K_KEY, TOP_K_DEFAULT),
+                config.getConcurrency(),
+                config.getBatchSize()
+            ), computesSimilarityGraph
+        );
     }
 
     public static class NeighborhoodSimilarityResult {

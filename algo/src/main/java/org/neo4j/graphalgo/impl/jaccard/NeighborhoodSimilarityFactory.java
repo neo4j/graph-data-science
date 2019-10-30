@@ -20,23 +20,80 @@
 
 package org.neo4j.graphalgo.impl.jaccard;
 
+import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
+import org.neo4j.graphalgo.core.huge.AdjacencyList;
+import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.logging.Log;
+
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
 public class NeighborhoodSimilarityFactory extends AlgorithmFactory<NeighborhoodSimilarity> {
 
     private final NeighborhoodSimilarity.Config jaccardConfig;
-
-    public NeighborhoodSimilarityFactory(NeighborhoodSimilarity.Config jaccardConfig) {
+    private final boolean computesSimilarityGraph;
+    public NeighborhoodSimilarityFactory(NeighborhoodSimilarity.Config jaccardConfig, boolean computesSimilarityGraph) {
         this.jaccardConfig = jaccardConfig;
+        this.computesSimilarityGraph = computesSimilarityGraph;
     }
 
     @Override
     public NeighborhoodSimilarity build(Graph graph, ProcedureConfiguration configuration, AllocationTracker tracker, Log log) {
         return new NeighborhoodSimilarity(graph, jaccardConfig, Pools.DEFAULT, tracker, log);
+    }
+
+    @Override
+    public MemoryEstimation memoryEstimation() {
+        MemoryEstimations.Builder builder = MemoryEstimations.builder(NeighborhoodSimilarity.class)
+            .perNode("node filter", (nodeCount) -> sizeOfLongArray(BitSet.bits2words(nodeCount)))
+            .add(
+                "vectors",
+                MemoryEstimations.setup("", ((dimensions, concurrency) -> {
+                    int averageDegree = dimensions.nodeCount() == 0
+                        ? 0
+                        : Math.toIntExact(dimensions.maxRelCount() / dimensions.nodeCount());
+                    long averageVectorSize = sizeOfLongArray(averageDegree);
+                    return MemoryEstimations.builder(HugeObjectArray.class)
+                        .perNode("array", (nodeCount) -> nodeCount * averageVectorSize).build();
+                }))
+            );
+        if (computesSimilarityGraph) {
+            builder.add(
+                "similarity graph",
+                MemoryEstimations.setup("", (dimensions, concurrency) -> {
+                    long nodeCount = dimensions.nodeCount();
+                    int averageDegree = Math.toIntExact((nodeCount - 1) / 2);
+                    System.out.println("averageDegree = " + averageDegree);
+                    System.out.println("nodeCount = " + nodeCount);
+                    if (jaccardConfig.topk() > 0) {
+                        averageDegree = Math.min(averageDegree, jaccardConfig.topk());
+                    }
+                    return MemoryEstimations.builder(HugeGraph.class)
+                        .add(
+                            "adjacency list",
+                            AdjacencyList.compressedMemoryEstimation(averageDegree, nodeCount)
+                        )
+                        .add("adjacency offsets", AdjacencyOffsets.memoryEstimation())
+                        .build();
+                })
+            );
+        }
+        if (jaccardConfig.topk() > 0) {
+            builder.add(
+                "topk map",
+                MemoryEstimations.setup("", ((dimensions, concurrency) ->
+                    TopKMap.memoryEstimation(dimensions.nodeCount(), jaccardConfig.topk())
+                ))
+            );
+        }
+        return builder.build();
     }
 }

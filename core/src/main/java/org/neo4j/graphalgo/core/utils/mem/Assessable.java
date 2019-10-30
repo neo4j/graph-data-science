@@ -31,9 +31,7 @@ public interface Assessable {
      * @see MemoryEstimations
      * @see MemoryEstimation#estimate(GraphDimensions, int)
      */
-    default MemoryEstimation memoryEstimation() {
-        return MemoryEstimations.empty();
-    }
+    MemoryEstimation memoryEstimation();
 
     /**
      * Computes the memory consumption for the algorithm depending on the given {@link GraphDimensions} and concurrency.

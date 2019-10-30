@@ -179,9 +179,9 @@ public class NeighborhoodSimilarityBenchmark {
     }
 
     static void createGraph(GraphDatabaseService db) {
-        int itemCount = 2_000;
+        int itemCount = 5_000;
         Label itemLabel = Label.label("Item");
-        int personCount = 20_000;
+        int personCount = 50_000;
         Label personLabel = Label.label("Person");
         RelationshipType likesType = RelationshipType.withName("LIKES");
 

@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.GraphLoadFactory;
 import org.neo4j.graphalgo.impl.jaccard.SimilarityResult;
@@ -133,5 +134,17 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
                 ", (a)-[{w: %f}]->(c)" +
                 ", (b)-[{w: %f}]->(c)", 2 / 3.0, 1 / 3.0, 0.0)
             ), simGraph);
+    }
+
+    @Test
+    void shouldComputeMemrec() {
+        String query = "CALL algo.neighborhoodSimilarity.memrec(" +
+                       "    '', 'LIKES', {" +
+                       "        direction: 'OUTGOING'," +
+                       "        write: true, writeRelationshipType: 'SIMILAR_TO', writeProperty: 'score'" +
+                       "    }" +
+                       ") YIELD treeView";
+
+        System.out.println(db.execute(query).resultAsString());
     }
 }

@@ -200,17 +200,19 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
 
     public static final class Config {
         public static final Config DEFAULT = new NeighborhoodSimilarity.Config(
-                0.0,
-                0,
-                0,
-                0,
-                Pools.DEFAULT_CONCURRENCY,
-                ParallelUtil.DEFAULT_BATCH_SIZE);
+            0.0,
+            0,
+            0,
+            0,
+            Pools.DEFAULT_CONCURRENCY,
+            ParallelUtil.DEFAULT_BATCH_SIZE
+        );
 
         private final double similarityCutoff;
         private final double degreeCutoff;
 
         private final int top;
+
         private final int topk;
 
         private final int concurrency;
@@ -222,7 +224,8 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
                 int top,
                 int topk,
                 int concurrency,
-                int minBatchSize) {
+                int minBatchSize
+        ) {
             this.similarityCutoff = similarityCutoff;
             // TODO: make this constraint more prominent
             this.degreeCutoff = Math.max(1, degreeCutoff);
@@ -231,6 +234,11 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
             this.concurrency = concurrency;
             this.minBatchSize = minBatchSize;
         }
+
+        int topk() {
+            return topk;
+        }
+
     }
 
 }

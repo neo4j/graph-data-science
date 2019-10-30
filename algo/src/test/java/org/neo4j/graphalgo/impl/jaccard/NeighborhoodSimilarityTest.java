@@ -30,10 +30,13 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -377,5 +380,38 @@ final class NeighborhoodSimilarityTest {
         assertFalse(log.getLogMessages().isEmpty());
         assertThat(log.getLogMessages().get(0), containsString(NeighborhoodSimilarity.class.getSimpleName()));
     }
+
+
+    @Test
+    void shouldComputeMemrec() {
+        // upper bound is actually the number of relationships -- nodes to compare
+        // we assume that all target nodes are not compared
+        // relationship count is the lower bound of what to compare
+
+        GraphDimensions dimensions = new GraphDimensions.Builder()
+            .setNodeCount(2_222_000)
+            .setMaxRelCount(10_296_000)
+            .build();
+
+        NeighborhoodSimilarity.Config config = new NeighborhoodSimilarity.Config(
+            0.0,
+            0,
+            100,
+            100,
+            Pools.DEFAULT_CONCURRENCY,
+            ParallelUtil.DEFAULT_BATCH_SIZE
+        );
+
+        NeighborhoodSimilarityFactory factory = new NeighborhoodSimilarityFactory(
+            config,
+            true
+        );
+
+        MemoryEstimation estimation = factory.memoryEstimation();
+        MemoryTree estimate = estimation.estimate(dimensions, 1);
+
+        System.out.println(estimate.render());
+    }
+
 }
 

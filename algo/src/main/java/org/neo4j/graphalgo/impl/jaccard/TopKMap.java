@@ -21,6 +21,8 @@
 package org.neo4j.graphalgo.impl.jaccard;
 
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.core.utils.queue.LongPriorityQueue;
@@ -31,6 +33,17 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public class TopKMap implements Consumer<SimilarityResult> {
+
+    static MemoryEstimation memoryEstimation(long items, int topk) {
+        return MemoryEstimations.builder(TopKMap.class)
+            .add("topk lists",
+                MemoryEstimations.builder("topk lists", TopKList.class)
+                    .add("queue", LongPriorityQueue.memoryEstimation(topk))
+                    .build()
+                    .times(items)
+            )
+            .build();
+    }
 
     private final HugeObjectArray<TopKList> topKLists;
 

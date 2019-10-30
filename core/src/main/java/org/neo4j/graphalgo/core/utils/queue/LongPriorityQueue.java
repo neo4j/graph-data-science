@@ -20,12 +20,18 @@
 package org.neo4j.graphalgo.core.utils.queue;
 
 import com.carrotsearch.hppc.LongDoubleScatterMap;
+import com.carrotsearch.hppc.OpenHashContainers;
 import org.apache.lucene.util.ArrayUtil;
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 
 import java.util.NoSuchElementException;
 
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
 /**
  * A PriorityQueue specialized for ints that maintains a partial ordering of
@@ -37,6 +43,24 @@ import java.util.NoSuchElementException;
  * @author phorn@avantgarde-labs.de
  */
 public abstract class LongPriorityQueue implements PrimitiveLongIterable {
+
+    public static MemoryEstimation memoryEstimation(int capacity) {
+        return MemoryEstimations.builder(LongPriorityQueue.class)
+            .fixed("heap", sizeOfLongArray(capacity))
+            .add("costs",
+                MemoryEstimations.builder(LongDoubleScatterMap.class)
+                    .rangePerNode("map buffers", nodeCount -> {
+                            int minBufferSize = OpenHashContainers.emptyBufferSize();
+                            int maxBufferSize = OpenHashContainers.expectedBufferSize((int) Math.min(capacity, nodeCount));
+                            long min = sizeOfLongArray(minBufferSize) + sizeOfDoubleArray(minBufferSize);
+                            long max = sizeOfLongArray(maxBufferSize) + sizeOfDoubleArray(maxBufferSize);
+                            return MemoryRange.of(min, max);
+                        }
+                    ).build()
+            )
+            .build();
+    }
+
     private static final int DEFAULT_CAPACITY = 14;
     private int size = 0;
     private long[] heap;
