@@ -141,8 +141,8 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
         return betaLabelPropagationStream(label, relationshipType, config).map(StreamResult::new);
     }
 
-    @Procedure(value = "algo.labelPropagation.memRec")
-    @Description("CALL algo.labelPropagation.memRec(label:String, relationship:String, config:Map<String, Object>) " +
+    @Procedure(value = "algo.labelPropagation.memrec")
+    @Description("CALL algo.labelPropagation.memrec(label:String, relationship:String, config:Map<String, Object>) " +
                  "YIELD nodeId, label")
     public Stream<MemRecResult> labelPropagationMemrec(
             @Name(value = "label", defaultValue = "") String label,
