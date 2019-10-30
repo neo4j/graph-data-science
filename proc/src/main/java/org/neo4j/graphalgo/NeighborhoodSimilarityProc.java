@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.impl.jaccard.NeighborhoodSimilarity;
 import org.neo4j.graphalgo.impl.jaccard.NeighborhoodSimilarityFactory;
 import org.neo4j.graphalgo.impl.jaccard.SimilarityGraphResult;
 import org.neo4j.graphalgo.impl.jaccard.SimilarityResult;
+import org.neo4j.graphalgo.impl.results.AbstractResultBuilder;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -81,7 +82,7 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
     ) {
         AllocationTracker tracker = AllocationTracker.create();
         ProcedureConfiguration configuration = newConfig(label, relationshipType, config);
-        final Graph graph = loadGraph(configuration, tracker);
+        Graph graph = loadGraph(configuration, tracker, new WriteResultBuilder());
 
         if (graph.isEmpty()) {
             graph.release();
@@ -102,27 +103,27 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
                  "  write: 'true', writeRelationshipType: 'SIMILAR_TO', writeProperty: 'similarity', writeConcurrency: 4" +
                  "}) " +
                  "YIELD nodesCompared, relationships, write, writeRelationshipType, writeProperty - computes neighborhood similarities based on the Jaccard index")
-    public Stream<WriteResult> write(
+    public Stream<NeighborhoodSimilarityResult> write(
         @Name(value = "label", defaultValue = "") String label,
         @Name(value = "relationship", defaultValue = "") String relationshipType,
         @Name(value = "config", defaultValue = "{}") Map<String, Object> config
     ) {
+        WriteResultBuilder resultBuilder = new WriteResultBuilder();
         AllocationTracker tracker = AllocationTracker.create();
         ProcedureConfiguration configuration = newConfig(label, relationshipType, config);
-        final Graph graph = loadGraph(configuration, tracker);
+        Graph graph = loadGraph(configuration, tracker, resultBuilder);
 
         String writeRelationshipType = configuration.get(WRITE_RELATIONSHIP_TYPE_KEY, WRITE_RELATIONSHIP_TYPE_DEFAULT);
         String writeProperty = configuration.get(WRITE_PROPERTY_KEY, WRITE_PROPERTY_DEFAULT);
 
-        WriteResult writeResult = new WriteResult(
-            configuration.isWriteFlag(),
-            writeRelationshipType,
-            writeProperty
-        );
+        resultBuilder
+            .withWriteRelationshipType(writeRelationshipType)
+            .withWrite(configuration.isWriteFlag())
+            .withWriteProperty(writeProperty);
 
         if (graph.isEmpty()) {
             graph.release();
-            return Stream.of(writeResult);
+            return Stream.of(resultBuilder.build());
         }
 
         NeighborhoodSimilarity neighborhoodSimilarity = newAlgorithm(graph, configuration, tracker);
@@ -130,8 +131,9 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
         Direction direction = configuration.getDirection(COMPUTE_DIRECTION_DEFAULT);
         SimilarityGraphResult similarityGraphResult = neighborhoodSimilarity.computeToGraph(direction);
         Graph similarityGraph = similarityGraphResult.similarityGraph();
-        writeResult.nodesCompared = similarityGraphResult.comparedNodes();
-        writeResult.relationships = similarityGraph.relationshipCount();
+        resultBuilder
+            .withNodesCompared(similarityGraphResult.comparedNodes())
+            .withRelationshipCount(similarityGraph.relationshipCount());
 
         if (configuration.isWriteFlag() && similarityGraph.relationshipCount() > 0) {
             Exporter.of(api, similarityGraph)
@@ -151,7 +153,7 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
                     }
                 );
         }
-        return Stream.of(writeResult);
+        return Stream.of(resultBuilder.build());
     }
 
     private static RelationshipWithPropertyConsumer writeBack(int relType, int propertyType, Graph graph, Write ops) {
@@ -191,29 +193,66 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
         ));
     }
 
-    public static class WriteResult {
-        public long nodesCompared;
-        public long relationships;
-        public boolean write;
-        public String writeRelationshipType;
-        public String writeProperty;
+    public static class NeighborhoodSimilarityResult {
+        public final long loadMillis;
+        public final long computeMillis;
+        public final long writeMillis;
 
-        WriteResult(boolean write, String writeRelationshipType, String writeProperty) {
-            this(0L, 0L, write, writeRelationshipType, writeProperty);
-        }
+        public final long nodesCompared;
+        public final long relationships;
+        public final boolean write;
+        public final String writeRelationshipType;
+        public final String writeProperty;
 
-        WriteResult(
+        NeighborhoodSimilarityResult(
+            long loadMillis,
+            long computeMillis,
+            long writeMillis,
             long nodesCompared,
             long relationships,
             boolean write,
             String writeRelationshipType,
             String writeProperty
         ) {
+            this.loadMillis = loadMillis;
+            this.computeMillis = computeMillis;
+            this.writeMillis = writeMillis;
             this.nodesCompared = nodesCompared;
             this.relationships = relationships;
             this.write = write;
             this.writeRelationshipType = writeRelationshipType;
             this.writeProperty = writeProperty;
+        }
+    }
+
+    private static class WriteResultBuilder extends AbstractResultBuilder<NeighborhoodSimilarityResult> {
+
+        private long nodesCompared = 0L;
+
+        private String writeRelationshipType;
+
+        WriteResultBuilder withNodesCompared(long nodesCompared) {
+            this.nodesCompared = nodesCompared;
+            return this;
+        }
+
+        WriteResultBuilder withWriteRelationshipType(String writeRelationshipType) {
+            this.writeRelationshipType = writeRelationshipType;
+            return this;
+        }
+
+        @Override
+        public NeighborhoodSimilarityResult build() {
+            return new NeighborhoodSimilarityResult(
+                loadMillis,
+                computeMillis,
+                writeMillis,
+                nodesCompared,
+                relationshipCount,
+                write,
+                writeRelationshipType,
+                writeProperty
+            );
         }
     }
 

@@ -30,6 +30,8 @@ public abstract class AbstractResultBuilder<R> {
     protected long writeMillis = -1;
 
     protected long nodeCount;
+    protected long relationshipCount;
+
     protected boolean write = false;
     protected String writeProperty;
 
@@ -83,6 +85,11 @@ public abstract class AbstractResultBuilder<R> {
 
     public AbstractResultBuilder<R> withNodeCount(long nodeCount) {
         this.nodeCount = nodeCount;
+        return this;
+    }
+
+    public AbstractResultBuilder<R> withRelationshipCount(long relationshipCount) {
+        this.relationshipCount = relationshipCount;
         return this;
     }
 

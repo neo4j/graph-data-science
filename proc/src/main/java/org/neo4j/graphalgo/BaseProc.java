@@ -116,7 +116,7 @@ public abstract class BaseProc {
         }
     }
 
-    protected Graph loadGraph(
+    private Graph loadGraph(
             final ProcedureConfiguration config,
             final AllocationTracker tracker) {
         return runWithExceptionLogging(
@@ -130,7 +130,9 @@ public abstract class BaseProc {
             final AbstractResultBuilder<R> resultBuilder) {
         try (ProgressTimer ignored = resultBuilder.timeLoad()) {
             Graph graph = loadGraph(config, tracker);
-            resultBuilder.withNodeCount(graph.nodeCount());
+            resultBuilder
+                .withNodeCount(graph.nodeCount())
+                .withRelationshipCount(graph.relationshipCount());
             return graph;
         }
     }
