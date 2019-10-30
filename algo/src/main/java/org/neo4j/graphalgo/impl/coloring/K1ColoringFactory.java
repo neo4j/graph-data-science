@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.logging.Log;
@@ -51,23 +52,12 @@ public class K1ColoringFactory extends AlgorithmFactory<K1Coloring> {
     @Override
     public MemoryEstimation memoryEstimation() {
         return MemoryEstimations.builder(K1Coloring.class)
-                .perNode("labels", HugeLongArray::memoryEstimation)
-//                .perThread("votes", MemoryEstimations.builder()
-//                        .field("init step", InitStep.class)
-//                        .field("compute step", ComputeStep.class)
-//                        .field("step runner", StepRunner.class)
-//                        .field("compute step consumer", ComputeStepConsumer.class)
-//                        .field("votes container", LongDoubleScatterMap.class)
-//                        .rangePerNode("votes", nodeCount -> {
-//                            int minBufferSize = OpenHashContainers.emptyBufferSize();
-//                            int maxBufferSize = OpenHashContainers.expectedBufferSize((int) Math.min(nodeCount, Integer.MAX_VALUE));
-//                            if (maxBufferSize < minBufferSize) {
-//                                maxBufferSize = minBufferSize;
-//                            }
-//                            long min = sizeOfLongArray(minBufferSize) + sizeOfDoubleArray(minBufferSize);
-//                            long max = sizeOfLongArray(maxBufferSize) + sizeOfDoubleArray(maxBufferSize);
-//                            return MemoryRange.of(min, max);
-//                        }).build())
+                .perNode("colors", HugeLongArray::memoryEstimation)
+                .perNode("nodesToColor", MemoryUsage::sizeOfBitset)
+                .perThread("coloring", MemoryEstimations.builder()
+                        .field("coloringStep", ColoringStep.class)
+                        .perNode("forbiddenColors", MemoryUsage::sizeOfBitset)
+                    .build())
                 .build();
     }
 }

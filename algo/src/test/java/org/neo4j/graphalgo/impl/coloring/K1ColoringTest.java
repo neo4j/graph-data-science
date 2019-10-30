@@ -22,8 +22,10 @@ package org.neo4j.graphalgo.impl.coloring;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.impl.generator.RandomGraphGenerator;
@@ -33,6 +35,8 @@ import org.neo4j.graphdb.Direction;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class K1ColoringTest {
 
@@ -81,6 +85,37 @@ class K1ColoringTest {
         System.out.println(diffColors.size());
         System.out.println(diffColors);
 
+    }
+
+
+    @Test
+    void shouldComputeMemoryEstimation1Thread() {
+        long nodeCount = 100_000L;
+        int concurrency = 1;
+
+        assertMemoryEstimation(nodeCount, concurrency, 825256);
+    }
+
+    @Test
+    void shouldComputeMemoryEstimation4Threads() {
+        long nodeCount = 100_000L;
+        int concurrency = 4;
+        assertMemoryEstimation(nodeCount, concurrency, 863056);
+    }
+
+    @Test
+    void shouldComputeMemoryEstimation42Threads() {
+        long nodeCount = 100_000L;
+        int concurrency = 42;
+        assertMemoryEstimation(nodeCount, concurrency, 1341856);
+    }
+
+    private void assertMemoryEstimation(long nodeCount, int concurrency, long expected) {
+        GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(nodeCount).build();
+        final MemoryRange actual = new K1ColoringFactory().memoryEstimation().estimate(dimensions, concurrency).memoryUsage();
+
+        assertEquals(actual.min, actual.max);
+        assertEquals(expected, actual.min);
     }
 
 }

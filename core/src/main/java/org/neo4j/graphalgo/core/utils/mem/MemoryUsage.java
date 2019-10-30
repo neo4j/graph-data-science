@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.mem;
 
+import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectLongIdentityHashMap;
 import com.carrotsearch.hppc.ObjectLongMap;
 
@@ -194,6 +195,11 @@ public final class MemoryUsage {
 
     public static long sizeOfArray(final int length, final long bytesPerElement) {
         return alignObjectSize((long) BYTES_ARRAY_HEADER + (long) length * bytesPerElement);
+    }
+
+    public static long sizeOfBitset(final long length) {
+        int numWords = BitSet.bits2words(length);
+        return sizeOfLongArray(numWords) + sizeOfInstance(BitSet.class);
     }
 
     /**
