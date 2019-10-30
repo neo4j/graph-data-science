@@ -33,24 +33,23 @@ import java.util.concurrent.ExecutorService;
 
 public class K1Coloring extends Algorithm<K1Coloring> {
 
-    private final AllocationTracker tracker;
-    private final long batchSize;
-    private final ExecutorService executor;
-    private final int threadSize;
+    private final Graph graph;
     private final long nodeCount;
+    private final long batchSize;
+    private final int threadSize;
+    private final ExecutorService executor;
+    private final AllocationTracker tracker;
 
     private BitSet nodesToColor;
-
-    private Graph graph;
     private HugeLongArray colors;
     private long ranIterations;
 
     public K1Coloring(
-            Graph graph,
-            int minBatchSize,
-            int concurrency,
-            ExecutorService executor,
-            AllocationTracker tracker
+        Graph graph,
+        int minBatchSize,
+        int concurrency,
+        ExecutorService executor,
+        AllocationTracker tracker
     ) {
         this.graph = graph;
         this.executor = executor;
@@ -58,21 +57,24 @@ public class K1Coloring extends Algorithm<K1Coloring> {
 
         this.nodeCount = graph.nodeCount();
 
-        this.nodesToColor = new BitSet(nodeCount);
         this.batchSize = ParallelUtil.adjustedBatchSize(
             nodeCount,
             concurrency,
             minBatchSize,
-            Integer.MAX_VALUE);
+            Integer.MAX_VALUE
+        );
         long threadSize = ParallelUtil.threadCount(minBatchSize, nodeCount);
         if (threadSize > Integer.MAX_VALUE) {
             throw new IllegalArgumentException(String.format(
                 "Too many nodes (%d) to run k1 coloring with the given concurrency (%d) and batchSize (%d)",
                 nodeCount,
                 concurrency,
-                minBatchSize));
+                minBatchSize
+            ));
         }
         this.threadSize = (int) threadSize;
+
+        this.nodesToColor = new BitSet(nodeCount);
     }
 
     @Override
@@ -82,7 +84,7 @@ public class K1Coloring extends Algorithm<K1Coloring> {
 
     @Override
     public void release() {
-        graph = null;
+        graph.release();
         nodesToColor = null;
     }
 
@@ -152,7 +154,6 @@ public class K1Coloring extends Algorithm<K1Coloring> {
         }
 
         ParallelUtil.run(steps, executor);
-
         this.nodesToColor = nextNodesToColor;
     }
 }
