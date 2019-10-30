@@ -21,9 +21,16 @@
 package org.neo4j.graphalgo.impl.coloring;
 
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -31,60 +38,118 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.impl.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.impl.generator.RelationshipDistribution;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.Transaction;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.core.utils.ParallelUtil.DEFAULT_BATCH_SIZE;
 
 class K1ColoringTest {
 
+    private GraphDatabaseAPI db;
+
+    @BeforeEach
+    void setupGraphDb() {
+        db = TestDatabaseCreator.createTestDatabase();
+    }
+
+    @AfterEach
+    void shutdownGraphDb() {
+        if (db != null) db.shutdown();
+    }
+
+    @TestSupport.AllGraphTypesTest
+    void testK1Coloring(Class<? extends GraphFactory> graphImpl) {
+        final String DB_CYPHER =
+            "CREATE" +
+            " (a)" +
+            ",(b)" +
+            ",(c)" +
+            ",(d)" +
+            ",(a)-[:REL]->(b)" +
+            ",(a)-[:REL]->(c)";
+
+        db.execute(DB_CYPHER);
+
+        Graph graph;
+
+        GraphLoader graphLoader = new GraphLoader(db, Pools.DEFAULT)
+            .withDirection(Direction.OUTGOING)
+            .withDefaultConcurrency();
+
+
+        if (graphImpl == CypherGraphFactory.class) {
+            graphLoader
+                .withLabel("MATCH (n) RETURN id(n) AS id")
+                .withRelationshipType("MATCH (m)-->(n) \n" +
+                                      "RETURN id(m) AS source, id(n) AS target")
+                .withName("cypher");
+        }
+
+        try (Transaction tx = db.beginTx()) {
+            graph = graphLoader.load(graphImpl);
+        }
+
+        K1Coloring k1Coloring = new K1Coloring(
+            graph,
+            DEFAULT_BATCH_SIZE,
+            1,
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY
+        );
+
+        k1Coloring.compute(Direction.OUTGOING, 1000);
+
+        HugeLongArray colors = k1Coloring.colors();
+
+        assertNotEquals(colors.get(0), colors.get(1));
+        assertNotEquals(colors.get(0), colors.get(2));
+    }
+
     @Test
-    void test() {
+    void testParallelK1Coloring() {
         RandomGraphGenerator generator = new RandomGraphGenerator(
-            1000,
+            100_000,
             5,
-            RelationshipDistribution.UNIFORM,
+            RelationshipDistribution.POWER_LAW,
             Optional.empty(),
             AllocationTracker.EMPTY
         );
 
-        HugeGraph graph = generator.generate();
-
+        Graph graph = generator.generate();
 
         K1Coloring k1Coloring = new K1Coloring(
             graph,
-            500,
+            DEFAULT_BATCH_SIZE,
             2,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
-        k1Coloring.compute(Direction.BOTH, 1000);
-
+        k1Coloring.compute(Direction.BOTH, 100);
         HugeLongArray colors = k1Coloring.colors();
 
-        MutableLong counter = new MutableLong(0);
-        Set<Long> diffColors = new HashSet<>();
-
-        graph.forEachNode((nodeId) ->{
-            graph.forEachRelationship(nodeId, Direction.OUTGOING, (source, target) -> {
-                if (colors.get(source) == colors.get(target) && source != target) {
-                    counter.increment();
+        Set<Long> colorsUsed = new HashSet<>(100);
+        MutableLong conflicts = new MutableLong(0);
+        graph.forEachNode((nodeId) -> {
+            graph.forEachRelationship(nodeId, Direction.BOTH, (s, t) -> {
+                if(colors.get(s) == colors.get(t)) {
+                    conflicts.increment();
                 }
-
-                diffColors.add(colors.get(source));
+                colorsUsed.add(colors.get(s));
                 return true;
             });
             return true;
         });
 
-        System.out.println(k1Coloring.ranIterations());
-        System.out.println(counter);
-        System.out.println(diffColors.size());
-        System.out.println(diffColors);
-
+        assertTrue(conflicts.getValue() < 20);
+        assertTrue(colorsUsed.size() < 20);
     }
 
 
