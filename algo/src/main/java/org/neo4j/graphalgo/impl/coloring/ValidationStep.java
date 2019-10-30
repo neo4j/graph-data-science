@@ -64,6 +64,7 @@ final class ValidationStep implements Runnable {
                         !nextNodesToColor.get(target)
                     ) {
                         nextNodesToColor.set(source);
+                        return false;
                     }
 
                     return true;
