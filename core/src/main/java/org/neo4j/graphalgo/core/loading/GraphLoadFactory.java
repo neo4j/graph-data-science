@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 
 public final class GraphLoadFactory extends GraphFactory {
 
-    private static final ConcurrentHashMap<String, GraphsByRelationshipType> graphs = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, GraphsByRelationshipType> graphsByName = new ConcurrentHashMap<>();
 
     public GraphLoadFactory(
             final GraphDatabaseAPI api,
@@ -60,21 +60,21 @@ public final class GraphLoadFactory extends GraphFactory {
         return HugeGraphFactory.getMemoryEstimation(setup, dimensions);
     }
 
-    public static void set(String name, GraphsByRelationshipType graph) {
-        if (name == null || graph == null) {
+    public static void set(String graphName, GraphsByRelationshipType graph) {
+        if (graphName == null || graph == null) {
             throw new IllegalArgumentException("Both name and graph must be not null");
         }
-        if (graphs.putIfAbsent(name, graph) != null) {
-            throw new IllegalStateException("Graph name " + name + " already loaded");
+        if (graphsByName.putIfAbsent(graphName, graph) != null) {
+            throw new IllegalStateException("Graph name " + graphName + " already loaded");
         }
         graph.canRelease(false);
     }
 
-    public static Graph get(String name, String relationshipType, Optional<String> maybeRelationshipProperty) {
-        if (!exists(name)) {
-            throw new IllegalArgumentException(String.format("Graph with name '%s' does not exist.", name));
+    public static Graph get(String graphName, String relationshipType, Optional<String> maybeRelationshipProperty) {
+        if (!exists(graphName)) {
+            throw new IllegalArgumentException(String.format("Graph with name '%s' does not exist.", graphName));
         }
-        return graphs.get(name).getGraph(relationshipType, maybeRelationshipProperty);
+        return graphsByName.get(graphName).getGraph(relationshipType, maybeRelationshipProperty);
     }
 
     /**
@@ -82,47 +82,47 @@ public final class GraphLoadFactory extends GraphFactory {
      * Each sub-graph has the same node set and represents a unique relationship type / property combination.
      * This method returns the union of all subgraphs refered to by the given name.
      */
-    public static Graph getUnion(String name) {
-        if (!exists(name)) {
+    public static Graph getUnion(String graphName) {
+        if (!exists(graphName)) {
             // getAll is allowed to return null if the graph does not exist
             // as it's being used by algo.graph.info or algo.graph.remove,
             // that can deal with missing graphs
             return null;
         }
-        return graphs.get(name).getUnion();
+        return graphsByName.get(graphName).getUnion();
     }
 
-    public static boolean exists(String name) {
-        return name != null && graphs.containsKey(name);
+    public static boolean exists(String graphName) {
+        return graphName != null && graphsByName.containsKey(graphName);
     }
 
-    public static Graph remove(String name) {
-        if (!exists(name)) {
+    public static Graph remove(String graphName) {
+        if (!exists(graphName)) {
             // remove is allowed to return null if the graph does not exist
             // as it's being used by algo.graph.info or algo.graph.remove,
             // that can deal with missing graphs
             return null;
         }
-        Graph graph = graphs.remove(name).getUnion();
+        Graph graph = graphsByName.remove(graphName).getUnion();
         graph.canRelease(true);
         graph.release();
         return graph;
     }
 
-    public static String getType(String name) {
-        if (name == null) return null;
-        GraphsByRelationshipType graph = graphs.get(name);
+    public static String getType(String graphName) {
+        if (graphName == null) return null;
+        GraphsByRelationshipType graph = graphsByName.get(graphName);
         return graph == null ? null : graph.getGraphType();
     }
 
     public static Map<String, Graph> getLoadedGraphs() {
-        return graphs.entrySet().stream().collect(Collectors.toMap(
+        return graphsByName.entrySet().stream().collect(Collectors.toMap(
                 Map.Entry::getKey,
                 e -> e.getValue().getUnion()
         ));
     }
 
     public static void removeAllLoadedGraphs() {
-        graphs.clear();
+        graphsByName.clear();
     }
 }

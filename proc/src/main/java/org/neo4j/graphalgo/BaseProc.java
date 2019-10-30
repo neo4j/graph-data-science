@@ -54,6 +54,10 @@ public abstract class BaseProc {
     @Context
     public ProcedureCallContext callContext;
 
+    protected String getUsername() {
+        return transaction.subjectOrAnonymous().username();
+    }
+
     protected abstract GraphLoader configureLoader(
             GraphLoader loader,
             ProcedureConfiguration config);
@@ -74,7 +78,7 @@ public abstract class BaseProc {
             configuration.setRelationshipTypeOrQuery(relationship);
         }
 
-        configuration.setUsername(transaction.subjectOrAnonymous().username());
+        configuration.setUsername(getUsername());
 
         Set<String> returnItems = callContext.outputFields().collect(Collectors.toSet());
         configuration
