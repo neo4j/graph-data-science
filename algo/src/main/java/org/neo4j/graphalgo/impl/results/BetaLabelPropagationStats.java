@@ -46,7 +46,8 @@ public class BetaLabelPropagationStats {
         false,
         false,
         "<empty>",
-        "<empty>", "<empty>"
+        "<empty>",
+        "<empty>"
     );
 
     public final long loadMillis;
