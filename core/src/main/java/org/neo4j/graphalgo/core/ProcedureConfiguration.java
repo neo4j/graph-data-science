@@ -53,6 +53,8 @@ public class ProcedureConfiguration {
 
     private final Map<String, Object> config;
 
+    private String username;
+
     private boolean computeHistogram = false;
 
     private boolean computeCommunityCount = false;
@@ -69,6 +71,15 @@ public class ProcedureConfiguration {
      */
     public boolean containsKey(String key) {
         return this.config.containsKey(key);
+    }
+
+    public ProcedureConfiguration setUsername(String username) {
+        this.username = username;
+        return this;
+    }
+
+    public String getUsername() {
+        return username;
     }
 
     /**

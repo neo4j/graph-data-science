@@ -74,6 +74,8 @@ public abstract class BaseProc {
             configuration.setRelationshipTypeOrQuery(relationship);
         }
 
+        configuration.setUsername(transaction.subjectOrAnonymous().username());
+
         Set<String> returnItems = callContext.outputFields().collect(Collectors.toSet());
         configuration
             .setComputeCommunityCount(OutputFieldParser.computeCommunityCount(returnItems))

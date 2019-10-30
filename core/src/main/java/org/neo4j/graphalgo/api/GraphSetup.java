@@ -19,15 +19,12 @@
  */
 package org.neo4j.graphalgo.api;
 
-import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
-import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
-import org.neo4j.logging.NullLog;
 
 import java.util.Collections;
 import java.util.Map;
@@ -40,6 +37,8 @@ import java.util.concurrent.ExecutorService;
  */
 public class GraphSetup {
 
+    // user name
+    public final String username;
     // graph name
     public final String name;
     // start label type. null means any label.
@@ -84,41 +83,6 @@ public class GraphSetup {
     public final DeduplicationStrategy deduplicationStrategy;
 
     /**
-     * Setup Graph to load any label, any relationship, no property in single threaded mode
-     */
-    public GraphSetup() {
-        this(null, null, null, 1.0, null);
-    }
-
-    public GraphSetup(
-            String label,
-            String relation,
-            String weightProperty,
-            double defaultWeight,
-            ExecutorService executor) {
-        this(
-                label,
-                label,
-                relation,
-                Direction.BOTH,
-                Collections.emptyMap(),
-                executor,
-                Pools.DEFAULT_CONCURRENCY,
-                -1,
-                DeduplicationStrategy.NONE,
-                NullLog.getInstance(),
-                -1L,
-                false,
-                false,
-                AllocationTracker.EMPTY,
-                TerminationFlag.RUNNING_TRUE,
-                null,
-                PropertyMappings.of(),
-                PropertyMappings.of(PropertyMapping.of(weightProperty, weightProperty, defaultWeight))
-        );
-    }
-
-    /**
      * main ctor
      *
      * @param startLabel                 the start label. null means any label.
@@ -130,6 +94,7 @@ public class GraphSetup {
      * @param sort                       true if relationships should stored in sorted ascending order
      */
     public GraphSetup(
+            String username,
             String startLabel,
             String endLabel,
             String relationshipType,
@@ -149,6 +114,7 @@ public class GraphSetup {
             PropertyMappings nodePropertyMappings,
             PropertyMappings relationshipPropertyMappings) {
 
+        this.username = username;
         this.startLabel = startLabel;
         this.endLabel = endLabel;
         this.relationshipType = relationshipType;

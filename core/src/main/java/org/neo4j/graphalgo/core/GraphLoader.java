@@ -65,6 +65,8 @@ public class GraphLoader {
             GraphDatabaseAPI.class,
             GraphSetup.class);
 
+    private String username = null;
+
     private String name = null;
     private String label = null;
     private String relation = null;
@@ -110,6 +112,7 @@ public class GraphLoader {
 
     public GraphLoader init(Log log, String label, String relationship, ProcedureConfiguration config) {
         return withLog(log)
+                .withUsername(config.getUsername())
                 .withName(config.getGraphName(null))
                 .withOptionalLabel(label)
                 .withOptionalRelationshipType(relationship)
@@ -204,6 +207,11 @@ public class GraphLoader {
 
     public GraphLoader withName(String name) {
         this.name = name;
+        return this;
+    }
+
+    public GraphLoader withUsername(String username) {
+        this.username = username;
         return this;
     }
 
@@ -436,6 +444,7 @@ public class GraphLoader {
         }
 
         return new GraphSetup(
+                username,
                 label,
                 null,
                 relation,
