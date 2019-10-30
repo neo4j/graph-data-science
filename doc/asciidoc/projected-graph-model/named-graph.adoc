@@ -205,6 +205,29 @@ CALL algo.graph.load('cities', 'City', '', {
 We can refer to the loaded properties in each algorithm that supports reading node properties.
 For a path search algorithm, one could use the `population` as node weight whereas a clustering algorithm could use the `stateId` as seed value.
 
+We can also use the <<cypher-projection, Cypher projection>> to load multiple node properties.
+Here, the specified Neo4j node property must appear in the `RETURN` clause of the node query.
+If a property is not present on a node in Neo4j, the given default value is used instead.
+
+.The following query also loads all cities including their `population` and `stateId` properties
+[source,cypher]
+----
+CALL algo.graph.load('cities',
+  'MATCH (c:City) RETURN id(c) AS id, c.population AS population, c.stateId AS stateId',
+  'MATCH (a:City)-->(b:City) RETURN id(a) AS sourceId, id(b) AS targetId', {
+    graph: 'cypher',
+    nodeProperties: {
+      population: {
+          property: 'population'
+      },
+      seedValue: {
+          property: 'stateId',
+          defaultValue: 0
+      }
+  }
+})
+----
+
 .If we just want to refer to the Neo4j node property key, we can use the following shorthand syntax:
 [source,cypher]
 ----

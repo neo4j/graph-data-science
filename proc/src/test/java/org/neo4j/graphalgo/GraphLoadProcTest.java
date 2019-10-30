@@ -189,8 +189,9 @@ class GraphLoadProcTest extends ProcTestBase {
         }
     }
 
-    @Test
-    void shouldLoadGraphWithMultipleNodeProperties() throws KernelException {
+    @ParameterizedTest
+    @ValueSource(strings = {"huge", "cypher"})
+    void shouldLoadGraphWithMultipleNodeProperties(String graphType) throws KernelException {
         GraphDatabaseAPI testLocalDb = TestDatabaseCreator.createTestDatabase();
         testLocalDb.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(GraphLoadProc.class);
 
@@ -203,8 +204,9 @@ class GraphLoadProcTest extends ProcTestBase {
 
         testLocalDb.execute(testGraph);
 
-        String loadQuery = "CALL algo.graph.load(" +
-                           "    'fooGraph', 'Node', '', {" +
+        String loadQueryTemplate = "CALL algo.graph.load(" +
+                           "    'fooGraph', '%s', '%s', {" +
+                           "        graph: '%s'," +
                            "        nodeProperties: {" +
                            "            fooProp: 'foo'," +
                            "            barProp: {" +
@@ -214,6 +216,16 @@ class GraphLoadProcTest extends ProcTestBase {
                            "        }" +
                            "    }" +
                            ")";
+
+        String loadQuery;
+        if (graphType.equalsIgnoreCase("cypher")) {
+            loadQuery = String.format(loadQueryTemplate,
+                "MATCH (n:Node) RETURN id(n) AS id, n.foo AS foo, n.bar AS bar",
+                "MATCH (n:Node)-->(m:Node) RETURN id(n) AS sourceId, id(m) AS targetId",
+                graphType);
+        } else {
+            loadQuery = String.format(loadQueryTemplate, "Node", "", graphType);
+        }
 
         runQuery(loadQuery, testLocalDb, row -> {
             Map<String, Object> nodeProperties = (Map<String, Object>) row.get("nodeProperties");
