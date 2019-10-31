@@ -36,6 +36,7 @@ import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -404,13 +405,37 @@ final class NeighborhoodSimilarityTest {
             true
         );
 
-        MemoryEstimation estimation = factory.memoryEstimation();
-        MemoryTree estimate = estimation.estimate(dimensions, 1);
-        MemoryRange actual = estimate.memoryUsage();
-        System.out.println(estimate.render());
+        MemoryTree actual = factory.memoryEstimation().estimate(dimensions, 1);
 
-        MemoryRange expected = MemoryRange.of(1273641824L, 5340739816L);
-        assertEquals(expected, actual);
+        long graphRangeMin = 8651112L;
+        long graphRangeMax = 8651112L;
+        MemoryRange graphRange = MemoryRange.of(graphRangeMin, graphRangeMax);
+
+        long topKMapRangeMin = 1104000016L;
+        long topKMapRangeMax = 5072000016L;
+        MemoryRange topKRange = MemoryRange.of(topKMapRangeMin, topKMapRangeMax);
+
+        long vectorsRangeMin = 56000016L;
+        long vectorsRangeMax = 56000016L;
+        MemoryRange vectorsRange = MemoryRange.of(vectorsRangeMin, vectorsRangeMax);
+
+        long nodeFilterRangeMin = 125016L;
+        long nodeFilterRangeMax = 125016L;
+        MemoryRange nodeFilterRange = MemoryRange.of(nodeFilterRangeMin, nodeFilterRangeMax);
+
+        long thisInstance = 64;
+
+        MemoryTree expected = MemoryEstimations.builder()
+            .fixed("", graphRange)
+            .fixed("", topKRange)
+            .fixed("", vectorsRange)
+            .fixed("", nodeFilterRange)
+            .fixed("", thisInstance)
+            .build().estimate(dimensions, 1);
+
+        System.out.println(actual.render());
+
+        assertEquals(expected.memoryUsage(), actual.memoryUsage());
     }
 
 }

@@ -45,19 +45,23 @@ public class SimilarityGraphBuilder {
 
     private static final int DEFAULT_WEIGHT_PROPERTY_ID = -2;
 
-    static MemoryEstimation memoryEstimation(int topk) {
+    static MemoryEstimation memoryEstimation(int topk, int top) {
         return MemoryEstimations.setup("", (dimensions, concurrency) -> {
             long maxNodesToCompare = Math.min(dimensions.maxRelCount(), dimensions.nodeCount());
-
             long maxNumberOfSimilarityResults = maxNodesToCompare * (maxNodesToCompare - 1) / 2;
-            int averageDegree = Math.toIntExact(maxNumberOfSimilarityResults / maxNodesToCompare);
+            long maxNodesWithNewRels = maxNodesToCompare;
+            if (top > 0) {
+                maxNumberOfSimilarityResults = Math.min(maxNumberOfSimilarityResults, top);
+                maxNodesWithNewRels = maxNumberOfSimilarityResults * 2;
+            }
+            int averageDegree = Math.toIntExact(maxNumberOfSimilarityResults / maxNodesWithNewRels);
             if (topk > 0) {
                 averageDegree = Math.min(averageDegree, topk);
             }
             return MemoryEstimations.builder(HugeGraph.class)
                 .add(
                     "adjacency list",
-                    AdjacencyList.compressedMemoryEstimation(averageDegree, maxNodesToCompare)
+                    AdjacencyList.compressedMemoryEstimation(averageDegree, maxNodesWithNewRels)
                 )
                 .add("adjacency offsets", AdjacencyOffsets.memoryEstimation())
                 .build();

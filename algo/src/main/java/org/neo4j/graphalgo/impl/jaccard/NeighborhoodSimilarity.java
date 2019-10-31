@@ -239,6 +239,10 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
             return topk;
         }
 
+        int top() {
+            return top;
+        }
+
     }
 
 }
