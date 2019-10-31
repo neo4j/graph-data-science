@@ -383,9 +383,60 @@ final class NeighborhoodSimilarityTest {
         assertThat(log.getLogMessages().get(0), containsString(NeighborhoodSimilarity.class.getSimpleName()));
     }
 
-
     @Test
     void shouldComputeMemrec() {
+        GraphDimensions dimensions = new GraphDimensions.Builder()
+            .setNodeCount(1_000_000)
+            .setMaxRelCount(5_000_000)
+            .build();
+
+        NeighborhoodSimilarity.Config config = new NeighborhoodSimilarity.Config(
+            0.0,
+            0,
+            0,
+            100,
+            Pools.DEFAULT_CONCURRENCY,
+            ParallelUtil.DEFAULT_BATCH_SIZE
+        );
+
+        NeighborhoodSimilarityFactory factory = new NeighborhoodSimilarityFactory(
+            config,
+            true
+        );
+
+        MemoryTree actual = factory.memoryEstimation().estimate(dimensions, 1);
+
+        long graphRangeMin = 113516712L;
+        long graphRangeMax = 212614704L;
+        MemoryRange graphRange = MemoryRange.of(graphRangeMin, graphRangeMax);
+
+        long topKMapRangeMin = 1104000016L;
+        long topKMapRangeMax = 5072000016L;
+        MemoryRange topKRange = MemoryRange.of(topKMapRangeMin, topKMapRangeMax);
+
+        long vectorsRangeMin = 56000016L;
+        long vectorsRangeMax = 56000016L;
+        MemoryRange vectorsRange = MemoryRange.of(vectorsRangeMin, vectorsRangeMax);
+
+        long nodeFilterRangeMin = 125016L;
+        long nodeFilterRangeMax = 125016L;
+        MemoryRange nodeFilterRange = MemoryRange.of(nodeFilterRangeMin, nodeFilterRangeMax);
+
+        long thisInstance = 64;
+
+        MemoryTree expected = MemoryEstimations.builder()
+            .fixed("", graphRange)
+            .fixed("", topKRange)
+            .fixed("", vectorsRange)
+            .fixed("", nodeFilterRange)
+            .fixed("", thisInstance)
+            .build().estimate(dimensions, 1);
+
+        assertEquals(expected.memoryUsage(), actual.memoryUsage());
+    }
+
+    @Test
+    void shouldComputeMemrecWithTop() {
         GraphDimensions dimensions = new GraphDimensions.Builder()
             .setNodeCount(1_000_000)
             .setMaxRelCount(5_000_000)
@@ -433,10 +484,7 @@ final class NeighborhoodSimilarityTest {
             .fixed("", thisInstance)
             .build().estimate(dimensions, 1);
 
-        System.out.println(actual.render());
-
         assertEquals(expected.memoryUsage(), actual.memoryUsage());
     }
-
 }
 
