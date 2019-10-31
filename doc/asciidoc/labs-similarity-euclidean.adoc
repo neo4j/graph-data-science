@@ -150,8 +150,39 @@ include::scripts/similarity-euclidean.cypher[tag=stream]
 [opts="header"]
 |===
 | `from`     | `to`       | `similarity`
-| "Zhen"     | "Arya"     | 0.0
-| "Zhen"     | "Karin"    | 0.0
+| "Praveena" | "Karin"    | 3.0
+| "Zhen"     | "Michael"  | 3.605551275463989
+| "Praveena" | "Michael"  | 4.0
+| "Arya"     | "Karin"    | 4.358898943540674
+| "Michael"  | "Arya"     | 5.0
+| "Zhen"     | "Praveena" | 6.708203932499369
+| "Michael"  | "Karin"    | 7.0
+| "Praveena" | "Arya"     | 8.0
+| "Zhen"     | "Arya"     | NaN
+| "Zhen"     | "Karin"    | NaN
+
+|===
+// end::stream[]
+
+Praveena and Karin have the most similar food preferences, with a euclidean distance of 3.0.
+Lower scores are better here; a score of 0 would indicate that users have exactly the same preferences.
+
+We can also see at the bottom of the list that Zhen and Arya and Zhen and Karin have a similarity of `NaN`.
+We get this result because there is no overlap in their food preferences.
+
+We can filter those results out using the `algo.isFinite` function.
+
+.The following will return a stream of node pairs, along with their intersection and finite euclidean similarities:
+[source,cypher]
+----
+include::scripts/similarity-euclidean.cypher[tag=stream-finite]
+----
+
+// tag::stream-finite[]
+.Results
+[opts="header"]
+|===
+| `from`     | `to`       | `similarity`
 | "Praveena" | "Karin"    | 3.0
 | "Zhen"     | "Michael"  | 3.605551275463989
 | "Praveena" | "Michael"  | 4.0
@@ -162,12 +193,11 @@ include::scripts/similarity-euclidean.cypher[tag=stream]
 | "Praveena" | "Arya"     | 8.0
 
 |===
-// end::stream[]
+// end::stream-finite[]
 
-Zhen and Arya, and Zhen and Karin have the most similar food preferences, with a euclidean distance of 0.0.
-Lower scores are better here; a score of 0 would indicate that users have exactly the same preferences.
+We can see in these results that Zhen and Arya and Zhen and Karin have been removed.
 
-We might decide that we don't want to see users with a similarity above 5 returned in our results.
+We might decide that we don't want to see users with a similarity above 4 returned in our results.
 If so, we can filter those out by passing in the `similarityCutoff` parameter.
 
 .The following will return a stream of node pairs that have a similarity of at most 17, along with their euclidean distance:
@@ -181,8 +211,6 @@ include::scripts/similarity-euclidean.cypher[tag=stream-similarity-cutoff]
 [opts="header"]
 |===
 | `from`     | `to`       | `similarity`
-| "Zhen"     | "Arya"    | 0.0
-| "Zhen"     | "Karin"   | 0.0
 | "Praveena" | "Karin"   | 3.0
 | "Zhen"     | "Michael" | 3.605551275463989
 | "Praveena" | "Michael" | 4.0
@@ -204,17 +232,17 @@ include::scripts/similarity-euclidean.cypher[tag=stream-topk]
 [opts="header",cols="1,1,1"]
 |===
 | `from`       | `to`         | `similarity`
-| "Arya"     | "Zhen"  | 0.0
-| "Karin"    | "Zhen"  | 0.0
-| "Michael"  | "Zhen"  | 3.605551275463989
-| "Praveena" | "Karin" | 3.0
-| "Zhen"     | "Arya"  | 0.0
+| "Arya"     | "Karin"    | 4.358898943540674
+| "Karin"    | "Praveena" | 3.0
+| "Michael"  | "Zhen"     | 3.605551275463989
+| "Praveena" | "Karin"    | 3.0
+| "Zhen"     | "Michael"  | 3.605551275463989
 
 |===
 // end::stream-topk[]
 
-These results will not be symmetrical.
-For example, the person most similar to Michael is Zhen, but the person most similar to Zhen is Arya.
+These results will not necessarily be symmetrical.
+For example, the person most similar to Arya is Karin, but the person most similar to Karin is Praveena.
 
 .The following will find the most similar user for each user, and store a relationship between those users:
 [source, cypher]
@@ -227,7 +255,7 @@ include::scripts/similarity-euclidean.cypher[tag=write-back]
 [opts="header"]
 |===
 | `nodes` | `similarityPairs` | `write` | `writeRelationshipType` | `writeProperty` | `min`  | `max`  | `mean` | `p95`
-| 5     | 5               | TRUE  | "SIMILAR"             | "score"       | 0.0 | 3.6055450439453125 | 1.3211090087890625 | 3.6055450439453125
+| 5     | 5               | TRUE  | "SIMILAR"             | "score"       | 3.0 | 4.3589019775390625 | 3.5139984130859374 | 4.3589019775390625
 |===
 // end::write-back[]
 
@@ -267,9 +295,9 @@ include::scripts/similarity-euclidean.cypher[tag=source-target-ids]
 .Results
 [opts="header",cols="1,1,1"]
 |===
-| `from`   | `to`     | `similarity`\
-| Praveena | Karin | 3.0       
-| Arya     | Zhen  | 0.0       
+| `from`   | `to`     | `similarity`
+| "Arya"     | "Karin" | 4.358898943540674
+| "Praveena" | "Karin" | 3.0
 |===
 // end::source-target-ids[]
 

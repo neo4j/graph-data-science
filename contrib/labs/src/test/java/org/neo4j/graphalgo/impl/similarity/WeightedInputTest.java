@@ -281,7 +281,7 @@ class WeightedInputTest {
 
         SimilarityResult similarityResult = input1.sumSquareDeltaSkip(null, -1.0, input2, Double.NaN, true);
 
-        assertEquals(Double.MAX_VALUE, similarityResult.similarity, 0.01);
+        assertEquals(Double.NaN, similarityResult.similarity, 0.01);
     }
 
 

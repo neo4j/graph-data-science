@@ -139,7 +139,7 @@ public class Intersections {
             comparisons++;
         }
 
-        return comparisons == 0 ? Double.MAX_VALUE : result;
+        return comparisons == 0 ? Double.NaN : result;
     }
 
     public static double sumSquareDelta(double[] vector1, double[] vector2, int len) {
