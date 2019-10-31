@@ -62,7 +62,7 @@ class MemRecProcTest {
     @Test
     void memrecProcedure() {
         test(
-                "algo.memrec(null, null, null, {direction: 'BOTH', graph: 'huge'})",
+                "algo.memrec(null, null, null, {})",
                 "Missing procedure parameter, the available and supported procedures are {graph.load, pageRank, unionFind}.");
         test(
                 "algo.memrec(null, null, 'doesNotExist', {direction: 'BOTH', graph: 'huge'})",
