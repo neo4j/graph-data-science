@@ -126,6 +126,7 @@ public class Intersections {
         boolean skipNan = Double.isNaN(skipValue);
 
         double result = 0;
+        double comparisons = 0;
         for (int i = 0; i < len; i++) {
             double weight1 = vector1[i];
             if (shouldSkip(weight1, skipValue, skipNan)) continue;
@@ -135,8 +136,10 @@ public class Intersections {
 
             double delta = weight1 - weight2;
             result += delta * delta;
+            comparisons++;
         }
-        return result;
+
+        return comparisons == 0 ? Double.MAX_VALUE : result;
     }
 
     public static double sumSquareDelta(double[] vector1, double[] vector2, int len) {
