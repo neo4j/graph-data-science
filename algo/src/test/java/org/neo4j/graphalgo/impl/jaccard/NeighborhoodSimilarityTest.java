@@ -36,6 +36,7 @@ import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
@@ -384,13 +385,9 @@ final class NeighborhoodSimilarityTest {
 
     @Test
     void shouldComputeMemrec() {
-        // upper bound is actually the number of relationships -- nodes to compare
-        // we assume that all target nodes are not compared
-        // relationship count is the lower bound of what to compare
-
         GraphDimensions dimensions = new GraphDimensions.Builder()
-            .setNodeCount(2_222_000)
-            .setMaxRelCount(10_296_000)
+            .setNodeCount(1_000_000)
+            .setMaxRelCount(5_000_000)
             .build();
 
         NeighborhoodSimilarity.Config config = new NeighborhoodSimilarity.Config(
@@ -409,8 +406,11 @@ final class NeighborhoodSimilarityTest {
 
         MemoryEstimation estimation = factory.memoryEstimation();
         MemoryTree estimate = estimation.estimate(dimensions, 1);
-
+        MemoryRange actual = estimate.memoryUsage();
         System.out.println(estimate.render());
+
+        MemoryRange expected = MemoryRange.of(1273641824L, 5340739816L);
+        assertEquals(expected, actual);
     }
 
 }

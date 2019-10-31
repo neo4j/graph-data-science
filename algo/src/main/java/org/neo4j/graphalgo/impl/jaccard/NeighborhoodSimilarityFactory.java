@@ -68,22 +68,7 @@ public class NeighborhoodSimilarityFactory extends AlgorithmFactory<Neighborhood
         if (computesSimilarityGraph) {
             builder.add(
                 "similarity graph",
-                MemoryEstimations.setup("", (dimensions, concurrency) -> {
-                    long nodeCount = dimensions.nodeCount();
-                    int averageDegree = Math.toIntExact((nodeCount - 1) / 2);
-                    System.out.println("averageDegree = " + averageDegree);
-                    System.out.println("nodeCount = " + nodeCount);
-                    if (jaccardConfig.topk() > 0) {
-                        averageDegree = Math.min(averageDegree, jaccardConfig.topk());
-                    }
-                    return MemoryEstimations.builder(HugeGraph.class)
-                        .add(
-                            "adjacency list",
-                            AdjacencyList.compressedMemoryEstimation(averageDegree, nodeCount)
-                        )
-                        .add("adjacency offsets", AdjacencyOffsets.memoryEstimation())
-                        .build();
-                })
+                SimilarityGraphBuilder.memoryEstimation(jaccardConfig.topk())
             );
         }
         if (jaccardConfig.topk() > 0) {

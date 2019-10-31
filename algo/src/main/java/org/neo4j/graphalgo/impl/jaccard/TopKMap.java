@@ -38,7 +38,7 @@ public class TopKMap implements Consumer<SimilarityResult> {
         return MemoryEstimations.builder(TopKMap.class)
             .add("topk lists",
                 MemoryEstimations.builder("topk lists", TopKList.class)
-                    .add("queue", LongPriorityQueue.memoryEstimation(topk))
+                    .add("queues", LongPriorityQueue.memoryEstimation(topk))
                     .build()
                     .times(items)
             )

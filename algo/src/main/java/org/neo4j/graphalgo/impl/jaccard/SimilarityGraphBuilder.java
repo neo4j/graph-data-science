@@ -32,6 +32,8 @@ import org.neo4j.graphalgo.core.loading.Relationships;
 import org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer;
 import org.neo4j.graphalgo.core.loading.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.RawValues;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.kernel.api.StatementConstants;
 
@@ -42,6 +44,25 @@ import java.util.stream.Stream;
 public class SimilarityGraphBuilder {
 
     private static final int DEFAULT_WEIGHT_PROPERTY_ID = -2;
+
+    static MemoryEstimation memoryEstimation(int topk) {
+        return MemoryEstimations.setup("", (dimensions, concurrency) -> {
+            long maxNodesToCompare = Math.min(dimensions.maxRelCount(), dimensions.nodeCount());
+
+            long maxNumberOfSimilarityResults = maxNodesToCompare * (maxNodesToCompare - 1) / 2;
+            int averageDegree = Math.toIntExact(maxNumberOfSimilarityResults / maxNodesToCompare);
+            if (topk > 0) {
+                averageDegree = Math.min(averageDegree, topk);
+            }
+            return MemoryEstimations.builder(HugeGraph.class)
+                .add(
+                    "adjacency list",
+                    AdjacencyList.compressedMemoryEstimation(averageDegree, maxNodesToCompare)
+                )
+                .add("adjacency offsets", AdjacencyOffsets.memoryEstimation())
+                .build();
+        });
+    }
 
     private final Graph baseGraph;
     private final AllocationTracker tracker;
