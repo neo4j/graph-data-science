@@ -49,7 +49,7 @@ public class TopKMap implements Consumer<SimilarityResult> {
 
     TopKMap(long items, int topK, Comparator<SimilarityResult> comparator, AllocationTracker tracker) {
         topKLists = HugeObjectArray.newArray(TopKList.class, items, tracker);
-        topKLists.setAll(node1 -> new TopKList(node1, topK, comparator));
+        topKLists.setAll(node1 -> new TopKList(topK, comparator));
     }
 
     @Override
@@ -60,7 +60,7 @@ public class TopKMap implements Consumer<SimilarityResult> {
     public Stream<SimilarityResult> stream() {
         return LongStream.range(0, topKLists.size())
             .boxed()
-            .flatMap(node1 -> topKLists.get(node1).stream());
+            .flatMap(node1 -> topKLists.get(node1).stream(node1));
     }
 
     // TODO: parallelize
@@ -74,14 +74,12 @@ public class TopKMap implements Consumer<SimilarityResult> {
 
     public static final class TopKList implements Consumer<SimilarityResult> {
 
-        private final long node1;
         private final LongPriorityQueue similarityQueue;
         private final int topK;
         private double minValue;
         private final PrimitiveDoubleComparator doubleComparator;
 
-        TopKList(long node1, int topK, Comparator<SimilarityResult> comparator) {
-            this.node1 = node1;
+        TopKList(int topK, Comparator<SimilarityResult> comparator) {
             this.topK = topK;
 
             if (comparator.equals(SimilarityResult.ASCENDING)) {
@@ -101,7 +99,7 @@ public class TopKMap implements Consumer<SimilarityResult> {
             }
         }
 
-        Stream<SimilarityResult> stream() {
+        Stream<SimilarityResult> stream(long node1) {
             Stream.Builder<SimilarityResult> builder = Stream.builder();
             PrimitiveLongIterator iterator = similarityQueue.iterator();
             while (iterator.hasNext()) {
