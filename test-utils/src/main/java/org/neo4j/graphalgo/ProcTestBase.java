@@ -244,6 +244,7 @@ public class ProcTestBase {
                 Map<String, Object> actualRow = actual.get(i);
 
                 assertThat(actualRow.keySet(), equalTo(expectedRow.keySet()));
+                int rowNumner = i;
                 expectedRow.forEach((key, expectedValue) -> {
                     Matcher<Object> matcher;
                     if (expectedValue instanceof Matcher) {
@@ -253,7 +254,10 @@ public class ProcTestBase {
                         matcher = equalTo(expectedValue);
                     }
                     Object actualValue = actualRow.get(key);
-                    assertThat(actualValue, matcher);
+                    assertThat(
+                        String.format("Different value for column '%s' of row %d", key, rowNumner),
+                        actualValue, matcher
+                    );
                 });
             }
         }
