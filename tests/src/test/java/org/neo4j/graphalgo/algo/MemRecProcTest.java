@@ -23,11 +23,12 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.GraphLoadProc;
+import org.neo4j.graphalgo.LabelPropagationProc;
 import org.neo4j.graphalgo.MemRecProc;
 import org.neo4j.graphalgo.PageRankProc;
-import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
+import org.neo4j.graphalgo.unionfind.UnionFindProc;
 import org.neo4j.graphdb.DependencyResolver;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.kernel.impl.proc.Procedures;
@@ -51,6 +52,7 @@ class MemRecProcTest {
         procedures.registerProcedure(MemRecProc.class);
         procedures.registerProcedure(PageRankProc.class);
         procedures.registerProcedure(UnionFindProc.class);
+        procedures.registerProcedure(LabelPropagationProc.class);
         procedures.registerProcedure(GraphLoadProc.class);
     }
 
@@ -61,18 +63,25 @@ class MemRecProcTest {
 
     @Test
     void memrecProcedure() {
+        String availableProcedures = "the available and supported procedures are {graph.load, labelPropagation, pageRank, unionFind}.";
         test(
                 "algo.memrec(null, null, null, {})",
-                "Missing procedure parameter, the available and supported procedures are {graph.load, pageRank, unionFind}.");
+                "Missing procedure parameter, " + availableProcedures);
         test(
                 "algo.memrec(null, null, 'doesNotExist', {direction: 'BOTH', graph: 'huge'})",
-                "The procedure [doesNotExist] does not support memrec or does not exist, the available and supported procedures are {graph.load, pageRank, unionFind}.");
+                "The procedure [doesNotExist] does not support memrec or does not exist, " + availableProcedures);
 
         test("algo.memrec(null, null, 'pageRank', {direction: 'BOTH', graph: 'huge'})");
         test("algo.pageRank.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
         test("algo.pageRank.memrec(null, null, { graph: 'huge'})");
+
         test("algo.memrec(null, null, 'graph.load')");
         test("algo.graph.load.memrec(null, null)");
+
+        test("algo.memrec(null, null, 'labelPropagation')");
+        test("algo.memrec(null, null, 'labelPropagation', {direction: 'BOTH', graph: 'huge'})");
+        test("algo.labelPropagation.memrec(null, null)");
+        test("algo.labelPropagation.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
     }
 
     private void test(final String s, final String expectedMessage) {
