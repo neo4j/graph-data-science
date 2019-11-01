@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -750,12 +751,12 @@ class GraphLoadProcTest extends ProcTestBase {
     }
 
     @Test
-    public void shouldReturnEmptyList() {
+    void shouldReturnEmptyList() {
         assertEmptyResult("CALL algo.graph.list() YIELD name, nodes, relationships, type, direction");
     }
 
     @Test
-    public void shouldListAllAvailableGraphs() {
+    void shouldListAllAvailableGraphs() {
         String loadQuery = "CALL algo.graph.load(" +
                            "    $name, null, null, {" +
                            "        graph: $type, direction: $direction" +
@@ -787,6 +788,22 @@ class GraphLoadProcTest extends ProcTestBase {
         });
 
         assertEquals(parameters.get(0), actual.get(0));
+    }
+
+    @Test
+    void shouldListAllAvailableGraphsForUser() {
+        String loadQuery = "CALL algo.graph.load(" +
+                           "    $name, null, null, {}" +
+                           ")" +
+                           "YIELD nodes, relationships";
+
+        runQuery("alice", loadQuery, MapUtil.map("name", "aliceGraph"), resultRow -> {});
+        runQuery("bob", loadQuery, MapUtil.map("name", "bobGraph"), resultRow -> {});
+
+        String listQuery = "CALL algo.graph.list() YIELD name, nodes, relationships, type, direction";
+
+        runQuery("alice", listQuery, resultRow -> Assertions.assertEquals("aliceGraph", resultRow.getString("name")));
+        runQuery("bob", listQuery, resultRow -> Assertions.assertEquals("bobGraph", resultRow.getString("name")));
     }
 
     @ParameterizedTest

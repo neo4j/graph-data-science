@@ -26,6 +26,11 @@ import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
+import org.neo4j.internal.kernel.api.security.AuthSubject;
+import org.neo4j.internal.kernel.api.security.AuthenticationResult;
+import org.neo4j.internal.kernel.api.security.SecurityContext;
+import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -44,6 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphdb.DependencyResolver.SelectionStrategy.ONLY;
+import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 
 public class ProcTestBase {
 
@@ -109,6 +115,37 @@ public class ProcTestBase {
                 return true;
             });
         }
+    }
+
+    protected void runQuery(
+        String username,
+        String query,
+        Consumer<Result.ResultRow> check
+    ) {
+        runQuery(username, query, Collections.emptyMap(), check);
+    }
+
+    protected void runQuery(
+        String username,
+        String query,
+        Map<String, Object> params,
+        Consumer<Result.ResultRow> check
+    ) {
+        try (KernelTransaction.Revertable ignored = withUsername(db.beginTx(), username)) {
+            Result result = db.execute(query, params);
+            result.accept(row -> {
+                check.accept(row);
+                return true;
+
+            });
+        }
+    }
+
+    private KernelTransaction.Revertable withUsername(Transaction tx, String username) {
+        InternalTransaction topLevelTransaction = (InternalTransaction) tx;
+        AuthSubject subject = topLevelTransaction.securityContext().subject();
+        SecurityContext securityContext = new SecurityContext(new CustomUserNameAuthSubject(username, subject), READ);
+        return topLevelTransaction.overrideWith(securityContext);
     }
 
     protected void assertEmptyResult(String query) {
@@ -197,6 +234,42 @@ public class ProcTestBase {
                 final Map<String, Object> actualRow = actual.get(i);
                 assertThat(actualRow, equalTo(expectedRow));
             }
+        }
+    }
+
+    private static class CustomUserNameAuthSubject implements AuthSubject {
+
+        private final String username;
+        private final AuthSubject authSubject;
+
+        CustomUserNameAuthSubject(String username, AuthSubject authSubject) {
+            this.username = username;
+            this.authSubject = authSubject;
+        }
+
+        @Override
+        public void logout() {
+            authSubject.logout();
+        }
+
+        @Override
+        public AuthenticationResult getAuthenticationResult() {
+            return authSubject.getAuthenticationResult();
+        }
+
+        @Override
+        public void setPasswordChangeNoLongerRequired() {
+            authSubject.setPasswordChangeNoLongerRequired();
+        }
+
+        @Override
+        public boolean hasUsername(String username) {
+            return this.username.equals(username);
+        }
+
+        @Override
+        public String username() {
+            return username;
         }
     }
 }
