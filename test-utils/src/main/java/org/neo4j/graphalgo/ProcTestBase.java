@@ -21,6 +21,7 @@ package org.neo4j.graphalgo;
 
 import com.carrotsearch.hppc.IntIntMap;
 import com.carrotsearch.hppc.cursors.IntIntCursor;
+import org.hamcrest.Matcher;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterAll;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
@@ -36,7 +37,6 @@ import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import static java.lang.String.format;
+import static java.util.Collections.emptyMap;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -88,11 +89,11 @@ public class ProcTestBase {
     }
 
     protected void runQuery(String query, Consumer<Result.ResultRow> check) {
-        runQuery(query, Collections.emptyMap(), check);
+        runQuery(query, emptyMap(), check);
     }
 
     protected void runQuery(String query, GraphDatabaseAPI db, Consumer<Result.ResultRow> check) {
-        runQuery(query, db, Collections.emptyMap(), check);
+        runQuery(query, db, emptyMap(), check);
     }
 
     protected void runQuery(String query, Map<String, Object> params, Consumer<Result.ResultRow> check) {
@@ -150,7 +151,7 @@ public class ProcTestBase {
     }
 
     protected void assertEmptyResult(String query) {
-        assertEmptyResult(query, Collections.emptyMap());
+        assertEmptyResult(query, emptyMap());
     }
 
     protected void assertEmptyResult(String query, Map<String, Object> params) {
@@ -213,11 +214,19 @@ public class ProcTestBase {
     }
 
     public void assertCypherResult(@Language("Cypher") String query, List<Map<String, Object>> expected) {
+        assertCypherResult(query, emptyMap(), expected);
+    }
+
+    public void assertCypherResult(
+        @Language("Cypher") String query,
+        Map<String, Object> queryParameters,
+        List<Map<String, Object>> expected
+    ) {
         try (Transaction tx = db.beginTx()) {
-            final List<Map<String, Object>> actual = new ArrayList<>();
-            final Result result = db.execute(query);
+            List<Map<String, Object>> actual = new ArrayList<>();
+            Result result = db.execute(query, queryParameters);
             result.accept(row -> {
-                final Map<String, Object> _row = new HashMap<>();
+                Map<String, Object> _row = new HashMap<>();
                 for (String column : result.columns()) {
                     _row.put(column, row.get(column));
                 }
@@ -231,9 +240,21 @@ public class ProcTestBase {
             );
             assertThat(reason, actual.size(), equalTo(expected.size()));
             for (int i = 0; i < expected.size(); ++i) {
-                final Map<String, Object> expectedRow = expected.get(i);
-                final Map<String, Object> actualRow = actual.get(i);
-                assertThat(actualRow, equalTo(expectedRow));
+                Map<String, Object> expectedRow = expected.get(i);
+                Map<String, Object> actualRow = actual.get(i);
+
+                assertThat(actualRow.keySet(), equalTo(expectedRow.keySet()));
+                expectedRow.forEach((key, expectedValue) -> {
+                    Matcher<Object> matcher;
+                    if (expectedValue instanceof Matcher) {
+                        //noinspection unchecked
+                        matcher = (Matcher<Object>) expectedValue;
+                    } else {
+                        matcher = equalTo(expectedValue);
+                    }
+                    Object actualValue = actualRow.get(key);
+                    assertThat(actualValue, matcher);
+                });
             }
         }
     }
