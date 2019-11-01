@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,7 +34,6 @@ import java.util.stream.Collectors;
 public final class GraphCatalog extends GraphFactory {
 
     private static final ConcurrentHashMap<String, UserCatalog> userGraphCatalogs = new ConcurrentHashMap<>();
-    private static final Map<String, Graph> EMPTY_MAP = new HashMap<>();
 
     public GraphCatalog(
             final GraphDatabaseAPI api,
@@ -81,13 +79,11 @@ public final class GraphCatalog extends GraphFactory {
     }
 
     public static boolean exists(String username, String graphName) {
-        return userCatalogExists(username) && userGraphCatalogs.get(username).exists(graphName);
+        return getUserCatalog(username).exists(graphName);
     }
 
     public static Graph remove(String username, String graphName) {
-        return userCatalogExists(username)
-            ? getUserCatalog(username).remove(graphName)
-            : null;
+        return getUserCatalog(username).remove(graphName);
     }
 
     public static String getType(String username, String graphName) {
@@ -95,32 +91,24 @@ public final class GraphCatalog extends GraphFactory {
     }
 
     public static Map<String, Graph> getLoadedGraphs(String username) {
-        return userCatalogExists(username)
-            ? getUserCatalog(username).getLoadedGraphs()
-            : EMPTY_MAP;
+        return getUserCatalog(username).getLoadedGraphs();
+    }
+
+    private static UserCatalog getUserCatalog(String username) {
+        return userGraphCatalogs.getOrDefault(username, UserCatalog.EMPTY);
     }
 
     public static void removeAllLoadedGraphs() {
         userGraphCatalogs.clear();
     }
 
-    private static boolean userCatalogExists(String username) {
-        return username != null && userGraphCatalogs.containsKey(username);
-    }
-
-    private static UserCatalog getUserCatalog(String username) {
-        if (userCatalogExists(username)) {
-            return userGraphCatalogs.get(username);
-        } else {
-            throw new IllegalArgumentException(String.format("No graphs stored for user '%s'.", username));
-        }
-    }
-
     private static class UserCatalog {
 
-        private final Map<String, GraphsByRelationshipType> graphsByName = new HashMap<>();
+        private static final UserCatalog EMPTY = new UserCatalog();
 
-        public void set(String graphName, GraphsByRelationshipType graph) {
+        private final Map<String, GraphsByRelationshipType> graphsByName = new ConcurrentHashMap<>();
+
+        void set(String graphName, GraphsByRelationshipType graph) {
             if (graphName == null || graph == null) {
                 throw new IllegalArgumentException("Both name and graph must be not null");
             }
@@ -130,7 +118,7 @@ public final class GraphCatalog extends GraphFactory {
             graph.canRelease(false);
         }
 
-        public Graph get(String graphName, String relationshipType, Optional<String> maybeRelationshipProperty) {
+        Graph get(String graphName, String relationshipType, Optional<String> maybeRelationshipProperty) {
             if (!exists(graphName)) {
                 throw new IllegalArgumentException(String.format("Graph with name '%s' does not exist.", graphName));
             }
@@ -142,7 +130,7 @@ public final class GraphCatalog extends GraphFactory {
          * Each sub-graph has the same node set and represents a unique relationship type / property combination.
          * This method returns the union of all subgraphs refered to by the given name.
          */
-        public Graph getUnion(String graphName) {
+        Graph getUnion(String graphName) {
             if (!exists(graphName)) {
                 // getAll is allowed to return null if the graph does not exist
                 // as it's being used by algo.graph.info or algo.graph.remove,
@@ -152,11 +140,11 @@ public final class GraphCatalog extends GraphFactory {
             return graphsByName.get(graphName).getUnion();
         }
 
-        public boolean exists(String graphName) {
+        boolean exists(String graphName) {
             return graphName != null && graphsByName.containsKey(graphName);
         }
 
-        public Graph remove(String graphName) {
+        Graph remove(String graphName) {
             if (!exists(graphName)) {
                 // remove is allowed to return null if the graph does not exist
                 // as it's being used by algo.graph.info or algo.graph.remove,
@@ -169,13 +157,13 @@ public final class GraphCatalog extends GraphFactory {
             return graph;
         }
 
-        public String getType(String graphName) {
+        String getType(String graphName) {
             if (graphName == null) return null;
             GraphsByRelationshipType graph = graphsByName.get(graphName);
             return graph == null ? null : graph.getGraphType();
         }
 
-        public Map<String, Graph> getLoadedGraphs() {
+        Map<String, Graph> getLoadedGraphs() {
             return graphsByName.entrySet().stream().collect(Collectors.toMap(
                 Map.Entry::getKey,
                 e -> e.getValue().getUnion()
