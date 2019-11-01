@@ -28,7 +28,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.TestSupport.SingleAndMultiThreadedAllGraphNames;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.loading.GraphLoadFactory;
+import org.neo4j.graphalgo.core.loading.UserGraphCatalog;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.graphdb.Result;
@@ -82,7 +82,7 @@ class LabelPropagationBetaProcTest extends ProcTestBase {
     @AfterEach
     void tearDown() {
         db.shutdown();
-        GraphLoadFactory.removeAllLoadedGraphs();
+        UserGraphCatalog.removeAllLoadedGraphs();
     }
 
     static Stream<Arguments> successParameters() {

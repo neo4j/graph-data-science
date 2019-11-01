@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
-import org.neo4j.graphalgo.core.loading.GraphLoadFactory;
+import org.neo4j.graphalgo.core.loading.UserGraphCatalog;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -120,7 +120,7 @@ public class GraphLoader {
                 .withBatchSize(config.getBatchSize())
                 .withDeduplicationStrategy(config.getDeduplicationStrategy())
                 .withParams(config.getParams())
-                .withLoadedGraph(config.getGraphImpl() == GraphLoadFactory.class);
+                .withLoadedGraph(config.getGraphImpl() == UserGraphCatalog.class);
     }
 
     /**

@@ -29,7 +29,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.GraphLoadFactory;
+import org.neo4j.graphalgo.core.loading.UserGraphCatalog;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -106,7 +106,7 @@ class GraphLoadProcTest extends ProcTestBase {
     @AfterEach
     void tearDown() {
         db.shutdown();
-        GraphLoadFactory.removeAllLoadedGraphs();
+        UserGraphCatalog.removeAllLoadedGraphs();
     }
 
     @ParameterizedTest
@@ -148,7 +148,7 @@ class GraphLoadProcTest extends ProcTestBase {
 
         runQuery(query, singletonMap("graph", graphImpl));
 
-        Graph fooGraph = GraphLoadFactory.getUnion(getUsername(), "foo");
+        Graph fooGraph = UserGraphCatalog.getUnion(getUsername(), "foo");
         assertNotNull(fooGraph);
         assertEquals(12, fooGraph.nodeCount());
         assertEquals(10, fooGraph.relationshipCount());
@@ -240,14 +240,14 @@ class GraphLoadProcTest extends ProcTestBase {
 
         });
 
-        Graph loadedGraph = GraphLoadFactory.getUnion(getUsername(), "fooGraph");
+        Graph loadedGraph = UserGraphCatalog.getUnion(getUsername(), "fooGraph");
         Graph expected = TestGraph.Builder.fromGdl("({ fooProp: 42, barProp: 13.37D })" +
                                                    "({ fooProp: 43, barProp: 13.38D })" +
                                                    "({ fooProp: 44, barProp: 13.39D })" +
                                                    "({ fooProp: 45, barProp: 19.84D })");
         assertGraphEquals(expected, loadedGraph);
 
-        GraphLoadFactory.remove(getUsername(), "fooGraph");
+        UserGraphCatalog.remove(getUsername(), "fooGraph");
         testLocalDb.shutdown();
     }
 
@@ -336,7 +336,7 @@ class GraphLoadProcTest extends ProcTestBase {
             assertEquals("MAX", maxCostParams.get("aggregation").toString());
         });
 
-        Graph g = GraphLoadFactory.getUnion(getUsername(), "aggGraph");
+        Graph g = UserGraphCatalog.getUnion(getUsername(), "aggGraph");
 
         assertEquals(2, g.nodeCount());
         assertEquals(3, g.relationshipCount());
@@ -344,7 +344,7 @@ class GraphLoadProcTest extends ProcTestBase {
         assertOutRelationships(g, 0, 1, 1, 1);
         assertOutPropertiesWithDelta(g, 1E-3, 0, 85.3, 42.1, 2.0);
 
-        GraphLoadFactory.remove(getUsername(), "aggGraph");
+        UserGraphCatalog.remove(getUsername(), "aggGraph");
         testLocalDb.shutdown();
     }
 

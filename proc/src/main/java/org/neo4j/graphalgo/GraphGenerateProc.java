@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.loading.GraphLoadFactory;
+import org.neo4j.graphalgo.core.loading.UserGraphCatalog;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -80,7 +80,7 @@ public final class GraphGenerateProc extends BaseProc {
             long averageDegree) {
         GraphGenerationStats stats = new GraphGenerationStats(name, averageDegree, config);
 
-        if (GraphLoadFactory.exists(getUsername(), name)) {
+        if (UserGraphCatalog.exists(getUsername(), name)) {
             throw new IllegalArgumentException(String.format("A graph with name '%s' is already loaded.", name));
         }
 
@@ -104,7 +104,7 @@ public final class GraphGenerateProc extends BaseProc {
 
             stats.nodes = graphFromType.nodeCount();
             stats.relationships = graphFromType.relationshipCount();
-            GraphLoadFactory.set(getUsername(), name, graphFromType);
+            UserGraphCatalog.set(getUsername(), name, graphFromType);
         }
 
         return stats;

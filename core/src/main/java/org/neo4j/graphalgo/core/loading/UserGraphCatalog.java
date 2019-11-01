@@ -31,12 +31,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-public final class GraphLoadFactory extends GraphFactory {
+public final class UserGraphCatalog extends GraphFactory {
 
     private static final ConcurrentHashMap<String, GraphCatalog> userGraphCatalogs = new ConcurrentHashMap<>();
     private static final Map<String, Graph> EMPTY_MAP = new HashMap<>();
 
-    public GraphLoadFactory(
+    public UserGraphCatalog(
             final GraphDatabaseAPI api,
             final GraphSetup setup) {
         super(api, setup);
