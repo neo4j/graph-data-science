@@ -22,7 +22,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
-import org.neo4j.graphalgo.core.loading.UserGraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.QueryExecutionException;
@@ -147,7 +147,7 @@ class PageRankProcTest extends ProcTestBase {
     @AllGraphNamesTest
     void testPageRankStreamFromLoadedGraph(String graphImpl) {
         String graphName = "aggGraph";
-        UserGraphCatalog.remove(getUsername(), graphName);
+        GraphCatalog.remove(getUsername(), graphName);
 
         String loadQuery = String.format(
                 "CALL algo.graph.load(" +
@@ -187,7 +187,7 @@ class PageRankProcTest extends ProcTestBase {
     @AllGraphNamesTest
     void testWeightedPageRankStreamFromLoadedGraph(String graphImpl) {
         String graphName = "aggGraph";
-        UserGraphCatalog.remove(getUsername(), graphName);
+        GraphCatalog.remove(getUsername(), graphName);
 
         String loadQuery = String.format(
                 "CALL algo.graph.load(" +

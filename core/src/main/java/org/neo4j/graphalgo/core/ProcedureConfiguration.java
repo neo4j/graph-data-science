@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.lightweight.LightGraph;
-import org.neo4j.graphalgo.core.loading.UserGraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.Directions;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -357,8 +357,8 @@ public class ProcedureConfiguration {
             case HugeGraph.TYPE:
                 return HugeGraphFactory.class;
             default:
-                if (validCustomName(graphImpl) && UserGraphCatalog.exists(getUsername(), graphImpl)) {
-                    return UserGraphCatalog.class;
+                if (validCustomName(graphImpl) && GraphCatalog.exists(getUsername(), graphImpl)) {
+                    return GraphCatalog.class;
                 }
                 throw new IllegalArgumentException("Unknown impl: " + graphImpl);
         }
@@ -379,7 +379,7 @@ public class ProcedureConfiguration {
             String... alloweds) {
         String graphName = getGraphName(defaultImpl);
         List<String> allowedNames = asList(alloweds);
-        if (allowedNames.contains(graphName) || allowedNames.contains(UserGraphCatalog.getType(getUsername(), graphName))) {
+        if (allowedNames.contains(graphName) || allowedNames.contains(GraphCatalog.getType(getUsername(), graphName))) {
             return getGraphImpl(defaultImpl);
         }
         throw new IllegalArgumentException("The graph algorithm only supports these graph types; " + allowedNames);

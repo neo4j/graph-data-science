@@ -22,7 +22,7 @@ package org.neo4j.graphalgo;
 import com.carrotsearch.hppc.IntIntMap;
 import com.carrotsearch.hppc.cursors.IntIntCursor;
 import org.junit.jupiter.api.AfterAll;
-import org.neo4j.graphalgo.core.loading.UserGraphCatalog;
+import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -51,7 +51,7 @@ public class ProcTestBase {
 
     @AfterAll
     static void clearLoadedGraphs() {
-        UserGraphCatalog.removeAllLoadedGraphs();
+        GraphCatalog.removeAllLoadedGraphs();
     }
 
     void registerFunctions(Class<?>... functionClasses) throws KernelException {
