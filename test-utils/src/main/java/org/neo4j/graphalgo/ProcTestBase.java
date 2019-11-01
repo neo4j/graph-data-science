@@ -21,6 +21,7 @@ package org.neo4j.graphalgo;
 
 import com.carrotsearch.hppc.IntIntMap;
 import com.carrotsearch.hppc.cursors.IntIntCursor;
+import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterAll;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphdb.Result;
@@ -211,7 +212,7 @@ public class ProcTestBase {
         }
     }
 
-    void assertCypherResult(String query, List<Map<String, Object>> expected) {
+    void assertCypherResult(@Language("Cypher") String query, List<Map<String, Object>> expected) {
         try (Transaction tx = db.beginTx()) {
             final List<Map<String, Object>> actual = new ArrayList<>();
             final Result result = db.execute(query);

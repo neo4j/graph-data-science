@@ -3,8 +3,9 @@ description = 'Neo4j Graph Algorithms :: Core'
 dependencies {
     compile group: 'com.carrotsearch',           name: 'hppc',               version: ver.hppc
     compile group: 'com.github.petitparser',     name: 'petitparser-core',   version: ver.petitparser
+    compile group: 'org.jetbrains',              name: 'annotations',        version: ver.jetbrains_annotations
 
-    compileOnly group: 'org.neo4j',              name: 'neo4j',              version: ver.'neo4j'
+    compileOnly group: 'org.neo4j',              name: 'neo4j',              version: ver.neo4j
 
     testCompile project(':test-utils')
 }
