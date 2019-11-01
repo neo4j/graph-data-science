@@ -212,7 +212,7 @@ public class ProcTestBase {
         }
     }
 
-    void assertCypherResult(@Language("Cypher") String query, List<Map<String, Object>> expected) {
+    public void assertCypherResult(@Language("Cypher") String query, List<Map<String, Object>> expected) {
         try (Transaction tx = db.beginTx()) {
             final List<Map<String, Object>> actual = new ArrayList<>();
             final Result result = db.execute(query);
