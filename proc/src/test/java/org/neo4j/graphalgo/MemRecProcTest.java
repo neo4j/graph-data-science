@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
+import org.neo4j.graphalgo.wcc.WccProc;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
@@ -34,16 +35,23 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 class MemRecProcTest extends ProcTestBase {
 
+    private String availableAlgoProcedures;
+
     @BeforeEach
     void setUp() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase();
         registerProcedures(
+                GraphLoadProc.class,
                 MemRecProc.class,
                 PageRankProc.class,
                 UnionFindProc.class,
                 LabelPropagationProc.class,
-                GraphLoadProc.class
+                WccProc.class,
+                LouvainProc.class
         );
+        availableAlgoProcedures = "the available and supported procedures are {" +
+                                  "beta.wcc, graph.load, labelPropagation, louvain, pageRank, unionFind, wcc" +
+                                  "}.";
     }
 
     @AfterEach
@@ -53,13 +61,12 @@ class MemRecProcTest extends ProcTestBase {
 
     @Test
     void memrecProcedure() {
-        String availableProcedures = "the available and supported procedures are {graph.load, labelPropagation, pageRank, unionFind}.";
         test(
                 "algo.memrec(null, null, null, {})",
-                "Missing procedure parameter, " + availableProcedures);
+                "Missing procedure parameter, " + availableAlgoProcedures);
         test(
                 "algo.memrec(null, null, 'doesNotExist', {direction: 'BOTH', graph: 'huge'})",
-                "The procedure [doesNotExist] does not support memrec or does not exist, " + availableProcedures);
+                "The procedure [doesNotExist] does not support memrec or does not exist, " + availableAlgoProcedures);
 
         test("algo.memrec(null, null, 'pageRank', {direction: 'BOTH', graph: 'huge'})");
         test("algo.pageRank.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");

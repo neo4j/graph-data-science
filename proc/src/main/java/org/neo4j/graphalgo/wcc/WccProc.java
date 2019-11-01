@@ -132,19 +132,6 @@ public class WccProc<T extends WCC<T>> extends WccBaseProc<T> {
         return stream(label, relationship, config, WCCType.PREGEL);
     }
 
-    @Procedure(value = "algo.beta.wcc.pregel.memrec", mode = Mode.READ)
-    @Description("CALL algo.beta.wcc.pregel.memrec(label:String, relationship:String, {...properties}) " +
-                 "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for WCC")
-    public Stream<MemRecResult> betaWccPregelMemRec(
-            @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationship,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
-
-        ProcedureConfiguration configuration = newConfig(label, relationship, config);
-        MemoryTreeWithDimensions memoryEstimation = this.memoryEstimation(configuration);
-        return Stream.of(new MemRecResult(memoryEstimation));
-    }
-
     @Override
     protected String name() {
         return "WCC";
