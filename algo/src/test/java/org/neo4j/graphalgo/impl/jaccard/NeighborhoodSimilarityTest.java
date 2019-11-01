@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.loading.GraphLoadFactory;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -79,7 +80,10 @@ final class NeighborhoodSimilarityTest {
         ", (a)-[:LIKES]->(i3)" +
         ", (b)-[:LIKES]->(i1)" +
         ", (b)-[:LIKES]->(i2)" +
-        ", (c)-[:LIKES]->(i3)";
+        ", (c)-[:LIKES]->(i3)" +
+        ", (d)-[:LIKES]->(i1)" +
+        ", (d)-[:LIKES]->(i2)" +
+        ", (d)-[:LIKES]->(i3)";
 
     private static final Collection<SimilarityResult> EXPECTED_OUTGOING = new HashSet<>();
     private static final Collection<SimilarityResult> EXPECTED_INCOMING = new HashSet<>();
@@ -97,43 +101,50 @@ final class NeighborhoodSimilarityTest {
     private static final Collection<SimilarityResult> EXPECTED_INCOMING_DEGREE_CUTOFF = new HashSet<>();
 
     private static final int COMPARED_ITEMS = 3;
-    private static final int COMPARED_PERSONS = 3;
+    private static final int COMPARED_PERSONS = 4;
 
     static {
         EXPECTED_OUTGOING.add(new SimilarityResult(0, 1, 2 / 3.0));
         EXPECTED_OUTGOING.add(new SimilarityResult(0, 2, 1 / 3.0));
+        EXPECTED_OUTGOING.add(new SimilarityResult(0, 3, 1.0));
         EXPECTED_OUTGOING.add(new SimilarityResult(1, 2, 0.0));
+        EXPECTED_OUTGOING.add(new SimilarityResult(1, 3, 2 / 3.0));
+        EXPECTED_OUTGOING.add(new SimilarityResult(2, 3, 1 / 3.0));
 
-        EXPECTED_OUTGOING_TOP_1.add(new SimilarityResult(0, 1, 2 / 3.0));
+        EXPECTED_OUTGOING_TOP_1.add(new SimilarityResult(0, 3, 1.0));
 
-        EXPECTED_OUTGOING_TOPK_1.add(new SimilarityResult(0, 1, 2 / 3.0));
+        EXPECTED_OUTGOING_TOPK_1.add(new SimilarityResult(0, 3, 1.0));
         EXPECTED_OUTGOING_TOPK_1.add(new SimilarityResult(1, 0, 2 / 3.0));
         EXPECTED_OUTGOING_TOPK_1.add(new SimilarityResult(2, 0, 1 / 3.0));
+        EXPECTED_OUTGOING_TOPK_1.add(new SimilarityResult(3, 0, 1.0));
 
         EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(new SimilarityResult(0, 1, 2 / 3.0));
         EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(new SimilarityResult(0, 2, 1 / 3.0));
+        EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(new SimilarityResult(0, 3, 1.0));
+        EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(new SimilarityResult(1, 3, 2 / 3.0));
+        EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(new SimilarityResult(2, 3, 1 / 3.0));
 
         EXPECTED_OUTGOING_DEGREE_CUTOFF.add(new SimilarityResult(0, 1, 2 / 3.0));
-        EXPECTED_OUTGOING_DEGREE_CUTOFF.add(new SimilarityResult(0, 2, 1 / 3.0));
-        EXPECTED_OUTGOING_DEGREE_CUTOFF.add(new SimilarityResult(1, 2, 0.0));
+        EXPECTED_OUTGOING_DEGREE_CUTOFF.add(new SimilarityResult(0, 3, 1.0));
+        EXPECTED_OUTGOING_DEGREE_CUTOFF.add(new SimilarityResult(1, 3, 2 / 3.0));
 
-        EXPECTED_INCOMING.add(new SimilarityResult(4, 5, 3.0 / 3.0));
-        EXPECTED_INCOMING.add(new SimilarityResult(4, 6, 1 / 3.0));
-        EXPECTED_INCOMING.add(new SimilarityResult(5, 6, 1 / 3.0));
+        EXPECTED_INCOMING.add(new SimilarityResult(4, 5, 1.0));
+        EXPECTED_INCOMING.add(new SimilarityResult(4, 6, 1 / 2.0));
+        EXPECTED_INCOMING.add(new SimilarityResult(5, 6, 1 / 2.0));
 
         EXPECTED_INCOMING_TOP_1.add(new SimilarityResult(4, 5, 3.0 / 3.0));
 
-        EXPECTED_INCOMING_TOPK_1.add(new SimilarityResult(4, 5, 3.0 / 3.0));
-        EXPECTED_INCOMING_TOPK_1.add(new SimilarityResult(5, 4, 3.0 / 3.0));
-        EXPECTED_INCOMING_TOPK_1.add(new SimilarityResult(6, 4, 1 / 3.0));
+        EXPECTED_INCOMING_TOPK_1.add(new SimilarityResult(4, 5, 1.0));
+        EXPECTED_INCOMING_TOPK_1.add(new SimilarityResult(5, 4, 1.0));
+        EXPECTED_INCOMING_TOPK_1.add(new SimilarityResult(6, 4, 1 / 2.0));
 
-        EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(new SimilarityResult(4, 5, 3.0 / 3.0));
-        EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(new SimilarityResult(4, 6, 1 / 3.0));
-        EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(new SimilarityResult(5, 6, 1 / 3.0));
+        EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(new SimilarityResult(4, 5, 1.0));
+        EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(new SimilarityResult(4, 6, 1 / 2.0));
+        EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(new SimilarityResult(5, 6, 1 / 2.0));
 
         EXPECTED_INCOMING_DEGREE_CUTOFF.add(new SimilarityResult(4, 5, 3.0 / 3.0));
-        EXPECTED_INCOMING_DEGREE_CUTOFF.add(new SimilarityResult(4, 6, 1 / 3.0));
-        EXPECTED_INCOMING_DEGREE_CUTOFF.add(new SimilarityResult(5, 6, 1 / 3.0));
+        EXPECTED_INCOMING_DEGREE_CUTOFF.add(new SimilarityResult(4, 6, 1 / 2.0));
+        EXPECTED_INCOMING_DEGREE_CUTOFF.add(new SimilarityResult(5, 6, 1 / 2.0));
     }
 
     private GraphDatabaseAPI db;
@@ -238,6 +249,37 @@ final class NeighborhoodSimilarityTest {
         "INCOMING, INCOMING",
         "BOTH, INCOMING"
     })
+    void shouldComputeNegativeTopKForSupportedDirections(Direction loadDirection, Direction algoDirection) {
+        Graph graph = new GraphLoader(db)
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .withDirection(loadDirection)
+            .load(HugeGraphFactory.class);
+
+        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
+            graph,
+            new NeighborhoodSimilarity.Config(0.0, 0, 0, -1, Pools.DEFAULT_CONCURRENCY, ParallelUtil.DEFAULT_BATCH_SIZE),
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY,
+            NullLog.getInstance());
+
+        Graph similarityGraph = neighborhoodSimilarity.computeToGraph(algoDirection).similarityGraph();
+
+        assertGraphEquals(
+            algoDirection == INCOMING
+                ? fromGdl("(i1)-[{w: 0.50000D}]->(i3), (i2)-[{w: 0.50000D}]->(i3), (i3)-[{w: 0.500000D}]->(i1), (d), (e), (f), (g), (h)")
+                : fromGdl("(a)-[{w: 0.333333D}]->(c), (b)-[{w: 0.00000D}]->(c), (c)-[{w: 0.000000D}]->(b), (d)-[{w: 0.333333D}]->(c), (e), (f), (g), (h)")
+            , similarityGraph
+        );
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "OUTGOING, OUTGOING",
+        "BOTH, OUTGOING",
+        "INCOMING, INCOMING",
+        "BOTH, INCOMING"
+    })
     void shouldComputeWithSimilarityCutoffForSupportedDirections(Direction loadDirection, Direction algoDirection) {
         Graph graph = new GraphLoader(db)
             .withAnyLabel()
@@ -274,7 +316,7 @@ final class NeighborhoodSimilarityTest {
 
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
-            new NeighborhoodSimilarity.Config(0.0, 1, 0, 0, Pools.DEFAULT_CONCURRENCY, ParallelUtil.DEFAULT_BATCH_SIZE),
+            new NeighborhoodSimilarity.Config(0.0, 2, 0, 0, Pools.DEFAULT_CONCURRENCY, ParallelUtil.DEFAULT_BATCH_SIZE),
             Pools.DEFAULT,
             AllocationTracker.EMPTY,
             NullLog.getInstance());
@@ -330,8 +372,14 @@ final class NeighborhoodSimilarityTest {
         Graph resultGraph = similarityGraphResult.similarityGraph();
         assertGraphEquals(
             algoDirection == INCOMING
-                ? fromGdl("(a), (b), (c), (d), (e), (f)-[{property: 1.000000D}]->(g), (f)-[{property: 0.333333D}]->(h), (g)-[{property: 0.333333D}]->(h)")
-                : fromGdl("(a)-[{property: 0.666667D}]->(b), (a)-[{property: 0.333333D}]->(c), (b)-[{property: 0.00000D}]->(c), (d), (e), (f), (g), (h)"),
+                ? fromGdl("(a), (b), (c), (d), (e), (f)-[{property: 1.000000D}]->(g), (f)-[{property: 0.500000D}]->(h), (g)-[{property: 0.500000D}]->(h)")
+                : fromGdl("(a)-[{property: 0.666667D}]->(b)" +
+                          ", (a)-[{property: 0.333333D}]->(c)" +
+                          ", (a)-[{property: 1.000000D}]->(d)" +
+                          ", (b)-[{property: 0.000000D}]->(c)" +
+                          ", (b)-[{property: 0.666667D}]->(d)" +
+                          ", (c)-[{property: 0.333333D}]->(d)" +
+                          ", (e), (f), (g), (h)"),
             resultGraph
         );
         neighborhoodSimilarity.release();
@@ -406,30 +454,30 @@ final class NeighborhoodSimilarityTest {
 
         MemoryTree actual = factory.memoryEstimation().estimate(dimensions, 1);
 
-        long graphRangeMin = 113516712L;
-        long graphRangeMax = 212614704L;
-        MemoryRange graphRange = MemoryRange.of(graphRangeMin, graphRangeMax);
-
-        long topKMapRangeMin = 1104000016L;
-        long topKMapRangeMax = 5072000016L;
-        MemoryRange topKRange = MemoryRange.of(topKMapRangeMin, topKMapRangeMax);
-
-        long vectorsRangeMin = 56000016L;
-        long vectorsRangeMax = 56000016L;
-        MemoryRange vectorsRange = MemoryRange.of(vectorsRangeMin, vectorsRangeMax);
+        long thisInstance = 64;
 
         long nodeFilterRangeMin = 125016L;
         long nodeFilterRangeMax = 125016L;
         MemoryRange nodeFilterRange = MemoryRange.of(nodeFilterRangeMin, nodeFilterRangeMax);
 
-        long thisInstance = 64;
+        long vectorsRangeMin = 56000016L;
+        long vectorsRangeMax = 56000016L;
+        MemoryRange vectorsRange = MemoryRange.of(vectorsRangeMin, vectorsRangeMax);
+
+        long graphRangeMin = 113516712L;
+        long graphRangeMax = 212614704L;
+        MemoryRange graphRange = MemoryRange.of(graphRangeMin, graphRangeMax);
+
+        long topKMapRangeMin = 1088000016L;
+        long topKMapRangeMax = 5056000016L;
+        MemoryRange topKRange = MemoryRange.of(topKMapRangeMin, topKMapRangeMax);
 
         MemoryTree expected = MemoryEstimations.builder()
-            .fixed("", graphRange)
-            .fixed("", topKRange)
-            .fixed("", vectorsRange)
-            .fixed("", nodeFilterRange)
-            .fixed("", thisInstance)
+            .fixed("this.instance", thisInstance)
+            .fixed("node filter", nodeFilterRange)
+            .fixed("vectors", vectorsRange)
+            .fixed("similarity graph", graphRange)
+            .fixed("topk map", topKRange)
             .build().estimate(dimensions, 1);
 
         assertEquals(expected.memoryUsage(), actual.memoryUsage());
@@ -458,23 +506,23 @@ final class NeighborhoodSimilarityTest {
 
         MemoryTree actual = factory.memoryEstimation().estimate(dimensions, 1);
 
-        long graphRangeMin = 8651112L;
-        long graphRangeMax = 8651112L;
-        MemoryRange graphRange = MemoryRange.of(graphRangeMin, graphRangeMax);
-
-        long topKMapRangeMin = 1104000016L;
-        long topKMapRangeMax = 5072000016L;
-        MemoryRange topKRange = MemoryRange.of(topKMapRangeMin, topKMapRangeMax);
-
-        long vectorsRangeMin = 56000016L;
-        long vectorsRangeMax = 56000016L;
-        MemoryRange vectorsRange = MemoryRange.of(vectorsRangeMin, vectorsRangeMax);
+        long thisInstance = 64;
 
         long nodeFilterRangeMin = 125016L;
         long nodeFilterRangeMax = 125016L;
         MemoryRange nodeFilterRange = MemoryRange.of(nodeFilterRangeMin, nodeFilterRangeMax);
 
-        long thisInstance = 64;
+        long vectorsRangeMin = 56000016L;
+        long vectorsRangeMax = 56000016L;
+        MemoryRange vectorsRange = MemoryRange.of(vectorsRangeMin, vectorsRangeMax);
+
+        long graphRangeMin = 8651112L;
+        long graphRangeMax = 8651112L;
+        MemoryRange graphRange = MemoryRange.of(graphRangeMin, graphRangeMax);
+
+        long topKMapRangeMin = 1088000016L;
+        long topKMapRangeMax = 5056000016L;
+        MemoryRange topKRange = MemoryRange.of(topKMapRangeMin, topKMapRangeMax);
 
         MemoryTree expected = MemoryEstimations.builder()
             .fixed("", graphRange)

@@ -20,7 +20,6 @@
 
 package org.neo4j.graphalgo.impl.jaccard;
 
-import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -28,9 +27,12 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.core.utils.queue.LongPriorityQueue;
 
 import java.util.Comparator;
+import java.util.Iterator;
+import java.util.PrimitiveIterator;
 import java.util.function.Consumer;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class TopKMap implements Consumer<SimilarityResult> {
 
@@ -48,8 +50,14 @@ public class TopKMap implements Consumer<SimilarityResult> {
     private final HugeObjectArray<TopKList> topKLists;
 
     TopKMap(long items, int topK, Comparator<SimilarityResult> comparator, AllocationTracker tracker) {
+        int boundedTopK = (int) Math.min(topK, items);
         topKLists = HugeObjectArray.newArray(TopKList.class, items, tracker);
-        topKLists.setAll(node1 -> new TopKList(topK, comparator));
+        topKLists.setAll(node1 -> new TopKList(
+            comparator.equals(SimilarityResult.ASCENDING)
+                ? TopKLongPriorityQueue.min(boundedTopK)
+                : TopKLongPriorityQueue.max(boundedTopK)
+            )
+        );
     }
 
     @Override
@@ -67,52 +75,43 @@ public class TopKMap implements Consumer<SimilarityResult> {
     public long size() {
         long size = 0L;
         for (long i = 0; i < topKLists.size(); i++) {
-            size += topKLists.get(i).similarityQueue.size();
+            size += topKLists.get(i).queue.count();
         }
         return size;
     }
 
-    public static final class TopKList implements Consumer<SimilarityResult> {
+    public static final class TopKList {
 
-        private final LongPriorityQueue similarityQueue;
-        private final int topK;
-        private double minValue;
-        private final PrimitiveDoubleComparator doubleComparator;
+        private final TopKLongPriorityQueue queue;
 
-        TopKList(int topK, Comparator<SimilarityResult> comparator) {
-            this.topK = topK;
-
-            if (comparator.equals(SimilarityResult.ASCENDING)) {
-                this.doubleComparator = Double::compare;
-                this.similarityQueue = LongPriorityQueue.min(topK);
-            } else {
-                this.doubleComparator = (d1, d2) -> Double.compare(d2, d1);
-                this.similarityQueue = LongPriorityQueue.max(topK);
-            }
+        TopKList(TopKLongPriorityQueue queue) {
+            this.queue = queue;
         }
 
-        @Override
-        public void accept(SimilarityResult similarity) {
-            if ((similarityQueue.size() < topK || doubleComparator.compare(similarity.similarity, minValue) < 0)) {
-                similarityQueue.add(similarity.node2, similarity.similarity);
-                minValue = similarityQueue.topCost();
-            }
+        void accept(SimilarityResult similarityResult) {
+            queue.offer(similarityResult.node2, similarityResult.similarity);
         }
 
         Stream<SimilarityResult> stream(long node1) {
-            Stream.Builder<SimilarityResult> builder = Stream.builder();
-            PrimitiveLongIterator iterator = similarityQueue.iterator();
-            while (iterator.hasNext()) {
-                long node2 = iterator.next();
-                builder.add(new SimilarityResult(node1, node2, similarityQueue.getCost(node2)));
-            }
-            return builder.build();
+
+            Iterable<SimilarityResult> iterable = () -> new Iterator<SimilarityResult>() {
+
+                PrimitiveIterator.OfLong elementsIter = queue.elements().iterator();
+                PrimitiveIterator.OfDouble prioritiesIter = queue.priorities().iterator();
+
+                @Override
+                public boolean hasNext() {
+                    return elementsIter.hasNext() && prioritiesIter.hasNext();
+                }
+
+                @Override
+                public SimilarityResult next() {
+                    return new SimilarityResult(node1, elementsIter.nextLong(), prioritiesIter.nextDouble());
+                }
+            };
+
+            return StreamSupport.stream(iterable.spliterator(), false);
         }
     }
-
-    private interface PrimitiveDoubleComparator {
-        int compare(double d1, double d2);
-    }
-
 }
 

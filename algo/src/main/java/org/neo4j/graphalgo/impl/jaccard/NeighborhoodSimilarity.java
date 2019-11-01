@@ -110,6 +110,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         });
 
         graph.forEachNode(node -> {
+            // TODO: can we inline this where we populate the nodeFilter?
             if (nodeFilter.get(node)) {
                 int degree = graph.degree(node, direction);
                 final LongArrayList targetIds = new LongArrayList(degree, ARRAY_SIZING_STRATEGY);
@@ -212,7 +213,6 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         private final double degreeCutoff;
 
         private final int top;
-
         private final int topk;
 
         private final int concurrency;

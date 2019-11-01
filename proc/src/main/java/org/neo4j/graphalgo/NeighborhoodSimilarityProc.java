@@ -60,7 +60,7 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
     private static final int TOP_DEFAULT = 0;
 
     private static final String TOP_K_KEY = "topK";
-    private static final int TOP_K_DEFAULT = 0;
+    private static final int TOP_K_DEFAULT = 10;
 
     private static final String WRITE_RELATIONSHIP_TYPE_KEY = "writeRelationshipType";
     private static final String WRITE_RELATIONSHIP_TYPE_DEFAULT = "SIMILAR";
@@ -146,7 +146,7 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
                         similarityGraph.forEachNode(nodeId -> {
                             similarityGraph.forEachRelationship(
                                 nodeId,
-                                direction,
+                                OUTGOING,
                                 0.0,
                                 writeBack(relType, propertyType, similarityGraph, ops)
                             );
@@ -196,8 +196,9 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
 
     @Override
     protected AlgorithmFactory<NeighborhoodSimilarity> algorithmFactory(ProcedureConfiguration config) {
-//        boolean computesSimilarityGraph = transaction.securityContext().mode().allowsWrites();
+        // TODO: Should check if we are writing or streaming, but how to do that in memrec?
         boolean computesSimilarityGraph = true;
+        enforceTopK(config);
         return new NeighborhoodSimilarityFactory(
             new NeighborhoodSimilarity.Config(
                 config.get(SIMILARITY_CUTOFF_KEY, SIMILARITY_CUTOFF_DEFAULT),
@@ -208,6 +209,12 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
                 config.getBatchSize()
             ), computesSimilarityGraph
         );
+    }
+
+    private void enforceTopK(ProcedureConfiguration config) {
+        if (config.getInt(TOP_K_KEY, TOP_K_DEFAULT) == 0) {
+            throw new IllegalArgumentException("Must set non-zero topk value");
+        }
     }
 
     public static class NeighborhoodSimilarityResult {

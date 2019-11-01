@@ -61,9 +61,9 @@ public abstract class LongPriorityQueue implements PrimitiveLongIterable {
             .build();
     }
 
-    private static final int DEFAULT_CAPACITY = 14;
-    private int size = 0;
-    private long[] heap;
+    protected static final int DEFAULT_CAPACITY = 14;
+    protected int size = 0;
+    protected long[] heap;
 
     protected final LongDoubleScatterMap costs;
 
@@ -179,7 +179,7 @@ public abstract class LongPriorityQueue implements PrimitiveLongIterable {
         costs.values = null;
     }
 
-    private boolean upHeap(int origPos) {
+    protected boolean upHeap(int origPos) {
         int i = origPos;
         long node = heap[i];          // save bottom node
         int j = i >>> 1;
@@ -192,7 +192,7 @@ public abstract class LongPriorityQueue implements PrimitiveLongIterable {
         return i != origPos;
     }
 
-    private void downHeap(int i) {
+    protected void downHeap(int i) {
         long node = heap[i];          // save top node
         int j = i << 1;              // find smaller child
         int k = j + 1;
@@ -211,7 +211,7 @@ public abstract class LongPriorityQueue implements PrimitiveLongIterable {
         heap[i] = node;            // install saved node
     }
 
-    private void ensureCapacityForInsert() {
+    protected void ensureCapacityForInsert() {
         if (size >= heap.length) {
             long[] newHeap = new long[ArrayUtil.oversize(
                     size + 1,
@@ -243,7 +243,7 @@ public abstract class LongPriorityQueue implements PrimitiveLongIterable {
     }
 
     public static LongPriorityQueue min(int capacity) {
-        return new LongPriorityQueue() {
+        return new LongPriorityQueue(capacity) {
             @Override
             protected boolean lessThan(long a, long b) {
                 return costs.get(a) < costs.get(b);
@@ -252,7 +252,7 @@ public abstract class LongPriorityQueue implements PrimitiveLongIterable {
     }
 
     public static LongPriorityQueue max(int capacity) {
-        return new LongPriorityQueue() {
+        return new LongPriorityQueue(capacity) {
             @Override
             protected boolean lessThan(long a, long b) {
                 return costs.get(a) > costs.get(b);
