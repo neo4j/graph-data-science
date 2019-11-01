@@ -30,6 +30,7 @@ import org.neo4j.graphdb.Direction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Function;
 
 public class K1Coloring extends Algorithm<K1Coloring> {
 
@@ -117,43 +118,70 @@ public class K1Coloring extends Algorithm<K1Coloring> {
     }
 
     private void runColoring(Direction direction) {
-        Collection<ColoringStep> steps = new ArrayList<>(threadSize);
-        for (long i = 0L; i < nodeCount; i += batchSize) {
-            ColoringStep step = new ColoringStep(
-                graph.concurrentCopy(),
-                direction,
-                colors,
-                nodesToColor,
-                nodeCount,
-                i,
-                batchSize
-            );
+        Function<Long, ColoringStep> producer = (batchStart) -> new ColoringStep(
+            graph.concurrentCopy(),
+            direction,
+            colors,
+            nodesToColor,
+            nodeCount,
+            batchStart,
+            batchSize
+        );
 
-            steps.add(step);
-        }
+        Collection<ColoringStep> steps = degreePartition(producer, direction);
 
         ParallelUtil.run(steps, executor);
     }
 
     private void runValidation(Direction direction) {
-        Collection<ValidationStep> steps = new ArrayList<>(threadSize);
         BitSet nextNodesToColor = new BitSet(nodeCount);
-        for (long i = 0L; i < nodeCount; i += batchSize) {
-            ValidationStep step = new ValidationStep(
+
+        Function<Long, ValidationStep> producer = (batchStart) -> new ValidationStep(
                 graph.concurrentCopy(),
                 direction,
                 colors,
                 nodesToColor,
                 nextNodesToColor,
                 nodeCount,
-                i,
+                batchStart,
                 batchSize
             );
 
-            steps.add(step);
-        }
+        Collection<ValidationStep> steps = degreePartition(producer, direction);
 
         ParallelUtil.run(steps, executor);
         this.nodesToColor = nextNodesToColor;
     }
+
+
+    private <T extends Runnable> Collection<T> degreePartition(Function<Long, T> taskSupplier, Direction direction) {
+        Collection<T> tasks = new ArrayList<>(threadSize);
+
+        long cumulativeDegree = direction == Direction.BOTH ? graph.relationshipCount() / 2 : graph.relationshipCount();
+        long batchDegree = cumulativeDegree * (nodesToColor.cardinality() / nodeCount) / threadSize;
+
+        long currentNode = nodesToColor.nextSetBit(0);
+        long batchStart = currentNode;
+        long currentDegree = 0;
+        do  {
+            currentDegree += graph.degree(currentNode,direction);
+
+            if (currentDegree >= batchDegree) {
+                tasks.add(taskSupplier.apply(batchStart));
+                currentNode++;
+                batchStart = currentNode;
+                currentDegree = 0;
+
+            }
+
+            currentNode = nodesToColor.nextSetBit(currentNode + 1);
+        } while(currentNode >= 0 && currentNode < nodeCount);
+
+        if(currentDegree > 0) {
+            tasks.add(taskSupplier.apply(batchStart));
+        }
+
+        return tasks;
+    };
+
 }
