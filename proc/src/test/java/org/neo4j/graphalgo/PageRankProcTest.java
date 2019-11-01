@@ -147,7 +147,7 @@ class PageRankProcTest extends ProcTestBase {
     @AllGraphNamesTest
     void testPageRankStreamFromLoadedGraph(String graphImpl) {
         String graphName = "aggGraph";
-        GraphLoadFactory.remove(graphName);
+        GraphLoadFactory.remove(getUsername(), graphName);
 
         String loadQuery = String.format(
                 "CALL algo.graph.load(" +
@@ -187,7 +187,7 @@ class PageRankProcTest extends ProcTestBase {
     @AllGraphNamesTest
     void testWeightedPageRankStreamFromLoadedGraph(String graphImpl) {
         String graphName = "aggGraph";
-        GraphLoadFactory.remove(graphName);
+        GraphLoadFactory.remove(getUsername(), graphName);
 
         String loadQuery = String.format(
                 "CALL algo.graph.load(" +

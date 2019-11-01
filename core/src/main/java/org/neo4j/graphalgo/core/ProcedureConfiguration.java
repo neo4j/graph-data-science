@@ -357,7 +357,7 @@ public class ProcedureConfiguration {
             case HugeGraph.TYPE:
                 return HugeGraphFactory.class;
             default:
-                if (validCustomName(graphImpl) && GraphLoadFactory.exists(graphImpl)) {
+                if (validCustomName(graphImpl) && GraphLoadFactory.exists(getUsername(), graphImpl)) {
                     return GraphLoadFactory.class;
                 }
                 throw new IllegalArgumentException("Unknown impl: " + graphImpl);
@@ -379,7 +379,7 @@ public class ProcedureConfiguration {
             String... alloweds) {
         String graphName = getGraphName(defaultImpl);
         List<String> allowedNames = asList(alloweds);
-        if (allowedNames.contains(graphName) || allowedNames.contains(GraphLoadFactory.getType(graphName))) {
+        if (allowedNames.contains(graphName) || allowedNames.contains(GraphLoadFactory.getType(getUsername(), graphName))) {
             return getGraphImpl(defaultImpl);
         }
         throw new IllegalArgumentException("The graph algorithm only supports these graph types; " + allowedNames);

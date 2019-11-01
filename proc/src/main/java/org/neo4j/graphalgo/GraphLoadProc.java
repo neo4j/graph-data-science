@@ -73,7 +73,7 @@ public final class GraphLoadProc extends BaseProc {
     private GraphLoadStats loadGraph(ProcedureConfiguration config, String name) {
         GraphLoadStats stats = new GraphLoadStats(name, config);
 
-        if (GraphLoadFactory.exists(name)) {
+        if (GraphLoadFactory.exists(getUsername(), name)) {
             throw new IllegalArgumentException(String.format("A graph with name '%s' is already loaded.", name));
         }
 
@@ -103,7 +103,7 @@ public final class GraphLoadProc extends BaseProc {
             stats.nodes = graphFromType.nodeCount();
             stats.relationships = graphFromType.relationshipCount();
 
-            GraphLoadFactory.set(name, graphFromType);
+            GraphLoadFactory.set(getUsername(), name, graphFromType);
         }
 
         return stats;
@@ -189,7 +189,7 @@ public final class GraphLoadProc extends BaseProc {
     public Stream<GraphInfo> remove(@Name("name") String name) {
         GraphInfo info = new GraphInfo(name);
 
-        Graph graph = GraphLoadFactory.remove(name);
+        Graph graph = GraphLoadFactory.remove(getUsername(), name);
         if (graph != null) {
             info.type = graph.getType();
             info.nodes = graph.nodeCount();
@@ -208,10 +208,10 @@ public final class GraphLoadProc extends BaseProc {
             @Name("name") String name,
             @Name(value = "degreeDistribution", defaultValue = "null") Object degreeDistribution) {
         final GraphInfoWithHistogram info;
-        if (!GraphLoadFactory.exists(name)) {
+        if (!GraphLoadFactory.exists(getUsername(), name)) {
             info = new GraphInfoWithHistogram(name);
         } else {
-            Graph graph = GraphLoadFactory.getUnion(name);
+            Graph graph = GraphLoadFactory.getUnion(getUsername(), name);
             final boolean calculateDegreeDistribution;
             final ProcedureConfiguration configuration;
             if (Boolean.TRUE.equals(degreeDistribution)) {
@@ -248,7 +248,7 @@ public final class GraphLoadProc extends BaseProc {
                  "YIELD name, type, nodes, relationships, direction" +
                  "list all loaded graphs")
     public Stream<GraphInfo> list() {
-        Map<String, Graph> loadedGraphs = GraphLoadFactory.getLoadedGraphs();
+        Map<String, Graph> loadedGraphs = GraphLoadFactory.getLoadedGraphs(getUsername());
 
         return loadedGraphs.entrySet().stream().map(entry -> {
             Graph graph = entry.getValue();

@@ -80,7 +80,7 @@ public final class GraphGenerateProc extends BaseProc {
             long averageDegree) {
         GraphGenerationStats stats = new GraphGenerationStats(name, averageDegree, config);
 
-        if (GraphLoadFactory.exists(name)) {
+        if (GraphLoadFactory.exists(getUsername(), name)) {
             throw new IllegalArgumentException(String.format("A graph with name '%s' is already loaded.", name));
         }
 
@@ -104,7 +104,7 @@ public final class GraphGenerateProc extends BaseProc {
 
             stats.nodes = graphFromType.nodeCount();
             stats.relationships = graphFromType.relationshipCount();
-            GraphLoadFactory.set(name, graphFromType);
+            GraphLoadFactory.set(getUsername(), name, graphFromType);
         }
 
         return stats;

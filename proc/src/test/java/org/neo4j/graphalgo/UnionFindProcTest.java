@@ -406,7 +406,7 @@ public class UnionFindProcTest extends ProcTestBase {
             String weightProperty,
             int[] expectedSizes) {
         String graphName = "aggGraph";
-        GraphLoadFactory.remove(graphName);
+        GraphLoadFactory.remove(getUsername(), graphName);
 
         String loadQuery = "CALL algo.graph.load(" +
                            "    '" + graphName + "', '', '" + loadRelType + "', {" +

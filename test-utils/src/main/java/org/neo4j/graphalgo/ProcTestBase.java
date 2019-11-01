@@ -68,6 +68,10 @@ public class ProcTestBase {
         }
     }
 
+    protected String getUsername() {
+        return "";
+    }
+
     protected void runQuery(String query) {
         runQuery(query, row -> {});
     }
