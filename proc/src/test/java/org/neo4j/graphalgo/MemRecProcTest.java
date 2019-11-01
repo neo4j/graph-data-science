@@ -19,45 +19,35 @@
  */
 package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.GraphLoadProc;
-import org.neo4j.graphalgo.LabelPropagationProc;
-import org.neo4j.graphalgo.MemRecProc;
-import org.neo4j.graphalgo.PageRankProc;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
-import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
-import org.neo4j.graphdb.DependencyResolver;
 import org.neo4j.graphdb.QueryExecutionException;
-import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-class MemRecProcTest {
+class MemRecProcTest extends ProcTestBase {
 
-    private static GraphDatabaseAPI db;
-
-    @BeforeAll
-    static void setUp() throws Exception {
-        db = LdbcDownloader.openDb("Yelp");
-        Procedures procedures = db
-                .getDependencyResolver()
-                .resolveDependency(Procedures.class, DependencyResolver.SelectionStrategy.FIRST);
-        procedures.registerProcedure(MemRecProc.class);
-        procedures.registerProcedure(PageRankProc.class);
-        procedures.registerProcedure(UnionFindProc.class);
-        procedures.registerProcedure(LabelPropagationProc.class);
-        procedures.registerProcedure(GraphLoadProc.class);
+    @BeforeEach
+    void setUp() throws KernelException {
+        db = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(
+                MemRecProc.class,
+                PageRankProc.class,
+                UnionFindProc.class,
+                LabelPropagationProc.class,
+                GraphLoadProc.class
+        );
     }
 
-    @AfterAll
-    static void tearDown() {
+    @AfterEach
+    void tearDown() {
         db.shutdown();
     }
 
