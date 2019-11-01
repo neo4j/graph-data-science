@@ -19,6 +19,9 @@
  */
 package org.neo4j.graphalgo.core;
 
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -116,7 +119,8 @@ public final class CypherMapWrapper {
      *         or the provided default value if no entry for the key is found (or it's mapped to null).
      * @throws IllegalArgumentException if a value was found, but it is not of the expected type.
      */
-    <V> V getChecked(String key, V defaultValue, Class<V> expectedType) {
+    @Contract("_, !null, _ -> !null")
+    @Nullable <V> V getChecked(String key, @Nullable V defaultValue, Class<V> expectedType) {
         Object value = config.get(key);
         return checkValue(key, defaultValue, expectedType, value);
     }
@@ -141,12 +145,19 @@ public final class CypherMapWrapper {
         return null == value ? defaultValue : (V) value;
     }
 
-    private <V> V getChecked(String key, String oldKey, V defaultValue, Class<V> expectedType) {
+    @Contract("_, _, !null, _ -> !null")
+    private @Nullable <V> V getChecked(String key, String oldKey, @Nullable V defaultValue, Class<V> expectedType) {
         Object value = get(key, oldKey, null);
         return checkValue(key, defaultValue, expectedType, value);
     }
 
-    private <V> V checkValue(final String key, final V defaultValue, final Class<V> expectedType, final Object value) {
+    @Contract("_, !null, _, _ -> !null; _, _, _, null -> param2")
+    private @Nullable <V> V checkValue(
+        String key,
+        @Nullable V defaultValue,
+        Class<V> expectedType,
+        Object value
+    ) {
         if (null == value) {
             return defaultValue;
         }
