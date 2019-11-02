@@ -24,6 +24,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 
 public final class ExceptionMessageMatcher<EX extends Throwable>
@@ -37,6 +38,10 @@ public final class ExceptionMessageMatcher<EX extends Throwable>
 
     public static <EX extends Throwable> Matcher<EX> exceptionMessage(final String message) {
         return new ExceptionMessageMatcher<>(is(message));
+    }
+
+    public static <EX extends Throwable> Matcher<EX> containsMessage(final String message) {
+        return new ExceptionMessageMatcher<>(containsString(message));
     }
 
     @Override

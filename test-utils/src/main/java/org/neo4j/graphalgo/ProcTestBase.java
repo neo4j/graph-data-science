@@ -50,6 +50,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessage;
 import static org.neo4j.graphdb.DependencyResolver.SelectionStrategy.ONLY;
 import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 
@@ -124,7 +125,7 @@ public class ProcTestBase {
         String query,
         Consumer<Result.ResultRow> check
     ) {
-        runQuery(username, query, Collections.emptyMap(), check);
+        runQuery(username, query, emptyMap(), check);
     }
 
     protected void runQuery(
@@ -213,11 +214,11 @@ public class ProcTestBase {
         }
     }
 
-    public void assertCypherResult(@Language("Cypher") String query, List<Map<String, Object>> expected) {
+    protected void assertCypherResult(@Language("Cypher") String query, List<Map<String, Object>> expected) {
         assertCypherResult(query, emptyMap(), expected);
     }
 
-    public void assertCypherResult(
+    protected void assertCypherResult(
         @Language("Cypher") String query,
         Map<String, Object> queryParameters,
         List<Map<String, Object>> expected
@@ -260,6 +261,18 @@ public class ProcTestBase {
                     );
                 });
             }
+        }
+    }
+
+    protected void assertError(
+        @Language("Cypher") String query,
+        String messageSubstring
+    ) {
+        try {
+            db.execute(query);
+            fail(format("Expected an exception to be thrown by query:\n%s", query));
+        } catch (Exception e) {
+            assertThat(e, containsMessage(messageSubstring));
         }
     }
 
