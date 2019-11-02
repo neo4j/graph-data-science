@@ -10,6 +10,12 @@ When Neo4j is restarted, named graphs are lost and will need to be reloaded.
 As it can take some time to load large graphs into the algorithm data structures, you can pre-load graphs and then later refer to them by name when calling graph algorithm procedures.
 After usage, they can be removed from memory to free resources used.
 
+[NOTE]
+====
+Loading, using, listing and removing named graphs are user-related management operations.
+Graphs created by a different user are not accessible at any time.
+====
+
 
 == Loading a named graph
 
@@ -69,7 +75,7 @@ We can use our named graph in queries by specifying its name in the `graph` key 
 .The following will run the PageRank algorithm on the `my-graph` named graph:
 [source,cypher]
 ----
-CALL algo.pageRank(null,null,{graph:'my-graph' /*, ... */})
+CALL algo.pageRank(null, null, {graph: 'my-graph' /*, ... */})
 ----
 
 
