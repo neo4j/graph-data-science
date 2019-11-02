@@ -22,10 +22,11 @@ package org.neo4j.graphalgo.core;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import static java.util.Collections.emptyMap;
 
 /**
  * Wrapper around configuration options map
@@ -55,6 +56,14 @@ public final class CypherMapWrapper {
             return Optional.of(getChecked(key, null, String.class));
         }
         return Optional.empty();
+    }
+
+    public Map<String, Object> getMap(String key) {
+        Map<String, Object> map = getChecked(key, null, Map.class);
+        if (map == null) {
+            return emptyMap();
+        }
+        return map;
     }
 
     /**
@@ -104,7 +113,7 @@ public final class CypherMapWrapper {
         return (Number) value;
     }
 
-    int getInt(String key, int defaultValue) {
+    public int getInt(String key, int defaultValue) {
         Number value = (Number) config.get(key);
         if (null == value) {
             return defaultValue;
@@ -183,7 +192,7 @@ public final class CypherMapWrapper {
     }
 
     public static CypherMapWrapper empty() {
-        return new CypherMapWrapper(Collections.emptyMap());
+        return new CypherMapWrapper(emptyMap());
     }
 
     CypherMapWrapper withString(String key, String value) {
