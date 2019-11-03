@@ -66,4 +66,8 @@ public final class PregelContext {
     public int getDegree(long nodeId, Direction direction) {
         return computeStep.getDegree(nodeId, direction);
     }
+
+    public double getInitialNodeValue() {
+        return config.getInitialNodeValue();
+    }
 }

@@ -76,7 +76,8 @@ public class WCCPregel extends WCC<WCCPregel> {
         NodeProperties communityMap = algoConfig.communityMap;
 
         PregelConfig config = new PregelConfig.Builder()
-            .withMessageDirection(Direction.OUTGOING)
+            .withMessageDirection(Direction.BOTH)
+            .withInitialNodeValue(-1.0)
             .isAsynchronous(true)
             .build();
 
