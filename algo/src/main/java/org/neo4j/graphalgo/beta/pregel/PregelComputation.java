@@ -17,14 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.pregel.examples;
 
-import org.neo4j.graphdb.Direction;
+package org.neo4j.graphalgo.beta.pregel;
 
-public class SCCComputation extends WCCComputation {
+import java.util.Queue;
 
-    @Override
-    protected Direction getMessageDirection() {
-        return Direction.OUTGOING;
-    }
+@FunctionalInterface
+public interface PregelComputation {
+
+    void compute(PregelContext context, long nodeId, Queue<Double> messages);
 }

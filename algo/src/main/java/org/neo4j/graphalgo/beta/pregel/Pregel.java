@@ -43,7 +43,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.LongStream;
 
 public final class Pregel {
@@ -51,7 +50,9 @@ public final class Pregel {
     // Marks the end of messages from the previous iteration in synchronous mode.
     private static final Double TERMINATION_SYMBOL = Double.NaN;
 
-    private final Supplier<Computation> computationFactory;
+    private final PregelConfig config;
+
+    private final PregelComputation computation;
 
     private final Graph graph;
 
@@ -67,14 +68,15 @@ public final class Pregel {
 
     public static Pregel withDefaultNodeValues(
             final Graph graph,
-            final Supplier<Computation> computationFactory,
+            final PregelConfig config,
+            final PregelComputation computation,
             final int batchSize,
             final int concurrency,
             final ExecutorService executor,
             final AllocationTracker tracker) {
 
         // HugeDoubleArray is faster for set operations compared to HugeNodePropertyMap
-        double defaultNodeValue = computationFactory.get().getDefaultNodeValue();
+        double defaultNodeValue = config.getInitialNodeValue();
         HugeDoubleArray hugeDoubleArray = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
         ParallelUtil.parallelStreamConsume(
                 LongStream.range(0, graph.nodeCount()),
@@ -83,7 +85,8 @@ public final class Pregel {
 
         return new Pregel(
                 graph,
-                computationFactory,
+                config,
+                computation,
                 hugeDoubleArray,
                 batchSize,
                 concurrency,
@@ -94,7 +97,8 @@ public final class Pregel {
 
     public static Pregel withInitialNodeValues(
             final Graph graph,
-            final Supplier<Computation> computationFactory,
+            final PregelConfig config,
+            final PregelComputation computation,
             final NodeProperties initialNodeValues,
             final int batchSize,
             final int concurrency,
@@ -110,7 +114,8 @@ public final class Pregel {
 
         return new Pregel(
                 graph,
-                computationFactory,
+                config,
+                computation,
                 hugeDoubleArray,
                 batchSize,
                 concurrency,
@@ -121,14 +126,16 @@ public final class Pregel {
 
     private Pregel(
             final Graph graph,
-            final Supplier<Computation> computationFactory,
+            final PregelConfig config,
+            final PregelComputation computation,
             final HugeDoubleArray initialNodeValues,
             final int batchSize,
             final int concurrency,
             final ExecutorService executor,
             final AllocationTracker tracker) {
         this.graph = graph;
-        this.computationFactory = computationFactory;
+        this.config = config;
+        this.computation = computation;
         this.nodeValues = initialNodeValues;
         this.batchSize = batchSize;
         this.concurrency = concurrency;
@@ -140,7 +147,7 @@ public final class Pregel {
         // we can compute the maximum number of received messages
         // which allows us to use ArrayQueues instead of LinkedQueues.
         this.messageQueues = (loadDirection == Direction.BOTH)
-                ? initArrayQueues(graph, computationFactory, tracker)
+                ? initArrayQueues(graph, tracker)
                 : initLinkedQueues(graph, tracker);
     }
 
@@ -195,7 +202,7 @@ public final class Pregel {
 
         final List<ComputeStep> tasks = new ArrayList<>(nodeBatches.size());
 
-        if (!computationFactory.get().supportsAsynchronousParallel()) {
+        if (!config.isAsynchronous()) {
             // Synchronization barrier:
             // Add termination flag to message queues that
             // received messages in the previous iteration.
@@ -214,7 +221,8 @@ public final class Pregel {
                 nodeBatches,
                 nodeBatch -> {
                     ComputeStep task = new ComputeStep(
-                            computationFactory.get(),
+                            computation,
+                            config,
                             graph.nodeCount(),
                             iteration,
                             nodeBatch,
@@ -235,12 +243,10 @@ public final class Pregel {
     @SuppressWarnings({"unchecked", "InstantiatingObjectToGetClassObject"})
     private HugeObjectArray<MpscArrayQueue<Double>> initArrayQueues(
             Graph graph,
-            Supplier<Computation> computationFactory,
             AllocationTracker tracker) {
-        Computation computation = computationFactory.get();
-        Direction receiveDirection = computation.getMessageDirection().reverse();
+        Direction receiveDirection = config.getMessageDirection().reverse();
         // In sync mode, we need to reserve space for the termination symbol.
-        int minSize = computation.supportsAsynchronousParallel() ? 0 : 1;
+        int minSize = config.isAsynchronous() ? 0 : 1;
 
         Class<MpscArrayQueue<Double>> queueClass = (Class<MpscArrayQueue<Double>>) new MpscArrayQueue<>(0).getClass();
 
@@ -281,7 +287,8 @@ public final class Pregel {
     public static final class ComputeStep implements Runnable {
 
         private final int iteration;
-        private final Computation computation;
+        private final PregelComputation computation;
+        private final PregelContext pregelContext;
         private final BitSet senderBits;
         private final BitSet receiverBits;
         private final BitSet voteBits;
@@ -292,7 +299,8 @@ public final class Pregel {
         private final RelationshipIterator relationshipIterator;
 
         private ComputeStep(
-                final Computation computation,
+                final PregelComputation computation,
+                final PregelConfig config,
                 final long globalNodeCount,
                 final int iteration,
                 final PrimitiveLongIterable nodeBatch,
@@ -312,8 +320,7 @@ public final class Pregel {
             this.nodeValues = nodeValues;
             this.messageQueues = messageQueues;
             this.relationshipIterator = relationshipIterator.concurrentCopy();
-
-            computation.setComputeStep(this);
+            this.pregelContext = new PregelContext(this, config);
         }
 
         @Override
@@ -325,7 +332,7 @@ public final class Pregel {
 
                 if (receiverBits.get(nodeId) || !voteBits.get(nodeId)) {
                     voteBits.clear(nodeId);
-                    computation.compute(nodeId, receiveMessages(nodeId));
+                    computation.compute(pregelContext, nodeId, receiveMessages(nodeId));
                 }
             }
         }

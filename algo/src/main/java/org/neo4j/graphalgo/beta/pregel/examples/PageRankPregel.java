@@ -19,35 +19,29 @@
  */
 package org.neo4j.graphalgo.beta.pregel.examples;
 
-import org.neo4j.graphalgo.beta.pregel.Computation;
+import org.neo4j.graphalgo.beta.pregel.PregelComputation;
+import org.neo4j.graphalgo.beta.pregel.PregelContext;
 
 import java.util.Queue;
 
-public class PRComputation extends Computation {
+public class PageRankPregel implements PregelComputation {
 
     private final long nodeCount;
     private final double jumpProbability;
     private final double dampingFactor;
 
-    public PRComputation(
-            final long nodeCount,
-            final double dampingFactor) {
+    public PageRankPregel(long nodeCount, final double dampingFactor) {
         this.nodeCount = nodeCount;
         this.jumpProbability = 1.0 - dampingFactor;
         this.dampingFactor = dampingFactor;
     }
 
     @Override
-    protected double getDefaultNodeValue() {
-        return 1.0 / nodeCount;
-    }
-
-    @Override
-    protected void compute(final long nodeId, Queue<Double> messages) {
-        double newRank = getNodeValue(nodeId);
+    public void compute(PregelContext pregel, final long nodeId, Queue<Double> messages) {
+        double newRank = pregel.getNodeValue(nodeId);
 
         // compute new rank based on neighbor ranks
-        if (getSuperstep() > 0) {
+        if (!pregel.isInitialSuperStep()) {
             double sum = 0;
             if (messages != null) {
                 Double nextMessage;
@@ -59,7 +53,7 @@ public class PRComputation extends Computation {
         }
 
         // send new rank to neighbors
-        setNodeValue(nodeId, newRank);
-        sendMessages(nodeId, newRank / getDegree(nodeId));
+        pregel.setNodeValue(nodeId, newRank);
+        pregel.sendMessages(nodeId, newRank / pregel.getDegree(nodeId));
     }
 }

@@ -17,57 +17,53 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.neo4j.graphalgo.beta.pregel.examples;
 
-import org.neo4j.graphalgo.beta.pregel.Computation;
-import org.neo4j.graphdb.Direction;
+import org.neo4j.graphalgo.beta.pregel.PregelComputation;
+import org.neo4j.graphalgo.beta.pregel.PregelContext;
 
 import java.util.Queue;
 
-// TODO: Inheritance would be an anti pattern for other languages (e.g. use compute closure)
-// TODO: byte code javap (explore inlining)
-public class WCCComputation extends Computation {
+public class SingleSourceShortestPathPregel implements PregelComputation {
 
-    @Override
-    protected Direction getMessageDirection() {
-        return Direction.BOTH;
+    private final long startNode;
+
+    public SingleSourceShortestPathPregel(long startNode) {
+        this.startNode = startNode;
     }
 
     @Override
-    protected boolean supportsAsynchronousParallel() {
-        return true;
-    }
-
-    @Override
-    protected void compute(final long nodeId, Queue<Double> messages) {
-        if (getSuperstep() == 0) {
-            double currentValue = getNodeValue(nodeId);
-            if (currentValue == getDefaultNodeValue()) {
-                sendMessages(nodeId, nodeId);
-                setNodeValue(nodeId, nodeId);
+    public void compute(PregelContext pregel, long nodeId, Queue<Double> messages) {
+        if (pregel.isInitialSuperStep()) {
+            if (nodeId == startNode) {
+                pregel.setNodeValue(nodeId, 0);
+                pregel.sendMessages(nodeId, 1);
             } else {
-                sendMessages(nodeId, currentValue);
+                pregel.setNodeValue(nodeId, Long.MAX_VALUE);
             }
         } else {
-            long newComponentId = (long) getNodeValue(nodeId);
+            // This is basically the same message passing as WCC (except the new message)
+            long newDistance = (long) pregel.getNodeValue(nodeId);
             boolean hasChanged = false;
 
             if (messages != null) {
                 Double message;
                 while ((message = messages.poll()) != null) {
-                    if (message < newComponentId) {
-                        newComponentId = message.longValue();
+                    if (message < newDistance) {
+                        newDistance = message.longValue();
                         hasChanged = true;
                     }
                 }
             }
 
             if (hasChanged) {
-                setNodeValue(nodeId, newComponentId);
-                sendMessages(nodeId, newComponentId);
+                pregel.setNodeValue(nodeId, newDistance);
+                pregel.sendMessages(nodeId, newDistance + 1);
             }
 
-            voteToHalt(nodeId);
+            pregel.voteToHalt(nodeId);
         }
+
     }
 }

@@ -20,8 +20,8 @@
 
 package org.neo4j.graphalgo.beta.pregel.examples;
 
-import org.neo4j.graphalgo.beta.pregel.Computation;
-import org.neo4j.graphdb.Direction;
+import org.neo4j.graphalgo.beta.pregel.PregelComputation;
+import org.neo4j.graphalgo.beta.pregel.PregelContext;
 
 import java.util.Arrays;
 import java.util.Queue;
@@ -29,27 +29,21 @@ import java.util.Queue;
 /**
  * Basic implementation potentially suffering from osciallating vertex states due to synchronous computation.
  */
-public class LPComputation extends Computation {
+public class LabelPropagationPregel implements PregelComputation {
 
     @Override
-    protected Direction getMessageDirection() {
-        return Direction.BOTH;
-    }
-
-    @Override
-    protected void compute(long nodeId, Queue<Double> messages) {
-        // TODO: boolean isInitialSuperstep()
-        if (getSuperstep() == 0) {
-            setNodeValue(nodeId, nodeId);
-            sendMessages(nodeId, nodeId);
+    public void compute(PregelContext pregel, long nodeId, Queue<Double> messages) {
+        if (pregel.isInitialSuperStep()) {
+            pregel.setNodeValue(nodeId, nodeId);
+            pregel.sendMessages(nodeId, nodeId);
         } else {
             if (messages != null) {
-                long oldValue = (long) getNodeValue(nodeId);
+                long oldValue = (long) pregel.getNodeValue(nodeId);
                 long newValue = oldValue;
 
                 // TODO: could be shared across compute functions per thread
                 // We receive at most |degree| messages
-                long[] buffer = new long[getDegree(nodeId)];
+                long[] buffer = new long[pregel.getDegree(nodeId)];
 
                 int messageCount = 0;
                 Double nextMessage;
@@ -81,11 +75,11 @@ public class LPComputation extends Computation {
                 }
 
                 if (newValue != oldValue) {
-                    setNodeValue(nodeId, newValue);
-                    sendMessages(nodeId, newValue);
+                    pregel.setNodeValue(nodeId, newValue);
+                    pregel.sendMessages(nodeId, newValue);
                 }
             }
         }
-        voteToHalt(nodeId);
+        pregel.voteToHalt(nodeId);
     }
 }

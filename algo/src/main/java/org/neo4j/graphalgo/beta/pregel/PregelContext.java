@@ -21,59 +21,49 @@ package org.neo4j.graphalgo.beta.pregel;
 
 import org.neo4j.graphdb.Direction;
 
-import java.util.Queue;
+public final class PregelContext {
 
-public abstract class Computation {
+    private final Pregel.ComputeStep computeStep;
+    private final PregelConfig config;
 
-    private Pregel.ComputeStep computeStep;
+    PregelContext(Pregel.ComputeStep computeStep, PregelConfig config) {
+        this.computeStep = computeStep;
+        this.config = config;
+    }
 
-    protected abstract void compute(long nodeId, Queue<Double> messages);
-
-    protected void voteToHalt(long nodeId) {
+    public void voteToHalt(long nodeId) {
         computeStep.voteToHalt(nodeId);
     }
 
-    protected int getSuperstep() {
+    public boolean isInitialSuperStep() {
+        return getSuperstep() == 0;
+    }
+
+    public int getSuperstep() {
         return computeStep.getIteration();
     }
 
-    protected double getNodeValue(long nodeId) {
+    public double getNodeValue(long nodeId) {
         return computeStep.getNodeValue(nodeId);
     }
 
-    protected void setNodeValue(long nodeId, double value) {
+    public void setNodeValue(long nodeId, double value) {
         computeStep.setNodeValue(nodeId, value);
     }
 
-    protected void sendMessages(long nodeId, double message) {
-        sendMessages(nodeId, message, getMessageDirection());
+    public void sendMessages(long nodeId, double message) {
+        sendMessages(nodeId, message, config.getMessageDirection());
     }
 
-    protected void sendMessages(long nodeId, double message, Direction direction) {
+    public void sendMessages(long nodeId, double message, Direction direction) {
         computeStep.sendMessages(nodeId, message, direction);
     }
 
-    protected int getDegree(long nodeId) {
-        return getDegree(nodeId, getMessageDirection());
+    public int getDegree(long nodeId) {
+        return getDegree(nodeId, config.getMessageDirection());
     }
 
-    protected int getDegree(long nodeId, Direction direction) {
+    public int getDegree(long nodeId, Direction direction) {
         return computeStep.getDegree(nodeId, direction);
-    }
-
-    protected Direction getMessageDirection() {
-        return Direction.OUTGOING;
-    }
-
-    protected double getDefaultNodeValue() {
-        return -1.0;
-    }
-
-    void setComputeStep(Pregel.ComputeStep computeStep) {
-        this.computeStep = computeStep;
-    }
-
-    protected boolean supportsAsynchronousParallel() {
-        return false;
     }
 }

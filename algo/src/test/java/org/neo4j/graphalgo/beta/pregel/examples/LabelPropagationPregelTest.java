@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
+import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -34,45 +35,34 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import static org.neo4j.graphalgo.beta.pregel.examples.ComputationTestUtil.assertDoubleValues;
+import static org.neo4j.graphalgo.beta.pregel.examples.ComputationTestUtil.assertLongValues;
 
-class PageRankTest {
+class LabelPropagationPregelTest {
 
     private static final String ID_PROPERTY = "id";
 
-    private static final Label NODE_LABEL = Label.label("Node");
+    private static final Label NODE_LABEL = Label.label("User");
 
-    // https://en.wikipedia.org/wiki/PageRank#/media/File:PageRanks-Example.jpg
+    // https://neo4j.com/blog/graph-algorithms-neo4j-label-propagation/
+    //
     private static final String TEST_GRAPH =
             "CREATE" +
-            "  (a:Node { id: 0, name: 'a' })" +
-            ", (b:Node { id: 1, name: 'b' })" +
-            ", (c:Node { id: 2, name: 'c' })" +
-            ", (d:Node { id: 3, name: 'd' })" +
-            ", (e:Node { id: 4, name: 'e' })" +
-            ", (f:Node { id: 5, name: 'f' })" +
-            ", (g:Node { id: 6, name: 'g' })" +
-            ", (h:Node { id: 7, name: 'h' })" +
-            ", (i:Node { id: 8, name: 'i' })" +
-            ", (j:Node { id: 9, name: 'j' })" +
-            ", (k:Node { id: 10, name: 'k' })" +
-            ", (b)-[:REL]->(c)" +
-            ", (c)-[:REL]->(b)" +
-            ", (d)-[:REL]->(a)" +
-            ", (d)-[:REL]->(b)" +
-            ", (e)-[:REL]->(b)" +
-            ", (e)-[:REL]->(d)" +
-            ", (e)-[:REL]->(f)" +
-            ", (f)-[:REL]->(b)" +
-            ", (f)-[:REL]->(e)" +
-            ", (g)-[:REL]->(b)" +
-            ", (g)-[:REL]->(e)" +
-            ", (h)-[:REL]->(b)" +
-            ", (h)-[:REL]->(e)" +
-            ", (i)-[:REL]->(b)" +
-            ", (i)-[:REL]->(e)" +
-            ", (j)-[:REL]->(e)" +
-            ", (k)-[:REL]->(e)";
+            "  (nAlice:User   { id: 0 })" +
+            ", (nBridget:User { id: 1 })" +
+            ", (nCharles:User { id: 2 })" +
+            ", (nDoug:User    { id: 3 })" +
+            ", (nMark:User    { id: 4 })" +
+            ", (nMichael:User { id: 5 })" +
+            ", (nAlice)-[:FOLLOW]->(nBridget)" +
+            ", (nAlice)-[:FOLLOW]->(nCharles)" +
+            ", (nMark)-[:FOLLOW]->(nDoug)" +
+            ", (nBridget)-[:FOLLOW]->(nMichael)" +
+            ", (nDoug)-[:FOLLOW]->(nMark)" +
+            ", (nMichael)-[:FOLLOW]->(nAlice)" +
+            ", (nAlice)-[:FOLLOW]->(nMichael)" +
+            ", (nBridget)-[:FOLLOW]->(nAlice)" +
+            ", (nMichael)-[:FOLLOW]->(nBridget)" +
+            ", (nCharles)-[:FOLLOW]->(nDoug)";
 
     private GraphDatabaseAPI db;
     private Graph graph;
@@ -84,7 +74,7 @@ class PageRankTest {
         graph = new GraphLoader(db)
                 .withAnyRelationshipType()
                 .withAnyLabel()
-                .withDirection(Direction.OUTGOING)
+                .withDirection(Direction.BOTH)
                 .load(HugeGraphFactory.class);
     }
 
@@ -94,34 +84,27 @@ class PageRankTest {
     }
 
     @Test
-    void runPR() {
+    void runLP() {
         int batchSize = 10;
         int maxIterations = 10;
-        float dampingFactor = 0.85f;
+
+        PregelConfig config = new PregelConfig.Builder()
+            .withMessageDirection(Direction.BOTH)
+            .isAsynchronous(false)
+            .build();
 
         Pregel pregelJob = Pregel.withDefaultNodeValues(
                 graph,
-                () -> new PRComputation(graph.nodeCount(), dampingFactor),
+                config,
+                new LabelPropagationPregel(),
                 batchSize,
                 Pools.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT,
                 AllocationTracker.EMPTY
         );
 
-        final HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
+        HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
 
-        assertDoubleValues(db, NODE_LABEL, ID_PROPERTY, graph, nodeValues, 1e-3,
-                0.0276, // a
-                0.3483, // b
-                0.2650, // c
-                0.0330, // d
-                0.0682, // e
-                0.0330, // f
-                0.0136, // g
-                0.0136, // h
-                0.0136, // i
-                0.0136, // j
-                0.0136 // k
-        );
+        assertLongValues(db, NODE_LABEL, ID_PROPERTY, graph, nodeValues, 0, 0, 0, 4, 3, 0);
     }
 }

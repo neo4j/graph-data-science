@@ -17,57 +17,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.neo4j.graphalgo.beta.pregel.examples;
 
-import org.neo4j.graphalgo.beta.pregel.Computation;
+import org.neo4j.graphalgo.beta.pregel.PregelComputation;
+import org.neo4j.graphalgo.beta.pregel.PregelContext;
 
 import java.util.Queue;
 
-public class SSSPComputation extends Computation {
-
-    private final long startNode;
-
-    public SSSPComputation(long startNode) {
-        this.startNode = startNode;
-    }
+public class ConnectedComponentsPregel implements PregelComputation {
 
     @Override
-    protected boolean supportsAsynchronousParallel() {
-        return true;
-    }
-
-    @Override
-    protected void compute(long nodeId, Queue<Double> messages) {
-        if (getSuperstep() == 0) {
-            if (nodeId == startNode) {
-                setNodeValue(nodeId, 0);
-                sendMessages(nodeId, 1);
-            } else {
-                setNodeValue(nodeId, Long.MAX_VALUE);
-            }
+    public void compute(PregelContext pregel, final long nodeId, Queue<Double> messages) {
+        if (pregel.isInitialSuperStep()) {
+            pregel.sendMessages(nodeId, nodeId);
+            pregel.setNodeValue(nodeId, nodeId);
         } else {
-            // This is basically the same message passing as WCC (except the new message)
-            long newDistance = (long) getNodeValue(nodeId);
+            long newComponentId = (long) pregel.getNodeValue(nodeId);
             boolean hasChanged = false;
 
             if (messages != null) {
                 Double message;
                 while ((message = messages.poll()) != null) {
-                    if (message < newDistance) {
-                        newDistance = message.longValue();
+                    if (message < newComponentId) {
+                        newComponentId = message.longValue();
                         hasChanged = true;
                     }
                 }
             }
 
             if (hasChanged) {
-                setNodeValue(nodeId, newDistance);
-                sendMessages(nodeId, newDistance + 1);
+                pregel.setNodeValue(nodeId, newComponentId);
+                pregel.sendMessages(nodeId, newComponentId);
             }
 
-            voteToHalt(nodeId);
+            pregel.voteToHalt(nodeId);
         }
-
     }
 }

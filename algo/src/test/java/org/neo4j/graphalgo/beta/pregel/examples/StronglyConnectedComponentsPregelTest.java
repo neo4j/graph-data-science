@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
+import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -36,7 +37,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.neo4j.graphalgo.beta.pregel.examples.ComputationTestUtil.assertLongValues;
 
-class WeaklyConnectedComponentsTest {
+class StronglyConnectedComponentsPregelTest {
 
     private static final String ID_PROPERTY = "id";
 
@@ -59,11 +60,14 @@ class WeaklyConnectedComponentsTest {
             ", (nA)-[:TYPE]->(nB)" +
             ", (nB)-[:TYPE]->(nC)" +
             ", (nC)-[:TYPE]->(nD)" +
+            ", (nD)-[:TYPE]->(nA)" +
             // {E, F, G}
             ", (nE)-[:TYPE]->(nF)" +
             ", (nF)-[:TYPE]->(nG)" +
+            ", (nG)-[:TYPE]->(nE)" +
             // {H, I}
-            ", (nI)-[:TYPE]->(nH)";
+            ", (nI)-[:TYPE]->(nH)" +
+            ", (nH)-[:TYPE]->(nI)";
 
     private GraphDatabaseAPI db;
     private Graph graph;
@@ -75,7 +79,7 @@ class WeaklyConnectedComponentsTest {
         graph = new GraphLoader(db)
                 .withAnyRelationshipType()
                 .withAnyLabel()
-                .withDirection(Direction.BOTH)
+                .withDirection(Direction.OUTGOING)
                 .load(HugeGraphFactory.class);
     }
 
@@ -85,13 +89,19 @@ class WeaklyConnectedComponentsTest {
     }
 
     @Test
-    void runWCC() {
+    void runSCC() {
         int batchSize = 10;
         int maxIterations = 10;
 
+        PregelConfig config = new PregelConfig.Builder()
+            .withMessageDirection(Direction.OUTGOING)
+            .isAsynchronous(true)
+            .build();
+
         Pregel pregelJob = Pregel.withDefaultNodeValues(
                 graph,
-                WCCComputation::new,
+                config,
+                new ConnectedComponentsPregel(),
                 batchSize,
                 Pools.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT,

@@ -22,6 +22,10 @@ package org.neo4j.graphalgo.impl.wcc;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.beta.pregel.Pregel;
+import org.neo4j.graphalgo.beta.pregel.PregelComputation;
+import org.neo4j.graphalgo.beta.pregel.PregelConfig;
+import org.neo4j.graphalgo.beta.pregel.examples.ConnectedComponentsPregel;
 import org.neo4j.graphalgo.core.loading.NullPropertyMap;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -29,8 +33,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.graphalgo.beta.pregel.Pregel;
-import org.neo4j.graphalgo.beta.pregel.examples.WCCComputation;
+import org.neo4j.graphdb.Direction;
 
 import java.util.concurrent.ExecutorService;
 
@@ -72,10 +75,18 @@ public class WCCPregel extends WCC<WCCPregel> {
 
         NodeProperties communityMap = algoConfig.communityMap;
 
+        PregelConfig config = new PregelConfig.Builder()
+            .withMessageDirection(Direction.OUTGOING)
+            .isAsynchronous(true)
+            .build();
+
+        PregelComputation computation = new ConnectedComponentsPregel();
+
         if (communityMap == null || communityMap instanceof NullPropertyMap) {
             this.pregel = Pregel.withDefaultNodeValues(
                     graph,
-                    WCCComputation::new,
+                    config,
+                    computation,
                     (int) batchSize,
                     (int) threadSize,
                     executor,
@@ -84,7 +95,8 @@ public class WCCPregel extends WCC<WCCPregel> {
         } else {
             this.pregel = Pregel.withInitialNodeValues(
                     graph,
-                    WCCComputation::new,
+                    config,
+                    computation,
                     communityMap,
                     (int) batchSize,
                     (int) threadSize,
