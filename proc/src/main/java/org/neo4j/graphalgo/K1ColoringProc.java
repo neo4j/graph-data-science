@@ -117,7 +117,8 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
                 coloring.colors(),
                 setup.procedureConfig,
                 writeProperty,
-                setup.tracker);
+                setup.tracker
+            );
 
             setup.graph.releaseProperties();
         }
@@ -128,7 +129,8 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
     public Stream<StreamResult> stream(
         String label,
         String relationship,
-        Map<String, Object> config) {
+        Map<String, Object> config
+    ) {
 
         ProcedureSetup setup = setup(label, relationship, config);
 
@@ -194,7 +196,8 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
         HugeLongArray coloring,
         ProcedureConfiguration configuration,
         String writeProperty,
-        AllocationTracker tracker) {
+        AllocationTracker tracker
+    ) {
         try (ProgressTimer ignored = timer.get()) {
             write(graph, coloring, configuration, writeProperty, tracker);
         }
@@ -205,7 +208,8 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
         HugeLongArray coloring,
         ProcedureConfiguration procedureConfiguration,
         String writeProperty,
-        AllocationTracker tracker) {
+        AllocationTracker tracker
+    ) {
         log.debug("Writing results");
 
         Exporter exporter = Exporter.of(api, graph)
@@ -213,12 +217,14 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
             .parallel(
                 Pools.DEFAULT,
                 procedureConfiguration.getWriteConcurrency(),
-                TerminationFlag.wrap(transaction))
+                TerminationFlag.wrap(transaction)
+            )
             .build();
         exporter.write(
             writeProperty,
             coloring,
-            HugeLongArray.Translator.INSTANCE);
+            HugeLongArray.Translator.INSTANCE
+        );
     }
 
     public static class ProcedureSetup {

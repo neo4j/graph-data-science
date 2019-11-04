@@ -53,11 +53,12 @@ public class K1Coloring extends Algorithm<K1Coloring> {
 
     public K1Coloring(
         Graph graph,
+        Direction direction,
+        long maxIterations,
         int minBatchSize,
         int concurrency,
         ExecutorService executor,
-        AllocationTracker tracker,
-        Direction direction, long maxIterations
+        AllocationTracker tracker
     ) {
         this.graph = graph;
         this.minBatchSize = minBatchSize;
@@ -146,15 +147,15 @@ public class K1Coloring extends Algorithm<K1Coloring> {
         BitSet nextNodesToColor = new BitSet(nodeCount);
 
         DegreeTaskProducer<ValidationStep> producer = (batchStart, batchSize) -> new ValidationStep(
-                graph.concurrentCopy(),
-                direction,
-                colors,
-                nodesToColor,
-                nextNodesToColor,
-                nodeCount,
-                batchStart,
-                batchSize
-            );
+            graph.concurrentCopy(),
+            direction,
+            colors,
+            nodesToColor,
+            nextNodesToColor,
+            nodeCount,
+            batchStart,
+            batchSize
+        );
 
         Collection<ValidationStep> steps = degreePartition(producer, direction);
 
@@ -163,7 +164,10 @@ public class K1Coloring extends Algorithm<K1Coloring> {
     }
 
 
-    private <T extends Runnable> Collection<T> degreePartition(DegreeTaskProducer<T> taskSupplier, Direction direction) {
+    private <T extends Runnable> Collection<T> degreePartition(
+        DegreeTaskProducer<T> taskSupplier,
+        Direction direction
+    ) {
 
         long cumulativeDegree = direction == Direction.BOTH ? graph.relationshipCount() / 2 : graph.relationshipCount();
         long adjustedDegree = cumulativeDegree * (nodesToColor.cardinality() / nodeCount);
@@ -179,8 +183,8 @@ public class K1Coloring extends Algorithm<K1Coloring> {
         long currentNode = nodesToColor.nextSetBit(0);
         long batchStart = currentNode;
         long currentDegree = 0;
-        do  {
-            currentDegree += graph.degree(currentNode,direction);
+        do {
+            currentDegree += graph.degree(currentNode, direction);
 
             if (currentDegree >= batchDegree) {
                 tasks.add(taskSupplier.produce(batchStart, currentDegree));
@@ -190,16 +194,16 @@ public class K1Coloring extends Algorithm<K1Coloring> {
             }
 
             currentNode = nodesToColor.nextSetBit(currentNode + 1);
-        } while(currentNode >= 0 && currentNode < nodeCount);
+        } while (currentNode >= 0 && currentNode < nodeCount);
 
-        if(currentDegree > 0) {
+        if (currentDegree > 0) {
             tasks.add(taskSupplier.produce(batchStart, currentDegree));
         }
 
         return tasks;
-    };
+    }
 
-    interface  DegreeTaskProducer<T extends Runnable>  {
+    interface DegreeTaskProducer<T extends Runnable> {
         T produce(long batchStart, long batchSize);
     }
 }

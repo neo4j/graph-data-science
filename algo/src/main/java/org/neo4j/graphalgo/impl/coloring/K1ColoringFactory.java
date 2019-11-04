@@ -38,10 +38,11 @@ public class K1ColoringFactory extends AlgorithmFactory<K1Coloring> {
 
     @Override
     public K1Coloring build(
-            final Graph graph,
-            final ProcedureConfiguration configuration,
-            final AllocationTracker tracker,
-            final Log log) {
+        final Graph graph,
+        final ProcedureConfiguration configuration,
+        final AllocationTracker tracker,
+        final Log log
+    ) {
         int concurrency = configuration.getConcurrency();
         int batchSize = configuration.getBatchSize();
 
@@ -49,25 +50,25 @@ public class K1ColoringFactory extends AlgorithmFactory<K1Coloring> {
         Direction direction = configuration.getDirection(DEFAULT_DIRECTION);
 
         return new K1Coloring(
-                graph,
-                batchSize,
-                concurrency,
-                Pools.DEFAULT,
-                tracker,
-                direction,
-                maxIterations
+            graph,
+            direction,
+            maxIterations,
+            batchSize,
+            concurrency,
+            Pools.DEFAULT,
+            tracker
         );
     }
 
     @Override
     public MemoryEstimation memoryEstimation() {
         return MemoryEstimations.builder(K1Coloring.class)
-                .perNode("colors", HugeLongArray::memoryEstimation)
-                .perNode("nodesToColor", MemoryUsage::sizeOfBitset)
-                .perThread("coloring", MemoryEstimations.builder()
-                        .field("coloringStep", ColoringStep.class)
-                        .perNode("forbiddenColors", MemoryUsage::sizeOfBitset)
-                    .build())
-                .build();
+            .perNode("colors", HugeLongArray::memoryEstimation)
+            .perNode("nodesToColor", MemoryUsage::sizeOfBitset)
+            .perThread("coloring", MemoryEstimations.builder()
+                .field("coloringStep", ColoringStep.class)
+                .perNode("forbiddenColors", MemoryUsage::sizeOfBitset)
+                .build())
+            .build();
     }
 }

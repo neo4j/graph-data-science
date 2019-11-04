@@ -57,13 +57,13 @@ final class ColoringStep implements Runnable {
 
     @Override
     public void run() {
-        for (long nodeId = offset; nodeId < batchEnd ; nodeId++) {
+        for (long nodeId = offset; nodeId < batchEnd; nodeId++) {
             if (nodesToColor.get(nodeId)) {
                 forbiddenColors.clear();
 
                 graph.forEachRelationship(nodeId, direction, (s, target) -> {
-                    if( s != target) {
-                        if(target >= nodeCount) {
+                    if (s != target) {
+                        if (target >= nodeCount) {
                             System.out.println("target = " + target);
                         }
 
@@ -73,8 +73,8 @@ final class ColoringStep implements Runnable {
                 });
 
                 long nextColor = 0;
-                while(forbiddenColors.get(nextColor)) {
-                    nextColor ++;
+                while (forbiddenColors.get(nextColor)) {
+                    nextColor++;
                 }
 
                 colors.set(nodeId, nextColor);

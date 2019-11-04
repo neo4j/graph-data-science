@@ -98,12 +98,10 @@ class K1ColoringTest {
 
         K1Coloring k1Coloring = new K1Coloring(
             graph,
-            DEFAULT_BATCH_SIZE,
+            Direction.OUTGOING, 1000, DEFAULT_BATCH_SIZE,
             1,
             Pools.DEFAULT,
-            AllocationTracker.EMPTY,
-            Direction.OUTGOING,
-            1000
+            AllocationTracker.EMPTY
         );
 
         k1Coloring.compute();
@@ -129,12 +127,10 @@ class K1ColoringTest {
 
         K1Coloring k1Coloring = new K1Coloring(
             graph,
-            DEFAULT_BATCH_SIZE,
+            Direction.BOTH, 100, DEFAULT_BATCH_SIZE,
             2,
             Pools.DEFAULT,
-            AllocationTracker.EMPTY,
-            Direction.BOTH,
-            100
+            AllocationTracker.EMPTY
         );
 
         k1Coloring.compute();
@@ -144,7 +140,7 @@ class K1ColoringTest {
         MutableLong conflicts = new MutableLong(0);
         graph.forEachNode((nodeId) -> {
             graph.forEachRelationship(nodeId, Direction.BOTH, (s, t) -> {
-                if(colors.get(s) == colors.get(t)) {
+                if (colors.get(s) == colors.get(t)) {
                     conflicts.increment();
                 }
                 colorsUsed.add(colors.get(s));
@@ -182,7 +178,10 @@ class K1ColoringTest {
 
     private void assertMemoryEstimation(long nodeCount, int concurrency, long expected) {
         GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(nodeCount).build();
-        final MemoryRange actual = new K1ColoringFactory().memoryEstimation().estimate(dimensions, concurrency).memoryUsage();
+        final MemoryRange actual = new K1ColoringFactory()
+            .memoryEstimation()
+            .estimate(dimensions, concurrency)
+            .memoryUsage();
 
         assertEquals(actual.min, actual.max);
         assertEquals(expected, actual.min);
