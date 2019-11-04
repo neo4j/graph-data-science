@@ -17,71 +17,89 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.algo;
+package org.neo4j.graphalgo;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.GraphLoadProc;
-import org.neo4j.graphalgo.LabelPropagationProc;
-import org.neo4j.graphalgo.MemRecProc;
-import org.neo4j.graphalgo.PageRankProc;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
-import org.neo4j.graphalgo.helper.ldbc.LdbcDownloader;
 import org.neo4j.graphalgo.unionfind.UnionFindProc;
-import org.neo4j.graphdb.DependencyResolver;
+import org.neo4j.graphalgo.wcc.WccProc;
 import org.neo4j.graphdb.QueryExecutionException;
-import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-class MemRecProcTest {
+class MemRecProcTest extends ProcTestBase {
 
-    private static GraphDatabaseAPI db;
+    private String availableAlgoProcedures;
 
-    @BeforeAll
-    static void setUp() throws Exception {
-        db = LdbcDownloader.openDb("Yelp");
-        Procedures procedures = db
-                .getDependencyResolver()
-                .resolveDependency(Procedures.class, DependencyResolver.SelectionStrategy.FIRST);
-        procedures.registerProcedure(MemRecProc.class);
-        procedures.registerProcedure(PageRankProc.class);
-        procedures.registerProcedure(UnionFindProc.class);
-        procedures.registerProcedure(LabelPropagationProc.class);
-        procedures.registerProcedure(GraphLoadProc.class);
+    @BeforeEach
+    void setUp() throws KernelException {
+        db = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(
+                GraphLoadProc.class,
+                MemRecProc.class,
+                PageRankProc.class,
+                UnionFindProc.class,
+                LabelPropagationProc.class,
+                WccProc.class,
+                LouvainProc.class
+        );
+        availableAlgoProcedures = "the available and supported procedures are {" +
+                                  "beta.wcc, graph.load, labelPropagation, louvain, pageRank, unionFind, wcc" +
+                                  "}.";
     }
 
-    @AfterAll
-    static void tearDown() {
+    @AfterEach
+    void tearDown() {
         db.shutdown();
     }
 
     @Test
     void memrecProcedure() {
-        String availableProcedures = "the available and supported procedures are {graph.load, labelPropagation, pageRank, unionFind}.";
         test(
                 "algo.memrec(null, null, null, {})",
-                "Missing procedure parameter, " + availableProcedures);
+                "Missing procedure parameter, " + availableAlgoProcedures);
         test(
                 "algo.memrec(null, null, 'doesNotExist', {direction: 'BOTH', graph: 'huge'})",
-                "The procedure [doesNotExist] does not support memrec or does not exist, " + availableProcedures);
-
-        test("algo.memrec(null, null, 'pageRank', {direction: 'BOTH', graph: 'huge'})");
-        test("algo.pageRank.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
-        test("algo.pageRank.memrec(null, null, { graph: 'huge'})");
+                "The procedure [doesNotExist] does not support memrec or does not exist, " + availableAlgoProcedures);
 
         test("algo.memrec(null, null, 'graph.load')");
         test("algo.graph.load.memrec(null, null)");
+
+        test("algo.memrec(null, null, 'pageRank')");
+        test("algo.memrec(null, null, 'pageRank', {direction: 'BOTH', graph: 'huge'})");
+        test("algo.pageRank.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
+        test("algo.pageRank.memrec(null, null, { graph: 'huge'})");
 
         test("algo.memrec(null, null, 'labelPropagation')");
         test("algo.memrec(null, null, 'labelPropagation', {direction: 'BOTH', graph: 'huge'})");
         test("algo.labelPropagation.memrec(null, null)");
         test("algo.labelPropagation.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
+
+        test("algo.memrec(null, null, 'beta.wcc')");
+        test("algo.memrec(null, null, 'beta.wcc', {direction: 'BOTH', graph: 'huge'})");
+        test("algo.beta.wcc.memrec(null, null)");
+        test("algo.beta.wcc.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
+
+        test("algo.memrec(null, null, 'wcc')");
+        test("algo.memrec(null, null, 'wcc', {direction: 'BOTH', graph: 'huge'})");
+        test("algo.wcc.memrec(null, null)");
+        test("algo.wcc.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
+
+        test("algo.memrec(null, null, 'louvain')");
+        test("algo.memrec(null, null, 'louvain', {direction: 'BOTH', graph: 'huge'})");
+        test("algo.louvain.memrec(null, null)");
+        test("algo.louvain.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
+
+        test("algo.memrec(null, null, 'unionFind')");
+        test("algo.memrec(null, null, 'unionFind', {direction: 'BOTH', graph: 'huge'})");
+        test("algo.unionFind.memrec(null, null)");
+        test("algo.unionFind.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
     }
 
     private void test(final String s, final String expectedMessage) {
