@@ -12,7 +12,7 @@ After usage, they can be removed from memory to free resources used.
 
 [NOTE]
 ====
-Loading, using, listing and removing named graphs are user-related management operations.
+Loading, using, listing, and removing named graphs are user-related management operations.
 Graphs created by a different user are not accessible at any time.
 ====
 
