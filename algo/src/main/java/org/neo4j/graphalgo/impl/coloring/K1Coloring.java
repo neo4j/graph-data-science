@@ -31,16 +31,14 @@ import org.neo4j.graphdb.Direction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
-import java.util.function.Function;
 
 public class K1Coloring extends Algorithm<K1Coloring> {
 
     private final Graph graph;
     private final long nodeCount;
-    private final long batchSize;
-    private final int threadSize;
     private final ExecutorService executor;
     private final AllocationTracker tracker;
+    private final int minBatchSize;
     private final int concurrency;
 
     private final Direction direction;
@@ -62,30 +60,14 @@ public class K1Coloring extends Algorithm<K1Coloring> {
         Direction direction, long maxIterations
     ) {
         this.graph = graph;
+        this.minBatchSize = minBatchSize;
+        this.concurrency = concurrency;
         this.executor = executor;
         this.tracker = tracker;
 
         this.nodeCount = graph.nodeCount();
         this.direction = direction;
         this.maxIterations = maxIterations;
-
-        this.batchSize = ParallelUtil.adjustedBatchSize(
-            nodeCount,
-            concurrency,
-            minBatchSize,
-            Integer.MAX_VALUE
-        );
-        long threadSize = ParallelUtil.threadCount(minBatchSize, nodeCount);
-        if (threadSize > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException(String.format(
-                "Too many nodes (%d) to run k1 coloring with the given concurrency (%d) and batchSize (%d)",
-                nodeCount,
-                concurrency,
-                minBatchSize
-            ));
-        }
-        this.threadSize = (int) threadSize;
-        this.concurrency = concurrency;
 
         this.nodesToColor = new BitSet(nodeCount);
     }
@@ -145,7 +127,7 @@ public class K1Coloring extends Algorithm<K1Coloring> {
     }
 
     private void runColoring(Direction direction) {
-        Function<Long, ColoringStep> producer = (batchStart) -> new ColoringStep(
+        DegreeTaskProducer<ColoringStep> producer = (batchStart, batchSize) -> new ColoringStep(
             graph.concurrentCopy(),
             direction,
             colors,
@@ -163,7 +145,7 @@ public class K1Coloring extends Algorithm<K1Coloring> {
     private void runValidation(Direction direction) {
         BitSet nextNodesToColor = new BitSet(nodeCount);
 
-        Function<Long, ValidationStep> producer = (batchStart) -> new ValidationStep(
+        DegreeTaskProducer<ValidationStep> producer = (batchStart, batchSize) -> new ValidationStep(
                 graph.concurrentCopy(),
                 direction,
                 colors,
@@ -181,12 +163,19 @@ public class K1Coloring extends Algorithm<K1Coloring> {
     }
 
 
-    private <T extends Runnable> Collection<T> degreePartition(Function<Long, T> taskSupplier, Direction direction) {
-        Collection<T> tasks = new ArrayList<>(threadSize);
+    private <T extends Runnable> Collection<T> degreePartition(DegreeTaskProducer<T> taskSupplier, Direction direction) {
 
         long cumulativeDegree = direction == Direction.BOTH ? graph.relationshipCount() / 2 : graph.relationshipCount();
-        long batchDegree = cumulativeDegree * (nodesToColor.cardinality() / nodeCount) / threadSize;
+        long adjustedDegree = cumulativeDegree * (nodesToColor.cardinality() / nodeCount);
 
+        long batchDegree = ParallelUtil.adjustedBatchSize(
+            adjustedDegree,
+            concurrency,
+            minBatchSize,
+            Integer.MAX_VALUE
+        );
+
+        Collection<T> tasks = new ArrayList<>(concurrency);
         long currentNode = nodesToColor.nextSetBit(0);
         long batchStart = currentNode;
         long currentDegree = 0;
@@ -194,21 +183,23 @@ public class K1Coloring extends Algorithm<K1Coloring> {
             currentDegree += graph.degree(currentNode,direction);
 
             if (currentDegree >= batchDegree) {
-                tasks.add(taskSupplier.apply(batchStart));
+                tasks.add(taskSupplier.produce(batchStart, currentDegree));
                 currentNode++;
                 batchStart = currentNode;
                 currentDegree = 0;
-
             }
 
             currentNode = nodesToColor.nextSetBit(currentNode + 1);
         } while(currentNode >= 0 && currentNode < nodeCount);
 
         if(currentDegree > 0) {
-            tasks.add(taskSupplier.apply(batchStart));
+            tasks.add(taskSupplier.produce(batchStart, currentDegree));
         }
 
         return tasks;
     };
 
+    interface  DegreeTaskProducer<T extends Runnable>  {
+        T produce(long batchStart, long batchSize);
+    }
 }
