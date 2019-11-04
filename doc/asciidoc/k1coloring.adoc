@@ -26,7 +26,7 @@ However the precision of the latter can be controlled by the number of iteration
 
 For more information on this algorithm, see:
 
-* https://arxiv.org/pdf/1205.3809.pdf[Çatalyürek, Ümit V., et al. "Graph coloring algorithms for multi-core and massively multithreaded architectures."^].
+* https://arxiv.org/pdf/1205.3809.pdf[Çatalyürek, Ümit V., et al. "Graph coloring algorithms for multi-core and massively multithreaded architectures."^]
 * https://en.wikipedia.org/wiki/Graph_coloring#Vertex_coloring
 
 [NOTE]
