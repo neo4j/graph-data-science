@@ -68,17 +68,38 @@ class MemRecProcTest extends ProcTestBase {
                 "algo.memrec(null, null, 'doesNotExist', {direction: 'BOTH', graph: 'huge'})",
                 "The procedure [doesNotExist] does not support memrec or does not exist, " + availableAlgoProcedures);
 
+        test("algo.memrec(null, null, 'graph.load')");
+        test("algo.graph.load.memrec(null, null)");
+
+        test("algo.memrec(null, null, 'pageRank')");
         test("algo.memrec(null, null, 'pageRank', {direction: 'BOTH', graph: 'huge'})");
         test("algo.pageRank.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
         test("algo.pageRank.memrec(null, null, { graph: 'huge'})");
-
-        test("algo.memrec(null, null, 'graph.load')");
-        test("algo.graph.load.memrec(null, null)");
 
         test("algo.memrec(null, null, 'labelPropagation')");
         test("algo.memrec(null, null, 'labelPropagation', {direction: 'BOTH', graph: 'huge'})");
         test("algo.labelPropagation.memrec(null, null)");
         test("algo.labelPropagation.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
+
+        test("algo.memrec(null, null, 'beta.wcc')");
+        test("algo.memrec(null, null, 'beta.wcc', {direction: 'BOTH', graph: 'huge'})");
+        test("algo.beta.wcc.memrec(null, null)");
+        test("algo.beta.wcc.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
+
+        test("algo.memrec(null, null, 'wcc')");
+        test("algo.memrec(null, null, 'wcc', {direction: 'BOTH', graph: 'huge'})");
+        test("algo.wcc.memrec(null, null)");
+        test("algo.wcc.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
+
+        test("algo.memrec(null, null, 'louvain')");
+        test("algo.memrec(null, null, 'louvain', {direction: 'BOTH', graph: 'huge'})");
+        test("algo.louvain.memrec(null, null)");
+        test("algo.louvain.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
+
+        test("algo.memrec(null, null, 'unionFind')");
+        test("algo.memrec(null, null, 'unionFind', {direction: 'BOTH', graph: 'huge'})");
+        test("algo.unionFind.memrec(null, null)");
+        test("algo.unionFind.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
     }
 
     private void test(final String s, final String expectedMessage) {
