@@ -131,7 +131,7 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
 
         return LongStream.range(0, setup.graph.nodeCount())
             .mapToObj(nodeId -> {
-                final long neoNodeId = setup.graph.toOriginalNodeId(nodeId);
+                long neoNodeId = setup.graph.toOriginalNodeId(nodeId);
                 return new StreamResult(neoNodeId, coloring.colors().get(nodeId));
             });
     }

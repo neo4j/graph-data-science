@@ -52,7 +52,7 @@ final class ColoringStep implements Runnable {
         this.nodeCount = nodeCount;
         this.offset = offset;
         this.batchEnd = Math.min(offset + batchSize, nodeCount);
-        forbiddenColors = new BitSet(nodeCount);
+        this.forbiddenColors = new BitSet(nodeCount);
     }
 
     @Override
