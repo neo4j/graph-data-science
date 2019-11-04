@@ -41,7 +41,6 @@ import org.neo4j.graphdb.Direction;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -104,7 +103,7 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
 
         WccResultProducer producer = getResultProducer(
             dss,
-            getSeedProperties(setup.graph, setup.procedureConfig),
+            getSeedProperty(setup.graph, setup.procedureConfig),
             setup.procedureConfig,
             setup.tracker
         );
@@ -176,7 +175,7 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
         };
     }
 
-    private NodeProperties getSeedProperties(Graph graph, ProcedureConfiguration config) {
+    private NodeProperties getSeedProperty(Graph graph, ProcedureConfiguration config) {
         return graph.nodeProperties(config.getString(CONFIG_SEED_PROPERTY).orElse(null));
     }
 
@@ -204,7 +203,7 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
 
         WccResultProducer producer = getResultProducer(
             dss,
-            getSeedProperties(graph, procedureConfiguration),
+            getSeedProperty(graph, procedureConfiguration),
             procedureConfiguration,
             tracker
         );
@@ -244,7 +243,7 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
 
     private WccResultProducer getResultProducer(
         final DisjointSetStruct dss,
-        final NodeProperties seedProperties,
+        final NodeProperties seedProperty,
         final ProcedureConfiguration procedureConfiguration,
         final AllocationTracker tracker
     ) {
@@ -255,23 +254,23 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
         );
 
         boolean withConsecutiveIds = procedureConfiguration.get(CONFIG_CONSECUTIVE_IDS_PROPERTY, false);
-        boolean writePropertyEqualsSeedProperty = Objects.equals(seedProperties, writeProperty);
-        boolean hasSeedProperties = seedProperties != null && !(seedProperties instanceof NullPropertyMap);
+        boolean writePropertyEqualsSeedProperty = Objects.equals(seedProperty, writeProperty);
+        boolean hasSeedProperty = seedProperty != null && !(seedProperty instanceof NullPropertyMap);
 
         WccResultProducer resultProducer = new WccResultProducer.NonConsecutive(
             WccResultProducer.NonSeedingTranslator.INSTANCE,
             dss
         );
 
-        if (withConsecutiveIds && !hasSeedProperties) {
+        if (withConsecutiveIds && !hasSeedProperty) {
             resultProducer = new WccResultProducer.Consecutive(
                 WccResultProducer.NonSeedingTranslator.INSTANCE,
                 dss,
                 tracker
             );
-        } else if (writePropertyEqualsSeedProperty && hasSeedProperties) {
+        } else if (writePropertyEqualsSeedProperty && hasSeedProperty) {
             resultProducer = new WccResultProducer.NonConsecutive(
-                new PropertyTranslator.OfLongIfChanged<>(seedProperties, WccResultProducer::setIdOf),
+                new PropertyTranslator.OfLongIfChanged<>(seedProperty, WccResultProducer::setIdOf),
                 dss
             );
         }
