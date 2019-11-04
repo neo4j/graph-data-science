@@ -60,6 +60,8 @@ include::algorithms-centrality.adoc[leveloffset=+1]
 
 include::algorithms-community-detection.adoc[leveloffset=+1]
 
+include::algorithms-auxiliary.adoc[leveloffset=+1]
+
 include::algorithms-graph-similarity.adoc[leveloffset=+1]
 
 include::labs-algorithms.adoc[leveloffset=+1]
