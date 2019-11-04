@@ -41,6 +41,7 @@ public class K1Coloring extends Algorithm<K1Coloring> {
     private final int threadSize;
     private final ExecutorService executor;
     private final AllocationTracker tracker;
+    private final int concurrency;
 
     private final Direction direction;
     private final long maxIterations;
@@ -84,6 +85,7 @@ public class K1Coloring extends Algorithm<K1Coloring> {
             ));
         }
         this.threadSize = (int) threadSize;
+        this.concurrency = concurrency;
 
         this.nodesToColor = new BitSet(nodeCount);
     }
@@ -155,7 +157,7 @@ public class K1Coloring extends Algorithm<K1Coloring> {
 
         Collection<ColoringStep> steps = degreePartition(producer, direction);
 
-        ParallelUtil.run(steps, executor);
+        ParallelUtil.runWithConcurrency(concurrency, steps, executor);
     }
 
     private void runValidation(Direction direction) {
@@ -174,7 +176,7 @@ public class K1Coloring extends Algorithm<K1Coloring> {
 
         Collection<ValidationStep> steps = degreePartition(producer, direction);
 
-        ParallelUtil.run(steps, executor);
+        ParallelUtil.runWithConcurrency(concurrency, steps, executor);
         this.nodesToColor = nextNodesToColor;
     }
 
