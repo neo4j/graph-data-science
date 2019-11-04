@@ -30,7 +30,6 @@ final class ColoringStep implements Runnable {
     private final Direction direction;
     private final HugeLongArray colors;
     private final BitSet nodesToColor;
-    private final long nodeCount;
     private final long offset;
     private final long batchEnd;
 
@@ -49,7 +48,6 @@ final class ColoringStep implements Runnable {
         this.direction = direction;
         this.colors = colors;
         this.nodesToColor = nodesToColor;
-        this.nodeCount = nodeCount;
         this.offset = offset;
         this.batchEnd = Math.min(offset + batchSize, nodeCount);
         this.forbiddenColors = new BitSet(nodeCount);
@@ -57,7 +55,7 @@ final class ColoringStep implements Runnable {
 
     @Override
     public void run() {
-        for (long nodeId = offset; nodeId < batchEnd; nodeId++) {
+        for (long nodeId = offset; nodeId <= batchEnd; nodeId++) {
             if (nodesToColor.get(nodeId)) {
                 forbiddenColors.clear();
 

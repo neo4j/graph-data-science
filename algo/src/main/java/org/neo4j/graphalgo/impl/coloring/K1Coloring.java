@@ -96,6 +96,10 @@ public class K1Coloring extends Algorithm<K1Coloring> {
         this.maxIterations = maxIterations;
 
         this.nodesToColor = new BitSet(nodeCount);
+
+        if (maxIterations <= 0L) {
+            throw new IllegalArgumentException("Must iterate at least 1 time");
+        }
     }
 
     @Override
@@ -132,10 +136,6 @@ public class K1Coloring extends Algorithm<K1Coloring> {
     }
 
     public K1Coloring compute() {
-        if (maxIterations <= 0L) {
-            throw new IllegalArgumentException("Must iterate at least 1 time");
-        }
-
         colors = HugeLongArray.newArray(nodeCount, tracker);
         colors.setAll((nodeId) -> nodeId);
 
@@ -153,14 +153,14 @@ public class K1Coloring extends Algorithm<K1Coloring> {
     }
 
     private void runColoring(Direction direction) {
-        DegreeTaskProducer<ColoringStep> producer = (batchStart, batchSize) -> new ColoringStep(
+        DegreeTaskProducer<ColoringStep> producer = (batchStart, batchEnd) -> new ColoringStep(
             graph.concurrentCopy(),
             direction,
             colors,
             nodesToColor,
             nodeCount,
             batchStart,
-            batchSize
+            batchEnd
         );
 
         Collection<ColoringStep> steps = degreePartition(producer, direction);
@@ -171,7 +171,7 @@ public class K1Coloring extends Algorithm<K1Coloring> {
     private void runValidation(Direction direction) {
         BitSet nextNodesToColor = new BitSet(nodeCount);
 
-        DegreeTaskProducer<ValidationStep> producer = (batchStart, batchSize) -> new ValidationStep(
+        DegreeTaskProducer<ValidationStep> producer = (batchStart, batchEnd) -> new ValidationStep(
             graph.concurrentCopy(),
             direction,
             colors,
@@ -179,7 +179,7 @@ public class K1Coloring extends Algorithm<K1Coloring> {
             nextNodesToColor,
             nodeCount,
             batchStart,
-            batchSize
+            batchEnd
         );
 
         Collection<ValidationStep> steps = degreePartition(producer, direction);
@@ -206,29 +206,30 @@ public class K1Coloring extends Algorithm<K1Coloring> {
 
         Collection<T> tasks = new ArrayList<>(concurrency);
         long currentNode = nodesToColor.nextSetBit(0);
+        long lastNode = currentNode;
         long batchStart = currentNode;
         long currentDegree = 0;
         do {
             currentDegree += graph.degree(currentNode, direction);
 
             if (currentDegree >= batchDegree) {
-                tasks.add(taskSupplier.produce(batchStart, currentDegree));
+                tasks.add(taskSupplier.produce(batchStart, currentNode));
                 currentNode++;
                 batchStart = currentNode;
                 currentDegree = 0;
             }
-
+            lastNode = currentNode;
             currentNode = nodesToColor.nextSetBit(currentNode + 1);
         } while (currentNode >= 0 && currentNode < nodeCount);
 
         if (currentDegree > 0) {
-            tasks.add(taskSupplier.produce(batchStart, currentDegree));
+            tasks.add(taskSupplier.produce(batchStart, lastNode));
         }
 
         return tasks;
     }
 
     interface DegreeTaskProducer<T extends Runnable> {
-        T produce(long batchStart, long batchSize);
+        T produce(long batchStart, long batchEnd);
     }
 }

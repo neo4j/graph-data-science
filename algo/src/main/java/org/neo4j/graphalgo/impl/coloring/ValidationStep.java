@@ -55,7 +55,7 @@ final class ValidationStep implements Runnable {
 
     @Override
     public void run() {
-        for (long nodeId = offset; nodeId < batchEnd; nodeId++) {
+        for (long nodeId = offset; nodeId <= batchEnd; nodeId++) {
             if (currentNodesToColor.get(nodeId)) {
                 graph.forEachRelationship(nodeId, direction, (source, target) -> {
                     if (
