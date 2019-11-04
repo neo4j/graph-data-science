@@ -59,7 +59,10 @@ public abstract class BaseProc {
             final String relationship,
             final Map<String, Object> config) {
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = (config != null)
+            ? ProcedureConfiguration.create(config)
+            : ProcedureConfiguration.empty();
+
         if (label != null && !label.isEmpty()) {
             configuration.setNodeLabelOrQuery(label);
         }
