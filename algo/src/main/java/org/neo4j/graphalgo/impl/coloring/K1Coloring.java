@@ -32,6 +32,31 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
+/**
+ *<p>
+ * This is a parallel implementation of the K1-Coloring algorithm.
+ * The Algorithm will assign a color to every node in the graph, trying to optimize for two objectives:
+ * <ul>
+ *   <li> given a single node, make sure that every neigbor of that node has a different color </li>
+ *   <li> use as little colors as possible </li>
+ * </ul>
+ * </p>
+ *
+ * <p>
+ * The implementation is a greedy implementation based on:<br>
+ * <cite>
+ * Çatalyürek, Ümit V., et al.
+ * "Graph coloring algorithms for multi-core and massively multithreaded architectures."
+ * Parallel Computing 38.10-11 (2012): 576-594.
+ * https://arxiv.org/pdf/1205.3809.pdf
+ * </cite>
+ * </p>
+ *
+ * <p>
+ * The implementation is greedy, so it is not garantied to find an optimal solution, i.e. the coloring can be imperfect
+ * and contain more colors as needed.
+ * </p>
+ */
 public class K1Coloring extends Algorithm<K1Coloring> {
 
     private final Graph graph;
@@ -92,7 +117,7 @@ public class K1Coloring extends Algorithm<K1Coloring> {
         return didConverge;
     }
 
-    public HugeLongLongMap getColorMap() {
+    public HugeLongLongMap colorMap() {
         if (colorMap == null) {
             this.colorMap = new HugeLongLongMap(100, tracker);
             for (long nodeId = 0; nodeId < nodeCount; nodeId++) {

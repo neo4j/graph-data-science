@@ -33,10 +33,6 @@ import org.neo4j.graphalgo.impl.coloring.K1Coloring;
 import org.neo4j.graphalgo.impl.coloring.K1ColoringFactory;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -52,14 +48,6 @@ import static org.neo4j.procedure.Mode.READ;
 public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
 
     public static final String COLOR_COUNT_FIELD_NAME = "colorCount";
-    @Context
-    public GraphDatabaseAPI dbAPI;
-
-    @Context
-    public Log log;
-
-    @Context
-    public KernelTransaction transaction;
 
     @Procedure(name = "algo.beta.k1coloring", mode = Mode.WRITE)
     @Description("CALL algo.beta.k1coloring(" +
@@ -101,7 +89,7 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
         setup.builder.withCommunityFunction(coloring.colors()::get);
 
         if (callContext.outputFields().anyMatch((field) -> field.equals(COLOR_COUNT_FIELD_NAME))) {
-            setup.builder.withColorCount(coloring.getColorMap().size());
+            setup.builder.withColorCount(coloring.colorMap().size());
         }
         setup.builder.withRanIterations(coloring.ranIterations());
         setup.builder.withDidConverge(coloring.didConverge());
@@ -160,7 +148,7 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
         return new K1ColoringFactory();
     }
 
-    private K1Coloring compute(final ProcedureSetup setup) {
+    private K1Coloring compute(ProcedureSetup setup) {
         final K1Coloring k1Coloring = newAlgorithm(setup.graph, setup.procedureConfig, setup.tracker);
         K1Coloring algoResult = runWithExceptionLogging(
             K1Coloring.class.getSimpleName() + " failed",

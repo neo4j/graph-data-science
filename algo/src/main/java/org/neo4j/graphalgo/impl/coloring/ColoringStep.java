@@ -63,10 +63,6 @@ final class ColoringStep implements Runnable {
 
                 graph.forEachRelationship(nodeId, direction, (s, target) -> {
                     if (s != target) {
-                        if (target >= nodeCount) {
-                            System.out.println("target = " + target);
-                        }
-
                         forbiddenColors.set(colors.get(target));
                     }
                     return true;
