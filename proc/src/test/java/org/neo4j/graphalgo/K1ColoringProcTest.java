@@ -83,11 +83,12 @@ class K1ColoringProcTest extends ProcTestBase {
                        "    null, null, {" +
                        "        graph: $graph, write: true, writeProperty: 'color'" +
                        "    }" +
-                       ") YIELD nodes, colorCount, didConverge, ranIterations";
+                       ") YIELD nodes, colorCount, didConverge, ranIterations, writeProperty";
 
         runQuery(query, MapUtil.map("graph", graphImpl), row -> {
             assertEquals(4, row.getNumber("nodes").longValue());
             assertEquals(2, row.getNumber("colorCount").longValue());
+            assertEquals("color", row.getString("writeProperty"));
             assertTrue(row.getBoolean("didConverge"));
             assertTrue(row.getNumber("ranIterations").longValue() < 3);
         });

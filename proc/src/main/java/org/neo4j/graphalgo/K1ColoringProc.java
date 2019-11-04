@@ -39,10 +39,12 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.core.ProcedureConstants.WRITE_PROPERTY_KEY;
 import static org.neo4j.procedure.Mode.READ;
 
 public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
@@ -52,8 +54,8 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
     @Procedure(name = "algo.beta.k1coloring", mode = Mode.WRITE)
     @Description("CALL algo.beta.k1coloring(" +
                  "label:String, relationship:String, " +
-                 "{iterations: 10, direction: 'OUTGOING', write: true, concurrency: 4}) " +
-                 "YIELD nodes, ranIterations, didConverge, loadMillis, computeMillis, writeMillis, write, colorCount")
+                 "{iterations: 10, direction: 'OUTGOING', write: true, writeProperty: null, concurrency: 4}) " +
+                 "YIELD colorCount, ranIterations, didConverge, loadMillis, computeMillis, writeMillis, write, writeProperty, nodes")
     public Stream<WriteResult> betaK1Coloring(
         @Name(value = "label", defaultValue = "") String label,
         @Name(value = "relationship", defaultValue = "") String relationshipType,
@@ -91,20 +93,24 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
         if (callContext.outputFields().anyMatch((field) -> field.equals(COLOR_COUNT_FIELD_NAME))) {
             setup.builder.withColorCount(coloring.colorMap().size());
         }
-        setup.builder.withRanIterations(coloring.ranIterations());
-        setup.builder.withDidConverge(coloring.didConverge());
 
-        if (setup.procedureConfig.isWriteFlag()) {
-            String writeProperty = setup.procedureConfig.getWriteProperty();
+        Optional<String> writeProperty = setup.procedureConfig.getString(WRITE_PROPERTY_KEY);
+
+        setup.builder
+            .withRanIterations(coloring.ranIterations())
+            .withDidConverge(coloring.didConverge())
+            .withWriteProperty(writeProperty.orElse(null));
+
+        if (setup.procedureConfig.isWriteFlag() && writeProperty.isPresent() && !writeProperty.get().equals("")) {
             setup.builder.withWrite(true);
-            setup.builder.withWriteProperty(writeProperty);
+            setup.builder.withWriteProperty(writeProperty.get());
 
             write(
                 setup.builder::timeWrite,
                 setup.graph,
                 coloring.colors(),
                 setup.procedureConfig,
-                writeProperty,
+                writeProperty.get(),
                 setup.tracker
             );
 
@@ -244,7 +250,8 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
             0,
             0,
             false,
-            false
+            false,
+            null
         );
 
         public final long loadMillis;
@@ -255,6 +262,7 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
         public final long colorCount;
         public final long ranIterations;
         public final boolean didConverge;
+        public final String writeProperty;
 
         public final boolean write;
 
@@ -266,7 +274,8 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
             long colorCount,
             long ranIterations,
             boolean write,
-            boolean didConverge
+            boolean didConverge,
+            String writeProperty
         ) {
             this.loadMillis = loadMillis;
             this.computeMillis = computeMillis;
@@ -276,6 +285,7 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
             this.ranIterations = ranIterations;
             this.write = write;
             this.didConverge = didConverge;
+            this.writeProperty = writeProperty;
         }
     }
 
@@ -284,6 +294,7 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
         private long colorCount = -1L;
         private long ranIterations;
         private boolean didConverge;
+        private String writeProperty;
 
         WriteResultBuilder(Stream<String> returnFields, AllocationTracker tracker) {
             super(returnFields, tracker);
@@ -304,6 +315,11 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
             return this;
         }
 
+        public WriteResultBuilder withWriteProperty(String writeProperty) {
+            this.writeProperty = writeProperty;
+            return this;
+        }
+
         @Override
         protected WriteResult buildResult() {
             return new WriteResult(
@@ -314,7 +330,8 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
                 colorCount,
                 ranIterations,
                 write,
-                didConverge
+                didConverge,
+                writeProperty
             );
         }
     }

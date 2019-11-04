@@ -25,7 +25,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphDimensions;
@@ -48,6 +47,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import static org.neo4j.graphalgo.core.utils.ParallelUtil.DEFAULT_BATCH_SIZE;
 
 class K1ColoringTest {
@@ -64,7 +64,7 @@ class K1ColoringTest {
         if (db != null) db.shutdown();
     }
 
-    @TestSupport.AllGraphTypesTest
+    @AllGraphTypesTest
     void testK1Coloring(Class<? extends GraphFactory> graphImpl) {
         final String DB_CYPHER =
             "CREATE" +
