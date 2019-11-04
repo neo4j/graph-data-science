@@ -86,7 +86,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
     public Stream<BetaLabelPropagationStats> betaLabelPropagation(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationshipType,
-            @Name(value = "config", defaultValue = "null") Map<String, Object> config) {
+            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         return run(label, relationshipType, config);
     }
@@ -113,7 +113,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
     public Stream<LabelPropagationStats> labelPropagation(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationshipType,
-            @Name(value = "config", defaultValue = "null") Object directionOrConfig,
+            @Name(value = "config", defaultValue = "{}") Object directionOrConfig,
             @Name(value = "deprecatedConfig", defaultValue = "{}") Map<String, Object> config) {
         Map<String, Object> rawConfig = config;
         if (directionOrConfig == null) {
