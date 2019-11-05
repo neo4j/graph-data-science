@@ -70,10 +70,10 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
 
     private static final Direction COMPUTE_DIRECTION_DEFAULT = OUTGOING;
 
-    @Procedure(name = "algo.neighborhoodSimilarity.stream", mode = Mode.READ)
-    @Description("CALL algo.neighborhoodSimilarity.stream(" +
+    @Procedure(name = "algo.beta.nhs.jaccard.stream", mode = Mode.READ)
+    @Description("CALL algo.beta.nhs.jaccard.stream(" +
                  "nodeFilter, relationshipFilter, {" +
-                 "  similarityCutoff: -1.0, degreeCutoff: 0, top: 0, topK: 0," +
+                 "  similarityCutoff: 0.0, degreeCutoff: 0, top: 0, topK: 10," +
                  "  graph: 'graph', direction: 'OUTGOING', concurrency: 4, readConcurrency: 4" +
                  "}) " +
                  "YIELD node1, node2, similarity - computes neighborhood similarities based on the Jaccard index")
@@ -97,10 +97,10 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
         return neighborhoodSimilarity.computeToStream(direction);
     }
 
-    @Procedure(name = "algo.neighborhoodSimilarity", mode = Mode.WRITE)
-    @Description("CALL algo.neighborhoodSimilarity(" +
+    @Procedure(name = "algo.beta.nhs.jaccard", mode = Mode.WRITE)
+    @Description("CALL algo.beta.nhs.jaccard(" +
                  "nodeFilter, relationshipFilter, {" +
-                 "  similarityCutoff: -1.0, degreeCutoff: 0, top: 0, topK: 0," +
+                 "  similarityCutoff: 0.0, degreeCutoff: 0, top: 0, topK: 10," +
                  "  graph: 'graph', direction: 'OUTGOING', concurrency: 4, readConcurrency: 4," +
                  "  write: 'true', writeRelationshipType: 'SIMILAR_TO', writeProperty: 'similarity', writeConcurrency: 4" +
                  "}) " +
@@ -158,7 +158,7 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
         return Stream.of(resultBuilder.build());
     }
 
-    @Procedure(value = "algo.neighborhoodSimilarity.memrec")
+    @Procedure(value = "algo.beta.nhs.jaccard.memrec")
     public Stream<MemRecResult> memrec(
         @Name(value = "nodeFilter", defaultValue = "") String nodeFilter,
         @Name(value = "relationshipFilter", defaultValue = "") String relationshipFilter,

@@ -32,14 +32,11 @@ import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.impl.jaccard.SimilarityResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.QueryExecutionException;
-import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -121,7 +118,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
     @ParameterizedTest(name = "{0} -- {1}")
     @MethodSource("allGraphNamesWithIncomingOutgoing")
     void shouldStreamResults(String graphImpl, Direction direction) {
-        String query = "CALL algo.neighborhoodSimilarity.stream(" +
+        String query = "CALL algo.beta.nhs.jaccard.stream(" +
                        "    '', 'LIKES', {" +
                        "        graph: $graph," +
                        "        direction: $direction" +
@@ -149,7 +146,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
     @MethodSource("allGraphNamesWithIncomingOutgoing")
     void shouldStreamTopResults(String graphImpl, Direction direction) {
         int top = 2;
-        String query = "CALL algo.neighborhoodSimilarity.stream(" +
+        String query = "CALL algo.beta.nhs.jaccard.stream(" +
                        "    '', 'LIKES', {" +
                        "        graph: $graph," +
                        "        direction: $direction," +
@@ -177,7 +174,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
     @ParameterizedTest(name = "{0} -- {1}")
     @MethodSource("allGraphNamesWithIncomingOutgoing")
     void shouldWriteResults(String graphImpl, Direction direction) throws KernelException {
-        String query = "CALL algo.neighborhoodSimilarity(" +
+        String query = "CALL algo.beta.nhs.jaccard(" +
                        "    '', 'LIKES', {" +
                        "        graph: $graph," +
                        "        direction: $direction" +
@@ -247,7 +244,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
 
     @Test
     void shouldThrowIfTopKSetToZero() {
-        String query = "CALL algo.neighborhoodSimilarity(" +
+        String query = "CALL algo.beta.nhs.jaccard(" +
                        "    '', 'LIKES', {" +
                        "        direction: 'OUTGOING'," +
                        "        topK: 0," +
