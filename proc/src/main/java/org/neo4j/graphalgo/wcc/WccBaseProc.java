@@ -158,11 +158,10 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
         Map<String, Object> config,
         WCCType algoType
     ) {
-        final AllocationTracker tracker = AllocationTracker.create();
-        final WriteResultBuilder builder = new WriteResultBuilder(callContext.outputFields(), tracker);
-
         config.put(CONFIG_ALGO_TYPE, algoType);
+        final AllocationTracker tracker = AllocationTracker.create();
         ProcedureConfiguration configuration = newConfig(label, relationship, config);
+        final WriteResultBuilder builder = new WriteResultBuilder(configuration, tracker);
 
         Graph graph = loadGraph(configuration, tracker, builder);
 
@@ -398,8 +397,8 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
     public static class WriteResultBuilder extends AbstractCommunityResultBuilder<WriteResult> {
         private String partitionProperty;
 
-        WriteResultBuilder(Stream<String> returnFields, AllocationTracker tracker) {
-            super(returnFields, tracker);
+        WriteResultBuilder(ProcedureConfiguration config, AllocationTracker tracker) {
+            super(config.computeHistogram(), config.computeCommunityCount(), tracker);
         }
 
         WriteResultBuilder withPartitionProperty(String partitionProperty) {

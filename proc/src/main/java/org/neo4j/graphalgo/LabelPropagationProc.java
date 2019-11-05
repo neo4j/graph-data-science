@@ -244,12 +244,11 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
             Map<String, Object> config) {
 
         AllocationTracker tracker = AllocationTracker.create();
+        ProcedureConfiguration configuration = newConfig(label, relationshipType, config);
         BetaLabelPropagationStats.WriteResultBuilder resultBuilder = new BetaLabelPropagationStats.WriteResultBuilder(
-            callContext.outputFields(),
+            configuration,
             tracker
         );
-
-        ProcedureConfiguration configuration = newConfig(label, relationshipType, config);
 
         Graph graph = this.loadGraph(configuration, tracker, resultBuilder);
 

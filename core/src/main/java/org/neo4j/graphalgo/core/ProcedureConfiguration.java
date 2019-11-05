@@ -53,6 +53,10 @@ public class ProcedureConfiguration {
 
     private final Map<String, Object> config;
 
+    private boolean computeHistogram = false;
+
+    private boolean computeCommunityCount = false;
+
     public ProcedureConfiguration(Map<String, Object> config) {
         this.config = new HashMap<>(config);
     }
@@ -115,6 +119,30 @@ public class ProcedureConfiguration {
     public ProcedureConfiguration setDirection(Direction direction) {
         config.put(ProcedureConstants.DIRECTION_KEY, direction.name());
         return this;
+    }
+
+    public ProcedureConfiguration setComputeHistogram(boolean computeHistogram) {
+        this.computeHistogram = computeHistogram;
+        return this;
+    }
+
+    public ProcedureConfiguration setComputeCommunityCount(boolean computeCommunityCount) {
+        this.computeCommunityCount = computeCommunityCount;
+        return this;
+    }
+
+    /**
+     * True iff the procedure caller yields histogram fields (p01, p25, etc.).
+     */
+    public boolean computeHistogram() {
+        return computeHistogram;
+    }
+
+    /**
+     * True iff the procedure caller yields community counts (communityCount, setCount).
+     */
+    public boolean computeCommunityCount() {
+        return computeCommunityCount;
     }
 
     /**

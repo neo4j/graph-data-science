@@ -77,8 +77,8 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         AllocationTracker tracker = AllocationTracker.create();
-        final WriteResultBuilder resultBuilder = new WriteResultBuilder(callContext.outputFields(), tracker);
         ProcedureConfiguration configuration = newConfig(label, relationship, config);
+        final WriteResultBuilder resultBuilder = new WriteResultBuilder(configuration, tracker);
         final Graph graph = this.loadGraph(configuration, tracker, resultBuilder);
 
         if (graph.isEmpty()) {
@@ -128,8 +128,8 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         AllocationTracker tracker = AllocationTracker.create();
-        WriteResultBuilder builder = new WriteResultBuilder(callContext.outputFields(), tracker);
         ProcedureConfiguration configuration = newConfig(label, relationship, config);
+        WriteResultBuilder builder = new WriteResultBuilder(configuration, tracker);
         final Graph graph = this.loadGraph(configuration, tracker, builder);
 
         if (graph.isEmpty()) {
@@ -330,8 +330,8 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
         private String intermediateCommunitiesWriteProperty;
         private boolean includeIntermediateCommunities;
 
-        WriteResultBuilder(Stream<String> returnFields, AllocationTracker tracker) {
-            super(returnFields, tracker);
+        WriteResultBuilder(ProcedureConfiguration config, AllocationTracker tracker) {
+            super(config.computeHistogram(), config.computeCommunityCount(), tracker);
         }
 
         WriteResultBuilder withIterations(long iterations) {

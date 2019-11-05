@@ -74,7 +74,7 @@ public class MSColoringProc {
                 .setRelationshipTypeOrQuery(relationship);
 
         AllocationTracker tracker = AllocationTracker.create();
-        WriteResultBuilder builder = new WriteResultBuilder(callContext.outputFields(), tracker);
+        WriteResultBuilder builder = new WriteResultBuilder(configuration, tracker);
 
         // loading
         final Graph graph;
@@ -252,8 +252,8 @@ public class MSColoringProc {
     public static class WriteResultBuilder extends AbstractCommunityResultBuilder<WriteResult> {
         private String partitionProperty;
 
-        WriteResultBuilder(Stream<String> returnFields, AllocationTracker tracker) {
-            super(returnFields, tracker);
+        WriteResultBuilder(ProcedureConfiguration config, AllocationTracker tracker) {
+            super(config.computeHistogram(), config.computeCommunityCount(), tracker);
         }
 
         WriteResultBuilder withPartitionProperty(String partitionProperty) {

@@ -175,9 +175,8 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
         Map<String, Object> config
     ) {
         AllocationTracker tracker = AllocationTracker.create();
-        WriteResultBuilder builder = new WriteResultBuilder(callContext.outputFields(), tracker);
-
         ProcedureConfiguration configuration = newConfig(label, relationship, config);
+        WriteResultBuilder builder = new WriteResultBuilder(configuration, tracker);
 
         Graph graph = loadGraph(configuration, tracker, builder);
 
@@ -296,8 +295,8 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
         private boolean didConverge;
         private String writeProperty;
 
-        WriteResultBuilder(Stream<String> returnFields, AllocationTracker tracker) {
-            super(returnFields, tracker);
+        WriteResultBuilder(ProcedureConfiguration config, AllocationTracker tracker) {
+            super(config.computeHistogram(), config.computeCommunityCount(), tracker);
         }
 
         public WriteResultBuilder withColorCount(long colorCount) {

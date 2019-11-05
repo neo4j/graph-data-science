@@ -19,9 +19,8 @@
  */
 package org.neo4j.graphalgo.impl.results;
 
+import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-
-import java.util.stream.Stream;
 
 public class BetaLabelPropagationStats {
 
@@ -131,8 +130,8 @@ public class BetaLabelPropagationStats {
         private String weightProperty;
         private String seedProperty;
 
-        public WriteResultBuilder(Stream<String> returnFields, AllocationTracker tracker) {
-            super(returnFields, tracker);
+        public WriteResultBuilder(ProcedureConfiguration config, AllocationTracker tracker) {
+            super(config.computeHistogram(), config.computeCommunityCount(), tracker);
         }
 
         public WriteResultBuilder ranIterations(final long ranIterations) {

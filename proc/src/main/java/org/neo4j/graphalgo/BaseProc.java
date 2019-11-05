@@ -33,8 +33,12 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
 
+import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public abstract class BaseProc {
 
@@ -69,6 +73,12 @@ public abstract class BaseProc {
         if (relationship != null && !relationship.isEmpty()) {
             configuration.setRelationshipTypeOrQuery(relationship);
         }
+
+        Set<String> returnItems = callContext.outputFields().collect(Collectors.toSet());
+        configuration
+            .setComputeCommunityCount(ReturnItemParser.computeCommunityCount(returnItems))
+            .setComputeHistogram(ReturnItemParser.computeHistogram(returnItems));
+
         return configuration;
     }
 
@@ -127,6 +137,21 @@ public abstract class BaseProc {
             final Supplier<ProgressTimer> timer) {
         try (ProgressTimer ignored = timer.get()) {
             return loadGraph(config, tracker);
+        }
+    }
+
+    static final class ReturnItemParser {
+        private static final Pattern PERCENTILE_FIELD_REGEXP = Pattern.compile("^p\\d{1,3}$");
+        private static final Pattern COMMUNITY_COUNT_REGEXP = Pattern.compile("^(community|set)Count$");
+
+        private ReturnItemParser() {}
+
+        static boolean computeHistogram(Collection<String> returnItems) {
+            return returnItems.stream().anyMatch(PERCENTILE_FIELD_REGEXP.asPredicate());
+        }
+
+        static boolean computeCommunityCount(Collection<String> returnItems) {
+            return computeHistogram(returnItems) || returnItems.stream().anyMatch(COMMUNITY_COUNT_REGEXP.asPredicate());
         }
     }
 

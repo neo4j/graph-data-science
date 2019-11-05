@@ -25,12 +25,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.OptionalLong;
-import java.util.Set;
 import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,15 +34,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class AbstractCommunityResultBuilderTest {
-
-    private static final Set<String> COMMUNITY_COUNT_FIELD = Collections.singleton("communityCount");
-    private static final Set<String> SET_COUNT_FIELD = Collections.singleton("setCount");
-    private static final Set<String> HISTOGRAM_FIELDS = new HashSet<>(Arrays.asList("p01", "p75", "p100"));
-    private static final Set<String> ALL_FIELDS = new HashSet<String>() {{
-        this.addAll(COMMUNITY_COUNT_FIELD);
-        this.addAll(SET_COUNT_FIELD);
-        this.addAll(HISTOGRAM_FIELDS);
-    }};
 
     @Test
     void countCommunitySizesOverHugeCommunities() {
@@ -60,7 +47,7 @@ final class AbstractCommunityResultBuilderTest {
             assertEquals(10L, communityCount, "should build 10 communities");
             assertEquals(2L, histogram.getCountAtValue(5L), "should 2 communities with 5 members");
             assertEquals(8L, histogram.getCountAtValue(4L), "should build 8 communities with 4 members");
-        }, ALL_FIELDS);
+        }, true, true);
 
         builder
             .withCommunityFunction(n -> n % 10L)
@@ -80,7 +67,7 @@ final class AbstractCommunityResultBuilderTest {
             assertEquals(10L, communityCount, "should build 10 communities");
             assertEquals(2L, histogram.getCountAtValue(5L), "should 2 communities with 5 members");
             assertEquals(8L, histogram.getCountAtValue(4L), "should build 8 communities with 4 members");
-        }, ALL_FIELDS);
+        }, true, true);
 
         builder
             .withExpectedNumberOfCommunities(10L)
@@ -101,7 +88,7 @@ final class AbstractCommunityResultBuilderTest {
             assertEquals(5L, communityCount, "should build 5 communities");
             assertEquals(4L, histogram.getCountAtValue(10L), "should build 4 communities with 10 member");
             assertEquals(1L, histogram.getCountAtValue(2L), "should build 1 community with 2 members");
-        }, ALL_FIELDS);
+        }, true, true);
 
         builder
             .withCommunityFunction(n -> (n / 10) + 1)
@@ -121,7 +108,7 @@ final class AbstractCommunityResultBuilderTest {
             assertEquals(5L, communityCount, "should build 5 communities");
             assertEquals(4L, histogram.getCountAtValue(10L), "should build 4 communities with 10 member");
             assertEquals(1L, histogram.getCountAtValue(2L), "should build 1 community with 2 members");
-        }, ALL_FIELDS);
+        }, true, true);
 
         builder
             .withExpectedNumberOfCommunities(42)
@@ -135,7 +122,7 @@ final class AbstractCommunityResultBuilderTest {
         AbstractCommunityResultBuilder<Void> builder = builder((maybeCommunityCount, maybeHistogram) -> {
             assertFalse(maybeCommunityCount.isPresent());
             assertFalse(maybeHistogram.isPresent());
-        }, Collections.emptySet());
+        }, false, false);
         builder
             .withCommunityFunction(n -> n % 10L)
             .withNodeCount(42L)
@@ -147,17 +134,7 @@ final class AbstractCommunityResultBuilderTest {
         AbstractCommunityResultBuilder<Void> builder = builder((maybeCommunityCount, maybeHistogram) -> {
             assertTrue(maybeCommunityCount.isPresent());
             assertFalse(maybeHistogram.isPresent());
-        }, COMMUNITY_COUNT_FIELD);
-
-        builder
-            .withCommunityFunction(n -> n % 10L)
-            .withNodeCount(42L)
-            .build();
-
-        builder = builder((maybeCommunityCount, maybeHistogram) -> {
-            assertTrue(maybeCommunityCount.isPresent());
-            assertFalse(maybeHistogram.isPresent());
-        }, SET_COUNT_FIELD);
+        }, false, true);
 
         builder
             .withCommunityFunction(n -> n % 10L)
@@ -202,9 +179,11 @@ final class AbstractCommunityResultBuilderTest {
 
 
     private AbstractCommunityResultBuilder<Void> builder(
-            BiConsumer<OptionalLong, Optional<Histogram>> check,
-            Set<String> resultFields) {
-        return new AbstractCommunityResultBuilder<Void>(resultFields, AllocationTracker.EMPTY) {
+        BiConsumer<OptionalLong, Optional<Histogram>> check,
+        boolean buildHistogram,
+        boolean buildCommunityCount
+    ) {
+        return new AbstractCommunityResultBuilder<Void>(buildHistogram, buildCommunityCount, AllocationTracker.EMPTY) {
             @Override
             protected Void buildResult() {
                 check.accept(maybeCommunityCount, maybeCommunityHistogram);

@@ -27,16 +27,10 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 
 import java.util.Optional;
 import java.util.OptionalLong;
-import java.util.Set;
 import java.util.function.LongUnaryOperator;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public abstract class AbstractCommunityResultBuilder<R> extends AbstractResultBuilder<R> {
 
-    private static final Pattern PERCENTILE_FIELD_REGEXP = Pattern.compile("^p\\d{1,3}$");
-    private static final Pattern COMMUNITY_COUNT_REGEXP = Pattern.compile("^(community|set)Count$");
     private static final long EXPECTED_NUMBER_OF_COMMUNITIES_DEFAULT = 4L;
 
     private final boolean buildHistogram;
@@ -52,16 +46,10 @@ public abstract class AbstractCommunityResultBuilder<R> extends AbstractResultBu
 
     private final AllocationTracker tracker;
 
-    protected AbstractCommunityResultBuilder(Set<String> returnFields, AllocationTracker tracker) {
-        this.buildHistogram = returnFields.stream().anyMatch(PERCENTILE_FIELD_REGEXP.asPredicate());
-        this.buildCommunityCount = buildHistogram || returnFields
-                .stream()
-                .anyMatch(COMMUNITY_COUNT_REGEXP.asPredicate());
+    protected AbstractCommunityResultBuilder(boolean buildHistogram, boolean buildCommunityCount, AllocationTracker tracker) {
+        this.buildHistogram = buildHistogram;
+        this.buildCommunityCount = buildCommunityCount;
         this.tracker = tracker;
-    }
-
-    protected AbstractCommunityResultBuilder(Stream<String> returnFields, AllocationTracker tracker) {
-        this(returnFields.collect(Collectors.toSet()), tracker);
     }
 
     protected abstract R buildResult();
