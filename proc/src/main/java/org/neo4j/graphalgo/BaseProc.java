@@ -76,8 +76,8 @@ public abstract class BaseProc {
 
         Set<String> returnItems = callContext.outputFields().collect(Collectors.toSet());
         configuration
-            .setComputeCommunityCount(ReturnItemParser.computeCommunityCount(returnItems))
-            .setComputeHistogram(ReturnItemParser.computeHistogram(returnItems));
+            .setComputeCommunityCount(OutputFieldParser.computeCommunityCount(returnItems))
+            .setComputeHistogram(OutputFieldParser.computeHistogram(returnItems));
 
         return configuration;
     }
@@ -140,11 +140,11 @@ public abstract class BaseProc {
         }
     }
 
-    static final class ReturnItemParser {
+    static final class OutputFieldParser {
         private static final Pattern PERCENTILE_FIELD_REGEXP = Pattern.compile("^p\\d{1,3}$");
         private static final Pattern COMMUNITY_COUNT_REGEXP = Pattern.compile("^(community|set)Count$");
 
-        private ReturnItemParser() {}
+        private OutputFieldParser() {}
 
         static boolean computeHistogram(Collection<String> returnItems) {
             return returnItems.stream().anyMatch(PERCENTILE_FIELD_REGEXP.asPredicate());
