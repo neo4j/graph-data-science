@@ -17,10 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.huge.loader;
+package org.neo4j.graphalgo.core.loading;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.loading.RadixSort;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 

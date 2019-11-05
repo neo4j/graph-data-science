@@ -5,8 +5,6 @@ dependencies {
     compile project(':labs')
     
     testCompile project(':test-utils')
-
-    testCompile group: 'io.qala.datagen', name: 'qala-datagen-junit5', version: ver.'qala-datagen'
 }
 
 task javadocJar(type: Jar) {

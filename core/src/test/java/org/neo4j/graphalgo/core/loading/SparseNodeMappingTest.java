@@ -17,12 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.huge.loader;
+package org.neo4j.graphalgo.core.loading;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.loading.SparseNodeMapping;
-import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.PrivateLookup;
+import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
