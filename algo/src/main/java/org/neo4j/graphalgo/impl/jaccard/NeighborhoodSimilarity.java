@@ -83,15 +83,6 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     private static final ArraySizingStrategy ARRAY_SIZING_STRATEGY =
         (currentBufferLength, elementsCount, expectedAdditions) -> expectedAdditions + elementsCount;
 
-    /**
-     * Requires:
-     * - Input graph must be bipartite:
-     * (:Person)-[:LIKES]->(:Thing)
-     * We collect all targets and use them only in the vectors, not as the thing for which we compute similarity.
-     * If (:Person)-[:LIKES]->(:Person) we would filter out the person nodes.
-     *
-     * Number of results: (n^2 - n) / 2
-     */
     public Stream<SimilarityResult> computeToStream(Direction direction) {
 
         this.vectors = HugeObjectArray.newArray(long[].class, graph.nodeCount(), tracker);
@@ -102,17 +93,12 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         }
 
         graph.forEachNode(node -> {
-            if (graph.degree(node, direction) >= config.degreeCutoff) {
+            int degree = graph.degree(node, direction);
+
+            if (degree >= config.degreeCutoff) {
                 nodesToCompare++;
                 nodeFilter.set(node);
-            }
-            return true;
-        });
 
-        graph.forEachNode(node -> {
-            // TODO: can we inline this where we populate the nodeFilter?
-            if (nodeFilter.get(node)) {
-                int degree = graph.degree(node, direction);
                 final LongArrayList targetIds = new LongArrayList(degree, ARRAY_SIZING_STRATEGY);
                 graph.forEachRelationship(node, direction, (source, target) -> {
                     targetIds.add(target);
