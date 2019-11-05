@@ -11,6 +11,10 @@ This topic includes:
 * <<algorithms-neighborhood-similarity-intro, Introduction>>
 * <<algorithms-neighborhood-similarity-syntax, Syntax>>
 * <<algorithms-neighborhood-similarity-examples, Examples>>
+** <<algorithms-neighborhood-similarity-examples-stream, Streaming results>>
+** <<algorithms-neighborhood-similarity-examples-write, Writing results>>
+** <<algorithms-neighborhood-similarity-examples-top-topk, Top and topK>>
+** <<algorithms-neighborhood-similarity-examples-degree-similarity-cutoff, Degree cutoff and similarity cutoff>>
 
 
 [[algorithms-neighborhood-similarity-intro]]
@@ -21,7 +25,15 @@ Two nodes are considered to be similar if they share many of the same neighbors.
 Neighborhood Similarity computes pair-wise similarities based on the Jaccard metric.
 
 The input of this algorithm is a biparite, connected graph.
-All nodes from the first node set are compared based on their relationships to the second node set.
+All nodes from the first node set are compared with each other based on their relationships to nodes in the second set.
+The complexity of this comparison grows quadratically with the number of nodes to compare.
+The algorithm reduces the complexity by ignoring disconnected nodes.
+
+In addition to computational complexity, the memory requirement for producing results also scales roughly quadratically.
+In order to bound memory usage, the algorithm requires an explicit limit on the number of results to compute per node.
+This is the 'topK' parameter.
+It can be set to any value, except 0.
+
 The output of the algorithm are new relationships between pairs of the first node set.
 Similarity scores are expressed via relationship properties.
 
@@ -35,7 +47,7 @@ For more information on this algorithm, see:
 
 [NOTE]
 ====
-Running this algorithm requires sufficient memory availability (quadratic growth).
+Running this algorithm requires sufficient available memory.
 Before running this algorithm, we recommend that you read <<memory-requirements>>.
 ====
 
@@ -92,8 +104,8 @@ YIELD nodesCompared, relationships, write, writeRelationshipType, writeProperty
 | loadMillis            | int     | Milliseconds for loading data.
 | computeMillis         | int     | Milliseconds for running the algorithm.
 | writeMillis           | int     | Milliseconds for writing result data back.
-| postProcessingMillis  | int     | Milliseconds for computing percentiles and community count.
 // TODO: uncomment when histogram is implemented
+//| postProcessingMillis  | int     | Milliseconds for computing percentiles and community count.
 //| min                   | double  | The minimum similarity score computed.
 //| max                   | double  | The maximum similarity score computed.
 //| mean                  | double  | The mean of similarities scores computed.
@@ -199,6 +211,7 @@ To circumvent this, an common node label like 'Node' can be added to Person and 
 ====
 
 
+[[algorithms-neighborhood-similarity-examples-stream]]
 === Streaming results
 
 .The following will load the graph, run the algorithm, and stream results:
@@ -237,6 +250,7 @@ TopK is set to 10, top is set to 0.
 Because of that the result set contains the top 10 similarity scores for each node.
 
 
+[[algorithms-neighborhood-similarity-examples-write]]
 === Writing results
 
 To instead write the similarity results back to the graph in Neo4j, use the following query.
@@ -264,12 +278,13 @@ YIELD nodesCompared, relationships, write, writeProperty, writeRelationshipType;
 As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.
 
 
+[[algorithms-neighborhood-similarity-examples-top-topk]]
 === Top and topK
 
 Top is a global limit on the number of similarity scores computed.
 If the given value is positive, the results are ordered descending.
 If a negative value is used, the results are ordered ascending.
-A value of 0 means that all results are computed and returned in any order.
+A value of 0 means no global limit is imposed and results are returned in any order.
 
 .The following will load the graph, run the algorithm, and stream the top 3 results:
 [source, cypher]
@@ -323,6 +338,7 @@ ORDER BY Person1
 |===
 
 
+[[algorithms-neighborhood-similarity-examples-degree-similarity-cutoff]]
 === Degree cutoff and similarity cutoff
 
 Degree cutoff is a lower limit on the node degree for a node to be considered in the comparisons.
@@ -377,6 +393,4 @@ ORDER BY Person1
 | "Dave"  | "Bob"   | 0.6666666666666666
 3+|6 rows
 |===
-
-
 
