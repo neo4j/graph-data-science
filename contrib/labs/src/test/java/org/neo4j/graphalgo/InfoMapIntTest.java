@@ -17,14 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.algo;
+package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.InfoMapProc;
-import org.neo4j.graphalgo.PageRankProc;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Node;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
@@ -69,7 +66,7 @@ class InfoMapIntTest {
 
         db.execute(cypher);
         db.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(InfoMapProc.class);
-        db.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(PageRankProc.class);
+        db.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(ArticleRankProc.class);
     }
 
     @AfterEach
@@ -144,7 +141,7 @@ class InfoMapIntTest {
     void testPredefinedPageRankStream() {
 
 
-        db.execute("CALL algo.pageRank('Node', 'TYPE', {writeProperty:'p', iterations:1}) YIELD nodes").close();
+        db.execute("CALL algo.articleRank('Node', 'TYPE', {writeProperty:'p', iterations:1}) YIELD nodes").close();
 
         final BitSet bitSet = new BitSet(8);
 
