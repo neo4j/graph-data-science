@@ -38,10 +38,6 @@ import org.neo4j.graphalgo.impl.scc.SCCTunedTarjan;
 import org.neo4j.graphalgo.results.SCCResult;
 import org.neo4j.graphalgo.results.SCCStreamResult;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -52,20 +48,11 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class StronglyConnectedComponentsProc {
+public class StronglyConnectedComponentsProc extends LabsProc {
 
     public static final String CONFIG_WRITE_PROPERTY = "writeProperty";
     public static final String CONFIG_OLD_WRITE_PROPERTY = "partitionProperty";
     public static final String CONFIG_CLUSTER = "partition";
-
-    @Context
-    public GraphDatabaseAPI api;
-
-    @Context
-    public Log log;
-
-    @Context
-    public KernelTransaction transaction;
 
     // default algo.scc -> iterative tarjan
     @Procedure(value = "algo.scc", mode = Mode.WRITE)
@@ -100,7 +87,7 @@ public class StronglyConnectedComponentsProc {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
 
         SCCResult.Builder builder = SCCResult.builder();
 
@@ -161,7 +148,7 @@ public class StronglyConnectedComponentsProc {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
 
         SCCResult.Builder builder = SCCResult.builder();
 
@@ -217,7 +204,7 @@ public class StronglyConnectedComponentsProc {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
 
         Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, configuration)
@@ -244,7 +231,7 @@ public class StronglyConnectedComponentsProc {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
 
         final SCCResult.Builder builder = SCCResult.builder();
 
@@ -300,7 +287,7 @@ public class StronglyConnectedComponentsProc {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
 
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, configuration)
@@ -333,7 +320,7 @@ public class StronglyConnectedComponentsProc {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
 
         SCCResult.Builder builder = SCCResult.builder();
 
@@ -396,7 +383,7 @@ public class StronglyConnectedComponentsProc {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
         Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, configuration)
                 .load(configuration.getGraphImpl());
@@ -424,7 +411,7 @@ public class StronglyConnectedComponentsProc {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
         Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, label, relationship, configuration)
                 .load(configuration.getGraphImpl());

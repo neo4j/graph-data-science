@@ -47,7 +47,7 @@ public class PearsonProc extends SimilarityProc {
     public Stream<SimilarityResult> pearsonStream(
             @Name(value = "data", defaultValue = "null") Object rawData,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) throws Exception {
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
         Double skipValue = readSkipValue(configuration);
 
 
@@ -76,7 +76,7 @@ public class PearsonProc extends SimilarityProc {
     public Stream<SimilaritySummaryResult> pearson(
             @Name(value = "data", defaultValue = "null") Object rawData,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) throws Exception {
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
         Double skipValue = readSkipValue(configuration);
 
         WeightedInput[] inputs = prepareWeights(rawData, configuration, skipValue);

@@ -32,10 +32,6 @@ import org.neo4j.graphalgo.impl.ShortestPathDeltaStepping;
 import org.neo4j.graphalgo.results.DeltaSteppingProcResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -60,19 +56,10 @@ import static org.neo4j.procedure.Mode.READ;
  * <a href="http://www.cc.gatech.edu/~bader/papers/ShortestPaths-ALENEX2007.pdf">http://www.cc.gatech.edu/~bader/papers/ShortestPaths-ALENEX2007.pdf</a><br>
  * <a href="http://www.dis.uniroma1.it/challenge9/papers/madduri.pdf">http://www.dis.uniroma1.it/challenge9/papers/madduri.pdf</a>
  */
-public class ShortestPathDeltaSteppingProc {
+public class ShortestPathDeltaSteppingProc extends LabsProc {
 
     public static final String WRITE_PROPERTY = "writeProperty";
     public static final String DEFAULT_TARGET_PROPERTY = "sssp";
-
-    @Context
-    public GraphDatabaseAPI api;
-
-    @Context
-    public Log log;
-
-    @Context
-    public KernelTransaction transaction;
 
     @Procedure(name = "algo.shortestPath.deltaStepping.stream", mode = READ)
     @Description("CALL algo.shortestPath.deltaStepping.stream(startNode:Node, weightProperty:String, delta:Double" +
@@ -85,7 +72,7 @@ public class ShortestPathDeltaSteppingProc {
             @Name(value = "config", defaultValue = "{}")
                     Map<String, Object> config) {
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
         Direction direction = configuration.getDirection(Direction.BOTH);
 
         GraphLoader graphLoader = new GraphLoader(api, Pools.DEFAULT)
@@ -130,7 +117,7 @@ public class ShortestPathDeltaSteppingProc {
             @Name(value = "config", defaultValue = "{}")
                     Map<String, Object> config) {
 
-        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
         Direction direction = configuration.getDirection(Direction.BOTH);
 
         final DeltaSteppingProcResult.Builder builder = DeltaSteppingProcResult.builder();

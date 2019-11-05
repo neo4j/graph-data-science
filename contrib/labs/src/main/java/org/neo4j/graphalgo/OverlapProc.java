@@ -48,7 +48,7 @@ public class OverlapProc extends SimilarityProc {
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
 
         CategoricalInput[] inputs = prepareCategories(data, getDegreeCutoff(configuration));
 
@@ -73,7 +73,7 @@ public class OverlapProc extends SimilarityProc {
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
 
         CategoricalInput[] inputs = prepareCategories(data, getDegreeCutoff(configuration));
 

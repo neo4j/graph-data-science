@@ -68,8 +68,8 @@ public abstract class BaseProc {
             final Map<String, Object> config) {
 
         ProcedureConfiguration configuration = (config != null)
-            ? ProcedureConfiguration.create(config)
-            : ProcedureConfiguration.empty();
+            ? ProcedureConfiguration.create(config, getUsername())
+            : ProcedureConfiguration.create(getUsername());
 
         if (label != null && !label.isEmpty()) {
             configuration.setNodeLabelOrQuery(label);
@@ -77,8 +77,6 @@ public abstract class BaseProc {
         if (relationship != null && !relationship.isEmpty()) {
             configuration.setRelationshipTypeOrQuery(relationship);
         }
-
-        configuration.setUsername(getUsername());
 
         Set<String> returnItems = callContext.outputFields().collect(Collectors.toSet());
         configuration

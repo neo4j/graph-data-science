@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.unionfind;
 
+import org.neo4j.graphalgo.LabsProc;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -31,10 +32,6 @@ import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.impl.MSColoring;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -46,19 +43,10 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class MSColoringProc {
+public class MSColoringProc extends LabsProc {
 
     public static final String CONFIG_CLUSTER_PROPERTY = "partitionProperty";
     public static final String DEFAULT_CLUSTER_PROPERTY = "partition";
-
-    @Context
-    public GraphDatabaseAPI api;
-
-    @Context
-    public Log log;
-
-    @Context
-    public ProcedureCallContext callContext;
 
     @Procedure(value = "algo.unionFind.mscoloring", mode = Mode.WRITE)
     @Description("CALL algo.unionFind.mscoloring(label:String, relationship:String, " +
@@ -69,7 +57,7 @@ public class MSColoringProc {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername())
                 .setNodeLabelOrQuery(label)
                 .setRelationshipTypeOrQuery(relationship);
 
@@ -113,7 +101,7 @@ public class MSColoringProc {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername())
                 .setNodeLabelOrQuery(label)
                 .setRelationshipTypeOrQuery(relationship);
 

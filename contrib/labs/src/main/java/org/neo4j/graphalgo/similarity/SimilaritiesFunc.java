@@ -23,7 +23,6 @@ import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.LongDoubleMap;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
-import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Intersections;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -83,9 +82,7 @@ public class SimilaritiesFunc {
     @Description("algo.similarity.pearson([vector1], [vector2]) " +
             "given two collection vectors, calculate pearson similarity")
     public double pearsonSimilarity(@Name("vector1") Object rawVector1, @Name("vector2") Object rawVector2, @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
-
-        String listType = configuration.get("vectorType", "numbers");
+        String listType = config.getOrDefault("vectorType", "numbers").toString();
 
         if (listType.equalsIgnoreCase("maps")) {
             List<Map<String, Object>> vector1 = (List<Map<String, Object>>) rawVector1;

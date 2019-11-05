@@ -93,7 +93,7 @@ class GraphGenerateProcTest extends ProcTestBase {
         Map<String, Object> configMap = new HashMap<>();
         configMap.put(RELATIONSHIP_DISTRIBUTION_KEY, relationshipDistribution.name());
 
-        ProcedureConfiguration procedureConfig = ProcedureConfiguration.create(configMap);
+        ProcedureConfiguration procedureConfig = ProcedureConfiguration.create(configMap, getUsername());
 
         GraphGenerateProc proc = new GraphGenerateProc();
         RandomGraphGenerator generator = proc.initializeGraphGenerator(10, 5, procedureConfig);
@@ -110,7 +110,7 @@ class GraphGenerateProcTest extends ProcTestBase {
         Map<String, Object> configMap = new HashMap<>();
         configMap.put(RELATIONSHIP_PROPERTY_KEY, config);
 
-        ProcedureConfiguration procedureConfig = ProcedureConfiguration.create(configMap);
+        ProcedureConfiguration procedureConfig = ProcedureConfiguration.create(configMap, getUsername());
 
         GraphGenerateProc proc = new GraphGenerateProc();
         RandomGraphGenerator generator = proc.initializeGraphGenerator(10, 5, procedureConfig);
@@ -130,7 +130,7 @@ class GraphGenerateProcTest extends ProcTestBase {
         Map<String, Object> configMap = new HashMap<>();
         configMap.put(RELATIONSHIP_PROPERTY_KEY, config);
 
-        ProcedureConfiguration procedureConfig = ProcedureConfiguration.create(configMap);
+        ProcedureConfiguration procedureConfig = ProcedureConfiguration.create(configMap, getUsername());
 
         GraphGenerateProc proc = new GraphGenerateProc();
 
@@ -154,7 +154,7 @@ class GraphGenerateProcTest extends ProcTestBase {
     void shouldGenerateGraphFromDefaults() {
         Map<String, Object> configMap = new HashMap<>();
 
-        ProcedureConfiguration procedureConfig = ProcedureConfiguration.create(configMap);
+        ProcedureConfiguration procedureConfig = ProcedureConfiguration.create(configMap, getUsername());
 
         GraphGenerateProc proc = new GraphGenerateProc();
         RandomGraphGenerator generator = proc.initializeGraphGenerator(10, 5, procedureConfig);

@@ -48,7 +48,7 @@ public class CosineProc extends SimilarityProc {
     public Stream<SimilarityResult> cosineStream(
             @Name(value = "data", defaultValue = "null") Object rawData,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) throws Exception {
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
         Double skipValue = configuration.get("skipValue", Double.NaN);
 
         WeightedInput[] inputs = prepareWeights(rawData, configuration, skipValue);
@@ -76,7 +76,7 @@ public class CosineProc extends SimilarityProc {
             @Name(value = "data", defaultValue = "null") Object rawData,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) throws Exception {
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
         Double skipValue = configuration.get("skipValue", Double.NaN);
 
         WeightedInput[] inputs = prepareWeights(rawData, configuration, skipValue);

@@ -30,18 +30,21 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 class ProcedureConfigurationTest {
 
+    private final String testUsername = "test";
+
     @Test
     void useDefault() {
         Map<String, Object> map = Collections.emptyMap();
-        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
+        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map, testUsername);
         String value = procedureConfiguration.get("partitionProperty", "defaultValue");
         assertEquals("defaultValue", value);
+        assertEquals(testUsername, procedureConfiguration.getUsername());
     }
 
     @Test
     void returnValueIfPresent() {
         Map<String, Object> map = MapUtil.map("partitionProperty", "partition");
-        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
+        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map, testUsername);
         String value = procedureConfiguration.get("partitionProperty", "defaultValue");
         assertEquals("partition", value);
     }
@@ -49,7 +52,7 @@ class ProcedureConfigurationTest {
     @Test
     void newKeyIfPresent() {
         Map<String, Object> map = MapUtil.map("partitionProperty", "old", "writeProperty", "new");
-        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
+        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map, testUsername);
         String value = procedureConfiguration.get("writeProperty", "partitionProperty", "defaultValue");
         assertEquals("new", value);
     }
@@ -57,7 +60,7 @@ class ProcedureConfigurationTest {
     @Test
     void oldKeyIfNewKeyNotPresent() {
         Map<String, Object> map = MapUtil.map("partitionProperty", "old");
-        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
+        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map, testUsername);
         String value = procedureConfiguration.get("writeProperty", "partitionProperty", "defaultValue");
         assertEquals("old", value);
     }
@@ -65,7 +68,7 @@ class ProcedureConfigurationTest {
     @Test
     void defaultIfNoKeysPresent() {
         Map<String, Object> map = Collections.emptyMap();
-        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
+        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map, testUsername);
         String value = procedureConfiguration.get("writeProperty", "partitionProperty", "defaultValue");
         assertEquals("defaultValue", value);
     }
@@ -73,35 +76,35 @@ class ProcedureConfigurationTest {
     @Test
     void defaultIfKeyMissing() {
         Map<String, Object> map = Collections.emptyMap();
-        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
+        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map, testUsername);
         assertEquals("defaultValue", procedureConfiguration.getString("writeProperty", "defaultValue"));
     }
 
     @Test
     void defaultIfKeyPresentButNoValue() {
         Map<String, Object> map = MapUtil.map("writeProperty", "");
-        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
+        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map, testUsername);
         assertEquals("defaultValue", procedureConfiguration.getString("writeProperty", "defaultValue"));
     }
 
     @Test
     void valueIfKeyPresent() {
         Map<String, Object> map = MapUtil.map("writeProperty", "scc");
-        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
+        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map, testUsername);
         assertEquals("scc", procedureConfiguration.getString("writeProperty", "defaultValue"));
     }
 
     @Test
     void convertNonDoubleDefaultValues() {
         Map<String, Object> map = MapUtil.map("defaultValue", 1L);
-        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
+        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map, testUsername);
         assertEquals(1.0, procedureConfiguration.getWeightPropertyDefaultValue(0.0), 0.001);
     }
 
     @Test
     void returnDefaultConcurrencyIfNoReadOrWriteConcurrencyIsGiven() {
         Map<String, Object> map = MapUtil.map("concurrency", 2L);
-        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
+        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map, testUsername);
         assertEquals(2L, procedureConfiguration.getReadConcurrency(1));
         assertEquals(2L, procedureConfiguration.getWriteConcurrency(1));
     }
@@ -109,21 +112,21 @@ class ProcedureConfigurationTest {
     @Test
     void skipValueDefault() {
         Map<String, Object> map = Collections.emptyMap();
-        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
+        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map, testUsername);
         assertEquals(Double.NaN, procedureConfiguration.getSkipValue(Double.NaN), 0.01);
     }
 
     @Test
     void skipValueAllowNull() {
         Map<String, Object> map = MapUtil.map("skipValue", null);
-        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
+        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map, testUsername);
         assertNull(procedureConfiguration.getSkipValue(Double.NaN));
     }
 
     @Test
     void skipValueAllowIntegers() {
         Map<String, Object> map = MapUtil.map("skipValue", 0);
-        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map);
+        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(map, testUsername);
         assertEquals(0.0, procedureConfiguration.getSkipValue(Double.NaN), 0.0);
     }
 

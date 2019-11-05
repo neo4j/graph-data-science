@@ -33,10 +33,6 @@ import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.impl.triangle.BalancedTriads;
 import org.neo4j.graphalgo.results.AbstractCommunityResultBuilder;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -47,19 +43,10 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class BalancedTriadsProc {
+public class BalancedTriadsProc extends LabsProc {
 
     public static final String DEFAULT_BALANCED_PROPERTY = "balanced";
     public static final String DEFAULT_UNBALANCED_PROPERTY = "unbalanced";
-
-    @Context
-    public GraphDatabaseAPI api;
-
-    @Context
-    public Log log;
-
-    @Context
-    public KernelTransaction transaction;
 
     @Procedure(name = "algo.balancedTriads.stream", mode = READ)
     @Description("CALL algo.balancedTriads.stream(label, relationship, {concurrency:8}) " +
@@ -69,7 +56,7 @@ public class BalancedTriadsProc {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
+        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername())
                 .setNodeLabelOrQuery(label)
                 .setRelationshipTypeOrQuery(relationship);
 
@@ -110,7 +97,7 @@ public class BalancedTriadsProc {
         final Graph graph;
         final BalancedTriads balancedTriads;
 
-        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
+        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername())
                 .setNodeLabelOrQuery(label)
                 .setRelationshipTypeOrQuery(relationship);
 

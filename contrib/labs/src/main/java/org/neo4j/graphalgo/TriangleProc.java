@@ -38,10 +38,6 @@ import org.neo4j.graphalgo.impl.triangle.TriangleCountBase;
 import org.neo4j.graphalgo.impl.triangle.TriangleCountForkJoin;
 import org.neo4j.graphalgo.impl.triangle.TriangleStream;
 import org.neo4j.graphalgo.results.AbstractCommunityResultBuilder;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -55,19 +51,10 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class TriangleProc {
+public class TriangleProc extends LabsProc {
 
     public static final String DEFAULT_WRITE_PROPERTY_VALUE = "triangles";
     public static final String COEFFICIENT_WRITE_PROPERTY_VALUE = "clusteringCoefficientProperty";
-
-    @Context
-    public GraphDatabaseAPI api;
-
-    @Context
-    public Log log;
-
-    @Context
-    public KernelTransaction transaction;
 
     @Procedure(name = "algo.triangle.stream", mode = READ)
     @Description("CALL algo.triangle.stream(label, relationship, {concurrency:4}) " +
@@ -77,7 +64,7 @@ public class TriangleProc {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
+        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername())
                 .setNodeLabelOrQuery(label)
                 .setRelationshipTypeOrQuery(relationship);
 
@@ -110,7 +97,7 @@ public class TriangleProc {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
+        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername())
                 .setNodeLabelOrQuery(label)
                 .setRelationshipTypeOrQuery(relationship);
 
@@ -148,7 +135,7 @@ public class TriangleProc {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
+        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername())
                 .setNodeLabelOrQuery(label)
                 .setRelationshipTypeOrQuery(relationship);
 
@@ -184,7 +171,7 @@ public class TriangleProc {
         final Graph graph;
         final IntersectingTriangleCount triangleCount;
 
-        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
+        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername())
                 .setNodeLabelOrQuery(label)
                 .setRelationshipTypeOrQuery(relationship);
         final TriangleCountResultBuilder builder = new TriangleCountResultBuilder();
@@ -302,7 +289,7 @@ public class TriangleProc {
         final TriangleCountForkJoin triangleCount;
         final AtomicDoubleArray clusteringCoefficients;
 
-        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
+        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername())
                 .setNodeLabelOrQuery(label)
                 .setRelationshipTypeOrQuery(relationship);
         final TriangleCountResultBuilder builder = new TriangleCountResultBuilder();

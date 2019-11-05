@@ -33,10 +33,6 @@ import org.neo4j.graphalgo.impl.spanningTrees.Prim;
 import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
 import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -46,23 +42,10 @@ import org.neo4j.values.storable.Values;
 import java.util.Map;
 import java.util.stream.Stream;
 
-/**
- * @author mknblch
- */
-public class PrimProc {
+public class PrimProc extends LabsProc {
 
     public static final String CONFIG_WRITE_RELATIONSHIP = "writeProperty";
     public static final String CONFIG_WRITE_RELATIONSHIP_DEFAULT = "MST";
-
-    @Context
-    public GraphDatabaseAPI api;
-
-    @Context
-    public Log log;
-
-    @Context
-    public KernelTransaction transaction;
-
 
     @Procedure(value = "algo.mst", mode = Mode.WRITE)
     @Description("CALL algo.mst(label:String, relationshipType:String, weightProperty:String, startNodeId:long, {" +
@@ -125,7 +108,7 @@ public class PrimProc {
                                             Map<String, Object> config,
                                             boolean max) {
 
-        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
         final Prim.Builder builder = new Prim.Builder();
         final Graph graph;
         try (ProgressTimer timer = builder.timeLoad()) {

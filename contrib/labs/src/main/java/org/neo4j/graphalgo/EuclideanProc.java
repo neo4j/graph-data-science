@@ -48,7 +48,7 @@ public class EuclideanProc extends SimilarityProc {
     public Stream<SimilarityResult> euclideanStream(
             @Name(value = "data", defaultValue = "null") Object rawData,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) throws Exception {
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
         Double skipValue = readSkipValue(configuration);
 
         WeightedInput[] inputs = prepareWeights(rawData, configuration, skipValue);
@@ -76,7 +76,7 @@ public class EuclideanProc extends SimilarityProc {
     public Stream<SimilaritySummaryResult> euclidean(
             @Name(value = "data", defaultValue = "null") Object rawData,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) throws Exception {
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
         Double skipValue = readSkipValue(configuration);
 
         WeightedInput[] inputs = prepareWeights(rawData, configuration, skipValue);

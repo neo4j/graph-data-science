@@ -21,10 +21,7 @@ package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.impl.walking.WalkPath;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Path;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -34,10 +31,7 @@ import java.util.Map;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class UtilityProc {
-
-    @Context
-    public GraphDatabaseService db;
+public class UtilityProc extends LabsProc {
 
     @Procedure("algo.asPath")
     @Description("CALL algo.asPath - returns a path for the provided node ids and weights")
@@ -51,7 +45,7 @@ public class UtilityProc {
         }
         long[] nodes = nodeIds.stream().mapToLong(l -> l).toArray();
 
-        ProcedureConfiguration config = ProcedureConfiguration.create(rawConfig);
+        ProcedureConfiguration config = ProcedureConfiguration.create(rawConfig, getUsername());
 
         if (!weights.isEmpty()) {
             boolean cumulativeWeights = config.get("cumulativeWeights", true);
@@ -60,15 +54,15 @@ public class UtilityProc {
                     throw new RuntimeException(message(weights.size(), nodeIds.size(), "size of 'nodeIds'"));
                 }
 
-                return Stream.of(new PathResult(WalkPath.toPath((GraphDatabaseAPI) db, nodes, IntStream.range(0, weights.size() - 1).mapToDouble(index -> weights.get(index + 1) - weights.get(index)).toArray())));
+                return Stream.of(new PathResult(WalkPath.toPath(api, nodes, IntStream.range(0, weights.size() - 1).mapToDouble(index -> weights.get(index + 1) - weights.get(index)).toArray())));
             } else {
                 if (nodeIds.size() - 1 != weights.size()) {
                     throw new RuntimeException(message(weights.size(), nodeIds.size() - 1, "size of 'nodeIds'-1"));
                 }
-                return Stream.of(new PathResult(WalkPath.toPath((GraphDatabaseAPI) db, nodes, weights.stream().mapToDouble(d -> d).toArray())));
+                return Stream.of(new PathResult(WalkPath.toPath(api, nodes, weights.stream().mapToDouble(d -> d).toArray())));
             }
         } else {
-            return Stream.of(new PathResult(WalkPath.toPath((GraphDatabaseAPI) db, nodes)));
+            return Stream.of(new PathResult(WalkPath.toPath(api, nodes)));
         }
     }
 

@@ -23,10 +23,10 @@ import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.heavyweight.HeavyGraph;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.lightweight.LightGraph;
+import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Directions;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
@@ -53,14 +53,15 @@ public class ProcedureConfiguration {
 
     private final Map<String, Object> config;
 
-    private String username;
+    private final String username;
 
     private boolean computeHistogram = false;
 
     private boolean computeCommunityCount = false;
 
-    public ProcedureConfiguration(Map<String, Object> config) {
+    protected ProcedureConfiguration(Map<String, Object> config, String username) {
         this.config = new HashMap<>(config);
+        this.username = username;
     }
 
     /**
@@ -71,11 +72,6 @@ public class ProcedureConfiguration {
      */
     public boolean containsKey(String key) {
         return this.config.containsKey(key);
-    }
-
-    public ProcedureConfiguration setUsername(String username) {
-        this.username = username;
-        return this;
     }
 
     public String getUsername() {
@@ -518,12 +514,12 @@ public class ProcedureConfiguration {
         return expectedType.cast(value);
     }
 
-    public static ProcedureConfiguration create(Map<String, Object> config) {
-        return new ProcedureConfiguration(config);
+    public static ProcedureConfiguration create(String username) {
+        return new ProcedureConfiguration(Collections.emptyMap(), username);
     }
 
-    public static ProcedureConfiguration empty() {
-        return new ProcedureConfiguration(Collections.emptyMap());
+    public static ProcedureConfiguration create(Map<String, Object> config, String username) {
+        return new ProcedureConfiguration(config, username);
     }
 
     public Map<String, Object> getParams() {

@@ -35,10 +35,6 @@ import org.neo4j.graphalgo.impl.ShortestPathDijkstra;
 import org.neo4j.graphalgo.results.DijkstraResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -49,19 +45,9 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class ShortestPathProc {
+public class ShortestPathProc extends LabsProc {
 
     public static final String DEFAULT_TARGET_PROPERTY = "sssp";
-
-
-    @Context
-    public GraphDatabaseAPI api;
-
-    @Context
-    public Log log;
-
-    @Context
-    public KernelTransaction transaction;
 
     /**
      * single threaded dijkstra impl.
@@ -86,7 +72,7 @@ public class ShortestPathProc {
             @Name(value = "config", defaultValue = "{}")
                     Map<String, Object> config) {
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
 
         Direction direction = configuration.getDirection(Direction.BOTH);
 
@@ -129,7 +115,7 @@ public class ShortestPathProc {
             @Name(value = "config", defaultValue = "{}")
                     Map<String, Object> config) {
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
 
         DijkstraResult.Builder builder = DijkstraResult.builder();
 
@@ -203,7 +189,7 @@ public class ShortestPathProc {
             @Name(value = "propertyKeyLon", defaultValue = "longitude") String propertyKeyLon,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
         Direction direction = configuration.getDirection(Direction.BOTH);
 
         GraphLoader graphLoader = new GraphLoader(api, Pools.DEFAULT)

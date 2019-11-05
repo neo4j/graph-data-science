@@ -19,12 +19,11 @@
  */
 package org.neo4j.graphalgo.linkprediction;
 
+import org.neo4j.graphalgo.LabsProc;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.UserFunction;
@@ -32,9 +31,7 @@ import org.neo4j.procedure.UserFunction;
 import java.util.Map;
 import java.util.Set;
 
-public class LinkPredictionFunc {
-    @Context
-    public GraphDatabaseAPI api;
+public class LinkPredictionFunc extends LabsProc {
 
     @UserFunction("algo.linkprediction.adamicAdar")
     @Description("algo.linkprediction.adamicAdar(node1:Node, node2:Node, {relationshipQuery:'relationshipName', direction:'BOTH'}) " +
@@ -47,7 +44,7 @@ public class LinkPredictionFunc {
             throw new RuntimeException("Nodes must not be null");
         }
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
         RelationshipType relationshipType = configuration.getRelationship();
         Direction direction = configuration.getDirection(Direction.BOTH);
 
@@ -66,7 +63,7 @@ public class LinkPredictionFunc {
             throw new RuntimeException("Nodes must not be null");
         }
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
         RelationshipType relationshipType = configuration.getRelationship();
         Direction direction = configuration.getDirection(Direction.BOTH);
 
@@ -83,7 +80,7 @@ public class LinkPredictionFunc {
             throw new RuntimeException("Nodes must not be null");
         }
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
         RelationshipType relationshipType = configuration.getRelationship();
         Direction direction = configuration.getDirection(Direction.BOTH);
 
@@ -100,7 +97,7 @@ public class LinkPredictionFunc {
             throw new RuntimeException("Nodes must not be null");
         }
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
         RelationshipType relationshipType = configuration.getRelationship();
         Direction direction = configuration.getDirection(Direction.BOTH);
 
@@ -112,7 +109,7 @@ public class LinkPredictionFunc {
             "given two nodes, calculate Total Neighbors")
     public double totalNeighbors(@Name("node1") Node node1, @Name("node2") Node node2,
                                          @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
         RelationshipType relationshipType = configuration.getRelationship();
         Direction direction = configuration.getDirection(Direction.BOTH);
 

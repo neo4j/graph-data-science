@@ -21,9 +21,12 @@ package org.neo4j.graphalgo.algo;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.GraphLoadProc;
 import org.neo4j.graphalgo.StronglyConnectedComponentsProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
+import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -57,14 +60,42 @@ class StronglyConnectedComponentsProcTest {
     static void setup() throws KernelException {
         DB = TestDatabaseCreator.createTestDatabase();
         DB.execute(DB_CYPHER);
-        DB.getDependencyResolver()
-                .resolveDependency(Procedures.class)
-                .registerProcedure(StronglyConnectedComponentsProc.class);
+        Procedures procedures = DB.getDependencyResolver().resolveDependency(Procedures.class);
+        procedures.registerProcedure(GraphLoadProc.class);
+        procedures.registerProcedure(StronglyConnectedComponentsProc.class);
     }
 
     @AfterAll
     static void tearDown() {
         if (DB != null) DB.shutdown();
+    }
+
+    @Test
+    void testSccOnLoadedGraph() {
+        String graphName = "aliceGraph";
+        String loadQuery = "CALL algo.graph.load(" +
+                           "    $name, 'Node', 'TYPE', {}" +
+                           ")" +
+                           "YIELD nodes, relationships";
+
+        DB.execute(loadQuery, MapUtil.map("name", graphName)).accept(row -> true);
+
+        String algoQuery = "CALL algo.scc('Node', 'TYPE', {write:true, graph:'" + graphName + "'}) " +
+                           "YIELD loadMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize, partitionProperty, writeProperty";
+
+        DB.execute(algoQuery, MapUtil.map("name", graphName)).accept(row -> {
+            assertNotEquals(-1L, row.getNumber("computeMillis").longValue());
+            assertNotEquals(-1L, row.getNumber("writeMillis").longValue());
+            assertEquals(2, row.getNumber("setCount").longValue());
+            assertEquals(2, row.getNumber("minSetSize").longValue());
+            assertEquals(3, row.getNumber("maxSetSize").longValue());
+            assertEquals("partition", row.getString("partitionProperty"));
+            assertEquals("partition", row.getString("writeProperty"));
+
+            return true;
+        });
+
+        DB.execute("CALL algo.graph.remove($name)", MapUtil.map("name", graphName));
     }
 
     @AllGraphNamesTest

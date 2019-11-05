@@ -30,10 +30,6 @@ import org.neo4j.graphalgo.impl.MSBFSASPAlgorithm;
 import org.neo4j.graphalgo.impl.MSBFSAllShortestPaths;
 import org.neo4j.graphalgo.impl.WeightedAllShortestPaths;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -43,16 +39,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class AllShortestPathsProc {
-
-    @Context
-    public GraphDatabaseAPI api;
-
-    @Context
-    public Log log;
-
-    @Context
-    public KernelTransaction transaction;
+public class AllShortestPathsProc extends LabsProc {
 
     @Procedure(name = "algo.allShortestPaths.stream", mode = READ)
     @Description("CALL algo.allShortestPaths.stream(weightProperty:String" +
@@ -63,7 +50,7 @@ public class AllShortestPathsProc {
             @Name(value = "config", defaultValue = "{}")
                     Map<String, Object> config) {
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
 
         Direction direction = configuration.getDirection(Direction.BOTH);
 

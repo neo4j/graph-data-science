@@ -33,10 +33,6 @@ import org.neo4j.graphalgo.impl.ShortestPaths;
 import org.neo4j.graphalgo.results.ShortestPathResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -47,19 +43,10 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class ShortestPathsProc {
+public class ShortestPathsProc extends LabsProc {
 
     public static final String WRITE_PROPERTY = "writeProperty";
     public static final String DEFAULT_TARGET_PROPERTY = "sssp";
-
-    @Context
-    public GraphDatabaseAPI api;
-
-    @Context
-    public Log log;
-
-    @Context
-    public KernelTransaction transaction;
 
     @Procedure(name = "algo.shortestPaths.stream", mode = READ)
     @Description("CALL algo.shortestPaths.stream(startNode:Node, weightProperty:String" +
@@ -71,7 +58,7 @@ public class ShortestPathsProc {
             @Name(value = "config", defaultValue = "{}")
                     Map<String, Object> config) {
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
 
         final Graph graph = new GraphLoader(api, Pools.DEFAULT)
                 .init(log, configuration.getNodeLabelOrQuery(),configuration.getRelationshipOrQuery(),configuration)
@@ -104,7 +91,7 @@ public class ShortestPathsProc {
             @Name(value = "config", defaultValue = "{}")
                     Map<String, Object> config) {
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
 
         ShortestPathResult.Builder builder = ShortestPathResult.builder();
 

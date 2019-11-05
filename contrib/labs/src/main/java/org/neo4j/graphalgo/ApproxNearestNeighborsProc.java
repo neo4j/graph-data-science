@@ -54,7 +54,7 @@ public class ApproxNearestNeighborsProc extends SimilarityProc {
             @Name(value = "algorithm", defaultValue = "null") String algorithmName,
             @Name(value = "data", defaultValue = "null") Object rawData,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) throws Exception {
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
         Double skipValue = configuration.getSkipValue(Double.NaN);
 
         SimilarityAlgorithm<SimilarityInput> algorithm = selectAlgorithm(algorithmName, configuration);
@@ -93,7 +93,7 @@ public class ApproxNearestNeighborsProc extends SimilarityProc {
             @Name(value = "algorithm", defaultValue = "null") String algorithmName,
             @Name(value = "data", defaultValue = "null") Object rawData,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) throws Exception {
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
         Double skipValue = configuration.getSkipValue(Double.NaN);
 
         SimilarityAlgorithm<SimilarityInput> algorithm = selectAlgorithm(algorithmName, configuration);

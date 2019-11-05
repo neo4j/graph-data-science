@@ -29,10 +29,6 @@ import org.neo4j.graphalgo.impl.Traverse;
 import org.neo4j.graphalgo.impl.walking.WalkPath;
 import org.neo4j.graphalgo.impl.walking.WalkResult;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -45,16 +41,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class TraverseProc {
-
-    @Context
-    public GraphDatabaseAPI api;
-
-    @Context
-    public Log log;
-
-    @Context
-    public KernelTransaction transaction;
+public class TraverseProc extends LabsProc {
 
     @Procedure(name = "algo.bfs.stream", mode = READ)
     @Description("CALL algo.bfs.stream(label:String, relationshipType:String, startNodeId:long, direction:Direction, " +
@@ -66,7 +53,7 @@ public class TraverseProc {
             @Name(value = "startNodeId") long startNode,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
+        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername())
                 .setDirection(direction)
                 .setNodeLabelOrQuery(label)
                 .setRelationshipTypeOrQuery(relationship);
@@ -131,7 +118,7 @@ public class TraverseProc {
             @Name(value = "startNodeId") long startNode,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config)
+        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername())
                 .setDirection(direction)
                 .setNodeLabelOrQuery(label)
                 .setRelationshipTypeOrQuery(relationship);

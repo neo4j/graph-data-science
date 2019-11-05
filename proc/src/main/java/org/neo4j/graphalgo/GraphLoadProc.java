@@ -216,14 +216,14 @@ public final class GraphLoadProc extends BaseProc {
             final ProcedureConfiguration configuration;
             if (Boolean.TRUE.equals(degreeDistribution)) {
                 calculateDegreeDistribution = true;
-                configuration = ProcedureConfiguration.empty();
+                configuration = ProcedureConfiguration.create(getUsername());
             } else if (degreeDistribution instanceof Map) {
                 @SuppressWarnings("unchecked") Map<String, Object> config = (Map) degreeDistribution;
                 calculateDegreeDistribution = !config.isEmpty();
-                configuration = ProcedureConfiguration.create(config);
+                configuration = ProcedureConfiguration.create(config, getUsername());
             } else {
                 calculateDegreeDistribution = false;
-                configuration = ProcedureConfiguration.empty();
+                configuration = ProcedureConfiguration.create(getUsername());
             }
 
             if (calculateDegreeDistribution) {

@@ -34,10 +34,6 @@ import org.neo4j.graphalgo.results.AbstractResultBuilder;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -57,21 +53,12 @@ import static org.neo4j.procedure.Mode.READ;
  * The paths are written to the graph using new relationships named
  * by prefix + index.
  */
-public class KShortestPathsProc {
+public class KShortestPathsProc extends LabsProc {
 
     public static final String DEFAULT_TARGET_PROPERTY = "PATH_";
     public static final String PREFIX_IDENTIFIER = "writePropertyPrefix";
     public static final String REL_TYPE_PROPERTY_IDENTIFIER = "writeRelationshipTypeProperty";
     public static final String DEFAULT_RELATIONSHIP_PROPERTY = "weight";
-
-    @Context
-    public GraphDatabaseAPI api;
-
-    @Context
-    public Log log;
-
-    @Context
-    public KernelTransaction transaction;
 
     @Procedure(value = "algo.kShortestPaths", mode = Mode.WRITE)
     @Description("CALL algo.kShortestPaths(startNode:Node, endNode:Node, k:int, weightProperty:String" +
@@ -86,7 +73,7 @@ public class KShortestPathsProc {
             @Name(value = "config", defaultValue = "{}")
                     Map<String, Object> config) {
 
-        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
         final KspResult.Builder builder = new KspResult.Builder();
         final Graph graph;
         final YensKShortestPaths algorithm;
@@ -148,7 +135,7 @@ public class KShortestPathsProc {
             @Name(value = "config", defaultValue = "{}")
                     Map<String, Object> config) {
 
-        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        final ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
         final KspResult.Builder builder = new KspResult.Builder();
         final Graph graph;
         final YensKShortestPaths algorithm;

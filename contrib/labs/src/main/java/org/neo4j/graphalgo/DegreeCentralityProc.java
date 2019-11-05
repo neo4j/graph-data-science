@@ -33,10 +33,6 @@ import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphalgo.impl.results.CentralityScore;
 import org.neo4j.graphalgo.impl.utils.CentralityUtils;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -48,19 +44,10 @@ import java.util.stream.Stream;
 import static org.neo4j.graphalgo.core.ProcedureConstants.CYPHER_QUERY_KEY;
 import static org.neo4j.procedure.Mode.READ;
 
-public final class DegreeCentralityProc {
+public final class DegreeCentralityProc extends LabsProc {
 
     public static final String DEFAULT_SCORE_PROPERTY = "degree";
     public static final String CONFIG_WEIGHT_KEY = "weightProperty";
-
-    @Context
-    public GraphDatabaseAPI api;
-
-    @Context
-    public Log log;
-
-    @Context
-    public KernelTransaction transaction;
 
     @Procedure(value = "algo.degree", mode = Mode.WRITE)
     @Description("CALL algo.degree(label:String, relationship:String, " +
@@ -72,7 +59,7 @@ public final class DegreeCentralityProc {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
         final String weightPropertyKey = configuration.getString(CONFIG_WEIGHT_KEY, null);
 
         CentralityScore.Stats.Builder statsBuilder = new CentralityScore.Stats.Builder();
@@ -133,7 +120,7 @@ public final class DegreeCentralityProc {
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
 
         final String weightPropertyKey = configuration.getString(CONFIG_WEIGHT_KEY, null);
 

@@ -45,7 +45,7 @@ public class JaccardProc extends SimilarityProc {
     public Stream<SimilarityResult> similarityStream(
             @Name(value = "data", defaultValue = "null") List<Map<String,Object>> data,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
         CategoricalInput[] inputs = prepareCategories(data, getDegreeCutoff(configuration));
 
         if(inputs.length == 0) {
@@ -68,7 +68,7 @@ public class JaccardProc extends SimilarityProc {
     public Stream<SimilaritySummaryResult> jaccard(
             @Name(value = "data", defaultValue = "null") List<Map<String, Object>> data,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
         CategoricalInput[] inputs = prepareCategories(data, getDegreeCutoff(configuration));
 
         String writeRelationshipType = configuration.get("writeRelationshipType", "SIMILAR");

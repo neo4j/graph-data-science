@@ -91,7 +91,7 @@ public class SimilarityStreamGeneratorBenchmark {
 
     @Setup
     public void setup() {
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(MapUtil.map("concurrency", concurrency));
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(MapUtil.map("concurrency", concurrency), "");
         TerminationFlag terminationFlag = terminationFlag();
         streamGenerator = new SimilarityStreamGenerator<>(terminationFlag, configuration, () -> null, ALL_PAIRS_COMPUTER);
     }

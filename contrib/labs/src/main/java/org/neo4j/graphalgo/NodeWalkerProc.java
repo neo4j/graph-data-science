@@ -33,10 +33,6 @@ import org.neo4j.graphalgo.impl.walking.WalkResult;
 import org.neo4j.graphalgo.results.PageRankScore;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -52,17 +48,7 @@ import java.util.stream.Stream;
 import static org.neo4j.graphalgo.core.utils.ParallelUtil.parallelStream;
 import static org.neo4j.procedure.Mode.READ;
 
-public class NodeWalkerProc  {
-
-    @Context
-    public GraphDatabaseAPI api;
-
-    @Context
-    public Log log;
-
-    @Context
-    public KernelTransaction transaction;
-
+public class NodeWalkerProc extends LabsProc {
 
     @Procedure(name = "algo.randomWalk.stream", mode = READ)
     @Description("CALL algo.randomWalk.stream(start:null=all/[ids]/label, steps, walks, {graph: 'huge/cypher', nodeQuery:nodeLabel/query, relationshipQuery:relType/query, mode:random/node2vec, return:1.0, inOut:1.0, path:false/true concurrency:4, direction:'BOTH'}) " +
@@ -73,7 +59,7 @@ public class NodeWalkerProc  {
             @Name(value = "walks", defaultValue = "1") long walks,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        ProcedureConfiguration configuration = ProcedureConfiguration.create(config);
+        ProcedureConfiguration configuration = ProcedureConfiguration.create(config, getUsername());
 
         PageRankScore.Stats.Builder statsBuilder = new PageRankScore.Stats.Builder();
 

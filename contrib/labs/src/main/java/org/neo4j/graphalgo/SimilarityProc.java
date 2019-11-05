@@ -32,26 +32,33 @@ import org.neo4j.graphalgo.impl.results.ApproxSimilaritySummaryResult;
 import org.neo4j.graphalgo.impl.results.SimilarityExporter;
 import org.neo4j.graphalgo.impl.results.SimilarityResult;
 import org.neo4j.graphalgo.impl.results.SimilaritySummaryResult;
-import org.neo4j.graphalgo.impl.similarity.*;
+import org.neo4j.graphalgo.impl.similarity.CategoricalInput;
+import org.neo4j.graphalgo.impl.similarity.Computations;
+import org.neo4j.graphalgo.impl.similarity.NonRecordingSimilarityRecorder;
+import org.neo4j.graphalgo.impl.similarity.RecordingSimilarityRecorder;
+import org.neo4j.graphalgo.impl.similarity.RleDecoder;
+import org.neo4j.graphalgo.impl.similarity.SimilarityComputer;
+import org.neo4j.graphalgo.impl.similarity.SimilarityInput;
+import org.neo4j.graphalgo.impl.similarity.SimilarityRecorder;
+import org.neo4j.graphalgo.impl.similarity.SimilarityStreamGenerator;
+import org.neo4j.graphalgo.impl.similarity.TopKConsumer;
+import org.neo4j.graphalgo.impl.similarity.WeightedInput;
+import org.neo4j.graphalgo.impl.similarity.Weights;
 import org.neo4j.graphdb.Result;
-import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
-import org.neo4j.procedure.Context;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public class SimilarityProc {
-    @Context
-    public GraphDatabaseAPI api;
-    @Context
-    public Log log;
-    @Context
-    public KernelTransaction transaction;
+public class SimilarityProc extends LabsProc {
 
     protected static Stream<SimilarityResult> topN(Stream<SimilarityResult> stream, int topN) {
         if (topN == 0) {
