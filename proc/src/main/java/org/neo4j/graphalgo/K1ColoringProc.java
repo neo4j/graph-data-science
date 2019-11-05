@@ -91,7 +91,7 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
         setup.builder.withCommunityFunction(coloring.colors()::get);
 
         if (callContext.outputFields().anyMatch((field) -> field.equals(COLOR_COUNT_FIELD_NAME))) {
-            setup.builder.withColorCount(coloring.colorMap().size());
+            setup.builder.withColorCount(coloring.usedColors().cardinality());
         }
 
         Optional<String> writeProperty = setup.procedureConfig.getString(WRITE_PROPERTY_KEY);

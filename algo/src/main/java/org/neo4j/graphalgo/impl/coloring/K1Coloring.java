@@ -25,12 +25,12 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.LongStream;
 
 /**
  *<p>
@@ -74,7 +74,7 @@ public class K1Coloring extends Algorithm<K1Coloring> {
     private long ranIterations;
     private boolean didConverge;
 
-    private HugeLongLongMap colorMap;
+    private BitSet usedColors;
 
     public K1Coloring(
         Graph graph,
@@ -121,14 +121,15 @@ public class K1Coloring extends Algorithm<K1Coloring> {
         return didConverge;
     }
 
-    public HugeLongLongMap colorMap() {
-        if (colorMap == null) {
-            this.colorMap = new HugeLongLongMap(100, tracker);
-            for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
-                colorMap.addTo(colors.get(nodeId), 1L);
-            }
+    public BitSet usedColors() {
+        if (usedColors == null) {
+            this.usedColors = new BitSet(nodeCount);
+            ParallelUtil.parallelStreamConsume(
+                LongStream.range(0, nodeCount),
+                (stream) -> stream.forEach((nodeId) -> usedColors.set(colors.get(nodeId)))
+            );
         }
-        return colorMap;
+        return usedColors;
     }
 
     public HugeLongArray colors() {
