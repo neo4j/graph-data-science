@@ -23,7 +23,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
-import org.neo4j.graphalgo.core.loading.GraphLoadFactory;
+import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
@@ -55,7 +55,7 @@ class K1ColoringProcTest extends ProcTestBase {
     @AfterEach
     void tearDown() {
         db.shutdown();
-        GraphLoadFactory.removeAllLoadedGraphs();
+        GraphCatalog.removeAllLoadedGraphs();
     }
 
     @AllGraphNamesTest
