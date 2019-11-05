@@ -51,10 +51,10 @@ import static org.neo4j.graphdb.Direction.OUTGOING;
 public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilarity> {
 
     private static final String SIMILARITY_CUTOFF_KEY = "similarityCutoff";
-    private static final double SIMILARITY_CUTOFF_DEFAULT = -1.0;
+    private static final double SIMILARITY_CUTOFF_DEFAULT = 0.0;
 
-    private static final String DEGREE_CUTOFF_KEY = "degreeCutOff";
-    private static final int DEGREE_CUTOFF_DEFAULT = 0;
+    private static final String DEGREE_CUTOFF_KEY = "degreeCutoff";
+    private static final int DEGREE_CUTOFF_DEFAULT = 1;
 
     private static final String TOP_KEY = "top";
     private static final int TOP_DEFAULT = 0;
@@ -72,18 +72,18 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
 
     @Procedure(name = "algo.neighborhoodSimilarity.stream", mode = Mode.READ)
     @Description("CALL algo.neighborhoodSimilarity.stream(" +
-                 "labelPredicate, relationshipPredicate, {" +
+                 "nodeFilter, relationshipFilter, {" +
                  "  similarityCutoff: -1.0, degreeCutoff: 0, top: 0, topK: 0," +
                  "  graph: 'graph', direction: 'OUTGOING', concurrency: 4, readConcurrency: 4" +
                  "}) " +
                  "YIELD node1, node2, similarity - computes neighborhood similarities based on the Jaccard index")
     public Stream<SimilarityResult> stream(
-        @Name(value = "label", defaultValue = "") String label,
-        @Name(value = "relationship", defaultValue = "") String relationshipType,
+        @Name(value = "nodeFilter", defaultValue = "") String nodeFilter,
+        @Name(value = "relationshipFilter", defaultValue = "") String relationshipFilter,
         @Name(value = "config", defaultValue = "{}") Map<String, Object> config
     ) {
         AllocationTracker tracker = AllocationTracker.create();
-        ProcedureConfiguration configuration = newConfig(label, relationshipType, config);
+        ProcedureConfiguration configuration = newConfig(nodeFilter, relationshipFilter, config);
         Graph graph = loadGraph(configuration, tracker, new WriteResultBuilder());
 
         if (graph.isEmpty()) {
@@ -99,20 +99,20 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
 
     @Procedure(name = "algo.neighborhoodSimilarity", mode = Mode.WRITE)
     @Description("CALL algo.neighborhoodSimilarity(" +
-                 "labelPredicate, relationshipPredicate, {" +
+                 "nodeFilter, relationshipFilter, {" +
                  "  similarityCutoff: -1.0, degreeCutoff: 0, top: 0, topK: 0," +
                  "  graph: 'graph', direction: 'OUTGOING', concurrency: 4, readConcurrency: 4," +
                  "  write: 'true', writeRelationshipType: 'SIMILAR_TO', writeProperty: 'similarity', writeConcurrency: 4" +
                  "}) " +
                  "YIELD nodesCompared, relationships, write, writeRelationshipType, writeProperty - computes neighborhood similarities based on the Jaccard index")
     public Stream<NeighborhoodSimilarityResult> write(
-        @Name(value = "label", defaultValue = "") String label,
-        @Name(value = "relationship", defaultValue = "") String relationshipType,
+        @Name(value = "nodeFilter", defaultValue = "") String nodeFilter,
+        @Name(value = "relationshipFilter", defaultValue = "") String relationshipFilter,
         @Name(value = "config", defaultValue = "{}") Map<String, Object> config
     ) {
         WriteResultBuilder resultBuilder = new WriteResultBuilder();
         AllocationTracker tracker = AllocationTracker.create();
-        ProcedureConfiguration configuration = newConfig(label, relationshipType, config);
+        ProcedureConfiguration configuration = newConfig(nodeFilter, relationshipFilter, config);
         Graph graph = loadGraph(configuration, tracker, resultBuilder);
 
         String writeRelationshipType = configuration.get(WRITE_RELATIONSHIP_TYPE_KEY, WRITE_RELATIONSHIP_TYPE_DEFAULT);
@@ -160,11 +160,11 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
 
     @Procedure(value = "algo.neighborhoodSimilarity.memrec")
     public Stream<MemRecResult> memrec(
-        @Name(value = "label", defaultValue = "") String label,
-        @Name(value = "relationship", defaultValue = "") String relationshipType,
+        @Name(value = "nodeFilter", defaultValue = "") String nodeFilter,
+        @Name(value = "relationshipFilter", defaultValue = "") String relationshipFilter,
         @Name(value = "config", defaultValue = "{}") Map<String, Object> config
     ) {
-        ProcedureConfiguration configuration = newConfig(label, relationshipType, config);
+        ProcedureConfiguration configuration = newConfig(nodeFilter, relationshipFilter, config);
         MemoryTreeWithDimensions memoryEstimation = this.memoryEstimation(configuration);
         return Stream.of(new MemRecResult(memoryEstimation));
     }
@@ -199,12 +199,13 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
         // TODO: Should check if we are writing or streaming, but how to do that in memrec?
         boolean computesSimilarityGraph = true;
         enforceTopK(config);
+        // TODO: enforce degreeCutoff <= DEGREE_CUTOFF_DEFAULT
         return new NeighborhoodSimilarityFactory(
             new NeighborhoodSimilarity.Config(
-                config.get(SIMILARITY_CUTOFF_KEY, SIMILARITY_CUTOFF_DEFAULT),
-                config.get(DEGREE_CUTOFF_KEY, DEGREE_CUTOFF_DEFAULT),
-                config.get(TOP_KEY, TOP_DEFAULT),
-                config.get(TOP_K_KEY, TOP_K_DEFAULT),
+                config.getNumber(SIMILARITY_CUTOFF_KEY, SIMILARITY_CUTOFF_DEFAULT).doubleValue(),
+                config.getInt(DEGREE_CUTOFF_KEY, DEGREE_CUTOFF_DEFAULT),
+                config.getInt(TOP_KEY, TOP_DEFAULT),
+                config.getInt(TOP_K_KEY, TOP_K_DEFAULT),
                 config.getConcurrency(),
                 config.getBatchSize()
             ), computesSimilarityGraph
