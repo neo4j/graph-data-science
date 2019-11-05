@@ -40,10 +40,6 @@ import org.neo4j.graphalgo.impl.results.BetaLabelPropagationStats.LabelPropagati
 import org.neo4j.graphalgo.impl.results.BetaLabelPropagationStats.StreamResult;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -67,16 +63,6 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
     private static final String CONFIG_OLD_SEED_KEY = "partitionProperty";
     private static final Boolean DEFAULT_WRITE = Boolean.TRUE;
     private static final int DEFAULT_ITERATIONS = 10;
-
-    @SuppressWarnings("WeakerAccess")
-    @Context
-    public GraphDatabaseAPI dbAPI;
-
-    @Context
-    public Log log;
-
-    @Context
-    public KernelTransaction transaction;
 
     @Procedure(name = "algo.beta.labelPropagation", mode = Mode.WRITE)
     @Description("CALL algo.beta.labelPropagation(" +
@@ -308,7 +294,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
             if (writePropertyEqualsSeedProperty && hasSeedProperties) {
                 translator = new PropertyTranslator.OfLongIfChanged<>(seedProperties, HugeLongArray::get);
             }
-            Exporter.of(dbAPI, graph)
+            Exporter.of(api, graph)
                     .withLog(log)
                     .parallel(Pools.DEFAULT, concurrency, TerminationFlag.wrap(transaction))
                     .build()
