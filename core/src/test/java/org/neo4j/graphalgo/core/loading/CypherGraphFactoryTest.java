@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.huge.loader;
+package org.neo4j.graphalgo.core.loading;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Transaction;
@@ -43,8 +42,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 class CypherGraphFactoryTest {
 
-    private static final int COUNT = 10000;
-    private static final String QUERY = "UNWIND range(1, " + COUNT + ") AS id CREATE (n {id: id})-[:REL {prop: id % 10}]->(n)";
+    private static final int COUNT = 10_000;
+    private static final String DB_CYPHER = "UNWIND range(1, $count) AS id " +
+                                            "CREATE (n {id: id})-[:REL {prop: id % 10}]->(n)";
     private static final String SKIP_LIMIT = "WITH * SKIP $skip LIMIT $limit";
 
     private GraphDatabaseAPI db;
@@ -56,7 +56,7 @@ class CypherGraphFactoryTest {
     @BeforeEach
     void setUp() {
         db = TestDatabaseCreator.createTestDatabase();
-        db.execute(QUERY);
+        db.execute(DB_CYPHER, MapUtil.map("count", COUNT));
     }
 
     @AfterEach
@@ -69,10 +69,10 @@ class CypherGraphFactoryTest {
     void testLoadCypher() {
         db = TestDatabaseCreator.createTestDatabase();
 
-        db.execute(
-                "CREATE (n1 {partition: 6})-[:REL {prop:1}]->(n2 {foo: 4})-[:REL {prop: 2}]->(n3) " +
-                "CREATE (n1)-[:REL {prop: 3}]->(n3) " +
-                "RETURN id(n1) AS id1, id(n2) AS id2, id(n3) AS id3").accept(row -> {
+        String query = " CREATE (n1 {partition: 6})-[:REL {prop:1}]->(n2 {foo: 4})-[:REL {prop: 2}]->(n3)" +
+                       " CREATE (n1)-[:REL {prop: 3}]->(n3)"+
+                       " RETURN id(n1) AS id1, id(n2) AS id2, id(n3) AS id3";
+        db.execute(query).accept( row -> {
             id1 = row.getNumber("id1").intValue();
             id2 = row.getNumber("id2").intValue();
             id3 = row.getNumber("id3").intValue();
@@ -80,7 +80,6 @@ class CypherGraphFactoryTest {
         });
         String nodes = "MATCH (n) RETURN id(n) AS id, n.partition AS partition, n.foo AS foo";
         String rels = "MATCH (n)-[r]->(m) WHERE type(r) = $rel RETURN id(n) AS source, id(m) AS target, r.prop AS weight ORDER BY id(r) DESC ";
-
 
         Graph graph;
         try (Transaction tx = db.beginTx()) {
