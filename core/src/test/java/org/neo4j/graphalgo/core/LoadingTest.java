@@ -17,17 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.huge;
+package org.neo4j.graphalgo.core;
 
 import com.carrotsearch.hppc.LongArrayList;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -39,42 +37,39 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 final class LoadingTest {
 
-    private static GraphDatabaseAPI DB;
+    public static final String DB_CYPHER =
+        "CREATE " +
+        "  (a:Node {name:'a'})" +
+        ", (b:Node {name:'b'})" +
+        ", (c:Node {name:'c'})" +
+        ", (d:Node2 {name:'d'})" +
+        ", (e:Node2 {name:'e'})" +
+        ", (a)-[:TYPE {prop:1}]->(b)" +
+        ", (e)-[:TYPE {prop:2}]->(d)" +
+        ", (d)-[:TYPE {prop:3}]->(c)" +
+        ", (a)-[:TYPE {prop:4}]->(c)" +
+        ", (a)-[:TYPE {prop:5}]->(d)" +
+        ", (a)-[:TYPE2 {prop:6}]->(d)" +
+        ", (b)-[:TYPE2 {prop:7}]->(e)" +
+        ", (a)-[:TYPE2 {prop:8}]->(e)";
 
-    @BeforeAll
-    static void setupGraphDb() {
-        DB = TestDatabaseCreator.createTestDatabase();
+    private GraphDatabaseAPI db;
+
+    @BeforeEach
+    void setupGraphDb() {
+        db = TestDatabaseCreator.createTestDatabase();
+        db.execute(DB_CYPHER);
     }
 
     @AfterEach
     void clearDb() {
-        DB.execute("MATCH (n) DETACH DELETE n");
-    }
-
-    @AfterAll
-    static void shutdownGraphDb() {
-        if (DB != null) DB.shutdown();
+        db.shutdown();
     }
 
     @AllGraphTypesWithoutCypherTest
     void testBasicLoading(Class<? extends GraphFactory> graphFactory) {
-        DB.execute("CREATE (a:Node {name:'a'})\n" +
-                   "CREATE (b:Node {name:'b'})\n" +
-                   "CREATE (c:Node {name:'c'})\n" +
-                   "CREATE (d:Node2 {name:'d'})\n" +
-                   "CREATE (e:Node2 {name:'e'})\n" +
 
-                   "CREATE" +
-                   " (a)-[:TYPE {prop:1}]->(b),\n" +
-                   " (e)-[:TYPE {prop:2}]->(d),\n" +
-                   " (d)-[:TYPE {prop:3}]->(c),\n" +
-                   " (a)-[:TYPE {prop:4}]->(c),\n" +
-                   " (a)-[:TYPE {prop:5}]->(d),\n" +
-                   " (a)-[:TYPE2 {prop:6}]->(d),\n" +
-                   " (b)-[:TYPE2 {prop:7}]->(e),\n" +
-                   " (a)-[:TYPE2 {prop:8}]->(e)");
-
-        final Graph graph = new GraphLoader(DB)
+        Graph graph = new GraphLoader(db)
                 .withDirection(Direction.OUTGOING)
                 .withExecutorService(Pools.DEFAULT)
                 .withLabel("Node")
