@@ -66,7 +66,6 @@ public class GraphLoader {
             GraphSetup.class);
 
     private String username = null;
-
     private String name = null;
     private String label = null;
     private String relation = null;
