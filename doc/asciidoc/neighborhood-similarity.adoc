@@ -1,0 +1,382 @@
+[[algorithms-neighborhood-similarity]]
+= The Neighborhood Similarity algorithm
+
+[abstract]
+--
+This section describes the Neighborhood Similarity (NHS) algorithm in the Neo4j Graph Algorithms library.
+--
+
+This topic includes:
+
+* <<algorithms-neighborhood-similarity-intro, Introduction>>
+* <<algorithms-neighborhood-similarity-syntax, Syntax>>
+* <<algorithms-neighborhood-similarity-examples, Examples>>
+
+
+[[algorithms-neighborhood-similarity-intro]]
+== Introduction
+
+The Neighborhood Similarity algorithm compares a set of nodes based on the nodes they are connected to.
+Two nodes are considered to be similar if they share many of the same neighbors.
+Neighborhood Similarity computes pair-wise similarities based on the Jaccard metric.
+
+The input of this algorithm is a biparite, connected graph.
+All nodes from the first node set are compared based on their relationships to the second node set.
+The output of the algorithm are new relationships between pairs of the first node set.
+Similarity scores are expressed via relationship properties.
+
+For more information on this algorithm, see:
+
+// TODO: find other places than Wikipedia
+
+* https://en.wikipedia.org/wiki/Similarity_(network_science)#Structural_equivalence[Structural equivalence (Wikipedia)]
+* https://en.wikipedia.org/wiki/Jaccard_index[The Jaccard index (Wikipedia)].
+* https://en.wikipedia.org/wiki/Bipartite_graph[Biparite graphs (Wikipedia)]
+
+[NOTE]
+====
+Running this algorithm requires sufficient memory availability (quadratic growth).
+Before running this algorithm, we recommend that you read <<memory-requirements>>.
+====
+
+
+[[algorithms-neighborhood-similarity-syntax]]
+== Syntax
+
+.The following describes the API for running the algorithm and writing results back to Neo4j:
+[source, cypher]
+----
+CALL algo.beta.nhs.jaccard(nodeFilter: STRING, relationshipFilter: STRING, {
+  write: BOOLEAN,
+  writeProperty: STRING
+  // additional configuration
+})
+YIELD nodesCompared, relationships, write, writeRelationshipType, writeProperty
+----
+
+.Parameters
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name         | Type    | Default | Optional | Description
+| node label   | string  | null    | yes      | The node label to load from the graph. If null, load all nodes.
+| relationship | string  | null    | yes      | The relationship type to load from the graph. If null, load all relationships.
+| config       | map     | {}      | yes      | Additional configuration, see below.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name                  | Type    | Default                | Optional | Description
+| graph                 | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with node label and relationship type parameters. Use 'cypher' for describing the subset using Cypher queries for nodes and relationships.
+| concurrency           | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
+| readConcurrency       | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency      | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
+| write                 | boolean | true                   | yes      | Specifies if the result should be written back as a node property.
+| writeRelationshipType | string  | SIMILAR                | yes      | The relationship type used to represent a similarity score.
+| writeProperty         | string  | 'score'                | yes      | The relationship property that stores the similary score.
+| similarityCutoff      | float   | 0.0                    | yes      | Lower limit for the similarity score to be present in the result.
+| degreeCutoff          | int     | 1                      | yes      | Lower limit on the node degree for a node to be considered in the comparisons. This value can not be lower than 1.
+| top                   | int     | 0                      | yes      | Global limit on the number of scores computed. If positive, the result is ordered descending, otherwise ascending.
+| topK                  | int     | 10                     | yes      | Limit on the number of scores computed per node. If positive, the result is ordered descending, otherwise ascending. This value can not be 0.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type    | Description
+| nodesCompared         | int     | The number of nodes compared.
+| relationships         | int     | The number of relationships created.
+| write                 | boolean | Specifies if the result was written back as a node property.
+| writeRelationshipType | string  | The relationship type used to represent a similarity score.
+| writeProperty         | string  | The relationship property that stores the similary score.
+| loadMillis            | int     | Milliseconds for loading data.
+| computeMillis         | int     | Milliseconds for running the algorithm.
+| writeMillis           | int     | Milliseconds for writing result data back.
+| postProcessingMillis  | int     | Milliseconds for computing percentiles and community count.
+// TODO: uncomment when histogram is implemented
+//| min                   | double  | The minimum similarity score computed.
+//| max                   | double  | The maximum similarity score computed.
+//| mean                  | double  | The mean of similarities scores computed.
+//| stdDev                | double  | The standard deviation of similarities scores computed.
+//| p1                    | double  | The 1 percentile of similarity scores computed.
+//| p5                    | double  | The 5 percentile of similarity scores computed.
+//| p10                   | double  | The 10 percentile of similarity scores computed.
+//| p25                   | double  | The 25 percentile of similarity scores computed.
+//| p50                   | double  | The 50 percentile of similarity scores computed.
+//| p75                   | double  | The 75 percentile of similarity scores computed.
+//| p90                   | double  | The 90 percentile of similarity scores computed.
+//| p95                   | double  | The 95 percentile of similarity scores computed.
+//| p99                   | double  | The 99 percentile of similarity scores computed.
+//| p100                  | double  | The 100 percentile of similarity scores computed.
+|===
+
+[[algorithms-neighborhood-similarity-syntax-stream]]
+.The following describes the API for running the algorithm and streaming results:
+[source, cypher]
+----
+CALL algo.beta.nhs.jaccard.stream(nodeFilter: STRING, relationshipFilter: STRING, {
+  // configuration
+})
+YIELD node1, node2, similarity
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type    | Default      | Optional | Description
+| node label        | string  | null         | yes      | The node label to load from the graph. If null, load all nodes.
+| relationship type | string  | null         | yes      | The relationship type to load from the graph. If null, load all relationships.
+| config            | map     | {}           | yes      | Additional configuration, see below.
+|===
+
+.Configuration
+[opts="header",cols="1m,1,1,1,4"]
+|===
+| Name              | Type    | Default                | Optional | Description
+| graph             | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with node label and relationship type parameters. Use 'cypher' for describing the subset using Cypher queries for nodes and relationships.
+| concurrency       | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
+| readConcurrency   | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| similarityCutoff  | float   | 0.0                    | yes      | Lower limit for the similarity score to be present in the result.
+| degreeCutoff      | int     | 1                      | yes      | Lower limit on the node degree for a node to be considered in the comparisons. This value can not be lower than 1.
+| top               | int     | 0                      | yes      | Global limit on the number of scores computed. If positive, the result is ordered descending, otherwise ascending.
+| topK              | int     | 10                     | yes      | Limit on the number of scores computed per node. If positive, the result is ordered descending, otherwise ascending. This value can not be 0.
+|===
+
+.Results
+[opts="header",cols="1m,1,6"]
+|===
+| Name          | Type     | Description
+| node1         | int      | Node ID
+| node2         | int      | Node ID
+| similarity    | double   | Similarity score
+|===
+
+
+[[algorithms-neighborhood-similarity-examples]]
+== Examples
+
+Consider the graph created by the following Cypher statement:
+
+[source, cypher]
+----
+CREATE (alice:Person {name: 'Alice'})
+CREATE (bob:Person {name: 'Bob'})
+CREATE (carol:Person {name: 'Carol'})
+CREATE (dave:Person {name: 'Dave'})
+CREATE (eve:Person {name: 'Eve'})
+CREATE (guitar:Instrument {name: 'Guitar'})
+CREATE (synth:Instrument {name: 'Synthesizer'})
+CREATE (bongos:Instrument {name: 'Bongos'})
+CREATE (trumpet:Instrument {name: 'Trumpet'})
+
+CREATE (alice)-[:LIKES]->(guitar)
+CREATE (alice)-[:LIKES]->(synth)
+CREATE (alice)-[:LIKES]->(bongos)
+CREATE (bob)-[:LIKES]->(guitar)
+CREATE (bob)-[:LIKES]->(synth)
+CREATE (carol)-[:LIKES]->(bongos)
+CREATE (dave)-[:LIKES]->(guitar)
+CREATE (dave)-[:LIKES]->(synth)
+CREATE (dave)-[:LIKES]->(bongos);
+----
+
+This bipartite graph has two node sets, Person nodes and Instrument nodes.
+The two node sets are connected via LIKES relationships.
+Each relationship starts at a Person node and ends at an Instrument node.
+
+In the example, we want to use NHS to compare persons based on the instruments they like.
+
+The NHS algorithm will only compute similarity for nodes that have a degree of at least 1.
+In the example graph, the Eve node will not be compared to other Person nodes.
+
+The graph is bipartite, but the library does not support loading multiple node labels.
+In order to load both node sets, Persons and Instruments, we need to pass an empty node filter.
+
+[NOTE]
+====
+Loading a graph with an empty node filter means all the nodes in the Neo4j graph are loaded.
+To circumvent this, an common node label like 'Node' can be added to Person and Instrument nodes.
+====
+
+
+=== Streaming results
+
+.The following will load the graph, run the algorithm, and stream results:
+[source, cypher]
+----
+CALL algo.beta.nhs.jaccard.stream('', 'LIKES', {
+  graph: 'huge',
+  direction: 'OUTGOING'
+})
+YIELD node1, node2, similarity
+RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity
+ORDER BY similarity DESCENDING, Person1, Person2
+----
+
+.Results
+[opts="header"]
+|===
+| Person1 | Person2 | similarity
+| "Alice" | "Dave"  | 1.0
+| "Dave"  | "Alice" | 1.0
+| "Alice" | "Bob"   | 0.6666666666666666
+| "Bob"   | "Alice" | 0.6666666666666666
+| "Bob"   | "Dave"  | 0.6666666666666666
+| "Dave"  | "Bob"   | 0.6666666666666666
+| "Alice" | "Carol" | 0.3333333333333333
+| "Carol" | "Alice" | 0.3333333333333333
+| "Carol" | "Dave"  | 0.3333333333333333
+| "Dave"  | "Carol" | 0.3333333333333333
+| "Bob"   | "Carol" | 0.0
+| "Carol" | "Bob"   | 0.0
+3+|12 rows
+|===
+
+We use default values for the procedure configuration parameter.
+TopK is set to 10, top is set to 0.
+Because of that the result set contains the top 10 similarity scores for each node.
+
+
+=== Writing results
+
+To instead write the similarity results back to the graph in Neo4j, use the following query.
+Each result is written as a relationship between the compared nodes.
+The similarity score is written as a property on the relationship.
+
+.The following will load the graph, run the algorithm, and write back results:
+[source, cypher]
+----
+CALL algo.beta.nhs.jaccard('', 'LIKES', {
+  graph: 'huge',
+  direction: 'OUTGOING',
+  write: true
+})
+YIELD nodesCompared, relationships, write, writeProperty, writeRelationshipType;
+----
+
+.Results
+[opts="header"]
+|===
+| nodesCompared | relationships | write | writeProperty | writeRelationshipType
+| 4             | 12            | true  | "score"       | "SIMILAR"
+|===
+
+As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.
+
+
+=== Top and topK
+
+Top is a global limit on the number of similarity scores computed.
+If the given value is positive, the results are ordered descending.
+If a negative value is used, the results are ordered ascending.
+A value of 0 means that all results are computed and returned in any order.
+
+.The following will load the graph, run the algorithm, and stream the top 3 results:
+[source, cypher]
+----
+CALL algo.beta.nhs.jaccard.stream('', 'LIKES', {
+  graph: 'huge',
+  direction: 'OUTGOING',
+  top: 3
+})
+YIELD node1, node2, similarity
+RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity
+----
+
+.Results
+[opts="header"]
+|===
+| Person1 | Person2 | similarity
+| "Alice" | "Dave"  | 1.0
+| "Dave"  | "Alice" | 1.0
+| "Alice" | "Bob"   | 0.6666666666666666
+3+|3 rows
+|===
+
+TopK is a limit on the number of scores computed per node.
+If the given value is positive, the results per node are ordered descending.
+If a negative value is used, the results are ordered ascending.
+// TopK cannot be 0.
+
+.The following will load the graph, run the algorithm, and stream the top 1 result per node:
+[source, cypher]
+----
+CALL algo.beta.nhs.jaccard.stream('', 'LIKES', {
+  graph: 'huge',
+  direction: 'OUTGOING',
+  topK: 1
+})
+YIELD node1, node2, similarity
+RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity
+ORDER BY Person1
+----
+
+.Results
+[opts="header"]
+|===
+| Person1 | Person2 | similarity
+| "Alice" | "Dave"  | 1.0
+| "Bob"   | "Alice" | 0.6666666666666666
+| "Carol" | "Alice" | 0.3333333333333333
+| "Dave"  | "Alice" | 1.0
+3+|4 rows
+|===
+
+
+=== Degree cutoff and similarity cutoff
+
+Degree cutoff is a lower limit on the node degree for a node to be considered in the comparisons.
+This value can not be lower than 1.
+
+.The following will ignore nodes with less than 3 LIKES relationships:
+[source, cypher]
+----
+CALL algo.beta.nhs.jaccard.stream('', 'LIKES', {
+  graph: 'huge',
+  direction: 'OUTGOING',
+  degreeCutOff: 3
+})
+YIELD node1, node2, similarity
+RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity
+ORDER BY Person1
+----
+
+.Results
+[opts="header"]
+|===
+| Person1 | Person2 | similarity
+| "Alice" | "Dave"  | 1.0
+| "Dave"  | "Alice" | 1.0
+3+|2 rows
+|===
+
+Similarity cutoff is a lower limit for the similarity score to be present in the result.
+
+.The following will ignore node pairs with a similarty score less than 0.5:
+[source, cypher]
+----
+CALL algo.beta.nhs.jaccard.stream('', 'LIKES', {
+  graph: 'huge',
+  direction: 'OUTGOING',
+  similarityCutoff: 0.5
+})
+YIELD node1, node2, similarity
+RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity
+ORDER BY Person1
+----
+
+.Results
+[opts="header"]
+|===
+| Person1 | Person2 | similarity
+| "Alice" | "Dave"  | 1.0
+| "Alice" | "Bob"   | 0.6666666666666666
+| "Bob"   | "Dave"  | 0.6666666666666666
+| "Bob"   | "Alice" | 0.6666666666666666
+| "Dave"  | "Alice" | 1.0
+| "Dave"  | "Bob"   | 0.6666666666666666
+3+|6 rows
+|===
+
+
+

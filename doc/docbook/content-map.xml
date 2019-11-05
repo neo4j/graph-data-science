@@ -34,6 +34,10 @@
             <d:tocentry linkend="algorithms-wcc"><?dbhtml filename="algorithms/wcc/index.html"?>
             </d:tocentry>
         </d:tocentry>
+        <d:tocentry linkend="algorithms-graph-similarity"><?dbhtml filename="algorithms/graph-similarity/index.html"?>
+            <d:tocentry linkend="algorithms-neighborhood-similarity"><?dbhtml filename="algorithms/neighborhood-similarity/index.html"?>
+            </d:tocentry>
+        </d:tocentry>
 
         <d:tocentry linkend="labs-algorithms"><?dbhtml filename="labs-algorithms/index.html"?>
             <d:tocentry linkend="labs-procedures"><?dbhtml filename="labs-procedures/index.html"?>
