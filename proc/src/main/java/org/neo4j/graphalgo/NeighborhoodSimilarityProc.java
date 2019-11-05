@@ -70,8 +70,8 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
 
     private static final Direction COMPUTE_DIRECTION_DEFAULT = OUTGOING;
 
-    @Procedure(name = "algo.beta.nhs.jaccard.stream", mode = Mode.READ)
-    @Description("CALL algo.beta.nhs.jaccard.stream(" +
+    @Procedure(name = "algo.beta.jaccard.stream", mode = Mode.READ)
+    @Description("CALL algo.beta.jaccard.stream(" +
                  "nodeFilter, relationshipFilter, {" +
                  "  similarityCutoff: 0.0, degreeCutoff: 0, top: 0, topK: 10," +
                  "  graph: 'graph', direction: 'OUTGOING', concurrency: 4, readConcurrency: 4" +
@@ -97,8 +97,8 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
         return neighborhoodSimilarity.computeToStream(direction);
     }
 
-    @Procedure(name = "algo.beta.nhs.jaccard", mode = Mode.WRITE)
-    @Description("CALL algo.beta.nhs.jaccard(" +
+    @Procedure(name = "algo.beta.jaccard", mode = Mode.WRITE)
+    @Description("CALL algo.beta.jaccard(" +
                  "nodeFilter, relationshipFilter, {" +
                  "  similarityCutoff: 0.0, degreeCutoff: 0, top: 0, topK: 10," +
                  "  graph: 'graph', direction: 'OUTGOING', concurrency: 4, readConcurrency: 4," +
@@ -158,7 +158,7 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
         return Stream.of(resultBuilder.build());
     }
 
-    @Procedure(value = "algo.beta.nhs.jaccard.memrec")
+    @Procedure(value = "algo.beta.jaccard.memrec")
     public Stream<MemRecResult> memrec(
         @Name(value = "nodeFilter", defaultValue = "") String nodeFilter,
         @Name(value = "relationshipFilter", defaultValue = "") String relationshipFilter,

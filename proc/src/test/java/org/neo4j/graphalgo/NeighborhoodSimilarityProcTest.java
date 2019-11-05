@@ -121,7 +121,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
     @ParameterizedTest(name = "{0} -- {1}")
     @MethodSource("allGraphNamesWithIncomingOutgoing")
     void shouldStreamResults(String graphImpl, Direction direction) {
-        String query = "CALL algo.beta.nhs.jaccard.stream(" +
+        String query = "CALL algo.beta.jaccard.stream(" +
                        "    '', 'LIKES', {" +
                        "        graph: $graph," +
                        "        direction: $direction" +
@@ -149,7 +149,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
     @MethodSource("allGraphNamesWithIncomingOutgoing")
     void shouldStreamTopResults(String graphImpl, Direction direction) {
         int top = 2;
-        String query = "CALL algo.beta.nhs.jaccard.stream(" +
+        String query = "CALL algo.beta.jaccard.stream(" +
                        "    '', 'LIKES', {" +
                        "        graph: $graph," +
                        "        direction: $direction," +
@@ -177,7 +177,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
     @ParameterizedTest(name = "{0} -- {1}")
     @MethodSource("allGraphNamesWithIncomingOutgoing")
     void shouldWriteResults(String graphImpl, Direction direction) throws KernelException {
-        String query = "CALL algo.beta.nhs.jaccard(" +
+        String query = "CALL algo.beta.jaccard(" +
                        "    '', 'LIKES', {" +
                        "        graph: $graph," +
                        "        direction: $direction" +
