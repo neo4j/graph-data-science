@@ -1,7 +1,7 @@
 description = 'Neo4j Graph Algorithms :: Tests'
 
 dependencies {
-    compile project(':algo')
+    compile project(':algo-common')
     compile project(':labs')
     
     testCompile project(':test-utils')
