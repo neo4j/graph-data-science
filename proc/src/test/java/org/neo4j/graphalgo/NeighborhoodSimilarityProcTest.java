@@ -27,16 +27,19 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.loading.GraphLoadFactory;
-import org.neo4j.graphalgo.core.utils.ExceptionUtil;
+import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.impl.jaccard.NeighborhoodSimilarity;
 import org.neo4j.graphalgo.impl.jaccard.SimilarityResult;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -244,22 +247,60 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
 
     @Test
     void shouldThrowIfTopKSetToZero() {
-        String query = "CALL algo.beta.nhs.jaccard(" +
-                       "    '', 'LIKES', {" +
-                       "        direction: 'OUTGOING'," +
-                       "        topK: 0," +
-                       "        write: true," +
-                       "        writeRelationshipType: 'SIMILAR_TO'," +
-                       "        writeProperty: 'score'" +
-                       "    }" +
-                       ") YIELD nodesCompared, relationships, write, writeRelationshipType, writeProperty";
+        Map<String, Object> input = MapUtil.map("topK", 0L);
+        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(input);
 
-        QueryExecutionException exception = assertThrows(
-            QueryExecutionException.class,
-            () -> db.execute(query).next()
+        IllegalArgumentException illegalArgumentException = assertThrows(
+            IllegalArgumentException.class,
+            () -> new NeighborhoodSimilarityProc().config(procedureConfiguration)
         );
-
-        assertThat(ExceptionUtil.rootCause(exception).getMessage(), is("Must set non-zero topk value"));
+        assertThat(illegalArgumentException.getMessage(), is("Must set non-zero topk value"));
     }
 
+    @Test
+    void shouldThrowIfDegreeCutoffSetToZero() {
+        Map<String, Object> input = MapUtil.map("degreeCutoff", 0L);
+        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(input);
+
+        IllegalArgumentException illegalArgumentException = assertThrows(
+            IllegalArgumentException.class,
+            () -> new NeighborhoodSimilarityProc().config(procedureConfiguration)
+        );
+        assertThat(illegalArgumentException.getMessage(), is("Must set degree cutoff to 1 or greater"));
+    }
+
+    @Test
+    void shouldCreateValidDefaultAlgoConfig() {
+        Map<String, Object> input = MapUtil.map();
+        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(input);
+        NeighborhoodSimilarity.Config config = new NeighborhoodSimilarityProc().config(procedureConfiguration);
+
+        assertEquals(10, config.topk());
+        assertEquals(0, config.top());
+        assertEquals(1, config.degreeCutoff());
+        assertEquals(0.0, config.similarityCutoff());
+        assertEquals(Pools.DEFAULT_CONCURRENCY, config.concurrency());
+        assertEquals(ParallelUtil.DEFAULT_BATCH_SIZE, config.minBatchSize());
+    }
+
+    @Test
+    void shouldCreateValidCustomAlgoConfig() {
+        Map<String, Object> input = MapUtil.map(
+            "topK", 100,
+            "top", 1000,
+            "degreeCutoff", 42,
+            "similarityCutoff", 0.23,
+            "concurrency", 1,
+            "batchSize", 100_000
+        );
+        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(input);
+        NeighborhoodSimilarity.Config config = new NeighborhoodSimilarityProc().config(procedureConfiguration);
+
+        assertEquals(100, config.topk());
+        assertEquals(1000, config.top());
+        assertEquals(42, config.degreeCutoff());
+        assertEquals(0.23, config.similarityCutoff());
+        assertEquals(1, config.concurrency());
+        assertEquals(100_000, config.minBatchSize());
+    }
 }

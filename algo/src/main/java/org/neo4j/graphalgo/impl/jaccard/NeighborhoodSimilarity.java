@@ -235,14 +235,29 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
             this.minBatchSize = minBatchSize;
         }
 
-        int topk() {
+        public int topk() {
             return topk;
         }
 
-        int top() {
+        public int top() {
             return top;
         }
 
+        public double similarityCutoff() {
+            return similarityCutoff;
+        }
+
+        public double degreeCutoff() {
+            return degreeCutoff;
+        }
+
+        public int concurrency() {
+            return concurrency;
+        }
+
+        public int minBatchSize() {
+            return minBatchSize;
+        }
     }
 
 }

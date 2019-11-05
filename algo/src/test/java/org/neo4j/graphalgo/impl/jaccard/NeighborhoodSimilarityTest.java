@@ -64,7 +64,6 @@ import static org.neo4j.graphdb.Direction.OUTGOING;
 
 final class NeighborhoodSimilarityTest {
 
-    // TODO: maybe create random graph similar to JaccardProcTest#buildRandomDB
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a:Person {name: 'Alice'})" +

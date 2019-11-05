@@ -198,24 +198,38 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
     protected AlgorithmFactory<NeighborhoodSimilarity> algorithmFactory(ProcedureConfiguration config) {
         // TODO: Should check if we are writing or streaming, but how to do that in memrec?
         boolean computesSimilarityGraph = true;
-        enforceTopK(config);
-        // TODO: enforce degreeCutoff <= DEGREE_CUTOFF_DEFAULT
         return new NeighborhoodSimilarityFactory(
-            new NeighborhoodSimilarity.Config(
-                config.getNumber(SIMILARITY_CUTOFF_KEY, SIMILARITY_CUTOFF_DEFAULT).doubleValue(),
-                config.getInt(DEGREE_CUTOFF_KEY, DEGREE_CUTOFF_DEFAULT),
-                config.getInt(TOP_KEY, TOP_DEFAULT),
-                config.getInt(TOP_K_KEY, TOP_K_DEFAULT),
-                config.getConcurrency(),
-                config.getBatchSize()
-            ), computesSimilarityGraph
+            config(config),
+            computesSimilarityGraph
         );
     }
 
-    private void enforceTopK(ProcedureConfiguration config) {
-        if (config.getInt(TOP_K_KEY, TOP_K_DEFAULT) == 0) {
+    NeighborhoodSimilarity.Config config(ProcedureConfiguration procedureConfiguration) {
+        int topK = validTopK(procedureConfiguration);
+        int degreeCutoff = validDegreeCutoff(procedureConfiguration);
+        double similarityCutoff = procedureConfiguration
+            .getNumber(SIMILARITY_CUTOFF_KEY, SIMILARITY_CUTOFF_DEFAULT)
+            .doubleValue();
+        int top = procedureConfiguration.getInt(TOP_KEY, TOP_DEFAULT);
+        int concurrency = procedureConfiguration.getConcurrency();
+        int batchSize = procedureConfiguration.getBatchSize();
+        return new NeighborhoodSimilarity.Config(similarityCutoff, degreeCutoff, top, topK, concurrency, batchSize);
+    }
+
+    private int validTopK(ProcedureConfiguration config) {
+        int topK = config.getInt(TOP_K_KEY, TOP_K_DEFAULT);
+        if (topK == 0) {
             throw new IllegalArgumentException("Must set non-zero topk value");
         }
+        return topK;
+    }
+
+    private int validDegreeCutoff(ProcedureConfiguration config) {
+        int degreeCutoff = config.getInt(DEGREE_CUTOFF_KEY, DEGREE_CUTOFF_DEFAULT);
+        if (degreeCutoff < 1) {
+            throw new IllegalArgumentException("Must set degree cutoff to 1 or greater");
+        }
+        return degreeCutoff;
     }
 
     public static class NeighborhoodSimilarityResult {
