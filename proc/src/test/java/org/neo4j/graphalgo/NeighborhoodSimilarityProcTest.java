@@ -28,7 +28,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
-import org.neo4j.graphalgo.core.loading.GraphLoadFactory;
+import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.impl.jaccard.NeighborhoodSimilarity;
@@ -110,7 +110,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
     void setup() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase();
         db.execute(DB_CYPHER);
-        registerProcedures(db, NeighborhoodSimilarityProc.class);
+        registerProcedures(NeighborhoodSimilarityProc.class);
     }
 
     @AfterEach
@@ -198,7 +198,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
         String resultGraphName = "simGraph_" + direction.name();
         String loadQuery = "CALL algo.graph.load($resultGraphName, $label, 'SIMILAR', {nodeProperties: 'id', relationshipProperties: 'score', direction: $direction})";
         db.execute(loadQuery, MapUtil.map("resultGraphName", resultGraphName, "label", direction == INCOMING ? "Item" : "Person", "direction", direction.name()));
-        Graph simGraph = GraphLoadFactory.getUnion(resultGraphName);
+        Graph simGraph = GraphCatalog.getUnion(getUsername(), resultGraphName);
         assertGraphEquals(direction == INCOMING
             ? fromGdl(
                 String.format(
@@ -248,7 +248,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
     @Test
     void shouldThrowIfTopKSetToZero() {
         Map<String, Object> input = MapUtil.map("topK", 0L);
-        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(input);
+        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(input, getUsername());
 
         IllegalArgumentException illegalArgumentException = assertThrows(
             IllegalArgumentException.class,
@@ -260,7 +260,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
     @Test
     void shouldThrowIfDegreeCutoffSetToZero() {
         Map<String, Object> input = MapUtil.map("degreeCutoff", 0L);
-        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(input);
+        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(input, getUsername());
 
         IllegalArgumentException illegalArgumentException = assertThrows(
             IllegalArgumentException.class,
@@ -272,7 +272,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
     @Test
     void shouldCreateValidDefaultAlgoConfig() {
         Map<String, Object> input = MapUtil.map();
-        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(input);
+        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(input, getUsername());
         NeighborhoodSimilarity.Config config = new NeighborhoodSimilarityProc().config(procedureConfiguration);
 
         assertEquals(10, config.topk());
@@ -293,7 +293,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
             "concurrency", 1,
             "batchSize", 100_000
         );
-        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(input);
+        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(input, getUsername());
         NeighborhoodSimilarity.Config config = new NeighborhoodSimilarityProc().config(procedureConfiguration);
 
         assertEquals(100, config.topk());
