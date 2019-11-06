@@ -138,8 +138,7 @@ class InfoMapIntTest {
     }
 
     @Test
-    void testPredefinedPageRankStream() {
-
+    void testPredefinedArticleRankStream() {
 
         db.execute("CALL algo.articleRank('Node', 'TYPE', {writeProperty:'p', iterations:1}) YIELD nodes").close();
 
