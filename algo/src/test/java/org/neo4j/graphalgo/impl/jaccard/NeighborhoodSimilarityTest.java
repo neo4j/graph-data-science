@@ -25,18 +25,17 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.loading.GraphLoadFactory;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
@@ -50,6 +49,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -159,13 +159,16 @@ final class NeighborhoodSimilarityTest {
         db.shutdown();
     }
 
-    @ParameterizedTest
-    @CsvSource({
-        "OUTGOING, OUTGOING",
-        "BOTH, OUTGOING",
-        "INCOMING, INCOMING",
-        "BOTH, INCOMING"
-    })
+    static Stream<Arguments> supportedLoadAndComputeDirections() {
+        return Stream.of(
+            Arguments.of("OUTGOING", "OUTGOING"),
+            Arguments.of("BOTH", "OUTGOING"),
+            Arguments.of("INCOMING", "INCOMING"),
+            Arguments.of("BOTH", "INCOMING")
+            );
+    }
+    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}")
+    @MethodSource("supportedLoadAndComputeDirections")
     void shouldComputeForSupportedDirections(Direction loadDirection, Direction algoDirection) {
         Graph graph = new GraphLoader(db)
             .withAnyLabel()
@@ -187,13 +190,8 @@ final class NeighborhoodSimilarityTest {
         assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING : EXPECTED_OUTGOING, result);
     }
 
-    @ParameterizedTest
-    @CsvSource({
-        "OUTGOING, OUTGOING",
-        "BOTH, OUTGOING",
-        "INCOMING, INCOMING",
-        "BOTH, INCOMING"
-    })
+    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}")
+    @MethodSource("supportedLoadAndComputeDirections")
     void shouldComputeTopForSupportedDirections(Direction loadDirection, Direction algoDirection) {
         Graph graph = new GraphLoader(db)
             .withAnyLabel()
@@ -214,13 +212,8 @@ final class NeighborhoodSimilarityTest {
         assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_TOP_1 : EXPECTED_OUTGOING_TOP_1, result);
     }
 
-    @ParameterizedTest
-    @CsvSource({
-        "OUTGOING, OUTGOING",
-        "BOTH, OUTGOING",
-        "INCOMING, INCOMING",
-        "BOTH, INCOMING"
-    })
+    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}")
+    @MethodSource("supportedLoadAndComputeDirections")
     void shouldComputeTopKForSupportedDirections(Direction loadDirection, Direction algoDirection) {
         Graph graph = new GraphLoader(db)
             .withAnyLabel()
@@ -241,13 +234,8 @@ final class NeighborhoodSimilarityTest {
         assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_TOPK_1 : EXPECTED_OUTGOING_TOPK_1, result);
     }
 
-    @ParameterizedTest
-    @CsvSource({
-        "OUTGOING, OUTGOING",
-        "BOTH, OUTGOING",
-        "INCOMING, INCOMING",
-        "BOTH, INCOMING"
-    })
+    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}")
+    @MethodSource("supportedLoadAndComputeDirections")
     void shouldComputeNegativeTopKForSupportedDirections(Direction loadDirection, Direction algoDirection) {
         Graph graph = new GraphLoader(db)
             .withAnyLabel()
@@ -272,13 +260,8 @@ final class NeighborhoodSimilarityTest {
         );
     }
 
-    @ParameterizedTest
-    @CsvSource({
-        "OUTGOING, OUTGOING",
-        "BOTH, OUTGOING",
-        "INCOMING, INCOMING",
-        "BOTH, INCOMING"
-    })
+    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}")
+    @MethodSource("supportedLoadAndComputeDirections")
     void shouldComputeWithSimilarityCutoffForSupportedDirections(Direction loadDirection, Direction algoDirection) {
         Graph graph = new GraphLoader(db)
             .withAnyLabel()
@@ -299,13 +282,8 @@ final class NeighborhoodSimilarityTest {
         assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_SIMILARITY_CUTOFF : EXPECTED_OUTGOING_SIMILARITY_CUTOFF, result);
     }
 
-    @ParameterizedTest
-    @CsvSource({
-        "OUTGOING, OUTGOING",
-        "BOTH, OUTGOING",
-        "INCOMING, INCOMING",
-        "BOTH, INCOMING"
-    })
+    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}")
+    @MethodSource("supportedLoadAndComputeDirections")
     void shouldComputeWithDegreeCutoffForSupportedDirections(Direction loadDirection, Direction algoDirection) {
         Graph graph = new GraphLoader(db)
             .withAnyLabel()
@@ -345,13 +323,8 @@ final class NeighborhoodSimilarityTest {
         assertNotEquals(Collections.emptySet(), result);
     }
 
-    @ParameterizedTest
-    @CsvSource({
-        "OUTGOING, OUTGOING",
-        "BOTH, OUTGOING",
-        "INCOMING, INCOMING",
-        "BOTH, INCOMING"
-    })
+    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}")
+    @MethodSource("supportedLoadAndComputeDirections")
     void shouldComputeSimilarityGraphInAllSupportedDirections(Direction loadDirection, Direction algoDirection) {
         Graph graph = new GraphLoader(db)
             .withAnyLabel()
