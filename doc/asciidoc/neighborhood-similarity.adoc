@@ -24,8 +24,9 @@ The Neighborhood Similarity algorithm compares a set of nodes based on the nodes
 Two nodes are considered to be similar if they share many of the same neighbors.
 Neighborhood Similarity computes pair-wise similarities based on the Jaccard metric.
 
-The input of this algorithm is a biparite, connected graph.
-All nodes from the first node set are compared with each other based on their relationships to nodes in the second set.
+The input of this algorithm is a bipartite, connected graph containing two disjoint node sets.
+Each relationship starts from a node in the first node set and ends at a node in the second node set.
+The NHS algorithm compares all nodes from the first node set with each other based on their relationships to nodes in the second set.
 The complexity of this comparison grows quadratically with the number of nodes to compare.
 The algorithm reduces the complexity by ignoring disconnected nodes.
 
@@ -38,8 +39,6 @@ The output of the algorithm are new relationships between pairs of the first nod
 Similarity scores are expressed via relationship properties.
 
 For more information on this algorithm, see:
-
-// TODO: find other places than Wikipedia
 
 * https://en.wikipedia.org/wiki/Similarity_(network_science)#Structural_equivalence[Structural equivalence (Wikipedia)]
 * https://en.wikipedia.org/wiki/Jaccard_index[The Jaccard index (Wikipedia)].
@@ -69,10 +68,10 @@ YIELD nodesCompared, relationships, write, writeRelationshipType, writeProperty
 .Parameters
 [opts="header",cols="1,1,1m,1,4"]
 |===
-| Name         | Type    | Default | Optional | Description
-| node label   | string  | null    | yes      | The node label to load from the graph. If null, load all nodes.
-| relationship | string  | null    | yes      | The relationship type to load from the graph. If null, load all relationships.
-| config       | map     | {}      | yes      | Additional configuration, see below.
+| Name               | Type    | Default | Optional | Description
+| nodeFilter         | string  | null    | yes      | The node label to load from the graph. If null, load all nodes.
+| relationshipFilter | string  | null    | yes      | The relationship types to load from the graph. If null, load all relationships.
+| config             | map     | {}      | yes      | Additional configuration, see below.
 |===
 
 .Configuration
@@ -135,10 +134,10 @@ YIELD node1, node2, similarity
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name              | Type    | Default      | Optional | Description
-| node label        | string  | null         | yes      | The node label to load from the graph. If null, load all nodes.
-| relationship type | string  | null         | yes      | The relationship type to load from the graph. If null, load all relationships.
-| config            | map     | {}           | yes      | Additional configuration, see below.
+| Name               | Type    | Default      | Optional | Description
+| nodeFilter         | string  | null         | yes      | The node label to load from the graph. If null, load all nodes.
+| relationshipFilter | string  | null         | yes      | The relationship types to load from the graph. If null, load all relationships.
+| config             | map     | {}           | yes      | Additional configuration, see below.
 |===
 
 .Configuration
