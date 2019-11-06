@@ -24,10 +24,6 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
-import org.neo4j.graphalgo.core.huge.AdjacencyList;
-import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -47,23 +43,23 @@ public class NeighborhoodSimilarityFactory extends AlgorithmFactory<Neighborhood
 
     @Override
     public NeighborhoodSimilarity build(Graph graph, ProcedureConfiguration configuration, AllocationTracker tracker, Log log) {
-        return new NeighborhoodSimilarity(graph, jaccardConfig, Pools.DEFAULT, tracker, log);
+        return new NeighborhoodSimilarity(graph, jaccardConfig, tracker);
     }
 
     @Override
     public MemoryEstimation memoryEstimation() {
         MemoryEstimations.Builder builder = MemoryEstimations.builder(NeighborhoodSimilarity.class)
-            .perNode("node filter", (nodeCount) -> sizeOfLongArray(BitSet.bits2words(nodeCount)))
+            .perNode("node filter", nodeCount -> sizeOfLongArray(BitSet.bits2words(nodeCount)))
             .add(
                 "vectors",
-                MemoryEstimations.setup("", ((dimensions, concurrency) -> {
+                MemoryEstimations.setup("", (dimensions, concurrency) -> {
                     int averageDegree = dimensions.nodeCount() == 0
                         ? 0
                         : Math.toIntExact(dimensions.maxRelCount() / dimensions.nodeCount());
                     long averageVectorSize = sizeOfLongArray(averageDegree);
                     return MemoryEstimations.builder(HugeObjectArray.class)
-                        .perNode("array", (nodeCount) -> nodeCount * averageVectorSize).build();
-                }))
+                        .perNode("array", nodeCount -> nodeCount * averageVectorSize).build();
+                })
             );
         if (computesSimilarityGraph) {
             builder.add(
@@ -74,9 +70,8 @@ public class NeighborhoodSimilarityFactory extends AlgorithmFactory<Neighborhood
         if (jaccardConfig.topk() > 0) {
             builder.add(
                 "topk map",
-                MemoryEstimations.setup("", ((dimensions, concurrency) ->
-                    TopKMap.memoryEstimation(dimensions.nodeCount(), jaccardConfig.topk())
-                ))
+                MemoryEstimations.setup("", (dimensions, concurrency) ->
+                    TopKMap.memoryEstimation(dimensions.nodeCount(), jaccardConfig.topk()))
             );
         }
         return builder.build();

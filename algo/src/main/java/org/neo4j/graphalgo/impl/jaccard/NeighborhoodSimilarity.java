@@ -25,17 +25,16 @@ import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.Intersections;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.logging.Log;
 
 import java.util.Comparator;
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -45,9 +44,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     private final Graph graph;
     private final Config config;
 
-    private final ExecutorService executorService;
     private final AllocationTracker tracker;
-    private final Log log;
 
     private final BitSet nodeFilter;
 
@@ -58,15 +55,11 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     public NeighborhoodSimilarity(
             Graph graph,
             Config config,
-            ExecutorService executorService,
-            AllocationTracker tracker,
-            Log log
+            AllocationTracker tracker
     ) {
         this.graph = graph;
         this.config = config;
-        this.executorService = executorService;
         this.tracker = tracker;
-        this.log = log;
         this.nodeFilter = new BitSet(graph.nodeCount());
     }
 
@@ -80,19 +73,20 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         graph.release();
     }
 
+    // The buffer is sized on the first call to the sizing strategy to hold exactly node degree elements
     private static final ArraySizingStrategy ARRAY_SIZING_STRATEGY =
-        (currentBufferLength, elementsCount, expectedAdditions) -> expectedAdditions + elementsCount;
+        (currentBufferLength, elementsCount, degree) -> elementsCount + degree;
 
     public Stream<SimilarityResult> computeToStream(Direction direction) {
-
-        this.vectors = HugeObjectArray.newArray(long[].class, graph.nodeCount(), tracker);
 
         if (direction == Direction.BOTH) {
             throw new IllegalArgumentException(
                 "Direction BOTH is not supported by the NeighborhoodSimilarity algorithm.");
         }
 
-        graph.forEachNode(node -> {
+        this.vectors = HugeObjectArray.newArray(long[].class, graph.nodeCount(), tracker);
+
+        vectors.setAll(node -> {
             int degree = graph.degree(node, direction);
 
             if (degree >= config.degreeCutoff) {
@@ -104,9 +98,9 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
                     targetIds.add(target);
                     return true;
                 });
-                vectors.set(node, targetIds.buffer);
+                return targetIds.buffer;
             }
-            return true;
+            return null;
         });
 
         // Generate initial similarities
@@ -121,9 +115,9 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         long similarityResultCount = (config.topk > 0)
             ? topkComparisons
             : nodesToCompare * nodesToCompare / 2;
-
+        long logInterval = Math.max(1, BitUtil.nearbyPowerOfTwo(similarityResultCount / 100));
         AtomicLong count = new AtomicLong();
-        stream = stream.peek(sim -> logProgress(count.incrementAndGet(), similarityResultCount));
+        stream = stream.peek(sim -> logProgress(count.incrementAndGet(), logInterval, similarityResultCount));
 
         // Compute topN if necessary
         if (config.top != 0) {
@@ -134,8 +128,8 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
 
     // TODO: benchmark if inlining the if check in the call sites is faster. it's ugly to inline,
     //  so unless its faster prefer to keep it here
-    private void logProgress(long currentNode, long nodeCount) {
-        if (currentNode % Math.max((nodeCount / 100), 1) == 0) {
+    private void logProgress(long currentNode, long logInterval, long nodeCount) {
+        if ((currentNode & (logInterval - 1)) == 0) {
             progressLogger.logProgress(currentNode, nodeCount);
         }
     }
@@ -149,11 +143,11 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         return LongStream.range(0, graph.nodeCount())
             .filter(nodeFilter::get)
             .boxed()
-            .flatMap(n1 -> {
-                long[] v1 = vectors.get(n1);
-                return LongStream.range(n1 + 1, graph.nodeCount())
+            .flatMap(node1 -> {
+                long[] vector1 = vectors.get(node1);
+                return LongStream.range(node1 + 1, graph.nodeCount())
                     .filter(nodeFilter::get)
-                    .mapToObj(n2 -> jaccard(n1, n2, v1, vectors.get(n2)))
+                    .mapToObj(node2 -> jaccard(node1, node2, vector1, vectors.get(node2)))
                     .filter(Objects::nonNull);
             });
     }
@@ -173,11 +167,11 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         return similarities.sorted(comparator).limit(Math.abs(config.top));
     }
 
-    private SimilarityResult jaccard(long n1, long n2, long[] v1, long[] v2) {
-        long intersection = Intersections.intersection3(v1, v2);
-        double union = v1.length + v2.length - intersection;
+    private SimilarityResult jaccard(long node1, long node2, long[] vector1, long[] vector2) {
+        long intersection = Intersections.intersection3(vector1, vector2);
+        double union = vector1.length + vector2.length - intersection;
         double similarity = union == 0 ? 0 : intersection / union;
-        return similarity >= config.similarityCutoff ? new SimilarityResult(n1, n2, similarity) : null;
+        return similarity >= config.similarityCutoff ? new SimilarityResult(node1, node2, similarity) : null;
     }
 
     private Graph similarityGraph(Stream<SimilarityResult> similarities) {
@@ -186,14 +180,6 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     }
 
     public static final class Config {
-        public static final Config DEFAULT = new NeighborhoodSimilarity.Config(
-            0.0,
-            0,
-            0,
-            0,
-            Pools.DEFAULT_CONCURRENCY,
-            ParallelUtil.DEFAULT_BATCH_SIZE
-        );
 
         private final double similarityCutoff;
         private final double degreeCutoff;

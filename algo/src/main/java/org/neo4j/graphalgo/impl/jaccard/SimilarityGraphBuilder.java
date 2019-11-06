@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.core.loading.RelationshipImporter;
 import org.neo4j.graphalgo.core.loading.Relationships;
 import org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer;
 import org.neo4j.graphalgo.core.loading.RelationshipsBuilder;
+import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -39,6 +40,7 @@ import org.neo4j.kernel.api.StatementConstants;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class SimilarityGraphBuilder {
@@ -77,7 +79,7 @@ public class SimilarityGraphBuilder {
         this.baseGraph = baseGraph;
         this.tracker = tracker;
         this.concurrency = 1;
-        this.bufferSize = (int) Math.min(baseGraph.nodeCount(), 10_000);
+        this.bufferSize = (int) Math.min(baseGraph.nodeCount(), ParallelUtil.DEFAULT_BATCH_SIZE);
     }
 
     Graph build(Stream<SimilarityResult> stream) {
@@ -120,7 +122,7 @@ public class SimilarityGraphBuilder {
 
         RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(baseGraph, StatementConstants.ANY_RELATIONSHIP_TYPE, bufferSize);
         RelationshipWriter writer = new RelationshipWriter(imports, buffer);
-        stream.forEach(writer::accept);
+        stream.forEach(writer);
         writer.flush();
 
         importer.flushTasks().forEach(Runnable::run);
@@ -144,11 +146,7 @@ public class SimilarityGraphBuilder {
         );
     }
 
-    interface ResultConsumer {
-        void accept(SimilarityResult result);
-    }
-
-    private class RelationshipWriter implements ResultConsumer {
+    private static class RelationshipWriter implements Consumer<SimilarityResult> {
 
         private static final long NO_RELATIONSHIP_REFERENCE = -1L;
 

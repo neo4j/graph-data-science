@@ -38,7 +38,6 @@ import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.NullLog;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -69,6 +68,15 @@ public class NeighborhoodSimilarityBenchmark {
 
     private GraphDatabaseAPI db;
     private Graph graph;
+
+    static final NeighborhoodSimilarity.Config DEFAULT_CONFIG = new NeighborhoodSimilarity.Config(
+        0.0,
+        1,
+        0,
+        0,
+        Pools.DEFAULT_CONCURRENCY,
+        ParallelUtil.DEFAULT_BATCH_SIZE
+    );
 
     private static final NeighborhoodSimilarity.Config TOPK_CONFIG = new NeighborhoodSimilarity.Config(
         0.0,
@@ -133,16 +141,15 @@ public class NeighborhoodSimilarityBenchmark {
     }
 
     private NeighborhoodSimilarity initAlgo() {
-        return initAlgo(NeighborhoodSimilarity.Config.DEFAULT);
+        return initAlgo(DEFAULT_CONFIG);
     }
 
     private NeighborhoodSimilarity initAlgo(NeighborhoodSimilarity.Config config) {
         return new NeighborhoodSimilarity(
             graph,
             config,
-            Pools.DEFAULT,
-            AllocationTracker.EMPTY,
-            NullLog.getInstance());
+            AllocationTracker.EMPTY
+        );
     }
 
     private void runJaccardProcedure(

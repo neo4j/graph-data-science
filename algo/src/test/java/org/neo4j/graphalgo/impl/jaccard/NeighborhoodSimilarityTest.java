@@ -42,7 +42,6 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.NullLog;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -56,6 +55,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphdb.Direction.BOTH;
@@ -102,6 +102,15 @@ final class NeighborhoodSimilarityTest {
     private static final int COMPARED_ITEMS = 3;
     private static final int COMPARED_PERSONS = 4;
 
+    static final NeighborhoodSimilarity.Config DEFAULT_CONFIG = new NeighborhoodSimilarity.Config(
+        0.0,
+        1,
+        0,
+        0,
+        Pools.DEFAULT_CONCURRENCY,
+        ParallelUtil.DEFAULT_BATCH_SIZE
+    );
+
     static {
         EXPECTED_OUTGOING.add(new SimilarityResult(0, 1, 2 / 3.0));
         EXPECTED_OUTGOING.add(new SimilarityResult(0, 2, 1 / 3.0));
@@ -146,6 +155,15 @@ final class NeighborhoodSimilarityTest {
         EXPECTED_INCOMING_DEGREE_CUTOFF.add(new SimilarityResult(5, 6, 1 / 2.0));
     }
 
+    static Stream<Arguments> supportedLoadAndComputeDirections() {
+        return Stream.of(
+            arguments("OUTGOING", "OUTGOING"),
+            arguments("BOTH", "OUTGOING"),
+            arguments("INCOMING", "INCOMING"),
+            arguments("BOTH", "INCOMING")
+        );
+    }
+
     private GraphDatabaseAPI db;
 
     @BeforeEach
@@ -159,14 +177,6 @@ final class NeighborhoodSimilarityTest {
         db.shutdown();
     }
 
-    static Stream<Arguments> supportedLoadAndComputeDirections() {
-        return Stream.of(
-            Arguments.of("OUTGOING", "OUTGOING"),
-            Arguments.of("BOTH", "OUTGOING"),
-            Arguments.of("INCOMING", "INCOMING"),
-            Arguments.of("BOTH", "INCOMING")
-            );
-    }
     @ParameterizedTest(name = "load direction: {0}, compute direction: {1}")
     @MethodSource("supportedLoadAndComputeDirections")
     void shouldComputeForSupportedDirections(Direction loadDirection, Direction algoDirection) {
@@ -178,10 +188,8 @@ final class NeighborhoodSimilarityTest {
 
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
-            NeighborhoodSimilarity.Config.DEFAULT,
-            Pools.DEFAULT,
-            AllocationTracker.EMPTY,
-            NullLog.getInstance()
+            DEFAULT_CONFIG,
+            AllocationTracker.EMPTY
         );
 
         Set<SimilarityResult> result = neighborhoodSimilarity.computeToStream(algoDirection).collect(Collectors.toSet());
@@ -202,9 +210,8 @@ final class NeighborhoodSimilarityTest {
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
             new NeighborhoodSimilarity.Config(0.0, 0, 1, 0, Pools.DEFAULT_CONCURRENCY, ParallelUtil.DEFAULT_BATCH_SIZE),
-            Pools.DEFAULT,
-            AllocationTracker.EMPTY,
-            NullLog.getInstance());
+            AllocationTracker.EMPTY
+        );
 
         Set<SimilarityResult> result = neighborhoodSimilarity.computeToStream(algoDirection).collect(Collectors.toSet());
         neighborhoodSimilarity.release();
@@ -224,9 +231,8 @@ final class NeighborhoodSimilarityTest {
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
             new NeighborhoodSimilarity.Config(0.0, 0, 0, 1, Pools.DEFAULT_CONCURRENCY, ParallelUtil.DEFAULT_BATCH_SIZE),
-            Pools.DEFAULT,
-            AllocationTracker.EMPTY,
-            NullLog.getInstance());
+            AllocationTracker.EMPTY
+        );
 
         Set<SimilarityResult> result = neighborhoodSimilarity.computeToStream(algoDirection).collect(Collectors.toSet());
         neighborhoodSimilarity.release();
@@ -246,9 +252,8 @@ final class NeighborhoodSimilarityTest {
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
             new NeighborhoodSimilarity.Config(0.0, 0, 0, -1, Pools.DEFAULT_CONCURRENCY, ParallelUtil.DEFAULT_BATCH_SIZE),
-            Pools.DEFAULT,
-            AllocationTracker.EMPTY,
-            NullLog.getInstance());
+            AllocationTracker.EMPTY
+        );
 
         Graph similarityGraph = neighborhoodSimilarity.computeToGraph(algoDirection).similarityGraph();
 
@@ -272,9 +277,8 @@ final class NeighborhoodSimilarityTest {
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
             new NeighborhoodSimilarity.Config(0.1, 0, 0, 0, Pools.DEFAULT_CONCURRENCY, ParallelUtil.DEFAULT_BATCH_SIZE),
-            Pools.DEFAULT,
-            AllocationTracker.EMPTY,
-            NullLog.getInstance());
+            AllocationTracker.EMPTY
+        );
 
         Set<SimilarityResult> result = neighborhoodSimilarity.computeToStream(algoDirection).collect(Collectors.toSet());
         neighborhoodSimilarity.release();
@@ -294,9 +298,8 @@ final class NeighborhoodSimilarityTest {
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
             new NeighborhoodSimilarity.Config(0.0, 2, 0, 0, Pools.DEFAULT_CONCURRENCY, ParallelUtil.DEFAULT_BATCH_SIZE),
-            Pools.DEFAULT,
-            AllocationTracker.EMPTY,
-            NullLog.getInstance());
+            AllocationTracker.EMPTY
+        );
 
         Set<SimilarityResult> result = neighborhoodSimilarity.computeToStream(algoDirection).collect(Collectors.toSet());
         neighborhoodSimilarity.release();
@@ -314,10 +317,9 @@ final class NeighborhoodSimilarityTest {
 
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
-            NeighborhoodSimilarity.Config.DEFAULT,
-            Pools.DEFAULT,
-            AllocationTracker.EMPTY,
-            NullLog.getInstance());
+            DEFAULT_CONFIG,
+            AllocationTracker.EMPTY
+        );
         Set<SimilarityResult> result = neighborhoodSimilarity.computeToStream(OUTGOING).collect(Collectors.toSet());
         neighborhoodSimilarity.release();
         assertNotEquals(Collections.emptySet(), result);
@@ -334,10 +336,9 @@ final class NeighborhoodSimilarityTest {
 
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
-            NeighborhoodSimilarity.Config.DEFAULT,
-            Pools.DEFAULT,
-            AllocationTracker.EMPTY,
-            NullLog.getInstance());
+            DEFAULT_CONFIG,
+            AllocationTracker.EMPTY
+        );
 
         SimilarityGraphResult similarityGraphResult = neighborhoodSimilarity.computeToGraph(algoDirection);
         assertEquals(algoDirection == INCOMING ? COMPARED_ITEMS : COMPARED_PERSONS, similarityGraphResult.comparedNodes());
@@ -370,10 +371,9 @@ final class NeighborhoodSimilarityTest {
             IllegalArgumentException.class,
             () -> new NeighborhoodSimilarity(
                 graph,
-                NeighborhoodSimilarity.Config.DEFAULT,
-                Pools.DEFAULT,
-                AllocationTracker.EMPTY,
-                NullLog.getInstance()).computeToStream(BOTH)
+                DEFAULT_CONFIG,
+                AllocationTracker.EMPTY
+            ).computeToStream(BOTH)
         );
         assertThat(ex.getMessage(), containsString("Direction BOTH is not supported"));
     }
@@ -392,9 +392,7 @@ final class NeighborhoodSimilarityTest {
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
             new NeighborhoodSimilarity.Config(0.0, 0, 100, topk, Pools.DEFAULT_CONCURRENCY, ParallelUtil.DEFAULT_BATCH_SIZE),
-            Pools.DEFAULT,
-            AllocationTracker.EMPTY,
-            log
+            AllocationTracker.EMPTY
         ).withProgressLogger(log);
 
         neighborhoodSimilarity.computeToGraph(OUTGOING);
@@ -426,7 +424,7 @@ final class NeighborhoodSimilarityTest {
 
         MemoryTree actual = factory.memoryEstimation().estimate(dimensions, 1);
 
-        long thisInstance = 64;
+        long thisInstance = 56;
 
         long nodeFilterRangeMin = 125016L;
         long nodeFilterRangeMax = 125016L;
@@ -478,7 +476,7 @@ final class NeighborhoodSimilarityTest {
 
         MemoryTree actual = factory.memoryEstimation().estimate(dimensions, 1);
 
-        long thisInstance = 64;
+        long thisInstance = 56;
 
         long nodeFilterRangeMin = 125016L;
         long nodeFilterRangeMax = 125016L;

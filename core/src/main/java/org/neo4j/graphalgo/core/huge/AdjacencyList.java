@@ -70,37 +70,12 @@ public final class AdjacencyList {
     }
 
     public static MemoryEstimation compressedMemoryEstimation(boolean undirected) {
-
-        return MemoryEstimations
-                .builder(AdjacencyList.class)
-                .rangePerGraphDimension("pages", dim -> {
-                    long nodeCount = dim.nodeCount();
-                    long relCount = undirected ? dim.maxRelCount() * 2 : dim.maxRelCount();
-                    long avgDegree = (nodeCount > 0) ? ceilDiv(relCount, nodeCount) : 0L;
-
-                    // Best case scenario:
-                    // Difference between node identifiers in each adjacency list is 1.
-                    // This leads to ideal compression through delta encoding.
-                    int deltaBestCase = 1;
-                    long bestCaseAdjacencySize = computeAdjacencyByteSize(avgDegree, nodeCount, deltaBestCase);
-
-                    // Worst case scenario:
-                    // Relationships are equally distributed across nodes, i.e. each node has the same number of rels.
-                    // Within each adjacency list, all identifiers have the highest possible difference between each other.
-                    // Highest possible difference is the number of nodes divided by the average degree.
-                    long deltaWorstCase = (avgDegree > 0) ? ceilDiv(nodeCount, avgDegree) : 0L;
-                    long worstCaseAdjacencySize = computeAdjacencyByteSize(avgDegree, nodeCount, deltaWorstCase);
-
-                    int minPages = PageUtil.numPagesFor(bestCaseAdjacencySize, PAGE_SHIFT, PAGE_MASK);
-                    int maxPages = PageUtil.numPagesFor(worstCaseAdjacencySize, PAGE_SHIFT, PAGE_MASK);
-
-                    long bytesPerPage = MemoryUsage.sizeOfByteArray(PAGE_SIZE);
-                    long minMemoryReqs = minPages * bytesPerPage + MemoryUsage.sizeOfObjectArray(minPages);
-                    long maxMemoryReqs = maxPages * bytesPerPage + MemoryUsage.sizeOfObjectArray(maxPages);
-
-                    return MemoryRange.of(minMemoryReqs, maxMemoryReqs);
-                })
-                .build();
+        return MemoryEstimations.setup("", dim -> {
+            long nodeCount = dim.nodeCount();
+            long relCount = undirected ? dim.maxRelCount() * 2 : dim.maxRelCount();
+            long avgDegree = (nodeCount > 0) ? ceilDiv(relCount, nodeCount) : 0L;
+            return AdjacencyList.compressedMemoryEstimation(avgDegree, nodeCount);
+        });
     }
 
     public static MemoryEstimation uncompressedMemoryEstimation(boolean undirected) {

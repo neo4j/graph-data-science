@@ -26,7 +26,7 @@ import java.util.Objects;
 public class SimilarityResult implements Comparable<SimilarityResult> {
 
     static Comparator<SimilarityResult> ASCENDING = SimilarityResult::compareTo;
-    static Comparator<SimilarityResult> DESCENDING = (o1, o2) -> -o1.compareTo(o2);
+    static Comparator<SimilarityResult> DESCENDING = ASCENDING.reversed();
 
     public long node1;
     public long node2;
