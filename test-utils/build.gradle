@@ -16,6 +16,7 @@ dependencies {
     compile group: 'org.hamcrest',                          name: 'hamcrest-library',         version: ver.'hamcrest'
     compile group: 'com.github.s1ck',                       name: 'gdl',                      version: ver.'gdl'
     compile group: 'net.jqwik',                             name: 'jqwik',                    version: ver.'jqwik'
+    compile group: 'io.qala.datagen',                       name: 'qala-datagen-junit5',      version: ver.'qala-datagen'
 
     compile platform(dep.junit5bom)
     compile dep.junit5jupiter

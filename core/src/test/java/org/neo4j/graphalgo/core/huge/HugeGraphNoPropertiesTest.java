@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -37,9 +36,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 final class HugeGraphNoPropertiesTest {
 
     private static final int BATCH_SIZE = 100;
-    public static final RelationshipType TYPE = RelationshipType.withName("TYPE");
 
-    private GraphDatabaseAPI DB;
+    private GraphDatabaseAPI db;
 
     private static final String DB_CYPHER =
             "CREATE " +
@@ -59,19 +57,19 @@ final class HugeGraphNoPropertiesTest {
 
     @BeforeEach
     void setup() {
-        DB = TestDatabaseCreator.createTestDatabase();
-        DB.execute(DB_CYPHER);
+        db = TestDatabaseCreator.createTestDatabase();
+        db.execute(DB_CYPHER);
     }
 
     @AfterEach
     void teardown() {
-        DB.shutdown();
+        db.shutdown();
     }
 
     @ParameterizedTest
     @EnumSource(Direction.class)
     void relationshipIteratorShouldReturnFallbackWeight(Direction direction) {
-        Graph graph = loadGraph(DB, direction);
+        Graph graph = loadGraph(db, direction);
 
         double fallbackWeight = 42D;
         graph.forEachNode((nodeId) -> {
@@ -86,7 +84,7 @@ final class HugeGraphNoPropertiesTest {
     @ParameterizedTest
     @EnumSource(Direction.class)
     void weightOfShouldReturnFallbackWeight(Direction direction) {
-        Graph graph = loadGraph(DB, direction);
+        Graph graph = loadGraph(db, direction);
 
         double fallbackWeight = 42D;
         graph.forEachNode((nodeId) -> {

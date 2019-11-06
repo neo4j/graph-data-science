@@ -17,10 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.huge.loader;
+package org.neo4j.graphalgo.core.loading;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -42,29 +41,29 @@ import static org.neo4j.graphalgo.GraphHelper.collectTargetProperties;
 
 class CypherGraphFactoryDeduplicationTest {
 
-    private static GraphDatabaseService db;
+    public static final String DB_CYPHER = "MERGE (n1 {id: 1})" +
+                                           "MERGE (n2 {id: 2}) " +
+                                           "CREATE (n1)-[:REL {weight: 4}]->(n2) " +
+                                           "CREATE (n2)-[:REL {weight: 10}]->(n1) " +
+                                           "RETURN id(n1) AS id1, id(n2) AS id2";
+
+    private GraphDatabaseService db;
 
     private static int id1;
     private static int id2;
 
-    @BeforeAll
-    static void setUp() {
+    @BeforeEach
+    void setUp() {
         db = TestDatabaseCreator.createTestDatabase();
-
-        db.execute(
-                "MERGE (n1 {id: 1}) " +
-                "MERGE (n2 {id: 2}) " +
-                "CREATE (n1)-[:REL {weight: 4}]->(n2) " +
-                "CREATE (n2)-[:REL {weight: 10}]->(n1) " +
-                "RETURN id(n1) AS id1, id(n2) AS id2").accept(row -> {
+        db.execute(DB_CYPHER ).accept(row -> {
             id1 = row.getNumber("id1").intValue();
             id2 = row.getNumber("id2").intValue();
             return true;
         });
     }
 
-    @AfterAll
-    static void tearDown() {
+    @AfterEach
+    void tearDown() {
         db.shutdown();
     }
 
