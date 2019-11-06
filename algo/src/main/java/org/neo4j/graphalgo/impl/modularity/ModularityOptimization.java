@@ -61,6 +61,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private final AllocationTracker tracker;
 
     private int iterationCounter;
+    private boolean didConverge = false;
     private double totalNodeWeight = 0.0;
     private double modularity = -1.0;
     private BitSet colorsUsed;
@@ -109,7 +110,10 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                 currentColor = colorsUsed.nextSetBit(currentColor + 1);
             }
 
-            if (!updateModularity()) break;
+            if (!updateModularity()) {
+                this.didConverge = true;
+                break;
+            }
         }
 
         return this;
@@ -262,5 +266,9 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
     public double getModularity() {
         return this.modularity;
+    }
+
+    public boolean didConverge() {
+        return this.didConverge;
     }
 }

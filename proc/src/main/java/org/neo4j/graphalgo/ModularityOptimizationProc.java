@@ -29,8 +29,8 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.write.Exporter;
-import org.neo4j.graphalgo.impl.coloring.K1Coloring;
-import org.neo4j.graphalgo.impl.coloring.K1ColoringFactory;
+import org.neo4j.graphalgo.impl.modularity.ModularityOptimization;
+import org.neo4j.graphalgo.impl.modularity.ModularityOptimizationFactory;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.procedure.Description;
@@ -45,36 +45,23 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.core.ProcedureConstants.WRITE_PROPERTY_KEY;
-import static org.neo4j.procedure.Mode.READ;
 
-public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
+public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimization> {
 
-    public static final String COLOR_COUNT_FIELD_NAME = "colorCount";
+    public static final String COMMUNITY_COUNT_FIELD_NAME = "communityCount";
+    public static final String DEFAULT_COMMUNITY_PROPERTY = "community";
 
-    @Procedure(name = "algo.beta.k1coloring", mode = Mode.WRITE)
-    @Description("CALL algo.beta.k1coloring(" +
+    @Procedure(name = "algo.beta.modularityOptimization", mode = Mode.WRITE)
+    @Description("CALL algo.beta.modularityOptimization(" +
                  "label:String, relationship:String, " +
-                 "{iterations: 10, direction: 'OUTGOING', write: true, writeProperty: null, concurrency: 4}) " +
-                 "YIELD colorCount, ranIterations, didConverge, loadMillis, computeMillis, writeMillis, write, writeProperty, nodes")
-    public Stream<WriteResult> betaK1Coloring(
+                 "{iterations: 10, direction: 'OUTGOING', write: true, writeProperty: null, concurrency: 4})" +
+                 "YIELD communityCount, ranIterations, didConverge, loadMillis, computeMillis, writeMillis, write, writeProperty, nodes")
+    public Stream<WriteResult> betaModularityOptimization(
         @Name(value = "label", defaultValue = "") String label,
         @Name(value = "relationship", defaultValue = "") String relationshipType,
         @Name(value = "config", defaultValue = "null") Map<String, Object> config
     ) {
         return run(label, relationshipType, config);
-    }
-
-    @Procedure(name = "algo.beta.k1coloring.stream", mode = READ)
-    @Description("CALL algo.beta.k1coloring.stream(label:String, relationship:String, " +
-                 "{iterations: 10, direction: 'OUTGOING', concurrency: 4}) " +
-                 "YIELD nodeId, color")
-    public Stream<StreamResult> betaK1ColoringStream(
-        @Name(value = "label", defaultValue = "") String label,
-        @Name(value = "relationship", defaultValue = "") String relationshipType,
-        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
-    ) {
-
-        return stream(label, relationshipType, config);
     }
 
     public Stream<WriteResult> run(String label, String relationshipType, Map<String, Object> config) {
@@ -85,28 +72,25 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
             return Stream.of(WriteResult.EMPTY);
         }
 
-        K1Coloring coloring = compute(setup);
+        ModularityOptimization modularity = compute(setup);
 
-        setup.builder.withCommunityFunction(coloring.colors()::get);
-
-        if (callContext.outputFields().anyMatch((field) -> field.equals(COLOR_COUNT_FIELD_NAME))) {
-            setup.builder.withColorCount(coloring.usedColors().cardinality());
-        }
+        setup.builder.withCommunityFunction(modularity.getCommunityIds()::get);
 
         Optional<String> writeProperty = setup.procedureConfig.getString(WRITE_PROPERTY_KEY);
 
         setup.builder
-            .withRanIterations(coloring.ranIterations())
-            .withDidConverge(coloring.didConverge());
+            .withRanIterations(modularity.getIterations())
+            .withDidConverge(modularity.didConverge())
+            .withWriteProperty(writeProperty.orElse(null));
 
         if (setup.procedureConfig.isWriteFlag() && writeProperty.isPresent() && !writeProperty.get().equals("")) {
             setup.builder.withWrite(true);
-            setup.builder.withWriteProperty(writeProperty.get());
+            setup.builder.withCommunityProperty(writeProperty.get()).withWriteProperty(writeProperty.get());
 
             write(
                 setup.builder::timeWrite,
                 setup.graph,
-                coloring.colors(),
+                modularity.getCommunityIds(),
                 setup.procedureConfig,
                 writeProperty.get(),
                 setup.tracker
@@ -116,6 +100,19 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
         }
 
         return Stream.of(setup.builder.build());
+    }
+
+    @Procedure(name = "algo.beta.modularityOptimization", mode = Mode.WRITE)
+    @Description("CALL algo.beta.modularityOptimization(" +
+                 "label:String, relationship:String, " +
+                 "{iterations: 10, direction: 'OUTGOING', write: true, writeProperty: null, concurrency: 4})" +
+                 "YIELD communityCount, ranIterations, didConverge, loadMillis, computeMillis, writeMillis, write, writeProperty, nodes")
+    public Stream<StreamResult> betaModularityOptimizationStream(
+        @Name(value = "label", defaultValue = "") String label,
+        @Name(value = "relationship", defaultValue = "") String relationshipType,
+        @Name(value = "config", defaultValue = "null") Map<String, Object> config
+    ) {
+        return stream(label, relationshipType, config);
     }
 
     public Stream<StreamResult> stream(
@@ -131,12 +128,12 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
             return Stream.empty();
         }
 
-        K1Coloring coloring = compute(setup);
+        ModularityOptimization modularityOptimization = compute(setup);
 
         return LongStream.range(0, setup.graph.nodeCount())
             .mapToObj(nodeId -> {
                 long neoNodeId = setup.graph.toOriginalNodeId(nodeId);
-                return new StreamResult(neoNodeId, coloring.colors().get(nodeId));
+                return new StreamResult(neoNodeId, modularityOptimization.getCommunityIds().get(nodeId));
             });
     }
 
@@ -148,37 +145,23 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
     }
 
     @Override
-    protected AlgorithmFactory<K1Coloring> algorithmFactory(ProcedureConfiguration config) {
-        return new K1ColoringFactory();
+    protected AlgorithmFactory<ModularityOptimization> algorithmFactory(ProcedureConfiguration config) {
+        return new ModularityOptimizationFactory();
     }
 
-    private K1Coloring compute(ProcedureSetup setup) {
-        final K1Coloring k1Coloring = newAlgorithm(setup.graph, setup.procedureConfig, setup.tracker);
-        K1Coloring algoResult = runWithExceptionLogging(
-            K1Coloring.class.getSimpleName() + " failed",
-            () -> setup.builder.timeEval(k1Coloring::compute)
+    private ModularityOptimization compute(ProcedureSetup setup) {
+        final ModularityOptimization modularityOptimization = newAlgorithm(setup.graph, setup.procedureConfig, setup.tracker);
+        ModularityOptimization algoResult = runWithExceptionLogging(
+            ModularityOptimization.class.getSimpleName() + "failed",
+            () -> setup.builder.timeEval(modularityOptimization::compute)
         );
 
-        log.info(K1Coloring.class.getSimpleName() + ": overall memory usage %s", setup.tracker.getUsageString());
+        log.info(ModularityOptimization.class.getSimpleName() + ": overall memory usage %s", setup.tracker.getUsageString());
 
-        k1Coloring.release();
+        modularityOptimization.release();
         setup.graph.releaseTopology();
 
         return algoResult;
-    }
-
-    private ProcedureSetup setup(
-        String label,
-        String relationship,
-        Map<String, Object> config
-    ) {
-        AllocationTracker tracker = AllocationTracker.create();
-        ProcedureConfiguration configuration = newConfig(label, relationship, config);
-        WriteResultBuilder builder = new WriteResultBuilder(configuration, tracker);
-
-        Graph graph = loadGraph(configuration, tracker, builder);
-
-        return new ProcedureSetup(builder, graph, tracker, configuration);
     }
 
     private void write(
@@ -218,6 +201,20 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
         );
     }
 
+    private ProcedureSetup setup(
+        String label,
+        String relationship,
+        Map<String, Object> config
+    ) {
+        AllocationTracker tracker = AllocationTracker.create();
+        ProcedureConfiguration configuration = newConfig(label, relationship, config);
+        WriteResultBuilder builder = new WriteResultBuilder(configuration, tracker);
+
+        Graph graph = loadGraph(configuration, tracker, builder);
+
+        return new ProcedureSetup(builder, graph, tracker, configuration);
+    }
+
     public static class ProcedureSetup {
         final WriteResultBuilder builder;
         final Graph graph;
@@ -246,60 +243,100 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
             0,
             0,
             0,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
             false,
+            null,
+            null,
             false,
-            null
+            0
         );
 
         public final long loadMillis;
         public final long computeMillis;
         public final long writeMillis;
-
+        public final long postProcessingMillis;
         public final long nodes;
-        public final long colorCount;
-        public final long ranIterations;
-        public final boolean didConverge;
-        public final String writeProperty;
-
+        public final long communityCount;
+        public final long setCount;
+        public final long p1;
+        public final long p5;
+        public final long p10;
+        public final long p25;
+        public final long p50;
+        public final long p75;
+        public final long p90;
+        public final long p95;
+        public final long p99;
+        public final long p100;
         public final boolean write;
+        public final String communityProperty;
+        public final String writeProperty;
+        public boolean didConverge;
+        public long ranIterations;
 
-        public WriteResult(
+        WriteResult(
             long loadMillis,
             long computeMillis,
+            long postProcessingMillis,
             long writeMillis,
             long nodes,
-            long colorCount,
-            long ranIterations,
+            long communityCount,
+            long p100,
+            long p99,
+            long p95,
+            long p90,
+            long p75,
+            long p50,
+            long p25,
+            long p10,
+            long p5,
+            long p1,
             boolean write,
+            String communityProperty,
+            String writeProperty,
             boolean didConverge,
-            String writeProperty
+            long ranIterations
         ) {
             this.loadMillis = loadMillis;
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
+            this.postProcessingMillis = postProcessingMillis;
             this.nodes = nodes;
-            this.colorCount = colorCount;
-            this.ranIterations = ranIterations;
+            this.communityCount = this.setCount = communityCount;
+            this.p100 = p100;
+            this.p99 = p99;
+            this.p95 = p95;
+            this.p90 = p90;
+            this.p75 = p75;
+            this.p50 = p50;
+            this.p25 = p25;
+            this.p10 = p10;
+            this.p5 = p5;
+            this.p1 = p1;
             this.write = write;
-            this.didConverge = didConverge;
+            this.communityProperty = communityProperty;
             this.writeProperty = writeProperty;
+            this.didConverge = didConverge;
+            this.ranIterations = ranIterations;
         }
     }
 
     public static class WriteResultBuilder extends AbstractCommunityResultBuilder<WriteResult> {
-
-        private long colorCount = -1L;
+        private String communityProperty;
         private long ranIterations;
         private boolean didConverge;
-        private String writeProperty;
 
         WriteResultBuilder(ProcedureConfiguration config, AllocationTracker tracker) {
             super(config.computeHistogram(), config.computeCommunityCount(), tracker);
-        }
-
-        public WriteResultBuilder withColorCount(long colorCount) {
-            this.colorCount = colorCount;
-            return this;
         }
 
         public WriteResultBuilder withRanIterations(long ranIterations) {
@@ -312,8 +349,8 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
             return this;
         }
 
-        public WriteResultBuilder withWriteProperty(String writeProperty) {
-            this.writeProperty = writeProperty;
+        public WriteResultBuilder withCommunityProperty(String communityProperty) {
+            this.communityProperty = communityProperty;
             return this;
         }
 
@@ -322,13 +359,25 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
             return new WriteResult(
                 loadMillis,
                 computeMillis,
+                postProcessingDuration,
                 writeMillis,
                 nodeCount,
-                colorCount,
-                ranIterations,
+                maybeCommunityCount.orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(100)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(99)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(95)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(90)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(75)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(50)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(25)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(10)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(5)).orElse(-1L),
+                maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(1)).orElse(-1L),
                 write,
+                communityProperty,
+                writeProperty,
                 didConverge,
-                writeProperty
+                ranIterations
             );
         }
     }
