@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 final class HugeIntArrayTest extends HugeArrayTestBase<int[], Integer, HugeIntArray> {
 
     @Test
-    final void shouldBinaryOrValues() {
+    void shouldBinaryOrValues() {
         testArray(10, array -> {
             int index = integer(2, 8);
             int value = integer(42, 1337);
@@ -40,7 +40,7 @@ final class HugeIntArrayTest extends HugeArrayTestBase<int[], Integer, HugeIntAr
     }
 
     @Test
-    final void shouldBinaryAndValues() {
+    void shouldBinaryAndValues() {
         testArray(10, array -> {
             int index = integer(2, 8);
             int value = integer(42, 1337);
@@ -52,7 +52,7 @@ final class HugeIntArrayTest extends HugeArrayTestBase<int[], Integer, HugeIntAr
     }
 
     @Test
-    final void shouldAddToValues() {
+    void shouldAddToValues() {
         testArray(10, array -> {
             int index = integer(2, 8);
             int value = integer(42, 1337);

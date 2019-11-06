@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 final class HugeDoubleArrayTest extends HugeArrayTestBase<double[], Double, HugeDoubleArray> {
 
     @Test
-    final void shouldAddToValues() {
+    void shouldAddToValues() {
         testArray(10, array -> {
             int index = integer(2, 8);
             int value = integer(42, 1337);
