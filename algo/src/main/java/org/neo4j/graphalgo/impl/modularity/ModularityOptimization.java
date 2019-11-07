@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.impl.coloring.K1Coloring;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.logging.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -67,14 +68,17 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private BitSet colorsUsed;
     private HugeLongArray colors;
     private HugeAtomicDoubleArray communityWeightUpdates;
+    private Log log;
 
     ModularityOptimization(
         final Graph graph,
         Direction direction,
-        int maxIterations, final int concurrency,
+        int maxIterations,
+        final int concurrency,
         final int minBatchSize,
         final ExecutorService executor,
-        final AllocationTracker tracker
+        final AllocationTracker tracker,
+        final Log log
     ) {
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
@@ -89,6 +93,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         this.nodeCommunityInfluences = HugeDoubleArray.newArray(nodeCount, tracker);
         this.communityWeights = HugeAtomicDoubleArray.newArray(nodeCount, tracker);
         this.communityWeightUpdates = HugeAtomicDoubleArray.newArray(nodeCount, tracker);
+        this.log = log;
         this.batchSize = ParallelUtil.adjustedBatchSize(
             nodeCount,
             concurrency,

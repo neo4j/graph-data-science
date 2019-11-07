@@ -21,7 +21,30 @@
 package org.neo4j.graphalgo.impl.modularity;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.impl.modularity.ModularityOptimization;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.ProcedureConfiguration;
+import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphdb.Direction;
+import org.neo4j.logging.Log;
 
 public class ModularityOptimizationFactory extends AlgorithmFactory<ModularityOptimization> {
+
+    public static final int DEFAULT_MAX_ITERATIONS = 10;
+
+    @Override
+    public ModularityOptimization build(
+        Graph graph, ProcedureConfiguration configuration, AllocationTracker tracker, Log log
+    ) {
+        return new ModularityOptimization(
+            graph,
+            configuration.getDirection(Direction.OUTGOING),
+            configuration.getIterations(DEFAULT_MAX_ITERATIONS),
+            configuration.getConcurrency(),
+            configuration.getBatchSize(),
+            Pools.DEFAULT,
+            tracker,
+            log
+        );
+    }
 }

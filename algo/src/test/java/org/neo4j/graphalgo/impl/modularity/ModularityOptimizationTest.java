@@ -30,13 +30,13 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.logging.NullLog;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 
 class ModularityOptimizationTest {
 
@@ -84,7 +84,8 @@ class ModularityOptimizationTest {
             3,
             2,
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.EMPTY,
+            NullLog.getInstance()
         );
 
         pmo.compute();
@@ -112,7 +113,8 @@ class ModularityOptimizationTest {
             3,
             2,
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.EMPTY,
+            NullLog.getInstance()
         );
 
         pmo.compute();
@@ -122,41 +124,4 @@ class ModularityOptimizationTest {
         assertTrue(pmo.getIterations() <= 3);
     }
 
-    void assertCommunities(HugeLongArray communityData, long[]... communities) {
-        for(long[] community: communities) {
-            assertSameCommunity(communityData, community);
-        }
-
-        for (int i = 0; i < communities.length; i++) {
-            for (int j = i + 1; j < communities.length; j++) {
-                assertNotEquals(
-                    communityData.get(communities[i][0]), communityData.get(communities[j][0]),
-                    String.format(
-                        "Expected node %d to be in a different community than node %d",
-                        communities[i][0],
-                        communities[j][0]
-                    )
-                );
-            }
-        }
-    }
-
-    void assertSameCommunity(HugeLongArray communities, long[] members) {
-        long expectedCommunity = communities.get(members[0]);
-
-        for (int i = 1; i < members.length; i++) {
-            long actualCommunity = communities.get(members[i]);
-            assertEquals(
-                expectedCommunity,
-                actualCommunity,
-                String.format(
-                    "Expected node %d (community %d) to have the same community as node %d (community %d)",
-                    members[i],
-                    actualCommunity,
-                    members[0],
-                    expectedCommunity
-                )
-            );
-        }
-    }
 }
