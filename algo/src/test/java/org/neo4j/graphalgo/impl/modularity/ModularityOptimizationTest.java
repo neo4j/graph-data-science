@@ -46,7 +46,7 @@ class ModularityOptimizationTest {
         "CREATE" +
         "  (a:Node {name:'a', seed1: 0, seed2: 1})" +
         ", (b:Node {name:'b', seed1: 0, seed2: 1})" +
-        ", (c:Node {name:'c', seed1: 2, seed2: 1})" +
+        ", (c:Node {name:'c', seed1: 2, seed2: 42})" +
         ", (d:Node {name:'d', seed1: 2, seed2: 42})" +
         ", (e:Node {name:'e', seed1: 2, seed2: 42})" +
         ", (f:Node {name:'f', seed1: 2, seed2: 42})" +
@@ -70,7 +70,7 @@ class ModularityOptimizationTest {
     }
 
     @Test
-    void testUnweightedLouvain() {
+    void testUnweighted() {
         Graph graph = new GraphLoader(db)
             .withAnyLabel()
             .withAnyRelationshipType()
@@ -97,7 +97,7 @@ class ModularityOptimizationTest {
     }
 
     @Test
-    void weightedLouvain() {
+    void testWeighted() {
         Graph graph = new GraphLoader(db)
             .withAnyLabel()
             .withAnyRelationshipType()
@@ -123,6 +123,70 @@ class ModularityOptimizationTest {
 
         assertEquals(0.4985, pmo.getModularity(), 0.001);
         assertCommunities(getCommunityIds(graph.nodeCount(), pmo), new long[]{0, 4, 5} , new long[]{1, 2, 3});
+        assertTrue(pmo.getIterations() <= 3);
+    }
+
+    @Test
+    void testSeedingWithBiggerSeedValues() {
+        Graph graph = new GraphLoader(db)
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .withOptionalNodeProperties(
+                PropertyMapping.of("seed2", -1)
+            )
+            .withDirection(Direction.BOTH)
+            .load(HugeGraphFactory.class);
+
+        ModularityOptimization pmo = new ModularityOptimization(
+            graph,
+            Direction.BOTH,
+            10,
+            graph.nodeProperties("seed2"),
+            1,
+            100,
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY,
+            NullLog.getInstance()
+        );
+
+        pmo.compute();
+
+        long[] actualCommunities = getCommunityIds(graph.nodeCount(), pmo);
+        assertEquals(-0.0816, pmo.getModularity(), 0.001);
+        assertCommunities(actualCommunities, new long[]{0, 1}, new long[]{2, 3, 4, 5});
+        assertTrue(actualCommunities[0] == 1 && actualCommunities[2] == 42);
+        assertTrue(pmo.getIterations() <= 3);
+    }
+
+    @Test
+    void testSeeding() {
+        Graph graph = new GraphLoader(db)
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .withOptionalNodeProperties(
+                PropertyMapping.of("seed1", -1)
+            )
+            .withDirection(Direction.BOTH)
+            .load(HugeGraphFactory.class);
+
+        ModularityOptimization pmo = new ModularityOptimization(
+            graph,
+            Direction.BOTH,
+            10,
+            graph.nodeProperties("seed1"),
+            1,
+            100,
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY,
+            NullLog.getInstance()
+        );
+
+        pmo.compute();
+
+        long[] actualCommunities = getCommunityIds(graph.nodeCount(), pmo);
+        assertEquals(-0.0816, pmo.getModularity(), 0.001);
+        assertCommunities(actualCommunities, new long[]{0, 1}, new long[]{2, 3, 4, 5});
+        assertTrue(actualCommunities[0] == 0 && actualCommunities[2] == 2);
         assertTrue(pmo.getIterations() <= 3);
     }
 

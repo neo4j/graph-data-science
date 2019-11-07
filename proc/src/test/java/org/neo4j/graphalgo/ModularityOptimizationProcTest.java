@@ -33,7 +33,6 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
-import static org.neo4j.graphalgo.CommunityHelper.assertSameCommunity;
 
 class ModularityOptimizationProcTest extends ProcTestBase {
 
@@ -55,7 +54,7 @@ class ModularityOptimizationProcTest extends ProcTestBase {
 
     private static final long[][] UNWEIGHTED_COMMUNITIES = {new long[]{0, 1, 2, 4}, new long[]{3, 5}};
     private static final long[][] WEIGHTED_COMMUNITIES = {new long[]{0, 4, 5}, new long[]{1, 2, 3}};
-    private static final long[] SEEDED_COMMUNITY = new long[]{0, 1, 2, 3, 4, 5};
+    private static final long[][] SEEDED_COMMUNITIES = {new long[]{0, 1}, new long[]{2, 3, 4, 5}};
 
 
     @BeforeEach
@@ -197,8 +196,8 @@ class ModularityOptimizationProcTest extends ProcTestBase {
             communities[(int)nodeId] = row.getNumber("community").longValue();
         });
 
-        assertSameCommunity(communities, new long[]{0, 1, 2, 3, 4, 5});
-        assertTrue(communities[0] == 0 || communities[0] == 2);
+        assertCommunities(communities, SEEDED_COMMUNITIES);
+        assertTrue(communities[0] == 0 && communities[2] == 2);
     }
 
     @Test
@@ -216,11 +215,11 @@ class ModularityOptimizationProcTest extends ProcTestBase {
             communities[i.getAndIncrement()] = row.getNumber("community").longValue();
         });
 
-        assertSameCommunity(communities, SEEDED_COMMUNITY);
-        assertTrue(communities[0] == 0 || communities[0] == 2);
+        assertCommunities(communities, SEEDED_COMMUNITIES);
+        assertTrue(communities[0] == 0 && communities[2] == 2);
     }
 
-    public void assertWriteResult(long[]... expectedCommunities) {
+    private void assertWriteResult(long[]... expectedCommunities) {
         Map<String, Object> nameMapping = MapUtil.map(
             "a", 0,
             "b", 1,
@@ -238,6 +237,4 @@ class ModularityOptimizationProcTest extends ProcTestBase {
 
         assertCommunities(actualCommunities, expectedCommunities);
     }
-
-
 }

@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.impl.modularity;
 
 import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
@@ -39,7 +40,6 @@ import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
-import java.util.stream.StreamSupport;
 
 /**
  * Implementation of parallel modularity optimization based on:
@@ -272,14 +272,10 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         }
 
         this.reverseSeedCommunityMapping = HugeLongArray.newArray(communityMapping.size(), tracker);
-        ParallelUtil.parallelStreamConsume(
-            StreamSupport.stream(communityMapping.spliterator(), true),
-            (stream) -> {
-                stream.forEach((cursor) -> {
-                    reverseSeedCommunityMapping.set(cursor.value, cursor.key);
-                });
-            }
-        );
+
+        for (LongLongCursor entry : communityMapping) {
+            reverseSeedCommunityMapping.set(entry.value, entry.key);
+        }
     }
 
 
