@@ -19,15 +19,12 @@
  */
 package org.neo4j.graphalgo.algo.similarity;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.EuclideanProc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.impl.proc.Procedures;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -40,73 +37,63 @@ import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphdb.DependencyResolver.SelectionStrategy.ONLY;
 import static org.neo4j.helpers.collection.MapUtil.map;
 
 class EuclideanTest {
 
-    private static GraphDatabaseAPI db;
-    private Transaction tx;
+    private GraphDatabaseAPI db;
     private static final String STATEMENT_STREAM =
-            "MATCH (i:Item) WITH i ORDER BY id(i) MATCH (p:Person) OPTIONAL MATCH (p)-[r:LIKES]->(i)\n" +
-            "WITH {item:id(p), weights: collect(coalesce(r.stars,$missingValue))} AS userData\n" +
-            "WITH collect(userData) AS data\n" +
-            "CALL algo.similarity.euclidean.stream(data,$config) " +
-            "YIELD item1, item2, count1, count2, intersection, similarity " +
-            "RETURN item1, item2, count1, count2, intersection, similarity " +
-            "ORDER BY item1,item2";
+            " MATCH (i:Item) WITH i ORDER BY id(i) MATCH (p:Person) OPTIONAL MATCH (p)-[r:LIKES]->(i)" +
+            " WITH {item:id(p), weights: collect(coalesce(r.stars, $missingValue))} AS userData" +
+            " WITH collect(userData) AS data" +
+            " CALL algo.similarity.euclidean.stream(data, $config) " +
+            " YIELD item1, item2, count1, count2, intersection, similarity " +
+            " RETURN item1, item2, count1, count2, intersection, similarity " +
+            " ORDER BY item1, item2";
 
     private static final String STATEMENT_CYPHER_STREAM =
-            "CALL algo.similarity.euclidean.stream($query,$config) " +
-            "YIELD item1, item2, count1, count2, intersection, similarity " +
-            "RETURN * " +
-            "ORDER BY item1,item2";
+            " CALL algo.similarity.euclidean.stream($query, $config) " +
+            " YIELD item1, item2, count1, count2, intersection, similarity " +
+            " RETURN * " +
+            " ORDER BY item1, item2";
 
     private static final String STATEMENT =
-            "MATCH (i:Item) WITH i ORDER BY id(i) MATCH (p:Person) OPTIONAL MATCH (p)-[r:LIKES]->(i)\n" +
-            "WITH {item:id(p), weights: collect(coalesce(r.stars,0))} AS userData\n" +
-            "WITH collect(userData) AS data\n" +
+            " MATCH (i:Item) WITH i ORDER BY id(i) MATCH (p:Person) OPTIONAL MATCH (p)-[r:LIKES]->(i)" +
+            " WITH {item:id(p), weights: collect(coalesce(r.stars, 0))} AS userData" +
+            " WITH collect(userData) AS data" +
 
-            "CALL algo.similarity.euclidean(data, $config) " +
-            "YIELD p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs, computations " +
-            "RETURN *";
+            " CALL algo.similarity.euclidean(data, $config) " +
+            " YIELD p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs, computations " +
+            " RETURN *";
 
     private static final String STORE_EMBEDDING_STATEMENT =
-            "MATCH (i:Item) WITH i ORDER BY id(i) MATCH (p:Person) OPTIONAL MATCH (p)-[r:LIKES]->(i)\n" +
-            "WITH p, collect(coalesce(r.stars,0)) AS userData\n" +
-            "SET p.embedding = userData";
+            " MATCH (i:Item) WITH i ORDER BY id(i) MATCH (p:Person) OPTIONAL MATCH (p)-[r:LIKES]->(i)" +
+            " WITH p, collect(coalesce(r.stars, 0)) AS userData" +
+            " SET p.embedding = userData";
 
     private static final String EMBEDDING_STATEMENT =
-            "MATCH (p:Person)\n" +
-            "WITH {item:id(p), weights: p.embedding} AS userData\n" +
-            "WITH collect(userData) AS data\n" +
+            " MATCH (p:Person)" +
+            " WITH {item:id(p), weights: p.embedding} AS userData" +
+            " WITH collect(userData) AS data" +
 
-            "CALL algo.similarity.euclidean(data, $config) " +
-            "YIELD p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs " +
-            "RETURN *";
+            " CALL algo.similarity.euclidean(data, $config) " +
+            " YIELD p25, p50, p75, p90, p95, p99, p999, p100, nodes, similarityPairs " +
+            " RETURN *";
 
-    @BeforeAll
-    static void beforeClass() throws KernelException {
+    @BeforeEach
+    void setup() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase();
-        db.getDependencyResolver().resolveDependency(Procedures.class).registerProcedure(EuclideanProc.class);
+        db.getDependencyResolver().resolveDependency(Procedures.class, ONLY).registerProcedure(EuclideanProc.class);
         db.execute(buildDatabaseQuery()).close();
     }
 
-    @AfterAll
-    static void AfterClass() {
+    @AfterEach
+    void teardown() {
         db.shutdown();
     }
 
-    @BeforeEach
-    void setUp() {
-        tx = db.beginTx();
-    }
-
-    @AfterEach
-    void tearDown() {
-        tx.close();
-    }
-
-    private static void buildRandomDB(int size) {
+    private void buildRandomDB(int size) {
         db.execute("MATCH (n) DETACH DELETE n").close();
         db.execute("UNWIND range(1,$size/10) AS _ CREATE (:Person) CREATE (:Item) ", singletonMap("size", size)).close();
         String statement =
@@ -118,7 +105,7 @@ class EuclideanTest {
         db.execute(statement, singletonMap("size", size)).close();
     }
 
-    private static String buildDatabaseQuery() {
+    private String buildDatabaseQuery() {
         return "CREATE (a:Person {name:'Alice'})\n" +
                 "CREATE (b:Person {name:'Bob'})\n" +
                 "CREATE (c:Person {name:'Charlie'})\n" +
@@ -265,8 +252,15 @@ class EuclideanTest {
 
     @Test
     void eucideanSkipStreamTest() {
-        Result results = db.execute(STATEMENT_STREAM,
-                map("config", map("concurrency", 1, "skipValue", Double.NaN), "missingValue", Double.NaN));
+        System.out.println(db.execute(
+            STATEMENT_STREAM,
+            map("config", map("concurrency", 1, "skipValue", Double.NaN), "missingValue", Double.NaN)
+        ).resultAsString());
+
+        Result results = db.execute(
+            STATEMENT_STREAM,
+            map("config", map("concurrency", 1, "skipValue", Double.NaN), "missingValue", Double.NaN)
+        );
 
         assertTrue(results.hasNext());
         assert01Skip(results.next());
@@ -503,7 +497,6 @@ class EuclideanTest {
         assertEquals(0.0, row.get("similarity"));
     }
 
-
     private void assert12(Map<String, Object> row) {
         assertEquals(1L, row.get("item1"));
         assertEquals(2L, row.get("item2"));
@@ -519,7 +512,7 @@ class EuclideanTest {
         assertEquals(2L, row.get("count1"));
         assertEquals(1L, row.get("count2"));
         // assertEquals(0L, row.get("intersection"));
-        assertEquals(0.0, row.get("similarity"));
+        assertEquals(Double.NaN, row.get("similarity"));
     }
 
     private void assert03(Map<String, Object> row) {
