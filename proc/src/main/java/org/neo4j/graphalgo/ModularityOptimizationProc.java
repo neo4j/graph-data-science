@@ -51,11 +51,11 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
     public static final String COMMUNITY_COUNT_FIELD_NAME = "communityCount";
     public static final String DEFAULT_COMMUNITY_PROPERTY = "community";
 
-    @Procedure(name = "algo.beta.modularityOptimization", mode = Mode.WRITE)
-    @Description("CALL algo.beta.modularityOptimization(" +
+    @Procedure(name = "algo.beta.modularityOptimization.write", mode = Mode.WRITE)
+    @Description("CALL algo.beta.modularityOptimization.write(" +
                  "label:String, relationship:String, " +
                  "{iterations: 10, direction: 'OUTGOING', write: true, writeProperty: null, concurrency: 4})" +
-                 "YIELD communityCount, ranIterations, didConverge, loadMillis, computeMillis, writeMillis, write, writeProperty, nodes")
+                 "YIELD modularity, communityCount, ranIterations, didConverge, loadMillis, computeMillis, writeMillis, write, writeProperty, nodes")
     public Stream<WriteResult> betaModularityOptimization(
         @Name(value = "label", defaultValue = "") String label,
         @Name(value = "relationship", defaultValue = "") String relationshipType,
@@ -79,6 +79,7 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
         Optional<String> writeProperty = setup.procedureConfig.getString(WRITE_PROPERTY_KEY);
 
         setup.builder
+            .withModularity(modularity.getModularity())
             .withRanIterations(modularity.getIterations())
             .withDidConverge(modularity.didConverge())
             .withWriteProperty(writeProperty.orElse(null));
@@ -102,11 +103,11 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
         return Stream.of(setup.builder.build());
     }
 
-    @Procedure(name = "algo.beta.modularityOptimization", mode = Mode.WRITE)
-    @Description("CALL algo.beta.modularityOptimization(" +
+    @Procedure(name = "algo.beta.modularityOptimization.stream", mode = Mode.WRITE)
+    @Description("CALL algo.beta.modularityOptimization.stream(" +
                  "label:String, relationship:String, " +
                  "{iterations: 10, direction: 'OUTGOING', write: true, writeProperty: null, concurrency: 4})" +
-                 "YIELD communityCount, ranIterations, didConverge, loadMillis, computeMillis, writeMillis, write, writeProperty, nodes")
+                 "YIELD nodeId, community")
     public Stream<StreamResult> betaModularityOptimizationStream(
         @Name(value = "label", defaultValue = "") String label,
         @Name(value = "relationship", defaultValue = "") String relationshipType,
@@ -257,7 +258,8 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
             null,
             null,
             false,
-            0
+            0,
+            0.0D
         );
 
         public final long loadMillis;
@@ -282,6 +284,7 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
         public final String writeProperty;
         public boolean didConverge;
         public long ranIterations;
+        public double modularity;
 
         WriteResult(
             long loadMillis,
@@ -304,7 +307,8 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
             String communityProperty,
             String writeProperty,
             boolean didConverge,
-            long ranIterations
+            long ranIterations,
+            double modularity
         ) {
             this.loadMillis = loadMillis;
             this.computeMillis = computeMillis;
@@ -327,6 +331,7 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
             this.writeProperty = writeProperty;
             this.didConverge = didConverge;
             this.ranIterations = ranIterations;
+            this.modularity = modularity;
         }
     }
 
@@ -334,6 +339,7 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
         private String communityProperty;
         private long ranIterations;
         private boolean didConverge;
+        private double modularity;
 
         WriteResultBuilder(ProcedureConfiguration config, AllocationTracker tracker) {
             super(config.computeHistogram(), config.computeCommunityCount(), tracker);
@@ -351,6 +357,11 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
 
         public WriteResultBuilder withCommunityProperty(String communityProperty) {
             this.communityProperty = communityProperty;
+            return this;
+        }
+
+        public WriteResultBuilder withModularity(double modularity) {
+            this.modularity = modularity;
             return this;
         }
 
@@ -377,18 +388,19 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
                 communityProperty,
                 writeProperty,
                 didConverge,
-                ranIterations
+                ranIterations,
+                modularity
             );
         }
     }
 
     public static class StreamResult {
         public final long nodeId;
-        public final long color;
+        public final long community;
 
-        public StreamResult(long nodeId, long color) {
+        public StreamResult(long nodeId, long community) {
             this.nodeId = nodeId;
-            this.color = color;
+            this.community = community;
         }
     }
 }
