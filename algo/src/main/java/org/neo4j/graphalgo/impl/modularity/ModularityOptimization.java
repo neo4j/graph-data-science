@@ -23,11 +23,13 @@ import com.carrotsearch.hppc.BitSet;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import org.neo4j.graphalgo.impl.coloring.K1Coloring;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
@@ -35,7 +37,9 @@ import org.neo4j.logging.Log;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
+import java.util.stream.StreamSupport;
 
 /**
  * Implementation of parallel modularity optimization based on:
@@ -58,6 +62,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private final HugeDoubleArray cumulativeNodeWeights;
     private final HugeDoubleArray nodeCommunityInfluences;
     private final HugeAtomicDoubleArray communityWeights;
+    private final NodeProperties seedProperty;
     private final ExecutorService executor;
     private final AllocationTracker tracker;
 
@@ -67,13 +72,16 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private double modularity = -1.0;
     private BitSet colorsUsed;
     private HugeLongArray colors;
+    private HugeLongArray reverseSeedCommunityMapping ;
     private HugeAtomicDoubleArray communityWeightUpdates;
     private Log log;
+
 
     ModularityOptimization(
         final Graph graph,
         Direction direction,
         int maxIterations,
+        NodeProperties seedProperty,
         final int concurrency,
         final int minBatchSize,
         final ExecutorService executor,
@@ -84,6 +92,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         this.nodeCount = graph.nodeCount();
         this.direction = direction;
         this.maxIterations = maxIterations;
+        this.seedProperty = seedProperty;
         this.executor = executor;
         this.concurrency = concurrency;
         this.tracker = tracker;
@@ -103,6 +112,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     }
 
     public ModularityOptimization compute() {
+        initSeeding();
         init();
         computeColoring();
 
@@ -130,7 +140,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             (nodeStream) ->
                 nodeStream.mapToDouble((nodeId) -> {
                     // Note: this map function has side effects - For performance reasons!!!11!
-                    currentCommunities.set(nodeId, nodeId);
+                    if (seedProperty == null) currentCommunities.set(nodeId, nodeId);
 
                     MutableDouble cumulativeWeight = new MutableDouble(0.0D);
 
@@ -139,7 +149,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                         return true;
                     });
 
-                    communityWeights.set(nodeId, cumulativeWeight.doubleValue());
+                    communityWeights.update(currentCommunities.get(nodeId), (acc) -> acc + cumulativeWeight.doubleValue());
 
                     cumulativeNodeWeights.set(nodeId, cumulativeWeight.doubleValue());
 
@@ -244,6 +254,34 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         return (ex / (2 * totalNodeWeight)) - (ax / (Math.pow(2 * totalNodeWeight, 2)));
     }
 
+    private void initSeeding() {
+        if (seedProperty == null) return;
+
+        HugeLongLongMap communityMapping = new HugeLongLongMap(nodeCount, tracker);
+        AtomicLong nextAvailableInternalCommunityId = new AtomicLong(-1);
+        final long maxCommunityId = seedProperty.getMaxPropertyValue().orElse(0) + 1;
+
+        for (long  nodeId = 0; nodeId < nodeCount; nodeId++) {
+            long seedCommunity = (long) seedProperty.nodeProperty(nodeId,-1);
+            seedCommunity = seedCommunity >= 0 ? seedCommunity : graph.toOriginalNodeId(nodeId) + maxCommunityId;
+            if(communityMapping.getOrDefault(seedCommunity, -1) < 0 ) {
+                communityMapping.addTo(seedCommunity, nextAvailableInternalCommunityId.incrementAndGet());
+            };
+
+            currentCommunities.set(nodeId, communityMapping.getOrDefault(seedCommunity, -1));
+        }
+
+        this.reverseSeedCommunityMapping = HugeLongArray.newArray(communityMapping.size(), tracker);
+        ParallelUtil.parallelStreamConsume(
+            StreamSupport.stream(communityMapping.spliterator(), true),
+            (stream) -> {
+                stream.forEach((cursor) -> {
+                    reverseSeedCommunityMapping.set(cursor.value, cursor.key);
+                });
+            }
+        );
+    }
+
 
     @Override
     public ModularityOptimization me() {
@@ -261,8 +299,11 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         this.colorsUsed = null;
     }
 
-    public HugeLongArray getCommunityIds() {
-        return this.currentCommunities;
+    public long getCommunityId(long nodeId) {
+        if(seedProperty == null) {
+            return currentCommunities.get(nodeId);
+        }
+        return reverseSeedCommunityMapping.get(currentCommunities.get(nodeId));
     }
 
     public int getIterations() {

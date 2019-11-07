@@ -22,11 +22,14 @@ package org.neo4j.graphalgo.impl.modularity;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
+
+import static org.neo4j.graphalgo.core.ProcedureConstants.SEED_PROPERTY_KEY;
 
 public class ModularityOptimizationFactory extends AlgorithmFactory<ModularityOptimization> {
 
@@ -36,10 +39,15 @@ public class ModularityOptimizationFactory extends AlgorithmFactory<ModularityOp
     public ModularityOptimization build(
         Graph graph, ProcedureConfiguration configuration, AllocationTracker tracker, Log log
     ) {
+        NodeProperties seedProperty = configuration.getString(SEED_PROPERTY_KEY)
+            .map(graph::nodeProperties)
+            .orElse(null);
+
         return new ModularityOptimization(
             graph,
             configuration.getDirection(Direction.OUTGOING),
             configuration.getIterations(DEFAULT_MAX_ITERATIONS),
+            seedProperty,
             configuration.getConcurrency(),
             configuration.getBatchSize(),
             Pools.DEFAULT,

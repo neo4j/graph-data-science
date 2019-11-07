@@ -81,6 +81,7 @@ class ModularityOptimizationTest {
             graph,
             Direction.BOTH,
             3,
+            null,
             3,
             2,
             Pools.DEFAULT,
@@ -91,7 +92,7 @@ class ModularityOptimizationTest {
         pmo.compute();
 
         assertEquals(0.12244, pmo.getModularity(), 0.001);
-        assertCommunities(pmo.getCommunityIds(), new long[]{0, 1, 2, 4}, new long[]{3, 5});
+        assertCommunities(getCommunityIds(graph.nodeCount(), pmo), new long[]{0, 1, 2, 4}, new long[]{3, 5});
         assertTrue(pmo.getIterations() <= 3);
     }
 
@@ -110,6 +111,7 @@ class ModularityOptimizationTest {
             graph,
             Direction.BOTH,
             3,
+            null,
             3,
             2,
             Pools.DEFAULT,
@@ -120,8 +122,15 @@ class ModularityOptimizationTest {
         pmo.compute();
 
         assertEquals(0.4985, pmo.getModularity(), 0.001);
-        assertCommunities(pmo.getCommunityIds(), new long[]{0, 4, 5} , new long[]{1, 2, 3});
+        assertCommunities(getCommunityIds(graph.nodeCount(), pmo), new long[]{0, 4, 5} , new long[]{1, 2, 3});
         assertTrue(pmo.getIterations() <= 3);
     }
 
+    private long[] getCommunityIds(long nodeCount, ModularityOptimization pmo) {
+        long[] communityIds = new long[(int)nodeCount];
+        for (int i = 0; i < nodeCount; i++) {
+            communityIds[i] = pmo.getCommunityId(i);
+        }
+        return communityIds;
+    }
 }

@@ -20,17 +20,20 @@
 
 package org.neo4j.graphalgo;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
-import java.util.Arrays;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
+import static org.neo4j.graphalgo.CommunityHelper.assertSameCommunity;
 
 class ModularityOptimizationProcTest extends ProcTestBase {
 
@@ -50,6 +53,11 @@ class ModularityOptimizationProcTest extends ProcTestBase {
         ", (c)-[:TYPE {weight: 0.01}]->(e)" +
         ", (f)-[:TYPE {weight: 0.01}]->(d)";
 
+    private static final long[][] UNWEIGHTED_COMMUNITIES = {new long[]{0, 1, 2, 4}, new long[]{3, 5}};
+    private static final long[][] WEIGHTED_COMMUNITIES = {new long[]{0, 4, 5}, new long[]{1, 2, 3}};
+    private static final long[] SEEDED_COMMUNITY = new long[]{0, 1, 2, 3, 4, 5};
+
+
     @BeforeEach
     void setup() throws KernelException {
         db = TestDatabaseCreator.createTestDatabase();
@@ -67,7 +75,7 @@ class ModularityOptimizationProcTest extends ProcTestBase {
     void writingOnImplicitlyLoadedGraph() {
         String query = "CALL algo.beta.modularityOptimization.write(" +
                        "    null, null, {" +
-                       "        write: false, direction: 'BOTH'" +
+                       "        write: true, writeProperty: 'community', direction: 'BOTH'" +
                        "    }" +
                        ")";
 
@@ -77,6 +85,8 @@ class ModularityOptimizationProcTest extends ProcTestBase {
             assertEquals(2, row.getNumber("communityCount").longValue());
             assertTrue(row.getNumber("ranIterations").longValue() <= 3);
         });
+
+        assertWriteResult(UNWEIGHTED_COMMUNITIES);
     }
 
     @Test
@@ -89,7 +99,7 @@ class ModularityOptimizationProcTest extends ProcTestBase {
         runQuery(loadQuery);
         String query = "CALL algo.beta.modularityOptimization.write(" +
                        "    null, null, {" +
-                       "        graph: 'myGraph', write: false, direction: 'BOTH'" +
+                       "        graph: 'myGraph', write: true, writeProperty: 'community', direction: 'BOTH'" +
                        "    }" +
                        ")";
 
@@ -99,6 +109,8 @@ class ModularityOptimizationProcTest extends ProcTestBase {
             assertEquals(2, row.getNumber("communityCount").longValue());
             assertTrue(row.getNumber("ranIterations").longValue() <= 3);
         });
+
+        assertWriteResult(UNWEIGHTED_COMMUNITIES);
     }
 
     @Test
@@ -111,7 +123,7 @@ class ModularityOptimizationProcTest extends ProcTestBase {
         runQuery(loadQuery);
         String query = "CALL algo.beta.modularityOptimization.write(" +
                        "    null, null, {" +
-                       "        graph: 'myGraph', write: false, direction: 'BOTH'" +
+                       "        graph: 'myGraph', write: true, writeProperty: 'community', direction: 'BOTH'" +
                        "    }" +
                        ")";
 
@@ -121,6 +133,8 @@ class ModularityOptimizationProcTest extends ProcTestBase {
             assertEquals(2, row.getNumber("communityCount").longValue());
             assertTrue(row.getNumber("ranIterations").longValue() <= 3);
         });
+
+        assertWriteResult(WEIGHTED_COMMUNITIES);
     }
 
     @Test
@@ -143,8 +157,7 @@ class ModularityOptimizationProcTest extends ProcTestBase {
             communities[(int)nodeId] = row.getNumber("community").longValue();
         });
 
-        System.out.println(Arrays.toString(communities));
-        assertCommunities(communities, new long[]{0, 1, 2, 4}, new long[]{3, 5});
+        assertCommunities(communities, UNWEIGHTED_COMMUNITIES);
     }
 
     @Test
@@ -167,7 +180,64 @@ class ModularityOptimizationProcTest extends ProcTestBase {
             communities[(int)nodeId] = row.getNumber("community").longValue();
         });
 
-        System.out.println(Arrays.toString(communities));
-        assertCommunities(communities, new long[]{0, 4, 5} , new long[]{1, 2, 3});
+        assertCommunities(communities, WEIGHTED_COMMUNITIES);
     }
+
+    @Test
+    void streamingWithSeeding() {
+        String query = "CALL algo.beta.modularityOptimization.stream(" +
+                       "    null, null, {" +
+                       "        direction: 'BOTH', seedProperty: 'seed1'" +
+                       "    }" +
+                       ") YIELD nodeId, community";
+
+        long[] communities = new long[6];
+        runQuery(query, row -> {
+            long nodeId = row.getNumber("nodeId").longValue();
+            communities[(int)nodeId] = row.getNumber("community").longValue();
+        });
+
+        assertSameCommunity(communities, new long[]{0, 1, 2, 3, 4, 5});
+        assertTrue(communities[0] == 0 || communities[0] == 2);
+    }
+
+    @Test
+    void writingWithSeeding() {
+        String query = "CALL algo.beta.modularityOptimization.write(" +
+                       "    null, null, {" +
+                       "        write: true, writeProperty: 'community', direction: 'BOTH', seedProperty: 'seed1'" +
+                       "    }" +
+                       ")";
+        runQuery(query);
+
+        long[] communities = new long[6];
+        MutableInt i = new MutableInt(0);
+        runQuery("MATCH (n) RETURN n.community as community", (row) -> {
+            communities[i.getAndIncrement()] = row.getNumber("community").longValue();
+        });
+
+        assertSameCommunity(communities, SEEDED_COMMUNITY);
+        assertTrue(communities[0] == 0 || communities[0] == 2);
+    }
+
+    public void assertWriteResult(long[]... expectedCommunities) {
+        Map<String, Object> nameMapping = MapUtil.map(
+            "a", 0,
+            "b", 1,
+            "c", 2,
+            "d", 3,
+            "e", 4,
+            "f", 5
+        );
+        long[] actualCommunities = new long[6];
+        runQuery("MATCH (n) RETURN n.name as name, n.community as community", (row) -> {
+            long community = row.getNumber("community").longValue();
+            String name = row.getString("name");
+            actualCommunities[(int) nameMapping.get(name)] = community;
+        });
+
+        assertCommunities(actualCommunities, expectedCommunities);
+    }
+
+
 }

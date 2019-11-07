@@ -27,8 +27,8 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.write.Exporter;
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.modularity.ModularityOptimization;
 import org.neo4j.graphalgo.impl.modularity.ModularityOptimizationFactory;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
@@ -44,12 +44,10 @@ import java.util.function.Supplier;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.core.ProcedureConstants.SEED_PROPERTY_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.WRITE_PROPERTY_KEY;
 
 public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimization> {
-
-    public static final String COMMUNITY_COUNT_FIELD_NAME = "communityCount";
-    public static final String DEFAULT_COMMUNITY_PROPERTY = "community";
 
     @Procedure(name = "algo.beta.modularityOptimization.write", mode = Mode.WRITE)
     @Description("CALL algo.beta.modularityOptimization.write(" +
@@ -64,6 +62,19 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
         return run(label, relationshipType, config);
     }
 
+    @Procedure(name = "algo.beta.modularityOptimization.stream", mode = Mode.WRITE)
+    @Description("CALL algo.beta.modularityOptimization.stream(" +
+                 "label:String, relationship:String, " +
+                 "{iterations: 10, direction: 'OUTGOING', write: true, writeProperty: null, concurrency: 4})" +
+                 "YIELD nodeId, community")
+    public Stream<StreamResult> betaModularityOptimizationStream(
+        @Name(value = "label", defaultValue = "") String label,
+        @Name(value = "relationship", defaultValue = "") String relationshipType,
+        @Name(value = "config", defaultValue = "null") Map<String, Object> config
+    ) {
+        return stream(label, relationshipType, config);
+    }
+
     public Stream<WriteResult> run(String label, String relationshipType, Map<String, Object> config) {
         ProcedureSetup setup = setup(label, relationshipType, config);
 
@@ -74,7 +85,7 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
 
         ModularityOptimization modularity = compute(setup);
 
-        setup.builder.withCommunityFunction(modularity.getCommunityIds()::get);
+        setup.builder.withCommunityFunction(modularity::getCommunityId);
 
         Optional<String> writeProperty = setup.procedureConfig.getString(WRITE_PROPERTY_KEY);
 
@@ -91,7 +102,7 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
             write(
                 setup.builder::timeWrite,
                 setup.graph,
-                modularity.getCommunityIds(),
+                modularity,
                 setup.procedureConfig,
                 writeProperty.get(),
                 setup.tracker
@@ -101,19 +112,6 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
         }
 
         return Stream.of(setup.builder.build());
-    }
-
-    @Procedure(name = "algo.beta.modularityOptimization.stream", mode = Mode.WRITE)
-    @Description("CALL algo.beta.modularityOptimization.stream(" +
-                 "label:String, relationship:String, " +
-                 "{iterations: 10, direction: 'OUTGOING', write: true, writeProperty: null, concurrency: 4})" +
-                 "YIELD nodeId, community")
-    public Stream<StreamResult> betaModularityOptimizationStream(
-        @Name(value = "label", defaultValue = "") String label,
-        @Name(value = "relationship", defaultValue = "") String relationshipType,
-        @Name(value = "config", defaultValue = "null") Map<String, Object> config
-    ) {
-        return stream(label, relationshipType, config);
     }
 
     public Stream<StreamResult> stream(
@@ -134,7 +132,7 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
         return LongStream.range(0, setup.graph.nodeCount())
             .mapToObj(nodeId -> {
                 long neoNodeId = setup.graph.toOriginalNodeId(nodeId);
-                return new StreamResult(neoNodeId, modularityOptimization.getCommunityIds().get(nodeId));
+                return new StreamResult(neoNodeId, modularityOptimization.getCommunityId(nodeId));
             });
     }
 
@@ -142,6 +140,11 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
     protected GraphLoader configureAlgoLoader(
         GraphLoader loader, ProcedureConfiguration config
     ) {
+        final String seedProperty = config.getString(SEED_PROPERTY_KEY, null);
+        if (seedProperty != null) {
+            loader.withOptionalNodeProperties(PropertyMapping.of(seedProperty, -1));
+        }
+
         return loader.withDirection(config.getDirection(Direction.OUTGOING));
     }
 
@@ -168,19 +171,19 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
     private void write(
         Supplier<ProgressTimer> timer,
         Graph graph,
-        HugeLongArray coloring,
+        ModularityOptimization modularityOptimization,
         ProcedureConfiguration configuration,
         String writeProperty,
         AllocationTracker tracker
     ) {
         try (ProgressTimer ignored = timer.get()) {
-            write(graph, coloring, configuration, writeProperty, tracker);
+            write(graph, modularityOptimization, configuration, writeProperty, tracker);
         }
     }
 
     private void write(
         Graph graph,
-        HugeLongArray coloring,
+        ModularityOptimization modularityOptimization,
         ProcedureConfiguration procedureConfiguration,
         String writeProperty,
         AllocationTracker tracker
@@ -197,8 +200,8 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
             .build();
         exporter.write(
             writeProperty,
-            coloring,
-            HugeLongArray.Translator.INSTANCE
+            modularityOptimization,
+            ModularityOptimizationTranslator.INSTANCE
         );
     }
 
@@ -214,6 +217,15 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
         Graph graph = loadGraph(configuration, tracker, builder);
 
         return new ProcedureSetup(builder, graph, tracker, configuration);
+    }
+
+    static final class ModularityOptimizationTranslator implements PropertyTranslator.OfLong<ModularityOptimization> {
+        public static final ModularityOptimizationTranslator INSTANCE = new ModularityOptimizationTranslator();
+
+        @Override
+        public long toLong(ModularityOptimization data, long nodeId) {
+            return data.getCommunityId(nodeId);
+        }
     }
 
     public static class ProcedureSetup {

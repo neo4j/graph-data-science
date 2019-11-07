@@ -53,6 +53,7 @@ public final class ProcedureConstants {
     public static final String RELATIONSHIP_PROPERTY_VALUE_KEY = "value";
 
     // algos specific
+    public static final String SEED_PROPERTY_KEY = "seedProperty";
 
     // graph type params
     public static final String GRAPH_IMPL_KEY = "graph";

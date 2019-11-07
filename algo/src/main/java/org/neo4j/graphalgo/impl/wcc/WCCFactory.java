@@ -28,11 +28,12 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.logging.Log;
 
+import static org.neo4j.graphalgo.core.ProcedureConstants.SEED_PROPERTY_KEY;
+
 public class WCCFactory<A extends WCC<A>> extends AlgorithmFactory<A> {
 
     public static final String CONFIG_ALGO_TYPE = "algoType";
     public static final String CONFIG_THRESHOLD = "threshold";
-    public static final String CONFIG_SEED_PROPERTY = "seedProperty";
 
     private final WCCType algorithmType;
 
@@ -53,7 +54,7 @@ public class WCCFactory<A extends WCC<A>> extends AlgorithmFactory<A> {
         int concurrency = configuration.getConcurrency();
         int minBatchSize = configuration.getBatchSize();
 
-        NodeProperties seedProperty = configuration.getString(CONFIG_SEED_PROPERTY)
+        NodeProperties seedProperty = configuration.getString(SEED_PROPERTY_KEY)
             .map(graph::nodeProperties)
             .orElse(null);
 
