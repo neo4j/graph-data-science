@@ -111,6 +111,13 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             minBatchSize,
             Integer.MAX_VALUE
         );
+
+        if(maxIterations < 1) {
+            throw new IllegalArgumentException(String.format(
+                "Need to run at least one iteration, but got %d",
+                maxIterations
+            ));
+        }
     }
 
     public ModularityOptimization compute() {

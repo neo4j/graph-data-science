@@ -36,6 +36,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.NullLog;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 import static org.neo4j.graphalgo.TestLog.INFO;
@@ -230,5 +231,28 @@ class ModularityOptimizationTest {
         assertTrue(log.containsMessage(INFO, "Initialization finished after"));
         assertTrue(log.containsMessage(INFO, "Iteration 1"));
         assertTrue(log.containsMessage(INFO, "Modularity Optimization - Finished"));
+    }
+
+    @Test
+    void requireAtLeastOneIteration() {
+        Graph graph = new GraphLoader(db)
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .withDirection(Direction.BOTH)
+            .load(HugeGraphFactory.class);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> new ModularityOptimization(
+            graph,
+            Direction.BOTH,
+            0,
+            null,
+            3,
+            2,
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY,
+            NullLog.getInstance()
+        ));
+
+        assertTrue(exception.getMessage().contains("at least one iteration"));
     }
 }

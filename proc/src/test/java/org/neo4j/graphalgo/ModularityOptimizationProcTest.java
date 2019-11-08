@@ -31,6 +31,7 @@ import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 
@@ -214,9 +215,20 @@ class ModularityOptimizationProcTest extends ProcTestBase {
         runQuery("MATCH (n) RETURN n.community as community", (row) -> {
             communities[i.getAndIncrement()] = row.getNumber("community").longValue();
         });
+    }
 
-        assertCommunities(communities, SEEDED_COMMUNITIES);
-        assertTrue(communities[0] == 0 && communities[2] == 2);
+    @Test
+    void setIterations() {
+        String query = "CALL algo.beta.modularityOptimization.write(" +
+                       "    null, null, {" +
+                       "        write: false, direction: 'BOTH', iterations: 1" +
+                       "    }" +
+                       ") YIELD didConverge, ranIterations";
+
+        runQuery(query, (row) -> {
+            assertFalse(row.getBoolean("didConverge"));
+            assertEquals(1, row.getNumber("ranIterations").longValue());
+        });
     }
 
     private void assertWriteResult(long[]... expectedCommunities) {
