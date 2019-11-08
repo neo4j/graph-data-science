@@ -27,16 +27,12 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.Intersections;
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Comparator;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
@@ -50,7 +46,6 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
 
     private HugeObjectArray<long[]> vectors;
     private long nodesToCompare;
-    private long topkComparisons;
 
     public NeighborhoodSimilarity(
             Graph graph,
@@ -86,6 +81,33 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
 
         this.vectors = HugeObjectArray.newArray(long[].class, graph.nodeCount(), tracker);
 
+        // Create a filter for which nodes to compare and calculate the neighborhood for each node
+        prepare(direction);
+
+        // Generate initial similarities
+        Stream<SimilarityResult> stream = compute();
+
+        // Compute topK if necessary
+        if (config.topk != 0) {
+            stream = topK(stream);
+        }
+
+        // Log progress
+        stream = log(stream);
+
+        // Compute topN if necessary
+        if (config.top != 0) {
+            stream = topN(stream);
+        }
+        return stream;
+    }
+
+    public SimilarityGraphResult computeToGraph(Direction direction) {
+        Graph simGraph = similarityGraph(computeToStream(direction));
+        return new SimilarityGraphResult(simGraph, nodesToCompare);
+    }
+
+    private void prepare(Direction direction) {
         vectors.setAll(node -> {
             int degree = graph.degree(node, direction);
 
@@ -102,51 +124,14 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
             }
             return null;
         });
-
-        // Generate initial similarities
-        Stream<SimilarityResult> stream = compute();
-
-        // Compute topK if necessary
-        if (config.topk != 0) {
-            stream = topK(stream);
-        }
-
-        // Log progress
-        long similarityResultCount = (config.topk > 0)
-            ? topkComparisons
-            : nodesToCompare * nodesToCompare / 2;
-        long logInterval = Math.max(1, BitUtil.nearbyPowerOfTwo(similarityResultCount / 100));
-        AtomicLong count = new AtomicLong();
-        stream = stream.peek(sim -> logProgress(count.incrementAndGet(), logInterval, similarityResultCount));
-
-        // Compute topN if necessary
-        if (config.top != 0) {
-            stream = topN(stream);
-        }
-        return stream;
-    }
-
-    // TODO: benchmark if inlining the if check in the call sites is faster. it's ugly to inline,
-    //  so unless its faster prefer to keep it here
-    private void logProgress(long currentNode, long logInterval, long nodeCount) {
-        if ((currentNode & (logInterval - 1)) == 0) {
-            progressLogger.logProgress(currentNode, nodeCount);
-        }
-    }
-
-    public SimilarityGraphResult computeToGraph(Direction direction) {
-        Graph simGraph = similarityGraph(computeToStream(direction));
-        return new SimilarityGraphResult(simGraph, nodesToCompare);
     }
 
     private Stream<SimilarityResult> compute() {
-        return LongStream.range(0, graph.nodeCount())
-            .filter(nodeFilter::get)
+        return new SetBitsIterable(nodeFilter).stream()
             .boxed()
             .flatMap(node1 -> {
                 long[] vector1 = vectors.get(node1);
-                return LongStream.range(node1 + 1, graph.nodeCount())
-                    .filter(nodeFilter::get)
+                return new SetBitsIterable(nodeFilter, node1 + 1).stream()
                     .mapToObj(node2 -> jaccard(node1, node2, vector1, vectors.get(node2)))
                     .filter(Objects::nonNull);
             });
@@ -158,8 +143,16 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         inputStream
             .flatMap(similarity -> Stream.of(similarity, similarity.reverse()))
             .forEach(topKMap);
-        topkComparisons = topKMap.size();
         return topKMap.stream();
+    }
+
+    private Stream<SimilarityResult> log(Stream<SimilarityResult> stream) {
+        long logInterval = Math.max(1, BitUtil.nearbyPowerOfTwo(nodesToCompare / 100));
+        return stream.peek(sim -> {
+            if ((sim.node1 & (logInterval - 1)) == 0) {
+                progressLogger.logProgress(sim.node1, nodesToCompare);
+            }
+        });
     }
 
     private Stream<SimilarityResult> topN(Stream<SimilarityResult> similarities) {

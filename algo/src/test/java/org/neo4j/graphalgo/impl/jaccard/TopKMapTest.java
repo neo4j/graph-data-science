@@ -61,7 +61,6 @@ class TopKMapTest {
 
         List<SimilarityResult> actual = topKMap.stream().collect(Collectors.toList());
 
-        assertEquals(expected.size(), topKMap.size());
         assertEquals(expected, actual);
     }
 
@@ -86,7 +85,6 @@ class TopKMapTest {
 
         List<SimilarityResult> actual = topKMap.stream().collect(Collectors.toList());
 
-        assertEquals(expected.size(), topKMap.size());
         assertEquals(expected, actual);
     }
 
@@ -111,7 +109,6 @@ class TopKMapTest {
 
         List<SimilarityResult> actual = topKMap.stream().collect(Collectors.toList());
 
-        assertEquals(expected.size(), topKMap.size());
         assertEquals(expected, actual);
     }
 
@@ -141,7 +138,6 @@ class TopKMapTest {
 
         List<SimilarityResult> actual = topKMap.stream().collect(Collectors.toList());
 
-        assertEquals(expected.size(), topKMap.size());
         assertEquals(expected, actual);
     }
 }

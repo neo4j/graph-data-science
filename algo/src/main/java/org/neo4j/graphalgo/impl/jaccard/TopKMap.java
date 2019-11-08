@@ -71,15 +71,6 @@ public class TopKMap implements Consumer<SimilarityResult> {
             .flatMap(node1 -> topKLists.get(node1).stream(node1));
     }
 
-    // TODO: parallelize
-    public long size() {
-        long size = 0L;
-        for (long i = 0; i < topKLists.size(); i++) {
-            size += topKLists.get(i).queue.count();
-        }
-        return size;
-    }
-
     public static final class TopKList {
 
         private final TopKLongPriorityQueue queue;

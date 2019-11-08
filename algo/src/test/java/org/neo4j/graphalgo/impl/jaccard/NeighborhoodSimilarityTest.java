@@ -424,7 +424,7 @@ final class NeighborhoodSimilarityTest {
 
         MemoryTree actual = factory.memoryEstimation().estimate(dimensions, 1);
 
-        long thisInstance = 56;
+        long thisInstance = 48;
 
         long nodeFilterRangeMin = 125016L;
         long nodeFilterRangeMax = 125016L;
@@ -476,7 +476,7 @@ final class NeighborhoodSimilarityTest {
 
         MemoryTree actual = factory.memoryEstimation().estimate(dimensions, 1);
 
-        long thisInstance = 56;
+        long thisInstance = 48;
 
         long nodeFilterRangeMin = 125016L;
         long nodeFilterRangeMax = 125016L;
