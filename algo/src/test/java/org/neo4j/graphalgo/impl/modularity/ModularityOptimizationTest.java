@@ -40,16 +40,18 @@ import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 
 class ModularityOptimizationTest {
 
+    public static final long[][] EXPECTED_SEED_COMMUNITIES = {new long[]{0, 1}, new long[]{2, 4}, new long[]{3, 5}};
+
     GraphDatabaseAPI db;
 
     static final String DB_CYPHER =
         "CREATE" +
-        "  (a:Node {name:'a', seed1: 0, seed2: 1})" +
-        ", (b:Node {name:'b', seed1: 0, seed2: 1})" +
+        "  (a:Node {name:'a', seed1: 1, seed2: 21})" +
+        ", (b:Node {name:'b'})" +
         ", (c:Node {name:'c', seed1: 2, seed2: 42})" +
-        ", (d:Node {name:'d', seed1: 2, seed2: 42})" +
+        ", (d:Node {name:'d', seed1: 3, seed2: 33})" +
         ", (e:Node {name:'e', seed1: 2, seed2: 42})" +
-        ", (f:Node {name:'f', seed1: 2, seed2: 42})" +
+        ", (f:Node {name:'f', seed1: 3, seed2: 33})" +
         ", (a)-[:TYPE {weight: 0.01}]->(b)" +
         ", (a)-[:TYPE {weight: 5.0}]->(e)" +
         ", (a)-[:TYPE {weight: 5.0}]->(f)" +
@@ -152,9 +154,9 @@ class ModularityOptimizationTest {
         pmo.compute();
 
         long[] actualCommunities = getCommunityIds(graph.nodeCount(), pmo);
-        assertEquals(-0.0816, pmo.getModularity(), 0.001);
-        assertCommunities(actualCommunities, new long[]{0, 1}, new long[]{2, 3, 4, 5});
-        assertTrue(actualCommunities[0] == 1 && actualCommunities[2] == 42);
+        assertEquals(0.0816, pmo.getModularity(), 0.001);
+        assertCommunities(actualCommunities, EXPECTED_SEED_COMMUNITIES);
+        assertTrue(actualCommunities[0] == 43 && actualCommunities[2] == 42 && actualCommunities[3] == 33);
         assertTrue(pmo.getIterations() <= 3);
     }
 
@@ -184,9 +186,9 @@ class ModularityOptimizationTest {
         pmo.compute();
 
         long[] actualCommunities = getCommunityIds(graph.nodeCount(), pmo);
-        assertEquals(-0.0816, pmo.getModularity(), 0.001);
-        assertCommunities(actualCommunities, new long[]{0, 1}, new long[]{2, 3, 4, 5});
-        assertTrue(actualCommunities[0] == 0 && actualCommunities[2] == 2);
+        assertEquals(0.0816, pmo.getModularity(), 0.001);
+        assertCommunities(actualCommunities, EXPECTED_SEED_COMMUNITIES);
+        assertTrue(actualCommunities[0] == 4 && actualCommunities[2] == 2 || actualCommunities[3] == 3);
         assertTrue(pmo.getIterations() <= 3);
     }
 
