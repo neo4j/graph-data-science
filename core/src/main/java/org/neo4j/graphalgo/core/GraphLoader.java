@@ -54,8 +54,6 @@ import java.util.concurrent.TimeUnit;
  * By default, the complete graph is loaded – no restriction based on
  * node label or relationship type is made.
  * Weights are also not loaded by default.
- *
- * @author mknobloch
  */
 public class GraphLoader {
 

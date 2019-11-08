@@ -17,22 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl;
+package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.TerminateProcedure;
-import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.TransactionFailureException;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.api.exceptions.Status;
+import org.neo4j.kernel.api.query.ExecutingQuery;
 import org.neo4j.kernel.impl.api.KernelTransactions;
-import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,6 +37,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.graphdb.DependencyResolver.SelectionStrategy.ONLY;
 
 /**        _______
  *        /       \
@@ -48,27 +46,23 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  *        (2)  (6) (5)
  *             / \
  *           (7)-(8)
- *
- * @author mknblch
  */
-class TerminationTest {
+class TerminationTest extends ProcTestBase {
 
-    private GraphDatabaseAPI api;
+    public static final String QUERY = "CALL test.testProc()";
 
     private KernelTransactions kernelTransactions;
 
     @BeforeEach
     void setup() throws KernelException {
-        api = TestDatabaseCreator.createTestDatabase();
-        final Procedures procedures = api.getDependencyResolver()
-                .resolveDependency(Procedures.class);
-        procedures.registerProcedure(TerminateProcedure.class);
-        kernelTransactions = api.getDependencyResolver().resolveDependency(KernelTransactions.class);
+        db = TestDatabaseCreator.createTestDatabase();
+        registerProcedures(TerminateProcedure.class);
+        kernelTransactions = db.getDependencyResolver().resolveDependency(KernelTransactions.class, ONLY);
     }
 
     @AfterEach
     void tearDown() {
-        api.shutdown();
+        db.shutdown();
     }
 
     // terminate a transaction by its id
@@ -88,7 +82,7 @@ class TerminationTest {
         kernelTransactions.activeTransactions()
                 .forEach(kth -> {
                     final String query = kth.executingQueries()
-                            .map(q -> q.queryText())
+                            .map(ExecutingQuery::queryText)
                             .collect(Collectors.joining(", "));
                     map.put(query, kth.lastTransactionIdWhenStarted());
                 });
@@ -96,18 +90,18 @@ class TerminationTest {
     }
 
     // find tx id to query
-    private long findQueryTxId(String query) {
-        return getQueryTransactionIds().getOrDefault(query, -1L);
+    private long findQueryTxId() {
+        return getQueryTransactionIds().getOrDefault(TerminationTest.QUERY, -1L);
     }
 
     // execute query as usual but also submits a termination thread which kills the tx after a timeout
-    private void executeAndKill(String query, long killTimeout, Result.ResultVisitor<? extends Exception> visitor) {
+    private void executeAndKill(Result.ResultVisitor<? extends Exception> visitor) {
         final ArrayList<Runnable> runnables = new ArrayList<>();
 
         // add query runnable
         runnables.add(() -> {
             try {
-                api.execute(query).accept(visitor);
+                db.execute(TerminationTest.QUERY).accept(visitor);
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new RuntimeException(e);
@@ -117,11 +111,11 @@ class TerminationTest {
         // add killer runnable
         runnables.add(() -> {
             try {
-                Thread.sleep(killTimeout);
+                Thread.sleep(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            terminateTransaction(findQueryTxId(query));
+            terminateTransaction(findQueryTxId());
         });
 
         // submit
@@ -134,7 +128,7 @@ class TerminationTest {
                 TransactionFailureException.class,
                 () -> {
                     try {
-                        executeAndKill("CALL test.testProc()", 2000L, row -> true);
+                        executeAndKill(row -> true);
                     } catch (RuntimeException e) {
                         throw e.getCause();
                     }

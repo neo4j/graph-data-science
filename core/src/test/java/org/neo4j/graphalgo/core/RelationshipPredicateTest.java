@@ -19,8 +19,8 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
 import org.neo4j.graphalgo.api.Graph;
@@ -50,29 +50,29 @@ class RelationshipPredicateTest {
             ", (b)-[:TYPE]->(c)" +
             ", (c)-[:TYPE]->(a)";
 
-    public static final Label LABEL = Label.label("Node");
+    private static final Label LABEL = Label.label("Node");
 
     private static long nodeA;
     private static long nodeB;
     private static long nodeC;
 
-    private static GraphDatabaseAPI DB;
+    private GraphDatabaseAPI db;
 
-    @BeforeAll
-    static void setupGraph() {
-        DB = TestDatabaseCreator.createTestDatabase();
-        DB.execute(DB_CYPHER);
-        try (Transaction tx = DB.beginTx()) {
-            nodeA = DB.findNode(LABEL, "name", "a").getId();
-            nodeB = DB.findNode(LABEL, "name", "b").getId();
-            nodeC = DB.findNode(LABEL, "name", "c").getId();
+    @BeforeEach
+    void setupGraph() {
+        db = TestDatabaseCreator.createTestDatabase();
+        db.execute(DB_CYPHER);
+        try (Transaction tx = db.beginTx()) {
+            nodeA = db.findNode(LABEL, "name", "a").getId();
+            nodeB = db.findNode(LABEL, "name", "b").getId();
+            nodeC = db.findNode(LABEL, "name", "c").getId();
             tx.success();
         }
     }
 
-    @AfterAll
-    static void shutdown() {
-        if (DB != null) DB.shutdown();
+    @AfterEach
+    void shutdown() {
+        db.shutdown();
     }
 
     @AllGraphTypesWithoutCypherTest
@@ -306,7 +306,7 @@ class RelationshipPredicateTest {
     }
 
     private GraphLoader loader() {
-        return new GraphLoader(DB)
+        return new GraphLoader(db)
                 .withAnyLabel()
                 .withAnyRelationshipType();
     }

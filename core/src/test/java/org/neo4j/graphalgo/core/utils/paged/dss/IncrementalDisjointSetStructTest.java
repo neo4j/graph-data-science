@@ -19,10 +19,14 @@
  */
 package org.neo4j.graphalgo.core.utils.paged.dss;
 
+import com.carrotsearch.hppc.IntIntHashMap;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+
+import java.util.OptionalLong;
+import java.util.stream.StreamSupport;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -87,5 +91,56 @@ class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
         assertMemoryEstimation(memoryEstimation(), 0, MemoryRange.of(296));
         assertMemoryEstimation(memoryEstimation(), 100, MemoryRange.of(2696));
         assertMemoryEstimation(memoryEstimation(), 100_000_000_000L, MemoryRange.of(2_400_366_211_280L));
+    }
+
+    static final class TestNodeProperties implements NodeProperties {
+        private final IntIntHashMap weights;
+
+        private TestNodeProperties(final IntIntHashMap weights) {
+            this.weights = weights;
+        }
+
+        TestNodeProperties(int... values) {
+            this(toMap(values));
+        }
+
+        private static IntIntHashMap toMap(int... values) {
+            assert values.length % 2 == 0;
+            IntIntHashMap map = new IntIntHashMap(values.length / 2);
+            for (int i = 0; i < values.length; i += 2) {
+                int key = values[i];
+                int value = values[i + 1];
+                map.put(key, value);
+            }
+            return map;
+        }
+
+        @Override
+        public double nodeProperty(long nodeId) {
+            return nodeProperty(nodeId, 0.0);
+        }
+
+        @Override
+        public double nodeProperty(long nodeId, double defaultValue) {
+            int key = Math.toIntExact(nodeId);
+            int index = weights.indexOf(key);
+            if (weights.indexExists(index)) {
+                return weights.indexGet(index);
+            }
+            return defaultValue;
+        }
+
+        @Override
+        public OptionalLong getMaxPropertyValue() {
+            return StreamSupport
+                .stream(weights.values().spliterator(), false)
+                .mapToLong(d -> d.value)
+                .max();
+        }
+
+        @Override
+        public long size() {
+            return weights.size();
+        }
     }
 }

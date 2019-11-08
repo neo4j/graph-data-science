@@ -59,7 +59,7 @@ import static org.neo4j.helpers.collection.Iterables.asSet;
 
 class GraphLoaderMultipleRelTypesAndPropertiesTest {
 
-    public static final String DB_CYPHER =
+    private static final String DB_CYPHER =
             "CREATE" +
             "  (n1:Node1 {prop1: 1})" +
             ", (n2:Node2 {prop2: 2})" +

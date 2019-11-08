@@ -45,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
-public class GraphLoaderTest {
+class GraphLoaderTest {
 
     public static final String DB_CYPHER =
             "CREATE" +

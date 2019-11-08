@@ -23,10 +23,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * @author mknblch
- *         added 30.03.2017.
- */
 class RawValuesTest {
 
     @Test

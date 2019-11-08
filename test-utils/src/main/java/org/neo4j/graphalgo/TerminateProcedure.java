@@ -29,9 +29,6 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 
-/**
- * @author mknblch
- */
 public class TerminateProcedure {
 
     @Context

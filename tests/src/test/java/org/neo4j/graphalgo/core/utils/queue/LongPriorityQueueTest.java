@@ -35,20 +35,20 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-final class LongMinPriorityQueueTest {
+final class LongPriorityQueueTest {
 
     @Test
     void testIsEmpty() {
-        final int capacity = integer(10, 20);
-        final LongMinPriorityQueue queue = new LongMinPriorityQueue(capacity);
+        int capacity = integer(10, 20);
+        LongPriorityQueue queue = LongPriorityQueue.min(capacity);
         assertEquals(queue.size(), 0);
     }
 
     @Test
     void testClear() {
-        final int maxSize = integer(3, 10);
-        final LongMinPriorityQueue queue = new LongMinPriorityQueue(maxSize);
-        final int iterations = integer(3, maxSize);
+        int maxSize = integer(3, 10);
+        LongPriorityQueue queue = LongPriorityQueue.min(maxSize);
+        int iterations = integer(3, maxSize);
         for (int i = 0; i < iterations; i++) {
             queue.add(i, integer(1, 5));
         }
@@ -59,8 +59,8 @@ final class LongMinPriorityQueueTest {
 
     @Test
     void testGrowing() {
-        final int maxSize = integer(10, 20);
-        final LongMinPriorityQueue queue = new LongMinPriorityQueue(1);
+        int maxSize = integer(10, 20);
+        LongPriorityQueue queue = LongPriorityQueue.min(1);
         for (int i = 0; i < maxSize; i++) {
             queue.add(i, integer(1, 5));
         }
@@ -69,12 +69,12 @@ final class LongMinPriorityQueueTest {
 
     @Test
     void testAdd() {
-        final int iterations = integer(5, 50);
-        final LongMinPriorityQueue queue = new LongMinPriorityQueue();
+        int iterations = integer(5, 50);
+        LongPriorityQueue queue = LongPriorityQueue.min();
         int min = -1;
         double minWeight = Double.POSITIVE_INFINITY;
         for (int i = 0; i < iterations; i++) {
-            final double weight = exclusiveDouble(0D, 100D);
+            double weight = exclusiveDouble(0D, 100D);
             if (weight < minWeight) {
                 minWeight = weight;
                 min = i;
@@ -85,14 +85,14 @@ final class LongMinPriorityQueueTest {
 
     @Test
     void testAddAndPop() {
-        final LongMinPriorityQueue queue = new LongMinPriorityQueue();
-        final List<Pair<Long, Double>> elements = new ArrayList<>();
+        LongPriorityQueue queue = LongPriorityQueue.min();
+        List<Pair<Long, Double>> elements = new ArrayList<>();
 
-        final int iterations = integer(5, 50);
+        int iterations = integer(5, 50);
         long min = -1;
         double minWeight = Double.POSITIVE_INFINITY;
         for (long i = 1; i <= iterations; i++) {
-            final double weight = exclusiveDouble(0D, 100D);
+            double weight = exclusiveDouble(0D, 100D);
             if (weight < minWeight) {
                 minWeight = weight;
                 min = i;
@@ -103,21 +103,21 @@ final class LongMinPriorityQueueTest {
 
         // PQ isn't stable for duplicate elements, so we have to
         // test those with non strict ordering requirements
-        final Map<Double, Set<Long>> byWeight = elements
+        Map<Double, Set<Long>> byWeight = elements
                 .stream()
                 .collect(Collectors.groupingBy(
                         Pair::other,
                         Collectors.mapping(Pair::first, Collectors.toSet())));
-        final List<Double> weightGroups = byWeight
+        List<Double> weightGroups = byWeight
                 .keySet()
                 .stream()
                 .sorted()
                 .collect(Collectors.toList());
 
         for (Double weight : weightGroups) {
-            final Set<Long> allowedIds = byWeight.get(weight);
+            Set<Long> allowedIds = byWeight.get(weight);
             while (!allowedIds.isEmpty()) {
-                final long item = queue.pop();
+                long item = queue.pop();
                 assertThat(allowedIds, hasItem(item));
                 allowedIds.remove(item);
             }
@@ -127,8 +127,9 @@ final class LongMinPriorityQueueTest {
     }
 
     private double exclusiveDouble(
-            final double exclusiveMin,
-            final double exclusiveMax) {
+            double exclusiveMin,
+            double exclusiveMax
+    ) {
         return RandomShortApi.Double(Math.nextUp(exclusiveMin), exclusiveMax);
     }
 }

@@ -20,8 +20,8 @@
 
 package org.neo4j.graphalgo.core;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
@@ -41,8 +41,8 @@ final class CypherExporterTest {
 
     private static GraphDatabaseAPI db;
 
-    @BeforeAll
-    static void setup() {
+    @BeforeEach
+    void setup() {
         String createGraph =
                 "CREATE (nA:Label1 { foo: 'bar' })\n" +
                 "CREATE (nB:Label1 { property: 42.1337 })\n" +
@@ -62,9 +62,9 @@ final class CypherExporterTest {
         }
     }
 
-    @AfterAll
-    static void tearDown() {
-        if (db != null) db.shutdown();
+    @AfterEach
+    void tearDown() {
+        db.shutdown();
     }
 
     @Test
