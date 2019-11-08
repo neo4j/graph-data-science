@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
+import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
@@ -37,6 +38,7 @@ import org.neo4j.logging.NullLog;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
+import static org.neo4j.graphalgo.TestLog.INFO;
 
 class ModularityOptimizationTest {
 
@@ -198,5 +200,35 @@ class ModularityOptimizationTest {
             communityIds[i] = pmo.getCommunityId(i);
         }
         return communityIds;
+    }
+
+    @Test
+    void testLogging() {
+        Graph graph = new GraphLoader(db)
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .withDirection(Direction.BOTH)
+            .load(HugeGraphFactory.class);
+
+        TestLog log = new TestLog();
+
+        ModularityOptimization pmo = new ModularityOptimization(
+            graph,
+            Direction.BOTH,
+            3,
+            null,
+            3,
+            2,
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY,
+            log
+        );
+
+        pmo.compute();
+
+        assertTrue(log.containsMessage(INFO, "Modularity Optimization - Started"));
+        assertTrue(log.containsMessage(INFO, "Initialization finished after"));
+        assertTrue(log.containsMessage(INFO, "Iteration 1"));
+        assertTrue(log.containsMessage(INFO, "Modularity Optimization - Finished"));
     }
 }

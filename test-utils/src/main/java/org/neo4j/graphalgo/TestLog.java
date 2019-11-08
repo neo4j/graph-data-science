@@ -17,46 +17,99 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.neo4j.graphalgo;
 
-import org.neo4j.logging.AbstractLog;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.Logger;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
-public class TestLog extends AbstractLog {
+public class TestLog implements Log {
+    public static String DEBUG = "debug";
+    public static String INFO = "info";
+    public static String WARN = "warn";
+    public static String ERROR = "error";
 
-    private final List<String> logMessages = new ArrayList<>();
 
-    private final Logger logger = new Logger() {
+    private final Map<String, List<String>> messages;
 
-        @Override
-        public void log(String message) {
-            logMessages.add(message);
-        }
+    public TestLog() {
+        messages = new HashMap<>(3);
+    }
 
-        @Override
-        public void log(String message, Throwable throwable) {
-            log(message);
-        }
+    public boolean containsMessage(String level, String fragment) {
+        List<String> messageList = messages.getOrDefault(level, Collections.emptyList());
+        return messageList.stream().anyMatch((message) -> message.contains(fragment));
+    }
 
-        @Override
-        public void log(String format, Object... arguments) {
-            log(String.format(format, arguments));
-        }
+    @Override
+    public void debug(String message) {
+        logMessage(DEBUG, message);
+    }
 
-        @Override
-        public void bulk(Consumer<Logger> consumer) {
-            throw new UnsupportedOperationException();
-        }
-    };
+    @Override
+    public void debug(String message, Throwable throwable) {
+        logMessage(DEBUG, message + " - Error: " + throwable.getMessage());
+    }
 
-    public List<String> getLogMessages() {
-        return logMessages;
+    @Override
+    public void debug(String format, Object... arguments) {
+        logMessage(DEBUG, String.format(format, arguments));
+    }
+
+    @Override
+    public void info(String message) {
+        logMessage(INFO, message);
+    }
+
+    @Override
+    public void info(String message, Throwable throwable) {
+        logMessage(INFO, message + " - Error: " + throwable.getMessage());
+    }
+
+    @Override
+    public void info(String format, Object... arguments) {
+        logMessage(INFO, String.format(format, arguments));
+    }
+
+    @Override
+    public void warn(String message) {
+        logMessage(WARN, message);
+    }
+
+    @Override
+    public void warn(String message, Throwable throwable) {
+        logMessage(WARN, message + " - Error: " + throwable.getMessage());
+    }
+
+    @Override
+    public void warn(String format, Object... arguments) {
+        logMessage(WARN, String.format(format, arguments));
+    }
+
+    @Override
+    public void error(String message) {
+        logMessage(ERROR, message);
+    }
+
+    @Override
+    public void error(String message, Throwable throwable) {
+        logMessage(ERROR, message + " - Error: " + throwable.getMessage());
+    }
+
+    @Override
+    public void error(String format, Object... arguments) {
+        logMessage(ERROR, String.format(format, arguments));
+    }
+
+    @Override
+    public void bulk(Consumer<Log> consumer) {
+        consumer.accept(this);
     }
 
     @Override
@@ -66,26 +119,26 @@ public class TestLog extends AbstractLog {
 
     @Override
     public Logger debugLogger() {
-        return logger;
+        return null;
     }
 
     @Override
     public Logger infoLogger() {
-        return logger;
+        return null;
     }
 
     @Override
     public Logger warnLogger() {
-        return logger;
+        return null;
     }
 
     @Override
     public Logger errorLogger() {
-        return logger;
+        return null;
     }
 
-    @Override
-    public void bulk(Consumer<Log> consumer) {
-        consumer.accept(this);
+    private void logMessage(String level, String message) {
+        List<String> messageList = messages.computeIfAbsent(level, (ignore) -> new ArrayList<>());
+        messageList.add(message);
     }
 }

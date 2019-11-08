@@ -114,11 +114,17 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     }
 
     public ModularityOptimization compute() {
+        long initStart = System.currentTimeMillis();
+        log.info("Modularity Optimization - Started");
         initSeeding();
         init();
         computeColoring();
+        log.info(String.format("Modularity Optimization - Initialization finished after %dms", System.currentTimeMillis() - initStart) );
+
 
         for(iterationCounter = 0; iterationCounter < maxIterations; iterationCounter++) {
+            long iterationStart = System.currentTimeMillis();
+
             nodeCommunityInfluences.fill(0.0);
 
             long currentColor = colorsUsed.nextSetBit(0);
@@ -127,12 +133,17 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                 currentColor = colorsUsed.nextSetBit(currentColor + 1);
             }
 
-            if (!updateModularity()) {
+            boolean hasConverged = !updateModularity();
+
+            log.info(String.format("Modularity Optimization - Iteration %d finished after %dms", iterationCounter + 1, System.currentTimeMillis() - iterationStart));
+
+            if (hasConverged) {
                 this.didConverge = true;
                 break;
             }
         }
 
+        log.info("Modularity Optimization - Finished");
         return this;
     }
 
