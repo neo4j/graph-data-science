@@ -77,7 +77,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private Log log;
 
 
-    ModularityOptimization(
+    public ModularityOptimization(
         final Graph graph,
         Direction direction,
         int maxIterations,
