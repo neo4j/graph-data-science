@@ -40,7 +40,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 import static org.neo4j.graphalgo.TestLog.INFO;
-import static org.neo4j.graphalgo.impl.pagerank.PageRank.DEFAULT_TOLERANCE;
 
 class ModularityOptimizationTest {
 
