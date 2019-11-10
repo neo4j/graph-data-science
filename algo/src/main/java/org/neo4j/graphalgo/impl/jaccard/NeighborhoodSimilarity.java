@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.Intersections;
+import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphdb.Direction;
@@ -85,7 +86,9 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         prepare(direction);
 
         // Generate initial similarities
-        Stream<SimilarityResult> stream = compute();
+        Stream<SimilarityResult> stream = config.concurrency > 1
+            ? computeParallel()
+            : compute();
 
         // Compute topK if necessary
         if (config.topk != 0) {
@@ -135,6 +138,18 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
                     .mapToObj(node2 -> jaccard(node1, node2, vector1, vectors.get(node2)))
                     .filter(Objects::nonNull);
             });
+    }
+
+    private Stream<SimilarityResult> computeParallel() {
+        return ParallelUtil.parallelStream(
+            new SetBitsIterable(nodeFilter).stream(), stream -> stream.boxed()
+                .flatMap(node1 -> {
+                    long[] vector1 = vectors.get(node1);
+                    return new SetBitsIterable(nodeFilter, node1 + 1).stream()
+                        .mapToObj(node2 -> jaccard(node1, node2, vector1, vectors.get(node2)))
+                        .filter(Objects::nonNull);
+                })
+        );
     }
 
     private Stream<SimilarityResult> topK(Stream<SimilarityResult> inputStream) {

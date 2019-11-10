@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -139,5 +140,31 @@ class TopKMapTest {
         List<SimilarityResult> actual = topKMap.stream().collect(Collectors.toList());
 
         assertEquals(expected, actual);
+    }
+
+    // This test fails because for equal results, which ones are retained depends on insertion order
+    // That's fine single-threaded because insertion order is deterministic (order of node ids)
+    // but running in parallel we don't know insertion order and result becomes non-deterministic
+    @Test
+    void shouldRetainSameResultsIndependentOnInsertionOrder() {
+        List<SimilarityResult> input = new ArrayList<>();
+        input.add(new SimilarityResult(0, 1, 10.0));
+        input.add(new SimilarityResult(0, 6, 10.0));
+        input.add(new SimilarityResult(0, 2, 10.0));
+        input.add(new SimilarityResult(0, 5, 10.0));
+        input.add(new SimilarityResult(0, 3, 10.0));
+        input.add(new SimilarityResult(0, 4, 10.0));
+
+        TopKMap topKMap1 = new TopKMap(input.size(), 3, SimilarityResult.ASCENDING, AllocationTracker.EMPTY);
+        TopKMap topKMap2 = new TopKMap(input.size(), 3, SimilarityResult.ASCENDING, AllocationTracker.EMPTY);
+
+        input.forEach(topKMap1);
+        Collections.reverse(input);
+        input.forEach(topKMap2);
+
+        List<SimilarityResult> result = topKMap1.stream().collect(Collectors.toList());
+        List<SimilarityResult> resultReversedInputOrder = topKMap2.stream().collect(Collectors.toList());
+
+        assertEquals(result, resultReversedInputOrder);
     }
 }

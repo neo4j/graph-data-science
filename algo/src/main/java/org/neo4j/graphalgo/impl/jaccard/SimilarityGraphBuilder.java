@@ -162,7 +162,7 @@ public class SimilarityGraphBuilder {
         }
 
         @Override
-        public void accept(SimilarityResult result) {
+        public synchronized void accept(SimilarityResult result) {
             buffer.add(
                 result.node1,
                 result.node2,
