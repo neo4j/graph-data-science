@@ -26,7 +26,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -58,7 +57,7 @@ class TopKMapTest {
 
         TopKMap topKMap = new TopKMap(input.size(), 1, SimilarityResult.DESCENDING, AllocationTracker.EMPTY);
 
-        input.forEach(topKMap);
+        input.forEach(sim -> topKMap.accept(sim.node1, sim.node2, sim.similarity));
 
         List<SimilarityResult> actual = topKMap.stream().collect(Collectors.toList());
 
@@ -82,7 +81,7 @@ class TopKMapTest {
 
         TopKMap topKMap = new TopKMap(input.size(), 3, SimilarityResult.DESCENDING, AllocationTracker.EMPTY);
 
-        input.forEach(topKMap);
+        input.forEach(sim -> topKMap.accept(sim.node1, sim.node2, sim.similarity));
 
         List<SimilarityResult> actual = topKMap.stream().collect(Collectors.toList());
 
@@ -106,7 +105,7 @@ class TopKMapTest {
 
         TopKMap topKMap = new TopKMap(input.size(), 3, SimilarityResult.ASCENDING, AllocationTracker.EMPTY);
 
-        input.forEach(topKMap);
+        input.forEach(sim -> topKMap.accept(sim.node1, sim.node2, sim.similarity));
 
         List<SimilarityResult> actual = topKMap.stream().collect(Collectors.toList());
 
@@ -135,7 +134,7 @@ class TopKMapTest {
 
         TopKMap topKMap = new TopKMap(input.size(), 3, comparator, AllocationTracker.EMPTY);
 
-        input.forEach(topKMap);
+        input.forEach(sim -> topKMap.accept(sim.node1, sim.node2, sim.similarity));
 
         List<SimilarityResult> actual = topKMap.stream().collect(Collectors.toList());
 

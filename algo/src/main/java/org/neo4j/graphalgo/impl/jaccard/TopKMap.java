@@ -29,12 +29,11 @@ import org.neo4j.graphalgo.core.utils.queue.LongPriorityQueue;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.PrimitiveIterator;
-import java.util.function.Consumer;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class TopKMap implements Consumer<SimilarityResult> {
+public class TopKMap {
 
     static MemoryEstimation memoryEstimation(long items, int topk) {
         return MemoryEstimations.builder(TopKMap.class)
@@ -60,9 +59,8 @@ public class TopKMap implements Consumer<SimilarityResult> {
         );
     }
 
-    @Override
-    public void accept(SimilarityResult similarityResult) {
-        topKLists.get(similarityResult.node1).accept(similarityResult);
+    public void accept(long node1, long node2, double similarity) {
+        topKLists.get(node1).accept(node2, similarity);
     }
 
     public Stream<SimilarityResult> stream() {
@@ -79,8 +77,8 @@ public class TopKMap implements Consumer<SimilarityResult> {
             this.queue = queue;
         }
 
-        void accept(SimilarityResult similarityResult) {
-            queue.offer(similarityResult.node2, similarityResult.similarity);
+        void accept(long node2, double similarity) {
+            queue.offer(node2, similarity);
         }
 
         Stream<SimilarityResult> stream(long node1) {

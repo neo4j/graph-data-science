@@ -94,9 +94,10 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
                 stream = computeParallel();
             }
         } else {
-            stream = compute();
             if (config.topk != 0) {
-                stream = topK(stream.flatMap(similarity -> Stream.of(similarity, similarity.reverse())));
+                stream = computeTopK();
+            } else {
+                stream = compute();
             }
         }
 
@@ -157,24 +158,42 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         );
     }
 
-    private Stream<SimilarityResult> computeParallelTopK() {
-        Stream<SimilarityResult> result = ParallelUtil.parallelStream(
-            new SetBitsIterable(nodeFilter).stream(), stream -> stream.boxed()
-                .flatMap(node1 -> {
-                    long[] vector1 = vectors.get(node1);
-                    return new SetBitsIterable(nodeFilter).stream()
-                        .filter(node2 -> node1 != node2)
-                        .mapToObj(node2 -> jaccard(node1, node2, vector1, vectors.get(node2)))
-                        .filter(Objects::nonNull);
-                })
-        );
-        return topK(result);
-    }
-
-    private Stream<SimilarityResult> topK(Stream<SimilarityResult> inputStream) {
+    private Stream<SimilarityResult> computeTopK() {
         Comparator<SimilarityResult> comparator = config.topk > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
         TopKMap topKMap = new TopKMap(vectors.size(), Math.abs(config.topk), comparator, tracker);
-        inputStream.forEach(topKMap);
+        new SetBitsIterable(nodeFilter).stream()
+            .forEach(node1 -> {
+                long[] vector1 = vectors.get(node1);
+                new SetBitsIterable(nodeFilter, node1 + 1).stream()
+                    .forEach(node2 -> {
+                        double similarity = jaccardPrimitive(node1, node2, vector1, vectors.get(node2));
+                        if (!Double.isNaN(similarity)) {
+                            topKMap.accept(node1, node2, similarity);
+                            topKMap.accept(node2, node1, similarity);
+                        }
+                    });
+            });
+        return topKMap.stream();
+    }
+
+    private Stream<SimilarityResult> computeParallelTopK() {
+        Comparator<SimilarityResult> comparator = config.topk > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
+        TopKMap topKMap = new TopKMap(vectors.size(), Math.abs(config.topk), comparator, tracker);
+        ParallelUtil.parallelStreamConsume(
+            new SetBitsIterable(nodeFilter).stream(),
+            stream -> stream
+                .forEach(node1 -> {
+                    long[] vector1 = vectors.get(node1);
+                    new SetBitsIterable(nodeFilter).stream()
+                        .filter(node2 -> node1 != node2)
+                        .forEach(node2 -> {
+                            double similarity = jaccardPrimitive(node1, node2, vector1, vectors.get(node2));
+                            if (!Double.isNaN(similarity)) {
+                                topKMap.accept(node1, node2, similarity);
+                            }
+                        });
+                })
+        );
         return topKMap.stream();
     }
 
@@ -199,6 +218,13 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         return similarity >= config.similarityCutoff ? new SimilarityResult(node1, node2, similarity) : null;
     }
 
+    private double jaccardPrimitive(long node1, long node2, long[] vector1, long[] vector2) {
+        long intersection = Intersections.intersection3(vector1, vector2);
+        double union = vector1.length + vector2.length - intersection;
+        double similarity = union == 0 ? 0 : intersection / union;
+        return similarity >= config.similarityCutoff ? similarity : Double.NaN;
+    }
+
     private Graph similarityGraph(Stream<SimilarityResult> similarities) {
         SimilarityGraphBuilder builder = new SimilarityGraphBuilder(graph, tracker);
         return builder.build(similarities);
@@ -207,7 +233,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     public static final class Config {
 
         private final double similarityCutoff;
-        private final double degreeCutoff;
+        private final int degreeCutoff;
 
         private final int top;
         private final int topk;
@@ -244,7 +270,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
             return similarityCutoff;
         }
 
-        public double degreeCutoff() {
+        public int degreeCutoff() {
             return degreeCutoff;
         }
 

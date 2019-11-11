@@ -27,9 +27,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -58,6 +58,8 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
+import static org.neo4j.graphalgo.TestSupport.crossArguments;
+import static org.neo4j.graphalgo.TestSupport.toArguments;
 import static org.neo4j.graphdb.Direction.BOTH;
 import static org.neo4j.graphdb.Direction.INCOMING;
 import static org.neo4j.graphdb.Direction.OUTGOING;
@@ -102,14 +104,16 @@ final class NeighborhoodSimilarityTest {
     private static final int COMPARED_ITEMS = 3;
     private static final int COMPARED_PERSONS = 4;
 
-    static final NeighborhoodSimilarity.Config DEFAULT_CONFIG = new NeighborhoodSimilarity.Config(
-        0.0,
-        1,
-        0,
-        0,
-        Pools.DEFAULT_CONCURRENCY,
-        ParallelUtil.DEFAULT_BATCH_SIZE
-    );
+    private static ConfigBuilder configBuilder() {
+        return new ConfigBuilder(new NeighborhoodSimilarity.Config(
+            0.0,
+            1,
+            0,
+            0,
+            Pools.DEFAULT_CONCURRENCY,
+            ParallelUtil.DEFAULT_BATCH_SIZE
+        )); 
+    }
 
     static {
         EXPECTED_OUTGOING.add(new SimilarityResult(0, 1, 2 / 3.0));
@@ -155,13 +159,23 @@ final class NeighborhoodSimilarityTest {
         EXPECTED_INCOMING_DEGREE_CUTOFF.add(new SimilarityResult(5, 6, 1 / 2.0));
     }
 
+    private static Stream<Integer> concurrencies() {
+        return Stream.of(1, 4);
+    }
+
     static Stream<Arguments> supportedLoadAndComputeDirections() {
-        return Stream.of(
+        Stream<Arguments> directions = Stream.of(
             arguments("OUTGOING", "OUTGOING"),
             arguments("BOTH", "OUTGOING"),
             arguments("INCOMING", "INCOMING"),
             arguments("BOTH", "INCOMING")
         );
+        return crossArguments(() -> directions, toArguments(NeighborhoodSimilarityTest::concurrencies));
+    }
+
+    static Stream<Arguments> topKAndConcurrencies() {
+        Stream<Integer> topKStream = Stream.of(0, 100);
+        return TestSupport.crossArguments(toArguments(() -> topKStream), toArguments(NeighborhoodSimilarityTest::concurrencies));
     }
 
     private GraphDatabaseAPI db;
@@ -177,9 +191,9 @@ final class NeighborhoodSimilarityTest {
         db.shutdown();
     }
 
-    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}")
+    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeForSupportedDirections(Direction loadDirection, Direction algoDirection) {
+    void shouldComputeForSupportedDirections(Direction loadDirection, Direction algoDirection, int concurrency) {
         Graph graph = new GraphLoader(db)
             .withAnyLabel()
             .withAnyRelationshipType()
@@ -188,19 +202,21 @@ final class NeighborhoodSimilarityTest {
 
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
-            DEFAULT_CONFIG,
+            configBuilder().withConcurrency(concurrency).toConfig(),
             AllocationTracker.EMPTY
         );
 
-        Set<SimilarityResult> result = neighborhoodSimilarity.computeToStream(algoDirection).collect(Collectors.toSet());
+        Set<SimilarityResult> result = neighborhoodSimilarity
+            .computeToStream(algoDirection)
+            .collect(Collectors.toSet());
         neighborhoodSimilarity.release();
 
         assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING : EXPECTED_OUTGOING, result);
     }
 
-    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}")
+    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeTopForSupportedDirections(Direction loadDirection, Direction algoDirection) {
+    void shouldComputeTopForSupportedDirections(Direction loadDirection, Direction algoDirection, int concurrency) {
         Graph graph = new GraphLoader(db)
             .withAnyLabel()
             .withAnyRelationshipType()
@@ -209,19 +225,21 @@ final class NeighborhoodSimilarityTest {
 
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
-            new NeighborhoodSimilarity.Config(0.0, 0, 1, 0, Pools.DEFAULT_CONCURRENCY, ParallelUtil.DEFAULT_BATCH_SIZE),
+            configBuilder().withConcurrency(concurrency).withTop(1).toConfig(),
             AllocationTracker.EMPTY
         );
 
-        Set<SimilarityResult> result = neighborhoodSimilarity.computeToStream(algoDirection).collect(Collectors.toSet());
+        Set<SimilarityResult> result = neighborhoodSimilarity
+            .computeToStream(algoDirection)
+            .collect(Collectors.toSet());
         neighborhoodSimilarity.release();
 
         assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_TOP_1 : EXPECTED_OUTGOING_TOP_1, result);
     }
 
-    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}")
+    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeTopKForSupportedDirections(Direction loadDirection, Direction algoDirection) {
+    void shouldComputeTopKForSupportedDirections(Direction loadDirection, Direction algoDirection, int concurrency) {
         Graph graph = new GraphLoader(db)
             .withAnyLabel()
             .withAnyRelationshipType()
@@ -230,19 +248,21 @@ final class NeighborhoodSimilarityTest {
 
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
-            new NeighborhoodSimilarity.Config(0.0, 0, 0, 1, Pools.DEFAULT_CONCURRENCY, ParallelUtil.DEFAULT_BATCH_SIZE),
+            configBuilder().withTopK(1).withConcurrency(concurrency).toConfig(),
             AllocationTracker.EMPTY
         );
 
-        Set<SimilarityResult> result = neighborhoodSimilarity.computeToStream(algoDirection).collect(Collectors.toSet());
+        Set<SimilarityResult> result = neighborhoodSimilarity
+            .computeToStream(algoDirection)
+            .collect(Collectors.toSet());
         neighborhoodSimilarity.release();
 
         assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_TOPK_1 : EXPECTED_OUTGOING_TOPK_1, result);
     }
 
-    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}")
+    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeNegativeTopKForSupportedDirections(Direction loadDirection, Direction algoDirection) {
+    void shouldComputeNegativeTopKForSupportedDirections(Direction loadDirection, Direction algoDirection, int concurrency) {
         Graph graph = new GraphLoader(db)
             .withAnyLabel()
             .withAnyRelationshipType()
@@ -251,7 +271,7 @@ final class NeighborhoodSimilarityTest {
 
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
-            new NeighborhoodSimilarity.Config(0.0, 0, 0, -1, Pools.DEFAULT_CONCURRENCY, ParallelUtil.DEFAULT_BATCH_SIZE),
+            configBuilder().withConcurrency(concurrency).withTopK(-1).toConfig(),
             AllocationTracker.EMPTY
         );
 
@@ -259,15 +279,17 @@ final class NeighborhoodSimilarityTest {
 
         assertGraphEquals(
             algoDirection == INCOMING
-                ? fromGdl("(i1)-[{w: 0.50000D}]->(i3), (i2)-[{w: 0.50000D}]->(i3), (i3)-[{w: 0.500000D}]->(i1), (d), (e), (f), (g), (h)")
-                : fromGdl("(a)-[{w: 0.333333D}]->(c), (b)-[{w: 0.00000D}]->(c), (c)-[{w: 0.000000D}]->(b), (d)-[{w: 0.333333D}]->(c), (e), (f), (g), (h)")
+                ? fromGdl(
+                "(i1)-[{w: 0.50000D}]->(i3), (i2)-[{w: 0.50000D}]->(i3), (i3)-[{w: 0.500000D}]->(i1), (d), (e), (f), (g), (h)")
+                : fromGdl(
+                "(a)-[{w: 0.333333D}]->(c), (b)-[{w: 0.00000D}]->(c), (c)-[{w: 0.000000D}]->(b), (d)-[{w: 0.333333D}]->(c), (e), (f), (g), (h)")
             , similarityGraph
         );
     }
 
-    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}")
+    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeWithSimilarityCutoffForSupportedDirections(Direction loadDirection, Direction algoDirection) {
+    void shouldComputeWithSimilarityCutoffForSupportedDirections(Direction loadDirection, Direction algoDirection, int concurrency) {
         Graph graph = new GraphLoader(db)
             .withAnyLabel()
             .withAnyRelationshipType()
@@ -276,19 +298,24 @@ final class NeighborhoodSimilarityTest {
 
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
-            new NeighborhoodSimilarity.Config(0.1, 0, 0, 0, Pools.DEFAULT_CONCURRENCY, ParallelUtil.DEFAULT_BATCH_SIZE),
+            configBuilder().withConcurrency(concurrency).withSimilarityCutoff(0.1).toConfig(),
             AllocationTracker.EMPTY
         );
 
-        Set<SimilarityResult> result = neighborhoodSimilarity.computeToStream(algoDirection).collect(Collectors.toSet());
+        Set<SimilarityResult> result = neighborhoodSimilarity
+            .computeToStream(algoDirection)
+            .collect(Collectors.toSet());
         neighborhoodSimilarity.release();
 
-        assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_SIMILARITY_CUTOFF : EXPECTED_OUTGOING_SIMILARITY_CUTOFF, result);
+        assertEquals(
+            algoDirection == INCOMING ? EXPECTED_INCOMING_SIMILARITY_CUTOFF : EXPECTED_OUTGOING_SIMILARITY_CUTOFF,
+            result
+        );
     }
 
-    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}")
+    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeWithDegreeCutoffForSupportedDirections(Direction loadDirection, Direction algoDirection) {
+    void shouldComputeWithDegreeCutoffForSupportedDirections(Direction loadDirection, Direction algoDirection, int concurrency) {
         Graph graph = new GraphLoader(db)
             .withAnyLabel()
             .withAnyRelationshipType()
@@ -297,18 +324,24 @@ final class NeighborhoodSimilarityTest {
 
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
-            new NeighborhoodSimilarity.Config(0.0, 2, 0, 0, Pools.DEFAULT_CONCURRENCY, ParallelUtil.DEFAULT_BATCH_SIZE),
+            configBuilder().withDegreeCutoff(2).withConcurrency(concurrency).toConfig(),
             AllocationTracker.EMPTY
         );
 
-        Set<SimilarityResult> result = neighborhoodSimilarity.computeToStream(algoDirection).collect(Collectors.toSet());
+        Set<SimilarityResult> result = neighborhoodSimilarity
+            .computeToStream(algoDirection)
+            .collect(Collectors.toSet());
         neighborhoodSimilarity.release();
 
-        assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_DEGREE_CUTOFF : EXPECTED_OUTGOING_DEGREE_CUTOFF, result);
+        assertEquals(
+            algoDirection == INCOMING ? EXPECTED_INCOMING_DEGREE_CUTOFF : EXPECTED_OUTGOING_DEGREE_CUTOFF,
+            result
+        );
     }
 
-    @Test
-    void shouldComputeForUndirectedGraphs() {
+    @ParameterizedTest(name = "concurrency = {0}")
+    @MethodSource("concurrencies")
+    void shouldComputeForUndirectedGraphs(int concurrency) {
         Graph graph = new GraphLoader(db)
             .withAnyLabel()
             .withAnyRelationshipType()
@@ -317,7 +350,7 @@ final class NeighborhoodSimilarityTest {
 
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
-            DEFAULT_CONFIG,
+            configBuilder().withConcurrency(concurrency).toConfig(),
             AllocationTracker.EMPTY
         );
         Set<SimilarityResult> result = neighborhoodSimilarity.computeToStream(OUTGOING).collect(Collectors.toSet());
@@ -325,9 +358,9 @@ final class NeighborhoodSimilarityTest {
         assertNotEquals(Collections.emptySet(), result);
     }
 
-    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}")
+    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeSimilarityGraphInAllSupportedDirections(Direction loadDirection, Direction algoDirection) {
+    void shouldComputeSimilarityGraphInAllSupportedDirections(Direction loadDirection, Direction algoDirection, int concurrency) {
         Graph graph = new GraphLoader(db)
             .withAnyLabel()
             .withAnyRelationshipType()
@@ -336,16 +369,20 @@ final class NeighborhoodSimilarityTest {
 
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
-            DEFAULT_CONFIG,
+            configBuilder().withConcurrency(concurrency).toConfig(),
             AllocationTracker.EMPTY
         );
 
         SimilarityGraphResult similarityGraphResult = neighborhoodSimilarity.computeToGraph(algoDirection);
-        assertEquals(algoDirection == INCOMING ? COMPARED_ITEMS : COMPARED_PERSONS, similarityGraphResult.comparedNodes());
+        assertEquals(
+            algoDirection == INCOMING ? COMPARED_ITEMS : COMPARED_PERSONS,
+            similarityGraphResult.comparedNodes()
+        );
         Graph resultGraph = similarityGraphResult.similarityGraph();
         assertGraphEquals(
             algoDirection == INCOMING
-                ? fromGdl("(a), (b), (c), (d), (e), (f)-[{property: 1.000000D}]->(g), (f)-[{property: 0.500000D}]->(h), (g)-[{property: 0.500000D}]->(h)")
+                ? fromGdl(
+                "(a), (b), (c), (d), (e), (f)-[{property: 1.000000D}]->(g), (f)-[{property: 0.500000D}]->(h), (g)-[{property: 0.500000D}]->(h)")
                 : fromGdl("(a)-[{property: 0.666667D}]->(b)" +
                           ", (a)-[{property: 0.333333D}]->(c)" +
                           ", (a)-[{property: 1.000000D}]->(d)" +
@@ -359,8 +396,9 @@ final class NeighborhoodSimilarityTest {
         resultGraph.release();
     }
 
-    @Test
-    void shouldThrowForDirectionBoth() {
+    @ParameterizedTest(name = "concurrency = {0}")
+    @MethodSource("concurrencies")
+    void shouldThrowForDirectionBoth(int concurrency) {
         Graph graph = new GraphLoader(db)
             .withAnyLabel()
             .withAnyRelationshipType()
@@ -371,16 +409,16 @@ final class NeighborhoodSimilarityTest {
             IllegalArgumentException.class,
             () -> new NeighborhoodSimilarity(
                 graph,
-                DEFAULT_CONFIG,
+                configBuilder().withConcurrency(concurrency).toConfig(),
                 AllocationTracker.EMPTY
             ).computeToStream(BOTH)
         );
         assertThat(ex.getMessage(), containsString("Direction BOTH is not supported"));
     }
 
-    @ParameterizedTest(name = "topk = {0}")
-    @ValueSource(ints = {0, 100})
-    void shouldLogProgress(int topk) {
+    @ParameterizedTest(name = "topk = {0}, concurrency = {1}")
+    @MethodSource("topKAndConcurrencies")
+    void shouldLogProgress(int topk, int concurrency) {
         TestLog log = new TestLog();
 
         Graph graph = new GraphLoader(db)
@@ -391,7 +429,7 @@ final class NeighborhoodSimilarityTest {
 
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
-            new NeighborhoodSimilarity.Config(0.0, 0, 100, topk, Pools.DEFAULT_CONCURRENCY, ParallelUtil.DEFAULT_BATCH_SIZE),
+            configBuilder().withTop(100).withTopK(topk).withConcurrency(concurrency).toConfig(),
             AllocationTracker.EMPTY
         ).withProgressLogger(log);
 
@@ -503,6 +541,60 @@ final class NeighborhoodSimilarityTest {
             .build().estimate(dimensions, 1);
 
         assertEquals(expected.memoryUsage(), actual.memoryUsage());
+    }
+
+    private static class ConfigBuilder {
+        private final NeighborhoodSimilarity.Config config;
+        private int concurrency;
+        private int topK;
+        private int top;
+        private int degreeCutoff;
+        private double similarityCutoff;
+
+        ConfigBuilder(NeighborhoodSimilarity.Config config) {
+            this.config = config;
+            this.concurrency = config.concurrency();
+            this.top = config.top();
+            this.topK = config.topk();
+            this.degreeCutoff = config.degreeCutoff();
+            this.similarityCutoff = config.similarityCutoff();
+        }
+
+        ConfigBuilder withConcurrency(int concurrency) {
+            this.concurrency = concurrency;
+            return this;
+        }
+
+        ConfigBuilder withTop(int top) {
+            this.top = top;
+            return this;
+        }
+
+        ConfigBuilder withTopK(int topK) {
+            this.topK = topK;
+            return this;
+        }
+
+        ConfigBuilder withDegreeCutoff(int degreeCutoff) {
+            this.degreeCutoff = degreeCutoff;
+            return this;
+        }
+
+        ConfigBuilder withSimilarityCutoff(double similarityCutoff) {
+            this.similarityCutoff = similarityCutoff;
+            return this;
+        }
+
+        NeighborhoodSimilarity.Config toConfig() {
+            return new NeighborhoodSimilarity.Config(
+                similarityCutoff,
+                degreeCutoff,
+                top,
+                topK,
+                concurrency,
+                config.minBatchSize()
+            );
+        }
     }
 }
 
