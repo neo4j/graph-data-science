@@ -127,7 +127,7 @@ class ModularityOptimizationTest {
         pmo.compute();
 
         assertEquals(0.4985, pmo.getModularity(), 0.001);
-        assertCommunities(getCommunityIds(graph.nodeCount(), pmo), new long[]{0, 4, 5} , new long[]{1, 2, 3});
+        assertCommunities(getCommunityIds(graph.nodeCount(), pmo), new long[]{0, 4, 5}, new long[]{1, 2, 3});
         assertTrue(pmo.getIterations() <= 3);
     }
 
@@ -196,7 +196,7 @@ class ModularityOptimizationTest {
     }
 
     private long[] getCommunityIds(long nodeCount, ModularityOptimization pmo) {
-        long[] communityIds = new long[(int)nodeCount];
+        long[] communityIds = new long[(int) nodeCount];
         for (int i = 0; i < nodeCount; i++) {
             communityIds[i] = pmo.getCommunityId(i);
         }
@@ -241,17 +241,20 @@ class ModularityOptimizationTest {
             .withDirection(Direction.BOTH)
             .load(HugeGraphFactory.class);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> new ModularityOptimization(
-            graph,
-            Direction.BOTH,
-            0,
-            null,
-            3,
-            2,
-            Pools.DEFAULT,
-            AllocationTracker.EMPTY,
-            NullLog.getInstance()
-        ));
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> new ModularityOptimization(
+                graph,
+                Direction.BOTH,
+                0,
+                null,
+                3,
+                2,
+                Pools.DEFAULT,
+                AllocationTracker.EMPTY,
+                NullLog.getInstance()
+            )
+        );
 
         assertTrue(exception.getMessage().contains("at least one iteration"));
     }

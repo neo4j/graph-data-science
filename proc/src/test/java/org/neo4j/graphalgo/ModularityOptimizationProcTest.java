@@ -81,7 +81,7 @@ class ModularityOptimizationProcTest extends ProcTestBase {
 
         runQuery(query, row -> {
             assertEquals(true, row.getBoolean("didConverge"));
-            assertEquals(0.12244, row.getNumber("modularity").doubleValue(),0.001);
+            assertEquals(0.12244, row.getNumber("modularity").doubleValue(), 0.001);
             assertEquals(2, row.getNumber("communityCount").longValue());
             assertTrue(row.getNumber("ranIterations").longValue() <= 3);
         });
@@ -105,7 +105,7 @@ class ModularityOptimizationProcTest extends ProcTestBase {
 
         runQuery(query, row -> {
             assertEquals(true, row.getBoolean("didConverge"));
-            assertEquals(0.12244, row.getNumber("modularity").doubleValue(),0.001);
+            assertEquals(0.12244, row.getNumber("modularity").doubleValue(), 0.001);
             assertEquals(2, row.getNumber("communityCount").longValue());
             assertTrue(row.getNumber("ranIterations").longValue() <= 3);
         });
@@ -129,7 +129,7 @@ class ModularityOptimizationProcTest extends ProcTestBase {
 
         runQuery(query, row -> {
             assertEquals(true, row.getBoolean("didConverge"));
-            assertEquals(0.4985, row.getNumber("modularity").doubleValue(),0.001);
+            assertEquals(0.4985, row.getNumber("modularity").doubleValue(), 0.001);
             assertEquals(2, row.getNumber("communityCount").longValue());
             assertTrue(row.getNumber("ranIterations").longValue() <= 3);
         });
@@ -154,7 +154,7 @@ class ModularityOptimizationProcTest extends ProcTestBase {
         long[] communities = new long[6];
         runQuery(query, row -> {
             long nodeId = row.getNumber("nodeId").longValue();
-            communities[(int)nodeId] = row.getNumber("community").longValue();
+            communities[(int) nodeId] = row.getNumber("community").longValue();
         });
 
         assertCommunities(communities, UNWEIGHTED_COMMUNITIES);
@@ -177,7 +177,7 @@ class ModularityOptimizationProcTest extends ProcTestBase {
         long[] communities = new long[6];
         runQuery(query, row -> {
             long nodeId = row.getNumber("nodeId").longValue();
-            communities[(int)nodeId] = row.getNumber("community").longValue();
+            communities[(int) nodeId] = row.getNumber("community").longValue();
         });
 
         assertCommunities(communities, WEIGHTED_COMMUNITIES);
@@ -194,7 +194,7 @@ class ModularityOptimizationProcTest extends ProcTestBase {
         long[] communities = new long[6];
         runQuery(query, row -> {
             long nodeId = row.getNumber("nodeId").longValue();
-            communities[(int)nodeId] = row.getNumber("community").longValue();
+            communities[(int) nodeId] = row.getNumber("community").longValue();
         });
 
         assertCommunities(communities, SEEDED_COMMUNITIES);

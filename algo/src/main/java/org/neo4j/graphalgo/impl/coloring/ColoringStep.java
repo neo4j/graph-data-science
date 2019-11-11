@@ -64,13 +64,13 @@ public final class ColoringStep implements Runnable {
 
                 found.setFalse();
                 nextColor.setValue(0);
-                while(!found.booleanValue()) {
+                while (!found.booleanValue()) {
                     found.setTrue();
                     graph.forEachRelationship(nodeId, direction, (s, target) -> {
                         if (s != target && colors.get(target) == nextColor.getValue()) {
-                             nextColor.increment();
-                             found.setFalse();
-                             return false;
+                            nextColor.increment();
+                            found.setFalse();
+                            return false;
                         }
                         return true;
                     });

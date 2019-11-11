@@ -65,6 +65,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private final NodeProperties seedProperty;
     private final ExecutorService executor;
     private final AllocationTracker tracker;
+    private final Log log;
 
     private int iterationCounter;
     private boolean didConverge = false;
@@ -74,8 +75,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private HugeLongArray colors;
     private HugeLongArray reverseSeedCommunityMapping ;
     private HugeAtomicDoubleArray communityWeightUpdates;
-    private Log log;
-
 
     public ModularityOptimization(
         final Graph graph,

@@ -154,13 +154,20 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
     }
 
     private ModularityOptimization compute(ProcedureSetup setup) {
-        final ModularityOptimization modularityOptimization = newAlgorithm(setup.graph, setup.procedureConfig, setup.tracker);
+        final ModularityOptimization modularityOptimization = newAlgorithm(
+            setup.graph,
+            setup.procedureConfig,
+            setup.tracker
+        );
         ModularityOptimization algoResult = runWithExceptionLogging(
             ModularityOptimization.class.getSimpleName() + "failed",
             () -> setup.builder.timeEval(modularityOptimization::compute)
         );
 
-        log.info(ModularityOptimization.class.getSimpleName() + ": overall memory usage %s", setup.tracker.getUsageString());
+        log.info(
+            ModularityOptimization.class.getSimpleName() + ": overall memory usage %s",
+            setup.tracker.getUsageString()
+        );
 
         modularityOptimization.release();
         setup.graph.releaseTopology();
