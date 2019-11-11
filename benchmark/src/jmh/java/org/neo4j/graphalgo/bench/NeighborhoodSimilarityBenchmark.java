@@ -87,6 +87,15 @@ public class NeighborhoodSimilarityBenchmark {
         ParallelUtil.DEFAULT_BATCH_SIZE
     );
 
+    private static final NeighborhoodSimilarity.Config TOPK_CONFIG_SINGLE_THREADED = new NeighborhoodSimilarity.Config(
+        0.0,
+        0,
+        0,
+        100,
+        1,
+        ParallelUtil.DEFAULT_BATCH_SIZE
+    );
+
     @Setup
     public void setup() {
         db = TestDatabaseCreator.createTestDatabase();
@@ -113,6 +122,11 @@ public class NeighborhoodSimilarityBenchmark {
 
     @Benchmark
     public void neighborhoodSimilarityToStreamTopK(Blackhole blackhole) {
+        initAlgo(TOPK_CONFIG_SINGLE_THREADED).computeToStream(Direction.OUTGOING).forEach(blackhole::consume);
+    }
+
+    @Benchmark
+    public void neighborhoodSimilarityParallelToStreamTopK(Blackhole blackhole) {
         initAlgo(TOPK_CONFIG).computeToStream(Direction.OUTGOING).forEach(blackhole::consume);
     }
 

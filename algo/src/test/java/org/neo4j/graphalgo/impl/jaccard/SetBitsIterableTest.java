@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
@@ -109,5 +110,24 @@ class SetBitsIterableTest {
 
         List<Long> actual = new SetBitsIterable(bitSet, bound).stream().boxed().collect(Collectors.toList());
         assertEquals(emptyList(), actual);
+    }
+
+    @Test
+    void shouldOnlyParallelizeOnTheOuterStream() {
+        int endExclusive = 1_000;
+
+        BitSet bitSet = new BitSet(endExclusive);
+        LongStream.range(0, endExclusive).forEach(bitSet::set);
+
+        // When parallelizing the outer stream and collecting one result per outerVal and thread
+        Set<String> actual = new SetBitsIterable(bitSet).stream().parallel().boxed().flatMap(
+            outerVal -> new SetBitsIterable(bitSet, outerVal + 1).stream()
+                .mapToObj(innerVal -> String.format("%d handled by %s", outerVal, Thread.currentThread().getName()))
+        ).collect(Collectors.toSet());
+
+        // There should be exactly one result per outerVal, because each inner iteration is handled by exactly one thread
+        int expected = endExclusive - 1;
+
+        assertEquals(expected, actual.size());
     }
 }

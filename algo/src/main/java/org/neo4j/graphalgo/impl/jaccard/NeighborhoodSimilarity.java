@@ -86,13 +86,18 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         prepare(direction);
 
         // Generate initial similarities
-        Stream<SimilarityResult> stream = config.concurrency > 1
-            ? computeParallel()
-            : compute();
-
-        // Compute topK if necessary
-        if (config.topk != 0) {
-            stream = topK(stream);
+        Stream<SimilarityResult> stream;
+        if (config.concurrency > 1) {
+            if (config.topk != 0) {
+                stream = computeParallelTopK();
+            } else {
+                stream = computeParallel();
+            }
+        } else {
+            stream = compute();
+            if (config.topk != 0) {
+                stream = topK(stream.flatMap(similarity -> Stream.of(similarity, similarity.reverse())));
+            }
         }
 
         // Log progress
@@ -152,12 +157,24 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         );
     }
 
+    private Stream<SimilarityResult> computeParallelTopK() {
+        Stream<SimilarityResult> result = ParallelUtil.parallelStream(
+            new SetBitsIterable(nodeFilter).stream(), stream -> stream.boxed()
+                .flatMap(node1 -> {
+                    long[] vector1 = vectors.get(node1);
+                    return new SetBitsIterable(nodeFilter).stream()
+                        .filter(node2 -> node1 != node2)
+                        .mapToObj(node2 -> jaccard(node1, node2, vector1, vectors.get(node2)))
+                        .filter(Objects::nonNull);
+                })
+        );
+        return topK(result);
+    }
+
     private Stream<SimilarityResult> topK(Stream<SimilarityResult> inputStream) {
         Comparator<SimilarityResult> comparator = config.topk > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
         TopKMap topKMap = new TopKMap(vectors.size(), Math.abs(config.topk), comparator, tracker);
-        inputStream
-            .flatMap(similarity -> Stream.of(similarity, similarity.reverse()))
-            .forEach(topKMap);
+        inputStream.forEach(topKMap);
         return topKMap.stream();
     }
 
