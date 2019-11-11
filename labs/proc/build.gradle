@@ -1,0 +1,7 @@
+description = 'Neo4j Labs :: Graph Algorithms :: Procedures'
+
+dependencies {
+    compile project(':proc')
+    compile project(':labs-algo')
+    testCompile project(':test-utils')
+}
