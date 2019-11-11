@@ -41,8 +41,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
 
-import static org.neo4j.graphalgo.core.utils.ParallelUtil.parallelForEachNode;
-
 /**
  * Implementation of parallel modularity optimization based on:
  *
@@ -186,7 +184,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         K1Coloring coloring = new K1Coloring(
             graph,
             direction,
-            10,
+            3,
             (int) batchSize,
             concurrency,
             executor,
@@ -279,43 +277,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
         final long maxSeedCommunity = seedProperty.getMaxPropertyValue().orElse(0);
 
-        if (maxSeedCommunity < nodeCount ) {
-           fillSeedCommunities(maxSeedCommunity);
-        } else {
-           remapSeedCommunities(maxSeedCommunity);
-        }
-    }
-
-    private void fillSeedCommunities(long maxSeedCommunity) {
-        BitSet freeNodeIds = new BitSet(nodeCount);
-        freeNodeIds.set(0, nodeCount);
-
-        parallelForEachNode(graph, (nodeId) -> {
-            long seedCommunity = (long) seedProperty.nodeProperty(nodeId, -1);
-            if (seedCommunity != -1) {
-                freeNodeIds.clear(seedCommunity);
-            }
-        });
-
-        AtomicLong counter = new AtomicLong(0);
-        parallelForEachNode(graph, (nodeId) -> {
-            long seedCommunity = (long) seedProperty.nodeProperty(nodeId, -1);
-            if (seedCommunity != -1) {
-                currentCommunities.set(nodeId, seedCommunity);
-            } else {
-                long currentCounterValue;
-                long nextFreeCommunity;
-                do {
-                    currentCounterValue = counter.get();
-                    nextFreeCommunity = freeNodeIds.nextSetBit(currentCounterValue + 1);
-                } while(!counter.compareAndSet(currentCounterValue, nextFreeCommunity));
-
-                currentCommunities.set(nodeId, nextFreeCommunity);
-            }
-        });
-    }
-
-    private void remapSeedCommunities(long maxSeedCommunity) {
         HugeLongLongMap communityMapping = new HugeLongLongMap(nodeCount, tracker);
         AtomicLong nextAvailableInternalCommunityId = new AtomicLong(-1);
 
@@ -335,7 +296,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             reverseSeedCommunityMapping.set(entry.value, entry.key);
         }
     }
-
 
     @Override
     public ModularityOptimization me() {
