@@ -35,11 +35,11 @@ import java.util.stream.StreamSupport;
 class SetBitsIterable implements Iterable<Long> {
 
     private final BitSet set;
-    private final long start;
+    private final long offset;
 
-    SetBitsIterable(BitSet set, long index) {
+    SetBitsIterable(BitSet set, long offset) {
         this.set = set;
-        this.start = index;
+        this.offset = offset;
     }
 
     SetBitsIterable(BitSet set) {
@@ -48,7 +48,7 @@ class SetBitsIterable implements Iterable<Long> {
 
     @Override
     public PrimitiveIterator.OfLong iterator() {
-        return new Iterator(start);
+        return new Iterator(offset);
     }
 
     LongStream stream() {
@@ -60,11 +60,11 @@ class SetBitsIterable implements Iterable<Long> {
         return Spliterators.spliterator(
             iterator(),
             set.cardinality(),
-            Spliterator.ORDERED | Spliterator.SORTED | Spliterator.IMMUTABLE | Spliterator.NONNULL
+            Spliterator.ORDERED | Spliterator.SORTED | Spliterator.IMMUTABLE | Spliterator.NONNULL | Spliterator.DISTINCT
         );
     }
 
-    class Iterator implements PrimitiveIterator.OfLong {
+    private final class Iterator implements PrimitiveIterator.OfLong {
 
         long value;
 

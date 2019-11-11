@@ -87,14 +87,14 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
 
         // Generate initial similarities
         Stream<SimilarityResult> stream;
-        if (config.concurrency > 1) {
-            if (config.topk != 0) {
+        if (config.isParallel()) {
+            if (config.hasTopK()) {
                 stream = computeParallelTopK();
             } else {
                 stream = computeParallel();
             }
         } else {
-            if (config.topk != 0) {
+            if (config.hasTopK()) {
                 stream = computeTopK();
             } else {
                 stream = compute();
@@ -105,7 +105,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         stream = log(stream);
 
         // Compute topN if necessary
-        if (config.top != 0) {
+        if (config.hasTop()) {
             stream = topN(stream);
         }
         return stream;
@@ -148,7 +148,8 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
 
     private Stream<SimilarityResult> computeParallel() {
         return ParallelUtil.parallelStream(
-            new SetBitsIterable(nodeFilter).stream(), stream -> stream.boxed()
+            new SetBitsIterable(nodeFilter).stream(), stream -> stream
+                .boxed()
                 .flatMap(node1 -> {
                     long[] vector1 = vectors.get(node1);
                     return new SetBitsIterable(nodeFilter, node1 + 1).stream()
@@ -280,6 +281,18 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
 
         public int minBatchSize() {
             return minBatchSize;
+        }
+
+        public boolean isParallel() {
+            return concurrency > 1;
+        }
+
+        public boolean hasTopK() {
+            return topk != 0;
+        }
+
+        public boolean hasTop() {
+            return top != 0;
         }
     }
 
