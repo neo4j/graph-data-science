@@ -59,6 +59,7 @@ import static org.neo4j.graphalgo.impl.louvain.Louvain.DEFAULT_WEIGHT;
  *
  * @author mknblch
  */
+@Deprecated
 public final class ModularityOptimization extends Algorithm<ModularityOptimization> {
 
     private static final MemoryEstimation MEMORY_ESTIMATION_TASK = MemoryEstimations
