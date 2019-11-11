@@ -476,8 +476,8 @@ final class NeighborhoodSimilarityTest {
         long graphRangeMax = 212614704L;
         MemoryRange graphRange = MemoryRange.of(graphRangeMin, graphRangeMax);
 
-        long topKMapRangeMin = 1088000016L;
-        long topKMapRangeMax = 5056000016L;
+        long topKMapRangeMin = 1088000024L;
+        long topKMapRangeMax = 5056000024L;
         MemoryRange topKRange = MemoryRange.of(topKMapRangeMin, topKMapRangeMax);
 
         MemoryTree expected = MemoryEstimations.builder()
@@ -528,8 +528,8 @@ final class NeighborhoodSimilarityTest {
         long graphRangeMax = 8651112L;
         MemoryRange graphRange = MemoryRange.of(graphRangeMin, graphRangeMax);
 
-        long topKMapRangeMin = 1088000016L;
-        long topKMapRangeMax = 5056000016L;
+        long topKMapRangeMin = 1088000024L;
+        long topKMapRangeMax = 5056000024L;
         MemoryRange topKRange = MemoryRange.of(topKMapRangeMin, topKMapRangeMax);
 
         MemoryTree expected = MemoryEstimations.builder()

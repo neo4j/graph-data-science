@@ -20,6 +20,7 @@
 
 package org.neo4j.graphalgo.impl.jaccard;
 
+import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -29,11 +30,12 @@ import org.neo4j.graphalgo.core.utils.queue.LongPriorityQueue;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.PrimitiveIterator;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class TopKMap {
+
+    private final BitSet nodeFilter;
 
     static MemoryEstimation memoryEstimation(long items, int topk) {
         return MemoryEstimations.builder(TopKMap.class)
@@ -48,14 +50,21 @@ public class TopKMap {
 
     private final HugeObjectArray<TopKList> topKLists;
 
-    TopKMap(long items, int topK, Comparator<SimilarityResult> comparator, AllocationTracker tracker) {
+    TopKMap(
+        long items,
+        BitSet nodeFilter,
+        int topK,
+        Comparator<SimilarityResult> comparator,
+        AllocationTracker tracker
+    ) {
+        this.nodeFilter = nodeFilter;
         int boundedTopK = (int) Math.min(topK, items);
         topKLists = HugeObjectArray.newArray(TopKList.class, items, tracker);
-        topKLists.setAll(node1 -> new TopKList(
-            comparator.equals(SimilarityResult.ASCENDING)
+        topKLists.setAll(node1 -> nodeFilter.get(node1)
+            ? new TopKList(comparator.equals(SimilarityResult.ASCENDING)
                 ? TopKLongPriorityQueue.min(boundedTopK)
                 : TopKLongPriorityQueue.max(boundedTopK)
-            )
+            ) : null
         );
     }
 
@@ -64,7 +73,7 @@ public class TopKMap {
     }
 
     public Stream<SimilarityResult> stream() {
-        return LongStream.range(0, topKLists.size())
+        return new SetBitsIterable(nodeFilter).stream()
             .boxed()
             .flatMap(node1 -> topKLists.get(node1).stream(node1));
     }

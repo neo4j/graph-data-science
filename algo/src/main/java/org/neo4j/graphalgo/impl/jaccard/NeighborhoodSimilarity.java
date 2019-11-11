@@ -160,7 +160,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
 
     private Stream<SimilarityResult> computeTopK() {
         Comparator<SimilarityResult> comparator = config.topk > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
-        TopKMap topKMap = new TopKMap(vectors.size(), Math.abs(config.topk), comparator, tracker);
+        TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.topk), comparator, tracker);
         new SetBitsIterable(nodeFilter).stream()
             .forEach(node1 -> {
                 long[] vector1 = vectors.get(node1);
@@ -178,7 +178,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
 
     private Stream<SimilarityResult> computeParallelTopK() {
         Comparator<SimilarityResult> comparator = config.topk > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
-        TopKMap topKMap = new TopKMap(vectors.size(), Math.abs(config.topk), comparator, tracker);
+        TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.topk), comparator, tracker);
         ParallelUtil.parallelStreamConsume(
             new SetBitsIterable(nodeFilter).stream(),
             stream -> stream

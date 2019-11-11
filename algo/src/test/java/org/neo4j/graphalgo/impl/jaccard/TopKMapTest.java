@@ -20,6 +20,7 @@
 
 package org.neo4j.graphalgo.impl.jaccard;
 
+import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -55,7 +56,10 @@ class TopKMapTest {
         input.add(new SimilarityResult(0, 6, 30.0));
         input.addAll(input.stream().map(SimilarityResult::reverse).collect(Collectors.toList()));
 
-        TopKMap topKMap = new TopKMap(input.size(), 1, SimilarityResult.DESCENDING, AllocationTracker.EMPTY);
+        BitSet bitSet = new BitSet();
+        bitSet.set(0, input.size());
+
+        TopKMap topKMap = new TopKMap(input.size(), bitSet, 1, SimilarityResult.DESCENDING, AllocationTracker.EMPTY);
 
         input.forEach(sim -> topKMap.accept(sim.node1, sim.node2, sim.similarity));
 
@@ -79,7 +83,10 @@ class TopKMapTest {
         input.add(new SimilarityResult(0, 3, 15.0));
         input.add(new SimilarityResult(0, 4, 20.0));
 
-        TopKMap topKMap = new TopKMap(input.size(), 3, SimilarityResult.DESCENDING, AllocationTracker.EMPTY);
+        BitSet bitSet = new BitSet();
+        bitSet.set(0, input.size());
+
+        TopKMap topKMap = new TopKMap(input.size(), bitSet, 3, SimilarityResult.DESCENDING, AllocationTracker.EMPTY);
 
         input.forEach(sim -> topKMap.accept(sim.node1, sim.node2, sim.similarity));
 
@@ -103,7 +110,10 @@ class TopKMapTest {
         input.add(new SimilarityResult(0, 3, 15.0));
         input.add(new SimilarityResult(0, 4, 20.0));
 
-        TopKMap topKMap = new TopKMap(input.size(), 3, SimilarityResult.ASCENDING, AllocationTracker.EMPTY);
+        BitSet bitSet = new BitSet();
+        bitSet.set(0, input.size());
+
+        TopKMap topKMap = new TopKMap(input.size(), bitSet, 3, SimilarityResult.ASCENDING, AllocationTracker.EMPTY);
 
         input.forEach(sim -> topKMap.accept(sim.node1, sim.node2, sim.similarity));
 
@@ -132,7 +142,10 @@ class TopKMapTest {
         input.add(new SimilarityResult(0, 1, 20.0));
         input.add(new SimilarityResult(0, 5, 20.0));
 
-        TopKMap topKMap = new TopKMap(input.size(), 3, comparator, AllocationTracker.EMPTY);
+        BitSet bitSet = new BitSet();
+        bitSet.set(0, input.size());
+
+        TopKMap topKMap = new TopKMap(input.size(), bitSet, 3, comparator, AllocationTracker.EMPTY);
 
         input.forEach(sim -> topKMap.accept(sim.node1, sim.node2, sim.similarity));
 
