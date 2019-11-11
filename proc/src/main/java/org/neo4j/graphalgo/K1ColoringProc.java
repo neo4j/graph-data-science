@@ -98,8 +98,7 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
 
         setup.builder
             .withRanIterations(coloring.ranIterations())
-            .withDidConverge(coloring.didConverge())
-            .withWriteProperty(writeProperty.orElse(null));
+            .withDidConverge(coloring.didConverge());
 
         if (setup.procedureConfig.isWriteFlag() && writeProperty.isPresent() && !writeProperty.get().equals("")) {
             setup.builder.withWrite(true);

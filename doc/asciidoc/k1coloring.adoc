@@ -16,12 +16,14 @@ This topic includes:
 [[algorithms-k1coloring-intro]]
 == Introduction
 
-The K-1 Coloring algorithm assigns a color to every node in the graph, trying to optimize for two objectives.
-The first objective is to make sure that every neighbor of a given node has a different color than the node itself.
-The second objective is to use as few colors as possible.
+The K-1 Coloring algorithm assigns a color to every node in the graph, trying to optimize for two objectives:
 
-Note that the implemented algorithm is a greedy algorithm.
-Thus it is neither guaranteed that the result is an optimal solution, using as few colors as theoretically possible (NP-complete!), nor does it always produce a correct result where no two neighboring nodes have different colors.
+1. To make sure that every neighbor of a given node has a different color than the node itself.
+2. To use as few colors as possible.
+
+Note that the graph coloring problem is proven to be NP-complete, which makes it intractable on anything but trivial graph sizes.
+For that reason the implemented algorithm is a greedy algorithm.
+Thus it is neither guaranteed that the result is an optimal solution, using as few colors as theoretically possible, nor does it always produce a correct result where no two neighboring nodes have different colors.
 However the precision of the latter can be controlled by the number of iterations this algorithm runs.
 
 For more information on this algorithm, see:
@@ -67,10 +69,10 @@ YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
 | readConcurrency   | int     | value of 'concurrency'    | yes      | The number of concurrent threads used for reading the graph.
 | writeConcurrency  | int     | value of 'concurrency'    | yes      | The number of concurrent threads used for writing the result.
 | write             | boolean | `true`                    | yes      | Specifies if the result should be written back as a node property.
-| writeProperty     | string  | `'color'`             | yes      | The property name written back the ID of the partition particular node belongs to.
+| writeProperty     | string  |                           | yes      | The property name written back the ID of the partition particular node belongs to.
 | graph             | string  | `'huge'`                  | yes      | Use `'huge'` when describing the subset of the graph with node label and relationship type parameters. Use `'cypher'` for describing the subset using Cypher queries for nodes and relationships.
 | iterations        | int     | 10                        | yes      | The maximum number of iterations the algorithms runs with.
-| batchSize         | int     | 10_000                    | yes      | Cummulative degree used for partioning the graph.
+| batchSize         | int     | 10_000                    | yes      | Controls the the number of relationships each parallel thread processes.
 |===
 
 .Results
@@ -82,7 +84,7 @@ YIELD nodes, setCount, loadMillis, computeMillis, writeMillis
 | writeMillis          | int     | Milliseconds for writing result data back.
 | nodes                | int     | The number of nodes considered.
 | ranIterations        | int     | The actual number of iterations the algorithm ran.
-| didConverge          | boolean | An indicator of wether the algorithm found a correct coloring.
+| didConverge          | boolean | An indicator of whether the algorithm found a correct coloring.
 | colorCount           | int     | The number of colors used.
 | write                | boolean | Specifies if the result was written back as a node property.
 | writeProperty        | string  | The property name written back to.
@@ -115,7 +117,7 @@ YIELD nodeId, color
 | readConcurrency   | int     | value of 'concurrency'    | yes      | The number of concurrent threads used for reading the graph.
 | graph             | string  | `'huge'`                  | yes      | Use `'huge'` when describing the subset of the graph with node label and relationship type parameters. Use `'cypher'` for describing the subset using Cypher queries for nodes and relationships.
 | iterations        | int     | 10                        | yes      | The maximum number of iterations the algorithms runs with.
-| batchSize         | int     | 10_000                    | yes      | Cummulative degree used for partioning the graph.
+| batchSize         | int     | 10_000                    | yes      | Controls the the number of relationships each parallel thread processes.
 |===
 
 .Results
@@ -145,14 +147,14 @@ CREATE (nAlice)-[:LINK]->(nDoug)
 CREATE (nBridget)-[:LINK]->(nCharles)
 ----
 
-This graph has a super node with name "Alice" that connects to every other.
-It should therefore not be possible for any other node to be assigned to the color that Alice will be assigned to.
+This graph has a super node with name "Alice" that connects to all other nodes.
+It should therefore not be possible for any other node to be assigned to the color as the Alice node.
 In the following examples we will demonstrate using the K-1 Coloring algorithm on this graph.
 
 [[algorithms-k1coloring-examples-projection]]
 === Named graphs and Cypher projections
 
-In the examples above, we have relied on the _implicit_ loading of graphs for the algorithm computation.
+In the examples below, we will rely on the _implicit_ loading of graphs for the algorithm computation.
 However, like other algorithms K-1 Coloring also accepts _named graphs_ and _Cypher projections_ as inputs.
 See <<projected-graph-model, Projected Graph Model>> for more details.
 
@@ -164,13 +166,13 @@ CALL algo.graph.load('myGraph', 'User', 'LINK');
 CALL algo.k1coloring.stream(null, null, {graph: 'myGraph'})
 YIELD nodeId, color
 RETURN algo.asNode(nodeId).name AS Name, color AS Color
-ORDER BY Color, Name;
+ORDER BY Name;
 ----
 
 .Results
 [opts="header",cols="1m,1m"]
 |===
-| Name      | ComponentId
+| Name      | Color
 | "Alice"   | 2
 | "Bridget" | 1
 | "Charles" | 0
@@ -188,13 +190,13 @@ CALL algo.k1coloring.stream(
 )
 YIELD nodeId, color
 RETURN algo.asNode(nodeId).name AS Name, color AS Color
-ORDER BY Color, Name
+ORDER BY Name
 ----
 
 .Results
 [opts="header",cols="1m,1m"]
 |===
-| Name      | ComponentId
+| Name      | Color
 | "Alice"   | 2
 | "Bridget" | 1
 | "Charles" | 0
