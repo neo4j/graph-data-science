@@ -39,6 +39,11 @@
             </d:tocentry>
         </d:tocentry>
 
+        <d:tocentry linkend="algorithms-auxiliary"><?dbhtml filename="algorithms/auxiliary/index.html"?>
+            <d:tocentry linkend="algorithms-k1coloring"><?dbhtml filename="algorithms/k1coloring/index.html"?>
+            </d:tocentry>
+        </d:tocentry>
+
         <d:tocentry linkend="labs-algorithms"><?dbhtml filename="labs-algorithms/index.html"?>
             <d:tocentry linkend="labs-procedures"><?dbhtml filename="labs-procedures/index.html"?>
             </d:tocentry>

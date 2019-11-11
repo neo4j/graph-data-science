@@ -33,6 +33,7 @@ The guide covers the following areas:
 * <<algorithms-centrality>> -- A detailed guide to each of the centrality algorithms, including use-cases and examples.
 * <<algorithms-community>> -- A detailed guide to each of the community detection algorithms, including use-cases and examples.
 * <<algorithms-graph-similarity>> -- A detailed guide to each of the similarity detection algorithms, including use-cases and examples.
+* <<algorithms-auxiliary>> -- A detailed guide to each of the auxiliary procedures, including use-cases and examples.
 
 
 In addition to the above algorithms, there are a large number of algorithm implementations developed as part of Neo4j Labs.
@@ -61,6 +62,8 @@ include::algorithms-centrality.adoc[leveloffset=+1]
 include::algorithms-community-detection.adoc[leveloffset=+1]
 
 include::algorithms-graph-similarity.adoc[leveloffset=+1]
+
+include::algorithms-auxiliary.adoc[leveloffset=+1]
 
 include::labs-algorithms.adoc[leveloffset=+1]
 
