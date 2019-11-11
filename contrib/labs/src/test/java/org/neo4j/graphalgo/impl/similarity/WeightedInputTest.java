@@ -271,5 +271,19 @@ class WeightedInputTest {
         assertEquals(0.0, similarityResult.similarity, 0.01);
     }
 
+    @Test
+    void euclideanNoOverlap() {
+        double[] weights1 = new double[]{1,Double.NaN, 2};
+        double[] weights2 = new double[]{Double.NaN, 3, Double.NaN};
+
+        WeightedInput input1 = new WeightedInput(1, weights1);
+        WeightedInput input2 = new WeightedInput(2, weights2);
+
+        SimilarityResult similarityResult = input1.sumSquareDeltaSkip(null, -1.0, input2, Double.NaN, true);
+
+        assertEquals(Double.NaN, similarityResult.similarity, 0.01);
+    }
+
+
 
 }

@@ -71,6 +71,18 @@ RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarit
 ORDER BY similarity
 // end::stream[]
 
+// tag::stream-finite[]
+MATCH (p:Person), (c:Cuisine)
+OPTIONAL MATCH (p)-[likes:LIKES]->(c)
+WITH {item:id(p), weights: collect(coalesce(likes.score, algo.NaN()))} as userData
+WITH collect(userData) as data
+CALL algo.similarity.euclidean.stream(data)
+YIELD item1, item2, count1, count2, similarity
+WHERE algo.isFinite(similarity)
+RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity
+ORDER BY similarity
+// end::stream-finite[]
+
 // tag::stream-similarity-cutoff[]
 MATCH (p:Person), (c:Cuisine)
 OPTIONAL MATCH (p)-[likes:LIKES]->(c)
@@ -78,6 +90,7 @@ WITH {item:id(p), weights: collect(coalesce(likes.score, algo.NaN()))} as userDa
 WITH collect(userData) as data
 CALL algo.similarity.euclidean.stream(data, {similarityCutoff: 4.0})
 YIELD item1, item2, count1, count2, similarity
+WHERE algo.isFinite(similarity)
 RETURN algo.asNode(item1).name AS from, algo.asNode(item2).name AS to, similarity
 ORDER BY similarity
 // end::stream-similarity-cutoff[]
