@@ -189,7 +189,6 @@ public class K1Coloring extends Algorithm<K1Coloring> {
         this.nodesToColor = nextNodesToColor;
     }
 
-
     private <T extends Runnable> Collection<T> degreePartition(
         DegreeTaskProducer<T> taskSupplier,
         Direction direction
@@ -207,7 +206,7 @@ public class K1Coloring extends Algorithm<K1Coloring> {
 
         Collection<T> tasks = new ArrayList<>(concurrency);
         long currentNode = nodesToColor.nextSetBit(0);
-        long lastNode = currentNode;
+        long lastNode;
         long batchStart = currentNode;
         long currentDegree = 0;
         do {

@@ -20,22 +20,24 @@
 package org.neo4j.graphalgo.impl.coloring;
 
 import com.carrotsearch.hppc.BitSet;
+import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Direction;
 
-final class ColoringStep implements Runnable {
+public final class ColoringStep implements Runnable {
 
     private final RelationshipIterator graph;
     private final Direction direction;
     private final HugeLongArray colors;
     private final BitSet nodesToColor;
+    private final MutableBoolean found;
+    private final MutableLong nextColor;
     private final long offset;
     private final long batchEnd;
 
-    private final BitSet forbiddenColors;
-
-    ColoringStep(
+    public ColoringStep(
         RelationshipIterator graph,
         Direction direction,
         HugeLongArray colors,
@@ -50,28 +52,31 @@ final class ColoringStep implements Runnable {
         this.nodesToColor = nodesToColor;
         this.offset = offset;
         this.batchEnd = Math.min(offset + batchSize, nodeCount);
-        this.forbiddenColors = new BitSet(nodeCount);
+        found = new MutableBoolean(false);
+        nextColor = new MutableLong(0);
     }
 
     @Override
     public void run() {
         for (long nodeId = offset; nodeId <= batchEnd; nodeId++) {
             if (nodesToColor.get(nodeId)) {
-                forbiddenColors.clear();
 
-                graph.forEachRelationship(nodeId, direction, (s, target) -> {
-                    if (s != target) {
-                        forbiddenColors.set(colors.get(target));
-                    }
-                    return true;
-                });
 
-                long nextColor = 0;
-                while (forbiddenColors.get(nextColor)) {
-                    nextColor++;
+                found.setFalse();
+                nextColor.setValue(0);
+                while(!found.booleanValue()) {
+                    found.setTrue();
+                    graph.forEachRelationship(nodeId, direction, (s, target) -> {
+                        if (s != target && colors.get(target) == nextColor.getValue()) {
+                             nextColor.increment();
+                             found.setFalse();
+                             return false;
+                        }
+                        return true;
+                    });
                 }
 
-                colors.set(nodeId, nextColor);
+                colors.set(nodeId, nextColor.getValue());
             }
         }
     }
