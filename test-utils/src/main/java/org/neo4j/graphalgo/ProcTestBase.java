@@ -268,8 +268,16 @@ public class ProcTestBase {
         @Language("Cypher") String query,
         String messageSubstring
     ) {
+       assertError(query, emptyMap(), messageSubstring);
+    }
+
+    protected void assertError(
+        @Language("Cypher") String query,
+        Map<String, Object> queryParameters,
+        String messageSubstring
+    ) {
         try {
-            db.execute(query);
+            db.execute(query, queryParameters);
             fail(format("Expected an exception to be thrown by query:\n%s", query));
         } catch (Exception e) {
             assertThat(e, containsMessage(messageSubstring));
