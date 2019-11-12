@@ -28,15 +28,6 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
-/**
- * (a)-(b)--(g)-(h)
- * \  /     \ /
- * (c)     (i)           (ABC)-(GHI)
- * \      /         =>    \   /       =>
- * (d)-(e)                (DEF)
- * \  /
- * (f)
- */
 class LouvainMultiLevelTest extends LouvainTestBase {
 
     private static final String DB_CYPHER =
@@ -50,22 +41,38 @@ class LouvainMultiLevelTest extends LouvainTestBase {
             ", (g:Node {name: 'g'})" +
             ", (h:Node {name: 'h'})" +
             ", (i:Node {name: 'i'})" +
+            ", (j:Node {name: 'j'})" +
+            ", (k:Node {name: 'k'})" +
+            ", (l:Node {name: 'l'})" +
+            ", (m:Node {name: 'm'})" +
+            ", (n:Node {name: 'n'})" +
+            ", (x:Node {name: 'x'})" +
 
-            ", (a)-[:TYPE {weight: 1.0}]->(b)" +
-            ", (a)-[:TYPE {weight: 1.0}]->(c)" +
-            ", (b)-[:TYPE {weight: 1.0}]->(c)" +
-
-            ", (g)-[:TYPE {weight: 1.0}]->(h)" +
-            ", (g)-[:TYPE {weight: 1.0}]->(i)" +
-            ", (h)-[:TYPE {weight: 1.0}]->(i)" +
-
-            ", (e)-[:TYPE {weight: 1.0}]->(d)" +
-            ", (e)-[:TYPE {weight: 1.0}]->(f)" +
-            ", (d)-[:TYPE {weight: 1.0}]->(f)" +
-
-            ", (a)-[:TYPE {weight: 1.0}]->(g)" +
-            ", (c)-[:TYPE {weight: 1.0}]->(e)" +
-            ", (f)-[:TYPE {weight: 1.0}]->(i)";
+        ", (a)-[:TYPE {weight: 1.0}]->(b)" +
+        ", (a)-[:TYPE {weight: 1.0}]->(d)" +
+        ", (a)-[:TYPE {weight: 1.0}]->(f)" +
+        ", (b)-[:TYPE {weight: 1.0}]->(d)" +
+        ", (b)-[:TYPE {weight: 1.0}]->(x)" +
+        ", (b)-[:TYPE {weight: 1.0}]->(g)" +
+        ", (b)-[:TYPE {weight: 1.0}]->(e)" +
+        ", (c)-[:TYPE {weight: 1.0}]->(x)" +
+        ", (c)-[:TYPE {weight: 1.0}]->(f)" +
+        ", (d)-[:TYPE {weight: 1.0}]->(k)" +
+        ", (e)-[:TYPE {weight: 1.0}]->(x)" +
+        ", (e)-[:TYPE {weight: 1.0}]->(f)" +
+        ", (e)-[:TYPE {weight: 1.0}]->(h)" +
+        ", (f)-[:TYPE {weight: 1.0}]->(g)" +
+        ", (g)-[:TYPE {weight: 1.0}]->(h)" +
+        ", (h)-[:TYPE {weight: 1.0}]->(i)" +
+        ", (h)-[:TYPE {weight: 1.0}]->(j)" +
+        ", (i)-[:TYPE {weight: 1.0}]->(k)" +
+        ", (j)-[:TYPE {weight: 1.0}]->(k)" +
+        ", (j)-[:TYPE {weight: 1.0}]->(m)" +
+        ", (j)-[:TYPE {weight: 1.0}]->(n)" +
+        ", (k)-[:TYPE {weight: 1.0}]->(m)" +
+        ", (k)-[:TYPE {weight: 1.0}]->(l)" +
+        ", (l)-[:TYPE {weight: 1.0}]->(n)" +
+        ", (m)-[:TYPE {weight: 1.0}]->(n)";
 
     @Override
     void setupGraphDb(Graph graph) {

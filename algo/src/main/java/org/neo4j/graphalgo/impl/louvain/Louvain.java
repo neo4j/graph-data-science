@@ -65,6 +65,7 @@ public final class Louvain extends Algorithm<Louvain> {
         Graph workingGraph = rootGraph;
         NodeProperties seed = seedingValues;
 
+        long oldNodeCount = rootGraph.nodeCount();
         for (int level = 0; level < maxLevel; level++) {
             ModularityOptimization modularityOptimization = runModularityOptimization(workingGraph, seed);
             modularityOptimization.release();
@@ -74,6 +75,11 @@ public final class Louvain extends Algorithm<Louvain> {
 
             workingGraph = summarizeGraph(workingGraph, modularityOptimization, maxCommunityId);
             seed = new OriginalIdNodeProperties(workingGraph);
+
+            if (workingGraph.nodeCount() == oldNodeCount || workingGraph.nodeCount() == 1) {
+                break;
+            }
+            oldNodeCount = workingGraph.nodeCount();
         }
     }
 
