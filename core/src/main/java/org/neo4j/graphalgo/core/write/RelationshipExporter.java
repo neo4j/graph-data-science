@@ -26,31 +26,25 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.ProgressLoggerAdapter;
 import org.neo4j.graphalgo.core.utils.StatementApi;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
 import org.neo4j.values.storable.Values;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static java.util.Collections.singletonList;
 import static org.neo4j.graphalgo.core.write.Exporter.MAX_BATCH_SIZE;
 import static org.neo4j.graphalgo.core.write.Exporter.MIN_BATCH_SIZE;
-import static org.neo4j.graphalgo.core.write.Exporter.TASK_EXPORT;
 
-public class RelationshipExporter extends StatementApi {
+public final class RelationshipExporter extends StatementApi {
 
     private final Graph graph;
     private final long nodeCount;
@@ -63,7 +57,35 @@ public class RelationshipExporter extends StatementApi {
         return new RelationshipExporter.Builder(db, graph);
     }
 
-    public RelationshipExporter(
+    public static final class Builder extends ExporterBuilder<RelationshipExporter> {
+
+        private final Graph graph;
+
+        Builder(GraphDatabaseAPI db, Graph graph) {
+            super(db, graph);
+            this.graph = graph;
+        }
+
+        @Override
+        public RelationshipExporter build() {
+            ProgressLogger progressLogger = loggerAdapter == null
+                ? ProgressLogger.NULL_LOGGER
+                : loggerAdapter;
+            TerminationFlag flag = terminationFlag == null
+                ? TerminationFlag.RUNNING_TRUE
+                : terminationFlag;
+            return new RelationshipExporter(
+                db,
+                graph,
+                flag,
+                progressLogger,
+                writeConcurrency,
+                executorService
+            );
+        }
+    }
+
+    private RelationshipExporter(
         GraphDatabaseAPI db,
         Graph graph,
         TerminationFlag flag,
@@ -104,18 +126,6 @@ public class RelationshipExporter extends StatementApi {
                 partition.nodeCount
             ))
             .forEach(this::writeBatch);
-    }
-
-    private int getOrCreatePropertyToken(String propertyKey) {
-        return applyInTransaction(stmt -> stmt
-            .tokenWrite()
-            .propertyKeyGetOrCreateForName(propertyKey));
-    }
-
-    private int getOrCreateRelationshipToken(String relationshipType) {
-        return applyInTransaction(stmt -> stmt
-            .tokenWrite()
-            .relationshipTypeGetOrCreateForName(relationshipType));
     }
 
     private Runnable createBatchRunnable(
@@ -181,7 +191,7 @@ public class RelationshipExporter extends StatementApi {
 
         // rough estimate of what capacity would still yield acceptable performance
         // per thread
-        public static final int MAX_NODE_COUNT = (Integer.MAX_VALUE - 32) >> 1;
+        private static final int MAX_NODE_COUNT = (Integer.MAX_VALUE - 32) >> 1;
 
         private final long startNode;
         private final int nodeCount;
@@ -239,63 +249,4 @@ public class RelationshipExporter extends StatementApi {
             return true;
         }
     }
-
-    public static final class Builder {
-
-        private final GraphDatabaseAPI db;
-        private final Graph graph;
-        private TerminationFlag terminationFlag;
-        private ExecutorService executorService;
-        private ProgressLoggerAdapter loggerAdapter;
-        private int concurrency;
-
-        private Builder(GraphDatabaseAPI db, Graph graph) {
-            Objects.requireNonNull(graph);
-            this.db = Objects.requireNonNull(db);
-            this.graph = graph;
-            this.concurrency = Pools.DEFAULT_CONCURRENCY;
-        }
-
-        public RelationshipExporter.Builder withLog(Log log) {
-            loggerAdapter = new ProgressLoggerAdapter(Objects.requireNonNull(log), TASK_EXPORT);
-            return this;
-        }
-
-        public RelationshipExporter.Builder withLogInterval(long time, TimeUnit unit) {
-            if (loggerAdapter == null) {
-                throw new IllegalStateException("no logger set");
-            }
-            final long logTime = unit.toMillis(time);
-            if ((int) logTime != logTime) {
-                throw new IllegalArgumentException("timespan too large");
-            }
-            loggerAdapter.withLogIntervalMillis((int) logTime);
-            return this;
-        }
-
-        public RelationshipExporter.Builder parallel(ExecutorService es, int concurrency, TerminationFlag flag) {
-            this.executorService = es;
-            this.concurrency = Pools.allowedConcurrency(concurrency);
-            this.terminationFlag = flag;
-            return this;
-        }
-
-        public RelationshipExporter build() {
-            ProgressLogger progressLogger = loggerAdapter == null
-                ? ProgressLogger.NULL_LOGGER
-                : loggerAdapter;
-            TerminationFlag flag = terminationFlag == null
-                ? TerminationFlag.RUNNING_TRUE
-                : terminationFlag;
-            return new RelationshipExporter(
-                db,
-                graph,
-                flag,
-                progressLogger,
-                concurrency,
-                executorService
-            );
-        }
-    }
-
 }

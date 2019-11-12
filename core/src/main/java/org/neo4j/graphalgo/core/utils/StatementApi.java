@@ -61,4 +61,16 @@ public abstract class StatementApi {
             }
         });
     }
+
+    protected final int getOrCreatePropertyToken(String propertyKey) {
+        return applyInTransaction(stmt -> stmt
+            .tokenWrite()
+            .propertyKeyGetOrCreateForName(propertyKey));
+    }
+
+    protected final int getOrCreateRelationshipToken(String relationshipType) {
+        return applyInTransaction(stmt -> stmt
+            .tokenWrite()
+            .relationshipTypeGetOrCreateForName(relationshipType));
+    }
 }

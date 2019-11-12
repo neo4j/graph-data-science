@@ -22,19 +22,15 @@ package org.neo4j.graphalgo.core.write;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.ProgressLoggerAdapter;
 import org.neo4j.graphalgo.core.utils.StatementApi;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
 import org.neo4j.values.storable.Value;
 
 import java.util.Collection;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -44,7 +40,6 @@ public final class Exporter extends StatementApi {
 
     static final long MIN_BATCH_SIZE = 10_000L;
     static final long MAX_BATCH_SIZE = 100_000L;
-    public static final String TASK_EXPORT = "EXPORT";
 
     private final TerminationFlag terminationFlag;
     private final ExecutorService executorService;
@@ -57,48 +52,13 @@ public final class Exporter extends StatementApi {
         return new Builder(db, idMapping);
     }
 
-    public static final class Builder {
+    public static class Builder extends ExporterBuilder<Exporter> {
 
-        private final GraphDatabaseAPI db;
-        private final LongUnaryOperator toOriginalId;
-        private final long nodeCount;
-        private TerminationFlag terminationFlag;
-        private ExecutorService executorService;
-        private ProgressLoggerAdapter loggerAdapter;
-        private int concurrency;
-
-        private Builder(GraphDatabaseAPI db, IdMapping idMapping) {
-            Objects.requireNonNull(idMapping);
-            this.db = Objects.requireNonNull(db);
-            this.nodeCount = idMapping.nodeCount();
-            this.toOriginalId = idMapping::toOriginalNodeId;
-            this.concurrency = Pools.DEFAULT_CONCURRENCY;
+        Builder(GraphDatabaseAPI db, IdMapping idMapping) {
+            super(db, idMapping);
         }
 
-        public Builder withLog(Log log) {
-            loggerAdapter = new ProgressLoggerAdapter(Objects.requireNonNull(log), TASK_EXPORT);
-            return this;
-        }
-
-        public Builder withLogInterval(long time, TimeUnit unit) {
-            if (loggerAdapter == null) {
-                throw new IllegalStateException("no logger set");
-            }
-            final long logTime = unit.toMillis(time);
-            if ((int) logTime != logTime) {
-                throw new IllegalArgumentException("timespan too large");
-            }
-            loggerAdapter.withLogIntervalMillis((int) logTime);
-            return this;
-        }
-
-        public Builder parallel(ExecutorService es, int concurrency, TerminationFlag flag) {
-            this.executorService = es;
-            this.concurrency = Pools.allowedConcurrency(concurrency);
-            this.terminationFlag = flag;
-            return this;
-        }
-
+        @Override
         public Exporter build() {
             ProgressLogger progressLogger = loggerAdapter == null
                     ? ProgressLogger.NULL_LOGGER
@@ -106,16 +66,12 @@ public final class Exporter extends StatementApi {
             TerminationFlag flag = terminationFlag == null
                     ? TerminationFlag.RUNNING_TRUE
                     : terminationFlag;
-            return new Exporter(db, nodeCount, toOriginalId, flag, progressLogger, concurrency, executorService);
+            return new Exporter(db, nodeCount, toOriginalId, flag, progressLogger, writeConcurrency, executorService);
         }
     }
 
     public interface WriteConsumer {
         void accept(Write ops, long value) throws KernelException;
-    }
-
-    public interface PropertyWriteConsumer {
-        void accept(Write ops, int relationshipId, int propertyId) throws KernelException;
     }
 
     private Exporter(
@@ -139,7 +95,7 @@ public final class Exporter extends StatementApi {
             String property,
             T data,
             PropertyTranslator<T> translator) {
-        final int propertyId = getOrCreatePropertyId(property);
+        final int propertyId = getOrCreatePropertyToken(property);
         if (propertyId == -1) {
             throw new IllegalStateException("no write property id is set");
         }
@@ -157,11 +113,11 @@ public final class Exporter extends StatementApi {
             String property2,
             U data2,
             PropertyTranslator<U> translator2) {
-        final int propertyId1 = getOrCreatePropertyId(property1);
+        final int propertyId1 = getOrCreatePropertyToken(property1);
         if (propertyId1 == -1) {
             throw new IllegalStateException("no write property id is set");
         }
-        final int propertyId2 = getOrCreatePropertyId(property2);
+        final int propertyId2 = getOrCreatePropertyToken(property2);
         if (propertyId2 == -1) {
             throw new IllegalStateException("no write property id is set");
         }
@@ -321,11 +277,5 @@ public final class Exporter extends StatementApi {
         if (prop2 != null) {
             ops.nodeSetProperty(originalNodeId, propertyId2, prop2);
         }
-    }
-
-    private int getOrCreatePropertyId(String propertyName) {
-        return applyInTransaction(stmt -> stmt
-                .tokenWrite()
-                .propertyKeyGetOrCreateForName(propertyName));
     }
 }

@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.write.Exporter;
+import org.neo4j.graphalgo.core.write.ExporterBuilder;
 import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -111,7 +112,7 @@ class ProgressLoggingTest {
         final String output = buffer.toString();
 
         assertTrue(output.length() > 0);
-        assertTrue(output.contains(Exporter.TASK_EXPORT));
+        assertTrue(output.contains(ExporterBuilder.TASK_EXPORT));
     }
 
     private void setup(Class<? extends GraphFactory> graphImpl) {
