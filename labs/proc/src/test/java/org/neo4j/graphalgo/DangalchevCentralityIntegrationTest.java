@@ -41,10 +41,6 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-
-/**
- * @author mknblch
- */
 @ExtendWith(MockitoExtension.class)
 class DangalchevCentralityIntegrationTest {
 

@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.walking.NodeWalker;
 import org.neo4j.graphalgo.impl.walking.WalkPath;
 import org.neo4j.graphalgo.impl.walking.WalkResult;
-import org.neo4j.graphalgo.results.PageRankScore;
+import org.neo4j.graphalgo.results.AbstractWriteBuilder;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.procedure.Description;
@@ -151,6 +151,92 @@ public class NodeWalkerProc extends LabsProc {
             Graph graph = graphLoader.load(graphFactory);
             statsBuilder.withNodes(graph.nodeCount());
             return graph;
+        }
+    }
+
+    public static class PageRankScore {
+
+        public final long nodeId;
+        public final Double score;
+
+        public PageRankScore(long nodeId, final Double score) {
+            this.nodeId = nodeId;
+            this.score = score;
+        }
+
+        // TODO: return number of relationships as well
+        //  the Graph API doesn't expose this value yet
+        public static final class Stats {
+            public final long nodes, iterations, loadMillis, computeMillis, writeMillis;
+            public final double dampingFactor;
+            public final boolean write;
+            public final String writeProperty;
+
+            Stats(
+                long nodes,
+                long iterations,
+                long loadMillis,
+                long computeMillis,
+                long writeMillis,
+                double dampingFactor,
+                boolean write,
+                String writeProperty) {
+                this.nodes = nodes;
+                this.iterations = iterations;
+                this.loadMillis = loadMillis;
+                this.computeMillis = computeMillis;
+                this.writeMillis = writeMillis;
+                this.dampingFactor = dampingFactor;
+                this.write = write;
+                this.writeProperty = writeProperty;
+            }
+
+            public static final class Builder extends AbstractWriteBuilder<Stats> {
+                private long nodes;
+                private long iterations;
+                private double dampingFactor;
+                private boolean write;
+                private String writeProperty;
+
+                public Builder withNodes(long nodes) {
+                    this.nodes = nodes;
+                    return this;
+                }
+
+                public Builder withIterations(long iterations) {
+                    this.iterations = iterations;
+                    return this;
+                }
+
+                public Builder withDampingFactor(double dampingFactor) {
+                    this.dampingFactor = dampingFactor;
+                    return this;
+                }
+
+                @Override
+                public Builder withWrite(boolean write) {
+                    this.write = write;
+                    return this;
+                }
+
+                @Override
+                public Builder withProperty(String writeProperty) {
+                    this.writeProperty = writeProperty;
+                    return this;
+                }
+
+                public PageRankScore.Stats build() {
+                    return new PageRankScore.Stats(
+                        nodes,
+                        iterations,
+                        loadDuration,
+                        evalDuration,
+                        writeDuration,
+                        dampingFactor,
+                        write,
+                        writeProperty);
+                }
+            }
         }
     }
 

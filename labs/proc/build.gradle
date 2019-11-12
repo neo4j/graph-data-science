@@ -2,9 +2,9 @@ description = 'Neo4j Labs :: Graph Algorithms :: Procedures'
 
 dependencies {
 
-    // TEMPORARY
-    compile project(':labs')
-    // TEMPORARY
+//     TEMPORARY
+//    compile project(':labs')
+//     TEMPORARY
 
     compile project(':proc')
     compile project(':labs-algo')

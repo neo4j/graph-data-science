@@ -3,5 +3,9 @@ description = 'Neo4j Labs :: Graph Algorithms :: Algorithms'
 dependencies {
     compile project(':algo')
     compile project(':labs-core')
+    compile group: 'org.roaringbitmap', name: 'RoaringBitmap', version: ver.'RoaringBitmap'
+
+    compileOnly group: 'org.neo4j', name: 'neo4j', version: ver.'neo4j'
+
     testCompile project(':test-utils')
 }

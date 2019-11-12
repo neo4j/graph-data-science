@@ -36,7 +36,6 @@ import org.neo4j.graphalgo.impl.scc.SCCAlgorithm;
 import org.neo4j.graphalgo.impl.scc.SCCTarjan;
 import org.neo4j.graphalgo.impl.scc.SCCTunedTarjan;
 import org.neo4j.graphalgo.results.SCCResult;
-import org.neo4j.graphalgo.results.SCCStreamResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -44,6 +43,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -395,8 +395,17 @@ public class StronglyConnectedComponentsProc extends LabsProc {
                 .withProgressLogger(ProgressLogger.wrap(log, "SCC(MultiStep)"))
                 .withTerminationFlag(TerminationFlag.wrap(transaction));
         multistep.compute();
+
+        int nodeCount = Math.toIntExact(graph.nodeCount());
+
         graph.release();
-        return multistep.resultStream();
+
+        int[] connectedComponents = multistep.result();
+
+        return IntStream.range(0, nodeCount)
+            .filter(node -> connectedComponents[node] != -1)
+            .mapToObj(node ->
+                new SCCStreamResult(graph.toOriginalNodeId(node), connectedComponents[node]));
     }
 
     // algo.scc.forwardBackward.stream
@@ -424,5 +433,24 @@ public class StronglyConnectedComponentsProc extends LabsProc {
                 .compute(graph.toMappedNodeId(startNodeId));
         graph.release();
         return algo.resultStream();
+    }
+
+    public static class SCCStreamResult {
+
+        /**
+         * the node id
+         */
+        public final long nodeId;
+
+        /**
+         * the set id of the stronly connected component or
+         * -1 of not part of a SCC
+         */
+        public final long partition;
+
+        public SCCStreamResult(long nodeId, long clusterId) {
+            this.nodeId = nodeId;
+            this.partition = clusterId;
+        }
     }
 }
