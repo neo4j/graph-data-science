@@ -96,10 +96,9 @@ final class ModularityOptimizationTask implements Runnable {
             localGraph.forEachRelationship(nodeId, direction, 1.0D, (s, t, w) -> {
                 if (s == t) {
                     selfWeight.add(w);
-                } else {
-                    long targetCommunity = currentCommunities.get(t);
-                    communityInfluences.addTo(targetCommunity, w);
                 }
+                long targetCommunity = currentCommunities.get(t);
+                communityInfluences.addTo(targetCommunity, w);
                 return true;
             });
 
@@ -135,7 +134,6 @@ final class ModularityOptimizationTask implements Runnable {
 
             nodeCommunityInfluences.set(nodeId, communityInfluences.get(nextCommunity));
 
-            // TODO implement swap protection
             nextCommunities.set(nodeId, nextCommunity);
             communityWeightUpdates.update(currentCommunity, agg -> agg - cumulativeNodeWeight);
             communityWeightUpdates.update(nextCommunity, agg -> agg + cumulativeNodeWeight);
