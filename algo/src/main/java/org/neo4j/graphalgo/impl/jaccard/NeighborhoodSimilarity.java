@@ -169,8 +169,8 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
                     .forEach(node2 -> {
                         double similarity = jaccardPrimitive(node1, node2, vector1, vectors.get(node2));
                         if (!Double.isNaN(similarity)) {
-                            topKMap.accept(node1, node2, similarity);
-                            topKMap.accept(node2, node1, similarity);
+                            topKMap.put(node1, node2, similarity);
+                            topKMap.put(node2, node1, similarity);
                         }
                     });
             });
@@ -196,7 +196,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
                         .forEach(node2 -> {
                             double similarity = jaccardPrimitive(node1, node2, vector1, vectors.get(node2));
                             if (!Double.isNaN(similarity)) {
-                                topKMap.accept(node1, node2, similarity);
+                                topKMap.put(node1, node2, similarity);
                             }
                         });
                 })

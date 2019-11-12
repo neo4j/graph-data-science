@@ -68,7 +68,7 @@ public class TopKMap {
         );
     }
 
-    public void accept(long node1, long node2, double similarity) {
+    public void put(long node1, long node2, double similarity) {
         topKLists.get(node1).accept(node2, similarity);
     }
 

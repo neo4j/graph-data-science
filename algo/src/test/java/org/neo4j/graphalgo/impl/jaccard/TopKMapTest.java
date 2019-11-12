@@ -61,7 +61,7 @@ class TopKMapTest {
 
         TopKMap topKMap = new TopKMap(input.size(), bitSet, 1, SimilarityResult.DESCENDING, AllocationTracker.EMPTY);
 
-        input.forEach(sim -> topKMap.accept(sim.node1, sim.node2, sim.similarity));
+        input.forEach(sim -> topKMap.put(sim.node1, sim.node2, sim.similarity));
 
         List<SimilarityResult> actual = topKMap.stream().collect(Collectors.toList());
 
@@ -88,7 +88,7 @@ class TopKMapTest {
 
         TopKMap topKMap = new TopKMap(input.size(), bitSet, 3, SimilarityResult.DESCENDING, AllocationTracker.EMPTY);
 
-        input.forEach(sim -> topKMap.accept(sim.node1, sim.node2, sim.similarity));
+        input.forEach(sim -> topKMap.put(sim.node1, sim.node2, sim.similarity));
 
         List<SimilarityResult> actual = topKMap.stream().collect(Collectors.toList());
 
@@ -115,7 +115,7 @@ class TopKMapTest {
 
         TopKMap topKMap = new TopKMap(input.size(), bitSet, 3, SimilarityResult.ASCENDING, AllocationTracker.EMPTY);
 
-        input.forEach(sim -> topKMap.accept(sim.node1, sim.node2, sim.similarity));
+        input.forEach(sim -> topKMap.put(sim.node1, sim.node2, sim.similarity));
 
         List<SimilarityResult> actual = topKMap.stream().collect(Collectors.toList());
 
@@ -147,7 +147,7 @@ class TopKMapTest {
 
         TopKMap topKMap = new TopKMap(input.size(), bitSet, 3, comparator, AllocationTracker.EMPTY);
 
-        input.forEach(sim -> topKMap.accept(sim.node1, sim.node2, sim.similarity));
+        input.forEach(sim -> topKMap.put(sim.node1, sim.node2, sim.similarity));
 
         List<SimilarityResult> actual = topKMap.stream().collect(Collectors.toList());
 
