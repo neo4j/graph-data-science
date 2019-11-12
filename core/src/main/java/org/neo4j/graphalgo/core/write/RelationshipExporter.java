@@ -23,6 +23,9 @@ package org.neo4j.graphalgo.core.write;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.api.NodeIterator;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
@@ -46,24 +49,61 @@ import static org.neo4j.graphalgo.core.write.Exporter.MIN_BATCH_SIZE;
 
 public final class RelationshipExporter extends StatementApi {
 
-    private final Graph graph;
+    private final IdMapping idMapping;
+    private final NodeIterator nodeIterator;
+    private final RelationshipIterator relationshipIterator;
+    private final Degrees degrees;
     private final long nodeCount;
+    private final long relationshipCount;
     private final TerminationFlag terminationFlag;
     private final ProgressLogger progressLogger;
     private final int concurrency;
     private final ExecutorService executorService;
 
+    public static RelationshipExporter.Builder of(
+        GraphDatabaseAPI db,
+        IdMapping idMapping,
+        NodeIterator nodeIterator,
+        RelationshipIterator relationshipIterator,
+        Degrees degrees,
+        long relationshipCount
+    ) {
+        return new RelationshipExporter.Builder(
+            db,
+            idMapping,
+            nodeIterator,
+            relationshipIterator,
+            degrees,
+            relationshipCount
+        );
+    }
+
     public static RelationshipExporter.Builder of(GraphDatabaseAPI db, Graph graph) {
-        return new RelationshipExporter.Builder(db, graph);
+        return new RelationshipExporter.Builder(db, graph, graph, graph, graph, graph.relationshipCount());
     }
 
     public static final class Builder extends ExporterBuilder<RelationshipExporter> {
 
-        private final Graph graph;
+        private final IdMapping idMapping;
+        private final NodeIterator nodeIterator;
+        private final RelationshipIterator relationshipIterator;
+        private final Degrees degrees;
+        private final long relationshipCount;
 
-        Builder(GraphDatabaseAPI db, Graph graph) {
-            super(db, graph);
-            this.graph = graph;
+        Builder(
+            GraphDatabaseAPI db,
+            IdMapping idMapping,
+            NodeIterator nodeIterator,
+            RelationshipIterator relationshipIterator,
+            Degrees degrees,
+            long relationshipCount
+        ) {
+            super(db, idMapping);
+            this.idMapping = idMapping;
+            this.nodeIterator = nodeIterator;
+            this.relationshipIterator = relationshipIterator;
+            this.degrees = degrees;
+            this.relationshipCount = relationshipCount;
         }
 
         @Override
@@ -76,7 +116,11 @@ public final class RelationshipExporter extends StatementApi {
                 : terminationFlag;
             return new RelationshipExporter(
                 db,
-                graph,
+                idMapping,
+                nodeIterator,
+                relationshipIterator,
+                degrees,
+                relationshipCount,
                 flag,
                 progressLogger,
                 writeConcurrency,
@@ -87,15 +131,23 @@ public final class RelationshipExporter extends StatementApi {
 
     private RelationshipExporter(
         GraphDatabaseAPI db,
-        Graph graph,
+        IdMapping idMapping,
+        NodeIterator nodeIterator,
+        RelationshipIterator relationshipIterator,
+        Degrees degrees,
+        long relationshipCount,
         TerminationFlag flag,
         ProgressLogger progressLogger,
         int concurrency,
         ExecutorService executorService
     ) {
         super(db);
-        this.graph = graph;
-        this.nodeCount = graph.nodeCount();
+        this.nodeCount = idMapping.nodeCount();
+        this.idMapping = idMapping;
+        this.nodeIterator = nodeIterator;
+        this.relationshipIterator = relationshipIterator;
+        this.degrees = degrees;
+        this.relationshipCount = relationshipCount;
         this.terminationFlag = flag;
         this.progressLogger = progressLogger;
         this.concurrency = concurrency;
@@ -104,10 +156,11 @@ public final class RelationshipExporter extends StatementApi {
 
     public void write(String relationshipType, String propertyKey, double fallbackValue, Direction direction) {
         final long batchSize = ParallelUtil.adjustedBatchSize(
-            graph.relationshipCount(),
+            relationshipCount,
             concurrency,
             MIN_BATCH_SIZE,
-            MAX_BATCH_SIZE);
+            MAX_BATCH_SIZE
+        );
 
         final AtomicLong progress = new AtomicLong(0L);
 
@@ -141,9 +194,9 @@ public final class RelationshipExporter extends StatementApi {
             terminationFlag.assertRunning();
             long end = start + length;
             Write ops = stmt.dataWrite();
-            WriteConsumer writeConsumer = new WriteConsumer(graph, ops, relationshipToken, propertyToken);
+            WriteConsumer writeConsumer = new WriteConsumer(idMapping, ops, relationshipToken, propertyToken);
             for (long currentNode = start; currentNode < end; currentNode++) {
-                graph.forEachRelationship(currentNode, direction, fallbackValue, writeConsumer);
+                relationshipIterator.forEachRelationship(currentNode, direction, fallbackValue, writeConsumer);
 
                 // Only log every 10_000 written nodes
                 // add +1 to avoid logging on the first written node
@@ -170,13 +223,13 @@ public final class RelationshipExporter extends StatementApi {
     }
 
     private List<Partition> degreePartitionGraph(long batchSize, Direction direction) {
-        PrimitiveLongIterator nodes = graph.nodeIterator();
+        PrimitiveLongIterator nodes = nodeIterator.nodeIterator();
         List<Partition> partitions = new ArrayList<>();
         long start = 0L;
         while (nodes.hasNext()) {
             Partition partition = new Partition(
                 nodes,
-                graph,
+                degrees,
                 direction,
                 start,
                 batchSize
@@ -218,13 +271,13 @@ public final class RelationshipExporter extends StatementApi {
 
     private static class WriteConsumer implements RelationshipWithPropertyConsumer {
 
-        private final Graph graph;
+        private final IdMapping idMapping;
         private final Write ops;
         private final int relTypeToken;
         private final int propertyToken;
 
-        WriteConsumer(Graph graph, Write ops, int relTypeToken, int propertyToken) {
-            this.graph = graph;
+        WriteConsumer(IdMapping idMapping, Write ops, int relTypeToken, int propertyToken) {
+            this.idMapping = idMapping;
             this.ops = ops;
             this.relTypeToken = relTypeToken;
             this.propertyToken = propertyToken;
@@ -234,9 +287,9 @@ public final class RelationshipExporter extends StatementApi {
         public boolean accept(long sourceNodeId, long targetNodeId, double property) {
             try {
                 final long relId = ops.relationshipCreate(
-                    graph.toOriginalNodeId(sourceNodeId),
+                    idMapping.toOriginalNodeId(sourceNodeId),
                     relTypeToken,
-                    graph.toOriginalNodeId(targetNodeId)
+                    idMapping.toOriginalNodeId(targetNodeId)
                 );
                 ops.relationshipSetProperty(
                     relId,

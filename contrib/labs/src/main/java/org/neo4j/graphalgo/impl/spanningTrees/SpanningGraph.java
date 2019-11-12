@@ -20,21 +20,15 @@
 
 package org.neo4j.graphalgo.impl.spanningTrees;
 
-import org.neo4j.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.collection.primitive.PrimitiveLongIterator;
+import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
-import org.neo4j.graphalgo.api.RelationshipIntersect;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphdb.Direction;
 
-import java.util.Collection;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.LongPredicate;
-
-public class SpanningGraph implements Graph {
+public class SpanningGraph implements IdMapping, RelationshipIterator, Degrees {
 
     private final Graph graph;
     private final SpanningTree spanningTree;
@@ -42,46 +36,6 @@ public class SpanningGraph implements Graph {
     public SpanningGraph(Graph graph, SpanningTree spanningTree) {
         this.graph = graph;
         this.spanningTree = spanningTree;
-    }
-
-    @Override
-    public long relationshipCount() {
-        AtomicInteger relationshipCount = new AtomicInteger();
-        spanningTree.forEach((sourceNodeId, targetNodeId) -> {
-            relationshipCount.incrementAndGet();
-            return true;
-        });
-        return relationshipCount.get();
-    }
-
-    @Override
-    public boolean isUndirected() {
-        return true;
-    }
-
-    @Override
-    public boolean hasRelationshipProperty() {
-        return graph.hasRelationshipProperty();
-    }
-
-    @Override
-    public Direction getLoadDirection() {
-        return graph.getLoadDirection();
-    }
-
-    @Override
-    public void canRelease(boolean canRelease) {
-        graph.canRelease(canRelease);
-    }
-
-    @Override
-    public RelationshipIntersect intersection() {
-        return graph.intersection();
-    }
-
-    @Override
-    public Collection<PrimitiveLongIterable> batchIterables(int batchSize) {
-        return graph.batchIterables(batchSize);
     }
 
     @Override
@@ -107,31 +61,6 @@ public class SpanningGraph implements Graph {
     @Override
     public long nodeCount() {
         return graph.nodeCount();
-    }
-
-    @Override
-    public void forEachNode(LongPredicate consumer) {
-        graph.forEachNode(consumer);
-    }
-
-    @Override
-    public PrimitiveLongIterator nodeIterator() {
-        return graph.nodeIterator();
-    }
-
-    @Override
-    public NodeProperties nodeProperties(String type) {
-        return graph.nodeProperties(type);
-    }
-
-    @Override
-    public Set<String> availableNodeProperties() {
-        return graph.availableNodeProperties();
-    }
-
-    @Override
-    public long getTarget(long nodeId, long index, Direction direction) {
-        return spanningTree.parent[(int) nodeId];
     }
 
     @Override
@@ -162,15 +91,5 @@ public class SpanningGraph implements Graph {
         int source = Math.toIntExact(sourceNodeId);
         int target = Math.toIntExact(targetNodeId);
         return spanningTree.parent[source] != -1 || spanningTree.parent[target] != -1;
-    }
-
-    @Override
-    public double relationshipProperty(long sourceNodeId, long targetNodeId, double fallbackValue) {
-        return fallbackValue;
-    }
-
-    @Override
-    public double relationshipProperty(long sourceNodeId, long targetNodeId) {
-        return 0;
     }
 }

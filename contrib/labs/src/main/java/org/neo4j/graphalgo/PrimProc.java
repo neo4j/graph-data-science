@@ -136,11 +136,19 @@ public class PrimProc extends LabsProc {
         });
 
         final SpanningTree spanningTree = mstPrim.getSpanningTree();
+        SpanningGraph spanningGraph = new SpanningGraph(graph, spanningTree);
         builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount);
         if (configuration.isWriteFlag()) {
             mstPrim.release();
             builder.timeWrite(() -> {
-                RelationshipExporter.of(api, new SpanningGraph(graph, spanningTree))
+                RelationshipExporter.of(
+                    api,
+                    graph,
+                    graph,
+                    spanningGraph,
+                    spanningGraph,
+                    spanningTree.effectiveNodeCount
+                )
                         .withLog(log)
                         .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), TerminationFlag.wrap(transaction))
                         .build()
