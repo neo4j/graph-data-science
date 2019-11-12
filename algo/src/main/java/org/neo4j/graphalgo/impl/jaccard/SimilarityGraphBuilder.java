@@ -122,13 +122,7 @@ public class SimilarityGraphBuilder {
 
         RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(baseGraph, StatementConstants.ANY_RELATIONSHIP_TYPE, bufferSize);
         RelationshipWriter writer = new RelationshipWriter(imports, buffer);
-        // TODO: Similarity graph creation is not thread safe yet.
-        //       We need to synchronize when the stream is parallel, but this hurts non-parallel performance, so we provide two methods for now.
-        if (stream.isParallel()) {
-            stream.forEach(writer);
-        } else {
-            stream.forEach(writer::acceptNonParallel);
-        }
+        stream.forEach(writer);
         writer.flush();
 
         importer.flushTasks().forEach(Runnable::run);
@@ -167,12 +161,9 @@ public class SimilarityGraphBuilder {
             this.relPropertyReader = RelationshipImporter.preLoadedPropertyReader();
         }
 
+        // TODO: Similarity graph creation is not thread safe yet.
         @Override
         public synchronized void accept(SimilarityResult result) {
-            add(result.node1, result.node2, result.similarity);
-        }
-
-        public void acceptNonParallel(SimilarityResult result) {
             add(result.node1, result.node2, result.similarity);
         }
 
