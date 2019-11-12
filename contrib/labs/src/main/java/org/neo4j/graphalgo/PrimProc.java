@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.write.RelationshipExporter;
 import org.neo4j.graphalgo.impl.spanningTrees.Prim;
+import org.neo4j.graphalgo.impl.spanningTrees.SpanningGraph;
 import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.procedure.Description;
@@ -133,12 +134,13 @@ public class PrimProc extends LabsProc {
                 mstPrim.computeMinimumSpanningTree(root);
             }
         });
+
         final SpanningTree spanningTree = mstPrim.getSpanningTree();
         builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount);
         if (configuration.isWriteFlag()) {
             mstPrim.release();
             builder.timeWrite(() -> {
-                RelationshipExporter.of(api, graph)
+                RelationshipExporter.of(api, new SpanningGraph(graph, spanningTree))
                         .withLog(log)
                         .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), TerminationFlag.wrap(transaction))
                         .build()
