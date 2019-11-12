@@ -1,7 +1,15 @@
 description = 'Neo4j Labs :: Graph Algorithms :: Procedures'
 
 dependencies {
+
+    // TEMPORARY
+    compile project(':labs')
+    // TEMPORARY
+
     compile project(':proc')
     compile project(':labs-algo')
+
+    compileOnly group: 'org.neo4j', name: 'neo4j', version: ver.'neo4j'
+
     testCompile project(':test-utils')
 }

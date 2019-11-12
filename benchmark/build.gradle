@@ -11,7 +11,7 @@ repositories {
 
 dependencies {
     compile project(':proc')
-    compile project(':labs')
+    compile project(':labs-proc')
 
     jmh group: 'org.neo4j',            name: 'neo4j',              version: ver.'neo4j'
     jmh group: 'org.neo4j',            name: 'neo4j-kernel',       version: ver.'neo4j'
