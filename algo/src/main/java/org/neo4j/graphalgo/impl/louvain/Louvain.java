@@ -19,9 +19,11 @@
  */
 package org.neo4j.graphalgo.impl.louvain;
 
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.impl.modularity.ModularityOptimization;
@@ -59,6 +61,7 @@ public final class Louvain extends Algorithm<Louvain> {
     }
 
     public void compute() {
+
         Graph workingGraph = rootGraph;
         NodeProperties seed = seedingValues;
 
@@ -67,17 +70,32 @@ public final class Louvain extends Algorithm<Louvain> {
             modularityOptimization.release();
 
             dendrogramm[level] = HugeLongArray.newArray(rootGraph.nodeCount(), tracker);
-            for(long nodeId = 0; nodeId < rootGraph.nodeCount(); nodeId++) {
-                long prevId = level == 0 ?
-                    nodeId :
-                    workingGraph.toMappedNodeId(dendrogramm[level - 1].get(nodeId));
+            long maxCommunityId = buildDendrogram(workingGraph, level, modularityOptimization);
 
-                dendrogramm[level].set(nodeId, modularityOptimization.getCommunityId(prevId));
-            }
-
-            workingGraph = summarizeGraph(workingGraph, modularityOptimization);
+            workingGraph = summarizeGraph(workingGraph, modularityOptimization, maxCommunityId);
             seed = new OriginalIdNodeProperties(workingGraph);
         }
+    }
+
+    private long buildDendrogram(
+        Graph workingGraph,
+        int level,
+        ModularityOptimization modularityOptimization
+    ) {
+        MutableLong maxCommunityId = new MutableLong(0L);
+        ParallelUtil.parallelForEachNode(rootGraph, (nodeId) -> {
+            long prevId = level == 0
+                ? nodeId
+                : workingGraph.toMappedNodeId(dendrogramm[level - 1].get(nodeId));
+
+            final long communityId = modularityOptimization.getCommunityId(prevId);
+            if (communityId > maxCommunityId.getValue()) {
+                maxCommunityId.setValue(communityId);
+            }
+            dendrogramm[level].set(nodeId, communityId);
+        });
+
+        return maxCommunityId.getValue();
     }
 
     private ModularityOptimization runModularityOptimization(Graph louvainGraph, NodeProperties seed) {
@@ -97,9 +115,10 @@ public final class Louvain extends Algorithm<Louvain> {
             .compute();
     }
 
-    private Graph summarizeGraph(Graph workingGraph, ModularityOptimization modularityOptimization) {
+    private Graph summarizeGraph(Graph workingGraph, ModularityOptimization modularityOptimization, long maxCommunityId) {
         SubGraphGenerator.NodeImporter nodeImporter = new SubGraphGenerator.NodeImporter(
             workingGraph.nodeCount(),
+            maxCommunityId,
             tracker
         );
 
@@ -122,7 +141,7 @@ public final class Louvain extends Algorithm<Louvain> {
         return relImporter.build();
     }
 
-    HugeLongArray[] dendrogramm() {
+    public HugeLongArray[] dendrogramm() {
         return this.dendrogramm;
     }
 

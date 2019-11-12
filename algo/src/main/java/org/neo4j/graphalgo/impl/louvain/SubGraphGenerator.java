@@ -52,10 +52,10 @@ public class SubGraphGenerator {
         private final AtomicLong nextAvailableId;
         private final BitSet seenNeoIds;
 
-        NodeImporter(long oldNodeCount, AllocationTracker tracker) {
+        NodeImporter(long oldNodeCount, long maxCommunityId, AllocationTracker tracker) {
             this.tracker = tracker;
 
-            this.neoToInternalBuilder = SparseNodeMapping.Builder.create(oldNodeCount, tracker);
+            this.neoToInternalBuilder = SparseNodeMapping.Builder.create(maxCommunityId, tracker);
             this.nextAvailableId = new AtomicLong(0);
             seenNeoIds = new BitSet(oldNodeCount);
         }
