@@ -185,6 +185,12 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
             stream -> stream
                 .forEach(node1 -> {
                     long[] vector1 = vectors.get(node1);
+                    // We deliberately compute the full matrix (except the diagonal).
+                    // The parallel workload is partitioned based on the outer stream.
+                    // The TopKMap stores a priority queue for each node. Writing
+                    // into these queues is not considered to be thread-safe.
+                    // Hence, we need to ensure that down the stream, exactly one queue
+                    // within the TopKMap processes all pairs for a single node.
                     new SetBitsIterable(nodeFilter).stream()
                         .filter(node2 -> node1 != node2)
                         .forEach(node2 -> {
