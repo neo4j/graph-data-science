@@ -161,13 +161,18 @@ public class SimilarityGraphBuilder {
             this.relPropertyReader = RelationshipImporter.preLoadedPropertyReader();
         }
 
+        // TODO: Similarity graph creation is not thread safe yet.
         @Override
-        public void accept(SimilarityResult result) {
+        public synchronized void accept(SimilarityResult result) {
+            add(result.node1, result.node2, result.similarity);
+        }
+
+        private void add(long node1, long node2, double similarity) {
             buffer.add(
-                result.node1,
-                result.node2,
+                node1,
+                node2,
                 NO_RELATIONSHIP_REFERENCE,
-                Double.doubleToLongBits(result.similarity)
+                Double.doubleToLongBits(similarity)
             );
 
             if (buffer.isFull()) {

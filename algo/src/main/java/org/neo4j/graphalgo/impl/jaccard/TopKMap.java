@@ -20,6 +20,7 @@
 
 package org.neo4j.graphalgo.impl.jaccard;
 
+import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -29,12 +30,12 @@ import org.neo4j.graphalgo.core.utils.queue.LongPriorityQueue;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.PrimitiveIterator;
-import java.util.function.Consumer;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class TopKMap implements Consumer<SimilarityResult> {
+public class TopKMap {
+
+    private final BitSet nodeFilter;
 
     static MemoryEstimation memoryEstimation(long items, int topk) {
         return MemoryEstimations.builder(TopKMap.class)
@@ -49,35 +50,32 @@ public class TopKMap implements Consumer<SimilarityResult> {
 
     private final HugeObjectArray<TopKList> topKLists;
 
-    TopKMap(long items, int topK, Comparator<SimilarityResult> comparator, AllocationTracker tracker) {
+    TopKMap(
+        long items,
+        BitSet nodeFilter,
+        int topK,
+        Comparator<SimilarityResult> comparator,
+        AllocationTracker tracker
+    ) {
+        this.nodeFilter = nodeFilter;
         int boundedTopK = (int) Math.min(topK, items);
         topKLists = HugeObjectArray.newArray(TopKList.class, items, tracker);
-        topKLists.setAll(node1 -> new TopKList(
-            comparator.equals(SimilarityResult.ASCENDING)
+        topKLists.setAll(node1 -> nodeFilter.get(node1)
+            ? new TopKList(comparator.equals(SimilarityResult.ASCENDING)
                 ? TopKLongPriorityQueue.min(boundedTopK)
                 : TopKLongPriorityQueue.max(boundedTopK)
-            )
+            ) : null
         );
     }
 
-    @Override
-    public void accept(SimilarityResult similarityResult) {
-        topKLists.get(similarityResult.node1).accept(similarityResult);
+    public void put(long node1, long node2, double similarity) {
+        topKLists.get(node1).accept(node2, similarity);
     }
 
     public Stream<SimilarityResult> stream() {
-        return LongStream.range(0, topKLists.size())
+        return new SetBitsIterable(nodeFilter).stream()
             .boxed()
             .flatMap(node1 -> topKLists.get(node1).stream(node1));
-    }
-
-    // TODO: parallelize
-    public long size() {
-        long size = 0L;
-        for (long i = 0; i < topKLists.size(); i++) {
-            size += topKLists.get(i).queue.count();
-        }
-        return size;
     }
 
     public static final class TopKList {
@@ -88,8 +86,8 @@ public class TopKMap implements Consumer<SimilarityResult> {
             this.queue = queue;
         }
 
-        void accept(SimilarityResult similarityResult) {
-            queue.offer(similarityResult.node2, similarityResult.similarity);
+        void accept(long node2, double similarity) {
+            queue.offer(node2, similarity);
         }
 
         Stream<SimilarityResult> stream(long node1) {

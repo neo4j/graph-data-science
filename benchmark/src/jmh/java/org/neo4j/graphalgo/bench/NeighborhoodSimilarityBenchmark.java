@@ -44,6 +44,7 @@ import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
@@ -69,29 +70,23 @@ public class NeighborhoodSimilarityBenchmark {
     private GraphDatabaseAPI db;
     private Graph graph;
 
-    static final NeighborhoodSimilarity.Config DEFAULT_CONFIG = new NeighborhoodSimilarity.Config(
-        0.0,
-        1,
-        0,
-        0,
-        Pools.DEFAULT_CONCURRENCY,
-        ParallelUtil.DEFAULT_BATCH_SIZE
-    );
+    @Param(value = {"1", "4"})
+    int concurrency;
 
-    private static final NeighborhoodSimilarity.Config TOPK_CONFIG = new NeighborhoodSimilarity.Config(
-        0.0,
-        0,
-        0,
-        100,
-        Pools.DEFAULT_CONCURRENCY,
-        ParallelUtil.DEFAULT_BATCH_SIZE
-    );
+    @Param(value = {"0", "100"})
+    int topk;
+
+    @Param(value = {"5"})
+    int scaleFactor;
+
+    private NeighborhoodSimilarity.Config config;
 
     @Setup
     public void setup() {
+        config = new NeighborhoodSimilarity.Config(0, 0, 0, topk, concurrency, ParallelUtil.DEFAULT_BATCH_SIZE);
         db = TestDatabaseCreator.createTestDatabase();
 
-        createGraph(db);
+        createGraph(db, scaleFactor);
 
         this.graph = new GraphLoader(db)
             .withAnyLabel()
@@ -108,40 +103,19 @@ public class NeighborhoodSimilarityBenchmark {
 
     @Benchmark
     public void neighborhoodSimilarityToStream(Blackhole blackhole) {
-        initAlgo().computeToStream(Direction.OUTGOING).forEach(blackhole::consume);
-    }
-
-    @Benchmark
-    public void neighborhoodSimilarityToStreamTopK(Blackhole blackhole) {
-        initAlgo(TOPK_CONFIG).computeToStream(Direction.OUTGOING).forEach(blackhole::consume);
+        initAlgo(config).computeToStream(Direction.OUTGOING).forEach(blackhole::consume);
     }
 
     @Benchmark
     public void neighborhoodSimilarityToGraph(Blackhole blackhole) {
-        blackhole.consume(initAlgo().computeToGraph(Direction.OUTGOING));
-    }
-
-    @Benchmark
-    public void neighborhoodSimilarityToGraphTopK(Blackhole blackhole) {
-        blackhole.consume(initAlgo(TOPK_CONFIG).computeToGraph(Direction.OUTGOING));
+        blackhole.consume(initAlgo(config).computeToGraph(Direction.OUTGOING));
     }
 
     @Benchmark
     public void jaccardSimilarity(Blackhole blackhole) {
         List<Map<String, Object>> jaccardInput = prepareProcedureInput();
-        Map<String, Object> procedureConfig = MapUtil.map("concurrency", 1);
+        Map<String, Object> procedureConfig = MapUtil.map("concurrency", concurrency, "topK", topk);
         runJaccardProcedure(blackhole, jaccardInput, procedureConfig);
-    }
-
-    @Benchmark
-    public void jaccardSimilarityTopK(Blackhole blackhole) {
-        List<Map<String, Object>> jaccardInput = prepareProcedureInput();
-        Map<String, Object> procedureConfig = MapUtil.map("concurrency", 1, "topK", 100);
-        runJaccardProcedure(blackhole, jaccardInput, procedureConfig);
-    }
-
-    private NeighborhoodSimilarity initAlgo() {
-        return initAlgo(DEFAULT_CONFIG);
     }
 
     private NeighborhoodSimilarity initAlgo(NeighborhoodSimilarity.Config config) {
@@ -185,10 +159,10 @@ public class NeighborhoodSimilarityBenchmark {
         return jaccardInput;
     }
 
-    static void createGraph(GraphDatabaseService db) {
-        int itemCount = 5_000;
+    static void createGraph(GraphDatabaseService db, int scaleFactor) {
+        int itemCount = 1_000 * scaleFactor;
         Label itemLabel = Label.label("Item");
-        int personCount = 50_000;
+        int personCount = 10_000 * scaleFactor;
         Label personLabel = Label.label("Person");
         RelationshipType likesType = RelationshipType.withName("LIKES");
 

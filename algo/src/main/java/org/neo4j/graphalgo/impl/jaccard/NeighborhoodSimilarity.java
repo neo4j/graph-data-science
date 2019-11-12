@@ -28,15 +28,12 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.Intersections;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphdb.Direction;
 
 import java.util.Comparator;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
@@ -50,7 +47,6 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
 
     private HugeObjectArray<long[]> vectors;
     private long nodesToCompare;
-    private long topkComparisons;
 
     public NeighborhoodSimilarity(
             Graph graph,
@@ -86,6 +82,41 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
 
         this.vectors = HugeObjectArray.newArray(long[].class, graph.nodeCount(), tracker);
 
+        // Create a filter for which nodes to compare and calculate the neighborhood for each node
+        prepare(direction);
+
+        // Generate initial similarities
+        Stream<SimilarityResult> stream;
+        if (config.isParallel()) {
+            if (config.hasTopK()) {
+                stream = computeParallelTopK();
+            } else {
+                stream = computeParallel();
+            }
+        } else {
+            if (config.hasTopK()) {
+                stream = computeTopK();
+            } else {
+                stream = compute();
+            }
+        }
+
+        // Log progress
+        stream = log(stream);
+
+        // Compute topN if necessary
+        if (config.hasTop()) {
+            stream = topN(stream);
+        }
+        return stream;
+    }
+
+    public SimilarityGraphResult computeToGraph(Direction direction) {
+        Graph simGraph = similarityGraph(computeToStream(direction));
+        return new SimilarityGraphResult(simGraph, nodesToCompare);
+    }
+
+    private void prepare(Direction direction) {
         vectors.setAll(node -> {
             int degree = graph.degree(node, direction);
 
@@ -102,64 +133,84 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
             }
             return null;
         });
-
-        // Generate initial similarities
-        Stream<SimilarityResult> stream = compute();
-
-        // Compute topK if necessary
-        if (config.topk != 0) {
-            stream = topK(stream);
-        }
-
-        // Log progress
-        long similarityResultCount = (config.topk > 0)
-            ? topkComparisons
-            : nodesToCompare * nodesToCompare / 2;
-        long logInterval = Math.max(1, BitUtil.nearbyPowerOfTwo(similarityResultCount / 100));
-        AtomicLong count = new AtomicLong();
-        stream = stream.peek(sim -> logProgress(count.incrementAndGet(), logInterval, similarityResultCount));
-
-        // Compute topN if necessary
-        if (config.top != 0) {
-            stream = topN(stream);
-        }
-        return stream;
-    }
-
-    // TODO: benchmark if inlining the if check in the call sites is faster. it's ugly to inline,
-    //  so unless its faster prefer to keep it here
-    private void logProgress(long currentNode, long logInterval, long nodeCount) {
-        if ((currentNode & (logInterval - 1)) == 0) {
-            progressLogger.logProgress(currentNode, nodeCount);
-        }
-    }
-
-    public SimilarityGraphResult computeToGraph(Direction direction) {
-        Graph simGraph = similarityGraph(computeToStream(direction));
-        return new SimilarityGraphResult(simGraph, nodesToCompare);
     }
 
     private Stream<SimilarityResult> compute() {
-        return LongStream.range(0, graph.nodeCount())
-            .filter(nodeFilter::get)
+        return new SetBitsIterable(nodeFilter).stream()
             .boxed()
             .flatMap(node1 -> {
                 long[] vector1 = vectors.get(node1);
-                return LongStream.range(node1 + 1, graph.nodeCount())
-                    .filter(nodeFilter::get)
+                return new SetBitsIterable(nodeFilter, node1 + 1).stream()
                     .mapToObj(node2 -> jaccard(node1, node2, vector1, vectors.get(node2)))
                     .filter(Objects::nonNull);
             });
     }
 
-    private Stream<SimilarityResult> topK(Stream<SimilarityResult> inputStream) {
+    private Stream<SimilarityResult> computeParallel() {
+        return ParallelUtil.parallelStream(
+            new SetBitsIterable(nodeFilter).stream(), stream -> stream
+                .boxed()
+                .flatMap(node1 -> {
+                    long[] vector1 = vectors.get(node1);
+                    return new SetBitsIterable(nodeFilter, node1 + 1).stream()
+                        .mapToObj(node2 -> jaccard(node1, node2, vector1, vectors.get(node2)))
+                        .filter(Objects::nonNull);
+                })
+        );
+    }
+
+    private Stream<SimilarityResult> computeTopK() {
         Comparator<SimilarityResult> comparator = config.topk > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
-        TopKMap topKMap = new TopKMap(vectors.size(), Math.abs(config.topk), comparator, tracker);
-        inputStream
-            .flatMap(similarity -> Stream.of(similarity, similarity.reverse()))
-            .forEach(topKMap);
-        topkComparisons = topKMap.size();
+        TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.topk), comparator, tracker);
+        new SetBitsIterable(nodeFilter).stream()
+            .forEach(node1 -> {
+                long[] vector1 = vectors.get(node1);
+                new SetBitsIterable(nodeFilter, node1 + 1).stream()
+                    .forEach(node2 -> {
+                        double similarity = jaccardPrimitive(node1, node2, vector1, vectors.get(node2));
+                        if (!Double.isNaN(similarity)) {
+                            topKMap.put(node1, node2, similarity);
+                            topKMap.put(node2, node1, similarity);
+                        }
+                    });
+            });
         return topKMap.stream();
+    }
+
+    private Stream<SimilarityResult> computeParallelTopK() {
+        Comparator<SimilarityResult> comparator = config.topk > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
+        TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.topk), comparator, tracker);
+        ParallelUtil.parallelStreamConsume(
+            new SetBitsIterable(nodeFilter).stream(),
+            stream -> stream
+                .forEach(node1 -> {
+                    long[] vector1 = vectors.get(node1);
+                    // We deliberately compute the full matrix (except the diagonal).
+                    // The parallel workload is partitioned based on the outer stream.
+                    // The TopKMap stores a priority queue for each node. Writing
+                    // into these queues is not considered to be thread-safe.
+                    // Hence, we need to ensure that down the stream, exactly one queue
+                    // within the TopKMap processes all pairs for a single node.
+                    new SetBitsIterable(nodeFilter).stream()
+                        .filter(node2 -> node1 != node2)
+                        .forEach(node2 -> {
+                            double similarity = jaccardPrimitive(node1, node2, vector1, vectors.get(node2));
+                            if (!Double.isNaN(similarity)) {
+                                topKMap.put(node1, node2, similarity);
+                            }
+                        });
+                })
+        );
+        return topKMap.stream();
+    }
+
+    private Stream<SimilarityResult> log(Stream<SimilarityResult> stream) {
+        long logInterval = Math.max(1, BitUtil.nearbyPowerOfTwo(nodesToCompare / 100));
+        return stream.peek(sim -> {
+            if ((sim.node1 & (logInterval - 1)) == 0) {
+                progressLogger.logProgress(sim.node1, nodesToCompare);
+            }
+        });
     }
 
     private Stream<SimilarityResult> topN(Stream<SimilarityResult> similarities) {
@@ -174,6 +225,13 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         return similarity >= config.similarityCutoff ? new SimilarityResult(node1, node2, similarity) : null;
     }
 
+    private double jaccardPrimitive(long node1, long node2, long[] vector1, long[] vector2) {
+        long intersection = Intersections.intersection3(vector1, vector2);
+        double union = vector1.length + vector2.length - intersection;
+        double similarity = union == 0 ? 0 : intersection / union;
+        return similarity >= config.similarityCutoff ? similarity : Double.NaN;
+    }
+
     private Graph similarityGraph(Stream<SimilarityResult> similarities) {
         SimilarityGraphBuilder builder = new SimilarityGraphBuilder(graph, tracker);
         return builder.build(similarities);
@@ -182,7 +240,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     public static final class Config {
 
         private final double similarityCutoff;
-        private final double degreeCutoff;
+        private final int degreeCutoff;
 
         private final int top;
         private final int topk;
@@ -219,7 +277,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
             return similarityCutoff;
         }
 
-        public double degreeCutoff() {
+        public int degreeCutoff() {
             return degreeCutoff;
         }
 
@@ -229,6 +287,18 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
 
         public int minBatchSize() {
             return minBatchSize;
+        }
+
+        public boolean isParallel() {
+            return concurrency > 1;
+        }
+
+        public boolean hasTopK() {
+            return topk != 0;
+        }
+
+        public boolean hasTop() {
+            return top != 0;
         }
     }
 
