@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.louvain;
+package org.neo4j.graphalgo.impl.louvain.legacy;
 
 import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.LongDoubleMap;
@@ -47,7 +47,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.LongPredicate;
 
-import static org.neo4j.graphalgo.impl.louvain.Louvain.DEFAULT_WEIGHT;
+import static org.neo4j.graphalgo.impl.louvain.legacy.Louvain.DEFAULT_WEIGHT;
 
 /**
  * parallel weighted undirected modularity based community detection

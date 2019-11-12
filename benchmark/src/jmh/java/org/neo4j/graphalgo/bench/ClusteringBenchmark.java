@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.impl.infomap.InfoMap;
-import org.neo4j.graphalgo.impl.louvain.Louvain;
+import org.neo4j.graphalgo.impl.louvain.legacy.Louvain;
 import org.neo4j.graphalgo.impl.pagerank.PageRank;
 import org.neo4j.graphalgo.impl.pagerank.PageRankAlgorithmType;
 import org.neo4j.graphalgo.impl.results.CentralityResult;

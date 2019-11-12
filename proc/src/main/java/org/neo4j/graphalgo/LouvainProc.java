@@ -28,8 +28,8 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
-import org.neo4j.graphalgo.impl.louvain.Louvain;
-import org.neo4j.graphalgo.impl.louvain.LouvainFactory;
+import org.neo4j.graphalgo.impl.louvain.legacy.Louvain;
+import org.neo4j.graphalgo.impl.louvain.legacy.LouvainFactory;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
 import org.neo4j.graphdb.Direction;
@@ -46,7 +46,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.impl.louvain.Louvain.DEFAULT_INTERMEDIATE_COMMUNITIES_FLAG;
+import static org.neo4j.graphalgo.impl.louvain.legacy.Louvain.DEFAULT_INTERMEDIATE_COMMUNITIES_FLAG;
 import static org.neo4j.procedure.Mode.READ;
 
 /**

@@ -31,6 +31,8 @@ import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.impl.louvain.legacy.Louvain;
+import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -72,7 +74,7 @@ abstract class LouvainTestBase {
                     .map(p -> PropertyMapping.of(p, -1))
                     .toArray(PropertyMapping[]::new)
             )
-            .undirected();
+            .withDirection(Direction.BOTH);
         if (graphImpl == CypherGraphFactory.class) {
             loader
                 .withNodeStatement("MATCH (u:Node) RETURN id(u) as id, u.seed1 as seed1, u.seed2 as seed2")

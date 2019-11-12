@@ -17,43 +17,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.louvain;
+package org.neo4j.graphalgo.impl.louvain.legacy;
 
-import com.carrotsearch.hppc.LongFloatHashMap;
-import com.carrotsearch.hppc.cursors.LongFloatCursor;
+import com.carrotsearch.hppc.IntFloatHashMap;
+import com.carrotsearch.hppc.cursors.IntFloatCursor;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
-final class LongLongSubGraph extends SubGraph {
+final class IntIntSubGraph extends SubGraph {
 
-    private HugeObjectArray<LongFloatHashMap> graph;
-    private final long nodeCount;
-    private final AllocationTracker tracker;
+    private IntFloatHashMap[] graph;
+    private final int communityCount;
 
-    LongLongSubGraph(final long nodeCount, boolean hasRelationshipProperty, final AllocationTracker tracker) {
+    IntIntSubGraph(final int communityCount, boolean hasRelationshipProperty) {
         super(hasRelationshipProperty);
-        this.nodeCount = nodeCount;
-        this.tracker = tracker;
-        graph = HugeObjectArray.newArray(LongFloatHashMap.class, nodeCount, tracker);
+        this.graph = new IntFloatHashMap[communityCount];
+        this.communityCount = communityCount;
     }
 
-    void add(final long source, final long target, final float weight) {
-        assert source < graph.size() && target < graph.size();
-        graph.putIfAbsent(source, LongFloatHashMap::new).addTo(target, weight);
-        graph.putIfAbsent(target, LongFloatHashMap::new).addTo(source, weight);
+    void add(final int source, final int target, final float weight) {
+        assert source < graph.length && target < graph.length;
+        putIfAbsent(source).addTo(target, weight);
+        putIfAbsent(target).addTo(source, weight);
     }
 
     @Override
     public long nodeCount() {
-        return nodeCount;
+        return communityCount;
     }
 
     @Override
     void forEach(final long nodeId, final RelationshipWithPropertyConsumer consumer) {
-        LongFloatHashMap targets = graph.get(nodeId);
+        assert nodeId < graph.length;
+        IntFloatHashMap targets = graph[(int) nodeId];
         if (targets != null) {
-            for (LongFloatCursor cursor : targets) {
+            for (IntFloatCursor cursor : targets) {
                 if (!consumer.accept(nodeId, cursor.key, cursor.value)) {
                     return;
                 }
@@ -63,14 +60,22 @@ final class LongLongSubGraph extends SubGraph {
 
     @Override
     int degree(final long nodeId) {
-        assert nodeId < graph.size();
-        LongFloatHashMap targets = graph.get(nodeId);
+        assert nodeId < graph.length;
+        IntFloatHashMap targets = graph[(int) nodeId];
         return null == targets ? 0 : targets.size();
     }
 
     @Override
     public void release() {
-        tracker.remove(graph.release());
         graph = null;
+    }
+
+    private IntFloatHashMap putIfAbsent(final int communityId) {
+        IntFloatHashMap targets = graph[communityId];
+        if (null == targets) {
+            targets = new IntFloatHashMap();
+            graph[communityId] = targets;
+        }
+        return targets;
     }
 }

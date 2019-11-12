@@ -191,7 +191,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         K1Coloring coloring = new K1Coloring(
             graph,
             direction,
-            3,
+            5,
             (int) batchSize,
             concurrency,
             executor,
