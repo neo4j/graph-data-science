@@ -309,7 +309,6 @@ class JaccardProcTest {
                 "RETURN a.name AS node1, b.name as node2, similar.score AS score " +
                 "ORDER BY id(a), id(b)";
 
-        System.out.println(db.execute(checkSimilaritiesQuery).resultAsString());
         Result result = db.execute(checkSimilaritiesQuery);
 
         assertTrue(result.hasNext());

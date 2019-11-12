@@ -38,13 +38,12 @@ import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.IntFunction;
 import java.util.function.LongUnaryOperator;
 
 public final class Exporter extends StatementApi {
 
-    private static final long MIN_BATCH_SIZE = 10_000L;
-    private static final long MAX_BATCH_SIZE = 100_000L;
+    static final long MIN_BATCH_SIZE = 10_000L;
+    static final long MAX_BATCH_SIZE = 100_000L;
     public static final String TASK_EXPORT = "EXPORT";
 
     private final TerminationFlag terminationFlag;
@@ -171,39 +170,6 @@ public final class Exporter extends StatementApi {
         } else {
             writeSequential(propertyId1, data1, translator1, propertyId2, data2, translator2);
         }
-    }
-
-    public void write(String property, IntFunction<WriteConsumer> createWriter) {
-        final int propertyId = getOrCreatePropertyId(property);
-        if (propertyId == -1) {
-            throw new IllegalStateException("no write property id is set");
-        }
-        final WriteConsumer writer = createWriter.apply(propertyId);
-        if (ParallelUtil.canRunInParallel(executorService)) {
-            writeParallel(writer);
-        } else {
-            writeSequential(writer);
-        }
-    }
-
-    public void writeRelationships(String relationship, WriteConsumer writer) {
-        final int propertyId = getOrCreateRelationshipId(relationship);
-        if (propertyId == -1) {
-            throw new IllegalStateException("no write property id is set");
-        }
-        acceptInTransaction(stmt -> {
-            Write write = stmt.dataWrite();
-            writer.accept(write, propertyId);
-        });
-    }
-
-    public void writeRelationshipAndProperty(String relationshipType, String property, PropertyWriteConsumer writer) {
-        final int relationshipId = getOrCreateRelationshipId(relationshipType);
-        final int propertyId = getOrCreatePropertyId(property);
-        if (relationshipId == -1) {
-            throw new IllegalStateException("no write property id is set");
-        }
-        acceptInTransaction(stmt -> writer.accept(stmt.dataWrite(), relationshipId, propertyId));
     }
 
     private <T> void writeSequential(
@@ -361,11 +327,5 @@ public final class Exporter extends StatementApi {
         return applyInTransaction(stmt -> stmt
                 .tokenWrite()
                 .propertyKeyGetOrCreateForName(propertyName));
-    }
-
-    private int getOrCreateRelationshipId(String propertyName) {
-        return applyInTransaction(stmt -> stmt
-                .tokenWrite()
-                .relationshipTypeGetOrCreateForName(propertyName));
     }
 }

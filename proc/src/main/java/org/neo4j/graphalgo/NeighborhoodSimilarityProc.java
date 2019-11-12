@@ -21,13 +21,13 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
-import org.neo4j.graphalgo.core.utils.ExceptionUtil;
+import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.write.Exporter;
+import org.neo4j.graphalgo.core.write.RelationshipExporter;
 import org.neo4j.graphalgo.impl.jaccard.NeighborhoodSimilarity;
 import org.neo4j.graphalgo.impl.jaccard.NeighborhoodSimilarityFactory;
 import org.neo4j.graphalgo.impl.jaccard.SimilarityGraphResult;
@@ -35,13 +35,10 @@ import org.neo4j.graphalgo.impl.jaccard.SimilarityResult;
 import org.neo4j.graphalgo.impl.results.AbstractResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.internal.kernel.api.Write;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
-import org.neo4j.values.storable.Values;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -67,6 +64,7 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
 
     private static final String WRITE_PROPERTY_KEY = "writeProperty";
     private static final String WRITE_PROPERTY_DEFAULT = "score";
+    private static final double WRITE_PROPERTY_VALUE_DEFAULT = 0.0;
 
     private static final Direction COMPUTE_DIRECTION_DEFAULT = OUTGOING;
 
@@ -138,22 +136,11 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
             .withRelationshipCount(similarityGraph.relationshipCount());
 
         if (configuration.isWriteFlag() && similarityGraph.relationshipCount() > 0) {
-            Exporter.of(api, similarityGraph)
+            RelationshipExporter.of(api, similarityGraph)
                 .withLog(log)
+                .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), TerminationFlag.wrap(transaction))
                 .build()
-                .writeRelationshipAndProperty(writeRelationshipType, writeProperty,
-                    (ops, relType, propertyType) -> {
-                        similarityGraph.forEachNode(nodeId -> {
-                            similarityGraph.forEachRelationship(
-                                nodeId,
-                                OUTGOING,
-                                0.0,
-                                writeBack(relType, propertyType, similarityGraph, ops)
-                            );
-                            return true;
-                        });
-                    }
-                );
+                .write(writeRelationshipType, writeProperty, WRITE_PROPERTY_VALUE_DEFAULT, direction);
         }
         return Stream.of(resultBuilder.build());
     }
@@ -167,26 +154,6 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
         ProcedureConfiguration configuration = newConfig(nodeFilter, relationshipFilter, config);
         MemoryTreeWithDimensions memoryEstimation = this.memoryEstimation(configuration);
         return Stream.of(new MemRecResult(memoryEstimation));
-    }
-
-    private static RelationshipWithPropertyConsumer writeBack(int relType, int propertyType, Graph graph, Write ops) {
-        return (source, target, property) -> {
-            try {
-                final long relId = ops.relationshipCreate(
-                    graph.toOriginalNodeId(source),
-                    relType,
-                    graph.toOriginalNodeId(target)
-                );
-                ops.relationshipSetProperty(
-                    relId,
-                    propertyType,
-                    Values.doubleValue(property)
-                );
-            } catch (KernelException e) {
-                ExceptionUtil.throwKernelException(e);
-            }
-            return true;
-        };
     }
 
     @Override

@@ -20,24 +20,20 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
-import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.write.Exporter;
+import org.neo4j.graphalgo.core.write.RelationshipExporter;
 import org.neo4j.graphalgo.impl.spanningTrees.Prim;
 import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
-import org.neo4j.internal.kernel.api.Write;
-import org.neo4j.internal.kernel.api.exceptions.KernelException;
+import org.neo4j.graphdb.Direction;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
-import org.neo4j.values.storable.Values;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -142,32 +138,17 @@ public class PrimProc extends LabsProc {
         if (configuration.isWriteFlag()) {
             mstPrim.release();
             builder.timeWrite(() -> {
-                Exporter.of(api, graph)
+                RelationshipExporter.of(api, graph)
                         .withLog(log)
+                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), TerminationFlag.wrap(transaction))
                         .build()
-                        .writeRelationshipAndProperty(
-                                configuration.get(CONFIG_WRITE_RELATIONSHIP, CONFIG_WRITE_RELATIONSHIP_DEFAULT),
-                                weightProperty,
-                                (ops, relType, propertyType) -> spanningTree.forEach(writeBack(relType, propertyType, graph, ops))
-                        );
+                        .write(
+                            configuration.get(CONFIG_WRITE_RELATIONSHIP, CONFIG_WRITE_RELATIONSHIP_DEFAULT),
+                            weightProperty,
+                            0.0,
+                            Direction.OUTGOING);
             });
         }
         return Stream.of(builder.build());
-    }
-
-    private static RelationshipConsumer writeBack(int relType, int propertyType, Graph graph, Write ops) {
-        return (source, target) -> {
-            try {
-                final long relId = ops.relationshipCreate(
-                        graph.toOriginalNodeId(source),
-                        relType,
-                        graph.toOriginalNodeId(target)
-                );
-                ops.relationshipSetProperty(relId, propertyType, Values.doubleValue(graph.relationshipProperty(source, target, Double.NaN)));
-            } catch (KernelException e) {
-                ExceptionUtil.throwKernelException(e);
-            }
-            return true;
-        };
     }
 }
