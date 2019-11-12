@@ -140,7 +140,7 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
                 .withLog(log)
                 .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), TerminationFlag.wrap(transaction))
                 .build()
-                .write(writeRelationshipType, writeProperty, WRITE_PROPERTY_VALUE_DEFAULT, direction);
+                .write(writeRelationshipType, writeProperty, WRITE_PROPERTY_VALUE_DEFAULT, similarityGraph.getLoadDirection());
         }
         return Stream.of(resultBuilder.build());
     }
