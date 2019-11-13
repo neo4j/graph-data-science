@@ -24,7 +24,6 @@ import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.api.NodeIterator;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
@@ -48,35 +47,12 @@ import static org.neo4j.graphalgo.core.write.NodeExporter.MIN_BATCH_SIZE;
 
 public final class RelationshipExporter extends StatementApi {
 
-    private final IdMapping idMapping;
-    private final NodeIterator nodeIterator;
-    private final RelationshipIterator relationshipIterator;
-    private final Degrees degrees;
+    private final Graph graph;
     private final Direction readDirection;
     private final long nodeCount;
     private final TerminationFlag terminationFlag;
     private final ProgressLogger progressLogger;
     private final ExecutorService executorService;
-
-    public static RelationshipExporter.Builder of(
-        GraphDatabaseAPI db,
-        IdMapping idMapping,
-        NodeIterator nodeIterator,
-        RelationshipIterator relationshipIterator,
-        Degrees degrees,
-        Direction readDirection,
-        TerminationFlag terminationFlag
-    ) {
-        return new RelationshipExporter.Builder(
-            db,
-            idMapping,
-            nodeIterator,
-            relationshipIterator,
-            degrees,
-            readDirection,
-            terminationFlag
-        );
-    }
 
     public static RelationshipExporter.Builder of(
         GraphDatabaseAPI db,
@@ -87,9 +63,6 @@ public final class RelationshipExporter extends StatementApi {
         return new RelationshipExporter.Builder(
             db,
             graph,
-            graph,
-            graph,
-            graph,
             readDirection,
             terminationFlag
         );
@@ -97,26 +70,17 @@ public final class RelationshipExporter extends StatementApi {
 
     public static final class Builder extends ExporterBuilder<RelationshipExporter> {
 
-        private final IdMapping idMapping;
-        private final NodeIterator nodeIterator;
-        private final RelationshipIterator relationshipIterator;
-        private final Degrees degrees;
+        private final Graph graph;
         private final Direction readDirection;
 
         Builder(
             GraphDatabaseAPI db,
-            IdMapping idMapping,
-            NodeIterator nodeIterator,
-            RelationshipIterator relationshipIterator,
-            Degrees degrees,
+            Graph graph,
             Direction readDirection,
             TerminationFlag terminationFlag
         ) {
-            super(db, idMapping, terminationFlag);
-            this.idMapping = idMapping;
-            this.nodeIterator = nodeIterator;
-            this.relationshipIterator = relationshipIterator;
-            this.degrees = degrees;
+            super(db, graph, terminationFlag);
+            this.graph = graph;
             this.readDirection = readDirection;
         }
 
@@ -128,10 +92,7 @@ public final class RelationshipExporter extends StatementApi {
 
             return new RelationshipExporter(
                 db,
-                idMapping,
-                nodeIterator,
-                relationshipIterator,
-                degrees,
+                graph,
                 readDirection,
                 terminationFlag,
                 progressLogger,
@@ -142,23 +103,17 @@ public final class RelationshipExporter extends StatementApi {
 
     private RelationshipExporter(
         GraphDatabaseAPI db,
-        IdMapping idMapping,
-        NodeIterator nodeIterator,
-        RelationshipIterator relationshipIterator,
-        Degrees degrees,
+        Graph graph,
         Direction readDirection,
-        TerminationFlag flag,
+        TerminationFlag terminationFlag,
         ProgressLogger progressLogger,
         ExecutorService executorService
     ) {
         super(db);
-        this.nodeCount = idMapping.nodeCount();
-        this.idMapping = idMapping;
-        this.nodeIterator = nodeIterator;
-        this.relationshipIterator = relationshipIterator;
-        this.degrees = degrees;
+        this.nodeCount = graph.nodeCount();
+        this.graph = graph;
         this.readDirection = readDirection;
-        this.terminationFlag = flag;
+        this.terminationFlag = terminationFlag;
         this.progressLogger = progressLogger;
         this.executorService = executorService;
     }
@@ -198,7 +153,8 @@ public final class RelationshipExporter extends StatementApi {
             terminationFlag.assertRunning();
             long end = start + length;
             Write ops = stmt.dataWrite();
-            WriteConsumer writeConsumer = new WriteConsumer(idMapping, ops, relationshipToken, propertyToken);
+            WriteConsumer writeConsumer = new WriteConsumer(graph, ops, relationshipToken, propertyToken);
+            RelationshipIterator relationshipIterator = graph.concurrentCopy();
             for (long currentNode = start; currentNode < end; currentNode++) {
                 relationshipIterator.forEachRelationship(currentNode, direction, fallbackValue, writeConsumer);
 
@@ -227,13 +183,13 @@ public final class RelationshipExporter extends StatementApi {
     }
 
     private List<Partition> degreePartitionGraph(long batchSize, Direction direction) {
-        PrimitiveLongIterator nodes = nodeIterator.nodeIterator();
+        PrimitiveLongIterator nodes = graph.nodeIterator();
         List<Partition> partitions = new ArrayList<>();
         long start = 0L;
         while (nodes.hasNext()) {
             Partition partition = new Partition(
                 nodes,
-                degrees,
+                graph,
                 direction,
                 start,
                 batchSize
