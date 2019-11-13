@@ -55,8 +55,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
+import static org.neo4j.graphalgo.TestLog.INFO;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.crossArguments;
 import static org.neo4j.graphalgo.TestSupport.toArguments;
@@ -435,8 +437,8 @@ final class NeighborhoodSimilarityTest {
 
         neighborhoodSimilarity.computeToGraph(OUTGOING);
 
-        assertFalse(log.getLogMessages().isEmpty());
-        assertThat(log.getLogMessages().get(0), containsString(NeighborhoodSimilarity.class.getSimpleName()));
+        assertTrue(log.hasMessages(INFO));
+        assertTrue(log.containsMessage(INFO, NeighborhoodSimilarity.class.getSimpleName()));
     }
 
     @Test

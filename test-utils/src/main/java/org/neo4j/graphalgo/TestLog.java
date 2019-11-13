@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.logging.AbstractLog;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.Logger;
 
@@ -29,12 +30,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class TestLog implements Log {
+public class TestLog extends AbstractLog {
     public static String DEBUG = "debug";
     public static String INFO = "info";
     public static String WARN = "warn";
     public static String ERROR = "error";
-
 
     private final Map<String, List<String>> messages;
 
@@ -47,69 +47,8 @@ public class TestLog implements Log {
         return messageList.stream().anyMatch((message) -> message.contains(fragment));
     }
 
-    @Override
-    public void debug(String message) {
-        logMessage(DEBUG, message);
-    }
-
-    @Override
-    public void debug(String message, Throwable throwable) {
-        logMessage(DEBUG, message + " - Error: " + throwable.getMessage());
-    }
-
-    @Override
-    public void debug(String format, Object... arguments) {
-        logMessage(DEBUG, String.format(format, arguments));
-    }
-
-    @Override
-    public void info(String message) {
-        logMessage(INFO, message);
-    }
-
-    @Override
-    public void info(String message, Throwable throwable) {
-        logMessage(INFO, message + " - Error: " + throwable.getMessage());
-    }
-
-    @Override
-    public void info(String format, Object... arguments) {
-        logMessage(INFO, String.format(format, arguments));
-    }
-
-    @Override
-    public void warn(String message) {
-        logMessage(WARN, message);
-    }
-
-    @Override
-    public void warn(String message, Throwable throwable) {
-        logMessage(WARN, message + " - Error: " + throwable.getMessage());
-    }
-
-    @Override
-    public void warn(String format, Object... arguments) {
-        logMessage(WARN, String.format(format, arguments));
-    }
-
-    @Override
-    public void error(String message) {
-        logMessage(ERROR, message);
-    }
-
-    @Override
-    public void error(String message, Throwable throwable) {
-        logMessage(ERROR, message + " - Error: " + throwable.getMessage());
-    }
-
-    @Override
-    public void error(String format, Object... arguments) {
-        logMessage(ERROR, String.format(format, arguments));
-    }
-
-    @Override
-    public void bulk(Consumer<Log> consumer) {
-        consumer.accept(this);
+    public boolean hasMessages(String level) {
+        return !messages.getOrDefault(level, Collections.emptyList()).isEmpty();
     }
 
     @Override
@@ -119,26 +58,64 @@ public class TestLog implements Log {
 
     @Override
     public Logger debugLogger() {
-        return null;
+        return new TestLogger(DEBUG, messages);
     }
 
     @Override
     public Logger infoLogger() {
-        return null;
+        return new TestLogger(INFO, messages);
     }
 
     @Override
     public Logger warnLogger() {
-        return null;
+        return new TestLogger(WARN, messages);
     }
 
     @Override
     public Logger errorLogger() {
-        return null;
+        return new TestLogger(ERROR, messages);
     }
 
-    private void logMessage(String level, String message) {
-        List<String> messageList = messages.computeIfAbsent(level, (ignore) -> new ArrayList<>());
-        messageList.add(message);
+    @Override
+    public void bulk(Consumer<Log> consumer) {
+        consumer.accept(this);
+    }
+
+    class TestLogger implements Logger {
+        private final String level;
+        private final Map<String, List<String>> messages;
+
+
+        TestLogger(String level, Map<String, List<String>> messages) {
+            this.level = level;
+            this.messages = messages;
+        }
+
+        @Override
+        public void log(String message) {
+            logMessage(message);
+        }
+
+        @Override
+        public void log(String message, Throwable throwable) {
+            logMessage(message + " - " + throwable.getMessage());
+        }
+
+        @Override
+        public void log(String format, Object... arguments) {
+            log(String.format(format, arguments));
+        }
+
+        @Override
+        public void bulk(Consumer<Logger> consumer) {
+            consumer.accept(this);
+        }
+
+        private void logMessage(String message) {
+            List<String> messageList = messages.computeIfAbsent(level, (ignore) -> new ArrayList<>());
+            messageList.add(message);
+        }
     }
 }
+
+

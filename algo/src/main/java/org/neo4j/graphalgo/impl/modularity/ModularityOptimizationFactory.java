@@ -25,6 +25,8 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
@@ -36,6 +38,11 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_KEY;
 public class ModularityOptimizationFactory extends AlgorithmFactory<ModularityOptimization> {
 
     public static final int DEFAULT_MAX_ITERATIONS = 10;
+
+    @Override
+    public MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.empty();
+    }
 
     @Override
     public ModularityOptimization build(
