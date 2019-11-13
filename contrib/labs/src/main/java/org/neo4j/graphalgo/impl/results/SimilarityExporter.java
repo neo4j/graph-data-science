@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.impl.results;
 
 import org.neo4j.graphalgo.core.utils.ExceptionUtil;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.StatementApi;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.internal.kernel.api.exceptions.EntityNotFoundException;
@@ -119,7 +120,7 @@ public class SimilarityExporter extends StatementApi {
         } else {
             Iterator<SimilarityResult> iterator = similarityPairs.iterator();
             do {
-                ParallelUtil.run(() -> export(take(iterator, Math.toIntExact(batchSize))));
+                ParallelUtil.run(() -> export(take(iterator, Math.toIntExact(batchSize))), Pools.DEFAULT_SINGLE_THREAD_POOL);
             } while (iterator.hasNext());
         }
     }

@@ -25,6 +25,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -50,6 +51,7 @@ public final class Pools {
     public static final int DEFAULT_QUEUE_SIZE = DEFAULT_CONCURRENCY * 50;
 
     public static final ExecutorService DEFAULT = createDefaultPool();
+    public static final ExecutorService DEFAULT_SINGLE_THREAD_POOL = createDefaultSingleThreadPool();
     public static final ForkJoinPool FJ_POOL = createFJPool();
 
     private Pools() {
@@ -65,6 +67,10 @@ public final class Pools {
                 new ArrayBlockingQueue<>(DEFAULT_QUEUE_SIZE),
                 NamedThreadFactory.daemon("algo"),
                 new CallerBlocksPolicy());
+    }
+
+    public static ExecutorService createDefaultSingleThreadPool() {
+        return Executors.newSingleThreadExecutor(NamedThreadFactory.daemon("algo"));
     }
 
     public static ForkJoinPool createFJPool() {

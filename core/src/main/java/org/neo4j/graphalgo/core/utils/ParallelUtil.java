@@ -246,14 +246,8 @@ public final class ParallelUtil {
     /**
      * Runs a single task and waits until it's finished.
      */
-    public static void run(Runnable task) {
-        try {
-            Thread thread = new Thread(task);
-            thread.start();
-            thread.join();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+    public static void run(Runnable task, ExecutorService executor) {
+        awaitTermination(Collections.singleton(executor.submit(task)));
     }
 
     /**

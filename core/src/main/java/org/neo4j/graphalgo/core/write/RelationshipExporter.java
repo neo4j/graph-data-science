@@ -39,8 +39,10 @@ import org.neo4j.values.storable.Values;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static org.neo4j.graphalgo.core.utils.Pools.DEFAULT_SINGLE_THREAD_POOL;
 import static org.neo4j.graphalgo.core.write.NodePropertyExporter.MIN_BATCH_SIZE;
 
 public final class RelationshipExporter extends StatementApi {
@@ -50,6 +52,7 @@ public final class RelationshipExporter extends StatementApi {
     private final long nodeCount;
     private final TerminationFlag terminationFlag;
     private final ProgressLogger progressLogger;
+    private final ExecutorService executorService;
 
     public static RelationshipExporter.Builder of(
         GraphDatabaseAPI db,
@@ -110,6 +113,7 @@ public final class RelationshipExporter extends StatementApi {
         this.readDirection = readDirection;
         this.terminationFlag = terminationFlag;
         this.progressLogger = progressLogger;
+        this.executorService = DEFAULT_SINGLE_THREAD_POOL;
     }
 
     public void write(String relationshipType, String propertyKey, double fallbackValue) {
@@ -131,7 +135,7 @@ public final class RelationshipExporter extends StatementApi {
                 partition.startNode,
                 partition.nodeCount
             ))
-            .forEach(ParallelUtil::run);
+            .forEach(runnable -> ParallelUtil.run(runnable, executorService));
     }
 
     private Runnable createBatchRunnable(
