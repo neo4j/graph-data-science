@@ -150,7 +150,6 @@ public class PrimProc extends LabsProc {
                     spanningTree.effectiveNodeCount
                 )
                         .withLog(log)
-                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), TerminationFlag.wrap(transaction))
                         .build()
                         .write(
                             configuration.get(CONFIG_WRITE_RELATIONSHIP, CONFIG_WRITE_RELATIONSHIP_DEFAULT),
