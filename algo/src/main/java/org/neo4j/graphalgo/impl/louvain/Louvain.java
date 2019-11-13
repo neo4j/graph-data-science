@@ -32,6 +32,7 @@ import org.neo4j.logging.NullLog;
 
 import java.util.concurrent.ExecutorService;
 
+import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
 import static org.neo4j.graphalgo.core.utils.ParallelUtil.DEFAULT_BATCH_SIZE;
 
 public final class Louvain extends Algorithm<Louvain> {
@@ -109,6 +110,7 @@ public final class Louvain extends Algorithm<Louvain> {
             louvainGraph,
             Direction.BOTH,
             10,
+            TOLERANCE_DEFAULT,
             seed,
             concurrency,
             DEFAULT_BATCH_SIZE,

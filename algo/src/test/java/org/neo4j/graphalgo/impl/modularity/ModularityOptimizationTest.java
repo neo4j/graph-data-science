@@ -40,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 import static org.neo4j.graphalgo.TestLog.INFO;
+import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
 
 class ModularityOptimizationTest {
 
@@ -86,7 +87,7 @@ class ModularityOptimizationTest {
             graph,
             Direction.BOTH,
             3,
-            DEFAULT_TOLERANCE,
+            TOLERANCE_DEFAULT,
             null,
             1,
             10_000,
@@ -117,7 +118,7 @@ class ModularityOptimizationTest {
             graph,
             Direction.BOTH,
             3,
-            DEFAULT_TOLERANCE,
+            TOLERANCE_DEFAULT,
             null,
             3,
             2,
@@ -148,7 +149,7 @@ class ModularityOptimizationTest {
             graph,
             Direction.BOTH,
             10,
-            DEFAULT_TOLERANCE,
+            TOLERANCE_DEFAULT,
             graph.nodeProperties("seed2"),
             1,
             100,
@@ -181,7 +182,7 @@ class ModularityOptimizationTest {
             graph,
             Direction.BOTH,
             10,
-            DEFAULT_TOLERANCE,
+            TOLERANCE_DEFAULT,
             graph.nodeProperties("seed1"),
             1,
             100,
@@ -221,7 +222,7 @@ class ModularityOptimizationTest {
             graph,
             Direction.BOTH,
             3,
-            DEFAULT_TOLERANCE,
+            TOLERANCE_DEFAULT,
             null,
             3,
             2,
@@ -251,7 +252,7 @@ class ModularityOptimizationTest {
                 graph,
                 Direction.BOTH,
                 0,
-                DEFAULT_TOLERANCE,
+                TOLERANCE_DEFAULT,
                 null,
                 3,
                 2,
