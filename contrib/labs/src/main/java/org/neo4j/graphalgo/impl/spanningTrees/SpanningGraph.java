@@ -20,47 +20,30 @@
 
 package org.neo4j.graphalgo.impl.spanningTrees;
 
-import org.neo4j.graphalgo.api.Degrees;
+import org.neo4j.graphalgo.api.FilterGraph;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
-import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphdb.Direction;
 
-public class SpanningGraph implements IdMapping, RelationshipIterator, Degrees {
+import java.util.Arrays;
 
-    private final Graph graph;
+public class SpanningGraph extends FilterGraph {
+
     private final SpanningTree spanningTree;
 
     public SpanningGraph(Graph graph, SpanningTree spanningTree) {
-        this.graph = graph;
+        super(graph);
         this.spanningTree = spanningTree;
     }
 
     @Override
     public int degree(long nodeId, Direction direction) {
-        return 1;
-    }
-
-    @Override
-    public long toMappedNodeId(long nodeId) {
-        return graph.toMappedNodeId(nodeId);
-    }
-
-    @Override
-    public long toOriginalNodeId(long nodeId) {
-        return graph.toOriginalNodeId(nodeId);
-    }
-
-    @Override
-    public boolean contains(long nodeId) {
-        return graph.contains(nodeId);
-    }
-
-    @Override
-    public long nodeCount() {
-        return graph.nodeCount();
+        if (spanningTree.parent[Math.toIntExact(nodeId)] == -1) {
+            return Math.toIntExact(Arrays.stream(spanningTree.parent).filter(i -> i == -1).count());
+        } else {
+            return 1;
+        }
     }
 
     @Override
