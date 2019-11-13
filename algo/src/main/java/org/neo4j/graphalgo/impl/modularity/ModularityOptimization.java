@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
@@ -118,28 +119,27 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     }
 
     public ModularityOptimization compute() {
-        long initStart = System.currentTimeMillis();
-        log.info("Modularity Optimization - Started");
-        initSeeding();
-        init();
-        computeColoring();
-        log.info(String.format("Modularity Optimization - Initialization finished after %dms", System.currentTimeMillis() - initStart) );
-
+        try (ProgressTimer timer = ProgressTimer.start(millis -> log.info("Modularity Optimization - Initialization finished after %dms", millis))) {
+            initSeeding();
+            init();
+            computeColoring();
+        }
 
         for(iterationCounter = 0; iterationCounter < maxIterations; iterationCounter++) {
-            long iterationStart = System.currentTimeMillis();
+            boolean hasConverged;
+            try (ProgressTimer timer = ProgressTimer.start(millis -> log.info("Modularity Optimization - Iteration %d finished after %dms", iterationCounter + 1,  millis))) {
 
-            nodeCommunityInfluences.fill(0.0);
+                nodeCommunityInfluences.fill(0.0);
 
-            long currentColor = colorsUsed.nextSetBit(0);
-            while(currentColor != -1) {
-                optimizeForColor(currentColor);
-                currentColor = colorsUsed.nextSetBit(currentColor + 1);
+                long currentColor = colorsUsed.nextSetBit(0);
+                while (currentColor != -1) {
+                    optimizeForColor(currentColor);
+                    currentColor = colorsUsed.nextSetBit(currentColor + 1);
+                }
+
+                 hasConverged = !updateModularity();
+
             }
-
-            boolean hasConverged = !updateModularity();
-
-            log.info(String.format("Modularity Optimization - Iteration %d finished after %dms", iterationCounter + 1, System.currentTimeMillis() - iterationStart));
 
             if (hasConverged) {
                 this.didConverge = true;
