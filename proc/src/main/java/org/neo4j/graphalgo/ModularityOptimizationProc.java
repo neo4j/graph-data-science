@@ -57,7 +57,7 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
     public Stream<WriteResult> betaModularityOptimization(
         @Name(value = "label", defaultValue = "") String label,
         @Name(value = "relationship", defaultValue = "") String relationshipType,
-        @Name(value = "config", defaultValue = "null") Map<String, Object> config
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
     ) {
         return run(label, relationshipType, config);
     }
@@ -70,7 +70,7 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
     public Stream<StreamResult> betaModularityOptimizationStream(
         @Name(value = "label", defaultValue = "") String label,
         @Name(value = "relationship", defaultValue = "") String relationshipType,
-        @Name(value = "config", defaultValue = "null") Map<String, Object> config
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
     ) {
         return stream(label, relationshipType, config);
     }
