@@ -28,6 +28,9 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
+
 class LouvainMultiLevelTest extends LouvainTestBase {
 
     private static final String DB_CYPHER =
@@ -93,14 +96,11 @@ class LouvainMultiLevelTest extends LouvainTestBase {
 
         algorithm.compute();
 
-        final HugeLongArray[] dendogram = algorithm.dendrogramm();
-        for (int i = 0; i < dendogram.length; i++) {
-            System.out.println(dendogram[i]);
-        }
+        final HugeLongArray[] dendrogram = algorithm.dendrograms();
+        final double[] modularities = algorithm.modularities();
 
-//        assertArrayEquals(new long[]{0, 0, 0, 1, 1, 1, 2, 2, 2}, dendogram[0].toArray());
-//        assertArrayEquals(new long[]{0, 0, 0, 1, 1, 1, 2, 2, 2}, algorithm.getCommunityIds().toArray());
-//        assertEquals(0.53, algorithm.getFinalModularity(), 0.01);
-//        assertArrayEquals(new double[]{0.53}, algorithm.getModularities(), 0.01);
+        assertCommunities(dendrogram[0], new long[]{0, 1, 3}, new long[]{2, 4, 5, 14}, new long[]{6, 7, 8}, new long[]{9, 10, 11, 12, 13});
+        assertCommunities(dendrogram[1], new long[]{0, 1, 2, 3, 4, 5, 14}, new long[]{6, 7, 8, 9, 10, 11, 12, 13});
+        assertEquals(0.071, modularities[modularities.length-1], 0.01);
     }
 }
