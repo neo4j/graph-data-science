@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.write.Exporter;
+import org.neo4j.graphalgo.core.write.NodeExporter;
 import org.neo4j.graphalgo.impl.closeness.HarmonicCentrality;
 import org.neo4j.graphalgo.results.CentralityProcResult;
 import org.neo4j.graphdb.Direction;
@@ -126,7 +126,7 @@ public class HarmonicCentralityProc extends LabsProc {
             graph.release();
             final String writeProperty = configuration.getWriteProperty(DEFAULT_TARGET_PROPERTY);
             builder.timeWrite(() -> {
-                Exporter exporter = Exporter.of(api, graph, algo.terminationFlag)
+                NodeExporter exporter = NodeExporter.of(api, graph, algo.terminationFlag)
                         .withLog(log)
                         .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
                         .build();

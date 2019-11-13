@@ -44,8 +44,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static java.util.Collections.singletonList;
-import static org.neo4j.graphalgo.core.write.Exporter.MAX_BATCH_SIZE;
-import static org.neo4j.graphalgo.core.write.Exporter.MIN_BATCH_SIZE;
+import static org.neo4j.graphalgo.core.write.NodeExporter.MAX_BATCH_SIZE;
+import static org.neo4j.graphalgo.core.write.NodeExporter.MIN_BATCH_SIZE;
 
 public final class RelationshipExporter extends StatementApi {
 

@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.write.Exporter;
+import org.neo4j.graphalgo.core.write.NodeExporter;
 import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.impl.ShortestPathAStar;
 import org.neo4j.graphalgo.impl.ShortestPathDijkstra;
@@ -163,7 +163,7 @@ public class ShortestPathProc extends LabsProc {
                 dijkstra.release();
 
                 final DequeMapping mapping = new DequeMapping(graph, finalPath);
-                Exporter.of(api, mapping, dijkstra.terminationFlag)
+                NodeExporter.of(api, mapping, dijkstra.terminationFlag)
                         .withLog(log)
                         .build()
                         .write(

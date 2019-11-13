@@ -32,7 +32,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.write.Exporter;
+import org.neo4j.graphalgo.core.write.NodeExporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.values.storable.Values;
@@ -400,7 +400,7 @@ public final class Louvain extends Algorithm<Louvain> {
     }
 
     public void export(
-        final Exporter exporter,
+        final NodeExporter exporter,
         final String propertyName,
         final String intermediateCommunitiesPropertyName
     ) {

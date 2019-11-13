@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.results;
 
-import org.neo4j.graphalgo.core.write.Exporter;
+import org.neo4j.graphalgo.core.write.NodeExporter;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 
 import java.util.function.DoubleUnaryOperator;
@@ -34,7 +34,7 @@ public class NormalizedCentralityResult extends CentralityResult {
         this.normalizationFunction = normalizationFunction;
     }
 
-    public void export(String propertyName, Exporter exporter, DoubleUnaryOperator normalizationFunction) {
+    public void export(String propertyName, NodeExporter exporter, DoubleUnaryOperator normalizationFunction) {
         result.export(propertyName, exporter, normalizationFunction);
     }
 
@@ -46,7 +46,7 @@ public class NormalizedCentralityResult extends CentralityResult {
         return normalizationFunction.applyAsDouble(result.score(nodeId));
     }
 
-    public void export(String propertyName, Exporter exporter) {
+    public void export(String propertyName, NodeExporter exporter) {
         export(propertyName, exporter, normalizationFunction);
     }
 }

@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class ExporterTest {
+class NodeExporterTest {
 
     private static GraphDatabaseAPI DB;
 
@@ -76,7 +76,7 @@ class ExporterTest {
 
     private void transactionTerminationTest(ExecutorService executorService) {
         TerminationFlag terminationFlag = () -> false;
-        Exporter exporter = Exporter.of(DB, new DirectIdMapping(3), terminationFlag)
+        NodeExporter exporter = NodeExporter.of(DB, new DirectIdMapping(3), terminationFlag)
                 .parallel(executorService, 4)
                 .build();
         TransactionTerminatedException exception = assertThrows(

@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.write.Exporter;
+import org.neo4j.graphalgo.core.write.NodeExporter;
 import org.neo4j.graphalgo.impl.louvain.Louvain;
 import org.neo4j.graphalgo.impl.louvain.LouvainFactory;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
@@ -104,7 +104,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
                 resultBuilder.withIntermediateCommunitiesWriteProperty(intermediateCommunitiesWriteProperty);
 
                 log.debug("Writing results");
-                Exporter exporter = exporter(graph, Pools.DEFAULT, configuration.getWriteConcurrency());
+                NodeExporter exporter = exporter(graph, Pools.DEFAULT, configuration.getWriteConcurrency());
                 louvain.export(
                         exporter,
                         writeProperty,
@@ -205,11 +205,11 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
         return louvain;
     }
 
-    private Exporter exporter(
+    private NodeExporter exporter(
             Graph graph,
             ExecutorService pool,
             int concurrency) {
-        Exporter.Builder builder = Exporter.of(api, graph, TerminationFlag.wrap(transaction));
+        NodeExporter.Builder builder = NodeExporter.of(api, graph, TerminationFlag.wrap(transaction));
         if (log != null) {
             builder.withLog(log);
         }

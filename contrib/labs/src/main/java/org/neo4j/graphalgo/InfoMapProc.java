@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.write.Exporter;
+import org.neo4j.graphalgo.core.write.NodeExporter;
 import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.impl.infomap.InfoMap;
 import org.neo4j.graphalgo.results.AbstractResultBuilder;
@@ -322,7 +322,7 @@ public class InfoMapProc extends LabsProc {
 
         if (config.isWriteFlag()) {
             try (ProgressTimer timer = builder.timeWrite()) {
-                Exporter.of(api, graph, infoMap.terminationFlag)
+                NodeExporter.of(api, graph, infoMap.terminationFlag)
                         .withLog(log)
                         .build()
                         .write(config.getWriteProperty(DEFAULT_WRITE_PROPERTY_VALUE),

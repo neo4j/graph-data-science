@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.graphalgo.core.write.Exporter;
+import org.neo4j.graphalgo.core.write.NodeExporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.wcc.WCC;
@@ -210,7 +210,7 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
             tracker
         );
 
-        Exporter exporter = Exporter.of(api, graph, terminationFlag)
+        NodeExporter exporter = NodeExporter.of(api, graph, terminationFlag)
             .withLog(log)
             .parallel(Pools.DEFAULT, procedureConfiguration.getWriteConcurrency())
             .build();

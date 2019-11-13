@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.write.Exporter;
+import org.neo4j.graphalgo.core.write.NodeExporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.labelprop.LabelPropagation;
 import org.neo4j.graphalgo.impl.labelprop.LabelPropagationFactory;
@@ -294,7 +294,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
             if (writePropertyEqualsSeedProperty && hasSeedProperties) {
                 translator = new PropertyTranslator.OfLongIfChanged<>(seedProperties, HugeLongArray::get);
             }
-            Exporter.of(api, graph, TerminationFlag.wrap(transaction))
+            NodeExporter.of(api, graph, TerminationFlag.wrap(transaction))
                     .withLog(log)
                     .parallel(Pools.DEFAULT, concurrency)
                     .build()

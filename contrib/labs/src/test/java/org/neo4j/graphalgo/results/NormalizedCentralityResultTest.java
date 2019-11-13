@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.results;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.core.write.Exporter;
+import org.neo4j.graphalgo.core.write.NodeExporter;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphalgo.impl.utils.NormalizationFunction;
 
@@ -109,7 +109,7 @@ class NormalizedCentralityResultTest {
         CentralityResultWithStatistics centralityResultWithStatistics =
                 CentralityResultWithStatistics.of(new CentralityResult(given));
 
-        Exporter exporter = mock(Exporter.class);
+        NodeExporter exporter = mock(NodeExporter.class);
         ArgumentCaptor<CentralityResult.MapTranslator> arg = ArgumentCaptor
                 .forClass(CentralityResult.MapTranslator.class);
 

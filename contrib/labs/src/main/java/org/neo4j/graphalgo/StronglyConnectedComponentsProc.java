@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.write.Exporter;
+import org.neo4j.graphalgo.core.write.NodeExporter;
 import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.impl.multistepscc.MultistepSCC;
 import org.neo4j.graphalgo.impl.scc.ForwardBackwardScc;
@@ -123,7 +123,7 @@ public class StronglyConnectedComponentsProc extends LabsProc {
             builder.timeWrite(() -> {
                 graph.release();
                 tarjan.release();
-                Exporter.of(api, graph, tarjan.terminationFlag)
+                NodeExporter.of(api, graph, tarjan.terminationFlag)
                         .withLog(log)
                         .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
                         .build()
@@ -177,7 +177,7 @@ public class StronglyConnectedComponentsProc extends LabsProc {
                     CONFIG_CLUSTER);
             builder.withPartitionProperty(partitionProperty);
 
-            builder.timeWrite(() -> Exporter
+            builder.timeWrite(() -> NodeExporter
                     .of(api, graph, tarjan.terminationFlag)
                     .withLog(log)
                     .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
@@ -259,7 +259,7 @@ public class StronglyConnectedComponentsProc extends LabsProc {
                     CONFIG_CLUSTER);
             builder.withPartitionProperty(partitionProperty).withWriteProperty(partitionProperty);
 
-            builder.timeWrite(() -> Exporter.of(api, graph, terminationFlag)
+            builder.timeWrite(() -> NodeExporter.of(api, graph, terminationFlag)
                     .withLog(log)
                     .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
                     .build()
@@ -356,7 +356,7 @@ public class StronglyConnectedComponentsProc extends LabsProc {
                         CONFIG_CLUSTER);
                 builder.withPartitionProperty(partitionProperty);
 
-                Exporter
+                NodeExporter
                         .of(api, graph, multistep.terminationFlag)
                         .withLog(log)
                         .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
