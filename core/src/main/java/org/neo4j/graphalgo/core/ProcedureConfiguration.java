@@ -21,9 +21,7 @@ package org.neo4j.graphalgo.core;
 
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.GraphFactory;
-import org.neo4j.graphalgo.core.heavyweight.HeavyGraph;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.lightweight.LightGraph;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
@@ -50,6 +48,9 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIE
  * Wrapper around configuration options map
  */
 public class ProcedureConfiguration {
+
+    public static final String HEAVY_GRAPH_TYPE = "heavy";
+    public static final String LIGHT_GRAPH_TYPE = "light";
 
     private final Map<String, Object> config;
 
@@ -348,8 +349,8 @@ public class ProcedureConfiguration {
         switch (graphImpl.toLowerCase(Locale.ROOT)) {
             case CypherGraphFactory.TYPE:
                 return CypherGraphFactory.class;
-            case LightGraph.TYPE:
-            case HeavyGraph.TYPE:
+            case LIGHT_GRAPH_TYPE:
+            case HEAVY_GRAPH_TYPE:
             case HugeGraph.TYPE:
                 return HugeGraphFactory.class;
             default:
@@ -361,10 +362,11 @@ public class ProcedureConfiguration {
     }
 
     private static final Set<String> RESERVED = new HashSet<>(asList(
-            CypherGraphFactory.TYPE,
-            LightGraph.TYPE,
-            HugeGraph.TYPE,
-            HeavyGraph.TYPE));
+        CypherGraphFactory.TYPE,
+        HugeGraph.TYPE,
+        LIGHT_GRAPH_TYPE,
+        HEAVY_GRAPH_TYPE
+    ));
 
     public static boolean validCustomName(String name) {
         return name != null && !name.trim().isEmpty() && !RESERVED.contains(name.trim().toLowerCase());

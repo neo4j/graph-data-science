@@ -62,14 +62,6 @@ import java.util.function.LongPredicate;
  * 4 bytes into the {@code degree} from the ByteArray, starting from the offset, then read
  * {@code degree} vlongs as targetId.
  * <p>
- * <p>
- * The graph encoding (sans delta+vlong) is similar to that of the
- * {@link org.neo4j.graphalgo.core.lightweight.LightGraph} but stores degree
- * explicitly into the target adjacency array where the LightGraph would subtract
- * offsets of two consecutive nodes. While that doesn't use up memory to store the
- * degree, it makes it practically impossible to build the array out-of-order,
- * which is necessary for loading the graph in parallel.
- * <p>
  * Reading the degree from the offset position not only does not require the offset array
  * to be sorted but also allows the adjacency array to be sparse. This fact is
  * used during the import – each thread pre-allocates a local chunk of some pages (512 KiB)
