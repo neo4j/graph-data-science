@@ -244,6 +244,19 @@ public final class ParallelUtil {
     }
 
     /**
+     * Runs a single task and waits until it's finished.
+     */
+    public static void run(Runnable task) {
+        try {
+            Thread thread = new Thread(task);
+            thread.start();
+            thread.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * Runs a collection of {@link Runnable}s in parallel for their side-effects.
      * The level of parallelism is defined by the given executor.
      * <p>

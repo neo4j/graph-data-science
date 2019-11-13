@@ -19,7 +19,10 @@
  */
 package org.neo4j.graphalgo.impl.results;
 
-import org.neo4j.graphalgo.core.utils.*;
+import org.neo4j.graphalgo.core.utils.ExceptionUtil;
+import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.StatementApi;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.internal.kernel.api.exceptions.EntityNotFoundException;
 import org.neo4j.internal.kernel.api.exceptions.InvalidTransactionTypeKernelException;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -29,10 +32,8 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.values.storable.Values;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
 public class SimilarityExporter extends StatementApi {
@@ -40,19 +41,16 @@ public class SimilarityExporter extends StatementApi {
     private final int propertyId;
     private final int relationshipTypeId;
     private final TerminationFlag terminationFlag;
-    private ExecutorService executorService;
 
     public SimilarityExporter(
             GraphDatabaseAPI api,
             String relationshipType,
             String propertyName,
-            TerminationFlag terminationFlag,
-            ExecutorService executorService) {
+            TerminationFlag terminationFlag) {
         super(api);
         propertyId = getOrCreatePropertyId(propertyName);
         relationshipTypeId = getOrCreateRelationshipId(relationshipType);
         this.terminationFlag = terminationFlag;
-        this.executorService = executorService;
     }
 
     public void export(Stream<SimilarityResult> similarityPairs, long batchSize) {
@@ -121,9 +119,7 @@ public class SimilarityExporter extends StatementApi {
         } else {
             Iterator<SimilarityResult> iterator = similarityPairs.iterator();
             do {
-                List<SimilarityResult> items = take(iterator, Math.toIntExact(batchSize));
-                List<Runnable> tasks = Collections.singletonList(() -> export(items));
-                ParallelUtil.awaitTermination(ParallelUtil.run(tasks, false, executorService, null));
+                ParallelUtil.run(() -> export(take(iterator, Math.toIntExact(batchSize))));
             } while (iterator.hasNext());
         }
     }

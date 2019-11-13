@@ -39,10 +39,8 @@ import org.neo4j.values.storable.Values;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static java.util.Collections.singletonList;
 import static org.neo4j.graphalgo.core.write.NodeExporter.MIN_BATCH_SIZE;
 
 public final class RelationshipExporter extends StatementApi {
@@ -52,7 +50,6 @@ public final class RelationshipExporter extends StatementApi {
     private final long nodeCount;
     private final TerminationFlag terminationFlag;
     private final ProgressLogger progressLogger;
-    private final ExecutorService executorService;
 
     public static RelationshipExporter.Builder of(
         GraphDatabaseAPI db,
@@ -95,8 +92,7 @@ public final class RelationshipExporter extends StatementApi {
                 graph,
                 readDirection,
                 terminationFlag,
-                progressLogger,
-                executorService
+                progressLogger
             );
         }
     }
@@ -106,8 +102,7 @@ public final class RelationshipExporter extends StatementApi {
         Graph graph,
         Direction readDirection,
         TerminationFlag terminationFlag,
-        ProgressLogger progressLogger,
-        ExecutorService executorService
+        ProgressLogger progressLogger
     ) {
         super(db);
         this.nodeCount = graph.nodeCount();
@@ -115,7 +110,6 @@ public final class RelationshipExporter extends StatementApi {
         this.readDirection = readDirection;
         this.terminationFlag = terminationFlag;
         this.progressLogger = progressLogger;
-        this.executorService = executorService;
     }
 
     public void write(String relationshipType, String propertyKey, double fallbackValue) {
@@ -137,7 +131,7 @@ public final class RelationshipExporter extends StatementApi {
                 partition.startNode,
                 partition.nodeCount
             ))
-            .forEach(this::writeBatch);
+            .forEach(ParallelUtil::run);
     }
 
     private Runnable createBatchRunnable(
@@ -175,10 +169,6 @@ public final class RelationshipExporter extends StatementApi {
                 nodeCount
             );
         });
-    }
-
-    private void writeBatch(Runnable batch) {
-        ParallelUtil.run(singletonList(batch), true, executorService, null);
     }
 
     private List<Partition> degreePartitionGraph(long batchSize, Direction direction) {
