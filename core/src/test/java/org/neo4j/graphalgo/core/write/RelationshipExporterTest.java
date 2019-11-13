@@ -77,8 +77,10 @@ class RelationshipExporterTest {
             .load(HugeGraphFactory.class);
 
         // export into new database
-        RelationshipExporter build = RelationshipExporter.of(db, fromGraph, RUNNING_TRUE).build();
-        build.write("FOOBAR", "weight", 0.0, Direction.OUTGOING);
+        RelationshipExporter build = RelationshipExporter
+            .of(db, fromGraph, Direction.OUTGOING, RUNNING_TRUE)
+            .build();
+        build.write("FOOBAR", "weight", 0.0);
 
         // validate
         Graph actual = new GraphLoader(db)

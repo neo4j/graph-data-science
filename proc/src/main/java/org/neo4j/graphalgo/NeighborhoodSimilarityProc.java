@@ -134,10 +134,11 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
             .withRelationshipCount(similarityGraph.relationshipCount());
 
         if (configuration.isWriteFlag() && similarityGraph.relationshipCount() > 0) {
-            RelationshipExporter.of(api, similarityGraph, neighborhoodSimilarity.terminationFlag)
+            RelationshipExporter
+                .of(api, similarityGraph, similarityGraph.getLoadDirection(), neighborhoodSimilarity.terminationFlag)
                 .withLog(log)
                 .build()
-                .write(writeRelationshipType, writeProperty, WRITE_PROPERTY_VALUE_DEFAULT, similarityGraph.getLoadDirection());
+                .write(writeRelationshipType, writeProperty, WRITE_PROPERTY_VALUE_DEFAULT);
         }
         return Stream.of(resultBuilder.build());
     }

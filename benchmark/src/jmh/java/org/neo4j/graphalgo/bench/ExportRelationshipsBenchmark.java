@@ -80,7 +80,7 @@ public class ExportRelationshipsBenchmark {
             .withDirection(Direction.OUTGOING)
             .load(HugeGraphFactory.class);
 
-        this.exporter = RelationshipExporter.of(db, graph, TerminationFlag.RUNNING_TRUE).build();
+        this.exporter = RelationshipExporter.of(db, graph, OUTGOING, TerminationFlag.RUNNING_TRUE).build();
     }
 
     @TearDown
@@ -91,6 +91,6 @@ public class ExportRelationshipsBenchmark {
 
     @Benchmark
     public void writeRelationshipAndProperty() {
-        exporter.write("FOOBAR", "weight", 0.0, OUTGOING);
+        exporter.write("FOOBAR", "weight", 0.0);
     }
 }

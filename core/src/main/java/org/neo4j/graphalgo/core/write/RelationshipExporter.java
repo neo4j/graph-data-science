@@ -52,6 +52,7 @@ public final class RelationshipExporter extends StatementApi {
     private final NodeIterator nodeIterator;
     private final RelationshipIterator relationshipIterator;
     private final Degrees degrees;
+    private final Direction readDirection;
     private final long nodeCount;
     private final TerminationFlag terminationFlag;
     private final ProgressLogger progressLogger;
@@ -63,6 +64,7 @@ public final class RelationshipExporter extends StatementApi {
         NodeIterator nodeIterator,
         RelationshipIterator relationshipIterator,
         Degrees degrees,
+        Direction readDirection,
         TerminationFlag terminationFlag
     ) {
         return new RelationshipExporter.Builder(
@@ -71,17 +73,24 @@ public final class RelationshipExporter extends StatementApi {
             nodeIterator,
             relationshipIterator,
             degrees,
+            readDirection,
             terminationFlag
         );
     }
 
-    public static RelationshipExporter.Builder of(GraphDatabaseAPI db, Graph graph, TerminationFlag terminationFlag) {
+    public static RelationshipExporter.Builder of(
+        GraphDatabaseAPI db,
+        Graph graph,
+        Direction readDirection,
+        TerminationFlag terminationFlag
+    ) {
         return new RelationshipExporter.Builder(
             db,
             graph,
             graph,
             graph,
             graph,
+            readDirection,
             terminationFlag
         );
     }
@@ -92,6 +101,7 @@ public final class RelationshipExporter extends StatementApi {
         private final NodeIterator nodeIterator;
         private final RelationshipIterator relationshipIterator;
         private final Degrees degrees;
+        private final Direction readDirection;
 
         Builder(
             GraphDatabaseAPI db,
@@ -99,6 +109,7 @@ public final class RelationshipExporter extends StatementApi {
             NodeIterator nodeIterator,
             RelationshipIterator relationshipIterator,
             Degrees degrees,
+            Direction readDirection,
             TerminationFlag terminationFlag
         ) {
             super(db, idMapping, terminationFlag);
@@ -106,6 +117,7 @@ public final class RelationshipExporter extends StatementApi {
             this.nodeIterator = nodeIterator;
             this.relationshipIterator = relationshipIterator;
             this.degrees = degrees;
+            this.readDirection = readDirection;
         }
 
         @Override
@@ -120,6 +132,7 @@ public final class RelationshipExporter extends StatementApi {
                 nodeIterator,
                 relationshipIterator,
                 degrees,
+                readDirection,
                 terminationFlag,
                 progressLogger,
                 executorService
@@ -133,6 +146,7 @@ public final class RelationshipExporter extends StatementApi {
         NodeIterator nodeIterator,
         RelationshipIterator relationshipIterator,
         Degrees degrees,
+        Direction readDirection,
         TerminationFlag flag,
         ProgressLogger progressLogger,
         ExecutorService executorService
@@ -143,12 +157,13 @@ public final class RelationshipExporter extends StatementApi {
         this.nodeIterator = nodeIterator;
         this.relationshipIterator = relationshipIterator;
         this.degrees = degrees;
+        this.readDirection = readDirection;
         this.terminationFlag = flag;
         this.progressLogger = progressLogger;
         this.executorService = executorService;
     }
 
-    public void write(String relationshipType, String propertyKey, double fallbackValue, Direction direction) {
+    public void write(String relationshipType, String propertyKey, double fallbackValue) {
         final AtomicLong progress = new AtomicLong(0L);
 
         final int relationshipToken = getOrCreateRelationshipToken(relationshipType);
@@ -156,11 +171,11 @@ public final class RelationshipExporter extends StatementApi {
 
         // We use MIN_BATCH_SIZE since writing relationships
         // is performed batch-wise, but single-threaded.
-        degreePartitionGraph(MIN_BATCH_SIZE, direction)
+        degreePartitionGraph(MIN_BATCH_SIZE, readDirection)
             .stream()
             .map(partition -> createBatchRunnable(
                 fallbackValue,
-                direction,
+                readDirection,
                 progress,
                 relationshipToken,
                 propertyToken,

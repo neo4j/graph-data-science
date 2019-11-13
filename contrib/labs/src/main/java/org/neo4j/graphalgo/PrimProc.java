@@ -147,15 +147,12 @@ public class PrimProc extends LabsProc {
                     graph,
                     spanningGraph,
                     spanningGraph,
+                    Direction.OUTGOING,
                     mstPrim.terminationFlag
                 )
                         .withLog(log)
                         .build()
-                        .write(
-                            configuration.get(CONFIG_WRITE_RELATIONSHIP, CONFIG_WRITE_RELATIONSHIP_DEFAULT),
-                            weightProperty,
-                            0.0,
-                            Direction.OUTGOING);
+                        .write(configuration.get(CONFIG_WRITE_RELATIONSHIP, CONFIG_WRITE_RELATIONSHIP_DEFAULT), weightProperty, 0.0);
             });
         }
         return Stream.of(builder.build());
