@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core;
 
-import jdk.internal.jline.internal.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.Graph;
