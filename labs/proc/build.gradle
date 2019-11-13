@@ -1,10 +1,8 @@
 description = 'Neo4j Labs :: Graph Algorithms :: Procedures'
 
-dependencies {
+apply plugin: 'com.github.johnrengelman.shadow'
 
-//     TEMPORARY
-//    compile project(':labs')
-//     TEMPORARY
+dependencies {
 
     compile project(':proc')
     compile project(':labs-algo')
@@ -12,4 +10,13 @@ dependencies {
     compileOnly group: 'org.neo4j', name: 'neo4j', version: ver.'neo4j'
 
     testCompile project(':test-utils')
+}
+
+shadowJar {
+    baseName = "neo4j-labs-graph-algorithms"
+    classifier = "standalone"
+    minimize()
+    exclude 'META-INF/versions/**/*'
+    from licenseFile
+    from generateLicensesFiles
 }

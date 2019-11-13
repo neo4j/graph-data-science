@@ -21,7 +21,6 @@
 package org.neo4j.graphalgo.impl.nn;
 
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Random;
@@ -34,8 +33,8 @@ public class ANNUtilsTest {
 
     @Test
     public void sampleNeighbors() {
-        Assertions.assertEquals(3, ANNUtils.sampleNeighbors(new long[] {1L, 3L, 5L, 7L}, 3, new Random()).length);
-        Assertions.assertEquals(2, ANNUtils.sampleNeighbors(new long[] {1L, 3L}, 3, new Random()).length);
+        assertEquals(3, ANNUtils.sampleNeighbors(new long[] {1L, 3L, 5L, 7L}, 3, new Random()).length);
+        assertEquals(2, ANNUtils.sampleNeighbors(new long[] {1L, 3L}, 3, new Random()).length);
     }
 
     @Test

@@ -1,7 +1,5 @@
 description = 'Neo4j Labs :: Graph Algorithms'
 
-apply plugin: 'com.github.johnrengelman.shadow'
-
 dependencies {
     compile project(':algo')
 
@@ -14,13 +12,6 @@ dependencies {
 
     testCompile project(':test-utils')
     testCompile group: 'net.jqwik',         name: 'jqwik',          version: ver.'jqwik'
-}
-
-test {
-    useJUnitPlatform {
-        includeEngines 'jqwik', 'junit-jupiter'
-    }
-    include '**/*Test.class'
 }
 
 task javadocJar(type: Jar) {
@@ -37,13 +28,4 @@ tasks.withType(JavaCompile) {
         '-ADocumentation.QuotedFields=false' <<
         '-ADocumentation.DelimitedFirstField=true' <<
         '-ADocumentation.ExportGrouping=SINGLE'
-}
-
-shadowJar {
-    baseName = "neo4j-labs-graph-algorithms"
-    classifier = "standalone"
-    minimize()
-    exclude 'META-INF/versions/**/*'
-    from licenseFile
-    from generateLicensesFiles
 }

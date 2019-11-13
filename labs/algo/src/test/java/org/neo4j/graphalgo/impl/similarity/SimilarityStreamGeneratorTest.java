@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.impl.similarity;
 
-import org.hamcrest.Matchers;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
@@ -77,9 +76,9 @@ class SimilarityStreamGeneratorTest {
         List<SimilarityResult> rows = stream.collect(Collectors.toList());
         assertEquals(3, rows.size());
 
-        assertThat(rows, Matchers.hasItems(similarityResult(0, 1, true, false)));
-        assertThat(rows, Matchers.hasItems(similarityResult(0, 2, true, false)));
-        assertThat(rows, Matchers.hasItems(similarityResult(1, 2, true, false)));
+        assertThat(rows, hasItems(similarityResult(0, 1, true, false)));
+        assertThat(rows, hasItems(similarityResult(0, 2, true, false)));
+        assertThat(rows, hasItems(similarityResult(1, 2, true, false)));
     }
 
     @ParameterizedTest(name = "concurrency = {0}")
@@ -103,9 +102,9 @@ class SimilarityStreamGeneratorTest {
         List<SimilarityResult> rows = stream.collect(Collectors.toList());
         assertEquals(3, rows.size());
 
-        assertThat(rows, Matchers.hasItems(similarityResult(0, 1, true, false)));
-        assertThat(rows, Matchers.hasItems(similarityResult(1, 0, true, true)));
-        assertThat(rows, Matchers.hasItems(similarityResult(2, 0, true, true)));
+        assertThat(rows, hasItems(similarityResult(0, 1, true, false)));
+        assertThat(rows, hasItems(similarityResult(1, 0, true, true)));
+        assertThat(rows, hasItems(similarityResult(2, 0, true, true)));
     }
 
     @ParameterizedTest(name = "concurrency = {0}")
@@ -131,8 +130,8 @@ class SimilarityStreamGeneratorTest {
         List<SimilarityResult> rows = stream.collect(Collectors.toList());
         assertEquals(2, rows.size());
 
-        assertThat(rows, Matchers.hasItems(similarityResult(0, 1, false, false)));
-        assertThat(rows, Matchers.hasItems(similarityResult(0, 2, false, false)));
+        assertThat(rows, hasItems(similarityResult(0, 1, false, false)));
+        assertThat(rows, hasItems(similarityResult(0, 2, false, false)));
     }
 
     @ParameterizedTest(name = "concurrency = {0}")
@@ -159,7 +158,7 @@ class SimilarityStreamGeneratorTest {
         List<SimilarityResult> rows = stream.collect(Collectors.toList());
         assertEquals(1, rows.size());
 
-        assertThat(rows, Matchers.hasItems(similarityResult(1, 0, false, false)));
+        assertThat(rows, hasItems(similarityResult(1, 0, false, false)));
     }
 
     @ParameterizedTest(name = "concurrency = {0}")
@@ -193,12 +192,12 @@ class SimilarityStreamGeneratorTest {
 
         assertEquals(6, rows.size());
 
-        assertThat(rows, Matchers.hasItems(similarityResult(1, 0, false, false)));
-        assertThat(rows, Matchers.hasItems(similarityResult(1, 2, false, false)));
-        assertThat(rows, Matchers.hasItems(similarityResult(1, 3, false, false)));
-        assertThat(rows, Matchers.hasItems(similarityResult(3, 0, false, false)));
-        assertThat(rows, Matchers.hasItems(similarityResult(3, 1, false, false)));
-        assertThat(rows, Matchers.hasItems(similarityResult(3, 2, false, false)));
+        assertThat(rows, hasItems(similarityResult(1, 0, false, false)));
+        assertThat(rows, hasItems(similarityResult(1, 2, false, false)));
+        assertThat(rows, hasItems(similarityResult(1, 3, false, false)));
+        assertThat(rows, hasItems(similarityResult(3, 0, false, false)));
+        assertThat(rows, hasItems(similarityResult(3, 1, false, false)));
+        assertThat(rows, hasItems(similarityResult(3, 2, false, false)));
     }
 
     @ParameterizedTest(name = "concurrency = {0}")
@@ -232,8 +231,8 @@ class SimilarityStreamGeneratorTest {
         assertEquals(2, rows.size());
 
 
-        assertThat(rows, Matchers.hasItems(similarityResult(1, 0, false, false)));
-        assertThat(rows, Matchers.hasItems(similarityResult(3, 0, false, false)));
+        assertThat(rows, hasItems(similarityResult(1, 0, false, false)));
+        assertThat(rows, hasItems(similarityResult(3, 0, false, false)));
     }
 
     @ParameterizedTest(name = "concurrency = {0}")
@@ -263,13 +262,13 @@ class SimilarityStreamGeneratorTest {
 
         assertEquals(6, rows.size());
 
-        assertThat(rows, Matchers.hasItems(similarityResult(0, 3, false, false)));
-        assertThat(rows, Matchers.hasItems(similarityResult(1, 3, false, false)));
-        assertThat(rows, Matchers.hasItems(similarityResult(2, 3, false, false)));
+        assertThat(rows, hasItems(similarityResult(0, 3, false, false)));
+        assertThat(rows, hasItems(similarityResult(1, 3, false, false)));
+        assertThat(rows, hasItems(similarityResult(2, 3, false, false)));
 
-        assertThat(rows, Matchers.hasItems(similarityResult(0, 2, false, false)));
-        assertThat(rows, Matchers.hasItems(similarityResult(1, 2, false, false)));
-        assertThat(rows, Matchers.hasItems(similarityResult(2, 3, false, false)));
+        assertThat(rows, hasItems(similarityResult(0, 2, false, false)));
+        assertThat(rows, hasItems(similarityResult(1, 2, false, false)));
+        assertThat(rows, hasItems(similarityResult(2, 3, false, false)));
     }
 
     @ParameterizedTest(name = "concurrency = {0}")
@@ -299,10 +298,10 @@ class SimilarityStreamGeneratorTest {
         List<SimilarityResult> rows = stream.collect(Collectors.toList());
 
         assertEquals(4, rows.size());
-        assertThat(rows, Matchers.hasItems(similarityResult(0, 2, false, false)));
-        assertThat(rows, Matchers.hasItems(similarityResult(1, 2, false, false)));
-        assertThat(rows, Matchers.hasItems(similarityResult(2, 3, false, false)));
-        assertThat(rows, Matchers.hasItems(similarityResult(3, 2, false, false)));
+        assertThat(rows, hasItems(similarityResult(0, 2, false, false)));
+        assertThat(rows, hasItems(similarityResult(1, 2, false, false)));
+        assertThat(rows, hasItems(similarityResult(2, 3, false, false)));
+        assertThat(rows, hasItems(similarityResult(3, 2, false, false)));
     }
 
     @ParameterizedTest(name = "concurrency = {0}")
@@ -332,10 +331,10 @@ class SimilarityStreamGeneratorTest {
 
         assertEquals(4, rows.size());
 
-        assertThat(rows, Matchers.hasItems(similarityResult(5, 6, false, false)));
-        assertThat(rows, Matchers.hasItems(similarityResult(5, 7, false, false)));
-        assertThat(rows, Matchers.hasItems(similarityResult(6, 7, false, false)));
-        assertThat(rows, Matchers.hasItems(similarityResult(7, 6, false, false)));
+        assertThat(rows, hasItems(similarityResult(5, 6, false, false)));
+        assertThat(rows, hasItems(similarityResult(5, 7, false, false)));
+        assertThat(rows, hasItems(similarityResult(6, 7, false, false)));
+        assertThat(rows, hasItems(similarityResult(7, 6, false, false)));
     }
 
     @ParameterizedTest(name = "concurrency = {0}")
@@ -363,9 +362,9 @@ class SimilarityStreamGeneratorTest {
         List<SimilarityResult> rows = stream.collect(Collectors.toList());
 
         assertEquals(3, rows.size());
-        assertThat(rows, Matchers.hasItems(similarityResult(5, 6, false, false)));
-        assertThat(rows, Matchers.hasItems(similarityResult(6, 7, false, false)));
-        assertThat(rows, Matchers.hasItems(similarityResult(7, 6, false, false)));
+        assertThat(rows, hasItems(similarityResult(5, 6, false, false)));
+        assertThat(rows, hasItems(similarityResult(6, 7, false, false)));
+        assertThat(rows, hasItems(similarityResult(7, 6, false, false)));
     }
 
     private ProcedureConfiguration getProcedureConfiguration(int concurrency) {

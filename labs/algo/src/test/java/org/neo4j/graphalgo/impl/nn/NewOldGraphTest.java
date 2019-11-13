@@ -64,8 +64,8 @@ class NewOldGraphTest {
         relationshipsBuilder.addRelationship(0, 2);
         relationshipsBuilder.addRelationship(0, 3);
 
-        RoaringBitmap[] visitedRelationships = ANNUtils.initializeRoaringBitmaps(5);
-        NewOldGraph graph = new NewOldGraph(ANNUtils.hugeGraph(nodes, relationshipsBuilder.build()), visitedRelationships);
+        RoaringBitmap[] visitedRelationships = initializeRoaringBitmaps(5);
+        NewOldGraph graph = new NewOldGraph(hugeGraph(nodes, relationshipsBuilder.build()), visitedRelationships);
 
         long[] newNeighbors = graph.findNewNeighbors(0).toArray();
         assertEquals(3, newNeighbors.length);
@@ -95,10 +95,10 @@ class NewOldGraphTest {
         relationshipsBuilder.addRelationship(0, 2);
         relationshipsBuilder.addRelationship(0, 3);
 
-        RoaringBitmap[] visitedRelationships = ANNUtils.initializeRoaringBitmaps(5);
+        RoaringBitmap[] visitedRelationships = initializeRoaringBitmaps(5);
         visitedRelationships[0].add(1);
 
-        NewOldGraph graph = new NewOldGraph(ANNUtils.hugeGraph(nodes, relationshipsBuilder.build()), visitedRelationships);
+        NewOldGraph graph = new NewOldGraph(hugeGraph(nodes, relationshipsBuilder.build()), visitedRelationships);
 
         long[] newNeighbors = graph.findNewNeighbors(0).toArray();
         assertEquals(2, newNeighbors.length);
@@ -128,10 +128,10 @@ class NewOldGraphTest {
         relationshipsBuilder.addRelationship(0, 2);
         relationshipsBuilder.addRelationship(0, 3);
 
-        RoaringBitmap[] visitedRelationships = ANNUtils.initializeRoaringBitmaps(5);
+        RoaringBitmap[] visitedRelationships = initializeRoaringBitmaps(5);
         visitedRelationships[0].add(1);
 
-        NewOldGraph graph = new NewOldGraph(ANNUtils.hugeGraph(nodes, relationshipsBuilder.build()), visitedRelationships);
+        NewOldGraph graph = new NewOldGraph(hugeGraph(nodes, relationshipsBuilder.build()), visitedRelationships);
 
         long[] oldNeighbors = graph.findOldNeighbors(0).toArray();
         assertEquals(1, oldNeighbors.length);
