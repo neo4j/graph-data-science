@@ -80,7 +80,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     /**
      * only outgoing directions are visited since the graph itself must be loaded using {@code .asUndirected(true) } !
      */
-    private static final Direction DIRECTION = Direction.BOTH;
+    private static final Direction DIRECTION = Direction.OUTGOING;
     private static final int NONE = -1;
     private final long nodeCount;
     private final int concurrency;
