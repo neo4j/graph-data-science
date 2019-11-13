@@ -40,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 import static org.neo4j.graphalgo.TestLog.INFO;
+import static org.neo4j.graphalgo.impl.pagerank.PageRank.DEFAULT_TOLERANCE;
 
 class ModularityOptimizationTest {
 
@@ -86,6 +87,7 @@ class ModularityOptimizationTest {
             graph,
             Direction.BOTH,
             3,
+            DEFAULT_TOLERANCE,
             null,
             3,
             2,
@@ -116,6 +118,7 @@ class ModularityOptimizationTest {
             graph,
             Direction.BOTH,
             3,
+            DEFAULT_TOLERANCE,
             null,
             3,
             2,
@@ -146,6 +149,7 @@ class ModularityOptimizationTest {
             graph,
             Direction.BOTH,
             10,
+            DEFAULT_TOLERANCE,
             graph.nodeProperties("seed2"),
             1,
             100,
@@ -178,6 +182,7 @@ class ModularityOptimizationTest {
             graph,
             Direction.BOTH,
             10,
+            DEFAULT_TOLERANCE,
             graph.nodeProperties("seed1"),
             1,
             100,
@@ -217,6 +222,7 @@ class ModularityOptimizationTest {
             graph,
             Direction.BOTH,
             3,
+            DEFAULT_TOLERANCE,
             null,
             3,
             2,
@@ -227,8 +233,7 @@ class ModularityOptimizationTest {
 
         pmo.compute();
 
-        assertTrue(log.containsMessage(INFO, "Modularity Optimization - Started"));
-        assertTrue(log.containsMessage(INFO, "Initialization finished after"));
+        assertTrue(log.containsMessage(INFO, "Modularity Optimization - Initialization finished"));
         assertTrue(log.containsMessage(INFO, "Iteration 1"));
         assertTrue(log.containsMessage(INFO, "Modularity Optimization - Finished"));
     }
@@ -247,6 +252,7 @@ class ModularityOptimizationTest {
                 graph,
                 Direction.BOTH,
                 0,
+                DEFAULT_TOLERANCE,
                 null,
                 3,
                 2,
