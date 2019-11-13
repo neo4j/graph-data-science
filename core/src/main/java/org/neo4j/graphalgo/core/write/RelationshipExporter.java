@@ -202,7 +202,7 @@ public final class RelationshipExporter extends StatementApi {
             for (long currentNode = start; currentNode < end; currentNode++) {
                 relationshipIterator.forEachRelationship(currentNode, direction, fallbackValue, writeConsumer);
 
-                // Only log every 10_000 written nodes
+                // Only log after writing relationships for 10_000 nodes
                 // add +1 to avoid logging on the first written node
                 if (((currentNode + 1) - start) % TerminationFlag.RUN_CHECK_NODE_COUNT == 0) {
                     long currentProgress = progress.addAndGet(TerminationFlag.RUN_CHECK_NODE_COUNT);
@@ -214,7 +214,7 @@ public final class RelationshipExporter extends StatementApi {
                 }
             }
 
-            // log progress for the last batch of written nodes
+            // log progress for the last batch of written relationships
             progressLogger.logProgress(
                 progress.addAndGet((end - start + 1) % TerminationFlag.RUN_CHECK_NODE_COUNT),
                 nodeCount
