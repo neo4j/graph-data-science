@@ -83,7 +83,9 @@ final class ModularityOptimizationTask implements Runnable {
     public void run() {
         for (long nodeId = batchStart; nodeId < batchEnd; nodeId++) {
 
-            if (colors.get(nodeId) != color) continue;
+            if (colors.get(nodeId) != color) {
+                continue;
+            }
 
             long currentCommunity = currentCommunities.get(nodeId);
             final int degree = graph.degree(nodeId, direction);
@@ -135,8 +137,8 @@ final class ModularityOptimizationTask implements Runnable {
 
             // TODO implement swap protection
             nextCommunities.set(nodeId, nextCommunity);
-            communityWeightUpdates.update(currentCommunity, (agg) -> agg - cumulativeNodeWeight);
-            communityWeightUpdates.update(nextCommunity, (agg) -> agg + cumulativeNodeWeight);
+            communityWeightUpdates.update(currentCommunity, agg -> agg - cumulativeNodeWeight);
+            communityWeightUpdates.update(nextCommunity, agg -> agg + cumulativeNodeWeight);
         }
 
     }

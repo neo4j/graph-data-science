@@ -157,10 +157,12 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private void init() {
         double doubleTotalNodeWeight = ParallelUtil.parallelStream(
             LongStream.range(0, nodeCount),
-            (nodeStream) ->
-                nodeStream.mapToDouble((nodeId) -> {
+            nodeStream ->
+                nodeStream.mapToDouble(nodeId -> {
                     // Note: this map function has side effects - For performance reasons!!!11!
-                    if (seedProperty == null) currentCommunities.set(nodeId, nodeId);
+                    if (seedProperty == null) {
+                        currentCommunities.set(nodeId, nodeId);
+                    }
 
                     MutableDouble cumulativeWeight = new MutableDouble(0.0D);
 
@@ -169,7 +171,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                         return true;
                     });
 
-                    communityWeights.update(currentCommunities.get(nodeId), (acc) -> acc + cumulativeWeight.doubleValue());
+                    communityWeights.update(currentCommunities.get(nodeId), acc -> acc + cumulativeWeight.doubleValue());
 
                     cumulativeNodeWeights.set(nodeId, cumulativeWeight.doubleValue());
 
@@ -211,14 +213,14 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         // apply communityWeight updates to communityWeights
         ParallelUtil.parallelStreamConsume(
             LongStream.range(0, nodeCount),
-            (stream -> stream.forEach((nodeId) -> {
+            stream -> stream.forEach(nodeId -> {
                 final double update = communityWeightUpdates.get(nodeId);
-                communityWeights.update(nodeId, (w) -> w + update);
-            }))
+                communityWeights.update(nodeId, w -> w + update);
+            })
         );
 
         // reset communityWeightUpdates
-        communityWeightUpdates = HugeAtomicDoubleArray.newArray(nodeCount, (i) -> 0.0, tracker);
+        communityWeightUpdates = HugeAtomicDoubleArray.newArray(nodeCount, i -> 0.0, tracker);
     }
 
     private Collection<ModularityOptimizationTask> createModularityOptimizationTasks(long currentColor) {
@@ -255,7 +257,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private double calculateModularity() {
         double ex = ParallelUtil.parallelStream(
             LongStream.range(0, nodeCount),
-            (nodeStream) ->
+            nodeStream ->
                 nodeStream
                     .mapToDouble(nodeCommunityInfluences::get)
                     .reduce(Double::sum)
@@ -264,9 +266,9 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
         double ax = ParallelUtil.parallelStream(
             LongStream.range(0, nodeCount),
-            (nodeStream) ->
+            nodeStream ->
                 nodeStream
-                    .mapToDouble((nodeId) -> Math.pow(communityWeights.get(nodeId), 2.0))
+                    .mapToDouble(nodeId -> Math.pow(communityWeights.get(nodeId), 2.0))
                     .reduce(Double::sum)
                     .orElseThrow(() -> new RuntimeException("Error while comptuing modularity"))
         );
@@ -275,7 +277,9 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     }
 
     private void initSeeding() {
-        if (seedProperty == null) return;
+        if (seedProperty == null) {
+            return;
+        }
 
         final long maxSeedCommunity = seedProperty.getMaxPropertyValue().orElse(0);
 
