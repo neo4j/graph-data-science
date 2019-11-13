@@ -214,7 +214,6 @@ public class TriangleProc extends LabsProc {
                         graph,
                         triangleCount,
                         configuration,
-                        terminationFlag,
                         writeProperty,
                         clusteringCoefficientProperty);
             }
@@ -234,7 +233,6 @@ public class TriangleProc extends LabsProc {
      * @param graph               the graph
      * @param algorithm           Impl. of TriangleCountAlgorithm
      * @param configuration       configuration wrapper
-     * @param flag                termination flag
      * @param writeProperty
      * @param coefficientProperty
      */
@@ -242,13 +240,12 @@ public class TriangleProc extends LabsProc {
             Graph graph,
             IntersectingTriangleCount algorithm,
             ProcedureConfiguration configuration,
-            TerminationFlag flag,
             String writeProperty,
             Optional<String> coefficientProperty) {
 
-        final Exporter exporter = Exporter.of(api, graph)
+        final Exporter exporter = Exporter.of(api, graph, algorithm.terminationFlag)
                 .withLog(log)
-                .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), flag)
+                .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
                 .build();
 
 
@@ -305,14 +302,13 @@ public class TriangleProc extends LabsProc {
                     .load(configuration.getGraphImpl());
         }
 
-        final TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
         try (ProgressTimer timer = builder.timeEval()) {
             triangleCount = new TriangleCountForkJoin(
                     graph,
                     ForkJoinPool.commonPool(),
                     configuration.getNumber("threshold", 10_000).intValue())
                     .withProgressLogger(ProgressLogger.wrap(log, "triangleCount"))
-                    .withTerminationFlag(terminationFlag)
+                    .withTerminationFlag(TerminationFlag.wrap(transaction))
                     .compute();
             clusteringCoefficients = triangleCount.getClusteringCoefficients();
         }
@@ -320,9 +316,9 @@ public class TriangleProc extends LabsProc {
         if (configuration.isWriteFlag()) {
             try (ProgressTimer timer = builder.timeWrite()) {
                 final Optional<String> coefficientProperty = configuration.getString(COEFFICIENT_WRITE_PROPERTY_VALUE);
-                final Exporter exporter = Exporter.of(api, graph)
+                final Exporter exporter = Exporter.of(api, graph, triangleCount.terminationFlag)
                         .withLog(log)
-                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), terminationFlag)
+                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
                         .build();
                 if (coefficientProperty.isPresent()) {
                     exporter.write(

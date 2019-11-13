@@ -135,9 +135,9 @@ public class BalancedTriadsProc extends LabsProc {
             builder.withUnbalancedProperty(unbalancedProperty);
 
             try (ProgressTimer timer = builder.timeWrite()) {
-                Exporter.of(api, graph)
+                Exporter.of(api, graph, balancedTriads.terminationFlag)
                         .withLog(log)
-                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), terminationFlag)
+                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
                         .build()
                         .write(
                                 balancedProperty,

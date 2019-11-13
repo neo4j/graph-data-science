@@ -77,7 +77,6 @@ public class InfoMap extends Algorithm<InfoMap> {
     private final ForkJoinPool pool;
     private final int concurrency;
     private final ProgressLogger logger;
-    private final TerminationFlag terminationFlag;
 
     // following values are updated during a merge
     // number of iterations the last computation took

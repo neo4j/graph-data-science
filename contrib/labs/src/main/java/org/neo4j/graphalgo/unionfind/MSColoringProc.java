@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.Exporter;
 import org.neo4j.graphalgo.core.write.Translators;
@@ -142,9 +143,9 @@ public class MSColoringProc extends LabsProc {
 
     private void write(Graph graph, AtomicIntegerArray struct, ProcedureConfiguration configuration) {
         log.debug("Writing results");
-        Exporter.of(api, graph)
+        Exporter.of(api, graph, TerminationFlag.wrap(transaction))
                 .withLog(log)
-                .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), null)
+                .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
                 .build()
                 .write(
                         configuration.get(CONFIG_CLUSTER_PROPERTY, DEFAULT_CLUSTER_PROPERTY),

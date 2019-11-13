@@ -163,7 +163,7 @@ public class ShortestPathProc extends LabsProc {
                 dijkstra.release();
 
                 final DequeMapping mapping = new DequeMapping(graph, finalPath);
-                Exporter.of(api, mapping)
+                Exporter.of(api, mapping, dijkstra.terminationFlag)
                         .withLog(log)
                         .build()
                         .write(

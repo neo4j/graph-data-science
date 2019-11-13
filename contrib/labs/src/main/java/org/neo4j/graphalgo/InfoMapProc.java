@@ -322,7 +322,7 @@ public class InfoMapProc extends LabsProc {
 
         if (config.isWriteFlag()) {
             try (ProgressTimer timer = builder.timeWrite()) {
-                Exporter.of(api, graph)
+                Exporter.of(api, graph, infoMap.terminationFlag)
                         .withLog(log)
                         .build()
                         .write(config.getWriteProperty(DEFAULT_WRITE_PROPERTY_VALUE),

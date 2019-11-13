@@ -66,7 +66,8 @@ public final class RelationshipExporter extends StatementApi {
         NodeIterator nodeIterator,
         RelationshipIterator relationshipIterator,
         Degrees degrees,
-        long relationshipCount
+        long relationshipCount,
+        TerminationFlag terminationFlag
     ) {
         return new RelationshipExporter.Builder(
             db,
@@ -74,12 +75,21 @@ public final class RelationshipExporter extends StatementApi {
             nodeIterator,
             relationshipIterator,
             degrees,
-            relationshipCount
+            relationshipCount,
+            terminationFlag
         );
     }
 
-    public static RelationshipExporter.Builder of(GraphDatabaseAPI db, Graph graph) {
-        return new RelationshipExporter.Builder(db, graph, graph, graph, graph, graph.relationshipCount());
+    public static RelationshipExporter.Builder of(GraphDatabaseAPI db, Graph graph, TerminationFlag terminationFlag) {
+        return new RelationshipExporter.Builder(
+            db,
+            graph,
+            graph,
+            graph,
+            graph,
+            graph.relationshipCount(),
+            terminationFlag
+        );
     }
 
     public static final class Builder extends ExporterBuilder<RelationshipExporter> {
@@ -96,9 +106,10 @@ public final class RelationshipExporter extends StatementApi {
             NodeIterator nodeIterator,
             RelationshipIterator relationshipIterator,
             Degrees degrees,
-            long relationshipCount
+            long relationshipCount,
+            TerminationFlag terminationFlag
         ) {
-            super(db, idMapping);
+            super(db, idMapping, terminationFlag);
             this.idMapping = idMapping;
             this.nodeIterator = nodeIterator;
             this.relationshipIterator = relationshipIterator;
@@ -111,9 +122,7 @@ public final class RelationshipExporter extends StatementApi {
             ProgressLogger progressLogger = loggerAdapter == null
                 ? ProgressLogger.NULL_LOGGER
                 : loggerAdapter;
-            TerminationFlag flag = terminationFlag == null
-                ? TerminationFlag.RUNNING_TRUE
-                : terminationFlag;
+
             return new RelationshipExporter(
                 db,
                 idMapping,
@@ -121,7 +130,7 @@ public final class RelationshipExporter extends StatementApi {
                 relationshipIterator,
                 degrees,
                 relationshipCount,
-                flag,
+                terminationFlag,
                 progressLogger,
                 writeConcurrency,
                 executorService

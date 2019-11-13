@@ -294,9 +294,9 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
             if (writePropertyEqualsSeedProperty && hasSeedProperties) {
                 translator = new PropertyTranslator.OfLongIfChanged<>(seedProperties, HugeLongArray::get);
             }
-            Exporter.of(api, graph)
+            Exporter.of(api, graph, TerminationFlag.wrap(transaction))
                     .withLog(log)
-                    .parallel(Pools.DEFAULT, concurrency, TerminationFlag.wrap(transaction))
+                    .parallel(Pools.DEFAULT, concurrency)
                     .build()
                     .write(
                             writeProperty,

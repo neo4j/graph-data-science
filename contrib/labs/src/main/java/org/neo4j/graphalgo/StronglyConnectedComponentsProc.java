@@ -106,10 +106,9 @@ public class StronglyConnectedComponentsProc extends LabsProc {
             return Stream.of(SCCResult.EMPTY);
         }
 
-        final TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
         SCCTarjan tarjan = new SCCTarjan(graph)
                 .withProgressLogger(ProgressLogger.wrap(log, "SCC(Tarjan)"))
-                .withTerminationFlag(terminationFlag);
+                .withTerminationFlag(TerminationFlag.wrap(transaction));
 
         builder.timeEval(tarjan::compute);
 
@@ -124,9 +123,9 @@ public class StronglyConnectedComponentsProc extends LabsProc {
             builder.timeWrite(() -> {
                 graph.release();
                 tarjan.release();
-                Exporter.of(api, graph)
+                Exporter.of(api, graph, tarjan.terminationFlag)
                         .withLog(log)
-                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), terminationFlag)
+                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
                         .build()
                         .write(
                                 partitionProperty,
@@ -165,10 +164,9 @@ public class StronglyConnectedComponentsProc extends LabsProc {
             return Stream.of(SCCResult.EMPTY);
         }
 
-        final TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
         SCCTunedTarjan tarjan = new SCCTunedTarjan(graph)
                 .withProgressLogger(ProgressLogger.wrap(log, "SCC(TunedTarjan)"))
-                .withTerminationFlag(terminationFlag);
+                .withTerminationFlag(TerminationFlag.wrap(transaction));
 
         builder.timeEval(tarjan::compute);
 
@@ -180,9 +178,9 @@ public class StronglyConnectedComponentsProc extends LabsProc {
             builder.withPartitionProperty(partitionProperty);
 
             builder.timeWrite(() -> Exporter
-                    .of(api, graph)
+                    .of(api, graph, tarjan.terminationFlag)
                     .withLog(log)
-                    .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), terminationFlag)
+                    .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
                     .build()
                     .write(
                             partitionProperty,
@@ -261,9 +259,9 @@ public class StronglyConnectedComponentsProc extends LabsProc {
                     CONFIG_CLUSTER);
             builder.withPartitionProperty(partitionProperty).withWriteProperty(partitionProperty);
 
-            builder.timeWrite(() -> Exporter.of(api, graph)
+            builder.timeWrite(() -> Exporter.of(api, graph, terminationFlag)
                     .withLog(log)
-                    .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), terminationFlag)
+                    .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
                     .build()
                     .write(
                             partitionProperty,
@@ -359,9 +357,9 @@ public class StronglyConnectedComponentsProc extends LabsProc {
                 builder.withPartitionProperty(partitionProperty);
 
                 Exporter
-                        .of(api, graph)
+                        .of(api, graph, multistep.terminationFlag)
                         .withLog(log)
-                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), terminationFlag)
+                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
                         .build()
                         .write(
                                 partitionProperty,

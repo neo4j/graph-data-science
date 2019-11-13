@@ -164,9 +164,9 @@ public class ShortestPathDeltaSteppingProc extends LabsProc {
             algorithm.release();
             graph.release();
             builder.timeWrite(() -> Exporter
-                    .of(api, graph)
+                    .of(api, graph, algorithm.terminationFlag)
                     .withLog(log)
-                    .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), terminationFlag)
+                    .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
                     .build()
                     .write(
                             configuration.get(WRITE_PROPERTY, DEFAULT_TARGET_PROPERTY),

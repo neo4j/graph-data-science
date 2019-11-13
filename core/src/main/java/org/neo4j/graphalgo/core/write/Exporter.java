@@ -48,25 +48,29 @@ public final class Exporter extends StatementApi {
     private final long nodeCount;
     private final LongUnaryOperator toOriginalId;
 
-    public static Builder of(GraphDatabaseAPI db, IdMapping idMapping) {
-        return new Builder(db, idMapping);
+    public static Builder of(GraphDatabaseAPI db, IdMapping idMapping, TerminationFlag terminationFlag) {
+        return new Builder(db, idMapping, terminationFlag);
     }
 
     public static class Builder extends ExporterBuilder<Exporter> {
 
-        Builder(GraphDatabaseAPI db, IdMapping idMapping) {
-            super(db, idMapping);
+        Builder(GraphDatabaseAPI db, IdMapping idMapping, TerminationFlag terminationFlag) {
+            super(db, idMapping, terminationFlag);
         }
 
         @Override
         public Exporter build() {
             ProgressLogger progressLogger = loggerAdapter == null
-                    ? ProgressLogger.NULL_LOGGER
-                    : loggerAdapter;
-            TerminationFlag flag = terminationFlag == null
-                    ? TerminationFlag.RUNNING_TRUE
-                    : terminationFlag;
-            return new Exporter(db, nodeCount, toOriginalId, flag, progressLogger, writeConcurrency, executorService);
+                ? ProgressLogger.NULL_LOGGER
+                : loggerAdapter;
+            return new Exporter(
+                db,
+                nodeCount,
+                toOriginalId,
+                terminationFlag,
+                progressLogger,
+                writeConcurrency,
+                executorService);
         }
     }
 

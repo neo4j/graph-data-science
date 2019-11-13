@@ -28,11 +28,13 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
+import static org.neo4j.graphalgo.core.utils.TerminationFlag.RUNNING_TRUE;
 
 class RelationshipExporterTest {
 
@@ -75,7 +77,7 @@ class RelationshipExporterTest {
             .load(HugeGraphFactory.class);
 
         // export into new database
-        RelationshipExporter build = RelationshipExporter.of(db, fromGraph).build();
+        RelationshipExporter build = RelationshipExporter.of(db, fromGraph, RUNNING_TRUE).build();
         build.write("FOOBAR", "weight", 0.0, Direction.OUTGOING);
 
         // validate

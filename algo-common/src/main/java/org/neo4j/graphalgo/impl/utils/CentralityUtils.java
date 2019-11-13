@@ -53,9 +53,9 @@ public final class CentralityUtils {
             String propertyName = configuration.getWriteProperty(defaultScoreProperty);
             try (ProgressTimer ignored = statsBuilder.timeWrite()) {
                 Exporter exporter = Exporter
-                        .of(api, graph)
+                        .of(api, graph, terminationFlag)
                         .withLog(log)
-                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), terminationFlag)
+                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
                         .build();
                 result.export(propertyName, exporter);
             }

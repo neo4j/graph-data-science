@@ -37,18 +37,19 @@ public abstract class ExporterBuilder<T> {
     final GraphDatabaseAPI db;
     final LongUnaryOperator toOriginalId;
     final long nodeCount;
+    final TerminationFlag terminationFlag;
 
-    TerminationFlag terminationFlag;
     ExecutorService executorService;
     ProgressLoggerAdapter loggerAdapter;
     int writeConcurrency;
 
-    ExporterBuilder(GraphDatabaseAPI db, IdMapping idMapping) {
+    ExporterBuilder(GraphDatabaseAPI db, IdMapping idMapping, TerminationFlag terminationFlag) {
         Objects.requireNonNull(idMapping);
         this.db = Objects.requireNonNull(db);
         this.nodeCount = idMapping.nodeCount();
         this.toOriginalId = idMapping::toOriginalNodeId;
         this.writeConcurrency = Pools.DEFAULT_CONCURRENCY;
+        this.terminationFlag = terminationFlag;
     }
 
     public abstract T build();
@@ -58,10 +59,9 @@ public abstract class ExporterBuilder<T> {
         return this;
     }
 
-    public ExporterBuilder<T> parallel(ExecutorService es, int writeConcurrency, TerminationFlag flag) {
+    public ExporterBuilder<T> parallel(ExecutorService es, int writeConcurrency) {
         this.executorService = es;
         this.writeConcurrency = Pools.allowedConcurrency(writeConcurrency);
-        this.terminationFlag = flag;
         return this;
     }
 }

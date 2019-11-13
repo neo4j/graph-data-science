@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.write.RelationshipExporter;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -79,9 +80,7 @@ public class ExportRelationshipsBenchmark {
             .withDirection(Direction.OUTGOING)
             .load(HugeGraphFactory.class);
 
-        this.exporter = RelationshipExporter.of(db, graph)
-            .parallel(Pools.DEFAULT, concurrency, () -> true)
-            .build();
+        this.exporter = RelationshipExporter.of(db, graph, TerminationFlag.RUNNING_TRUE).build();
     }
 
     @TearDown

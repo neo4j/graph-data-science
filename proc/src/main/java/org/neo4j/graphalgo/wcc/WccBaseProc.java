@@ -143,6 +143,7 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
                 communities,
                 setup.procedureConfig,
                 writeProperty,
+                TerminationFlag.wrap(transaction),
                 setup.tracker
             );
 
@@ -184,10 +185,11 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
         DisjointSetStruct struct,
         ProcedureConfiguration configuration,
         String writeProperty,
+        TerminationFlag terminationFlag,
         AllocationTracker tracker
     ) {
         try (ProgressTimer ignored = timer.get()) {
-            write(graph, struct, configuration, writeProperty, tracker);
+            write(graph, struct, configuration, writeProperty, terminationFlag, tracker);
         }
     }
 
@@ -196,6 +198,7 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
         DisjointSetStruct dss,
         ProcedureConfiguration procedureConfiguration,
         String writeProperty,
+        TerminationFlag terminationFlag,
         AllocationTracker tracker
     ) {
         log.debug("Writing results");
@@ -207,13 +210,9 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
             tracker
         );
 
-        Exporter exporter = Exporter.of(api, graph)
+        Exporter exporter = Exporter.of(api, graph, terminationFlag)
             .withLog(log)
-            .parallel(
-                Pools.DEFAULT,
-                procedureConfiguration.getWriteConcurrency(),
-                TerminationFlag.wrap(transaction)
-            )
+            .parallel(Pools.DEFAULT, procedureConfiguration.getWriteConcurrency())
             .build();
         exporter.write(
             writeProperty,

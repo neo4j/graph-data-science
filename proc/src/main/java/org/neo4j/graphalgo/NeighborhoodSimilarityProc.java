@@ -23,6 +23,7 @@ package org.neo4j.graphalgo;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.RelationshipExporter;
@@ -134,7 +135,7 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
             .withRelationshipCount(similarityGraph.relationshipCount());
 
         if (configuration.isWriteFlag() && similarityGraph.relationshipCount() > 0) {
-            RelationshipExporter.of(api, similarityGraph)
+            RelationshipExporter.of(api, similarityGraph, neighborhoodSimilarity.terminationFlag)
                 .withLog(log)
                 .build()
                 .write(writeRelationshipType, writeProperty, WRITE_PROPERTY_VALUE_DEFAULT, similarityGraph.getLoadDirection());

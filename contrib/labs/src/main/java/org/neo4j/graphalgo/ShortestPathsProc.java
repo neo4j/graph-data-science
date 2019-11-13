@@ -110,10 +110,9 @@ public class ShortestPathsProc extends LabsProc {
             return Stream.of(builder.build());
         }
 
-        final TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
         final ShortestPaths algorithm = new ShortestPaths(graph)
                 .withProgressLogger(ProgressLogger.wrap(log, "ShortestPaths"))
-                .withTerminationFlag(terminationFlag);
+                .withTerminationFlag(TerminationFlag.wrap(transaction));
 
         builder.timeEval(() -> algorithm.compute(startNode.getId()));
 
@@ -122,9 +121,9 @@ public class ShortestPathsProc extends LabsProc {
                 final IntDoubleMap shortestPaths = algorithm.getShortestPaths();
                 algorithm.release();
                 graph.release();
-                Exporter.of(api, graph)
+                Exporter.of(api, graph, algorithm.terminationFlag)
                         .withLog(log)
-                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), terminationFlag)
+                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
                         .build()
                         .write(
                                 configuration.getWriteProperty(DEFAULT_TARGET_PROPERTY),

@@ -93,7 +93,6 @@ public class DangalchevCentralityProc extends LabsProc {
         final CentralityProcResult.Builder builder = CentralityProcResult.builder();
 
         final AllocationTracker tracker = AllocationTracker.create();
-        final TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
 
         final Graph graph;
         try (ProgressTimer timer = builder.timeLoad()) {
@@ -121,9 +120,9 @@ public class DangalchevCentralityProc extends LabsProc {
             graph.release();
             final String writeProperty = configuration.getWriteProperty(DEFAULT_TARGET_PROPERTY);
             builder.timeWrite(() -> {
-                Exporter exporter = Exporter.of(api, graph)
+                Exporter exporter = Exporter.of(api, graph, algo.terminationFlag)
                         .withLog(log)
-                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), terminationFlag)
+                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
                         .build();
                 algo.export(writeProperty, exporter);
             });

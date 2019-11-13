@@ -114,12 +114,9 @@ public class KSpanningTreeProc extends LabsProc {
             try (ProgressTimer timer = builder.timeWrite()) {
 
                 final SpanningTree spanningTree = kSpanningTree.getSpanningTree();
-                final Exporter exporter = Exporter.of(api, graph)
+                final Exporter exporter = Exporter.of(api, graph, TerminationFlag.wrap(transaction))
                         .withLog(log)
-                        .parallel(
-                                Pools.DEFAULT,
-                                configuration.getWriteConcurrency(),
-                                TerminationFlag.wrap(transaction))
+                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
                         .build();
 
                 exporter.write(

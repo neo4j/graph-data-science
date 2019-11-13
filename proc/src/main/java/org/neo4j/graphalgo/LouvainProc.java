@@ -209,12 +209,12 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
             Graph graph,
             ExecutorService pool,
             int concurrency) {
-        Exporter.Builder builder = Exporter.of(api, graph);
+        Exporter.Builder builder = Exporter.of(api, graph, TerminationFlag.wrap(transaction));
         if (log != null) {
             builder.withLog(log);
         }
         if (ParallelUtil.canRunInParallel(pool)) {
-            builder.parallel(pool, concurrency, TerminationFlag.wrap(transaction));
+            builder.parallel(pool, concurrency);
         }
         return builder.build();
     }

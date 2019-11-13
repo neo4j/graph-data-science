@@ -212,9 +212,9 @@ public class BetweennessCentralityProc extends LabsProc {
             builder.timeWrite(() -> {
                 final AtomicDoubleArray centrality = bc.getCentrality();
                 final String writeProperty = configuration.getWriteProperty(DEFAULT_TARGET_PROPERTY);
-                Exporter.of(api, graph)
+                Exporter.of(api, graph, bc.terminationFlag)
                         .withLog(log)
-                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), terminationFlag)
+                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
                         .build()
                         .write(writeProperty, centrality, Translators.ATOMIC_DOUBLE_ARRAY_TRANSLATOR);
             });
@@ -266,9 +266,9 @@ public class BetweennessCentralityProc extends LabsProc {
 
         if (configuration.isWriteFlag()) {
             final String writeProperty = configuration.getWriteProperty(DEFAULT_TARGET_PROPERTY);
-            builder.timeWrite(() -> Exporter.of(api, graph)
+            builder.timeWrite(() -> Exporter.of(api, graph, bc.terminationFlag)
                     .withLog(log)
-                    .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), terminationFlag)
+                    .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
                     .build()
                     .write(
                             writeProperty,
@@ -325,9 +325,9 @@ public class BetweennessCentralityProc extends LabsProc {
             builder.timeWrite(() -> {
                 final AtomicDoubleArray centrality = bc.getCentrality();
                 final String writeProperty = configuration.getWriteProperty(DEFAULT_TARGET_PROPERTY);
-                Exporter.of(api, graph)
+                Exporter.of(api, graph, bc.terminationFlag)
                         .withLog(log)
-                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency(), terminationFlag)
+                        .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
                         .build()
                         .write(writeProperty, centrality, Translators.ATOMIC_DOUBLE_ARRAY_TRANSLATOR);
             });
