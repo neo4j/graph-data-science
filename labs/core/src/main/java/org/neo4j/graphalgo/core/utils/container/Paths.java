@@ -27,12 +27,7 @@ import java.util.function.Consumer;
 import java.util.function.IntPredicate;
 
 /**
- *
  * Pathmap (map for list of nodes)
- *
- *
- *
- * @author mknblch
  */
 public class Paths {
 

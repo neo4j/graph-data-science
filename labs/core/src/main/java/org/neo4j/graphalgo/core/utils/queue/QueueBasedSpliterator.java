@@ -17,7 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.utils;
+package org.neo4j.graphalgo.core.utils.queue;
+
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
 
 import java.util.Spliterator;
 import java.util.concurrent.BlockingQueue;
@@ -25,10 +27,6 @@ import java.util.function.Consumer;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-/**
- * @author mh
- * @since 07.07.18
- */
 public class QueueBasedSpliterator<T> implements Spliterator<T> {
     private final BlockingQueue<T> queue;
     private T tombstone;

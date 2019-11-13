@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.core.utils.paged.dss;
 
 
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.utils.CommunityUtils;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -42,6 +41,7 @@ public final class IncrementalDisjointSetStruct extends SequentialDisjointSetStr
             .perNode("parent", HugeLongArray::memoryEstimation)
             .add("internalToProvidedIds", HugeLongLongMap.memoryEstimation())
             .build();
+    public static final int NO_SUCH_SEED_PROPERTY = -1;
 
     private final HugeLongArray parent;
     private final HugeLongLongMap internalToProvidedIds;
@@ -78,7 +78,7 @@ public final class IncrementalDisjointSetStruct extends SequentialDisjointSetStr
      * reset the container
      */
     private void init(AllocationTracker tracker) {
-        this.maxCommunity = communityMapping.getMaxPropertyValue().orElse(CommunityUtils.NO_SUCH_SEED_PROPERTY);
+        this.maxCommunity = communityMapping.getMaxPropertyValue().orElse(NO_SUCH_SEED_PROPERTY);
 
         final HugeLongLongMap internalMapping = new HugeLongLongMap(size, tracker);
 

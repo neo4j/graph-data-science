@@ -27,9 +27,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.function.IntConsumer;
 
-/**
- * @author mknblch
- */
 public class MultiQueue {
 
     private final AtomicIntegerArray offsets;

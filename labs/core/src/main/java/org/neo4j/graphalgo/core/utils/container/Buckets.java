@@ -25,8 +25,6 @@ import java.util.function.IntPredicate;
 
 /**
  * container for assigning nodeIds to arbitrary buckets
- *
- * @author mknblch
  */
 public class Buckets {
 

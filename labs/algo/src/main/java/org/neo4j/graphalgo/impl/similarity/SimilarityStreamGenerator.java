@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.impl.similarity;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.core.utils.QueueBasedSpliterator;
+import org.neo4j.graphalgo.core.utils.queue.QueueBasedSpliterator;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.impl.results.SimilarityResult;
 
