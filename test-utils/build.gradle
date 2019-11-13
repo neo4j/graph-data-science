@@ -18,6 +18,8 @@ dependencies {
     compile group: 'net.jqwik',                             name: 'jqwik',                    version: ver.'jqwik'
     compile group: 'io.qala.datagen',                       name: 'qala-datagen-junit5',      version: ver.'qala-datagen'
 
+    compileOnly group: 'org.jetbrains',                     name: 'annotations',              version: ver.'jetbrains-annotations'
+
     compile platform(dep.junit5bom)
     compile dep.junit5jupiter
 }

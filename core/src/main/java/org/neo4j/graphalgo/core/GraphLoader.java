@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.Graph;
@@ -107,17 +108,22 @@ public class GraphLoader {
         this.concurrency = Pools.DEFAULT_CONCURRENCY;
     }
 
-    public GraphLoader init(Log log, String label, String relationship, ProcedureConfiguration config) {
+    public GraphLoader init(
+        Log log,
+        @Nullable String label,
+        @Nullable String relationship,
+        ProcedureConfiguration config
+    ) {
         return withLog(log)
-                .withUsername(config.getUsername())
-                .withName(config.getGraphName(null))
-                .withOptionalLabel(label)
-                .withOptionalRelationshipType(relationship)
-                .withConcurrency(config.getReadConcurrency())
-                .withBatchSize(config.getBatchSize())
-                .withDeduplicationStrategy(config.getDeduplicationStrategy())
-                .withParams(config.getParams())
-                .withLoadedGraph(config.getGraphImpl() == GraphCatalog.class);
+            .withUsername(config.getUsername())
+            .withName(config.getGraphName(null))
+            .withOptionalLabel(label)
+            .withOptionalRelationshipType(relationship)
+            .withConcurrency(config.getReadConcurrency())
+            .withBatchSize(config.getBatchSize())
+            .withDeduplicationStrategy(config.getDeduplicationStrategy())
+            .withParams(config.getParams())
+            .withLoadedGraph(config.getGraphImpl() == GraphCatalog.class);
     }
 
     /**
