@@ -81,6 +81,7 @@ final class ModularityOptimizationTask implements Runnable {
 
     @Override
     public void run() {
+        LongDoubleMap reuseCommunityInfluences = new LongDoubleHashMap(50);
         for (long nodeId = batchStart; nodeId < batchEnd; nodeId++) {
 
             if (colors.get(nodeId) != color) {
@@ -89,7 +90,14 @@ final class ModularityOptimizationTask implements Runnable {
 
             long currentCommunity = currentCommunities.get(nodeId);
             final int degree = graph.degree(nodeId, direction);
-            LongDoubleMap communityInfluences = new LongDoubleHashMap(degree);
+
+            LongDoubleMap communityInfluences;
+            if (degree < 50) {
+                reuseCommunityInfluences.clear();
+                communityInfluences = reuseCommunityInfluences;
+            } else {
+                communityInfluences = new LongDoubleHashMap(degree);
+            }
             MutableDouble selfWeight = new MutableDouble(0.0D);
 
             // calculate influence of this node w.r.t its neighbours communities

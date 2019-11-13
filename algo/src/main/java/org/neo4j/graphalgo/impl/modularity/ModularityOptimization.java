@@ -25,6 +25,7 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -156,6 +157,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     }
 
     private void init() {
+        final ThreadLocal<RelationshipIterator> graphCopy = ThreadLocal.withInitial(graph::concurrentCopy);
         double doubleTotalNodeWeight = ParallelUtil.parallelStream(
             LongStream.range(0, nodeCount),
             nodeStream ->
@@ -167,7 +169,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
                     MutableDouble cumulativeWeight = new MutableDouble(0.0D);
 
-                    graph.concurrentCopy().forEachRelationship(nodeId, direction, 1.0, (s, t, w) -> {
+                    graphCopy.get().forEachRelationship(nodeId, direction, 1.0, (s, t, w) -> {
                         cumulativeWeight.add(w);
                         return true;
                     });
