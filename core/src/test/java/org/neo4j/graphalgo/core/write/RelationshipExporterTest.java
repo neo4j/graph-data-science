@@ -36,13 +36,21 @@ import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 class RelationshipExporterTest {
 
-    private static final String DB_CYPHER =
-        "CREATE" +
-        "  (a {id: 0})" +
-        ", (b {id: 1})";
+    private static final String NODE_QUERY_PART =
+        "CREATE"+
+        "  (a)"+
+        ", (b)"+
+        ", (c)";
+
+    private static final String RELS_QUERY_PART =
+        ", (a)-[:BARFOO {weight: 4.2}]->(b)" +
+        ", (a)-[:BARFOO {weight: 1.0}]->(a)" +
+        ", (a)-[:BARFOO {weight: 2.3}]->(c)" +
+        ", (b)-[:BARFOO]->(c)";
+
+    private static final String DB_CYPHER = NODE_QUERY_PART;
 
     private GraphDatabaseAPI db;
-
 
     @BeforeEach
     void setup() {
@@ -59,15 +67,11 @@ class RelationshipExporterTest {
     void exportRelationships() {
         // create graph to export
         GraphDatabaseAPI fromDb = TestDatabaseCreator.createTestDatabase();
-        fromDb.execute(
-            "CREATE" +
-            "  (a {id: 0})" +
-            ", (b {id: 1})" +
-            ", (a)-[:FOOBAR {weight: 4.2}]->(b)");
+        fromDb.execute(NODE_QUERY_PART + RELS_QUERY_PART);
         Graph fromGraph = new GraphLoader(fromDb)
             .withAnyLabel()
-            .withRelationshipType("FOOBAR")
-            .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
+            .withRelationshipType("BARFOO")
+            .withRelationshipProperties(PropertyMapping.of("weight", 2.0))
             .load(HugeGraphFactory.class);
 
         // export into new database
@@ -77,11 +81,18 @@ class RelationshipExporterTest {
         // validate
         Graph actual = new GraphLoader(db)
             .withAnyLabel()
-            .withAnyRelationshipType()
+            .withRelationshipType("FOOBAR")
             .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
             .load(HugeGraphFactory.class);
 
-        assertGraphEquals(fromGdl("(a)-[{w: 4.2}]->(b)"), actual);
+        assertGraphEquals(
+            fromGdl(
+                "(a)-[{w: 4.2}]->(b)," +
+                "(a)-[{w: 1.0}]->(a)," +
+                "(a)-[{w: 2.3}]->(c)," +
+                "(b)-[{w: 2.0}]->(c)"),
+            actual
+        );
     }
 
 }
