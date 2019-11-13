@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicDoubleArray;
-import org.neo4j.graphalgo.core.write.NodeExporter;
+import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.impl.msbfs.BfsConsumer;
@@ -83,7 +83,7 @@ public class HarmonicCentrality extends Algorithm<HarmonicCentrality> {
                         inverseFarness.get(nodeId) / (double)(nodeCount - 1)));
     }
 
-    public void export(final String propertyName, final NodeExporter exporter) {
+    public void export(final String propertyName, final NodePropertyExporter exporter) {
         exporter.write(
                 propertyName,
                 inverseFarness,

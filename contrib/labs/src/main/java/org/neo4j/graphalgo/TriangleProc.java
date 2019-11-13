@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
-import org.neo4j.graphalgo.core.write.NodeExporter;
+import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.impl.triangle.IntersectingTriangleCount;
 import org.neo4j.graphalgo.impl.triangle.TriangleCountBase;
@@ -243,7 +243,7 @@ public class TriangleProc extends LabsProc {
             String writeProperty,
             Optional<String> coefficientProperty) {
 
-        final NodeExporter exporter = NodeExporter.of(api, graph, algorithm.terminationFlag)
+        final NodePropertyExporter exporter = NodePropertyExporter.of(api, graph, algorithm.terminationFlag)
                 .withLog(log)
                 .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
                 .build();
@@ -316,7 +316,7 @@ public class TriangleProc extends LabsProc {
         if (configuration.isWriteFlag()) {
             try (ProgressTimer timer = builder.timeWrite()) {
                 final Optional<String> coefficientProperty = configuration.getString(COEFFICIENT_WRITE_PROPERTY_VALUE);
-                final NodeExporter exporter = NodeExporter.of(api, graph, triangleCount.terminationFlag)
+                final NodePropertyExporter exporter = NodePropertyExporter.of(api, graph, triangleCount.terminationFlag)
                         .withLog(log)
                         .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
                         .build();

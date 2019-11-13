@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.write.NodeExporter;
+import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.impl.ShortestPathDeltaStepping;
 import org.neo4j.graphalgo.results.DeltaSteppingProcResult;
@@ -163,7 +163,7 @@ public class ShortestPathDeltaSteppingProc extends LabsProc {
             final double[] shortestPaths = algorithm.getShortestPaths();
             algorithm.release();
             graph.release();
-            builder.timeWrite(() -> NodeExporter
+            builder.timeWrite(() -> NodePropertyExporter
                     .of(api, graph, algorithm.terminationFlag)
                     .withLog(log)
                     .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())

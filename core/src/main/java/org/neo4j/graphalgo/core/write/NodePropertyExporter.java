@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongUnaryOperator;
 
-public final class NodeExporter extends StatementApi {
+public final class NodePropertyExporter extends StatementApi {
 
     static final long MIN_BATCH_SIZE = 10_000L;
     static final long MAX_BATCH_SIZE = 100_000L;
@@ -52,18 +52,18 @@ public final class NodeExporter extends StatementApi {
         return new Builder(db, idMapping, terminationFlag);
     }
 
-    public static class Builder extends ExporterBuilder<NodeExporter> {
+    public static class Builder extends ExporterBuilder<NodePropertyExporter> {
 
         Builder(GraphDatabaseAPI db, IdMapping idMapping, TerminationFlag terminationFlag) {
             super(db, idMapping, terminationFlag);
         }
 
         @Override
-        public NodeExporter build() {
+        public NodePropertyExporter build() {
             ProgressLogger progressLogger = loggerAdapter == null
                 ? ProgressLogger.NULL_LOGGER
                 : loggerAdapter;
-            return new NodeExporter(
+            return new NodePropertyExporter(
                 db,
                 nodeCount,
                 toOriginalId,
@@ -78,7 +78,7 @@ public final class NodeExporter extends StatementApi {
         void accept(Write ops, long value) throws KernelException;
     }
 
-    private NodeExporter(
+    private NodePropertyExporter(
             GraphDatabaseAPI db,
             long nodeCount,
             LongUnaryOperator toOriginalId,

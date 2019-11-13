@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.write.NodeExporter;
+import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.impl.coloring.K1Coloring;
 import org.neo4j.graphalgo.impl.coloring.K1ColoringFactory;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
@@ -207,7 +207,7 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
     ) {
         log.debug("Writing results");
 
-        NodeExporter exporter = NodeExporter.of(api, graph, terminationFlag)
+        NodePropertyExporter exporter = NodePropertyExporter.of(api, graph, terminationFlag)
             .withLog(log)
             .parallel(Pools.DEFAULT, procedureConfiguration.getWriteConcurrency())
             .build();

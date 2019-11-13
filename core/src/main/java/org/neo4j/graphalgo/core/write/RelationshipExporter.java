@@ -41,7 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.neo4j.graphalgo.core.write.NodeExporter.MIN_BATCH_SIZE;
+import static org.neo4j.graphalgo.core.write.NodePropertyExporter.MIN_BATCH_SIZE;
 
 public final class RelationshipExporter extends StatementApi {
 

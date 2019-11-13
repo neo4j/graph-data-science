@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
-import org.neo4j.graphalgo.core.write.NodeExporter;
+import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.impl.triangle.BalancedTriads;
 import org.neo4j.graphalgo.results.AbstractCommunityResultBuilder;
 import org.neo4j.procedure.Description;
@@ -135,7 +135,7 @@ public class BalancedTriadsProc extends LabsProc {
             builder.withUnbalancedProperty(unbalancedProperty);
 
             try (ProgressTimer timer = builder.timeWrite()) {
-                NodeExporter.of(api, graph, balancedTriads.terminationFlag)
+                NodePropertyExporter.of(api, graph, balancedTriads.terminationFlag)
                         .withLog(log)
                         .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
                         .build()

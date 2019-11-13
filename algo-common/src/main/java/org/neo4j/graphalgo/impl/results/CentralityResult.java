@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.impl.results;
 
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.core.write.NodeExporter;
+import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
 import java.util.function.DoubleUnaryOperator;
@@ -38,14 +38,14 @@ public class CentralityResult {
     }
 
     public void export(
-            final String propertyName, final NodeExporter exporter) {
+            final String propertyName, final NodePropertyExporter exporter) {
         exporter.write(
                 propertyName,
                 result,
                 HugeDoubleArray.Translator.INSTANCE);
     }
 
-    public void export(String propertyName, NodeExporter exporter, DoubleUnaryOperator normalizationFunction) {
+    public void export(String propertyName, NodePropertyExporter exporter, DoubleUnaryOperator normalizationFunction) {
         exporter.write(
                 propertyName,
                 result,

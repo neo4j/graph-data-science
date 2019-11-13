@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.write.NodeExporter;
+import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.ExporterBuilder;
 import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
@@ -99,7 +99,7 @@ class ProgressLoggingTest {
         final int[] ints = new int[(int) graph.nodeCount()];
         Arrays.fill(ints, -1);
 
-        NodeExporter.of(DB, graph, TerminationFlag.RUNNING_TRUE)
+        NodePropertyExporter.of(DB, graph, TerminationFlag.RUNNING_TRUE)
                 .withLog(testLogger(buffer))
                 .build()
                 .write(

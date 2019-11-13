@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.write.NodeExporter;
+import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.impl.spanningTrees.KSpanningTree;
 import org.neo4j.graphalgo.impl.spanningTrees.Prim;
 import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
@@ -114,7 +114,7 @@ public class KSpanningTreeProc extends LabsProc {
             try (ProgressTimer timer = builder.timeWrite()) {
 
                 final SpanningTree spanningTree = kSpanningTree.getSpanningTree();
-                final NodeExporter exporter = NodeExporter.of(api, graph, TerminationFlag.wrap(transaction))
+                final NodePropertyExporter exporter = NodePropertyExporter.of(api, graph, TerminationFlag.wrap(transaction))
                         .withLog(log)
                         .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
                         .build();

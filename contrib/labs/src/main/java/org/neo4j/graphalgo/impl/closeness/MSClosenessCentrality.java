@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
-import org.neo4j.graphalgo.core.write.NodeExporter;
+import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.msbfs.BfsConsumer;
 import org.neo4j.graphalgo.impl.msbfs.MultiSourceBFS;
@@ -108,7 +108,7 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality> {
         return cc;
     }
 
-    public void export(final String propertyName, final NodeExporter exporter) {
+    public void export(final String propertyName, final NodePropertyExporter exporter) {
         exporter.write(
                 propertyName,
                 farness,

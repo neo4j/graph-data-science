@@ -20,7 +20,7 @@
 
 package org.neo4j.graphalgo.results;
 
-import org.neo4j.graphalgo.core.write.NodeExporter;
+import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 
 import java.util.function.DoubleUnaryOperator;
@@ -55,12 +55,12 @@ public abstract class CentralityResultWithStatistics extends CentralityResult {
     }
 
     @Override
-    public void export(String propertyName, NodeExporter exporter) {
+    public void export(String propertyName, NodePropertyExporter exporter) {
         result.export(propertyName, exporter);
     }
 
     @Override
-    public void export(String propertyName, NodeExporter exporter, DoubleUnaryOperator normalizationFunction) {
+    public void export(String propertyName, NodePropertyExporter exporter, DoubleUnaryOperator normalizationFunction) {
         result.export(propertyName, exporter, normalizationFunction);
     }
 

@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.write.NodeExporter;
+import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.impl.results.AbstractResultBuilder;
 import org.neo4j.graphalgo.impl.results.CentralityResult;
 import org.neo4j.graphalgo.impl.results.CentralityScore;
@@ -52,7 +52,7 @@ public final class CentralityUtils {
             log.debug("Writing results");
             String propertyName = configuration.getWriteProperty(defaultScoreProperty);
             try (ProgressTimer ignored = statsBuilder.timeWrite()) {
-                NodeExporter exporter = NodeExporter
+                NodePropertyExporter exporter = NodePropertyExporter
                         .of(api, graph, terminationFlag)
                         .withLog(log)
                         .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())

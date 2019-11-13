@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.write.NodeExporter;
+import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.impl.betweenness.BetweennessCentrality;
 import org.neo4j.graphalgo.impl.betweenness.ParallelBetweennessCentrality;
@@ -212,7 +212,7 @@ public class BetweennessCentralityProc extends LabsProc {
             builder.timeWrite(() -> {
                 final AtomicDoubleArray centrality = bc.getCentrality();
                 final String writeProperty = configuration.getWriteProperty(DEFAULT_TARGET_PROPERTY);
-                NodeExporter.of(api, graph, bc.terminationFlag)
+                NodePropertyExporter.of(api, graph, bc.terminationFlag)
                         .withLog(log)
                         .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
                         .build()
@@ -266,7 +266,7 @@ public class BetweennessCentralityProc extends LabsProc {
 
         if (configuration.isWriteFlag()) {
             final String writeProperty = configuration.getWriteProperty(DEFAULT_TARGET_PROPERTY);
-            builder.timeWrite(() -> NodeExporter.of(api, graph, bc.terminationFlag)
+            builder.timeWrite(() -> NodePropertyExporter.of(api, graph, bc.terminationFlag)
                     .withLog(log)
                     .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
                     .build()
@@ -325,7 +325,7 @@ public class BetweennessCentralityProc extends LabsProc {
             builder.timeWrite(() -> {
                 final AtomicDoubleArray centrality = bc.getCentrality();
                 final String writeProperty = configuration.getWriteProperty(DEFAULT_TARGET_PROPERTY);
-                NodeExporter.of(api, graph, bc.terminationFlag)
+                NodePropertyExporter.of(api, graph, bc.terminationFlag)
                         .withLog(log)
                         .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
                         .build()

@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.write.NodeExporter;
+import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.impl.ShortestPaths;
 import org.neo4j.graphalgo.results.ShortestPathResult;
@@ -121,7 +121,7 @@ public class ShortestPathsProc extends LabsProc {
                 final IntDoubleMap shortestPaths = algorithm.getShortestPaths();
                 algorithm.release();
                 graph.release();
-                NodeExporter.of(api, graph, algorithm.terminationFlag)
+                NodePropertyExporter.of(api, graph, algorithm.terminationFlag)
                         .withLog(log)
                         .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
                         .build()
