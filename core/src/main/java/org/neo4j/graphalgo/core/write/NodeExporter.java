@@ -216,12 +216,11 @@ public final class NodeExporter extends StatementApi {
                         terminationFlag.assertRunning();
                         long end = start + len;
                         Write ops = stmt.dataWrite();
-                        for (long j = start; j < end; j++) {
-                            writer.accept(ops, j);
+                        for (long currentNode = start; currentNode < end; currentNode++) {
+                            writer.accept(ops, currentNode);
 
                             // Only log every 10_000 written nodes
-                            // add +1 to avoid logging on the first written node
-                            if (((j + 1) - start) % TerminationFlag.RUN_CHECK_NODE_COUNT == 0) {
+                            if ((currentNode - start) % TerminationFlag.RUN_CHECK_NODE_COUNT == 0) {
                                 long currentProgress = progress.addAndGet(TerminationFlag.RUN_CHECK_NODE_COUNT);
                                 progressLogger.logProgress(
                                         currentProgress,
