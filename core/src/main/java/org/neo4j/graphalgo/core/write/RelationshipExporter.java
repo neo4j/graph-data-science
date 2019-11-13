@@ -44,7 +44,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static java.util.Collections.singletonList;
-import static org.neo4j.graphalgo.core.write.NodeExporter.MAX_BATCH_SIZE;
 import static org.neo4j.graphalgo.core.write.NodeExporter.MIN_BATCH_SIZE;
 
 public final class RelationshipExporter extends StatementApi {
@@ -54,10 +53,8 @@ public final class RelationshipExporter extends StatementApi {
     private final RelationshipIterator relationshipIterator;
     private final Degrees degrees;
     private final long nodeCount;
-    private final long relationshipCount;
     private final TerminationFlag terminationFlag;
     private final ProgressLogger progressLogger;
-    private final int concurrency;
     private final ExecutorService executorService;
 
     public static RelationshipExporter.Builder of(
@@ -66,7 +63,6 @@ public final class RelationshipExporter extends StatementApi {
         NodeIterator nodeIterator,
         RelationshipIterator relationshipIterator,
         Degrees degrees,
-        long relationshipCount,
         TerminationFlag terminationFlag
     ) {
         return new RelationshipExporter.Builder(
@@ -75,7 +71,6 @@ public final class RelationshipExporter extends StatementApi {
             nodeIterator,
             relationshipIterator,
             degrees,
-            relationshipCount,
             terminationFlag
         );
     }
@@ -87,7 +82,6 @@ public final class RelationshipExporter extends StatementApi {
             graph,
             graph,
             graph,
-            graph.relationshipCount(),
             terminationFlag
         );
     }
@@ -98,7 +92,6 @@ public final class RelationshipExporter extends StatementApi {
         private final NodeIterator nodeIterator;
         private final RelationshipIterator relationshipIterator;
         private final Degrees degrees;
-        private final long relationshipCount;
 
         Builder(
             GraphDatabaseAPI db,
@@ -106,7 +99,6 @@ public final class RelationshipExporter extends StatementApi {
             NodeIterator nodeIterator,
             RelationshipIterator relationshipIterator,
             Degrees degrees,
-            long relationshipCount,
             TerminationFlag terminationFlag
         ) {
             super(db, idMapping, terminationFlag);
@@ -114,7 +106,6 @@ public final class RelationshipExporter extends StatementApi {
             this.nodeIterator = nodeIterator;
             this.relationshipIterator = relationshipIterator;
             this.degrees = degrees;
-            this.relationshipCount = relationshipCount;
         }
 
         @Override
@@ -129,10 +120,8 @@ public final class RelationshipExporter extends StatementApi {
                 nodeIterator,
                 relationshipIterator,
                 degrees,
-                relationshipCount,
                 terminationFlag,
                 progressLogger,
-                writeConcurrency,
                 executorService
             );
         }
@@ -144,10 +133,8 @@ public final class RelationshipExporter extends StatementApi {
         NodeIterator nodeIterator,
         RelationshipIterator relationshipIterator,
         Degrees degrees,
-        long relationshipCount,
         TerminationFlag flag,
         ProgressLogger progressLogger,
-        int concurrency,
         ExecutorService executorService
     ) {
         super(db);
@@ -156,27 +143,20 @@ public final class RelationshipExporter extends StatementApi {
         this.nodeIterator = nodeIterator;
         this.relationshipIterator = relationshipIterator;
         this.degrees = degrees;
-        this.relationshipCount = relationshipCount;
         this.terminationFlag = flag;
         this.progressLogger = progressLogger;
-        this.concurrency = concurrency;
         this.executorService = executorService;
     }
 
     public void write(String relationshipType, String propertyKey, double fallbackValue, Direction direction) {
-        final long batchSize = ParallelUtil.adjustedBatchSize(
-            relationshipCount,
-            concurrency,
-            MIN_BATCH_SIZE,
-            MAX_BATCH_SIZE
-        );
-
         final AtomicLong progress = new AtomicLong(0L);
 
         final int relationshipToken = getOrCreateRelationshipToken(relationshipType);
         final int propertyToken = getOrCreatePropertyToken(propertyKey);
 
-        degreePartitionGraph(batchSize, direction)
+        // We use MIN_BATCH_SIZE since writing relationships
+        // is performed batch-wise, but single-threaded.
+        degreePartitionGraph(MIN_BATCH_SIZE, direction)
             .stream()
             .map(partition -> createBatchRunnable(
                 fallbackValue,

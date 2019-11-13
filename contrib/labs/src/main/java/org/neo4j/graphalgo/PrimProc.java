@@ -147,7 +147,6 @@ public class PrimProc extends LabsProc {
                     graph,
                     spanningGraph,
                     spanningGraph,
-                    spanningTree.effectiveNodeCount,
                     mstPrim.terminationFlag
                 )
                         .withLog(log)
