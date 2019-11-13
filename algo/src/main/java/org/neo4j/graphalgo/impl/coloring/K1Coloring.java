@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.PartitionUtils.TaskProducer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Direction;
@@ -30,10 +31,11 @@ import org.neo4j.graphdb.Direction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.LongStream;
+
+import static org.neo4j.graphalgo.core.utils.PartitionUtils.numberAlignedPartitioning;
 
 /**
- *<p>
+ * <p>
  * This is a parallel implementation of the K1-Coloring algorithm.
  * The Algorithm will assign a color to every node in the graph, trying to optimize for two objectives:
  * <ul>
@@ -124,9 +126,10 @@ public class K1Coloring extends Algorithm<K1Coloring> {
     public BitSet usedColors() {
         if (usedColors == null) {
             this.usedColors = new BitSet(nodeCount);
-            ParallelUtil.parallelStreamConsume(
-                LongStream.range(0, nodeCount),
-                (stream) -> stream.forEach((nodeId) -> usedColors.set(colors.get(nodeId)))
+            graph.forEachNode((nodeId) -> {
+                    usedColors.set(colors.get(nodeId));
+                    return true;
+                }
             );
         }
         return usedColors;
@@ -154,7 +157,7 @@ public class K1Coloring extends Algorithm<K1Coloring> {
     }
 
     private void runColoring(Direction direction) {
-        DegreeTaskProducer<ColoringStep> producer = (batchStart, batchEnd) -> new ColoringStep(
+        TaskProducer<ColoringStep> producer = (batchStart, batchEnd) -> new ColoringStep(
             graph.concurrentCopy(),
             direction,
             colors,
@@ -172,7 +175,7 @@ public class K1Coloring extends Algorithm<K1Coloring> {
     private void runValidation(Direction direction) {
         BitSet nextNodesToColor = new BitSet(nodeCount);
 
-        DegreeTaskProducer<ValidationStep> producer = (batchStart, batchEnd) -> new ValidationStep(
+        TaskProducer<ValidationStep> producer = (batchStart, batchEnd) -> new ValidationStep(
             graph.concurrentCopy(),
             direction,
             colors,
@@ -183,14 +186,15 @@ public class K1Coloring extends Algorithm<K1Coloring> {
             batchEnd
         );
 
-        Collection<ValidationStep> steps = degreePartition(producer, direction);
+        // The nodesToColor bitset is not thread safe, therefore we have to align the batches to multiples of 64
+        Collection<ValidationStep> steps = numberAlignedPartitioning(producer, nodeCount, concurrency, Long.SIZE);
 
         ParallelUtil.runWithConcurrency(concurrency, steps, executor);
         this.nodesToColor = nextNodesToColor;
     }
 
     private <T extends Runnable> Collection<T> degreePartition(
-        DegreeTaskProducer<T> taskSupplier,
+        TaskProducer<T> taskSupplier,
         Direction direction
     ) {
 
@@ -208,7 +212,7 @@ public class K1Coloring extends Algorithm<K1Coloring> {
         long currentNode = nodesToColor.nextSetBit(0);
         long lastNode;
         long batchStart = currentNode;
-        long currentDegree = 0;
+        long currentDegree = 0L;
         do {
             currentDegree += graph.degree(currentNode, direction);
 
@@ -227,9 +231,5 @@ public class K1Coloring extends Algorithm<K1Coloring> {
         }
 
         return tasks;
-    }
-
-    interface DegreeTaskProducer<T extends Runnable> {
-        T produce(long batchStart, long batchEnd);
     }
 }
