@@ -428,7 +428,7 @@ public class HugeGraph implements Graph {
         ExistsConsumer consumer = new ExistsConsumer(targetNodeId);
         runForEach(sourceNodeId, direction, consumer,
             // HugeGraph interface make no promises about thread-safety (that's what concurrentCopy is for)
-            false);
+            true);
         return consumer.found;
     }
 
@@ -440,7 +440,7 @@ public class HugeGraph implements Graph {
         GetTargetConsumer consumer = new GetTargetConsumer(index);
         runForEach(sourceNodeId, direction, consumer,
             // HugeGraph interface make no promises about thread-safety (that's what concurrentCopy is for)
-            false);
+            true);
         return consumer.target;
     }
 
@@ -478,12 +478,12 @@ public class HugeGraph implements Graph {
         }
 
         if (!hasRelationshipProperty()) {
-            runForEach(sourceNodeId, direction, (s, t) -> consumer.accept(s, t, fallbackValue), false);
+            runForEach(sourceNodeId, direction, (s, t) -> consumer.accept(s, t, fallbackValue), true);
         } else {
             AdjacencyList.DecompressingCursor adjacencyCursor = adjacencyCursorForIteration(
                 sourceNodeId,
                 direction,
-                false
+                true
             );
 
             AdjacencyList.Cursor propertyCursor = propertyCursorForIteration(sourceNodeId, direction);
