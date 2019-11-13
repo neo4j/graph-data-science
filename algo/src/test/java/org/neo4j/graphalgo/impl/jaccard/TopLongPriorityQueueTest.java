@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class TopKLongPriorityQueueTest {
+class TopLongPriorityQueueTest {
 
     @Test
     void shouldKeepMinValues() {
@@ -37,7 +37,7 @@ class TopKLongPriorityQueueTest {
         expected.add(1L);
         expected.add(2L);
 
-        TopKLongPriorityQueue queue = TopKLongPriorityQueue.min(3);
+        TopLongPriorityQueue queue = TopLongPriorityQueue.min(3);
 
         queue.offer(0, 0.0);
         queue.offer(6, 6.0);
@@ -58,7 +58,7 @@ class TopKLongPriorityQueueTest {
         expected.add(5L);
         expected.add(4L);
 
-        TopKLongPriorityQueue queue = TopKLongPriorityQueue.max(3);
+        TopLongPriorityQueue queue = TopLongPriorityQueue.max(3);
 
         queue.offer(0, 0.0);
         queue.offer(6, 6.0);
@@ -79,7 +79,7 @@ class TopKLongPriorityQueueTest {
         expected.add(5L);
         expected.add(4L);
 
-        TopKLongPriorityQueue queue = TopKLongPriorityQueue.max(10);
+        TopLongPriorityQueue queue = TopLongPriorityQueue.max(10);
 
         queue.offer(6, 6.0);
         queue.offer(5, 5.0);

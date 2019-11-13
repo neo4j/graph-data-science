@@ -32,7 +32,9 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphdb.Direction;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -49,9 +51,9 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     private long nodesToCompare;
 
     public NeighborhoodSimilarity(
-            Graph graph,
-            Config config,
-            AllocationTracker tracker
+        Graph graph,
+        Config config,
+        AllocationTracker tracker
     ) {
         this.graph = graph;
         this.config = config;
@@ -89,13 +91,21 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         Stream<SimilarityResult> stream;
         if (config.isParallel()) {
             if (config.hasTopK()) {
-                stream = computeParallelTopK();
+                if (config.hasTop()) {
+                    stream = topN(computeTopKMapParallel());
+                } else {
+                    stream = computeTopKMapParallel().stream();
+                }
             } else {
                 stream = computeParallel();
             }
         } else {
             if (config.hasTopK()) {
-                stream = computeTopK();
+                if (config.hasTop()) {
+                    stream = topN(computeTopkMap());
+                } else {
+                    stream = computeTopkMap().stream();
+                }
             } else {
                 stream = compute();
             }
@@ -104,8 +114,9 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         // Log progress
         stream = log(stream);
 
-        // Compute topN if necessary
-        if (config.hasTop()) {
+        // Compute topN iff we did not run topK before.
+        // Can not happen when algo is called from proc.
+        if (config.hasTop() && !config.hasTopK()) {
             stream = topN(stream);
         }
         return stream;
@@ -159,7 +170,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         );
     }
 
-    private Stream<SimilarityResult> computeTopK() {
+    private TopKMap computeTopkMap() {
         Comparator<SimilarityResult> comparator = config.topk > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
         TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.topk), comparator, tracker);
         new SetBitsIterable(nodeFilter).stream()
@@ -174,10 +185,10 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
                         }
                     });
             });
-        return topKMap.stream();
+        return topKMap;
     }
 
-    private Stream<SimilarityResult> computeParallelTopK() {
+    private TopKMap computeTopKMapParallel() {
         Comparator<SimilarityResult> comparator = config.topk > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
         TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.topk), comparator, tracker);
         ParallelUtil.parallelStreamConsume(
@@ -201,7 +212,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
                         });
                 })
         );
-        return topKMap.stream();
+        return topKMap;
     }
 
     private Stream<SimilarityResult> log(Stream<SimilarityResult> stream) {
@@ -216,6 +227,20 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     private Stream<SimilarityResult> topN(Stream<SimilarityResult> similarities) {
         Comparator<SimilarityResult> comparator = config.top > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
         return similarities.sorted(comparator).limit(Math.abs(config.top));
+    }
+
+    private Stream<SimilarityResult> topN(TopKMap topKMap) {
+        int absTop = Math.abs(config.top);
+
+        TopLongLongPriorityQueue topNLongPriorityQueue = config.top > 0
+            ? TopLongLongPriorityQueue.max(absTop)
+            : TopLongLongPriorityQueue.min(absTop);
+        topKMap.forEach(topNLongPriorityQueue::offer);
+
+        List<SimilarityResult> topNResults = new ArrayList<>(absTop);
+        topNLongPriorityQueue.foreach((element1, element2, priority) ->
+            topNResults.add(new SimilarityResult(element1, element2, priority)));
+        return topNResults.stream();
     }
 
     private SimilarityResult jaccard(long node1, long node2, long[] vector1, long[] vector2) {
@@ -249,12 +274,12 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         private final int minBatchSize;
 
         public Config(
-                double similarityCutoff,
-                int degreeCutoff,
-                int top,
-                int topk,
-                int concurrency,
-                int minBatchSize
+            double similarityCutoff,
+            int degreeCutoff,
+            int top,
+            int topk,
+            int concurrency,
+            int minBatchSize
         ) {
             this.similarityCutoff = similarityCutoff;
             // TODO: make this constraint more prominent
