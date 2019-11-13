@@ -27,8 +27,6 @@ import java.util.function.IntConsumer;
 
 /**
  * flippable Stack impl. where pop() and push() operations work on distinct stacks
- *
- * @author mknblch
  */
 public class FlipStack {
 

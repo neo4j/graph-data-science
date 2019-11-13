@@ -24,9 +24,6 @@ import org.neo4j.graphalgo.core.utils.container.SimpleBitSet;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
-/**
- * @author mknblch
- */
 public class PagedSimpleBitSet extends PagedDataStructure<SimpleBitSet> {
 
     private static final PageAllocator.Factory<SimpleBitSet> ALLOCATOR_FACTORY;

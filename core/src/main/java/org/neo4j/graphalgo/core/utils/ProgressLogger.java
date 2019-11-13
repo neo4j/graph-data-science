@@ -25,9 +25,6 @@ import org.neo4j.logging.NullLog;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-/**
- * @author mknblch
- */
 public interface ProgressLogger {
 
     ProgressLogger NULL_LOGGER = new ProgressLoggerAdapter(NullLog.getInstance(), "NULL");

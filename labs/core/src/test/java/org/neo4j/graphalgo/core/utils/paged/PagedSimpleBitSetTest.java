@@ -24,15 +24,12 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * @author mknblch
- */
 class PagedSimpleBitSetTest {
 
     private final PagedSimpleBitSet set = PagedSimpleBitSet.newBitSet(Integer.MAX_VALUE + 100L, AllocationTracker.EMPTY);
 
     @Test
-    void testLowValues() throws Exception {
+    void testLowValues() {
         assertFalse(set.contains(123));
         set.put(123);
         assertTrue(set.contains(123));
@@ -41,7 +38,7 @@ class PagedSimpleBitSetTest {
     }
 
     @Test
-    void testHighValues() throws Exception {
+    void testHighValues() {
         assertFalse(set.contains(Integer.MAX_VALUE + 42L));
         set.put(Integer.MAX_VALUE + 42L);
         assertTrue(set.contains(Integer.MAX_VALUE + 42L));
