@@ -141,7 +141,7 @@ public class K1Coloring extends Algorithm<K1Coloring> {
 
     public K1Coloring compute() {
         colors = HugeLongArray.newArray(nodeCount, tracker);
-        colors.setAll((nodeId) -> nodeId);
+        colors.setAll((nodeId) -> 0);
 
         ranIterations = 0L;
         nodesToColor.set(0, nodeCount);

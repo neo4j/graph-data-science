@@ -20,11 +20,11 @@
 package org.neo4j.graphalgo.impl.coloring;
 
 import com.carrotsearch.hppc.BitSet;
-import org.apache.commons.lang3.mutable.MutableBoolean;
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Direction;
+
+import java.util.Arrays;
 
 public final class ColoringStep implements Runnable {
 
@@ -32,10 +32,11 @@ public final class ColoringStep implements Runnable {
     private final Direction direction;
     private final HugeLongArray colors;
     private final BitSet nodesToColor;
-    private final MutableBoolean found;
-    private final MutableLong nextColor;
     private final long offset;
     private final long batchEnd;
+
+    private final BitSet forbiddenColors;
+    private final long[] resetMask;
 
     public ColoringStep(
         RelationshipIterator graph,
@@ -52,32 +53,36 @@ public final class ColoringStep implements Runnable {
         this.nodesToColor = nodesToColor;
         this.offset = offset;
         this.batchEnd = Math.min(offset + batchSize, nodeCount);
-        found = new MutableBoolean(false);
-        nextColor = new MutableLong(0);
+        this.forbiddenColors = new BitSet(1000);
+        this.resetMask = new long[forbiddenColors.bits.length];
+        Arrays.fill(resetMask, 0);
     }
 
     @Override
     public void run() {
         for (long nodeId = offset; nodeId <= batchEnd; nodeId++) {
             if (nodesToColor.get(nodeId)) {
+                resetForbiddenColors();
 
+                graph.forEachRelationship(nodeId, direction, (s, target) -> {
+                    if (s != target) {
+                        forbiddenColors.set(colors.get(target));
+                    }
+                    return true;
+                });
 
-                found.setFalse();
-                nextColor.setValue(0);
-                while (!found.booleanValue()) {
-                    found.setTrue();
-                    graph.forEachRelationship(nodeId, direction, (s, target) -> {
-                        if (s != target && colors.get(target) == nextColor.getValue()) {
-                            nextColor.increment();
-                            found.setFalse();
-                            return false;
-                        }
-                        return true;
-                    });
+                long nextColor = 0;
+                while (forbiddenColors.get(nextColor)) {
+                    nextColor++;
                 }
 
-                colors.set(nodeId, nextColor.getValue());
+                colors.set(nodeId, nextColor);
             }
         }
+    }
+
+    private void resetForbiddenColors() {
+        System.arraycopy(resetMask, 0, forbiddenColors.bits, 0, forbiddenColors.bits.length);
+        forbiddenColors.wlen = 0;
     }
 }
