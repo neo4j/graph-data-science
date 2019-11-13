@@ -52,7 +52,7 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
     @Procedure(name = "algo.beta.modularityOptimization.write", mode = Mode.WRITE)
     @Description("CALL algo.beta.modularityOptimization.write(" +
                  "label:String, relationship:String, " +
-                 "{iterations: 10, direction: 'OUTGOING', write: true, writeProperty: null, concurrency: 4})" +
+                 "{iterations: 10, tolerance: 0.0001, direction: 'OUTGOING', write: true, writeProperty: null, concurrency: 4})" +
                  "YIELD modularity, communityCount, ranIterations, didConverge, loadMillis, computeMillis, writeMillis, write, writeProperty, nodes")
     public Stream<WriteResult> betaModularityOptimization(
         @Name(value = "label", defaultValue = "") String label,
@@ -65,7 +65,7 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
     @Procedure(name = "algo.beta.modularityOptimization.stream", mode = Mode.WRITE)
     @Description("CALL algo.beta.modularityOptimization.stream(" +
                  "label:String, relationship:String, " +
-                 "{iterations: 10, direction: 'OUTGOING', write: true, writeProperty: null, concurrency: 4})" +
+                 "{iterations: 10, tolerance: 0.0001, direction: 'OUTGOING', write: true, writeProperty: null, concurrency: 4})" +
                  "YIELD nodeId, community")
     public Stream<StreamResult> betaModularityOptimizationStream(
         @Name(value = "label", defaultValue = "") String label,

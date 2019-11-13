@@ -218,6 +218,20 @@ class ModularityOptimizationProcTest extends ProcTestBase {
     }
 
     @Test
+    void tolerance() {
+        String query = "CALL algo.beta.modularityOptimization.write(" +
+                       "    null, null, {" +
+                       "        write: false, direction: 'BOTH', tolerance: 1" +
+                       "    }" +
+                       ") YIELD didConverge, ranIterations";
+
+        runQuery(query, (row) -> {
+            assertTrue(row.getBoolean("didConverge"));
+            assertEquals(1, row.getNumber("ranIterations").longValue());
+        });
+    }
+
+    @Test
     void setIterations() {
         String query = "CALL algo.beta.modularityOptimization.write(" +
                        "    null, null, {" +

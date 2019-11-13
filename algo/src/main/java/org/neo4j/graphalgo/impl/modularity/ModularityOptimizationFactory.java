@@ -30,6 +30,8 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
 
 import static org.neo4j.graphalgo.core.ProcedureConstants.SEED_PROPERTY_KEY;
+import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
+import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_KEY;
 
 public class ModularityOptimizationFactory extends AlgorithmFactory<ModularityOptimization> {
 
@@ -47,6 +49,7 @@ public class ModularityOptimizationFactory extends AlgorithmFactory<ModularityOp
             graph,
             configuration.getDirection(Direction.OUTGOING),
             configuration.getIterations(DEFAULT_MAX_ITERATIONS),
+            configuration.getNumber(TOLERANCE_KEY, TOLERANCE_DEFAULT).doubleValue(),
             seedProperty,
             configuration.getConcurrency(),
             configuration.getBatchSize(),

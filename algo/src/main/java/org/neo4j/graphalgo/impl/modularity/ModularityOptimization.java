@@ -56,6 +56,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private final int maxIterations;
     private final long nodeCount;
     private final long batchSize;
+    private final double tolerance;
     private final Graph graph;
     private final Direction direction;
     private final HugeLongArray currentCommunities;
@@ -81,6 +82,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         final Graph graph,
         Direction direction,
         int maxIterations,
+        double tolerance,
         NodeProperties seedProperty,
         final int concurrency,
         final int minBatchSize,
@@ -92,6 +94,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         this.nodeCount = graph.nodeCount();
         this.direction = direction;
         this.maxIterations = maxIterations;
+        this.tolerance = tolerance;
         this.seedProperty = seedProperty;
         this.executor = executor;
         this.concurrency = concurrency;
@@ -246,7 +249,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         double oldModularity = this.modularity;
         this.modularity = calculateModularity();
 
-        return this.modularity > oldModularity && Math.abs(this.modularity - oldModularity) > 0.001;
+        return this.modularity > oldModularity && Math.abs(this.modularity - oldModularity) > tolerance;
     }
 
     private double calculateModularity() {
@@ -329,5 +332,9 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
     public boolean didConverge() {
         return this.didConverge;
+    }
+
+    public double getTolerance() {
+        return tolerance;
     }
 }

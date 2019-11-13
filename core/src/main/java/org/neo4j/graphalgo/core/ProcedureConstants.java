@@ -55,6 +55,9 @@ public final class ProcedureConstants {
     // algos specific
     public static final String SEED_PROPERTY_KEY = "seedProperty";
 
+    public static final String TOLERANCE_KEY = "tolerance";
+    public static final double TOLERANCE_DEFAULT = 0.0001D;
+
     // graph type params
     public static final String GRAPH_IMPL_KEY = "graph";
     public static final String GRAPH_IMPL_DEFAULT = "huge";
