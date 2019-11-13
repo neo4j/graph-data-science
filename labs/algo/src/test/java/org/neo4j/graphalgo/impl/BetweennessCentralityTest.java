@@ -19,24 +19,16 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
-import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
-import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphalgo.impl.betweenness.BetweennessCentralitySuccessorBrandes;
 import org.neo4j.graphalgo.impl.betweenness.MaxDepthBetweennessCentrality;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 /**
  *  (A)-->(B)-->(C)-->(D)-->(E)
@@ -44,11 +36,12 @@ import static org.mockito.Mockito.verify;
  */
 class BetweennessCentralityTest {
 
-    private static GraphDatabaseAPI db;
-    private static Graph graph;
+    private Graph graph;
 
-    @BeforeAll
-    static void setupGraph() {
+    private GraphDatabaseAPI db;
+
+    @BeforeEach
+    void setupGraph() {
 
         String cypher =
                 "CREATE (a:Node {name:'a'})\n" +
@@ -74,12 +67,11 @@ class BetweennessCentralityTest {
                 .withAnyRelationshipType()
                 .withAnyLabel()
                 .load(HugeGraphFactory.class);
-
     }
 
-    @AfterAll
-    static void tearDown() {
-        if (db != null) db.shutdown();
+    @AfterEach
+    void tearDown() {
+        db.shutdown();
         graph = null;
     }
 
@@ -95,40 +87,9 @@ class BetweennessCentralityTest {
 
     @Test
     void testMBC() {
-
         new MaxDepthBetweennessCentrality(graph, 3)
                 .compute()
                 .resultStream()
                 .forEach(r -> System.out.println(name(r.nodeId) + " -> " + r.centrality));
-    }
-
-    @Test
-    void testSuccessorBrandes() {
-
-        final TestConsumer mock = mock(TestConsumer.class);
-
-        final BetweennessCentralitySuccessorBrandes bc =
-                new BetweennessCentralitySuccessorBrandes(graph, Pools.DEFAULT)
-                        .compute();
-
-        final AtomicDoubleArray centrality = bc.getCentrality();
-
-
-        for (int i = 0; i < centrality.length(); i++) {
-            System.out.println(i + ":" + centrality.get(i));
-        }
-
-        bc.resultStream().forEach(r -> mock.consume(name(r.nodeId), r.centrality));
-
-        verify(mock, times(1)).consume(eq("a"), eq(0.0));
-        verify(mock, times(1)).consume(eq("b"), eq(3.0));
-        verify(mock, times(1)).consume(eq("c"), eq(4.0));
-        verify(mock, times(1)).consume(eq("d"), eq(3.0));
-        verify(mock, times(1)).consume(eq("e"), eq(0.0));
-    }
-
-    interface TestConsumer {
-
-        void consume(String name, double centrality);
     }
 }

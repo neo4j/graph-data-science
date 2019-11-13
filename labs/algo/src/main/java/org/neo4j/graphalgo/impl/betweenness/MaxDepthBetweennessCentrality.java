@@ -38,8 +38,6 @@ import java.util.stream.Stream;
  * like the node-queue. It contains the number of steps
  * the process took to reach the node. if it exceeds
  * a given limit the dfs stops
- *
- * @author mknblch
  */
 public class MaxDepthBetweennessCentrality extends Algorithm<MaxDepthBetweennessCentrality> {
 
