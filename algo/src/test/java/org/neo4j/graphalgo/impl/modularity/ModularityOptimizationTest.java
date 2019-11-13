@@ -89,8 +89,8 @@ class ModularityOptimizationTest {
             3,
             DEFAULT_TOLERANCE,
             null,
-            3,
-            2,
+            1,
+            10_000,
             Pools.DEFAULT,
             AllocationTracker.EMPTY,
             NullLog.getInstance()

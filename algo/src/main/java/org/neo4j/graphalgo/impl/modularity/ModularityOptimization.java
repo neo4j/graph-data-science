@@ -146,6 +146,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
             if (hasConverged) {
                 this.didConverge = true;
+                iterationCounter++;
                 break;
             }
         }
