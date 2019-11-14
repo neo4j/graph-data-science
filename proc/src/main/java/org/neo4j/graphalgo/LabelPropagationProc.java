@@ -132,8 +132,8 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
     }
 
     @Procedure(value = "algo.labelPropagation.memrec")
-    @Description("CALL algo.labelPropagation.memrec(label:String, relationship:String, config:Map<String, Object>) " +
-                 "YIELD nodeId, label")
+    @Description("CALL algo.labelPropagation.memrec(label:String, relationship:String, {...properties}) " +
+                 "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for LabelPropagation")
     public Stream<MemRecResult> labelPropagationMemrec(
         @Name(value = "label", defaultValue = "") String label,
         @Name(value = "relationship", defaultValue = "") String relationshipType,
