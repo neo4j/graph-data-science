@@ -48,7 +48,7 @@ public final class CypherMapWrapper {
     public Optional<String> getString(String key) {
         if (config.containsKey(key)) {
             // Optional.of will throw an NPE if key does not exist because of the default value
-            //  which we want have as a kind of sanity check - the default value *should* not be used
+            //  which we want to have as a kind of sanity check - the default value *should* not be used
             return Optional.of(getChecked(key, null, String.class));
         }
         return Optional.empty();

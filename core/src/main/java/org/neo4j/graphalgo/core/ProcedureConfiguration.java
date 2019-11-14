@@ -51,19 +51,19 @@ public class ProcedureConfiguration {
     public static final String HEAVY_GRAPH_TYPE = "heavy";
     public static final String LIGHT_GRAPH_TYPE = "light";
 
-    private final CypherMapWrapper map;
+    private final CypherMapWrapper configurationMap;
 
     private final String username;
     private final boolean computeHistogram;
     private final boolean computeCommunityCount;
 
     protected ProcedureConfiguration(
-        CypherMapWrapper map,
+        CypherMapWrapper configurationMap,
         String username,
         boolean computeHistogram,
         boolean computeCommunityCount
     ) {
-        this.map = map;
+        this.configurationMap = configurationMap;
         this.username = username;
         this.computeHistogram = computeHistogram;
         this.computeCommunityCount = computeCommunityCount;
@@ -73,51 +73,51 @@ public class ProcedureConfiguration {
     // START DELEGATION
 
     public boolean containsKey(String key) {
-        return map.containsKey(key);
+        return configurationMap.containsKey(key);
     }
 
     public Optional<String> getStringWithFallback(String key, String oldKey) {
-        return map.getStringWithFallback(key, oldKey);
+        return configurationMap.getStringWithFallback(key, oldKey);
     }
 
     public <V> V get(String key, V defaultValue) {
-        return map.get(key, defaultValue);
+        return configurationMap.get(key, defaultValue);
     }
 
     public String getString(String key, String defaultValue) {
-        return map.getString(key, defaultValue);
+        return configurationMap.getString(key, defaultValue);
     }
 
     public String getString(String key, String oldKey, String defaultValue) {
-        return map.getString(key, oldKey, defaultValue);
+        return configurationMap.getString(key, oldKey, defaultValue);
     }
 
     public Optional<String> getString(String key) {
-        return map.getString(key);
+        return configurationMap.getString(key);
     }
 
     public Boolean getBool(String key, boolean defaultValue) {
-        return map.getBool(key, defaultValue);
+        return configurationMap.getBool(key, defaultValue);
     }
 
     public Number getNumber(String key, Number defaultValue) {
-        return map.getNumber(key, defaultValue);
+        return configurationMap.getNumber(key, defaultValue);
     }
 
     public Number getNumber(String key, String oldKey, Number defaultValue) {
-        return map.getNumber(key, oldKey, defaultValue);
+        return configurationMap.getNumber(key, oldKey, defaultValue);
     }
 
     public int getInt(String key, int defaultValue) {
-        return map.getInt(key, defaultValue);
+        return configurationMap.getInt(key, defaultValue);
     }
 
     public <V> V getChecked(String key, V defaultValue, Class<V> expectedType) {
-        return map.getChecked(key, defaultValue, expectedType);
+        return configurationMap.getChecked(key, defaultValue, expectedType);
     }
 
     public <V> V get(String newKey, String oldKey, V defaultValue) {
-        return map.get(newKey, oldKey, defaultValue);
+        return configurationMap.get(newKey, oldKey, defaultValue);
     }
 
     // END DELEGATION
@@ -136,7 +136,7 @@ public class ProcedureConfiguration {
      */
     public ProcedureConfiguration setNodeLabelOrQuery(String nodeLabelOrQuery) {
         return new ProcedureConfiguration(
-            map.withString(ProcedureConstants.NODE_LABEL_QUERY_KEY, nodeLabelOrQuery),
+            configurationMap.withString(ProcedureConstants.NODE_LABEL_QUERY_KEY, nodeLabelOrQuery),
             username,
             computeHistogram,
             computeCommunityCount
@@ -153,7 +153,7 @@ public class ProcedureConfiguration {
      */
     public ProcedureConfiguration setRelationshipTypeOrQuery(String relationshipTypeOrQuery) {
         return new ProcedureConfiguration(
-            map.withString(ProcedureConstants.RELATIONSHIP_QUERY_KEY, relationshipTypeOrQuery),
+            configurationMap.withString(ProcedureConstants.RELATIONSHIP_QUERY_KEY, relationshipTypeOrQuery),
             username,
             computeHistogram,
             computeCommunityCount
@@ -169,7 +169,7 @@ public class ProcedureConfiguration {
      */
     public ProcedureConfiguration setDirection(String direction) {
         return new ProcedureConfiguration(
-            map.withString(ProcedureConstants.DIRECTION_KEY, direction),
+            configurationMap.withString(ProcedureConstants.DIRECTION_KEY, direction),
             username,
             computeHistogram,
             computeCommunityCount
@@ -177,11 +177,11 @@ public class ProcedureConfiguration {
     }
 
     public ProcedureConfiguration setComputeHistogram(boolean computeHistogram) {
-        return new ProcedureConfiguration(map, username, computeHistogram, computeCommunityCount);
+        return new ProcedureConfiguration(configurationMap, username, computeHistogram, computeCommunityCount);
     }
 
     public ProcedureConfiguration setComputeCommunityCount(boolean computeCommunityCount) {
-        return new ProcedureConfiguration(map, username, computeHistogram, computeCommunityCount);
+        return new ProcedureConfiguration(configurationMap, username, computeHistogram, computeCommunityCount);
     }
 
     /**
@@ -204,7 +204,7 @@ public class ProcedureConfiguration {
      * @return the label or query
      */
     public String getNodeLabelOrQuery() {
-        return map.getString(ProcedureConstants.NODE_LABEL_QUERY_KEY, null);
+        return configurationMap.getString(ProcedureConstants.NODE_LABEL_QUERY_KEY, null);
     }
 
     /**
@@ -215,11 +215,11 @@ public class ProcedureConfiguration {
      * @return the label or query
      */
     public String getNodeLabelOrQuery(String defaultValue) {
-        return map.getString(ProcedureConstants.NODE_LABEL_QUERY_KEY, defaultValue);
+        return configurationMap.getString(ProcedureConstants.NODE_LABEL_QUERY_KEY, defaultValue);
     }
 
     public String getRelationshipOrQuery() {
-        return map.getString(ProcedureConstants.RELATIONSHIP_QUERY_KEY, null);
+        return configurationMap.getString(ProcedureConstants.RELATIONSHIP_QUERY_KEY, null);
     }
 
     /**
@@ -238,7 +238,7 @@ public class ProcedureConfiguration {
      * @return the property name
      */
     public String getWriteProperty(String defaultValue) {
-        return map.getString(ProcedureConstants.WRITE_PROPERTY_KEY, defaultValue);
+        return configurationMap.getString(ProcedureConstants.WRITE_PROPERTY_KEY, defaultValue);
     }
 
     /**
@@ -249,7 +249,7 @@ public class ProcedureConfiguration {
      * @return the relationship name or query
      */
     public String getRelationshipOrQuery(String defaultValue) {
-        return map.getString(ProcedureConstants.RELATIONSHIP_QUERY_KEY, defaultValue);
+        return configurationMap.getString(ProcedureConstants.RELATIONSHIP_QUERY_KEY, defaultValue);
     }
 
     /**
@@ -267,7 +267,7 @@ public class ProcedureConfiguration {
      * @return true if stat flag is activated, false otherwise
      */
     public boolean isStatsFlag() {
-        return map.get(ProcedureConstants.STATS_FLAG_KEY, false);
+        return configurationMap.get(ProcedureConstants.STATS_FLAG_KEY, false);
     }
 
     /**
@@ -277,7 +277,7 @@ public class ProcedureConfiguration {
      * @return true if write is activated, false otherwise
      */
     public boolean isWriteFlag(boolean defaultValue) {
-        return map.get(ProcedureConstants.WRITE_FLAG_KEY, defaultValue);
+        return configurationMap.get(ProcedureConstants.WRITE_FLAG_KEY, defaultValue);
     }
 
     public boolean hasWeightProperty() {
@@ -285,7 +285,7 @@ public class ProcedureConfiguration {
     }
 
     public String getWeightProperty() {
-        return map.getString(ProcedureConstants.DEPRECATED_RELATIONSHIP_PROPERTY_KEY, null);
+        return configurationMap.getString(ProcedureConstants.DEPRECATED_RELATIONSHIP_PROPERTY_KEY, null);
     }
 
     public PropertyMappings getNodeProperties() {
@@ -297,7 +297,7 @@ public class ProcedureConfiguration {
     }
 
     private PropertyMappings getPropertyMappings(String paramKey) {
-        Object propertyMappings = map.get(paramKey, null);
+        Object propertyMappings = configurationMap.get(paramKey, null);
         if (propertyMappings != null) {
             return PropertyMappings.fromObject(propertyMappings);
         }
@@ -305,7 +305,7 @@ public class ProcedureConfiguration {
     }
 
     public double getWeightPropertyDefaultValue(double defaultValue) {
-        return map.getNumber(ProcedureConstants.DEFAULT_VALUE_KEY, defaultValue).doubleValue();
+        return configurationMap.getNumber(ProcedureConstants.DEFAULT_VALUE_KEY, defaultValue).doubleValue();
     }
 
     /**
@@ -315,7 +315,7 @@ public class ProcedureConfiguration {
      * @return
      */
     public int getIterations(int defaultValue) {
-        return map.getNumber(ProcedureConstants.ITERATIONS_KEY, defaultValue).intValue();
+        return configurationMap.getNumber(ProcedureConstants.ITERATIONS_KEY, defaultValue).intValue();
     }
 
     /**
@@ -324,7 +324,7 @@ public class ProcedureConfiguration {
      * @return batch size
      */
     public int getBatchSize() {
-        return map.getNumber(ProcedureConstants.BATCH_SIZE_KEY, ParallelUtil.DEFAULT_BATCH_SIZE).intValue();
+        return configurationMap.getNumber(ProcedureConstants.BATCH_SIZE_KEY, ParallelUtil.DEFAULT_BATCH_SIZE).intValue();
     }
 
     public int getConcurrency() {
@@ -332,7 +332,7 @@ public class ProcedureConfiguration {
     }
 
     public int getConcurrency(int defaultValue) {
-        int requestedConcurrency = map.getNumber(ProcedureConstants.CONCURRENCY_KEY, defaultValue).intValue();
+        int requestedConcurrency = configurationMap.getNumber(ProcedureConstants.CONCURRENCY_KEY, defaultValue).intValue();
         return Pools.allowedConcurrency(requestedConcurrency);
     }
 
@@ -341,7 +341,7 @@ public class ProcedureConfiguration {
     }
 
     public int getReadConcurrency(int defaultValue) {
-        Number readConcurrency = map.getNumber(
+        Number readConcurrency = configurationMap.getNumber(
                 ProcedureConstants.READ_CONCURRENCY_KEY,
                 ProcedureConstants.CONCURRENCY_KEY,
                 defaultValue);
@@ -354,7 +354,7 @@ public class ProcedureConfiguration {
     }
 
     public int getWriteConcurrency(int defaultValue) {
-        Number writeConcurrency = map.getNumber(
+        Number writeConcurrency = configurationMap.getNumber(
                 ProcedureConstants.WRITE_CONCURRENCY_KEY,
                 ProcedureConstants.CONCURRENCY_KEY,
                 defaultValue);
@@ -363,7 +363,7 @@ public class ProcedureConfiguration {
     }
 
     private String getDirectionName(String defaultDirection) {
-        return map.get(ProcedureConstants.DIRECTION_KEY, defaultDirection);
+        return configurationMap.get(ProcedureConstants.DIRECTION_KEY, defaultDirection);
     }
 
     public Direction getDirection(Direction defaultDirection) {
@@ -375,7 +375,7 @@ public class ProcedureConfiguration {
     }
 
     public String getGraphName(String defaultValue) {
-        return map.getString(ProcedureConstants.GRAPH_IMPL_KEY, defaultValue);
+        return configurationMap.getString(ProcedureConstants.GRAPH_IMPL_KEY, defaultValue);
     }
 
     public Class<? extends GraphFactory> getGraphImpl() {
@@ -426,16 +426,16 @@ public class ProcedureConfiguration {
 
     public Double getSkipValue(Double defaultValue) {
         String key = ProcedureConstants.SKIP_VALUE_KEY;
-        if (!map.containsKey(key)) {
+        if (!configurationMap.containsKey(key)) {
             return defaultValue;
         }
-        Object value = map.get(key, null);
+        Object value = configurationMap.get(key, null);
 
         if (value == null) {
             return null;
         }
 
-        return map.typedValue(key, Number.class, value).doubleValue();
+        return configurationMap.typedValue(key, Number.class, value).doubleValue();
     }
 
     public static ProcedureConfiguration create(Map<String, Object> config, String username) {
@@ -451,11 +451,11 @@ public class ProcedureConfiguration {
     }
 
     public Map<String, Object> getParams() {
-        return map.getChecked("params", Collections.emptyMap(), Map.class);
+        return configurationMap.getChecked("params", Collections.emptyMap(), Map.class);
     }
 
     public DeduplicationStrategy getDeduplicationStrategy() {
-        String strategy = map.get("duplicateRelationships", null);
+        String strategy = configurationMap.get("duplicateRelationships", null);
         return strategy != null ? DeduplicationStrategy.lookup(strategy.toUpperCase()) : DeduplicationStrategy.DEFAULT;
     }
 }
