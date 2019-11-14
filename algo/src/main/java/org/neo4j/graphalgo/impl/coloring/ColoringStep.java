@@ -24,18 +24,17 @@ import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Direction;
 
-import java.util.Arrays;
-
 public final class ColoringStep implements Runnable {
 
+    static final int INITIAL_FORBIDDEN_COLORS = 1000;
+    
     private final RelationshipIterator graph;
     private final Direction direction;
     private final HugeLongArray colors;
     private final BitSet nodesToColor;
+    private final BitSet forbiddenColors;
     private final long offset;
     private final long batchEnd;
-
-    private final BitSet forbiddenColors;
     private final long[] resetMask;
 
     public ColoringStep(
@@ -53,9 +52,8 @@ public final class ColoringStep implements Runnable {
         this.nodesToColor = nodesToColor;
         this.offset = offset;
         this.batchEnd = Math.min(offset + batchSize, nodeCount);
-        this.forbiddenColors = new BitSet(1000);
-        this.resetMask = new long[forbiddenColors.bits.length];
-        Arrays.fill(resetMask, 0);
+        this.forbiddenColors = new BitSet(INITIAL_FORBIDDEN_COLORS);
+        this.resetMask = new long[INITIAL_FORBIDDEN_COLORS];
     }
 
     @Override
@@ -82,7 +80,9 @@ public final class ColoringStep implements Runnable {
     }
 
     private void resetForbiddenColors() {
-        System.arraycopy(resetMask, 0, forbiddenColors.bits, 0, forbiddenColors.bits.length);
-        forbiddenColors.wlen = 0;
+        for (int i = 0; i <= forbiddenColors.bits.length; i += resetMask.length) {
+            System.arraycopy(resetMask, 0, forbiddenColors.bits, i, Math.min(forbiddenColors.bits.length -i, INITIAL_FORBIDDEN_COLORS));
+            forbiddenColors.wlen = 0;
+        }
     }
 }
