@@ -26,12 +26,14 @@ import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.modularity.ModularityOptimization;
 import org.neo4j.graphalgo.impl.modularity.ModularityOptimizationFactory;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
+import org.neo4j.graphalgo.impl.results.MemRecResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -73,6 +75,19 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
         @Name(value = "config", defaultValue = "{}") Map<String, Object> config
     ) {
         return stream(label, relationshipType, config);
+    }
+
+    @Procedure(value = "algo.beta.modularityOptimization.memrec")
+    @Description("CALL algo.beta.modularityOptimization.memrec(label:String, relationship:String, {...properties}) " +
+                 "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for LabelPropagation")
+    public Stream<MemRecResult> modularityOptimizationMemrec(
+        @Name(value = "label", defaultValue = "") String label,
+        @Name(value = "relationship", defaultValue = "") String relationshipType,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+
+        ProcedureConfiguration configuration = newConfig(label, relationshipType, config);
+        MemoryTreeWithDimensions memoryEstimation = this.memoryEstimation(configuration);
+        return Stream.of(new MemRecResult(memoryEstimation));
     }
 
     public Stream<WriteResult> run(String label, String relationshipType, Map<String, Object> config) {

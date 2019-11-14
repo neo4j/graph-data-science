@@ -245,6 +245,18 @@ class ModularityOptimizationProcTest extends ProcTestBase {
         });
     }
 
+    @Test
+    void computeMemrec() {
+        String query = "CALL algo.beta.modularityOptimization.memrec(" +
+                       "    null, null" +
+                       ") YIELD requiredMemory, treeView, bytesMin, bytesMax";
+
+        runQuery(query, (row) -> {
+            assertTrue(row.getNumber("bytesMin").longValue() > 0);
+            assertTrue(row.getNumber("bytesMax").longValue() > 0);
+        });
+    }
+
     private void assertWriteResult(long[]... expectedCommunities) {
         Map<String, Object> nameMapping = MapUtil.map(
             "a", 0,

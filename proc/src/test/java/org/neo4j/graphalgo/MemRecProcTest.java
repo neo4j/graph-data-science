@@ -64,10 +64,11 @@ class MemRecProcTest extends ProcTestBase {
                 LabelPropagationProc.class,
                 WccProc.class,
                 LouvainProc.class,
-                K1ColoringProc.class
+                K1ColoringProc.class,
+                ModularityOptimizationProc.class
         );
         availableAlgoProcedures = "the available and supported procedures are {" +
-                                  "beta.k1coloring, beta.wcc, graph.load, labelPropagation, louvain, pageRank, unionFind, wcc" +
+                                  "beta.modularityOptimization, beta.k1coloring, beta.wcc, graph.load, labelPropagation, louvain, pageRank, unionFind, wcc" +
                                   "}.";
         db.execute(DB_CYPHER);
     }
@@ -123,6 +124,11 @@ class MemRecProcTest extends ProcTestBase {
         test("algo.memrec(null, null, 'beta.k1coloring', {direction: 'BOTH', graph: 'huge'})");
         test("algo.beta.k1coloring.memrec(null, null)");
         test("algo.beta.k1coloring.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
+
+        test("algo.memrec(null, null, 'beta.modularityOptimization')");
+        test("algo.memrec(null, null, 'beta.modularityOptimization', {direction: 'BOTH', graph: 'huge'})");
+        test("algo.beta.modularityOptimization.memrec(null, null)");
+        test("algo.beta.modularityOptimization.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
     }
 
     private void test(final String s, final String expectedMessage) {

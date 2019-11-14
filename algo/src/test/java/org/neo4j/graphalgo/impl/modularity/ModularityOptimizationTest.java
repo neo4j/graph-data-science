@@ -23,21 +23,29 @@ package org.neo4j.graphalgo.impl.modularity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.NullLog;
 
+import java.util.stream.Stream;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 import static org.neo4j.graphalgo.TestLog.INFO;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
@@ -263,5 +271,23 @@ class ModularityOptimizationTest {
         );
 
         assertTrue(exception.getMessage().contains("at least one iteration"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("memoryEstimationTuples")
+    void testMemoryEstimation(int concurrency, long min, long max) {
+        GraphDimensions dimensions = new GraphDimensions.Builder().setNodeCount(100_000L).build();
+
+        MemoryTree memoryTree = new ModularityOptimizationFactory().memoryEstimation(dimensions, concurrency);
+        assertEquals(min, memoryTree.memoryUsage().min);
+        assertEquals(max, memoryTree.memoryUsage().max);
+    }
+
+    static Stream<Arguments> memoryEstimationTuples() {
+        return Stream.of(
+            arguments(1, 5614088, 8413120),
+            arguments(4, 5617376, 14413384),
+            arguments(42, 5659024, 90416728)
+        );
     }
 }

@@ -27,7 +27,12 @@ import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
 
@@ -41,7 +46,29 @@ public class ModularityOptimizationFactory extends AlgorithmFactory<ModularityOp
 
     @Override
     public MemoryEstimation memoryEstimation() {
-        return MemoryEstimations.empty();
+        return MemoryEstimations.builder(ModularityOptimization.class)
+            .perNode("currentCommunities", HugeLongArray::memoryEstimation)
+            .perNode("nextCommunities", HugeLongArray::memoryEstimation)
+            .perNode("cumulativeNodeWeights", HugeDoubleArray::memoryEstimation)
+            .perNode("nodeCommunityInfluences", HugeDoubleArray::memoryEstimation)
+            .perNode("communityWeights", HugeAtomicDoubleArray::memoryEstimation)
+            .perNode("colorsUsed", MemoryUsage::sizeOfBitset)
+            .perNode("colors", HugeLongArray::memoryEstimation)
+            .rangePerNode(
+                "reversedSeedCommunityMapping", (nodeCount) ->
+                    MemoryRange.of(0, HugeLongArray.memoryEstimation(nodeCount))
+            )
+            .perNode("communityWeightUpdates", HugeAtomicDoubleArray::memoryEstimation)
+            .perThread("ModularityOptimizationTask", MemoryEstimations.builder()
+                .rangePerNode("communityInfluences",
+                    (nodeCount) -> MemoryRange.of(
+                        MemoryUsage.sizeOfLongDoubeHashMap(50),
+                        MemoryUsage.sizeOfLongDoubeHashMap(Math.max(50, nodeCount))
+                    )
+                )
+                .build()
+            )
+            .build();
     }
 
     @Override
