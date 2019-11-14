@@ -47,10 +47,11 @@ class MemRecProcTest extends ProcTestBase {
                 UnionFindProc.class,
                 LabelPropagationProc.class,
                 WccProc.class,
-                LouvainProc.class
+                LouvainProc.class,
+                K1ColoringProc.class
         );
         availableAlgoProcedures = "the available and supported procedures are {" +
-                                  "beta.wcc, graph.load, labelPropagation, louvain, pageRank, unionFind, wcc" +
+                                  "beta.k1coloring, beta.wcc, graph.load, labelPropagation, louvain, pageRank, unionFind, wcc" +
                                   "}.";
     }
 
@@ -100,6 +101,11 @@ class MemRecProcTest extends ProcTestBase {
         test("algo.memrec(null, null, 'unionFind', {direction: 'BOTH', graph: 'huge'})");
         test("algo.unionFind.memrec(null, null)");
         test("algo.unionFind.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
+
+        test("algo.memrec(null, null, 'beta.k1coloring')");
+        test("algo.memrec(null, null, 'beta.k1coloring', {direction: 'BOTH', graph: 'huge'})");
+        test("algo.beta.k1coloring.memrec(null, null)");
+        test("algo.beta.k1coloring.memrec(null, null, {direction: 'BOTH', graph: 'huge'})");
     }
 
     private void test(final String s, final String expectedMessage) {

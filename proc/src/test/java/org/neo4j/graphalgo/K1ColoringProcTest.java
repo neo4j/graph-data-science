@@ -22,8 +22,10 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestSupport.AllGraphNamesTest;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
 
@@ -103,6 +105,20 @@ class K1ColoringProcTest extends ProcTestBase {
 
         assertNotEquals(coloringResult.get(0L), coloringResult.get(1L));
         assertNotEquals(coloringResult.get(0L), coloringResult.get(2L));
+    }
+
+    @Test
+    void memrecProc() {
+        String query = "CALL algo.beta.k1coloring.memrec(" +
+                       "    null, null" +
+                       ") YIELD requiredMemory, treeView, bytesMin, bytesMax";
+        runQuery(query, row -> {
+            assertTrue(row.getNumber("bytesMin").longValue() > 0);
+            assertTrue(row.getNumber("bytesMax").longValue() > 0);
+
+            String bytesHuman = MemoryUsage.humanReadable(row.getNumber("bytesMin").longValue());
+            assertTrue(row.getString("requiredMemory").contains(bytesHuman));
+        });
     }
 
 }
