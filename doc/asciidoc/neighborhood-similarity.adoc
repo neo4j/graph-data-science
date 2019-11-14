@@ -278,40 +278,12 @@ As we can see from the results, the number of created relationships is equal to 
 
 
 [[algorithms-neighborhood-similarity-examples-top-topk]]
-=== Top and topK
-
-Top is a global limit on the number of similarity scores computed.
-If the given value is positive, the results are ordered descending.
-If a negative value is used, the results are ordered ascending.
-A value of 0 means no global limit is imposed and results are returned in any order.
-
-.The following will load the graph, run the algorithm, and stream the top 3 results:
-[source, cypher]
-----
-CALL algo.beta.jaccard.stream('', 'LIKES', {
-  graph: 'huge',
-  direction: 'OUTGOING',
-  top: 3
-})
-YIELD node1, node2, similarity
-RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity
-ORDER BY similarity DESC, Person1, Person2
-----
-
-.Results
-[opts="header"]
-|===
-| Person1 | Person2 | similarity
-| "Alice" | "Dave"  | 1.0
-| "Dave"  | "Alice" | 1.0
-| "Bob"   | "Dave"  | 0.6666666666666666
-3+|3 rows
-|===
+=== TopK and top
 
 TopK is a limit on the number of scores computed per node.
 If the given value is positive, the results per node are ordered descending.
 If a negative value is used, the results are ordered ascending.
-// TopK cannot be 0.
+TopK cannot be 0 and the default value is 10.
 
 .The following will load the graph, run the algorithm, and stream the top 1 result per node:
 [source, cypher]
@@ -335,6 +307,35 @@ ORDER BY Person1
 | "Carol" | "Alice" | 0.3333333333333333
 | "Dave"  | "Alice" | 1.0
 3+|4 rows
+|===
+
+Top limits the number of topK similarity scores across all nodes.
+If the given value is positive, the results are ordered descending.
+If a negative value is used, the results are ordered ascending.
+A value of 0 means no global limit is imposed and results are returned in topK order.
+
+.The following will load the graph, run the algorithm, and streams the 3 highest out of the top 1 results per node:
+[source, cypher]
+----
+CALL algo.beta.jaccard.stream('', 'LIKES', {
+  graph: 'huge',
+  direction: 'OUTGOING',
+  topK: 1,
+  top: 3
+})
+YIELD node1, node2, similarity
+RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity
+ORDER BY similarity DESC, Person1, Person2
+----
+
+.Results
+[opts="header"]
+|===
+| Person1 | Person2 | similarity
+| "Alice" | "Dave"  | 1.0
+| "Dave"  | "Alice" | 1.0
+| "Bob"   | "Alice" | 0.6666666666666666
+3+|3 rows
 |===
 
 

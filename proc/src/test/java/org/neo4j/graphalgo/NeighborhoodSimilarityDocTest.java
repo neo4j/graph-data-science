@@ -124,6 +124,7 @@ class NeighborhoodSimilarityDocTest extends ProcTestBase {
                        "    '', 'LIKES', {" +
                        "        graph: 'huge'," +
                        "        direction: 'OUTGOING'," +
+                       "        topK: 1," +
                        "        top: 3" +
                        "    }" +
                        ") YIELD node1, node2, similarity " +
@@ -135,7 +136,7 @@ class NeighborhoodSimilarityDocTest extends ProcTestBase {
                                 "+----------------------------------------+\n" +
                                 "| \"Alice\" | \"Dave\"  | 1.0                |\n" +
                                 "| \"Dave\"  | \"Alice\" | 1.0                |\n" +
-                                "| \"Bob\"   | \"Dave\"  | 0.6666666666666666 |\n" +
+                                "| \"Bob\"   | \"Alice\" | 0.6666666666666666 |\n" +
                                 "+----------------------------------------+\n" +
                                 "3 rows\n";
 
