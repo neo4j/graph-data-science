@@ -32,7 +32,6 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.RelationshipType;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -52,28 +51,76 @@ public class ProcedureConfiguration {
     public static final String HEAVY_GRAPH_TYPE = "heavy";
     public static final String LIGHT_GRAPH_TYPE = "light";
 
-    private final Map<String, Object> config;
+    private final CypherMapWrapper configurationMap;
 
     private final String username;
+    private final boolean computeHistogram;
+    private final boolean computeCommunityCount;
 
-    private boolean computeHistogram = false;
-
-    private boolean computeCommunityCount = false;
-
-    protected ProcedureConfiguration(Map<String, Object> config, String username) {
-        this.config = new HashMap<>(config);
+    protected ProcedureConfiguration(
+        CypherMapWrapper configurationMap,
+        String username,
+        boolean computeHistogram,
+        boolean computeCommunityCount
+    ) {
+        this.configurationMap = configurationMap;
         this.username = username;
+        this.computeHistogram = computeHistogram;
+        this.computeCommunityCount = computeCommunityCount;
     }
 
-    /**
-     * Checks if the given key exists in the configuration.
-     *
-     * @param key key to look for
-     * @return true, iff the key exists
-     */
+    // Below methods are delegators that will be removed
+    // START DELEGATION
+
     public boolean containsKey(String key) {
-        return this.config.containsKey(key);
+        return configurationMap.containsKey(key);
     }
+
+    public Optional<String> getStringWithFallback(String key, String oldKey) {
+        return configurationMap.getStringWithFallback(key, oldKey);
+    }
+
+    public <V> V get(String key, V defaultValue) {
+        return configurationMap.get(key, defaultValue);
+    }
+
+    public String getString(String key, String defaultValue) {
+        return configurationMap.getString(key, defaultValue);
+    }
+
+    public String getString(String key, String oldKey, String defaultValue) {
+        return configurationMap.getString(key, oldKey, defaultValue);
+    }
+
+    public Optional<String> getString(String key) {
+        return configurationMap.getString(key);
+    }
+
+    public Boolean getBool(String key, boolean defaultValue) {
+        return configurationMap.getBool(key, defaultValue);
+    }
+
+    public Number getNumber(String key, Number defaultValue) {
+        return configurationMap.getNumber(key, defaultValue);
+    }
+
+    public Number getNumber(String key, String oldKey, Number defaultValue) {
+        return configurationMap.getNumber(key, oldKey, defaultValue);
+    }
+
+    public int getInt(String key, int defaultValue) {
+        return configurationMap.getInt(key, defaultValue);
+    }
+
+    public <V> V getChecked(String key, V defaultValue, Class<V> expectedType) {
+        return configurationMap.getChecked(key, defaultValue, expectedType);
+    }
+
+    public <V> V get(String newKey, String oldKey, V defaultValue) {
+        return configurationMap.get(newKey, oldKey, defaultValue);
+    }
+
+    // END DELEGATION
 
     public String getUsername() {
         return username;
@@ -85,11 +132,15 @@ public class ProcedureConfiguration {
      * If the parameters is already set, it's overriden.
      *
      * @param nodeLabelOrQuery the query or identifier
-     * @return this configuration
+     * @return an updated configuration
      */
     public ProcedureConfiguration setNodeLabelOrQuery(String nodeLabelOrQuery) {
-        config.put(ProcedureConstants.NODE_LABEL_QUERY_KEY, nodeLabelOrQuery);
-        return this;
+        return new ProcedureConfiguration(
+            configurationMap.withString(ProcedureConstants.NODE_LABEL_QUERY_KEY, nodeLabelOrQuery),
+            username,
+            computeHistogram,
+            computeCommunityCount
+        );
     }
 
     /**
@@ -98,11 +149,15 @@ public class ProcedureConfiguration {
      * If the parameters is already set, it's overriden.
      *
      * @param relationshipTypeOrQuery the relationshipQuery or Identifier
-     * @return this configuration
+     * @return an updated configuration
      */
     public ProcedureConfiguration setRelationshipTypeOrQuery(String relationshipTypeOrQuery) {
-        config.put(ProcedureConstants.RELATIONSHIP_QUERY_KEY, relationshipTypeOrQuery);
-        return this;
+        return new ProcedureConfiguration(
+            configurationMap.withString(ProcedureConstants.RELATIONSHIP_QUERY_KEY, relationshipTypeOrQuery),
+            username,
+            computeHistogram,
+            computeCommunityCount
+        );
     }
 
     /**
@@ -113,30 +168,20 @@ public class ProcedureConfiguration {
      * @return this configuration
      */
     public ProcedureConfiguration setDirection(String direction) {
-        config.put(ProcedureConstants.DIRECTION_KEY, direction);
-        return this;
-    }
-
-    /**
-     * Sets the direction parameter.
-     *
-     * If the parameters is already set, it's overriden.
-     *
-     * @return this configuration
-     */
-    public ProcedureConfiguration setDirection(Direction direction) {
-        config.put(ProcedureConstants.DIRECTION_KEY, direction.name());
-        return this;
+        return new ProcedureConfiguration(
+            configurationMap.withString(ProcedureConstants.DIRECTION_KEY, direction),
+            username,
+            computeHistogram,
+            computeCommunityCount
+        );
     }
 
     public ProcedureConfiguration setComputeHistogram(boolean computeHistogram) {
-        this.computeHistogram = computeHistogram;
-        return this;
+        return new ProcedureConfiguration(configurationMap, username, computeHistogram, computeCommunityCount);
     }
 
     public ProcedureConfiguration setComputeCommunityCount(boolean computeCommunityCount) {
-        this.computeCommunityCount = computeCommunityCount;
-        return this;
+        return new ProcedureConfiguration(configurationMap, username, computeHistogram, computeCommunityCount);
     }
 
     /**
@@ -159,7 +204,7 @@ public class ProcedureConfiguration {
      * @return the label or query
      */
     public String getNodeLabelOrQuery() {
-        return getString(ProcedureConstants.NODE_LABEL_QUERY_KEY, null);
+        return configurationMap.getString(ProcedureConstants.NODE_LABEL_QUERY_KEY, null);
     }
 
     /**
@@ -170,11 +215,11 @@ public class ProcedureConfiguration {
      * @return the label or query
      */
     public String getNodeLabelOrQuery(String defaultValue) {
-        return getString(ProcedureConstants.NODE_LABEL_QUERY_KEY, defaultValue);
+        return configurationMap.getString(ProcedureConstants.NODE_LABEL_QUERY_KEY, defaultValue);
     }
 
     public String getRelationshipOrQuery() {
-        return getString(ProcedureConstants.RELATIONSHIP_QUERY_KEY, null);
+        return configurationMap.getString(ProcedureConstants.RELATIONSHIP_QUERY_KEY, null);
     }
 
     /**
@@ -193,7 +238,7 @@ public class ProcedureConfiguration {
      * @return the property name
      */
     public String getWriteProperty(String defaultValue) {
-        return getString(ProcedureConstants.WRITE_PROPERTY_KEY, defaultValue);
+        return configurationMap.getString(ProcedureConstants.WRITE_PROPERTY_KEY, defaultValue);
     }
 
     /**
@@ -204,7 +249,7 @@ public class ProcedureConfiguration {
      * @return the relationship name or query
      */
     public String getRelationshipOrQuery(String defaultValue) {
-        return getString(ProcedureConstants.RELATIONSHIP_QUERY_KEY, defaultValue);
+        return configurationMap.getString(ProcedureConstants.RELATIONSHIP_QUERY_KEY, defaultValue);
     }
 
     /**
@@ -222,7 +267,7 @@ public class ProcedureConfiguration {
      * @return true if stat flag is activated, false otherwise
      */
     public boolean isStatsFlag() {
-        return isStatsFlag(false);
+        return configurationMap.get(ProcedureConstants.STATS_FLAG_KEY, false);
     }
 
     /**
@@ -232,11 +277,7 @@ public class ProcedureConfiguration {
      * @return true if write is activated, false otherwise
      */
     public boolean isWriteFlag(boolean defaultValue) {
-        return get(ProcedureConstants.WRITE_FLAG_KEY, defaultValue);
-    }
-
-    public boolean isStatsFlag(boolean defaultValue) {
-        return get(ProcedureConstants.STATS_FLAG_KEY, defaultValue);
+        return configurationMap.get(ProcedureConstants.WRITE_FLAG_KEY, defaultValue);
     }
 
     public boolean hasWeightProperty() {
@@ -244,7 +285,7 @@ public class ProcedureConfiguration {
     }
 
     public String getWeightProperty() {
-        return getString(ProcedureConstants.DEPRECATED_RELATIONSHIP_PROPERTY_KEY, null);
+        return configurationMap.getString(ProcedureConstants.DEPRECATED_RELATIONSHIP_PROPERTY_KEY, null);
     }
 
     public PropertyMappings getNodeProperties() {
@@ -256,7 +297,7 @@ public class ProcedureConfiguration {
     }
 
     private PropertyMappings getPropertyMappings(String paramKey) {
-        Object propertyMappings = get(paramKey, null);
+        Object propertyMappings = configurationMap.get(paramKey, null);
         if (propertyMappings != null) {
             return PropertyMappings.fromObject(propertyMappings);
         }
@@ -264,7 +305,7 @@ public class ProcedureConfiguration {
     }
 
     public double getWeightPropertyDefaultValue(double defaultValue) {
-        return getNumber(ProcedureConstants.DEFAULT_VALUE_KEY, defaultValue).doubleValue();
+        return configurationMap.getNumber(ProcedureConstants.DEFAULT_VALUE_KEY, defaultValue).doubleValue();
     }
 
     /**
@@ -274,7 +315,7 @@ public class ProcedureConfiguration {
      * @return
      */
     public int getIterations(int defaultValue) {
-        return getNumber(ProcedureConstants.ITERATIONS_KEY, defaultValue).intValue();
+        return configurationMap.getNumber(ProcedureConstants.ITERATIONS_KEY, defaultValue).intValue();
     }
 
     /**
@@ -283,7 +324,7 @@ public class ProcedureConfiguration {
      * @return batch size
      */
     public int getBatchSize() {
-        return getNumber(ProcedureConstants.BATCH_SIZE_KEY, ParallelUtil.DEFAULT_BATCH_SIZE).intValue();
+        return configurationMap.getNumber(ProcedureConstants.BATCH_SIZE_KEY, ParallelUtil.DEFAULT_BATCH_SIZE).intValue();
     }
 
     public int getConcurrency() {
@@ -291,7 +332,7 @@ public class ProcedureConfiguration {
     }
 
     public int getConcurrency(int defaultValue) {
-        int requestedConcurrency = getNumber(ProcedureConstants.CONCURRENCY_KEY, defaultValue).intValue();
+        int requestedConcurrency = configurationMap.getNumber(ProcedureConstants.CONCURRENCY_KEY, defaultValue).intValue();
         return Pools.allowedConcurrency(requestedConcurrency);
     }
 
@@ -300,7 +341,7 @@ public class ProcedureConfiguration {
     }
 
     public int getReadConcurrency(int defaultValue) {
-        Number readConcurrency = getNumber(
+        Number readConcurrency = configurationMap.getNumber(
                 ProcedureConstants.READ_CONCURRENCY_KEY,
                 ProcedureConstants.CONCURRENCY_KEY,
                 defaultValue);
@@ -313,7 +354,7 @@ public class ProcedureConfiguration {
     }
 
     public int getWriteConcurrency(int defaultValue) {
-        Number writeConcurrency = getNumber(
+        Number writeConcurrency = configurationMap.getNumber(
                 ProcedureConstants.WRITE_CONCURRENCY_KEY,
                 ProcedureConstants.CONCURRENCY_KEY,
                 defaultValue);
@@ -321,8 +362,8 @@ public class ProcedureConfiguration {
         return Pools.allowedConcurrency(requestedConcurrency);
     }
 
-    public String getDirectionName(String defaultDirection) {
-        return get(ProcedureConstants.DIRECTION_KEY, defaultDirection);
+    private String getDirectionName(String defaultDirection) {
+        return configurationMap.get(ProcedureConstants.DIRECTION_KEY, defaultDirection);
     }
 
     public Direction getDirection(Direction defaultDirection) {
@@ -334,7 +375,7 @@ public class ProcedureConfiguration {
     }
 
     public String getGraphName(String defaultValue) {
-        return getString(ProcedureConstants.GRAPH_IMPL_KEY, defaultValue);
+        return configurationMap.getString(ProcedureConstants.GRAPH_IMPL_KEY, defaultValue);
     }
 
     public Class<? extends GraphFactory> getGraphImpl() {
@@ -368,7 +409,7 @@ public class ProcedureConfiguration {
         HEAVY_GRAPH_TYPE
     ));
 
-    public static boolean validCustomName(String name) {
+    private static boolean validCustomName(String name) {
         return name != null && !name.trim().isEmpty() && !RESERVED.contains(name.trim().toLowerCase());
     }
 
@@ -383,153 +424,38 @@ public class ProcedureConfiguration {
         throw new IllegalArgumentException("The graph algorithm only supports these graph types; " + allowedNames);
     }
 
-    /**
-     * specialized getter for String which either returns the value
-     * if found, the defaultValue if the key is not found or null if
-     * the key is found but its value is empty.
-     *
-     * @param key          configuration key
-     * @param defaultValue the default value if key is not found
-     * @return the configuration value
-     */
-    public String getString(String key, String defaultValue) {
-        String value = (String) config.getOrDefault(key, defaultValue);
-        return (null == value || "".equals(value)) ? defaultValue : value;
-    }
-
-    public String getString(String key, String oldKey, String defaultValue) {
-        return getChecked(key, oldKey, defaultValue, String.class);
-    }
-
-    public Optional<String> getString(String key) {
-        if (config.containsKey(key)) {
-            // Optional.of will throw an NPE if key does not exist because of the default value
-            //  which we want have as a kind of sanity check - the default value *should* not be used
-            return Optional.of(getChecked(key, null, String.class));
-        }
-        return Optional.empty();
-    }
-
-    public Optional<String> getStringWithFallback(String key, String oldKey) {
-        Optional<String> value = getString(key);
-        // #migration-note: On Java9+ there is a #or method on Optional that we should use instead
-        //  https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Optional.html#or(java.util.function.Supplier)
-        if (!value.isPresent()) {
-            value = getString(oldKey);
-        }
-        return value;
-    }
-
-    public Object get(String key) {
-        return config.get(key);
-    }
-
-    public Boolean getBool(String key, boolean defaultValue) {
-        return getChecked(key, defaultValue, Boolean.class);
-    }
-
-    public Number getNumber(String key, Number defaultValue) {
-        return getChecked(key, defaultValue, Number.class);
-    }
-
-    public Number getNumber(String key, String oldKey, Number defaultValue) {
-        Object value = get(key, oldKey, (Object) defaultValue);
-        if (null == value) {
-            return defaultValue;
-        }
-        if (!(value instanceof Number)) {
-            throw new IllegalArgumentException("The value of " + key + " must be a Number type");
-        }
-        return (Number) value;
-    }
-
-    public int getInt(String key, int defaultValue) {
-        Number value = (Number) config.get(key);
-        if (null == value) {
-            return defaultValue;
-        }
-        return value.intValue();
-    }
-
-    @SuppressWarnings("unchecked")
-    public <V> V get(String key, V defaultValue) {
-        Object value = config.get(key);
-        if (null == value) {
-            return defaultValue;
-        }
-        return (V) value;
-    }
-
     public Double getSkipValue(Double defaultValue) {
         String key = ProcedureConstants.SKIP_VALUE_KEY;
-        if (!config.containsKey(key)) {
+        if (!configurationMap.containsKey(key)) {
             return defaultValue;
         }
-        Object value = config.get(key);
+        Object value = configurationMap.get(key, null);
 
-        if(value == null) {
+        if (value == null) {
             return null;
         }
 
-        return typedValue(key, Number.class, value).doubleValue();
-    }
-
-    /**
-     * Get and convert the value under the given key to the given type.
-     *
-     * @return the found value under the key - if it is of the provided type,
-     *         or the provided default value if no entry for the key is found (or it's mapped to null).
-     * @throws IllegalArgumentException if a value was found, but it is not of the expected type.
-     */
-    public <V> V getChecked(String key, V defaultValue, Class<V> expectedType) {
-        Object value = config.get(key);
-        return checkValue(key, defaultValue, expectedType, value);
-    }
-
-    @SuppressWarnings("unchecked")
-    public <V> V get(String newKey, String oldKey, V defaultValue) {
-        Object value = config.get(newKey);
-        if (null == value) {
-            value = config.get(oldKey);
-        }
-        return null == value ? defaultValue : (V) value;
-    }
-
-    public <V> V getChecked(String key, String oldKey, V defaultValue, Class<V> expectedType) {
-        Object value = get(key, oldKey, null);
-        return checkValue(key, defaultValue, expectedType, value);
-    }
-
-    private <V> V checkValue(final String key, final V defaultValue, final Class<V> expectedType, final Object value) {
-        if (null == value) {
-            return defaultValue;
-        }
-        return typedValue(key, expectedType, value);
-    }
-
-    private <V> V typedValue(String key, Class<V> expectedType, Object value) {
-        if (!expectedType.isInstance(value)) {
-            String template = "The value of %s must be a %s.";
-            String message = String.format(template, key, expectedType.getSimpleName());
-            throw new IllegalArgumentException(message);
-        }
-        return expectedType.cast(value);
-    }
-
-    public static ProcedureConfiguration create(String username) {
-        return new ProcedureConfiguration(Collections.emptyMap(), username);
+        return configurationMap.typedValue(key, Number.class, value).doubleValue();
     }
 
     public static ProcedureConfiguration create(Map<String, Object> config, String username) {
-        return new ProcedureConfiguration(config, username);
+        return create(CypherMapWrapper.create(config), username);
+    }
+
+    public static ProcedureConfiguration create(CypherMapWrapper map, String username) {
+        return new ProcedureConfiguration(map, username, false, false);
+    }
+
+    public static ProcedureConfiguration create(String username) {
+        return create(CypherMapWrapper.empty(), username);
     }
 
     public Map<String, Object> getParams() {
-        return (Map<String, Object>) config.getOrDefault("params", Collections.emptyMap());
+        return configurationMap.getChecked("params", Collections.emptyMap(), Map.class);
     }
 
     public DeduplicationStrategy getDeduplicationStrategy() {
-        String strategy = get("duplicateRelationships", null);
+        String strategy = configurationMap.get("duplicateRelationships", null);
         return strategy != null ? DeduplicationStrategy.lookup(strategy.toUpperCase()) : DeduplicationStrategy.DEFAULT;
     }
 }

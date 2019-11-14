@@ -59,42 +59,43 @@ public abstract class BaseProc {
     }
 
     protected abstract GraphLoader configureLoader(
-            GraphLoader loader,
-            ProcedureConfiguration config);
+        GraphLoader loader,
+        ProcedureConfiguration config
+    );
 
     protected final ProcedureConfiguration newConfig(
-            final String label,
-            final String relationship,
-            final Map<String, Object> config) {
+        String label,
+        String relationship,
+        Map<String, Object> config
+    ) {
 
         ProcedureConfiguration configuration = (config != null)
             ? ProcedureConfiguration.create(config, getUsername())
             : ProcedureConfiguration.create(getUsername());
 
         if (label != null && !label.isEmpty()) {
-            configuration.setNodeLabelOrQuery(label);
+            configuration = configuration.setNodeLabelOrQuery(label);
         }
         if (relationship != null && !relationship.isEmpty()) {
-            configuration.setRelationshipTypeOrQuery(relationship);
+            configuration = configuration.setRelationshipTypeOrQuery(relationship);
         }
 
         Set<String> returnItems = callContext.outputFields().collect(Collectors.toSet());
-        configuration
+        return configuration
             .setComputeCommunityCount(OutputFieldParser.computeCommunityCount(returnItems))
             .setComputeHistogram(OutputFieldParser.computeHistogram(returnItems));
-
-        return configuration;
     }
 
     final GraphLoader newLoader(
-            final ProcedureConfiguration config,
-            final AllocationTracker tracker) {
+        ProcedureConfiguration config,
+        AllocationTracker tracker
+    ) {
         String label = config.getNodeLabelOrQuery();
         String relationship = config.getRelationshipOrQuery();
         GraphLoader loader = new GraphLoader(api, Pools.DEFAULT)
-                .init(log, label, relationship, config)
-                .withAllocationTracker(tracker)
-                .withTerminationFlag(TerminationFlag.wrap(transaction));
+            .init(log, label, relationship, config)
+            .withAllocationTracker(tracker)
+            .withTerminationFlag(TerminationFlag.wrap(transaction));
         return configureLoader(loader, config);
     }
 
@@ -117,17 +118,20 @@ public abstract class BaseProc {
     }
 
     private Graph loadGraph(
-            final ProcedureConfiguration config,
-            final AllocationTracker tracker) {
+        ProcedureConfiguration config,
+        AllocationTracker tracker
+    ) {
         return runWithExceptionLogging(
-                "Loading failed",
-                () -> newLoader(config, tracker).load(config.getGraphImpl()));
+            "Loading failed",
+            () -> newLoader(config, tracker).load(config.getGraphImpl())
+        );
     }
 
     protected final <R> Graph loadGraph(
-            final ProcedureConfiguration config,
-            final AllocationTracker tracker,
-            final AbstractResultBuilder<R> resultBuilder) {
+        ProcedureConfiguration config,
+        AllocationTracker tracker,
+        AbstractResultBuilder<R> resultBuilder
+    ) {
         try (ProgressTimer ignored = resultBuilder.timeLoad()) {
             Graph graph = loadGraph(config, tracker);
             resultBuilder
@@ -138,9 +142,10 @@ public abstract class BaseProc {
     }
 
     final Graph loadGraph(
-            final ProcedureConfiguration config,
-            final AllocationTracker tracker,
-            final Supplier<ProgressTimer> timer) {
+        ProcedureConfiguration config,
+        AllocationTracker tracker,
+        Supplier<ProgressTimer> timer
+    ) {
         try (ProgressTimer ignored = timer.get()) {
             return loadGraph(config, tracker);
         }

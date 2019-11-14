@@ -128,7 +128,7 @@ public final class GraphGenerateProc extends BaseProc {
     }
 
     private Optional<RelationshipPropertyProducer> getRelationshipPropertyProducer(ProcedureConfiguration config) {
-        Object maybeMap = config.get(RELATIONSHIP_PROPERTY_KEY);
+        Object maybeMap = config.get(RELATIONSHIP_PROPERTY_KEY, null);
 
         if ((maybeMap instanceof Map)) {
             Map<String, Object> configMap = (Map<String, Object>) maybeMap;
