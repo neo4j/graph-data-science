@@ -32,9 +32,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphdb.Direction;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -227,17 +225,9 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     }
 
     private Stream<SimilarityResult> computeTopN(TopKMap topKMap) {
-        int absTop = Math.abs(config.top);
-
-        BoundedLongLongPriorityQueue topNLongPriorityQueue = config.top > 0
-            ? BoundedLongLongPriorityQueue.max(absTop)
-            : BoundedLongLongPriorityQueue.min(absTop);
-        topKMap.forEach(topNLongPriorityQueue::offer);
-
-        List<SimilarityResult> topNResults = new ArrayList<>(absTop);
-        topNLongPriorityQueue.foreach((node1, node2, similarity) ->
-            topNResults.add(new SimilarityResult(node1, node2, similarity)));
-        return topNResults.stream();
+        TopNList topNList = new TopNList(config.top);
+        topKMap.forEach(topNList::add);
+        return topNList.stream();
     }
 
     private SimilarityResult jaccard(long node1, long node2, long[] vector1, long[] vector2) {
