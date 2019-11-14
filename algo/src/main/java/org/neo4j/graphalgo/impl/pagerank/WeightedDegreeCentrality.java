@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.impl.pagerank;
 
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -104,6 +105,7 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
     private class DegreeTask implements Runnable {
         @Override
         public void run() {
+            final RelationshipIterator threadLocalGraph = graph.concurrentCopy();
             Direction loadDirection = graph.getLoadDirection();
             while (true) {
                 final int nodeId = nodeQueue.getAndIncrement();
@@ -112,7 +114,7 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
                 }
 
                 double[] weightedDegree = new double[1];
-                graph.forEachRelationship(nodeId, loadDirection, Double.NaN, (sourceNodeId, targetNodeId, weight) -> {
+                threadLocalGraph.forEachRelationship(nodeId, loadDirection, Double.NaN, (sourceNodeId, targetNodeId, weight) -> {
                     if(weight > 0) {
                         weightedDegree[0] += weight;
                     }
@@ -129,6 +131,7 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
     private class CacheDegreeTask implements Runnable {
         @Override
         public void run() {
+            final RelationshipIterator threadLocalGraph = graph.concurrentCopy();
             Direction loadDirection = graph.getLoadDirection();
             double[] weightedDegree = new double[1];
             for (; ; ) {
@@ -142,7 +145,7 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
 
                 int[] index = {0};
                 weightedDegree[0] = 0D;
-                graph.forEachRelationship(nodeId, loadDirection, Double.NaN, (sourceNodeId, targetNodeId, weight) -> {
+                threadLocalGraph.forEachRelationship(nodeId, loadDirection, Double.NaN, (sourceNodeId, targetNodeId, weight) -> {
                     if(weight > 0) {
                         weightedDegree[0] += weight;
                     }

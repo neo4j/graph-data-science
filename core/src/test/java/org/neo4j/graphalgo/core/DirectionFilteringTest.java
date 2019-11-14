@@ -47,16 +47,17 @@ final class DirectionFilteringTest extends RandomGraphTestCase {
     }
 
     private void testFilter(
-            Class<? extends GraphFactory> graphImpl,
-            Direction filter,
-            Direction... expectedToFail) {
+        Class<? extends GraphFactory> graphImpl,
+        Direction filter,
+        Direction... expectedToFail
+    ) {
         EnumSet<Direction> failing = EnumSet.noneOf(Direction.class);
         failing.addAll(Arrays.asList(expectedToFail));
         EnumSet<Direction> succeeding = EnumSet.complementOf(failing);
 
         final Graph graph = new GraphLoader(RandomGraphTestCase.db)
-                .withDirection(filter)
-                .load(graphImpl);
+            .withDirection(filter)
+            .load(graphImpl);
         graph.forEachNode(node -> {
             for (Direction direction : succeeding) {
                 graph.degree(node, direction);
@@ -70,10 +71,11 @@ final class DirectionFilteringTest extends RandomGraphTestCase {
                 }
                 try {
                     graph.forEachRelationship(
-                            node,
-                            direction,
-                            Double.NaN,
-                            (s, t, r) -> true);
+                        node,
+                        direction,
+                        Double.NaN,
+                        (s, t, r) -> true
+                    );
                     fail("should have failed to traverse nodes for " + direction);
                 } catch (NullPointerException ignored) {
                 }

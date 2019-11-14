@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.impl.walking;
 
+import org.apache.commons.lang3.mutable.MutableInt;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IntBinaryPredicate;
@@ -62,7 +64,7 @@ public class NodeWalker {
             int size = i;
             tasks.add(() -> {
                 for (int j = 0; j < size; j++) {
-                    put(queue,doWalk(ids[j], steps, strategy, graph, terminationFlag));
+                    put(queue, doWalk(ids[j], steps, strategy, graph, terminationFlag));
                 }
             });
         }
@@ -121,7 +123,17 @@ public class NodeWalker {
             }
             int randomEdgeIndex = ThreadLocalRandom.current().nextInt(degree);
 
-            return graph.getTarget(currentNodeId, randomEdgeIndex, Direction.BOTH);
+            MutableLong targetNodeId = new MutableLong(-1L);
+            MutableInt counter = new MutableInt(0);
+            graph.concurrentCopy().forEachRelationship(currentNodeId, Direction.BOTH, (s, t) -> {
+                if (counter.getAndIncrement() == randomEdgeIndex) {
+                    targetNodeId.setValue(t);
+                    return false;
+                }
+                return true;
+            });
+
+            return targetNodeId.getValue();
         }
 
     }

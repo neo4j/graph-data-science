@@ -604,7 +604,8 @@ public class HugeGraph implements Graph {
         AdjacencyList adjacencyList
     ) {
         if (offsets == null) {
-            return emptyAdjacencyCursor;
+            throw new NullPointerException();
+//            return emptyAdjacencyCursor;
         }
         final long offset = offsets.get(node);
         if (offset == 0L) {

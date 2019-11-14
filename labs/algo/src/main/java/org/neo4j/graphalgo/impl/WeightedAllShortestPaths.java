@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.impl;
 
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
 import org.neo4j.graphdb.Direction;
@@ -140,10 +141,12 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm<WeightedAllShort
 
         private final IntPriorityQueue queue;
         private final double[] distance;
+        private final RelationshipIterator threadLocalGraph;
 
         private ShortestPathTask() {
             distance = new double[nodeCount];
             queue = IntPriorityQueue.min();
+            this.threadLocalGraph = graph.concurrentCopy();
         }
 
         @Override
@@ -175,7 +178,7 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm<WeightedAllShort
             while (outputStreamOpen && !queue.isEmpty()) {
                 final int node = queue.pop();
                 final double sourceDistance = distance[node];
-                graph.forEachRelationship(
+                threadLocalGraph.forEachRelationship(
                         node,
                         direction,
                         Double.NaN,
