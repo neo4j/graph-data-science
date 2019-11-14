@@ -34,6 +34,7 @@ import org.neo4j.graphdb.Direction;
 
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
@@ -85,20 +86,24 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         // Create a filter for which nodes to compare and calculate the neighborhood for each node
         prepare(direction);
 
+
         // Compute similarities
-        Stream<SimilarityResult> stream = config.isParallel()
-            ? computeParallel()
-            : compute();
+        Stream<SimilarityResult> stream;
+
+        if (config.hasTop() && !config.hasTopK()) {
+            // Special case: compute topN without topK.
+            // This can not happen when algo is called from proc.
+            // Ignore parallelism, always run single threaded,
+            // but run on primitives.
+            stream = computeTopN();
+        } else {
+            stream = config.isParallel()
+                ? computeParallel()
+                : compute();
+        }
 
         // Log progress
-        stream = log(stream);
-
-        // Compute topN iff we did not run topK before.
-        // Can not happen when algo is called from proc.
-        if (config.hasTop() && !config.hasTopK()) {
-            stream = computeTopN(stream);
-        }
-        return stream;
+        return log(stream);
     }
 
     private Stream<SimilarityResult> compute() {
@@ -142,11 +147,11 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     }
 
     private Stream<SimilarityResult> computeAll() {
-        return new SetBitsIterable(nodeFilter).stream()
+        return nodeStream()
             .boxed()
             .flatMap(node1 -> {
                 long[] vector1 = vectors.get(node1);
-                return new SetBitsIterable(nodeFilter, node1 + 1).stream()
+                return nodeStream(node1 + 1)
                     .mapToObj(node2 -> jaccard(node1, node2, vector1, vectors.get(node2)))
                     .filter(Objects::nonNull);
             });
@@ -154,11 +159,11 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
 
     private Stream<SimilarityResult> computeAllParallel() {
         return ParallelUtil.parallelStream(
-            new SetBitsIterable(nodeFilter).stream(), stream -> stream
+            nodeStream(), stream -> stream
                 .boxed()
                 .flatMap(node1 -> {
                     long[] vector1 = vectors.get(node1);
-                    return new SetBitsIterable(nodeFilter, node1 + 1).stream()
+                    return nodeStream(node1 + 1)
                         .mapToObj(node2 -> jaccard(node1, node2, vector1, vectors.get(node2)))
                         .filter(Objects::nonNull);
                 })
@@ -168,10 +173,10 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     private TopKMap computeTopkMap() {
         Comparator<SimilarityResult> comparator = config.topk > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
         TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.topk), comparator, tracker);
-        new SetBitsIterable(nodeFilter).stream()
+        nodeStream()
             .forEach(node1 -> {
                 long[] vector1 = vectors.get(node1);
-                new SetBitsIterable(nodeFilter, node1 + 1).stream()
+                nodeStream(node1 + 1)
                     .forEach(node2 -> {
                         double similarity = jaccardPrimitive(vector1, vectors.get(node2));
                         if (!Double.isNaN(similarity)) {
@@ -187,7 +192,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         Comparator<SimilarityResult> comparator = config.topk > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
         TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.topk), comparator, tracker);
         ParallelUtil.parallelStreamConsume(
-            new SetBitsIterable(nodeFilter).stream(),
+            nodeStream(),
             stream -> stream
                 .forEach(node1 -> {
                     long[] vector1 = vectors.get(node1);
@@ -197,7 +202,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
                     // into these queues is not considered to be thread-safe.
                     // Hence, we need to ensure that down the stream, exactly one queue
                     // within the TopKMap processes all pairs for a single node.
-                    new SetBitsIterable(nodeFilter).stream()
+                    nodeStream()
                         .filter(node2 -> node1 != node2)
                         .forEach(node2 -> {
                             double similarity = jaccardPrimitive(vector1, vectors.get(node2));
@@ -210,6 +215,28 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         return topKMap;
     }
 
+    private Stream<SimilarityResult> computeTopN() {
+        TopNList topNList = new TopNList(config.top);
+        nodeStream()
+            .forEach(node1 -> {
+                long[] vector1 = vectors.get(node1);
+                nodeStream(node1 + 1)
+                    .forEach(node2 -> {
+                        double similarity = jaccardPrimitive(vector1, vectors.get(node2));
+                        if (!Double.isNaN(similarity)) {
+                            topNList.add(node1, node2, similarity);
+                        }
+                    });
+            });
+        return topNList.stream();
+    }
+
+    private Stream<SimilarityResult> computeTopN(TopKMap topKMap) {
+        TopNList topNList = new TopNList(config.top);
+        topKMap.forEach(topNList::add);
+        return topNList.stream();
+    }
+
     private Stream<SimilarityResult> log(Stream<SimilarityResult> stream) {
         long logInterval = Math.max(1, BitUtil.nearbyPowerOfTwo(nodesToCompare / 100));
         return stream.peek(sim -> {
@@ -217,17 +244,6 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
                 progressLogger.logProgress(sim.node1, nodesToCompare);
             }
         });
-    }
-
-    private Stream<SimilarityResult> computeTopN(Stream<SimilarityResult> similarities) {
-        Comparator<SimilarityResult> comparator = config.top > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
-        return similarities.sorted(comparator).limit(Math.abs(config.top));
-    }
-
-    private Stream<SimilarityResult> computeTopN(TopKMap topKMap) {
-        TopNList topNList = new TopNList(config.top);
-        topKMap.forEach(topNList::add);
-        return topNList.stream();
     }
 
     private SimilarityResult jaccard(long node1, long node2, long[] vector1, long[] vector2) {
@@ -242,6 +258,14 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         double union = vector1.length + vector2.length - intersection;
         double similarity = union == 0 ? 0 : intersection / union;
         return similarity >= config.similarityCutoff ? similarity : Double.NaN;
+    }
+
+    private LongStream nodeStream() {
+        return nodeStream(0);
+    }
+
+    private LongStream nodeStream(long offset) {
+        return new SetBitsIterable(nodeFilter, offset).stream();
     }
 
     private Graph similarityGraph(Stream<SimilarityResult> similarities) {
