@@ -221,7 +221,8 @@ public class HugeGraph implements Graph {
                 outProperties,
                 outPropertyOffsets,
                 outAdjacency,
-                outOffsets);
+                outOffsets
+            );
             if (!Double.isNaN(maybeValue)) {
                 return maybeValue;
             }
@@ -229,7 +230,8 @@ public class HugeGraph implements Graph {
 
         if (inProperties != null) {
             maybeValue = findPropertyValue(targetNodeId, sourceNodeId, inProperties,
-                inPropertyOffsets, inAdjacency, inOffsets);
+                inPropertyOffsets, inAdjacency, inOffsets
+            );
 
             if (!Double.isNaN(maybeValue)) {
                 return maybeValue;
@@ -282,16 +284,16 @@ public class HugeGraph implements Graph {
     public void forEachRelationship(long nodeId, Direction direction, RelationshipConsumer consumer) {
         switch (direction) {
             case INCOMING:
-                runForEach(nodeId, Direction.INCOMING, consumer, /* reuseCursor */ true);
+                runForEach(nodeId, Direction.INCOMING, consumer);
                 return;
 
             case OUTGOING:
-                runForEach(nodeId, Direction.OUTGOING, consumer, /* reuseCursor */ true);
+                runForEach(nodeId, Direction.OUTGOING, consumer);
                 return;
 
             default:
-                runForEach(nodeId, Direction.OUTGOING, consumer, /* reuseCursor */ true);
-                runForEach(nodeId, Direction.INCOMING, consumer, /* reuseCursor */ true);
+                runForEach(nodeId, Direction.OUTGOING, consumer);
+                runForEach(nodeId, Direction.INCOMING, consumer);
         }
     }
 
@@ -356,12 +358,12 @@ public class HugeGraph implements Graph {
 
     @Override
     public void forEachIncoming(long node, final RelationshipConsumer consumer) {
-        runForEach(node, Direction.INCOMING, consumer, /* reuseCursor */ true);
+        runForEach(node, Direction.INCOMING, consumer);
     }
 
     @Override
     public void forEachOutgoing(long node, final RelationshipConsumer consumer) {
-        runForEach(node, Direction.OUTGOING, consumer, /* reuseCursor */ true);
+        runForEach(node, Direction.OUTGOING, consumer);
     }
 
     @Override
@@ -381,7 +383,8 @@ public class HugeGraph implements Graph {
             outProperties,
             inPropertyOffsets,
             outPropertyOffsets,
-            isUndirected);
+            isUndirected
+        );
     }
 
     public HugeGraph copyWithNewRelationships(
@@ -411,7 +414,8 @@ public class HugeGraph implements Graph {
             newOutProperties,
             newInPropertyOffsets,
             newOutPropertyOffsets,
-            isUndirected);
+            isUndirected
+        );
     }
 
 
@@ -426,9 +430,7 @@ public class HugeGraph implements Graph {
     @Override
     public boolean exists(long sourceNodeId, long targetNodeId, Direction direction) {
         ExistsConsumer consumer = new ExistsConsumer(targetNodeId);
-        runForEach(sourceNodeId, direction, consumer,
-            // HugeGraph interface make no promises about thread-safety (that's what concurrentCopy is for)
-            true);
+        runForEach(sourceNodeId, direction, consumer);
         return consumer.found;
     }
 
@@ -438,29 +440,26 @@ public class HugeGraph implements Graph {
     @Override
     public long getTarget(long sourceNodeId, long index, Direction direction) {
         GetTargetConsumer consumer = new GetTargetConsumer(index);
-        runForEach(sourceNodeId, direction, consumer,
-            // HugeGraph interface make no promises about thread-safety (that's what concurrentCopy is for)
-            true);
+        runForEach(sourceNodeId, direction, consumer);
         return consumer.target;
     }
 
     private void runForEach(
         long sourceNodeId,
         Direction direction,
-        RelationshipConsumer consumer,
-        boolean reuseCursor
+        RelationshipConsumer consumer
     ) {
 
         if (direction == Direction.BOTH) {
-            runForEach(sourceNodeId, Direction.OUTGOING, consumer, reuseCursor);
-            runForEach(sourceNodeId, Direction.INCOMING, consumer, reuseCursor);
+            runForEach(sourceNodeId, Direction.OUTGOING, consumer);
+            runForEach(sourceNodeId, Direction.INCOMING, consumer);
             return;
         }
 
         AdjacencyList.DecompressingCursor adjacencyCursor = adjacencyCursorForIteration(
             sourceNodeId,
-            direction,
-            reuseCursor);
+            direction
+        );
         consumeAdjacentNodes(sourceNodeId, adjacencyCursor, consumer);
     }
 
@@ -478,12 +477,11 @@ public class HugeGraph implements Graph {
         }
 
         if (!hasRelationshipProperty()) {
-            runForEach(sourceNodeId, direction, (s, t) -> consumer.accept(s, t, fallbackValue), true);
+            runForEach(sourceNodeId, direction, (s, t) -> consumer.accept(s, t, fallbackValue));
         } else {
             AdjacencyList.DecompressingCursor adjacencyCursor = adjacencyCursorForIteration(
                 sourceNodeId,
-                direction,
-                true
+                direction
             );
 
             AdjacencyList.Cursor propertyCursor = propertyCursorForIteration(sourceNodeId, direction);
@@ -493,21 +491,22 @@ public class HugeGraph implements Graph {
 
     private AdjacencyList.DecompressingCursor adjacencyCursorForIteration(
         long sourceNodeId,
-        Direction direction,
-        boolean reuseCursor
+        Direction direction
     ) {
         if (direction == Direction.OUTGOING) {
             return adjacencyCursor(
                 sourceNodeId,
-                reuseCursor ? outCache : outAdjacency.rawDecompressingCursor(),
+                outCache,
                 outOffsets,
-                outAdjacency);
+                outAdjacency
+            );
         } else {
             return adjacencyCursor(
                 sourceNodeId,
-                reuseCursor ? inCache : inAdjacency.rawDecompressingCursor(),
+                inCache,
                 inOffsets,
-                inAdjacency);
+                inAdjacency
+            );
         }
     }
 
@@ -516,12 +515,14 @@ public class HugeGraph implements Graph {
             return propertyCursor(
                 sourceNodeId,
                 outPropertyOffsets,
-                outProperties);
+                outProperties
+            );
         } else {
             return propertyCursor(
                 sourceNodeId,
                 inPropertyOffsets,
-                inProperties);
+                inProperties
+            );
         }
     }
 
@@ -605,7 +606,6 @@ public class HugeGraph implements Graph {
     ) {
         if (offsets == null) {
             throw new NullPointerException();
-//            return emptyAdjacencyCursor;
         }
         final long offset = offsets.get(node);
         if (offset == 0L) {
