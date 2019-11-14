@@ -37,13 +37,13 @@ import static org.neo4j.graphalgo.core.utils.ParallelUtil.DEFAULT_BATCH_SIZE;
 
 public final class Louvain extends Algorithm<Louvain> {
 
-    private final int maxLevel;
     private final NodeProperties seedingValues;
     private final Direction direction;
     private final ExecutorService pool;
     private final int concurrency;
     private final AllocationTracker tracker;
     private final Graph rootGraph;
+    private final Config config;
 
     // results
     private HugeLongArray[] dendrograms;
@@ -51,23 +51,23 @@ public final class Louvain extends Algorithm<Louvain> {
 
 
     public Louvain(
-        int maxLevel,
         Graph graph,
+        Config config,
         NodeProperties seedingValues,
         Direction direction,
         ExecutorService pool,
         int concurrency,
         AllocationTracker tracker
     ) {
-        this.maxLevel = maxLevel;
+        this.config = config;
         this.rootGraph = graph;
         this.seedingValues = seedingValues;
         this.direction = direction;
         this.pool = pool;
         this.concurrency = concurrency;
         this.tracker = tracker;
-        this.dendrograms = new HugeLongArray[maxLevel];
-        this.modularities = new double[maxLevel];
+        this.dendrograms = new HugeLongArray[config.maxLevel];
+        this.modularities = new double[config.maxLevel];
     }
 
     public void compute() {
@@ -76,7 +76,7 @@ public final class Louvain extends Algorithm<Louvain> {
         NodeProperties seed = seedingValues;
 
         long oldNodeCount = rootGraph.nodeCount();
-        for (int level = 0; level < maxLevel; level++) {
+        for (int level = 0; level < config.maxLevel; level++) {
             ModularityOptimization modularityOptimization = runModularityOptimization(workingGraph, seed);
             modularityOptimization.release();
 
@@ -203,5 +203,25 @@ public final class Louvain extends Algorithm<Louvain> {
         public double nodeProperty(long nodeId) {
             return graph.toOriginalNodeId(nodeId);
         }
+    }
+
+    public class Config {
+        int maxLevel;
+        int maxInnerIterations;
+        double threshold;
+        boolean includeIntermediateCommunities;
+
+        public Config(
+            int maxLevel,
+            int maxInnerIterations,
+            double threshold,
+            boolean includeIntermediateCommunities
+        ) {
+            this.maxLevel = maxLevel;
+            this.maxInnerIterations = maxInnerIterations;
+            this.threshold = threshold;
+            this.includeIntermediateCommunities = includeIntermediateCommunities;
+        }
+
     }
 }

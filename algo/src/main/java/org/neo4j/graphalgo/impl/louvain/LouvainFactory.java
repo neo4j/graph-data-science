@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.louvain.legacy;
+package org.neo4j.graphalgo.impl.louvain;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
@@ -25,18 +25,13 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
-
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
 public class LouvainFactory extends AlgorithmFactory<Louvain> {
 
+    public static final Direction DEFAULT_LOUVAIN_DIRECTION = Direction.BOTH;
     private Louvain.Config config;
 
     public LouvainFactory(Louvain.Config config) {
@@ -50,13 +45,14 @@ public class LouvainFactory extends AlgorithmFactory<Louvain> {
             final AllocationTracker tracker,
             final Log log) {
 
-        NodeProperties communityMap = config.maybeSeedPropertyKey
+        NodeProperties communityMap = maybeSeedPropertyKey
             .map(graph::nodeProperties)
             .orElse(null);
 
         return new Louvain(graph,
                 config,
                 communityMap,
+                configuration.getDirection(DEFAULT_LOUVAIN_DIRECTION),
                 Pools.DEFAULT,
                 configuration.getConcurrency(),
                 tracker);
@@ -64,24 +60,6 @@ public class LouvainFactory extends AlgorithmFactory<Louvain> {
 
     @Override
     public MemoryEstimation memoryEstimation() {
-        int maxLevel = config.maxLevel;
-        return MemoryEstimations.builder(Louvain.class)
-                .field("Config", Louvain.Config.class)
-                .perNode("communities", HugeLongArray::memoryEstimation)
-                .perNode("nodeWeights", HugeDoubleArray::memoryEstimation)
-                .rangePerNode("dendrogram", (nodeCount) -> {
-                    final long communityArraySize = HugeLongArray.memoryEstimation(nodeCount);
-
-                    final MemoryRange innerCommunities = MemoryRange.of(
-                            communityArraySize,
-                            communityArraySize * maxLevel);
-
-                    final MemoryRange communityArrayLength = MemoryRange.of(sizeOfObjectArray(1), sizeOfObjectArray(maxLevel));
-
-                    return innerCommunities.add(communityArrayLength);
-                })
-                .fixed("modularities", MemoryRange.of(sizeOfDoubleArray(1), sizeOfDoubleArray(maxLevel)))
-                .add("modularityOptimization", ModularityOptimization.memoryEstimation())
-                .build();
+        return null;
     }
 }

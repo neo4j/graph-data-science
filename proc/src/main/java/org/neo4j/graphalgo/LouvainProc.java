@@ -27,9 +27,9 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.write.NodePropertyExporter;
-import org.neo4j.graphalgo.impl.louvain.legacy.Louvain;
-import org.neo4j.graphalgo.impl.louvain.legacy.LouvainFactory;
+import org.neo4j.graphalgo.core.write.Exporter;
+import org.neo4j.graphalgo.impl.louvain.Louvain;
+import org.neo4j.graphalgo.impl.louvain.LouvainFactory;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
 import org.neo4j.graphdb.Direction;
@@ -46,7 +46,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.impl.louvain.legacy.Louvain.DEFAULT_INTERMEDIATE_COMMUNITIES_FLAG;
+import static org.neo4j.graphalgo.impl.louvain.Louvain.DEFAULT_INTERMEDIATE_COMMUNITIES_FLAG;
 import static org.neo4j.procedure.Mode.READ;
 
 /**
@@ -104,7 +104,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
                 resultBuilder.withIntermediateCommunitiesWriteProperty(intermediateCommunitiesWriteProperty);
 
                 log.debug("Writing results");
-                NodePropertyExporter exporter = exporter(graph, Pools.DEFAULT, configuration.getWriteConcurrency());
+                Exporter exporter = exporter(graph, Pools.DEFAULT, configuration.getWriteConcurrency());
                 louvain.export(
                         exporter,
                         writeProperty,
@@ -122,7 +122,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
     @Description("CALL algo.louvain.stream(label:String, relationship:String, " +
                  "{weightProperty:'propertyName', defaultValue:1.0, concurrency:4, communityProperty:'propertyOfPredefinedCommunity', innerIterations:10, communitySelection:'classic') " +
                  "YIELD nodeId, community - yields a setId to each node id")
-    public Stream<Louvain.StreamingResult> louvainStream(
+    public Stream<StreamingResult> louvainStream(
             @Name(value = "label", defaultValue = "") String label,
             @Name(value = "relationship", defaultValue = "") String relationship,
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
@@ -205,18 +205,41 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
         return louvain;
     }
 
-    private NodePropertyExporter exporter(
+    private Exporter exporter(
             Graph graph,
             ExecutorService pool,
             int concurrency) {
-        NodePropertyExporter.Builder builder = NodePropertyExporter.of(api, graph, TerminationFlag.wrap(transaction));
+        Exporter.Builder builder = Exporter.of(api, graph);
         if (log != null) {
             builder.withLog(log);
         }
         if (ParallelUtil.canRunInParallel(pool)) {
-            builder.parallel(pool, concurrency);
+            builder.parallel(pool, concurrency, TerminationFlag.wrap(transaction));
         }
         return builder.build();
+    }
+
+    public static final class Result {
+
+        public final long nodeId;
+        public final long community;
+
+        public Result(final long id, final long community) {
+            this.nodeId = id;
+            this.community = community;
+        }
+    }
+
+    public static final class StreamingResult {
+        public final long nodeId;
+        public final List<Long> communities;
+        public final long community;
+
+        StreamingResult(final long nodeId, final List<Long> communities, final long community) {
+            this.nodeId = nodeId;
+            this.communities = communities;
+            this.community = community;
+        }
     }
 
     public static class LouvainResult {

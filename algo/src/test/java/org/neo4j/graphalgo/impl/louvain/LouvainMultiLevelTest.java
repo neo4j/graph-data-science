@@ -86,8 +86,7 @@ class LouvainMultiLevelTest extends LouvainTestBase {
     void testComplex(Class<? extends GraphFactory> graphImpl) {
         Graph graph = loadGraph(graphImpl, DB_CYPHER);
         final Louvain algorithm = new Louvain(
-            5,
-            graph,
+            graph, 5,
             null,
             Direction.BOTH,
             Pools.DEFAULT,
