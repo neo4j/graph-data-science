@@ -295,6 +295,7 @@ CALL algo.beta.jaccard.stream('', 'LIKES', {
 })
 YIELD node1, node2, similarity
 RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity
+ORDER BY similarity DESC, Person1, Person2
 ----
 
 .Results
@@ -303,7 +304,7 @@ RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, s
 | Person1 | Person2 | similarity
 | "Alice" | "Dave"  | 1.0
 | "Dave"  | "Alice" | 1.0
-| "Alice" | "Bob"   | 0.6666666666666666
+| "Bob"   | "Dave"  | 0.6666666666666666
 3+|3 rows
 |===
 
