@@ -60,11 +60,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private final double tolerance;
     private final Graph graph;
     private final Direction direction;
-    private final HugeLongArray currentCommunities;
-    private final HugeLongArray nextCommunities;
-    private final HugeDoubleArray cumulativeNodeWeights;
-    private final HugeDoubleArray nodeCommunityInfluences;
-    private final HugeAtomicDoubleArray communityWeights;
     private final NodeProperties seedProperty;
     private final ExecutorService executor;
     private final AllocationTracker tracker;
@@ -76,7 +71,12 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private double modularity = -1.0;
     private BitSet colorsUsed;
     private HugeLongArray colors;
+    private HugeLongArray currentCommunities;
+    private HugeLongArray nextCommunities;
     private HugeLongArray reverseSeedCommunityMapping ;
+    private HugeDoubleArray cumulativeNodeWeights;
+    private HugeDoubleArray nodeCommunityInfluences;
+    private HugeAtomicDoubleArray communityWeights;
     private HugeAtomicDoubleArray communityWeightUpdates;
 
     public ModularityOptimization(
@@ -100,12 +100,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         this.executor = executor;
         this.concurrency = concurrency;
         this.tracker = tracker;
-        this.currentCommunities = HugeLongArray.newArray(nodeCount, tracker);
-        this.nextCommunities = HugeLongArray.newArray(nodeCount, tracker);
-        this.cumulativeNodeWeights = HugeDoubleArray.newArray(nodeCount, tracker);
-        this.nodeCommunityInfluences = HugeDoubleArray.newArray(nodeCount, tracker);
-        this.communityWeights = HugeAtomicDoubleArray.newArray(nodeCount, tracker);
-        this.communityWeightUpdates = HugeAtomicDoubleArray.newArray(nodeCount, tracker);
         this.log = log;
         this.batchSize = ParallelUtil.adjustedBatchSize(
             nodeCount,
@@ -124,9 +118,9 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
     public ModularityOptimization compute() {
         try (ProgressTimer timer = ProgressTimer.start(millis -> log.info("Modularity Optimization - Initialization finished after %dms", millis))) {
+            computeColoring();
             initSeeding();
             init();
-            computeColoring();
         }
 
         for(iterationCounter = 0; iterationCounter < maxIterations; iterationCounter++) {
@@ -156,7 +150,57 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         return this;
     }
 
+    private void computeColoring() {
+        K1Coloring coloring = new K1Coloring(
+            graph,
+            direction,
+            5,
+            (int) batchSize,
+            concurrency,
+            executor,
+            tracker
+        ).compute();
+
+        this.colors = coloring.colors();
+        this.colorsUsed = coloring.usedColors();
+    }
+
+    private void initSeeding() {
+        this.currentCommunities = HugeLongArray.newArray(nodeCount, tracker);
+
+        if (seedProperty == null) {
+            return;
+        }
+
+        final long maxSeedCommunity = seedProperty.getMaxPropertyValue().orElse(0);
+
+        HugeLongLongMap communityMapping = new HugeLongLongMap(nodeCount, tracker);
+        AtomicLong nextAvailableInternalCommunityId = new AtomicLong(-1);
+
+        for (long  nodeId = 0; nodeId < nodeCount; nodeId++) {
+            long seedCommunity = (long) seedProperty.nodeProperty(nodeId,-1);
+            seedCommunity = seedCommunity >= 0 ? seedCommunity : graph.toOriginalNodeId(nodeId) + maxSeedCommunity;
+            if(communityMapping.getOrDefault(seedCommunity, -1) < 0 ) {
+                communityMapping.addTo(seedCommunity, nextAvailableInternalCommunityId.incrementAndGet());
+            };
+
+            currentCommunities.set(nodeId, communityMapping.getOrDefault(seedCommunity, -1));
+        }
+
+        this.reverseSeedCommunityMapping = HugeLongArray.newArray(communityMapping.size(), tracker);
+
+        for (LongLongCursor entry : communityMapping) {
+            reverseSeedCommunityMapping.set(entry.value, entry.key);
+        }
+    }
+
     private void init() {
+        this.nextCommunities = HugeLongArray.newArray(nodeCount, tracker);
+        this.cumulativeNodeWeights = HugeDoubleArray.newArray(nodeCount, tracker);
+        this.nodeCommunityInfluences = HugeDoubleArray.newArray(nodeCount, tracker);
+        this.communityWeights = HugeAtomicDoubleArray.newArray(nodeCount, tracker);
+        this.communityWeightUpdates = HugeAtomicDoubleArray.newArray(nodeCount, tracker);
+
         final ThreadLocal<RelationshipIterator> graphCopy = ThreadLocal.withInitial(graph::concurrentCopy);
         double doubleTotalNodeWeight = ParallelUtil.parallelStream(
             LongStream.range(0, nodeCount),
@@ -185,21 +229,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
         totalNodeWeight = doubleTotalNodeWeight / 2.0;
         currentCommunities.copyTo(nextCommunities, nodeCount);
-    }
-
-    private void computeColoring() {
-        K1Coloring coloring = new K1Coloring(
-            graph,
-            direction,
-            5,
-            (int) batchSize,
-            concurrency,
-            executor,
-            tracker
-        ).compute();
-
-        this.colors = coloring.colors();
-        this.colorsUsed = coloring.usedColors();
     }
 
     private void optimizeForColor(long currentColor) {
@@ -277,33 +306,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         );
 
         return (ex / (2 * totalNodeWeight)) - (ax / (Math.pow(2 * totalNodeWeight, 2)));
-    }
-
-    private void initSeeding() {
-        if (seedProperty == null) {
-            return;
-        }
-
-        final long maxSeedCommunity = seedProperty.getMaxPropertyValue().orElse(0);
-
-        HugeLongLongMap communityMapping = new HugeLongLongMap(nodeCount, tracker);
-        AtomicLong nextAvailableInternalCommunityId = new AtomicLong(-1);
-
-        for (long  nodeId = 0; nodeId < nodeCount; nodeId++) {
-            long seedCommunity = (long) seedProperty.nodeProperty(nodeId,-1);
-            seedCommunity = seedCommunity >= 0 ? seedCommunity : graph.toOriginalNodeId(nodeId) + maxSeedCommunity;
-            if(communityMapping.getOrDefault(seedCommunity, -1) < 0 ) {
-                communityMapping.addTo(seedCommunity, nextAvailableInternalCommunityId.incrementAndGet());
-            };
-
-            currentCommunities.set(nodeId, communityMapping.getOrDefault(seedCommunity, -1));
-        }
-
-        this.reverseSeedCommunityMapping = HugeLongArray.newArray(communityMapping.size(), tracker);
-
-        for (LongLongCursor entry : communityMapping) {
-            reverseSeedCommunityMapping.set(entry.value, entry.key);
-        }
     }
 
     @Override
