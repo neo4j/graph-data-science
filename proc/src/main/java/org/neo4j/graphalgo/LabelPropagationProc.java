@@ -52,14 +52,14 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.core.ProcedureConstants.SEED_PROPERTY_KEY;
+import static org.neo4j.graphalgo.core.ProcedureConstants.WRITE_PROPERTY_KEY;
 import static org.neo4j.procedure.Mode.READ;
 
 @SuppressWarnings("unused")
 public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
 
     private static final String CONFIG_WEIGHT_KEY = "weightProperty";
-    private static final String CONFIG_WRITE_KEY = "writeProperty";
-    private static final String CONFIG_SEED_KEY = "seedProperty";
     private static final String CONFIG_OLD_SEED_KEY = "partitionProperty";
     private static final Boolean DEFAULT_WRITE = Boolean.TRUE;
     private static final int DEFAULT_ITERATIONS = 10;
@@ -160,7 +160,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
         return loader
                 .withReducedRelationshipLoading(config.getDirection(Direction.OUTGOING))
                 .withOptionalNodeProperties(createPropertyMappings(
-                        config.getString(CONFIG_SEED_KEY, CONFIG_OLD_SEED_KEY, null),
+                        config.getString(SEED_PROPERTY_KEY, CONFIG_OLD_SEED_KEY, null),
                         config.getString(CONFIG_WEIGHT_KEY, null)));
     }
 
@@ -181,7 +181,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
         }
 
         if (setup.procedureConfig.isWriteFlag(DEFAULT_WRITE) && setup.procedureConfig.getWriteProperty() == null) {
-            throw new IllegalArgumentException(String.format("Write property '%s' not specified", CONFIG_WRITE_KEY));
+            throw new IllegalArgumentException(String.format("Write property '%s' not specified", WRITE_PROPERTY_KEY));
         }
 
         final HugeLongArray labels = compute(setup);
@@ -189,7 +189,7 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
 
 
         if (setup.procedureConfig.isWriteFlag()) {
-            String seedProperty = setup.procedureConfig.getString(CONFIG_SEED_KEY, CONFIG_OLD_SEED_KEY, null);
+            String seedProperty = setup.procedureConfig.getString(SEED_PROPERTY_KEY, CONFIG_OLD_SEED_KEY, null);
             setup.statsBuilder.withWrite(true);
             write(
                     setup.procedureConfig.getWriteConcurrency(),
@@ -239,9 +239,9 @@ public final class LabelPropagationProc extends BaseAlgoProc<LabelPropagation> {
         Graph graph = this.loadGraph(configuration, tracker, resultBuilder);
 
         resultBuilder
-            .seedProperty(configuration.getString(CONFIG_SEED_KEY, CONFIG_OLD_SEED_KEY, null))
+            .seedProperty(configuration.getString(SEED_PROPERTY_KEY, CONFIG_OLD_SEED_KEY, null))
             .weightProperty(configuration.getString(CONFIG_WEIGHT_KEY, null))
-            .withWriteProperty(configuration.getString(CONFIG_WRITE_KEY, CONFIG_OLD_SEED_KEY, null));
+            .withWriteProperty(configuration.getString(WRITE_PROPERTY_KEY, CONFIG_OLD_SEED_KEY, null));
 
         return new ProcedureSetup(graph, tracker, configuration, resultBuilder);
     }

@@ -59,6 +59,7 @@ import static org.neo4j.graphalgo.impl.louvain.Louvain.DEFAULT_WEIGHT;
  *
  * @author mknblch
  */
+@Deprecated
 public final class ModularityOptimization extends Algorithm<ModularityOptimization> {
 
     private static final MemoryEstimation MEMORY_ESTIMATION_TASK = MemoryEstimations
@@ -99,12 +100,13 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         return MEMORY_ESTIMATION;
     }
 
-    ModularityOptimization(
-            final Graph graph,
-            final NodeProperties nodeProperties,
-            final ExecutorService pool,
-            final int concurrency,
-            final AllocationTracker tracker) {
+    public ModularityOptimization(
+        final Graph graph,
+        final NodeProperties nodeProperties,
+        final ExecutorService pool,
+        final int concurrency,
+        final AllocationTracker tracker
+    ) {
         this.graph = graph;
         this.nodeProperties = nodeProperties;
         this.nodeCount = graph.nodeCount();
@@ -254,7 +256,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         return iterations;
     }
 
-    double getModularity() {
+    public double getModularity() {
         return q;
     }
 

@@ -24,18 +24,20 @@ import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Direction;
 
-final class ColoringStep implements Runnable {
+public final class ColoringStep implements Runnable {
 
+    static final int INITIAL_FORBIDDEN_COLORS = 1000;
+    
     private final RelationshipIterator graph;
     private final Direction direction;
     private final HugeLongArray colors;
     private final BitSet nodesToColor;
+    private final BitSet forbiddenColors;
     private final long offset;
     private final long batchEnd;
+    private final long[] resetMask;
 
-    private final BitSet forbiddenColors;
-
-    ColoringStep(
+    public ColoringStep(
         RelationshipIterator graph,
         Direction direction,
         HugeLongArray colors,
@@ -50,14 +52,15 @@ final class ColoringStep implements Runnable {
         this.nodesToColor = nodesToColor;
         this.offset = offset;
         this.batchEnd = Math.min(offset + batchSize, nodeCount);
-        this.forbiddenColors = new BitSet(nodeCount);
+        this.forbiddenColors = new BitSet(INITIAL_FORBIDDEN_COLORS);
+        this.resetMask = new long[INITIAL_FORBIDDEN_COLORS];
     }
 
     @Override
     public void run() {
         for (long nodeId = offset; nodeId <= batchEnd; nodeId++) {
             if (nodesToColor.get(nodeId)) {
-                forbiddenColors.clear();
+                resetForbiddenColors();
 
                 graph.forEachRelationship(nodeId, direction, (s, target) -> {
                     if (s != target) {
@@ -73,6 +76,13 @@ final class ColoringStep implements Runnable {
 
                 colors.set(nodeId, nextColor);
             }
+        }
+    }
+
+    private void resetForbiddenColors() {
+        for (int i = 0; i <= forbiddenColors.bits.length; i += resetMask.length) {
+            System.arraycopy(resetMask, 0, forbiddenColors.bits, i, Math.min(forbiddenColors.bits.length -i, INITIAL_FORBIDDEN_COLORS));
+            forbiddenColors.wlen = 0;
         }
     }
 }

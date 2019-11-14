@@ -23,17 +23,19 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.PartitionUtils.TaskProducer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import org.neo4j.graphdb.Direction;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
+import static org.neo4j.graphalgo.core.utils.PartitionUtils.numberAlignedPartitioning;
+
 /**
- *<p>
+ * <p>
  * This is a parallel implementation of the K1-Coloring algorithm.
  * The Algorithm will assign a color to every node in the graph, trying to optimize for two objectives:
  * <ul>
@@ -74,7 +76,7 @@ public class K1Coloring extends Algorithm<K1Coloring> {
     private long ranIterations;
     private boolean didConverge;
 
-    private HugeLongLongMap colorMap;
+    private BitSet usedColors;
 
     public K1Coloring(
         Graph graph,
@@ -121,14 +123,16 @@ public class K1Coloring extends Algorithm<K1Coloring> {
         return didConverge;
     }
 
-    public HugeLongLongMap colorMap() {
-        if (colorMap == null) {
-            this.colorMap = new HugeLongLongMap(100, tracker);
-            for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
-                colorMap.addTo(colors.get(nodeId), 1L);
-            }
+    public BitSet usedColors() {
+        if (usedColors == null) {
+            this.usedColors = new BitSet(nodeCount);
+            graph.forEachNode((nodeId) -> {
+                    usedColors.set(colors.get(nodeId));
+                    return true;
+                }
+            );
         }
-        return colorMap;
+        return usedColors;
     }
 
     public HugeLongArray colors() {
@@ -137,7 +141,7 @@ public class K1Coloring extends Algorithm<K1Coloring> {
 
     public K1Coloring compute() {
         colors = HugeLongArray.newArray(nodeCount, tracker);
-        colors.setAll((nodeId) -> nodeId);
+        colors.setAll((nodeId) -> ColoringStep.INITIAL_FORBIDDEN_COLORS);
 
         ranIterations = 0L;
         nodesToColor.set(0, nodeCount);
@@ -153,7 +157,7 @@ public class K1Coloring extends Algorithm<K1Coloring> {
     }
 
     private void runColoring(Direction direction) {
-        DegreeTaskProducer<ColoringStep> producer = (batchStart, batchEnd) -> new ColoringStep(
+        TaskProducer<ColoringStep> producer = (batchStart, batchEnd) -> new ColoringStep(
             graph.concurrentCopy(),
             direction,
             colors,
@@ -171,7 +175,7 @@ public class K1Coloring extends Algorithm<K1Coloring> {
     private void runValidation(Direction direction) {
         BitSet nextNodesToColor = new BitSet(nodeCount);
 
-        DegreeTaskProducer<ValidationStep> producer = (batchStart, batchEnd) -> new ValidationStep(
+        TaskProducer<ValidationStep> producer = (batchStart, batchEnd) -> new ValidationStep(
             graph.concurrentCopy(),
             direction,
             colors,
@@ -182,15 +186,15 @@ public class K1Coloring extends Algorithm<K1Coloring> {
             batchEnd
         );
 
-        Collection<ValidationStep> steps = degreePartition(producer, direction);
+        // The nodesToColor bitset is not thread safe, therefore we have to align the batches to multiples of 64
+        Collection<ValidationStep> steps = numberAlignedPartitioning(producer, nodeCount, concurrency, Long.SIZE);
 
         ParallelUtil.runWithConcurrency(concurrency, steps, executor);
         this.nodesToColor = nextNodesToColor;
     }
 
-
     private <T extends Runnable> Collection<T> degreePartition(
-        DegreeTaskProducer<T> taskSupplier,
+        TaskProducer<T> taskSupplier,
         Direction direction
     ) {
 
@@ -206,9 +210,9 @@ public class K1Coloring extends Algorithm<K1Coloring> {
 
         Collection<T> tasks = new ArrayList<>(concurrency);
         long currentNode = nodesToColor.nextSetBit(0);
-        long lastNode = currentNode;
+        long lastNode;
         long batchStart = currentNode;
-        long currentDegree = 0;
+        long currentDegree = 0L;
         do {
             currentDegree += graph.degree(currentNode, direction);
 
@@ -227,9 +231,5 @@ public class K1Coloring extends Algorithm<K1Coloring> {
         }
 
         return tasks;
-    }
-
-    interface DegreeTaskProducer<T extends Runnable> {
-        T produce(long batchStart, long batchEnd);
     }
 }

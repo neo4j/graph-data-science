@@ -61,7 +61,6 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
         @Name(value = "relationship", defaultValue = "") String relationshipType,
         @Name(value = "config", defaultValue = "null") Map<String, Object> config
     ) {
-
         return run(label, relationshipType, config);
     }
 
@@ -91,7 +90,7 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
         setup.builder.withCommunityFunction(coloring.colors()::get);
 
         if (callContext.outputFields().anyMatch((field) -> field.equals(COLOR_COUNT_FIELD_NAME))) {
-            setup.builder.withColorCount(coloring.colorMap().size());
+            setup.builder.withColorCount(coloring.usedColors().cardinality());
         }
 
         Optional<String> writeProperty = setup.procedureConfig.getString(WRITE_PROPERTY_KEY);

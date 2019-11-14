@@ -44,8 +44,8 @@ import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.core.ProcedureConstants.SEED_PROPERTY_KEY;
 import static org.neo4j.graphalgo.impl.wcc.WCCFactory.CONFIG_ALGO_TYPE;
-import static org.neo4j.graphalgo.impl.wcc.WCCFactory.CONFIG_SEED_PROPERTY;
 
 public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
 
@@ -56,7 +56,7 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
 
     @Override
     protected GraphLoader configureAlgoLoader(final GraphLoader loader, final ProcedureConfiguration config) {
-        final String seedProperty = config.getString(CONFIG_SEED_PROPERTY, null);
+        final String seedProperty = config.getString(SEED_PROPERTY_KEY, null);
         if (seedProperty != null) {
             loader.withOptionalNodeProperties(createPropertyMappings(seedProperty));
         }
@@ -74,7 +74,7 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
 
     @Override
     protected WCCFactory<T> algorithmFactory(final ProcedureConfiguration config) {
-        boolean incremental = config.getString(CONFIG_SEED_PROPERTY).isPresent();
+        boolean incremental = config.getString(SEED_PROPERTY_KEY).isPresent();
         WCCType defaultAlgoType = WCCType.PARALLEL;
         WCCType algoType = config.getChecked(CONFIG_ALGO_TYPE, defaultAlgoType, WCCType.class);
         return new WCCFactory<>(algoType, incremental);
@@ -176,7 +176,7 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
     }
 
     private NodeProperties getSeedProperty(Graph graph, ProcedureConfiguration config) {
-        return graph.nodeProperties(config.getString(CONFIG_SEED_PROPERTY).orElse(null));
+        return graph.nodeProperties(config.getString(SEED_PROPERTY_KEY).orElse(null));
     }
 
     private void write(

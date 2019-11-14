@@ -17,7 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.wcc;
+
+package org.neo4j.graphalgo.impl.modularity;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
@@ -25,56 +26,43 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
 
 import static org.neo4j.graphalgo.core.ProcedureConstants.SEED_PROPERTY_KEY;
+import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
+import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_KEY;
 
-public class WCCFactory<A extends WCC<A>> extends AlgorithmFactory<A> {
+public class ModularityOptimizationFactory extends AlgorithmFactory<ModularityOptimization> {
 
-    public static final String CONFIG_ALGO_TYPE = "algoType";
-    public static final String CONFIG_THRESHOLD = "threshold";
+    public static final int DEFAULT_MAX_ITERATIONS = 10;
 
-    private final WCCType algorithmType;
-
-    private final boolean incremental;
-
-    public WCCFactory(final WCCType algorithmType, final boolean incremental) {
-        this.algorithmType = algorithmType;
-        this.incremental = incremental;
+    @Override
+    public MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.empty();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public A build(
-            final Graph graph,
-            final ProcedureConfiguration configuration,
-            final AllocationTracker tracker,
-            final Log log) {
-        int concurrency = configuration.getConcurrency();
-        int minBatchSize = configuration.getBatchSize();
-
+    public ModularityOptimization build(
+        Graph graph, ProcedureConfiguration configuration, AllocationTracker tracker, Log log
+    ) {
         NodeProperties seedProperty = configuration.getString(SEED_PROPERTY_KEY)
             .map(graph::nodeProperties)
             .orElse(null);
 
-        WCC.Config algoConfig = new WCC.Config(
-                seedProperty,
-                configuration.get(CONFIG_THRESHOLD, Double.NaN)
+        return new ModularityOptimization(
+            graph,
+            configuration.getDirection(Direction.OUTGOING),
+            configuration.getIterations(DEFAULT_MAX_ITERATIONS),
+            configuration.getNumber(TOLERANCE_KEY, TOLERANCE_DEFAULT).doubleValue(),
+            seedProperty,
+            configuration.getConcurrency(),
+            configuration.getBatchSize(),
+            Pools.DEFAULT,
+            tracker,
+            log
         );
-
-        final WCC<?> algo = algorithmType.create(
-                graph,
-                Pools.DEFAULT,
-                minBatchSize,
-                concurrency,
-                algoConfig,
-                tracker);
-        return (A) algo;
-    }
-
-    @Override
-    public MemoryEstimation memoryEstimation() {
-        return algorithmType.memoryEstimation(incremental);
     }
 }

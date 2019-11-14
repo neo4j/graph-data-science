@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.utils;
 
 import org.neo4j.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.api.BatchNodeIterable;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.HugeParallelGraphImporter;
 import org.neo4j.helpers.Exceptions;
 
@@ -48,8 +49,10 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntConsumer;
+import java.util.function.LongConsumer;
 import java.util.function.Supplier;
 import java.util.stream.BaseStream;
+import java.util.stream.LongStream;
 
 import static java.lang.String.format;
 
@@ -83,6 +86,12 @@ public final class ParallelUtil {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static void parallelForEachNode(Graph graph, LongConsumer consumer) {
+        parallelStreamConsume(LongStream.range(0, graph.nodeCount()), (stream) -> {
+            stream.forEach(consumer);
+        });
     }
 
     /**

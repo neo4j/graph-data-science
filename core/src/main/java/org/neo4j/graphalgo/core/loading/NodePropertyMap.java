@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.core.utils.paged.PagedLongDoubleMap;
 
 import java.util.OptionalLong;
 
-final class NodePropertyMap implements NodeProperties {
+public final class NodePropertyMap implements NodeProperties {
 
     private static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations
             .builder(NodePropertyMap.class)
@@ -40,7 +40,7 @@ final class NodePropertyMap implements NodeProperties {
         return MEMORY_ESTIMATION;
     }
 
-    NodePropertyMap(PagedLongDoubleMap properties, double defaultValue) {
+    public NodePropertyMap(PagedLongDoubleMap properties, double defaultValue) {
         this.properties = properties;
         this.defaultValue = defaultValue;
     }

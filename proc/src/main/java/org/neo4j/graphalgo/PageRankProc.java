@@ -45,11 +45,11 @@ import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.core.ProcedureConstants.DAMPING_FACTOR_DEFAULT;
 import static org.neo4j.graphalgo.core.ProcedureConstants.DAMPING_FACTOR_KEY;
+import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_KEY;
 import static org.neo4j.procedure.Mode.READ;
 
 public final class PageRankProc extends BaseAlgoProc<PageRank> {
 
-    private static final String TOLERANCE_KEY = "tolerance";
     private static final String CACHE_WEIGHTS_KEY = "cacheWeights";
     private static final Integer ITERATIONS_DEFAULT = 20;
     private static final String WRITE_PROPERTY_DEFAULT = "pagerank";
