@@ -87,29 +87,10 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         // Create a filter for which nodes to compare and calculate the neighborhood for each node
         prepare(direction);
 
-        // Generate initial similarities
-        Stream<SimilarityResult> stream;
-        if (config.isParallel()) {
-            if (config.hasTopK()) {
-                if (config.hasTop()) {
-                    stream = topN(computeTopKMapParallel());
-                } else {
-                    stream = computeTopKMapParallel().stream();
-                }
-            } else {
-                stream = computeParallel();
-            }
-        } else {
-            if (config.hasTopK()) {
-                if (config.hasTop()) {
-                    stream = topN(computeTopkMap());
-                } else {
-                    stream = computeTopkMap().stream();
-                }
-            } else {
-                stream = compute();
-            }
-        }
+        // Compute similarities
+        Stream<SimilarityResult> stream = config.isParallel()
+            ? computeParallel()
+            : compute();
 
         // Log progress
         stream = log(stream);
@@ -117,9 +98,25 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         // Compute topN iff we did not run topK before.
         // Can not happen when algo is called from proc.
         if (config.hasTop() && !config.hasTopK()) {
-            stream = topN(stream);
+            stream = computeTopN(stream);
         }
         return stream;
+    }
+
+    private Stream<SimilarityResult> compute() {
+        return (config.hasTopK() && config.hasTop())
+            ? computeTopN(computeTopkMap())
+            : (config.hasTopK())
+                ? computeTopkMap().stream()
+                : computeAll();
+    }
+
+    private Stream<SimilarityResult> computeParallel() {
+        return (config.hasTopK() && config.hasTop())
+            ? computeTopN(computeTopKMapParallel())
+            : (config.hasTopK())
+                ? computeTopKMapParallel().stream()
+                : computeAllParallel();
     }
 
     public SimilarityGraphResult computeToGraph(Direction direction) {
@@ -146,7 +143,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         });
     }
 
-    private Stream<SimilarityResult> compute() {
+    private Stream<SimilarityResult> computeAll() {
         return new SetBitsIterable(nodeFilter).stream()
             .boxed()
             .flatMap(node1 -> {
@@ -157,7 +154,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
             });
     }
 
-    private Stream<SimilarityResult> computeParallel() {
+    private Stream<SimilarityResult> computeAllParallel() {
         return ParallelUtil.parallelStream(
             new SetBitsIterable(nodeFilter).stream(), stream -> stream
                 .boxed()
@@ -224,12 +221,12 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         });
     }
 
-    private Stream<SimilarityResult> topN(Stream<SimilarityResult> similarities) {
+    private Stream<SimilarityResult> computeTopN(Stream<SimilarityResult> similarities) {
         Comparator<SimilarityResult> comparator = config.top > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
         return similarities.sorted(comparator).limit(Math.abs(config.top));
     }
 
-    private Stream<SimilarityResult> topN(TopKMap topKMap) {
+    private Stream<SimilarityResult> computeTopN(TopKMap topKMap) {
         int absTop = Math.abs(config.top);
 
         TopLongLongPriorityQueue topNLongPriorityQueue = config.top > 0
