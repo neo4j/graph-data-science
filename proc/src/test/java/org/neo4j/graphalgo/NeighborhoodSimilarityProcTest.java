@@ -47,6 +47,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
@@ -241,7 +242,8 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
         String resultGraphName = "simGraph_" + direction.name();
         String loadQuery = "CALL algo.graph.load($resultGraphName, $label, 'SIMILAR', {nodeProperties: 'id', relationshipProperties: 'score', direction: $direction})";
         db.execute(loadQuery, MapUtil.map("resultGraphName", resultGraphName, "label", direction == INCOMING ? "Item" : "Person", "direction", direction.name()));
-        Graph simGraph = GraphCatalog.getUnion(getUsername(), resultGraphName);
+        Graph simGraph = GraphCatalog.getUnion(getUsername(), resultGraphName).orElse(null);
+        assertNotNull(simGraph);
         assertGraphEquals(direction == INCOMING
             ? fromGdl(
                 String.format(
