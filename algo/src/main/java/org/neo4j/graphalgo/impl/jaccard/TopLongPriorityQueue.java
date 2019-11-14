@@ -40,12 +40,16 @@ public abstract class TopLongPriorityQueue {
 
     public abstract void offer(long element, double priority);
 
-    public abstract DoubleStream priorities();
-
     public LongStream elements() {
+        return elementCount == 0
+            ? LongStream.empty()
+            : Arrays.stream(elements).limit(elementCount);
+    }
+
+    public DoubleStream priorities() {
         return Double.isNaN(minValue)
-                ? LongStream.empty()
-                : Arrays.stream(elements).limit(elementCount);
+            ? DoubleStream.empty()
+            : Arrays.stream(priorities).limit(elementCount);
     }
 
     public int count() {
@@ -70,12 +74,6 @@ public abstract class TopLongPriorityQueue {
         }
     }
 
-    DoubleStream prioritiesStream() {
-        return Double.isNaN(minValue)
-            ? DoubleStream.empty()
-            : Arrays.stream(priorities).limit(elementCount);
-    }
-
     public static TopLongPriorityQueue max(int bound) {
         return new TopLongPriorityQueue(bound) {
 
@@ -86,7 +84,7 @@ public abstract class TopLongPriorityQueue {
 
             @Override
             public DoubleStream priorities() {
-                return prioritiesStream().map(d -> -d);
+                return super.priorities().map(d -> -d);
             }
         };
     }
@@ -99,10 +97,6 @@ public abstract class TopLongPriorityQueue {
                 add(element, priority);
             }
 
-            @Override
-            public DoubleStream priorities() {
-                return prioritiesStream();
-            }
         };
     }
 

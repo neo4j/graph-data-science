@@ -69,12 +69,6 @@ public abstract class TopLongLongPriorityQueue {
         }
     }
 
-    public DoubleStream priorities() {
-        return elementCount == 0
-            ? DoubleStream.empty()
-            : Arrays.stream(priorities).limit(elementCount);
-    }
-
     public LongStream elements1() {
         return elementCount == 0
             ? LongStream.empty()
@@ -85,6 +79,12 @@ public abstract class TopLongLongPriorityQueue {
         return elementCount == 0
             ? LongStream.empty()
             : Arrays.stream(elements2).limit(elementCount);
+    }
+
+    public DoubleStream priorities() {
+        return elementCount == 0
+            ? DoubleStream.empty()
+            : Arrays.stream(priorities).limit(elementCount);
     }
 
     public static TopLongLongPriorityQueue max(int bound) {
