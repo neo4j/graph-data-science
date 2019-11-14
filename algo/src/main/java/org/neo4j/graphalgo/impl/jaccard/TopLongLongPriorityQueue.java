@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.impl.jaccard;
 
 import java.util.Arrays;
 import java.util.stream.DoubleStream;
+import java.util.stream.LongStream;
 
 public abstract class TopLongLongPriorityQueue {
 
@@ -68,10 +69,22 @@ public abstract class TopLongLongPriorityQueue {
         }
     }
 
-    DoubleStream prioritiesStream() {
-        return Double.isNaN(minValue)
+    public DoubleStream priorities() {
+        return elementCount == 0
             ? DoubleStream.empty()
             : Arrays.stream(priorities).limit(elementCount);
+    }
+
+    public LongStream elements1() {
+        return elementCount == 0
+            ? LongStream.empty()
+            : Arrays.stream(elements1).limit(elementCount);
+    }
+
+    public LongStream elements2() {
+        return elementCount == 0
+            ? LongStream.empty()
+            : Arrays.stream(elements2).limit(elementCount);
     }
 
     public static TopLongLongPriorityQueue max(int bound) {
@@ -87,6 +100,13 @@ public abstract class TopLongLongPriorityQueue {
                 for (int i = 0; i < elementCount; i++) {
                     consumer.accept(elements1[i], elements2[i], -priorities[i]);
                 }
+            }
+
+            @Override
+            public DoubleStream priorities() {
+                return elementCount == 0
+                    ? DoubleStream.empty()
+                    : Arrays.stream(priorities).map(d -> -d).limit(elementCount);
             }
         };
     }
@@ -107,5 +127,4 @@ public abstract class TopLongLongPriorityQueue {
             }
         };
     }
-
 }
