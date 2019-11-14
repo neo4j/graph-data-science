@@ -24,7 +24,7 @@ import java.util.Arrays;
 import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
 
-public abstract class TopLongPriorityQueue {
+public abstract class BoundedLongPriorityQueue {
 
     private final int bound;
     private final long[] elements;
@@ -32,7 +32,7 @@ public abstract class TopLongPriorityQueue {
     private double minValue = Double.NaN;
     private int elementCount = 0;
 
-    TopLongPriorityQueue(int bound) {
+    BoundedLongPriorityQueue(int bound) {
         this.bound = bound;
         this.elements = new long[bound];
         this.priorities = new double[bound];
@@ -74,8 +74,8 @@ public abstract class TopLongPriorityQueue {
         }
     }
 
-    public static TopLongPriorityQueue max(int bound) {
-        return new TopLongPriorityQueue(bound) {
+    public static BoundedLongPriorityQueue max(int bound) {
+        return new BoundedLongPriorityQueue(bound) {
 
             @Override
             public void offer(long element, double priority) {
@@ -89,8 +89,8 @@ public abstract class TopLongPriorityQueue {
         };
     }
 
-    public static TopLongPriorityQueue min(int bound) {
-        return new TopLongPriorityQueue(bound) {
+    public static BoundedLongPriorityQueue min(int bound) {
+        return new BoundedLongPriorityQueue(bound) {
 
             @Override
             public void offer(long element, double priority) {

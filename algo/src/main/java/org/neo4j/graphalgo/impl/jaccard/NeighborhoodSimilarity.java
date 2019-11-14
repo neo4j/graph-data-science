@@ -229,9 +229,9 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     private Stream<SimilarityResult> computeTopN(TopKMap topKMap) {
         int absTop = Math.abs(config.top);
 
-        TopLongLongPriorityQueue topNLongPriorityQueue = config.top > 0
-            ? TopLongLongPriorityQueue.max(absTop)
-            : TopLongLongPriorityQueue.min(absTop);
+        BoundedLongLongPriorityQueue topNLongPriorityQueue = config.top > 0
+            ? BoundedLongLongPriorityQueue.max(absTop)
+            : BoundedLongLongPriorityQueue.min(absTop);
         topKMap.forEach(topNLongPriorityQueue::offer);
 
         List<SimilarityResult> topNResults = new ArrayList<>(absTop);

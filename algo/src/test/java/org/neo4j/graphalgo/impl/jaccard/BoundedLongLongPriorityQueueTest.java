@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class TopLongLongPriorityQueueTest {
+class BoundedLongLongPriorityQueueTest {
 
     @Test
     void shouldKeepMinValues() {
@@ -37,7 +37,7 @@ class TopLongLongPriorityQueueTest {
         expected.add(1L);
         expected.add(2L);
 
-        TopLongLongPriorityQueue queue = TopLongLongPriorityQueue.min(3);
+        BoundedLongLongPriorityQueue queue = BoundedLongLongPriorityQueue.min(3);
 
         queue.offer(0, 0, 0.0);
         queue.offer(6, 6, 6.0);
@@ -57,7 +57,7 @@ class TopLongLongPriorityQueueTest {
         expected.add(5L);
         expected.add(4L);
 
-        TopLongLongPriorityQueue queue = TopLongLongPriorityQueue.max(3);
+        BoundedLongLongPriorityQueue queue = BoundedLongLongPriorityQueue.max(3);
 
         queue.offer(0, 0, 0.0);
         queue.offer(6, 6, 6.0);
@@ -77,7 +77,7 @@ class TopLongLongPriorityQueueTest {
         expected.add(5L);
         expected.add(4L);
 
-        TopLongLongPriorityQueue queue = TopLongLongPriorityQueue.max(10);
+        BoundedLongLongPriorityQueue queue = BoundedLongLongPriorityQueue.max(10);
 
         queue.offer(6, 6, 6.0);
         queue.offer(5, 5, 5.0);
@@ -86,7 +86,7 @@ class TopLongLongPriorityQueueTest {
         assertResults(expected, queue);
     }
 
-    private void assertResults(List<Long> expected, TopLongLongPriorityQueue queue) {
+    private void assertResults(List<Long> expected, BoundedLongLongPriorityQueue queue) {
         List<Double> expectedPriorities = expected.stream().map(Long::doubleValue).collect(Collectors.toList());
 
         List<Long> actualElements1 = queue.elements1().boxed().collect(Collectors.toList());
