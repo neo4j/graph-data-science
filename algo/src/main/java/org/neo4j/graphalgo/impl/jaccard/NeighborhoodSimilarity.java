@@ -175,7 +175,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
                 long[] vector1 = vectors.get(node1);
                 new SetBitsIterable(nodeFilter, node1 + 1).stream()
                     .forEach(node2 -> {
-                        double similarity = jaccardPrimitive(node1, node2, vector1, vectors.get(node2));
+                        double similarity = jaccardPrimitive(vector1, vectors.get(node2));
                         if (!Double.isNaN(similarity)) {
                             topKMap.put(node1, node2, similarity);
                             topKMap.put(node2, node1, similarity);
@@ -202,7 +202,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
                     new SetBitsIterable(nodeFilter).stream()
                         .filter(node2 -> node1 != node2)
                         .forEach(node2 -> {
-                            double similarity = jaccardPrimitive(node1, node2, vector1, vectors.get(node2));
+                            double similarity = jaccardPrimitive(vector1, vectors.get(node2));
                             if (!Double.isNaN(similarity)) {
                                 topKMap.put(node1, node2, similarity);
                             }
@@ -247,7 +247,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         return similarity >= config.similarityCutoff ? new SimilarityResult(node1, node2, similarity) : null;
     }
 
-    private double jaccardPrimitive(long node1, long node2, long[] vector1, long[] vector2) {
+    private double jaccardPrimitive(long[] vector1, long[] vector2) {
         long intersection = Intersections.intersection3(vector1, vector2);
         double union = vector1.length + vector2.length - intersection;
         double similarity = union == 0 ? 0 : intersection / union;
