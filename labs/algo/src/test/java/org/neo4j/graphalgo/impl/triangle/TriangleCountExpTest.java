@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.impl.triangle;
 
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesWithoutCypherTest;
@@ -91,10 +90,10 @@ class TriangleCountExpTest {
         try (ProgressTimer start = ProgressTimer.start(l -> System.out.println("took " + l + "ms"))) {
             algo.compute();
         }
-        Assertions.assertEquals(TRIANGLE_COUNT, algo.getTriangleCount());
+        assertEquals(TRIANGLE_COUNT, algo.getTriangleCount());
         assertTriangles(algo.getTriangles());
         assertCoefficients(algo.getCoefficients());
-        Assertions.assertEquals(EXPECTED_COEFFICIENT, algo.getAverageCoefficient(), 0.001);
+        assertEquals(EXPECTED_COEFFICIENT, algo.getAverageCoefficient(), 0.001);
     }
 
     @AllGraphTypesWithoutCypherTest
@@ -108,10 +107,10 @@ class TriangleCountExpTest {
         try (ProgressTimer start = ProgressTimer.start(l -> System.out.println("took " + l + "ms"))) {
             algo.compute();
         }
-        Assertions.assertEquals(TRIANGLE_COUNT, algo.getTriangleCount());
+        assertEquals(TRIANGLE_COUNT, algo.getTriangleCount());
         assertTriangles(algo.getTriangles());
         assertCoefficients(algo.getCoefficients());
-        Assertions.assertEquals(EXPECTED_COEFFICIENT, algo.getAverageCoefficient(), 0.001);
+        assertEquals(EXPECTED_COEFFICIENT, algo.getAverageCoefficient(), 0.001);
     }
 
     @AllGraphTypesWithoutCypherTest

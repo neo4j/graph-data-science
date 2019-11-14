@@ -41,7 +41,7 @@ public final class IncrementalDisjointSetStruct extends SequentialDisjointSetStr
             .perNode("parent", HugeLongArray::memoryEstimation)
             .add("internalToProvidedIds", HugeLongLongMap.memoryEstimation())
             .build();
-    public static final int NO_SUCH_SEED_PROPERTY = -1;
+    private static final int NO_SUCH_SEED_PROPERTY = -1;
 
     private final HugeLongArray parent;
     private final HugeLongLongMap internalToProvidedIds;

@@ -406,13 +406,15 @@ public class BetweennessCentralityProc extends LabsProc {
         public final double maxCentrality;
         public final double sumCentrality;
 
-        private BetweennessCentralityProcResult(Long loadMillis,
-                                                Long computeMillis,
-                                                Long writeMillis,
-                                                Long nodes,
-                                                Double centralityMin,
-                                                Double centralityMax,
-                                                Double centralitySum) {
+        private BetweennessCentralityProcResult(
+            Long loadMillis,
+            Long computeMillis,
+            Long writeMillis,
+            Long nodes,
+            Double centralityMin,
+            Double centralityMax,
+            Double centralitySum
+        ) {
             this.loadMillis = loadMillis;
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
