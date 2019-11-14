@@ -39,6 +39,7 @@ public final class Louvain extends Algorithm<Louvain> {
 
     private final int maxLevel;
     private final NodeProperties seedingValues;
+    private final Direction direction;
     private final ExecutorService pool;
     private final int concurrency;
     private final AllocationTracker tracker;
@@ -50,8 +51,10 @@ public final class Louvain extends Algorithm<Louvain> {
 
 
     public Louvain(
-        int maxLevel, Graph graph,
+        int maxLevel,
+        Graph graph,
         NodeProperties seedingValues,
+        Direction direction,
         ExecutorService pool,
         int concurrency,
         AllocationTracker tracker
@@ -59,6 +62,7 @@ public final class Louvain extends Algorithm<Louvain> {
         this.maxLevel = maxLevel;
         this.rootGraph = graph;
         this.seedingValues = seedingValues;
+        this.direction = direction;
         this.pool = pool;
         this.concurrency = concurrency;
         this.tracker = tracker;
@@ -126,7 +130,7 @@ public final class Louvain extends Algorithm<Louvain> {
     private ModularityOptimization runModularityOptimization(Graph louvainGraph, NodeProperties seed) {
         return new ModularityOptimization(
             louvainGraph,
-            Direction.BOTH,
+            direction,
             10,
             TOLERANCE_DEFAULT,
             seed,
@@ -145,6 +149,9 @@ public final class Louvain extends Algorithm<Louvain> {
         SubGraphGenerator.NodeImporter nodeImporter = new SubGraphGenerator.NodeImporter(
             workingGraph.nodeCount(),
             maxCommunityId,
+            direction,
+            rootGraph.isUndirected(),
+            true,
             tracker
         );
 
@@ -158,7 +165,7 @@ public final class Louvain extends Algorithm<Louvain> {
         workingGraph.forEachNode((nodeId) -> {
             long communityId = modularityOptimization.getCommunityId(nodeId);
             workingGraph.forEachRelationship(nodeId, Direction.BOTH, 1.0, (s, t, w) -> {
-                relImporter.add(communityId, modularityOptimization.getCommunityId(t));
+                relImporter.add(communityId, modularityOptimization.getCommunityId(t), w);
                 return true;
             });
             return true;

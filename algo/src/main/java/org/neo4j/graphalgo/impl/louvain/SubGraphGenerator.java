@@ -37,6 +37,7 @@ import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphdb.Direction;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -45,19 +46,50 @@ import java.util.concurrent.atomic.LongAdder;
 
 public class SubGraphGenerator {
 
+    public static NodeImporter create(
+        long oldNodeCount,
+        long maxCommunityId,
+        Direction direction,
+        boolean undirected,
+        boolean loadRelationshipProperty,
+        AllocationTracker tracker
+    ) {
+        return new NodeImporter(
+            oldNodeCount,
+            maxCommunityId,
+            direction,
+            undirected,
+            loadRelationshipProperty,
+            tracker
+        );
+    }
+
     static class NodeImporter {
 
         private final SparseNodeMapping.Builder neoToInternalBuilder;
+        private Direction direction;
+        private final boolean undirected;
+        private boolean loadRelationshipProperty;
         private final AllocationTracker tracker;
         private final AtomicLong nextAvailableId;
         private final BitSet seenNeoIds;
 
-        NodeImporter(long oldNodeCount, long maxCommunityId, AllocationTracker tracker) {
+        NodeImporter(
+            long oldNodeCount,
+            long maxCommunityId,
+            Direction direction,
+            boolean undirected,
+            boolean loadRelationshipProperty,
+            AllocationTracker tracker
+        ) {
+            this.direction = direction;
+            this.undirected = undirected;
+            this.loadRelationshipProperty = loadRelationshipProperty;
             this.tracker = tracker;
 
             this.neoToInternalBuilder = SparseNodeMapping.Builder.create(maxCommunityId, tracker);
             this.nextAvailableId = new AtomicLong(0);
-            seenNeoIds = new BitSet(oldNodeCount);
+            seenNeoIds = new BitSet(Math.min(maxCommunityId, oldNodeCount));
         }
 
         void addNode(long originalId) {
@@ -71,80 +103,122 @@ public class SubGraphGenerator {
             SparseNodeMapping neoToInternal = neoToInternalBuilder.build();
 
             HugeLongArray internalToNeo = HugeLongArray.newArray(nextAvailableId.get(), tracker);
-            for(LongCursor nodeId : seenNeoIds.asLongLookupContainer()) {
+            for (LongCursor nodeId : seenNeoIds.asLongLookupContainer()) {
                 internalToNeo.set(neoToInternal.get(nodeId.value), nodeId.value);
             }
 
             IdMap idMap = new IdMap(internalToNeo, neoToInternal, internalToNeo.size());
 
-            return new RelImporter(idMap, tracker);
+            return new RelImporter(idMap, direction, undirected, loadRelationshipProperty, tracker);
         }
     }
 
     static class RelImporter {
 
-        private final RelationshipsBuilder outRelationshipsBuilder;
-        private final RelationshipsBuilder inRelationshipsBuilder;
+        private RelationshipsBuilder outRelationshipsBuilder;
+        private RelationshipsBuilder inRelationshipsBuilder;
         private final RelationshipImporter relationshipImporter;
         private final RelationshipImporter.Imports imports;
         private final RelationshipsBatchBuffer relationshipBuffer;
         private final IdMap idMap;
-        private long importedRelationships = 0;
+        private final boolean undirected;
+        private final boolean loadRelationshipProperty;
         private final AllocationTracker tracker;
+        private long importedRelationships = 0;
+
+        boolean loadOutgoing;
+        boolean loadIncoming;
 
         RelImporter(
             IdMap idMap,
+            Direction direction,
+            boolean undirected,
+            boolean loadRelationshipProperty,
             AllocationTracker tracker
         ) {
+            this.undirected = undirected;
+            this.loadRelationshipProperty = loadRelationshipProperty;
             this.tracker = tracker;
             this.idMap = idMap;
+
+            if (undirected && direction != Direction.OUTGOING) {
+                throw new IllegalArgumentException(String.format(
+                    "Direction must be %s if graph is undirected, but got %s",
+                    Direction.OUTGOING,
+                    direction
+                ));
+            }
 
             ImportSizing importSizing = ImportSizing.of(1, idMap.nodeCount());
             int pageSize = importSizing.pageSize();
             int numberOfPages = importSizing.numberOfPages();
 
-            this.outRelationshipsBuilder = new RelationshipsBuilder(
-                new DeduplicationStrategy[]{DeduplicationStrategy.SUM},
-                AllocationTracker.EMPTY,
-                0
-            );
+            AdjacencyBuilder outAdjacencyBuilder = null;
+            AdjacencyBuilder inAdjacencyBuilder = null;
+            int[] propertyKeyIds = loadRelationshipProperty ? new int[]{1} : new int[0];
 
-            this.inRelationshipsBuilder = new RelationshipsBuilder(
-                new DeduplicationStrategy[]{DeduplicationStrategy.SUM},
-                AllocationTracker.EMPTY,
-                0
-            );
+            this.loadOutgoing = direction == Direction.OUTGOING || direction == Direction.BOTH;
+            this.loadIncoming = direction == Direction.INCOMING || direction == Direction.BOTH;
 
-            AdjacencyBuilder outAdjacencyBuilder = AdjacencyBuilder.compressing(
-                outRelationshipsBuilder,
-                numberOfPages, pageSize,
-                AllocationTracker.EMPTY,
-                new LongAdder(),
-                new int[0],
-                new double[]{}
-            );
+            if (loadOutgoing) {
+                this.outRelationshipsBuilder = new RelationshipsBuilder(
+                    new DeduplicationStrategy[]{DeduplicationStrategy.SUM},
+                    AllocationTracker.EMPTY,
+                    loadRelationshipProperty ? 1 : 0
+                );
 
-            AdjacencyBuilder inAdjacencyBuilder = AdjacencyBuilder.compressing(
-                inRelationshipsBuilder,
-                numberOfPages, pageSize,
-                AllocationTracker.EMPTY,
-                new LongAdder(),
-                new int[0],
-                new double[]{}
-            );
+                outAdjacencyBuilder = AdjacencyBuilder.compressing(
+                    outRelationshipsBuilder,
+                    numberOfPages, pageSize,
+                    AllocationTracker.EMPTY,
+                    new LongAdder(),
+                    propertyKeyIds,
+                    new double[]{}
+                );
+            }
+
+            if (loadIncoming || undirected) {
+                this.inRelationshipsBuilder = new RelationshipsBuilder(
+                    new DeduplicationStrategy[]{DeduplicationStrategy.SUM},
+                    AllocationTracker.EMPTY,
+                    loadRelationshipProperty ? 1 : 0
+                );
+
+                inAdjacencyBuilder = AdjacencyBuilder.compressing(
+                    inRelationshipsBuilder,
+                    numberOfPages, pageSize,
+                    AllocationTracker.EMPTY,
+                    new LongAdder(),
+                    propertyKeyIds,
+                    new double[]{}
+                );
+            }
 
             this.relationshipImporter = new RelationshipImporter(
                 AllocationTracker.EMPTY,
                 outAdjacencyBuilder,
                 inAdjacencyBuilder
             );
-            this.imports = relationshipImporter.imports(false, true, true, false);
+            this.imports = relationshipImporter.imports(
+                undirected,
+                loadOutgoing,
+                loadIncoming,
+                loadRelationshipProperty
+            );
 
             relationshipBuffer = new RelationshipsBatchBuffer(idMap, -1, 10_000);
         }
 
         void add(long source, long target) {
             relationshipBuffer.add(idMap.toMappedNodeId(source), idMap.toMappedNodeId(target), -1L, -1L);
+            if (relationshipBuffer.isFull()) {
+                flushBuffer();
+                relationshipBuffer.reset();
+            }
+        }
+
+        void add(long source, long target, double relationshipPropertyValue) {
+            relationshipBuffer.add(idMap.toMappedNodeId(source), idMap.toMappedNodeId(target), -1L, Double.doubleToLongBits(relationshipPropertyValue));
             if (relationshipBuffer.isFull()) {
                 flushBuffer();
                 relationshipBuffer.reset();
@@ -165,16 +239,18 @@ public class SubGraphGenerator {
                 relationships.inOffsets(),
                 relationships.outOffsets(),
                 Optional.empty(),
-                Optional.empty(),
-                Optional.empty(),
-                Optional.empty(),
-                Optional.empty(),
-                false
+                loadRelationshipProperty && loadIncoming ? Optional.of(relationships.inRelProperties()) : Optional.empty(),
+                loadRelationshipProperty && loadOutgoing ? Optional.of(relationships.outRelProperties()) : Optional.empty(),
+                loadRelationshipProperty && loadIncoming ? Optional.of(relationships.inRelPropertyOffsets()) : Optional.empty(),
+                loadRelationshipProperty && loadOutgoing ? Optional.of(relationships.outRelPropertyOffsets()) : Optional.empty(),
+                undirected
             );
         }
 
         private void flushBuffer() {
-            long newImportedInOut = imports.importRels(relationshipBuffer, null);
+            RelationshipImporter.PropertyReader propertyReader = loadRelationshipProperty ? RelationshipImporter.preLoadedPropertyReader() : null;
+
+            long newImportedInOut = imports.importRels(relationshipBuffer, propertyReader);
             importedRelationships += RawValues.getHead(newImportedInOut) / 2;
             relationshipBuffer.reset();
         }
@@ -184,15 +260,15 @@ public class SubGraphGenerator {
             return new Relationships(
                 -1,
                 importedRelationships,
-                inRelationshipsBuilder.adjacency(),
-                outRelationshipsBuilder.adjacency(),
-                inRelationshipsBuilder.globalAdjacencyOffsets(),
-                outRelationshipsBuilder.globalAdjacencyOffsets(),
+                loadIncoming ? inRelationshipsBuilder.adjacency() : null,
+                loadOutgoing ? outRelationshipsBuilder.adjacency() : null,
+                loadIncoming ? inRelationshipsBuilder.globalAdjacencyOffsets() : null,
+                loadOutgoing ? outRelationshipsBuilder.globalAdjacencyOffsets() : null,
                 Optional.empty(),
-                null,
-                null,
-                null,
-                null
+                loadRelationshipProperty && loadIncoming ? inRelationshipsBuilder.weights() : null,
+                loadRelationshipProperty && loadOutgoing ? outRelationshipsBuilder.weights() : null,
+                loadRelationshipProperty && loadIncoming ? inRelationshipsBuilder.globalWeightOffsets() : null,
+                loadRelationshipProperty && loadOutgoing ? outRelationshipsBuilder.globalWeightOffsets() : null
             );
         }
     }

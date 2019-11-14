@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphdb.Direction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
@@ -88,6 +89,7 @@ class LouvainMultiLevelTest extends LouvainTestBase {
             5,
             graph,
             null,
+            Direction.BOTH,
             Pools.DEFAULT,
             1,
             AllocationTracker.EMPTY)
