@@ -24,7 +24,7 @@ import java.util.Arrays;
 import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
 
-public abstract class TopKLongPriorityQueue {
+public abstract class BoundedLongPriorityQueue {
 
     private final int bound;
     private final long[] elements;
@@ -32,7 +32,7 @@ public abstract class TopKLongPriorityQueue {
     private double minValue = Double.NaN;
     private int elementCount = 0;
 
-    TopKLongPriorityQueue(int bound) {
+    BoundedLongPriorityQueue(int bound) {
         this.bound = bound;
         this.elements = new long[bound];
         this.priorities = new double[bound];
@@ -40,12 +40,16 @@ public abstract class TopKLongPriorityQueue {
 
     public abstract void offer(long element, double priority);
 
-    public abstract DoubleStream priorities();
-
     public LongStream elements() {
+        return elementCount == 0
+            ? LongStream.empty()
+            : Arrays.stream(elements).limit(elementCount);
+    }
+
+    public DoubleStream priorities() {
         return Double.isNaN(minValue)
-                ? LongStream.empty()
-                : Arrays.stream(elements).limit(elementCount);
+            ? DoubleStream.empty()
+            : Arrays.stream(priorities).limit(elementCount);
     }
 
     public int count() {
@@ -70,14 +74,8 @@ public abstract class TopKLongPriorityQueue {
         }
     }
 
-    DoubleStream prioritiesStream() {
-        return Double.isNaN(minValue)
-            ? DoubleStream.empty()
-            : Arrays.stream(priorities).limit(elementCount);
-    }
-
-    public static TopKLongPriorityQueue max(int bound) {
-        return new TopKLongPriorityQueue(bound) {
+    public static BoundedLongPriorityQueue max(int bound) {
+        return new BoundedLongPriorityQueue(bound) {
 
             @Override
             public void offer(long element, double priority) {
@@ -86,23 +84,19 @@ public abstract class TopKLongPriorityQueue {
 
             @Override
             public DoubleStream priorities() {
-                return prioritiesStream().map(d -> -d);
+                return super.priorities().map(d -> -d);
             }
         };
     }
 
-    public static TopKLongPriorityQueue min(int bound) {
-        return new TopKLongPriorityQueue(bound) {
+    public static BoundedLongPriorityQueue min(int bound) {
+        return new BoundedLongPriorityQueue(bound) {
 
             @Override
             public void offer(long element, double priority) {
                 add(element, priority);
             }
 
-            @Override
-            public DoubleStream priorities() {
-                return prioritiesStream();
-            }
         };
     }
 

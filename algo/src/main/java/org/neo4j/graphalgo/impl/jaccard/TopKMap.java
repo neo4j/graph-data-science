@@ -62,14 +62,26 @@ public class TopKMap {
         topKLists = HugeObjectArray.newArray(TopKList.class, items, tracker);
         topKLists.setAll(node1 -> nodeFilter.get(node1)
             ? new TopKList(comparator.equals(SimilarityResult.ASCENDING)
-                ? TopKLongPriorityQueue.min(boundedTopK)
-                : TopKLongPriorityQueue.max(boundedTopK)
+                ? BoundedLongPriorityQueue.min(boundedTopK)
+                : BoundedLongPriorityQueue.max(boundedTopK)
             ) : null
         );
     }
 
     public void put(long node1, long node2, double similarity) {
         topKLists.get(node1).accept(node2, similarity);
+    }
+
+    public void forEach(BoundedLongLongPriorityQueue.Consumer consumer) {
+        SetBitsIterable items = new SetBitsIterable(nodeFilter);
+        items.stream().forEach(element1 -> {
+            BoundedLongPriorityQueue queue = topKLists.get(element1).queue;
+            PrimitiveIterator.OfLong node2Iterator = queue.elements().iterator();
+            PrimitiveIterator.OfDouble priorityIterator = queue.priorities().iterator();
+            while (node2Iterator.hasNext()) {
+                consumer.accept(element1, node2Iterator.nextLong(), priorityIterator.nextDouble());
+            }
+        });
     }
 
     public Stream<SimilarityResult> stream() {
@@ -80,9 +92,9 @@ public class TopKMap {
 
     public static final class TopKList {
 
-        private final TopKLongPriorityQueue queue;
+        private final BoundedLongPriorityQueue queue;
 
-        TopKList(TopKLongPriorityQueue queue) {
+        TopKList(BoundedLongPriorityQueue queue) {
             this.queue = queue;
         }
 

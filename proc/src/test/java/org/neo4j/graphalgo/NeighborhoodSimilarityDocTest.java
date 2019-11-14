@@ -124,17 +124,19 @@ class NeighborhoodSimilarityDocTest extends ProcTestBase {
                        "    '', 'LIKES', {" +
                        "        graph: 'huge'," +
                        "        direction: 'OUTGOING'," +
+                       "        topK: 1," +
                        "        top: 3" +
                        "    }" +
                        ") YIELD node1, node2, similarity " +
-                       "RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity";
+                       "RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity " +
+                       "ORDER BY similarity DESC, Person1, Person2";
 
         String expectedString = "+----------------------------------------+\n" +
                                 "| Person1 | Person2 | similarity         |\n" +
                                 "+----------------------------------------+\n" +
                                 "| \"Alice\" | \"Dave\"  | 1.0                |\n" +
                                 "| \"Dave\"  | \"Alice\" | 1.0                |\n" +
-                                "| \"Alice\" | \"Bob\"   | 0.6666666666666666 |\n" +
+                                "| \"Bob\"   | \"Alice\" | 0.6666666666666666 |\n" +
                                 "+----------------------------------------+\n" +
                                 "3 rows\n";
 

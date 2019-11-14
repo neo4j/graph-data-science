@@ -74,6 +74,9 @@ public class NeighborhoodSimilarityBenchmark {
     int concurrency;
 
     @Param(value = {"0", "100"})
+    int top;
+
+    @Param(value = {"0", "100"})
     int topk;
 
     @Param(value = {"5"})
@@ -83,7 +86,7 @@ public class NeighborhoodSimilarityBenchmark {
 
     @Setup
     public void setup() {
-        config = new NeighborhoodSimilarity.Config(0, 0, 0, topk, concurrency, ParallelUtil.DEFAULT_BATCH_SIZE);
+        config = new NeighborhoodSimilarity.Config(0, 0, top, topk, concurrency, ParallelUtil.DEFAULT_BATCH_SIZE);
         db = TestDatabaseCreator.createTestDatabase();
 
         createGraph(db, scaleFactor);
@@ -114,7 +117,7 @@ public class NeighborhoodSimilarityBenchmark {
     @Benchmark
     public void jaccardSimilarity(Blackhole blackhole) {
         List<Map<String, Object>> jaccardInput = prepareProcedureInput();
-        Map<String, Object> procedureConfig = MapUtil.map("concurrency", concurrency, "topK", topk);
+        Map<String, Object> procedureConfig = MapUtil.map("concurrency", concurrency, "top", top, "topK", topk);
         runJaccardProcedure(blackhole, jaccardInput, procedureConfig);
     }
 
