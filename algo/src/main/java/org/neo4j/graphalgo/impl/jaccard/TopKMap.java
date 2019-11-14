@@ -72,7 +72,7 @@ public class TopKMap {
         topKLists.get(node1).accept(node2, similarity);
     }
 
-    public void forEach(SimilarityPairConsumer consumer) {
+    public void forEach(BoundedLongLongPriorityQueue.Consumer consumer) {
         SetBitsIterable items = new SetBitsIterable(nodeFilter);
         items.stream().forEach(element1 -> {
             BoundedLongPriorityQueue queue = topKLists.get(element1).queue;

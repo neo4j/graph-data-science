@@ -26,6 +26,10 @@ import java.util.stream.LongStream;
 
 public abstract class BoundedLongLongPriorityQueue {
 
+    public interface Consumer {
+        void accept(long element1, long element2, double priority);
+    }
+
     private final int bound;
     private double minValue = Double.NaN;
 
@@ -43,7 +47,7 @@ public abstract class BoundedLongLongPriorityQueue {
 
     public abstract void offer(long element1, long element2, double priority);
 
-    public abstract void foreach(SimilarityPairConsumer consumer);
+    public abstract void foreach(Consumer consumer);
 
     public int count() {
         return elementCount;
@@ -96,7 +100,7 @@ public abstract class BoundedLongLongPriorityQueue {
             }
 
             @Override
-            public void foreach(SimilarityPairConsumer consumer) {
+            public void foreach(Consumer consumer) {
                 for (int i = 0; i < elementCount; i++) {
                     consumer.accept(elements1[i], elements2[i], -priorities[i]);
                 }
@@ -120,7 +124,7 @@ public abstract class BoundedLongLongPriorityQueue {
             }
 
             @Override
-            public void foreach(SimilarityPairConsumer consumer) {
+            public void foreach(Consumer consumer) {
                 for (int i = 0; i < elementCount; i++) {
                     consumer.accept(elements1[i], elements2[i], priorities[i]);
                 }

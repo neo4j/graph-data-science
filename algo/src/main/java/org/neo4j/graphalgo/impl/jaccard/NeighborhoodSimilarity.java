@@ -235,8 +235,8 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         topKMap.forEach(topNLongPriorityQueue::offer);
 
         List<SimilarityResult> topNResults = new ArrayList<>(absTop);
-        topNLongPriorityQueue.foreach((element1, element2, priority) ->
-            topNResults.add(new SimilarityResult(element1, element2, priority)));
+        topNLongPriorityQueue.foreach((node1, node2, similarity) ->
+            topNResults.add(new SimilarityResult(node1, node2, similarity)));
         return topNResults.stream();
     }
 
