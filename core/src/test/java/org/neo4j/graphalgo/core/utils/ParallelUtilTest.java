@@ -67,6 +67,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.neo4j.graphalgo.core.utils.ParallelUtil.parallelStream;
+import static org.neo4j.graphalgo.core.utils.ParallelUtil.parallelStreamConsume;
 
 final class ParallelUtilTest {
 
@@ -93,6 +94,32 @@ final class ParallelUtilTest {
         });
 
         assertEquals((lastNum + firstNum) * lastNum / 2, actualTotal);
+    }
+
+    @Test
+    void shouldParallelizeStreamsWithLimitedConcurrency() {
+        LongStream data = LongStream.range(0, 100_000);
+        parallelStream(data, Pools.DEFAULT_CONCURRENCY - 1, (s) -> {
+            assertTrue(s.isParallel());
+            Thread thread = Thread.currentThread();
+            assertTrue(thread instanceof ForkJoinWorkerThread);
+            ForkJoinPool threadPool = ((ForkJoinWorkerThread) thread).getPool();
+            assertEquals(Pools.DEFAULT_CONCURRENCY - 1, threadPool.getParallelism());
+
+            return s.reduce(0L, Long::sum);
+        });
+    }
+
+    @Test
+    void shouldParallelizeAndConsumeStreamsWithLimitedConcurrency() {
+        LongStream data = LongStream.range(0, 100_000);
+        parallelStreamConsume(data, Pools.DEFAULT_CONCURRENCY - 1, (s) -> {
+            assertTrue(s.isParallel());
+            Thread thread = Thread.currentThread();
+            assertTrue(thread instanceof ForkJoinWorkerThread);
+            ForkJoinPool threadPool = ((ForkJoinWorkerThread) thread).getPool();
+            assertEquals(Pools.DEFAULT_CONCURRENCY - 1, threadPool.getParallelism());
+        });
     }
 
     @Test

@@ -74,7 +74,11 @@ public final class Pools {
     }
 
     public static ForkJoinPool createFJPool() {
-        return new ForkJoinPool(DEFAULT_CONCURRENCY);
+        return createFJPool(DEFAULT_CONCURRENCY);
+    }
+
+    public static ForkJoinPool createFJPool(int concurrency) {
+        return new ForkJoinPool(concurrency);
     }
 
     static class CallerBlocksPolicy implements RejectedExecutionHandler {
