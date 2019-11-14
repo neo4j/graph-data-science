@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.write.Exporter;
+import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.modularity.ModularityOptimization;
 import org.neo4j.graphalgo.impl.modularity.ModularityOptimizationFactory;
@@ -104,8 +104,7 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
                 setup.graph,
                 modularity,
                 setup.procedureConfig,
-                writeProperty.get(),
-                setup.tracker
+                writeProperty.get()
             );
 
             setup.graph.releaseProperties();
@@ -180,11 +179,10 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
         Graph graph,
         ModularityOptimization modularityOptimization,
         ProcedureConfiguration configuration,
-        String writeProperty,
-        AllocationTracker tracker
+        String writeProperty
     ) {
         try (ProgressTimer ignored = timer.get()) {
-            write(graph, modularityOptimization, configuration, writeProperty, tracker);
+            write(graph, modularityOptimization, configuration, writeProperty);
         }
     }
 
@@ -192,17 +190,16 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
         Graph graph,
         ModularityOptimization modularityOptimization,
         ProcedureConfiguration procedureConfiguration,
-        String writeProperty,
-        AllocationTracker tracker
+        String writeProperty
     ) {
         log.debug("Writing results");
 
-        Exporter exporter = Exporter.of(api, graph)
+        TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
+        NodePropertyExporter exporter = NodePropertyExporter.of(api, graph, terminationFlag)
             .withLog(log)
             .parallel(
                 Pools.DEFAULT,
-                procedureConfiguration.getWriteConcurrency(),
-                TerminationFlag.wrap(transaction)
+                procedureConfiguration.getWriteConcurrency()
             )
             .build();
         exporter.write(
