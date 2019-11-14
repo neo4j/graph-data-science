@@ -100,7 +100,9 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         }
 
         // Log progress
-        return log(stream);
+        stream = log(stream);
+
+        return assertRunning(stream);
     }
 
     public SimilarityGraphResult computeToGraph(Direction direction) {
@@ -262,6 +264,15 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         return stream.peek(sim -> {
             if ((sim.node1 & (logInterval - 1)) == 0) {
                 progressLogger.logProgress(sim.node1, nodesToCompare);
+            }
+        });
+    }
+
+    private Stream<SimilarityResult> assertRunning(Stream<SimilarityResult> stream) {
+        long checkInterval = Math.max(1, BitUtil.nearbyPowerOfTwo(nodesToCompare / 100));
+        return stream.peek(sim -> {
+            if ((sim.node1 & (checkInterval - 1)) == 0) {
+                assertRunning();
             }
         });
     }
