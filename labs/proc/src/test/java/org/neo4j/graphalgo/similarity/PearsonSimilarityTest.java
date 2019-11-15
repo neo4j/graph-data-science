@@ -17,9 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.similarity;
+package org.neo4j.graphalgo.similarity;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.SimilaritiesFunc;
+import org.neo4j.graphalgo.impl.similarity.SimilarityVectorAggregator;
 import org.neo4j.graphdb.Node;
 import org.neo4j.helpers.collection.MapUtil;
 
