@@ -191,7 +191,21 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
                        " write," +
                        " writeMillis," +
                        " writeProperty," +
-                       " writeRelationshipType";
+                       " writeRelationshipType," +
+                       " min," +
+                       " max," +
+                       " mean," +
+                       " stdDev," +
+                       " p1," +
+                       " p5," +
+                       " p10," +
+                       " p25," +
+                       " p50," +
+                       " p75," +
+                       " p90," +
+                       " p95," +
+                       " p99," +
+                       " p100";
 
         runQuery(query, MapUtil.map("graph", graphImpl, "direction", direction.name()),
             row -> {
@@ -203,6 +217,20 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
                 assertThat("Missing computeMillis", -1L, lessThan(row.getNumber("computeMillis").longValue()));
                 assertThat("Missing loadMillis", -1L, lessThan(row.getNumber("loadMillis").longValue()));
                 assertThat("Missing writeMillis", -1L, lessThan(row.getNumber("writeMillis").longValue()));
+                assertThat("Missing min", -1.0, lessThan(row.getNumber("min").doubleValue()));
+                assertThat("Missing max", -1.0, lessThan(row.getNumber("max").doubleValue()));
+                assertThat("Missing mean", -1.0, lessThan(row.getNumber("mean").doubleValue()));
+                assertThat("Missing stdDev", -1.0, lessThan(row.getNumber("stdDev").doubleValue()));
+                assertThat("Missing p1", -1.0, lessThan(row.getNumber("p1").doubleValue()));
+                assertThat("Missing p5", -1.0, lessThan(row.getNumber("p5").doubleValue()));
+                assertThat("Missing p10", -1.0, lessThan(row.getNumber("p10").doubleValue()));
+                assertThat("Missing p25", -1.0, lessThan(row.getNumber("p25").doubleValue()));
+                assertThat("Missing p50", -1.0, lessThan(row.getNumber("p50").doubleValue()));
+                assertThat("Missing p75", -1.0, lessThan(row.getNumber("p75").doubleValue()));
+                assertThat("Missing p90", -1.0, lessThan(row.getNumber("p90").doubleValue()));
+                assertThat("Missing p95", -1.0, lessThan(row.getNumber("p95").doubleValue()));
+                assertThat("Missing p99", -1.0, lessThan(row.getNumber("p99").doubleValue()));
+                assertThat("Missing p100", -1.0, lessThan(row.getNumber("p100").doubleValue()));
             }
         );
 

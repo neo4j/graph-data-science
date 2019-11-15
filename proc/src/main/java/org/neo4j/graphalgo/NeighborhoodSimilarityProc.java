@@ -20,6 +20,7 @@
 
 package org.neo4j.graphalgo;
 
+import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
@@ -39,6 +40,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphdb.Direction.OUTGOING;
@@ -134,6 +136,7 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
 
         Graph similarityGraph = similarityGraphResult.similarityGraph();
         resultBuilder
+            .withHistogram(similarityGraphResult.histogram())
             .withNodesCompared(similarityGraphResult.comparedNodes())
             .withRelationshipCount(similarityGraph.relationshipCount());
 
@@ -187,7 +190,16 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
         int top = procedureConfiguration.getInt(TOP_KEY, TOP_DEFAULT);
         int concurrency = procedureConfiguration.getConcurrency();
         int batchSize = procedureConfiguration.getBatchSize();
-        return new NeighborhoodSimilarity.Config(similarityCutoff, degreeCutoff, top, topK, concurrency, batchSize);
+        boolean computeHistogram = procedureConfiguration.computeHistogram();
+        return new NeighborhoodSimilarity.Config(
+            similarityCutoff,
+            degreeCutoff,
+            top,
+            topK,
+            concurrency,
+            batchSize,
+            computeHistogram
+        );
     }
 
     private int validTopK(ProcedureConfiguration config) {
@@ -217,6 +229,21 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
         public final String writeRelationshipType;
         public final String writeProperty;
 
+        public final double min;
+        public final double max;
+        public final double mean;
+        public final double stdDev;
+        public final double p1;
+        public final double p5;
+        public final double p10;
+        public final double p25;
+        public final double p50;
+        public final double p75;
+        public final double p90;
+        public final double p95;
+        public final double p99;
+        public final double p100;
+
         NeighborhoodSimilarityResult(
             long loadMillis,
             long computeMillis,
@@ -225,7 +252,21 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
             long relationships,
             boolean write,
             String writeRelationshipType,
-            String writeProperty
+            String writeProperty,
+            double min,
+            double max,
+            double mean,
+            double stdDev,
+            double p1,
+            double p5,
+            double p10,
+            double p25,
+            double p50,
+            double p75,
+            double p90,
+            double p95,
+            double p99,
+            double p100
         ) {
             this.loadMillis = loadMillis;
             this.computeMillis = computeMillis;
@@ -235,6 +276,20 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
             this.write = write;
             this.writeRelationshipType = writeRelationshipType;
             this.writeProperty = writeProperty;
+            this.min = min;
+            this.max = max;
+            this.mean = mean;
+            this.stdDev = stdDev;
+            this.p1 = p1;
+            this.p5 = p5;
+            this.p10 = p10;
+            this.p25 = p25;
+            this.p50 = p50;
+            this.p75 = p75;
+            this.p90 = p90;
+            this.p95 = p95;
+            this.p99 = p99;
+            this.p100 = p100;
         }
     }
 
@@ -243,6 +298,7 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
         private long nodesCompared = 0L;
 
         private String writeRelationshipType;
+        private Optional<DoubleHistogram> maybeHistogram;
 
         WriteResultBuilder withNodesCompared(long nodesCompared) {
             this.nodesCompared = nodesCompared;
@@ -251,6 +307,11 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
 
         WriteResultBuilder withWriteRelationshipType(String writeRelationshipType) {
             this.writeRelationshipType = writeRelationshipType;
+            return this;
+        }
+
+        WriteResultBuilder withHistogram(Optional<DoubleHistogram> maybeHistogram) {
+            this.maybeHistogram = maybeHistogram;
             return this;
         }
 
@@ -264,7 +325,21 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
                 relationshipCount,
                 write,
                 writeRelationshipType,
-                writeProperty
+                writeProperty,
+                maybeHistogram.map(DoubleHistogram::getMinValue).orElse(-1.0),
+                maybeHistogram.map(DoubleHistogram::getMaxValue).orElse(-1.0),
+                maybeHistogram.map(DoubleHistogram::getMean).orElse(-1.0),
+                maybeHistogram.map(DoubleHistogram::getStdDeviation).orElse(-1.0),
+                maybeHistogram.map(histogram -> histogram.getValueAtPercentile(1)).orElse(-1.0),
+                maybeHistogram.map(histogram -> histogram.getValueAtPercentile(5)).orElse(-1.0),
+                maybeHistogram.map(histogram -> histogram.getValueAtPercentile(10)).orElse(-1.0),
+                maybeHistogram.map(histogram -> histogram.getValueAtPercentile(25)).orElse(-1.0),
+                maybeHistogram.map(histogram -> histogram.getValueAtPercentile(50)).orElse(-1.0),
+                maybeHistogram.map(histogram -> histogram.getValueAtPercentile(75)).orElse(-1.0),
+                maybeHistogram.map(histogram -> histogram.getValueAtPercentile(90)).orElse(-1.0),
+                maybeHistogram.map(histogram -> histogram.getValueAtPercentile(95)).orElse(-1.0),
+                maybeHistogram.map(histogram -> histogram.getValueAtPercentile(99)).orElse(-1.0),
+                maybeHistogram.map(histogram -> histogram.getValueAtPercentile(100)).orElse(-1.0)
             );
         }
     }

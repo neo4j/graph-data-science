@@ -103,22 +103,20 @@ YIELD nodesCompared, relationships, write, writeRelationshipType, writeProperty
 | loadMillis            | int     | Milliseconds for loading data.
 | computeMillis         | int     | Milliseconds for running the algorithm.
 | writeMillis           | int     | Milliseconds for writing result data back.
-// TODO: uncomment when histogram is implemented
-//| postProcessingMillis  | int     | Milliseconds for computing percentiles and community count.
-//| min                   | double  | The minimum similarity score computed.
-//| max                   | double  | The maximum similarity score computed.
-//| mean                  | double  | The mean of similarities scores computed.
-//| stdDev                | double  | The standard deviation of similarities scores computed.
-//| p1                    | double  | The 1 percentile of similarity scores computed.
-//| p5                    | double  | The 5 percentile of similarity scores computed.
-//| p10                   | double  | The 10 percentile of similarity scores computed.
-//| p25                   | double  | The 25 percentile of similarity scores computed.
-//| p50                   | double  | The 50 percentile of similarity scores computed.
-//| p75                   | double  | The 75 percentile of similarity scores computed.
-//| p90                   | double  | The 90 percentile of similarity scores computed.
-//| p95                   | double  | The 95 percentile of similarity scores computed.
-//| p99                   | double  | The 99 percentile of similarity scores computed.
-//| p100                  | double  | The 100 percentile of similarity scores computed.
+| min                   | double  | The minimum similarity score computed.
+| max                   | double  | The maximum similarity score computed.
+| mean                  | double  | The mean of similarities scores computed.
+| stdDev                | double  | The standard deviation of similarities scores computed.
+| p1                    | double  | The 1 percentile of similarity scores computed.
+| p5                    | double  | The 5 percentile of similarity scores computed.
+| p10                   | double  | The 10 percentile of similarity scores computed.
+| p25                   | double  | The 25 percentile of similarity scores computed.
+| p50                   | double  | The 50 percentile of similarity scores computed.
+| p75                   | double  | The 75 percentile of similarity scores computed.
+| p90                   | double  | The 90 percentile of similarity scores computed.
+| p95                   | double  | The 95 percentile of similarity scores computed.
+| p99                   | double  | The 99 percentile of similarity scores computed.
+| p100                  | double  | The 100 percentile of similarity scores computed.
 |===
 
 [[algorithms-neighborhood-similarity-syntax-stream]]

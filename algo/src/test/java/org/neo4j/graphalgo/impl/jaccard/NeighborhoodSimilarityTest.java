@@ -53,7 +53,6 @@ import java.util.stream.Stream;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -113,7 +112,8 @@ final class NeighborhoodSimilarityTest {
             0,
             0,
             Pools.DEFAULT_CONCURRENCY,
-            ParallelUtil.DEFAULT_BATCH_SIZE
+            ParallelUtil.DEFAULT_BATCH_SIZE,
+            true
         )); 
     }
 
@@ -454,7 +454,8 @@ final class NeighborhoodSimilarityTest {
             0,
             100,
             Pools.DEFAULT_CONCURRENCY,
-            ParallelUtil.DEFAULT_BATCH_SIZE
+            ParallelUtil.DEFAULT_BATCH_SIZE,
+            true
         );
 
         NeighborhoodSimilarityFactory factory = new NeighborhoodSimilarityFactory(
@@ -506,7 +507,8 @@ final class NeighborhoodSimilarityTest {
             100,
             100,
             Pools.DEFAULT_CONCURRENCY,
-            ParallelUtil.DEFAULT_BATCH_SIZE
+            ParallelUtil.DEFAULT_BATCH_SIZE,
+            true
         );
 
         NeighborhoodSimilarityFactory factory = new NeighborhoodSimilarityFactory(
@@ -594,7 +596,8 @@ final class NeighborhoodSimilarityTest {
                 top,
                 topK,
                 concurrency,
-                config.minBatchSize()
+                config.minBatchSize(),
+                true
             );
         }
     }

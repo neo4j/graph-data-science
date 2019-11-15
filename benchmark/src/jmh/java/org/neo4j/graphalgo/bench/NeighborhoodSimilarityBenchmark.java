@@ -86,7 +86,7 @@ public class NeighborhoodSimilarityBenchmark {
 
     @Setup
     public void setup() {
-        config = new NeighborhoodSimilarity.Config(0, 0, top, topk, concurrency, ParallelUtil.DEFAULT_BATCH_SIZE);
+        config = new NeighborhoodSimilarity.Config(0, 0, top, topk, concurrency, ParallelUtil.DEFAULT_BATCH_SIZE, true);
         db = TestDatabaseCreator.createTestDatabase();
 
         createGraph(db, scaleFactor);
