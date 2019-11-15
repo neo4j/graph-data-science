@@ -398,7 +398,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         initDatabase();
         GraphsByRelationshipType graphs = new GraphLoader(db)
             .withAnyLabel()
-            .withRelationshipType("REL1 | REL2")
+            .withRelationshipType("REL1 | REL2 | REL3")
+            .withDirection(OUTGOING)
             .build(graphFactory)
             .importAllGraphs();
 
