@@ -42,6 +42,7 @@ class ListProcTest extends ProcTestBase {
     private static final List<String> PROCEDURES = asList(
         "algo.beta.graph.generate",
         "algo.beta.k1coloring",
+        "algo.beta.k1coloring.memrec",
         "algo.beta.k1coloring.stream",
         "algo.beta.labelPropagation",
         "algo.beta.labelPropagation.stream",
