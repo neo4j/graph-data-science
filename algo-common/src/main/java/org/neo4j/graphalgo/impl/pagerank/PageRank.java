@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 
+import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
@@ -232,10 +233,13 @@ public class PageRank extends Algorithm<PageRank> {
         if (batchSize == 0) {
             return Partition.MAX_NODE_COUNT;
         }
-        // multiply batchsize by 8 as a very rough estimate of an average
-        // degree of 8 for nodes, so that every partition has approx
-        // batchSize relationships.
-        return Math.toIntExact(batchSize * 8L);
+
+        // multiply batchsize by average degree, so that the resulting
+        // partitions are sized closer to the provided batchSize
+        long averageDegree = Math.max(1, ceilDiv(graph.relationshipCount(), graph.nodeCount()));
+        long degreeBatchSize = averageDegree * batchSize;
+
+        return (int) Math.min(degreeBatchSize, Partition.MAX_NODE_COUNT);
     }
 
     private List<Partition> partitionGraph(
