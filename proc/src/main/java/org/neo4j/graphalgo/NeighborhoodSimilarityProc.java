@@ -90,7 +90,7 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
         NeighborhoodSimilarity neighborhoodSimilarity = newAlgorithm(graph, configuration, tracker);
 
         Direction direction = configuration.getDirection(COMPUTE_DIRECTION_DEFAULT);
-        return neighborhoodSimilarity.computeToStream(direction);
+        return runWithExceptionLogging("NeighborhoodSimilarity compute failed", () -> neighborhoodSimilarity.computeToStream(direction));
     }
 
     @Procedure(name = "algo.beta.jaccard", mode = Mode.WRITE)
@@ -127,18 +127,27 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
         NeighborhoodSimilarity neighborhoodSimilarity = newAlgorithm(graph, configuration, tracker);
 
         Direction direction = configuration.getDirection(COMPUTE_DIRECTION_DEFAULT);
-        SimilarityGraphResult similarityGraphResult = neighborhoodSimilarity.computeToGraph(direction);
+        SimilarityGraphResult similarityGraphResult = runWithExceptionLogging(
+            "NeighborhoodSimilarity compute failed",
+            () -> resultBuilder.timeEval(() -> neighborhoodSimilarity.computeToGraph(direction))
+        );
+
         Graph similarityGraph = similarityGraphResult.similarityGraph();
         resultBuilder
             .withNodesCompared(similarityGraphResult.comparedNodes())
             .withRelationshipCount(similarityGraph.relationshipCount());
 
         if (configuration.isWriteFlag() && similarityGraph.relationshipCount() > 0) {
-            RelationshipExporter
-                .of(api, similarityGraph, similarityGraph.getLoadDirection(), neighborhoodSimilarity.terminationFlag)
-                .withLog(log)
-                .build()
-                .write(writeRelationshipType, writeProperty, WRITE_PROPERTY_VALUE_DEFAULT);
+            runWithExceptionLogging(
+                "NeighborhoodSimilarity write-back failed",
+                () -> resultBuilder.timeWrite(
+                    () -> RelationshipExporter
+                            .of(api, similarityGraph, similarityGraph.getLoadDirection(), neighborhoodSimilarity.terminationFlag)
+                            .withLog(log)
+                            .build()
+                            .write(writeRelationshipType, writeProperty, WRITE_PROPERTY_VALUE_DEFAULT)
+                )
+            );
         }
         return Stream.of(resultBuilder.build());
     }

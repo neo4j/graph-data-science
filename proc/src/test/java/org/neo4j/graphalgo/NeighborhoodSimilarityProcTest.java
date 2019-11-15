@@ -44,6 +44,7 @@ import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
@@ -182,7 +183,15 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
                        "        graph: $graph," +
                        "        direction: $direction" +
                        "    }" +
-                       ") YIELD nodesCompared, relationships, write, writeRelationshipType, writeProperty";
+                       ") YIELD" +
+                       " computeMillis," +
+                       " loadMillis," +
+                       " nodesCompared, " +
+                       " relationships," +
+                       " write," +
+                       " writeMillis," +
+                       " writeProperty," +
+                       " writeRelationshipType";
 
         runQuery(query, MapUtil.map("graph", graphImpl, "direction", direction.name()),
             row -> {
@@ -191,6 +200,9 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
                 assertEquals(true, row.getBoolean("write"));
                 assertEquals("SIMILAR", row.getString("writeRelationshipType"));
                 assertEquals("score", row.getString("writeProperty"));
+                assertThat("Missing computeMillis", -1L, lessThan(row.getNumber("computeMillis").longValue()));
+                assertThat("Missing loadMillis", -1L, lessThan(row.getNumber("loadMillis").longValue()));
+                assertThat("Missing writeMillis", -1L, lessThan(row.getNumber("writeMillis").longValue()));
             }
         );
 
