@@ -34,7 +34,8 @@ import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.MultipleRelTypesSupport;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
 import org.neo4j.graphalgo.core.utils.Pools;
-import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Optional;
@@ -55,6 +56,7 @@ import static org.neo4j.graphalgo.core.DeduplicationStrategy.MAX;
 import static org.neo4j.graphalgo.core.DeduplicationStrategy.MIN;
 import static org.neo4j.graphalgo.core.DeduplicationStrategy.SKIP;
 import static org.neo4j.graphalgo.core.DeduplicationStrategy.SUM;
+import static org.neo4j.graphdb.Direction.OUTGOING;
 import static org.neo4j.helpers.collection.Iterables.asSet;
 
 class GraphLoaderMultipleRelTypesAndPropertiesTest {
@@ -206,7 +208,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
                         PropertyMapping.of("agg2", "p2", 2.0, DeduplicationStrategy.NONE),
                         PropertyMapping.of("agg3", "p3", 2.0, DeduplicationStrategy.NONE)
                 )
-                .withDirection(Direction.OUTGOING)
+                .withDirection(OUTGOING)
                 .build(graphImpl)
                 .importAllGraphs();
 
@@ -251,7 +253,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
                         PropertyMapping.of("agg2", "p1", 50.0, MAX),
                         PropertyMapping.of("agg3", "p1", 3.0, SUM)
                 )
-                .withDirection(Direction.OUTGOING)
+                .withDirection(OUTGOING)
                 .build(graphImpl)
                 .importAllGraphs();
 
@@ -294,7 +296,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
                                 PropertyMapping.of("p1", "p1", 1.0, DeduplicationStrategy.NONE),
                                 PropertyMapping.of("p2", "p2", 2.0, SUM)
                         )
-                        .withDirection(Direction.OUTGOING)
+                        .withDirection(OUTGOING)
                         .build(graphImpl)
                         .importAllGraphs());
 
@@ -322,7 +324,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
                         PropertyMapping.of("agg1", "p1", 1.0, MAX),
                         PropertyMapping.of("agg2", "p1", 2.0, MIN)
                 )
-                .withDirection(Direction.OUTGOING)
+                .withDirection(OUTGOING)
                 .build(graphImpl)
                 .importAllGraphs();
 
@@ -354,7 +356,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
                 .withRelationshipProperties(
                         PropertyMapping.of("agg", "p1", 1.0, MAX)
                 )
-                .withDirection(Direction.OUTGOING)
+                .withDirection(OUTGOING)
                 .build(graphImpl)
                 .importAllGraphs();
 
@@ -362,6 +364,64 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
         assertEquals(1L, g.nodeCount());
         assertEquals(3L, g.relationshipCount());
         assertOutProperties(g, 0, 42, 44, 84);
+    }
+
+    @AllGraphTypesWithMultipleRelTypeSupportTest
+    <T extends GraphFactory & MultipleRelTypesSupport> void multipleRelTypeGraphsCanBeReleased(Class<T> graphFactory) {
+        initDatabase();
+        GraphsByRelationshipType graphs = new GraphLoader(db)
+            .withAnyLabel()
+            .withRelationshipType("REL1 | REL2")
+            .build(graphFactory)
+            .importAllGraphs();
+
+        Graph rel1Graph = graphs.getGraph("REL1");
+        Graph unionGraph = graphs.getUnion();
+
+        rel1Graph.release();
+
+        assertThrows(NullPointerException.class, () -> rel1Graph.forEachNode(n -> {
+            rel1Graph.forEachRelationship(n, OUTGOING, (s, t) -> true);
+            return true;
+        }), "Graph should release");
+
+        unionGraph.release();
+
+        assertThrows(NullPointerException.class, () -> unionGraph.forEachNode(n -> {
+            unionGraph.forEachRelationship(n, OUTGOING, (s, t) -> true);
+            return true;
+        }), "UnionGraph should release");
+    }
+
+    @AllGraphTypesWithMultipleRelTypeSupportTest
+    <T extends GraphFactory & MultipleRelTypesSupport> void multipleRelTypeGraphsGiveCorrectElementCounts(Class<T> graphFactory) {
+        initDatabase();
+        GraphsByRelationshipType graphs = new GraphLoader(db)
+            .withAnyLabel()
+            .withRelationshipType("REL1 | REL2")
+            .build(graphFactory)
+            .importAllGraphs();
+
+        Graph rel1Graph = graphs.getGraph("REL1");
+        Graph unionGraph = graphs.getUnion();
+
+        long unionGraphExpectedNodeCount;
+        long unionGraphExpectedRelCount;
+        long rel1GraphExpectedNodeCount;
+        long rel1GraphExpectedRelCount;
+        try (Transaction tx = db.beginTx()) {
+            unionGraphExpectedNodeCount = db.getAllNodes().stream().count();
+            unionGraphExpectedRelCount = db.getAllRelationships().stream().count();
+            // The graphs share the node mapping, so we expect the node count for a subgraph
+            // to be equal to the node Count for the entire Neo4j graph
+            rel1GraphExpectedNodeCount = db.getAllNodes().stream().count();
+            rel1GraphExpectedRelCount = db.getAllRelationships().stream().filter(r -> r.isType(RelationshipType.withName("REL1"))).count();
+        }
+
+        assertEquals(unionGraphExpectedNodeCount, unionGraph.nodeCount());
+        assertEquals(unionGraphExpectedRelCount, unionGraph.relationshipCount());
+        assertEquals(rel1GraphExpectedNodeCount, rel1Graph.nodeCount());
+        assertEquals(rel1GraphExpectedRelCount, rel1Graph.relationshipCount());
     }
 
     static Stream<Arguments> globalAndLocalDeduplicationArguments() {
@@ -410,7 +470,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
                         PropertyMapping.of("p1", "p1", 1.0, localDeduplicationStrategy1),
                         PropertyMapping.of("p2", "p2", 2.0, localDeduplicationStrategy2)
                 )
-                .withDirection(Direction.OUTGOING)
+                .withDirection(OUTGOING)
                 .build(graphImpl)
                 .importAllGraphs();
 
@@ -466,7 +526,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest {
                         PropertyMapping.of("p1", "p1", 1.0, deduplicationStrategy),
                         PropertyMapping.of("p2", "p2", 2.0, deduplicationStrategy)
                 )
-                .withDirection(Direction.OUTGOING)
+                .withDirection(OUTGOING)
                 .build(graphImpl)
                 .importAllGraphs();
 
