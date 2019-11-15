@@ -198,8 +198,8 @@ public class K1Coloring extends Algorithm<K1Coloring> {
         TaskProducer<T> taskSupplier
     ) {
 
-        long cumulativeDegree = direction == Direction.BOTH ? graph.relationshipCount() / 2 : graph.relationshipCount();
-        long adjustedDegree = cumulativeDegree * (nodesToColor.cardinality() / nodeCount);
+        long cumulativeDegree = graph.relationshipCount();
+        long adjustedDegree = ceilDiv(cumulativeDegree, nodeCount) * nodesToColor.cardinality();
 
         long batchDegree = ParallelUtil.adjustedBatchSize(
             adjustedDegree,
@@ -208,12 +208,16 @@ public class K1Coloring extends Algorithm<K1Coloring> {
             Integer.MAX_VALUE
         );
 
+        if (direction == Direction.BOTH) {
+            batchDegree *= 2;
+        }
+
         Collection<T> tasks = new ArrayList<>(concurrency);
         long currentNode = nodesToColor.nextSetBit(0);
-        long lastNode;
+        long lastNode = 0;
         long batchStart = currentNode;
         long currentDegree = 0L;
-        do {
+        while (currentNode >= 0 && currentNode < nodeCount-1) {
             currentDegree += graph.degree(currentNode, direction);
 
             if (currentDegree >= batchDegree) {
@@ -224,7 +228,7 @@ public class K1Coloring extends Algorithm<K1Coloring> {
             }
             lastNode = currentNode;
             currentNode = nodesToColor.nextSetBit(currentNode + 1);
-        } while (currentNode >= 0 && currentNode < nodeCount);
+        }
 
         if (currentDegree > 0) {
             tasks.add(taskSupplier.produce(batchStart, lastNode));
