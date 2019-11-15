@@ -191,7 +191,7 @@ public final class UnionGraph implements Graph {
     @Override
     public void releaseTopology() {
         for (Graph graph : graphs) {
-            graph.releaseProperties();
+            graph.releaseTopology();
         }
     }
 

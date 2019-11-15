@@ -118,7 +118,6 @@ public interface GraphsByRelationshipType {
 
         private MultipleRelationshipTypes(Map<String, Map<String, Graph>> graphs) {
             this.graphs = graphs;
-            forEach(g -> g.canRelease(false));
         }
 
         @Override
