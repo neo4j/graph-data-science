@@ -127,7 +127,9 @@ class K1ColoringTest {
 
         K1Coloring k1Coloring = new K1Coloring(
             graph,
-            Direction.BOTH, 100, DEFAULT_BATCH_SIZE,
+            Direction.BOTH,
+            100,
+            DEFAULT_BATCH_SIZE,
             2,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
@@ -135,6 +137,8 @@ class K1ColoringTest {
 
         k1Coloring.compute();
         HugeLongArray colors = k1Coloring.colors();
+
+        System.out.println(k1Coloring.ranIterations());
 
         Set<Long> colorsUsed = new HashSet<>(100);
         MutableLong conflicts = new MutableLong(0);

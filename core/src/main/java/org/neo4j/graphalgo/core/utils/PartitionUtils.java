@@ -31,9 +31,9 @@ public class PartitionUtils {
 
     public static <T extends Runnable> Collection<T> numberAlignedPartitioning(
         TaskProducer<T> taskSupplier,
-        long alignTo,
+        int concurrency,
         long nodeCount,
-        int concurrency
+        long alignTo
     ) {
         final long initialBatchSize = ParallelUtil.adjustedBatchSize(nodeCount, concurrency, alignTo);
         final long remainder = initialBatchSize % alignTo;
