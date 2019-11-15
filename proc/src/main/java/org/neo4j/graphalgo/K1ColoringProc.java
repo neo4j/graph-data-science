@@ -82,7 +82,7 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
     @Procedure(value = "algo.beta.k1coloring.memrec", mode = READ)
     @Description("CALL algo.beta.k1coloring.memrec(label:String, relationship:String, {...properties}) " +
                  "YIELD requiredMemory, treeView, bytesMin, bytesMax - estimates memory requirements for K1Coloring")
-    public Stream<MemRecResult> pageRankMemrec(
+    public Stream<MemRecResult> betaK1ColoringMemrec(
         @Name(value = "label", defaultValue = "") String label,
         @Name(value = "relationship", defaultValue = "") String relationshipType,
         @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
