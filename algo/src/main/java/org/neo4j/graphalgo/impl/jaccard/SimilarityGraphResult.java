@@ -20,29 +20,19 @@
 
 package org.neo4j.graphalgo.impl.jaccard;
 
-import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.graphalgo.api.Graph;
-
-import java.util.Optional;
 
 public class SimilarityGraphResult {
     private final Graph similarityGraph;
-
-    private final Optional<DoubleHistogram> maybeHistogram;
     private final long comparedNodes;
 
-    public SimilarityGraphResult(Graph similarityGraph, Optional<DoubleHistogram> histogram, long comparedNodes) {
+    SimilarityGraphResult(Graph similarityGraph, long comparedNodes) {
         this.similarityGraph = similarityGraph;
-        this.maybeHistogram = histogram;
         this.comparedNodes = comparedNodes;
     }
 
     public Graph similarityGraph() {
         return similarityGraph;
-    }
-
-    public Optional<DoubleHistogram> histogram() {
-        return maybeHistogram;
     }
 
     public long comparedNodes() {

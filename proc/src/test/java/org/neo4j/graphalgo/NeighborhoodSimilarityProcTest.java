@@ -205,7 +205,8 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
                        " p90," +
                        " p95," +
                        " p99," +
-                       " p100";
+                       " p100," +
+                       " postProcessingMillis";
 
         runQuery(query, MapUtil.map("graph", graphImpl, "direction", direction.name()),
             row -> {
@@ -231,6 +232,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
                 assertThat("Missing p95", -1.0, lessThan(row.getNumber("p95").doubleValue()));
                 assertThat("Missing p99", -1.0, lessThan(row.getNumber("p99").doubleValue()));
                 assertThat("Missing p100", -1.0, lessThan(row.getNumber("p100").doubleValue()));
+                assertThat("Missing postProcessingMillis", -1L, lessThan(row.getNumber("postProcessingMillis").longValue()));
             }
         );
 

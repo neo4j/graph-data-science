@@ -112,8 +112,7 @@ final class NeighborhoodSimilarityTest {
             0,
             0,
             Pools.DEFAULT_CONCURRENCY,
-            ParallelUtil.DEFAULT_BATCH_SIZE,
-            true
+            ParallelUtil.DEFAULT_BATCH_SIZE
         )); 
     }
 
@@ -454,8 +453,7 @@ final class NeighborhoodSimilarityTest {
             0,
             100,
             Pools.DEFAULT_CONCURRENCY,
-            ParallelUtil.DEFAULT_BATCH_SIZE,
-            true
+            ParallelUtil.DEFAULT_BATCH_SIZE
         );
 
         NeighborhoodSimilarityFactory factory = new NeighborhoodSimilarityFactory(
@@ -507,8 +505,7 @@ final class NeighborhoodSimilarityTest {
             100,
             100,
             Pools.DEFAULT_CONCURRENCY,
-            ParallelUtil.DEFAULT_BATCH_SIZE,
-            true
+            ParallelUtil.DEFAULT_BATCH_SIZE
         );
 
         NeighborhoodSimilarityFactory factory = new NeighborhoodSimilarityFactory(
@@ -596,8 +593,7 @@ final class NeighborhoodSimilarityTest {
                 top,
                 topK,
                 concurrency,
-                config.minBatchSize(),
-                true
+                config.minBatchSize()
             );
         }
     }

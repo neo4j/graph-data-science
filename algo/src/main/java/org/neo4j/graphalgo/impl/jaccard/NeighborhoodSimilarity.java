@@ -35,7 +35,6 @@ import org.neo4j.graphdb.Direction;
 
 import java.util.Comparator;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -125,19 +124,9 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     }
 
     public SimilarityGraphResult computeToGraph(Direction direction) {
-        Stream<SimilarityResult> similarities;
-
-        Optional<DoubleHistogram> maybeHistogram = Optional.empty();
-        if (config.computeHistogram()) {
-            DoubleHistogram histogram = new DoubleHistogram(5);
-            similarities = computeHistogram(computeToStream(direction), histogram);
-            maybeHistogram = Optional.of(histogram);
-        } else {
-            similarities = computeToStream(direction);
-        }
-
+        Stream<SimilarityResult> similarities = computeToStream(direction);
         Graph simGraph = new SimilarityGraphBuilder(graph, tracker).build(similarities);
-        return new SimilarityGraphResult(simGraph, maybeHistogram, nodesToCompare);
+        return new SimilarityGraphResult(simGraph, nodesToCompare);
     }
 
     private void prepare(Direction direction) {
@@ -296,16 +285,13 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         private final int concurrency;
         private final int minBatchSize;
 
-        private final boolean computeHistogram;
-
         public Config(
             double similarityCutoff,
             int degreeCutoff,
             int top,
             int topk,
             int concurrency,
-            int minBatchSize,
-            boolean computeHistogram
+            int minBatchSize
         ) {
             this.similarityCutoff = similarityCutoff;
             // TODO: make this constraint more prominent
@@ -314,7 +300,6 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
             this.topk = topk;
             this.concurrency = concurrency;
             this.minBatchSize = minBatchSize;
-            this.computeHistogram = computeHistogram;
         }
 
         public int topk() {
@@ -351,10 +336,6 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
 
         public boolean hasTop() {
             return top != 0;
-        }
-
-        public boolean computeHistogram() {
-            return computeHistogram;
         }
     }
 

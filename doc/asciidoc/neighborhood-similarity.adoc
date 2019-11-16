@@ -103,6 +103,7 @@ YIELD nodesCompared, relationships, write, writeRelationshipType, writeProperty
 | loadMillis            | int     | Milliseconds for loading data.
 | computeMillis         | int     | Milliseconds for running the algorithm.
 | writeMillis           | int     | Milliseconds for writing result data back.
+| postProcessingMillis  | int     | Milliseconds for computing percentiles.
 | min                   | double  | The minimum similarity score computed.
 | max                   | double  | The maximum similarity score computed.
 | mean                  | double  | The mean of similarities scores computed.

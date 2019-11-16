@@ -24,6 +24,7 @@ import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
+import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.RelationshipExporter;
@@ -92,7 +93,10 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
         NeighborhoodSimilarity neighborhoodSimilarity = newAlgorithm(graph, configuration, tracker);
 
         Direction direction = configuration.getDirection(COMPUTE_DIRECTION_DEFAULT);
-        return runWithExceptionLogging("NeighborhoodSimilarity compute failed", () -> neighborhoodSimilarity.computeToStream(direction));
+        return runWithExceptionLogging(
+            "NeighborhoodSimilarity compute failed",
+            () -> neighborhoodSimilarity.computeToStream(direction)
+        );
     }
 
     @Procedure(name = "algo.beta.jaccard", mode = Mode.WRITE)
@@ -136,7 +140,6 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
 
         Graph similarityGraph = similarityGraphResult.similarityGraph();
         resultBuilder
-            .withHistogram(similarityGraphResult.histogram())
             .withNodesCompared(similarityGraphResult.comparedNodes())
             .withRelationshipCount(similarityGraph.relationshipCount());
 
@@ -144,15 +147,48 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
             runWithExceptionLogging(
                 "NeighborhoodSimilarity write-back failed",
                 () -> resultBuilder.timeWrite(
-                    () -> RelationshipExporter
+                    () -> {
+                        RelationshipExporter exporter = RelationshipExporter
                             .of(api, similarityGraph, similarityGraph.getLoadDirection(), neighborhoodSimilarity.terminationFlag)
                             .withLog(log)
-                            .build()
-                            .write(writeRelationshipType, writeProperty, WRITE_PROPERTY_VALUE_DEFAULT)
+                            .build();
+                        if (configuration.computeHistogram()) {
+                            DoubleHistogram histogram = new DoubleHistogram(5);
+                            exporter.write(
+                                writeRelationshipType,
+                                writeProperty,
+                                WRITE_PROPERTY_VALUE_DEFAULT,
+                                (node1, node2, similarity) -> {
+                                    histogram.recordValue(similarity);
+                                    return true;
+                                }
+                            );
+                            resultBuilder.withHistogram(histogram);
+                        } else {
+                            exporter.write(writeRelationshipType, writeProperty, WRITE_PROPERTY_VALUE_DEFAULT);
+                        }
+                    }
                 )
             );
+        } else if (configuration.computeHistogram()) {
+            try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {
+                resultBuilder.withHistogram(computeHistogram(similarityGraph));
+            }
         }
         return Stream.of(resultBuilder.build());
+    }
+
+    private DoubleHistogram computeHistogram(Graph similarityGraph) {
+        DoubleHistogram histogram = new DoubleHistogram(5);
+        similarityGraph.forEachNode(nodeId -> {
+                similarityGraph.forEachRelationship(nodeId, OUTGOING, 0.0, (node1, node2, property) -> {
+                    histogram.recordValue(property);
+                    return true;
+                });
+                return true;
+            }
+        );
+        return histogram;
     }
 
     @Procedure(value = "algo.beta.jaccard.memrec")
@@ -190,16 +226,7 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
         int top = procedureConfiguration.getInt(TOP_KEY, TOP_DEFAULT);
         int concurrency = procedureConfiguration.getConcurrency();
         int batchSize = procedureConfiguration.getBatchSize();
-        boolean computeHistogram = procedureConfiguration.computeHistogram();
-        return new NeighborhoodSimilarity.Config(
-            similarityCutoff,
-            degreeCutoff,
-            top,
-            topK,
-            concurrency,
-            batchSize,
-            computeHistogram
-        );
+        return new NeighborhoodSimilarity.Config(similarityCutoff, degreeCutoff, top, topK, concurrency, batchSize);
     }
 
     private int validTopK(ProcedureConfiguration config) {
@@ -222,6 +249,7 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
         public final long loadMillis;
         public final long computeMillis;
         public final long writeMillis;
+        public final long postProcessingMillis;
 
         public final long nodesCompared;
         public final long relationships;
@@ -248,6 +276,7 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
             long loadMillis,
             long computeMillis,
             long writeMillis,
+            long postProcessingMillis,
             long nodesCompared,
             long relationships,
             boolean write,
@@ -271,6 +300,7 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
             this.loadMillis = loadMillis;
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
+            this.postProcessingMillis = postProcessingMillis;
             this.nodesCompared = nodesCompared;
             this.relationships = relationships;
             this.write = write;
@@ -297,8 +327,10 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
 
         private long nodesCompared = 0L;
 
+        private long postProcessingMillis = -1L;
+
         private String writeRelationshipType;
-        private Optional<DoubleHistogram> maybeHistogram;
+        private Optional<DoubleHistogram> maybeHistogram = Optional.empty();
 
         WriteResultBuilder withNodesCompared(long nodesCompared) {
             this.nodesCompared = nodesCompared;
@@ -310,9 +342,17 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
             return this;
         }
 
-        WriteResultBuilder withHistogram(Optional<DoubleHistogram> maybeHistogram) {
-            this.maybeHistogram = maybeHistogram;
+        WriteResultBuilder withHistogram(DoubleHistogram histogram) {
+            this.maybeHistogram = Optional.of(histogram);
             return this;
+        }
+
+        void setPostProcessingMillis(long postProcessingMillis) {
+            this.postProcessingMillis = postProcessingMillis;
+        }
+
+        ProgressTimer timePostProcessing() {
+            return ProgressTimer.start(this::setPostProcessingMillis);
         }
 
         @Override
@@ -321,6 +361,7 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
                 loadMillis,
                 computeMillis,
                 writeMillis,
+                postProcessingMillis,
                 nodesCompared,
                 relationshipCount,
                 write,
