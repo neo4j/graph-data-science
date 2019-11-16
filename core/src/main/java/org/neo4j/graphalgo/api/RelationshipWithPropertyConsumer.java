@@ -33,4 +33,11 @@ public interface RelationshipWithPropertyConsumer {
         long targetNodeId,
         double property
     );
+
+    default RelationshipWithPropertyConsumer andThen(RelationshipWithPropertyConsumer after) {
+        return (sourceNodeId, targetNodeId, property) -> {
+            this.accept(sourceNodeId, targetNodeId, property);
+            return after.accept(sourceNodeId, targetNodeId, property);
+        };
+    }
 }

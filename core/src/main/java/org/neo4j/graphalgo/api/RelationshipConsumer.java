@@ -36,4 +36,11 @@ public interface RelationshipConsumer {
     boolean accept(
             long sourceNodeId,
             long targetNodeId);
+
+    default RelationshipConsumer andThen(RelationshipConsumer after) {
+        return (sourceNodeId, targetNodeId) -> {
+            this.accept(sourceNodeId, targetNodeId);
+            return after.accept(sourceNodeId, targetNodeId);
+        };
+    }
 }
