@@ -72,6 +72,22 @@ public class TopKMap {
         topKLists.get(node1).accept(node2, similarity);
     }
 
+    public TopKList get(long node1) {
+        return topKLists.get(node1);
+    }
+
+    long similarityPairCount() {
+        SetBitsIterable longs = new SetBitsIterable(nodeFilter);
+        PrimitiveIterator.OfLong iterator = longs.iterator();
+
+        long size = 0L;
+        while (iterator.hasNext()) {
+            size += topKLists.get(iterator.next()).size();
+        }
+
+        return size;
+    }
+
     public void forEach(BoundedLongLongPriorityQueue.Consumer consumer) {
         SetBitsIterable items = new SetBitsIterable(nodeFilter);
         items.stream().forEach(element1 -> {
@@ -98,8 +114,16 @@ public class TopKMap {
             this.queue = queue;
         }
 
+        int size() {
+            return queue.count();
+        }
+
         void accept(long node2, double similarity) {
             queue.offer(node2, similarity);
+        }
+
+        void forEach(BoundedLongPriorityQueue.Consumer consumer) {
+            queue.foreach(consumer);
         }
 
         Stream<SimilarityResult> stream(long node1) {

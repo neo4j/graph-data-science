@@ -26,11 +26,16 @@ import java.util.stream.LongStream;
 
 public abstract class BoundedLongPriorityQueue {
 
+    public interface Consumer {
+        void accept(long element, double priority);
+    }
+
     private final int bound;
-    private final long[] elements;
-    private final double[] priorities;
     private double minValue = Double.NaN;
-    private int elementCount = 0;
+
+    final long[] elements;
+    final double[] priorities;
+    int elementCount = 0;
 
     BoundedLongPriorityQueue(int bound) {
         this.bound = bound;
@@ -39,6 +44,8 @@ public abstract class BoundedLongPriorityQueue {
     }
 
     public abstract void offer(long element, double priority);
+
+    public abstract void foreach(Consumer consumer);
 
     public LongStream elements() {
         return elementCount == 0
@@ -83,6 +90,13 @@ public abstract class BoundedLongPriorityQueue {
             }
 
             @Override
+            public void foreach(Consumer consumer) {
+                for (int i = 0; i < elementCount; i++) {
+                    consumer.accept(elements[i], -priorities[i]);
+                }
+            }
+
+            @Override
             public DoubleStream priorities() {
                 return super.priorities().map(d -> -d);
             }
@@ -95,6 +109,13 @@ public abstract class BoundedLongPriorityQueue {
             @Override
             public void offer(long element, double priority) {
                 add(element, priority);
+            }
+
+            @Override
+            public void foreach(Consumer consumer) {
+                for (int i = 0; i < elementCount; i++) {
+                    consumer.accept(elements[i], priorities[i]);
+                }
             }
 
         };

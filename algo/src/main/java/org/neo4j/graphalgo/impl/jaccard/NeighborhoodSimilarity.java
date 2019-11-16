@@ -76,16 +76,8 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
 
     public Stream<SimilarityResult> computeToStream(Direction direction) {
 
-        if (direction == Direction.BOTH) {
-            throw new IllegalArgumentException(
-                "Direction BOTH is not supported by the NeighborhoodSimilarity algorithm.");
-        }
-
-        this.vectors = HugeObjectArray.newArray(long[].class, graph.nodeCount(), tracker);
-
         // Create a filter for which nodes to compare and calculate the neighborhood for each node
         prepare(direction);
-
 
         // Compute similarities
         Stream<SimilarityResult> stream;
@@ -123,12 +115,28 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     }
 
     public SimilarityGraphResult computeToGraph(Direction direction) {
-        Stream<SimilarityResult> similarities = computeToStream(direction);
-        Graph simGraph = new SimilarityGraphBuilder(graph, tracker).build(similarities);
-        return new SimilarityGraphResult(simGraph, nodesToCompare);
+        Graph similarityGraph;
+        if (config.hasTopK() && !config.hasTop()) {
+            prepare(direction);
+            TopKMap topKMap = config.isParallel()
+                ? computeTopKMapParallel()
+                : computeTopkMap();
+            similarityGraph = new TopKGraph(graph, topKMap);
+        } else {
+            Stream<SimilarityResult> similarities = computeToStream(direction);
+            similarityGraph = new SimilarityGraphBuilder(graph, tracker).build(similarities);
+        }
+        return new SimilarityGraphResult(similarityGraph, nodesToCompare);
     }
 
     private void prepare(Direction direction) {
+        if (direction == Direction.BOTH) {
+            throw new IllegalArgumentException(
+                "Direction BOTH is not supported by the NeighborhoodSimilarity algorithm.");
+        }
+
+        vectors = HugeObjectArray.newArray(long[].class, graph.nodeCount(), tracker);
+
         vectors.setAll(node -> {
             int degree = graph.degree(node, direction);
 
