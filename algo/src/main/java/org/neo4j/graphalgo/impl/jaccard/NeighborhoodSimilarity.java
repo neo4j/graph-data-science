@@ -23,7 +23,6 @@ package org.neo4j.graphalgo.impl.jaccard;
 import com.carrotsearch.hppc.ArraySizingStrategy;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongArrayList;
-import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.BitUtil;
@@ -268,10 +267,6 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
 
     private LongStream nodeStream(long offset) {
         return new SetBitsIterable(nodeFilter, offset).stream();
-    }
-
-    private Stream<SimilarityResult> computeHistogram(Stream<SimilarityResult> stream, DoubleHistogram histogram) {
-        return stream.peek(sim -> histogram.recordValue(sim.similarity));
     }
 
     public static final class Config {
