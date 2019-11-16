@@ -20,7 +20,9 @@
 
 package org.neo4j.graphalgo.core.write;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.PropertyMapping;
@@ -28,7 +30,6 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
-import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -67,6 +68,24 @@ class RelationshipExporterTest {
 
     @Test
     void exportRelationships() {
+        RelationshipExporter build = setupExportTest();
+        build.write("FOOBAR", "weight", 0.0);
+        validateWrittenGraph();
+    }
+
+    @Test
+    void exportRelationshipsWithAfterWriteConsumer() {
+        RelationshipExporter build = setupExportTest();
+        MutableInt count = new MutableInt();
+        build.write("FOOBAR", "weight", 0.0, (sourceNodeId, targetNodeId, property) -> {
+            count.increment();
+            return true;
+        });
+        Assertions.assertEquals(4, count.getValue());
+        validateWrittenGraph();
+    }
+
+    private RelationshipExporter setupExportTest() {
         // create graph to export
         GraphDatabaseAPI fromDb = TestDatabaseCreator.createTestDatabase();
         fromDb.execute(NODE_QUERY_PART + RELS_QUERY_PART);
@@ -77,12 +96,12 @@ class RelationshipExporterTest {
             .load(HugeGraphFactory.class);
 
         // export into new database
-        RelationshipExporter build = RelationshipExporter
+        return RelationshipExporter
             .of(db, fromGraph, Direction.OUTGOING, RUNNING_TRUE)
             .build();
-        build.write("FOOBAR", "weight", 0.0);
+    }
 
-        // validate
+    private void validateWrittenGraph() {
         Graph actual = new GraphLoader(db)
             .withAnyLabel()
             .withRelationshipType("FOOBAR")
@@ -98,5 +117,4 @@ class RelationshipExporterTest {
             actual
         );
     }
-
 }

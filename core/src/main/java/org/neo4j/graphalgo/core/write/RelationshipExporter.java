@@ -20,6 +20,7 @@
 
 package org.neo4j.graphalgo.core.write;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
@@ -117,6 +118,16 @@ public final class RelationshipExporter extends StatementApi {
     }
 
     public void write(String relationshipType, String propertyKey, double fallbackValue) {
+        write(relationshipType, propertyKey, fallbackValue, null);
+    }
+
+    public void write(
+        String relationshipType,
+        String propertyKey,
+        double fallbackValue,
+        @Nullable RelationshipWithPropertyConsumer afterWriteConsumer
+    ) {
+
         final AtomicLong progress = new AtomicLong(0L);
 
         final int relationshipToken = getOrCreateRelationshipToken(relationshipType);
@@ -133,7 +144,8 @@ public final class RelationshipExporter extends StatementApi {
                 relationshipToken,
                 propertyToken,
                 partition.startNode,
-                partition.nodeCount
+                partition.nodeCount,
+                afterWriteConsumer
             ))
             .forEach(runnable -> ParallelUtil.run(runnable, executorService));
     }
@@ -145,13 +157,17 @@ public final class RelationshipExporter extends StatementApi {
         int relationshipToken,
         int propertyToken,
         long start,
-        long length
+        long length,
+        @Nullable RelationshipWithPropertyConsumer afterWrite
     ) {
         return () -> acceptInTransaction(stmt -> {
             terminationFlag.assertRunning();
             long end = start + length;
             Write ops = stmt.dataWrite();
-            WriteConsumer writeConsumer = new WriteConsumer(graph, ops, relationshipToken, propertyToken);
+            RelationshipWithPropertyConsumer writeConsumer = new WriteConsumer(graph, ops, relationshipToken, propertyToken);
+            if (afterWrite != null) {
+                writeConsumer = writeConsumer.andThen(afterWrite);
+            }
             RelationshipIterator relationshipIterator = graph.concurrentCopy();
             for (long currentNode = start; currentNode < end; currentNode++) {
                 relationshipIterator.forEachRelationship(currentNode, direction, fallbackValue, writeConsumer);
