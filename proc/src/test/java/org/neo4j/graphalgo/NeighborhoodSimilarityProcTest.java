@@ -42,6 +42,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
@@ -232,7 +233,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
                 assertThat("Missing p95", -1.0, lessThan(row.getNumber("p95").doubleValue()));
                 assertThat("Missing p99", -1.0, lessThan(row.getNumber("p99").doubleValue()));
                 assertThat("Missing p100", -1.0, lessThan(row.getNumber("p100").doubleValue()));
-                assertThat("Missing postProcessingMillis", -1L, lessThan(row.getNumber("postProcessingMillis").longValue()));
+                assertThat("Missing postProcessingMillis", -1L, equalTo(row.getNumber("postProcessingMillis").longValue()));
             }
         );
 
