@@ -1,0 +1,44 @@
+import org.gradle.internal.jvm.Jvm
+
+/*
+ * Copyright (c) 2017-2019 "Neo4j,"
+ * Neo4j Sweden AB [http://neo4j.com]
+ *
+ * This file is part of Neo4j.
+ *
+ * Neo4j is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+description = 'Neo4j Graph Algorithms :: Procedures Processor'
+
+dependencies {
+    annotationProcessor project(':annotations')
+    annotationProcessor 'com.google.auto.service:auto-service:1.0-rc6'
+    annotationProcessor 'org.immutables:builder:2.8.1'
+    annotationProcessor 'org.immutables:value:2.8.1'
+    compileOnly 'com.google.auto.service:auto-service:1.0-rc6'
+    compileOnly 'org.immutables:value-annotations:2.8.1'
+
+    compile project(':annotations')
+    compile project(':algo-common')
+
+    compile 'com.google.auto:auto-common:0.10'
+    compile 'com.squareup:javapoet:1.11.1'
+
+    def toolsJar = Jvm.current().getToolsJar()
+    if (toolsJar != null) {
+        testImplementation files(toolsJar)
+    }
+    testImplementation 'com.google.testing.compile:compile-testing:0.18'
+}
