@@ -70,32 +70,24 @@ public class SimilarityGraphBuilder {
         });
     }
 
-    private final Graph baseGraph;
+    private final HugeGraph baseGraph;
     private final AllocationTracker tracker;
     private final int concurrency;
     private final int bufferSize;
 
     SimilarityGraphBuilder(Graph baseGraph, AllocationTracker tracker) {
-        this.baseGraph = baseGraph;
+        if (baseGraph instanceof HugeGraph) {
+            this.baseGraph = (HugeGraph) baseGraph;
+        } else {
+            throw new IllegalArgumentException("Base graph must be a huge graph.");
+        }
         this.tracker = tracker;
         this.concurrency = 1;
         this.bufferSize = (int) Math.min(baseGraph.nodeCount(), ParallelUtil.DEFAULT_BATCH_SIZE);
     }
 
     Graph build(Stream<SimilarityResult> stream) {
-        Relationships relationships = loadRelationships(stream);
-        return ((HugeGraph) baseGraph).copyWithNewRelationships(
-            relationships.relationshipCount(),
-            null,
-            relationships.outAdjacency(),
-            null,
-            relationships.outOffsets(),
-            true,
-            null,
-            relationships.outRelProperties(),
-            null,
-            relationships.outRelPropertyOffsets()
-        );
+        return HugeGraph.create(baseGraph, loadRelationships(stream), false);
     }
 
     private Relationships loadRelationships(Stream<SimilarityResult> stream) {

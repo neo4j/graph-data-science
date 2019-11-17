@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.loading.IdMap;
+import org.neo4j.graphalgo.core.loading.Relationships;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.internal.kernel.api.CursorFactory;
@@ -102,7 +103,6 @@ public class HugeGraph implements Graph {
     private final boolean hasRelationshipProperty;
     private final boolean isUndirected;
 
-
     public static HugeGraph create(
         final AllocationTracker tracker,
         final IdMap idMapping,
@@ -138,6 +138,32 @@ public class HugeGraph implements Graph {
         );
     }
 
+    /**
+     * Create a HugeGraph based on an existing graph but with different topology.
+     * The new relationships must guarantee to connect nodes within the node space
+     * of the base graph.
+     */
+    public static HugeGraph create(HugeGraph baseGraph, Relationships relationships, boolean isUndirected) {
+        boolean hasRelationshipProperty = relationships.inRelProperties() != null || relationships.outRelProperties() != null;
+        double defaultPropertyValue = relationships.maybeDefaultRelProperty().orElse(baseGraph.defaultPropertyValue);
+        return new HugeGraph(
+            baseGraph.tracker,
+            baseGraph.idMapping,
+            baseGraph.nodeProperties,
+            relationships.relationshipCount(),
+            relationships.inAdjacency(),
+            relationships.outAdjacency(),
+            relationships.inOffsets(),
+            relationships.outOffsets(),
+            hasRelationshipProperty,
+            defaultPropertyValue,
+            relationships.inRelProperties(),
+            relationships.outRelProperties(),
+            relationships.inRelPropertyOffsets(),
+            relationships.outRelPropertyOffsets(),
+            isUndirected
+        );
+    }
 
     public HugeGraph(
         final AllocationTracker tracker,
@@ -386,38 +412,6 @@ public class HugeGraph implements Graph {
             isUndirected
         );
     }
-
-    public HugeGraph copyWithNewRelationships(
-        long newRelationshipCount,
-        AdjacencyList newInAdjacency,
-        AdjacencyList newOutAdjacency,
-        AdjacencyOffsets newInOffsets,
-        AdjacencyOffsets newOutOffsets,
-        boolean newHasRelationshipProperty,
-        AdjacencyList newInProperties,
-        AdjacencyList newOutProperties,
-        AdjacencyOffsets newInPropertyOffsets,
-        AdjacencyOffsets newOutPropertyOffsets
-    ) {
-        return new HugeGraph(
-            tracker,
-            idMapping,
-            nodeProperties,
-            newRelationshipCount,
-            newInAdjacency,
-            newOutAdjacency,
-            newInOffsets,
-            newOutOffsets,
-            newHasRelationshipProperty,
-            defaultPropertyValue,
-            newInProperties,
-            newOutProperties,
-            newInPropertyOffsets,
-            newOutPropertyOffsets,
-            isUndirected
-        );
-    }
-
 
     @Override
     public RelationshipIntersect intersection() {
