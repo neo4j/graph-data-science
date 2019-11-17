@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
@@ -30,7 +31,6 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.impl.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.impl.generator.RelationshipPropertyProducer;
-import org.neo4j.graphalgo.utils.ConfigMapHelper;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -127,29 +127,29 @@ public final class GraphGenerateProc extends BaseProc {
         return RelationshipDistribution.valueOf(distributionValue.toUpperCase());
     }
 
-    private Optional<RelationshipPropertyProducer> getRelationshipPropertyProducer(ProcedureConfiguration config) {
-        Object maybeMap = config.get(RELATIONSHIP_PROPERTY_KEY, null);
+    private Optional<RelationshipPropertyProducer> getRelationshipPropertyProducer(ProcedureConfiguration procedureConfig) {
+        Object maybeMap = procedureConfig.get(RELATIONSHIP_PROPERTY_KEY, null);
 
         if ((maybeMap instanceof Map)) {
             Map<String, Object> configMap = (Map<String, Object>) maybeMap;
-
             if (configMap.isEmpty()) {
                 return Optional.empty();
             }
+            CypherMapWrapper config = CypherMapWrapper.create(configMap);
 
-            String propertyName = ConfigMapHelper.getString(configMap, RELATIONSHIP_PROPERTY_NAME_KEY);
-            String generatorString = ConfigMapHelper.getString(configMap, RELATIONSHIP_PROPERTY_TYPE_KEY);
+            String propertyName = config.requireString(RELATIONSHIP_PROPERTY_NAME_KEY);
+            String generatorString = config.requireString(RELATIONSHIP_PROPERTY_TYPE_KEY);
 
             RelationshipPropertyProducer propertyProducer;
             switch (generatorString.toLowerCase()) {
                 case "random":
-                    double min = ConfigMapHelper.getDouble(configMap, RELATIONSHIP_PROPERTY_MIN_KEY, 0.0);
-                    double max = ConfigMapHelper.getDouble(configMap, RELATIONSHIP_PROPERTY_MAX_KEY, 1.0);
+                    double min = config.getDouble(RELATIONSHIP_PROPERTY_MIN_KEY, 0.0);
+                    double max = config.getDouble(RELATIONSHIP_PROPERTY_MAX_KEY, 1.0);
                     propertyProducer = RelationshipPropertyProducer.random(propertyName, min, max);
                     break;
 
                 case "fixed":
-                    double value = ConfigMapHelper.getDouble(configMap, RELATIONSHIP_PROPERTY_VALUE_KEY);
+                    double value = config.requireDouble(RELATIONSHIP_PROPERTY_VALUE_KEY);
                     propertyProducer = RelationshipPropertyProducer.fixed(propertyName, value);
                     break;
 

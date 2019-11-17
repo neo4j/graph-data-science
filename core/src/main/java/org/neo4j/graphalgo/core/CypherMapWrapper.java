@@ -51,11 +51,13 @@ public final class CypherMapWrapper {
 
     public Optional<String> getString(String key) {
         if (config.containsKey(key)) {
-            // Optional.of will throw an NPE if key does not exist because of the default value
-            //  which we want to have as a kind of sanity check - the default value *should* not be used
-            return Optional.of(getChecked(key, null, String.class));
+            return Optional.of(requireChecked(key, String.class));
         }
         return Optional.empty();
+    }
+
+    public String requireString(String key) {
+        return getString(key).orElseThrow(() -> missingValueFor(key));
     }
 
     public Map<String, Object> getMap(String key) {
@@ -81,7 +83,8 @@ public final class CypherMapWrapper {
     }
 
     public String getString(String key, String oldKey, String defaultValue) {
-        return getChecked(key, oldKey, defaultValue, String.class);
+        Object value = get(key, oldKey, null);
+        return checkValue(key, defaultValue, String.class, value);
     }
 
     Optional<String> getStringWithFallback(String key, String oldKey) {
@@ -94,12 +97,20 @@ public final class CypherMapWrapper {
         return value;
     }
 
-    Boolean getBool(String key, boolean defaultValue) {
+    public boolean getBool(String key, boolean defaultValue) {
         return getChecked(key, defaultValue, Boolean.class);
+    }
+
+    boolean requireBool(String key) {
+        return requireChecked(key, Boolean.class);
     }
 
     public Number getNumber(String key, Number defaultValue) {
         return getChecked(key, defaultValue, Number.class);
+    }
+
+    public Number requireNumber(String key) {
+        return requireChecked(key, Number.class);
     }
 
     public Number getNumber(String key, String oldKey, Number defaultValue) {
@@ -114,11 +125,27 @@ public final class CypherMapWrapper {
     }
 
     public int getInt(String key, int defaultValue) {
-        Number value = (Number) config.get(key);
-        if (null == value) {
-            return defaultValue;
-        }
-        return value.intValue();
+        return getNumber(key, defaultValue).intValue();
+    }
+
+    public int requireInt(String key) {
+        return requireNumber(key).intValue();
+    }
+
+    public long getLong(String key, long defaultValue) {
+        return getNumber(key, defaultValue).longValue();
+    }
+
+    public long requireLong(String key) {
+        return requireNumber(key).longValue();
+    }
+
+    public double getDouble(String key, double defaultValue) {
+        return getNumber(key, defaultValue).doubleValue();
+    }
+
+    public double requireDouble(String key) {
+        return requireNumber(key).doubleValue();
     }
 
     /**
@@ -129,9 +156,17 @@ public final class CypherMapWrapper {
      * @throws IllegalArgumentException if a value was found, but it is not of the expected type.
      */
     @Contract("_, !null, _ -> !null")
-    @Nullable <V> V getChecked(String key, @Nullable V defaultValue, Class<V> expectedType) {
+    public @Nullable <V> V getChecked(String key, @Nullable V defaultValue, Class<V> expectedType) {
         Object value = config.get(key);
         return checkValue(key, defaultValue, expectedType, value);
+    }
+
+    public <V> V requireChecked(String key, Class<V> expectedType) {
+        Object value = config.get(key);
+        if (value == null) {
+            throw missingValueFor(key);
+        }
+        return typedValue(key, expectedType, value);
     }
 
     @SuppressWarnings("unchecked")
@@ -154,12 +189,6 @@ public final class CypherMapWrapper {
         return null == value ? defaultValue : (V) value;
     }
 
-    @Contract("_, _, !null, _ -> !null")
-    private @Nullable <V> V getChecked(String key, String oldKey, @Nullable V defaultValue, Class<V> expectedType) {
-        Object value = get(key, oldKey, null);
-        return checkValue(key, defaultValue, expectedType, value);
-    }
-
     @Contract("_, !null, _, _ -> !null; _, _, _, null -> param2")
     private @Nullable <V> V checkValue(
         String key,
@@ -180,6 +209,13 @@ public final class CypherMapWrapper {
             throw new IllegalArgumentException(message);
         }
         return expectedType.cast(value);
+    }
+
+    private IllegalArgumentException missingValueFor(String key) {
+        return new IllegalArgumentException(String.format(
+            "There is no value for the key `%s`",
+            key
+        ));
     }
 
     // FACTORIES
