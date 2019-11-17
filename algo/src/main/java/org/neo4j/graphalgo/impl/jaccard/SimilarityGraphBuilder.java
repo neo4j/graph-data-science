@@ -21,31 +21,17 @@
 package org.neo4j.graphalgo.impl.jaccard;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.huge.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.loading.AdjacencyBuilder;
-import org.neo4j.graphalgo.core.loading.ImportSizing;
-import org.neo4j.graphalgo.core.loading.RelationshipImporter;
-import org.neo4j.graphalgo.core.loading.Relationships;
-import org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer;
-import org.neo4j.graphalgo.core.loading.RelationshipsBuilder;
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.RawValues;
+import org.neo4j.graphalgo.core.loading.RelationshipStreamBuilder;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.kernel.api.StatementConstants;
 
-import java.util.Optional;
-import java.util.concurrent.atomic.LongAdder;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-public class SimilarityGraphBuilder {
-
-    private static final int DEFAULT_WEIGHT_PROPERTY_ID = -2;
+class SimilarityGraphBuilder {
 
     static MemoryEstimation memoryEstimation(int topk, int top) {
         return MemoryEstimations.setup("", (dimensions, concurrency) -> {
@@ -71,115 +57,19 @@ public class SimilarityGraphBuilder {
     }
 
     private final HugeGraph baseGraph;
-    private final AllocationTracker tracker;
-    private final int concurrency;
-    private final int bufferSize;
+    private final RelationshipStreamBuilder relationshipStreamBuilder;
 
-    SimilarityGraphBuilder(Graph baseGraph, AllocationTracker tracker) {
+    SimilarityGraphBuilder(Graph baseGraph, long nodesToCompare, AllocationTracker tracker) {
         if (baseGraph instanceof HugeGraph) {
             this.baseGraph = (HugeGraph) baseGraph;
         } else {
             throw new IllegalArgumentException("Base graph must be a huge graph.");
         }
-        this.tracker = tracker;
-        this.concurrency = 1;
-        this.bufferSize = (int) Math.min(baseGraph.nodeCount(), ParallelUtil.DEFAULT_BATCH_SIZE);
+
+        this.relationshipStreamBuilder = new RelationshipStreamBuilder(baseGraph, nodesToCompare, tracker);
     }
 
     Graph build(Stream<SimilarityResult> stream) {
-        return HugeGraph.create(baseGraph, loadRelationships(stream), false);
-    }
-
-    private Relationships loadRelationships(Stream<SimilarityResult> stream) {
-        ImportSizing importSizing = ImportSizing.of(concurrency, baseGraph.nodeCount());
-        int pageSize = importSizing.pageSize();
-        int numberOfPages = importSizing.numberOfPages();
-
-        RelationshipsBuilder outgoingRelationshipsBuilder = new RelationshipsBuilder(
-            new DeduplicationStrategy[]{DeduplicationStrategy.NONE},
-            tracker,
-            1);
-        AdjacencyBuilder outBuilder = AdjacencyBuilder.compressing(
-            outgoingRelationshipsBuilder,
-            numberOfPages,
-            pageSize,
-            tracker,
-            new LongAdder(),
-            new int[]{DEFAULT_WEIGHT_PROPERTY_ID},
-            new double[]{0.0}
-        );
-
-        RelationshipImporter importer = new RelationshipImporter(tracker, outBuilder, null);
-        RelationshipImporter.Imports imports = importer.imports(false, true, false, true);
-
-        RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(baseGraph, StatementConstants.ANY_RELATIONSHIP_TYPE, bufferSize);
-        RelationshipWriter writer = new RelationshipWriter(imports, buffer);
-        stream.forEach(writer);
-        writer.flush();
-
-        importer.flushTasks().forEach(Runnable::run);
-        AdjacencyList outAdjacencyList = outgoingRelationshipsBuilder.adjacency();
-        AdjacencyOffsets outAdjacencyOffsets = outgoingRelationshipsBuilder.globalAdjacencyOffsets();
-        AdjacencyList outWeightList = outgoingRelationshipsBuilder.weights();
-        AdjacencyOffsets outWeightOffsets = outgoingRelationshipsBuilder.globalWeightOffsets();
-
-        return new Relationships(
-            writer.relationshipCount,
-            writer.relationshipCount,
-            null,
-            outAdjacencyList,
-            null,
-            outAdjacencyOffsets,
-            Optional.of(0.0),
-            null,
-            outWeightList,
-            null,
-            outWeightOffsets
-        );
-    }
-
-    private static class RelationshipWriter implements Consumer<SimilarityResult> {
-
-        private static final long NO_RELATIONSHIP_REFERENCE = -1L;
-
-        final RelationshipImporter.Imports imports;
-        final RelationshipsBatchBuffer buffer;
-        final RelationshipImporter.PropertyReader relPropertyReader;
-        long relationshipCount = 0;
-
-        RelationshipWriter(RelationshipImporter.Imports imports, RelationshipsBatchBuffer buffer) {
-            this.imports = imports;
-            this.buffer = buffer;
-            this.relPropertyReader = RelationshipImporter.preLoadedPropertyReader();
-        }
-
-        // TODO: Similarity graph creation is not thread safe yet.
-        @Override
-        public synchronized void accept(SimilarityResult result) {
-            add(result.node1, result.node2, result.similarity);
-        }
-
-        private void add(long node1, long node2, double similarity) {
-            buffer.add(
-                node1,
-                node2,
-                NO_RELATIONSHIP_REFERENCE,
-                Double.doubleToLongBits(similarity)
-            );
-
-            if (buffer.isFull()) {
-                flush();
-                reset();
-            }
-        }
-
-        void flush() {
-            long imported = imports.importRels(buffer, relPropertyReader);
-            relationshipCount += RawValues.getHead(imported);
-        }
-
-        private void reset() {
-            buffer.reset();
-        }
+        return HugeGraph.create(baseGraph, relationshipStreamBuilder.loadRelationships(stream), false);
     }
 }

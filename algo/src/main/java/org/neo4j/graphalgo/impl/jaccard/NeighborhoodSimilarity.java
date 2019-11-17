@@ -124,7 +124,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
             similarityGraph = new TopKGraph(graph, topKMap);
         } else {
             Stream<SimilarityResult> similarities = computeToStream(direction);
-            similarityGraph = new SimilarityGraphBuilder(graph, tracker).build(similarities);
+            similarityGraph = new SimilarityGraphBuilder(graph, nodesToCompare, tracker).build(similarities);
         }
         return new SimilarityGraphResult(similarityGraph, nodesToCompare);
     }

@@ -20,10 +20,12 @@
 
 package org.neo4j.graphalgo.impl.jaccard;
 
+import org.neo4j.graphalgo.core.loading.RelationshipStreamBuilder;
+
 import java.util.Comparator;
 import java.util.Objects;
 
-public class SimilarityResult implements Comparable<SimilarityResult> {
+public class SimilarityResult implements Comparable<SimilarityResult>, RelationshipStreamBuilder.Relationship {
 
     static Comparator<SimilarityResult> ASCENDING = SimilarityResult::compareTo;
     static Comparator<SimilarityResult> DESCENDING = ASCENDING.reversed();
@@ -36,6 +38,21 @@ public class SimilarityResult implements Comparable<SimilarityResult> {
         this.node1 = node1;
         this.node2 = node2;
         this.similarity = similarity;
+    }
+
+    @Override
+    public long sourceNodeId() {
+        return node1;
+    }
+
+    @Override
+    public long targetNodeId() {
+        return node2;
+    }
+
+    @Override
+    public double property() {
+        return similarity;
     }
 
     public SimilarityResult reverse() {
