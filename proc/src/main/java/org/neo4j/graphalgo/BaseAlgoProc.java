@@ -60,7 +60,7 @@ public abstract class BaseAlgoProc<A extends Algorithm<A>> extends BaseProc {
         MemoryEstimations.Builder estimationsBuilder = MemoryEstimations.builder("graph with procedure")
             .add(algorithmFactory.memoryEstimation());
 
-        if (config.containsKey(NODECOUNT_KEY)) {
+        if (config.forNonExistingGraph()) {
             Long nodeCount = config.get(NODECOUNT_KEY, 0L);
             Long relCount = config.get(RELCOUNT_KEY, 0L);
             dimensions = new GraphDimensions.Builder().setNodeCount(nodeCount)

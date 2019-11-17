@@ -130,7 +130,7 @@ public final class GraphLoadProc extends BaseProc {
         GraphDimensions dimensions;
         MemoryTree memoryTree;
 
-        if (configuration.containsKey(NODECOUNT_KEY)) {
+        if (config.forNonExistingGraph()) {
             Long nodeCount = config.get(NODECOUNT_KEY, 0L);
             Long relCount = config.get(RELCOUNT_KEY, 0L);
             dimensions = new GraphDimensions.Builder().setNodeCount(nodeCount)
