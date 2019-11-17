@@ -34,6 +34,7 @@ import org.neo4j.graphdb.Direction;
 
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -42,6 +43,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     private final Graph graph;
     private final Config config;
 
+    private final ExecutorService executorService;
     private final AllocationTracker tracker;
 
     private final BitSet nodeFilter;
@@ -52,10 +54,12 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     public NeighborhoodSimilarity(
         Graph graph,
         Config config,
+        ExecutorService executorService,
         AllocationTracker tracker
     ) {
         this.graph = graph;
         this.config = config;
+        this.executorService = executorService;
         this.tracker = tracker;
         this.nodeFilter = new BitSet(graph.nodeCount());
     }
@@ -124,7 +128,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
             similarityGraph = new TopKGraph(graph, topKMap);
         } else {
             Stream<SimilarityResult> similarities = computeToStream(direction);
-            similarityGraph = new SimilarityGraphBuilder(graph, nodesToCompare, tracker).build(similarities);
+            similarityGraph = new SimilarityGraphBuilder(graph, nodesToCompare, executorService, tracker).build(similarities);
         }
         return new SimilarityGraphResult(similarityGraph, nodesToCompare);
     }

@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.kernel.api.StatementConstants;
 
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -45,21 +46,23 @@ public class RelationshipStreamBuilder {
     private static final int DEFAULT_WEIGHT_PROPERTY_ID = -2;
 
     private final IdMapping idMapping;
+    private final ExecutorService executorService;
     private final long nodeCount;
 
     private final int concurrency;
     private final int bufferSize;
     private final AllocationTracker tracker;
 
-    public RelationshipStreamBuilder(IdMapping idMapping, AllocationTracker tracker) {
-        this(idMapping, idMapping.nodeCount(), tracker);
+    public RelationshipStreamBuilder(IdMapping idMapping, ExecutorService executorService, AllocationTracker tracker) {
+        this(idMapping, idMapping.nodeCount(), executorService, tracker);
     }
 
-    public RelationshipStreamBuilder(IdMapping idMapping, long nodeCount, AllocationTracker tracker) {
+    public RelationshipStreamBuilder(IdMapping idMapping, long nodeCount, ExecutorService executorService, AllocationTracker tracker) {
         this.idMapping = idMapping;
         this.concurrency = 1;
         this.nodeCount = nodeCount;
         this.bufferSize = (int) Math.min(nodeCount, ParallelUtil.DEFAULT_BATCH_SIZE);
+        this.executorService = executorService;
         this.tracker = tracker;
     }
 
@@ -90,7 +93,7 @@ public class RelationshipStreamBuilder {
         stream.forEach(writer);
         writer.flush();
 
-        importer.flushTasks().forEach(Runnable::run);
+        ParallelUtil.run(importer.flushTasks(), executorService);
         AdjacencyList outAdjacencyList = outgoingRelationshipsBuilder.adjacency();
         AdjacencyOffsets outAdjacencyOffsets = outgoingRelationshipsBuilder.globalAdjacencyOffsets();
         AdjacencyList outWeightList = outgoingRelationshipsBuilder.weights();

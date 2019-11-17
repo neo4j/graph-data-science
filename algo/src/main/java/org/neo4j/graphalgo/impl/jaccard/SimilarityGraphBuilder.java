@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
 class SimilarityGraphBuilder {
@@ -59,14 +60,14 @@ class SimilarityGraphBuilder {
     private final HugeGraph baseGraph;
     private final RelationshipStreamBuilder relationshipStreamBuilder;
 
-    SimilarityGraphBuilder(Graph baseGraph, long nodesToCompare, AllocationTracker tracker) {
+    SimilarityGraphBuilder(Graph baseGraph, long nodesToCompare, ExecutorService executorService, AllocationTracker tracker) {
         if (baseGraph instanceof HugeGraph) {
             this.baseGraph = (HugeGraph) baseGraph;
         } else {
             throw new IllegalArgumentException("Base graph must be a huge graph.");
         }
 
-        this.relationshipStreamBuilder = new RelationshipStreamBuilder(baseGraph, nodesToCompare, tracker);
+        this.relationshipStreamBuilder = new RelationshipStreamBuilder(baseGraph, nodesToCompare, executorService, tracker);
     }
 
     Graph build(Stream<SimilarityResult> stream) {

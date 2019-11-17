@@ -204,6 +204,7 @@ final class NeighborhoodSimilarityTest {
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
             configBuilder().withConcurrency(concurrency).toConfig(),
+            Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
@@ -227,6 +228,7 @@ final class NeighborhoodSimilarityTest {
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
             configBuilder().withConcurrency(concurrency).withTop(1).toConfig(),
+            Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
@@ -250,6 +252,7 @@ final class NeighborhoodSimilarityTest {
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
             configBuilder().withTopK(1).withConcurrency(concurrency).toConfig(),
+            Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
@@ -273,6 +276,7 @@ final class NeighborhoodSimilarityTest {
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
             configBuilder().withConcurrency(concurrency).withTopK(-1).toConfig(),
+            Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
@@ -300,6 +304,7 @@ final class NeighborhoodSimilarityTest {
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
             configBuilder().withConcurrency(concurrency).withSimilarityCutoff(0.1).toConfig(),
+            Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
@@ -326,6 +331,7 @@ final class NeighborhoodSimilarityTest {
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
             configBuilder().withDegreeCutoff(2).withConcurrency(concurrency).toConfig(),
+            Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
@@ -352,6 +358,7 @@ final class NeighborhoodSimilarityTest {
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
             configBuilder().withConcurrency(concurrency).toConfig(),
+            Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
         Set<SimilarityResult> result = neighborhoodSimilarity.computeToStream(OUTGOING).collect(Collectors.toSet());
@@ -371,6 +378,7 @@ final class NeighborhoodSimilarityTest {
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
             configBuilder().withConcurrency(concurrency).toConfig(),
+            Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
 
@@ -411,6 +419,7 @@ final class NeighborhoodSimilarityTest {
             () -> new NeighborhoodSimilarity(
                 graph,
                 configBuilder().withConcurrency(concurrency).toConfig(),
+                Pools.DEFAULT,
                 AllocationTracker.EMPTY
             ).computeToStream(BOTH)
         );
@@ -431,6 +440,7 @@ final class NeighborhoodSimilarityTest {
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
             configBuilder().withTop(100).withTopK(topk).withConcurrency(concurrency).toConfig(),
+            Pools.DEFAULT,
             AllocationTracker.EMPTY
         ).withProgressLogger(log);
 
@@ -463,7 +473,7 @@ final class NeighborhoodSimilarityTest {
 
         MemoryTree actual = factory.memoryEstimation().estimate(dimensions, 1);
 
-        long thisInstance = 48;
+        long thisInstance = 56;
 
         long nodeFilterRangeMin = 125016L;
         long nodeFilterRangeMax = 125016L;
@@ -515,7 +525,7 @@ final class NeighborhoodSimilarityTest {
 
         MemoryTree actual = factory.memoryEstimation().estimate(dimensions, 1);
 
-        long thisInstance = 48;
+        long thisInstance = 56;
 
         long nodeFilterRangeMin = 125016L;
         long nodeFilterRangeMax = 125016L;

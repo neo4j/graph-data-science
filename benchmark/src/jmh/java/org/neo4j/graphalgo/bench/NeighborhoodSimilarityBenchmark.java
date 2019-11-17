@@ -125,6 +125,7 @@ public class NeighborhoodSimilarityBenchmark {
         return new NeighborhoodSimilarity(
             graph,
             config,
+            Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
     }
