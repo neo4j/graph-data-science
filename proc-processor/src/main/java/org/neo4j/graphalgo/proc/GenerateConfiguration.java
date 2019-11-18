@@ -76,7 +76,7 @@ final class GenerateConfiguration {
         PackageElement rootPackage = elementUtils.getPackageOf(config.root());
         String packageName = rootPackage.getQualifiedName().toString();
         TypeSpec typeSpec = process(config, packageName, className);
-        return JavaFile.builder(packageName, typeSpec).build();
+        return JavaFile.builder(packageName, typeSpec).skipJavaLangImports(true).build();
     }
 
     private TypeSpec process(ConfigParser.Spec config, String packageName, String generatedClassName) {
