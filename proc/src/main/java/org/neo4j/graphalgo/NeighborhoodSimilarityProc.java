@@ -54,8 +54,8 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
     private static final String DEGREE_CUTOFF_KEY = "degreeCutoff";
     private static final int DEGREE_CUTOFF_DEFAULT = 1;
 
-    private static final String TOP_KEY = "top";
-    private static final int TOP_DEFAULT = 0;
+    private static final String TOP_N_KEY = "topN";
+    private static final int TOP_N_DEFAULT = 0;
 
     private static final String TOP_K_KEY = "topK";
     private static final int TOP_K_DEFAULT = 10;
@@ -72,7 +72,7 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
     @Procedure(name = "algo.beta.jaccard.stream", mode = Mode.READ)
     @Description("CALL algo.beta.jaccard.stream(" +
                  "nodeFilter, relationshipFilter, {" +
-                 "  similarityCutoff: 0.0, degreeCutoff: 0, top: 0, topK: 10," +
+                 "  similarityCutoff: 0.0, degreeCutoff: 0, topK: 10, topN: 0," +
                  "  graph: 'graph', direction: 'OUTGOING', concurrency: 4, readConcurrency: 4" +
                  "}) " +
                  "YIELD node1, node2, similarity - computes neighborhood similarities based on the Jaccard index")
@@ -102,7 +102,7 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
     @Procedure(name = "algo.beta.jaccard", mode = Mode.WRITE)
     @Description("CALL algo.beta.jaccard(" +
                  "nodeFilter, relationshipFilter, {" +
-                 "  similarityCutoff: 0.0, degreeCutoff: 0, top: 0, topK: 10," +
+                 "  similarityCutoff: 0.0, degreeCutoff: 0, topK: 10, topN: 0," +
                  "  graph: 'graph', direction: 'OUTGOING', concurrency: 4, readConcurrency: 4," +
                  "  write: 'true', writeRelationshipType: 'SIMILAR_TO', writeProperty: 'similarity', writeConcurrency: 4" +
                  "}) " +
@@ -223,10 +223,10 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
         double similarityCutoff = procedureConfiguration
             .getNumber(SIMILARITY_CUTOFF_KEY, SIMILARITY_CUTOFF_DEFAULT)
             .doubleValue();
-        int top = procedureConfiguration.getInt(TOP_KEY, TOP_DEFAULT);
+        int topN = procedureConfiguration.getInt(TOP_N_KEY, TOP_N_DEFAULT);
         int concurrency = procedureConfiguration.getConcurrency();
         int batchSize = procedureConfiguration.getBatchSize();
-        return new NeighborhoodSimilarity.Config(similarityCutoff, degreeCutoff, top, topK, concurrency, batchSize);
+        return new NeighborhoodSimilarity.Config(similarityCutoff, degreeCutoff, topN, topK, concurrency, batchSize);
     }
 
     private int validTopK(ProcedureConfiguration config) {

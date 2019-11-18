@@ -65,7 +65,7 @@ public class NeighborhoodSimilarityFactory extends AlgorithmFactory<Neighborhood
         if (computesSimilarityGraph) {
             builder.add(
                 "similarity graph",
-                SimilarityGraphBuilder.memoryEstimation(jaccardConfig.topK(), jaccardConfig.top())
+                SimilarityGraphBuilder.memoryEstimation(jaccardConfig.topK(), jaccardConfig.topN())
             );
         }
         if (jaccardConfig.topK() > 0) {

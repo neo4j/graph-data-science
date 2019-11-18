@@ -152,17 +152,17 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
     @ParameterizedTest(name = "{0} -- {1}")
     @MethodSource("allGraphNamesWithIncomingOutgoing")
     void shouldStreamTopResults(String graphImpl, Direction direction) {
-        int top = 2;
+        int topN = 2;
         String query = "CALL algo.beta.jaccard.stream(" +
                        "    '', 'LIKES', {" +
                        "        graph: $graph," +
                        "        direction: $direction," +
-                       "        top: $top" +
+                       "        topN: $topN" +
                        "    }" +
                        ") YIELD node1, node2, similarity";
 
         Collection<SimilarityResult> result = new HashSet<>();
-        runQuery(query, db, MapUtil.map("graph", graphImpl, "direction", direction.name(), "top", top),
+        runQuery(query, db, MapUtil.map("graph", graphImpl, "direction", direction.name(), "topN", topN),
             row -> {
                 long node1 = row.getNumber("node1").longValue();
                 long node2 = row.getNumber("node2").longValue();
@@ -323,7 +323,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
         NeighborhoodSimilarity.Config config = new NeighborhoodSimilarityProc().config(procedureConfiguration);
 
         assertEquals(10, config.topK());
-        assertEquals(0, config.top());
+        assertEquals(0, config.topN());
         assertEquals(1, config.degreeCutoff());
         assertEquals(1E-42, config.similarityCutoff());
         assertEquals(Pools.DEFAULT_CONCURRENCY, config.concurrency());
@@ -334,7 +334,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
     void shouldCreateValidCustomAlgoConfig() {
         Map<String, Object> input = MapUtil.map(
             "topK", 100,
-            "top", 1000,
+            "topN", 1000,
             "degreeCutoff", 42,
             "similarityCutoff", 0.23,
             "concurrency", 1,
@@ -344,7 +344,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
         NeighborhoodSimilarity.Config config = new NeighborhoodSimilarityProc().config(procedureConfiguration);
 
         assertEquals(100, config.topK());
-        assertEquals(1000, config.top());
+        assertEquals(1000, config.topN());
         assertEquals(42, config.degreeCutoff());
         assertEquals(0.23, config.similarityCutoff());
         assertEquals(1, config.concurrency());

@@ -90,11 +90,11 @@ final class NeighborhoodSimilarityTest {
     private static final Collection<SimilarityResult> EXPECTED_OUTGOING = new HashSet<>();
     private static final Collection<SimilarityResult> EXPECTED_INCOMING = new HashSet<>();
 
-    private static final Collection<SimilarityResult> EXPECTED_OUTGOING_TOP_1 = new HashSet<>();
-    private static final Collection<SimilarityResult> EXPECTED_INCOMING_TOP_1 = new HashSet<>();
+    private static final Collection<SimilarityResult> EXPECTED_OUTGOING_TOP_N_1 = new HashSet<>();
+    private static final Collection<SimilarityResult> EXPECTED_INCOMING_TOP_N_1 = new HashSet<>();
 
-    private static final Collection<SimilarityResult> EXPECTED_OUTGOING_TOPK_1 = new HashSet<>();
-    private static final Collection<SimilarityResult> EXPECTED_INCOMING_TOPK_1 = new HashSet<>();
+    private static final Collection<SimilarityResult> EXPECTED_OUTGOING_TOP_K_1 = new HashSet<>();
+    private static final Collection<SimilarityResult> EXPECTED_INCOMING_TOP_K_1 = new HashSet<>();
 
     private static final Collection<SimilarityResult> EXPECTED_OUTGOING_SIMILARITY_CUTOFF = new HashSet<>();
     private static final Collection<SimilarityResult> EXPECTED_INCOMING_SIMILARITY_CUTOFF = new HashSet<>();
@@ -124,12 +124,12 @@ final class NeighborhoodSimilarityTest {
         EXPECTED_OUTGOING.add(new SimilarityResult(1, 3, 2 / 3.0));
         EXPECTED_OUTGOING.add(new SimilarityResult(2, 3, 1 / 3.0));
 
-        EXPECTED_OUTGOING_TOP_1.add(new SimilarityResult(0, 3, 1.0));
+        EXPECTED_OUTGOING_TOP_N_1.add(new SimilarityResult(0, 3, 1.0));
 
-        EXPECTED_OUTGOING_TOPK_1.add(new SimilarityResult(0, 3, 1.0));
-        EXPECTED_OUTGOING_TOPK_1.add(new SimilarityResult(1, 0, 2 / 3.0));
-        EXPECTED_OUTGOING_TOPK_1.add(new SimilarityResult(2, 0, 1 / 3.0));
-        EXPECTED_OUTGOING_TOPK_1.add(new SimilarityResult(3, 0, 1.0));
+        EXPECTED_OUTGOING_TOP_K_1.add(new SimilarityResult(0, 3, 1.0));
+        EXPECTED_OUTGOING_TOP_K_1.add(new SimilarityResult(1, 0, 2 / 3.0));
+        EXPECTED_OUTGOING_TOP_K_1.add(new SimilarityResult(2, 0, 1 / 3.0));
+        EXPECTED_OUTGOING_TOP_K_1.add(new SimilarityResult(3, 0, 1.0));
 
         EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(new SimilarityResult(0, 1, 2 / 3.0));
         EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(new SimilarityResult(0, 2, 1 / 3.0));
@@ -145,11 +145,11 @@ final class NeighborhoodSimilarityTest {
         EXPECTED_INCOMING.add(new SimilarityResult(4, 6, 1 / 2.0));
         EXPECTED_INCOMING.add(new SimilarityResult(5, 6, 1 / 2.0));
 
-        EXPECTED_INCOMING_TOP_1.add(new SimilarityResult(4, 5, 3.0 / 3.0));
+        EXPECTED_INCOMING_TOP_N_1.add(new SimilarityResult(4, 5, 3.0 / 3.0));
 
-        EXPECTED_INCOMING_TOPK_1.add(new SimilarityResult(4, 5, 1.0));
-        EXPECTED_INCOMING_TOPK_1.add(new SimilarityResult(5, 4, 1.0));
-        EXPECTED_INCOMING_TOPK_1.add(new SimilarityResult(6, 4, 1 / 2.0));
+        EXPECTED_INCOMING_TOP_K_1.add(new SimilarityResult(4, 5, 1.0));
+        EXPECTED_INCOMING_TOP_K_1.add(new SimilarityResult(5, 4, 1.0));
+        EXPECTED_INCOMING_TOP_K_1.add(new SimilarityResult(6, 4, 1 / 2.0));
 
         EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(new SimilarityResult(4, 5, 1.0));
         EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(new SimilarityResult(4, 6, 1 / 2.0));
@@ -218,7 +218,7 @@ final class NeighborhoodSimilarityTest {
 
     @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
     @MethodSource("supportedLoadAndComputeDirections")
-    void shouldComputeTopForSupportedDirections(Direction loadDirection, Direction algoDirection, int concurrency) {
+    void shouldComputeTopNForSupportedDirections(Direction loadDirection, Direction algoDirection, int concurrency) {
         Graph graph = new GraphLoader(db)
             .withAnyLabel()
             .withAnyRelationshipType()
@@ -227,7 +227,7 @@ final class NeighborhoodSimilarityTest {
 
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
-            configBuilder().withConcurrency(concurrency).withTop(1).toConfig(),
+            configBuilder().withConcurrency(concurrency).withTopN(1).toConfig(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -237,7 +237,7 @@ final class NeighborhoodSimilarityTest {
             .collect(Collectors.toSet());
         neighborhoodSimilarity.release();
 
-        assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_TOP_1 : EXPECTED_OUTGOING_TOP_1, result);
+        assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_TOP_N_1 : EXPECTED_OUTGOING_TOP_N_1, result);
     }
 
     @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
@@ -261,7 +261,7 @@ final class NeighborhoodSimilarityTest {
             .collect(Collectors.toSet());
         neighborhoodSimilarity.release();
 
-        assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_TOPK_1 : EXPECTED_OUTGOING_TOPK_1, result);
+        assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_TOP_K_1 : EXPECTED_OUTGOING_TOP_K_1, result);
     }
 
     @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
@@ -439,7 +439,7 @@ final class NeighborhoodSimilarityTest {
 
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
-            configBuilder().withTop(100).withTopK(topK).withConcurrency(concurrency).toConfig(),
+            configBuilder().withTopN(100).withTopK(topK).withConcurrency(concurrency).toConfig(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         ).withProgressLogger(log);
@@ -558,14 +558,14 @@ final class NeighborhoodSimilarityTest {
         private final NeighborhoodSimilarity.Config config;
         private int concurrency;
         private int topK;
-        private int top;
+        private int topN;
         private int degreeCutoff;
         private double similarityCutoff;
 
         ConfigBuilder(NeighborhoodSimilarity.Config config) {
             this.config = config;
             this.concurrency = config.concurrency();
-            this.top = config.top();
+            this.topN = config.topN();
             this.topK = config.topK();
             this.degreeCutoff = config.degreeCutoff();
             this.similarityCutoff = config.similarityCutoff();
@@ -576,8 +576,8 @@ final class NeighborhoodSimilarityTest {
             return this;
         }
 
-        ConfigBuilder withTop(int top) {
-            this.top = top;
+        ConfigBuilder withTopN(int topN) {
+            this.topN = topN;
             return this;
         }
 
@@ -600,7 +600,7 @@ final class NeighborhoodSimilarityTest {
             return new NeighborhoodSimilarity.Config(
                 similarityCutoff,
                 degreeCutoff,
-                top,
+                topN,
                 topK,
                 concurrency,
                 config.minBatchSize()

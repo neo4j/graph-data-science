@@ -13,7 +13,7 @@ This topic includes:
 * <<algorithms-neighborhood-similarity-examples, Examples>>
 ** <<algorithms-neighborhood-similarity-examples-stream, Streaming results>>
 ** <<algorithms-neighborhood-similarity-examples-write, Writing results>>
-** <<algorithms-neighborhood-similarity-examples-top-topk, Top and topK>>
+** <<algorithms-neighborhood-similarity-examples-topk-topn, TopK and topN>>
 ** <<algorithms-neighborhood-similarity-examples-degree-similarity-cutoff, Degree cutoff and similarity cutoff>>
 
 
@@ -87,8 +87,8 @@ YIELD nodesCompared, relationships, write, writeRelationshipType, writeProperty
 | writeProperty         | string  | 'score'                | yes      | The relationship property that stores the similarity score.
 | similarityCutoff      | float   | 1E-42                  | yes      | Lower limit for the similarity score to be present in the result.
 | degreeCutoff          | int     | 1                      | yes      | Lower limit on the node degree for a node to be considered in the comparisons. This value can not be lower than 1.
-| top                   | int     | 0                      | yes      | Global limit on the number of scores computed. If positive, the result is ordered descending, otherwise ascending.
 | topK                  | int     | 10                     | yes      | Limit on the number of scores computed per node. If positive, the result is ordered descending, otherwise ascending. This value can not be 0.
+| topN                  | int     | 0                      | yes      | Global limit on the number of scores computed. If positive, the result is ordered descending, otherwise ascending.
 |===
 
 .Results
@@ -148,8 +148,8 @@ YIELD node1, node2, similarity
 | readConcurrency   | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 | similarityCutoff  | float   | 1E-42                  | yes      | Lower limit for the similarity score to be present in the result.
 | degreeCutoff      | int     | 1                      | yes      | Lower limit on the node degree for a node to be considered in the comparisons. This value can not be lower than 1.
-| top               | int     | 0                      | yes      | Global limit on the number of scores computed. If positive, the result is ordered descending, otherwise ascending.
 | topK              | int     | 10                     | yes      | Limit on the number of scores computed per node. If positive, the result is ordered descending, otherwise ascending. This value can not be 0.
+| topN               | int     | 0                      | yes      | Global limit on the number of scores computed. If positive, the result is ordered descending, otherwise ascending.
 |===
 
 .Results
@@ -244,7 +244,7 @@ ORDER BY similarity DESCENDING, Person1, Person2
 |===
 
 We use default values for the procedure configuration parameter.
-TopK is set to 10, top is set to 0.
+TopK is set to 10, topN is set to 0.
 Because of that the result set contains the top 10 similarity scores for each node.
 
 
@@ -276,8 +276,8 @@ YIELD nodesCompared, relationships, write, writeProperty, writeRelationshipType;
 As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.
 
 
-[[algorithms-neighborhood-similarity-examples-top-topk]]
-=== TopK and top
+[[algorithms-neighborhood-similarity-examples-topk-topn]]
+=== TopK and topN
 
 TopK is a limit on the number of scores computed per node.
 If the given value is positive, the results per node are ordered descending.
@@ -308,7 +308,7 @@ ORDER BY Person1
 3+|4 rows
 |===
 
-Top limits the number of topK similarity scores across all nodes.
+TopN limits the number of topK similarity scores across all nodes.
 If the given value is positive, the results are ordered descending.
 If a negative value is used, the results are ordered ascending.
 A value of 0 means no global limit is imposed and results are returned in topK order.
@@ -320,7 +320,7 @@ CALL algo.beta.jaccard.stream('', 'LIKES', {
   graph: 'huge',
   direction: 'OUTGOING',
   topK: 1,
-  top: 3
+  topN: 3
 })
 YIELD node1, node2, similarity
 RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity

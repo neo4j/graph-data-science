@@ -86,7 +86,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         // Compute similarities
         Stream<SimilarityResult> stream;
 
-        if (config.hasTop() && !config.hasTopK()) {
+        if (config.hasTopN() && !config.hasTopK()) {
             // Special case: compute topN without topK.
             // This can not happen when algo is called from proc.
             // Ignore parallelism, always run single threaded,
@@ -103,7 +103,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     }
 
     private Stream<SimilarityResult> compute() {
-        return (config.hasTopK() && config.hasTop())
+        return (config.hasTopK() && config.hasTopN())
             ? computeTopN(computeTopkMap())
             : (config.hasTopK())
                 ? computeTopkMap().stream()
@@ -111,7 +111,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     }
 
     private Stream<SimilarityResult> computeParallel() {
-        return (config.hasTopK() && config.hasTop())
+        return (config.hasTopK() && config.hasTopN())
             ? computeTopN(computeTopKMapParallel())
             : (config.hasTopK())
                 ? computeTopKMapParallel().stream()
@@ -229,7 +229,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     }
 
     private Stream<SimilarityResult> computeTopN() {
-        TopNList topNList = new TopNList(config.top);
+        TopNList topNList = new TopNList(config.topN);
         nodeStream()
             .forEach(node1 -> {
                 long[] vector1 = vectors.get(node1);
@@ -245,7 +245,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     }
 
     private Stream<SimilarityResult> computeTopN(TopKMap topKMap) {
-        TopNList topNList = new TopNList(config.top);
+        TopNList topNList = new TopNList(config.topN);
         topKMap.forEach(topNList::add);
         return topNList.stream();
     }
@@ -286,7 +286,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         private final double similarityCutoff;
         private final int degreeCutoff;
 
-        private final int top;
+        private final int topN;
         private final int topK;
 
         private final int concurrency;
@@ -295,7 +295,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         public Config(
             double similarityCutoff,
             int degreeCutoff,
-            int top,
+            int topN,
             int topK,
             int concurrency,
             int minBatchSize
@@ -303,7 +303,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
             this.similarityCutoff = similarityCutoff;
             // TODO: make this constraint more prominent
             this.degreeCutoff = Math.max(1, degreeCutoff);
-            this.top = top;
+            this.topN = topN;
             this.topK = topK;
             this.concurrency = concurrency;
             this.minBatchSize = minBatchSize;
@@ -313,8 +313,8 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
             return topK;
         }
 
-        public int top() {
-            return top;
+        public int topN() {
+            return topN;
         }
 
         public double similarityCutoff() {
@@ -341,8 +341,8 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
             return topK != 0;
         }
 
-        public boolean hasTop() {
-            return top != 0;
+        public boolean hasTopN() {
+            return topN != 0;
         }
     }
 
