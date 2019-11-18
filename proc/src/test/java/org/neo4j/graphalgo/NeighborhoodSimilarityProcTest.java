@@ -127,7 +127,8 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
         String query = "CALL algo.beta.jaccard.stream(" +
                        "    '', 'LIKES', {" +
                        "        graph: $graph," +
-                       "        direction: $direction" +
+                       "        direction: $direction," +
+                       "        similarityCutoff: 0.0" +
                        "    }" +
                        ") YIELD node1, node2, similarity";
 
@@ -183,7 +184,8 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
         String query = "CALL algo.beta.jaccard(" +
                        "    '', 'LIKES', {" +
                        "        graph: $graph," +
-                       "        direction: $direction" +
+                       "        direction: $direction," +
+                       "        similarityCutoff: 0.0" +
                        "    }" +
                        ") YIELD" +
                        " computeMillis," +
@@ -323,7 +325,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
         assertEquals(10, config.topk());
         assertEquals(0, config.top());
         assertEquals(1, config.degreeCutoff());
-        assertEquals(0.0, config.similarityCutoff());
+        assertEquals(1E-42, config.similarityCutoff());
         assertEquals(Pools.DEFAULT_CONCURRENCY, config.concurrency());
         assertEquals(ParallelUtil.DEFAULT_BATCH_SIZE, config.minBatchSize());
     }

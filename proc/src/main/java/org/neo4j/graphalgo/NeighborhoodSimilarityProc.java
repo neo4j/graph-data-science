@@ -49,7 +49,7 @@ import static org.neo4j.graphdb.Direction.OUTGOING;
 public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilarity> {
 
     private static final String SIMILARITY_CUTOFF_KEY = "similarityCutoff";
-    private static final double SIMILARITY_CUTOFF_DEFAULT = 0.0;
+    private static final double SIMILARITY_CUTOFF_DEFAULT = 1E-42;
 
     private static final String DEGREE_CUTOFF_KEY = "degreeCutoff";
     private static final int DEGREE_CUTOFF_DEFAULT = 1;

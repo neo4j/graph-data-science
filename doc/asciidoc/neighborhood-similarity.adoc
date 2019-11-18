@@ -85,7 +85,7 @@ YIELD nodesCompared, relationships, write, writeRelationshipType, writeProperty
 | write                 | boolean | true                   | yes      | Specifies if the result should be written back as a node property.
 | writeRelationshipType | string  | SIMILAR                | yes      | The relationship type used to represent a similarity score.
 | writeProperty         | string  | 'score'                | yes      | The relationship property that stores the similarity score.
-| similarityCutoff      | float   | 0.0                    | yes      | Lower limit for the similarity score to be present in the result.
+| similarityCutoff      | float   | 1E-42                  | yes      | Lower limit for the similarity score to be present in the result.
 | degreeCutoff          | int     | 1                      | yes      | Lower limit on the node degree for a node to be considered in the comparisons. This value can not be lower than 1.
 | top                   | int     | 0                      | yes      | Global limit on the number of scores computed. If positive, the result is ordered descending, otherwise ascending.
 | topK                  | int     | 10                     | yes      | Limit on the number of scores computed per node. If positive, the result is ordered descending, otherwise ascending. This value can not be 0.
@@ -146,7 +146,7 @@ YIELD node1, node2, similarity
 | graph             | string  | 'huge'                 | yes      | Use 'huge' when describing the subset of the graph with node label and relationship type parameters. Use 'cypher' for describing the subset using Cypher queries for nodes and relationships.
 | concurrency       | int     | available CPUs         | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
 | readConcurrency   | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| similarityCutoff  | float   | 0.0                    | yes      | Lower limit for the similarity score to be present in the result.
+| similarityCutoff  | float   | 1E-42                  | yes      | Lower limit for the similarity score to be present in the result.
 | degreeCutoff      | int     | 1                      | yes      | Lower limit on the node degree for a node to be considered in the comparisons. This value can not be lower than 1.
 | top               | int     | 0                      | yes      | Global limit on the number of scores computed. If positive, the result is ordered descending, otherwise ascending.
 | topK              | int     | 10                     | yes      | Limit on the number of scores computed per node. If positive, the result is ordered descending, otherwise ascending. This value can not be 0.
@@ -367,6 +367,13 @@ ORDER BY Person1
 |===
 
 Similarity cutoff is a lower limit for the similarity score to be present in the result.
+The default value is set to 1E-42 to exclude results with a similarity score of 0.
+
+[NOTE]
+====
+Setting similarityCutoff to 0 will compute a potentially vast result set.
+This can lead to an increased runtime during streaming and writing.
+====
 
 .The following will ignore node pairs with a similarty score less than 0.5:
 [source, cypher]
