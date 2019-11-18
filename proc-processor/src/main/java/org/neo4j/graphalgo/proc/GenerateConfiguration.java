@@ -32,7 +32,6 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.SourceVersion;
@@ -56,11 +55,13 @@ final class GenerateConfiguration {
     private final Messager messager;
     private final Elements elementUtils;
     private final SourceVersion sourceVersion;
+    private final TypeMirror mapWrapperType;
 
     GenerateConfiguration(Messager messager, Elements elementUtils, SourceVersion sourceVersion) {
         this.messager = messager;
         this.elementUtils = elementUtils;
         this.sourceVersion = sourceVersion;
+        mapWrapperType = elementUtils.getTypeElement("org.neo4j.graphalgo.core.CypherMapWrapper").asType();
     }
 
     JavaFile generateConfig(ConfigParser.Spec config, String className) {
@@ -128,7 +129,7 @@ final class GenerateConfiguration {
             .constructorBuilder()
             .addModifiers(Modifier.PUBLIC)
             .addParameter(
-                TypeName.get(CypherMapWrapper.class),
+                TypeName.get(mapWrapperType),
                 names.newName(CONFIG_VAR, CONFIG_VAR)
             );
 

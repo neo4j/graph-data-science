@@ -31,7 +31,6 @@ dependencies {
     compileOnly 'org.immutables:value-annotations:2.8.1'
 
     compile project(':annotations')
-    compile project(':algo-common')
 
     compile 'com.google.auto:auto-common:0.10'
     compile 'com.squareup:javapoet:1.11.1'
