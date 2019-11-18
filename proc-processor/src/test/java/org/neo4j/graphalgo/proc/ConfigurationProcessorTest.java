@@ -76,6 +76,11 @@ class ConfigurationProcessorTest {
     }
 
     @Test
+    void keyRenames() {
+        runGoodTest("KeyRenames");
+    }
+
+    @Test
     void baseClassMustBeAnInterface() {
         runBadTest(
             "BaseClassIsNotAnInterface",
