@@ -20,8 +20,6 @@
 
 package org.neo4j.graphalgo.annotation;
 
-import org.immutables.value.Value;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -33,11 +31,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface Configuration {
 
-    String DEFAULT_NAME = "d86041ef-d84e-4e89-a5ce-151a24975938";
-
-    String value() default DEFAULT_NAME;
-
-    String name() default DEFAULT_NAME;
+    /**
+     * Name of the generated class
+     */
+    String value();
 
     @Documented
     @Target(ElementType.METHOD)

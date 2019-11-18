@@ -25,20 +25,15 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.SetMultimap;
 import com.squareup.javapoet.JavaFile;
 import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.proc.AnProcUtil.ProcessResult;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
-import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.util.Optional;
 import java.util.Set;
-
-import static com.google.auto.common.MoreElements.getAnnotationMirror;
 
 public final class ConfigurationProcessingStep implements BasicAnnotationProcessor.ProcessingStep {
 
@@ -81,24 +76,9 @@ public final class ConfigurationProcessingStep implements BasicAnnotationProcess
 
     private ProcessResult process(Element element) {
         Configuration configuration = element.getAnnotation(ANNOTATION_CLASS);
-        Optional<String> specifiedClassName = AnProcUtil.declaredValue(
-            Configuration.DEFAULT_NAME,
-            configuration.name(),
-            configuration.value()
-        );
-        if (!specifiedClassName.isPresent()) {
-            messager.printMessage(
-                Diagnostic.Kind.ERROR,
-                "The @%s annotation is missing the name value",
-                element,
-                getAnnotation(element)
-            );
-            return ProcessResult.UNABLE_TO_PROCESS;
-        }
-
         TypeMirror elementType = element.asType();
         ConfigParser.Spec configSpec = configParser.process(elementType);
-        JavaFile generatedConfig = generateConfiguration.generateConfig(configSpec, specifiedClassName.get());
+        JavaFile generatedConfig = generateConfiguration.generateConfig(configSpec, configuration.value());
 
         try {
             generatedConfig.writeTo(filer);
@@ -113,14 +93,8 @@ public final class ConfigurationProcessingStep implements BasicAnnotationProcess
         }
     }
 
-    private AnnotationMirror getAnnotation(Element element) {
-
-        return getAnnotationMirror(element, ANNOTATION_CLASS).or(() -> {
-            throw new IllegalArgumentException(String.format(
-                "Element [%s] should be annotated with %s",
-                element,
-                ANNOTATION_CLASS
-            ));
-        });
+    enum ProcessResult {
+        PROCESSED,
+        RETRY
     }
 }
