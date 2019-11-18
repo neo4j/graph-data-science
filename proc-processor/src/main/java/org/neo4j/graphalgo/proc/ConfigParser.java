@@ -81,10 +81,28 @@ final class ConfigParser {
             return Optional.empty();
         }
 
-        if (!method.getParameters().isEmpty() || !method.getTypeParameters().isEmpty()) {
+        if (!method.getParameters().isEmpty()) {
             messager.printMessage(
                 Diagnostic.Kind.ERROR,
                 "Method may not have any parameters",
+                method
+            );
+            return Optional.empty();
+        }
+
+        if (!method.getTypeParameters().isEmpty()) {
+            messager.printMessage(
+                Diagnostic.Kind.ERROR,
+                "Method may not have any type parameters",
+                method
+            );
+            return Optional.empty();
+        }
+
+        if (!method.getThrownTypes().isEmpty()) {
+            messager.printMessage(
+                Diagnostic.Kind.ERROR,
+                "Method may not declare any exceptions to be thrown",
                 method
             );
             return Optional.empty();
