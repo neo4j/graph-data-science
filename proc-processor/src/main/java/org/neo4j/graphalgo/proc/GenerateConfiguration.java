@@ -188,7 +188,7 @@ final class GenerateConfiguration {
             default:
                 messager.printMessage(
                     Diagnostic.Kind.ERROR,
-                    "Usupported return type: " + returnType,
+                    "Unsupported return type: " + returnType,
                     member.method()
                 );
                 return Optional.empty();
