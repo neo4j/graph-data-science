@@ -101,14 +101,14 @@ class ConfigurationProcessorTest {
     void failOnUnsupportedMethods() {
         runBadTest(
             "InvalidMethods",
-            e("Unsupported return type: char", 9, 10),
-            e("Unsupported return type: void", 11, 10),
-            e("Unsupported return type: int[]", 13, 11),
-            e("Method may not have any parameters", 15, 12),
-            e("Method may not have any type parameters", 17, 11),
-            e("Method may not have any type parameters", 19, 24),
-            e("Method may not declare any exceptions to be thrown", 21, 9),
-            e("Method may not declare any exceptions to be thrown", 23, 12)
+            e("Unsupported return type: char", 10, 10),
+            e("Unsupported return type: void", 12, 10),
+            e("Unsupported return type: int[]", 14, 11),
+            e("Method may not have any parameters", 16, 12),
+            e("Method may not have any type parameters", 18, 11),
+            e("Method may not have any type parameters", 20, 24),
+            e("Method may not declare any exceptions to be thrown", 22, 9),
+            e("Method may not declare any exceptions to be thrown", 24, 12)
         );
     }
 
