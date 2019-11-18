@@ -63,7 +63,7 @@ public final class ConfigurationProcessingStep implements BasicAnnotationProcess
 
     @Override
     public Set<? extends Element> process(SetMultimap<Class<? extends Annotation>, Element> elementsByAnnotation) {
-        Set<Element> elements = elementsByAnnotation.get(Configuration.class);
+        Set<Element> elements = elementsByAnnotation.get(ANNOTATION_CLASS);
         ImmutableSet.Builder<Element> elementsToRetry = ImmutableSet.builder();
         for (Element element : elements) {
             ProcessResult result = process(element);
