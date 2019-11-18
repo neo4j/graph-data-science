@@ -36,6 +36,7 @@ import javax.annotation.processing.Messager;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic;
@@ -49,6 +50,7 @@ import static com.google.auto.common.MoreTypes.isTypeOf;
 
 final class GenerateConfiguration {
 
+    private static final String CYPHER_MAP_WRAPPER_TYPE = "org.neo4j.graphalgo.core.CypherMapWrapper";
     private static final String CONFIG_VAR = "config";
 
     private final Messager messager;
@@ -60,7 +62,14 @@ final class GenerateConfiguration {
         this.messager = messager;
         this.elementUtils = elementUtils;
         this.sourceVersion = sourceVersion;
-        mapWrapperType = elementUtils.getTypeElement("org.neo4j.graphalgo.core.CypherMapWrapper").asType();
+        TypeElement mapWrapper = elementUtils.getTypeElement(CYPHER_MAP_WRAPPER_TYPE);
+        if (mapWrapper == null) {
+            throw new IllegalStateException(String.format(
+                "Missing dependency on core module, the type `%s` is not available",
+                CYPHER_MAP_WRAPPER_TYPE
+            ));
+        }
+        mapWrapperType = mapWrapper.asType();
     }
 
     JavaFile generateConfig(ConfigParser.Spec config, String className) {
