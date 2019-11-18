@@ -71,6 +71,11 @@ class ConfigurationProcessorTest {
     }
 
     @Test
+    void resolveNamingConflicts() {
+        runGoodTest("NamingConflict");
+    }
+
+    @Test
     void baseClassMustBeAnInterface() {
         runBadTest(
             "BaseClassIsNotAnInterface",
