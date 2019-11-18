@@ -81,6 +81,11 @@ class ConfigurationProcessorTest {
     }
 
     @Test
+    void parameters() {
+        runGoodTest("Parameters");
+    }
+
+    @Test
     void baseClassMustBeAnInterface() {
         runBadTest(
             "BaseClassIsNotAnInterface",
