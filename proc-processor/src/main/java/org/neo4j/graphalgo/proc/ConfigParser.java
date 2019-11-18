@@ -24,6 +24,7 @@ import com.google.common.collect.Streams;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration.Ignore;
 import org.neo4j.graphalgo.annotation.Configuration.Key;
+import org.neo4j.graphalgo.annotation.Configuration.Parameter;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 import javax.annotation.processing.Messager;
@@ -117,6 +118,14 @@ final class ConfigParser {
 
         Key key = method.getAnnotation(Key.class);
         if (key != null) {
+            if (isAnnotationPresent(method, Parameter.class)) {
+                messager.printMessage(
+                    Diagnostic.Kind.ERROR,
+                    "The `@Parameter` annotation cannot be used together with the `@Key` annotation",
+                    method
+                );
+                return Optional.empty();
+            }
             memberBuilder.lookupKey(key.value());
         }
 

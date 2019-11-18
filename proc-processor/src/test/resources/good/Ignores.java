@@ -32,6 +32,18 @@ public interface Ignores {
         }
 
         @Configuration.Ignore
+        @Configuration.Parameter
+        default String canIgnoreParametersAsWell() {
+            return "foo";
+        }
+
+        @Configuration.Ignore
+        @Configuration.Key("bar")
+        default String canIgnoreKeyAnnotationsAsWell() {
+            return "baz";
+        }
+
+        @Configuration.Ignore
         default char canIgnoreInvalidMethods() {
             return 's';
         }

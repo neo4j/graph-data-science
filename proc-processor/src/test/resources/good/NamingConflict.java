@@ -26,4 +26,10 @@ import org.neo4j.graphalgo.annotation.Configuration;
 public interface NamingConflict {
 
     int config();
+
+    @Configuration.Key("config")
+    int anotherConfig();
+
+    @Configuration.Parameter
+    int config_();
 }

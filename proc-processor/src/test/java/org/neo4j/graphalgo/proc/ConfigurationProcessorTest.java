@@ -126,6 +126,14 @@ class ConfigurationProcessorTest {
         );
     }
 
+    @Test
+    void invalidAnnotationCombinations() {
+        runBadTest(
+            "InvalidAnnotationCombinations",
+            e("The `@Parameter` annotation cannot be used together with the `@Key` annotation", 12, 9)
+        );
+    }
+
     private void runGoodTest(String className) {
         assertAbout(javaSource())
             .that(forResource(String.format("good/%s.java", className)))
