@@ -157,7 +157,7 @@ public class K1ColoringProc extends BaseAlgoProc<K1Coloring> {
     }
 
     @Override
-    protected GraphLoader configureAlgoLoader(
+    protected GraphLoader configureGraphLoader(
         GraphLoader loader, ProcedureConfiguration config
     ) {
         return loader.withDirection(config.getDirection(Direction.OUTGOING));

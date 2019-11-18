@@ -58,7 +58,7 @@ public abstract class WccBaseProc<T extends WCC<T>> extends BaseAlgoProc<T> {
     private static final String CONFIG_CONSECUTIVE_IDS_PROPERTY = "consecutiveIds";
 
     @Override
-    protected GraphLoader configureAlgoLoader(final GraphLoader loader, final ProcedureConfiguration config) {
+    protected GraphLoader configureGraphLoader(final GraphLoader loader, final ProcedureConfiguration config) {
         final String seedProperty = config.getString(SEED_PROPERTY_KEY, null);
         if (seedProperty != null) {
             loader.withOptionalNodeProperties(createPropertyMappings(seedProperty));

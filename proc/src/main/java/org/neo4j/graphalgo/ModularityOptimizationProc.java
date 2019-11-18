@@ -151,7 +151,7 @@ public class ModularityOptimizationProc extends BaseAlgoProc<ModularityOptimizat
     }
 
     @Override
-    protected GraphLoader configureAlgoLoader(
+    protected GraphLoader configureGraphLoader(
         GraphLoader loader, ProcedureConfiguration config
     ) {
         final String seedProperty = config.getString(SEED_PROPERTY_KEY, null);

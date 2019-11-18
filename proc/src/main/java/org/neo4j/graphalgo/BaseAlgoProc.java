@@ -44,7 +44,7 @@ public abstract class BaseAlgoProc<A extends Algorithm<A>> extends BaseProc {
                 .withTerminationFlag(terminationFlag);
     }
 
-    protected abstract GraphLoader configureAlgoLoader(GraphLoader loader, ProcedureConfiguration config);
+    protected abstract GraphLoader configureGraphLoader(GraphLoader loader, ProcedureConfiguration config);
 
     protected abstract AlgorithmFactory<A> algorithmFactory(ProcedureConfiguration config);
 
@@ -75,6 +75,6 @@ public abstract class BaseAlgoProc<A extends Algorithm<A>> extends BaseProc {
                     config.getWeightPropertyDefaultValue(getDefaultWeightProperty(config))
             ));
         }
-        return configureAlgoLoader(loader, config);
+        return configureGraphLoader(loader, config);
     }
 }

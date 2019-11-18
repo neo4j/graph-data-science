@@ -129,7 +129,7 @@ public final class PageRankProc extends BaseAlgoProc<PageRank> {
     }
 
     @Override
-    protected GraphLoader configureAlgoLoader(GraphLoader loader, ProcedureConfiguration config) {
+    protected GraphLoader configureGraphLoader(GraphLoader loader, ProcedureConfiguration config) {
         return loader.withReducedRelationshipLoading(config.getDirection(Direction.OUTGOING));
     }
 
