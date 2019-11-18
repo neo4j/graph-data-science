@@ -121,7 +121,8 @@ class MemRecProcTest extends ProcTestBase {
         String query = String.format(queryTemplate, s);
 
         try {
-            db.execute(query).resultAsString();
+            System.out.println(s);
+            System.out.println((db.execute(query).resultAsString()));
             expectedMessage.ifPresent(value -> fail("Call should have failed with " + value));
         } catch (QueryExecutionException e) {
             if (expectedMessage.isPresent()) {
@@ -132,4 +133,14 @@ class MemRecProcTest extends ProcTestBase {
         }
     }
 
+    @Test
+    void memRecOnGraphStats() {
+        test("algo.memrec(null, null, 'graph.load', {nodeCount: 400, relationshipCount: 3551})");
+        test("algo.memrec(null, null, 'graph.load', {nodeCount: 400, relationshipCount: 3551, nodeProperties: {population: {property: 'population'}}})");
+        test("algo.wcc.memrec(null, null, {nodeCount: 400, relationshipCount: 3551})");
+        test("algo.louvain.memrec(null, null, {nodeCount: 200})");
+        test("algo.graph.load.memrec(null, null, {relationshipCount: 200})");
+        test("algo.graph.load.memrec(null, null, {relationshipCount: 1})");
+        test("algo.graph.load.memrec(null, null, {nodeCount: 500, relationshipCount: 200})");
+    }
 }

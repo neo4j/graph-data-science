@@ -21,15 +21,19 @@ package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.ProcedureConstants;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+
+import static org.neo4j.graphalgo.core.ProcedureConstants.NODECOUNT_KEY;
+import static org.neo4j.graphalgo.core.ProcedureConstants.RELCOUNT_KEY;
 
 public abstract class BaseAlgoProc<A extends Algorithm<A>> extends BaseProc {
 
@@ -51,13 +55,27 @@ public abstract class BaseAlgoProc<A extends Algorithm<A>> extends BaseProc {
     protected MemoryTreeWithDimensions memoryEstimation(final ProcedureConfiguration config) {
         GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
         GraphFactory graphFactory = loader.build(config.getGraphImpl());
+        GraphDimensions dimensions;
         AlgorithmFactory<A> algorithmFactory = algorithmFactory(config);
-        MemoryEstimation estimation = MemoryEstimations.builder("graph with procedure")
-                .add(algorithmFactory.memoryEstimation())
-                .add(graphFactory.memoryEstimation())
-                .build();
-        MemoryTree memoryTree = estimation.estimate(graphFactory.dimensions(), config.getConcurrency());
-        return new MemoryTreeWithDimensions(memoryTree, graphFactory.dimensions());
+        MemoryEstimations.Builder estimationsBuilder = MemoryEstimations.builder("graph with procedure")
+            .add(algorithmFactory.memoryEstimation());
+
+        if (config.containsKey(NODECOUNT_KEY)) {
+            Long nodeCount = config.get(NODECOUNT_KEY, 0L);
+            Long relCount = config.get(RELCOUNT_KEY, 0L);
+            dimensions = new GraphDimensions.Builder().setNodeCount(nodeCount)
+                .setHighestNeoId(nodeCount)
+                .setMaxRelCount(relCount)
+                .setNodeProperties(config.getNodeProperties())
+                .setRelationshipProperties(config.getRelationshipProperties()).build();
+            estimationsBuilder.add("Non-existing graph",
+                HugeGraphFactory.getMemoryEstimation(loader.toSetup(), dimensions, true));
+        } else {
+            dimensions = graphFactory.dimensions();
+            estimationsBuilder.add(graphFactory.memoryEstimation());
+        }
+        MemoryTree memoryTree = estimationsBuilder.build().estimate(dimensions, config.getConcurrency());
+        return new MemoryTreeWithDimensions(memoryTree, dimensions);
     }
 
     protected double getDefaultWeightProperty(ProcedureConfiguration config) {
