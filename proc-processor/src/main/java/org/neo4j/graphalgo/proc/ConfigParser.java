@@ -26,11 +26,9 @@ import org.neo4j.graphalgo.annotation.Configuration.Ignore;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 import javax.annotation.processing.Messager;
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 import java.util.Collection;
@@ -68,10 +66,6 @@ final class ConfigParser {
         for (TypeMirror implemented : configElement.getInterfaces()) {
             process(output, seen, asTypeElement(implemented), root);
         }
-
-        if (configElement.getSuperclass().getKind() != TypeKind.NONE) {
-            process(output, seen, asTypeElement(configElement.getSuperclass()), root);
-        }
     }
 
     private Optional<Member> validateMember(Collection<String> seen, TypeElement root, ExecutableElement method) {
@@ -84,24 +78,6 @@ final class ConfigParser {
 
         Set<Modifier> modifiers = method.getModifiers();
         if (modifiers.contains(Modifier.STATIC)) {
-            return Optional.empty();
-        }
-
-        if (!modifiers.contains(Modifier.PUBLIC)) {
-            messager.printMessage(
-                Diagnostic.Kind.ERROR,
-                "Method must be public",
-                method
-            );
-            return Optional.empty();
-        }
-
-        if (modifiers.contains(Modifier.FINAL)) {
-            messager.printMessage(
-                Diagnostic.Kind.ERROR,
-                "Method may not be final",
-                method
-            );
             return Optional.empty();
         }
 
@@ -124,10 +100,6 @@ final class ConfigParser {
         TypeMirror rootType();
 
         List<Member> members();
-
-        default boolean rootIsInterface() {
-            return root().getKind() == ElementKind.INTERFACE;
-        }
     }
 
     @ValueClass

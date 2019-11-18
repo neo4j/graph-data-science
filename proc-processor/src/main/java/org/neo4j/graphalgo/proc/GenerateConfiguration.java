@@ -103,12 +103,7 @@ final class GenerateConfiguration {
     }
 
     private void inheritFrom(TypeSpec.Builder classBuilder, ConfigParser.Spec config) {
-        TypeName parentName = TypeName.get(config.rootType());
-        if (config.rootIsInterface()) {
-            classBuilder.addSuperinterface(parentName);
-        } else {
-            classBuilder.superclass(parentName);
-        }
+        classBuilder.addSuperinterface(TypeName.get(config.rootType()));
     }
 
     private void addGeneratedAnnotation(TypeSpec.Builder classBuilder) {

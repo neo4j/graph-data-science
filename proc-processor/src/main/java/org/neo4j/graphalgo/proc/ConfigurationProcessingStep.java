@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.annotation.Configuration;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
-import javax.lang.model.type.TypeMirror;
+import javax.lang.model.element.ElementKind;
 import javax.tools.Diagnostic;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -75,9 +75,16 @@ public final class ConfigurationProcessingStep implements BasicAnnotationProcess
     }
 
     private ProcessResult process(Element element) {
+        if (element.getKind() != ElementKind.INTERFACE) {
+            messager.printMessage(
+                Diagnostic.Kind.ERROR,
+                "The annotated configuration must be an interface.",
+                element
+            );
+            return ProcessResult.INVALID;
+        }
+        ConfigParser.Spec configSpec = configParser.process(element.asType());
         Configuration configuration = element.getAnnotation(ANNOTATION_CLASS);
-        TypeMirror elementType = element.asType();
-        ConfigParser.Spec configSpec = configParser.process(elementType);
         JavaFile generatedConfig = generateConfiguration.generateConfig(configSpec, configuration.value());
 
         try {
@@ -95,6 +102,7 @@ public final class ConfigurationProcessingStep implements BasicAnnotationProcess
 
     enum ProcessResult {
         PROCESSED,
+        INVALID,
         RETRY
     }
 }
