@@ -30,7 +30,6 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.NameAllocator;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 import javax.annotation.processing.Messager;
@@ -107,7 +106,7 @@ final class GenerateConfiguration {
         GeneratedAnnotationSpecs.generatedAnnotationSpec(
             elementUtils,
             sourceVersion,
-            Configuration.class
+            ConfigurationProcessor.class
         ).ifPresent(classBuilder::addAnnotation);
     }
 
