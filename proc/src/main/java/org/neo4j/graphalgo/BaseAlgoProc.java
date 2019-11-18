@@ -55,7 +55,7 @@ public abstract class BaseAlgoProc<A extends Algorithm<A>> extends BaseProc {
     protected MemoryTreeWithDimensions memoryEstimation(final ProcedureConfiguration config) {
         GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
         GraphFactory graphFactory = loader.build(config.getGraphImpl());
-        GraphDimensions dimensions;
+        GraphDimensions dimensions = graphFactory.dimensions();
         AlgorithmFactory<A> algorithmFactory = algorithmFactory(config);
         MemoryEstimations.Builder estimationsBuilder = MemoryEstimations.builder("graph with procedure")
             .add(algorithmFactory.memoryEstimation());
@@ -63,18 +63,15 @@ public abstract class BaseAlgoProc<A extends Algorithm<A>> extends BaseProc {
         if (config.forNonExistingGraph()) {
             Long nodeCount = config.get(NODECOUNT_KEY, 0L);
             Long relCount = config.get(RELCOUNT_KEY, 0L);
-            dimensions = new GraphDimensions.Builder().setNodeCount(nodeCount)
-                .setHighestNeoId(nodeCount)
-                .setMaxRelCount(relCount)
-                .setNodeProperties(config.getNodeProperties())
-                .setRelationshipProperties(config.getRelationshipProperties()).build();
+            dimensions.nodeCount(nodeCount);
+            dimensions.maxRelCount(relCount);
             estimationsBuilder.add("Non-existing graph",
                 HugeGraphFactory.getMemoryEstimation(loader.toSetup(), dimensions, true));
         } else {
-            dimensions = graphFactory.dimensions();
             estimationsBuilder.add(graphFactory.memoryEstimation());
         }
         MemoryTree memoryTree = estimationsBuilder.build().estimate(dimensions, config.getConcurrency());
+        //System.out.println(memoryTree.render());
         return new MemoryTreeWithDimensions(memoryTree, dimensions);
     }
 

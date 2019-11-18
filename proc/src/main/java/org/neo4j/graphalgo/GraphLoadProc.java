@@ -127,24 +127,20 @@ public final class GraphLoadProc extends BaseProc {
         ProcedureConfiguration config = newConfig(label, relationshipType, configuration);
         GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
         GraphFactory graphFactory = loader.build(config.getGraphImpl());
-        GraphDimensions dimensions;
+        GraphDimensions dimensions = graphFactory.dimensions();;
         MemoryTree memoryTree;
 
         if (config.forNonExistingGraph()) {
-            Long nodeCount = config.get(NODECOUNT_KEY, 0L);
-            Long relCount = config.get(RELCOUNT_KEY, 0L);
-            dimensions = new GraphDimensions.Builder().setNodeCount(nodeCount)
-                .setHighestNeoId(nodeCount)
-                .setMaxRelCount(relCount)
-                .setNodeProperties(config.getNodeProperties())
-                .setRelationshipProperties(config.getRelationshipProperties()).build();
+            long nodeCount = config.get(NODECOUNT_KEY, 0L);
+            long relCount = config.get(RELCOUNT_KEY, 0L);
+            dimensions.nodeCount(nodeCount);
+            dimensions.maxRelCount(relCount);
             memoryTree = HugeGraphFactory
                 .getMemoryEstimation(loader.toSetup(), dimensions, true)
                 .estimate(dimensions, config.getConcurrency());
         } else {
             memoryTree = graphFactory.memoryEstimation()
                 .estimate(graphFactory.dimensions(), config.getConcurrency());
-            dimensions = graphFactory.dimensions();
         }
         return Stream.of(new MemRecResult(new MemoryTreeWithDimensions(memoryTree, dimensions)));
     }
