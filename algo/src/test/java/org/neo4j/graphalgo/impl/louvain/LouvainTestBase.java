@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.impl.louvain.legacy.Louvain;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -46,8 +45,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 abstract class LouvainTestBase {
 
-    static final Louvain.Config DEFAULT_CONFIG = new Louvain.Config(10, 10, Optional.empty());
-    static final Louvain.Config DEFAULT_CONFIG_WITH_DENDROGRAM = new Louvain.Config(10, 10, Optional.empty(), true);
+    static final Louvain.Config DEFAULT_CONFIG = new Louvain.Config(10, 10, 0.001, false,  Optional.empty());
+    static final Louvain.Config DEFAULT_CONFIG_WITH_DENDROGRAM = new Louvain.Config(10, 10, 0.001, true, Optional.empty());
 
     GraphDatabaseAPI db;
 
@@ -74,11 +73,12 @@ abstract class LouvainTestBase {
                     .map(p -> PropertyMapping.of(p, -1))
                     .toArray(PropertyMapping[]::new)
             )
-            .withDirection(Direction.BOTH);
+            .withDirection(Direction.OUTGOING)
+            .undirected();
         if (graphImpl == CypherGraphFactory.class) {
             loader
-                .withNodeStatement("MATCH (u:Node) RETURN id(u) as id, u.seed1 as seed1, u.seed2 as seed2")
-                .withRelationshipStatement("MATCH (u1:Node)-[rel]-(u2:Node) \n" +
+                .withNodeStatement("MATCH (u) RETURN id(u) as id, u.seed1 as seed1, u.seed2 as seed2")
+                .withRelationshipStatement("MATCH (u1)-[rel]-(u2) \n" +
                                            "RETURN id(u1) AS source, id(u2) AS target, rel.weight as weight")
                 .withDeduplicationStrategy(DeduplicationStrategy.SKIP);
         } else {

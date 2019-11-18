@@ -29,28 +29,30 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Direction;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 
 class LouvainMultiLevelTest extends LouvainTestBase {
 
     private static final String DB_CYPHER =
-            "CREATE" +
-            "  (a:Node {name: 'a'})" +
-            ", (b:Node {name: 'b'})" +
-            ", (c:Node {name: 'c'})" +
-            ", (d:Node {name: 'd'})" +
-            ", (e:Node {name: 'e'})" +
-            ", (f:Node {name: 'f'})" +
-            ", (g:Node {name: 'g'})" +
-            ", (h:Node {name: 'h'})" +
-            ", (i:Node {name: 'i'})" +
-            ", (j:Node {name: 'j'})" +
-            ", (k:Node {name: 'k'})" +
-            ", (l:Node {name: 'l'})" +
-            ", (m:Node {name: 'm'})" +
-            ", (n:Node {name: 'n'})" +
-            ", (x:Node {name: 'x'})" +
+        "CREATE" +
+        "  (a:Node {name: 'a'})" +
+        ", (b:Node {name: 'b'})" +
+        ", (c:Node {name: 'c'})" +
+        ", (d:Node {name: 'd'})" +
+        ", (e:Node {name: 'e'})" +
+        ", (f:Node {name: 'f'})" +
+        ", (g:Node {name: 'g'})" +
+        ", (h:Node {name: 'h'})" +
+        ", (i:Node {name: 'i'})" +
+        ", (j:Node {name: 'j'})" +
+        ", (k:Node {name: 'k'})" +
+        ", (l:Node {name: 'l'})" +
+        ", (m:Node {name: 'm'})" +
+        ", (n:Node {name: 'n'})" +
+        ", (x:Node {name: 'x'})" +
 
         ", (a)-[:TYPE {weight: 1.0}]->(b)" +
         ", (a)-[:TYPE {weight: 1.0}]->(d)" +
@@ -85,23 +87,31 @@ class LouvainMultiLevelTest extends LouvainTestBase {
     @AllGraphTypesTest
     void testComplex(Class<? extends GraphFactory> graphImpl) {
         Graph graph = loadGraph(graphImpl, DB_CYPHER);
-        final Louvain algorithm = new Louvain(
-            graph, 5,
-            null,
-            Direction.BOTH,
+
+        Louvain.Config config = new Louvain.Config(5, 10, 0.001, true, Optional.empty());
+        Louvain algorithm = new Louvain(
+            graph,
+            config,
+            Direction.OUTGOING,
             Pools.DEFAULT,
             1,
-            AllocationTracker.EMPTY)
-                .withProgressLogger(TestProgressLogger.INSTANCE)
-                .withTerminationFlag(TerminationFlag.RUNNING_TRUE);
+            AllocationTracker.EMPTY
+        ).withProgressLogger(TestProgressLogger.INSTANCE).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
         algorithm.compute();
 
         final HugeLongArray[] dendrogram = algorithm.dendrograms();
         final double[] modularities = algorithm.modularities();
 
-        assertCommunities(dendrogram[0], new long[]{0, 1, 3}, new long[]{2, 4, 5, 14}, new long[]{6, 7, 8}, new long[]{9, 10, 11, 12, 13});
-        assertCommunities(dendrogram[1], new long[]{0, 1, 2, 3, 4, 5, 14}, new long[]{6, 7, 8, 9, 10, 11, 12, 13});
-        assertEquals(0.071, modularities[modularities.length-1], 0.01);
+        assertCommunities(
+            dendrogram[0],
+            new long[]{0, 1, 3},
+            new long[]{2, 4, 5, 14},
+            new long[]{6, 7, 8},
+            new long[]{9, 10, 11, 12, 13}
+        );
+
+        assertCommunities(dendrogram[1], new long[]{0, 1, 2, 3, 4, 5, 14}, new long[]{6, 7, 8}, new long[]{9, 10, 11, 12, 13});
+        assertEquals(0.38, modularities[modularities.length - 1], 0.01);
     }
 }
