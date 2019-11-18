@@ -20,14 +20,16 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
-import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
+import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.write.Exporter;
+import org.neo4j.graphalgo.core.write.NodePropertyExporter;
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.louvain.Louvain;
 import org.neo4j.graphalgo.impl.louvain.LouvainFactory;
 import org.neo4j.graphalgo.impl.results.AbstractCommunityResultBuilder;
@@ -38,15 +40,16 @@ import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.impl.louvain.Louvain.DEFAULT_INTERMEDIATE_COMMUNITIES_FLAG;
+import static org.neo4j.graphalgo.core.ProcedureConstants.SEED_PROPERTY_KEY;
+import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
+import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_KEY;
+import static org.neo4j.graphalgo.core.ProcedureConstants.WRITE_PROPERTY_KEY;
 import static org.neo4j.procedure.Mode.READ;
 
 /**
@@ -56,90 +59,63 @@ import static org.neo4j.procedure.Mode.READ;
  */
 public class LouvainProc extends BaseAlgoProc<Louvain> {
 
-    public static final String INTERMEDIATE_COMMUNITIES_WRITE_PROPERTY = "intermediateCommunitiesWriteProperty";
     public static final int DEFAULT_CONCURRENCY = 1;
-    public static final String CONFIG_SEED_KEY = "seedProperty";
 
-    public static final String DEPRECATED_CONFIG_SEED_KEY = "communityProperty";
-    public static final String INCLUDE_INTERMEDIATE_COMMUNITIES_KEY = "includeIntermediateCommunities";
-    public static final int DEFAULT_MAX_LEVEL = 10;
-
+    public static final String LEVELS_KEY = "levels";
+    public static final int DEFAULT_LEVELS = 10;
     public static final String INNER_ITERATIONS_KEY = "innerIterations";
-    public static final long DEFAULT_INNER_ITERATIONS = 10L;
+    public static final int DEFAULT_INNER_ITERATIONS = 10;
+    public static final String INCLUDE_INTERMEDIATE_COMMUNITIES_KEY = "includeIntermediateCommunities";
+    public static final boolean INCLUDE_INTERMEDIATE_COMMUNITIES_DEFAULT = false;
 
-    @Procedure(value = "algo.louvain", mode = Mode.WRITE)
+    @Procedure(value = "algo.beta.louvain", mode = Mode.WRITE)
+    @Description("CALL algo.beta.louvain(label:String, relationship:String, " +
+                 "{levels: 10, innerIterations: 10, weightProperty:'weight', seedProperty: 'seed', write: true, writeProperty:'community', includeIntermediateCommunities: false, concurrency:4 }) " +
+                 "YIELD nodes, communityCount, levels, modularity, modularities, write, writerProperty, includeIntermediateCommunities, loadMillis, computeMillis, writeMillis, postProcessingMillis")
+    public Stream<WriteResult> louvain(
+            @Name(value = "label", defaultValue = "") String label,
+            @Name(value = "relationship", defaultValue = "") String relationshipTypes,
+            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+        return run(label, relationshipTypes, config);
+    }
+
+    @Procedure(value = "algo.beta.louvain.stream", mode = READ)
+    @Description("CALL algo.beta.louvain.stream(label:String, relationship:String, " +
+                 "{levels: 10, innerIterations: 10, weightProperty:'weight', seedProperty: 'seed', includeIntermediateCommunities: false, concurrency:4 }) " +
+                 "YIELD nodeId, community, communities - yields a setId to each node id")
+    public Stream<StreamResult> louvainStream(
+            @Name(value = "label", defaultValue = "") String label,
+            @Name(value = "relationship", defaultValue = "") String relationshipTypes,
+            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+
+        return stream(label, relationshipTypes, config);
+    }
+
     @Description("CALL algo.louvain(label:String, relationship:String, " +
                  "{weightProperty:'weight', defaultValue:1.0, write: true, writeProperty:'community', concurrency:4, communityProperty:'propertyOfPredefinedCommunity', innerIterations:10, communitySelection:'classic'}) " +
                  "YIELD nodes, communityCount, iterations, loadMillis, computeMillis, writeMillis")
-    public Stream<LouvainResult> louvain(
-            @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationship,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+    public Stream<LouvainLegacy.LegacyWriteResult> louvainLegacy(
+        @Name(value = "label", defaultValue = "") String label,
+        @Name(value = "relationship", defaultValue = "") String relationshipTypes,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        AllocationTracker tracker = AllocationTracker.create();
-        ProcedureConfiguration configuration = newConfig(label, relationship, config);
-        final WriteResultBuilder resultBuilder = new WriteResultBuilder(configuration, tracker);
-        final Graph graph = this.loadGraph(configuration, tracker, resultBuilder);
+        Object communityProperty = config.get("communityProperty");
+        config.put(SEED_PROPERTY_KEY, communityProperty);
 
-        if (graph.isEmpty()) {
-            graph.release();
-            return Stream.of(LouvainResult.EMPTY);
-        }
-
-        Louvain louvain = compute(resultBuilder, tracker, configuration, graph);
-        resultBuilder
-            .withExpectedNumberOfCommunities(louvain.communityCount())
-            .withCommunityFunction(louvain::communityIdOf);
-
-        if (configuration.isWriteFlag()) {
-            resultBuilder.timeWrite(() -> {
-                String writeProperty = configuration.getWriteProperty("community");
-                String intermediateCommunitiesWriteProperty = configuration.get(
-                        INTERMEDIATE_COMMUNITIES_WRITE_PROPERTY,
-                        "communities");
-
-                resultBuilder.withWrite(true);
-                resultBuilder.withWriteProperty(writeProperty);
-                resultBuilder.withIntermediateCommunities(louvain.getConfig().includeIntermediateCommunities);
-                resultBuilder.withIntermediateCommunitiesWriteProperty(intermediateCommunitiesWriteProperty);
-
-                log.debug("Writing results");
-                Exporter exporter = exporter(graph, Pools.DEFAULT, configuration.getWriteConcurrency());
-                louvain.export(
-                        exporter,
-                        writeProperty,
-                        intermediateCommunitiesWriteProperty);
-            });
-        }
-
-        resultBuilder.withIterations(louvain.getLevel());
-        resultBuilder.withModularities(louvain.getModularities());
-        resultBuilder.withFinalModularity(louvain.getFinalModularity());
-        return Stream.of(resultBuilder.build()).onClose(louvain::release);
+        Stream<WriteResult> resultStream = run(label, relationshipTypes, config);
+        return resultStream.map(LouvainLegacy.LegacyWriteResult::fromWriteResult);
     }
 
     @Procedure(value = "algo.louvain.stream", mode = READ)
     @Description("CALL algo.louvain.stream(label:String, relationship:String, " +
-                 "{weightProperty:'propertyName', defaultValue:1.0, concurrency:4, communityProperty:'propertyOfPredefinedCommunity', innerIterations:10, communitySelection:'classic') " +
-                 "YIELD nodeId, community - yields a setId to each node id")
-    public Stream<StreamingResult> louvainStream(
-            @Name(value = "label", defaultValue = "") String label,
-            @Name(value = "relationship", defaultValue = "") String relationship,
-            @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
+                 "{levels: 10, innerIterations: 10, weightProperty:'weight', seedProperty: 'seed', includeIntermediateCommunities: false, concurrency:4 }) " +
+                 "YIELD nodeId, community, communities - yields a setId to each node id")
+    public Stream<StreamResult> louvainStreamLegacy(
+        @Name(value = "label", defaultValue = "") String label,
+        @Name(value = "relationship", defaultValue = "") String relationshipTypes,
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
-        AllocationTracker tracker = AllocationTracker.create();
-        ProcedureConfiguration configuration = newConfig(label, relationship, config);
-        WriteResultBuilder builder = new WriteResultBuilder(configuration, tracker);
-        final Graph graph = this.loadGraph(configuration, tracker, builder);
-
-        if (graph.isEmpty()) {
-            graph.release();
-            return Stream.empty();
-        }
-
-        // evaluation
-        Louvain louvain = compute(builder, tracker, configuration, graph);
-        return louvain.dendrogramStream();
+        return louvainStream(label, relationshipTypes, config);
     }
 
     @Procedure(value = "algo.louvain.memrec", mode = READ)
@@ -155,119 +131,211 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
         return Stream.of(new MemRecResult(memoryEstimation));
     }
 
-    @Override
-    protected GraphLoader configureAlgoLoader(final GraphLoader loader, final ProcedureConfiguration config) {
-        config.getStringWithFallback(CONFIG_SEED_KEY, DEPRECATED_CONFIG_SEED_KEY).ifPresent(propertyIdentifier -> {
-            // configure predefined clustering if set
-            loader.withOptionalNodeProperties(PropertyMapping.of(propertyIdentifier, -1));
-        });
-        return loader.undirected().withDirection(Direction.OUTGOING);
+    public Stream<WriteResult> run(String label, String relationshipType, Map<String, Object> config) {
+        LouvainProc.ProcedureSetup setup = setup(label, relationshipType, config);
+
+        if (setup.graph.isEmpty()) {
+            setup.graph.release();
+            return Stream.of(WriteResult.EMPTY);
+        }
+
+        Louvain louvain = compute(setup);
+
+        setup.builder.withCommunityFunction(louvain::getCommunity);
+
+        Optional<String> writeProperty = setup.procedureConfig.getString(WRITE_PROPERTY_KEY);
+
+        setup.builder
+            .withLevels(louvain.levels())
+            .withModularity(louvain.modularities()[louvain.levels() -1])
+            .withModularities(louvain.modularities())
+            .withIncludeIntermediateCommunities(louvain.config().includeIntermediateCommunities);
+
+        if (setup.procedureConfig.isWriteFlag() && writeProperty.isPresent() && !writeProperty.get().equals("")) {
+            setup.builder.withWrite(true);
+            setup.builder.withWriteProperty(writeProperty.get());
+
+            write(
+                setup.builder::timeWrite,
+                setup.graph,
+                louvain,
+                setup.procedureConfig,
+                writeProperty.get(),
+                louvain.terminationFlag,
+                setup.tracker
+            );
+
+            setup.graph.releaseProperties();
+        }
+
+        return Stream.of(setup.builder.build());
+    }
+
+    public Stream<StreamResult> stream(
+        String label,
+        String relationship,
+        Map<String, Object> config
+    ) {
+
+        LouvainProc.ProcedureSetup setup = setup(label, relationship, config);
+
+        if (setup.graph.isEmpty()) {
+            setup.graph.release();
+            return Stream.empty();
+        }
+
+        Louvain louvain = compute(setup);
+
+        return LongStream.range(0, setup.graph.nodeCount())
+            .mapToObj(nodeId -> {
+                long neoNodeId = setup.graph.toOriginalNodeId(nodeId);
+                return new LouvainProc.StreamResult(neoNodeId, louvain.getCommunities(nodeId), louvain.getCommunity(nodeId) );
+            });
     }
 
     @Override
-    protected double getDefaultWeightProperty(ProcedureConfiguration config) {
-        return Louvain.DEFAULT_WEIGHT;
+    protected GraphLoader configureGraphLoader(
+        GraphLoader loader, ProcedureConfiguration config
+    ) {
+        return loader.withDirection(config.getDirection(Direction.OUTGOING));
     }
 
     @Override
-    protected LouvainFactory algorithmFactory(final ProcedureConfiguration procedureConfig) {
-        int maxLevel = procedureConfig.getIterations(DEFAULT_MAX_LEVEL);
-        int maxIterations = procedureConfig.getNumber(INNER_ITERATIONS_KEY, DEFAULT_INNER_ITERATIONS).intValue();
-        boolean includeIntermediateCommunities = procedureConfig.getBool(
-            INCLUDE_INTERMEDIATE_COMMUNITIES_KEY,
-                DEFAULT_INTERMEDIATE_COMMUNITIES_FLAG);
-
-        Optional<String> seedProperty = procedureConfig.getStringWithFallback(CONFIG_SEED_KEY, DEPRECATED_CONFIG_SEED_KEY);
-
-        Louvain.Config config = new Louvain.Config(
-            maxIterations, maxLevel, seedProperty, includeIntermediateCommunities
+    protected AlgorithmFactory<Louvain> algorithmFactory(ProcedureConfiguration config) {
+        Louvain.Config louvainConfig = new Louvain.Config(
+            config.getInt(LEVELS_KEY, DEFAULT_LEVELS),
+            config.getInt(INNER_ITERATIONS_KEY, DEFAULT_INNER_ITERATIONS),
+            config.get(TOLERANCE_KEY, TOLERANCE_DEFAULT),
+            config.getBool(INCLUDE_INTERMEDIATE_COMMUNITIES_KEY, INCLUDE_INTERMEDIATE_COMMUNITIES_DEFAULT),
+            config.getString(SEED_PROPERTY_KEY)
         );
 
-        return new LouvainFactory(config);
+        return new LouvainFactory(louvainConfig);
     }
 
-    private Louvain compute(
-            final WriteResultBuilder statsBuilder,
-            final AllocationTracker tracker,
-            final ProcedureConfiguration configuration,
-            final Graph graph) {
+    private Louvain compute(ProcedureSetup setup) {
+        final Louvain louvain = newAlgorithm(setup.graph, setup.procedureConfig, setup.tracker);
+        runWithExceptionLogging(
+            Louvain.class.getSimpleName() + " failed",
+            () -> setup.builder.timeEval(louvain::compute)
+        );
 
-        Louvain algo = newAlgorithm(graph, configuration, tracker);
+        log.info(Louvain.class.getSimpleName() + ": overall memory usage %s", setup.tracker.getUsageString());
 
-        final Louvain louvain = runWithExceptionLogging(
-                "Louvain failed",
-                () -> statsBuilder.timeEval((Supplier<Louvain>) algo::compute));
-
-        graph.release();
-
-        log.info("Louvain: overall memory usage: %s", tracker.getUsageString());
+        louvain.release();
+        setup.graph.releaseTopology();
 
         return louvain;
     }
 
-    private Exporter exporter(
-            Graph graph,
-            ExecutorService pool,
-            int concurrency) {
-        Exporter.Builder builder = Exporter.of(api, graph);
-        if (log != null) {
-            builder.withLog(log);
-        }
-        if (ParallelUtil.canRunInParallel(pool)) {
-            builder.parallel(pool, concurrency, TerminationFlag.wrap(transaction));
-        }
-        return builder.build();
+    private LouvainProc.ProcedureSetup setup(
+        String label,
+        String relationship,
+        Map<String, Object> config
+    ) {
+        AllocationTracker tracker = AllocationTracker.create();
+        ProcedureConfiguration configuration = newConfig(label, relationship, config);
+        LouvainProc.WriteResultBuilder builder = new LouvainProc.WriteResultBuilder(configuration, tracker);
+
+        Graph graph = loadGraph(configuration, tracker, builder);
+
+        return new LouvainProc.ProcedureSetup(builder, graph, tracker, configuration);
     }
 
-    public static final class Result {
+    private void write(
+        Supplier<ProgressTimer> timer,
+        Graph graph,
+        Louvain louvain,
+        ProcedureConfiguration configuration,
+        String writeProperty,
+        TerminationFlag terminationFlag,
+        AllocationTracker tracker
+    ) {
+        try (ProgressTimer ignored = timer.get()) {
+            log.debug("Writing results");
 
-        public final long nodeId;
-        public final long community;
+            NodePropertyExporter exporter = NodePropertyExporter.of(api, graph, terminationFlag)
+                .withLog(log)
+                .parallel(Pools.DEFAULT, configuration.getWriteConcurrency())
+                .build();
 
-        public Result(final long id, final long community) {
-            this.nodeId = id;
-            this.community = community;
+            Optional<NodeProperties> seed = louvain.config().maybeSeedPropertyKey.map(graph::nodeProperties);
+            PropertyTranslator<Louvain> translator;
+            if (!louvain.config().includeIntermediateCommunities) {
+                if (seed.isPresent() && configuration.getString(SEED_PROPERTY_KEY, "").equals(writeProperty)) {
+                    translator = new PropertyTranslator.OfLongIfChanged<>(seed.get(), Louvain::getCommunity);
+                } else {
+                    translator = CommunityTranslator.INSTANCE;
+                }
+            } else {
+               translator = CommunitiesTranslator.INSTANCE;
+            }
+
+            exporter.write(
+                writeProperty,
+                louvain,
+                translator
+            );
         }
     }
 
-    public static final class StreamingResult {
+    public static class ProcedureSetup {
+        final LouvainProc.WriteResultBuilder builder;
+        final Graph graph;
+        final AllocationTracker tracker;
+        final ProcedureConfiguration procedureConfig;
+
+        ProcedureSetup(
+            final LouvainProc.WriteResultBuilder builder,
+            final Graph graph,
+            final AllocationTracker tracker,
+            final ProcedureConfiguration procedureConfig
+        ) {
+            this.builder = builder;
+            this.graph = graph;
+            this.tracker = tracker;
+            this.procedureConfig = procedureConfig;
+        }
+    }
+
+    public static final class StreamResult {
         public final long nodeId;
-        public final List<Long> communities;
+        public final long[] communities;
         public final long community;
 
-        StreamingResult(final long nodeId, final List<Long> communities, final long community) {
+        StreamResult(final long nodeId, final long[] communities, final long community) {
             this.nodeId = nodeId;
             this.communities = communities;
             this.community = community;
         }
     }
 
-    public static class LouvainResult {
+    public static class WriteResult {
 
-        public static final LouvainResult EMPTY = new LouvainResult(
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                -1,
-                -1,
-                -1,
-                -1,
-                -1,
-                -1,
-                -1,
-                -1,
-                -1,
-                -1,
-                0,
-                new double[]{},
-                -1,
-                false,
-                null,
-                false,
-                null);
+        public static final WriteResult EMPTY = new WriteResult(
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            new double[0],
+            false,
+            null,
+            false
+        );
 
         public final long loadMillis;
         public final long computeMillis;
@@ -275,9 +343,9 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
         public final long postProcessingMillis;
         public final long nodes;
         public final long communityCount;
-        public final long iterations;
-        public final List<Double> modularities;
+        public final long levels;
         public final double modularity;
+        public final double[] modularities;
         public final long p1;
         public final long p5;
         public final long p10;
@@ -291,74 +359,70 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
         public final boolean write;
         public final String writeProperty;
         public final boolean includeIntermediateCommunities;
-        public final String intermediateCommunitiesWriteProperty;
 
-        public LouvainResult(
-                long loadMillis,
-                long computeMillis,
-                long postProcessingMillis,
-                long writeMillis,
-                long nodes,
-                long communityCount,
-                long p100,
-                long p99,
-                long p95,
-                long p90,
-                long p75,
-                long p50,
-                long p25,
-                long p10,
-                long p5,
-                long p1,
-                long iterations,
-                double[] modularities,
-                double finalModularity,
-                boolean write,
-                String writeProperty,
-                boolean includeIntermediateCommunities,
-                String intermediateCommunitiesWriteProperty) {
+        public WriteResult(
+            long loadMillis,
+            long computeMillis,
+            long postProcessingMillis,
+            long writeMillis,
+            long nodes,
+            long communityCount,
+            long p1,
+            long p5,
+            long p10,
+            long p25,
+            long p50,
+            long p75,
+            long p90,
+            long p95,
+            long p99,
+            long p100,
+            long levels,
+            double modularity,
+            double[] modularities,
+            boolean write,
+            String writeProperty,
+            boolean includeIntermediateCommunities
+        ) {
             this.loadMillis = loadMillis;
             this.computeMillis = computeMillis;
             this.postProcessingMillis = postProcessingMillis;
             this.writeMillis = writeMillis;
             this.nodes = nodes;
             this.communityCount = communityCount;
-            this.p100 = p100;
-            this.p99 = p99;
-            this.p95 = p95;
-            this.p90 = p90;
-            this.p75 = p75;
-            this.p50 = p50;
-            this.p25 = p25;
-            this.p10 = p10;
-            this.p5 = p5;
+            this.levels = levels;
+            this.modularity = modularity;
+            this.modularities = modularities;
             this.p1 = p1;
-            this.iterations = iterations;
-            this.modularities = new ArrayList<>(modularities.length);
+            this.p5 = p5;
+            this.p10 = p10;
+            this.p25 = p25;
+            this.p50 = p50;
+            this.p75 = p75;
+            this.p90 = p90;
+            this.p95 = p95;
+            this.p99 = p99;
+            this.p100 = p100;
             this.write = write;
-            this.includeIntermediateCommunities = includeIntermediateCommunities;
-            for (double mod : modularities) this.modularities.add(mod);
-            this.modularity = finalModularity;
             this.writeProperty = writeProperty;
-            this.intermediateCommunitiesWriteProperty = intermediateCommunitiesWriteProperty;
+            this.includeIntermediateCommunities = includeIntermediateCommunities;
         }
     }
 
-    public static class WriteResultBuilder extends AbstractCommunityResultBuilder<LouvainResult> {
+    public static class WriteResultBuilder extends AbstractCommunityResultBuilder<WriteResult> {
 
-        private long iterations = -1;
+        private long levels = -1;
         private double[] modularities = new double[]{};
-        private double finalModularity = -1;
+        private double modularity = -1;
 
-        private String intermediateCommunitiesWriteProperty;
         private boolean includeIntermediateCommunities;
 
         WriteResultBuilder(ProcedureConfiguration config, AllocationTracker tracker) {
             super(config.computeHistogram(), config.computeCommunityCount(), tracker);
         }
 
-        WriteResultBuilder withIterations(long iterations) {
-            this.iterations = iterations;
+        WriteResultBuilder withLevels(long levels) {
+            this.levels = levels;
             return this;
         }
 
@@ -367,24 +431,19 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
             return this;
         }
 
-        WriteResultBuilder withFinalModularity(double finalModularity) {
-            this.finalModularity = finalModularity;
+        WriteResultBuilder withModularity(double modularity) {
+            this.modularity = modularity;
             return null;
         }
 
-        WriteResultBuilder withIntermediateCommunitiesWriteProperty(String intermediateCommunitiesWriteProperty) {
-            this.intermediateCommunitiesWriteProperty = intermediateCommunitiesWriteProperty;
-            return null;
-        }
-
-        WriteResultBuilder withIntermediateCommunities(boolean includeIntermediateCommunities) {
+        WriteResultBuilder withIncludeIntermediateCommunities(boolean includeIntermediateCommunities) {
             this.includeIntermediateCommunities = includeIntermediateCommunities;
             return this;
         }
 
         @Override
-        protected LouvainResult buildResult() {
-            return new LouvainResult(
+        protected WriteResult buildResult() {
+            return new WriteResult(
                 loadMillis,
                 computeMillis,
                 writeMillis,
@@ -401,13 +460,32 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
                 maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(10)).orElse(-1L),
                 maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(5)).orElse(-1L),
                 maybeCommunityHistogram.map(histogram -> histogram.getValueAtPercentile(1)).orElse(-1L),
-                iterations,
+                levels,
+                modularity,
                 modularities,
-                finalModularity,
                 write,
                 writeProperty,
-                includeIntermediateCommunities,
-                intermediateCommunitiesWriteProperty);
+                includeIntermediateCommunities
+            );
+        }
+    }
+
+    static final class CommunityTranslator implements PropertyTranslator.OfLong<Louvain>  {
+        public static final CommunityTranslator INSTANCE = new CommunityTranslator();
+
+        @Override
+        public long toLong(Louvain louvain, long nodeId) {
+            return louvain.getCommunity(nodeId);
+        }
+    }
+
+
+    static final class CommunitiesTranslator implements PropertyTranslator.OfLongArray<Louvain> {
+        public static final CommunitiesTranslator INSTANCE = new CommunitiesTranslator();
+
+        @Override
+        public long[] toLongArray(Louvain louvain, long nodeId) {
+            return louvain.getCommunities(nodeId);
         }
     }
 }

@@ -97,6 +97,19 @@ public interface PropertyTranslator<T> {
         }
     }
 
+    interface OfLongArray<T> extends PropertyTranslator<T> {
+        long[] toLongArray(final T data, final long nodeId);
+
+        @Override
+        default Value toProperty(
+            int propertyId,
+            T data,
+            long nodeId) {
+            final long[] value = toLongArray(data, nodeId);
+            return Values.longArray(value);
+        }
+    }
+
     @FunctionalInterface
     interface SeededDataAccessFunction<T> {
 
