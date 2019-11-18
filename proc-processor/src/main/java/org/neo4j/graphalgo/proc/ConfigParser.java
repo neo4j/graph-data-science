@@ -70,6 +70,7 @@ final class ConfigParser {
 
     private Optional<Member> validateMember(Collection<String> seen, TypeElement root, ExecutableElement method) {
         if (isAnnotationPresent(method, Ignore.class)) {
+            seen.add(method.getSimpleName().toString());
             return Optional.empty();
         }
         if (!seen.add(method.getSimpleName().toString())) {
