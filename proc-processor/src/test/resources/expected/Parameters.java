@@ -1,6 +1,5 @@
 package good;
 
-import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import javax.annotation.Generated;
@@ -26,12 +25,12 @@ public final class ParametersConfig implements Parameters {
     }
 
     @Override
-    public int keyFromMap() {
+    public long keyFromMap() {
         return this.keyFromMap;
     }
 
     @Override
     public int parametersAreAddedFirst() {
-        return parametersAreAddedFirst;
+        return this.parametersAreAddedFirst;
     }
 }

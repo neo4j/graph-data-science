@@ -30,10 +30,12 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.NameAllocator;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.SourceVersion;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
@@ -45,6 +47,7 @@ import java.util.Optional;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
+import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.auto.common.MoreTypes.asTypeElement;
 import static com.google.auto.common.MoreTypes.isTypeOf;
 
@@ -130,17 +133,35 @@ final class GenerateConfiguration {
     private MethodSpec defineConstructor(ConfigParser.Spec config, NameAllocator names) {
         MethodSpec.Builder code = MethodSpec
             .constructorBuilder()
-            .addModifiers(Modifier.PUBLIC)
-            .addParameter(
-                TypeName.get(mapWrapperType),
-                names.newName(CONFIG_VAR, CONFIG_VAR)
-            );
+            .addModifiers(Modifier.PUBLIC);
 
-        config.members().stream()
-            .map(member -> codeForMemberDefinition(names, member))
-            .flatMap(Streams::stream)
-            .map(this::codeForMemberDefinition)
-            .forEach(code::addStatement);
+        String configParamterName = names.newName(CONFIG_VAR, CONFIG_VAR);
+        boolean requiredMapParameter = false;
+
+        for (ConfigParser.Member member : config.members()) {
+            Optional<MemberDefinition> memberDefinition = codeForMemberDefinition(names, member);
+            if (memberDefinition.isPresent()) {
+                ExecutableElement method = member.method();
+                MemberDefinition definition = memberDefinition.get();
+                if (isAnnotationPresent(method, Configuration.Parameter.class)) {
+                    code.addParameter(
+                        TypeName.get(method.getReturnType()),
+                        definition.fieldName()
+                    );
+                    code.addStatement(codeForMemberFromParameter(definition));
+                } else {
+                    requiredMapParameter = true;
+                    code.addStatement(codeForMemberDefinition(definition));
+                }
+            }
+        }
+
+        if (requiredMapParameter) {
+            code.addParameter(
+                TypeName.get(mapWrapperType),
+                configParamterName
+            );
+        }
 
         return code.build();
     }
@@ -222,6 +243,10 @@ final class GenerateConfiguration {
         return definition.converter()
             .map(c -> c.apply(codeBlock))
             .orElse(codeBlock);
+    }
+
+    private CodeBlock codeForMemberFromParameter(MemberDefinition definition) {
+        return CodeBlock.of("this.$1N = $1N", definition.fieldName());
     }
 
     private Iterable<MethodSpec> defineGetters(ConfigParser.Spec config, NameAllocator names) {
