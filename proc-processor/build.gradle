@@ -27,17 +27,26 @@ dependencies {
     annotationProcessor 'com.google.auto.service:auto-service:1.0-rc6'
     annotationProcessor 'org.immutables:builder:2.8.1'
     annotationProcessor 'org.immutables:value:2.8.1'
+
+    compileOnly project(':annotations')
     compileOnly 'com.google.auto.service:auto-service:1.0-rc6'
     compileOnly 'org.immutables:value-annotations:2.8.1'
-
-    compile project(':annotations')
+    compileOnly group: 'org.jetbrains',                     name: 'annotations',              version: ver.'jetbrains-annotations'
 
     compile 'com.google.auto:auto-common:0.10'
     compile 'com.squareup:javapoet:1.11.1'
 
+    testImplementation project(':core')
     def toolsJar = Jvm.current().getToolsJar()
     if (toolsJar != null) {
         testImplementation files(toolsJar)
     }
+    testImplementation platform(dep.junit5bom)
+    testImplementation dep.junit5jupiter
+    testImplementation dep.junit5migration
+
+    testImplementation group: 'org.mockito',                           name: 'mockito-core',             version: ver.'mockito'
+    testImplementation group: 'org.mockito',                           name: 'mockito-junit-jupiter',    version: ver.'mockito'
+    testImplementation group: 'org.hamcrest',                          name: 'hamcrest-library',         version: ver.'hamcrest'
     testImplementation 'com.google.testing.compile:compile-testing:0.18'
 }
