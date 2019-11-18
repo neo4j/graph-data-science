@@ -23,6 +23,7 @@ package org.neo4j.graphalgo.proc;
 import com.google.common.collect.Streams;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration.Ignore;
+import org.neo4j.graphalgo.annotation.Configuration.Key;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 import javax.annotation.processing.Messager;
@@ -109,7 +110,26 @@ final class ConfigParser {
             return Optional.empty();
         }
 
-        return Optional.of(ImmutableMember.builder().owner(root).method(method).build());
+        ImmutableMember.Builder memberBuilder = ImmutableMember
+            .builder()
+            .owner(root)
+            .method(method);
+
+        Key key = method.getAnnotation(Key.class);
+        if (key != null) {
+            memberBuilder.lookupKey(key.value());
+        }
+
+        try {
+            return Optional.of(memberBuilder.build());
+        } catch (InvalidMemberException invalid) {
+            messager.printMessage(
+                Diagnostic.Kind.ERROR,
+                invalid.getMessage(),
+                method
+            );
+            return Optional.empty();
+        }
     }
 
     @ValueClass
@@ -122,14 +142,37 @@ final class ConfigParser {
     }
 
     @ValueClass
-    interface Member {
-        TypeElement owner();
+    abstract static class Member {
+        public abstract TypeElement owner();
 
-        ExecutableElement method();
+        public abstract ExecutableElement method();
+
+        @Value.Default
+        public String lookupKey() {
+            return methodName();
+        }
 
         @Value.Derived
-        default String name() {
+        public String methodName() {
             return method().getSimpleName().toString();
+        }
+
+        @Value.Check
+        final Member normalize() {
+            String trimmedKey = lookupKey().trim();
+            if (trimmedKey.isEmpty()) {
+                throw new InvalidMemberException("The key must not be empty");
+            }
+            if (trimmedKey.equals(lookupKey())) {
+                return this;
+            }
+            return ((ImmutableMember) this).withLookupKey(trimmedKey);
+        }
+    }
+
+    private static final class InvalidMemberException extends RuntimeException {
+        InvalidMemberException(String message) {
+            super(message);
         }
     }
 }

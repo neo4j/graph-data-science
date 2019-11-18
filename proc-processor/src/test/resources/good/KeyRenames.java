@@ -7,4 +7,7 @@ public interface KeyRenames {
 
     @Configuration.Key("key could also be an invalid identifier")
     int lookupUnderAnotherKey();
+
+    @Configuration.Key("     whitespace will be trimmed    ")
+    int whitespaceWillBeTrimmed();
 }

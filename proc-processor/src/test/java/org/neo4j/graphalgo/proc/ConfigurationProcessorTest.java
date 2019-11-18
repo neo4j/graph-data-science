@@ -112,6 +112,15 @@ class ConfigurationProcessorTest {
         );
     }
 
+    @Test
+    void emptyKeyIsNotAllowed() {
+        runBadTest(
+            "EmptyKey",
+            e("The key must not be empty", 9, 9),
+            e("The key must not be empty", 12, 9)
+        );
+    }
+
     private void runGoodTest(String className) {
         assertAbout(javaSource())
             .that(forResource(String.format("good/%s.java", className)))

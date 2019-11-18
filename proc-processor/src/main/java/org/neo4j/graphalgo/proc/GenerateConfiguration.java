@@ -120,7 +120,7 @@ final class GenerateConfiguration {
         config.members().stream().map(member ->
             FieldSpec.builder(
                 TypeName.get(member.method().getReturnType()),
-                names.newName(member.name(), member),
+                names.newName(member.methodName(), member),
                 Modifier.PRIVATE, Modifier.FINAL
             ).build()
         ).forEach(builder::addField);
@@ -150,7 +150,7 @@ final class GenerateConfiguration {
             .builder()
             .fieldName(names.get(member))
             .configParamName(names.get(CONFIG_VAR))
-            .configKey(member.name())
+            .configKey(member.lookupKey())
             .methodPrefix("require");
 
         TypeMirror returnType = member.method().getReturnType();
@@ -200,7 +200,7 @@ final class GenerateConfiguration {
                 .defaultProvider(CodeBlock.of(
                     "$T.super.$N()",
                     member.owner().asType(),
-                    member.name()
+                    member.methodName()
                 ));
         }
 
