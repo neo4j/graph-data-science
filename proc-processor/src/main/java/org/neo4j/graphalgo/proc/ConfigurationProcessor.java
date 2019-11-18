@@ -51,6 +51,7 @@ public final class ConfigurationProcessor extends BasicAnnotationProcessor {
         GenerateConfiguration generateConfiguration = new GenerateConfiguration(
             processingEnv.getMessager(),
             processingEnv.getElementUtils(),
+            processingEnv.getTypeUtils(),
             getSupportedSourceVersion()
         );
         ProcessingStep configStep = new ConfigurationProcessingStep(
