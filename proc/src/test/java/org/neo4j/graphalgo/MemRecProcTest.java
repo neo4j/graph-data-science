@@ -175,7 +175,6 @@ class MemRecProcTest extends ProcTestBase {
         parameters.put("nodeCount", NODE_COUNT);
         parameters.put("relationshipCount", RELATIONSHIP_COUNT);
 
-
         String nonExistingGraph = "CALL algo.memrec('', '', $algo, {" +
                                   " nodeCount: $nodeCount, relationshipCount: $relationshipCount, " +
                                   " relationshipProperties: $relationshipProperties, nodeProperties: $nodeProperties" +

@@ -65,16 +65,19 @@ public final class HugeGraphFactory extends GraphFactory implements MultipleRelT
         return getMemoryEstimation(setup, dimensions, false);
     }
 
+
     public static MemoryEstimation getMemoryEstimation(
-            GraphSetup setup,
-            GraphDimensions dimensions,
-            Boolean nonExistingGraph) {
+        GraphSetup setup,
+        GraphDimensions dimensions,
+        boolean nonExistingGraph
+    ) {
         MemoryEstimations.Builder builder = MemoryEstimations
                 .builder(HugeGraph.class)
                 .add("nodeIdMap", IdMap.memoryEstimation());
 
         // Node properties
         for (PropertyMapping propertyMapping : dimensions.nodeProperties()) {
+            // for estimations based on node/rel-counts, unresolved PropertyMappings should not throw on calling `exists()`
             if (nonExistingGraph || propertyMapping.exists()) {
                 builder.add(propertyMapping.propertyKey(), NodePropertyMap.memoryEstimation());
             } else {
