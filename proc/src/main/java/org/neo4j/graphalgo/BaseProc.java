@@ -20,11 +20,15 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
+import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.results.AbstractResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -41,6 +45,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public abstract class BaseProc {
+
+    public static final String NODECOUNT_KEY = "nodeCount";
+    public static final String RELCOUNT_KEY = "relationshipCount";
 
     @Context
     public GraphDatabaseAPI api;
@@ -139,6 +146,27 @@ public abstract class BaseProc {
                 .withRelationshipCount(graph.relationshipCount());
             return graph;
         }
+    }
+
+    MemoryEstimation getGraphMemoryEstimation(
+        ProcedureConfiguration config,
+        GraphLoader loader,
+        GraphFactory graphFactory
+    ) {
+        GraphDimensions dimensions = graphFactory.dimensions();
+        MemoryEstimation estimation;
+
+        if (config.containsKey(NODECOUNT_KEY)) {
+            long nodeCount = config.get(NODECOUNT_KEY, 0L);
+            long relCount = config.get(RELCOUNT_KEY, 0L);
+            dimensions.nodeCount(nodeCount);
+            dimensions.maxRelCount(relCount);
+            estimation = HugeGraphFactory
+                .getMemoryEstimation(loader.toSetup(), dimensions, true);
+        } else {
+            estimation = graphFactory.memoryEstimation();
+        }
+        return estimation;
     }
 
     final Graph loadGraph(

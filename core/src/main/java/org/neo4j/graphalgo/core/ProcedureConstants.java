@@ -94,9 +94,5 @@ public final class ProcedureConstants {
     public static final String DAMPING_FACTOR_KEY = "dampingFactor";
     public static final Double DAMPING_FACTOR_DEFAULT = 0.85D;
 
-    // MemRec specific
-    public static final String NODECOUNT_KEY = "nodeCount";
-    public static final String RELCOUNT_KEY = "relationshipCount";
-
     private ProcedureConstants() {}
 }

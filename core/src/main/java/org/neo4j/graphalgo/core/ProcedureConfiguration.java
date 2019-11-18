@@ -40,7 +40,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static java.util.Arrays.asList;
-import static org.neo4j.graphalgo.core.ProcedureConstants.NODECOUNT_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.NODE_PROPERTIES_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES_KEY;
 
@@ -458,9 +457,5 @@ public class ProcedureConfiguration {
     public DeduplicationStrategy getDeduplicationStrategy() {
         String strategy = configurationMap.get("duplicateRelationships", null);
         return strategy != null ? DeduplicationStrategy.lookup(strategy.toUpperCase()) : DeduplicationStrategy.DEFAULT;
-    }
-
-    public boolean forNonExistingGraph() {
-        return containsKey(NODECOUNT_KEY);
     }
 }

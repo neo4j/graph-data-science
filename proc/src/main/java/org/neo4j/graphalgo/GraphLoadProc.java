@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.loading.GraphsByRelationshipType;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -52,9 +51,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
-
-import static org.neo4j.graphalgo.core.ProcedureConstants.NODECOUNT_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELCOUNT_KEY;
 
 public final class GraphLoadProc extends BaseProc {
     @Procedure(name = "algo.graph.load", mode = Mode.READ)
@@ -128,20 +124,10 @@ public final class GraphLoadProc extends BaseProc {
         GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
         GraphFactory graphFactory = loader.build(config.getGraphImpl());
         GraphDimensions dimensions = graphFactory.dimensions();;
-        MemoryTree memoryTree;
 
-        if (config.forNonExistingGraph()) {
-            long nodeCount = config.get(NODECOUNT_KEY, 0L);
-            long relCount = config.get(RELCOUNT_KEY, 0L);
-            dimensions.nodeCount(nodeCount);
-            dimensions.maxRelCount(relCount);
-            memoryTree = HugeGraphFactory
-                .getMemoryEstimation(loader.toSetup(), dimensions, true)
-                .estimate(dimensions, config.getConcurrency());
-        } else {
-            memoryTree = graphFactory.memoryEstimation()
-                .estimate(graphFactory.dimensions(), config.getConcurrency());
-        }
+        MemoryTree memoryTree = getGraphMemoryEstimation(config, loader, graphFactory)
+            .estimate(dimensions, config.getConcurrency());
+
         return Stream.of(new MemRecResult(new MemoryTreeWithDimensions(memoryTree, dimensions)));
     }
 

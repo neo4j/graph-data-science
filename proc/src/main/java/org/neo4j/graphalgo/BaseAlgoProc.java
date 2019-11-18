@@ -25,15 +25,11 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.ProcedureConstants;
-import org.neo4j.graphalgo.core.loading.HugeGraphFactory;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-
-import static org.neo4j.graphalgo.core.ProcedureConstants.NODECOUNT_KEY;
-import static org.neo4j.graphalgo.core.ProcedureConstants.RELCOUNT_KEY;
 
 public abstract class BaseAlgoProc<A extends Algorithm<A>> extends BaseProc {
 
@@ -57,21 +53,13 @@ public abstract class BaseAlgoProc<A extends Algorithm<A>> extends BaseProc {
         GraphFactory graphFactory = loader.build(config.getGraphImpl());
         GraphDimensions dimensions = graphFactory.dimensions();
         AlgorithmFactory<A> algorithmFactory = algorithmFactory(config);
-        MemoryEstimations.Builder estimationsBuilder = MemoryEstimations.builder("graph with procedure")
+        MemoryEstimations.Builder estimationsBuilder = MemoryEstimations.builder("graph with procedure");
+
+        estimationsBuilder.add(getGraphMemoryEstimation(config, loader, graphFactory))
             .add(algorithmFactory.memoryEstimation());
 
-        if (config.forNonExistingGraph()) {
-            Long nodeCount = config.get(NODECOUNT_KEY, 0L);
-            Long relCount = config.get(RELCOUNT_KEY, 0L);
-            dimensions.nodeCount(nodeCount);
-            dimensions.maxRelCount(relCount);
-            estimationsBuilder.add("Non-existing graph",
-                HugeGraphFactory.getMemoryEstimation(loader.toSetup(), dimensions, true));
-        } else {
-            estimationsBuilder.add(graphFactory.memoryEstimation());
-        }
         MemoryTree memoryTree = estimationsBuilder.build().estimate(dimensions, config.getConcurrency());
-        //System.out.println(memoryTree.render());
+
         return new MemoryTreeWithDimensions(memoryTree, dimensions);
     }
 
