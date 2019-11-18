@@ -26,7 +26,7 @@ import org.neo4j.graphdb.Direction;
 
 public final class ColoringStep implements Runnable {
 
-    static final int INITIAL_FORBIDDEN_COLORS = 1000;
+    public static final int INITIAL_FORBIDDEN_COLORS = 1000;
     
     private final RelationshipIterator graph;
     private final Direction direction;

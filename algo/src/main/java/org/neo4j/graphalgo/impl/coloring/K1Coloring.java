@@ -231,7 +231,7 @@ public class K1Coloring extends Algorithm<K1Coloring> {
         }
 
         if (currentDegree > 0) {
-            tasks.add(taskSupplier.produce(batchStart, lastNode));
+            tasks.add(taskSupplier.produce(batchStart, Math.min(lastNode + 1, graph.nodeCount())));
         }
 
         return tasks;

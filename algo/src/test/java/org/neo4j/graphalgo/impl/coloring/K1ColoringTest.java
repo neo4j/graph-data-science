@@ -45,6 +45,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
@@ -176,6 +177,33 @@ class K1ColoringTest {
         long nodeCount = 100_000L;
         int concurrency = 42;
         assertMemoryEstimation(nodeCount, concurrency, 1341872);
+    }
+
+    @Test
+    void everyNodeShouldHaveBeenColored() {
+        RandomGraphGenerator generator = new RandomGraphGenerator(
+            100_000,
+            10,
+            RelationshipDistribution.UNIFORM,
+            Optional.empty(),
+            AllocationTracker.EMPTY
+        );
+
+        Graph graph = generator.generate();
+
+        K1Coloring k1Coloring = new K1Coloring(
+            graph,
+            Direction.BOTH,
+            100,
+            DEFAULT_BATCH_SIZE,
+            8,
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY
+        );
+
+        k1Coloring.compute();
+
+        assertFalse(k1Coloring.usedColors().get(ColoringStep.INITIAL_FORBIDDEN_COLORS));
     }
 
     private void assertMemoryEstimation(long nodeCount, int concurrency, long expected) {
