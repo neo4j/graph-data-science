@@ -130,7 +130,7 @@ class K1ColoringTest {
             Direction.BOTH,
             100,
             DEFAULT_BATCH_SIZE,
-            2,
+            8,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -138,13 +138,11 @@ class K1ColoringTest {
         k1Coloring.compute();
         HugeLongArray colors = k1Coloring.colors();
 
-        System.out.println(k1Coloring.ranIterations());
-
         Set<Long> colorsUsed = new HashSet<>(100);
         MutableLong conflicts = new MutableLong(0);
         graph.forEachNode((nodeId) -> {
             graph.forEachRelationship(nodeId, Direction.BOTH, (s, t) -> {
-                if (colors.get(s) == colors.get(t)) {
+                if (s != t && colors.get(s) == colors.get(t)) {
                     conflicts.increment();
                 }
                 colorsUsed.add(colors.get(s));
