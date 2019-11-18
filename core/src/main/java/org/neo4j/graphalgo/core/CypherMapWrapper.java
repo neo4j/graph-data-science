@@ -101,7 +101,7 @@ public final class CypherMapWrapper {
         return getChecked(key, defaultValue, Boolean.class);
     }
 
-    boolean requireBool(String key) {
+    public boolean requireBool(String key) {
         return requireChecked(key, Boolean.class);
     }
 
