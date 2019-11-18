@@ -61,7 +61,7 @@ public final class CypherMapWrapper {
     }
 
     public Map<String, Object> getMap(String key) {
-        Map<String, Object> map = getChecked(key, null, Map.class);
+        @SuppressWarnings("unchecked") Map<String, Object> map = getChecked(key, null, Map.class);
         if (map == null) {
             return emptyMap();
         }
@@ -77,12 +77,14 @@ public final class CypherMapWrapper {
      * @param defaultValue the default value if key is not found
      * @return the configuration value
      */
-    public String getString(String key, String defaultValue) {
+    @Contract("_, !null -> !null")
+    public @Nullable String getString(String key, @Nullable String defaultValue) {
         String value = (String) config.getOrDefault(key, defaultValue);
         return (null == value || "".equals(value)) ? defaultValue : value;
     }
 
-    public String getString(String key, String oldKey, String defaultValue) {
+    @Contract("_, _, !null -> !null")
+    public @Nullable String getString(String key, String oldKey, @Nullable String defaultValue) {
         Object value = get(key, oldKey, null);
         return checkValue(key, defaultValue, String.class, value);
     }
@@ -114,14 +116,11 @@ public final class CypherMapWrapper {
     }
 
     public Number getNumber(String key, String oldKey, Number defaultValue) {
-        Object value = get(key, oldKey, (Object) defaultValue);
-        if (null == value) {
-            return defaultValue;
+        Number value = getChecked(key, null, Number.class);
+        if (value == null) {
+            value = getChecked(oldKey, defaultValue, Number.class);
         }
-        if (!(value instanceof Number)) {
-            throw new IllegalArgumentException("The value of " + key + " must be a Number type");
-        }
-        return (Number) value;
+        return value;
     }
 
     public int getInt(String key, int defaultValue) {
@@ -170,8 +169,9 @@ public final class CypherMapWrapper {
     }
 
     @SuppressWarnings("unchecked")
+    @Contract("_, !null -> !null")
     @Deprecated
-    public <V> V get(String key, V defaultValue) {
+    public <V> @Nullable V get(String key, @Nullable V defaultValue) {
         Object value = config.get(key);
         if (null == value) {
             return defaultValue;
@@ -180,8 +180,9 @@ public final class CypherMapWrapper {
     }
 
     @SuppressWarnings("unchecked")
+    @Contract("_, _, !null -> !null")
     @Deprecated
-    public <V> V get(String newKey, String oldKey, V defaultValue) {
+    public <V> @Nullable V get(String newKey, String oldKey, @Nullable V defaultValue) {
         Object value = config.get(newKey);
         if (null == value) {
             value = config.get(oldKey);
@@ -194,7 +195,7 @@ public final class CypherMapWrapper {
         String key,
         @Nullable V defaultValue,
         Class<V> expectedType,
-        Object value
+        @Nullable Object value
     ) {
         if (null == value) {
             return defaultValue;
