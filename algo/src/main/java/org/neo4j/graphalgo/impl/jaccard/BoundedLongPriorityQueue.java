@@ -45,7 +45,7 @@ public abstract class BoundedLongPriorityQueue {
 
     public abstract void offer(long element, double priority);
 
-    public abstract void foreach(Consumer consumer);
+    public abstract void forEach(Consumer consumer);
 
     public LongStream elements() {
         return elementCount == 0
@@ -90,7 +90,7 @@ public abstract class BoundedLongPriorityQueue {
             }
 
             @Override
-            public void foreach(Consumer consumer) {
+            public void forEach(Consumer consumer) {
                 for (int i = 0; i < elementCount; i++) {
                     consumer.accept(elements[i], -priorities[i]);
                 }
@@ -112,7 +112,7 @@ public abstract class BoundedLongPriorityQueue {
             }
 
             @Override
-            public void foreach(Consumer consumer) {
+            public void forEach(Consumer consumer) {
                 for (int i = 0; i < elementCount; i++) {
                     consumer.accept(elements[i], priorities[i]);
                 }

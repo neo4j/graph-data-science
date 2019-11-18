@@ -123,7 +123,7 @@ public class TopKMap {
         }
 
         void forEach(BoundedLongPriorityQueue.Consumer consumer) {
-            queue.foreach(consumer);
+            queue.forEach(consumer);
         }
 
         Stream<SimilarityResult> stream(long node1) {
