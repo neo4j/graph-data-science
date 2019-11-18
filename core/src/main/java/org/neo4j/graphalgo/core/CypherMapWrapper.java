@@ -214,7 +214,7 @@ public final class CypherMapWrapper {
 
     private IllegalArgumentException missingValueFor(String key) {
         return new IllegalArgumentException(String.format(
-            "There is no value for the key `%s`",
+            "No value for the key `%s` was specified",
             key
         ));
     }
