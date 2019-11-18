@@ -26,6 +26,8 @@ import com.google.testing.compile.CompileTester;
 import org.junit.Rule;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.lang.model.SourceVersion;
 import javax.tools.JavaFileObject;
@@ -45,49 +47,25 @@ class ConfigurationProcessorTest {
     @Rule
     final CompilationRule compilationRule = new CompilationRule();
 
-    @Test
-    void emptyClass() {
-        runGoodTest("EmptyClass");
-    }
-
-    @Test
-    void fieldTypes() {
-        runGoodTest("FieldTypes");
-    }
-
-    @Test
-    void defaultValues() {
-        runGoodTest("DefaultValues");
-    }
-
-    @Test
-    void inheritance() {
-        runGoodTest("Inheritance");
-    }
-
-    @Test
-    void ignoring() {
-        runGoodTest("Ignores");
-    }
-
-    @Test
-    void resolveNamingConflicts() {
-        runGoodTest("NamingConflict");
-    }
-
-    @Test
-    void keyRenames() {
-        runGoodTest("KeyRenames");
-    }
-
-    @Test
-    void parameters() {
-        runGoodTest("Parameters");
-    }
-
-    @Test
-    void parametersOnly() {
-        runGoodTest("ParametersOnly");
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "EmptyClass",
+        "FieldTypes",
+        "DefaultValues",
+        "Inheritance",
+        "Ignores",
+        "NamingConflict",
+        "KeyRenames",
+        "Parameters",
+        "ParametersOnly"
+    })
+    void goodTest(String className) {
+        assertAbout(javaSource())
+            .that(forResource(String.format("good/%s.java", className)))
+            .processedWith(new ConfigurationProcessor())
+            .compilesWithoutError()
+            .and()
+            .generatesSources(loadExpectedFile(String.format("expected/%s.java", className)));
     }
 
     @Test
@@ -132,15 +110,6 @@ class ConfigurationProcessorTest {
             "InvalidAnnotationCombinations",
             e("The `@Parameter` annotation cannot be used together with the `@Key` annotation", 12, 9)
         );
-    }
-
-    private void runGoodTest(String className) {
-        assertAbout(javaSource())
-            .that(forResource(String.format("good/%s.java", className)))
-            .processedWith(new ConfigurationProcessor())
-            .compilesWithoutError()
-            .and()
-            .generatesSources(loadExpectedFile(String.format("expected/%s.java", className)));
     }
 
     private void runBadTest(String className, ErrorCheck... expectations) {
