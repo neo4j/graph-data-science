@@ -232,7 +232,7 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
     private int validTopK(ProcedureConfiguration config) {
         int topK = config.getInt(TOP_K_KEY, TOP_K_DEFAULT);
         if (topK == 0) {
-            throw new IllegalArgumentException("Must set non-zero topk value");
+            throw new IllegalArgumentException("Must set non-zero topK value");
         }
         return topK;
     }

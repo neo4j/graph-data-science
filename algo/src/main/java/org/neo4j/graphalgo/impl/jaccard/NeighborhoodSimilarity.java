@@ -184,8 +184,8 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     }
 
     private TopKMap computeTopkMap() {
-        Comparator<SimilarityResult> comparator = config.topk > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
-        TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.topk), comparator, tracker);
+        Comparator<SimilarityResult> comparator = config.topK > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
+        TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.topK), comparator, tracker);
         nodeStream()
             .forEach(node1 -> {
                 long[] vector1 = vectors.get(node1);
@@ -202,8 +202,8 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
     }
 
     private TopKMap computeTopKMapParallel() {
-        Comparator<SimilarityResult> comparator = config.topk > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
-        TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.topk), comparator, tracker);
+        Comparator<SimilarityResult> comparator = config.topK > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
+        TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.topK), comparator, tracker);
         ParallelUtil.parallelStreamConsume(
             nodeStream(),
             stream -> stream
@@ -287,7 +287,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         private final int degreeCutoff;
 
         private final int top;
-        private final int topk;
+        private final int topK;
 
         private final int concurrency;
         private final int minBatchSize;
@@ -296,7 +296,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
             double similarityCutoff,
             int degreeCutoff,
             int top,
-            int topk,
+            int topK,
             int concurrency,
             int minBatchSize
         ) {
@@ -304,13 +304,13 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
             // TODO: make this constraint more prominent
             this.degreeCutoff = Math.max(1, degreeCutoff);
             this.top = top;
-            this.topk = topk;
+            this.topK = topK;
             this.concurrency = concurrency;
             this.minBatchSize = minBatchSize;
         }
 
-        public int topk() {
-            return topk;
+        public int topK() {
+            return topK;
         }
 
         public int top() {
@@ -338,7 +338,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         }
 
         public boolean hasTopK() {
-            return topk != 0;
+            return topK != 0;
         }
 
         public boolean hasTop() {

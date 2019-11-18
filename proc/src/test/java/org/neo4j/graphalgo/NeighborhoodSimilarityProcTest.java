@@ -89,7 +89,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
         EXPECTED_OUTGOING.add(new SimilarityResult(0, 1, 2 / 3.0));
         EXPECTED_OUTGOING.add(new SimilarityResult(0, 2, 1 / 3.0));
         EXPECTED_OUTGOING.add(new SimilarityResult(1, 2, 0.0));
-        // With mandatory topk, expect results in both directions
+        // With mandatory topK, expect results in both directions
         EXPECTED_OUTGOING.add(new SimilarityResult(1, 0, 2 / 3.0));
         EXPECTED_OUTGOING.add(new SimilarityResult(2, 0, 1 / 3.0));
         EXPECTED_OUTGOING.add(new SimilarityResult(2, 1, 0.0));
@@ -100,7 +100,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
         EXPECTED_INCOMING.add(new SimilarityResult(4, 5, 3.0 / 3.0));
         EXPECTED_INCOMING.add(new SimilarityResult(4, 6, 1 / 3.0));
         EXPECTED_INCOMING.add(new SimilarityResult(5, 6, 1 / 3.0));
-        // With mandatory topk, expect results in both directions
+        // With mandatory topK, expect results in both directions
         EXPECTED_INCOMING.add(new SimilarityResult(5, 4, 3.0 / 3.0));
         EXPECTED_INCOMING.add(new SimilarityResult(6, 4, 1 / 3.0));
         EXPECTED_INCOMING.add(new SimilarityResult(6, 5, 1 / 3.0));
@@ -301,7 +301,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
             IllegalArgumentException.class,
             () -> new NeighborhoodSimilarityProc().config(procedureConfiguration)
         );
-        assertThat(illegalArgumentException.getMessage(), is("Must set non-zero topk value"));
+        assertThat(illegalArgumentException.getMessage(), is("Must set non-zero topK value"));
     }
 
     @Test
@@ -322,7 +322,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
         ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(input, getUsername());
         NeighborhoodSimilarity.Config config = new NeighborhoodSimilarityProc().config(procedureConfiguration);
 
-        assertEquals(10, config.topk());
+        assertEquals(10, config.topK());
         assertEquals(0, config.top());
         assertEquals(1, config.degreeCutoff());
         assertEquals(1E-42, config.similarityCutoff());
@@ -343,7 +343,7 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
         ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(input, getUsername());
         NeighborhoodSimilarity.Config config = new NeighborhoodSimilarityProc().config(procedureConfiguration);
 
-        assertEquals(100, config.topk());
+        assertEquals(100, config.topK());
         assertEquals(1000, config.top());
         assertEquals(42, config.degreeCutoff());
         assertEquals(0.23, config.similarityCutoff());

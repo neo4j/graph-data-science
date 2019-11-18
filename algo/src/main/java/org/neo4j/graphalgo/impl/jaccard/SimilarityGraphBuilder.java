@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 
 class SimilarityGraphBuilder {
 
-    static MemoryEstimation memoryEstimation(int topk, int top) {
+    static MemoryEstimation memoryEstimation(int topK, int top) {
         return MemoryEstimations.setup("", (dimensions, concurrency) -> {
             long maxNodesToCompare = Math.min(dimensions.maxRelCount(), dimensions.nodeCount());
             long maxNumberOfSimilarityResults = maxNodesToCompare * (maxNodesToCompare - 1) / 2;
@@ -44,8 +44,8 @@ class SimilarityGraphBuilder {
                 maxNodesWithNewRels = maxNumberOfSimilarityResults * 2;
             }
             int averageDegree = Math.toIntExact(maxNumberOfSimilarityResults / maxNodesWithNewRels);
-            if (topk > 0) {
-                averageDegree = Math.min(averageDegree, topk);
+            if (topK > 0) {
+                averageDegree = Math.min(averageDegree, topK);
             }
             return MemoryEstimations.builder(HugeGraph.class)
                 .add(

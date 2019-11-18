@@ -37,11 +37,11 @@ public class TopKMap {
 
     private final BitSet nodeFilter;
 
-    static MemoryEstimation memoryEstimation(long items, int topk) {
+    static MemoryEstimation memoryEstimation(long items, int topK) {
         return MemoryEstimations.builder(TopKMap.class)
-            .add("topk lists",
-                MemoryEstimations.builder("topk lists", TopKList.class)
-                    .add("queues", LongPriorityQueue.memoryEstimation(topk))
+            .add("topK lists",
+                MemoryEstimations.builder("topK lists", TopKList.class)
+                    .add("queues", LongPriorityQueue.memoryEstimation(topK))
                     .build()
                     .times(items)
             )

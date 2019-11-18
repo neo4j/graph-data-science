@@ -65,14 +65,14 @@ public class NeighborhoodSimilarityFactory extends AlgorithmFactory<Neighborhood
         if (computesSimilarityGraph) {
             builder.add(
                 "similarity graph",
-                SimilarityGraphBuilder.memoryEstimation(jaccardConfig.topk(), jaccardConfig.top())
+                SimilarityGraphBuilder.memoryEstimation(jaccardConfig.topK(), jaccardConfig.top())
             );
         }
-        if (jaccardConfig.topk() > 0) {
+        if (jaccardConfig.topK() > 0) {
             builder.add(
-                "topk map",
+                "topK map",
                 MemoryEstimations.setup("", (dimensions, concurrency) ->
-                    TopKMap.memoryEstimation(dimensions.nodeCount(), jaccardConfig.topk()))
+                    TopKMap.memoryEstimation(dimensions.nodeCount(), jaccardConfig.topK()))
             );
         }
         return builder.build();

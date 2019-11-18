@@ -426,9 +426,9 @@ final class NeighborhoodSimilarityTest {
         assertThat(ex.getMessage(), containsString("Direction BOTH is not supported"));
     }
 
-    @ParameterizedTest(name = "topk = {0}, concurrency = {1}")
+    @ParameterizedTest(name = "topK = {0}, concurrency = {1}")
     @MethodSource("topKAndConcurrencies")
-    void shouldLogProgress(int topk, int concurrency) {
+    void shouldLogProgress(int topK, int concurrency) {
         TestLog log = new TestLog();
 
         Graph graph = new GraphLoader(db)
@@ -439,7 +439,7 @@ final class NeighborhoodSimilarityTest {
 
         NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
             graph,
-            configBuilder().withTop(100).withTopK(topk).withConcurrency(concurrency).toConfig(),
+            configBuilder().withTop(100).withTopK(topK).withConcurrency(concurrency).toConfig(),
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         ).withProgressLogger(log);
@@ -496,7 +496,7 @@ final class NeighborhoodSimilarityTest {
             .fixed("node filter", nodeFilterRange)
             .fixed("vectors", vectorsRange)
             .fixed("similarity graph", graphRange)
-            .fixed("topk map", topKRange)
+            .fixed("topK map", topKRange)
             .build().estimate(dimensions, 1);
 
         assertEquals(expected.memoryUsage(), actual.memoryUsage());
@@ -566,7 +566,7 @@ final class NeighborhoodSimilarityTest {
             this.config = config;
             this.concurrency = config.concurrency();
             this.top = config.top();
-            this.topK = config.topk();
+            this.topK = config.topK();
             this.degreeCutoff = config.degreeCutoff();
             this.similarityCutoff = config.similarityCutoff();
         }
