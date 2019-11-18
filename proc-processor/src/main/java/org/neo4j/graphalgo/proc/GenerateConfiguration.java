@@ -182,6 +182,8 @@ final class GenerateConfiguration {
             case DECLARED:
                 if (isTypeOf(String.class, returnType)) {
                     builder.methodName("String");
+                } else if (isTypeOf(Number.class, returnType)) {
+                    builder.methodName("Number");
                 } else {
                     builder
                         .methodName("Checked")
