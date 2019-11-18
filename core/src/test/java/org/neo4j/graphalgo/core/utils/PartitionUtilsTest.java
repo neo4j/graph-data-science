@@ -52,16 +52,16 @@ class PartitionUtilsTest {
 
     @Test
     void testAlignment() {
-        int alignTo = 64;
+        long alignTo = 64;
         long nodeCount = 200;
         int concurrency = 2;
 
         Collection<TestTask> tasks = PartitionUtils.numberAlignedPartitioning(
             TestTask::new,
-            alignTo,
+            concurrency,
             nodeCount,
-            concurrency
-        );
+            alignTo
+            );
 
         assertEquals(2, tasks.size());
         assertTrue(
