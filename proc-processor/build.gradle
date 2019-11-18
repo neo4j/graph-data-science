@@ -24,17 +24,17 @@ description = 'Neo4j Graph Algorithms :: Procedures Processor'
 
 dependencies {
     annotationProcessor project(':annotations')
-    annotationProcessor 'com.google.auto.service:auto-service:1.0-rc6'
-    annotationProcessor 'org.immutables:builder:2.8.1'
-    annotationProcessor 'org.immutables:value:2.8.1'
+    annotationProcessor group: 'com.google.auto.service',  name: 'auto-service',       version: ver.'auto-service'
+    annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.immutables
+    annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.immutables
 
-    compileOnly project(':annotations')
-    compileOnly 'com.google.auto.service:auto-service:1.0-rc6'
-    compileOnly 'org.immutables:value-annotations:2.8.1'
-    compileOnly group: 'org.jetbrains',                     name: 'annotations',              version: ver.'jetbrains-annotations'
+    compileOnly         project(':annotations')
+    compileOnly         group: 'com.google.auto.service',  name: 'auto-service',       version: ver.'auto-service'
+    compileOnly         group: 'org.immutables',           name: 'value-annotations',  version: ver.immutables
+    compileOnly         group: 'org.jetbrains',            name: 'annotations',        version: ver.'jetbrains-annotations'
 
-    compile 'com.google.auto:auto-common:0.10'
-    compile 'com.squareup:javapoet:1.11.1'
+    compile             group: 'com.google.auto',          name: 'auto-common',        version: ver.'auto-common'
+    compile             group: 'com.squareup',             name: 'javapoet',           version: ver.javapoet
 
     testImplementation project(':core')
     def toolsJar = Jvm.current().getToolsJar()
@@ -44,9 +44,5 @@ dependencies {
     testImplementation platform(dep.junit5bom)
     testImplementation dep.junit5jupiter
     testImplementation dep.junit5migration
-
-    testImplementation group: 'org.mockito',                           name: 'mockito-core',             version: ver.'mockito'
-    testImplementation group: 'org.mockito',                           name: 'mockito-junit-jupiter',    version: ver.'mockito'
-    testImplementation group: 'org.hamcrest',                          name: 'hamcrest-library',         version: ver.'hamcrest'
-    testImplementation 'com.google.testing.compile:compile-testing:0.18'
+    testImplementation group: 'com.google.testing.compile',  name: 'compile-testing',  version: ver.'compile-testing'
 }

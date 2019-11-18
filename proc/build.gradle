@@ -3,14 +3,8 @@ description = 'Neo4j Graph Algorithms :: Procedures'
 apply plugin: 'com.github.johnrengelman.shadow'
 
 dependencies {
-    compile project(':annotations')
     compile project(':algo')
-    annotationProcessor project(':proc-processor')
-    annotationProcessor project(':annotations')
-    annotationProcessor 'org.immutables:value:2.8.1'
-    annotationProcessor 'org.immutables:builder:2.8.1'
 
-    compileOnly 'org.immutables:value-annotations:2.8.1'
     compileOnly group: 'org.neo4j', name: 'neo4j', version: ver.'neo4j'
 
     testCompile project(':test-utils')
