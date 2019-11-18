@@ -59,6 +59,6 @@ public @interface Configuration {
     @Documented
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.SOURCE)
-    @interface ProcedureParameter {
+    @interface Parameter {
     }
 }
