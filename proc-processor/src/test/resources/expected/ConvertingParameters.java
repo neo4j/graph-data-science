@@ -22,32 +22,26 @@ package good;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
-import javax.annotation.processing.Generated;
+import javax.annotation.Generated;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
-public final class DefaultValuesConfig implements DefaultValues {
+public final class ConvertingParametersConfig implements ConvertingParameters {
 
-    private final int defaultInt;
+    private final int parametersAreSubjectToConversion;
 
-    private final String defaultString;
-
-    public DefaultValuesConfig(@NotNull CypherMapWrapper config) {
-        this.defaultInt = config.getInt("defaultInt", DefaultValues.super.defaultInt());
-        this.defaultString = config.getString("defaultString", DefaultValues.super.defaultString());
+    public ConvertingParametersConfig(@NotNull String parametersAreSubjectToConversion) {
+        this.parametersAreSubjectToConversion = ConvertingParameters.toInt(CypherMapWrapper.requireValue(
+            "parametersAreSubjectToConversion",
+            parametersAreSubjectToConversion
+        ));
     }
 
-    public DefaultValuesConfig(int defaultInt, @NotNull String defaultString) {
-        this.defaultInt = defaultInt;
-        this.defaultString = CypherMapWrapper.requireValue("defaultString", defaultString);
-    }
-
-    @Override
-    public int defaultInt() {
-        return this.defaultInt;
+    public ConversionsConfig(int parametersAreSubjectToConversion) {
+        this.parametersAreSubjectToConversion = parametersAreSubjectToConversion;
     }
 
     @Override
-    public String defaultString() {
-        return this.defaultString;
+    public int parametersAreSubjectToConversion() {
+        return this.parametersAreSubjectToConversion;
     }
 }

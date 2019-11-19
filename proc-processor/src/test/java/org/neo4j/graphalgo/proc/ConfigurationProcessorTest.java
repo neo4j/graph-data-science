@@ -58,7 +58,9 @@ class ConfigurationProcessorTest {
         "KeyRenames",
         "Parameters",
         "ParametersOnly",
-        "Conversions"
+        "NullableParameters",
+        "Conversions",
+        "ConvertingParameters"
     })
     void goodTest(String className) {
         assertAbout(javaSource())

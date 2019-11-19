@@ -19,26 +19,16 @@
  */
 package good;
 
-import org.jetbrains.annotations.NotNull;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.annotation.Configuration;
 
-import javax.annotation.Generated;
+@Configuration("ConvertingParametersConfig")
+public interface ConvertingParameters {
 
-@Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
-public final class MyConfig implements Ignores.MyConfig {
+    @Configuration.ConvertWith("toInt")
+    @Configuration.Parameter
+    int parametersAreSubjectToConversion();
 
-    private final long notIgnored;
-
-    public MyConfig(@NotNull CypherMapWrapper config) {
-        this.notIgnored = config.requireLong("notIgnored");
-    }
-
-    public MyConfig(long notIgnored) {
-        this.notIgnored = notIgnored;
-    }
-
-    @Override
-    public long notIgnored() {
-        return this.notIgnored;
+    static int toInt(String input) {
+        return Integer.parseInt(input);
     }
 }

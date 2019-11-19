@@ -19,6 +19,7 @@
  */
 package good;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import javax.annotation.processing.Generated;
@@ -36,7 +37,7 @@ public final class MyConfig implements Inheritance.MyConfig {
 
     private final short inheritedDefaultValue;
 
-    public MyConfig(CypherMapWrapper config) {
+    public MyConfig(@NotNull CypherMapWrapper config) {
         this.baseValue = config.requireString("baseValue");
         this.overriddenValue = config.getInt("overriddenValue", Inheritance.MyConfig.super.overriddenValue());
         this.overwrittenValue = config.getLong("overwrittenValue", Inheritance.MyConfig.super.overwrittenValue());
@@ -47,7 +48,7 @@ public final class MyConfig implements Inheritance.MyConfig {
     }
 
     public MyConfig(
-        String baseValue,
+        @NotNull String baseValue,
         int overriddenValue,
         long overwrittenValue,
         double inheritedValue,

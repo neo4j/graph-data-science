@@ -19,6 +19,7 @@
  */
 package good;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import javax.annotation.processing.Generated;
@@ -50,7 +51,7 @@ public final class FieldTypesConfig implements FieldTypes {
 
     private final List<Object> aList;
 
-    public FieldTypesConfig(CypherMapWrapper config) {
+    public FieldTypesConfig(@NotNull CypherMapWrapper config) {
         this.aBoolean = config.requireBool("aBoolean");
         this.aByte = config.requireNumber("aByte").byteValue();
         this.aShort = config.requireNumber("aShort").shortValue();
@@ -72,10 +73,10 @@ public final class FieldTypesConfig implements FieldTypes {
         long aLong,
         float aFloat,
         double aDouble,
-        Number aNumber,
-        String aString,
-        Map<String, Object> aMap,
-        List<Object> aList
+        @NotNull Number aNumber,
+        @NotNull String aString,
+        @NotNull Map<String, Object> aMap,
+        @NotNull List<Object> aList
     ) {
         this.aBoolean = aBoolean;
         this.aByte = aByte;

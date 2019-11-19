@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.proc;
 
 import com.google.auto.common.GeneratedAnnotationSpecs;
 import com.google.common.collect.ImmutableList;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -30,8 +31,10 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.NameAllocator;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import org.neo4j.graphalgo.annotation.Configuration;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.Configuration.ConvertWith;
+import org.neo4j.graphalgo.annotation.Configuration.Parameter;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -51,7 +54,6 @@ import javax.tools.Diagnostic;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
@@ -62,7 +64,6 @@ import java.util.stream.Collectors;
 
 import static com.google.auto.common.MoreElements.asType;
 import static com.google.auto.common.MoreElements.getAnnotationMirror;
-import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.auto.common.MoreTypes.asTypeElement;
 import static com.google.auto.common.MoreTypes.isTypeOf;
 import static javax.lang.model.util.ElementFilter.methodsIn;
@@ -70,6 +71,8 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 final class GenerateConfiguration {
 
     private static final String CONFIG_VAR = "config";
+    private static final AnnotationSpec NULLABLE = AnnotationSpec.builder(Nullable.class).build();
+    private static final AnnotationSpec NOT_NULL = AnnotationSpec.builder(NotNull.class).build();
 
     private final Messager messager;
     private final Elements elementUtils;
@@ -156,38 +159,131 @@ final class GenerateConfiguration {
                 ExecutableElement method = member.method();
                 MemberDefinition definition = memberDefinition.get();
 
-                allParametersConstructor.addParameter(
-                    TypeName.get(definition.fieldType()),
-                    definition.fieldName()
-                );
-                allParametersConstructor.addStatement(generateParameterCode(definition));
-
-
-                if (isAnnotationPresent(method, Configuration.Parameter.class)) {
-                    configMapConstructor.addParameter(
-                        TypeName.get(definition.parameterType()),
-                        definition.fieldName()
-                    );
-                    configMapConstructor.addStatement(generateParameterCodeForConfigConstructor(definition));
-                } else {
+                Parameter parameter = method.getAnnotation(Parameter.class);
+                if (parameter == null) {
                     requiredMapParameter = true;
-                    configMapConstructor.addStatement(generateConfigMapCode(definition));
+                    addConfigGetterToConstructor(
+                        configMapConstructor,
+                        definition
+                    );
+                } else {
+                    addParameterToPrimaryConstructor(
+                        configMapConstructor,
+                        definition,
+                        parameter
+                    );
                 }
+
+                addParameterToSecondaryConstructor(
+                    allParametersConstructor,
+                    definition
+                );
             }
         }
 
         if (requiredMapParameter) {
             configMapConstructor.addParameter(
-                TypeName.get(CypherMapWrapper.class),
+                TypeName.get(CypherMapWrapper.class).annotated(NOT_NULL),
                 configParamterName
-            );
-            return ImmutableList.of(
-                configMapConstructor.build(),
-                allParametersConstructor.build()
             );
         }
 
-        return Collections.singletonList(allParametersConstructor.build());
+        MethodSpec primaryConstructor = configMapConstructor.build();
+        MethodSpec secondaryConstructor = allParametersConstructor.build();
+
+        List<TypeName> primmaryParameters = primaryConstructor.parameters
+            .stream()
+            .map(p -> p.type.withoutAnnotations())
+            .collect(Collectors.toList());
+        List<TypeName> secondaryParamters = secondaryConstructor.parameters
+            .stream()
+            .map(p -> p.type.withoutAnnotations())
+            .collect(Collectors.toList());
+        boolean identicalSignature = primmaryParameters.equals(secondaryParamters);
+
+        if (identicalSignature) {
+            return ImmutableList.of(primaryConstructor);
+        } else {
+            return ImmutableList.of(primaryConstructor, secondaryConstructor);
+        }
+    }
+
+    private void addConfigGetterToConstructor(
+        MethodSpec.Builder constructor,
+        MemberDefinition definition
+    ) {
+        CodeBlock.Builder code = CodeBlock.builder().add(
+            "$N.$L$L($S",
+            definition.configParamName(),
+            definition.methodPrefix(),
+            definition.methodName(),
+            definition.configKey()
+        );
+        definition.defaultProvider().ifPresent(d -> code.add(", $L", d));
+        definition.expectedType().ifPresent(t -> code.add(", $L", t));
+        CodeBlock codeBlock = code.add(")").build();
+        for (UnaryOperator<CodeBlock> converter : definition.converters()) {
+            codeBlock = converter.apply(codeBlock);
+        }
+
+        constructor.addStatement("this.$N = $L", definition.fieldName(), codeBlock);
+    }
+
+    private void addParameterToPrimaryConstructor(
+        MethodSpec.Builder constructor,
+        MemberDefinition definition,
+        Parameter parameter
+    ) {
+        TypeName paramType = TypeName.get(definition.parameterType());
+
+        CodeBlock valueProducer;
+        if (definition.parameterType().getKind() == TypeKind.DECLARED) {
+            if (parameter.acceptNull()) {
+                paramType = paramType.annotated(NULLABLE);
+                valueProducer = CodeBlock.of("$N", definition.fieldName());
+            } else {
+                paramType = paramType.annotated(NOT_NULL);
+                valueProducer = CodeBlock.of(
+                    "$T.requireValue($S, $N)",
+                    CypherMapWrapper.class,
+                    definition.configKey(),
+                    definition.fieldName()
+                );
+            }
+        } else {
+            valueProducer = CodeBlock.of("$N", definition.fieldName());
+        }
+
+        for (UnaryOperator<CodeBlock> converter : definition.converters()) {
+            valueProducer = converter.apply(valueProducer);
+        }
+        constructor
+            .addParameter(paramType, definition.fieldName())
+            .addStatement("this.$N = $L", definition.fieldName(), valueProducer);
+    }
+
+    private void addParameterToSecondaryConstructor(
+        MethodSpec.Builder constructor,
+        MemberDefinition definition
+    ) {
+        TypeName paramType = TypeName.get(definition.fieldType());
+
+        CodeBlock valueProducer;
+        if (definition.fieldType().getKind() == TypeKind.DECLARED) {
+            paramType = paramType.annotated(NOT_NULL);
+            valueProducer = CodeBlock.of(
+                "this.$3N = $1T.requireValue($2S, $3N)",
+                CypherMapWrapper.class,
+                definition.configKey(),
+                definition.fieldName()
+            );
+        } else {
+            valueProducer = CodeBlock.of("this.$1N = $1N", definition.fieldName());
+        }
+
+        constructor
+            .addParameter(paramType, definition.fieldName())
+            .addStatement(valueProducer);
     }
 
     private Optional<MemberDefinition> memberDefinition(NameAllocator names, ConfigParser.Member member) {
@@ -406,57 +502,6 @@ final class GenerateConfiguration {
         }
 
         return Optional.of(builder.build());
-    }
-
-    private CodeBlock generateConfigMapCode(MemberDefinition definition) {
-        CodeBlock.Builder code = CodeBlock.builder().add(
-            "$N.$L$L($S",
-            definition.configParamName(),
-            definition.methodPrefix(),
-            definition.methodName(),
-            definition.configKey()
-        );
-        definition.defaultProvider().ifPresent(d -> code.add(", $L", d));
-        definition.expectedType().ifPresent(t -> code.add(", $L", t));
-        CodeBlock codeBlock = code.add(")").build();
-        for (UnaryOperator<CodeBlock> converter : definition.converters()) {
-            codeBlock = converter.apply(codeBlock);
-        }
-
-        return CodeBlock.of("this.$N = $L", definition.fieldName(), codeBlock);
-    }
-
-    private CodeBlock generateParameterCodeForConfigConstructor(MemberDefinition definition) {
-        CodeBlock valueProducer;
-        if (definition.parameterType().getKind() == TypeKind.DECLARED) {
-            valueProducer = CodeBlock.of(
-                "$T.requireValue($S, $N)",
-                CypherMapWrapper.class,
-                definition.configKey(),
-                definition.fieldName()
-            );
-        } else {
-            valueProducer = CodeBlock.of("$N", definition.fieldName());
-        }
-        for (UnaryOperator<CodeBlock> converter : definition.converters()) {
-            valueProducer = converter.apply(valueProducer);
-        }
-        return CodeBlock.of("this.$N = $L", definition.fieldName(), valueProducer);
-    }
-
-    private CodeBlock generateParameterCode(MemberDefinition definition) {
-        CodeBlock valueProducer;
-        if (definition.fieldType().getKind() == TypeKind.DECLARED) {
-            valueProducer = CodeBlock.of(
-                "$T.requireValue($S, $N)",
-                CypherMapWrapper.class,
-                definition.configKey(),
-                definition.fieldName()
-            );
-        } else {
-            valueProducer = CodeBlock.of("$N", definition.fieldName());
-        }
-        return CodeBlock.of("this.$N = $L", definition.fieldName(), valueProducer);
     }
 
     private Iterable<MethodSpec> defineGetters(ConfigParser.Spec config, NameAllocator names) {

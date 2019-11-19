@@ -20,6 +20,8 @@
 
 package org.neo4j.graphalgo.annotation;
 
+import org.immutables.value.Value;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -60,5 +62,6 @@ public @interface Configuration {
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.SOURCE)
     @interface Parameter {
+        boolean acceptNull() default false;
     }
 }

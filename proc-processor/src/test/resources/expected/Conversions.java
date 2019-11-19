@@ -19,6 +19,7 @@
  */
 package good;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import javax.annotation.Generated;
@@ -32,7 +33,7 @@ public final class ConversionsConfig implements Conversions.MyConversion {
 
     private final int qualifiedMethod;
 
-    public ConversionsConfig(CypherMapWrapper config) {
+    public ConversionsConfig(@NotNull CypherMapWrapper config) {
         this.directMethod = Conversions.MyConversion.toInt(config.requireString("directMethod"));
         this.inheritedMethod = Conversions.BaseConversion.toIntBase(config.requireString("inheritedMethod");
         this.qualifiedMethod = Conversions.OtherConversion.toIntQual(config.requireString("qualifiedMethod");

@@ -19,6 +19,7 @@
  */
 package good;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import javax.annotation.Generated;
@@ -32,7 +33,7 @@ public final class ParametersConfig implements Parameters {
 
     private final int parametersAreAddedFirst;
 
-    public ParametersConfig(int keyFromParameter, int parametersAreAddedFirst, CypherMapWrapper config) {
+    public ParametersConfig(int keyFromParameter, int parametersAreAddedFirst, @NotNull CypherMapWrapper config) {
         this.keyFromParameter = keyFromParameter;
         this.keyFromMap = config.requireLong("keyFromMap");
         this.parametersAreAddedFirst = parametersAreAddedFirst;

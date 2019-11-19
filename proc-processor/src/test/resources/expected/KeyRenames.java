@@ -19,6 +19,7 @@
  */
 package good;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import javax.annotation.Generated;
@@ -30,7 +31,7 @@ public final class KeyRenamesConfig implements KeyRenames {
 
     private final int whitespaceWillBeTrimmed;
 
-    public KeyRenamesConfig(CypherMapWrapper config) {
+    public KeyRenamesConfig(@NotNull CypherMapWrapper config) {
         this.lookupUnderAnotherKey = config.requireInt("key could also be an invalid identifier");
         this.whitespaceWillBeTrimmed = config.requireInt("whitespace will be trimmed");
     }

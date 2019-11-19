@@ -19,26 +19,19 @@
  */
 package good;
 
-import org.jetbrains.annotations.NotNull;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.annotation.Configuration;
 
-import javax.annotation.Generated;
+@Configuration("NullableParametersConfig")
+public interface NullableParameters {
 
-@Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
-public final class MyConfig implements Ignores.MyConfig {
+    @Configuration.Parameter
+    String referenceTypesDefaultToNotNull();
 
-    private final long notIgnored;
+    @Configuration.Parameter(acceptNull = false)
+    String referenceTypesCanBeMarkedAsNotNull();
 
-    public MyConfig(@NotNull CypherMapWrapper config) {
-        this.notIgnored = config.requireLong("notIgnored");
-    }
+    @Configuration.Parameter(acceptNull = true)
+    String referenceTypesCanBeMarkedAsNullable();
 
-    public MyConfig(long notIgnored) {
-        this.notIgnored = notIgnored;
-    }
-
-    @Override
-    public long notIgnored() {
-        return this.notIgnored;
-    }
+    int extraValue();
 }
