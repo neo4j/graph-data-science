@@ -90,10 +90,8 @@ class NeighborhoodSimilarityDocTest extends ProcTestBase {
                                 "| \"Carol\" | \"Alice\" | 0.3333333333333333 |\n" +
                                 "| \"Carol\" | \"Dave\"  | 0.3333333333333333 |\n" +
                                 "| \"Dave\"  | \"Carol\" | 0.3333333333333333 |\n" +
-                                "| \"Bob\"   | \"Carol\" | 0.0                |\n" +
-                                "| \"Carol\" | \"Bob\"   | 0.0                |\n" +
                                 "+----------------------------------------+\n" +
-                                "12 rows\n";
+                                "10 rows\n";
 
         assertEquals(expectedString, db.execute(query).resultAsString());
     }
@@ -110,7 +108,7 @@ class NeighborhoodSimilarityDocTest extends ProcTestBase {
         String expectedString = "+-------------------------------------------------------------------------------+\n" +
                                 "| nodesCompared | relationships | write | writeProperty | writeRelationshipType |\n" +
                                 "+-------------------------------------------------------------------------------+\n" +
-                                "| 4             | 12            | true  | \"score\"       | \"SIMILAR\"             |\n" +
+                                "| 4             | 10            | true  | \"score\"       | \"SIMILAR\"             |\n" +
                                 "+-------------------------------------------------------------------------------+\n" +
                                 "1 row\n";
 
@@ -125,7 +123,7 @@ class NeighborhoodSimilarityDocTest extends ProcTestBase {
                        "        graph: 'huge'," +
                        "        direction: 'OUTGOING'," +
                        "        topK: 1," +
-                       "        top: 3" +
+                       "        topN: 3" +
                        "    }" +
                        ") YIELD node1, node2, similarity " +
                        "RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity " +

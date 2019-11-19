@@ -120,7 +120,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
 
     public SimilarityGraphResult computeToGraph(Direction direction) {
         Graph similarityGraph;
-        if (config.hasTopK() && !config.hasTop()) {
+        if (config.hasTopK() && !config.hasTopN()) {
             prepare(direction);
             TopKMap topKMap = config.isParallel()
                 ? computeTopKMapParallel()

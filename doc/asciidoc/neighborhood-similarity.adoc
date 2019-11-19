@@ -238,9 +238,7 @@ ORDER BY similarity DESCENDING, Person1, Person2
 | "Carol" | "Alice" | 0.3333333333333333
 | "Carol" | "Dave"  | 0.3333333333333333
 | "Dave"  | "Carol" | 0.3333333333333333
-| "Bob"   | "Carol" | 0.0
-| "Carol" | "Bob"   | 0.0
-3+|12 rows
+3+|10 rows
 |===
 
 We use default values for the procedure configuration parameter.
@@ -270,7 +268,7 @@ YIELD nodesCompared, relationships, write, writeProperty, writeRelationshipType;
 [opts="header"]
 |===
 | nodesCompared | relationships | write | writeProperty | writeRelationshipType
-| 4             | 12            | true  | "score"       | "SIMILAR"
+| 4             | 10            | true  | "score"       | "SIMILAR"
 |===
 
 As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.
