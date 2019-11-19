@@ -142,11 +142,11 @@ class K1ColoringTest {
         Set<Long> colorsUsed = new HashSet<>(100);
         MutableLong conflicts = new MutableLong(0);
         graph.forEachNode((nodeId) -> {
-            graph.forEachRelationship(nodeId, Direction.BOTH, (s, t) -> {
-                if (s != t && colors.get(s) == colors.get(t)) {
+            graph.forEachRelationship(nodeId, Direction.BOTH, (source, target) -> {
+                if (source != target && colors.get(source) == colors.get(target)) {
                     conflicts.increment();
                 }
-                colorsUsed.add(colors.get(s));
+                colorsUsed.add(colors.get(source));
                 return true;
             });
             return true;

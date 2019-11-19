@@ -217,7 +217,7 @@ public class K1Coloring extends Algorithm<K1Coloring> {
         long lastNode = 0;
         long batchStart = currentNode;
         long currentDegree = 0L;
-        while (currentNode >= 0 && currentNode < nodeCount-1) {
+        while (currentNode >= 0 && currentNode < nodeCount - 1) {
             currentDegree += graph.degree(currentNode, direction);
 
             if (currentDegree >= batchDegree) {
