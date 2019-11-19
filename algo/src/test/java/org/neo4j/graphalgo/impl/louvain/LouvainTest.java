@@ -19,182 +19,209 @@
  */
 package org.neo4j.graphalgo.impl.louvain;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestProgressLogger;
-import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
+import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.loading.CypherGraphFactory;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.Transaction;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Arrays;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
+import static org.neo4j.graphalgo.CommunityHelper.assertCommunitiesWithLabels;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
 
-/**
- * (a)-(b) (d)
- * | /            -> (abc)-(d)
- * (c)
- */
-class LouvainTest extends LouvainTestBase {
+class LouvainTest {
+
+    static final Louvain.Config DEFAULT_CONFIG = new Louvain.Config(10, 10, TOLERANCE_DEFAULT, false,  Optional.empty());
+    static final Louvain.Config DEFAULT_CONFIG_WITH_DENDROGRAM = new Louvain.Config(10, 10, TOLERANCE_DEFAULT, true, Optional.empty());
+    static final Louvain.Config DEFAULT_CONFIG_WITH_SEED = new Louvain.Config(10, 10, TOLERANCE_DEFAULT, true, Optional.of("seed"));
+
+    Direction direction;
+    GraphDatabaseAPI db;
 
     private static final String DB_CYPHER =
         "CREATE" +
-        "  (a:Node {name:'a', seed1: 0, seed2: 1})" +
-        ", (b:Node {name:'b', seed1: 0, seed2: 1})" +
-        ", (c:Node {name:'c', seed1: 2, seed2: 1})" +
-        ", (d:Node {name:'d', seed1: 2, seed2: 42})" +
+        "  (a:Node {seed: 1})" +        // 0
+        ", (b:Node {seed: 1})" +        // 1
+        ", (c:Node {seed: 1})" +        // 2
+        ", (d:Node {seed: 1})" +        // 3
+        ", (e:Node {seed: 1})" +        // 4
+        ", (f:Node {seed: 1})" +        // 5
+        ", (g:Node {seed: 2})" +        // 6
+        ", (h:Node {seed: 2})" +        // 7
+        ", (i:Node {seed: 2})" +        // 8
+        ", (j:Node {seed: 42})" +       // 9
+        ", (k:Node {seed: 42})" +       // 10
+        ", (l:Node {seed: 42})" +       // 11
+        ", (m:Node {seed: 42})" +       // 12
+        ", (n:Node {seed: 42})" +       // 13
+        ", (x:Node {seed: 1})" +        // 14
+        ", (u:Some)" +
+        ", (v:Other)" +
+        ", (w:Label)" +
+
         ", (a)-[:TYPE {weight: 1.0}]->(b)" +
-        ", (b)-[:TYPE {weight: 1.0}]->(c)" +
-        ", (c)-[:TYPE {weight: 5.0}]->(a)" +
-        ", (a)-[:TYPE {weight: 1.0}]->(c)";
+        ", (a)-[:TYPE {weight: 1.0}]->(d)" +
+        ", (a)-[:TYPE {weight: 1.0}]->(f)" +
+        ", (b)-[:TYPE {weight: 1.0}]->(d)" +
+        ", (b)-[:TYPE {weight: 1.0}]->(x)" +
+        ", (b)-[:TYPE {weight: 1.0}]->(g)" +
+        ", (b)-[:TYPE {weight: 1.0}]->(e)" +
+        ", (c)-[:TYPE {weight: 1.0}]->(x)" +
+        ", (c)-[:TYPE {weight: 1.0}]->(f)" +
+        ", (d)-[:TYPE {weight: 1.0}]->(k)" +
+        ", (e)-[:TYPE {weight: 1.0}]->(x)" +
+        ", (e)-[:TYPE {weight: 0.01}]->(f)" +
+        ", (e)-[:TYPE {weight: 1.0}]->(h)" +
+        ", (f)-[:TYPE {weight: 1.0}]->(g)" +
+        ", (g)-[:TYPE {weight: 1.0}]->(h)" +
+        ", (h)-[:TYPE {weight: 1.0}]->(i)" +
+        ", (h)-[:TYPE {weight: 1.0}]->(j)" +
+        ", (i)-[:TYPE {weight: 1.0}]->(k)" +
+        ", (j)-[:TYPE {weight: 1.0}]->(k)" +
+        ", (j)-[:TYPE {weight: 1.0}]->(m)" +
+        ", (j)-[:TYPE {weight: 1.0}]->(n)" +
+        ", (k)-[:TYPE {weight: 1.0}]->(m)" +
+        ", (k)-[:TYPE {weight: 1.0}]->(l)" +
+        ", (l)-[:TYPE {weight: 1.0}]->(n)" +
+        ", (m)-[:TYPE {weight: 1.0}]->(n)";
 
-    @AllGraphTypesTest
-    void testWeightedLouvain(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = loadGraph(graphImpl, DB_CYPHER, true);
-        final Louvain louvain = new Louvain(
-            graph,
-            SINGLE_LEVEL_CONFIG,
-            direction,
-            Pools.DEFAULT,
-            1,
-            AllocationTracker.EMPTY
-        )
-            .withProgressLogger(TestProgressLogger.INSTANCE)
-            .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
-            .compute();
+    @BeforeEach
+    void setupGraphDb() {
+        db = TestDatabaseCreator.createTestDatabase();
+    }
 
-        final HugeLongArray communityIds = louvain.finalDendrogram();
-
-        assertEquals(3, communityIds.get(0));
-        assertCommunities(communityIds, new long[]{0, 1, 2}, new long[]{3});
+    @AfterEach
+    void shutdownGraphDb() {
+        if (db != null) db.shutdown();
     }
 
     @AllGraphTypesTest
-    void testLouvain(Class<? extends GraphFactory> graphImpl) {
+    void unweightedLouvain(Class<? extends GraphFactory> graphImpl) {
         Graph graph = loadGraph(graphImpl, DB_CYPHER);
-        final Louvain louvain = new Louvain(graph, DEFAULT_CONFIG, direction, Pools.DEFAULT, 1, AllocationTracker.EMPTY)
-            .withProgressLogger(TestProgressLogger.INSTANCE)
-            .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
-            .compute();
-        final HugeLongArray dendogram = louvain.finalDendrogram();
-        assertTrue(1 <= louvain.levels());
-        assertDefaultCommunityResult(dendogram);
-    }
 
-    @AllGraphTypesTest
-    void testLouvainWithDendrogram(Class<? extends GraphFactory> graphImpl) {
-        Graph graph = loadGraph(graphImpl, DB_CYPHER);
-        final Louvain louvain = new Louvain(
+        Louvain algorithm = new Louvain(
             graph,
             DEFAULT_CONFIG_WITH_DENDROGRAM,
             direction,
             Pools.DEFAULT,
             1,
             AllocationTracker.EMPTY
-        )
-            .withProgressLogger(TestProgressLogger.INSTANCE)
-            .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
-            .compute();
-        final HugeLongArray[] dendogram = louvain.dendrograms();
-        assertEquals(louvain.levels(), dendogram.length);
-        assertTrue(1 <= louvain.levels());
-        assertDefaultCommunityResult(louvain.finalDendrogram());
-    }
+        ).withProgressLogger(TestProgressLogger.INSTANCE).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
-    static Stream<Arguments> seededLouvainParameter() {
-        Stream<Class<? extends GraphFactory>> graphTypes = Stream.concat(
-            TestSupport.allTypesWithoutCypher(),
-            TestSupport.cypherType()
+        algorithm.compute();
+
+        final HugeLongArray[] dendrogram = algorithm.dendrograms();
+        final double[] modularities = algorithm.modularities();
+
+        assertCommunities(
+            dendrogram[0],
+            new long[]{0, 1, 3},
+            new long[]{2, 4, 5, 14},
+            new long[]{6, 7, 8},
+            new long[]{9, 10, 11, 12, 13}
         );
-        return graphTypes.flatMap(graphType -> Stream.of(
-            Arguments.of(graphType, "seed1", new long[]{0, 1, 2, 3}, null),
-            Arguments.of(graphType, "seed2", new long[]{0, 1, 2}, new long[]{3})
-        ));
+
+        assertCommunities(
+            dendrogram[1],
+            new long[]{0, 1, 2, 3, 4, 5, 14},
+            new long[]{6, 7, 8},
+            new long[]{9, 10, 11, 12, 13}
+        );
+
+        assertEquals(2, algorithm.levels());
+        assertEquals(0.38, modularities[modularities.length - 1], 0.01);
     }
 
     @AllGraphTypesTest
-    @MethodSource("seededLouvainParameter")
-    void testSeededLouvain(
-        Class<? extends GraphFactory> graphImpl,
-        String seedProperty,
-        long[] community1,
-        long[] community2
-    ) {
-        Graph graph = loadGraph(graphImpl, DB_CYPHER, "seed1", "seed2");
-        final Louvain louvain = new Louvain(
+    void weightedLouvain(Class<? extends GraphFactory> graphImpl) {
+        Graph graph = loadGraph(graphImpl, DB_CYPHER, true);
+
+        Louvain algorithm = new Louvain(
             graph,
-            new Louvain.Config(
-                10,
-                10,
-                TOLERANCE_DEFAULT,
-                false,
-                Optional.of(seedProperty)
-            ),
+            DEFAULT_CONFIG_WITH_DENDROGRAM,
             direction,
             Pools.DEFAULT,
             1,
             AllocationTracker.EMPTY
-        )
-            .withProgressLogger(TestProgressLogger.INSTANCE)
-            .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
-            .compute();
+        ).withProgressLogger(TestProgressLogger.INSTANCE).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
-        if (community2 == null) {
-            assertCommunities(louvain.finalDendrogram(), community1);
-        } else {
-            assertCommunities(louvain.finalDendrogram(), community1, community2);
-        }
+        algorithm.compute();
+
+        final HugeLongArray[] dendrogram = algorithm.dendrograms();
+        final double[] modularities = algorithm.modularities();
+
+        assertCommunities(
+            dendrogram[0],
+            new long[]{0, 1, 3},
+            new long[]{2, 4, 14},
+            new long[]{5, 6},
+            new long[]{7, 8},
+            new long[]{9, 10, 11, 12, 13}
+        );
+
+        assertCommunities(
+            dendrogram[1],
+            new long[]{0, 1, 2, 3, 4, 5, 6, 14},
+            new long[]{7, 8, 9, 10, 11, 12, 13}
+        );
+
+        assertEquals(2, algorithm.levels());
+        assertEquals(0.37, modularities[modularities.length - 1], 0.01);
     }
 
     @AllGraphTypesTest
-    void testSeededLouvainWithoutSeedPropertyAndSparseNodeMapping(Class<? extends GraphFactory> graphImpl) {
-        String sparseGraph =
-            "CREATE" +
-            "  (:Some)" +
-            ", (:Other)" +
-            ", (:Nodes)" +
-            ", (:That)" +
-            ", (:We)" +
-            ", (:Will)" +
-            ", (:Ignore)" +
-            ", (:In)" +
-            ", (:This)" +
-            ", (:Test)" +
-            ", (a:Node {name:'a'})" +
-            ", (b:Node {name:'b'})" +
-            ", (c:Node {name:'c'})" +
-            ", (a)-[:TYPE {weight: 1.0}]->(b)" +
-            ", (b)-[:TYPE {weight: 1.0}]->(c)" +
-            ", (c)-[:TYPE {weight: 1.0}]->(a)" +
-            ", (a)-[:TYPE {weight: 1.0}]->(c)";
+    void seededLouvain(Class<? extends GraphFactory> graphImpl) {
+        assumeFalse(graphImpl == CypherGraphFactory.class);
 
-        Graph graph = loadGraph(graphImpl, sparseGraph);
+        Graph graph = loadGraph(graphImpl, DB_CYPHER, true, "seed");
 
-        Louvain louvain = new Louvain(
+        Louvain algorithm = new Louvain(
             graph,
-            DEFAULT_CONFIG,
+            DEFAULT_CONFIG_WITH_SEED,
             direction,
             Pools.DEFAULT,
             1,
             AllocationTracker.EMPTY
-        )
-            .withProgressLogger(TestProgressLogger.INSTANCE)
-            .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
-            .compute();
+        ).withProgressLogger(TestProgressLogger.INSTANCE).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
-        assertCommunities(louvain.finalDendrogram(), new long[]{0, 1, 2});
+        algorithm.compute();
+
+        final HugeLongArray[] dendrogram = algorithm.dendrograms();
+        final double[] modularities = algorithm.modularities();
+
+        System.out.println("dendrogram = " + Arrays.toString(dendrogram));
+
+        assertCommunitiesWithLabels(
+            dendrogram[0],
+            new long[]{1, 2, 42},
+            new long[]{0, 1, 2, 3, 4, 5, 14},
+            new long[]{6, 7, 8},
+            new long[]{9, 10, 11, 12, 13}
+        );
+
+        assertEquals(1, algorithm.levels());
+        assertEquals(0.38, modularities[modularities.length - 1], 0.01);
     }
 
     @Test
@@ -215,13 +242,42 @@ class LouvainTest extends LouvainTestBase {
             factory.memoryEstimation().estimate(dimensions100B, 1).memoryUsage()
         );
         assertEquals(
-                MemoryRange.of(13602075196712L, 20803173830128L),
-                factory.memoryEstimation().estimate(dimensions100B, 4).memoryUsage());
+            MemoryRange.of(13602075196712L, 20803173830128L),
+            factory.memoryEstimation().estimate(dimensions100B, 4).memoryUsage());
     }
 
-    private void assertDefaultCommunityResult(HugeLongArray communities) {
-        assertEquals(2, communities.get(0));
-        assertCommunities(communities, new long[]{0, 1, 2}, new long[]{3});
+    private Graph loadGraph(Class<? extends GraphFactory> graphImpl, String cypher, String... nodeProperties) {
+        return loadGraph(graphImpl, cypher, false, nodeProperties);
     }
 
+    private Graph loadGraph(Class<? extends GraphFactory> graphImpl, String cypher, boolean loadRelWeight, String... nodeProperties) {
+        db.execute(cypher);
+        GraphLoader loader = new GraphLoader(db)
+            .withOptionalNodeProperties(
+                Arrays.stream(nodeProperties)
+                    .map(p -> PropertyMapping.of(p, -1))
+                    .toArray(PropertyMapping[]::new)
+            );
+        if (loadRelWeight) {
+            loader.withRelationshipProperties(PropertyMapping.of("weight", 1.0));
+        }
+        if (graphImpl == CypherGraphFactory.class) {
+            direction = Direction.OUTGOING;
+            loader
+                .withNodeStatement("MATCH (u) RETURN id(u) as id, u.seed1 as seed1, u.seed2 as seed2")
+                .withRelationshipStatement("MATCH (u1)-[rel]-(u2) \n" +
+                                           "RETURN id(u1) AS source, id(u2) AS target, rel.weight as weight")
+                .withDeduplicationStrategy(DeduplicationStrategy.NONE)
+                .undirected();
+        } else {
+            direction = Direction.BOTH;
+            loader
+                .withAnyRelationshipType()
+                .withLabel("Node");
+        }
+        loader.withDirection(direction);
+        try (Transaction tx = db.beginTx()) {
+            return loader.load(graphImpl);
+        }
+    }
 }

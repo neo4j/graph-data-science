@@ -49,8 +49,7 @@ public final class Louvain extends Algorithm<Louvain> {
     // results
     private HugeLongArray[] dendrograms;
     private double[] modularities;
-    private int levels;
-
+    private int ranLevels;
 
     public Louvain(
         Graph graph,
@@ -77,19 +76,18 @@ public final class Louvain extends Algorithm<Louvain> {
         NodeProperties seed = seedingValues;
 
         long oldNodeCount = rootGraph.nodeCount();
-        for (levels = 0; levels < config.maxLevel; levels++) {
+        for (ranLevels = 0; ranLevels < config.maxLevel; ranLevels++) {
             ModularityOptimization modularityOptimization = runModularityOptimization(workingGraph, seed);
             modularityOptimization.release();
 
-            modularities[levels] = modularityOptimization.getModularity();
-            dendrograms[levels] = HugeLongArray.newArray(rootGraph.nodeCount(), tracker);
-            long maxCommunityId = buildDendrogram(workingGraph, levels, modularityOptimization);
+            modularities[ranLevels] = modularityOptimization.getModularity();
+            dendrograms[ranLevels] = HugeLongArray.newArray(rootGraph.nodeCount(), tracker);
+            long maxCommunityId = buildDendrogram(workingGraph, ranLevels, modularityOptimization);
 
             workingGraph = summarizeGraph(workingGraph, modularityOptimization, maxCommunityId);
             seed = new OriginalIdNodeProperties(workingGraph);
 
             if (workingGraph.nodeCount() == oldNodeCount || workingGraph.nodeCount() == 1) {
-                levels++;
                 resizeResultArrays();
                 break;
             }
@@ -100,11 +98,12 @@ public final class Louvain extends Algorithm<Louvain> {
     }
 
     private void resizeResultArrays() {
-        HugeLongArray[] resizedDendrogram = new HugeLongArray[levels];
-        double[] resizedModularities = new double[levels];
-        if (levels < this.dendrograms.length) {
-            System.arraycopy(this.dendrograms, 0, resizedDendrogram, 0, levels);
-            System.arraycopy(this.modularities, 0, resizedModularities, 0, levels);
+        int numLevels = levels();
+        HugeLongArray[] resizedDendrogram = new HugeLongArray[numLevels];
+        double[] resizedModularities = new double[numLevels];
+        if (numLevels < this.dendrograms.length) {
+            System.arraycopy(this.dendrograms, 0, resizedDendrogram, 0, numLevels);
+            System.arraycopy(this.modularities, 0, resizedModularities, 0, numLevels);
         }
         this.dendrograms = resizedDendrogram;
         this.modularities = resizedModularities;
@@ -187,11 +186,11 @@ public final class Louvain extends Algorithm<Louvain> {
     }
 
     public HugeLongArray finalDendrogram() {
-        return this.dendrograms[levels - 1];
+        return this.dendrograms[levels() - 1];
     }
 
     public long getCommunity(long nodeId) {
-        return dendrograms[levels].get(nodeId);
+        return dendrograms[ranLevels].get(nodeId);
     }
 
     public long[] getCommunities(long nodeId) {
@@ -205,7 +204,7 @@ public final class Louvain extends Algorithm<Louvain> {
     }
 
     public int levels() {
-        return this.levels;
+        return this.ranLevels == 0 ? 1 : this.ranLevels;
     }
 
     public double[] modularities() {

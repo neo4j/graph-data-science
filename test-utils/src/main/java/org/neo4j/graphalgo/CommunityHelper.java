@@ -37,19 +37,19 @@ public final class CommunityHelper {
      * disregards specific community values.
      *
      * @param communityData The output of a community detection algorithm.
-     * @param communities The expected membership of communities. Elements within an array are
-     *                    expected to be in the same community, whereas all elements of different
-     *                    arrays are expected to be in different communities.
+     * @param communities   The expected membership of communities. Elements within an array are
+     *                      expected to be in the same community, whereas all elements of different
+     *                      arrays are expected to be in different communities.
      */
     public static void assertCommunities(long[] communityData, long[]... communities) {
-        for(long[] community: communities) {
+        for (long[] community : communities) {
             assertSameCommunity(communityData, community);
         }
 
         for (int i = 0; i < communities.length; i++) {
             for (int j = i + 1; j < communities.length; j++) {
                 assertNotEquals(
-                    communityData[(int)communities[i][0]], communityData[(int)communities[j][0]],
+                    communityData[(int) communities[i][0]], communityData[(int) communities[j][0]],
                     String.format(
                         "Expected node %d to be in a different community than node %d",
                         communities[i][0],
@@ -65,10 +65,10 @@ public final class CommunityHelper {
     }
 
     public static void assertSameCommunity(long[] communities, long[] members) {
-        long expectedCommunity = communities[(int)members[0]];
+        long expectedCommunity = communities[(int) members[0]];
 
         for (int i = 1; i < members.length; i++) {
-            long actualCommunity = communities[(int)members[i]];
+            long actualCommunity = communities[(int) members[i]];
             assertEquals(
                 expectedCommunity,
                 actualCommunity,
@@ -80,6 +80,27 @@ public final class CommunityHelper {
                     expectedCommunity
                 )
             );
+        }
+    }
+
+    public static void assertCommunitiesWithLabels(HugeLongArray communityData, long[] labels, long[]... communities) {
+        assertCommunitiesWithLabels(communityData.toArray(), labels, communities);
+    }
+
+    public static void assertCommunitiesWithLabels(long[] communityData, long[] labels, long[]... communities) {
+        assertCommunities(communityData, communities);
+        for (int i = 0; i < communities.length; i++) {
+            long[] community = communities[i];
+            for (int j = 0; j < community.length; j++) {
+                assertEquals(labels[i], communityData[(int) community[j]],
+                    String.format(
+                        "Expected node %d to be in community %d, but was %d",
+                        community[j],
+                        labels[i],
+                        communityData[(int) community[j]]
+                    )
+                );
+            }
         }
     }
 }

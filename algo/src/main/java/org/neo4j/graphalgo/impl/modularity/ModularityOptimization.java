@@ -126,7 +126,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         for(iterationCounter = 0; iterationCounter < maxIterations; iterationCounter++) {
             boolean hasConverged;
             try (ProgressTimer timer = ProgressTimer.start(millis -> log.info("Modularity Optimization - Iteration %d finished after %dms", iterationCounter + 1,  millis))) {
-
                 nodeCommunityInfluences.fill(0.0);
 
                 long currentColor = colorsUsed.nextSetBit(0);
@@ -136,7 +135,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                 }
 
                  hasConverged = !updateModularity();
-
             }
 
             if (hasConverged) {
