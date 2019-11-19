@@ -101,6 +101,7 @@ public final class GraphGenerateProc extends BaseProc {
             } else {
                 graphFromType = GraphsByRelationshipType.of(graph);
             }
+            graphFromType.canRelease(false);
 
             stats.nodes = graphFromType.nodeCount();
             stats.relationships = graphFromType.relationshipCount();

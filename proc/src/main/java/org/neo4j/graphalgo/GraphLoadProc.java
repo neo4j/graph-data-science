@@ -94,17 +94,18 @@ public final class GraphLoadProc extends BaseProc {
 
             GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
 
-            GraphsByRelationshipType graphFromType;
+            GraphsByRelationshipType graph;
             if (!relationshipTypes.isEmpty() || propertyMappings.hasMappings()) {
-                graphFromType = ((MultipleRelTypesSupport) loader.build(graphImpl)).importAllGraphs();
+                graph = ((MultipleRelTypesSupport) loader.build(graphImpl)).importAllGraphs();
             } else {
-                graphFromType = GraphsByRelationshipType.of(loader.load(graphImpl));
+                graph = GraphsByRelationshipType.of(loader.load(graphImpl));
             }
+            graph.canRelease(false);
 
-            stats.nodes = graphFromType.nodeCount();
-            stats.relationships = graphFromType.relationshipCount();
+            stats.nodes = graph.nodeCount();
+            stats.relationships = graph.relationshipCount();
 
-            GraphCatalog.set(getUsername(), name, graphFromType);
+            GraphCatalog.set(getUsername(), name, graph);
         }
 
         return stats;
