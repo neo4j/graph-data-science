@@ -252,6 +252,34 @@ final class NeighborhoodSimilarityTest {
 
     @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
     @MethodSource("supportedLoadAndComputeDirections")
+    void shouldComputeNegativeTopNForSupportedDirections(Direction loadDirection, Direction algoDirection, int concurrency) {
+        Graph graph = new GraphLoader(db)
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .withDirection(loadDirection)
+            .load(HugeGraphFactory.class);
+
+        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
+            graph,
+            configBuilder().withConcurrency(concurrency).withTopN(-1).toConfig(),
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY
+        );
+
+        Graph similarityGraph = neighborhoodSimilarity.computeToGraph(algoDirection).similarityGraph();
+
+        assertGraphEquals(
+            algoDirection == INCOMING
+                ? fromGdl(
+                "(i1)-[{w: 0.50000D}]->(i3), (i2), (i4), (a), (b), (c), (d)")
+                : fromGdl(
+                    "(a), (b)-[{w: 0.00000D}]->(c), (d), (i1), (i2), (i3), (i4)")
+            , similarityGraph
+        );
+    }
+
+    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
+    @MethodSource("supportedLoadAndComputeDirections")
     void shouldComputeTopKForSupportedDirections(Direction loadDirection, Direction algoDirection, int concurrency) {
         Graph graph = new GraphLoader(db)
             .withAnyLabel()

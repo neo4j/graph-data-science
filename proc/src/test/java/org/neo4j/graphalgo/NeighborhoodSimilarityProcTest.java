@@ -27,6 +27,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
@@ -352,11 +353,12 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
         assertEquals(ParallelUtil.DEFAULT_BATCH_SIZE, config.minBatchSize());
     }
 
-    @Test
-    void shouldCreateValidCustomAlgoConfig() {
+    @ParameterizedTest(name = "top or bottom: {0}")
+    @ValueSource(strings = {"top", "bottom"})
+    void shouldCreateValidCustomAlgoConfig(String parameter) {
         Map<String, Object> input = MapUtil.map(
-            "topK", 100,
-            "topN", 1000,
+            parameter + "K", 100,
+            parameter + "N", 1000,
             "degreeCutoff", 42,
             "similarityCutoff", 0.23,
             "concurrency", 1,
@@ -365,8 +367,8 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
         ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(input, getUsername());
         NeighborhoodSimilarity.Config config = new NeighborhoodSimilarityProc().config(procedureConfiguration);
 
-        assertEquals(100, config.topK());
-        assertEquals(1000, config.topN());
+        assertEquals(parameter.equals("top") ? 100 : -100, config.topK());
+        assertEquals(parameter.equals("top") ? 1000 : -1000, config.topN());
         assertEquals(42, config.degreeCutoff());
         assertEquals(0.23, config.similarityCutoff());
         assertEquals(1, config.concurrency());
