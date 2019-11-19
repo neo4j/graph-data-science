@@ -80,10 +80,6 @@ class LouvainMultiLevelTest extends LouvainTestBase {
         ", (l)-[:TYPE {weight: 1.0}]->(n)" +
         ", (m)-[:TYPE {weight: 1.0}]->(n)";
 
-    @Override
-    void setupGraphDb(Graph graph) {
-    }
-
     @AllGraphTypesTest
     void testComplex(Class<? extends GraphFactory> graphImpl) {
         Graph graph = loadGraph(graphImpl, DB_CYPHER);

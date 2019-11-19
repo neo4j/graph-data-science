@@ -42,11 +42,15 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
 
 abstract class LouvainTestBase {
 
-    static final Louvain.Config DEFAULT_CONFIG = new Louvain.Config(10, 10, 0.001, false,  Optional.empty());
-    static final Louvain.Config DEFAULT_CONFIG_WITH_DENDROGRAM = new Louvain.Config(10, 10, 0.001, true, Optional.empty());
+    protected Direction direction;
+
+    static final Louvain.Config DEFAULT_CONFIG = new Louvain.Config(10, 10, TOLERANCE_DEFAULT, false,  Optional.empty());
+    static final Louvain.Config DEFAULT_CONFIG_WITH_DENDROGRAM = new Louvain.Config(10, 10, TOLERANCE_DEFAULT, true, Optional.empty());
+    static final Louvain.Config SINGLE_LEVEL_CONFIG =  new Louvain.Config(1, 1, TOLERANCE_DEFAULT, false, Optional.empty());
 
     GraphDatabaseAPI db;
 
@@ -62,34 +66,38 @@ abstract class LouvainTestBase {
         if (db != null) db.shutdown();
     }
 
-    abstract void setupGraphDb(Graph graph);
-
     Graph loadGraph(Class<? extends GraphFactory> graphImpl, String cypher, String... nodeProperties) {
+        return loadGraph(graphImpl, cypher, false, nodeProperties);
+    }
+
+    Graph loadGraph(Class<? extends GraphFactory> graphImpl, String cypher, boolean weighted, String... nodeProperties) {
         db.execute(cypher);
         GraphLoader loader = new GraphLoader(db)
-            .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
             .withOptionalNodeProperties(
                 Arrays.stream(nodeProperties)
                     .map(p -> PropertyMapping.of(p, -1))
                     .toArray(PropertyMapping[]::new)
-            )
-            .withDirection(Direction.OUTGOING)
-            .undirected();
+            );
+        if (weighted) {
+            loader.withRelationshipProperties(PropertyMapping.of("weight", 1.0));
+        }
         if (graphImpl == CypherGraphFactory.class) {
+            direction = Direction.OUTGOING;
             loader
                 .withNodeStatement("MATCH (u) RETURN id(u) as id, u.seed1 as seed1, u.seed2 as seed2")
-                .withRelationshipStatement("MATCH (u1)-[rel]-(u2) \n" +
+                .withRelationshipStatement("MATCH (u1)-[rel]->(u2) \n" +
                                            "RETURN id(u1) AS source, id(u2) AS target, rel.weight as weight")
-                .withDeduplicationStrategy(DeduplicationStrategy.SKIP);
+                .withDeduplicationStrategy(DeduplicationStrategy.SKIP)
+                .undirected();
         } else {
+            direction = Direction.BOTH;
             loader
                 .withAnyRelationshipType()
                 .withLabel("Node");
         }
+        loader.withDirection(direction);
         try (Transaction tx = db.beginTx()) {
-            Graph graph = loader.load(graphImpl);
-            setupGraphDb(graph);
-            return graph;
+            return loader.load(graphImpl);
         }
     }
 
