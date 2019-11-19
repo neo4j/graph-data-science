@@ -446,6 +446,38 @@ final class NeighborhoodSimilarityTest {
         resultGraph.release();
     }
 
+    @ParameterizedTest(name = "load direction: {0}, compute direction: {1}, concurrency: {2}")
+    @MethodSource("supportedLoadAndComputeDirections")
+    void shouldIgnoreLoops(Direction loadDirection, Direction algoDirection, int concurrency) {
+        // Add loops
+        db.execute("" +
+                   " MATCH (alice {name: 'Alice'})" +
+                   " MATCH (thing {name: 'p1'})" +
+                   " CREATE (alice)-[:LIKES]->(alice), (thing)-[:LIKES]->(thing)"
+        );
+
+        Graph graph = new GraphLoader(db)
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .withDirection(loadDirection)
+            .load(HugeGraphFactory.class);
+
+        NeighborhoodSimilarity neighborhoodSimilarity = new NeighborhoodSimilarity(
+            graph,
+            configBuilder().withConcurrency(concurrency).withTopN(1).toConfig(),
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY
+        );
+
+        Set<String> result = neighborhoodSimilarity
+            .computeToStream(algoDirection)
+            .map(NeighborhoodSimilarityTest::resultString)
+            .collect(Collectors.toSet());
+        neighborhoodSimilarity.release();
+
+        assertEquals(algoDirection == INCOMING ? EXPECTED_INCOMING_TOP_N_1 : EXPECTED_OUTGOING_TOP_N_1, result);
+    }
+
     @ParameterizedTest(name = "concurrency = {0}")
     @MethodSource("concurrencies")
     void shouldThrowForDirectionBoth(int concurrency) {

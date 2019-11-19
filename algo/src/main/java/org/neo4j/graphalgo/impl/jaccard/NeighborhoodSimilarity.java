@@ -23,6 +23,7 @@ package org.neo4j.graphalgo.impl.jaccard;
 import com.carrotsearch.hppc.ArraySizingStrategy;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongArrayList;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.BitUtil;
@@ -126,7 +127,14 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         vectors = HugeObjectArray.newArray(long[].class, graph.nodeCount(), tracker);
 
         vectors.setAll(node -> {
-            int degree = graph.degree(node, direction);
+            MutableInt degreeCount = new MutableInt();
+            graph.forEachRelationship(node, direction, (source, target) -> {
+                if (source != target) {
+                    degreeCount.increment();
+                }
+                return true;
+            });
+            int degree = degreeCount.getValue();
 
             if (degree >= config.degreeCutoff) {
                 nodesToCompare++;
@@ -134,7 +142,9 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
 
                 final LongArrayList targetIds = new LongArrayList(degree, ARRAY_SIZING_STRATEGY);
                 graph.forEachRelationship(node, direction, (source, target) -> {
-                    targetIds.add(target);
+                    if (source != target) {
+                        targetIds.add(target);
+                    }
                     return true;
                 });
                 return targetIds.buffer;
