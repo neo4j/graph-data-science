@@ -61,6 +61,7 @@ public final class GraphCatalog extends GraphFactory {
     }
 
     public static void set(String username, String graphName, GraphsByRelationshipType graph) {
+        graph.canRelease(false);
         userGraphCatalogs.compute(username, (user, userCatalog) -> {
             if (userCatalog == null) {
                 userCatalog = new UserCatalog();

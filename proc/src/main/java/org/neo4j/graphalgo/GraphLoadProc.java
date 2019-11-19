@@ -100,7 +100,6 @@ public final class GraphLoadProc extends BaseProc {
             } else {
                 graph = GraphsByRelationshipType.of(loader.load(graphImpl));
             }
-            graph.canRelease(false);
 
             stats.nodes = graph.nodeCount();
             stats.relationships = graph.relationshipCount();
