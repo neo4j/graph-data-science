@@ -102,22 +102,6 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         return log(stream);
     }
 
-    private Stream<SimilarityResult> compute() {
-        return (config.hasTopK() && config.hasTopN())
-            ? computeTopN(computeTopkMap())
-            : (config.hasTopK())
-                ? computeTopkMap().stream()
-                : computeAll();
-    }
-
-    private Stream<SimilarityResult> computeParallel() {
-        return (config.hasTopK() && config.hasTopN())
-            ? computeTopN(computeTopKMapParallel())
-            : (config.hasTopK())
-                ? computeTopKMapParallel().stream()
-                : computeAllParallel();
-    }
-
     public SimilarityGraphResult computeToGraph(Direction direction) {
         Graph similarityGraph;
         if (config.hasTopK() && !config.hasTopN()) {
@@ -159,13 +143,32 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         });
     }
 
+    private Stream<SimilarityResult> compute() {
+        return (config.hasTopK() && config.hasTopN())
+            ? computeTopN(computeTopkMap())
+            : (config.hasTopK())
+                ? computeTopkMap().stream()
+                : computeAll();
+    }
+
+    private Stream<SimilarityResult> computeParallel() {
+        return (config.hasTopK() && config.hasTopN())
+            ? computeTopN(computeTopKMapParallel())
+            : (config.hasTopK())
+                ? computeTopKMapParallel().stream()
+                : computeAllParallel();
+    }
+
     private Stream<SimilarityResult> computeAll() {
         return nodeStream()
             .boxed()
             .flatMap(node1 -> {
                 long[] vector1 = vectors.get(node1);
                 return nodeStream(node1 + 1)
-                    .mapToObj(node2 -> jaccard(node1, node2, vector1, vectors.get(node2)))
+                    .mapToObj(node2 -> {
+                        double similarity = jaccard(vector1, vectors.get(node2));
+                        return Double.isNaN(similarity) ? null : new SimilarityResult(node1, node2, similarity);
+                    })
                     .filter(Objects::nonNull);
             });
     }
@@ -177,7 +180,10 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
                 .flatMap(node1 -> {
                     long[] vector1 = vectors.get(node1);
                     return nodeStream(node1 + 1)
-                        .mapToObj(node2 -> jaccard(node1, node2, vector1, vectors.get(node2)))
+                        .mapToObj(node2 -> {
+                            double similarity = jaccard(vector1, vectors.get(node2));
+                            return Double.isNaN(similarity) ? null : new SimilarityResult(node1, node2, similarity);
+                        })
                         .filter(Objects::nonNull);
                 })
         );
@@ -191,7 +197,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
                 long[] vector1 = vectors.get(node1);
                 nodeStream(node1 + 1)
                     .forEach(node2 -> {
-                        double similarity = jaccardPrimitive(vector1, vectors.get(node2));
+                        double similarity = jaccard(vector1, vectors.get(node2));
                         if (!Double.isNaN(similarity)) {
                             topKMap.put(node1, node2, similarity);
                             topKMap.put(node2, node1, similarity);
@@ -218,7 +224,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
                     nodeStream()
                         .filter(node2 -> node1 != node2)
                         .forEach(node2 -> {
-                            double similarity = jaccardPrimitive(vector1, vectors.get(node2));
+                            double similarity = jaccard(vector1, vectors.get(node2));
                             if (!Double.isNaN(similarity)) {
                                 topKMap.put(node1, node2, similarity);
                             }
@@ -235,7 +241,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
                 long[] vector1 = vectors.get(node1);
                 nodeStream(node1 + 1)
                     .forEach(node2 -> {
-                        double similarity = jaccardPrimitive(vector1, vectors.get(node2));
+                        double similarity = jaccard(vector1, vectors.get(node2));
                         if (!Double.isNaN(similarity)) {
                             topNList.add(node1, node2, similarity);
                         }
@@ -259,14 +265,7 @@ public class NeighborhoodSimilarity extends Algorithm<NeighborhoodSimilarity> {
         });
     }
 
-    private SimilarityResult jaccard(long node1, long node2, long[] vector1, long[] vector2) {
-        long intersection = Intersections.intersection3(vector1, vector2);
-        double union = vector1.length + vector2.length - intersection;
-        double similarity = union == 0 ? 0 : intersection / union;
-        return similarity >= config.similarityCutoff ? new SimilarityResult(node1, node2, similarity) : null;
-    }
-
-    private double jaccardPrimitive(long[] vector1, long[] vector2) {
+    private double jaccard(long[] vector1, long[] vector2) {
         long intersection = Intersections.intersection3(vector1, vector2);
         double union = vector1.length + vector2.length - intersection;
         double similarity = union == 0 ? 0 : intersection / union;
