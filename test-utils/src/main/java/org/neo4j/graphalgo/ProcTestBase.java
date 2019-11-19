@@ -56,7 +56,7 @@ import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 
 public class ProcTestBase {
 
-    GraphDatabaseAPI db;
+    protected GraphDatabaseAPI db;
 
     @AfterAll
     static void clearLoadedGraphs() {
@@ -70,7 +70,7 @@ public class ProcTestBase {
         }
     }
 
-    void registerProcedures(Class<?>... procedureClasses) throws KernelException {
+    protected void registerProcedures(Class<?>... procedureClasses) throws KernelException {
         final Procedures procedures = db.getDependencyResolver().resolveDependency(Procedures.class, ONLY);
         for (Class<?> clazz : procedureClasses) {
             procedures.registerProcedure(clazz);

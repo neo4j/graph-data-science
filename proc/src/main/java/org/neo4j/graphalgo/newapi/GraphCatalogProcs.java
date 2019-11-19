@@ -21,12 +21,14 @@
 package org.neo4j.graphalgo.newapi;
 
 import org.HdrHistogram.AtomicHistogram;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.NodeFilters;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipFilters;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.loading.GraphCatalog;
@@ -51,20 +53,19 @@ import java.util.stream.Stream;
 import static java.util.Collections.emptyMap;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
-public class GraphCatalogProcs extends BaseProc {
+public class GraphCatalogProcs extends BaseProc<GraphCreateConfig> {
 
     private static final String HISTOGRAM_FIELD_NAME = "histogram";
 
     @Override
-    protected GraphLoader configureLoader(
-        GraphLoader loader, ProcedureConfiguration config
-    ) {
+    protected GraphLoader configureLoader(GraphLoader loader, ProcedureConfiguration config) {
         return loader;
     }
 
     @Override
-    protected GraphLoader configureLoader(
-        GraphLoader loader, GraphCreateConfig config
+    protected GraphLoader newConfigureLoader(
+        GraphLoader loader,
+        GraphCreateConfig config
     ) {
         return loader;
     }
@@ -84,12 +85,13 @@ public class GraphCatalogProcs extends BaseProc {
                  "  createMillis: INTEGER")
     public Stream<GraphCreateResult> create(
         @Name(value = "graphName") String graphName,
-        @Name(value = "nodeFilter", defaultValue = "null") Object nodeFilter,
-        @Name(value = "relationshipFilter", defaultValue = "null") Object relationshipFilter,
+        @Name(value = "nodeFilter", defaultValue = "null") @Nullable Object nodeFilter,
+        @Name(value = "relationshipFilter", defaultValue = "null") @Nullable Object relationshipFilter,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         // input
         GraphCreateConfig config = GraphCreateConfig.of(
+            getUsername(),
             graphName,
             nodeFilter,
             relationshipFilter,
@@ -105,23 +107,23 @@ public class GraphCatalogProcs extends BaseProc {
     }
 
     private GraphCreateResult createGraph(GraphCreateConfig config) {
-        if (GraphCatalog.exists(getUsername(), config.graphName)) {
-            throw new IllegalArgumentException(String.format("A graph with name '%s' already exists.", config.graphName));
+        if (GraphCatalog.exists(config.username(), config.graphName())) {
+            throw new IllegalArgumentException(String.format("A graph with name '%s' already exists.", config.graphName()));
         }
 
         GraphCreateResult.Builder builder = new GraphCreateResult.Builder(config);
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
             PropertyMappings propertyMappings = PropertyMappings.EMPTY;
 
-            GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
+            GraphLoader loader = newLoader(AllocationTracker.EMPTY, config);
             HugeGraphFactory graphFactory = loader.build(HugeGraphFactory.class);
             GraphsByRelationshipType graphFromType =
-                !config.relationshipFilters.isEmpty() || propertyMappings.hasMappings()
+                !config.relationshipFilter().isEmpty() || propertyMappings.hasMappings()
                     ? graphFactory.importAllGraphs()
                     : GraphsByRelationshipType.of(graphFactory.build());
 
             builder.withGraph(graphFromType);
-            GraphCatalog.set(getUsername(), config, graphFromType);
+            GraphCatalog.set(config, graphFromType);
         }
 
         return builder.build();
@@ -178,9 +180,9 @@ public class GraphCatalogProcs extends BaseProc {
             private long nodes, relationships, createMillis;
 
             Builder(GraphCreateConfig config) {
-                this.graphName = config.graphName;
-                nodeFilters = config.nodeFilters;
-                relationshipFilters = config.relationshipFilters;
+                this.graphName = config.graphName();
+                nodeFilters = config.nodeFilter();
+                relationshipFilters = config.relationshipFilter();
             }
 
             void withGraph(GraphsByRelationshipType graph) {
@@ -213,9 +215,9 @@ public class GraphCatalogProcs extends BaseProc {
         public final Map<String, Object> histogram;
 
         GraphCatalogEntry(GraphCreateConfig config, Graph graph, boolean computeHistogram) {
-            this.graphName = config.graphName;
-            nodeFilter = config.nodeFilters.toObject();
-            relationshipFilter = config.relationshipFilters.toObject();
+            this.graphName = config.graphName();
+            nodeFilter = config.nodeFilter().toObject();
+            relationshipFilter = config.relationshipFilter().toObject();
             nodes = graph.nodeCount();
             relationships = graph.relationshipCount();
             histogram = computeHistogram ? computeHistogram(graph) : emptyMap();

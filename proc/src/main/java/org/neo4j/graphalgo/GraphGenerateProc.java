@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
@@ -30,6 +31,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.impl.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.impl.generator.RelationshipPropertyProducer;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -49,7 +51,7 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_
 import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_TYPE_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTY_VALUE_KEY;
 
-public final class GraphGenerateProc extends BaseProc {
+public final class GraphGenerateProc extends BaseProc<ProcedureConfiguration> {
 
     public static final String DUMMY_RELATIONSHIP_NAME = "RELATIONSHIP";
 
@@ -103,7 +105,7 @@ public final class GraphGenerateProc extends BaseProc {
 
             stats.nodes = graphFromType.nodeCount();
             stats.relationships = graphFromType.relationshipCount();
-            GraphCatalog.set(getUsername(), name, graphFromType);
+            GraphCatalog.set(GraphCreateConfig.emptyWithName(getUsername(), name), graphFromType);
         }
 
         return stats;
@@ -169,6 +171,13 @@ public final class GraphGenerateProc extends BaseProc {
     @Override
     protected GraphLoader configureLoader(GraphLoader loader, ProcedureConfiguration config) {
         return null;
+    }
+
+    @Override
+    protected GraphLoader newConfigureLoader(
+        GraphLoader loader, ProcedureConfiguration procedureConfiguration
+    ) {
+        return configureLoader(loader, procedureConfiguration);
     }
 
     public static class GraphGenerationStats {

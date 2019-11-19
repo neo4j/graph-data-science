@@ -5,7 +5,8 @@ apply plugin: 'com.github.johnrengelman.shadow'
 dependencies {
     compile project(':algo')
 
-    compileOnly group: 'org.neo4j', name: 'neo4j', version: ver.'neo4j'
+    compileOnly group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
+    compileOnly group: 'org.neo4j',     name: 'neo4j',       version: ver.'neo4j'
 
     testCompile project(':test-utils')
 }

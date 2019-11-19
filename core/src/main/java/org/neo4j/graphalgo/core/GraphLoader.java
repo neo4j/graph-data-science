@@ -126,6 +126,13 @@ public class GraphLoader {
             .withLoadedGraph(config.getGraphImpl() == GraphCatalog.class);
     }
 
+    public GraphLoader init(Log log, String username) {
+        return withLog(log).withUsername(username);
+//            .withBatchSize(config.getBatchSize())
+//            .withDeduplicationStrategy(config.getDeduplicationStrategy())
+//            .withParams(config.getParams());
+    }
+
     /**
      * Use the given {@link Log}instance to log the progress during loading.
      */

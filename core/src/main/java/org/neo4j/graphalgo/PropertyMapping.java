@@ -23,7 +23,9 @@ import org.neo4j.graphalgo.core.DeduplicationStrategy;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.kernel.api.StatementConstants;
 
+import java.util.AbstractMap;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.neo4j.graphalgo.core.ProcedureConstants.RELATIONSHIP_PROPERTIES_AGGREGATION_KEY;
@@ -151,6 +153,16 @@ public abstract class PropertyMapping {
             return this;
         }
         return copyWithDeduplicationStrategy(deduplicationStrategy);
+    }
+
+    public Map.Entry<String, Object> toObject() {
+        Map<String, Object> value = new LinkedHashMap<>();
+        value.put(RELATIONSHIP_PROPERTIES_PROPERTY_KEY, neoPropertyKey);
+        value.put(RELATIONSHIP_PROPERTIES_DEFAULT_VALUE_KEY, defaultValue);
+        if (deduplicationStrategy != DeduplicationStrategy.DEFAULT) {
+            value.put(RELATIONSHIP_PROPERTIES_AGGREGATION_KEY, deduplicationStrategy.name());
+        }
+        return new AbstractMap.SimpleImmutableEntry<>(propertyKey, value);
     }
 
     abstract PropertyMapping copyWithDeduplicationStrategy(DeduplicationStrategy deduplicationStrategy);

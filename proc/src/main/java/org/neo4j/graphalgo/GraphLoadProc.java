@@ -40,6 +40,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.results.MemRecResult;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -52,7 +53,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public final class GraphLoadProc extends BaseProc {
+public final class GraphLoadProc extends BaseProc<ProcedureConfiguration> {
     @Procedure(name = "algo.graph.load", mode = Mode.READ)
     @Description("CALL algo.graph.load(" +
                  "name:String, label:String, relationship:String" +
@@ -66,9 +67,11 @@ public final class GraphLoadProc extends BaseProc {
             @Name(value = "config", defaultValue = "{}") Map<String, Object> config) {
 
         final ProcedureConfiguration configuration = newConfig(label, relationshipType, config);
+
         GraphLoadStats stats = runWithExceptionLogging(
-                "Graph loading failed",
-                () -> loadGraph(configuration, name));
+            "Graph loading failed",
+            () -> this.loadGraph(configuration, name)
+        );
         return Stream.of(stats);
     }
 
@@ -105,7 +108,7 @@ public final class GraphLoadProc extends BaseProc {
             stats.nodes = graph.nodeCount();
             stats.relationships = graph.relationshipCount();
 
-            GraphCatalog.set(getUsername(), name, graph);
+            GraphCatalog.set(GraphCreateConfig.emptyWithName(getUsername(), name), graph);
         }
 
         return stats;

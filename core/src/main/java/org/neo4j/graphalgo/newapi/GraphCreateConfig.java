@@ -20,29 +20,39 @@
 
 package org.neo4j.graphalgo.newapi;
 
+import org.immutables.value.Value;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.NodeFilters;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipFilters;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.Configuration.ConvertWith;
 import org.neo4j.graphalgo.annotation.Configuration.Parameter;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.utils.Pools;
 
+@ValueClass
 @Configuration("GraphCreateConfigImpl")
-public interface GraphCreateConfig {
+public interface GraphCreateConfig extends BaseConfig {
 
     @Parameter
     String graphName();
 
-    @Parameter
+    @Parameter(acceptNull = true)
     @ConvertWith("org.neo4j.graphalgo.NodeFilters#fromObject")
-    NodeFilters nodeFilter();
+    default NodeFilters nodeFilter() {
+        return NodeFilters.empty();
+    }
 
-    @Parameter
+    @Parameter(acceptNull = true)
     @ConvertWith("org.neo4j.graphalgo.RelationshipFilters#fromObject")
-    RelationshipFilters relationshipFilter();
+    default RelationshipFilters relationshipFilter() {
+        return RelationshipFilters.empty();
+    }
 
     @ConvertWith("org.neo4j.graphalgo.PropertyMappings#fromObject")
     default PropertyMappings nodeProperties() {
@@ -54,32 +64,49 @@ public interface GraphCreateConfig {
         return PropertyMappings.EMPTY;
     }
 
+    @Value.Default
+    @Value.Parameter(false)
     @Configuration.Key(ProcedureConstants.READ_CONCURRENCY_KEY)
     default int concurrency() {
         return Pools.DEFAULT_CONCURRENCY;
     }
 
+    @Override
+    @Configuration.Ignore
+    default GraphLoader configureLoader(GraphLoader loader) {
+        return loader
+            .withName(graphName())
+            .withOptionalLabel(nodeFilter().labelFilter().orElse(null))
+            .withOptionalRelationshipType(relationshipFilter().typeFilter())
+            .withConcurrency(concurrency())
+            .withLoadedGraph(true);
+    }
+
     static GraphCreateConfig legacyFactory(String graphName) {
-        return new GraphCreateConfigImpl(
-            graphName,
-            NodeFilters.empty(),
-            RelationshipFilters.empty(),
-            PropertyMappings.EMPTY,
-            PropertyMappings.EMPTY,
-            -1
-        );
+        return ImmutableGraphCreateConfig
+            .builder()
+            .graphName(graphName)
+            .concurrency(-1)
+            .build();
+    }
+
+    @TestOnly
+    static GraphCreateConfig emptyWithName(String userName, String name) {
+        return ImmutableGraphCreateConfig.of(userName, name);
     }
 
     static GraphCreateConfig of(
+        String userName,
         String graphName,
-        Object nodeFilter,
-        Object relationshipFilter,
+        @Nullable Object nodeFilter,
+        @Nullable Object relationshipFilter,
         CypherMapWrapper config
     ) {
         return new GraphCreateConfigImpl(
             graphName,
             nodeFilter,
             relationshipFilter,
+            userName,
             config
         );
     }

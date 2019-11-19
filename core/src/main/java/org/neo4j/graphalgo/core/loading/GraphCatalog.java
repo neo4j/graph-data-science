@@ -20,10 +20,12 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphFactory;
 import org.neo4j.graphalgo.api.GraphSetup;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.newapi.GraphCreateConfig;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Map;
@@ -36,15 +38,21 @@ public final class GraphCatalog extends GraphFactory {
     private static final ConcurrentHashMap<String, UserCatalog> userGraphCatalogs = new ConcurrentHashMap<>();
 
     public GraphCatalog(
-            final GraphDatabaseAPI api,
-            final GraphSetup setup) {
+        final GraphDatabaseAPI api,
+        final GraphSetup setup
+    ) {
         super(api, setup);
     }
 
     @Override
     protected Graph importGraph() {
         assert setup.relationshipPropertyMappings.numberOfMappings() <= 1;
-        return get(setup.username, setup.name, setup.relationshipType, setup.relationshipPropertyMappings.head().map(PropertyMapping::propertyKey));
+        return get(
+            setup.username,
+            setup.name,
+            setup.relationshipType,
+            setup.relationshipPropertyMappings.head().map(PropertyMapping::propertyKey)
+        );
     }
 
     @Override
@@ -53,25 +61,35 @@ public final class GraphCatalog extends GraphFactory {
     }
 
     public MemoryEstimation memoryEstimation() {
-        Graph graph = get(setup.username, setup.name, setup.relationshipType, setup.relationshipPropertyMappings.head().map(PropertyMapping::propertyKey));
+        Graph graph = get(
+            setup.username,
+            setup.name,
+            setup.relationshipType,
+            setup.relationshipPropertyMappings.head().map(PropertyMapping::propertyKey)
+        );
         dimensions.nodeCount(graph.nodeCount());
         dimensions.maxRelCount(graph.relationshipCount());
 
         return HugeGraphFactory.getMemoryEstimation(setup, dimensions);
     }
 
-    public static void set(String username, String graphName, GraphsByRelationshipType graph) {
+    public static void set(GraphCreateConfig config, GraphsByRelationshipType graph) {
         graph.canRelease(false);
-        userGraphCatalogs.compute(username, (user, userCatalog) -> {
+        userGraphCatalogs.compute(config.username(), (user, userCatalog) -> {
             if (userCatalog == null) {
                 userCatalog = new UserCatalog();
             }
-            userCatalog.set(graphName, graph);
+            userCatalog.set(config, graph);
             return userCatalog;
         });
     }
 
-    public static Graph get(String username, String graphName, String relationshipType, Optional<String> maybeRelationshipProperty) {
+    public static Graph get(
+        String username,
+        String graphName,
+        String relationshipType,
+        Optional<String> maybeRelationshipProperty
+    ) {
         return getUserCatalog(username).get(graphName, relationshipType, maybeRelationshipProperty);
     }
 
@@ -103,18 +121,26 @@ public final class GraphCatalog extends GraphFactory {
         userGraphCatalogs.clear();
     }
 
+    public static Map<GraphCreateConfig, Graph> getLoadedGraphsNew(String username) {
+        return getUserCatalog(username).getLoadedGraphsNew();
+    }
+
     private static class UserCatalog {
 
         private static final UserCatalog EMPTY = new UserCatalog();
 
-        private final Map<String, GraphsByRelationshipType> graphsByName = new ConcurrentHashMap<>();
+        private final Map<String, GraphWithConfig> graphsByName = new ConcurrentHashMap<>();
 
-        void set(String graphName, GraphsByRelationshipType graph) {
-            if (graphName == null || graph == null) {
+        void set(GraphCreateConfig config, GraphsByRelationshipType graph) {
+            if (config.graphName() == null || graph == null) {
                 throw new IllegalArgumentException("Both name and graph must be not null");
             }
-            if (graphsByName.putIfAbsent(graphName, graph) != null) {
-                throw new IllegalStateException("Graph name " + graphName + " already loaded");
+            GraphWithConfig graphWithConfig = ImmutableGraphWithConfig.of(graph, config);
+            if (graphsByName.putIfAbsent(config.graphName(), graphWithConfig) != null) {
+                throw new IllegalStateException(String.format(
+                    "Graph name %s already loaded",
+                    config.graphName()
+                ));
             }
             graph.canRelease(false);
         }
@@ -123,7 +149,7 @@ public final class GraphCatalog extends GraphFactory {
             if (!exists(graphName)) {
                 throw new IllegalArgumentException(String.format("Graph with name '%s' does not exist.", graphName));
             }
-            return graphsByName.get(graphName).getGraph(relationshipType, maybeRelationshipProperty);
+            return graphsByName.get(graphName).graph().getGraph(relationshipType, maybeRelationshipProperty);
         }
 
         /**
@@ -132,7 +158,7 @@ public final class GraphCatalog extends GraphFactory {
          * This method returns the union of all subgraphs refered to by the given name.
          */
         Optional<Graph> getUnion(String graphName) {
-            return !exists(graphName) ? Optional.empty() : Optional.of(graphsByName.get(graphName).getUnion());
+            return !exists(graphName) ? Optional.empty() : Optional.of(graphsByName.get(graphName).graph().getUnion());
         }
 
         boolean exists(String graphName) {
@@ -146,7 +172,7 @@ public final class GraphCatalog extends GraphFactory {
                 // that can deal with missing graphs
                 return null;
             }
-            Graph graph = graphsByName.remove(graphName).getUnion();
+            Graph graph = graphsByName.remove(graphName).graph().getUnion();
             graph.canRelease(true);
             graph.release();
             return graph;
@@ -154,15 +180,28 @@ public final class GraphCatalog extends GraphFactory {
 
         String getType(String graphName) {
             if (graphName == null) return null;
-            GraphsByRelationshipType graph = graphsByName.get(graphName);
+            GraphsByRelationshipType graph = graphsByName.get(graphName).graph();
             return graph == null ? null : graph.getGraphType();
         }
 
         Map<String, Graph> getLoadedGraphs() {
             return graphsByName.entrySet().stream().collect(Collectors.toMap(
                 Map.Entry::getKey,
-                e -> e.getValue().getUnion()
+                e -> e.getValue().graph().getUnion()
             ));
         }
+
+        Map<GraphCreateConfig, Graph> getLoadedGraphsNew() {
+            return graphsByName.values().stream().collect(Collectors.toMap(
+                GraphWithConfig::config, gwc -> gwc.graph().getUnion()
+            ));
+        }
+    }
+
+    @ValueClass
+    interface GraphWithConfig {
+        GraphsByRelationshipType graph();
+
+        GraphCreateConfig config();
     }
 }

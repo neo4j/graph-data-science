@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.results.AbstractResultBuilder;
+import org.neo4j.graphalgo.newapi.BaseConfig;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -44,7 +45,7 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public abstract class BaseProc {
+public abstract class BaseProc<Config extends BaseConfig> {
 
     public static final String NODECOUNT_KEY = "nodeCount";
     public static final String RELCOUNT_KEY = "relationshipCount";
@@ -70,6 +71,14 @@ public abstract class BaseProc {
         ProcedureConfiguration config
     );
 
+    protected GraphLoader newConfigureLoader(
+        GraphLoader loader,
+        Config config
+    ) {
+        return loader;
+    }
+
+    // TODO: remove ProcedureConfiguration
     protected final ProcedureConfiguration newConfig(
         String label,
         String relationship,
@@ -104,6 +113,18 @@ public abstract class BaseProc {
             .withAllocationTracker(tracker)
             .withTerminationFlag(TerminationFlag.wrap(transaction));
         return configureLoader(loader, config);
+    }
+
+    protected final GraphLoader newLoader(
+        AllocationTracker tracker,
+        Config config
+    ) {
+        GraphLoader loader = new GraphLoader(api, Pools.DEFAULT)
+            .init(log, getUsername())
+            .withAllocationTracker(tracker)
+            .withTerminationFlag(TerminationFlag.wrap(transaction));
+        loader = config.configureLoader(loader);
+        return newConfigureLoader(loader, config);
     }
 
     void runWithExceptionLogging(String message, Runnable runnable) {

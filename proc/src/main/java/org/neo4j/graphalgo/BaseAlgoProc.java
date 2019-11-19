@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
-public abstract class BaseAlgoProc<A extends Algorithm<A>> extends BaseProc {
+public abstract class BaseAlgoProc<A extends Algorithm<A>> extends BaseProc<ProcedureConfiguration> {
 
     protected final A newAlgorithm(
             final Graph graph,
@@ -65,6 +65,13 @@ public abstract class BaseAlgoProc<A extends Algorithm<A>> extends BaseProc {
 
     protected double getDefaultWeightProperty(ProcedureConfiguration config) {
         return ProcedureConstants.DEFAULT_VALUE_DEFAULT;
+    }
+
+    @Override
+    protected GraphLoader newConfigureLoader(
+        GraphLoader loader, ProcedureConfiguration procedureConfiguration
+    ) {
+        return configureLoader(loader, procedureConfiguration);
     }
 
     @Override

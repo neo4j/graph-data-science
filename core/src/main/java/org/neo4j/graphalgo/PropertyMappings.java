@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -114,6 +115,12 @@ public final class PropertyMappings implements Iterable<PropertyMapping> {
         return stream()
                 .mapToDouble(PropertyMapping::defaultValue)
                 .toArray();
+    }
+
+    public Map<String, Object> toObject() {
+        return stream()
+            .map(PropertyMapping::toObject)
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public static final class Builder {
