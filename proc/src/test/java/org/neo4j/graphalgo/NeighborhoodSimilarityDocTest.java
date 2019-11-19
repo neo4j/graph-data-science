@@ -167,6 +167,32 @@ class NeighborhoodSimilarityDocTest extends ProcTestBase {
     }
 
     @Test
+    void shouldProduceBottomKStreamOutput() {
+        String query = "CALL algo.beta.jaccard.stream(" +
+                       "    '', 'LIKES', {" +
+                       "        graph: 'huge'," +
+                       "        direction: 'OUTGOING'," +
+                       "        bottomK: 1" +
+                       "    }" +
+                       ") YIELD node1, node2, similarity " +
+                       "RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity " +
+                       "ORDER BY Person1";
+
+        String expectedString = "+----------------------------------------+\n" +
+                                "| Person1 | Person2 | similarity         |\n" +
+                                "+----------------------------------------+\n" +
+                                "| \"Alice\" | \"Carol\" | 0.3333333333333333 |\n" +
+                                "| \"Bob\"   | \"Alice\" | 0.6666666666666666 |\n" +
+                                "| \"Carol\" | \"Alice\" | 0.3333333333333333 |\n" +
+                                "| \"Dave\"  | \"Carol\" | 0.3333333333333333 |\n" +
+                                "+----------------------------------------+\n" +
+                                "4 rows\n";
+
+
+        assertEquals(expectedString, db.execute(query).resultAsString());
+    }
+
+    @Test
     void shouldProduceDegreeCutoffStreamOutput() {
         String query = "CALL algo.beta.jaccard.stream(" +
                        "    '', 'LIKES', {" +

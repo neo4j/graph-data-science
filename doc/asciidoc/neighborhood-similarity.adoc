@@ -13,7 +13,9 @@ This topic includes:
 * <<algorithms-neighborhood-similarity-examples, Examples>>
 ** <<algorithms-neighborhood-similarity-examples-stream, Streaming results>>
 ** <<algorithms-neighborhood-similarity-examples-write, Writing results>>
-** <<algorithms-neighborhood-similarity-examples-topk-topn, TopK and topN>>
+** <<algorithms-neighborhood-similarity-examples-limits, Limits>>
+*** <<algorithms-neighborhood-similarity-examples-limits-topk-bottomk, topK and bottomK>>
+*** <<algorithms-neighborhood-similarity-examples-limits-topn-bottomn, topN and bottomN>>
 ** <<algorithms-neighborhood-similarity-examples-degree-similarity-cutoff, Degree cutoff and similarity cutoff>>
 
 
@@ -274,13 +276,37 @@ YIELD nodesCompared, relationships, write, writeProperty, writeRelationshipType;
 As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.
 
 
-[[algorithms-neighborhood-similarity-examples-topk-topn]]
-=== TopK and topN
+[[algorithms-neighborhood-similarity-examples-limits]]
+=== Limiting results
 
-TopK is a limit on the number of scores computed per node.
-If the given value is positive, the results per node are ordered descending.
-If a negative value is used, the results are ordered ascending.
-TopK cannot be 0 and the default value is 10.
+There are four limits that can be applied to the similarity results.
+Top limits the result to the highest similarity score.
+Bottom limits the result to the lowest similarity score.
+Both top and bottom limits can apply to the result as a whole ("N"), or to the result per node ("K").
+
+[NOTE]
+====
+There is always a "K" limit, either bottomK or topK, when computing Neighborhood Similarity.
+====
+
+
+.Limits
+[opts="header", cols="1h,1,1"]
+|===
+|               | total result | result per node
+| highest score | topN         | topK
+| lowest score  | bottomN      | bottomK
+|===
+
+
+[[algorithms-neighborhood-similarity-examples-limits-topk-bottomk]]
+==== topK and bottomK
+
+TopK and bottomK are limits on the number of scores computed per node.
+For topK, the K largest similarity scores per node are returned.
+For bottomK, the K smallest similarity scores per node are returned.
+TopK and bottomK cannot be 0, used in conjuntion, and the default value is 10.
+If neither is specified, topK is used.
 
 .The following will load the graph, run the algorithm, and stream the top 1 result per node:
 [source, cypher]
@@ -306,10 +332,39 @@ ORDER BY Person1
 3+|4 rows
 |===
 
-TopN limits the number of topK similarity scores across all nodes.
-If the given value is positive, the results are ordered descending.
-If a negative value is used, the results are ordered ascending.
-A value of 0 means no global limit is imposed and results are returned in topK order.
+.The following will load the graph, run the algorithm, and stream the bottom 1 result per node:
+[source, cypher]
+----
+CALL algo.beta.jaccard.stream('', 'LIKES', {
+  graph: 'huge',
+  direction: 'OUTGOING',
+  bottomK: 1
+})
+YIELD node1, node2, similarity
+RETURN algo.asNode(node1).name AS Person1, algo.asNode(node2).name AS Person2, similarity
+ORDER BY Person1
+----
+
+.Results
+[opts="header"]
+|===
+| Person1 | Person2 | similarity
+| Alice   | Carol   | 0.3333333333333333
+| Bob     | Alice   | 0.6666666666666666
+| Carol   | Alice   | 0.3333333333333333
+| Dave    | Carol   | 0.3333333333333333
+3+|4 rows
+|===
+
+
+[[algorithms-neighborhood-similarity-examples-limits-topn-bottomn]]
+==== topN and bottomN
+
+TopN and bottomN limit the number of similarity scores across all nodes.
+This is a limit on the total result set, in addition to the topK or bottomK limit on the results per node.
+For topN, the N largest similarity scores are returned.
+For bottomN, the N smallest similarity scores are returned.
+A value of 0 means no global limit is imposed and all results from topK or bottomK are returned.
 
 .The following will load the graph, run the algorithm, and streams the 3 highest out of the top 1 results per node:
 [source, cypher]
