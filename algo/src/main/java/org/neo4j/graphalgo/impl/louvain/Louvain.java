@@ -71,7 +71,7 @@ public final class Louvain extends Algorithm<Louvain> {
         this.modularities = new double[config.maxLevel];
     }
 
-    public void compute() {
+    public Louvain compute() {
 
         Graph workingGraph = rootGraph;
         NodeProperties seed = seedingValues;
@@ -89,11 +89,14 @@ public final class Louvain extends Algorithm<Louvain> {
             seed = new OriginalIdNodeProperties(workingGraph);
 
             if (workingGraph.nodeCount() == oldNodeCount || workingGraph.nodeCount() == 1) {
+                levels++;
                 resizeResultArrays();
                 break;
             }
             oldNodeCount = workingGraph.nodeCount();
         }
+
+        return this;
     }
 
     private void resizeResultArrays() {
@@ -183,6 +186,10 @@ public final class Louvain extends Algorithm<Louvain> {
         return this.dendrograms;
     }
 
+    public HugeLongArray finalDendrogram() {
+        return this.dendrograms[levels - 1];
+    }
+
     public long getCommunity(long nodeId) {
         return dendrograms[levels].get(nodeId);
     }
@@ -231,20 +238,20 @@ public final class Louvain extends Algorithm<Louvain> {
     public static class Config {
         public final int maxLevel;
         public final int maxInnerIterations;
-        public final double threshold;
+        public final double tolerance;
         public final boolean includeIntermediateCommunities;
         public final Optional<String> maybeSeedPropertyKey;
 
         public Config(
             int maxLevel,
             int maxInnerIterations,
-            double threshold,
+            double tolerance,
             boolean includeIntermediateCommunities,
             Optional<String> maybeSeedPropertyKey
         ) {
             this.maxLevel = maxLevel;
             this.maxInnerIterations = maxInnerIterations;
-            this.threshold = threshold;
+            this.tolerance = tolerance;
             this.includeIntermediateCommunities = includeIntermediateCommunities;
             this.maybeSeedPropertyKey = maybeSeedPropertyKey;
         }
