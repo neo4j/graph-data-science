@@ -60,6 +60,12 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
     private static final String TOP_K_KEY = "topK";
     private static final int TOP_K_DEFAULT = 10;
 
+    private static final String BOTTOM_N_KEY = "bottomN";
+    private static final int BOTTOM_N_DEFAULT = TOP_N_DEFAULT;
+
+    private static final String BOTTOM_K_KEY = "bottomK";
+    private static final int BOTTOM_K_DEFAULT = TOP_K_DEFAULT;
+
     private static final String WRITE_RELATIONSHIP_TYPE_KEY = "writeRelationshipType";
     private static final String WRITE_RELATIONSHIP_TYPE_DEFAULT = "SIMILAR";
 
@@ -218,23 +224,63 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
     }
 
     NeighborhoodSimilarity.Config config(ProcedureConfiguration procedureConfiguration) {
-        int topK = validTopK(procedureConfiguration);
+        validTopBottom(procedureConfiguration);
+        int topK = validK(procedureConfiguration);
+        int topN = validN(procedureConfiguration);
         int degreeCutoff = validDegreeCutoff(procedureConfiguration);
         double similarityCutoff = procedureConfiguration
             .getNumber(SIMILARITY_CUTOFF_KEY, SIMILARITY_CUTOFF_DEFAULT)
             .doubleValue();
-        int topN = procedureConfiguration.getInt(TOP_N_KEY, TOP_N_DEFAULT);
         int concurrency = procedureConfiguration.getConcurrency();
         int batchSize = procedureConfiguration.getBatchSize();
         return new NeighborhoodSimilarity.Config(similarityCutoff, degreeCutoff, topN, topK, concurrency, batchSize);
     }
 
-    private int validTopK(ProcedureConfiguration config) {
-        int topK = config.getInt(TOP_K_KEY, TOP_K_DEFAULT);
-        if (topK == 0) {
-            throw new IllegalArgumentException("Must set non-zero topK value");
+    private void validTopBottom(ProcedureConfiguration config) {
+        if (config.containsKey(TOP_K_KEY) && config.containsKey(BOTTOM_K_KEY)) {
+            throw new IllegalArgumentException(String.format("Invalid parameter combination: %s combined with %s", TOP_K_KEY, BOTTOM_K_KEY));
         }
-        return topK;
+        if (config.containsKey(TOP_N_KEY) && config.containsKey(BOTTOM_N_KEY)) {
+            throw new IllegalArgumentException(String.format("Invalid parameter combination: %s combined with %s", TOP_N_KEY, BOTTOM_N_KEY));
+        }
+    }
+
+    private int validK(ProcedureConfiguration config) {
+        boolean isTopK = config.containsKey(TOP_K_KEY);
+        String message = "Invalid value for %s: must be a positive integer";
+        if (isTopK) {
+            int topK = config.getInt(TOP_K_KEY, TOP_K_DEFAULT);
+            if (topK < 1) {
+                throw new IllegalArgumentException(String.format(message, TOP_K_KEY));
+            }
+            return topK;
+        } else {
+            int bottomK = config.getInt(BOTTOM_K_KEY, BOTTOM_K_DEFAULT);
+            if (bottomK < 1) {
+                throw new IllegalArgumentException(String.format(message, BOTTOM_K_KEY));
+            }
+            // The algorithm only knows 'topK', if it is negative it will sort ascending
+            return -bottomK;
+        }
+    }
+
+    private int validN(ProcedureConfiguration config) {
+        boolean isTopN = config.containsKey(TOP_N_KEY);
+        String message = "Invalid value for %s: must be a positive integer or zero";
+        if (isTopN) {
+            int topN = config.getInt(TOP_N_KEY, TOP_N_DEFAULT);
+            if (topN < 0) {
+                throw new IllegalArgumentException(String.format(message, TOP_N_KEY));
+            }
+            return topN;
+        } else {
+            int bottomN = config.getInt(BOTTOM_N_KEY, BOTTOM_N_DEFAULT);
+            if (bottomN < 0) {
+                throw new IllegalArgumentException(String.format(message, BOTTOM_N_KEY));
+            }
+            // The algorithm only knows 'topN', if it is negative it will sort ascending
+            return -bottomN;
+        }
     }
 
     private int validDegreeCutoff(ProcedureConfiguration config) {

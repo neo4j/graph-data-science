@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
@@ -44,6 +45,7 @@ import java.util.stream.Stream;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -295,16 +297,33 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
 
     }
 
-    @Test
-    void shouldThrowIfTopKSetToZero() {
-        Map<String, Object> input = MapUtil.map("topK", 0L);
+    @ParameterizedTest(name = "parameter: {0}, value: {1}")
+    @CsvSource(value = {"topN, -2", "bottomN, -2", "topK, -2", "bottomK, -2", "topK, 0", "bottomK, 0"})
+    void shouldThrowForInvalidTopsAndBottoms(String parameter, long value) {
+        String message = String.format("Invalid value for %s: must be a positive integer", parameter);
+        Map<String, Object> input = MapUtil.map(parameter, value);
         ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(input, getUsername());
 
         IllegalArgumentException illegalArgumentException = assertThrows(
             IllegalArgumentException.class,
             () -> new NeighborhoodSimilarityProc().config(procedureConfiguration)
         );
-        assertThat(illegalArgumentException.getMessage(), is("Must set non-zero topK value"));
+        assertThat(illegalArgumentException.getMessage(), containsString(message));
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"topK, bottomK", "topN, bottomN"})
+    void shouldThrowForInvalidTopAndBottomCombination(String top, String bottom) {
+        Map<String, Object> input = MapUtil.map(top, 1, bottom, 1);
+        ProcedureConfiguration procedureConfiguration = ProcedureConfiguration.create(input, getUsername());
+
+        String expectedMessage = String.format("Invalid parameter combination: %s combined with %s", top, bottom);
+
+        IllegalArgumentException illegalArgumentException = assertThrows(
+            IllegalArgumentException.class,
+            () -> new NeighborhoodSimilarityProc().config(procedureConfiguration)
+        );
+        assertThat(illegalArgumentException.getMessage(), is(expectedMessage));
     }
 
     @Test
