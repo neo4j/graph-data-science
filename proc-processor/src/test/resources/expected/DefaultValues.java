@@ -35,6 +35,11 @@ public final class DefaultValuesConfig implements DefaultValues {
         this.defaultString = config.getString("defaultString", DefaultValues.super.defaultString());
     }
 
+    public DefaultValuesConfig(int defaultInt, String defaultString) {
+        this.defaultInt = defaultInt;
+        this.defaultString = CypherMapWrapper.requireValue("defaultString", defaultString);
+    }
+
     @Override
     public int defaultInt() {
         return this.defaultInt;

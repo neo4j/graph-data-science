@@ -21,6 +21,7 @@
 package org.neo4j.graphalgo.proc;
 
 import com.google.auto.common.GeneratedAnnotationSpecs;
+import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -42,6 +43,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -49,6 +51,7 @@ import javax.tools.Diagnostic;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
@@ -91,7 +94,7 @@ final class GenerateConfiguration {
         FieldDefinitions fieldDefinitions = defineFields(config);
         return classBuilder(config, packageName, generatedClassName)
             .addFields(fieldDefinitions.fields())
-            .addMethod(defineConstructor(config, fieldDefinitions.names()))
+            .addMethods(defineConstructors(config, fieldDefinitions.names()))
             .addMethods(defineGetters(config, fieldDefinitions.names()))
             .build();
     }
@@ -135,8 +138,12 @@ final class GenerateConfiguration {
         return builder.build();
     }
 
-    private MethodSpec defineConstructor(ConfigParser.Spec config, NameAllocator names) {
-        MethodSpec.Builder code = MethodSpec
+    private Iterable<MethodSpec> defineConstructors(ConfigParser.Spec config, NameAllocator names) {
+        MethodSpec.Builder configMapConstructor = MethodSpec
+            .constructorBuilder()
+            .addModifiers(Modifier.PUBLIC);
+
+        MethodSpec.Builder allParametersConstructor = MethodSpec
             .constructorBuilder()
             .addModifiers(Modifier.PUBLIC);
 
@@ -148,27 +155,39 @@ final class GenerateConfiguration {
             if (memberDefinition.isPresent()) {
                 ExecutableElement method = member.method();
                 MemberDefinition definition = memberDefinition.get();
+
+                allParametersConstructor.addParameter(
+                    TypeName.get(definition.fieldType()),
+                    definition.fieldName()
+                );
+                allParametersConstructor.addStatement(generateParameterCode(definition));
+
+
                 if (isAnnotationPresent(method, Configuration.Parameter.class)) {
-                    code.addParameter(
-                        TypeName.get(method.getReturnType()),
+                    configMapConstructor.addParameter(
+                        TypeName.get(definition.parameterType()),
                         definition.fieldName()
                     );
-                    code.addStatement(generateParameterCode(definition));
+                    configMapConstructor.addStatement(generateParameterCodeForConfigConstructor(definition));
                 } else {
                     requiredMapParameter = true;
-                    code.addStatement(generateConfigMapCode(definition));
+                    configMapConstructor.addStatement(generateConfigMapCode(definition));
                 }
             }
         }
 
         if (requiredMapParameter) {
-            code.addParameter(
+            configMapConstructor.addParameter(
                 TypeName.get(CypherMapWrapper.class),
                 configParamterName
             );
+            return ImmutableList.of(
+                configMapConstructor.build(),
+                allParametersConstructor.build()
+            );
         }
 
-        return code.build();
+        return Collections.singletonList(allParametersConstructor.build());
     }
 
     private Optional<MemberDefinition> memberDefinition(NameAllocator names, ConfigParser.Member member) {
@@ -304,7 +323,6 @@ final class GenerateConfiguration {
                         ))
                         .build()
                     );
-
             }
 
             if (scanInheritance) {
@@ -338,6 +356,8 @@ final class GenerateConfiguration {
             .fieldName(names.get(member))
             .configParamName(names.get(CONFIG_VAR))
             .configKey(member.lookupKey())
+            .fieldType(member.method().getReturnType())
+            .parameterType(targetType)
             .methodPrefix("require");
 
         switch (targetType.getKind()) {
@@ -406,8 +426,37 @@ final class GenerateConfiguration {
         return CodeBlock.of("this.$N = $L", definition.fieldName(), codeBlock);
     }
 
+    private CodeBlock generateParameterCodeForConfigConstructor(MemberDefinition definition) {
+        CodeBlock valueProducer;
+        if (definition.parameterType().getKind() == TypeKind.DECLARED) {
+            valueProducer = CodeBlock.of(
+                "$T.requireValue($S, $N)",
+                CypherMapWrapper.class,
+                definition.configKey(),
+                definition.fieldName()
+            );
+        } else {
+            valueProducer = CodeBlock.of("$N", definition.fieldName());
+        }
+        for (UnaryOperator<CodeBlock> converter : definition.converters()) {
+            valueProducer = converter.apply(valueProducer);
+        }
+        return CodeBlock.of("this.$N = $L", definition.fieldName(), valueProducer);
+    }
+
     private CodeBlock generateParameterCode(MemberDefinition definition) {
-        return CodeBlock.of("this.$1N = $1N", definition.fieldName());
+        CodeBlock valueProducer;
+        if (definition.fieldType().getKind() == TypeKind.DECLARED) {
+            valueProducer = CodeBlock.of(
+                "$T.requireValue($S, $N)",
+                CypherMapWrapper.class,
+                definition.configKey(),
+                definition.fieldName()
+            );
+        } else {
+            valueProducer = CodeBlock.of("$N", definition.fieldName());
+        }
+        return CodeBlock.of("this.$N = $L", definition.fieldName(), valueProducer);
     }
 
     private Iterable<MethodSpec> defineGetters(ConfigParser.Spec config, NameAllocator names) {
@@ -445,6 +494,10 @@ final class GenerateConfiguration {
 
     @ValueClass
     interface MemberDefinition {
+        TypeMirror fieldType();
+
+        TypeMirror parameterType();
+
         String fieldName();
 
         String configParamName();

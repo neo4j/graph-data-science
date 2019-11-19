@@ -32,9 +32,15 @@ public final class NamingConflictConfig implements NamingConflict {
 
     private final int config_;
 
-    public KeyRenamesConfig(int config_, CypherMapWrapper config__) {
+    public NamingConflictConfig(int config_, CypherMapWrapper config__) {
         this.config = config__.requireInt("config");
         this.anotherConfig = config__.requireInt("config");
+        this.config_ = config_;
+    }
+
+    public NamingConflictConfig(int config, int anotherConfig, int config_) {
+        this.config = config;
+        this.anotherConfig = anotherConfig;
         this.config_ = config_;
     }
 

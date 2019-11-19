@@ -206,7 +206,14 @@ public final class CypherMapWrapper {
         return null == value ? defaultValue : (V) value;
     }
 
-    <V> V typedValue(String key, Class<V> expectedType, @Nullable Object value) {
+    public static <T> T requireValue(String key, T value) {
+        if (value == null) {
+            throw missingValueFor(key);
+        }
+        return value;
+    }
+
+    static <V> V typedValue(String key, Class<V> expectedType, @Nullable Object value) {
         if (!expectedType.isInstance(value)) {
             String message = String.format(
                 "The value of `%s` must be of type `%s` but was `%s`.",
@@ -219,7 +226,7 @@ public final class CypherMapWrapper {
         return expectedType.cast(value);
     }
 
-    private IllegalArgumentException missingValueFor(String key) {
+    private static IllegalArgumentException missingValueFor(String key) {
         return new IllegalArgumentException(String.format(
             "No value for the key `%s` was specified",
             key

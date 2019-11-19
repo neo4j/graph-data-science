@@ -38,6 +38,12 @@ public final class ConversionsConfig implements Conversions.MyConversion {
         this.qualifiedMethod = Conversions.OtherConversion.toIntQual(config.requireString("qualifiedMethod");
     }
 
+    public ConversionsConfig(int directMethod, int inheritedMethod, int qualifiedMethod) {
+        this.directMethod = directMethod;
+        this.inheritedMethod = inheritedMethod;
+        this.qualifiedMethod = qualifiedMethod;
+    }
+
     @Override
     public int directMethod() {
         return this.directMethod;

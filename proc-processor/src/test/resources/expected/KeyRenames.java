@@ -35,6 +35,11 @@ public final class KeyRenamesConfig implements KeyRenames {
         this.whitespaceWillBeTrimmed = config.requireInt("whitespace will be trimmed");
     }
 
+    public KeyRenamesConfig(int lookupUnderAnotherKey, int whitespaceWillBeTrimmed) {
+        this.lookupUnderAnotherKey = lookupUnderAnotherKey;
+        this.whitespaceWillBeTrimmed = whitespaceWillBeTrimmed;
+    }
+
     @Override
     public int lookupUnderAnotherKey() {
         return this.lookupUnderAnotherKey;
