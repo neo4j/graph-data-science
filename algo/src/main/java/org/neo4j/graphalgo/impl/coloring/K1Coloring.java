@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
+import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 import static org.neo4j.graphalgo.core.utils.PartitionUtils.numberAlignedPartitioning;
 
 /**
@@ -147,8 +148,8 @@ public class K1Coloring extends Algorithm<K1Coloring> {
         nodesToColor.set(0, nodeCount);
 
         while (ranIterations < maxIterations && !nodesToColor.isEmpty()) {
-            runColoring(direction);
-            runValidation(direction);
+            runColoring();
+            runValidation();
             ++ranIterations;
         }
 
@@ -156,7 +157,7 @@ public class K1Coloring extends Algorithm<K1Coloring> {
         return me();
     }
 
-    private void runColoring(Direction direction) {
+    private void runColoring() {
         TaskProducer<ColoringStep> producer = (batchStart, batchEnd) -> new ColoringStep(
             graph.concurrentCopy(),
             direction,
@@ -167,12 +168,12 @@ public class K1Coloring extends Algorithm<K1Coloring> {
             batchEnd
         );
 
-        Collection<ColoringStep> steps = degreePartition(producer, direction);
+        Collection<ColoringStep> steps = degreePartition(producer);
 
         ParallelUtil.runWithConcurrency(concurrency, steps, executor);
     }
 
-    private void runValidation(Direction direction) {
+    private void runValidation() {
         BitSet nextNodesToColor = new BitSet(nodeCount);
 
         TaskProducer<ValidationStep> producer = (batchStart, batchEnd) -> new ValidationStep(
@@ -187,19 +188,18 @@ public class K1Coloring extends Algorithm<K1Coloring> {
         );
 
         // The nodesToColor bitset is not thread safe, therefore we have to align the batches to multiples of 64
-        Collection<ValidationStep> steps = numberAlignedPartitioning(producer, nodeCount, concurrency, Long.SIZE);
+        Collection<ValidationStep> steps = numberAlignedPartitioning(producer, concurrency, nodeCount, Long.SIZE);
 
         ParallelUtil.runWithConcurrency(concurrency, steps, executor);
         this.nodesToColor = nextNodesToColor;
     }
 
     private <T extends Runnable> Collection<T> degreePartition(
-        TaskProducer<T> taskSupplier,
-        Direction direction
+        TaskProducer<T> taskSupplier
     ) {
 
-        long cumulativeDegree = direction == Direction.BOTH ? graph.relationshipCount() / 2 : graph.relationshipCount();
-        long adjustedDegree = cumulativeDegree * (nodesToColor.cardinality() / nodeCount);
+        long cumulativeDegree = graph.relationshipCount();
+        long adjustedDegree = ceilDiv(cumulativeDegree, nodeCount) * nodesToColor.cardinality();
 
         long batchDegree = ParallelUtil.adjustedBatchSize(
             adjustedDegree,
@@ -208,12 +208,16 @@ public class K1Coloring extends Algorithm<K1Coloring> {
             Integer.MAX_VALUE
         );
 
+        if (direction == Direction.BOTH) {
+            batchDegree *= 2;
+        }
+
         Collection<T> tasks = new ArrayList<>(concurrency);
         long currentNode = nodesToColor.nextSetBit(0);
-        long lastNode;
+        long lastNode = 0;
         long batchStart = currentNode;
         long currentDegree = 0L;
-        do {
+        while (currentNode >= 0 && currentNode < nodeCount - 1) {
             currentDegree += graph.degree(currentNode, direction);
 
             if (currentDegree >= batchDegree) {
@@ -224,10 +228,10 @@ public class K1Coloring extends Algorithm<K1Coloring> {
             }
             lastNode = currentNode;
             currentNode = nodesToColor.nextSetBit(currentNode + 1);
-        } while (currentNode >= 0 && currentNode < nodeCount);
+        }
 
         if (currentDegree > 0) {
-            tasks.add(taskSupplier.produce(batchStart, lastNode));
+            tasks.add(taskSupplier.produce(batchStart, Math.min(lastNode + 1, graph.nodeCount())));
         }
 
         return tasks;
