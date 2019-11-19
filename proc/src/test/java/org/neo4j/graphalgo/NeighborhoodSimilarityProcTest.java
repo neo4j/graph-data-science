@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.core.loading.GraphCatalog;
 import org.neo4j.graphalgo.core.utils.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.impl.jaccard.NeighborhoodSimilarity;
-import org.neo4j.graphalgo.impl.jaccard.SimilarityResult;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.exceptions.KernelException;
@@ -75,38 +74,42 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
             ", (b)-[:LIKES]->(i2)" +
             ", (c)-[:LIKES]->(i3)";
 
-    private static final Collection<SimilarityResult> EXPECTED_OUTGOING = new HashSet<>();
-    private static final Collection<SimilarityResult> EXPECTED_INCOMING = new HashSet<>();
+    private static final Collection<String> EXPECTED_OUTGOING = new HashSet<>();
+    private static final Collection<String> EXPECTED_INCOMING = new HashSet<>();
 
-    private static final Collection<SimilarityResult> EXPECTED_TOP_OUTGOING = new HashSet<>();
-    private static final Collection<SimilarityResult> EXPECTED_TOP_INCOMING = new HashSet<>();
+    private static final Collection<String> EXPECTED_TOP_OUTGOING = new HashSet<>();
+    private static final Collection<String> EXPECTED_TOP_INCOMING = new HashSet<>();
 
     static Stream<Arguments> allGraphNamesWithIncomingOutgoing() {
         return crossArguments(toArguments(TestSupport::allGraphNames), toArguments(() -> Stream.of(INCOMING, OUTGOING)));
     }
 
     static {
-        EXPECTED_OUTGOING.add(new SimilarityResult(0, 1, 2 / 3.0));
-        EXPECTED_OUTGOING.add(new SimilarityResult(0, 2, 1 / 3.0));
-        EXPECTED_OUTGOING.add(new SimilarityResult(1, 2, 0.0));
+        EXPECTED_OUTGOING.add(resultString(0, 1, 2 / 3.0));
+        EXPECTED_OUTGOING.add(resultString(0, 2, 1 / 3.0));
+        EXPECTED_OUTGOING.add(resultString(1, 2, 0.0));
         // With mandatory topK, expect results in both directions
-        EXPECTED_OUTGOING.add(new SimilarityResult(1, 0, 2 / 3.0));
-        EXPECTED_OUTGOING.add(new SimilarityResult(2, 0, 1 / 3.0));
-        EXPECTED_OUTGOING.add(new SimilarityResult(2, 1, 0.0));
+        EXPECTED_OUTGOING.add(resultString(1, 0, 2 / 3.0));
+        EXPECTED_OUTGOING.add(resultString(2, 0, 1 / 3.0));
+        EXPECTED_OUTGOING.add(resultString(2, 1, 0.0));
 
-        EXPECTED_TOP_OUTGOING.add(new SimilarityResult(0, 1, 2 / 3.0));
-        EXPECTED_TOP_OUTGOING.add(new SimilarityResult(1, 0, 2 / 3.0));
+        EXPECTED_TOP_OUTGOING.add(resultString(0, 1, 2 / 3.0));
+        EXPECTED_TOP_OUTGOING.add(resultString(1, 0, 2 / 3.0));
 
-        EXPECTED_INCOMING.add(new SimilarityResult(4, 5, 3.0 / 3.0));
-        EXPECTED_INCOMING.add(new SimilarityResult(4, 6, 1 / 3.0));
-        EXPECTED_INCOMING.add(new SimilarityResult(5, 6, 1 / 3.0));
+        EXPECTED_INCOMING.add(resultString(4, 5, 3.0 / 3.0));
+        EXPECTED_INCOMING.add(resultString(4, 6, 1 / 3.0));
+        EXPECTED_INCOMING.add(resultString(5, 6, 1 / 3.0));
         // With mandatory topK, expect results in both directions
-        EXPECTED_INCOMING.add(new SimilarityResult(5, 4, 3.0 / 3.0));
-        EXPECTED_INCOMING.add(new SimilarityResult(6, 4, 1 / 3.0));
-        EXPECTED_INCOMING.add(new SimilarityResult(6, 5, 1 / 3.0));
+        EXPECTED_INCOMING.add(resultString(5, 4, 3.0 / 3.0));
+        EXPECTED_INCOMING.add(resultString(6, 4, 1 / 3.0));
+        EXPECTED_INCOMING.add(resultString(6, 5, 1 / 3.0));
 
-        EXPECTED_TOP_INCOMING.add(new SimilarityResult(4, 5, 3.0 / 3.0));
-        EXPECTED_TOP_INCOMING.add(new SimilarityResult(5, 4, 3.0 / 3.0));
+        EXPECTED_TOP_INCOMING.add(resultString(4, 5, 3.0 / 3.0));
+        EXPECTED_TOP_INCOMING.add(resultString(5, 4, 3.0 / 3.0));
+    }
+
+    private static String resultString(long node1, long node2, double similarity) {
+        return String.format("%d,%d %f%n", node1, node2, similarity);
     }
 
     @BeforeEach
@@ -132,13 +135,13 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
                        "    }" +
                        ") YIELD node1, node2, similarity";
 
-        Collection<SimilarityResult> result = new HashSet<>();
+        Collection<String> result = new HashSet<>();
         runQuery(query, db, MapUtil.map("graph", graphImpl, "direction", direction.name()),
                 row -> {
                     long node1 = row.getNumber("node1").longValue();
                     long node2 = row.getNumber("node2").longValue();
                     double similarity = row.getNumber("similarity").doubleValue();
-                    result.add(new SimilarityResult(node1, node2, similarity));
+                    result.add(resultString(node1, node2, similarity));
                 });
 
         assertEquals(
@@ -161,13 +164,13 @@ class NeighborhoodSimilarityProcTest extends ProcTestBase {
                        "    }" +
                        ") YIELD node1, node2, similarity";
 
-        Collection<SimilarityResult> result = new HashSet<>();
+        Collection<String> result = new HashSet<>();
         runQuery(query, db, MapUtil.map("graph", graphImpl, "direction", direction.name(), "topN", topN),
             row -> {
                 long node1 = row.getNumber("node1").longValue();
                 long node2 = row.getNumber("node2").longValue();
                 double similarity = row.getNumber("similarity").doubleValue();
-                result.add(new SimilarityResult(node1, node2, similarity));
+                result.add(resultString(node1, node2, similarity));
             });
 
         assertEquals(

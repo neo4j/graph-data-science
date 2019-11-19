@@ -87,20 +87,20 @@ final class NeighborhoodSimilarityTest {
         ", (d)-[:LIKES]->(i2)" +
         ", (d)-[:LIKES]->(i3)";
 
-    private static final Collection<SimilarityResult> EXPECTED_OUTGOING = new HashSet<>();
-    private static final Collection<SimilarityResult> EXPECTED_INCOMING = new HashSet<>();
+    private static final Collection<String> EXPECTED_OUTGOING = new HashSet<>();
+    private static final Collection<String> EXPECTED_INCOMING = new HashSet<>();
 
-    private static final Collection<SimilarityResult> EXPECTED_OUTGOING_TOP_N_1 = new HashSet<>();
-    private static final Collection<SimilarityResult> EXPECTED_INCOMING_TOP_N_1 = new HashSet<>();
+    private static final Collection<String> EXPECTED_OUTGOING_TOP_N_1 = new HashSet<>();
+    private static final Collection<String> EXPECTED_INCOMING_TOP_N_1 = new HashSet<>();
 
-    private static final Collection<SimilarityResult> EXPECTED_OUTGOING_TOP_K_1 = new HashSet<>();
-    private static final Collection<SimilarityResult> EXPECTED_INCOMING_TOP_K_1 = new HashSet<>();
+    private static final Collection<String> EXPECTED_OUTGOING_TOP_K_1 = new HashSet<>();
+    private static final Collection<String> EXPECTED_INCOMING_TOP_K_1 = new HashSet<>();
 
-    private static final Collection<SimilarityResult> EXPECTED_OUTGOING_SIMILARITY_CUTOFF = new HashSet<>();
-    private static final Collection<SimilarityResult> EXPECTED_INCOMING_SIMILARITY_CUTOFF = new HashSet<>();
+    private static final Collection<String> EXPECTED_OUTGOING_SIMILARITY_CUTOFF = new HashSet<>();
+    private static final Collection<String> EXPECTED_INCOMING_SIMILARITY_CUTOFF = new HashSet<>();
 
-    private static final Collection<SimilarityResult> EXPECTED_OUTGOING_DEGREE_CUTOFF = new HashSet<>();
-    private static final Collection<SimilarityResult> EXPECTED_INCOMING_DEGREE_CUTOFF = new HashSet<>();
+    private static final Collection<String> EXPECTED_OUTGOING_DEGREE_CUTOFF = new HashSet<>();
+    private static final Collection<String> EXPECTED_INCOMING_DEGREE_CUTOFF = new HashSet<>();
 
     private static final int COMPARED_ITEMS = 3;
     private static final int COMPARED_PERSONS = 4;
@@ -117,47 +117,55 @@ final class NeighborhoodSimilarityTest {
     }
 
     static {
-        EXPECTED_OUTGOING.add(new SimilarityResult(0, 1, 2 / 3.0));
-        EXPECTED_OUTGOING.add(new SimilarityResult(0, 2, 1 / 3.0));
-        EXPECTED_OUTGOING.add(new SimilarityResult(0, 3, 1.0));
-        EXPECTED_OUTGOING.add(new SimilarityResult(1, 2, 0.0));
-        EXPECTED_OUTGOING.add(new SimilarityResult(1, 3, 2 / 3.0));
-        EXPECTED_OUTGOING.add(new SimilarityResult(2, 3, 1 / 3.0));
+        EXPECTED_OUTGOING.add(resultString(0, 1, 2 / 3.0));
+        EXPECTED_OUTGOING.add(resultString(0, 2, 1 / 3.0));
+        EXPECTED_OUTGOING.add(resultString(0, 3, 1.0));
+        EXPECTED_OUTGOING.add(resultString(1, 2, 0.0));
+        EXPECTED_OUTGOING.add(resultString(1, 3, 2 / 3.0));
+        EXPECTED_OUTGOING.add(resultString(2, 3, 1 / 3.0));
 
-        EXPECTED_OUTGOING_TOP_N_1.add(new SimilarityResult(0, 3, 1.0));
+        EXPECTED_OUTGOING_TOP_N_1.add(resultString(0, 3, 1.0));
 
-        EXPECTED_OUTGOING_TOP_K_1.add(new SimilarityResult(0, 3, 1.0));
-        EXPECTED_OUTGOING_TOP_K_1.add(new SimilarityResult(1, 0, 2 / 3.0));
-        EXPECTED_OUTGOING_TOP_K_1.add(new SimilarityResult(2, 0, 1 / 3.0));
-        EXPECTED_OUTGOING_TOP_K_1.add(new SimilarityResult(3, 0, 1.0));
+        EXPECTED_OUTGOING_TOP_K_1.add(resultString(0, 3, 1.0));
+        EXPECTED_OUTGOING_TOP_K_1.add(resultString(1, 0, 2 / 3.0));
+        EXPECTED_OUTGOING_TOP_K_1.add(resultString(2, 0, 1 / 3.0));
+        EXPECTED_OUTGOING_TOP_K_1.add(resultString(3, 0, 1.0));
 
-        EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(new SimilarityResult(0, 1, 2 / 3.0));
-        EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(new SimilarityResult(0, 2, 1 / 3.0));
-        EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(new SimilarityResult(0, 3, 1.0));
-        EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(new SimilarityResult(1, 3, 2 / 3.0));
-        EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(new SimilarityResult(2, 3, 1 / 3.0));
+        EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(resultString(0, 1, 2 / 3.0));
+        EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(resultString(0, 2, 1 / 3.0));
+        EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(resultString(0, 3, 1.0));
+        EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(resultString(1, 3, 2 / 3.0));
+        EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(resultString(2, 3, 1 / 3.0));
 
-        EXPECTED_OUTGOING_DEGREE_CUTOFF.add(new SimilarityResult(0, 1, 2 / 3.0));
-        EXPECTED_OUTGOING_DEGREE_CUTOFF.add(new SimilarityResult(0, 3, 1.0));
-        EXPECTED_OUTGOING_DEGREE_CUTOFF.add(new SimilarityResult(1, 3, 2 / 3.0));
+        EXPECTED_OUTGOING_DEGREE_CUTOFF.add(resultString(0, 1, 2 / 3.0));
+        EXPECTED_OUTGOING_DEGREE_CUTOFF.add(resultString(0, 3, 1.0));
+        EXPECTED_OUTGOING_DEGREE_CUTOFF.add(resultString(1, 3, 2 / 3.0));
 
-        EXPECTED_INCOMING.add(new SimilarityResult(4, 5, 1.0));
-        EXPECTED_INCOMING.add(new SimilarityResult(4, 6, 1 / 2.0));
-        EXPECTED_INCOMING.add(new SimilarityResult(5, 6, 1 / 2.0));
+        EXPECTED_INCOMING.add(resultString(4, 5, 1.0));
+        EXPECTED_INCOMING.add(resultString(4, 6, 1 / 2.0));
+        EXPECTED_INCOMING.add(resultString(5, 6, 1 / 2.0));
 
-        EXPECTED_INCOMING_TOP_N_1.add(new SimilarityResult(4, 5, 3.0 / 3.0));
+        EXPECTED_INCOMING_TOP_N_1.add(resultString(4, 5, 3.0 / 3.0));
 
-        EXPECTED_INCOMING_TOP_K_1.add(new SimilarityResult(4, 5, 1.0));
-        EXPECTED_INCOMING_TOP_K_1.add(new SimilarityResult(5, 4, 1.0));
-        EXPECTED_INCOMING_TOP_K_1.add(new SimilarityResult(6, 4, 1 / 2.0));
+        EXPECTED_INCOMING_TOP_K_1.add(resultString(4, 5, 1.0));
+        EXPECTED_INCOMING_TOP_K_1.add(resultString(5, 4, 1.0));
+        EXPECTED_INCOMING_TOP_K_1.add(resultString(6, 4, 1 / 2.0));
 
-        EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(new SimilarityResult(4, 5, 1.0));
-        EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(new SimilarityResult(4, 6, 1 / 2.0));
-        EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(new SimilarityResult(5, 6, 1 / 2.0));
+        EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(resultString(4, 5, 1.0));
+        EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(resultString(4, 6, 1 / 2.0));
+        EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(resultString(5, 6, 1 / 2.0));
 
-        EXPECTED_INCOMING_DEGREE_CUTOFF.add(new SimilarityResult(4, 5, 3.0 / 3.0));
-        EXPECTED_INCOMING_DEGREE_CUTOFF.add(new SimilarityResult(4, 6, 1 / 2.0));
-        EXPECTED_INCOMING_DEGREE_CUTOFF.add(new SimilarityResult(5, 6, 1 / 2.0));
+        EXPECTED_INCOMING_DEGREE_CUTOFF.add(resultString(4, 5, 3.0 / 3.0));
+        EXPECTED_INCOMING_DEGREE_CUTOFF.add(resultString(4, 6, 1 / 2.0));
+        EXPECTED_INCOMING_DEGREE_CUTOFF.add(resultString(5, 6, 1 / 2.0));
+    }
+
+    private static String resultString(long node1, long node2, double similarity) {
+        return String.format("%d,%d %f%n", node1, node2, similarity);
+    }
+
+    private static String resultString(SimilarityResult result) {
+        return resultString(result.node1, result.node2, result.similarity);
     }
 
     private static Stream<Integer> concurrencies() {
@@ -208,8 +216,9 @@ final class NeighborhoodSimilarityTest {
             AllocationTracker.EMPTY
         );
 
-        Set<SimilarityResult> result = neighborhoodSimilarity
+        Set<String> result = neighborhoodSimilarity
             .computeToStream(algoDirection)
+            .map(NeighborhoodSimilarityTest::resultString)
             .collect(Collectors.toSet());
         neighborhoodSimilarity.release();
 
@@ -232,8 +241,9 @@ final class NeighborhoodSimilarityTest {
             AllocationTracker.EMPTY
         );
 
-        Set<SimilarityResult> result = neighborhoodSimilarity
+        Set<String> result = neighborhoodSimilarity
             .computeToStream(algoDirection)
+            .map(NeighborhoodSimilarityTest::resultString)
             .collect(Collectors.toSet());
         neighborhoodSimilarity.release();
 
@@ -256,8 +266,9 @@ final class NeighborhoodSimilarityTest {
             AllocationTracker.EMPTY
         );
 
-        Set<SimilarityResult> result = neighborhoodSimilarity
+        Set<String> result = neighborhoodSimilarity
             .computeToStream(algoDirection)
+            .map(NeighborhoodSimilarityTest::resultString)
             .collect(Collectors.toSet());
         neighborhoodSimilarity.release();
 
@@ -308,8 +319,9 @@ final class NeighborhoodSimilarityTest {
             AllocationTracker.EMPTY
         );
 
-        Set<SimilarityResult> result = neighborhoodSimilarity
+        Set<String> result = neighborhoodSimilarity
             .computeToStream(algoDirection)
+            .map(NeighborhoodSimilarityTest::resultString)
             .collect(Collectors.toSet());
         neighborhoodSimilarity.release();
 
@@ -335,8 +347,9 @@ final class NeighborhoodSimilarityTest {
             AllocationTracker.EMPTY
         );
 
-        Set<SimilarityResult> result = neighborhoodSimilarity
+        Set<String> result = neighborhoodSimilarity
             .computeToStream(algoDirection)
+            .map(NeighborhoodSimilarityTest::resultString)
             .collect(Collectors.toSet());
         neighborhoodSimilarity.release();
 
