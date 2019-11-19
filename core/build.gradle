@@ -1,6 +1,7 @@
 description = 'Neo4j Graph Algorithms :: Core'
 
 dependencies {
+    compile project(":annotations")
     compile group: 'com.carrotsearch',           name: 'hppc',               version: ver.hppc
     compile group: 'com.github.petitparser',     name: 'petitparser-core',   version: ver.petitparser
 

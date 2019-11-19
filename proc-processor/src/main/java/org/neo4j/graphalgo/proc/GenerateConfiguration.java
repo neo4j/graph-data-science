@@ -32,6 +32,7 @@ import com.squareup.javapoet.TypeSpec;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.Configuration.ConvertWith;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.SourceVersion;
@@ -65,28 +66,18 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 
 final class GenerateConfiguration {
 
-    private static final String CYPHER_MAP_WRAPPER_TYPE = "org.neo4j.graphalgo.core.CypherMapWrapper";
     private static final String CONFIG_VAR = "config";
 
     private final Messager messager;
     private final Elements elementUtils;
     private final Types typeUtils;
     private final SourceVersion sourceVersion;
-    private final TypeMirror mapWrapperType;
 
     GenerateConfiguration(Messager messager, Elements elementUtils, Types typeUtils, SourceVersion sourceVersion) {
         this.messager = messager;
         this.elementUtils = elementUtils;
         this.typeUtils = typeUtils;
         this.sourceVersion = sourceVersion;
-        TypeElement mapWrapper = elementUtils.getTypeElement(CYPHER_MAP_WRAPPER_TYPE);
-        if (mapWrapper == null) {
-            throw new IllegalStateException(String.format(
-                "Missing dependency on core module, the type `%s` is not available",
-                CYPHER_MAP_WRAPPER_TYPE
-            ));
-        }
-        mapWrapperType = mapWrapper.asType();
     }
 
     JavaFile generateConfig(ConfigParser.Spec config, String className) {
@@ -172,7 +163,7 @@ final class GenerateConfiguration {
 
         if (requiredMapParameter) {
             code.addParameter(
-                TypeName.get(mapWrapperType),
+                TypeName.get(CypherMapWrapper.class),
                 configParamterName
             );
         }
