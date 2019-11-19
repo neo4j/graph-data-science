@@ -70,7 +70,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
 
     @Procedure(value = "algo.beta.louvain", mode = Mode.WRITE)
     @Description("CALL algo.beta.louvain(label:String, relationship:String, " +
-                 "{levels: 10, innerIterations: 10, weightProperty:'weight', seedProperty: 'seed', write: true, writeProperty:'community', includeIntermediateCommunities: false, concurrency:4 }) " +
+                 "{levels: 10, innerIterations: 10, tolerance: 0.00001, weightProperty:'weight', seedProperty: 'seed', write: true, writeProperty:'community', includeIntermediateCommunities: false, concurrency:4 }) " +
                  "YIELD nodes, communityCount, levels, modularity, modularities, write, writerProperty, includeIntermediateCommunities, loadMillis, computeMillis, writeMillis, postProcessingMillis")
     public Stream<WriteResult> louvain(
             @Name(value = "label", defaultValue = "") String label,
@@ -81,7 +81,7 @@ public class LouvainProc extends BaseAlgoProc<Louvain> {
 
     @Procedure(value = "algo.beta.louvain.stream", mode = READ)
     @Description("CALL algo.beta.louvain.stream(label:String, relationship:String, " +
-                 "{levels: 10, innerIterations: 10, weightProperty:'weight', seedProperty: 'seed', includeIntermediateCommunities: false, concurrency:4 }) " +
+                 "{levels: 10, innerIterations: 10, tolerance: 0.00001, weightProperty:'weight', seedProperty: 'seed', includeIntermediateCommunities: false, concurrency:4 }) " +
                  "YIELD nodeId, community, communities - yields a setId to each node id")
     public Stream<StreamResult> louvainStream(
             @Name(value = "label", defaultValue = "") String label,

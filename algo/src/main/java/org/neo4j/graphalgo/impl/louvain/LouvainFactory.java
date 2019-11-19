@@ -24,7 +24,10 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.ProcedureConfiguration;
 import org.neo4j.graphalgo.core.utils.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.logging.Log;
 
@@ -54,6 +57,11 @@ public class LouvainFactory extends AlgorithmFactory<Louvain> {
 
     @Override
     public MemoryEstimation memoryEstimation() {
-        return null;
+        return MemoryEstimations.builder(Louvain.class)
+            .rangePerNode("dendrograms", (nodeCount) -> MemoryRange.of(
+                HugeLongArray.memoryEstimation(nodeCount),
+                HugeLongArray.memoryEstimation(nodeCount * 10)
+            ))
+            .build();
     }
 }
