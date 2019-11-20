@@ -29,22 +29,23 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.impl.jaccard.NeighborhoodSimilarity.Config;
 import org.neo4j.logging.Log;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
 public class NeighborhoodSimilarityFactory extends AlgorithmFactory<NeighborhoodSimilarity> {
 
-    private final NeighborhoodSimilarity.Config jaccardConfig;
+    private final Config config;
     private final boolean computesSimilarityGraph;
-    public NeighborhoodSimilarityFactory(NeighborhoodSimilarity.Config jaccardConfig, boolean computesSimilarityGraph) {
-        this.jaccardConfig = jaccardConfig;
+    public NeighborhoodSimilarityFactory(Config config, boolean computesSimilarityGraph) {
+        this.config = config;
         this.computesSimilarityGraph = computesSimilarityGraph;
     }
 
     @Override
     public NeighborhoodSimilarity build(Graph graph, ProcedureConfiguration configuration, AllocationTracker tracker, Log log) {
-        return new NeighborhoodSimilarity(graph, jaccardConfig, Pools.DEFAULT, tracker);
+        return new NeighborhoodSimilarity(graph, config, Pools.DEFAULT, tracker);
     }
 
     @Override
@@ -65,14 +66,14 @@ public class NeighborhoodSimilarityFactory extends AlgorithmFactory<Neighborhood
         if (computesSimilarityGraph) {
             builder.add(
                 "similarity graph",
-                SimilarityGraphBuilder.memoryEstimation(jaccardConfig.topK(), jaccardConfig.topN())
+                SimilarityGraphBuilder.memoryEstimation(config.topK(), config.topN())
             );
         }
-        if (jaccardConfig.topK() > 0) {
+        if (config.topK() > 0) {
             builder.add(
                 "topK map",
                 MemoryEstimations.setup("", (dimensions, concurrency) ->
-                    TopKMap.memoryEstimation(dimensions.nodeCount(), jaccardConfig.topK()))
+                    TopKMap.memoryEstimation(dimensions.nodeCount(), config.topK()))
             );
         }
         return builder.build();
