@@ -248,21 +248,21 @@ public class NeighborhoodSimilarityProc extends BaseAlgoProc<NeighborhoodSimilar
     }
 
     private int validK(ProcedureConfiguration config) {
-        boolean isTopK = config.containsKey(TOP_K_KEY);
+        boolean isBottomK = config.containsKey(BOTTOM_K_KEY);
         String message = "Invalid value for %s: must be a positive integer";
-        if (isTopK) {
-            int topK = config.getInt(TOP_K_KEY, TOP_K_DEFAULT);
-            if (topK < 1) {
-                throw new IllegalArgumentException(String.format(message, TOP_K_KEY));
-            }
-            return topK;
-        } else {
+        if (isBottomK) {
             int bottomK = config.getInt(BOTTOM_K_KEY, BOTTOM_K_DEFAULT);
             if (bottomK < 1) {
                 throw new IllegalArgumentException(String.format(message, BOTTOM_K_KEY));
             }
             // The algorithm only knows 'topK', if it is negative it will sort ascending
             return -bottomK;
+        } else {
+            int topK = config.getInt(TOP_K_KEY, TOP_K_DEFAULT);
+            if (topK < 1) {
+                throw new IllegalArgumentException(String.format(message, TOP_K_KEY));
+            }
+            return topK;
         }
     }
 
